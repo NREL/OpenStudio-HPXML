@@ -11,7 +11,6 @@ require_relative 'resources/airflow'
 require_relative 'resources/constants'
 require_relative 'resources/constructions'
 require_relative 'resources/energyplus'
-require_relative 'resources/EPvalidator'
 require_relative 'resources/geometry'
 require_relative 'resources/hotwater_appliances'
 require_relative 'resources/hpxml'
@@ -28,6 +27,7 @@ require_relative 'resources/schedules'
 require_relative 'resources/simcontrols'
 require_relative 'resources/unit_conversions'
 require_relative 'resources/util'
+require_relative 'resources/validator'
 require_relative 'resources/version'
 require_relative 'resources/waterheater'
 require_relative 'resources/weather'
@@ -160,7 +160,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     # Validate input HPXML against EnergyPlus Use Case
-    errors = EnergyPlusValidator.run_validator(hpxml.doc)
+    stron_path = File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')
+    errors = Validator.run_validator(hpxml.doc, stron_path)
     errors.each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
@@ -1003,7 +1004,7 @@ class OSModel
         end
         surface.setSurfaceType('RoofCeiling')
         surface.setOutsideBoundaryCondition('Outdoors')
-        set_surface_interior(model, spaces, surface, roof.interior_adjacent_to)
+        set_surface_interior(model, spaces, surface, roof)
       end
 
       next if surfaces.empty?
@@ -1102,8 +1103,8 @@ class OSModel
           surface.setName(wall.id)
         end
         surface.setSurfaceType('Wall')
-        set_surface_interior(model, spaces, surface, wall.interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, wall.exterior_adjacent_to)
+        set_surface_interior(model, spaces, surface, wall)
+        set_surface_exterior(model, spaces, surface, wall)
         if wall.is_interior
           surface.setSunExposure('NoSun')
           surface.setWindExposure('NoWind')
@@ -1170,8 +1171,8 @@ class OSModel
           surface.setName(rim_joist.id)
         end
         surface.setSurfaceType('Wall')
-        set_surface_interior(model, spaces, surface, rim_joist.interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, rim_joist.exterior_adjacent_to)
+        set_surface_interior(model, spaces, surface, rim_joist)
+        set_surface_exterior(model, spaces, surface, rim_joist)
         if rim_joist.is_interior
           surface.setSunExposure('NoSun')
           surface.setWindExposure('NoWind')
@@ -1232,8 +1233,8 @@ class OSModel
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
         surface.additionalProperties.setFeature('SurfaceType', 'Floor')
       end
-      set_surface_interior(model, spaces, surface, frame_floor.interior_adjacent_to)
-      set_surface_exterior(model, spaces, surface, frame_floor.exterior_adjacent_to)
+      set_surface_interior(model, spaces, surface, frame_floor)
+      set_surface_exterior(model, spaces, surface, frame_floor)
       surface.setName(frame_floor.id)
       if frame_floor.is_interior
         surface.setSunExposure('NoSun')
@@ -1425,8 +1426,8 @@ class OSModel
         surface.additionalProperties.setFeature('SurfaceType', 'FoundationWall')
         surface.setName(foundation_wall.id)
         surface.setSurfaceType('Wall')
-        set_surface_interior(model, spaces, surface, foundation_wall.interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to)
+        set_surface_interior(model, spaces, surface, foundation_wall)
+        set_surface_exterior(model, spaces, surface, foundation_wall)
         surface.setSunExposure('NoSun')
         surface.setWindExposure('NoWind')
 
@@ -1490,8 +1491,8 @@ class OSModel
     surface.additionalProperties.setFeature('SurfaceType', 'FoundationWall')
     surface.setName(foundation_wall.id)
     surface.setSurfaceType('Wall')
-    set_surface_interior(model, spaces, surface, foundation_wall.interior_adjacent_to)
-    set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to)
+    set_surface_interior(model, spaces, surface, foundation_wall)
+    set_surface_exterior(model, spaces, surface, foundation_wall)
 
     if foundation_wall.is_thermal_boundary
       drywall_thick_in = 0.5
@@ -1557,7 +1558,7 @@ class OSModel
     surface.setSurfaceType('Floor')
     surface.setOutsideBoundaryCondition('Foundation')
     surface.additionalProperties.setFeature('SurfaceType', 'Slab')
-    set_surface_interior(model, spaces, surface, slab.interior_adjacent_to)
+    set_surface_interior(model, spaces, surface, slab)
     surface.setSunExposure('NoSun')
     surface.setWindExposure('NoWind')
 
@@ -1747,7 +1748,7 @@ class OSModel
         surface.additionalProperties.setFeature('SurfaceType', 'Window')
         surface.setName("surface #{window.id}")
         surface.setSurfaceType('Wall')
-        set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
+        set_surface_interior(model, spaces, surface, window.wall)
 
         sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
                                                                          window.azimuth, [-0.001, 0, 0.001, 0]), model)
@@ -1755,7 +1756,7 @@ class OSModel
         sub_surface.setSurface(surface)
         sub_surface.setSubSurfaceType('FixedWindow')
 
-        set_subsurface_exterior(surface, window.wall.exterior_adjacent_to, spaces, model)
+        set_subsurface_exterior(surface, spaces, model, window.wall)
         surfaces << surface
 
         if not overhang_depth.nil?
@@ -1785,7 +1786,7 @@ class OSModel
         surface.additionalProperties.setFeature('SurfaceType', 'Door')
         surface.setName("surface #{window.id}")
         surface.setSurfaceType('Wall')
-        set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
+        set_surface_interior(model, spaces, surface, window.wall)
 
         sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
                                                                          window.azimuth, [0, 0, 0, 0]), model)
@@ -1793,7 +1794,7 @@ class OSModel
         sub_surface.setSurface(surface)
         sub_surface.setSubSurfaceType('Door')
 
-        set_subsurface_exterior(surface, window.wall.exterior_adjacent_to, spaces, model)
+        set_subsurface_exterior(surface, spaces, model, window.wall)
         surfaces << surface
 
         # Apply construction
@@ -1864,7 +1865,7 @@ class OSModel
       surface.additionalProperties.setFeature('SurfaceType', 'Door')
       surface.setName("surface #{door.id}")
       surface.setSurfaceType('Wall')
-      set_surface_interior(model, spaces, surface, door.wall.interior_adjacent_to)
+      set_surface_interior(model, spaces, surface, door.wall)
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(door_width, door_height, z_origin,
                                                                        door.azimuth, [0, 0, 0, 0]), model)
@@ -1872,7 +1873,7 @@ class OSModel
       sub_surface.setSurface(surface)
       sub_surface.setSubSurfaceType('Door')
 
-      set_subsurface_exterior(surface, door.wall.exterior_adjacent_to, spaces, model)
+      set_subsurface_exterior(surface, spaces, model, door.wall)
       surfaces << surface
 
       # Apply construction
@@ -2280,7 +2281,7 @@ class OSModel
                                    HPXML::HVACTypeHeatPumpWaterLoopToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir, HPXML::HVACDistributionTypeDSE] }
 
     if not hvac_distribution_type_map[system_type].include? hvac_distribution.distribution_system_type
-      # EPvalidator.rb only checks that a HVAC distribution system of the correct type (for the given HVAC system) exists
+      # validator.rb only checks that a HVAC distribution system of the correct type (for the given HVAC system) exists
       # in the HPXML file, not that it is attached to this HVAC system. So here we perform the more rigorous check.
       fail "Incorrect HVAC distribution system type for HVAC type: '#{system_type}'. Should be one of: #{hvac_distribution_type_map[system_type]}"
     end
@@ -3432,7 +3433,8 @@ class OSModel
     end
   end
 
-  def self.set_surface_interior(model, spaces, surface, interior_adjacent_to)
+  def self.set_surface_interior(model, spaces, surface, hpxml_surface)
+    interior_adjacent_to = hpxml_surface.interior_adjacent_to
     if [HPXML::LocationBasementConditioned].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
       @cond_bsmnt_surfaces << surface
@@ -3441,18 +3443,21 @@ class OSModel
     end
   end
 
-  def self.set_surface_exterior(model, spaces, surface, exterior_adjacent_to)
+  def self.set_surface_exterior(model, spaces, surface, hpxml_surface)
+    exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
+    interior_adjacent_to = hpxml_surface.interior_adjacent_to
     if exterior_adjacent_to == HPXML::LocationOutside
       surface.setOutsideBoundaryCondition('Outdoors')
     elsif exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Foundation')
-    elsif exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+    elsif exterior_adjacent_to == HPXML::LocationOtherHousingUnit && [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include?(interior_adjacent_to)
       surface.setOutsideBoundaryCondition('Adiabatic')
+    elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
+           HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? exterior_adjacent_to
+      set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     elsif exterior_adjacent_to == HPXML::LocationBasementConditioned
       surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
       @cond_bsmnt_surfaces << surface
-    elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? exterior_adjacent_to
-      set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     else
       surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to))
     end
@@ -3602,15 +3607,15 @@ class OSModel
     return space
   end
 
-  def self.set_subsurface_exterior(surface, wall_exterior_adjacent_to, spaces, model)
+  def self.set_subsurface_exterior(surface, spaces, model, hpxml_surface)
     # Set its parent surface outside boundary condition, which will be also applied to subsurfaces through OS
     # The parent surface is entirely comprised of the subsurface.
 
     # Subsurface on foundation wall, set it to be adjacent to outdoors
-    if wall_exterior_adjacent_to == HPXML::LocationGround
+    if hpxml_surface.exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Outdoors')
     else
-      set_surface_exterior(model, spaces, surface, wall_exterior_adjacent_to)
+      set_surface_exterior(model, spaces, surface, hpxml_surface)
     end
   end
 
