@@ -1515,7 +1515,7 @@ class Airflow
       infil_program.addLine('Set FanLatToLv = FanTotalToLv - FanSensToLv')
     end
 
-    # Actuator, 
+    # Actuator,
     # If preconditioned, handle actuators later in calculate_precond_loads
     if not preconditioned
       infil_program.addLine("Set #{fan_sens_load_actuator.name} = #{fan_sens_load_actuator.name} + FanSensToLv")

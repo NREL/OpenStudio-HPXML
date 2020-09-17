@@ -717,6 +717,7 @@
                     <Value>0.92</Value>
                     <Units>COP</Units>
                   </AnnualHeatingEfficiency>
+                  <FractionVentilationLoadServed>0.8</FractionVentilationLoadServed>
                 </PreHeating>
                 <PreCooling>
                   <Fuel>electricity</Fuel>
@@ -724,6 +725,7 @@
                     <Value>4.0</Value>
                     <Units>COP</Units>
                   </AnnualCoolingEfficiency>
+                  <FractionVentilationLoadServed>0.8</FractionVentilationLoadServed>
                 </PreCooling>
               </extension>
             </VentilationFan>
@@ -746,6 +748,7 @@
                     <Value>0.87</Value>
                     <Units>COP</Units>
                   </AnnualHeatingEfficiency>
+                  <FractionVentilationLoadServed>1.0</FractionVentilationLoadServed>
                 </PreHeating>
                 <PreCooling>
                   <Fuel>electricity</Fuel>
@@ -753,6 +756,7 @@
                     <Value>3.5</Value>
                     <Units>COP</Units>
                   </AnnualCoolingEfficiency>
+                  <FractionVentilationLoadServed>1.0</FractionVentilationLoadServed>
                 </PreCooling>
               </extension>
             </VentilationFan>
@@ -774,6 +778,7 @@
                     <Value>4.0</Value>
                     <Units>COP</Units>
                   </AnnualHeatingEfficiency>
+                  <FractionVentilationLoadServed>1.0</FractionVentilationLoadServed>
                 </PreHeating>
                 <PreCooling>
                   <Fuel>electricity</Fuel>
@@ -781,6 +786,7 @@
                     <Value>4.5</Value>
                     <Units>COP</Units>
                   </AnnualCoolingEfficiency>
+                  <FractionVentilationLoadServed>1.0</FractionVentilationLoadServed>
                 </PreCooling>
               </extension>
             </VentilationFan>
@@ -801,6 +807,7 @@
                     <Value>3.5</Value>
                     <Units>COP</Units>
                   </AnnualHeatingEfficiency>
+                  <FractionVentilationLoadServed>0.9</FractionVentilationLoadServed>
                 </PreHeating>
                 <PreCooling>
                   <Fuel>electricity</Fuel>
@@ -808,6 +815,7 @@
                     <Value>4.0</Value>
                     <Units>COP</Units>
                   </AnnualCoolingEfficiency>
+                  <FractionVentilationLoadServed>1.0</FractionVentilationLoadServed>
                 </PreCooling>
               </extension>
             </VentilationFan>
