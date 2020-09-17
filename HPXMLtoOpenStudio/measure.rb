@@ -155,7 +155,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     is_valid = true
 
     # Validate input HPXML against schema
-    # HPXMLValidator.get_data_type_req_xml()
     HPXMLValidator.validate_xml(hpxml.doc)
 
     XMLHelper.validate(hpxml.doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), runner).each do |error|
