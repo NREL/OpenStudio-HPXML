@@ -1,3 +1,11 @@
+GIT
+  remote: http://github.com/shorowit/schematron.git
+  revision: 2e26890fa1fc918198270f94abc7caf659d18bb2
+  branch: return_context_path
+  specs:
+    schematron-nokogiri (0.0.2)
+      nokogiri (~> 1.6)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -9,7 +17,7 @@ GEM
     ci_reporter_minitest (1.0.0)
       ci_reporter (~> 2.0)
       minitest (~> 5.0)
-    codecov (0.2.6)
+    codecov (0.2.0)
       colorize
       json
       simplecov
@@ -25,9 +33,9 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
-    nokogiri (1.10.10-x64-mingw32)
+    nokogiri (1.10.10)
       mini_portile2 (~> 2.4.0)
-    oga (3.3)
+    oga (3.2)
       ast
       ruby-ll (~> 2.1)
     rake (13.0.1)
@@ -35,14 +43,13 @@ GEM
       ansi
       ast
     ruby-progressbar (1.10.1)
-    simplecov (0.17.1)
+    simplecov (0.18.5)
       docile (~> 1.1)
-      json (>= 1.8, < 3)
-      simplecov-html (~> 0.10.0)
-    simplecov-html (0.10.2)
+      simplecov-html (~> 0.11)
+    simplecov-html (0.12.2)
 
 PLATFORMS
-  x64-mingw32
+  ruby
 
 DEPENDENCIES
   ci_reporter_minitest (~> 1.0.0)
@@ -53,7 +60,8 @@ DEPENDENCIES
   nokogiri (~> 1.10)
   oga
   rake
+  schematron-nokogiri!
   simplecov
 
 BUNDLED WITH
-   2.1.0
+   2.1.4

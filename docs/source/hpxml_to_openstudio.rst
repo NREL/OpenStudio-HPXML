@@ -8,66 +8,37 @@ The HPXMLtoOpenStudio measure requires a building description in an `HPXML file 
 HPXML is an open data standard for collecting and transferring home energy data. 
 Using HPXML files reduces the complexity and effort for software developers to leverage the EnergyPlus simulation engine.
 
-Capabilities
-************
-
-The following building features/technologies are available for modeling via the HPXMLtoOpenStudio measure:
-
-- Enclosure
-
-  - Attics (Vented, Unvented, Conditioned)
-  - Foundations (Slab, Unconditioned Basement, Conditioned Basement, Vented Crawlspace, Unvented Crawlspace, Ambient)
-  - Garages
-  - Windows & Overhangs
-  - Skylights
-  - Doors
-  
-- HVAC
-
-  - Heating Systems (Electric Resistance, Central/Wall/Floor Furnaces, Stoves, Boilers, Portable/Fixed Heaters, Fireplaces)
-  - Cooling Systems (Central Air Conditioners, Room Air Conditioners, Evaporative Coolers, Mini Split Air Conditioners, Chillers, Cooling Towers)
-  - Heat Pumps (Air Source, Mini Split, Ground Source, Dual-Fuel, Water Loop)
-  - Setpoints
-  - Ducts
-  
-- Water Heating
-
-  - Water Heaters (Storage, Tankless, Heat Pump, Indirect, Tankless Coil)
-  - Solar Hot Water
-  - Desuperheater
-  - Hot Water Distribution (Standard, Recirculation)
-  - Drain Water Heat Recovery
-  - Hot Water Fixtures
-  
-- Ventilation
-
-  - Mechanical Ventilation (Exhaust, Supply, Balanced, ERV, HRV, CFIS)
-  - Kitchen/Bathroom Fans
-  - Whole House Fan
-
-- Photovoltaics
-- Appliances (Clothes Washer/Dryer, Dishwasher, Refrigerators, Freezers, Cooking Range/Oven)
-- Dehumidifier
-- Lighting
-- Ceiling Fans
-- Pool
-- Hot Tub
-- Plug Loads
-- Fuel Loads
-
-EnergyPlus Use Case for HPXML
-*****************************
+HPXML Inputs
+------------
 
 HPXML is an flexible and extensible format, where nearly all elements in the schema are optional and custom elements can be included.
-Because of this, an EnergyPlus Use Case for HPXML has been developed that specifies the HPXML elements or enumeration choices required to run the measure.
+Because of this, a stricter set of requirements for the HPXML file have been developed for purposes of running EnergyPlus simulations.
 
-Software developers should use the EnergyPlus Use Case (found at ``HPXMLtoOpenStudio/resources/EPvalidator.rb``, which defines sets of conditional XPath expressions) as well as the HPXML schema (HPXML.xsd) to construct valid HPXML files for EnergyPlus simulations.
+HPXML files submitted to OpenStudio-HPXML should undergo a two step validation process:
 
-The `HPXML Toolbox website <https://hpxml.nrel.gov/>`_ also provides several resources for software developers, including:
+1. Validation against the HPXML Schema
 
-#. An interactive schema validator
-#. A data dictionary
-#. An implementation guide
+  The HPXML XSD Schema can be found at ``HPXMLtoOpenStudio/resources/HPXML.xsd``.
+  It should be used by the software developer to validate their HPXML file prior to running the simulation.
+  XSD Schemas are used to validate what elements/attributes/enumerations are available, data types for elements/attributes, the number/order of children elements, etc.
+  
+  OpenStudio-HPXML **does not** validate the HPXML file against the XSD Schema and assumes the file submitted is valid.
+
+2. Validation using `Schematron <http://schematron.com/>`_
+
+  The Schematron document for the EnergyPlus use case can be found at ``HPXMLtoOpenStudio/resources/EPvalidator.xml``.
+  Schematron is a rule-based validation language, expressed in XML using XPath expressions, for validating the presence or absence of inputs in XML files. 
+  As opposed to an XSD Schema, a Schematron document validates constraints and requirements based on conditionals and other logical statements.
+  For example, if an element is specified with a particular value, the applicable enumerations of another element may change.
+  
+  OpenStudio-HPXML **automatically validates** the HPXML file against the Schematron document and reports any validation errors, but software developers may find it beneficial to also integrate Schematron validation into their software.
+ 
+.. important::
+
+  Usage of both validation approaches (XSD and Schematron) is recommended for developers actively working on creating HPXML files for EnergyPlus simulations:
+  
+  - Validation against XSD for general correctness and usage of HPXML
+  - Validation against Schematron for understanding XML document requirements specific to running EnergyPlus
 
 Input Defaults
 **************
@@ -120,7 +91,13 @@ In the ``in.xml`` file, the window would have additional elements like so:
 HPXML Software Info
 -------------------
 
-EnergyPlus simulation controls can be entered in ``/HPXML/SoftwareInfo/extension/SimulationControl``.
+High-level simulation inputs are entered in HPXML's ``/HPXML/SoftwareInfo``.
+Current inputs include simulation controls and HVAC sizing controls.
+
+HPXML Simulation Control
+************************
+
+EnergyPlus simulation controls can be entered in ``extension/SimulationControl``.
 
 The simulation timestep can be optionally provided as ``Timestep``, where the value is in minutes and must be a divisor of 60.
 If not provided, the default value of 60 (i.e., 1 hour) is used.
@@ -157,6 +134,21 @@ The following end uses will be zero during the vacancy period:
 - hot tubs
 
 If a schedule path is provided, no other weekday/weekend fraction or monthly multipliers may be contained in the HPXML file.
+
+HPXML HVAC Sizing Control
+*************************
+
+HVAC equipment sizing controls can be entered in ``extension/HVACSizingControl``.
+
+An optional ``AllowIncreasedFixedCapacities`` element can be provided to describe how HVAC equipment with fixed capacities are handled.
+If false, the user-specified fixed capacity will be used.
+If true, the maximum of the user-specified fixed capacity and the heating/cooling design load will be used to reduce potential for unmet loads.
+If not provided, the default value of false is used.
+
+An optional ``UseMaxLoadForHeatPumps`` element can be provided to describe how autosized heat pumps are handled.
+If true, heat pumps are sized based on the maximum of heating and cooling design loads.
+If false, heat pumps are sized per ACCA Manual J/S based on cooling design loads with some oversizing allowances for heating design loads.
+If not provided, the default value of true is used.
 
 HPXML Building Details
 ----------------------
@@ -256,7 +248,7 @@ basement - unconditioned                                                        
 crawlspace - vented                                                               EnergyPlus calculation                                    Any
 crawlspace - unvented                                                             EnergyPlus calculation                                    Any
 garage                          Single-family garage (not shared parking garage)  EnergyPlus calculation                                    Any
-other housing unit              E.g., adjacent unit or conditioned corridor       Same as conditioned space                                 Attached/Multifamily only
+other housing unit              E.g., conditioned adjacent unit or corridor       Same as conditioned space                                 Attached/Multifamily only
 other heated space              E.g., shared laundry/equipment space              Average of conditioned space and outside; minimum of 68F  Attached/Multifamily only
 other multifamily buffer space  E.g., enclosed unconditioned stairwell            Average of conditioned space and outside; minimum of 50F  Attached/Multifamily only
 other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                       Attached/Multifamily only
@@ -680,7 +672,7 @@ outside                                                                         
 exterior wall                                                                     Average of conditioned space and outside                   Any
 under slab                                                                        Ground                                                     Any
 roof deck                                                                         Outside                                                    Any
-other housing unit              E.g., adjacent unit or conditioned corridor       Same as conditioned space                                  Attached/Multifamily only
+other housing unit              E.g., conditioned adjacent unit or corridor       Same as conditioned space                                  Attached/Multifamily only
 other heated space              E.g., shared laundry/equipment space              Average of conditioned space and outside; minimum of 68F   Attached/Multifamily only
 other multifamily buffer space  E.g., enclosed unconditioned stairwell            Average of conditioned space and outside; minimum of 50F   Attached/Multifamily only
 other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                        Attached/Multifamily only
@@ -849,7 +841,7 @@ garage                          Single-family garage (not shared parking garage)
 crawlspace - unvented                                                             EnergyPlus calculation                                     Any
 crawlspace - vented                                                               EnergyPlus calculation                                     Any
 other exterior                  Outside                                           EnergyPlus calculation                                     Any
-other housing unit              E.g., adjacent unit or conditioned corridor       Same as conditioned space                                  Attached/Multifamily only
+other housing unit              E.g., conditioned adjacent unit or corridor       Same as conditioned space                                  Attached/Multifamily only
 other heated space              E.g., shared laundry/equipment space              Average of conditioned space and outside; minimum of 68F   Attached/Multifamily only
 other multifamily buffer space  E.g., enclosed unconditioned stairwell            Average of conditioned space and outside; minimum of 50F   Attached/Multifamily only
 other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                        Attached/Multifamily only
@@ -983,7 +975,6 @@ HPXML Photovoltaics
 Each solar electric (photovoltaic) system should be entered as a ``Systems/Photovoltaics/PVSystem``.
 The following elements, some adopted from the `PVWatts model <https://pvwatts.nrel.gov>`_, are required for each PV system:
 
-- ``IsSharedSystem``: true or false
 - ``Location``: 'ground' or 'roof' mounted
 - ``ModuleType``: 'standard', 'premium', or 'thin film'
 - ``Tracking``: 'fixed' or '1-axis' or '1-axis backtracked' or '2-axis'
@@ -1000,8 +991,9 @@ If ``SystemLossesFraction`` is not provided but ``YearModulesManufactured`` is p
 
 .. math:: System Losses Fraction = 1.0 - (1.0 - 0.14) \cdot (1.0 - (1.0 - 0.995^{(CurrentYear - YearModulesManufactured)}))
 
-If the PV system is a shared system (i.e., serving multiple dwelling units), it should be described using ``IsSharedSystem='true'``.
-In addition, the total number of bedrooms across all dwelling units served by the system must be entered as ``extension/NumberofBedroomsServed``.
+The PV system may be optionally described as a shared system (i.e., serving multiple dwelling units) using ``IsSharedSystem``.
+If not provided, it is assumed to be false.
+If provided and true, the total number of bedrooms across all dwelling units served by the system must be entered as ``extension/NumberofBedroomsServed``.
 PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms in the building.
 
 HPXML Appliances
@@ -1018,7 +1010,7 @@ living space                    Above-grade conditioned floor area              
 basement - conditioned          Below-grade conditioned floor area                Any
 basement - unconditioned                                                          Any
 garage                          Single-family garage (not shared parking garage)  Any
-other housing unit              E.g., adjacent unit or conditioned corridor       Attached/Multifamily only
+other housing unit              E.g., conditioned adjacent unit or corridor       Attached/Multifamily only
 other heated space              E.g., shared laundry/equipment space              Attached/Multifamily only
 other multifamily buffer space  E.g., enclosed unconditioned stairwell            Attached/Multifamily only
 other non-freezing space        E.g., shared parking garage ceiling               Attached/Multifamily only
@@ -1282,9 +1274,9 @@ This section describes elements specified in HPXML's ``MiscLoads``.
 HPXML Plug Loads
 ****************
 
-Misc electric plug loads can be provided by entering ``PlugLoad`` elements; if not provided, plug loads will not be modeled.
+Misc electric plug loads can be provided by entering ``PlugLoad`` elements.
 Currently only plug loads specified with ``PlugLoadType='other'``, ``PlugLoadType='TV other'``, ``PlugLoadType='electric vehicle charging'``, or ``PlugLoadType='well pump'`` are recognized.
-It is generally recommended to at least include the 'other' (miscellaneous) and 'TV other' plug load types for the typical home.
+The 'other' and 'TV other' plug loads are required to represent the typical home; the other less common plug loads will only be modeled if provided.
 
 The annual energy consumption (``Load[Units='kWh/year']/Value``), ``Location``, ``extension/FracSensible``, and ``extension/FracLatent`` elements are optional.
 If not provided, they will be defaulted as follows.
@@ -1314,8 +1306,9 @@ If not provided, values from Figures 23 & 24 of the `Building America House Simu
 HPXML Fuel Loads
 ****************
 
-Misc fuel loads can be provided by entering ``FuelLoad`` elements; if not provided, fuel loads will not be modeled.
+Misc fuel loads can be provided by entering ``FuelLoad`` elements.
 Currently only fuel loads specified with ``FuelLoadType='grill'``, ``FuelLoadType='lighting'``, or ``FuelLoadType='fireplace'`` are recognized.
+These less common fuel loads will only be modeled if provided.
 
 The annual energy consumption (``Load[Units='therm/year']/Value``), ``Location``, ``extension/FracSensible``, and ``extension/FracLatent`` elements are also optional.
 If not provided, they will be defaulted as follows.
