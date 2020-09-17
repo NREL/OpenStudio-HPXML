@@ -732,7 +732,7 @@
 
   <sch:pattern name='[MechanicalVentilationType=Shared]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForWholeBuildingVentilation="true" and h:IsSharedSystem="true"]'>
-      <sch:assert test='count(h:FractionRecirculation) = 1 and number(h:FractionRecirculation) &gt;=0 and number(h:FractionRecirculation) &lt;=1'>Expected 1 element(s) value from 0.0 to 1.0 for xpath: FractionRecirculation</sch:assert>
+      <sch:assert test='count(h:FractionRecirculation[number(text()) &gt;= 0 and number(text()) &lt;= 1]) = 1'>Expected 1 element(s) for xpath: FractionRecirculation[number(text()) &gt;= 0 and number(text()) &lt;= 1]</sch:assert>
       <sch:assert test='count(h:extension/h:InUnitFlowRate) = 1'>Expected 1 element(s) for xpath: extension/InUnitFlowRate</sch:assert>
       <sch:assert test='count(h:extension/h:PreHeating) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/PreHeating</sch:assert> <!-- See [MechanicalVentilationType=SharedWithPreHeating] -->
       <sch:assert test='count(h:extension/h:PreCooling) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/PreCooling</sch:assert> <!-- See [MechanicalVentilationType=SharedWithPreCooling] -->
