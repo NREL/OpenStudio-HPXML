@@ -1,0 +1,2 @@
+Feature Id,Feature Name,Mapper Class
+1,Mixed_use 1,URBANopt::Scenario::BaselineMapper

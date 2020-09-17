@@ -1,3 +1,6 @@
+*.lock
+/example_project/run/*
+*.DS_Store
 *.gem
 *.rbc
 /.config
