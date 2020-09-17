@@ -812,46 +812,34 @@
               </extension>
             </VentilationFan>
             <VentilationFan>
-              <SystemIdentifier id='SharedCFISPreconditioned'/>
-              <FanType>central fan integrated supply</FanType>
+              <SystemIdentifier id='SharedExhaust'/>
+              <FanType>exhaust only</FanType>
               <RatedFlowRate>700.0</RatedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>
-              <FractionRecirculation>0.3</FractionRecirculation>
+              <FractionRecirculation>0.0</FractionRecirculation>
               <FanPower>300.0</FanPower>
-              <AttachedToHVACDistributionSystem idref='HVACDistribution'/>
               <extension>
                 <InUnitFlowRate>70.0</InUnitFlowRate>
-                <PreHeating>
-                  <Fuel>electricity</Fuel>
-                  <AnnualHeatingEfficiency>
-                    <Value>3.5</Value>
-                    <Units>COP</Units>
-                  </AnnualHeatingEfficiency>
-                </PreHeating>
-                <PreCooling>
-                  <Fuel>electricity</Fuel>
-                  <AnnualCoolingEfficiency>
-                    <Value>4.0</Value>
-                    <Units>COP</Units>
-                  </AnnualCoolingEfficiency>
-                </PreCooling>
               </extension>
             </VentilationFan>
             <VentilationFan>
-              <SystemIdentifier id='SharedCFIS'/>
+              <SystemIdentifier id='Exhaust'/>
+              <FanType>exhaust only</FanType>
+              <RatedFlowRate>50.0</RatedFlowRate>
+              <HoursInOperation>14.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>10.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='CFIS'/>
               <FanType>central fan integrated supply</FanType>
-              <RatedFlowRate>700.0</RatedFlowRate>
+              <TestedFlowRate>160.0</TestedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <IsSharedSystem>true</IsSharedSystem>
-              <FractionRecirculation>0.3</FractionRecirculation>
-              <FanPower>300.0</FanPower>
-              <AttachedToHVACDistributionSystem idref='HVACDistribution2'/>
-              <extension>
-                <InUnitFlowRate>70.0</InUnitFlowRate>
-              </extension>
+              <FanPower>150.0</FanPower>
+              <AttachedToHVACDistributionSystem idref='HVACDistribution'/>
             </VentilationFan>
           </VentilationFans>
         </MechanicalVentilation>
