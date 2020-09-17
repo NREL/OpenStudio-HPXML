@@ -1011,6 +1011,9 @@ class HPXMLDefaults
 
   def self.apply_pv_systems(hpxml)
     hpxml.pv_systems.each do |pv_system|
+      if pv_system.is_shared_system.nil?
+        pv_system.is_shared_system = false
+      end
       if pv_system.inverter_efficiency.nil?
         pv_system.inverter_efficiency = PV.get_default_inv_eff()
       end

@@ -4159,15 +4159,12 @@ def set_hpxml_pv_systems(hpxml_file, hpxml)
                          system_losses_fraction: 0.14)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.pv_systems.add(id: 'PVSystem',
-                         is_shared_system: false,
                          module_type: HPXML::PVModuleTypeStandard,
                          location: HPXML::LocationRoof,
                          tracking: HPXML::PVTrackingTypeFixed,
                          array_azimuth: 180,
                          array_tilt: 20,
                          max_power_output: 4000,
-                         inverter_efficiency: nil,
-                         system_losses_fraction: nil,
                          year_modules_manufactured: 2015)
   elsif ['base-pv-shared.xml'].include? hpxml_file
     hpxml.pv_systems.add(id: 'PVSystem',
