@@ -641,6 +641,7 @@
                     <Value>0.92</Value>
                     <Units>COP</Units>
                   </AnnualHeatingEfficiency>
+                  <FractionVentilationHeatLoadServed>0.7</FractionVentilationHeatLoadServed>
                 </PreHeating>
                 <PreCooling>
                   <Fuel>electricity</Fuel>
@@ -648,6 +649,7 @@
                     <Value>4.0</Value>
                     <Units>COP</Units>
                   </AnnualCoolingEfficiency>
+                  <FractionVentilationCoolLoadServed>0.8</FractionVentilationCoolLoadServed>
                 </PreCooling>
               </extension>
             </VentilationFan>
