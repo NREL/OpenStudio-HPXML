@@ -14,7 +14,7 @@ class Constructions
     # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
     # cavity_depth_in - the cavity depth [inch]
     # cavity_filled - true if insulation thickness < cavity depth, and false otherwise
-    # framing_factor - the fraction of the total area occupied by stud and miscellaneous framing (i.e. framing around doors, windows, etc.).
+    # framing_factor - the fraction of the total area occupied by stud and miscellaneous framing (i.e. framing around doors, windows, etc.)
     # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
     # osb_thick_in - the oriented strand board (OSB) thickness [inch]
     # mat_ext_finish - exterior finish material
@@ -100,7 +100,7 @@ class Constructions
     # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
     # stud_depth_in - the stud depth [inch]
     # gap_depth_in - the gap depth [inch]
-    # framing_factor - the fraction of the total area occupied by stud and miscellaneous framing (i.e. framing around doors, windows, etc.).
+    # framing_factor - the fraction of the total area occupied by stud and miscellaneous framing (i.e. framing around doors, windows, etc.)
     # stud_spacing - the stud spacing on center [inch]
     # is_staggered - true if the stud is staggered, and false otherwise
     # inside_drywall_thick_in - the inside drywall thickness [inch]
@@ -445,7 +445,7 @@ class Constructions
     # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
     # cavity_depth_in - cavity depth [inch]
     # cavity_filled - true if insulation thickness < cavity depth, and false otherwise
-    # framing_factor - the fraction of the total area occupied by stud and miscellaneous framing (i.e. framing around doors, windows, etc.). (FIXME: Need to confirm)
+    # framing_factor - the fraction of the total area occupied by stud and miscellaneous framing (i.e. framing around doors, windows, etc.) (FIXME: Need to confirm)
     # correction_factor - is used to calculate the effective R-value of the cavity insulation with steel stud framing.
     # inside_drywall_thick_in - the inside drywall thickness [inch]
     # osb_thick_in - the oriented strand board (OSB) thickness [inch]
