@@ -224,7 +224,8 @@ def create_osws
     'extra-pv-shared.osw' => 'base-single-family-attached.osw',
 
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
-    'invalid_files/multiple-heating-and-cooling-systems.osw' => 'base.osw',
+    'invalid_files/heating-system-and-heat-pump.osw' => 'base.osw',
+    'invalid_files/cooling-system-and-heat-pump.osw' => 'base.osw',
     'invalid_files/non-integer-geometry-num-bathrooms.osw' => 'base.osw',
     'invalid_files/non-integer-ceiling-fan-quantity.osw' => 'base.osw',
     'invalid_files/single-family-detached-slab-non-zero-foundation-height.osw' => 'base.osw',
@@ -1993,7 +1994,11 @@ def get_values(osw_file, step)
   elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
-  elsif ['invalid_files/multiple-heating-and-cooling-systems.osw'].include? osw_file
+  elsif ['invalid_files/heating-system-and-heat-pump.osw'].include? osw_file
+    step.setArgument('cooling_system_type', 'none')
+    step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpAirToAir)
+  elsif ['invalid_files/cooling-system-and-heat-pump.osw'].include? osw_file
+    step.setArgument('heating_system_type', 'none')
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpAirToAir)
   elsif ['invalid_files/non-integer-geometry-num-bathrooms.osw'].include? osw_file
     step.setArgument('geometry_num_bathrooms', '1.5')

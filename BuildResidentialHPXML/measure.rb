@@ -3623,9 +3623,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     warning = ([HPXML::WaterHeaterTypeHeatPump].include?(args[:water_heater_type]) && (args[:water_heater_fuel_type] != HPXML::FuelTypeElectricity))
     warnings << "water_heater_type=#{args[:water_heater_type]} and water_heater_fuel_type=#{args[:water_heater_fuel_type]}" if warning
 
-    # furnace, air conditioner, and heat pump
-    error = (args[:heating_system_type] != 'none') && (args[:cooling_system_type] != 'none') && (args[:heat_pump_type] != 'none')
-    errors << "heating_system_type=#{args[:heating_system_type]} and cooling_system_type=#{args[:cooling_system_type]} and heat_pump_type=#{args[:heat_pump_type]}" if error
+    # heating system and heat pump
+    error = (args[:heating_system_type] != 'none') && (args[:heat_pump_type] != 'none') && (args[:heating_system_fraction_heat_load_served] > 0) && (args[:heat_pump_fraction_heat_load_served] > 0)
+    errors << "heating_system_type=#{args[:heating_system_type]} and heat_pump_type=#{args[:heat_pump_type]}" if error
+
+    # cooling system and heat pump
+    error = (args[:cooling_system_type] != 'none') && (args[:heat_pump_type] != 'none') && (args[:cooling_system_fraction_cool_load_served] > 0) && (args[:heat_pump_fraction_cool_load_served] > 0)
+    errors << "cooling_system_type=#{args[:cooling_system_type]} and heat_pump_type=#{args[:heat_pump_type]}" if error
 
     # non integer number of bathrooms
     if args[:geometry_num_bathrooms] != Constants.Auto
