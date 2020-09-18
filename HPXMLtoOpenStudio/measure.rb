@@ -11,7 +11,6 @@ require_relative 'resources/airflow'
 require_relative 'resources/constants'
 require_relative 'resources/constructions'
 require_relative 'resources/energyplus'
-require_relative 'resources/EPvalidator'
 require_relative 'resources/geometry'
 require_relative 'resources/hotwater_appliances'
 require_relative 'resources/hpxml'
@@ -28,6 +27,7 @@ require_relative 'resources/schedules'
 require_relative 'resources/simcontrols'
 require_relative 'resources/unit_conversions'
 require_relative 'resources/util'
+require_relative 'resources/validator'
 require_relative 'resources/version'
 require_relative 'resources/waterheater'
 require_relative 'resources/weather'
@@ -160,7 +160,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     # Validate input HPXML against EnergyPlus Use Case
-    errors = EnergyPlusValidator.run_validator(hpxml.doc)
+    stron_path = File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')
+    errors = Validator.run_validator(hpxml.doc, stron_path)
     errors.each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
@@ -264,14 +265,14 @@ class OSModel
     add_skylights(runner, model, spaces, weather)
     add_conditioned_floor_area(runner, model, spaces)
     add_thermal_mass(runner, model, spaces)
-    modify_cond_basement_surface_properties(runner, model)
-    assign_view_factor(runner, model, spaces)
+    update_conditioned_basement(runner, model, spaces)
     set_zone_volumes(runner, model, spaces)
     explode_surfaces(runner, model)
     add_num_occupants(model, runner, spaces)
 
     # HVAC
 
+    update_shared_hvac_systems()
     add_ideal_system(runner, model, spaces, epw_path)
     add_cooling_system(runner, model, spaces)
     add_heating_system(runner, model, spaces)
@@ -297,7 +298,7 @@ class OSModel
 
     add_airflow(runner, model, weather, spaces)
     add_hvac_sizing(runner, model, weather, spaces)
-    add_fuel_heating_eae(runner, model)
+    add_furnace_eae(runner, model)
     add_photovoltaics(runner, model)
     add_additional_properties(runner, model, hpxml_path)
     add_component_loads_output(runner, model, spaces)
@@ -307,6 +308,12 @@ class OSModel
       File.write(osm_output_path, model.to_s)
       runner.registerInfo("Wrote file: #{osm_output_path}")
     end
+
+    # Uncomment to debug EMS
+    # oems = model.getOutputEnergyManagementSystem
+    # oems.setActuatorAvailabilityDictionaryReporting('Verbose')
+    # oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
+    # oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
   end
 
   private
@@ -589,9 +596,16 @@ class OSModel
     end
   end
 
-  def self.modify_cond_basement_surface_properties(runner, model)
+  def self.update_conditioned_basement(runner, model, spaces)
+    return if @cond_bsmnt_surfaces.empty?
+
+    update_solar_absorptances(runner, model)
+    assign_view_factors(runner, model, spaces)
+  end
+
+  def self.update_solar_absorptances(runner, model)
     # modify conditioned basement surface properties
-    # - zero out interior solar absorptance in conditioned basement
+    # zero out interior solar absorptance in conditioned basement
     @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
       const = cond_bsmnt_surface.construction.get
       layered_const = const.to_LayeredConstruction.get
@@ -625,9 +639,7 @@ class OSModel
     end
   end
 
-  def self.assign_view_factor(runner, model, spaces)
-    return if @cond_bsmnt_surfaces.empty?
-
+  def self.assign_view_factors(runner, model, spaces)
     # zero out view factors between conditioned basement surfaces and living zone surfaces
     all_surfaces = [] # all surfaces in single conditioned space
     lv_surfaces = []  # surfaces in living
@@ -992,7 +1004,7 @@ class OSModel
         end
         surface.setSurfaceType('RoofCeiling')
         surface.setOutsideBoundaryCondition('Outdoors')
-        set_surface_interior(model, spaces, surface, roof.interior_adjacent_to)
+        set_surface_interior(model, spaces, surface, roof)
       end
 
       next if surfaces.empty?
@@ -1116,8 +1128,8 @@ class OSModel
           surface.setName(wall.id)
         end
         surface.setSurfaceType('Wall')
-        set_surface_interior(model, spaces, surface, wall.interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, wall.exterior_adjacent_to)
+        set_surface_interior(model, spaces, surface, wall)
+        set_surface_exterior(model, spaces, surface, wall)
         if wall.is_interior
           surface.setSunExposure('NoSun')
           surface.setWindExposure('NoWind')
@@ -1198,8 +1210,8 @@ class OSModel
           surface.setName(rim_joist.id)
         end
         surface.setSurfaceType('Wall')
-        set_surface_interior(model, spaces, surface, rim_joist.interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, rim_joist.exterior_adjacent_to)
+        set_surface_interior(model, spaces, surface, rim_joist)
+        set_surface_exterior(model, spaces, surface, rim_joist)
         if rim_joist.is_interior
           surface.setSunExposure('NoSun')
           surface.setWindExposure('NoWind')
@@ -1268,8 +1280,8 @@ class OSModel
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
         surface.additionalProperties.setFeature('SurfaceType', 'Floor')
       end
-      set_surface_interior(model, spaces, surface, frame_floor.interior_adjacent_to)
-      set_surface_exterior(model, spaces, surface, frame_floor.exterior_adjacent_to)
+      set_surface_interior(model, spaces, surface, frame_floor)
+      set_surface_exterior(model, spaces, surface, frame_floor)
       surface.setName(frame_floor.id)
       if frame_floor.is_interior
         surface.setSunExposure('NoSun')
@@ -1481,8 +1493,8 @@ class OSModel
         surface.additionalProperties.setFeature('SurfaceType', 'FoundationWall')
         surface.setName(foundation_wall.id)
         surface.setSurfaceType('Wall')
-        set_surface_interior(model, spaces, surface, foundation_wall.interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to)
+        set_surface_interior(model, spaces, surface, foundation_wall)
+        set_surface_exterior(model, spaces, surface, foundation_wall)
         surface.setSunExposure('NoSun')
         surface.setWindExposure('NoWind')
 
@@ -1547,8 +1559,8 @@ class OSModel
     surface.additionalProperties.setFeature('SurfaceType', 'FoundationWall')
     surface.setName(foundation_wall.id)
     surface.setSurfaceType('Wall')
-    set_surface_interior(model, spaces, surface, foundation_wall.interior_adjacent_to)
-    set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to)
+    set_surface_interior(model, spaces, surface, foundation_wall)
+    set_surface_exterior(model, spaces, surface, foundation_wall)
 
     if foundation_wall.is_thermal_boundary
       inside_drywall_thick_in = 0.5
@@ -1614,7 +1626,7 @@ class OSModel
     surface.setSurfaceType('Floor')
     surface.setOutsideBoundaryCondition('Foundation')
     surface.additionalProperties.setFeature('SurfaceType', 'Slab')
-    set_surface_interior(model, spaces, surface, slab.interior_adjacent_to)
+    set_surface_interior(model, spaces, surface, slab)
     surface.setSunExposure('NoSun')
     surface.setWindExposure('NoWind')
 
@@ -1804,7 +1816,7 @@ class OSModel
         surface.additionalProperties.setFeature('SurfaceType', 'Window')
         surface.setName("surface #{window.id}")
         surface.setSurfaceType('Wall')
-        set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
+        set_surface_interior(model, spaces, surface, window.wall)
 
         sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
                                                                          window.azimuth, [-0.001, 0, 0.001, 0]), model)
@@ -1812,7 +1824,7 @@ class OSModel
         sub_surface.setSurface(surface)
         sub_surface.setSubSurfaceType('FixedWindow')
 
-        set_subsurface_exterior(surface, window.wall.exterior_adjacent_to, spaces, model)
+        set_subsurface_exterior(surface, spaces, model, window.wall)
         surfaces << surface
 
         if not overhang_depth.nil?
@@ -1842,7 +1854,7 @@ class OSModel
         surface.additionalProperties.setFeature('SurfaceType', 'Door')
         surface.setName("surface #{window.id}")
         surface.setSurfaceType('Wall')
-        set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
+        set_surface_interior(model, spaces, surface, window.wall)
 
         sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
                                                                          window.azimuth, [0, 0, 0, 0]), model)
@@ -1850,7 +1862,7 @@ class OSModel
         sub_surface.setSurface(surface)
         sub_surface.setSubSurfaceType('Door')
 
-        set_subsurface_exterior(surface, window.wall.exterior_adjacent_to, spaces, model)
+        set_subsurface_exterior(surface, spaces, model, window.wall)
         surfaces << surface
 
         # Apply construction
@@ -1921,7 +1933,7 @@ class OSModel
       surface.additionalProperties.setFeature('SurfaceType', 'Door')
       surface.setName("surface #{door.id}")
       surface.setSurfaceType('Wall')
-      set_surface_interior(model, spaces, surface, door.wall.interior_adjacent_to)
+      set_surface_interior(model, spaces, surface, door.wall)
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(door_width, door_height, z_origin,
                                                                        door.azimuth, [0, 0, 0, 0]), model)
@@ -1929,7 +1941,7 @@ class OSModel
       sub_surface.setSurface(surface)
       sub_surface.setSubSurfaceType('Door')
 
-      set_subsurface_exterior(surface, door.wall.exterior_adjacent_to, spaces, model)
+      set_subsurface_exterior(surface, spaces, model, door.wall)
       surfaces << surface
 
       # Apply construction
@@ -2084,6 +2096,10 @@ class OSModel
     return true
   end
 
+  def self.update_shared_hvac_systems()
+    HVAC.apply_shared_systems(@hpxml)
+  end
+
   def self.add_cooling_system(runner, model, spaces)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
@@ -2190,7 +2206,14 @@ class OSModel
 
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
-      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
+      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir
+
+        HVAC.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
+                                               @remaining_heat_load_frac,
+                                               @remaining_cool_load_frac,
+                                               living_zone, @hvac_map)
+
+      elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
 
         HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
                                                 @remaining_heat_load_frac,
@@ -2316,16 +2339,17 @@ class OSModel
     return if hvac_distribution.nil?
 
     hvac_distribution_type_map = { HPXML::HVACTypeFurnace => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeBoiler => [HPXML::HVACDistributionTypeHydronic, HPXML::HVACDistributionTypeDSE],
+                                   HPXML::HVACTypeBoiler => [HPXML::HVACDistributionTypeHydronic, HPXML::HVACDistributionTypeHydronicAndAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeCentralAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeEvaporativeCooler => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeMiniSplitAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeHeatPumpAirToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeHeatPumpMiniSplit => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeHeatPumpGroundToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE] }
+                                   HPXML::HVACTypeHeatPumpGroundToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
+                                   HPXML::HVACTypeHeatPumpWaterLoopToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir, HPXML::HVACDistributionTypeDSE] }
 
     if not hvac_distribution_type_map[system_type].include? hvac_distribution.distribution_system_type
-      # EPvalidator.rb only checks that a HVAC distribution system of the correct type (for the given HVAC system) exists
+      # validator.rb only checks that a HVAC distribution system of the correct type (for the given HVAC system) exists
       # in the HPXML file, not that it is attached to this HVAC system. So here we perform the more rigorous check.
       fail "Incorrect HVAC distribution system type for HVAC type: '#{system_type}'. Should be one of: #{hvac_distribution_type_map[system_type]}"
     end
@@ -2416,24 +2440,45 @@ class OSModel
     # Ducts
     duct_systems = {}
     @hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+      next unless [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? hvac_distribution.distribution_system_type
 
       air_ducts = create_ducts(runner, model, hvac_distribution, spaces)
+      next if air_ducts.empty?
 
       # Connect AirLoopHVACs to ducts
+      added_ducts = false
       hvac_distribution.hvac_systems.each do |hvac_system|
-        @hvac_map[hvac_system.id].each do |loop|
-          next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
+        @hvac_map[hvac_system.id].each do |object|
+          next unless object.is_a? OpenStudio::Model::AirLoopHVAC
 
           if duct_systems[air_ducts].nil?
-            duct_systems[air_ducts] = loop
-          elsif duct_systems[air_ducts] != loop
+            duct_systems[air_ducts] = object
+            added_ducts = true
+          elsif duct_systems[air_ducts] != object
             # Multiple air loops associated with this duct system, treat
             # as separate duct systems.
             air_ducts2 = create_ducts(runner, model, hvac_distribution, spaces)
-            duct_systems[air_ducts2] = loop
+            duct_systems[air_ducts2] = object
+            added_ducts = true
           end
         end
+      end
+      if not added_ducts
+        # Check if ducted fan coil, which doesn't have an AirLoopHVAC;
+        # assign to FanCoil instead.
+        if hvac_distribution.distribution_system_type && hvac_distribution.hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
+          hvac_distribution.hvac_systems.each do |hvac_system|
+            @hvac_map[hvac_system.id].each do |object|
+              next unless object.is_a? OpenStudio::Model::ZoneHVACFourPipeFanCoil
+
+              duct_systems[air_ducts] = object
+              added_ducts = true
+            end
+          end
+        end
+      end
+      if not added_ducts
+        fail 'Unexpected error adding ducts to model.'
       end
     end
 
@@ -2536,24 +2581,16 @@ class OSModel
     HVACSizing.apply(model, runner, weather, spaces, @hpxml, @infil_volume, @nbeds, @min_neighbor_distance, @debug)
   end
 
-  def self.add_fuel_heating_eae(runner, model)
+  def self.add_furnace_eae(runner, model)
     # Needs to come after HVAC sizing (needs heating capacity and airflow rate)
     # FUTURE: Could remove this method and simplify everything if we could autosize via the HPXML file
 
     @hpxml.heating_systems.each do |heating_system|
       next unless heating_system.fraction_heat_load_served > 0
+      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove].include? heating_system.heating_system_type
+      next unless heating_system.heating_system_fuel != HPXML::FuelTypeElectricity
 
-      htg_type = heating_system.heating_system_type
-      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeBoiler].include? htg_type
-
-      fuel = heating_system.heating_system_fuel
-      next if fuel == HPXML::FuelTypeElectricity
-
-      fuel_eae = heating_system.electric_auxiliary_energy
-      load_frac = heating_system.fraction_heat_load_served
-      sys_id = heating_system.id
-
-      HVAC.apply_eae_to_heating_fan(runner, @hvac_map[sys_id], fuel_eae, fuel, load_frac, htg_type)
+      HVAC.apply_eae_to_heating_fan(runner, @hvac_map[heating_system.id], heating_system)
     end
   end
 
@@ -2776,73 +2813,66 @@ class OSModel
 
     # EMS Sensors: Ducts
 
-    plenum_zones = []
-    model.getThermalZones.each do |zone|
-      next unless zone.isPlenum
-
-      plenum_zones << zone
-    end
-
     ducts_sensors = []
     ducts_mix_gain_sensor = nil
     ducts_mix_loss_sensor = nil
 
-    if not plenum_zones.empty?
+    has_duct_zone_mixing = false
+    living_zone.airLoopHVACs.sort.each do |airloop|
+      living_zone.zoneMixing.each do |zone_mix|
+        next unless zone_mix.name.to_s.start_with? airloop.name.to_s.gsub(' ', '_')
 
-      has_duct_zone_mixing = false
-      living_zone.airLoopHVACs.sort.each do |airloop|
-        living_zone.zoneMixing.each do |zone_mix|
-          next unless zone_mix.name.to_s.start_with? airloop.name.to_s.gsub(' ', '_')
-
-          has_duct_zone_mixing = true
-        end
+        has_duct_zone_mixing = true
       end
+    end
 
-      if has_duct_zone_mixing
-        ducts_mix_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mixing Sensible Heat Gain Energy')
-        ducts_mix_gain_sensor.setName('duct_mix_gain')
-        ducts_mix_gain_sensor.setKeyName(living_zone.name.to_s)
+    if has_duct_zone_mixing
+      ducts_mix_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mixing Sensible Heat Gain Energy')
+      ducts_mix_gain_sensor.setName('duct_mix_gain')
+      ducts_mix_gain_sensor.setKeyName(living_zone.name.to_s)
 
-        ducts_mix_loss_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mixing Sensible Heat Loss Energy')
-        ducts_mix_loss_sensor.setName('duct_mix_loss')
-        ducts_mix_loss_sensor.setKeyName(living_zone.name.to_s)
+      ducts_mix_loss_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mixing Sensible Heat Loss Energy')
+      ducts_mix_loss_sensor.setName('duct_mix_loss')
+      ducts_mix_loss_sensor.setKeyName(living_zone.name.to_s)
+    end
+
+    # Return duct losses
+    model.getOtherEquipments.sort.each do |o|
+      next if objects_already_processed.include? o
+
+      is_duct_load = o.additionalProperties.getFeatureAsBoolean(Constants.IsDuctLoadForReport)
+      next unless is_duct_load.is_initialized
+
+      objects_already_processed << o
+      next unless is_duct_load.get
+
+      ducts_sensors << []
+      { 'Other Equipment Convective Heating Energy' => 'ducts_conv',
+        'Other Equipment Radiant Heating Energy' => 'ducts_rad' }.each do |var, name|
+        ducts_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+        ducts_sensor.setName(name)
+        ducts_sensor.setKeyName(o.name.to_s)
+        ducts_sensors[-1] << ducts_sensor
       end
+    end
 
-      # Return duct losses
-      plenum_zones.each do |plenum_zone|
-        model.getOtherEquipments.sort.each do |o|
-          next unless o.space.get.thermalZone.get.name.to_s == plenum_zone.name.to_s
-          next if objects_already_processed.include? o
+    # Supply duct losses
+    model.getOtherEquipments.sort.each do |o|
+      next if objects_already_processed.include? o
 
-          ducts_sensors << []
-          { 'Other Equipment Convective Heating Energy' => 'ducts_conv',
-            'Other Equipment Radiant Heating Energy' => 'ducts_rad' }.each do |var, name|
-            ducts_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-            ducts_sensor.setName(name)
-            ducts_sensor.setKeyName(o.name.to_s)
-            ducts_sensors[-1] << ducts_sensor
-            objects_already_processed << o
-          end
-        end
-      end
+      is_duct_load = o.additionalProperties.getFeatureAsBoolean(Constants.IsDuctLoadForReport)
+      next unless is_duct_load.is_initialized
 
-      # Supply duct losses
-      living_zone.airLoopHVACs.sort.each do |airloop|
-        model.getOtherEquipments.sort.each do |o|
-          next unless o.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
-          next unless o.name.to_s.start_with? airloop.name.to_s.gsub(' ', '_')
-          next if objects_already_processed.include? o
+      objects_already_processed << o
+      next unless is_duct_load.get
 
-          ducts_sensors << []
-          { 'Other Equipment Convective Heating Energy' => 'ducts_conv',
-            'Other Equipment Radiant Heating Energy' => 'ducts_rad' }.each do |var, name|
-            ducts_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-            ducts_sensor.setName(name)
-            ducts_sensor.setKeyName(o.name.to_s)
-            ducts_sensors[-1] << ducts_sensor
-            objects_already_processed << o
-          end
-        end
+      ducts_sensors << []
+      { 'Other Equipment Convective Heating Energy' => 'ducts_conv',
+        'Other Equipment Radiant Heating Energy' => 'ducts_rad' }.each do |var, name|
+        ducts_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+        ducts_sensor.setName(name)
+        ducts_sensor.setKeyName(o.name.to_s)
+        ducts_sensors[-1] << ducts_sensor
       end
     end
 
@@ -3570,7 +3600,8 @@ class OSModel
     end
   end
 
-  def self.set_surface_interior(model, spaces, surface, interior_adjacent_to)
+  def self.set_surface_interior(model, spaces, surface, hpxml_surface)
+    interior_adjacent_to = hpxml_surface.interior_adjacent_to
     if [HPXML::LocationBasementConditioned].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
       @cond_bsmnt_surfaces << surface
@@ -3579,18 +3610,21 @@ class OSModel
     end
   end
 
-  def self.set_surface_exterior(model, spaces, surface, exterior_adjacent_to)
+  def self.set_surface_exterior(model, spaces, surface, hpxml_surface)
+    exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
+    interior_adjacent_to = hpxml_surface.interior_adjacent_to
     if exterior_adjacent_to == HPXML::LocationOutside
       surface.setOutsideBoundaryCondition('Outdoors')
     elsif exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Foundation')
-    elsif exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+    elsif exterior_adjacent_to == HPXML::LocationOtherHousingUnit && [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include?(interior_adjacent_to)
       surface.setOutsideBoundaryCondition('Adiabatic')
+    elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
+           HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? exterior_adjacent_to
+      set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     elsif exterior_adjacent_to == HPXML::LocationBasementConditioned
       surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
       @cond_bsmnt_surfaces << surface
-    elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? exterior_adjacent_to
-      set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     else
       surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to))
     end
@@ -3740,15 +3774,15 @@ class OSModel
     return space
   end
 
-  def self.set_subsurface_exterior(surface, wall_exterior_adjacent_to, spaces, model)
+  def self.set_subsurface_exterior(surface, spaces, model, hpxml_surface)
     # Set its parent surface outside boundary condition, which will be also applied to subsurfaces through OS
     # The parent surface is entirely comprised of the subsurface.
 
     # Subsurface on foundation wall, set it to be adjacent to outdoors
-    if wall_exterior_adjacent_to == HPXML::LocationGround
+    if hpxml_surface.exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Outdoors')
     else
-      set_surface_exterior(model, spaces, surface, wall_exterior_adjacent_to)
+      set_surface_exterior(model, spaces, surface, hpxml_surface)
     end
   end
 

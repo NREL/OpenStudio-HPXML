@@ -61,6 +61,9 @@ class HPXMLDefaults
         end
       end
     end
+
+    hpxml.header.allow_increased_fixed_capacities = false if hpxml.header.allow_increased_fixed_capacities.nil?
+    hpxml.header.use_max_load_for_heat_pumps = true if hpxml.header.use_max_load_for_heat_pumps.nil?
   end
 
   def self.apply_site(hpxml)
@@ -148,10 +151,10 @@ class HPXMLDefaults
     measurements = []
     infil_volume = nil
     hpxml.air_infiltration_measurements.each do |measurement|
-      is_ach50 = ((measurement.unit_of_measure == HPXML::UnitsACH) && (measurement.house_pressure == 50))
-      is_cfm50 = ((measurement.unit_of_measure == HPXML::UnitsCFM) && (measurement.house_pressure == 50))
+      is_ach = ((measurement.unit_of_measure == HPXML::UnitsACH) && !measurement.house_pressure.nil?)
+      is_cfm = ((measurement.unit_of_measure == HPXML::UnitsCFM) && !measurement.house_pressure.nil?)
       is_nach = (measurement.unit_of_measure == HPXML::UnitsACHNatural)
-      next unless (is_ach50 || is_cfm50 || is_nach)
+      next unless (is_ach || is_cfm || is_nach)
 
       measurements << measurement
       next if measurement.infiltration_volume.nil?
@@ -296,6 +299,14 @@ class HPXMLDefaults
       heat_pump.compressor_type = HVAC.get_default_compressor_type(heat_pump.cooling_efficiency_seer)
     end
 
+    # Default boiler EAE
+    hpxml.heating_systems.each do |heating_system|
+      next unless heating_system.heating_system_type == HPXML::HVACTypeBoiler
+      next unless heating_system.electric_auxiliary_energy.nil?
+
+      heating_system.electric_auxiliary_energy = HVAC.get_electric_auxiliary_energy(heating_system)
+    end
+
     # Default AC/HP sensible heat ratio
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.cooling_shr.nil?
@@ -329,6 +340,18 @@ class HPXMLDefaults
         heat_pump.cooling_shr = 0.73
       elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
         heat_pump.cooling_shr = 0.732
+      end
+    end
+
+    # Default GSHP pump/fan power
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+
+      if heat_pump.fan_watts_per_cfm.nil?
+        heat_pump.fan_watts_per_cfm = HVAC.get_default_gshp_fan_power()
+      end
+      if heat_pump.pump_watts_per_ton.nil?
+        heat_pump.pump_watts_per_ton = HVAC.get_default_gshp_pump_power()
       end
     end
 
@@ -381,7 +404,7 @@ class HPXMLDefaults
     end
 
     hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+      next unless [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? hvac_distribution.distribution_system_type
 
       # Default return registers
       if hvac_distribution.number_of_return_registers.nil?
@@ -1027,6 +1050,9 @@ class HPXMLDefaults
 
   def self.apply_pv_systems(hpxml)
     hpxml.pv_systems.each do |pv_system|
+      if pv_system.is_shared_system.nil?
+        pv_system.is_shared_system = false
+      end
       if pv_system.inverter_efficiency.nil?
         pv_system.inverter_efficiency = PV.get_default_inv_eff()
       end

@@ -313,12 +313,6 @@
       <checksum>1A0446EE</checksum>
     </file>
     <file>
-      <filename>HPXML.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8B1ACB99</checksum>
-    </file>
-    <file>
       <filename>minitest_helper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -349,18 +343,6 @@
       <checksum>68F83651</checksum>
     </file>
     <file>
-      <filename>test_hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C3BC236A</checksum>
-    </file>
-    <file>
-      <filename>test_hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C3BC236A</checksum>
-    </file>
-    <file>
       <filename>test_location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -383,12 +365,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>7DAA5F02</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>830C5D1B</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>
@@ -421,12 +397,6 @@
       <checksum>3B8DB83C</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C4091CEF</checksum>
-    </file>
-    <file>
       <filename>test_miscloads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -443,12 +413,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>F39A6C6A</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0D7BC590</checksum>
     </file>
     <file>
       <filename>test_hotwater_appliance.rb</filename>
@@ -490,37 +454,49 @@
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>231D1FFD</checksum>
+      <checksum>4BB3F113</checksum>
+    </file>
+    <file>
+      <filename>HPXML.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BB8F37B8</checksum>
     </file>
     <file>
       <filename>test_pv.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>14BB9D9B</checksum>
+      <checksum>0AF23984</checksum>
     </file>
     <file>
       <filename>pv.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FE2813DC</checksum>
+      <checksum>5C352E25</checksum>
     </file>
     <file>
-      <filename>xmlhelper.rb</filename>
+      <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AE298605</checksum>
+      <checksum>BC675290</checksum>
+    </file>
+    <file>
+      <filename>test_hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AA4E8BA5</checksum>
     </file>
     <file>
       <filename>HPXMLDataTypes.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C83C2AAC</checksum>
+      <checksum>8CE65B50</checksum>
     </file>
     <file>
       <filename>BaseElements.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A88DA4D7</checksum>
+      <checksum>DB4F58D2</checksum>
     </file>
     <file>
       <filename>test_defaults.rb</filename>
