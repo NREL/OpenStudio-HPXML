@@ -627,14 +627,14 @@
             <VentilationFan>
               <SystemIdentifier id='SharedSupplyFan'/>
               <FanType>supply only</FanType>
-              <RatedFlowRate>1000.0</RatedFlowRate>
+              <TestedFlowRate>800.0</TestedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>
               <FractionRecirculation>0.5</FractionRecirculation>
-              <FanPower>300.0</FanPower>
+              <FanPower>240.0</FanPower>
               <extension>
-                <InUnitFlowRate>110.0</InUnitFlowRate>
+                <InUnitFlowRate>80.0</InUnitFlowRate>
                 <PreHeating>
                   <Fuel>natural gas</Fuel>
                   <AnnualHeatingEfficiency>
@@ -654,10 +654,10 @@
             <VentilationFan>
               <SystemIdentifier id='ExhaustFan'/>
               <FanType>exhaust only</FanType>
-              <TestedFlowRate>100.0</TestedFlowRate>
+              <TestedFlowRate>72.0</TestedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <FanPower>30.0</FanPower>
+              <FanPower>26.0</FanPower>
             </VentilationFan>
           </VentilationFans>
         </MechanicalVentilation>

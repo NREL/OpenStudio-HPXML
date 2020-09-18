@@ -3238,11 +3238,11 @@ class HPXML < Object
   end
 
   class VentilationFan < BaseElement
-    ATTRS = [:id, :fan_type, :rated_flow_rate, :tested_flow_rate, :hours_in_operation,
+    ATTRS = [:id, :fan_type, :rated_flow_rate, :tested_flow_rate, :hours_in_operation, :flow_rate_not_tested,
              :used_for_whole_building_ventilation, :used_for_seasonal_cooling_load_reduction,
              :used_for_local_ventilation, :total_recovery_efficiency, :total_recovery_efficiency_adjusted,
              :sensible_recovery_efficiency, :sensible_recovery_efficiency_adjusted,
-             :fan_power, :quantity, :fan_location, :distribution_system_idref, :start_hour,
+             :fan_power, :fan_power_defaulted, :quantity, :fan_location, :distribution_system_idref, :start_hour,
              :is_shared_system, :in_unit_flow_rate, :fraction_recirculation,
              :preheating_fuel, :preheating_efficiency_cop, :precooling_fuel, :precooling_efficiency_cop]
     attr_accessor(*ATTRS)
@@ -3276,6 +3276,7 @@ class HPXML < Object
     end
 
     def oa_unit_flow_rate
+      return if total_unit_flow_rate.nil?
       if not @is_shared_system
         return total_unit_flow_rate
       else
@@ -3289,20 +3290,16 @@ class HPXML < Object
 
     def average_oa_unit_flow_rate
       # Daily-average outdoor air (cfm) associated with the unit
-      if not @hours_in_operation.nil?
-        if not oa_unit_flow_rate.nil?
-          return oa_unit_flow_rate * (@hours_in_operation / 24.0)
-        end
-      end
+      return if oa_unit_flow_rate.nil?
+      return if @hours_in_operation.nil?
+      return oa_unit_flow_rate * (@hours_in_operation / 24.0)
     end
 
     def average_total_unit_flow_rate
       # Daily-average total air (cfm) associated with the unit
-      if not @hours_in_operation.nil?
-        if not total_unit_flow_rate.nil?
-          return total_unit_flow_rate * (@hours_in_operation / 24.0)
-        end
-      end
+      return if total_unit_flow_rate.nil?
+      return if @hours_in_operation.nil?
+      return total_unit_flow_rate * (@hours_in_operation / 24.0)
     end
 
     def unit_flow_rate_ratio
@@ -3312,6 +3309,7 @@ class HPXML < Object
       elsif not @rated_flow_rate.nil?
         ratio = @in_unit_flow_rate / @rated_flow_rate
       end
+      return 1.0 if ratio.nil?
       if ratio > 1.0
         fail "The in-unit flow rate of shared fan: #{@id} is greater than system flow rate."
       end
@@ -3319,6 +3317,7 @@ class HPXML < Object
     end
 
     def unit_fan_power
+      return if @fan_power.nil?
       if @is_shared_system
         return @fan_power * unit_flow_rate_ratio
       else
@@ -3327,9 +3326,9 @@ class HPXML < Object
     end
 
     def average_unit_fan_power
-      if not @hours_in_operation.nil?
-        return unit_fan_power * (@hours_in_operation / 24.0)
-      end
+      return if unit_fan_power.nil?
+      return if @hours_in_operation.nil?
+      return unit_fan_power * (@hours_in_operation / 24.0)
     end
 
     def includes_supply_air?
@@ -3415,6 +3414,8 @@ class HPXML < Object
           XMLHelper.add_element(eff, 'Units', UnitsCOP) unless eff.nil?
         end
       end
+      XMLHelper.add_extension(ventilation_fan, 'FlowRateNotTested', @flow_rate_not_tested) unless @flow_rate_not_tested.nil?
+      XMLHelper.add_extension(ventilation_fan, 'FanPowerDefaulted', @fan_power_defaulted) unless @fan_power_defaulted.nil?
     end
 
     def from_oga(ventilation_fan)
@@ -3426,7 +3427,9 @@ class HPXML < Object
       @is_shared_system = to_boolean_or_nil(XMLHelper.get_value(ventilation_fan, 'IsSharedSystem'))
       @rated_flow_rate = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'RatedFlowRate'))
       @tested_flow_rate = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'TestedFlowRate'))
+      @flow_rate_not_tested = to_boolean_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/FlowRateNotTested'))
       @fan_power = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'FanPower'))
+      @fan_power_defaulted = to_boolean_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/FanPowerDefaulted'))
       if @is_shared_system
         @fraction_recirculation = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'FractionRecirculation'))
         @in_unit_flow_rate = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/InUnitFlowRate'))
