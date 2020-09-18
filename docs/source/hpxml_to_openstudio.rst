@@ -699,13 +699,14 @@ HPXML Mechanical Ventilation
 ****************************
 
 This section describes elements specified in HPXML's ``Systems/MechanicalVentilation``.
-``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` elements can be used to specify whole building or multifamily unit ventilation, local ventilation, and/or cooling load reduction.
+``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` elements can be used to specify whole dwelling unit ventilation, local ventilation, and/or cooling load reduction.
 
-Whole Building Ventilation
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Whole Dwelling Unit Ventilation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Mechanical ventilation systems that provide whole building or whole multifamily unit ventilation may each be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``UsedForWholeBuildingVentilation='true'``.
+Mechanical ventilation systems that provide whole dwelling unit ventilation may each be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``UsedForWholeBuildingVentilation='true'``.
 Inputs including ``FanType``, ``TestedFlowRate`` (or ``RatedFlowRate``), ``HoursInOperation``, and ``FanPower`` must be provided.
+For a CFIS system, the flow rate should equal the amount of outdoor air provided to the distribution system.
 
 Depending on the type of mechanical ventilation specified, additional elements are required:
 
@@ -722,18 +723,24 @@ central fan integrated supply (CFIS)                                            
 
 Note that ``AdjustedSensibleRecoveryEfficiency`` and ``AdjustedTotalRecoveryEfficiency`` can be provided instead of ``SensibleRecoveryEfficiency`` and ``TotalRecoveryEfficiency``.
 
-For an individual CFIS system, the flow rate should equal the amount of outdoor air provided to the distribution system. For a shared CFIS system, the flow rate should equal the sum of outdoor air and recirculated air provided to the distribution system.
+The ventilation system may be optionally described as a shared system (i.e., serving multiple dwelling units) using ``IsSharedSystem``.
+If not provided, it is assumed to be false.
+If provided and true, note that ``TestedFlowRate`` (or ``RatedFlowRate``) and ``FanPower`` should reflect the entire shared ventilation system.
+In addition, additional elements are available:
 
-``IsSharedSystem`` will default to false if not provided.
+- ``extension/InUnitFlowRate``: The flow rate to the dwelling unit.
+- ``FractionRecirculation``: Fraction of the total supply air that is recirculated, with the remainder assumed to be outdoor air. The value must be 0 for exhaust only systems.
+- ``extension/PreHeating``: Optional. Element to specify if the supply air is preconditioned by heating equipment. It is not allowed for exhaust only systems. If provided, there are additional child elements required:
 
-If the mechanical ventilation is a shared system (i.e., serving multiple dwelling units), it should be described using ``IsSharedSystem='true'``.
-In this case, ``TestedFlowRate`` or ``RatedFlowRate`` and ``FanPower`` specified are assumed to be information at system level.
-Flow rates are required at both system level and in-unit level, in order to specify the in-unit flow rate, please use ``extension/InUnitFlowRate``.
-``FractionRecirculation`` is also needed for shared systems, where the values are the percentages of recirculation air in total supply air.
-In addition, it is also available to describe preconditioning heating/cooling systems for shared systems with ``extension/PreconditioningHeating`` and ``extension/PreconditioningCooling``.
-To describe a preconditioning system, eg. a preconditioning heating system, the ``extension/PreconditioningHeating/Fuel`` and ``extension/PreconditioningHeating/AnnualHeatingEfficiency[Units="COP"]/Value`` are required, assuming capacity is large enough to precondition the ventilation air.
-The same rule applies to preconditioning cooling system.
+  - ``Fuel``: Fuel type of the preconditioning heating equipment.
+  - ``AnnualHeatingEfficiency[Units="COP"]/Value``: Efficiency of the preconditioning heating equipment.
+  - ``FractionVentilationHeatLoadServed``: Fraction of heating load introduced by the shared ventilation system that is met by the preconditioning heating equipment.
 
+- ``extension/PreCooling``: Optional. Element to specify if the supply air is preconditioned by cooling equipment. It is not allowed for exhaust only systems. If provided, there are additional child elements required:
+
+  - ``Fuel``: Fuel type of the preconditioning cooling equipment.
+  - ``AnnualCoolingEfficiency[Units="COP"]/Value``: Efficiency of the preconditioning cooling equipment.
+  - ``FractionVentilationCoolLoadServed``: Fraction of cooling load introduced by the shared ventilation system that is met by the preconditioning cooling equipment.
 
 Local Ventilation
 ~~~~~~~~~~~~~~~~~
