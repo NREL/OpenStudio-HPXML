@@ -84,8 +84,6 @@ class HPXML < Object
   DuctTypeSupply = 'supply'
   DWHRFacilitiesConnectedAll = 'all'
   DWHRFacilitiesConnectedOne = 'one'
-  FoundationThermalBoundaryFloor = 'frame floor'
-  FoundationThermalBoundaryWall = 'foundation wall'
   FoundationTypeAmbient = 'Ambient'
   FoundationTypeBasementConditioned = 'ConditionedBasement'
   FoundationTypeBasementUnconditioned = 'UnconditionedBasement'
@@ -1240,7 +1238,7 @@ class HPXML < Object
   end
 
   class Foundation < BaseElement
-    ATTRS = [:id, :foundation_type, :vented_crawlspace_sla, :unconditioned_basement_thermal_boundary, :within_infiltration_volume,
+    ATTRS = [:id, :foundation_type, :vented_crawlspace_sla, :within_infiltration_volume,
              :attached_to_slab_idrefs, :attached_to_frame_floor_idrefs, :attached_to_foundation_wall_idrefs]
     attr_accessor(*ATTRS)
 
@@ -1338,7 +1336,6 @@ class HPXML < Object
         elsif @foundation_type == FoundationTypeBasementUnconditioned
           basement = XMLHelper.add_element(foundation_type_e, 'Basement')
           XMLHelper.add_element(basement, 'Conditioned', false)
-          XMLHelper.add_element(foundation, 'ThermalBoundary', @unconditioned_basement_thermal_boundary) unless @unconditioned_basement_thermal_boundary.nil?
         elsif @foundation_type == FoundationTypeCrawlspaceVented
           crawlspace = XMLHelper.add_element(foundation_type_e, 'Crawlspace')
           XMLHelper.add_element(crawlspace, 'Vented', true)
@@ -1376,8 +1373,6 @@ class HPXML < Object
       end
       if @foundation_type == FoundationTypeCrawlspaceVented
         @vented_crawlspace_sla = to_float_or_nil(XMLHelper.get_value(foundation, "VentilationRate[UnitofMeasure='SLA']/Value"))
-      elsif @foundation_type == FoundationTypeBasementUnconditioned
-        @unconditioned_basement_thermal_boundary = XMLHelper.get_value(foundation, 'ThermalBoundary')
       end
       @within_infiltration_volume = to_boolean_or_nil(XMLHelper.get_value(foundation, 'WithinInfiltrationVolume'))
       @attached_to_slab_idrefs = []
@@ -5158,7 +5153,8 @@ class HPXML < Object
 
   def self.is_thermal_boundary(surface)
     # Returns true if the surface is between conditioned space and outside/ground/unconditioned space.
-    # Note: Insulated foundation walls of, e.g., unconditioned spaces return false.
+    # Note: The location of insulation is not considered here, so an insulated foundation wall of an
+    # unconditioned basement, for example, returns false.
     def self.is_adjacent_to_conditioned(adjacent_to)
       if [HPXML::LocationLivingSpace,
           HPXML::LocationBasementConditioned,
