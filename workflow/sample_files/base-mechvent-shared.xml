@@ -627,7 +627,7 @@
             <VentilationFan>
               <SystemIdentifier id='SharedSupplyFan'/>
               <FanType>supply only</FanType>
-              <TestedFlowRate>800.0</TestedFlowRate>
+              <RatedFlowRate>800.0</RatedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>

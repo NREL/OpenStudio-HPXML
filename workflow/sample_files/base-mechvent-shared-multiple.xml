@@ -703,7 +703,7 @@
             <VentilationFan>
               <SystemIdentifier id='SharedSupplyPreconditioned'/>
               <FanType>supply only</FanType>
-              <TestedFlowRate>1000.0</TestedFlowRate>
+              <RatedFlowRate>1000.0</RatedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>
@@ -732,7 +732,7 @@
             <VentilationFan>
               <SystemIdentifier id='SharedERVPreconditioned'/>
               <FanType>energy recovery ventilator</FanType>
-              <TestedFlowRate>500.0</TestedFlowRate>
+              <RatedFlowRate>500.0</RatedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>
@@ -763,7 +763,7 @@
             <VentilationFan>
               <SystemIdentifier id='SharedHRVPreconditioned'/>
               <FanType>heat recovery ventilator</FanType>
-              <TestedFlowRate>500.0</TestedFlowRate>
+              <RatedFlowRate>500.0</RatedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>
@@ -793,7 +793,7 @@
             <VentilationFan>
               <SystemIdentifier id='SharedBalancedPreconditioned'/>
               <FanType>balanced</FanType>
-              <TestedFlowRate>300.0</TestedFlowRate>
+              <RatedFlowRate>300.0</RatedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>
@@ -822,7 +822,7 @@
             <VentilationFan>
               <SystemIdentifier id='SharedExhaust'/>
               <FanType>exhaust only</FanType>
-              <TestedFlowRate>700.0</TestedFlowRate>
+              <RatedFlowRate>700.0</RatedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>

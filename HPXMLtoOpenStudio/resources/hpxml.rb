@@ -3300,12 +3300,13 @@ class HPXML < Object
 
     def unit_flow_rate_ratio
       return 1.0 unless @is_shared_system
+      return if @in_unit_flow_rate.nil?
       if not @tested_flow_rate.nil?
         ratio = @in_unit_flow_rate / @tested_flow_rate
       elsif not @rated_flow_rate.nil?
         ratio = @in_unit_flow_rate / @rated_flow_rate
       end
-      return 1.0 if ratio.nil?
+      return if ratio.nil?
       if ratio > 1.0
         fail "The in-unit flow rate of shared fan: #{@id} is greater than system flow rate."
       end
@@ -3315,6 +3316,7 @@ class HPXML < Object
     def unit_fan_power
       return if @fan_power.nil?
       if @is_shared_system
+        return if unit_flow_rate_ratio.nil?
         return @fan_power * unit_flow_rate_ratio
       else
         return @fan_power

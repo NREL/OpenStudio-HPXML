@@ -2306,7 +2306,7 @@ class OSModel
       end
       modeled_mels << plug_load.plug_load_type
 
-      MiscLoads.apply_plug(model, plug_load, obj_name, @cfa, spaces[HPXML::LocationLivingSpace])
+      MiscLoads.apply_plug(model, plug_load, obj_name, spaces[HPXML::LocationLivingSpace])
     end
     if not modeled_mels.include? HPXML::PlugLoadTypeOther
       runner.registerWarning("No '#{HPXML::PlugLoadTypeOther}' plug loads specified, the model will not include misc plug load energy use.")
