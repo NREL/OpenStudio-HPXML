@@ -764,12 +764,12 @@ class HVACSizing
             cltd = [cltd + cltd_corr, 0.0].max # Assume zero cooling load for negative CLTD's
           end
 
-          zone_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * cltd
-          zone_loads.Heat_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * @htd
+          zone_loads.Cool_Walls += wall.additional_properties.ufactor * wall_area / azimuths.size * cltd
+          zone_loads.Heat_Walls += wall.additional_properties.ufactor * wall_area / azimuths.size * @htd
         else
           adjacent_space = wall.exterior_adjacent_to
-          zone_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (@cool_design_temps[adjacent_space] - @cool_setpoint)
-          zone_loads.Heat_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (@heat_setpoint - @heat_design_temps[adjacent_space])
+          zone_loads.Cool_Walls += wall.additional_properties.ufactor * wall_area / azimuths.size * (@cool_design_temps[adjacent_space] - @cool_setpoint)
+          zone_loads.Heat_Walls += wall.additional_properties.ufactor * wall_area / azimuths.size * (@heat_setpoint - @heat_design_temps[adjacent_space])
         end
       end
     end
@@ -855,12 +855,12 @@ class HVACSizing
       next unless frame_floor.is_thermal_boundary
 
       if frame_floor.is_exterior
-        zone_loads.Cool_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@ctd - 5.0 + @daily_range_temp_adjust[@daily_range_num])
-        zone_loads.Heat_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * @htd
+        zone_loads.Cool_Floors += frame_floor.additional_properties.ufactor * frame_floor.area * (@ctd - 5.0 + @daily_range_temp_adjust[@daily_range_num])
+        zone_loads.Heat_Floors += frame_floor.additional_properties.ufactor * frame_floor.area * @htd
       else
         adjacent_space = frame_floor.exterior_adjacent_to
-        zone_loads.Cool_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@cool_design_temps[adjacent_space] - @cool_setpoint)
-        zone_loads.Heat_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@heat_setpoint - @heat_design_temps[adjacent_space])
+        zone_loads.Cool_Floors += frame_floor.additional_properties.ufactor * frame_floor.area * (@cool_design_temps[adjacent_space] - @cool_setpoint)
+        zone_loads.Heat_Floors += frame_floor.additional_properties.ufactor * frame_floor.area * (@heat_setpoint - @heat_design_temps[adjacent_space])
       end
     end
 
@@ -2355,12 +2355,18 @@ class HVACSizing
       next unless ((space_type == surface.interior_adjacent_to && space_UAs.keys.include?(surface.exterior_adjacent_to)) ||
                    (space_type == surface.exterior_adjacent_to && space_UAs.keys.include?(surface.interior_adjacent_to)))
 
+      if surface.quick_fill
+        surface_ufactor = surface.additional_properties.ufactor
+      else
+        surface_ufactor = (1.0 / surface.insulation_assembly_r_value)
+      end
+
       if [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationOutside
-        space_UAs[HPXML::LocationOutside] += (1.0 / surface.insulation_assembly_r_value) * surface.area
+        space_UAs[HPXML::LocationOutside] += surface_ufactor * surface.area
       elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationLivingSpace
-        space_UAs[HPXML::LocationLivingSpace] += (1.0 / surface.insulation_assembly_r_value) * surface.area
+        space_UAs[HPXML::LocationLivingSpace] += surface_ufactor * surface.area
       elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationBasementConditioned
-        space_UAs[HPXML::LocationLivingSpace] += (1.0 / surface.insulation_assembly_r_value) * surface.area
+        space_UAs[HPXML::LocationLivingSpace] += surface_ufactor * surface.area
       elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationGround
         if surface.is_a? HPXML::FoundationWall
           u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(surface)
@@ -2461,7 +2467,11 @@ class HVACSizing
       wall_type = wall.wall_type
     end
 
-    wall_ufactor = 1.0 / wall.insulation_assembly_r_value
+    if not wall.insulation_assembly_r_value.nil?
+      wall_ufactor = 1.0 / wall.insulation_assembly_r_value
+    else
+      wall_ufactor = wall.additional_properties.ufactor
+    end
 
     # The following correlations were estimated by analyzing MJ8 construction tables.
     if [HPXML::WallTypeWoodStud, HPXML::WallTypeSteelStud].include? wall_type
@@ -2945,7 +2955,9 @@ class HVACSizing
       surfaces_a += surface.area
       if not surface.insulation_assembly_r_value.nil?
         surfaces_ua += (1.0 / surface.insulation_assembly_r_value) * surface.area
-      else
+      elsif not surface.additional_properties.ufactor.nil?
+        surfaces_ua += surface.additional_properties.ufactor * surface.area
+      else # FIXME: It seems that we need this to be able to handle foundation walls.
         surfaces_ua += (1.0 / (surface.insulation_interior_r_value + surface.insulation_exterior_r_value)) * surface.area
       end
     end

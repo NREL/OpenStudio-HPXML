@@ -4,10 +4,28 @@ class Constructions
   # Container class for walls, floors/ceilings, roofs, etc.
 
   def self.apply_wood_stud_wall(runner, model, surfaces, wall, constr_name,
-                                cavity_r, install_grade, cavity_depth_in, cavity_filled,
-                                framing_factor, drywall_thick_in, osb_thick_in,
-                                rigid_r, mat_ext_finish, otherside_drywall_thick_in,
-                                inside_film, outside_film)
+                                cavity_r:, install_grade:, cavity_depth_in:,
+                                cavity_filled:, framing_factor:,
+                                rigid_r:, osb_thick_in:, mat_ext_finish:,
+                                inside_drywall_thick_in:, outside_drywall_thick_in:,
+                                inside_film:, outside_film:)
+    # Parameters:
+    # cavity_r - the cavity insulation R-value [hr-ft^2-F/Btu]
+    # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
+    # cavity_depth_in - the cavity depth [inch]
+    # cavity_filled - true if insulation thickness < cavity depth, and false otherwise
+    # framing_factor - the fraction of the total area occupied by stud and miscellaneous framing (i.e. framing around doors, windows, etc.)
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # mat_ext_finish - exterior finish material
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # outside_drywall_thick_in - the outside drywall thickness [inch]
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
+
+    # Parallel path layer configuration:
+    # path fraction | framing_factor | 1 - framing_factor - gapFactor | gapFactor |
+    # layer         |     frame      |           insulation           |    gap    |
 
     return if surfaces.empty?
 
@@ -27,11 +45,11 @@ class Constructions
     mat_framing = Material.new(name = nil, thick_in = cavity_depth_in, mat_base = BaseMaterial.Wood)
     mat_gap = Material.AirCavityClosed(cavity_depth_in)
     mat_osb = nil
-    if osb_thick_in > 0
+    if (not osb_thick_in.nil?) && osb_thick_in > 0
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
-    if rigid_r > 0
+    if (not rigid_r.nil?) && rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = 'WallRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
@@ -46,8 +64,8 @@ class Constructions
     if not mat_ext_finish.nil?
       constr.add_layer(mat_ext_finish)
     end
-    if otherside_drywall_thick_in > 0 # E.g., interior partition wall
-      constr.add_layer(Material.GypsumWall(otherside_drywall_thick_in))
+    if outside_drywall_thick_in > 0 # E.g., interior partition wall
+      constr.add_layer(Material.GypsumWall(outside_drywall_thick_in))
     end
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
@@ -56,8 +74,8 @@ class Constructions
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_framing, mat_cavity, mat_gap], 'WallStudAndCavity')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
@@ -66,16 +84,42 @@ class Constructions
 
     # Store info for HVAC Sizing measure
     if not wall.nil?
+      wall.additional_properties.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
       wall.insulation_cavity_r_value = cavity_r
       wall.insulation_continuous_r_value = rigid_r
     end
   end
 
   def self.apply_double_stud_wall(runner, model, surfaces, wall, constr_name,
-                                  cavity_r, install_grade, stud_depth_in, gap_depth_in,
-                                  framing_factor, framing_spacing, is_staggered,
-                                  drywall_thick_in, osb_thick_in, rigid_r,
-                                  mat_ext_finish, inside_film, outside_film)
+                                  cavity_r:, install_grade:, stud_depth_in:, gap_depth_in:,
+                                  framing_factor:, stud_spacing:, is_staggered:,
+                                  inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
+                                  mat_ext_finish:, inside_film:, outside_film:)
+    # Parameters:
+    # cavity_r - the cavity insulation R-value [hr-ft^2-F/Btu]
+    # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
+    # stud_depth_in - the stud depth [inch]
+    # gap_depth_in - the gap depth [inch]
+    # framing_factor - the fraction of the total area occupied by stud and miscellaneous framing (i.e. framing around doors, windows, etc.)
+    # stud_spacing - the stud spacing on center [inch]
+    # is_staggered - true if the stud is staggered, and false otherwise
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
+    # mat_ext_finish - exterior finish material
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
+
+    # Parallel path layer configuration when "is_staggered" is true:
+    # path fraction | misc_framing_factor | stud_frac  | stud_frac  |  dsGapFactor  | 1.0 - (2 * stud_frac + misc_framing_factor + dsGapFactor |
+    # outer layer   |       frame         | insulation |    stud    |      gap      |                        insulation                        |
+    # gap layer     |       frame         | insulation | insulation |      gap      |                        insulation                        |
+    # inner layer   |       frame         |    stud    | insulation |      gap      |                        insulation                        |
+    # Parallel path layer configuration when "is_staggered" is false:
+    # path fraction | misc_framing_factor | stud_frac  | stud_frac  |  dsGapFactor  | 1.0 - (2 * stud_frac + misc_framing_factor + dsGapFactor |
+    # outer layer   |       frame         |    stud    | insulation |      gap      |                        insulation                        |
+    # gap layer     |       frame         | insulation | insulation |      gap      |                        insulation                        |
+    # inner layer   |       frame         |    stud    | insulation |      gap      |                        insulation                        |
 
     return if surfaces.empty?
 
@@ -90,17 +134,17 @@ class Constructions
     mat_gap_inner_outer = Material.new(name = nil, thick_in = stud_depth_in, mat_base = nil, k_in = stud_depth_in / (mat_gap_total.rvalue * stud_depth_in / cavity_depth_in), rho = Gas.Air.rho, cp = Gas.Air.cp)
     mat_gap_middle = Material.new(name = nil, thick_in = gap_depth_in, mat_base = nil, k_in = gap_depth_in / (mat_gap_total.rvalue * gap_depth_in / cavity_depth_in), rho = Gas.Air.rho, cp = Gas.Air.cp)
     mat_osb = nil
-    if osb_thick_in > 0
+    if (not osb_thick_in.nil?) && osb_thick_in > 0
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
-    if rigid_r > 0
+    if (not rigid_r.nil?) && rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = 'WallRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
 
     # Set paths
-    stud_frac = 1.5 / framing_spacing
+    stud_frac = 1.5 / stud_spacing
     misc_framing_factor = framing_factor - stud_frac
     if misc_framing_factor < 0
       fail "Framing Factor (#{framing_factor}) is less than the framing solely provided by the studs (#{stud_frac})."
@@ -130,8 +174,8 @@ class Constructions
       constr.add_layer([mat_framing_middle, mat_ins_middle, mat_ins_middle, mat_gap_middle, mat_ins_middle], 'WallCavity')
     end
     constr.add_layer([mat_framing_inner_outer, mat_stud, mat_ins_inner_outer, mat_gap_inner_outer, mat_ins_inner_outer], 'WallStudandCavityInner')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
@@ -139,28 +183,53 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    wall.insulation_continuous_r_value = rigid_r
+    if not wall.nil?
+      wall.additional_properties.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+      wall.insulation_continuous_r_value = rigid_r
+    end
   end
 
   def self.apply_cmu_wall(runner, model, surfaces, wall, constr_name,
-                          thick_in, conductivity, density, framing_factor,
-                          furring_r, furring_cavity_depth, furring_spacing,
-                          drywall_thick_in, osb_thick_in, rigid_r,
-                          mat_ext_finish, inside_film, outside_film)
+                          cmu_thick_in:, cmu_conductivity:, cmu_density:, framing_factor:,
+                          furring_r:, furring_cavity_depth_in:, furring_spacing:,
+                          inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
+                          mat_ext_finish:, inside_film:, outside_film:)
+    # Parameters:
+    # cmu_thick_in - the Concrete Masonry Unit (CMU) thickness [inch]
+    # cmu_conductivity - the CMU conductivity [Btu/hr-ft-F]
+    # cmu_density - the CMU density [lb/ft^3]
+    # framing_factor - the fraction of the total area occupied by framing around doors, windows, etc. (FIXME: Need to confirm)
+    # furring_r - the furring R-value [hr-ft^2-F/Btu]
+    # furring_cavity_depth_in - the furring cavity depth [inch]
+    # furring_spacing - the furring spacing on center [inch]
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
+    # mat_ext_finish - exterior finish material
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
+
+    # Parallel path layer configuration when the wall has furring:
+    # path fraction | framing_factor | stud_frac | 1.0 - (stud_frac + framing_factor) |
+    # outer layer   |     frame      |    cmu    |                 cmu                |
+    # inner layer   |    furring     |  furring  |           furring cavity           |
+    # Parallel path layer configuration when the wall has no furring:
+    # path fraction | framing_factor | 1.0 - framing_factor |
+    # layer         |     frame      |         cmu          |
 
     return if surfaces.empty?
 
     # Define materials
-    mat_cmu = Material.new(name = nil, thick_in = thick_in, mat_base = BaseMaterial.Concrete, k_in = conductivity, rho = density)
-    mat_framing = Material.new(name = nil, thick_in = thick_in, mat_base = BaseMaterial.Wood)
+    mat_cmu = Material.new(name = nil, thick_in = cmu_thick_in, mat_base = BaseMaterial.Concrete, k_in = cmu_conductivity, rho = cmu_density)
+    mat_framing = Material.new(name = nil, thick_in = cmu_thick_in, mat_base = BaseMaterial.Wood)
     mat_furring = nil
     mat_furring_cavity = nil
-    if furring_cavity_depth != 0
-      mat_furring = Material.new(name = nil, thick_in = furring_cavity_depth, mat_base = BaseMaterial.Wood)
+    if furring_cavity_depth_in != 0
+      mat_furring = Material.new(name = nil, thick_in = furring_cavity_depth_in, mat_base = BaseMaterial.Wood)
       if furring_r == 0
-        mat_furring_cavity = Material.AirCavityClosed(furring_cavity_depth)
+        mat_furring_cavity = Material.AirCavityClosed(furring_cavity_depth_in)
       else
-        mat_furring_cavity = Material.new(name = nil, thick_in = furring_cavity_depth, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = furring_cavity_depth / furring_r)
+        mat_furring_cavity = Material.new(name = nil, thick_in = furring_cavity_depth_in, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = furring_cavity_depth_in / furring_r)
       end
     end
     mat_osb = nil
@@ -168,7 +237,7 @@ class Constructions
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
-    if rigid_r > 0
+    if (not rigid_r.nil?) && rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = 'WallRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
@@ -200,8 +269,8 @@ class Constructions
     else
       constr.add_layer([mat_framing, mat_cmu], 'WallCMU')
     end
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
@@ -209,28 +278,48 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    wall.insulation_cavity_r_value = furring_r
-    wall.insulation_continuous_r_value = rigid_r
+    if not wall.nil?
+      wall.additional_properties.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+      wall.insulation_cavity_r_value = furring_r
+      wall.insulation_continuous_r_value = rigid_r
+    end
   end
 
   def self.apply_icf_wall(runner, model, surfaces, wall, constr_name,
-                          icf_r, ins_thick_in, concrete_thick_in, framing_factor,
-                          drywall_thick_in, osb_thick_in, rigid_r,
-                          mat_ext_finish, inside_film, outside_film)
+                          icf_r:, icf_ins_thick_in:, icf_concrete_thick_in:, framing_factor:,
+                          inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
+                          mat_ext_finish:, inside_film:, outside_film:)
+    # Parameters:
+    # icf_r - the Insulated Concrete Forms (ICF) R-value [hr-ft^2-F/Btu]
+    # icf_ins_thick_in - the ICF insulation layer thickness [inch]
+    # icf_concrete_thick_in - the ICF concrete layer thickness [inch]
+    # framing_factor - the fraction of the total area occupied by framing around doors, windows, etc. (FIXME: Need to confirm)
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
+    # mat_ext_finish - exterior finish material
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
+
+    # Parallel path layer configuration:
+    # path fraction | framing_factor | 1.0 - framing_factor |
+    # outer layer   |     frame      |     insulation       |
+    # layer         |     frame      |      concrete        |
+    # inner layer   |     frame      |     insulation       |
 
     return if surfaces.empty?
 
     # Define materials
-    mat_ins = Material.new(name = nil, thick_in = ins_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = ins_thick_in / icf_r)
-    mat_conc = Material.new(name = nil, thick_in = concrete_thick_in, mat_base = BaseMaterial.Concrete)
-    mat_framing_inner_outer = Material.new(name = nil, thick_in = ins_thick_in, mat_base = BaseMaterial.Wood)
-    mat_framing_middle = Material.new(name = nil, thick_in = concrete_thick_in, mat_base = BaseMaterial.Wood)
+    mat_ins = Material.new(name = nil, thick_in = icf_ins_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = icf_ins_thick_in / icf_r)
+    mat_conc = Material.new(name = nil, thick_in = icf_concrete_thick_in, mat_base = BaseMaterial.Concrete)
+    mat_framing_inner_outer = Material.new(name = nil, thick_in = icf_ins_thick_in, mat_base = BaseMaterial.Wood)
+    mat_framing_middle = Material.new(name = nil, thick_in = icf_concrete_thick_in, mat_base = BaseMaterial.Wood)
     mat_osb = nil
-    if osb_thick_in > 0
+    if (not osb_thick_in.nil?) && osb_thick_in > 0
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
-    if rigid_r > 0
+    if (not rigid_r.nil?) && rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = 'WallRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
@@ -253,8 +342,8 @@ class Constructions
     constr.add_layer([mat_framing_inner_outer, mat_ins], 'WallICFInsFormOuter')
     constr.add_layer([mat_framing_middle, mat_conc], 'WallICFConcrete')
     constr.add_layer([mat_framing_inner_outer, mat_ins], 'WallICFInsFormInner')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
@@ -262,13 +351,33 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    wall.insulation_continuous_r_value = rigid_r
+    if not wall.nil?
+      wall.additional_properties.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+      wall.insulation_continuous_r_value = rigid_r
+    end
   end
 
-  def self.apply_sip_wall(runner, model, surfaces, wall, constr_name, sip_r,
-                          sip_thick_in, framing_factor, sheathing_thick_in,
-                          drywall_thick_in, osb_thick_in, rigid_r,
-                          mat_ext_finish, inside_film, outside_film)
+  def self.apply_sip_wall(runner, model, surfaces, wall, constr_name,
+                          sip_r:, sip_thick_in:, framing_factor:, sheathing_thick_in:,
+                          inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
+                          mat_ext_finish:, inside_film:, outside_film:)
+    # Parameters:
+    # sip_r - the Structurally Insulated Panel (SIP) R-value [hr-ft^2-F/Btu]
+    # sip_thick_in - the SIP thickness [inch]
+    # framing_factor - the fraction of the total area occupied by framing around doors, windows, etc. (FIXME: Need to confirm)
+    # sheathing_thick_in - the sheathing thickness [inch]
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
+    # mat_ext_finish - exterior finish material
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
+
+    # Parallel path layer configuration:
+    # path fraction | framing_factor | spline_frac | 1 - (spline_frac + framing_factor) |
+    # outer layer   |     frame      |   spline    |            insulation              |
+    # layer         |     frame      | insulation  |            insulation              |
+    # inner layer   |     frame      |   spline    |            insulation              |
 
     return if surfaces.empty?
 
@@ -282,11 +391,11 @@ class Constructions
     mat_ins_inner_outer = Material.new(name = nil, thick_in = spline_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = sip_thick_in / sip_r)
     mat_ins_middle = Material.new(name = nil, thick_in = ins_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = sip_thick_in / sip_r)
     mat_osb = nil
-    if osb_thick_in > 0
+    if (not osb_thick_in.nil?) && osb_thick_in > 0
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
-    if rigid_r > 0
+    if (not rigid_r.nil?) && rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = 'WallRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
@@ -312,20 +421,42 @@ class Constructions
     constr.add_layer([mat_framing_middle, mat_ins_middle, mat_ins_middle], 'WallIns')
     constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], 'WallSplineLayerInner')
     constr.add_layer(mat_int_sheath)
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(runner, surfaces, model)
+
+    # Store info for HVAC Sizing measure
+    if not wall.nil?
+      wall.additional_properties.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+    end
   end
 
   def self.apply_steel_stud_wall(runner, model, surfaces, wall, constr_name,
-                                 cavity_r, install_grade, cavity_depth,
-                                 cavity_filled, framing_factor, correction_factor,
-                                 drywall_thick_in, osb_thick_in, rigid_r,
-                                 mat_ext_finish, inside_film, outside_film)
+                                 cavity_r:, install_grade:, cavity_depth_in:,
+                                 cavity_filled:, framing_factor:, correction_factor:,
+                                 inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
+                                 mat_ext_finish:, inside_film:, outside_film:)
+    # Parameters:
+    # cavity_r - the cavity insulation R-value [hr-ft^2-F/Btu]
+    # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
+    # cavity_depth_in - cavity depth [inch]
+    # cavity_filled - true if insulation thickness < cavity depth, and false otherwise
+    # framing_factor - the fraction of the total area occupied by stud and miscellaneous framing (i.e. framing around doors, windows, etc.) (FIXME: Need to confirm)
+    # correction_factor - is used to calculate the effective R-value of the cavity insulation with steel stud framing.
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
+    # mat_ext_finish - exterior finish material
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
+
+    # Parallel path layer configuration:
+    # path fraction |            1 - gapFactor              | gapFactor |
+    # layer         |  insulation with steel stud framing   |    gap    |
 
     return if surfaces.empty?
 
@@ -334,22 +465,22 @@ class Constructions
     if eR > 0
       if cavity_filled
         # Insulation
-        mat_cavity = Material.new(name = nil, thick_in = cavity_depth, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = cavity_depth / eR)
+        mat_cavity = Material.new(name = nil, thick_in = cavity_depth_in, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = cavity_depth_in / eR)
       else
         # Insulation plus air gap when insulation thickness < cavity depth
-        mat_cavity = Material.new(name = nil, thick_in = cavity_depth, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = cavity_depth / (eR + Gas.AirGapRvalue))
+        mat_cavity = Material.new(name = nil, thick_in = cavity_depth_in, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = cavity_depth_in / (eR + Gas.AirGapRvalue))
       end
     else
       # Empty cavity
-      mat_cavity = Material.AirCavityClosed(cavity_depth)
+      mat_cavity = Material.AirCavityClosed(cavity_depth_in)
     end
-    mat_gap = Material.AirCavityClosed(cavity_depth)
+    mat_gap = Material.AirCavityClosed(cavity_depth_in)
     mat_osb = nil
-    if osb_thick_in > 0
+    if (not osb_thick_in.nil?) && osb_thick_in > 0
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
-    if rigid_r > 0
+    if (not rigid_r.nil?) && rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = 'WallRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
@@ -371,8 +502,8 @@ class Constructions
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_cavity, mat_gap], 'WallStudAndCavity')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
@@ -380,45 +511,54 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    wall.insulation_cavity_r_value = cavity_r
-    wall.insulation_continuous_r_value = rigid_r
+    if not wall.nil?
+      wall.additional_properties.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+      wall.insulation_cavity_r_value = cavity_r
+      wall.insulation_continuous_r_value = rigid_r
+    end
   end
 
   def self.apply_generic_layered_wall(runner, model, surfaces, wall, constr_name,
-                                      thick_ins, conds, denss, specheats,
-                                      drywall_thick_in, osb_thick_in, rigid_r,
-                                      mat_ext_finish, inside_film, outside_film)
+                                      mats_thick_in:, mats_cond:, mats_den:, mats_spec_heat:,
+                                      inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
+                                      mat_ext_finish:, inside_film:, outside_film:)
+    # Parameters:
+    # mats_thick_in - the list of thickness of materials [inch]
+    # mats_cond - the list of conductivity of materials [Btu/hr-ft-F]
+    # mats_den - the list of density of materials [lb/ft^3]
+    # mats_spec_heat - the list of specific heat of materials [Btu/lb-F]
+    # mat_ext_finish - exterior finish material
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
+    # mat_ext_finish - exterior finish material
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
+
+    # Parallel path layer configuration:
+    # path fraction |       1       |
+    # layer 1       |  material[0]  |
+    # layer 2       |  material[1]  |
+    # layer n       | material[n-1] |
 
     return if surfaces.empty?
 
     # Validate inputs
-    for idx in 0..4
-      if (thick_ins[idx].nil? != conds[idx].nil?) || (thick_ins[idx].nil? != denss[idx].nil?) || (thick_ins[idx].nil? != specheats[idx].nil?)
+    for idx in 0..mats_thick_in.size
+      if (mats_thick_in[idx].nil? != mats_cond[idx].nil?) || (mats_thick_in[idx].nil? != mats_den[idx].nil?) || (mats_thick_in[idx].nil? != mats_spec_heat[idx].nil?)
         fail "Layer #{idx + 1} does not have all four properties (thickness, conductivity, density, specific heat) entered."
       end
     end
 
     # Define materials
     mats = []
-    mats << Material.new(name = 'WallLayer1', thick_in = thick_ins[0], mat_base = nil, k_in = conds[0], rho = denss[0], cp = specheats[0])
-    if not thick_ins[1].nil?
-      mats << Material.new(name = 'WallLayer2', thick_in = thick_ins[1], mat_base = nil, k_in = conds[1], rho = denss[1], cp = specheats[1])
-    end
-    if not thick_ins[2].nil?
-      mats << Material.new(name = 'WallLayer3', thick_in = thick_ins[2], mat_base = nil, k_in = conds[2], rho = denss[2], cp = specheats[2])
-    end
-    if not thick_ins[3].nil?
-      mats << Material.new(name = 'WallLayer4', thick_in = thick_ins[3], mat_base = nil, k_in = conds[3], rho = denss[3], cp = specheats[3])
-    end
-    if not thick_ins[4].nil?
-      mats << Material.new(name = 'WallLayer5', thick_in = thick_ins[4], mat_base = nil, k_in = conds[4], rho = denss[4], cp = specheats[4])
-    end
+    mats_thick_in.size.times { |i| mats << Material.new(name = "WallLayer#{i + 1}", thick_in = mats_thick_in[i], mat_base = nil, k_in = mats_cond[i], rho = mats_den[i], cp = mats_spec_heat[i]) }
     mat_osb = nil
-    if osb_thick_in > 0
+    if (not osb_thick_in.nil?) && osb_thick_in > 0
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
-    if rigid_r > 0
+    if (not rigid_r.nil?) && rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = 'WallRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
@@ -441,8 +581,8 @@ class Constructions
     mats.each do |mat|
       constr.add_layer(mat)
     end
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
@@ -450,14 +590,31 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    wall.insulation_continuous_r_value = rigid_r
+    if not wall.nil?
+      wall.additional_properties.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+      wall.insulation_continuous_r_value = rigid_r
+    end
   end
 
   def self.apply_rim_joist(runner, model, surfaces, rim_joist, constr_name,
-                           cavity_r, install_grade, framing_factor,
-                           drywall_thick_in, osb_thick_in,
-                           rigid_r, mat_ext_finish, inside_film,
-                           outside_film)
+                           cavity_r:, install_grade:, framing_factor:,
+                           inside_drywall_thick_in:, osb_thick_in:,
+                           rigid_r:, mat_ext_finish:,
+                           inside_film:, outside_film:)
+    # Parameters:
+    # cavity_r - the cavity insulation R-value [hr-ft^2-F/Btu]
+    # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
+    # framing_factor - the fraction of the total area occupied by stud
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
+    # mat_ext_finish - exterior finish material
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
+
+    # Parallel path layer configuration:
+    # path fraction | framing_factor | 1 - framing_factor - gapFactor | gapFactor |
+    # layer         |     frame      |           insulation           |    gap    |
 
     return if surfaces.empty?
 
@@ -475,11 +632,11 @@ class Constructions
     mat_framing = Material.new(name = nil, thick_in = framing_thick_in, mat_base = BaseMaterial.Wood)
     mat_gap = Material.AirCavityClosed(framing_thick_in)
     mat_osb = nil
-    if osb_thick_in > 0
+    if (not osb_thick_in.nil?) && osb_thick_in > 0
       mat_osb = Material.new(name = 'RimJoistSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
-    if rigid_r > 0
+    if (not rigid_r.nil?) && rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = 'RimJoistRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
@@ -501,8 +658,8 @@ class Constructions
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RimJoistStudAndCavity')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
@@ -510,16 +667,36 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    rim_joist.insulation_continuous_r_value = rigid_r
-    rim_joist.insulation_cavity_r_value = cavity_r
+    if not rim_joist.nil?
+      rim_joist.additional_properties.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+      rim_joist.insulation_continuous_r_value = rigid_r
+      rim_joist.insulation_cavity_r_value = cavity_r
+    end
   end
 
-  def self.apply_open_cavity_roof(runner, model, surfaces, constr_name,
-                                  cavity_r, install_grade, cavity_ins_thick_in,
-                                  framing_factor, framing_thick_in,
-                                  osb_thick_in, rigid_r,
-                                  mat_roofing, has_radiant_barrier,
-                                  inside_film, outside_film, radiant_barrier_grade)
+  def self.apply_open_cavity_roof(runner, model, surfaces, roof, constr_name,
+                                  cavity_r:, install_grade:, cavity_ins_thick_in:,
+                                  framing_factor:, framing_thick_in:,
+                                  osb_thick_in:, rigid_r:,
+                                  mat_roofing:, has_radiant_barrier:,
+                                  inside_film:, outside_film:, radiant_barrier_grade:)
+    # Parameters:
+    # cavity_r - the cavity insulation R-value [hr-ft^2-F/Btu]
+    # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
+    # cavity_ins_thick_in - the cavity insulation thickness [inch]
+    # framing_factor - the fraction of the total area occupied by stud (FIXME: Need to confirm)
+    # framing_thick_in - the framing thickness [inch]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
+    # mat_roofing - roofing material
+    # has_radiant_barrier - true if the roof has radiant barrier false otherwise
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
+    # radiant_barrier_grade - This value is for considering defects occurred in the process of radiant barrier installation
+
+    # Parallel path layer configuration:
+    # path fraction | framing_factor | 1 - framing_factor - gapFactor | gapFactor |
+    # layer         |     frame      |           insulation           |    gap    |
 
     return if surfaces.empty?
 
@@ -581,31 +758,54 @@ class Constructions
 
     # Create and assign construction to roof surfaces
     constr.create_and_assign_constructions(runner, surfaces, model)
+
+    # Store info for HVAC Sizing measure
+    if not roof.nil?
+      roof.additional_properties.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+    end
   end
 
-  def self.apply_closed_cavity_roof(runner, model, surfaces, constr_name,
-                                    cavity_r, install_grade, cavity_depth,
-                                    filled_cavity, framing_factor, drywall_thick_in,
-                                    osb_thick_in, rigid_r, mat_roofing, has_radiant_barrier,
-                                    inside_film, outside_film, radiant_barrier_grade)
+  def self.apply_closed_cavity_roof(runner, model, surfaces, roof, constr_name,
+                                    cavity_r:, install_grade:, cavity_depth_in:,
+                                    cavity_filled:, framing_factor:, inside_drywall_thick_in:,
+                                    osb_thick_in:, rigid_r:, mat_roofing:, has_radiant_barrier:,
+                                    inside_film:, outside_film:, radiant_barrier_grade:)
+    # Parameters:
+    # cavity_r - the cavity insulation R-value [hr-ft^2-F/Btu]
+    # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
+    # cavity_depth_in - the cavity depth [inch]
+    # cavity_filled - true if insulation thickness < cavity depth, and false otherwise
+    # framing_factor - the fraction of the total area occupied by stud (FIXME: Need to confirm)
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
+    # mat_roofing - roofing material
+    # has_radiant_barrier - true if the roof has radiant barrier false otherwise
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
+    # radiant_barrier_grade - This value is for considering defects occurred in the process of radiant barrier installation
+
+    # Parallel path layer configuration:
+    # path fraction | framing_factor | 1 - framing_factor - gapFactor | gapFactor |
+    # layer         |     frame      |           insulation           |    gap    |
 
     return if surfaces.empty?
 
     # Define materials
     if cavity_r > 0
-      if filled_cavity
+      if cavity_filled
         # Insulation
-        mat_cavity = Material.new(name = nil, thick_in = cavity_depth, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = cavity_depth / cavity_r)
+        mat_cavity = Material.new(name = nil, thick_in = cavity_depth_in, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = cavity_depth_in / cavity_r)
       else
         # Insulation plus air gap when insulation thickness < cavity depth
-        mat_cavity = Material.new(name = nil, thick_in = cavity_depth, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = cavity_depth / (cavity_r + Gas.AirGapRvalue))
+        mat_cavity = Material.new(name = nil, thick_in = cavity_depth_in, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = cavity_depth_in / (cavity_r + Gas.AirGapRvalue))
       end
     else
       # Empty cavity
-      mat_cavity = Material.AirCavityClosed(cavity_depth)
+      mat_cavity = Material.AirCavityClosed(cavity_depth_in)
     end
-    mat_framing = Material.new(name = nil, thick_in = cavity_depth, mat_base = BaseMaterial.Wood)
-    mat_gap = Material.AirCavityClosed(cavity_depth)
+    mat_framing = Material.new(name = nil, thick_in = cavity_depth_in, mat_base = BaseMaterial.Wood)
+    mat_gap = Material.AirCavityClosed(cavity_depth_in)
     mat_osb = nil
     if osb_thick_in > 0
       mat_osb = Material.new(name = 'RoofSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
@@ -637,8 +837,8 @@ class Constructions
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RoofStudAndCavity')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     if not mat_rb.nil?
       constr.add_layer(mat_rb)
@@ -647,12 +847,26 @@ class Constructions
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(runner, surfaces, model)
+
+    # Store info for HVAC Sizing measure
+    if not roof.nil?
+      roof.additional_properties.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+    end
   end
 
-  def self.apply_ceiling(runner, model, surfaces, constr_name,
-                         cavity_r, install_grade, ins_thick_in,
-                         framing_factor, joist_height_in,
-                         drywall_thick_in, inside_film, outside_film)
+  def self.apply_ceiling(runner, model, surfaces, frame_floor, constr_name,
+                         cavity_r:, install_grade:, ins_thick_in:,
+                         framing_factor:, joist_height_in:,
+                         inside_drywall_thick_in:, inside_film:, outside_film:)
+    # Parameters:
+    # cavity_r - the cavity insulation R-value [hr-ft^2-F/Btu]
+    # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
+    # ins_thick_in - the cavity insulation thickness [inch]
+    # framing_factor - the fraction of the total area occupied by stud
+    # joist_height_in - the floor joists height [inch]
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
 
     # Drywall below, open cavity above (e.g., attic floor)
 
@@ -691,20 +905,35 @@ class Constructions
       constr.add_layer(mat_addtl_ins)
     end
     constr.add_layer([mat_framing, mat_cavity, mat_gap], 'CeilingStudAndCavity')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
     # Create and assign construction to ceiling surfaces
     constr.create_and_assign_constructions(runner, surfaces, model)
+
+    # Store info for HVAC Sizing measure
+    if not frame_floor.nil?
+      frame_floor.additional_properties.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+    end
   end
 
-  def self.apply_floor(runner, model, surfaces, constr_name,
-                       cavity_r, install_grade,
-                       framing_factor, joist_height_in,
-                       plywood_thick_in, rigid_r, mat_floor_covering,
-                       inside_film, outside_film)
+  def self.apply_floor(runner, model, surfaces, frame_floor, constr_name,
+                       cavity_r:, install_grade:,
+                       framing_factor:, joist_height_in:,
+                       plywood_thick_in:, rigid_r:, mat_floor_covering:,
+                       inside_film:, outside_film:)
+    # Parameters:
+    # cavity_r - the cavity insulation R-value [hr-ft^2-F/Btu]
+    # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
+    # framing_factor - the fraction of the total area occupied by stud.
+    # joist_height_in - the floor joists height [inch]
+    # plywood_thick_in - the plywood thickness [inch]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
+    # mat_floor_covering - the floor covering material
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
 
     # Open cavity below, floor covering above (e.g., crawlspace ceiling)
 
@@ -746,9 +975,14 @@ class Constructions
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(runner, surfaces, model)
+
+    # Store info for HVAC Sizing measure
+    if not frame_floor.nil?
+      frame_floor.additional_properties.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+    end
   end
 
-  def self.apply_foundation_wall(runner, model, wall_surfaces, wall_constr_name,
+  def self.apply_foundation_wall(runner, model, wall_surfaces, foundation_wall, wall_constr_name,
                                  ext_rigid_ins_offset, int_rigid_ins_offset, ext_rigid_ins_height,
                                  int_rigid_ins_height, ext_rigid_r, int_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in, wall_height_above_grade)
 
@@ -774,6 +1008,11 @@ class Constructions
     # Assign surfaces to Kiva foundation
     wall_surfaces.each do |wall_surface|
       wall_surface.setAdjacentFoundation(foundation)
+    end
+
+    # Store info for HVAC Sizing measure
+    if not foundation_wall.nil?
+      foundation_wall.additional_properties.ufactor = nil
     end
   end
 
@@ -899,10 +1138,11 @@ class Constructions
     end
 
     apply_wood_stud_wall(runner, model, imdefs, nil, constr_name,
-                         0, 1, 3.5, false, 0.16,
-                         drywall_thick_in, 0, 0, nil, drywall_thick_in,
-                         Material.AirFilmVertical,
-                         Material.AirFilmVertical)
+                         cavity_r: 0, cavity_depth_in: 3.5, cavity_filled: false, install_grade: 1,
+                         framing_factor: 0.16, osb_thick_in: 0,
+                         rigid_r: 0, mat_ext_finish: nil,
+                         inside_drywall_thick_in: drywall_thick_in, outside_drywall_thick_in: drywall_thick_in,
+                         inside_film: Material.AirFilmVertical, outside_film: Material.AirFilmVertical)
   end
 
   def self.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft,

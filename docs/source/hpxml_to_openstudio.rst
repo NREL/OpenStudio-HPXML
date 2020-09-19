@@ -267,8 +267,24 @@ HPXML Roofs
 Pitched or flat roof surfaces that are exposed to ambient conditions should be specified as an ``Enclosure/Roofs/Roof``. 
 For a multifamily building where the dwelling unit has another dwelling unit above it, the surface between the two dwelling units should be considered a ``FrameFloor`` and not a ``Roof``.
 
-Roofs are defined by their ``Area``, ``Pitch``, ``Insulation/AssemblyEffectiveRValue``, ``SolarAbsorptance``, and ``Emittance``.
+Roofs can be defined in two ways:
 
+Option 1. An ``Insulation/Layer`` (Quick Fill Method).
+In this case, additional inputs are required as follows:
+- ``Insulation/Layer[InsulationType="cavity"]``
+- ``Insulation/Layer[InsulationType="cavity"]/NominalRValue``
+- ``Insulation/Layer[InsulationType="cavity"]/Thickness``
+- ``InsulationGrade``
+- ``Rafters/Size``
+- ``Rafters/FramingFactor``
+- Optional ``Insulation/Layer[InsulationType="cavity"]/InsulationMaterial``
+- Optional ``Insulation/Layer[InsulationType="continuous"]``; if provided, ``Insulation/Layer[InsulationType="continuous"]/NominalRValue`` must be provided and ``Insulation/Layer[InsulationType="continuous"]/InsulationMaterial`` can be optionally provided.
+- Optional ``extension/OrientedStrandBoard``; if provided, ``Thickness`` must be provided.
+
+Option 2. An ``AssemblyEffectiveRValue``
+The assembly effective R-value should include all construction materials and interior and exterior air film resistances. 
+
+Roofs must have ``Area``, ``Pitch``, and ``Emittance`` defined.
 Roofs must have either ``RoofColor`` and/or ``SolarAbsorptance`` defined.
 If ``RoofColor`` or ``SolarAbsorptance`` is not provided, it is defaulted based on the mapping below:
 
@@ -297,8 +313,25 @@ HPXML Rim Joists
 Rim joists, the perimeter of floor joists typically found between stories of a building or on top of a foundation wall, are specified as an ``Enclosure/RimJoists/RimJoist``.
 The ``InteriorAdjacentTo`` element should typically be "living space" for rim joists between stories of a building and "basement - conditioned", "basement - unconditioned", "crawlspace - vented", or "crawlspace - unvented" for rim joists on top of a foundation wall.
 
-Rim joists are defined by their ``Area`` and ``Insulation/AssemblyEffectiveRValue``.
+Rim joists can be defined in two ways:
 
+Option 1. An ``Insulation/Layer`` (Quick Fill Method).
+In this case, additional inputs are required as follows:
+- ``Insulation/Layer[InsulationType="cavity"]``
+- ``Insulation/Layer[InsulationType="cavity"]/NominalRValue``
+- ``Insulation/Layer[InsulationType="cavity"]/Thickness``
+- ``InsulationGrade``
+- ``FloorJoists/Size``
+- ``FloorJoists/Spacing``
+- ``FloorJoists/FramingFactor``
+- Optional ``Insulation/Layer[InsulationType="cavity"]/InsulationMaterial``
+- Optional ``Insulation/Layer[InsulationType="continuous"]``; if provided, ``Insulation/Layer[InsulationType="continuous"]/NominalRValue`` must be provided and ``Insulation/Layer[InsulationType="continuous"]/InsulationMaterial`` can be optionally provided.
+- Optional ``extension/OrientedStrandBoard``; if provided, ``Thickness`` must be provided.
+
+Option 2. An ``AssemblyEffectiveRValue``
+The assembly effective R-value should include all construction materials and interior and exterior air film resistances. 
+
+Rim Joists must have ``Area`` and ``Emittance`` defined.
 Rim joists must have either ``Color`` and/or ``SolarAbsorptance`` defined.
 If ``Color`` or ``SolarAbsorptance`` is not provided, it is defaulted based on the mapping below:
 
@@ -320,7 +353,32 @@ HPXML Walls
 Any wall that has no contact with the ground and bounds a space type should be specified as an ``Enclosure/Walls/Wall``. 
 Interior walls (for example, walls solely within the conditioned space of the building) are not required.
 
-Walls are defined by their ``Area`` and ``Insulation/AssemblyEffectiveRValue``.
+Walls can be defined in two ways:
+
+Option 1. An ``Insulation/Layer`` (Quick Fill Method).
+In this case, additional inputs are required as follows:
+- ``Insulation/Layer[InsulationType="cavity"]``
+- ``Insulation/Layer[InsulationType="cavity"]/NominalRValue``
+- ``Insulation/Layer[InsulationType="cavity"]/Thickness``
+- ``InsulationGrade``
+- ``Studs/Size`` (only for ``WoodStud``, ``DoubleWoodStud``, ``ConcreteMasonryUnit``, and ``SteelFrame`` walls)
+- ``Studs/Spacing`` (only for ``WoodStud``, ``DoubleWoodStud``, ``ConcreteMasonryUnit``, and ``SteelFrame`` walls)
+- ``Studs/FramingFactor`` (only for ``WoodStud``, ``DoubleWoodStud``, ``ConcreteMasonryUnit``, ``InsulatedConcreteForms``, ``StructurallyInsulatedPanel``, and ``SteelFrame`` walls)
+- ``DoubleWoodStud/Staggered`` (only for ``DoubleWoodStud`` walls)
+- ``DoubleWoodStud/GapDepth`` (only for ``DoubleWoodStud`` walls)
+- ``SteelFrame/extension/CorrectionFactor`` (only for ``SteelFrame`` walls)
+- ``extension/Thickness`` (only for ``SolidConcrete``, ``StructuralBrick``, ``StrawBale``, ``Stone``, ``LogWall`, and ``Adobe`` walls)
+- ``extension/conductivity`` (only for ``SolidConcrete``, ``StructuralBrick``, ``StrawBale``, ``Stone``, ``LogWall`, and ``Adobe`` walls)
+- ``extension/Density`` (only for ``SolidConcrete``, ``StructuralBrick``, ``StrawBale``, ``Stone``, ``LogWall`, and ``Adobe`` walls)
+- ``extension/SpecificHeat`` (only for ``SolidConcrete``, ``StructuralBrick``, ``StrawBale``, ``Stone``, ``LogWall`, and ``Adobe`` walls)
+- Optional ``Insulation/Layer[InsulationType="cavity"]/InsulationMaterial``
+- Optional ``Insulation/Layer[InsulationType="continuous"]``; if provided, ``Insulation/Layer[InsulationType="continuous"]/NominalRValue`` must be provided and ``Insulation/Layer[InsulationType="continuous"]/InsulationMaterial`` can be optionally provided.
+- Optional ``extension/OrientedStrandBoard``; if provided, ``Thickness`` must be provided.
+
+Option 2. An ``AssemblyEffectiveRValue``
+The assembly effective R-value should include all construction materials and interior and exterior air film resistances. 
+
+Walls must have ``Area`` and ``Emittance`` defined.
 The choice of ``WallType`` has a secondary effect on heat transfer in that it informs the assumption of wall thermal mass.
 
 Walls must have either ``Color`` and/or ``SolarAbsorptance`` defined.
@@ -372,7 +430,26 @@ HPXML Frame Floors
 Any horizontal floor/ceiling surface that is not in contact with the ground (Slab) nor adjacent to ambient conditions above (Roof) should be specified as an ``Enclosure/FrameFloors/FrameFloor``.
 Frame floors in an attached/multifamily building that are adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space" must have the ``extension/OtherSpaceAboveOrBelow`` property set to signify whether the other space is "above" or "below".
 
-Frame floors are primarily defined by their ``Insulation/AssemblyEffectiveRValue``.
+Frame floors can be defined in two ways:
+
+Option 1. An ``Insulation/Layer`` (Quick Fill Method).
+In this case, additional inputs are required as follows:
+- ``Insulation/Layer[InsulationType="cavity"]``
+- ``Insulation/Layer[InsulationType="cavity"]/NominalRValue``
+- ``Insulation/Layer[InsulationType="cavity"]/Thickness``
+- ``InsulationGrade``
+- ``FloorJoists/Size``
+- ``FloorJoists/FramingFactor``
+- ``FloorCovering``
+- Optional ``Insulation/Layer[InsulationType="cavity"]/InsulationMaterial``
+- Optional ``Insulation/Layer[InsulationType="continuous"]``; if provided, ``Insulation/Layer[InsulationType="continuous"]/NominalRValue`` must be provided and ``Insulation/Layer[InsulationType="continuous"]/InsulationMaterial`` can be optionally provided. 
+- Optional ``extension/Plywood``; if provided, ``Thickness`` must be provided.
+- Optional ``extension/InsideDryWall``; if provided, ``Thickness`` must be provided.
+
+Option 2. An ``AssemblyEffectiveRValue``
+The assembly effective R-value should include all construction materials and interior and exterior air film resistances. 
+
+Frame floors must have ``Area`` defined.
 
 HPXML Slabs
 ***********

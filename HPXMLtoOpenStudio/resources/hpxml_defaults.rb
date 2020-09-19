@@ -178,6 +178,12 @@ class HPXMLDefaults
       elsif roof.solar_absorptance.nil?
         roof.solar_absorptance = Constructions.get_default_roof_solar_absorptance(roof.roof_type, roof.roof_color)
       end
+
+      next unless roof.quick_fill
+
+      if roof.insulation_continuous_r_value.nil? # FIXME: This value is being used in hvac_sizing.rb. Is there a better way to handle this?
+        roof.insulation_continuous_r_value = 0
+      end
     end
   end
 
@@ -193,6 +199,12 @@ class HPXMLDefaults
       elsif wall.solar_absorptance.nil?
         wall.solar_absorptance = Constructions.get_default_wall_solar_absorptance(wall.color)
       end
+
+      next unless wall.quick_fill
+
+      if wall.insulation_continuous_r_value.nil? # FIXME: This value is being used in hvac_sizing.rb. Is there a better way to handle this?
+        wall.insulation_continuous_r_value = 0
+      end
     end
   end
 
@@ -207,6 +219,12 @@ class HPXMLDefaults
         rim_joist.color = Constructions.get_default_wall_color(rim_joist.solar_absorptance)
       elsif rim_joist.solar_absorptance.nil?
         rim_joist.solar_absorptance = Constructions.get_default_wall_solar_absorptance(rim_joist.color)
+      end
+
+      next unless rim_joist.quick_fill
+
+      if rim_joist.insulation_continuous_r_value.nil? # FIXME: This value is being used in hvac_sizing.rb. Is there a better way to handle this?
+        rim_joist.insulation_continuous_r_value = 0.0
       end
     end
   end

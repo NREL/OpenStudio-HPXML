@@ -204,6 +204,7 @@ def create_hpxmls
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-enclosure-attached-multifamily.xml' => 'base.xml',
+    'base-enclosure-detailed.xml' => 'base-enclosure-walltypes.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-conditioned-basement-slab-insulation.xml' => 'base.xml',
@@ -910,6 +911,17 @@ def set_hpxml_roofs(hpxml_file, hpxml)
          'base-enclosure-other-non-freezing-space.xml',
          'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
     hpxml.roofs.clear
+  elsif ['base-enclosure-detailed.xml'].include? hpxml_file
+    hpxml.roofs[0].quick_fill = true
+    hpxml.roofs[0].insulation_assembly_r_value = nil
+    hpxml.roofs[0].insulation_cavity_r_value = 19
+    hpxml.roofs[0].insulation_cavity_thickness = 5.5
+    hpxml.roofs[0].insulation_continuous_r_value = 5
+    hpxml.roofs[0].insulation_continuous_thickness = 1.5
+    hpxml.roofs[0].insulation_grade = 3
+    hpxml.roofs[0].rafters_size = '2x6'
+    hpxml.roofs[0].framing_factor = 0.1988
+    hpxml.roofs[0].osb_thickness = 0.5
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.roofs.size
       hpxml.roofs[n - 1].area /= 9.0
@@ -1005,6 +1017,17 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                            emittance: 0.92,
                            insulation_assembly_r_value: 23.0)
     end
+  elsif ['base-enclosure-detailed.xml'].include? hpxml_file
+    hpxml.rim_joists[0].quick_fill = true
+    hpxml.rim_joists[0].insulation_assembly_r_value = nil
+    hpxml.rim_joists[0].insulation_cavity_r_value = 19
+    hpxml.rim_joists[0].insulation_cavity_thickness = 5.5
+    hpxml.rim_joists[0].insulation_continuous_r_value = 5
+    hpxml.rim_joists[0].insulation_continuous_thickness = 1.5
+    hpxml.rim_joists[0].insulation_grade = 3
+    hpxml.rim_joists[0].floor_joist_size = '2x6'
+    hpxml.rim_joists[0].framing_factor = 0.1988
+    hpxml.rim_joists[0].osb_thickness = 0.5
   elsif ['base-foundation-ambient.xml',
          'base-foundation-slab.xml'].include? hpxml_file
     hpxml.rim_joists.clear
@@ -1404,6 +1427,37 @@ def set_hpxml_walls(hpxml_file, hpxml)
       wall.solar_absorptance = nil
       wall.color = HPXML::ColorMedium
     end
+  elsif ['base-enclosure-detailed.xml'].include? hpxml_file
+    [0, 1, 2, 3, 4, 6, -1].each do |idx|
+      hpxml.walls[idx].quick_fill = true
+      hpxml.walls[idx].insulation_assembly_r_value = nil
+      hpxml.walls[idx].insulation_cavity_r_value = 19
+      hpxml.walls[idx].insulation_cavity_thickness = 5.5
+      hpxml.walls[idx].insulation_continuous_r_value = 5
+      hpxml.walls[idx].insulation_continuous_thickness = 1.5
+      hpxml.walls[idx].insulation_grade = 3
+      hpxml.walls[idx].stud_size = '2x6' unless idx == 4
+      hpxml.walls[idx].framing_factor = 0.1988
+      hpxml.walls[idx].osb_thickness = 0.5 unless idx == 4
+    end
+    hpxml.walls[0].cmu_thickness = 8
+    hpxml.walls[0].cmu_conductivity = 7.70
+    hpxml.walls[0].cmu_density = 119.0
+    hpxml.walls[0].stud_spacing = 16
+    hpxml.walls[1].double_stud_gap_depth = 0.5
+    hpxml.walls[1].double_stud_is_staggered = true
+    hpxml.walls[1].stud_spacing = 16
+    hpxml.walls[2].icf_r_value = 22
+    hpxml.walls[2].icf_ins_thickness = 2.25
+    hpxml.walls[2].icf_concrete_thickness = 5.75
+    hpxml.walls[3].generic_wall_thickness_list = [6.0, 6.0]
+    hpxml.walls[3].generic_wall_cond_list = [0.8, 0.8]
+    hpxml.walls[3].generic_wall_den_list = [32.0, 32.0]
+    hpxml.walls[3].generic_wall_spec_heat_list = [0.29, 0.29]
+    hpxml.walls[4].sip_r_value = 16
+    hpxml.walls[4].sip_thickness = 4.5
+    hpxml.walls[4].sip_sheathing_thickness = 0.5
+    hpxml.walls[6].steel_frame_correction_factor = 0.75
   end
   hpxml.walls.each do |wall|
     next unless wall.is_interior
@@ -1764,6 +1818,18 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            interior_adjacent_to: HPXML::LocationGarage,
                            area: 600,
                            insulation_assembly_r_value: 2.1)
+  elsif ['base-enclosure-detailed.xml'].include? hpxml_file
+    hpxml.frame_floors[0].quick_fill = true
+    hpxml.frame_floors[0].insulation_assembly_r_value = nil
+    hpxml.frame_floors[0].insulation_cavity_r_value = 19
+    hpxml.frame_floors[0].insulation_cavity_thickness = 5.5
+    hpxml.frame_floors[0].insulation_continuous_r_value = 5
+    hpxml.frame_floors[0].insulation_continuous_thickness = 1.5
+    hpxml.frame_floors[0].insulation_grade = 3
+    hpxml.frame_floors[0].floor_joists_size = '2x6'
+    hpxml.frame_floors[0].framing_factor = 0.1988
+    hpxml.frame_floors[0].inside_drywall_thickness = 0.5
+    hpxml.frame_floors[0].plywood_thickness = 0.5
   elsif ['base-foundation-ambient.xml'].include? hpxml_file
     hpxml.frame_floors.add(id: 'FloorAboveAmbient',
                            exterior_adjacent_to: HPXML::LocationOutside,
