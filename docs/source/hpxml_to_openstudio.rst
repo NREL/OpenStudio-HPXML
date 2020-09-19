@@ -705,8 +705,7 @@ Whole Home Ventilation
 ~~~~~~~~~~~~~~~~~~~~~~
 
 Mechanical ventilation systems that provide whole home ventilation may each be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``UsedForWholeBuildingVentilation='true'``.
-Inputs including ``FanType``, ``TestedFlowRate`` (or ``RatedFlowRate``), ``HoursInOperation``, and ``FanPower`` must be provided.
-For a CFIS system, the flow rate should equal the amount of outdoor air provided to the distribution system.
+Inputs including ``FanType`` and ``HoursInOperation`` must be provided.
 
 Depending on the type of mechanical ventilation specified, additional elements are required:
 
@@ -725,11 +724,18 @@ Note that ``AdjustedSensibleRecoveryEfficiency`` and ``AdjustedTotalRecoveryEffi
 
 The ventilation system may be optionally described as a shared system (i.e., serving multiple dwelling units) using ``IsSharedSystem``.
 If not provided, it is assumed to be false.
-If provided and true, note that ``TestedFlowRate`` (or ``RatedFlowRate``) and ``FanPower`` should reflect the entire shared ventilation system.
-In addition, additional elements are available:
 
-- ``extension/InUnitFlowRate``: The flow rate to the dwelling unit.
+If the ventilation system is not shared, the following inputs are available:
+
+- ``TestedFlowRate`` or ``RatedFlowRate``: The airflow rate. For a CFIS system, the flow rate should equal the amount of outdoor air provided to the distribution system.
+- ``FanPower``: The fan power for the highest airflow setting.
+
+If the ventilation system is shared, the following inputs are available:
+
+- ``TestedFlowRate`` or ``RatedFlowRate``: The airflow rate of the entire system.
+- ``FanPower``: The fan power for the entire system at highest airflow setting.
 - ``FractionRecirculation``: Fraction of the total supply air that is recirculated, with the remainder assumed to be outdoor air. The value must be 0 for exhaust only systems.
+- ``extension/InUnitFlowRate``: The flow rate delivered to the dwelling unit.
 - ``extension/PreHeating``: Optional. Element to specify if the supply air is preconditioned by heating equipment. It is not allowed for exhaust only systems. If provided, there are additional child elements required:
 
   - ``Fuel``: Fuel type of the preconditioning heating equipment.

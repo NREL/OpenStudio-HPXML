@@ -3277,7 +3277,7 @@ class HPXML < Object
         return total_unit_flow_rate
       else
         if @fan_type == HPXML::MechVentTypeExhaust && @fraction_recirculation > 0.0
-          fail "Exhaust fan #{@id} can not have recirculation."
+          fail "Exhaust fan '#{@id}' must have the fraction recirculation set to zero."
         else
           return total_unit_flow_rate * (1 - @fraction_recirculation)
         end
@@ -3307,8 +3307,8 @@ class HPXML < Object
         ratio = @in_unit_flow_rate / @rated_flow_rate
       end
       return if ratio.nil?
-      if ratio > 1.0
-        fail "The in-unit flow rate of shared fan: #{@id} is greater than system flow rate."
+      if ratio >= 1.0
+        fail "The in-unit flow rate of shared fan '#{@id}' must be less than the system flow rate."
       end
       return ratio
     end
