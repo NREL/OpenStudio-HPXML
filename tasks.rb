@@ -1428,7 +1428,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
       wall.color = HPXML::ColorMedium
     end
   elsif ['base-enclosure-detailed.xml'].include? hpxml_file
-    [0, 1, 2, 3, 6, -1].each do |idx|
+    [0, 1, 2, 3, 4, 6, -1].each do |idx|
       hpxml.walls[idx].quick_fill = true
       hpxml.walls[idx].insulation_assembly_r_value = nil
       hpxml.walls[idx].insulation_cavity_r_value = 19
@@ -1436,9 +1436,9 @@ def set_hpxml_walls(hpxml_file, hpxml)
       hpxml.walls[idx].insulation_continuous_r_value = 5
       hpxml.walls[idx].insulation_continuous_thickness = 1.5
       hpxml.walls[idx].insulation_grade = 3
-      hpxml.walls[idx].stud_size = '2x6'
+      hpxml.walls[idx].stud_size = '2x6' unless idx == 4
       hpxml.walls[idx].framing_factor = 0.1988
-      hpxml.walls[idx].osb_thickness = 0.5
+      hpxml.walls[idx].osb_thickness = 0.5 unless idx == 4
     end
     hpxml.walls[0].cmu_thickness = 8
     hpxml.walls[0].cmu_conductivity = 7.70
@@ -1454,14 +1454,6 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls[3].generic_wall_cond_list = [0.8, 0.8]
     hpxml.walls[3].generic_wall_den_list = [32.0, 32.0]
     hpxml.walls[3].generic_wall_spec_heat_list = [0.29, 0.29]
-    hpxml.walls[4].quick_fill = true
-    hpxml.walls[4].insulation_assembly_r_value = nil
-    hpxml.walls[4].insulation_cavity_r_value = 19
-    hpxml.walls[4].insulation_cavity_thickness = 5.5
-    hpxml.walls[4].insulation_continuous_r_value = 5
-    hpxml.walls[4].insulation_continuous_thickness = 1.5
-    hpxml.walls[4].insulation_grade = 3
-    hpxml.walls[4].framing_factor = 0.1988
     hpxml.walls[4].sip_r_value = 16
     hpxml.walls[4].sip_thickness = 4.5
     hpxml.walls[4].sip_sheathing_thickness = 0.5
