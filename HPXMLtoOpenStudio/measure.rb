@@ -3292,7 +3292,7 @@ class OSModel
                                                  inside_drywall_thick_in:, outside_drywall_thick_in:,
                                                  inside_film:, outside_film:)
 
-    stud_depth_in = stud_size.split('x').last.to_f - 0.5
+    stud_depth_in = stud_size.split('x').last.to_f - 0.5 unless stud_size.nil?
 
     if wall_type == HPXML::WallTypeWoodStud
       if cavity_ins_thick_in < stud_depth_in
@@ -3343,51 +3343,14 @@ class OSModel
                                    inside_drywall_thick_in: inside_drywall_thick_in, osb_thick_in: osb_thick_in, rigid_r: rigid_r,
                                    mat_ext_finish: mat_ext_finish, inside_film: inside_film, outside_film: outside_film)
     elsif [HPXML::WallTypeConcrete, HPXML::WallTypeBrick, HPXML::WallTypeStrawBale, HPXML::WallTypeStone, HPXML::WallTypeLog, HPXML::WallTypeAdobe].include? wall_type
-      mats_thick_in, mats_cond, mats_den, mats_spec_heat = get_generic_wall_material_properties(wall)
-
       Constructions.apply_generic_layered_wall(runner, model, surfaces, wall, "#{wall_id} construction",
-                                               mats_thick_in: mats_thick_in, mats_cond: mats_cond, mats_den: mats_den, mats_spec_heat: mats_spec_heat,
+                                               mats_thick_in: wall.generic_wall_thickness_list, mats_cond: wall.generic_wall_cond_list,
+                                               mats_den: wall.generic_wall_den_list, mats_spec_heat: wall.generic_wall_spec_heat_list,
                                                inside_drywall_thick_in: inside_drywall_thick_in, osb_thick_in: osb_thick_in, rigid_r: rigid_r,
                                                mat_ext_finish: mat_ext_finish, inside_film: inside_film, outside_film: outside_film)
     else
       fail "Unexpected wall type '#{wall_type}'."
     end
-  end
-
-  def self.get_generic_wall_material_properties(wall)
-    if wall.wall_type == HPXML::WallTypeConcrete
-      mats_thick_in = wall.conc_thickness_list
-      mats_cond = wall.conc_cond_list
-      mats_den = wall.conc_den_list
-      mats_spec_heat = wall.conc_spec_heat_list
-    elsif wall.wall_type == HPXML::WallTypeBrick
-      mats_thick_in = wall.brick_thickness_list
-      mats_cond = wall.brick_cond_list
-      mats_den = wall.brick_den_list
-      mats_spec_heat = wall.brick_spec_heat_list
-    elsif wall.wall_type == HPXML::WallTypeStrawBale
-      mats_thick_in = wall.strawbale_thickness_list
-      mats_cond = wall.strawbale_cond_list
-      mats_den = wall.strawbale_den_list
-      mats_spec_heat = wall.strawbale_spec_heat_list
-    elsif wall.wall_type == HPXML::WallTypeStone
-      mats_thick_in = wall.stone_thickness_list
-      mats_cond = wall.stone_cond_list
-      mats_den = wall.stone_den_list
-      mats_spec_heat = wall.stone_spec_heat_list
-    elsif wall.wall_type == HPXML::WallTypeLog
-      mats_thick_in = wall.logwall_thickness_list
-      mats_cond = wall.logwall_cond_list
-      mats_den = wall.logwall_den_list
-      mats_spec_heat = wall.logwall_spec_heat_list
-    elsif wall.wall_type == HPXML::WallTypeAdobe
-      mats_thick_in = wall.adobe_thickness_list
-      mats_cond = wall.adobe_cond_list
-      mats_den = wall.adobe_den_list
-      mats_spec_heat = wall.adobe_spec_heat_list
-    end
-
-    return mats_thick_in, mats_cond, mats_den, mats_spec_heat
   end
 
   def self.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, surface_name)

@@ -916,6 +916,8 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs[0].insulation_assembly_r_value = nil
     hpxml.roofs[0].insulation_cavity_r_value = 19
     hpxml.roofs[0].insulation_cavity_thickness = 5.5
+    hpxml.roofs[0].insulation_continuous_r_value = 5
+    hpxml.roofs[0].insulation_continuous_thickness = 1.5
     hpxml.roofs[0].insulation_grade = 3
     hpxml.roofs[0].rafters_size = '2x6'
     hpxml.roofs[0].framing_factor = 0.1988
@@ -1020,8 +1022,10 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.rim_joists[0].insulation_assembly_r_value = nil
     hpxml.rim_joists[0].insulation_cavity_r_value = 19
     hpxml.rim_joists[0].insulation_cavity_thickness = 5.5
+    hpxml.rim_joists[0].insulation_continuous_r_value = 5
+    hpxml.rim_joists[0].insulation_continuous_thickness = 1.5
     hpxml.rim_joists[0].insulation_grade = 3
-    hpxml.rim_joists[0].joist_size = '2x6'
+    hpxml.rim_joists[0].floor_joist_size = '2x6'
     hpxml.rim_joists[0].framing_factor = 0.1988
     hpxml.rim_joists[0].osb_thickness = 0.5
   elsif ['base-foundation-ambient.xml',
@@ -1424,11 +1428,13 @@ def set_hpxml_walls(hpxml_file, hpxml)
       wall.color = HPXML::ColorMedium
     end
   elsif ['base-enclosure-detailed.xml'].include? hpxml_file
-    [0, 1, 2, 3, -1].each do |idx|
+    [0, 1, 2, 3, 6, -1].each do |idx|
       hpxml.walls[idx].quick_fill = true
       hpxml.walls[idx].insulation_assembly_r_value = nil
       hpxml.walls[idx].insulation_cavity_r_value = 19
       hpxml.walls[idx].insulation_cavity_thickness = 5.5
+      hpxml.walls[idx].insulation_continuous_r_value = 5
+      hpxml.walls[idx].insulation_continuous_thickness = 1.5
       hpxml.walls[idx].insulation_grade = 3
       hpxml.walls[idx].stud_size = '2x6'
       hpxml.walls[idx].framing_factor = 0.1988
@@ -1444,13 +1450,22 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls[2].icf_r_value = 22
     hpxml.walls[2].icf_ins_thickness = 2.25
     hpxml.walls[2].icf_concrete_thickness = 5.75
-    hpxml.walls[3].logwall_thickness_list = [6.0, 6.0]
-    hpxml.walls[3].logwall_cond_list = [0.8, 0.8]
-    hpxml.walls[3].logwall_den_list = [32.0, 32.0]
-    hpxml.walls[3].logwall_spec_heat_list = [0.29, 0.29]
+    hpxml.walls[3].generic_wall_thickness_list = [6.0, 6.0]
+    hpxml.walls[3].generic_wall_cond_list = [0.8, 0.8]
+    hpxml.walls[3].generic_wall_den_list = [32.0, 32.0]
+    hpxml.walls[3].generic_wall_spec_heat_list = [0.29, 0.29]
+    hpxml.walls[4].quick_fill = true
+    hpxml.walls[4].insulation_assembly_r_value = nil
+    hpxml.walls[4].insulation_cavity_r_value = 19
+    hpxml.walls[4].insulation_cavity_thickness = 5.5
+    hpxml.walls[4].insulation_continuous_r_value = 5
+    hpxml.walls[4].insulation_continuous_thickness = 1.5
+    hpxml.walls[4].insulation_grade = 3
+    hpxml.walls[4].framing_factor = 0.1988
     hpxml.walls[4].sip_r_value = 16
     hpxml.walls[4].sip_thickness = 4.5
     hpxml.walls[4].sip_sheathing_thickness = 0.5
+    hpxml.walls[6].steel_frame_correction_factor = 0.75
   end
   hpxml.walls.each do |wall|
     next unless wall.is_interior
@@ -1816,10 +1831,13 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
     hpxml.frame_floors[0].insulation_assembly_r_value = nil
     hpxml.frame_floors[0].insulation_cavity_r_value = 19
     hpxml.frame_floors[0].insulation_cavity_thickness = 5.5
+    hpxml.frame_floors[0].insulation_continuous_r_value = 5
+    hpxml.frame_floors[0].insulation_continuous_thickness = 1.5
     hpxml.frame_floors[0].insulation_grade = 3
     hpxml.frame_floors[0].floor_joists_size = '2x6'
     hpxml.frame_floors[0].framing_factor = 0.1988
     hpxml.frame_floors[0].inside_drywall_thickness = 0.5
+    hpxml.frame_floors[0].plywood_thickness = 0.5
   elsif ['base-foundation-ambient.xml'].include? hpxml_file
     hpxml.frame_floors.add(id: 'FloorAboveAmbient',
                            exterior_adjacent_to: HPXML::LocationOutside,

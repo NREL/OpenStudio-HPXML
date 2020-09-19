@@ -41,6 +41,7 @@
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>3</NumberofBedrooms>
+          <NumberofBathrooms>2</NumberofBathrooms>
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
@@ -111,6 +112,11 @@
                 <NominalRValue>19.0</NominalRValue>
                 <Thickness>5.5</Thickness>
               </Layer>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>5.0</NominalRValue>
+                <Thickness>1.5</Thickness>
+              </Layer>
             </Insulation>
             <extension>
               <OrientedStrandBoard>
@@ -135,6 +141,11 @@
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>19.0</NominalRValue>
                 <Thickness>5.5</Thickness>
+              </Layer>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>5.0</NominalRValue>
+                <Thickness>1.5</Thickness>
               </Layer>
             </Insulation>
             <FloorJoists>
@@ -231,6 +242,11 @@
                 <NominalRValue>19.0</NominalRValue>
                 <Thickness>5.5</Thickness>
               </Layer>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>5.0</NominalRValue>
+                <Thickness>1.5</Thickness>
+              </Layer>
             </Insulation>
             <extension>
               <OrientedStrandBoard>
@@ -266,6 +282,11 @@
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>19.0</NominalRValue>
                 <Thickness>5.5</Thickness>
+              </Layer>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>5.0</NominalRValue>
+                <Thickness>1.5</Thickness>
               </Layer>
             </Insulation>
             <extension>
@@ -303,6 +324,11 @@
                 <NominalRValue>19.0</NominalRValue>
                 <Thickness>5.5</Thickness>
               </Layer>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>5.0</NominalRValue>
+                <Thickness>1.5</Thickness>
+              </Layer>
             </Insulation>
             <extension>
               <OrientedStrandBoard>
@@ -315,18 +341,7 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <WallType>
-              <LogWall>
-                <extension>
-                  <Thickness>6.0</Thickness>
-                  <Thickness>6.0</Thickness>
-                  <Conductivity>0.8</Conductivity>
-                  <Conductivity>0.8</Conductivity>
-                  <Density>32.0</Density>
-                  <Density>32.0</Density>
-                  <SpecificHeat>0.29</SpecificHeat>
-                  <SpecificHeat>0.29</SpecificHeat>
-                </extension>
-              </LogWall>
+              <LogWall/>
             </WallType>
             <Area>109.0</Area>
             <Studs>
@@ -344,11 +359,26 @@
                 <NominalRValue>19.0</NominalRValue>
                 <Thickness>5.5</Thickness>
               </Layer>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>5.0</NominalRValue>
+                <Thickness>1.5</Thickness>
+              </Layer>
             </Insulation>
             <extension>
               <OrientedStrandBoard>
                 <Thickness>0.5</Thickness>
               </OrientedStrandBoard>
+              <GenericWall>
+                <Thickness>6.0</Thickness>
+                <Thickness>6.0</Thickness>
+                <Conductivity>0.8</Conductivity>
+                <Conductivity>0.8</Conductivity>
+                <Density>32.0</Density>
+                <Density>32.0</Density>
+                <SpecificHeat>0.29</SpecificHeat>
+                <SpecificHeat>0.29</SpecificHeat>
+              </GenericWall>
             </extension>
           </Wall>
           <Wall>
@@ -356,15 +386,34 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <WallType>
-              <StructurallyInsulatedPanel/>
+              <StructurallyInsulatedPanel>
+                <extension>
+                  <NominalRValue>16</NominalRValue>
+                  <Thickness>4.5</Thickness>
+                  <SheathingThickness>0.5</SheathingThickness>
+                </extension>
+              </StructurallyInsulatedPanel>
             </WallType>
             <Area>109.0</Area>
+            <Studs>
+              <FramingFactor>0.1988</FramingFactor>
+            </Studs>
             <Siding>vinyl siding</Siding>
             <Color>dark</Color>
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='Wall5Insulation'/>
-              <AssemblyEffectiveRValue>16.1</AssemblyEffectiveRValue>
+              <InsulationGrade>3</InsulationGrade>
+              <Layer>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>19.0</NominalRValue>
+                <Thickness>5.5</Thickness>
+              </Layer>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>5.0</NominalRValue>
+                <Thickness>1.5</Thickness>
+              </Layer>
             </Insulation>
           </Wall>
           <Wall>
@@ -388,16 +437,39 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <WallType>
-              <SteelFrame/>
+              <SteelFrame>
+                <extension>
+                  <CorrectionFactor>0.75</CorrectionFactor>
+                </extension>
+              </SteelFrame>
             </WallType>
             <Area>109.0</Area>
+            <Studs>
+              <Size>2x6</Size>
+              <FramingFactor>0.1988</FramingFactor>
+            </Studs>
             <Siding>brick veneer</Siding>
             <Color>medium dark</Color>
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='Wall7Insulation'/>
-              <AssemblyEffectiveRValue>8.1</AssemblyEffectiveRValue>
+              <InsulationGrade>3</InsulationGrade>
+              <Layer>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>19.0</NominalRValue>
+                <Thickness>5.5</Thickness>
+              </Layer>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>5.0</NominalRValue>
+                <Thickness>1.5</Thickness>
+              </Layer>
             </Insulation>
+            <extension>
+              <OrientedStrandBoard>
+                <Thickness>0.5</Thickness>
+              </OrientedStrandBoard>
+            </extension>
           </Wall>
           <Wall>
             <SystemIdentifier id='Wall8'/>
@@ -486,6 +558,11 @@
                 <NominalRValue>19.0</NominalRValue>
                 <Thickness>5.5</Thickness>
               </Layer>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>5.0</NominalRValue>
+                <Thickness>1.5</Thickness>
+              </Layer>
             </Insulation>
             <extension>
               <OrientedStrandBoard>
@@ -542,8 +619,16 @@
                 <NominalRValue>19.0</NominalRValue>
                 <Thickness>5.5</Thickness>
               </Layer>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>5.0</NominalRValue>
+                <Thickness>1.5</Thickness>
+              </Layer>
             </Insulation>
             <extension>
+              <Plywood>
+                <Thickness>0.5</Thickness>
+              </Plywood>
               <InsideDryWall>
                 <Thickness>0.5</Thickness>
               </InsideDryWall>

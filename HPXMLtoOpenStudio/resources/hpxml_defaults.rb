@@ -12,7 +12,6 @@ class HPXMLDefaults
     apply_roofs(hpxml)
     apply_walls(hpxml)
     apply_rim_joists(hpxml)
-    apply_frame_floors(hpxml)
     apply_windows(hpxml)
     apply_skylights(hpxml)
     apply_hvac(hpxml)
@@ -182,14 +181,8 @@ class HPXMLDefaults
 
       next unless roof.quick_fill
 
-      if (not roof.insulation_cavity_r_value.nil?) && roof.insulation_cavity_material.nil?
-        roof.insulation_cavity_material = HPXML::InsulationMaterialBatt
-      end
       if roof.insulation_continuous_r_value.nil? # FIXME: This value is being used in hvac_sizing.rb. Is there a better way to handle this?
         roof.insulation_continuous_r_value = 0
-      end
-      if (not roof.insulation_continuous_r_value.nil?) && roof.insulation_continuous_material.nil?
-        roof.insulation_continuous_material = HPXML::InsulationMaterialRigid
       end
     end
   end
@@ -209,14 +202,8 @@ class HPXMLDefaults
 
       next unless wall.quick_fill
 
-      if (not wall.insulation_cavity_r_value.nil?) && wall.insulation_cavity_material.nil?
-        wall.insulation_cavity_material = HPXML::InsulationMaterialBatt
-      end
       if wall.insulation_continuous_r_value.nil? # FIXME: This value is being used in hvac_sizing.rb. Is there a better way to handle this?
         wall.insulation_continuous_r_value = 0
-      end
-      if (not wall.insulation_continuous_r_value.nil?) && wall.insulation_continuous_material.nil?
-        wall.insulation_continuous_material = HPXML::InsulationMaterialRigid
       end
     end
   end
@@ -233,27 +220,11 @@ class HPXMLDefaults
       elsif rim_joist.solar_absorptance.nil?
         rim_joist.solar_absorptance = Constructions.get_default_wall_solar_absorptance(rim_joist.color)
       end
-      if (not rim_joist.insulation_cavity_r_value.nil?) && rim_joist.insulation_cavity_material.nil?
-        rim_joist.insulation_cavity_material = HPXML::InsulationMaterialBatt
-      end
+
+      next unless rim_joist.quick_fill
+
       if rim_joist.insulation_continuous_r_value.nil? # FIXME: This value is being used in hvac_sizing.rb. Is there a better way to handle this?
         rim_joist.insulation_continuous_r_value = 0.0
-      end
-      if (not rim_joist.insulation_continuous_r_value.nil?) && rim_joist.insulation_continuous_material.nil?
-        rim_joist.insulation_continuous_material = HPXML::InsulationMaterialRigid
-      end
-    end
-  end
-
-  def self.apply_frame_floors(hpxml)
-    hpxml.frame_floors.each do |frame_floor|
-      next unless frame_floor.quick_fill
-
-      if (not frame_floor.insulation_cavity_r_value.nil?) && frame_floor.insulation_cavity_material.nil?
-        frame_floor.insulation_cavity_material = HPXML::InsulationMaterialBatt
-      end
-      if (not frame_floor.insulation_continuous_r_value.nil?) && frame_floor.insulation_continuous_material.nil?
-        frame_floor.insulation_continuous_material = HPXML::InsulationMaterialRigid
       end
     end
   end
