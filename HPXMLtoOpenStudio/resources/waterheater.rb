@@ -1201,6 +1201,7 @@ class Waterheater
     if water_heating_system.fuel_type == HPXML::FuelTypeElectricity
       return 0.98
     else
+    #TODO: For UEF, need a default method for fuel type water heaters
       ef = water_heating_system.energy_factor
       if ef.nil?
         ef = calc_ef_from_uef(water_heating_system)
@@ -1733,7 +1734,7 @@ class Waterheater
   end
 
   def self.get_set_temp_c(t_set, wh_type)
-    return UnitConversions.convert(t_set, 'F', 'C') + deadband(wh_type) / 2.0 # Half the deadband to account for E+ deadband
+    return UnitConversions.convert(t_set, 'F', 'C')# Half the deadband to account for E+ deadband
   end
 
   def self.create_new_loop(model, name, t_set)
