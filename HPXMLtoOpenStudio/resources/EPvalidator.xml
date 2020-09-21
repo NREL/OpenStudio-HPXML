@@ -605,7 +605,7 @@
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:CoolingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:CoolingSensibleHeatFraction) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingSensibleHeatFraction</sch:assert>
-      <sch:assert role='ERROR' test='count(h:BackupSystemFuel) = 1'>Expected 1 element(s) for xpath: BackupSystemFuel</sch:assert> <!-- See [HeatPumpBackup] and [HeatPumpBackupSystemFuel]-->
+      <sch:assert role='ERROR' test='count(h:BackupSystemFuel) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BackupSystemFuel</sch:assert> <!-- See [HeatPumpBackup] and [HeatPumpBackupSystemFuel]-->
       <sch:assert role='ERROR' test='count(h:FractionHeatLoadServed) = 1'>Expected 1 element(s) for xpath: FractionHeatLoadServed</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionCoolLoadServed) = 1'>Expected 1 element(s) for xpath: FractionCoolLoadServed</sch:assert>
     </sch:rule>
@@ -833,7 +833,7 @@
       <sch:assert role='ERROR' test='count(h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: SystemIdentifier</sch:assert>
       <sch:assert role='ERROR' test='count(h:IsSharedSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: IsSharedSystem</sch:assert> <!-- See [WaterHeatingSystemType=Shared] -->
       <sch:assert role='ERROR' test='count(h:WaterHeaterType[text()="storage water heater" or text()="instantaneous water heater" or text()="heat pump water heater" or text()="space-heating boiler with storage tank" or text()="space-heating boiler with tankless coil"]) = 1'>Expected 1 element(s) for xpath: WaterHeaterType[text()="storage water heater" or text()="instantaneous water heater" or text()="heat pump water heater" or text()="space-heating boiler with storage tank" or text()="space-heating boiler with tankless coil"]</sch:assert> <!-- See [WaterHeatingSystemType=Tank] or [WaterHeatingSystemType=Tankless] or [WaterHeatingSystemType=HeatPump] or [WaterHeatingSystemType=CombiIndirect] or [WaterHeatingSystemType=CombiTanklessCoil] -->
-      <sch:assert role='ERROR' test='count(h:Location) = 1'>Expected 1 element(s) for xpath: Location</sch:assert> <!-- See [WaterHeatingSystemLocation] -->
+      <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert> <!-- See [WaterHeatingSystemLocation] -->
       <sch:assert role='ERROR' test='count(h:FractionDHWLoadServed) = 1'>Expected 1 element(s) for xpath: FractionDHWLoadServed</sch:assert>
       <sch:assert role='ERROR' test='count(h:HotWaterTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HotWaterTemperature</sch:assert>
       <sch:assert role='ERROR' test='count(h:UsesDesuperheater) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UsesDesuperheater</sch:assert> <!-- See [Desuperheater] -->
@@ -1008,7 +1008,7 @@
       <sch:assert role='ERROR' test='count(../../h:Systems/h:WaterHeating/h:HotWaterDistribution) = 1'>Expected 1 element(s) for xpath: ../../Systems/WaterHeating/HotWaterDistribution</sch:assert> <!-- See [HotWaterDistribution] -->
       <sch:assert role='ERROR' test='count(h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: SystemIdentifier</sch:assert>
       <sch:assert role='ERROR' test='count(h:IsSharedAppliance) &lt;= 1'>Expected 0 or 1 element(s) for xpath: IsSharedAppliance</sch:assert> <!-- See [ClothesWasherType=Shared] -->
-      <sch:assert role='ERROR' test='count(h:Location) = 1'>Expected 1 element(s) for xpath: Location</sch:assert> <!-- See [ClothesWasherLocation] -->
+      <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert> <!-- See [ClothesWasherLocation] -->
       <sch:assert role='ERROR' test='count(h:ModifiedEnergyFactor) + count(h:IntegratedModifiedEnergyFactor) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ModifiedEnergyFactor | IntegratedModifiedEnergyFactor</sch:assert> <!-- See [ClothesWasherType=Detailed] -->
       <sch:assert role='ERROR' test='count(h:extension/h:UsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/UsageMultiplier</sch:assert>
     </sch:rule>
