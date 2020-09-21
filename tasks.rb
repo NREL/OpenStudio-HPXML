@@ -198,6 +198,9 @@ def create_osws
     'base-mechvent-hrv.osw' => 'base.osw',
     'base-mechvent-hrv-asre.osw' => 'base.osw',
     # 'base-mechvent-multiple.osw' => 'base.osw',
+    # 'base-mechvent-shared.osw' => 'base.osw',
+    # 'base-mechvent-shared-multiple.osw' => 'base.osw',
+    # 'base-mechvent-shared-preconditioning.osw' => 'base.osw',
     'base-mechvent-supply.osw' => 'base.osw',
     'base-mechvent-whole-house-fan.osw' => 'base.osw',
     'base-misc-defaults.osw' => 'base.osw',
@@ -223,6 +226,8 @@ def create_osws
     'extra-second-heating-system-fireplace.osw' => 'base.osw',
     'extra-pv-shared.osw' => 'base-single-family-attached.osw',
     'extra-enclosure-garage-partially-protruded.osw' => 'base.osw',
+    'extra-mechvent-shared.osw' => 'base-single-family-attached.osw',
+    'extra-mechvent-shared-preconditioning.osw' => 'extra-mechvent-shared.osw',
 
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
     'invalid_files/heating-system-and-heat-pump.osw' => 'base.osw',
@@ -482,6 +487,7 @@ def get_values(osw_file, step)
     step.setArgument('mech_vent_sensible_recovery_efficiency_type', 'Unadjusted')
     step.setArgument('mech_vent_sensible_recovery_efficiency', 0.72)
     step.setArgument('mech_vent_fan_power', 30)
+    step.setArgument('mech_vent_is_shared_system', false)
     step.setArgument('kitchen_fans_present', false)
     step.setArgument('bathroom_fans_present', false)
     step.setArgument('whole_house_fan_present', false)
@@ -1947,7 +1953,9 @@ def get_values(osw_file, step)
     step.setArgument('simulation_control_run_period_end_day_of_month', 31)
   elsif ['base-simcontrol-timestep-10-mins.osw'].include? osw_file
     step.setArgument('simulation_control_timestep', '10')
-  elsif ['extra-auto.osw'].include? osw_file
+  end
+
+  if ['extra-auto.osw'].include? osw_file
     step.setArgument('geometry_num_occupants', Constants.Auto)
     step.setArgument('ducts_supply_location', Constants.Auto)
     step.setArgument('ducts_return_location', Constants.Auto)
@@ -1995,7 +2003,20 @@ def get_values(osw_file, step)
   elsif ['extra-enclosure-garage-partially-protruded.osw'].include? osw_file
     step.setArgument('geometry_garage_width', 12)
     step.setArgument('geometry_garage_protrusion', 0.5)
-  elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
+  elsif ['extra-mechvent-shared.osw'].include? osw_file
+    step.setArgument('mech_vent_is_shared_system', true)
+    step.setArgument('shared_mech_vent_flow_rate', 80.0)
+    step.setArgument('shared_mech_vent_frac_recirculation', 0.5)
+  elsif ['extra-mechvent-shared-preconditioning.osw'].include? osw_file
+    step.setArgument('shared_mech_vent_preheating_fuel', HPXML::FuelTypeNaturalGas)
+    step.setArgument('shared_mech_vent_preheating_efficiency', 0.92)
+    step.setArgument('shared_mech_vent_preheating_fraction_heat_load_served', 0.7)
+    step.setArgument('shared_mech_vent_precooling_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('shared_mech_vent_precooling_efficiency', 4.0)
+    step.setArgument('shared_mech_vent_precooling_fraction_cool_load_served', 0.8)
+  end
+
+  if ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
   elsif ['invalid_files/heating-system-and-heat-pump.osw'].include? osw_file

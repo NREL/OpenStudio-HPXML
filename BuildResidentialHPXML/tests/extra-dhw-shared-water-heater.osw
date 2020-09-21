@@ -241,6 +241,7 @@
         "mech_vent_fan_type": "none",
         "mech_vent_flow_rate": 110,
         "mech_vent_hours_in_operation": 24,
+        "mech_vent_is_shared_system": false,
         "mech_vent_sensible_recovery_efficiency": 0.72,
         "mech_vent_sensible_recovery_efficiency_type": "Unadjusted",
         "mech_vent_total_recovery_efficiency": 0.48,
