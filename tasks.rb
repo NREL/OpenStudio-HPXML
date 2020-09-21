@@ -222,6 +222,7 @@ def create_osws
     'extra-second-heating-system-portable-heater.osw' => 'base.osw',
     'extra-second-heating-system-fireplace.osw' => 'base.osw',
     'extra-pv-shared.osw' => 'base-single-family-attached.osw',
+    'extra-enclosure-garage-partially-protruded.osw' => 'base.osw',
 
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
     'invalid_files/heating-system-and-heat-pump.osw' => 'base.osw',
@@ -1991,6 +1992,9 @@ def get_values(osw_file, step)
     step.setArgument('geometry_building_num_bedrooms', 9)
     step.setArgument('pv_system_module_type_1', HPXML::PVModuleTypeStandard)
     step.setArgument('pv_system_is_shared_1', true)
+  elsif ['extra-enclosure-garage-partially-protruded.osw'].include? osw_file
+    step.setArgument('geometry_garage_width', 12)
+    step.setArgument('geometry_garage_protrusion', 0.5)
   elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
