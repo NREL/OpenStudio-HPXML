@@ -115,23 +115,6 @@
         "lighting_power_reduction_percent": 30
       }
     },{
-      "measure_dir_name": "add_central_ice_storage",
-        "arguments": {
-          "__SKIP__": true,
-          "chiller_resize_factor": 0.8,
-          "discharge_start": "08:00",
-          "discharge_end": "20:00",
-          "charge_start": "23:00",
-          "inter_sp": 46
-        }
-      },{
-        "measure_dir_name": "add_packaged_ice_storage",
-        "arguments": {
-          "__SKIP__": true,
-          "size_mult": "0.75",
-          "charge_start": "23:00"
-        }
-      },{
       "measure_dir_name": "default_feature_reports",
       "arguments": {
         "feature_id": null,
