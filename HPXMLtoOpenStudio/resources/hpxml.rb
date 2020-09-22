@@ -46,7 +46,7 @@ XMLHelper.write_file(hpxml.to_oga, "out.xml")
 #         E.g., in class Window, :wall_idref => :wall
 
 class HPXML < Object
-  HPXML_ATTRS = [:header, :site, :neighbor_buildings, :building_summary, :building_occupancy, :building_construction,
+  HPXML_ATTRS = [:header, :site, :neighbor_buildings, :building_occupancy, :building_construction,
                  :climate_and_risk_zones, :air_infiltration_measurements, :attics, :foundations,
                  :roofs, :rim_joists, :walls, :foundation_walls, :frame_floors, :slabs, :windows,
                  :skylights, :doors, :heating_systems, :cooling_systems, :heat_pumps, :hvac_controls,
@@ -481,7 +481,6 @@ class HPXML < Object
     @header.to_oga(@doc)
     @site.to_oga(@doc)
     @neighbor_buildings.to_oga(@doc)
-    @building_summary.to_oga(@doc)
     @building_occupancy.to_oga(@doc)
     @building_construction.to_oga(@doc)
     @climate_and_risk_zones.to_oga(@doc)
@@ -531,7 +530,6 @@ class HPXML < Object
     @header = Header.new(self, hpxml)
     @site = Site.new(self, hpxml)
     @neighbor_buildings = NeighborBuildings.new(self, hpxml)
-    @building_summary = BuildingSummary.new(self, hpxml)
     @building_occupancy = BuildingOccupancy.new(self, hpxml)
     @building_construction = BuildingConstruction.new(self, hpxml)
     @climate_and_risk_zones = ClimateandRiskZones.new(self, hpxml)
@@ -907,32 +905,6 @@ class HPXML < Object
       @azimuth = to_integer_or_nil(XMLHelper.get_value(neighbor_building, 'Azimuth'))
       @distance = to_float_or_nil(XMLHelper.get_value(neighbor_building, 'Distance'))
       @height = to_float_or_nil(XMLHelper.get_value(neighbor_building, 'Height'))
-    end
-  end
-
-  class BuildingSummary < BaseElement
-    ATTRS = [:comment]
-    attr_accessor(*ATTRS)
-
-    def check_for_errors
-      errors = []
-      return errors
-    end
-
-    def to_oga(doc)
-      return if nil?
-
-      building_summary = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'BuildingSummary'])
-      XMLHelper.add_extension(building_summary, 'Comment', @comment) unless @comment.nil?
-    end
-
-    def from_oga(hpxml)
-      return if hpxml.nil?
-
-      building_summary = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/BuildingSummary')
-      return if building_summary.nil?
-
-      @comment = XMLHelper.get_value(building_summary, 'Comment')
     end
   end
 
