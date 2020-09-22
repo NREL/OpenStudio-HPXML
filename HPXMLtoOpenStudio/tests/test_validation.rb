@@ -71,6 +71,33 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     end
   end
 
+  def test_role_attributes
+    puts 
+    puts "Checking for role attributes in Schematron file..."
+
+    schema_doc = XMLHelper.parse_file(@stron_path)
+    # check that every assert element has a role attribute
+    XMLHelper.get_elements(schema_doc, '/sch:schema/sch:pattern/sch:rule/sch:assert').each do |assert_element|
+      assert_test = XMLHelper.get_attribute_value(assert_element, 'test').gsub('h:', '')
+      role_attribute = XMLHelper.get_attribute_value(assert_element, 'role')
+      if role_attribute.nil?
+        fail "No attribute \"role='ERROR'\" has found for assertion test: #{assert_test}"
+      end
+
+      assert_equal('ERROR', role_attribute)
+    end
+    # check that every report element has a role attribute
+    XMLHelper.get_elements(schema_doc, '/sch:schema/sch:pattern/sch:rule/sch:report').each do |report_element|
+      report_test = XMLHelper.get_attribute_value(report_element, 'test').gsub('h:', '')
+      role_attribute = XMLHelper.get_attribute_value(report_element, 'role')
+      if role_attribute.nil?
+        fail "No attribute \"role='WARN'\" has found for report test: #{report_test}"
+      end
+
+      assert_equal('WARN', role_attribute)
+    end
+  end
+
   def test_sample_files
     puts
     puts "Testing #{@hpxml_docs.size} HPXML files..."
