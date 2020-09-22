@@ -266,7 +266,6 @@ class HPXMLTest < MiniTest::Test
                    ['Pump Electric Power', 'runperiod', Constants.ObjectNameBoiler + ' hydronic pump'],
                    ['Unitary System Part Load Ratio', 'runperiod', Constants.ObjectNameGroundSourceHeatPump + ' unitary system'],
                    ['Pump Electric Power', 'runperiod', Constants.ObjectNameGroundSourceHeatPump + ' pump']]
-
     # Run workflow
     workflow_start = Time.now
     results = run_hpxml_workflow(rundir, xml, measures, measures_dir,
@@ -947,7 +946,11 @@ class HPXMLTest < MiniTest::Test
       if clg_cap == 0
         assert_operator(sql_value, :<, 1)
       elsif clg_cap > 0
-        assert_in_epsilon(clg_cap, sql_value, 0.01)
+        if hpxml.header.allow_increased_fixed_capacities
+          assert_operator(sql_value, :>=, clg_cap)
+        else
+          assert_in_epsilon(clg_cap, sql_value, 0.01)
+        end
       else # autosized
         assert_operator(sql_value, :>, 1)
       end
@@ -957,7 +960,11 @@ class HPXMLTest < MiniTest::Test
       if htg_cap == 0
         assert_operator(sql_value, :<, 1)
       elsif htg_cap > 0
-        assert_in_epsilon(htg_cap, sql_value, 0.01)
+        if hpxml.header.allow_increased_fixed_capacities
+          assert_operator(sql_value, :>=, htg_cap)
+        else
+          assert_in_epsilon(htg_cap, sql_value, 0.01)
+        end
       else # autosized
         assert_operator(sql_value, :>, 1)
       end
@@ -1003,9 +1010,9 @@ class HPXMLTest < MiniTest::Test
       if not fan_cfis.empty?
         # CFIS, check for positive mech vent energy that is less than the energy if it had run 24/7
         # CFIS Fan energy
-        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='#{Constants.ObjectNameMechanicalVentilationHouseFanCFIS.upcase}' AND VariableName='Electric Equipment Electric Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue LIKE '#{Constants.ObjectNameMechanicalVentilationHouseFanCFIS.upcase}%' AND VariableName='Electric Equipment Electric Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
         cfis_energy = sqlFile.execAndReturnFirstDouble(query).get
-        fan_gj = fan_cfis.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+        fan_gj = fan_cfis.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
         if fan_gj > 0
           assert_operator(cfis_energy, :>, 0)
           assert_operator(cfis_energy, :<, fan_gj)
@@ -1019,19 +1026,19 @@ class HPXMLTest < MiniTest::Test
       # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
       fan_gj = 0
       if not fan_sup.empty?
-        fan_gj += fan_sup.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+        fan_gj += fan_sup.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
       end
       if not fan_exh.empty?
-        fan_gj += fan_exh.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+        fan_gj += fan_exh.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
       end
       if not fan_bal.empty?
-        fan_gj += fan_bal.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+        fan_gj += fan_bal.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
       end
       if not vent_fan_kitchen.empty?
-        fan_gj += vent_fan_kitchen.map { |vent_kitchen| UnitConversions.convert(vent_kitchen.fan_power * vent_kitchen.hours_in_operation * vent_kitchen.quantity * 365.0, 'Wh', 'GJ') }.sum(0.0)
+        fan_gj += vent_fan_kitchen.map { |vent_kitchen| UnitConversions.convert(vent_kitchen.unit_fan_power * vent_kitchen.hours_in_operation * vent_kitchen.quantity * 365.0, 'Wh', 'GJ') }.sum(0.0)
       end
       if not vent_fan_bath.empty?
-        fan_gj += vent_fan_bath.map { |vent_bath| UnitConversions.convert(vent_bath.fan_power * vent_bath.hours_in_operation * vent_bath.quantity * 365.0, 'Wh', 'GJ') }.sum(0.0)
+        fan_gj += vent_fan_bath.map { |vent_bath| UnitConversions.convert(vent_bath.unit_fan_power * vent_bath.hours_in_operation * vent_bath.quantity * 365.0, 'Wh', 'GJ') }.sum(0.0)
       end
       # Maximum error that can be caused by rounding
       assert_in_delta(mv_energy, fan_gj, 0.006)

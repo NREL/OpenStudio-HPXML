@@ -491,7 +491,6 @@ class HVAC
     hvac_map[heat_pump.id] << htg_supp_coil
 
     # Fan
-
     fan = create_supply_fan(model, obj_name, num_speeds, heat_pump.fan_watts_per_cfm)
     hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
@@ -655,7 +654,6 @@ class HVAC
     hvac_map[heat_pump.id] << htg_supp_coil
 
     # Fan
-
     fan_power_curve = create_curve_exponent(model, [0, 1, 3], obj_name + ' fan power curve', -100, 100)
     fan_eff_curve = create_curve_cubic(model, [0, 1, 0, 0], obj_name + ' fan eff curve', 0, 1, 0.01, 1)
     fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule, fan_power_curve, fan_eff_curve)
