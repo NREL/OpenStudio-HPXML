@@ -129,15 +129,4 @@ class HPXMLValidator
 
     XMLHelper.write_file(schema_validator, File.join(File.dirname(__FILE__), 'schema_validator.xml'))
   end
-
-  def self.validate_xml(hpxml_doc)
-    puts 'Validating xml...'
-    errors = Validator.run_validator(hpxml_doc, File.join(File.dirname(__FILE__), 'schema_validator.xml'))
-
-    if not errors.empty?
-      errors.each do |error|
-        fail "#{error}"
-      end
-    end
-  end
 end

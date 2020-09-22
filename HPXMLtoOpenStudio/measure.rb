@@ -155,7 +155,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     is_valid = true
 
     # Validate input HPXML against schema
-    HPXMLValidator.validate_xml(hpxml.doc)
+    puts 'Validating xml...'
+    errors = Validator.run_validator(hpxml.doc, File.join(File.dirname(__FILE__), 'resources', 'schema_validator.xml'))
+    errors.each do |error|
+      runner.registerError("#{hpxml_path}: #{error}")
+      is_valid = false
+    end
 
     XMLHelper.validate(hpxml.doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), runner).each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
@@ -169,7 +174,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
     end
-
+    
     # Check for additional errors
     errors = hpxml.check_for_errors()
     errors.each do |error|
