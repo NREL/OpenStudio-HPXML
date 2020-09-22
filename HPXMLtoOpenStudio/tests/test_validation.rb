@@ -72,8 +72,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
   end
 
   def test_role_attributes
-    puts 
-    puts "Checking for role attributes in Schematron file..."
+    puts
+    puts 'Checking for role attributes of assert and report elements...'
 
     schema_doc = XMLHelper.parse_file(@stron_path)
     # check that every assert element has a role attribute

@@ -102,8 +102,7 @@
       <sch:report role='WARN' test='count(h:Appliances/h:Dishwasher) = 0'>No dishwasher specified, the model will not include dishwasher energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:Refrigerator) = 0'>No refrigerator specified, the model will not include refrigerator energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:CookingRange) = 0'>No cooking range specified, the model will not include cooking range/oven energy use.</sch:report>
-      <sch:report role='WARN' test='count(h:Systems/h:WaterHeating/h:WaterHeatingSystem) = 0'>No water heater specified, the model will not include water heating energy use.</sch:report>
-    </sch:rule>
+      <sch:report role='WARN' test='count(h:Systems/h:WaterHeating/h:WaterHeatingSystem) = 0'>No water heater specified, the model will not include water heating energy use.</sch:report>    </sch:rule>
   </sch:pattern>  
   
   <sch:pattern name='[Site]'>
