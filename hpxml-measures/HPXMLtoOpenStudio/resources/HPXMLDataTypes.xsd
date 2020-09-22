@@ -1144,7 +1144,11 @@
 		</xs:simpleContent>
 	</xs:complexType>
 	<xs:simpleType name="AdjacentTo_simple">
+		<xs:annotation>
+			<xs:documentation>NOTE: "other housing unit above" and "other housing unit below" will be deprecated in v4.0. Use "other housing unit" instead.</xs:documentation>
+		</xs:annotation>
 		<xs:restriction base="xs:string">
+			<xs:enumeration value="adiabatic"/>
 			<xs:enumeration value="attic"/>
 			<xs:enumeration value="attic - conditioned"/>
 			<xs:enumeration value="attic - unconditioned"/>
@@ -1760,6 +1764,8 @@
 			<xs:enumeration value="mini-split"/>
 			<xs:enumeration value="room air conditioner"/>
 			<xs:enumeration value="evaporative cooler"/>
+			<xs:enumeration value="chiller"/>
+			<xs:enumeration value="cooling tower"/>
 			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -1850,6 +1856,8 @@
 			<xs:enumeration value="mini-split"/>
 			<xs:enumeration value="ground-to-air"/>
 			<xs:enumeration value="ground-to-water"/>
+			<xs:enumeration value="water-loop-to-air"/>
+			<xs:enumeration value="variable refrigerant flow"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:complexType name="HeatPumpType">
@@ -2767,6 +2775,20 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
+	<xs:simpleType name="HydronicAndAirDistributionType_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="fan coil"/>
+			<xs:enumeration value="water loop heat pump"/>
+			<xs:enumeration value="other"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="HydronicAndAirDistributionType">
+		<xs:simpleContent>
+			<xs:extension base="HydronicAndAirDistributionType_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
 	<xs:simpleType name="ElectricDistributionType_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="baseboard"/>
@@ -2975,6 +2997,10 @@
 			<xs:enumeration value="laundry room"/>
 			<xs:enumeration value="living space"/>
 			<xs:enumeration value="other"/>
+			<xs:enumeration value="other heated space"/>
+			<xs:enumeration value="other housing unit"/>
+			<xs:enumeration value="other multifamily buffer space"/>
+			<xs:enumeration value="other non-freezing space"/>
 			<xs:enumeration value="unconditioned space"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -3035,6 +3061,10 @@
 			<xs:enumeration value="kitchen"/>
 			<xs:enumeration value="living space"/>
 			<xs:enumeration value="other"/>
+			<xs:enumeration value="other heated space"/>
+			<xs:enumeration value="other housing unit"/>
+			<xs:enumeration value="other multifamily buffer space"/>
+			<xs:enumeration value="other non-freezing space"/>
 			<xs:enumeration value="unconditioned space"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -4378,6 +4408,10 @@
 			<xs:enumeration value="garage - conditioned"/>
 			<xs:enumeration value="garage - unconditioned"/>
 			<xs:enumeration value="living space"/>
+			<xs:enumeration value="other heated space"/>
+			<xs:enumeration value="other housing unit"/>
+			<xs:enumeration value="other multifamily buffer space"/>
+			<xs:enumeration value="other non-freezing space"/>
 			<xs:enumeration value="outside"/>
 			<xs:enumeration value="roof deck"/>
 			<xs:enumeration value="unconditioned space"/>
@@ -4626,4 +4660,43 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
+	<xs:simpleType name="PVSystemMaxPowerOutput_simple">
+		<xs:restriction base="Power_simple"/>
+	</xs:simpleType>
+	<xs:complexType name="PVSystemMaxPowerOutput">
+		<xs:simpleContent>
+			<xs:extension base="PVSystemMaxPowerOutput_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+				<xs:attribute name="scope" type="DataScope"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="PVSystemCollectorArea_simple">
+		<xs:restriction base="SurfaceArea_simple"/>
+	</xs:simpleType>
+	<xs:complexType name="PVSystemCollectorArea">
+		<xs:simpleContent>
+			<xs:extension base="PVSystemCollectorArea_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+				<xs:attribute name="scope" type="DataScope"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="PVSystemNumberOfPanels_simple">
+		<xs:restriction base="IntegerGreaterThanZero_simple"/>
+	</xs:simpleType>
+	<xs:complexType name="PVSystemNumberOfPanels">
+		<xs:simpleContent>
+			<xs:extension base="PVSystemNumberOfPanels_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+				<xs:attribute name="scope" type="DataScope"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="DataScope">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="single unit"/>
+			<xs:enumeration value="multiple units"/>
+		</xs:restriction>
+	</xs:simpleType>
 </xs:schema>

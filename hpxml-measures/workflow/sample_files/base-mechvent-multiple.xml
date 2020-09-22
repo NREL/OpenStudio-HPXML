@@ -41,6 +41,7 @@
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>3</NumberofBedrooms>
+          <NumberofBathrooms>2</NumberofBathrooms>
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
@@ -443,6 +444,7 @@
           <VentilationFans>
             <VentilationFan>
               <SystemIdentifier id='KitchenRangeFan'/>
+              <Quantity>1</Quantity>
               <RatedFlowRate>50.0</RatedFlowRate>
               <HoursInOperation>1.5</HoursInOperation>
               <FanLocation>kitchen</FanLocation>
@@ -481,7 +483,7 @@
             <VentilationFan>
               <SystemIdentifier id='Exhaust'/>
               <FanType>exhaust only</FanType>
-              <RatedFlowRate>25.0</RatedFlowRate>
+              <TestedFlowRate>25.0</TestedFlowRate>
               <HoursInOperation>14.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <FanPower>5.0</FanPower>
@@ -543,7 +545,7 @@
             <VentilationFan>
               <SystemIdentifier id='Exhaust_2'/>
               <FanType>exhaust only</FanType>
-              <RatedFlowRate>25.0</RatedFlowRate>
+              <TestedFlowRate>25.0</TestedFlowRate>
               <HoursInOperation>13.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <FanPower>5.0</FanPower>
@@ -576,6 +578,7 @@
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='KitchenRangeFan_2'/>
+              <Quantity>1</Quantity>
               <RatedFlowRate>50.0</RatedFlowRate>
               <HoursInOperation>0.5</HoursInOperation>
               <FanLocation>kitchen</FanLocation>
@@ -586,7 +589,7 @@
               </extension>
             </VentilationFan>
             <VentilationFan>
-              <SystemIdentifier id='CFIS1'/>
+              <SystemIdentifier id='CFIS'/>
               <FanType>central fan integrated supply</FanType>
               <TestedFlowRate>160.0</TestedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
@@ -595,7 +598,7 @@
               <AttachedToHVACDistributionSystem idref='HVACDistribution'/>
             </VentilationFan>
             <VentilationFan>
-              <SystemIdentifier id='CFIS2'/>
+              <SystemIdentifier id='CFIS_2'/>
               <FanType>central fan integrated supply</FanType>
               <TestedFlowRate>170.0</TestedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
@@ -618,7 +621,7 @@
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
-            <SystemIdentifier id='HotWaterDstribution'/>
+            <SystemIdentifier id='HotWaterDistribution'/>
             <SystemType>
               <Standard>
                 <PipingLength>50.0</PipingLength>

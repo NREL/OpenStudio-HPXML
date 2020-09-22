@@ -57,6 +57,7 @@ class HEScoreTest < Minitest::Unit::TestCase
   def run_and_check(xml, parent_dir, expect_error, zipfile)
     # Check input HPXML is valid
     xml = File.absolute_path(xml)
+    hpxml = HPXML.new(hpxml_path: xml)
 
     # Run workflow
     cli_path = OpenStudio.getOpenStudioCLI
@@ -83,8 +84,19 @@ class HEScoreTest < Minitest::Unit::TestCase
       # Check run.log for messages
       File.readlines(File.join(parent_dir, 'HEScoreDesign', 'run.log')).each do |log_line|
         next if log_line.include? 'Warning: Could not load nokogiri, no HPXML validation performed.'
+
         # FIXME: Remove this warning when window/skylight U-factors are reasonable
         next if log_line.include?('Warning: Glazing U-factor') && log_line.include?('above maximum expected value. U-factor decreased')
+
+        # Files w/o cooling systems
+        if hpxml.total_fraction_cool_load_served <= 0
+          next if log_line.include?('Warning: No cooling system specified, the model will not include space cooling energy use.')
+        end
+
+        # Files w/o heating systems
+        if hpxml.total_fraction_heat_load_served <= 0
+          next if log_line.include?('Warning: No heating system specified, the model will not include space heating energy use.')
+        end
 
         flunk "Unexpected warning found in run.log: #{log_line}"
       end
@@ -93,7 +105,7 @@ class HEScoreTest < Minitest::Unit::TestCase
       zipfile.addFile(OpenStudio::Path.new(results_json), OpenStudio::Path.new(File.basename(xml.gsub('.xml', '_results.json'))))
 
       results = _get_results(parent_dir, runtime)
-      _test_results(xml, results)
+      _test_results(xml, hpxml, results)
     end
 
     return results
@@ -138,9 +150,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     return results
   end
 
-  def _test_results(xml, results)
-    hpxml = HPXML.new(hpxml_path: xml)
-
+  def _test_results(xml, hpxml, results)
     fuel_map = { HPXML::FuelTypeElectricity => 'electric',
                  HPXML::FuelTypeNaturalGas => 'natural_gas',
                  HPXML::FuelTypeOil => 'fuel_oil',

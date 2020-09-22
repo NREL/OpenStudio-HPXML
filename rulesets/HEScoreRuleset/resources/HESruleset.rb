@@ -55,13 +55,14 @@ class HEScoreRuleset
 
   def self.set_summary(orig_hpxml, new_hpxml)
     # Get HPXML values
+    @bldg_type = orig_hpxml.building_construction.residential_facility_type
     @bldg_orient = orig_hpxml.site.orientation_of_front_of_home
     @bldg_azimuth = orientation_to_azimuth(@bldg_orient)
 
     @year_built = orig_hpxml.building_construction.year_built
     @nbeds = orig_hpxml.building_construction.number_of_bedrooms
     @cfa = orig_hpxml.building_construction.conditioned_floor_area # ft^2
-    @is_townhouse = (orig_hpxml.building_construction.residential_facility_type == HPXML::ResidentialTypeSFA)
+    @is_townhouse = (@bldg_type == HPXML::ResidentialTypeSFA)
     @fnd_areas = get_foundation_areas(orig_hpxml)
     @ducts = get_ducts_details(orig_hpxml)
     @cfa_basement = @fnd_areas[HPXML::LocationBasementConditioned]
@@ -99,11 +100,13 @@ class HEScoreRuleset
 
     new_hpxml.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(@nbeds)
 
+    new_hpxml.building_construction.residential_facility_type = @bldg_type
     new_hpxml.building_construction.number_of_conditioned_floors = @ncfl
     new_hpxml.building_construction.number_of_conditioned_floors_above_grade = @ncfl_ag
     new_hpxml.building_construction.number_of_bedrooms = @nbeds
     new_hpxml.building_construction.conditioned_floor_area = @cfa
     new_hpxml.building_construction.conditioned_building_volume = @cvolume
+    new_hpxml.building_construction.has_flue_or_chimney = false
   end
 
   def self.set_climate(orig_hpxml, new_hpxml)
@@ -706,7 +709,8 @@ class HEScoreRuleset
 
     additional_hydronic_ids.each do |hydronic_id|
       new_hpxml.hvac_distributions.add(id: hydronic_id,
-                                       distribution_system_type: HPXML::HVACDistributionTypeHydronic)
+                                       distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                       hydronic_type: HPXML::HydronicTypeBaseboard)
     end
   end
 
