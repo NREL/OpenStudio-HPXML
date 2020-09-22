@@ -21,19 +21,19 @@ class HPXMLValidator
     hpxml_docs.each do |xml, hpxml_doc|
       root = XMLHelper.get_element(hpxml_doc, '/HPXML')
       root.each_node do |node|
-        if node.is_a?(Oga::XML::Element)
-          ancestors = []
-          node.each_ancestor do |parent_node|
-            ancestors << ['h:', parent_node.name].join()
-          end
-          parent_element_xpath = ancestors.reverse
-          child_element_xpath = ['h:', node.name].join()
-          element_xpath = [parent_element_xpath, child_element_xpath].join('/')
+        next unless node.is_a?(Oga::XML::Element)
 
-          next if element_xpath.include? 'extension'
-
-          elements_being_used << element_xpath if not elements_being_used.include? element_xpath
+        ancestors = []
+        node.each_ancestor do |parent_node|
+          ancestors << ['h:', parent_node.name].join()
         end
+        parent_element_xpath = ancestors.reverse
+        child_element_xpath = ['h:', node.name].join()
+        element_xpath = [parent_element_xpath, child_element_xpath].join('/')
+
+        next if element_xpath.include? 'extension'
+
+        elements_being_used << element_xpath if not elements_being_used.include? element_xpath
       end
     end
 
@@ -42,7 +42,7 @@ class HPXMLValidator
 
   def self.create_schematron_schema_validator()
     elements_in_sample_files = get_elements_from_sample_files()
-    
+
     base_elements_xsd = File.read(File.join(File.dirname(__FILE__), 'BaseElements.xsd'))
     base_elements_xsd_doc = Oga.parse_xml(base_elements_xsd)
 
@@ -68,7 +68,7 @@ class HPXMLValidator
       parent_element_xpath = ancestors.reverse.join('/').chomp('/')
       child_element_xpath = ['h:', element.get('name')].join() if not element.get('name').nil?
       context_xpath = [parent_element_xpath, child_element_xpath].join('/').chomp('/').delete_prefix('/')
-      
+
       next unless elements_in_sample_files.any? { |item| item.include? context_xpath }
 
       hpxml_data_type_xsd_doc.xpath('//xs:simpleType').each do |simple_type_element|

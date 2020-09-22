@@ -8,9 +8,6 @@
     <sch:rule context='//h:ProjectStatus/h:EventType'>
       <sch:assert role='ERROR' test='contains("_audit_ _proposed workscope_ _approved workscope_ _construction-period testing/daily test out_ _job completion testing/final inspection_ _quality assurance/monitoring_ _preconstruction_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'audit' or 'proposed workscope' or 'approved workscope' or 'construction-period testing/daily test out' or 'job completion testing/final inspection' or 'quality assurance/monitoring' or 'preconstruction'</sch:assert>
     </sch:rule>
-    <sch:rule context='//h:Enclosure/h:Foundations/h:Foundation/h:ThermalBoundary'>
-      <sch:assert role='ERROR' test='contains("_frame floor_ _foundation wall_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'frame floor' or 'foundation wall'</sch:assert>
-    </sch:rule>
     <sch:rule context='//h:Enclosure/h:Roofs/h:Roof/h:InteriorAdjacentTo'>
       <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
     </sch:rule>
@@ -176,6 +173,10 @@
     </sch:rule>
     <sch:rule context='//h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan/h:FanLocation'>
       <sch:assert role='ERROR' test='contains("_bath_ _garage_ _garage - conditioned_ _garage - unconditioned_ _hallway_ _kitchen_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'bath' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'hallway' or 'kitchen' or 'other'</sch:assert>
+    </sch:rule>
+    <sch:rule context='//h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan/h:FractionRecirculation'>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan/h:TotalRecoveryEfficiency'>
       <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
