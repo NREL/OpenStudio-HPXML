@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2020-04-28T10:59:06-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2020-08-11T16:46:30-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2752.29258">
+    <BuildingID id="bid-7665.55658">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2020-03-24</Date>
+      <Date>2020-08-03</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
