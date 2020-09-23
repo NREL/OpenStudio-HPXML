@@ -72,7 +72,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('debug', false)
     arg.setDisplayName('Debug Mode?')
-    arg.setDescription('If enabled: 1) Writes in.osm file, 2) Writes in.xml HPXML file with defaults filled, and 3) Generates additional log output. Any files written will be in the output path specified above.')
+    arg.setDescription('If enabled: 1) Writes in.osm file, 2) Writes in.xml HPXML file with defaults populated, and 3) Generates additional log output. Any files written will be in the output path specified above.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -214,12 +214,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       File.open(cache_path, 'wb') do |file|
         weather.dump_to_csv(file)
       end
-    end
-
-    if not output_dir.nil?
-      epw_output_path = File.join(output_dir, 'in.epw')
-      FileUtils.cp(epw_path, epw_output_path)
-      runner.registerInfo("Copied EPW to: #{epw_output_path}")
     end
 
     return epw_path, cache_path

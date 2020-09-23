@@ -105,10 +105,6 @@ class Constants
     return 'backup htg coil'
   end
 
-  def self.ObjectNameBath
-    return 'baths'
-  end
-
   def self.ObjectNameBoiler
     return 'boiler'
   end
@@ -371,14 +367,6 @@ class Constants
 
   def self.ObjectNameSharedPump(hvac_name)
     return "#{hvac_name} shared pump"
-  end
-
-  def self.ObjectNameShower
-    return 'showers'
-  end
-
-  def self.ObjectNameSink
-    return 'sinks'
   end
 
   def self.ObjectNameSolarHotWater
