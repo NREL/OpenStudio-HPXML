@@ -202,7 +202,6 @@ class HVAC
     hvac_map[cooling_system.id] = []
     obj_name = Constants.ObjectNameRoomAirConditioner
     sequential_cool_load_frac = calc_sequential_load_fraction(cooling_system.fraction_cool_load_served, remaining_cool_load_frac)
-    airflow_rate = 350.0 # cfm/ton; assumed
 
     # Performance curves
     # From Frigidaire 10.7 eer unit in Winkler et. al. Lab Testing of Window ACs (2013)
@@ -265,7 +264,6 @@ class HVAC
     control_zone.setSequentialHeatingFractionSchedule(ptac, get_sequential_load_schedule(model, 0))
 
     # Store info for HVAC Sizing measure
-    ptac.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, airflow_rate.to_s)
     ptac.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated.join(','))
     ptac.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, cooling_system.fraction_cool_load_served)
     ptac.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameRoomAirConditioner)
@@ -1316,7 +1314,7 @@ class HVAC
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameUnitHeater
     sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
-    airflow_rate = 125.0 # cfm/ton   FIXME: Needs to be updated for, e.g., wall furnace?
+    cfms_ton_rated = [350.0]
 
     # Heating Coil
 
@@ -1354,7 +1352,7 @@ class HVAC
     control_zone.setSequentialCoolingFractionSchedule(unitary_system, get_sequential_load_schedule(model, 0))
 
     # Store info for HVAC Sizing measure
-    unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, airflow_rate.to_s)
+    unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, cfms_ton_rated.join(','))
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameUnitHeater)
     if not heating_system.airflow_cfm_per_ton.nil?
@@ -4122,10 +4120,6 @@ class HVAC
     secondary_duct_location = HPXML::LocationLivingSpace
 
     return primary_duct_location, secondary_duct_location
-  end
-
-  def self.calc_airflow_ratio(airflow_rated, airflow_design, airflow_defect_ratio)
-    return(airflow_design * (1.0 + airflow_defect_ratio) / airflow_rated)
   end
 
   def self.apply_installation_quality_EMS(model, unitary_system, clg_coil, htg_coil, control_zone, charge_defect_ratio, airflow_rated_defect_ratio_cool, airflow_rated_defect_ratio_heat)
