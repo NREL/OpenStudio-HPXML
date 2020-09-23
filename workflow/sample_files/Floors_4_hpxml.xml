@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2020-04-28T10:54:55-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2020-08-11T16:42:36-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2729.29235">
+    <BuildingID id="bid-7642.55635">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2020-03-24</Date>
+      <Date>2020-08-03</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -194,7 +194,7 @@
           <FrameFloor>
             <SystemIdentifier id="roof1_floor"/>
             <FloorCovering>none</FloorCovering>
-            <Area>1000</Area>
+            <Area>500</Area>
             <Insulation>
               <SystemIdentifier id="roof1_floor_insulation"/>
               <Layer>
@@ -207,7 +207,7 @@
         <Slabs>
           <Slab>
             <SystemIdentifier id="floor1_slab"/>
-            <Area>1000</Area>
+            <Area>500</Area>
             <PerimeterInsulation>
               <SystemIdentifier id="slab1_insulation"/>
               <Layer>
