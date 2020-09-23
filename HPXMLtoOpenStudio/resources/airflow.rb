@@ -1232,7 +1232,7 @@ class Airflow
         end
         remaining_hrs -= 1
       end
-      obj_sch = HourlyByMonthSchedule.new(model, "#{obj_name} schedule", [daily_sch] * 12, [daily_sch] * 12, false, true, Constants.ScheduleTypeLimitsFraction)
+      obj_sch = HourlyByMonthSchedule.new(model, "#{obj_name} schedule", [daily_sch] * 12, [daily_sch] * 12, Constants.ScheduleTypeLimitsFraction, false)
       obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       obj_sch_sensor.setName("#{obj_name} sch s")
       obj_sch_sensor.setKeyName(obj_sch.schedule.name.to_s)
@@ -1258,8 +1258,8 @@ class Airflow
     obj_sch_sensors = {}
     dryer_object_array.each_with_index do |dryer_object, index|
       obj_name = "#{obj_type_name} #{index}"
-      hr_shift = -1.0 / 24.0
-      obj_sch = HotWaterSchedule.new(model, obj_type_name, @nbeds, hr_shift, true, 24)
+      days_shift = -1.0 / 24.0 # Shift by 1 hour
+      obj_sch = HotWaterSchedule.new(model, obj_type_name, @nbeds, days_shift, 24)
       Schedule.set_schedule_type_limits(model, obj_sch.schedule, Constants.ScheduleTypeLimitsTemperature)
       obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       obj_sch_sensor.setName("#{obj_name} sch s")

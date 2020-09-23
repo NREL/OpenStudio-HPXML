@@ -5,8 +5,7 @@ class HourlyByMonthSchedule
   # weekday_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
   # weekend_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
   def initialize(model, sch_name, weekday_month_by_hour_values, weekend_month_by_hour_values,
-                 normalize_values = true, create_sch_object = true,
-                 schedule_type_limits_name = nil)
+                 schedule_type_limits_name = nil, normalize_values = true)
     @model = model
     @sch_name = sch_name
     @schedule = nil
@@ -19,9 +18,7 @@ class HourlyByMonthSchedule
     else
       @maxval = 1.0
     end
-    if create_sch_object
-      @schedule = createSchedule()
-    end
+    @schedule = createSchedule()
   end
 
   def calcDesignLevel(val)
@@ -180,13 +177,11 @@ class MonthWeekdayWeekendSchedule
   # weekend_hourly_values can either be a comma-separated string of 24 numbers or a 24-element array of numbers.
   # monthly_values can either be a comma-separated string of 12 numbers or a 12-element array of numbers.
   def initialize(model, sch_name, weekday_hourly_values, weekend_hourly_values, monthly_values,
-                 mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true,
-                 schedule_type_limits_name = nil, begin_month = 1, begin_day_of_month = 1, end_month = 12, end_day_of_month = 31)
+                 schedule_type_limits_name = nil, normalize_values = true, begin_month = 1,
+                 begin_day_of_month = 1, end_month = 12, end_day_of_month = 31)
     @model = model
     @sch_name = sch_name
     @schedule = nil
-    @mult_weekday = mult_weekday
-    @mult_weekend = mult_weekend
     @weekday_hourly_values = validateValues(weekday_hourly_values, 24, 'weekday')
     @weekend_hourly_values = validateValues(weekend_hourly_values, 24, 'weekend')
     @monthly_values = validateValues(monthly_values, 12, 'monthly')
@@ -206,9 +201,7 @@ class MonthWeekdayWeekendSchedule
       @maxval = 1.0
       @schadjust = 1.0
     end
-    if create_sch_object
-      @schedule = createSchedule()
-    end
+    @schedule = createSchedule()
   end
 
   def calcDesignLevelFromDailykWh(daily_kwh)
@@ -283,9 +276,9 @@ class MonthWeekdayWeekendSchedule
 
   def calcMaxval()
     if @weekday_hourly_values.max > @weekend_hourly_values.max
-      maxval = @monthly_values.max * @weekday_hourly_values.max * @mult_weekday
+      maxval = @monthly_values.max * @weekday_hourly_values.max
     else
-      maxval = @monthly_values.max * @weekend_hourly_values.max * @mult_weekend
+      maxval = @monthly_values.max * @weekend_hourly_values.max
     end
     if maxval == 0.0
       maxval == 1.0 # Prevent divide by zero
@@ -359,8 +352,8 @@ class MonthWeekdayWeekendSchedule
         wkdy_vals = []
         wknd_vals = []
         for h in 1..24
-          wkdy_vals[h] = (@monthly_values[m - 1] * @weekday_hourly_values[h - 1] * @mult_weekday) / @maxval
-          wknd_vals[h] = (@monthly_values[m - 1] * @weekend_hourly_values[h - 1] * @mult_weekend) / @maxval
+          wkdy_vals[h] = (@monthly_values[m - 1] * @weekday_hourly_values[h - 1]) / @maxval
+          wknd_vals[h] = (@monthly_values[m - 1] * @weekend_hourly_values[h - 1]) / @maxval
         end
 
         if (wkdy_vals == prev_wkdy_vals) && (wknd_vals == prev_wknd_vals)
@@ -434,7 +427,7 @@ class MonthWeekdayWeekendSchedule
 end
 
 class HotWaterSchedule
-  def initialize(model, obj_name, nbeds, days_shift = 0, create_sch_object = true, exhaust_min = 0)
+  def initialize(model, obj_name, nbeds, days_shift = 0, exhaust_min = 0)
     @model = model
     @sch_name = "#{obj_name} schedule"
     @schedule = nil
@@ -458,9 +451,7 @@ class HotWaterSchedule
 
     data = loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks, exhaust_min)
     @totflow, @maxflow, @ontime = loadDrawProfileStatsFromFile()
-    if create_sch_object
-      @schedule = createSchedule(data, timestep_minutes, weeks)
-    end
+    @schedule = createSchedule(data, timestep_minutes, weeks)
   end
 
   def calcDesignLevelFromDailykWh(daily_kWh)

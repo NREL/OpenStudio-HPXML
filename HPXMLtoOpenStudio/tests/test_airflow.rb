@@ -348,7 +348,7 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     assert_equal(1, get_oed_for_ventilation(model, "#{Constants.ObjectNameMechanicalVentilationHouseFan} latent load").size)
   end
 
-  def test_exhaust_clothes_dryer
+  def test_clothes_dryer_exhaust
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-appliances-gas.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -359,11 +359,6 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
 
     # Check infiltration/ventilation program
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameInfiltration} program")
-    assert_in_epsilon(0.0, UnitConversions.convert(program_values['QWHV_sup'].sum, 'm^3/s', 'cfm'), 0.01)
-    assert_in_epsilon(0.0, UnitConversions.convert(program_values['QWHV_exh'].sum, 'm^3/s', 'cfm'), 0.01)
-    assert_in_epsilon(0.0, UnitConversions.convert(program_values['QWHV_bal'].sum, 'm^3/s', 'cfm'), 0.01)
-    assert_in_epsilon(0.0, UnitConversions.convert(program_values['QWHV_cfis'].sum, 'm^3/s', 'cfm'), 0.01)
-    assert_in_epsilon(0.0, UnitConversions.convert(program_values['QWHV_ervhrv'].sum, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(clothes_dryer_cfm, UnitConversions.convert(program_values['Qdryer'].sum, 'm^3/s', 'cfm'), 0.01)
   end
 
