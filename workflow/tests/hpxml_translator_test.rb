@@ -612,16 +612,16 @@ class HPXMLTest < MiniTest::Test
       num_kiva_instances += 1
     end
 
-    num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,               # no foundation in contact w/ ground
-                                    'base-foundation-multiple.xml' => 2,              # additional instance for 2nd foundation type
-                                    'base-enclosure-2stories-garage.xml' => 2,        # additional instance for garage
-                                    'base-enclosure-garage.xml' => 2,                 # additional instance for garage
-                                    'base-enclosure-other-housing-unit.xml' => 0,     # no foundation in contact w/ ground
-                                    'base-enclosure-other-heated-space.xml' => 0,     # no foundation in contact w/ ground
-                                    'base-enclosure-other-non-freezing-space.xml' => 0, # no foundation in contact w/ ground
+    num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,                       # no foundation in contact w/ ground
+                                    'base-foundation-multiple.xml' => 2,                      # additional instance for 2nd foundation type
+                                    'base-enclosure-2stories-garage.xml' => 2,                # additional instance for garage
+                                    'base-enclosure-garage.xml' => 2,                         # additional instance for garage
+                                    'base-enclosure-other-housing-unit.xml' => 0,             # no foundation in contact w/ ground
+                                    'base-enclosure-other-heated-space.xml' => 0,             # no foundation in contact w/ ground
+                                    'base-enclosure-other-non-freezing-space.xml' => 0,       # no foundation in contact w/ ground
                                     'base-enclosure-other-multifamily-buffer-space.xml' => 0, # no foundation in contact w/ ground
-                                    'base-enclosure-common-surfaces.xml' => 2, # additional instance for vented crawlspace
-                                    'base-foundation-walkout-basement.xml' => 4, # 3 foundation walls plus a no-wall exposed perimeter
+                                    'base-enclosure-common-surfaces.xml' => 2,                # additional instance for vented crawlspace
+                                    'base-foundation-walkout-basement.xml' => 4,              # 3 foundation walls plus a no-wall exposed perimeter
                                     'base-foundation-complex.xml' => 10,
                                     'base-misc-loads-large-uncommon.xml' => 2,
                                     'base-misc-loads-large-uncommon2.xml' => 2 }
@@ -658,9 +658,8 @@ class HPXMLTest < MiniTest::Test
     (hpxml.walls + hpxml.rim_joists + hpxml.foundation_walls).each do |wall|
       wall_id = wall.id.upcase
 
-      # Common walls
-      if wall.exterior_adjacent_to == wall.interior_adjacent_to
-        # Common walls are adiabatic surfaces and adiabatic surfaces have their "BaseSurfaceIndex" as their "ExtBoundCond" in "Surfaces" table in SQL simulation results
+      if wall.is_adiabatic
+        # Adiabatic surfaces have their "BaseSurfaceIndex" as their "ExtBoundCond" in "Surfaces" table in SQL simulation results
         query_base_surf_idx = "SELECT BaseSurfaceIndex FROM Surfaces WHERE SurfaceName='#{wall_id}'"
         query_ext_bound = "SELECT ExtBoundCond FROM Surfaces WHERE SurfaceName='#{wall_id}'"
         sql_value_base_surf_idx = sqlFile.execAndReturnFirstDouble(query_base_surf_idx).get
@@ -748,9 +747,8 @@ class HPXMLTest < MiniTest::Test
     hpxml.frame_floors.each do |frame_floor|
       frame_floor_id = frame_floor.id.upcase
 
-      # Common frame floors
-      if frame_floor.exterior_adjacent_to == frame_floor.interior_adjacent_to
-        # Common frame floors are adiabatic surfaces and adiabatic surfaces have their "BaseSurfaceIndex" as their "ExtBoundCond" in "Surfaces" table in SQL simulation results
+      if frame_floor.is_adiabatic
+        # Adiabatic surfaces have their "BaseSurfaceIndex" as their "ExtBoundCond" in "Surfaces" table in SQL simulation results
         query_base_surf_idx = "SELECT BaseSurfaceIndex FROM Surfaces WHERE SurfaceName='#{frame_floor_id}'"
         query_ext_bound = "SELECT ExtBoundCond FROM Surfaces WHERE SurfaceName='#{frame_floor_id}'"
         sql_value_base_surf_idx = sqlFile.execAndReturnFirstDouble(query_base_surf_idx).get

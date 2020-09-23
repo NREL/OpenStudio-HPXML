@@ -1546,9 +1546,7 @@ class HPXML < Object
     end
 
     def is_adiabatic
-      if @exterior_adjacent_to == @interior_adjacent_to
-        return true
-      end
+      return HPXML::is_adiabatic(self)
     end
 
     def is_thermal_boundary
@@ -1669,9 +1667,7 @@ class HPXML < Object
     end
 
     def is_adiabatic
-      if @exterior_adjacent_to == @interior_adjacent_to
-        return true
-      end
+      return HPXML::is_adiabatic(self)
     end
 
     def is_thermal_boundary
@@ -1810,9 +1806,7 @@ class HPXML < Object
     end
 
     def is_adiabatic
-      if @exterior_adjacent_to == @interior_adjacent_to
-        return true
-      end
+      return HPXML::is_adiabatic(self)
     end
 
     def is_thermal_boundary
@@ -1956,9 +1950,7 @@ class HPXML < Object
     end
 
     def is_adiabatic
-      if @exterior_adjacent_to == @interior_adjacent_to
-        return true
-      end
+      return HPXML::is_adiabatic(self)
     end
 
     def is_thermal_boundary
@@ -5165,22 +5157,31 @@ class HPXML < Object
     return errors
   end
 
+  def self.conditioned_locations
+    return [HPXML::LocationLivingSpace,
+            HPXML::LocationBasementConditioned,
+            HPXML::LocationOtherHousingUnit]
+  end
+
+  def self.is_adiabatic(surface)
+    if surface.exterior_adjacent_to == surface.interior_adjacent_to
+      # E.g., wall between unit crawlspace and neighboring unit crawlspace
+      return true
+    elsif conditioned_locations.include?(surface.interior_adjacent_to) &&
+          conditioned_locations.include?(surface.exterior_adjacent_to)
+      # E.g., frame floor between living space and conditioned basement, or
+      # wall between living space and "other housing unit"
+      return true
+    end
+    return false
+  end
+
   def self.is_thermal_boundary(surface)
     # Returns true if the surface is between conditioned space and outside/ground/unconditioned space.
     # Note: The location of insulation is not considered here, so an insulated foundation wall of an
     # unconditioned basement, for example, returns false.
-    def self.is_adjacent_to_conditioned(adjacent_to)
-      if [HPXML::LocationLivingSpace,
-          HPXML::LocationBasementConditioned,
-          HPXML::LocationOtherHousingUnit].include? adjacent_to
-        return true
-      else
-        return false
-      end
-    end
-
-    interior_conditioned = is_adjacent_to_conditioned(surface.interior_adjacent_to)
-    exterior_conditioned = is_adjacent_to_conditioned(surface.exterior_adjacent_to)
+    interior_conditioned = conditioned_locations.include? surface.interior_adjacent_to
+    exterior_conditioned = conditioned_locations.include? surface.exterior_adjacent_to
     return (interior_conditioned != exterior_conditioned)
   end
 

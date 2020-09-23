@@ -376,17 +376,6 @@ class OSModel
         fail "There must be at least one floor adjacent to #{location}."
       end
     end
-
-    # Interior partition surfaces
-    (@hpxml.rim_joists + @hpxml.walls + @hpxml.foundation_walls + @hpxml.frame_floors).reverse_each do |surface|
-      next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
-      next unless [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? surface.interior_adjacent_to
-      next unless [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? surface.exterior_adjacent_to
-
-      if surface.interior_adjacent_to == surface.exterior_adjacent_to
-        fail "Interior partition surfaces should not be described using #{surface}."
-      end
-    end
   end
 
   def self.set_defaults_and_globals(runner, output_dir, epw_file)
@@ -3446,11 +3435,12 @@ class OSModel
   def self.set_surface_exterior(model, spaces, surface, hpxml_surface)
     exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
     interior_adjacent_to = hpxml_surface.interior_adjacent_to
+    is_adiabatic = hpxml_surface.is_adiabatic
     if exterior_adjacent_to == HPXML::LocationOutside
       surface.setOutsideBoundaryCondition('Outdoors')
     elsif exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Foundation')
-    elsif is_adiabatic || (exterior_adjacent_to == HPXML::LocationOtherHousingUnit && [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include?(interior_adjacent_to))
+    elsif is_adiabatic
       surface.setOutsideBoundaryCondition('Adiabatic')
     elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
            HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? exterior_adjacent_to
