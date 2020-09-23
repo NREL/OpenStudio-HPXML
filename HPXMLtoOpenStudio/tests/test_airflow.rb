@@ -350,7 +350,7 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
 
   def test_clothes_dryer_exhaust
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-appliances-gas.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
