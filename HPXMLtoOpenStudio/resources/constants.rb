@@ -74,7 +74,7 @@ class Constants
   end
 
   def self.ERIVersions
-    return ['2014', '2014A', '2014AD', '2014ADE', '2014ADEG', '2014ADEGL', '2019', '2019A']
+    return ['2014', '2014A', '2014AD', '2014ADE', '2014ADEG', '2014ADEGL', '2019', '2019A', '2019AB']
   end
 
   def self.FluidWater
@@ -103,10 +103,6 @@ class Constants
 
   def self.ObjectNameBackupHeatingCoil
     return 'backup htg coil'
-  end
-
-  def self.ObjectNameBath
-    return 'baths'
   end
 
   def self.ObjectNameBoiler
@@ -265,6 +261,10 @@ class Constants
     return 'mech vent'
   end
 
+  def self.ObjectNameMechanicalVentilationPreconditioning
+    return 'mech vent preconditioning'
+  end
+
   def self.ObjectNameMechanicalVentilationHouseFan
     return 'mech vent house fan'
   end
@@ -279,6 +279,10 @@ class Constants
 
   def self.ObjectNameMechanicalVentilationRangeFan
     return 'mech vent range fan'
+  end
+
+  def self.ObjectNameMechanicalVentilationAirflow
+    return 'Qfan'
   end
 
   def self.ObjectNameMiniSplitHeatPump
@@ -367,14 +371,6 @@ class Constants
 
   def self.ObjectNameSharedPump(hvac_name)
     return "#{hvac_name} shared pump"
-  end
-
-  def self.ObjectNameShower
-    return 'showers'
-  end
-
-  def self.ObjectNameSink
-    return 'sinks'
   end
 
   def self.ObjectNameSolarHotWater
@@ -554,6 +550,18 @@ class Constants
   end
 
   def self.SizingInfoMechVentWholeHouseRateUnbalanced
+    return __method__.to_s
+  end
+
+  def self.SizingInfoMechVentWholeHouseRatePreHeated
+    return __method__.to_s
+  end
+
+  def self.SizingInfoMechVentWholeHouseRatePreCooled
+    return __method__.to_s
+  end
+
+  def self.SizingInfoMechVentWholeHouseRateRecirculated
     return __method__.to_s
   end
 
