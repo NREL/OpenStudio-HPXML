@@ -230,8 +230,10 @@ other multifamily buffer space  E.g., enclosed unconditioned stairwell          
 other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                       Attached/Multifamily only
 ==============================  ================================================  ========================================================  =========================
 
-Interior surfaces solely within the conditioned space should not be described using subsets of HPXML's ``Enclosure`` (i.e. ``Enclosure/Walls``, ``Enclosure/Floors``, ``Enclosure/FoundationWalls``, etc).
-Interior surfaces solely within the unconditioned space (e.g. unconditioned crawlspace (or attic) walls adjacent to the neighboring unit's crawlspace (or attic)) can be described using subsets of HPXML's ``Enclosure``. The interior adjacency of these surfaces will be the same as their exterior adjacency.
+Interior partition surfaces (e.g., walls between rooms inside conditioned space, or the floor between two conditioned stories) can be excluded.
+
+For Attached/Multifamily buildings, surfaces between unconditioned space and the neigboring unit's same unconditioned space should set ``InteriorAdjacentTo`` and ``ExteriorAdjacentTo`` to the same value.
+For example, a foundation wall between the unit's vented crawlspace and the neighboring unit's vented crawlspace would use ``InteriorAdjacentTo="crawlspace - vented"`` and ``ExteriorAdjacentTo="crawlspace - vented"``.
 
 .. warning::
 
