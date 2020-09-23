@@ -1012,15 +1012,9 @@
       <sch:assert role='ERROR' test='count(../../h:Systems/h:WaterHeating/h:HotWaterDistribution) = 1'>Expected 1 element(s) for xpath: ../../Systems/WaterHeating/HotWaterDistribution</sch:assert> <!-- See [HotWaterDistribution] -->
       <sch:assert role='ERROR' test='count(h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: SystemIdentifier</sch:assert>
       <sch:assert role='ERROR' test='count(h:IsSharedAppliance) &lt;= 1'>Expected 0 or 1 element(s) for xpath: IsSharedAppliance</sch:assert> <!-- See [ClothesWasherType=Shared] -->
-      <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert> <!-- See [ClothesWasherLocation] -->
+      <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert> <!-- See [ApplianceLocation] -->
       <sch:assert role='ERROR' test='count(h:ModifiedEnergyFactor) + count(h:IntegratedModifiedEnergyFactor) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ModifiedEnergyFactor | IntegratedModifiedEnergyFactor</sch:assert> <!-- See [ClothesWasherType=Detailed] -->
       <sch:assert role='ERROR' test='count(h:extension/h:UsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/UsageMultiplier</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern name='[ClothesWasherLocation]'>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesWasher/h:Location'>
-      <sch:assert role='ERROR' test='contains("_living space_ _basement - unconditioned_ _basement - conditioned_ _attic - unvented_ _attic - vented_ _garage_ _crawlspace - unvented_ _crawlspace - vented_ _other exterior_ _other housing unit_ _other heated space_ _other multifamily buffer space_ _other non-freezing space_", concat("_", text(), "_"))'>Expected "text()" for xpath: "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space"</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -1048,16 +1042,10 @@
       <sch:assert role='ERROR' test='count(../h:ClothesWasher) = 1'>Expected 1 element(s) for xpath: ../ClothesWasher</sch:assert>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: SystemIdentifier</sch:assert>
       <sch:assert role='ERROR' test='count(h:IsSharedAppliance) &lt;= 1'>Expected 0 or 1 element(s) for xpath: IsSharedAppliance</sch:assert> <!-- See [ClothesDryerType=Shared] -->
-      <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert> <!-- See [ClothesDryerLocation] -->
+      <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert> <!-- See [ApplianceLocation] -->
       <sch:assert role='ERROR' test='count(h:FuelType[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="anthracite coal" or text()="electricity" or text()="wood" or text()="wood pellets"]) = 1'>Expected 1 element(s) for xpath: FuelType[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="anthracite coal" or text()="electricity" or text()="wood" or text()="wood pellets"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:EnergyFactor) + count(h:CombinedEnergyFactor) &lt;= 1'>Expected 0 or 1 element(s) for xpath: EnergyFactor | CombinedEnergyFactor</sch:assert> <!-- See [ClothesDryerType=Detailed] -->
       <sch:assert role='ERROR' test='count(h:extension/h:UsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/UsageMultiplier</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern name='[ClothesDryerLocation]'>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer/h:Location'>
-      <sch:assert role='ERROR' test='contains("_living space_ _basement - unconditioned_ _basement - conditioned_ _attic - unvented_ _attic - vented_ _garage_ _crawlspace - unvented_ _crawlspace - vented_ _other exterior_ _other housing unit_ _other heated space_ _other multifamily buffer space_ _other non-freezing space_", concat("_", text(), "_"))'>Expected "text()" for xpath: "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space"</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -1077,15 +1065,9 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Dishwasher'>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: SystemIdentifier</sch:assert>
       <sch:assert role='ERROR' test='count(h:IsSharedAppliance) &lt;= 1'>Expected 0 or 1 element(s) for xpath: IsSharedAppliance</sch:assert> <!-- See [DishwasherType=Shared] -->
-      <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert> <!-- See [DishwasherLocation] -->
+      <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert> <!-- See [ApplianceLocation] -->
       <sch:assert role='ERROR' test='count(h:RatedAnnualkWh) + count(h:EnergyFactor) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RatedAnnualkWh | EnergyFactor</sch:assert> <!-- See [DishwasherType=Detailed] -->
       <sch:assert role='ERROR' test='count(h:extension/h:UsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/UsageMultiplier</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern name='[DishwasherLocation]'>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Dishwasher/h:Location'>
-      <sch:assert role='ERROR' test='contains("_living space_ _basement - unconditioned_ _basement - conditioned_ _attic - unvented_ _attic - vented_ _garage_ _crawlspace - unvented_ _crawlspace - vented_ _other exterior_ _other housing unit_ _other heated space_ _other multifamily buffer space_ _other non-freezing space_", concat("_", text(), "_"))'>Expected "text()" for xpath: "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space"</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -1110,7 +1092,7 @@
   <sch:pattern name='[Refrigerator]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Refrigerator'>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: SystemIdentifier</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert> <!-- See [RefrigeratorLocation] -->
+      <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert> <!-- See [ApplianceLocation] -->
       <sch:assert role='ERROR' test='count(h:RatedAnnualkWh) + count(h:extension/h:AdjustedAnnualkWh) &gt;= 0'>Expected 0 or more element(s) for xpath: RatedAnnualkWh | extension/AdjustedAnnualkWh</sch:assert>
       <sch:assert role='ERROR' test='count(h:PrimaryIndicator) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PrimaryIndicator</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:UsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/UsageMultiplier</sch:assert>
@@ -1120,27 +1102,15 @@
     </sch:rule>
   </sch:pattern>
 
-  <sch:pattern name='[RefrigeratorLocation]'>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Refrigerator/h:Location'>
-      <sch:assert role='ERROR' test='contains("_living space_ _basement - unconditioned_ _basement - conditioned_ _attic - unvented_ _attic - vented_ _garage_ _crawlspace - unvented_ _crawlspace - vented_ _other exterior_ _other housing unit_ _other heated space_ _other multifamily buffer space_ _other non-freezing space_", concat("_", text(), "_"))'>Expected "text()" for xpath: "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space"</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-
   <sch:pattern name='[Freezer]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Freezer'>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: SystemIdentifier</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert> <!-- See [FreezerLocation] -->
+      <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert> <!-- See [ApplianceLocation] -->
       <sch:assert role='ERROR' test='count(h:RatedAnnualkWh) + count(h:extension/h:AdjustedAnnualkWh) &gt;= 0'>Expected 0 or more element(s) for xpath: RatedAnnualkWh | extension/AdjustedAnnualkWh</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:UsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/UsageMultiplier</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:WeekendScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern name='[FreezerLocation]'>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Freezer/h:Location'>
-      <sch:assert role='ERROR' test='contains("_living space_ _basement - unconditioned_ _basement - conditioned_ _attic - unvented_ _attic - vented_ _garage_ _crawlspace - unvented_ _crawlspace - vented_ _other exterior_ _other housing unit_ _other heated space_ _other multifamily buffer space_ _other non-freezing space_", concat("_", text(), "_"))'>Expected "text()" for xpath: "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space"</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -1158,7 +1128,7 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:CookingRange'>
       <sch:assert role='ERROR' test='count(../h:Oven) = 1'>Expected 1 element(s) for xpath: ../Oven</sch:assert> <!-- See [Oven] -->
       <sch:assert role='ERROR' test='count(h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: SystemIdentifier</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert> <!-- See [CookingRangeLocation] -->
+      <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert> <!-- See [ApplianceLocation] -->
       <sch:assert role='ERROR' test='count(h:FuelType[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="anthracite coal" or text()="electricity" or text()="wood" or text()="wood pellets"]) = 1'>Expected 1 element(s) for xpath: FuelType[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="anthracite coal" or text()="electricity" or text()="wood" or text()="wood pellets"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:IsInduction) &lt;= 1'>Expected 0 or 1 element(s) for xpath: IsInduction</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:UsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/UsageMultiplier</sch:assert>
@@ -1168,17 +1138,35 @@
     </sch:rule>
   </sch:pattern>
 
-  <sch:pattern name='[CookingRangeLocation]'>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:CookingRange/h:Location'>
-      <sch:assert role='ERROR' test='contains("_living space_ _basement - unconditioned_ _basement - conditioned_ _attic - unvented_ _attic - vented_ _garage_ _crawlspace - unvented_ _crawlspace - vented_ _other exterior_ _other housing unit_ _other heated space_ _other multifamily buffer space_ _other non-freezing space_", concat("_", text(), "_"))'>Expected "text()" for xpath: "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space"</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-
   <sch:pattern name='[Oven]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Oven'>
       <sch:assert role='ERROR' test='count(../h:CookingRange) = 1'>Expected 1 element(s) for xpath: ../CookingRange</sch:assert> <!-- See [CookingRange] -->
       <sch:assert role='ERROR' test='count(h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: SystemIdentifier</sch:assert>
       <sch:assert role='ERROR' test='count(h:IsConvection) &lt;= 1'>Expected 0 or 1 element(s) for xpath: IsConvection</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern name='[ApplianceLocation]'>
+    <sch:rule abstract='true' id='appliance_location'>
+	    <sch:assert role='ERROR' test='contains("_living space_ _basement - unconditioned_ _basement - conditioned_ _attic - unvented_ _attic - vented_ _garage_ _crawlspace - unvented_ _crawlspace - vented_ _other exterior_ _other housing unit_ _other heated space_ _other multifamily buffer space_ _other non-freezing space_", concat("_", text(), "_"))'>Expected "text()" for xpath: "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space"</sch:assert>
+    </sch:rule>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesWasher/h:Location'>
+      <sch:extends rule='appliance_location'/>
+    </sch:rule>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer/h:Location'>
+      <sch:extends rule='appliance_location'/>
+    </sch:rule>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Dishwasher/h:Location'>
+      <sch:extends rule='appliance_location'/>
+    </sch:rule>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Refrigerator/h:Location'>
+      <sch:extends rule='appliance_location'/>
+    </sch:rule>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Freezer/h:Location'>
+      <sch:extends rule='appliance_location'/>
+    </sch:rule>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:CookingRange/h:Location'>
+      <sch:extends rule='appliance_location'/>
     </sch:rule>
   </sch:pattern>
 
