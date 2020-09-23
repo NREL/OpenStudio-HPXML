@@ -2217,13 +2217,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('clothes_washer_efficiency_imef', true)
     arg.setDisplayName('Clothes Washer: Integrated Modified Energy Factor')
+    arg.setUnits('ft^3/kWh-cyc')
     arg.setDescription('The energy performance metric for ENERGY STAR certified residential clothes washers as of March 7, 2015.')
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('clothes_washer_rated_annual_kwh', true)
     arg.setDisplayName('Clothes Washer: Rated Annual Consumption')
-    arg.setUnits('kWh')
+    arg.setUnits('kWh/yr')
     arg.setDescription('The annual energy consumed by the clothes washer, as rated, obtained from the EnergyGuide label. This includes both the appliance electricity consumption and the energy required for water heating.')
     arg.setDefaultValue(Constants.Auto)
     args << arg
@@ -2360,6 +2361,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('dishwasher_efficiency_kwh', true)
     arg.setDisplayName('Dishwasher: Rated Annual kWh')
+    arg.setUnits('kWh/yr')
     arg.setDescription('The rated annual kWh of the dishwasher.')
     arg.setDefaultValue(Constants.Auto)
     args << arg
