@@ -102,7 +102,10 @@
       <sch:report role='WARN' test='count(h:Appliances/h:Dishwasher) = 0'>No dishwasher specified, the model will not include dishwasher energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:Refrigerator) = 0'>No refrigerator specified, the model will not include refrigerator energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:CookingRange) = 0'>No cooking range specified, the model will not include cooking range/oven energy use.</sch:report>
-      <sch:report role='WARN' test='count(h:Systems/h:WaterHeating/h:WaterHeatingSystem) = 0'>No water heater specified, the model will not include water heating energy use.</sch:report>    </sch:rule>
+      <sch:report role='WARN' test='count(h:Systems/h:WaterHeating/h:WaterHeatingSystem) = 0'>No water heater specified, the model will not include water heating energy use.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="other"]]) = 0'>No 'other' plug loads specified, the model will not include misc plug load energy use.</sch:report>
+      <sch:report role='WARN' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="TV other"]]) = 0'>No 'TV other' plug loads specified, the model will not include television plug load energy use.</sch:report>
+    </sch:rule>
   </sch:pattern>  
   
   <sch:pattern name='[Site]'>
@@ -886,6 +889,8 @@
       <sch:assert role='ERROR' test='count(h:TankVolume) = 1'>Expected 1 element(s) for xpath: TankVolume</sch:assert>
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
       <sch:assert role='ERROR' test='count(h:StandbyLoss) &lt;= 1'>Expected 0 or 1 element(s) for xpath: StandbyLoss</sch:assert> <!-- deg-F/h, refer to https://www.ahridirectory.org/NewSearch?programId=28&searchTypeId=3 -->
+      <!-- Warnings -->
+      <sch:report role='WARN' test='number(h:StandbyLoss) &gt; 10'>Indirect water heater standby loss is over 10.0 F/hr, double check water heater inputs.</sch:report>
     </sch:rule>
   </sch:pattern>
 

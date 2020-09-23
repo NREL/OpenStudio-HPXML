@@ -2292,12 +2292,6 @@ class OSModel
 
       MiscLoads.apply_plug(model, plug_load, obj_name, spaces[HPXML::LocationLivingSpace])
     end
-    if not modeled_mels.include? HPXML::PlugLoadTypeOther
-      runner.registerWarning("No '#{HPXML::PlugLoadTypeOther}' plug loads specified, the model will not include misc plug load energy use.")
-    end
-    if not modeled_mels.include? HPXML::PlugLoadTypeTelevision
-      runner.registerWarning("No '#{HPXML::PlugLoadTypeTelevision}' plug loads specified, the model will not include television plug load energy use.")
-    end
   end
 
   def self.add_mfls(runner, model, spaces)
