@@ -3491,7 +3491,7 @@ class HPXMLFile
     else
       args[:geometry_num_occupants] = Integer(args[:geometry_num_occupants])
     end
-    args[:resources_path] = File.join(File.dirname(__FILE__), 'resources/schedules')
+    args[:resources_path] = File.join(File.dirname(__FILE__), 'resources')
     success = schedule_generator.create(args: args)
     return false if not success
 
