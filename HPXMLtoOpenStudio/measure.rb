@@ -3435,11 +3435,12 @@ class OSModel
   def self.set_surface_exterior(model, spaces, surface, hpxml_surface)
     exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
     interior_adjacent_to = hpxml_surface.interior_adjacent_to
+    is_adiabatic = hpxml_surface.is_adiabatic
     if exterior_adjacent_to == HPXML::LocationOutside
       surface.setOutsideBoundaryCondition('Outdoors')
     elsif exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Foundation')
-    elsif exterior_adjacent_to == HPXML::LocationOtherHousingUnit && [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include?(interior_adjacent_to)
+    elsif is_adiabatic
       surface.setOutsideBoundaryCondition('Adiabatic')
     elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
            HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? exterior_adjacent_to
