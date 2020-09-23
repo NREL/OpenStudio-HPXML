@@ -3957,7 +3957,8 @@ class HPXMLFile
   def self.set_climate_and_risk_zones(hpxml, runner, args, weather)
     hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
     iecc_zone = Location.get_climate_zone_iecc(weather.header.Station)
-    if (not iecc_zone.nil?)
+
+    unless iecc_zone.nil?
       hpxml.climate_and_risk_zones.iecc_year = 2006
       hpxml.climate_and_risk_zones.iecc_zone = iecc_zone
     end
