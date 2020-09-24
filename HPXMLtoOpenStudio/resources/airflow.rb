@@ -429,7 +429,7 @@ class Airflow
     if hpxml_fuel_type.nil?
       other_equip.setFuelType('None')
     else
-      other_equip.setFuelType(EPlus.input_fuel_map(hpxml_fuel_type))
+      other_equip.setFuelType(EPlus.fuel_type(hpxml_fuel_type))
     end
     if not end_use.nil?
       other_equip.setEndUseSubcategory(end_use)

@@ -48,7 +48,6 @@ def create_hpxmls
     'invalid_files/clothes-dryer-location.xml' => 'base.xml',
     'invalid_files/cooking-range-location.xml' => 'base.xml',
     'invalid_files/appliances-location-unconditioned-space.xml' => 'base.xml',
-    'invalid_files/coal-for-non-boiler-heating.xml' => 'base-hvac-stove-oil-only.xml',
     'invalid_files/dhw-frac-load-served.xml' => 'base-dhw-multiple.xml',
     'invalid_files/dishwasher-location.xml' => 'base.xml',
     'invalid_files/duct-location.xml' => 'base.xml',
@@ -190,6 +189,7 @@ def create_hpxmls
     'base-enclosure-beds-2.xml' => 'base.xml',
     'base-enclosure-beds-4.xml' => 'base.xml',
     'base-enclosure-beds-5.xml' => 'base.xml',
+    'base-enclosure-common-surfaces.xml' => 'base-enclosure-attached-multifamily.xml',
     'base-enclosure-garage.xml' => 'base.xml',
     'base-enclosure-infil-ach-house-pressure.xml' => 'base.xml',
     'base-enclosure-infil-cfm-house-pressure.xml' => 'base-enclosure-infil-cfm50.xml',
@@ -246,6 +246,7 @@ def create_hpxmls
     'base-hvac-fixed-heater-gas-only.xml' => 'base.xml',
     'base-hvac-floor-furnace-propane-only.xml' => 'base.xml',
     'base-hvac-flowrate.xml' => 'base.xml',
+    'base-hvac-furnace-coal-only.xml' => 'base.xml',
     'base-hvac-furnace-elec-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-2-speed.xml' => 'base.xml',
@@ -297,9 +298,9 @@ def create_hpxmls
     'base-lighting-detailed.xml' => 'base.xml',
     'base-lighting-none.xml' => 'base.xml',
     'base-location-baltimore-md.xml' => 'base.xml',
-    'base-location-dallas-tx.xml' => 'base.xml',
+    'base-location-dallas-tx.xml' => 'base-foundation-slab.xml',
     'base-location-duluth-mn.xml' => 'base.xml',
-    'base-location-miami-fl.xml' => 'base.xml',
+    'base-location-miami-fl.xml' => 'base-foundation-slab.xml',
     'base-location-epw-filepath.xml' => 'base.xml',
     'base-location-epw-filepath-AMY-2012.xml' => 'base.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
@@ -1404,6 +1405,15 @@ def set_hpxml_walls(hpxml_file, hpxml)
       wall.solar_absorptance = nil
       wall.color = HPXML::ColorMedium
     end
+  elsif ['base-enclosure-common-surfaces.xml'].include? hpxml_file
+    hpxml.walls.add(id: 'CommonWallUnventedAttic',
+                    exterior_adjacent_to: HPXML::LocationAtticUnvented,
+                    interior_adjacent_to: HPXML::LocationAtticUnvented,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    area: 113,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 4)
   end
   hpxml.walls.each do |wall|
     next unless wall.is_interior
@@ -1716,6 +1726,34 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls[-1].area = 0.05
   elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
     hpxml.foundation_walls[-1].area = 880
+  elsif ['base-enclosure-common-surfaces.xml'].include? hpxml_file
+    hpxml.foundation_walls[1].area = 240
+    hpxml.foundation_walls.add(id: 'FoundationWallCrawlspace',
+                               exterior_adjacent_to: HPXML::LocationGround,
+                               interior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                               height: 4,
+                               area: 240,
+                               thickness: 8,
+                               depth_below_grade: 3,
+                               insulation_interior_r_value: 0,
+                               insulation_interior_distance_to_top: 0,
+                               insulation_interior_distance_to_bottom: 0,
+                               insulation_exterior_distance_to_top: 0,
+                               insulation_exterior_distance_to_bottom: 0,
+                               insulation_exterior_r_value: 0)
+    hpxml.foundation_walls.add(id: 'CommonFoundationWall',
+                               exterior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                               interior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                               height: 4,
+                               area: 240,
+                               thickness: 5.5,
+                               depth_below_grade: 3,
+                               insulation_interior_r_value: 0,
+                               insulation_interior_distance_to_top: 0,
+                               insulation_interior_distance_to_bottom: 0,
+                               insulation_exterior_distance_to_top: 0,
+                               insulation_exterior_distance_to_bottom: 0,
+                               insulation_exterior_r_value: 0)
   elsif ['invalid_files/enclosure-basement-missing-exterior-foundation-wall.xml'].include? hpxml_file
     hpxml.foundation_walls[0].delete
   end
@@ -1852,6 +1890,18 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            area: 150,
                            insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
+  elsif ['base-enclosure-common-surfaces.xml'].include? hpxml_file
+    hpxml.frame_floors[1].area = 650
+    hpxml.frame_floors.add(id: 'FloorAboveVentedCrawlspace',
+                           exterior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
+                           area: 350,
+                           insulation_assembly_r_value: 18.7)
+    hpxml.frame_floors.add(id: 'CommonFrameFloorVentedCrawlspace',
+                           exterior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                           interior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                           area: 350,
+                           insulation_assembly_r_value: 3.0)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.frame_floors.size
       hpxml.frame_floors[n - 1].area /= 9.0
@@ -2037,6 +2087,20 @@ def set_hpxml_slabs(hpxml_file, hpxml)
     hpxml.slabs << hpxml.slabs[-1].dup
     hpxml.slabs[-1].id = 'TinySlab'
     hpxml.slabs[-1].area = 0.05
+  elsif ['base-enclosure-common-surfaces.xml'].include? hpxml_file
+    hpxml.slabs[0].area = 1000
+    hpxml.slabs[0].exposed_perimeter = 111
+    hpxml.slabs.add(id: 'SlabUnderCrawlspace',
+                    interior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                    area: 350,
+                    thickness: 0,
+                    exposed_perimeter: 39,
+                    perimeter_insulation_depth: 0,
+                    under_slab_insulation_width: 0,
+                    perimeter_insulation_r_value: 0,
+                    under_slab_insulation_r_value: 0,
+                    carpet_fraction: 0,
+                    carpet_r_value: 0)
   elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
     hpxml.slabs[0].interior_adjacent_to = HPXML::LocationBasementUnconditioned
     hpxml.slabs[0].depth_below_grade = 7.0
@@ -2535,6 +2599,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeOil
   elsif ['base-hvac-furnace-propane-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypePropane
+  elsif ['base-hvac-furnace-coal-only.xml'].include? hpxml_file
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeCoal
   elsif ['base-hvac-furnace-wood-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWoodCord
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
@@ -2700,8 +2766,6 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].fraction_heat_load_served = 0.5
     hpxml.heating_systems << hpxml.heating_systems[0].dup
     hpxml.heating_systems[1].id += '2'
-  elsif ['invalid_files/coal-for-non-boiler-heating.xml'].include? hpxml_file
-    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeCoal
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_capacity /= 10.0
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
