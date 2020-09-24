@@ -1699,6 +1699,10 @@ class OSModel
     heating_season, cooling_season = HVAC.get_default_heating_and_cooling_seasons(weather)
     @clg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'cooling season schedule', Array.new(24, 1), Array.new(24, 1), cooling_season, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
 
+    # Create heating season as opposite of cooling season (i.e., with overlap months)
+    non_cooling_season = cooling_season.map { |m| (m - 1).abs }
+    @htg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'heating season schedule', Array.new(24, 1), Array.new(24, 1), non_cooling_season, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+
     @clg_ssn_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     @clg_ssn_sensor.setName('cool_season')
     @clg_ssn_sensor.setKeyName(@clg_season_sch.schedule.name.to_s)
@@ -1760,9 +1764,8 @@ class OSModel
         # Apply construction
         cool_shade_mult = window.interior_shading_factor_summer
         heat_shade_mult = window.interior_shading_factor_winter
-        Constructions.apply_window(runner, model, [sub_surface],
-                                   'WindowConstruction',
-                                   weather, @clg_season_sch, window.ufactor, window.shgc,
+        Constructions.apply_window(runner, model, [sub_surface], 'WindowConstruction',
+                                   weather, @htg_season_sch, @clg_season_sch, window.ufactor, window.shgc,
                                    heat_shade_mult, cool_shade_mult)
       else
         # Window is on an interior surface, which E+ does not allow. Model
@@ -1832,9 +1835,8 @@ class OSModel
       shgc = skylight.shgc
       cool_shade_mult = skylight.interior_shading_factor_summer
       heat_shade_mult = skylight.interior_shading_factor_winter
-      Constructions.apply_skylight(runner, model, [sub_surface],
-                                   'SkylightConstruction',
-                                   weather, @clg_season_sch, ufactor, shgc,
+      Constructions.apply_skylight(runner, model, [sub_surface], 'SkylightConstruction',
+                                   weather, @htg_season_sch, @clg_season_sch, ufactor, shgc,
                                    heat_shade_mult, cool_shade_mult)
     end
 
