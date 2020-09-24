@@ -71,7 +71,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('debug', false)
     arg.setDisplayName('Debug Mode?')
-    arg.setDescription('If enabled: 1) Writes in.osm file, 2) Writes in.xml HPXML file with defaults populated, and 3) Generates additional log output. Any files written will be in the output path specified above.')
+    arg.setDescription('If enabled: 1) Writes in.osm file, 2) Writes in.xml HPXML file with defaults populated, 3) Generates additional log output, and 4) Creates all EnergyPlus output files. Any files written will be in the output path specified above.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -294,19 +294,19 @@ class OSModel
     add_furnace_eae(runner, model)
     add_photovoltaics(runner, model)
     add_additional_properties(runner, model, hpxml_path)
+
+    # Output
+
     add_component_loads_output(runner, model, spaces)
+    add_output_control_files(runner, model)
+    # Uncomment to debug EMS
+    # add_ems_debug_output(runner, model)
 
     if debug && (not output_dir.nil?)
       osm_output_path = File.join(output_dir, 'in.osm')
       File.write(osm_output_path, model.to_s)
       runner.registerInfo("Wrote file: #{osm_output_path}")
     end
-
-    # Uncomment to debug EMS
-    # oems = model.getOutputEnergyManagementSystem
-    # oems.setActuatorAvailabilityDictionaryReporting('Verbose')
-    # oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
-    # oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
   end
 
   private
@@ -3029,6 +3029,30 @@ class OSModel
     program_calling_manager.setName("#{program.name} calling manager")
     program_calling_manager.setCallingPoint('EndOfZoneTimestepAfterZoneReporting')
     program_calling_manager.addProgram(program)
+  end
+
+  def self.add_output_control_files(runner, model)
+    return if @debug
+
+    # Disable various output files
+    ocf = model.getOutputControlFiles
+    ocf.setOutputAUDIT(false)
+    ocf.setOutputBND(false)
+    ocf.setOutputEIO(false)
+    ocf.setOutputESO(false)
+    ocf.setOutputMDD(false)
+    ocf.setOutputMTD(false)
+    ocf.setOutputMTR(false)
+    ocf.setOutputRDD(false)
+    ocf.setOutputSHD(false)
+    # ocf.setOutputTabular(false) # Cannot disable because it also affects what is populated in the SQL
+  end
+
+  def self.add_ems_debug_output(runner, model)
+    oems = model.getOutputEnergyManagementSystem
+    oems.setActuatorAvailabilityDictionaryReporting('Verbose')
+    oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
+    oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
   end
 
   # FUTURE: Move all of these construction methods to constructions.rb
