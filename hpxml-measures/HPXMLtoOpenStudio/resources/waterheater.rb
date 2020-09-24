@@ -966,7 +966,7 @@ class Waterheater
     lat_cool_sensor.setName("#{obj_name_hpwh} lat cool")
     lat_cool_sensor.setKeyName(coil.name.to_s)
 
-    fan_power_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Fan Electric Power')
+    fan_power_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan #{EPlus::FuelTypeElectricity} Rate")
     fan_power_sensor.setName("#{obj_name_hpwh} fan pwr")
     fan_power_sensor.setKeyName(fan.name.to_s)
 
@@ -1283,12 +1283,6 @@ class Waterheater
     # EMS for calculating the EC_adj
 
     # Sensors
-    eplus_fuel = EPlus.input_fuel_map(fuel_type)
-    if eplus_fuel == EPlus::FuelTypeElectricity
-      ep_consumption_name = "#{EPlus.output_fuel_map(eplus_fuel)} Power"
-    else
-      ep_consumption_name = "#{EPlus.output_fuel_map(eplus_fuel)} Rate"
-    end
     if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
       ec_adj_sensor_hx = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Fluid Heat Exchanger Heat Transfer Energy')
       ec_adj_sensor_hx.setName("#{combi_hx.name} energy")
@@ -1296,27 +1290,27 @@ class Waterheater
       ec_adj_sensor_boiler_heating = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Boiler Heating Energy')
       ec_adj_sensor_boiler_heating.setName("#{combi_boiler.name} heating energy")
       ec_adj_sensor_boiler_heating.setKeyName(combi_boiler.name.to_s)
-      ec_adj_sensor_boiler = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Boiler #{ep_consumption_name}")
+      ec_adj_sensor_boiler = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Boiler #{EPlus.fuel_type(fuel_type)} Rate")
       ec_adj_sensor_boiler.setName("#{combi_boiler.name} energy")
       ec_adj_sensor_boiler.setKeyName(combi_boiler.name.to_s)
     else
-      ec_adj_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater #{ep_consumption_name}")
+      ec_adj_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater #{EPlus.fuel_type(fuel_type)} Rate")
       ec_adj_sensor.setName("#{tank.name} energy")
       ec_adj_sensor.setKeyName(tank.name.to_s)
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
-        ec_adj_hp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Water Heating Electric Power')
+        ec_adj_hp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling Coil Water Heating #{EPlus::FuelTypeElectricity} Rate")
         ec_adj_hp_sensor.setName("#{heater.dXCoil.name} energy")
         ec_adj_hp_sensor.setKeyName(heater.dXCoil.name.to_s)
-        ec_adj_fan_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Fan Electric Power')
+        ec_adj_fan_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan #{EPlus::FuelTypeElectricity} Rate")
         ec_adj_fan_sensor.setName("#{heater.fan.name} energy")
         ec_adj_fan_sensor.setKeyName(heater.fan.name.to_s)
       end
     end
 
-    ec_adj_oncyc_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater On Cycle Parasitic Electric Power')
+    ec_adj_oncyc_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater On Cycle Parasitic #{EPlus::FuelTypeElectricity} Rate")
     ec_adj_oncyc_sensor.setName("#{tank.name} on cycle parasitic")
     ec_adj_oncyc_sensor.setKeyName(tank.name.to_s)
-    ec_adj_offcyc_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Off Cycle Parasitic Electric Power')
+    ec_adj_offcyc_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Off Cycle Parasitic #{EPlus::FuelTypeElectricity} Rate")
     ec_adj_offcyc_sensor.setName("#{tank.name} off cycle parasitic")
     ec_adj_offcyc_sensor.setKeyName(tank.name.to_s)
 
@@ -1347,7 +1341,7 @@ class Waterheater
     program_calling_manager.addProgram(ec_adj_program)
 
     # Sensor for EMS reporting
-    ec_adj_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Other Equipment #{ep_consumption_name.gsub('Rate', 'Energy').gsub('Power', 'Energy')}")
+    ec_adj_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Other Equipment #{EPlus.fuel_type(fuel_type)} Energy")
     ec_adj_object_sensor.setName("#{ec_adj_object.name} energy consumption")
     ec_adj_object_sensor.setKeyName(ec_adj_object.name.to_s)
 
@@ -1569,7 +1563,7 @@ class Waterheater
     new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
     new_heater.setName(name)
     new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
-    new_heater.setHeaterFuelType(EPlus.input_fuel_map(fuel)) unless fuel.nil?
+    new_heater.setHeaterFuelType(EPlus.fuel_type(fuel)) unless fuel.nil?
     configure_setpoint_schedule(new_heater, t_set_c, model)
     new_heater.setMaximumTemperatureLimit(99.0)
     if [HPXML::WaterHeaterTypeTankless, HPXML::WaterHeaterTypeCombiTankless].include? tank_type
