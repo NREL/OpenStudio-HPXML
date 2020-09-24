@@ -518,6 +518,8 @@ class HotWaterSchedule
       end
     end
 
+    # Set nonzero items to one
+    # Set exactly exhaust_min number of ones behind last nonzero item
     if exhaust_min > 0
       items.reverse.each_with_index do |val, i|
         next unless val > 0
