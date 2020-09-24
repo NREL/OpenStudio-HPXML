@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
-require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
 require 'fileutils'
@@ -139,7 +138,6 @@ class HPXMLTest < MiniTest::Test
                             'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
                             'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
-                            'coal-for-non-boiler-heating.xml' => ['Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Stove]: HeatingSystemFuel[text()='], # FIXME: Allow this when E+/OS is updated
                             'cooking-range-location.xml' => ["CookingRange location is 'garage' but building does not have this location specified."],
                             'dishwasher-location.xml' => ["Dishwasher location is 'garage' but building does not have this location specified."],
                             'dhw-frac-load-served.xml' => ['Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15.'],
@@ -259,13 +257,13 @@ class HPXMLTest < MiniTest::Test
                    ['Baseboard Total Heating Energy', 'runperiod', '*'],
                    ['Boiler Heating Energy', 'runperiod', '*'],
                    ['Fluid Heat Exchanger Heat Transfer Energy', 'runperiod', '*'],
-                   ['Fan Electric Power', 'runperiod', '*'],
+                   ['Fan Electricity Rate', 'runperiod', '*'],
                    ['Fan Runtime Fraction', 'runperiod', '*'],
-                   ['Electric Equipment Electric Energy', 'runperiod', Constants.ObjectNameMechanicalVentilationHouseFanCFIS],
+                   ['Electric Equipment Electricity Energy', 'runperiod', Constants.ObjectNameMechanicalVentilationHouseFanCFIS],
                    ['Boiler Part Load Ratio', 'runperiod', Constants.ObjectNameBoiler],
-                   ['Pump Electric Power', 'runperiod', Constants.ObjectNameBoiler + ' hydronic pump'],
+                   ['Pump Electricity Rate', 'runperiod', Constants.ObjectNameBoiler + ' hydronic pump'],
                    ['Unitary System Part Load Ratio', 'runperiod', Constants.ObjectNameGroundSourceHeatPump + ' unitary system'],
-                   ['Pump Electric Power', 'runperiod', Constants.ObjectNameGroundSourceHeatPump + ' pump']]
+                   ['Pump Electricity Rate', 'runperiod', Constants.ObjectNameGroundSourceHeatPump + ' pump']]
     # Run workflow
     workflow_start = Time.now
     results = run_hpxml_workflow(rundir, xml, measures, measures_dir,
@@ -484,14 +482,6 @@ class HPXMLTest < MiniTest::Test
       if hpxml.heat_pumps.select { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? hp.heat_pump_type }.size > 0
         next if err_line.include?('GetDXCoils: Coil:Heating:DX') && err_line.include?('curve values')
       end
-      # FUTURE: Remove when https://github.com/NREL/EnergyPlus/pull/8073 is available
-      if hpxml_path.include? 'ASHRAE_Standard_140'
-        next if err_line.include?('SurfaceProperty:ExposedFoundationPerimeter') && err_line.include?('Total Exposed Perimeter is greater than the perimeter')
-      end
-      # FUTURE: Remove when https://github.com/NREL/EnergyPlus/issues/8163 is addressed
-      if (hpxml.solar_thermal_systems.size > 0) || (hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0)
-        next if err_line.include? 'More Additional Loss Coefficients were entered than the number of nodes; extra coefficients will not be used'
-      end
       if hpxml_path.include?('base-dhw-tank-heat-pump-outside.xml') || hpxml_path.include?('base-hvac-flowrate.xml')
         next if err_line.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.'
         next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
@@ -543,9 +533,6 @@ class HPXMLTest < MiniTest::Test
       hpxml_value = hpxml.building_construction.conditioned_floor_area
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='InputVerificationandResultsSummary' AND ReportForString='Entire Facility' AND TableName='Zone Summary' AND RowName='Conditioned Total' AND ColumnName='Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
-      # Subtract duct return plenum conditioned floor area
-      query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='InputVerificationandResultsSummary' AND ReportForString='Entire Facility' AND TableName='Zone Summary' AND RowName LIKE '%RET AIR ZONE' AND ColumnName='Area' AND Units='m2'"
-      sql_value -= UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
     end
 
@@ -612,15 +599,16 @@ class HPXMLTest < MiniTest::Test
       num_kiva_instances += 1
     end
 
-    num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,               # no foundation in contact w/ ground
-                                    'base-foundation-multiple.xml' => 2,              # additional instance for 2nd foundation type
-                                    'base-enclosure-2stories-garage.xml' => 2,        # additional instance for garage
-                                    'base-enclosure-garage.xml' => 2,                 # additional instance for garage
-                                    'base-enclosure-other-housing-unit.xml' => 0,     # no foundation in contact w/ ground
-                                    'base-enclosure-other-heated-space.xml' => 0,     # no foundation in contact w/ ground
-                                    'base-enclosure-other-non-freezing-space.xml' => 0, # no foundation in contact w/ ground
+    num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,                       # no foundation in contact w/ ground
+                                    'base-foundation-multiple.xml' => 2,                      # additional instance for 2nd foundation type
+                                    'base-enclosure-2stories-garage.xml' => 2,                # additional instance for garage
+                                    'base-enclosure-garage.xml' => 2,                         # additional instance for garage
+                                    'base-enclosure-other-housing-unit.xml' => 0,             # no foundation in contact w/ ground
+                                    'base-enclosure-other-heated-space.xml' => 0,             # no foundation in contact w/ ground
+                                    'base-enclosure-other-non-freezing-space.xml' => 0,       # no foundation in contact w/ ground
                                     'base-enclosure-other-multifamily-buffer-space.xml' => 0, # no foundation in contact w/ ground
-                                    'base-foundation-walkout-basement.xml' => 4, # 3 foundation walls plus a no-wall exposed perimeter
+                                    'base-enclosure-common-surfaces.xml' => 2,                # additional instance for vented crawlspace
+                                    'base-foundation-walkout-basement.xml' => 4,              # 3 foundation walls plus a no-wall exposed perimeter
                                     'base-foundation-complex.xml' => 10,
                                     'base-misc-loads-large-uncommon.xml' => 2,
                                     'base-misc-loads-large-uncommon2.xml' => 2 }
@@ -655,9 +643,19 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Walls/RimJoists/FoundationWalls
     (hpxml.walls + hpxml.rim_joists + hpxml.foundation_walls).each do |wall|
-      next unless wall.is_exterior
-
       wall_id = wall.id.upcase
+
+      if wall.is_adiabatic
+        # Adiabatic surfaces have their "BaseSurfaceIndex" as their "ExtBoundCond" in "Surfaces" table in SQL simulation results
+        query_base_surf_idx = "SELECT BaseSurfaceIndex FROM Surfaces WHERE SurfaceName='#{wall_id}'"
+        query_ext_bound = "SELECT ExtBoundCond FROM Surfaces WHERE SurfaceName='#{wall_id}'"
+        sql_value_base_surf_idx = sqlFile.execAndReturnFirstDouble(query_base_surf_idx).get
+        sql_value_ext_bound_cond = sqlFile.execAndReturnFirstDouble(query_ext_bound).get
+        assert_equal(sql_value_base_surf_idx, sql_value_ext_bound_cond)
+      end
+
+      # Exterior walls
+      next unless wall.is_exterior
 
       # R-value
       if (not wall.insulation_assembly_r_value.nil?) && (not hpxml_path.include? 'base-foundation-unconditioned-basement-assembly-r.xml') # This file uses Foundation:Kiva for insulation, so skip it
@@ -734,9 +732,19 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure FrameFloors
     hpxml.frame_floors.each do |frame_floor|
-      next unless frame_floor.is_exterior
-
       frame_floor_id = frame_floor.id.upcase
+
+      if frame_floor.is_adiabatic
+        # Adiabatic surfaces have their "BaseSurfaceIndex" as their "ExtBoundCond" in "Surfaces" table in SQL simulation results
+        query_base_surf_idx = "SELECT BaseSurfaceIndex FROM Surfaces WHERE SurfaceName='#{frame_floor_id}'"
+        query_ext_bound = "SELECT ExtBoundCond FROM Surfaces WHERE SurfaceName='#{frame_floor_id}'"
+        sql_value_base_surf_idx = sqlFile.execAndReturnFirstDouble(query_base_surf_idx).get
+        sql_value_ext_bound_cond = sqlFile.execAndReturnFirstDouble(query_ext_bound).get
+        assert_equal(sql_value_base_surf_idx, sql_value_ext_bound_cond)
+      end
+
+      # Exterior frame floors
+      next unless frame_floor.is_exterior
 
       # R-value
       hpxml_value = frame_floor.insulation_assembly_r_value
@@ -878,7 +886,7 @@ class HPXMLTest < MiniTest::Test
         # Compare pump power from timeseries output
         query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Boiler Part Load Ratio' AND ReportingFrequency='Run Period')"
         avg_plr = sqlFile.execAndReturnFirstDouble(query).get
-        query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electric Power' AND ReportingFrequency='Run Period')"
+        query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electricity Rate' AND ReportingFrequency='Run Period')"
         avg_w = sqlFile.execAndReturnFirstDouble(query).get
         sql_value = avg_w / avg_plr
         assert_in_epsilon(sql_value, hpxml_value, 0.02)
@@ -888,7 +896,7 @@ class HPXMLTest < MiniTest::Test
         # Compare fan power from timeseries output
         query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Runtime Fraction' and KeyValue LIKE '% SUPPLY FAN' AND ReportingFrequency='Run Period')"
         avg_rtf = sqlFile.execAndReturnFirstDouble(query).get
-        query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Electric Power' and KeyValue LIKE '% SUPPLY FAN' AND ReportingFrequency='Run Period')"
+        query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Electricity Rate' and KeyValue LIKE '% SUPPLY FAN' AND ReportingFrequency='Run Period')"
         avg_w = sqlFile.execAndReturnFirstDouble(query).get
         sql_value = avg_w / avg_rtf
         assert_in_epsilon(sql_value, hpxml_value, 0.02)
@@ -905,7 +913,7 @@ class HPXMLTest < MiniTest::Test
       hpxml_value = heat_pump.pump_watts_per_ton * UnitConversions.convert(results['Capacity: Cooling (W)'], 'W', 'ton')
       query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Unitary System Part Load Ratio' AND ReportingFrequency='Run Period')"
       avg_plr = sqlFile.execAndReturnFirstDouble(query).get
-      query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electric Power' AND ReportingFrequency='Run Period')"
+      query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electricity Rate' AND ReportingFrequency='Run Period')"
       avg_w = sqlFile.execAndReturnFirstDouble(query).get
       sql_value = avg_w / avg_plr
       assert_in_epsilon(sql_value, hpxml_value, 0.02)
@@ -1029,7 +1037,7 @@ class HPXMLTest < MiniTest::Test
       if not fan_cfis.empty?
         # CFIS, check for positive mech vent energy that is less than the energy if it had run 24/7
         # CFIS Fan energy
-        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue LIKE '#{Constants.ObjectNameMechanicalVentilationHouseFanCFIS.upcase}%' AND VariableName='Electric Equipment Electric Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue LIKE '#{Constants.ObjectNameMechanicalVentilationHouseFanCFIS.upcase}%' AND VariableName='Electric Equipment Electricity Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
         cfis_energy = sqlFile.execAndReturnFirstDouble(query).get
         fan_gj = fan_cfis.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
         if fan_gj > 0
