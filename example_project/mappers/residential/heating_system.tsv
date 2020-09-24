@@ -1,0 +1,221 @@
+Dependency=Climate Zone	Dependency=Template Month	Dependency=Template Year	Dependency=heating_system_type	Dependency=heating_system_fuel	heating_system_heating_efficiency	Source
+1A	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+1B	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+1C	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+2A	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+2B	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+2C	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+3A	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+3B	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+3C	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+4A	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+4B	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+4C	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+5A	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+5B	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+5C	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+6A	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+6B	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+6C	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+7	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+8	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
+1A	Sep	2020	Furnace	electricity	1	Engineering judgment
+1B	Sep	2020	Furnace	electricity	1	Engineering judgment
+1C	Sep	2020	Furnace	electricity	1	Engineering judgment
+2A	Sep	2020	Furnace	electricity	1	Engineering judgment
+2B	Sep	2020	Furnace	electricity	1	Engineering judgment
+2C	Sep	2020	Furnace	electricity	1	Engineering judgment
+3A	Sep	2020	Furnace	electricity	1	Engineering judgment
+3B	Sep	2020	Furnace	electricity	1	Engineering judgment
+3C	Sep	2020	Furnace	electricity	1	Engineering judgment
+4A	Sep	2020	Furnace	electricity	1	Engineering judgment
+4B	Sep	2020	Furnace	electricity	1	Engineering judgment
+4C	Sep	2020	Furnace	electricity	1	Engineering judgment
+5A	Sep	2020	Furnace	electricity	1	Engineering judgment
+5B	Sep	2020	Furnace	electricity	1	Engineering judgment
+5C	Sep	2020	Furnace	electricity	1	Engineering judgment
+6A	Sep	2020	Furnace	electricity	1	Engineering judgment
+6B	Sep	2020	Furnace	electricity	1	Engineering judgment
+6C	Sep	2020	Furnace	electricity	1	Engineering judgment
+7	Sep	2020	Furnace	electricity	1	Engineering judgment
+8	Sep	2020	Furnace	electricity	1	Engineering judgment
+1A	Sep	2020	Furnace	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+1B	Sep	2020	Furnace	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+1C	Sep	2020	Furnace	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+2A	Sep	2020	Furnace	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+2B	Sep	2020	Furnace	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+2C	Sep	2020	Furnace	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+3A	Sep	2020	Furnace	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+3B	Sep	2020	Furnace	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+3C	Sep	2020	Furnace	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+4A	Sep	2020	Furnace	natural gas	0.95	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+4B	Sep	2020	Furnace	natural gas	0.95	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+4C	Sep	2020	Furnace	natural gas	0.95	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+5A	Sep	2020	Furnace	natural gas	0.95	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+5B	Sep	2020	Furnace	natural gas	0.95	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+5C	Sep	2020	Furnace	natural gas	0.95	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+6A	Sep	2020	Furnace	natural gas	0.95	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+6B	Sep	2020	Furnace	natural gas	0.95	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+6C	Sep	2020	Furnace	natural gas	0.95	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+7	Sep	2020	Furnace	natural gas	0.95	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+8	Sep	2020	Furnace	natural gas	0.95	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+1A	Sep	2020	Furnace	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+1B	Sep	2020	Furnace	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+1C	Sep	2020	Furnace	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+2A	Sep	2020	Furnace	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+2B	Sep	2020	Furnace	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+2C	Sep	2020	Furnace	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+3A	Sep	2020	Furnace	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+3B	Sep	2020	Furnace	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+3C	Sep	2020	Furnace	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+4A	Sep	2020	Furnace	fuel oil	0.85	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+4B	Sep	2020	Furnace	fuel oil	0.85	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+4C	Sep	2020	Furnace	fuel oil	0.85	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+5A	Sep	2020	Furnace	fuel oil	0.85	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+5B	Sep	2020	Furnace	fuel oil	0.85	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+5C	Sep	2020	Furnace	fuel oil	0.85	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+6A	Sep	2020	Furnace	fuel oil	0.85	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+6B	Sep	2020	Furnace	fuel oil	0.85	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+6C	Sep	2020	Furnace	fuel oil	0.85	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+7	Sep	2020	Furnace	fuel oil	0.85	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+8	Sep	2020	Furnace	fuel oil	0.85	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+1A	Sep	2020	Furnace	propane	0.8	Engineering judgment
+1B	Sep	2020	Furnace	propane	0.8	Engineering judgment
+1C	Sep	2020	Furnace	propane	0.8	Engineering judgment
+2A	Sep	2020	Furnace	propane	0.8	Engineering judgment
+2B	Sep	2020	Furnace	propane	0.8	Engineering judgment
+2C	Sep	2020	Furnace	propane	0.8	Engineering judgment
+3A	Sep	2020	Furnace	propane	0.8	Engineering judgment
+3B	Sep	2020	Furnace	propane	0.8	Engineering judgment
+3C	Sep	2020	Furnace	propane	0.8	Engineering judgment
+4A	Sep	2020	Furnace	propane	0.85	Engineering judgment
+4B	Sep	2020	Furnace	propane	0.85	Engineering judgment
+4C	Sep	2020	Furnace	propane	0.85	Engineering judgment
+5A	Sep	2020	Furnace	propane	0.85	Engineering judgment
+5B	Sep	2020	Furnace	propane	0.85	Engineering judgment
+5C	Sep	2020	Furnace	propane	0.85	Engineering judgment
+6A	Sep	2020	Furnace	propane	0.85	Engineering judgment
+6B	Sep	2020	Furnace	propane	0.85	Engineering judgment
+6C	Sep	2020	Furnace	propane	0.85	Engineering judgment
+7	Sep	2020	Furnace	propane	0.85	Engineering judgment
+8	Sep	2020	Furnace	propane	0.85	Engineering judgment
+1A	Sep	2020	Furnace	wood	0.8	Engineering judgment
+1B	Sep	2020	Furnace	wood	0.8	Engineering judgment
+1C	Sep	2020	Furnace	wood	0.8	Engineering judgment
+2A	Sep	2020	Furnace	wood	0.8	Engineering judgment
+2B	Sep	2020	Furnace	wood	0.8	Engineering judgment
+2C	Sep	2020	Furnace	wood	0.8	Engineering judgment
+3A	Sep	2020	Furnace	wood	0.8	Engineering judgment
+3B	Sep	2020	Furnace	wood	0.8	Engineering judgment
+3C	Sep	2020	Furnace	wood	0.8	Engineering judgment
+4A	Sep	2020	Furnace	wood	0.85	Engineering judgment
+4B	Sep	2020	Furnace	wood	0.85	Engineering judgment
+4C	Sep	2020	Furnace	wood	0.85	Engineering judgment
+5A	Sep	2020	Furnace	wood	0.85	Engineering judgment
+5B	Sep	2020	Furnace	wood	0.85	Engineering judgment
+5C	Sep	2020	Furnace	wood	0.85	Engineering judgment
+6A	Sep	2020	Furnace	wood	0.85	Engineering judgment
+6B	Sep	2020	Furnace	wood	0.85	Engineering judgment
+6C	Sep	2020	Furnace	wood	0.85	Engineering judgment
+7	Sep	2020	Furnace	wood	0.85	Engineering judgment
+8	Sep	2020	Furnace	wood	0.85	Engineering judgment
+1A	Sep	2020	Boiler	electricity	1	Engineering judgment
+1B	Sep	2020	Boiler	electricity	1	Engineering judgment
+1C	Sep	2020	Boiler	electricity	1	Engineering judgment
+2A	Sep	2020	Boiler	electricity	1	Engineering judgment
+2B	Sep	2020	Boiler	electricity	1	Engineering judgment
+2C	Sep	2020	Boiler	electricity	1	Engineering judgment
+3A	Sep	2020	Boiler	electricity	1	Engineering judgment
+3B	Sep	2020	Boiler	electricity	1	Engineering judgment
+3C	Sep	2020	Boiler	electricity	1	Engineering judgment
+4A	Sep	2020	Boiler	electricity	1	Engineering judgment
+4B	Sep	2020	Boiler	electricity	1	Engineering judgment
+4C	Sep	2020	Boiler	electricity	1	Engineering judgment
+5A	Sep	2020	Boiler	electricity	1	Engineering judgment
+5B	Sep	2020	Boiler	electricity	1	Engineering judgment
+5C	Sep	2020	Boiler	electricity	1	Engineering judgment
+6A	Sep	2020	Boiler	electricity	1	Engineering judgment
+6B	Sep	2020	Boiler	electricity	1	Engineering judgment
+6C	Sep	2020	Boiler	electricity	1	Engineering judgment
+7	Sep	2020	Boiler	electricity	1	Engineering judgment
+8	Sep	2020	Boiler	electricity	1	Engineering judgment
+1A	Sep	2020	Boiler	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+1B	Sep	2020	Boiler	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+1C	Sep	2020	Boiler	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+2A	Sep	2020	Boiler	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+2B	Sep	2020	Boiler	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+2C	Sep	2020	Boiler	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+3A	Sep	2020	Boiler	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+3B	Sep	2020	Boiler	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+3C	Sep	2020	Boiler	natural gas	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+4A	Sep	2020	Boiler	natural gas	0.9	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+4B	Sep	2020	Boiler	natural gas	0.9	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+4C	Sep	2020	Boiler	natural gas	0.9	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+5A	Sep	2020	Boiler	natural gas	0.9	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+5B	Sep	2020	Boiler	natural gas	0.9	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+5C	Sep	2020	Boiler	natural gas	0.9	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+6A	Sep	2020	Boiler	natural gas	0.9	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+6B	Sep	2020	Boiler	natural gas	0.9	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+6C	Sep	2020	Boiler	natural gas	0.9	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+7	Sep	2020	Boiler	natural gas	0.9	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+8	Sep	2020	Boiler	natural gas	0.9	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+1A	Sep	2020	Boiler	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+1B	Sep	2020	Boiler	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+1C	Sep	2020	Boiler	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+2A	Sep	2020	Boiler	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+2B	Sep	2020	Boiler	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+2C	Sep	2020	Boiler	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+3A	Sep	2020	Boiler	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+3B	Sep	2020	Boiler	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+3C	Sep	2020	Boiler	fuel oil	0.8	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+4A	Sep	2020	Boiler	fuel oil	0.86	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+4B	Sep	2020	Boiler	fuel oil	0.86	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+4C	Sep	2020	Boiler	fuel oil	0.86	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+5A	Sep	2020	Boiler	fuel oil	0.86	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+5B	Sep	2020	Boiler	fuel oil	0.86	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+5C	Sep	2020	Boiler	fuel oil	0.86	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+6A	Sep	2020	Boiler	fuel oil	0.86	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+6B	Sep	2020	Boiler	fuel oil	0.86	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+6C	Sep	2020	Boiler	fuel oil	0.86	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+7	Sep	2020	Boiler	fuel oil	0.86	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+8	Sep	2020	Boiler	fuel oil	0.86	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+1A	Sep	2020	Boiler	propane	0.8	Engineering judgment
+1B	Sep	2020	Boiler	propane	0.8	Engineering judgment
+1C	Sep	2020	Boiler	propane	0.8	Engineering judgment
+2A	Sep	2020	Boiler	propane	0.8	Engineering judgment
+2B	Sep	2020	Boiler	propane	0.8	Engineering judgment
+2C	Sep	2020	Boiler	propane	0.8	Engineering judgment
+3A	Sep	2020	Boiler	propane	0.8	Engineering judgment
+3B	Sep	2020	Boiler	propane	0.8	Engineering judgment
+3C	Sep	2020	Boiler	propane	0.8	Engineering judgment
+4A	Sep	2020	Boiler	propane	0.86	Engineering judgment
+4B	Sep	2020	Boiler	propane	0.86	Engineering judgment
+4C	Sep	2020	Boiler	propane	0.86	Engineering judgment
+5A	Sep	2020	Boiler	propane	0.86	Engineering judgment
+5B	Sep	2020	Boiler	propane	0.86	Engineering judgment
+5C	Sep	2020	Boiler	propane	0.86	Engineering judgment
+6A	Sep	2020	Boiler	propane	0.86	Engineering judgment
+6B	Sep	2020	Boiler	propane	0.86	Engineering judgment
+6C	Sep	2020	Boiler	propane	0.86	Engineering judgment
+7	Sep	2020	Boiler	propane	0.86	Engineering judgment
+8	Sep	2020	Boiler	propane	0.86	Engineering judgment
+1A	Sep	2020	Boiler	wood	0.8	Engineering judgment
+1B	Sep	2020	Boiler	wood	0.8	Engineering judgment
+1C	Sep	2020	Boiler	wood	0.8	Engineering judgment
+2A	Sep	2020	Boiler	wood	0.8	Engineering judgment
+2B	Sep	2020	Boiler	wood	0.8	Engineering judgment
+2C	Sep	2020	Boiler	wood	0.8	Engineering judgment
+3A	Sep	2020	Boiler	wood	0.8	Engineering judgment
+3B	Sep	2020	Boiler	wood	0.8	Engineering judgment
+3C	Sep	2020	Boiler	wood	0.8	Engineering judgment
+4A	Sep	2020	Boiler	wood	0.86	Engineering judgment
+4B	Sep	2020	Boiler	wood	0.86	Engineering judgment
+4C	Sep	2020	Boiler	wood	0.86	Engineering judgment
+5A	Sep	2020	Boiler	wood	0.86	Engineering judgment
+5B	Sep	2020	Boiler	wood	0.86	Engineering judgment
+5C	Sep	2020	Boiler	wood	0.86	Engineering judgment
+6A	Sep	2020	Boiler	wood	0.86	Engineering judgment
+6B	Sep	2020	Boiler	wood	0.86	Engineering judgment
+6C	Sep	2020	Boiler	wood	0.86	Engineering judgment
+7	Sep	2020	Boiler	wood	0.86	Engineering judgment
+8	Sep	2020	Boiler	wood	0.86	Engineering judgment

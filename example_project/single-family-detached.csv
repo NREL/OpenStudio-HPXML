@@ -1,0 +1,21 @@
+Feature Id,Feature Name,Mapper Class
+1,New Building_1,URBANopt::Scenario::BaselineMapper
+2,New Building_2,URBANopt::Scenario::BaselineMapper
+3,New Building_3,URBANopt::Scenario::BaselineMapper
+4,New Building_4,URBANopt::Scenario::BaselineMapper
+5,New Building_5,URBANopt::Scenario::BaselineMapper
+6,New Building_6,URBANopt::Scenario::BaselineMapper
+7,New Building_7,URBANopt::Scenario::BaselineMapper
+8,New Building_8,URBANopt::Scenario::BaselineMapper
+9,New Building_9,URBANopt::Scenario::BaselineMapper
+10,New Building_10,URBANopt::Scenario::BaselineMapper
+11,New Building_11,URBANopt::Scenario::BaselineMapper
+12,New Building_12,URBANopt::Scenario::BaselineMapper
+13,New Building_13,URBANopt::Scenario::BaselineMapper
+14,New Building_14,URBANopt::Scenario::BaselineMapper
+15,New Building_15,URBANopt::Scenario::BaselineMapper
+16,New Building_16,URBANopt::Scenario::BaselineMapper
+17,New Building_17,URBANopt::Scenario::BaselineMapper
+18,New Building_18,URBANopt::Scenario::BaselineMapper
+19,New Building_19,URBANopt::Scenario::BaselineMapper
+20,New Building_20,URBANopt::Scenario::BaselineMapper

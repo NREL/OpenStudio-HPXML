@@ -1,0 +1,2 @@
+Dependency=Template Month	Dependency=Template Year	clothes_washer_efficiency_imef	clothes_washer_rated_annual_kwh	clothes_washer_label_electric_rate	clothes_washer_label_gas_rate	clothes_washer_label_annual_gas_cost	clothes_washer_label_usage	clothes_washer_capacity	Source
+Sep	2020	2.92	75	0.12	1.09	7	6	4.5	"ResStock ""EnergyStar Most Efficient, 100% Usage"""

@@ -1,0 +1,612 @@
+{
+  "type": "FeatureCollection",
+  "mappers": [],
+  "project": {
+    "id": "7c33a001-bccb-413e-ac87-67558b5d4b07",
+    "name": "New Project",
+    "begin_date": "2017-01-01T07:00:00.000Z",
+    "end_date": "2017-12-31T07:00:00.000Z",
+    "cec_climate_zone": null,
+    "climate_zone": "6A",
+    "default_template": "90.1-2013",
+    "import_surrounding_buildings_as_shading": null,
+    "surface_elevation": null,
+    "tariff_filename": null,
+    "timesteps_per_hour": 1,
+    "weather_filename": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw"
+  },
+  "scenarios": [
+    {
+      "feature_mappings": [],
+      "id": "72301739-c6c3-4dd7-bf1a-f37c8eff40db",
+      "name": "New Scenario"
+    }
+  ],
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "53340c2c-ab20-40db-aba1-11ac607c52a7",
+        "name": "Site Origin",
+        "type": "Site Origin",
+        "begin_date": "2017-01-01T07:00:00.000Z",
+        "end_date": "2017-12-31T07:00:00.000Z",
+        "cec_climate_zone": null,
+        "climate_zone": "6A",
+        "default_template": "90.1-2013",      
+        "import_surrounding_buildings_as_shading": null,
+        "surface_elevation": null,
+        "tariff_filename": null,
+        "timesteps_per_hour": 1,
+        "weather_filename": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -78.84948467732347,
+          42.81677154451123
+        ] 
+      }      
+    },
+
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "1",
+        "name": "Mixed_use 1",
+        "type": "Building",
+        "building_type": "Mixed use",
+        "floor_area": 752184,
+        "footprint_area": 188046,
+        "number_of_stories": 4,
+        "mixed_type_1": "Office",
+        "mixed_type_1_percentage": 50,
+        "mixed_type_2": "Food service",
+        "mixed_type_2_percentage": 50,
+        "mixed_type_3": "Strip shopping mall",
+        "mixed_type_3_percentage": 0,
+        "mixed_type_4": "Lodging",
+        "mixed_type_4_percentage": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -78.84650338745196,
+              42.81331301863236
+            ],
+            [
+              -78.84652443964629,
+              42.81463974371101
+            ],
+            [
+              -78.84680142363833,
+              42.815293654042534
+            ],
+            [
+              -78.84744455124724,
+              42.81514110006128
+            ],
+            [
+              -78.84728610028628,
+              42.81478165791734
+            ],
+            [
+              -78.84786797764677,
+              42.814643631760134
+            ],
+            [
+              -78.84721106637106,
+              42.813153418927016
+            ],
+            [
+              -78.84650338745196,
+              42.81331301863236
+            ]
+          ]
+        ]
+      }
+    },
+
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "2",
+        "name": "Restaurant 1",
+        "type": "Building",
+        "building_type": "Food service",
+        "floor_area": 22313,
+        "footprint_area": 22313,
+        "number_of_stories": 1
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -78.8500120420453,
+              42.81812185529549
+            ],
+            [
+              -78.85038975191084,
+              42.81803226424341
+            ],
+            [
+              -78.850630729414,
+              42.81857888627522
+            ],
+            [
+              -78.85025301954843,
+              42.81866847653532
+            ],
+            [
+              -78.8500120420453,
+              42.81812185529549
+            ]
+          ]
+        ]
+      }
+    },
+
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "3",
+        "name": "Restaurant 10",
+        "type": "Building",
+        "building_type": "Food service",
+        "floor_area": 125631,
+        "footprint_area": 41877,
+        "number_of_stories": 3
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -78.84962224800356,
+              42.81329273502644
+            ],
+            [
+              -78.84929833482822,
+              42.81337083838241
+            ],
+            [
+              -78.84983265832118,
+              42.814563298664666
+            ],
+            [
+              -78.85015657149653,
+              42.81448519681467
+            ],
+            [
+              -78.84962224800356,
+              42.81329273502644
+            ]
+          ]
+        ]
+      }
+    },
+
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "4",
+        "name": "Restaurant 12",
+        "type": "Building",
+        "building_type": "Food service",
+        "floor_area": 31623,
+        "footprint_area": 10541,
+        "number_of_stories": 3
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -78.84907318596754,
+              42.81342719667407
+            ],
+            [
+              -78.84862090048105,
+              42.81353625345659
+            ],
+            [
+              -78.84871721918239,
+              42.813751210926796
+            ],
+            [
+              -78.84916950466888,
+              42.81364215452331
+            ],
+            [
+              -78.84907318596754,
+              42.81342719667407
+            ]
+          ]
+        ]
+      }
+    },
+
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "5",
+        "name": "Restaurant 14",
+        "type": "Building",
+        "building_type": "Food service",
+        "floor_area": 8804,
+        "footprint_area": 8804,
+        "number_of_stories": 1        
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -78.84809175426629,
+              42.81367038997507
+            ],
+            [
+              -78.84848670778973,
+              42.81357515750889
+            ],
+            [
+              -78.84857883872144,
+              42.81378076888831
+            ],
+            [
+              -78.84818388519801,
+              42.81387600103781
+            ],
+            [
+              -78.84809175426629,
+              42.81367038997507
+            ]
+          ]
+        ]
+      }
+    },
+
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "6",
+        "name": "Restaurant 15",
+        "type": "Building",
+        "building_type": "Food service",
+        "floor_area": 10689,
+        "footprint_area": 10689,
+        "number_of_stories": 1        
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -78.84846106738529,
+              42.814495803077364
+            ],
+            [
+              -78.8486903952376,
+              42.81444050756261
+            ],
+            [
+              -78.8484977578349,
+              42.81401059666683
+            ],
+            [
+              -78.84826842998261,
+              42.81406589256599
+            ],
+            [
+              -78.84846106738529,
+              42.814495803077364
+            ]
+          ]
+        ]
+      }
+    },
+
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "7",
+        "name": "Office 1",
+        "type": "Building",
+        "building_type": "Office",
+        "number_of_stories": 2,
+        "detailed_model_filename": "7_floorspace.osm"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-78.84807688933236,42.81598030837795],
+            [-78.84807689097995,42.81576080899332],
+            [-78.84854275129324,42.81576080994095],
+            [-78.84854275129324,42.81598030932559]
+          ]
+        ]
+      }
+    },
+
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "8",
+        "name": "Hospital 1",
+        "type": "Building",
+        "building_type": "Outpatient health care",
+        "number_of_stories": 10,
+        "detailed_model_filename": "8.osm"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -78.84973966335251,
+              42.8154441454509
+            ],
+            [
+              -78.85049562542395,
+              42.81525669280299
+            ],
+            [
+              -78.85078257620685,
+              42.81588131780643
+            ],
+            [
+              -78.8505086568277,
+              42.81594736368234
+            ],
+            [
+              -78.85041233812638,
+              42.815732413845666
+            ],
+            [
+              -78.84991755499783,
+              42.81585689105046
+            ],
+            [
+              -78.84973966335251,
+              42.8154441454509
+            ]
+          ]
+        ]
+      }      
+    },
+    
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "9",
+        "name": "Hospital 2",
+        "type": "Building",
+        "building_type": "Inpatient health care",
+        "number_of_stories": 3,
+        "detailed_model_filename": "9.osm"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -78.85083627755732,
+              42.81600678613279
+            ],
+            [
+              -78.85056039001891,
+              42.816076133580566
+            ],
+            [
+              -78.85072568130569,
+              42.816450649528036
+            ],
+            [
+              -78.84940134236577,
+              42.81677160705479
+            ],
+            [
+              -78.84958014898304,
+              42.81716858994267
+            ],
+            [
+              -78.8507262115271,
+              42.816890840117026
+            ],
+            [
+              -78.8508565789851,
+              42.81719595796099
+            ],
+            [
+              -78.85132137101688,
+              42.81708331517635
+            ],
+            [
+              -78.85083627755732,
+              42.81600678613279
+            ]
+          ]
+        ]
+      }
+    },
+    
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "10",
+        "name": "Mixed use 2",
+        "type": "Building",
+        "building_type": "Mixed use",
+        "floor_area": 1278384,
+        "footprint_area": 159798,
+        "number_of_stories": 8,
+        "mixed_type_1": "Strip shopping mall",
+        "mixed_type_1_percentage": 25,
+        "mixed_type_2": "Food service",
+        "mixed_type_2_percentage": 25,
+        "mixed_type_3": "Office",
+        "mixed_type_3_percentage": 15,
+        "mixed_type_4": "Lodging",
+        "mixed_type_4_percentage": 35
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -78.85115264550463,
+              42.81786093060211
+            ],
+            [
+              -78.85163483958878,
+              42.81774467026972
+            ],
+            [
+              -78.85246596719499,
+              42.819583261120755
+            ],
+            [
+              -78.85082390085432,
+              42.819979162017745
+            ],
+            [
+              -78.85060552295334,
+              42.81947573727234
+            ],
+            [
+              -78.85174564783776,
+              42.81920483484765
+            ],
+            [
+              -78.85115264550463,
+              42.81786093060211
+            ]
+          ]
+        ]
+      }
+    },
+    
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "11",
+        "name": "Restaurant 13",
+        "type": "Building",
+        "building_type": "Food service",
+        "floor_area": 32511,
+        "footprint_area": 10837,
+        "number_of_stories": 3
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -78.84961163640645,
+              42.81460851835703
+            ],
+            [
+              -78.84914661048371,
+              42.81472064501696
+            ],
+            [
+              -78.84905029178236,
+              42.81450569091638
+            ],
+            [
+              -78.84951531770513,
+              42.81439356386673
+            ],
+            [
+              -78.84961163640645,
+              42.81460851835703
+            ]
+          ]
+        ]
+      }
+    },
+    
+    {"type": "Feature",
+      "properties": {
+        "id": "12",
+        "name": "Mall 1",
+        "type": "Building",
+        "building_type": "Strip shopping mall",
+        "floor_area": 374409,
+        "footprint_area": 124803,
+        "number_of_stories": 3
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -78.84768338040897,
+              42.817161656757065
+            ],
+            [
+              -78.8482630702579,
+              42.8170218879136
+            ],
+            [
+              -78.84915297130291,
+              42.81900776764229
+            ],
+            [
+              -78.84857328145401,
+              42.81914753199706
+            ],
+            [
+              -78.84768338040897,
+              42.817161656757065
+            ]
+          ]
+        ]
+      }     
+    },
+    
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "13",
+        "name": "Hotel 1",
+        "type": "Building",
+        "building_type": "Lodging",
+        "floor_area": 316160,
+        "footprint_area": 31616,
+        "number_of_stories": 10
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -78.8494955083645,
+              42.819748790984335
+            ],
+            [
+              -78.84891089471263,
+              42.81989327725856
+            ],
+            [
+              -78.8491389243777,
+              42.82038967009544
+            ],
+            [
+              -78.84972353802956,
+              42.82024518498119
+            ],
+            [
+              -78.8494955083645,
+              42.819748790984335
+            ]
+          ]
+        ]
+      }      
+    }
+  ]
+}

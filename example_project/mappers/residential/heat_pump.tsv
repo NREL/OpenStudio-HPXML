@@ -1,0 +1,39 @@
+Dependency=Climate Zone	Dependency=Template Month	Dependency=Template Year	Dependency=heat_pump_type	heat_pump_heating_efficiency_hspf	heat_pump_heating_efficiency_cop	heat_pump_cooling_efficiency_seer	heat_pump_cooling_efficiency_eer	heat_pump_backup_fuel	Source
+1A	Sep	2020	air-to-air	8.2		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+1B	Sep	2020	air-to-air	8.2		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+1C	Sep	2020	air-to-air	8.2		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+2A	Sep	2020	air-to-air	8.2		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+2B	Sep	2020	air-to-air	8.2		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+2C	Sep	2020	air-to-air	8.2		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+3A	Sep	2020	air-to-air	8.2		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+3B	Sep	2020	air-to-air	8.2		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+3C	Sep	2020	air-to-air	8.2		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+4A	Sep	2020	air-to-air	8.5		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+4B	Sep	2020	air-to-air	8.5		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+4C	Sep	2020	air-to-air	9.25		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+5A	Sep	2020	air-to-air	9.25		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+5B	Sep	2020	air-to-air	9.25		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+5C	Sep	2020	air-to-air	9.25		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+6A	Sep	2020	air-to-air	9.5		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+6B	Sep	2020	air-to-air	9.5		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+6C	Sep	2020	air-to-air	9.5		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+1A	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+1B	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+1C	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+2A	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+2B	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+2C	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+3A	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+3B	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+3C	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+4A	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+4B	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+4C	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+5A	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+5B	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+5C	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+6A	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+6B	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+6C	Sep	2020	mini-split	10		19		electricity	Engineering judgment
+7	Sep	2020	ground-to-air		3.6		17.1		"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+8	Sep	2020	ground-to-air		3.6		17.1		"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"

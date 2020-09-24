@@ -1,0 +1,6 @@
+Dependency=Template Month	Dependency=Template Year	Dependency=water_heater_fuel_type	water_heater_efficiency_ef	water_heater_tank_volume	Source
+Sep	2020	electricity	0.93	40	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+Sep	2020	natural gas	0.61	40	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+Sep	2020	fuel oil	0.53	40	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+Sep	2020	propane	0.53	40	Engineering judgment
+Sep	2020	wood	0.53	40	Engineering judgment

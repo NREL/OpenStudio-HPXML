@@ -1,0 +1,198 @@
+{
+  "type":"FeatureCollection",
+  "project":{
+    "id":"7c33a001-bccb-413e-ac87-67558b5d4b07",
+    "name":"New Project",
+    "surface_elevation":null,
+    "import_surrounding_buildings_as_shading":null,
+    "weather_filename":"USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
+    "tariff_filename":null,
+    "climate_zone":"6A",
+    "cec_climate_zone":null,
+    "begin_date":"2017-01-01T07:00:00.000Z",
+    "end_date":"2017-12-31T07:00:00.000Z",
+    "timesteps_per_hour":1,
+    "default_template":"90.1-2013"
+  },
+  "features":[
+    {
+      "type":"Feature",
+      "properties":{
+        "id":"53340c2c-ab20-40db-aba1-11ac607c52a7",
+        "name":"Site Origin",
+        "type":"Site Origin",
+        "begin_date":"2017-01-01T07:00:00.000Z",
+        "end_date":"2017-12-31T07:00:00.000Z",
+        "cec_climate_zone":null,
+        "climate_zone":"6A",
+        "default_template":"90.1-2013",
+        "import_surrounding_buildings_as_shading":null,
+        "surface_elevation":null,
+        "tariff_filename":null,
+        "timesteps_per_hour":1,
+        "weather_filename":"USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw"
+      },
+      "geometry":{
+        "type":"Point",
+        "coordinates":[
+          -78.84948467732348,
+          42.81677154451123
+        ]
+      }
+    },
+    {
+      "type":"Feature",
+      "properties":{
+        "id":"1",
+        "name":"Residential 1",
+        "type":"Building",
+        "building_type":"Single-Family Detached",
+        "floor_area":3055,
+        "footprint_area":3055,
+        "number_of_stories_above_ground":1,
+        "number_of_stories":1,
+        "number_of_bedrooms":3,
+        "foundation_type":"crawlspace - unvented",
+        "attic_type":"attic - vented",
+        "system_type":"Residential - furnace and central air conditioner",
+        "heating_system_fuel_type":"natural gas",
+        "template":"Residential IECC 2015 - Customizable Template Sep 2020",
+        "schedules_type":"stochastic",
+        "random_seed":20
+      },
+      "geometry":{
+        "type":"Polygon",
+        "coordinates":[
+          [
+            [
+              -78.84782863379475,
+              42.81308406513335
+            ],
+            [
+              -78.84789445741784,
+              42.813211653666147
+            ],
+            [
+              -78.8481085224459,
+              42.81315222398479
+            ],
+            [
+              -78.84804269882281,
+              42.813024635329359
+            ],
+            [
+              -78.84782863379475,
+              42.81308406513335
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type":"Feature",
+      "properties":{
+        "id":"2",
+        "name":"Residential 2",
+        "type":"Building",
+        "building_type":"Single-Family Detached",
+        "floor_area":3055,
+        "footprint_area":3055,
+        "number_of_stories_above_ground":1,
+        "number_of_stories":1,
+        "number_of_bedrooms":3,
+        "foundation_type":"crawlspace - unvented",
+        "attic_type":"attic - vented",
+        "system_type":"Residential - furnace and central air conditioner",
+        "heating_system_fuel_type":"natural gas",
+        "template":"Residential IECC 2015 - Customizable Template Sep 2020",
+        "schedules_type":"stochastic"
+      },
+      "geometry":{
+        "type":"Polygon",
+        "coordinates":[
+          [
+            [
+              -78.84782863379475,
+              42.81308406513335
+            ],
+            [
+              -78.84789445741784,
+              42.813211653666147
+            ],
+            [
+              -78.8481085224459,
+              42.81315222398479
+            ],
+            [
+              -78.84804269882281,
+              42.813024635329359
+            ],
+            [
+              -78.84782863379475,
+              42.81308406513335
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type":"Feature",
+      "properties":{
+        "id":"3",
+        "name":"Residential 3",
+        "type":"Building",
+        "building_type":"Single-Family Detached",
+        "floor_area":3055,
+        "footprint_area":3055,
+        "number_of_stories_above_ground":1,
+        "number_of_stories":1,
+        "number_of_bedrooms":3,
+        "foundation_type":"crawlspace - unvented",
+        "attic_type":"attic - vented",
+        "system_type":"Residential - furnace and central air conditioner",
+        "heating_system_fuel_type":"natural gas",
+        "template":"Residential IECC 2015 - Customizable Template Sep 2020",
+        "schedules_type":"default"
+      },
+      "geometry":{
+        "type":"Polygon",
+        "coordinates":[
+          [
+            [
+              -78.84782863379475,
+              42.81308406513335
+            ],
+            [
+              -78.84789445741784,
+              42.813211653666147
+            ],
+            [
+              -78.8481085224459,
+              42.81315222398479
+            ],
+            [
+              -78.84804269882281,
+              42.813024635329359
+            ],
+            [
+              -78.84782863379475,
+              42.81308406513335
+            ]
+          ]
+        ]
+      }
+    }
+  ],
+  "mappers":[
+
+  ],
+  "scenarios":[
+    {
+      "feature_mappings":[
+
+      ],
+      "id":"72301739-c6c3-4dd7-bf1a-f37c8eff40db",
+      "name":"New Scenario"
+    }
+  ]
+}
