@@ -1798,7 +1798,9 @@ class HVAC
       htg_object_sensor = nil
     else
       var = "Heating Coil #{EPlus::FuelTypeElectricity} Energy"
-      if htg_object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
+      if htg_object.is_a? OpenStudio::Model::CoilHeatingGas
+        var = "Heating Coil #{htg_object.fuelType} Energy"
+      elsif htg_object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
         var = 'Baseboard Total Heating Energy'
       elsif htg_object.is_a? OpenStudio::Model::ZoneHVACFourPipeFanCoil
         var = 'Fan Coil Heating Energy'
@@ -1814,6 +1816,9 @@ class HVAC
       backup_htg_object_sensor = nil
     else
       var = "Heating Coil #{EPlus::FuelTypeElectricity} Energy"
+      if backup_htg_object.is_a? OpenStudio::Model::CoilHeatingGas
+        var = "Heating Coil #{backup_htg_object.fuelType} Energy"
+      end
 
       backup_htg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
       backup_htg_object_sensor.setName("#{backup_htg_object.name} s")

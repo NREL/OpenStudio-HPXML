@@ -2,7 +2,7 @@
 
 class EPlus
   # Constants
-  FuelTypeElectricity = 'electricity'
+  FuelTypeElectricity = 'Electricity'
   FuelTypeNaturalGas = 'NaturalGas'
   FuelTypeOil = 'FuelOilNo2'
   FuelTypePropane = 'Propane'

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
-require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
 require 'fileutils'
@@ -139,7 +138,7 @@ class HPXMLTest < MiniTest::Test
                             'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
                             'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
-                            'coal-for-non-boiler-heating.xml' => ['Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Stove]: HeatingSystemFuel[text()='], # FIXME: Allow this when E+/OS is updated
+                            'coal-for-non-boiler-heating.xml' => ['Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Stove]: HeatingSystemFuel[text()='],
                             'cooking-range-location.xml' => ["CookingRange location is 'garage' but building does not have this location specified."],
                             'dishwasher-location.xml' => ["Dishwasher location is 'garage' but building does not have this location specified."],
                             'dhw-frac-load-served.xml' => ['Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15.'],
@@ -484,10 +483,6 @@ class HPXMLTest < MiniTest::Test
       if hpxml.heat_pumps.select { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? hp.heat_pump_type }.size > 0
         next if err_line.include?('GetDXCoils: Coil:Heating:DX') && err_line.include?('curve values')
       end
-      # FUTURE: Remove when https://github.com/NREL/EnergyPlus/pull/8073 is available
-      if hpxml_path.include? 'ASHRAE_Standard_140'
-        next if err_line.include?('SurfaceProperty:ExposedFoundationPerimeter') && err_line.include?('Total Exposed Perimeter is greater than the perimeter')
-      end
       # FUTURE: Remove when https://github.com/NREL/EnergyPlus/issues/8163 is addressed
       if (hpxml.solar_thermal_systems.size > 0) || (hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0)
         next if err_line.include? 'More Additional Loss Coefficients were entered than the number of nodes; extra coefficients will not be used'
@@ -543,9 +538,6 @@ class HPXMLTest < MiniTest::Test
       hpxml_value = hpxml.building_construction.conditioned_floor_area
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='InputVerificationandResultsSummary' AND ReportForString='Entire Facility' AND TableName='Zone Summary' AND RowName='Conditioned Total' AND ColumnName='Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
-      # Subtract duct return plenum conditioned floor area
-      query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='InputVerificationandResultsSummary' AND ReportForString='Entire Facility' AND TableName='Zone Summary' AND RowName LIKE '%RET AIR ZONE' AND ColumnName='Area' AND Units='m2'"
-      sql_value -= UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
     end
 

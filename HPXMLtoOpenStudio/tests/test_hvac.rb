@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
-# TODO: Add fan/pump checks
-
 require_relative '../resources/minitest_helper'
-require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
 require 'fileutils'

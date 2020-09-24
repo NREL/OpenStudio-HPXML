@@ -3,7 +3,6 @@
 # Require all gems up front; this is much faster than multiple resource
 # files lazy loading as needed, as it prevents multiple lookups for the
 # same gem.
-require 'openstudio'
 require 'pathname'
 require 'csv'
 require 'oga'
