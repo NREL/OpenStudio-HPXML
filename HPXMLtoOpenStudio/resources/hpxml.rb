@@ -2202,12 +2202,6 @@ class HPXML < Object
           fail "For Window '#{@id}', overhangs distance to bottom (#{@overhangs_distance_to_bottom_of_window}) must be greater than distance to top (#{@overhangs_distance_to_top_of_window})."
         end
       end
-      # TODO: Remove this error when we can support it w/ EnergyPlus
-      if (not @interior_shading_factor_summer.nil?) && (not @interior_shading_factor_winter.nil?)
-        if @interior_shading_factor_summer > @interior_shading_factor_winter
-          fail "SummerShadingCoefficient (#{interior_shading_factor_summer}) must be less than or equal to WinterShadingCoefficient (#{interior_shading_factor_winter}) for window '#{@id}'."
-        end
-      end
 
       return errors
     end

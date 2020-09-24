@@ -80,7 +80,6 @@ def create_hpxmls
     'invalid_files/invalid-runperiod.xml' => 'base.xml',
     'invalid_files/invalid-timestep.xml' => 'base.xml',
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
-    'invalid_files/invalid-window-interior-shading.xml' => 'base.xml',
     'invalid_files/invalid-wmo.xml' => 'base.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
@@ -2230,9 +2229,6 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[2].interior_shading_factor_winter = 0.5
     hpxml.windows[3].interior_shading_factor_summer = 1.0
     hpxml.windows[3].interior_shading_factor_winter = 1.0
-  elsif ['invalid_files/invalid-window-interior-shading.xml'].include? hpxml_file
-    hpxml.windows[0].interior_shading_factor_summer = 0.85
-    hpxml.windows[0].interior_shading_factor_winter = 0.7
   elsif ['base-enclosure-windows-none.xml'].include? hpxml_file
     hpxml.windows.clear
   elsif ['invalid_files/net-area-negative-wall.xml'].include? hpxml_file
