@@ -10,7 +10,7 @@ class EPlus
   FuelTypeWoodPellets = 'OtherFuel2'
   FuelTypeCoal = 'Coal'
 
-  def self.input_fuel_map(hpxml_fuel)
+  def self.fuel_type(hpxml_fuel)
     # Name of fuel used as inputs to E+ objects
     if [HPXML::FuelTypeElectricity].include? hpxml_fuel
       return FuelTypeElectricity
@@ -37,19 +37,6 @@ class EPlus
       return FuelTypeCoal
     else
       fail "Unexpected HPXML fuel '#{hpxml_fuel}'."
-    end
-  end
-
-  def self.output_fuel_map(ep_fuel)
-    # Name of fuel used in E+ outputs
-    if ep_fuel == FuelTypeElectricity
-      return 'Electric'
-    elsif ep_fuel == FuelTypeNaturalGas
-      return 'Gas'
-    elsif ep_fuel == FuelTypeOil
-      return 'FuelOil#2'
-    else
-      return ep_fuel
     end
   end
 end
