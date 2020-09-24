@@ -1260,7 +1260,7 @@ class Airflow
       obj_name = "#{obj_type_name} #{index}"
       days_shift = -1.0 / 24.0 # Shift by 1 hour
       obj_sch = HotWaterSchedule.new(model, obj_type_name, @nbeds, days_shift, 24)
-      Schedule.set_schedule_type_limits(model, obj_sch.schedule, Constants.ScheduleTypeLimitsTemperature)
+      Schedule.set_schedule_type_limits(model, obj_sch.schedule, Constants.ScheduleTypeLimitsFraction)
       obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       obj_sch_sensor.setName("#{obj_name} sch s")
       obj_sch_sensor.setKeyName(obj_sch.schedule.name.to_s)
