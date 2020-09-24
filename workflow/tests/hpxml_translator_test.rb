@@ -806,7 +806,10 @@ class HPXMLTest < MiniTest::Test
       assert_in_epsilon(hpxml_value, sql_value, 0.02)
 
       # SHGC
-      # TODO: Affected by interior shading
+      hpxml_value = subsurface.shgc
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Glass SHGC'"
+      sql_value = sqlFile.execAndReturnFirstDouble(query).get
+      assert_in_delta(hpxml_value, sql_value, 0.01)
 
       # Azimuth
       hpxml_value = subsurface.azimuth

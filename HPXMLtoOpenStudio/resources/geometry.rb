@@ -167,7 +167,9 @@ class Geometry
     people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
 
     # Create schedule
-    activity_sch = OpenStudio::Model::ScheduleRuleset.new(model, activity_per_person)
+    activity_sch = OpenStudio::Model::ScheduleConstant.new(model)
+    activity_sch.setValue(activity_per_person)
+    activity_sch.setName(Constants.ObjectNameOccupants + ' activity schedule')
 
     # Add people definition for the occ
     occ_def = OpenStudio::Model::PeopleDefinition.new(model)
