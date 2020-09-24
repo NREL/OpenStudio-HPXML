@@ -1417,7 +1417,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('shared_mech_vent_flow_rate', false)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('shared_mech_vent_in_unit_flow_rate', false)
     arg.setDisplayName('Shared Mechanical Ventilation: In-Unit Flow Rate')
     arg.setDescription('The flow rate delivered to the dwelling unit. This is required for a shared mechanical ventilation system.')
     arg.setUnits('CFM')
@@ -1443,7 +1443,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('shared_mech_vent_preheating_fraction_heat_load_served', false)
     arg.setDisplayName('Shared Mechanical Ventilation: Preheating Fraction Ventilation Heat Load Served')
     arg.setDescription('Fraction of heating load introduced by the shared ventilation system that is met by the preconditioning heating equipment.')
-    arg.setUnits('COP')
+    arg.setUnits('Frac')
     args << arg
 
     cooling_system_fuel_choices = OpenStudio::StringVector.new
@@ -1463,7 +1463,60 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('shared_mech_vent_precooling_fraction_cool_load_served', false)
     arg.setDisplayName('Shared Mechanical Ventilation: Precooling Fraction Ventilation Cool Load Served')
     arg.setDescription('Fraction of cooling load introduced by the shared ventilation system that is met by the preconditioning cooling equipment.')
-    arg.setUnits('COP')
+    arg.setUnits('Frac')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_fan_type_2', mech_vent_fan_type_choices, true)
+    arg.setDisplayName('Mechanical Ventilation 2: Fan Type')
+    arg.setDescription("The type of the second mechanical ventilation. Use 'none' if there is no second mechanical ventilation system.")
+    arg.setDefaultValue('none')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_flow_rate_2', true)
+    arg.setDisplayName('Mechanical Ventilation 2: Flow Rate')
+    arg.setDescription('The flow rate of the second mechanical ventilation.')
+    arg.setUnits('CFM')
+    arg.setDefaultValue(110)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_hours_in_operation_2', true)
+    arg.setDisplayName('Mechanical Ventilation 2: Hours In Operation')
+    arg.setDescription('The hours in operation of the second mechanical ventilation.')
+    arg.setUnits('hrs')
+    arg.setDefaultValue(24)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_total_recovery_efficiency_type_2', mech_vent_recovery_efficiency_type_choices, true)
+    arg.setDisplayName('Mechanical Ventilation 2: Total Recovery Efficiency Type')
+    arg.setDescription('The total recovery efficiency type of the second mechanical ventilation.')
+    arg.setDefaultValue('Unadjusted')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_total_recovery_efficiency_2', true)
+    arg.setDisplayName('Mechanical Ventilation 2: Total Recovery Efficiency')
+    arg.setDescription('The Unadjusted or Adjusted total recovery efficiency of the second mechanical ventilation.')
+    arg.setUnits('Frac')
+    arg.setDefaultValue(0.48)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_sensible_recovery_efficiency_type_2', mech_vent_recovery_efficiency_type_choices, true)
+    arg.setDisplayName('Mechanical Ventilation 2: Sensible Recovery Efficiency Type')
+    arg.setDescription('The sensible recovery efficiency type of the second mechanical ventilation.')
+    arg.setDefaultValue('Unadjusted')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_sensible_recovery_efficiency_2', true)
+    arg.setDisplayName('Mechanical Ventilation 2: Sensible Recovery Efficiency')
+    arg.setDescription('The Unadjusted or Adjusted sensible recovery efficiency of the second mechanical ventilation.')
+    arg.setUnits('Frac')
+    arg.setDefaultValue(0.72)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_fan_power_2', true)
+    arg.setDisplayName('Mechanical Ventilation 2: Fan Power')
+    arg.setDescription('The fan power of the second mechanical ventilation.')
+    arg.setUnits('W')
+    arg.setDefaultValue(30)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('kitchen_fans_present', true)
@@ -3425,7 +3478,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              mech_vent_sensible_recovery_efficiency: runner.getDoubleArgumentValue('mech_vent_sensible_recovery_efficiency', user_arguments),
              mech_vent_fan_power: runner.getDoubleArgumentValue('mech_vent_fan_power', user_arguments),
              mech_vent_is_shared_system: runner.getBoolArgumentValue('mech_vent_is_shared_system', user_arguments),
-             shared_mech_vent_flow_rate: runner.getOptionalDoubleArgumentValue('shared_mech_vent_flow_rate', user_arguments),
+             shared_mech_vent_in_unit_flow_rate: runner.getOptionalDoubleArgumentValue('shared_mech_vent_in_unit_flow_rate', user_arguments),
              shared_mech_vent_frac_recirculation: runner.getOptionalDoubleArgumentValue('shared_mech_vent_frac_recirculation', user_arguments),
              shared_mech_vent_preheating_fuel: runner.getOptionalStringArgumentValue('shared_mech_vent_preheating_fuel', user_arguments),
              shared_mech_vent_preheating_efficiency: runner.getOptionalDoubleArgumentValue('shared_mech_vent_preheating_efficiency', user_arguments),
@@ -3433,6 +3486,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              shared_mech_vent_precooling_fuel: runner.getOptionalStringArgumentValue('shared_mech_vent_precooling_fuel', user_arguments),
              shared_mech_vent_precooling_efficiency: runner.getOptionalDoubleArgumentValue('shared_mech_vent_precooling_efficiency', user_arguments),
              shared_mech_vent_precooling_fraction_cool_load_served: runner.getOptionalDoubleArgumentValue('shared_mech_vent_precooling_fraction_cool_load_served', user_arguments),
+             mech_vent_fan_type_2: runner.getStringArgumentValue('mech_vent_fan_type_2', user_arguments),
+             mech_vent_flow_rate_2: runner.getDoubleArgumentValue('mech_vent_flow_rate_2', user_arguments),
+             mech_vent_hours_in_operation_2: runner.getDoubleArgumentValue('mech_vent_hours_in_operation_2', user_arguments),
+             mech_vent_total_recovery_efficiency_type_2: runner.getStringArgumentValue('mech_vent_total_recovery_efficiency_type_2', user_arguments),
+             mech_vent_total_recovery_efficiency_2: runner.getDoubleArgumentValue('mech_vent_total_recovery_efficiency_2', user_arguments),
+             mech_vent_sensible_recovery_efficiency_type_2: runner.getStringArgumentValue('mech_vent_sensible_recovery_efficiency_type_2', user_arguments),
+             mech_vent_sensible_recovery_efficiency_2: runner.getDoubleArgumentValue('mech_vent_sensible_recovery_efficiency_2', user_arguments),
+             mech_vent_fan_power_2: runner.getDoubleArgumentValue('mech_vent_fan_power_2', user_arguments),
              kitchen_fans_present: runner.getBoolArgumentValue('kitchen_fans_present', user_arguments),
              kitchen_fans_quantity: runner.getOptionalIntegerArgumentValue('kitchen_fans_quantity', user_arguments),
              kitchen_fans_flow_rate: runner.getOptionalDoubleArgumentValue('kitchen_fans_flow_rate', user_arguments),
@@ -4811,7 +4872,7 @@ class HPXMLFile
 
       if args[:mech_vent_is_shared_system]
         is_shared_system = args[:mech_vent_is_shared_system]
-        in_unit_flow_rate = args[:shared_mech_vent_flow_rate].get
+        in_unit_flow_rate = args[:shared_mech_vent_in_unit_flow_rate].get
         fraction_recirculation = args[:shared_mech_vent_frac_recirculation].get
         if args[:shared_mech_vent_preheating_fuel].is_initialized && args[:shared_mech_vent_preheating_efficiency].is_initialized && args[:shared_mech_vent_preheating_fraction_heat_load_served].is_initialized
           preheating_fuel = args[:shared_mech_vent_preheating_fuel].get
@@ -4845,6 +4906,50 @@ class HPXMLFile
                                  precooling_fuel: precooling_fuel,
                                  precooling_efficiency_cop: precooling_efficiency_cop,
                                  precooling_fraction_load_served: precooling_fraction_load_served)
+    end
+
+    if args[:mech_vent_fan_type_2] != 'none'
+
+      if args[:mech_vent_fan_type_2].include? 'recovery ventilator'
+
+        if args[:mech_vent_fan_type_2].include? 'energy'
+
+          if args[:mech_vent_total_recovery_efficiency_type_2] == 'Unadjusted'
+            total_recovery_efficiency = args[:mech_vent_total_recovery_efficiency_2]
+          elsif args[:mech_vent_total_recovery_efficiency_type_2] == 'Adjusted'
+            total_recovery_efficiency_adjusted = args[:mech_vent_total_recovery_efficiency_2]
+          end
+
+        end
+
+        if args[:mech_vent_sensible_recovery_efficiency_type_2] == 'Unadjusted'
+          sensible_recovery_efficiency = args[:mech_vent_sensible_recovery_efficiency_2]
+        elsif args[:mech_vent_sensible_recovery_efficiency_type_2] == 'Adjusted'
+          sensible_recovery_efficiency_adjusted = args[:mech_vent_sensible_recovery_efficiency_2]
+        end
+
+      end
+
+      distribution_system_idref = nil
+      if args[:mech_vent_fan_type_2] == HPXML::MechVentTypeCFIS
+        hpxml.hvac_distributions.each do |hvac_distribution|
+          next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+
+          distribution_system_idref = hvac_distribution.id
+        end
+      end
+
+      hpxml.ventilation_fans.add(id: 'SecondMechanicalVentilation',
+                                 fan_type: args[:mech_vent_fan_type_2],
+                                 rated_flow_rate: args[:mech_vent_flow_rate_2],
+                                 hours_in_operation: args[:mech_vent_hours_in_operation_2],
+                                 used_for_whole_building_ventilation: true,
+                                 total_recovery_efficiency: total_recovery_efficiency,
+                                 total_recovery_efficiency_adjusted: total_recovery_efficiency_adjusted,
+                                 sensible_recovery_efficiency: sensible_recovery_efficiency,
+                                 sensible_recovery_efficiency_adjusted: sensible_recovery_efficiency_adjusted,
+                                 fan_power: args[:mech_vent_fan_power_2],
+                                 distribution_system_idref: distribution_system_idref)
     end
 
     if args[:kitchen_fans_present]
