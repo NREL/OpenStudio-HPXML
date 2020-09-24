@@ -859,17 +859,17 @@ class Constructions
   end
 
   def self.apply_window(runner, model, subsurfaces, constr_name, weather,
-                        is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
+                        heat_sch, cool_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
 
     apply_window_skylight(runner, model, 'Window', subsurfaces, constr_name, weather,
-                          is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
+                          heat_sch, cool_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
   end
 
   def self.apply_skylight(runner, model, subsurfaces, constr_name, weather,
-                          is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
+                          heat_sch, cool_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
 
     apply_window_skylight(runner, model, 'Skylight', subsurfaces, constr_name, weather,
-                          is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
+                          heat_sch, cool_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
   end
 
   def self.apply_partition_walls(runner, model, constr_name, drywall_thick_in, frac_of_ffa,
@@ -1179,53 +1179,64 @@ class Constructions
   end
 
   def self.apply_window_skylight(runner, model, type, subsurfaces, constr_name, weather,
-                                 is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
+                                 heat_sch, cool_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
 
     return if subsurfaces.empty?
 
     # Define shade and schedule
-    sc = nil
-    if (cool_shade_mult < 1) || (heat_shade_mult < 1)
+    { 'Cooling' => [cool_sch, cool_shade_mult],
+      'Heating' => [heat_sch, heat_shade_mult] }.each do |mode, values|
+      sch, shade_mult = values
+      next if shade_mult >= 1.0
+
       # EnergyPlus doesn't like shades that absorb no heat, transmit no heat or reflect no heat.
-      if cool_shade_mult == 1
-        cool_shade_mult = 0.999
-      end
-      if heat_shade_mult == 1
-        heat_shade_mult = 0.999
+      if shade_mult == 1
+        shade_mult = 0.999
       end
 
-      total_shade_trans = cool_shade_mult / heat_shade_mult * 0.999
+      total_shade_trans = shade_mult
       total_shade_abs = 0.00001
-      total_shade_ref = 1 - total_shade_trans - total_shade_abs
+      total_shade_ref = 1.0 - total_shade_trans - total_shade_abs
 
-      # CoolingShade
-      sm = OpenStudio::Model::Shade.new(model)
-      sm.setName("#{type}CoolingShade")
-      sm.setSolarTransmittance(total_shade_trans)
-      sm.setSolarReflectance(total_shade_ref)
-      sm.setVisibleTransmittance(total_shade_trans)
-      sm.setVisibleReflectance(total_shade_ref)
-      sm.setThermalHemisphericalEmissivity(total_shade_abs)
-      sm.setThermalTransmittance(total_shade_trans)
-      sm.setThickness(0.0001)
-      sm.setConductivity(10000)
-      sm.setShadetoGlassDistance(0.001)
-      sm.setTopOpeningMultiplier(0)
-      sm.setBottomOpeningMultiplier(0)
-      sm.setLeftSideOpeningMultiplier(0)
-      sm.setRightSideOpeningMultiplier(0)
-      sm.setAirflowPermeability(0)
+      # Reuse existing ShadingControl?
+      sc = nil
+      model.getShadingControls.each do |shading_control|
+        next unless (shading_control.shadingMaterial.get.to_Shade.get.solarTransmittance - shade_mult).abs < 0.0001
 
-      # ShadingControl
-      sc = OpenStudio::Model::ShadingControl.new(sm)
-      sc.setName("#{type}ShadingControl")
-      sc.setShadingType('InteriorShade')
-      sc.setShadingControlType('OnIfScheduleAllows')
-      sc.setSchedule(is_sch.schedule)
+        sc = shading_control
+        break
+      end
+
+      if sc.nil?
+        # CoolingShade
+        sm = OpenStudio::Model::Shade.new(model)
+        sm.setName("#{type}#{mode}Shade")
+        sm.setSolarTransmittance(total_shade_trans)
+        sm.setSolarReflectance(total_shade_ref)
+        sm.setVisibleTransmittance(total_shade_trans)
+        sm.setVisibleReflectance(total_shade_ref)
+        sm.setThermalHemisphericalEmissivity(total_shade_abs)
+        sm.setThermalTransmittance(total_shade_trans)
+        sm.setThickness(0.0001)
+        sm.setConductivity(10000)
+        sm.setShadetoGlassDistance(0.001)
+        sm.setTopOpeningMultiplier(0)
+        sm.setBottomOpeningMultiplier(0)
+        sm.setLeftSideOpeningMultiplier(0)
+        sm.setRightSideOpeningMultiplier(0)
+        sm.setAirflowPermeability(0)
+
+        # ShadingControl
+        sc = OpenStudio::Model::ShadingControl.new(sm)
+        sc.setName("#{type}#{mode}ShadingControl")
+        sc.setShadingType('InteriorShade')
+        sc.setShadingControlType('OnIfScheduleAllows')
+        sc.setSchedule(sch.schedule)
+      end
 
       # Add shading controls
       subsurfaces.each do |subsurface|
-        subsurface.setShadingControl(sc)
+        subsurface.addShadingControl(sc)
       end
     end
 
@@ -1238,7 +1249,7 @@ class Constructions
       # by 1.20." Thus we divide by 1.2 to get the vertical position value.
       ufactor /= 1.2
     end
-    glaz_mat = GlazingMaterial.new("#{type}Material", ufactor, shgc * heat_shade_mult)
+    glaz_mat = GlazingMaterial.new("#{type}Material", ufactor, shgc)
 
     # Set paths
     path_fracs = [1]
