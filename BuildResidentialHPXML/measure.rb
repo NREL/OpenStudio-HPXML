@@ -57,6 +57,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('weather')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('random_seed', false)
+    arg.setDisplayName('Random Seed')
+    arg.setDescription('Seed for random number generation.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('building_id', false)
+    arg.setDisplayName('Building ID')
+    arg.setDescription('Building ID, also used for RNG seed if a seed is not provided.')
+    args << arg
+
+
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_program_used', false)
     arg.setDisplayName('Software Program Used')
     arg.setDescription('The name of the software program used.')
@@ -133,7 +144,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('schedules_type', schedules_type_choices, true)
     arg.setDisplayName('Schedules: Type')
-    arg.setDescription("The type of occupant-related schedules to use. Schedules corresponding to 'default' are average (e.g., Building America). Schedules corresponding to 'stochastic' are generated using time-inhomogenous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data.")
+    arg.setDescription(
+      "The type of occupant-related schedules to use. Schedules " \
+      "corresponding to 'default' are average (e.g., Building America). " \
+      "Schedules corresponding to 'stochastic' are generated using " \
+      "time-inhomogenous Markov chains derived from American Time Use Survey " \
+      "data, and supplemented with sampling duration and power level from " \
+      "NEEA RBSA data as well as DHW draw duration and flow rate from " \
+      "Aquacraft/AWWA data."
+    )
     arg.setDefaultValue('default')
     args << arg
 
@@ -2868,7 +2887,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   end
 
   def get_argument_values(runner, user_arguments)
-    return { simulation_control_timestep: runner.getOptionalIntegerArgumentValue('simulation_control_timestep', user_arguments),
+    return { building_id: runner.getOptionalIntegerArgumentValue('building_id', user_arguments),
+             random_seed: runner.getOptionalIntegerArgumentValue('random_seed', user_arguments),
+             simulation_control_timestep: runner.getOptionalIntegerArgumentValue('simulation_control_timestep', user_arguments),
              simulation_control_run_period_begin_month: runner.getOptionalIntegerArgumentValue('simulation_control_run_period_begin_month', user_arguments),
              simulation_control_run_period_begin_day_of_month: runner.getOptionalIntegerArgumentValue('simulation_control_run_period_begin_day_of_month', user_arguments),
              simulation_control_run_period_end_month: runner.getOptionalIntegerArgumentValue('simulation_control_run_period_end_month', user_arguments),
@@ -3483,7 +3504,13 @@ class HPXMLFile
       timestep.setNumberOfTimestepsPerHour(60 / args[:simulation_control_timestep].get)
     end
 
-    schedule_generator = ScheduleGenerator.new(runner: runner, model: model, weather: weather)
+    building_id = args[:building_id].get if args[:building_id].is_initialized
+    random_seed = args[:random_seed].get if args[:random_seed].is_initialized
+
+    schedule_generator = ScheduleGenerator.new(
+      runner: runner, model: model, weather: weather,
+      building_id: building_id, random_seed: random_seed
+    )
 
     # create the schedule
     if args[:geometry_num_occupants] == Constants.Auto
