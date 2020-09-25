@@ -44,11 +44,13 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
       if window.interior_shading_factor_summer == 1
         assert_nil(os_summer_control) # No shading
       else
+        refute_nil(os_summer_control)
         assert_equal(window.interior_shading_factor_summer, os_summer_control.shadingMaterial.get.to_Shade.get.solarTransmittance)
       end
       if window.interior_shading_factor_winter == 1
         assert_nil(os_winter_control) # No shading
       else
+        refute_nil(os_winter_control)
         assert_equal(window.interior_shading_factor_winter, os_winter_control.shadingMaterial.get.to_Shade.get.solarTransmittance)
       end
     end
