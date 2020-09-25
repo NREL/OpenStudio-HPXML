@@ -254,6 +254,11 @@ other multifamily buffer space  E.g., enclosed unconditioned stairwell          
 other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                       Attached/Multifamily only
 ==============================  ================================================  ========================================================  =========================
 
+Interior partition surfaces (e.g., walls between rooms inside conditioned space, or the floor between two conditioned stories) can be excluded.
+
+For Attached/Multifamily buildings, surfaces between unconditioned space and the neigboring unit's same unconditioned space should set ``InteriorAdjacentTo`` and ``ExteriorAdjacentTo`` to the same value.
+For example, a foundation wall between the unit's vented crawlspace and the neighboring unit's vented crawlspace would use ``InteriorAdjacentTo="crawlspace - vented"`` and ``ExteriorAdjacentTo="crawlspace - vented"``.
+
 .. warning::
 
   It is the software tool's responsibility to provide the appropriate building surfaces. 
@@ -341,8 +346,7 @@ Rim joists can have an optional element provided for ``Siding``; if not provided
 HPXML Walls
 ***********
 
-Any wall that has no contact with the ground and bounds a space type should be specified as an ``Enclosure/Walls/Wall``. 
-Interior walls (for example, walls solely within the conditioned space of the building) are not required.
+Any wall that has no contact with the ground and bounds a space type should be specified as an ``Enclosure/Walls/Wall``.
 
 Walls are defined by their ``Area`` and ``Insulation/AssemblyEffectiveRValue``.
 The choice of ``WallType`` has a secondary effect on heat transfer in that it informs the assumption of wall thermal mass.
@@ -394,9 +398,10 @@ HPXML Frame Floors
 ******************
 
 Any horizontal floor/ceiling surface that is not in contact with the ground (Slab) nor adjacent to ambient conditions above (Roof) should be specified as an ``Enclosure/FrameFloors/FrameFloor``.
+
 Frame floors in an attached/multifamily building that are adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space" must have the ``extension/OtherSpaceAboveOrBelow`` property set to signify whether the other space is "above" or "below".
 
-Frame floors are primarily defined by their ``Insulation/AssemblyEffectiveRValue``.
+Frame floors are primarily defined by their ``Area`` and ``Insulation/AssemblyEffectiveRValue``.
 
 HPXML Slabs
 ***********

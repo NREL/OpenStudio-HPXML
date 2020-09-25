@@ -87,6 +87,7 @@ def create_osws
     'base-enclosure-beds-2.osw' => 'base.osw',
     'base-enclosure-beds-4.osw' => 'base.osw',
     'base-enclosure-beds-5.osw' => 'base.osw',
+    # 'base-enclosure-common-surfaces.osw' => 'base.osw',
     'base-enclosure-garage.osw' => 'base.osw',
     'base-enclosure-infil-ach-house-pressure.osw' => 'base.osw',
     'base-enclosure-infil-cfm-house-pressure.osw' => 'base-enclosure-infil-cfm50.osw',
@@ -198,6 +199,9 @@ def create_osws
     'base-mechvent-hrv.osw' => 'base.osw',
     'base-mechvent-hrv-asre.osw' => 'base.osw',
     # 'base-mechvent-multiple.osw' => 'base.osw',
+    # 'base-mechvent-shared.osw' => 'base.osw',
+    # 'base-mechvent-shared-multiple.osw' => 'base.osw',
+    # 'base-mechvent-shared-preconditioning.osw' => 'base.osw',
     'base-mechvent-supply.osw' => 'base.osw',
     'base-mechvent-whole-house-fan.osw' => 'base.osw',
     'base-misc-defaults.osw' => 'base.osw',
@@ -225,6 +229,8 @@ def create_osws
     'extra-second-heating-system-fireplace.osw' => 'base.osw',
     'extra-pv-shared.osw' => 'base-single-family-attached.osw',
     'extra-enclosure-garage-partially-protruded.osw' => 'base.osw',
+    'extra-mechvent-shared.osw' => 'base-single-family-attached.osw',
+    'extra-mechvent-shared-preconditioning.osw' => 'extra-mechvent-shared.osw',
     'extra-vacancy-6-months.osw' => 'base.osw',
 
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
@@ -487,6 +493,15 @@ def get_values(osw_file, step)
     step.setArgument('mech_vent_sensible_recovery_efficiency_type', 'Unadjusted')
     step.setArgument('mech_vent_sensible_recovery_efficiency', 0.72)
     step.setArgument('mech_vent_fan_power', 30)
+    step.setArgument('mech_vent_is_shared_system', false)
+    step.setArgument('mech_vent_fan_type_2', 'none')
+    step.setArgument('mech_vent_flow_rate_2', 110)
+    step.setArgument('mech_vent_hours_in_operation_2', 24)
+    step.setArgument('mech_vent_total_recovery_efficiency_type_2', 'Unadjusted')
+    step.setArgument('mech_vent_total_recovery_efficiency_2', 0.48)
+    step.setArgument('mech_vent_sensible_recovery_efficiency_type_2', 'Unadjusted')
+    step.setArgument('mech_vent_sensible_recovery_efficiency_2', 0.72)
+    step.setArgument('mech_vent_fan_power_2', 30)
     step.setArgument('kitchen_fans_present', false)
     step.setArgument('bathroom_fans_present', false)
     step.setArgument('whole_house_fan_present', false)
@@ -1719,6 +1734,23 @@ def get_values(osw_file, step)
   elsif ['extra-enclosure-garage-partially-protruded.osw'].include? osw_file
     step.setArgument('geometry_garage_width', 12)
     step.setArgument('geometry_garage_protrusion', 0.5)
+  elsif ['extra-mechvent-shared.osw'].include? osw_file
+    step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeSupply)
+    step.setArgument('mech_vent_flow_rate', 800)
+    step.setArgument('mech_vent_fan_power', 240)
+    step.setArgument('mech_vent_is_shared_system', true)
+    step.setArgument('shared_mech_vent_in_unit_flow_rate', 80.0)
+    step.setArgument('shared_mech_vent_frac_recirculation', 0.5)
+    step.setArgument('mech_vent_fan_type_2', HPXML::MechVentTypeExhaust)
+    step.setArgument('mech_vent_flow_rate_2', 72)
+    step.setArgument('mech_vent_fan_power_2', 26)
+  elsif ['extra-mechvent-shared-preconditioning.osw'].include? osw_file
+    step.setArgument('shared_mech_vent_preheating_fuel', HPXML::FuelTypeNaturalGas)
+    step.setArgument('shared_mech_vent_preheating_efficiency', 0.92)
+    step.setArgument('shared_mech_vent_preheating_fraction_heat_load_served', 0.7)
+    step.setArgument('shared_mech_vent_precooling_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('shared_mech_vent_precooling_efficiency', 4.0)
+    step.setArgument('shared_mech_vent_precooling_fraction_cool_load_served', 0.8)
   elsif ['extra-vacancy-6-months.osw'].include? osw_file
     step.setArgument('schedules_type', 'stochastic')
     step.setArgument('schedules_vacancy_begin_month', 1)
@@ -1988,6 +2020,7 @@ def create_hpxmls
     'base-enclosure-beds-2.xml' => 'base.xml',
     'base-enclosure-beds-4.xml' => 'base.xml',
     'base-enclosure-beds-5.xml' => 'base.xml',
+    'base-enclosure-common-surfaces.xml' => 'base-enclosure-attached-multifamily.xml',
     'base-enclosure-garage.xml' => 'base.xml',
     'base-enclosure-infil-ach-house-pressure.xml' => 'base.xml',
     'base-enclosure-infil-cfm-house-pressure.xml' => 'base-enclosure-infil-cfm50.xml',
@@ -3210,6 +3243,15 @@ def set_hpxml_walls(hpxml_file, hpxml)
       wall.solar_absorptance = nil
       wall.color = HPXML::ColorMedium
     end
+  elsif ['base-enclosure-common-surfaces.xml'].include? hpxml_file
+    hpxml.walls.add(id: 'CommonWallUnventedAttic',
+                    exterior_adjacent_to: HPXML::LocationAtticUnvented,
+                    interior_adjacent_to: HPXML::LocationAtticUnvented,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    area: 113,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 4)
   end
   hpxml.walls.each do |wall|
     next unless wall.is_interior
@@ -3522,6 +3564,34 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls[-1].area = 0.05
   elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
     hpxml.foundation_walls[-1].area = 880
+  elsif ['base-enclosure-common-surfaces.xml'].include? hpxml_file
+    hpxml.foundation_walls[1].area = 240
+    hpxml.foundation_walls.add(id: 'FoundationWallCrawlspace',
+                               exterior_adjacent_to: HPXML::LocationGround,
+                               interior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                               height: 4,
+                               area: 240,
+                               thickness: 8,
+                               depth_below_grade: 3,
+                               insulation_interior_r_value: 0,
+                               insulation_interior_distance_to_top: 0,
+                               insulation_interior_distance_to_bottom: 0,
+                               insulation_exterior_distance_to_top: 0,
+                               insulation_exterior_distance_to_bottom: 0,
+                               insulation_exterior_r_value: 0)
+    hpxml.foundation_walls.add(id: 'CommonFoundationWall',
+                               exterior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                               interior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                               height: 4,
+                               area: 240,
+                               thickness: 5.5,
+                               depth_below_grade: 3,
+                               insulation_interior_r_value: 0,
+                               insulation_interior_distance_to_top: 0,
+                               insulation_interior_distance_to_bottom: 0,
+                               insulation_exterior_distance_to_top: 0,
+                               insulation_exterior_distance_to_bottom: 0,
+                               insulation_exterior_r_value: 0)
   elsif ['invalid_files/enclosure-basement-missing-exterior-foundation-wall.xml'].include? hpxml_file
     hpxml.foundation_walls[0].delete
   end
@@ -3658,6 +3728,18 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            area: 150,
                            insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
+  elsif ['base-enclosure-common-surfaces.xml'].include? hpxml_file
+    hpxml.frame_floors[1].area = 650
+    hpxml.frame_floors.add(id: 'FloorAboveVentedCrawlspace',
+                           exterior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
+                           area: 350,
+                           insulation_assembly_r_value: 18.7)
+    hpxml.frame_floors.add(id: 'CommonFrameFloorVentedCrawlspace',
+                           exterior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                           interior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                           area: 350,
+                           insulation_assembly_r_value: 3.0)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.frame_floors.size
       hpxml.frame_floors[n - 1].area /= 9.0
@@ -3843,6 +3925,20 @@ def set_hpxml_slabs(hpxml_file, hpxml)
     hpxml.slabs << hpxml.slabs[-1].dup
     hpxml.slabs[-1].id = 'TinySlab'
     hpxml.slabs[-1].area = 0.05
+  elsif ['base-enclosure-common-surfaces.xml'].include? hpxml_file
+    hpxml.slabs[0].area = 1000
+    hpxml.slabs[0].exposed_perimeter = 111
+    hpxml.slabs.add(id: 'SlabUnderCrawlspace',
+                    interior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                    area: 350,
+                    thickness: 0,
+                    exposed_perimeter: 39,
+                    perimeter_insulation_depth: 0,
+                    under_slab_insulation_width: 0,
+                    perimeter_insulation_r_value: 0,
+                    under_slab_insulation_r_value: 0,
+                    carpet_fraction: 0,
+                    carpet_r_value: 0)
   elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
     hpxml.slabs[0].interior_adjacent_to = HPXML::LocationBasementUnconditioned
     hpxml.slabs[0].depth_below_grade = 7.0
