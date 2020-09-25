@@ -427,7 +427,7 @@ class MonthWeekdayWeekendSchedule
 end
 
 class HotWaterSchedule
-  def initialize(model, obj_name, nbeds, days_shift = 0, exhaust_min = 0)
+  def initialize(model, obj_name, nbeds, days_shift = 0, dryer_exhaust_addtl_mins = 0)
     @model = model
     @sch_name = "#{obj_name} schedule"
     @schedule = nil
@@ -449,7 +449,7 @@ class HotWaterSchedule
     timestep_minutes = (60 / @model.getTimestep.numberOfTimestepsPerHour).to_i
     weeks = 1 # use a single week that repeats
 
-    data = loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks, exhaust_min)
+    data = loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks, dryer_exhaust_addtl_mins)
     @totflow, @maxflow, @ontime = loadDrawProfileStatsFromFile()
     @schedule = createSchedule(data, timestep_minutes, weeks)
   end
@@ -480,7 +480,7 @@ class HotWaterSchedule
 
   private
 
-  def loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks, exhaust_min)
+  def loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks, dryer_exhaust_addtl_mins)
     data = []
     if @file_prefix.nil?
       return data
@@ -518,13 +518,13 @@ class HotWaterSchedule
       end
     end
 
-    # Set nonzero items to one
-    # Set exactly exhaust_min number of ones behind last nonzero item
-    if exhaust_min > 0
+    if dryer_exhaust_addtl_mins > 0
+      # Clothes dryer exhaust vent should operate whenever the dryer is operating,
+      # plus additional time (dryer_exhaust_addtl_mins) after the dryer completes.
       items.reverse.each_with_index do |val, i|
         next unless val > 0
         place = (items.length - 1) - i
-        last = place + exhaust_min
+        last = place + dryer_exhaust_addtl_mins
         items.fill(1, place...last)
       end
     end

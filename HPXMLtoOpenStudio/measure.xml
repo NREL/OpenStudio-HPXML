@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>e3e2dc66-f113-42be-9822-55648eb0043c</version_id>
-  <version_modified>20200923T212045Z</version_modified>
+  <version_id>ce55695d-f5ba-4901-8ae8-242580878212</version_id>
+  <version_modified>20200925T230811Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -445,18 +445,6 @@
       <checksum>EA8598FF</checksum>
     </file>
     <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>66C24882</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B099AA1D</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.1.1</identifier>
@@ -466,12 +454,6 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>F1427F1D</checksum>
-    </file>
-    <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>EFF9998F</checksum>
     </file>
     <file>
       <filename>hvac.rb</filename>
@@ -496,6 +478,24 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>F57FF730</checksum>
+    </file>
+    <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D391F754</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>DAB214C5</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F89BB616</checksum>
     </file>
   </files>
 </measure>

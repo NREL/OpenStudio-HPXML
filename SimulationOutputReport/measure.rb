@@ -785,10 +785,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     if include_timeseries_airflows
       @airflows.each do |airflow_type, airflow|
-        shift = true
-        if airflow_type == AFT::ClothesDryerExhaust
-          shift = false
-        end
         airflow.timeseries_output = get_report_variable_data_timeseries(['EMS'], airflow.ems_variables.map { |var| "#{var}_timeseries_outvar" }, UnitConversions.convert(1.0, 'm^3/s', 'cfm'), 0, timeseries_frequency)
       end
     end

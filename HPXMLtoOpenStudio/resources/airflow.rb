@@ -1254,11 +1254,12 @@ class Airflow
     return obj_sch_sensors
   end
 
-  def self.apply_dryer_exhaust(model, dryer_object_array, obj_type_name)
+  def self.apply_dryer_exhaust(model, dryer_object_array)
     obj_sch_sensors = {}
+    obj_type_name = Constants.ObjectNameClothesDryerExhaust
     dryer_object_array.each_with_index do |dryer_object, index|
       obj_name = "#{obj_type_name} #{index}"
-      days_shift = -1.0 / 24.0 # Shift by 1 hour
+      days_shift = -1.0 / 24.0 # Shift by 1 hour relative to clothes washer
       obj_sch = HotWaterSchedule.new(model, obj_type_name, @nbeds, days_shift, 24)
       Schedule.set_schedule_type_limits(model, obj_sch.schedule, Constants.ScheduleTypeLimitsFraction)
       obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
@@ -1460,7 +1461,7 @@ class Airflow
   end
 
   def self.apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, clothes_dryers, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot,
-                                         infil_flow_actuator, cd_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map, dryer_sch_sensors_map)
+                                         infil_flow_actuator, cd_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map)
     infil_program.addLine('Set Qrange = 0')
     vent_fans_kitchen.each do |vent_kitchen|
       infil_program.addLine("Set Qrange = Qrange + #{UnitConversions.convert(vent_kitchen.rated_flow_rate * vent_kitchen.quantity, 'cfm', 'm^3/s').round(4)} * #{range_sch_sensors_map[vent_kitchen.id].name}")
@@ -1475,7 +1476,7 @@ class Airflow
     clothes_dryers.each do |clothes_dryer|
       next unless clothes_dryer.is_vented
 
-      infil_program.addLine("Set Qdryer = Qdryer + #{UnitConversions.convert(clothes_dryer.vented_flow_rate, 'cfm', 'm^3/s').round(4)} * #{dryer_sch_sensors_map[clothes_dryer.id].name}")
+      infil_program.addLine("Set Qdryer = Qdryer + #{UnitConversions.convert(clothes_dryer.vented_flow_rate, 'cfm', 'm^3/s').round(4)} * #{dryer_exhaust_sch_sensors_map[clothes_dryer.id].name}")
     end
 
     infil_program.addLine("Set QWHV_sup = #{UnitConversions.convert(sup_cfm_tot, 'cfm', 'm^3/s').round(4)}")
@@ -1596,7 +1597,7 @@ class Airflow
   end
 
   def self.apply_mechanical_ventilation(model, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, clothes_dryers,
-                                        range_sch_sensors_map, bath_sch_sensors_map, dryer_sch_sensors_map, has_flue_chimney, hvac_map)
+                                        range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map, has_flue_chimney, hvac_map)
     # Categorize fans into different types
     vent_mech_preheat = vent_fans_mech.select { |vent_mech| (not vent_mech.preheating_efficiency_cop.nil?) }
     vent_mech_precool = vent_fans_mech.select { |vent_mech| (not vent_mech.precooling_efficiency_cop.nil?) }
@@ -1696,7 +1697,7 @@ class Airflow
     # Calculate Qfan, Qinf_adj
     # Calculate adjusted infiltration based on mechanical ventilation system
     apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, clothes_dryers, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot,
-                                  infil_flow_actuator, cd_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map, dryer_sch_sensors_map)
+                                  infil_flow_actuator, cd_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map)
 
     # Address load of Qfan (Qload)
     # Qload as variable for tracking outdoor air flow rate, excluding recirculation
@@ -1751,11 +1752,11 @@ class Airflow
     bath_sch_sensors_map = apply_local_ventilation(model, vent_fans_bath, Constants.ObjectNameMechanicalVentilationBathFan)
 
     # Clothes dryer exhaust
-    dryer_sch_sensors_map = apply_dryer_exhaust(model, clothes_dryers, Constants.ObjectNameClothesDryerExhaust)
+    dryer_exhaust_sch_sensors_map = apply_dryer_exhaust(model, clothes_dryers)
 
     # Get mechanical ventilation
     apply_mechanical_ventilation(model, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, clothes_dryers,
-                                 range_sch_sensors_map, bath_sch_sensors_map, dryer_sch_sensors_map, has_flue_chimney, hvac_map)
+                                 range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map, has_flue_chimney, hvac_map)
   end
 
   def self.apply_infiltration_to_living(living_ach50, living_const_ach, infil_program, weather, has_flue_chimney)

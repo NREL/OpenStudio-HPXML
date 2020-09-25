@@ -61,7 +61,7 @@ class HotWaterAndAppliances
     # Clothes dryer energy
     if not clothes_dryer.nil?
       cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, clothes_dryer.additional_properties.space.nil?)
-      days_shift = -1.0 / 24.0 # Shift by one hour
+      days_shift = -1.0 / 24.0 # Shift by 1 hour relative to clothes washer
       cd_schedule = HotWaterSchedule.new(model, Constants.ObjectNameClothesDryer, nbeds, days_shift)
       cd_design_level_e = cd_schedule.calcDesignLevelFromDailykWh(cd_annual_kwh / 365.0)
       cd_design_level_f = cd_schedule.calcDesignLevelFromDailyTherm(cd_annual_therm / 365.0)
