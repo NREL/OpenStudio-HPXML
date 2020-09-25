@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>10363459-db52-45cb-bad6-cb9dcd5903d6</version_id>
-  <version_modified>20200924T215141Z</version_modified>
+  <version_id>cd26e5ee-0716-431b-8c6a-cbebdb14f43a</version_id>
+  <version_modified>20200925T155046Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -451,33 +451,10 @@
       <checksum>5F3BA764</checksum>
     </file>
     <file>
-      <filename>constructions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6C97E791</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.0.0</identifier>
-        <min_compatible>3.0.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>2DF12EEA</checksum>
-    </file>
-    <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>E2741211</checksum>
-    </file>
-    <file>
-      <filename>test_constructions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F75711D7</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -490,6 +467,29 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>0B260607</checksum>
+    </file>
+    <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>EE29B4ED</checksum>
+    </file>
+    <file>
+      <filename>test_constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B9827DE1</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.0.0</identifier>
+        <min_compatible>3.0.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>ED054E9D</checksum>
     </file>
   </files>
 </measure>
