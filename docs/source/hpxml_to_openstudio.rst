@@ -21,7 +21,7 @@ HPXML files submitted to OpenStudio-HPXML should undergo a two step validation p
   The HPXML XSD Schema can be found at ``HPXMLtoOpenStudio/resources/HPXML.xsd``.
   It should be used by the software developer to validate their HPXML file prior to running the simulation.
   XSD Schemas are used to validate what elements/attributes/enumerations are available, data types for elements/attributes, the number/order of children elements, etc.
-  
+
   OpenStudio-HPXML **does not** validate the HPXML file against the XSD Schema and assumes the file submitted is valid.
 
 2. Validation using `Schematron <http://schematron.com/>`_
@@ -32,11 +32,11 @@ HPXML files submitted to OpenStudio-HPXML should undergo a two step validation p
   For example, if an element is specified with a particular value, the applicable enumerations of another element may change.
   
   OpenStudio-HPXML **automatically validates** the HPXML file against the Schematron document and reports any validation errors, but software developers may find it beneficial to also integrate Schematron validation into their software.
- 
+
 .. important::
 
   Usage of both validation approaches (XSD and Schematron) is recommended for developers actively working on creating HPXML files for EnergyPlus simulations:
-  
+
   - Validation against XSD for general correctness and usage of HPXML
   - Validation against Schematron for understanding XML document requirements specific to running EnergyPlus
 
@@ -230,6 +230,11 @@ other multifamily buffer space  E.g., enclosed unconditioned stairwell          
 other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                       Attached/Multifamily only
 ==============================  ================================================  ========================================================  =========================
 
+Interior partition surfaces (e.g., walls between rooms inside conditioned space, or the floor between two conditioned stories) can be excluded.
+
+For Attached/Multifamily buildings, surfaces between unconditioned space and the neigboring unit's same unconditioned space should set ``InteriorAdjacentTo`` and ``ExteriorAdjacentTo`` to the same value.
+For example, a foundation wall between the unit's vented crawlspace and the neighboring unit's vented crawlspace would use ``InteriorAdjacentTo="crawlspace - vented"`` and ``ExteriorAdjacentTo="crawlspace - vented"``.
+
 .. warning::
 
   It is the software tool's responsibility to provide the appropriate building surfaces. 
@@ -317,8 +322,7 @@ Rim joists can have an optional element provided for ``Siding``; if not provided
 HPXML Walls
 ***********
 
-Any wall that has no contact with the ground and bounds a space type should be specified as an ``Enclosure/Walls/Wall``. 
-Interior walls (for example, walls solely within the conditioned space of the building) are not required.
+Any wall that has no contact with the ground and bounds a space type should be specified as an ``Enclosure/Walls/Wall``.
 
 Walls are defined by their ``Area`` and ``Insulation/AssemblyEffectiveRValue``.
 The choice of ``WallType`` has a secondary effect on heat transfer in that it informs the assumption of wall thermal mass.
@@ -370,9 +374,10 @@ HPXML Frame Floors
 ******************
 
 Any horizontal floor/ceiling surface that is not in contact with the ground (Slab) nor adjacent to ambient conditions above (Roof) should be specified as an ``Enclosure/FrameFloors/FrameFloor``.
+
 Frame floors in an attached/multifamily building that are adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space" must have the ``extension/OtherSpaceAboveOrBelow`` property set to signify whether the other space is "above" or "below".
 
-Frame floors are primarily defined by their ``Insulation/AssemblyEffectiveRValue``.
+Frame floors are primarily defined by their ``Area`` and ``Insulation/AssemblyEffectiveRValue``.
 
 HPXML Slabs
 ***********
@@ -699,14 +704,13 @@ HPXML Mechanical Ventilation
 ****************************
 
 This section describes elements specified in HPXML's ``Systems/MechanicalVentilation``.
-``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` elements can be used to specify whole building ventilation, local ventilation, and/or cooling load reduction.
+``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` elements can be used to specify whole home ventilation, local ventilation, and/or cooling load reduction.
 
-Whole Building Ventilation
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Whole Home Ventilation
+~~~~~~~~~~~~~~~~~~~~~~
 
-Mechanical ventilation systems that provide whole building ventilation may each be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``UsedForWholeBuildingVentilation='true'``.
-Inputs including ``FanType``, ``TestedFlowRate`` (or ``RatedFlowRate``), ``HoursInOperation``, and ``FanPower`` must be provided.
-For a CFIS system, the flow rate should equal the amount of outdoor air provided to the distribution system.
+Mechanical ventilation systems that provide whole home ventilation may each be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``UsedForWholeBuildingVentilation='true'``.
+Inputs including ``FanType`` and ``HoursInOperation`` must be provided.
 
 Depending on the type of mechanical ventilation specified, additional elements are required:
 
@@ -722,6 +726,32 @@ central fan integrated supply (CFIS)                                            
 ====================================  ==========================  =======================  ================================
 
 Note that ``AdjustedSensibleRecoveryEfficiency`` and ``AdjustedTotalRecoveryEfficiency`` can be provided instead of ``SensibleRecoveryEfficiency`` and ``TotalRecoveryEfficiency``.
+
+The ventilation system may be optionally described as a shared system (i.e., serving multiple dwelling units) using ``IsSharedSystem``.
+If not provided, it is assumed to be false.
+
+If the ventilation system is not shared, the following inputs are available:
+
+- ``TestedFlowRate`` or ``RatedFlowRate``: The airflow rate. For a CFIS system, the flow rate should equal the amount of outdoor air provided to the distribution system.
+- ``FanPower``: The fan power for the highest airflow setting.
+
+If the ventilation system is shared, the following inputs are available:
+
+- ``TestedFlowRate`` or ``RatedFlowRate``: The airflow rate of the entire system.
+- ``FanPower``: The fan power for the entire system at highest airflow setting.
+- ``FractionRecirculation``: Fraction of the total supply air that is recirculated, with the remainder assumed to be outdoor air. The value must be 0 for exhaust only systems.
+- ``extension/InUnitFlowRate``: The flow rate delivered to the dwelling unit.
+- ``extension/PreHeating``: Optional. Element to specify if the supply air is preconditioned by heating equipment. It is not allowed for exhaust only systems. If provided, there are additional child elements required:
+
+  - ``Fuel``: Fuel type of the preconditioning heating equipment.
+  - ``AnnualHeatingEfficiency[Units="COP"]/Value``: Efficiency of the preconditioning heating equipment.
+  - ``FractionVentilationHeatLoadServed``: Fraction of heating load introduced by the shared ventilation system that is met by the preconditioning heating equipment.
+
+- ``extension/PreCooling``: Optional. Element to specify if the supply air is preconditioned by cooling equipment. It is not allowed for exhaust only systems. If provided, there are additional child elements required:
+
+  - ``Fuel``: Fuel type of the preconditioning cooling equipment.
+  - ``AnnualCoolingEfficiency[Units="COP"]/Value``: Efficiency of the preconditioning cooling equipment.
+  - ``FractionVentilationCoolLoadServed``: Fraction of cooling load introduced by the shared ventilation system that is met by the preconditioning cooling equipment.
 
 Local Ventilation
 ~~~~~~~~~~~~~~~~~
@@ -997,7 +1027,7 @@ If the location is not specified, the appliance is assumed to be in the living s
 HPXML Clothes Washer
 ********************
 
-An ``Appliances/ClothesWasher`` element can be specified; if not provided, a clothes washer will not be modeled.
+A single ``Appliances/ClothesWasher`` element can be specified; if not provided, a clothes washer will not be modeled.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard clothes washer from 2006 will be used.
@@ -1027,7 +1057,7 @@ If provided and true, ``AttachedToWaterHeatingSystem`` must also be specified an
 HPXML Clothes Dryer
 *******************
 
-An ``Appliances/ClothesDryer`` element can be specified; if not provided, a clothes dryer will not be modeled.
+A single ``Appliances/ClothesDryer`` element can be specified; if not provided, a clothes dryer will not be modeled.
 The dryer's ``FuelType`` must be provided.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
@@ -1052,7 +1082,7 @@ If not provided, it is assumed to be false.
 HPXML Dishwasher
 ****************
 
-An ``Appliances/Dishwasher`` element can be specified; if not provided, a dishwasher will not be modeled.
+A single ``Appliances/Dishwasher`` element can be specified; if not provided, a dishwasher will not be modeled.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard dishwasher from 2006 will be used.
@@ -1118,7 +1148,7 @@ An extension/UsageMultiplier can also be optionally provided that scales energy 
 HPXML Cooking Range/Oven
 ************************
 
-``Appliances/CookingRange`` and ``Appliances/Oven`` elements can be specified; if not provided, a range/oven will not be modeled.
+A single pair of ``Appliances/CookingRange`` and ``Appliances/Oven`` elements can be specified; if not provided, a range/oven will not be modeled.
 The ``FuelType`` of the range must be provided.
 
 Inputs including ``CookingRange/IsInduction`` and ``Oven/IsConvection`` can be optionally provided.
@@ -1137,8 +1167,8 @@ An ``CookingRange/extension/UsageMultiplier`` can also be optionally provided th
 HPXML Dehumidifier
 ******************
 
-An ``Appliance/Dehumidifier`` element can be specified; if not provided, a dehumidifier will not be modeled.
-The ``Capacity``, ``DehumidistatSetpoint`` (relative humidity as a fraction, 0-1), and ``FractionDehumidificationLoadServed`` (0-1) must be provided.
+A single ``Appliance/Dehumidifier`` element can be specified; if not provided, a dehumidifier will not be modeled.
+The ``Capacity`` (pints/day), ``DehumidistatSetpoint`` (relative humidity as a fraction, 0-1), and ``FractionDehumidificationLoadServed`` (0-1) must be provided.
 The efficiency of the dehumidifier can either be entered as an ``IntegratedEnergyFactor`` or ``EnergyFactor``.
 
 HPXML Lighting
