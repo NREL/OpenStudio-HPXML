@@ -28,7 +28,7 @@ def run_workflow(basedir, rundir, hpxml, debug, hourly_outputs)
   # Add reporting measure to workflow
   measure_subdir = 'SimulationOutputReport'
   args = {}
-  args['timeseries_frequency'] = 'timestep'
+  args['timeseries_frequency'] = 'hourly'
   args['include_timeseries_fuel_consumptions'] = hourly_outputs.include? 'fuels'
   args['include_timeseries_end_use_consumptions'] = hourly_outputs.include? 'enduses'
   args['include_timeseries_hot_water_uses'] = hourly_outputs.include? 'hotwater'
