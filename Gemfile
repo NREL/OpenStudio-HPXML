@@ -47,7 +47,7 @@ end
 # elsif allow_local
   gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 # else
-#   gem 'urbanopt-scenario', '~> 0.3.0'
+  # gem 'urbanopt-scenario', '~> 0.3.0'
 # end
 
 if allow_local && File.exist?('../urbanopt-reporting-gem')
@@ -63,7 +63,7 @@ end
 #elsif allow_local
   gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
 #else
-#  gem 'urbanopt-geojson', '~> 0.3.0'
+  # gem 'urbanopt-geojson', '~> 0.3.1'
 #end
 
 #if allow_local && File.exist?('../openstudio-load-flexibility-measures-gem')
@@ -73,3 +73,9 @@ end
 #else
 #  gem 'openstudio-load-flexibility-measures', '~> 0.1.2'
 #end
+
+if File.exist?('../urbanopt-reopt-gem')
+  gem 'urbanopt-reopt', path:'../urbanopt-reopt-gem'
+else
+  gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'develop'
+end
