@@ -839,11 +839,11 @@ class Constructions
     surface.createSurfacePropertyExposedFoundationPerimeter('TotalExposedPerimeter', UnitConversions.convert(exposed_perimeter, 'ft', 'm'))
   end
 
-  def self.apply_door(runner, model, subsurfaces, constr_name, ufactor)
+  def self.apply_door(runner, model, subsurfaces, constr_name, ufactor, inside_film, outside_film)
     return if subsurfaces.empty?
 
     # Define materials
-    door_Rvalue = 1.0 / ufactor - Material.AirFilmOutside.rvalue - Material.AirFilmVertical.rvalue
+    door_Rvalue = 1.0 / ufactor - inside_film.rvalue - outside_film.rvalue
     door_thickness = 1.75 # in
     fin_door_mat = Material.new(name = 'DoorMaterial', thick_in = door_thickness, mat_base = BaseMaterial.Wood, k_in = 1.0 / door_Rvalue * door_thickness)
 
@@ -1193,30 +1193,32 @@ class Constructions
       if shade_mult == 1
         shade_mult = 0.999
       end
-
-      total_shade_trans = shade_mult
-      total_shade_abs = 0.00001
-      total_shade_ref = 1.0 - total_shade_trans - total_shade_abs
+      shade_name = "#{type}#{mode}Shade"
+      sc_name = "#{type}#{mode}ShadingControl"
 
       # Reuse existing ShadingControl?
       sc = nil
       model.getShadingControls.each do |shading_control|
         next unless (shading_control.shadingMaterial.get.to_Shade.get.solarTransmittance - shade_mult).abs < 0.0001
+        next unless shading_control.name.to_s.start_with? sc_name
 
         sc = shading_control
         break
       end
 
       if sc.nil?
+        shade_abs = 0.00001
+        shade_ref = 1.0 - shade_mult - shade_abs
+
         # CoolingShade
         sm = OpenStudio::Model::Shade.new(model)
-        sm.setName("#{type}#{mode}Shade")
-        sm.setSolarTransmittance(total_shade_trans)
-        sm.setSolarReflectance(total_shade_ref)
-        sm.setVisibleTransmittance(total_shade_trans)
-        sm.setVisibleReflectance(total_shade_ref)
-        sm.setThermalHemisphericalEmissivity(total_shade_abs)
-        sm.setThermalTransmittance(total_shade_trans)
+        sm.setName(shade_name)
+        sm.setSolarTransmittance(shade_mult)
+        sm.setSolarReflectance(shade_ref)
+        sm.setVisibleTransmittance(shade_mult)
+        sm.setVisibleReflectance(shade_ref)
+        sm.setThermalHemisphericalEmissivity(shade_abs)
+        sm.setThermalTransmittance(shade_mult)
         sm.setThickness(0.0001)
         sm.setConductivity(10000)
         sm.setShadetoGlassDistance(0.001)
@@ -1228,7 +1230,7 @@ class Constructions
 
         # ShadingControl
         sc = OpenStudio::Model::ShadingControl.new(sm)
-        sc.setName("#{type}#{mode}ShadingControl")
+        sc.setName(sc_name)
         sc.setShadingType('InteriorShade')
         sc.setShadingControlType('OnIfScheduleAllows')
         sc.setSchedule(sch.schedule)

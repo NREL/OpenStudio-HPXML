@@ -1009,6 +1009,7 @@ class OSModel
       if has_radiant_barrier
         radiant_barrier_grade = roof.radiant_barrier_grade
       end
+      # FUTURE: Create Constructions.get_air_film(surface) method; use in measure.rb and hpxml_translator_test.rb
       inside_film = Material.AirFilmRoof(Geometry.get_roof_pitch([surfaces[0]]))
       outside_film = Material.AirFilmOutside
       mat_roofing = Material.RoofMaterial(roof.roof_type, emitt, solar_abs)
@@ -1794,7 +1795,9 @@ class OSModel
         surfaces << surface
 
         # Apply construction
-        Constructions.apply_door(runner, model, [sub_surface], 'Window', window.ufactor)
+        inside_film = Material.AirFilmVertical
+        outside_film = Material.AirFilmVertical
+        Constructions.apply_door(runner, model, [sub_surface], 'Window', window.ufactor, inside_film, outside_film)
       end
     end
 
@@ -1873,7 +1876,13 @@ class OSModel
 
       # Apply construction
       ufactor = 1.0 / door.r_value
-      Constructions.apply_door(runner, model, [sub_surface], 'Door', ufactor)
+      inside_film = Material.AirFilmVertical
+      if door.wall.is_exterior
+        outside_film = Material.AirFilmOutside
+      else
+        outside_film = Material.AirFilmVertical
+      end
+      Constructions.apply_door(runner, model, [sub_surface], 'Door', ufactor, inside_film, outside_film)
     end
 
     apply_adiabatic_construction(runner, model, surfaces, 'wall')
@@ -3483,8 +3492,7 @@ class OSModel
       # Create E+ other side coefficient object
       otherside_object = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
       otherside_object.setName(exterior_adjacent_to)
-      # Refer to: https://www.sciencedirect.com/science/article/pii/B9780123972705000066 6.1.2 Part: Wall and roof transfer functions
-      otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(8.3)
+      otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(UnitConversions.convert(1.0 / Material.AirFilmVertical.rvalue, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'))
       # Schedule of space temperature, can be shared with water heater/ducts
       sch = get_space_temperature_schedule(model, exterior_adjacent_to, spaces)
       otherside_object.setConstantTemperatureSchedule(sch)
