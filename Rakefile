@@ -82,12 +82,13 @@ def baseline_scenario(json, csv)
   feature_file_path = File.join(root_dir, json)
   csv_file = File.join(root_dir, csv)
   mapper_files_dir = File.join(root_dir, 'mappers/')
+  scenario_reopt_assumptions_file_name = 'base_assumptions.json'
   num_header_rows = 1
 
   feature_file = URBANopt::GeoJSON::GeoFile.from_file(feature_file_path)
-  scenario = URBANopt::Scenario::ScenarioCSV.new(
+  scenario = URBANopt::Scenario::REoptScenarioCSV.new(
     name, root_dir, run_dir, feature_file, mapper_files_dir, csv_file,
-    num_header_rows
+    num_header_rows, scenario_reopt_assumptions_file_name
   )
   return scenario
 end
@@ -217,6 +218,8 @@ desc 'Post Process Baseline Scenario'
 task :post_process_baseline, [:json, :csv] do |t, args|
   puts 'Post Processing Baseline Scenario...'
 
+  json = args[:json]
+  csv = args[:csv]
   json = 'example_project.json' if args[:json].nil?
   csv = 'baseline_scenario.csv' if args[:csv].nil?
 
