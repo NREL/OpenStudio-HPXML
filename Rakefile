@@ -77,21 +77,19 @@ end
 
 def baseline_scenario(json, csv)
   name = 'Baseline Scenario'
-  run_dir = File.join(root_dir, 'run/baseline_scenario/')
+  scenario = File.basename(csv, '.csv')
+  run_dir = File.join(root_dir, "run/#{scenario}/")
   feature_file_path = File.join(root_dir, json)
   csv_file = File.join(root_dir, csv)
   mapper_files_dir = File.join(root_dir, 'mappers/')
-  reopt_files_dir = File.join(root_dir, 'reopt/')
-  scenario_reopt_assumptions_file_name = 'base_assumptions.json'
-
   num_header_rows = 1
 
   feature_file = URBANopt::GeoJSON::GeoFile.from_file(feature_file_path)
-  scenario = URBANopt::Scenario::REoptScenarioCSV.new(
+  scenario = URBANopt::Scenario::ScenarioCSV.new(
     name, root_dir, run_dir, feature_file, mapper_files_dir, csv_file,
-    num_header_rows, reopt_files_dir, scenario_reopt_assumptions_file_name
+    num_header_rows
   )
-  scenario
+  return scenario
 end
 
 def configure_project
@@ -105,6 +103,80 @@ def configure_project
   end
 end
 
+def visualize_scenarios
+  name = 'Visualize Scenario Results'
+  run_dir = File.join(root_dir, 'run')
+  scenario_folder_dirs = []
+  scenario_report_exists = false
+  Dir.glob(File.join(run_dir, '/*_scenario')) do |scenario_folder_dir|
+    scenario_report = File.join(
+      scenario_folder_dir, 'default_scenario_report.csv'
+    )
+    if File.exist?(scenario_report)
+      scenario_folder_dirs << scenario_folder_dir
+      scenario_report_exists = true
+    else
+      puts "\nERROR: Default reports not created for #{scenario_folder_dir}. Please use post processing command to create default post processing reports for all scenarios first. Visualization not generated for #{scenario_folder_dir}.\n"
+    end
+  end
+
+  if scenario_report_exists == true
+    puts "\nCreating visualizations for all Scenario results\n"
+    URBANopt::Scenario::ResultVisualization.create_visualization(scenario_folder_dirs, false)
+    vis_file_path = File.join(root_dir, 'visualization')
+    if !File.exists?(vis_file_path)
+      Dir.mkdir File.join(root_dir, 'visualization')
+    end
+    html_in_path = File.join(vis_file_path, 'input_visualization_scenario.html')
+    if !File.exists?(html_in_path)
+      visualization_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/master/example-project/visualization/input_visualization_scenario.html'
+      vis_file_name = File.basename(visualization_file)
+      vis_download = open(visualization_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
+      IO.copy_stream(vis_download, File.join(vis_file_path, vis_file_name))
+    end
+    html_out_path = File.join(root_dir, 'run', 'scenario_comparison.html')
+    FileUtils.cp(html_in_path, html_out_path)
+    puts "\nDone\n"
+  end
+end
+
+def visualize_features(scenario_file)
+  name = 'Visualize Feature Results'
+  scenario_name = File.basename(scenario_file, File.extname(scenario_file))
+  run_dir = File.join(root_dir, 'run', scenario_name.downcase)
+  feature_report_exists = false
+  feature_id = CSV.read(File.join(root_dir, scenario_file), :headers => true)
+  feature_folders = []
+  # loop through building feature ids from scenario csv
+  feature_id["Feature Id"].each do |feature|
+    feature_report = File.join(run_dir, feature, 'feature_reports')
+    if File.exist?(feature_report)
+      feature_report_exists = true
+      feature_folders << File.join(run_dir, feature)
+    else
+      puts "\nERROR: Default reports not created for #{feature}. Please use post processing command to create default post processing reports for all features first. Visualization not generated for #{feature}.\n"
+    end
+  end
+  if feature_report_exists == true
+    puts "\nCreating visualizations for Feature results in the Scenario\n"
+    URBANopt::Scenario::ResultVisualization.create_visualization(feature_folders, true)
+    vis_file_path = File.join(root_dir, 'visualization')
+    if !File.exists?(vis_file_path)
+      Dir.mkdir File.join(root_dir, 'visualization')
+    end
+    html_in_path = File.join(vis_file_path, 'input_visualization_feature.html')
+    if !File.exists?(html_in_path)
+      visualization_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/master/example_project/visualization/input_visualization_feature.html'
+      vis_file_name = File.basename(visualization_file)
+      vis_download = open(visualization_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
+      IO.copy_stream(vis_download, File.join(vis_file_path, vis_file_name))
+    end
+    html_out_path = File.join(root_dir, 'run', scenario_name, 'feature_comparison.html')
+    FileUtils.cp(html_in_path, html_out_path)
+    puts "\nDone\n"
+  end
+end
+
 # Load in the rake tasks from the base extension gem
 rake_task = OpenStudio::Extension::RakeTask.new
 rake_task.set_extension_class(
@@ -112,13 +184,14 @@ rake_task.set_extension_class(
 )
 
 ### Baseline
-
 desc 'Clear Baseline Scenario'
 task :clear_baseline, [:json, :csv] do |t, args|
   puts 'Clearing Baseline Scenario...'
 
-  json = 'example_project.json' if args[:json].nil?
-  csv = 'baseline_scenario.csv' if args[:csv].nil?
+  json = args[:json]
+  csv = args[:csv]
+  json = 'example_project_combined.json' if json.nil?
+  csv = 'baseline_scenario.csv' if csv.nil?
 
   baseline_scenario(json, csv).clear
 end
@@ -127,6 +200,8 @@ desc 'Run Baseline Scenario'
 task :run_baseline, [:json, :csv] do |t, args|
   puts 'Running Baseline Scenario...'
 
+  json = args[:json]
+  csv = args[:csv]
   json = 'example_project.json' if args[:json].nil?
   csv = 'baseline_scenario.csv' if args[:csv].nil?
 
@@ -160,17 +235,17 @@ task :post_process_baseline, [:json, :csv] do |t, args|
 
   puts 'Running REopt post processor...'
 
-  # scenario_base = default_post_processor.scenario_base
-  # reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(
-  #   scenario_report, scenario_base.scenario_reopt_assumptions_file,
-  #   scenario_base.reopt_feature_assumptions, DEVELOPER_NREL_KEY
-  # )
+  scenario_base = default_post_processor.scenario_base
+  reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(
+    scenario_report, scenario_base.scenario_reopt_assumptions_file,
+    scenario_base.reopt_feature_assumptions, DEVELOPER_NREL_KEY
+  )
 
-  # # Run Aggregate Scenario
-  # scenario_report_scenario = reopt_post_processor.run_scenario_report(
-  #   scenario_report: scenario_report,
-  #   save_name: 'scenario_report_reopt_global_optimization'
-  # )
+  # Run Aggregate Scenario
+  scenario_report_scenario = reopt_post_processor.run_scenario_report(
+    scenario_report: scenario_report,
+    save_name: 'scenario_report_reopt_global_optimization'
+  )
 end
 
 ### All
