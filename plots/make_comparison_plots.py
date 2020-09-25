@@ -93,9 +93,8 @@ def make_comparison_plots(df_doe2, df_os):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--doe2_csv',
-        type=argparse.FileType('r'),
-        default=os.path.join(here, 'doe2_enduse_v8_4.csv')
+        'doe2_csv',
+        type=argparse.FileType('r')
     )
     parser.add_argument(
         'results_csv',
