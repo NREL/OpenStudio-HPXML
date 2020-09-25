@@ -230,7 +230,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       @airflows.each do |airflow_type, airflow|
         ems_program = @model.getModelObjectByName(airflow.ems_program.gsub(' ', '_')).get.to_EnergyManagementSystemProgram.get
         airflow.ems_variables.each do |ems_variable|
-          result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{ems_variable}_timeseries_outvar,#{ems_variable},Summed,ZoneTimestep,#{ems_program.name},m^3/s;").get
+          result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{ems_variable}_timeseries_outvar,#{ems_variable},Averaged,ZoneTimestep,#{ems_program.name},m^3/s;").get
           result << OpenStudio::IdfObject.load("Output:Variable,*,#{ems_variable}_timeseries_outvar,#{timeseries_frequency};").get
         end
       end
