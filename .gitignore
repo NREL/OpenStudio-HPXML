@@ -1,4 +1,5 @@
 *.lock
+*.conf
 /example_project/run/*
 /example_project/.bundle
 *.DS_Store
