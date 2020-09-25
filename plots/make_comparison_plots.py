@@ -30,7 +30,7 @@ def rename_col(colname):
         return colname
 
 
-def make_comparison_plots(df_doe2, df_os):
+def make_comparison_plots(df_doe2, df_os, doe2_csv):
     df_os2 = df_os.rename(columns=rename_col)
     df_os2['address'] = df_os2['HPXML'].map(get_address_from_hpxml_file)
     df = df_doe2.merge(df_os2, on='address', suffixes=('_doe2', '_os'))
@@ -41,8 +41,8 @@ def make_comparison_plots(df_doe2, df_os):
     plots_dir = os.path.join(here, 'plots')
     if not os.path.exists(plots_dir):
         os.makedirs(plots_dir)
-    df.to_csv(os.path.join(plots_dir, 'results_os_doe2.csv'))
-    bio.output_file(os.path.join(plots_dir, 'comparison_plots.html'))
+    df.to_csv(os.path.join(plots_dir, 'results_os_' + doe2_csv))
+    bio.output_file(os.path.join(plots_dir, 'results_os_' + doe2_csv.replace('.csv','.html')))
     data_source = ColumnDataSource(df2)
     figures = []
     for colname in map(lambda y: y[:-5], filter(lambda x: x.endswith('_doe2'), df.columns)):
@@ -103,7 +103,7 @@ def main():
     args = parser.parse_args()
     df_doe2 = pd.read_csv(args.doe2_csv)
     df_os = pd.read_csv(args.results_csv)
-    make_comparison_plots(df_doe2, df_os)
+    make_comparison_plots(df_doe2, df_os, os.path.basename(args.doe2_csv.name))
 
 if __name__ == '__main__':
     main()
