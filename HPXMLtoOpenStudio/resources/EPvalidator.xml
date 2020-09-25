@@ -1147,26 +1147,8 @@
   </sch:pattern>
 
   <sch:pattern name='[ApplianceLocation]'>
-    <sch:rule abstract='true' id='appliance_location'>
-	    <sch:assert role='ERROR' test='contains("_living space_ _basement - unconditioned_ _basement - conditioned_ _attic - unvented_ _attic - vented_ _garage_ _crawlspace - unvented_ _crawlspace - vented_ _other exterior_ _other housing unit_ _other heated space_ _other multifamily buffer space_ _other non-freezing space_", concat("_", text(), "_"))'>Expected "text()" for xpath: "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space"</sch:assert>
-    </sch:rule>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesWasher/h:Location'>
-      <sch:extends rule='appliance_location'/>
-    </sch:rule>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer/h:Location'>
-      <sch:extends rule='appliance_location'/>
-    </sch:rule>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Dishwasher/h:Location'>
-      <sch:extends rule='appliance_location'/>
-    </sch:rule>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Refrigerator/h:Location'>
-      <sch:extends rule='appliance_location'/>
-    </sch:rule>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Freezer/h:Location'>
-      <sch:extends rule='appliance_location'/>
-    </sch:rule>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:CookingRange/h:Location'>
-      <sch:extends rule='appliance_location'/>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:*/h:Location'>
+      <sch:assert role='ERROR' test='contains("_living space_ _basement - unconditioned_ _basement - conditioned_ _attic - unvented_ _attic - vented_ _garage_ _crawlspace - unvented_ _crawlspace - vented_ _other exterior_ _other housing unit_ _other heated space_ _other multifamily buffer space_ _other non-freezing space_", concat("_", text(), "_"))'>Expected "text()" for xpath: "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space"</sch:assert>
     </sch:rule>
   </sch:pattern>
 

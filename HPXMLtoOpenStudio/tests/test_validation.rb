@@ -46,29 +46,26 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     @expected_assertions_by_addition = {}
     @expected_assertions_by_deletion = {}
     @expected_assertions_by_alteration = {}
-    abstract_assertions = {}
     XMLHelper.get_elements(doc, '/sch:schema/sch:pattern/sch:rule').each do |rule|
-      if XMLHelper.get_attribute_value(rule, 'abstract')
-        # store assertions of the abstract and then move on
-        abstract_id = XMLHelper.get_attribute_value(rule, 'id')
-        abstract_assertions[abstract_id] = []
-        XMLHelper.get_values(rule, 'sch:assert').each do |assertion|
-          abstract_assertions[abstract_id] << assertion
-        end
-        next
-      end
-
       rule_context = XMLHelper.get_attribute_value(rule, 'context')
       context_xpath = rule_context.gsub('h:', '')
 
       XMLHelper.get_values(rule, 'sch:assert').each do |assertion|
-        _populate_expected_assertions(context_xpath, assertion)
-      end
+        element_name = _get_element_name_for_assertion_test(assertion)
+        key = [context_xpath, element_name]
 
-      XMLHelper.get_elements(rule, 'sch:extends').each do |extends_element|
-        abstract_id = XMLHelper.get_attribute_value(extends_element, 'rule')
-        abstract_assertions[abstract_id].each do |abstract_assertion|
-          _populate_expected_assertions(context_xpath, abstract_assertion)
+        if assertion.start_with?('Expected 0 element')
+          # Skipping for now
+        elsif assertion.start_with?('Expected 0 or ')
+          @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion, 'addition')
+        elsif assertion.start_with?('Expected 1 ')
+          @expected_assertions_by_deletion[key] = _get_expected_error_msg(context_xpath, assertion, 'deletion')
+          @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion, 'addition')
+        elsif assertion.start_with?('Expected "text()"')
+          key = [context_xpath.split('/')[0...-1].reject(&:empty?).join('/').chomp('/'), context_xpath.split('/')[-1]] # override the key
+          @expected_assertions_by_alteration[key] = _get_expected_error_msg(context_xpath, assertion, 'alteration')
+        else
+          fail "Unexpected assertion: '#{assertion}'."
         end
       end
     end
@@ -268,25 +265,6 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     end
   end
 
-  def _populate_expected_assertions(context_xpath, assertion)
-    element_name = _get_element_name_for_assertion_test(assertion)
-    key = [context_xpath, element_name]
-
-    if assertion.start_with?('Expected 0 element')
-      # Skipping for now
-    elsif assertion.start_with?('Expected 0 or ')
-      @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion, 'addition')
-    elsif assertion.start_with?('Expected 1 ')
-      @expected_assertions_by_deletion[key] = _get_expected_error_msg(context_xpath, assertion, 'deletion')
-      @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion, 'addition')
-    elsif assertion.start_with?('Expected "text()"')
-      key = [context_xpath.split('/')[0...-1].reject(&:empty?).join('/').chomp('/'), context_xpath.split('/')[-1]] # override the key
-      @expected_assertions_by_alteration[key] = _get_expected_error_msg(context_xpath, assertion, 'alteration')
-    else
-      fail "Unexpected assertion: '#{assertion}'."
-    end
-  end
-  
   def _balance_brackets(element_name)
     if element_name.count('[') != element_name.count(']')
       diff = element_name.count('[') - element_name.count(']')
