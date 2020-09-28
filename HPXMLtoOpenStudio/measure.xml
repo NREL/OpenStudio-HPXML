@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>6df2feba-8d56-4a69-8d30-6b4883eebbb2</version_id>
-  <version_modified>20200925T202506Z</version_modified>
+  <version_id>9ddbfeae-79f0-4da5-ac1a-afc60ab532f8</version_id>
+  <version_modified>20200928T193253Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -163,12 +163,6 @@
       <checksum>79191DD1</checksum>
     </file>
     <file>
-      <filename>test_hotwater_appliance.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2AF5B488</checksum>
-    </file>
-    <file>
       <filename>test_water_heater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -247,28 +241,10 @@
       <checksum>9DA69F74</checksum>
     </file>
     <file>
-      <filename>test_airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>DA8AF16A</checksum>
-    </file>
-    <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>2A1D9D56</checksum>
-    </file>
-    <file>
       <filename>BaseElements.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
       <checksum>A737C597</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B7804506</checksum>
     </file>
     <file>
       <filename>test_validation.rb</filename>
@@ -277,22 +253,10 @@
       <checksum>8A8F0F97</checksum>
     </file>
     <file>
-      <filename>EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4B85F5D0</checksum>
-    </file>
-    <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>5180C452</checksum>
-    </file>
-    <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>367DF2E2</checksum>
     </file>
     <file>
       <filename>data_ashrae_622_wsf.csv</filename>
@@ -433,22 +397,34 @@
       <checksum>6BF095D2</checksum>
     </file>
     <file>
-      <filename>geometry.rb</filename>
+      <filename>test_hotwater_appliance.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B6772F33</checksum>
+      <usage_type>test</usage_type>
+      <checksum>C19732D8</checksum>
     </file>
     <file>
-      <filename>lighting.rb</filename>
+      <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>353D8037</checksum>
+      <checksum>E11B09EB</checksum>
     </file>
     <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
+      <filename>EPvalidator.xml</filename>
+      <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>777478EE</checksum>
+      <checksum>55D57787</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2FE07942</checksum>
+    </file>
+    <file>
+      <filename>test_airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F57FF730</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -457,28 +433,46 @@
       <checksum>AC14851E</checksum>
     </file>
     <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5FA48D41</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A62DC800</checksum>
+    </file>
+    <file>
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>158B6925</checksum>
+    </file>
+    <file>
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BFE6419E</checksum>
+      <checksum>D333CC02</checksum>
     </file>
     <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>26D95DD2</checksum>
+      <checksum>F9A8580B</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
+      <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DDA82A78</checksum>
+      <checksum>2E94C466</checksum>
     </file>
     <file>
-      <filename>hpxml_defaults.rb</filename>
+      <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>310320E4</checksum>
+      <checksum>FE6DC0B0</checksum>
     </file>
     <file>
       <version>
@@ -489,13 +483,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>266A40C6</checksum>
+      <checksum>2ADE394B</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
+      <filename>lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>47A03F40</checksum>
+      <checksum>BD5BF41C</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D0FBBCD2</checksum>
     </file>
   </files>
 </measure>

@@ -101,7 +101,7 @@ class ScheduleGenerator
 
     success = create_average_schedules(args: args)
     return false if not success
-
+    return true
     success = create_stochastic_schedules(args: args)
     return false if not success
 
@@ -177,21 +177,22 @@ class ScheduleGenerator
   end
 
   def create_average_dishwasher(args:)
-    create_timeseries_from_minutely(sch_name: 'dishwasher', obj_name: Constants.ObjectNameDishwasher, args: args)
-    create_timeseries_from_minutely(sch_name: 'dishwasher_power', obj_name: Constants.ObjectNameDishwasher, args: args)
+    create_timeseries_from_minutely(sch_name: 'dishwasher', obj_name: Constants.ObjectNameDishwasher, days_shift: 0, dryer_exhaust_min_runtime: 0, args: args)
+    create_timeseries_from_minutely(sch_name: 'dishwasher_power', obj_name: Constants.ObjectNameDishwasher, days_shift: 0, dryer_exhaust_min_runtime: 0, args: args)
   end
 
   def create_average_clothes_washer(args:)
-    create_timeseries_from_minutely(sch_name: 'clothes_washer', obj_name: Constants.ObjectNameClothesWasher, args: args)
-    create_timeseries_from_minutely(sch_name: 'clothes_washer_power', obj_name: Constants.ObjectNameClothesWasher, args: args)
+    create_timeseries_from_minutely(sch_name: 'clothes_washer', obj_name: Constants.ObjectNameClothesWasher, days_shift: 0, dryer_exhaust_min_runtime: 0, args: args)
+    create_timeseries_from_minutely(sch_name: 'clothes_washer_power', obj_name: Constants.ObjectNameClothesWasher, days_shift: 0, dryer_exhaust_min_runtime: 0, args: args)
   end
 
   def create_average_clothes_dryer(args:)
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_dryer', weekday_sch: Schedule.ClothesDryerWeekdayFractions, weekend_sch: Schedule.ClothesDryerWeekendFractions, monthly_sch: Schedule.ClothesDryerMonthlyMultipliers)
+    create_timeseries_from_minutely(sch_name: 'clothes_dryer', obj_name: Constants.ObjectNameClothesDryer, days_shift: -1.0 / 24.0, dryer_exhaust_min_runtime: 0, args: args)
+    create_timeseries_from_minutely(sch_name: 'clothes_dryer_exhaust', obj_name: Constants.ObjectNameClothesDryerExhaust, days_shift: -1.0 / 24.0, dryer_exhaust_min_runtime: 24, args: args)
   end
 
   def create_average_fixtures(args:)
-    create_timeseries_from_minutely(sch_name: 'fixtures', obj_name: Constants.ObjectNameFixtures, args: args)
+    create_timeseries_from_minutely(sch_name: 'fixtures', obj_name: Constants.ObjectNameFixtures, days_shift: 0, dryer_exhaust_min_runtime: 0, args: args)
   end
 
   def create_average_ceiling_fan
@@ -309,11 +310,13 @@ class ScheduleGenerator
 
   def create_timeseries_from_minutely(sch_name:,
                                       obj_name:,
+                                      days_shift:,
+                                      dryer_exhaust_min_runtime:,
                                       args:)
 
     nbeds = args[:geometry_num_bedrooms]
     create_sch_object = false
-    sch = HotWaterSchedule.new(@model, obj_name, nbeds, create_sch_object)
+    sch = HotWaterSchedule.new(@model, obj_name, nbeds, days_shift, dryer_exhaust_min_runtime, create_sch_object)
 
     weeks = 1 # use a single week that repeats
 

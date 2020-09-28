@@ -3,6 +3,7 @@
 class MiscLoads
   def self.apply_plug(model, plug_load, obj_name, living_space, schedules_file)
     kwh = 0
+
     if not plug_load.nil?
       kwh = plug_load.kWh_per_year * plug_load.usage_multiplier
       if not schedules_file.nil?
@@ -18,7 +19,7 @@ class MiscLoads
         space_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: col_name, annual_kwh: kwh)
         sch = schedules_file.create_schedule_file(col_name: col_name)
       else
-        sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', plug_load.weekday_fractions, plug_load.weekend_fractions, plug_load.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+        sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', plug_load.weekday_fractions, plug_load.weekend_fractions, plug_load.monthly_multipliers, Constants.ScheduleTypeLimitsFraction)
         space_design_level = sch.calcDesignLevelFromDailykWh(kwh / 365.0)
         sch = sch.schedule
       end
@@ -62,6 +63,7 @@ class MiscLoads
 
   def self.apply_fuel(model, fuel_load, obj_name, living_space, schedules_file)
     therm = 0
+
     if not fuel_load.nil?
       therm = fuel_load.therm_per_year * fuel_load.usage_multiplier
       if not schedules_file.nil?
@@ -75,7 +77,7 @@ class MiscLoads
         space_design_level = schedules_file.calc_design_level_from_annual_therm(col_name: col_name, annual_therm: therm)
         sch = schedules_file.create_schedule_file(col_name: col_name)
       else
-        sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', fuel_load.weekday_fractions, fuel_load.weekend_fractions, fuel_load.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+        sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', fuel_load.weekday_fractions, fuel_load.weekend_fractions, fuel_load.monthly_multipliers, Constants.ScheduleTypeLimitsFraction)
         space_design_level = sch.calcDesignLevelFromDailyTherm(therm / 365.0)
         sch = sch.schedule
       end
@@ -121,6 +123,7 @@ class MiscLoads
   def self.apply_pool_or_hot_tub_heater(model, pool_or_hot_tub, obj_name, living_space, schedules_file)
     heater_kwh = 0
     heater_therm = 0
+
     if not schedules_file.nil?
       if obj_name.include?('pool')
         col_name = 'pool_heater'
@@ -129,8 +132,9 @@ class MiscLoads
       end
       heater_sch = schedules_file.create_schedule_file(col_name: col_name)
     else
-      heater_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_hot_tub.heater_weekday_fractions, pool_or_hot_tub.heater_weekend_fractions, pool_or_hot_tub.heater_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      heater_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_hot_tub.heater_weekday_fractions, pool_or_hot_tub.heater_weekend_fractions, pool_or_hot_tub.heater_monthly_multipliers, Constants.ScheduleTypeLimitsFraction)
     end
+
     if pool_or_hot_tub.heater_load_units == HPXML::UnitsKwhPerYear
       heater_kwh = pool_or_hot_tub.heater_load_value * pool_or_hot_tub.heater_usage_multiplier
     elsif pool_or_hot_tub.heater_load_units == HPXML::UnitsThermPerYear
@@ -182,6 +186,7 @@ class MiscLoads
 
   def self.apply_pool_or_hot_tub_pump(model, pool_or_hot_tub, obj_name, living_space, schedules_file)
     pump_kwh = 0
+
     if not schedules_file.nil?
       if obj_name.include?('pool')
         col_name = 'pool_pump'
@@ -190,8 +195,9 @@ class MiscLoads
       end
       pump_sch = schedules_file.create_schedule_file(col_name: col_name)
     else
-      pump_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_hot_tub.pump_weekday_fractions, pool_or_hot_tub.pump_weekend_fractions, pool_or_hot_tub.pump_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      pump_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_hot_tub.pump_weekday_fractions, pool_or_hot_tub.pump_weekend_fractions, pool_or_hot_tub.pump_monthly_multipliers, Constants.ScheduleTypeLimitsFraction)
     end
+
     if not pool_or_hot_tub.pump_kwh_per_year.nil?
       pump_kwh = pool_or_hot_tub.pump_kwh_per_year * pool_or_hot_tub.pump_usage_multiplier
     end

@@ -231,7 +231,7 @@ def create_osws
     'extra-enclosure-garage-partially-protruded.osw' => 'base.osw',
     'extra-mechvent-shared.osw' => 'base-single-family-attached.osw',
     'extra-mechvent-shared-preconditioning.osw' => 'extra-mechvent-shared.osw',
-    'extra-vacancy-6-months.osw' => 'base.osw',
+    'extra-vacancy-6-months.osw' => 'base-schedules-stochastic.osw',
 
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
     'invalid_files/heating-system-and-heat-pump.osw' => 'base.osw',
@@ -602,6 +602,7 @@ def get_values(osw_file, step)
     step.setArgument('clothes_dryer_efficiency_ef', 3.4615)
     step.setArgument('clothes_dryer_efficiency_cef', '3.73')
     step.setArgument('clothes_dryer_control_type', HPXML::ClothesDryerControlTypeTimer)
+    step.setArgument('clothes_dryer_vented_flow_rate', '150.0')
     step.setArgument('clothes_dryer_usage_multiplier', 1.0)
     step.setArgument('dishwasher_present', true)
     step.setArgument('dishwasher_location', HPXML::LocationLivingSpace)
@@ -713,6 +714,7 @@ def get_values(osw_file, step)
     step.setArgument('clothes_dryer_fuel_type', HPXML::FuelTypeCoal)
     step.setArgument('clothes_dryer_efficiency_cef', '3.3')
     step.setArgument('clothes_dryer_control_type', HPXML::ClothesDryerControlTypeMoisture)
+    step.setArgument('clothes_dryer_vented_flow_rate', Constants.Auto)
     step.setArgument('cooking_range_oven_fuel_type', HPXML::FuelTypeCoal)
   elsif ['base-appliances-dehumidifier.osw'].include? osw_file
     step.setArgument('dehumidifier_present', true)
@@ -724,6 +726,7 @@ def get_values(osw_file, step)
     step.setArgument('clothes_dryer_fuel_type', HPXML::FuelTypeNaturalGas)
     step.setArgument('clothes_dryer_efficiency_cef', '3.3')
     step.setArgument('clothes_dryer_control_type', HPXML::ClothesDryerControlTypeMoisture)
+    step.setArgument('clothes_dryer_vented_flow_rate', Constants.Auto)
     step.setArgument('cooking_range_oven_fuel_type', HPXML::FuelTypeNaturalGas)
   elsif ['base-appliances-modified.osw'].include? osw_file
     step.setArgument('clothes_washer_efficiency_type', 'ModifiedEnergyFactor')
@@ -731,6 +734,7 @@ def get_values(osw_file, step)
     step.setArgument('clothes_dryer_efficiency_type', 'EnergyFactor')
     step.setArgument('clothes_dryer_efficiency_ef', 4.29)
     step.setArgument('clothes_dryer_control_type', HPXML::ClothesDryerControlTypeMoisture)
+    step.setArgument('clothes_dryer_vented_flow_rate', '0.0')
     step.setArgument('dishwasher_efficiency_type', 'EnergyFactor')
     step.setArgument('dishwasher_efficiency_ef', 0.7)
     step.setArgument('dishwasher_place_setting_capacity', '6')
@@ -744,16 +748,19 @@ def get_values(osw_file, step)
     step.setArgument('clothes_dryer_fuel_type', HPXML::FuelTypeOil)
     step.setArgument('clothes_dryer_efficiency_cef', '3.3')
     step.setArgument('clothes_dryer_control_type', HPXML::ClothesDryerControlTypeMoisture)
+    step.setArgument('clothes_dryer_vented_flow_rate', Constants.Auto)
     step.setArgument('cooking_range_oven_fuel_type', HPXML::FuelTypeOil)
   elsif ['base-appliances-propane.osw'].include? osw_file
     step.setArgument('clothes_dryer_fuel_type', HPXML::FuelTypePropane)
     step.setArgument('clothes_dryer_efficiency_cef', '3.3')
     step.setArgument('clothes_dryer_control_type', HPXML::ClothesDryerControlTypeMoisture)
+    step.setArgument('clothes_dryer_vented_flow_rate', Constants.Auto)
     step.setArgument('cooking_range_oven_fuel_type', HPXML::FuelTypePropane)
   elsif ['base-appliances-wood.osw'].include? osw_file
     step.setArgument('clothes_dryer_fuel_type', HPXML::FuelTypeWoodCord)
     step.setArgument('clothes_dryer_efficiency_cef', '3.3')
     step.setArgument('clothes_dryer_control_type', HPXML::ClothesDryerControlTypeMoisture)
+    step.setArgument('clothes_dryer_vented_flow_rate', Constants.Auto)
     step.setArgument('cooking_range_oven_fuel_type', HPXML::FuelTypeWoodCord)
   elsif ['base-atticroof-cathedral.osw'].include? osw_file
     step.setArgument('geometry_attic_type', HPXML::AtticTypeConditioned)
@@ -1565,6 +1572,7 @@ def get_values(osw_file, step)
     step.setArgument('clothes_dryer_location', Constants.Auto)
     step.setArgument('clothes_dryer_efficiency_cef', Constants.Auto)
     step.setArgument('clothes_dryer_control_type', Constants.Auto)
+    step.setArgument('clothes_dryer_vented_flow_rate', Constants.Auto)
     step.setArgument('dishwasher_efficiency_kwh', Constants.Auto)
     step.setArgument('dishwasher_label_electric_rate', Constants.Auto)
     step.setArgument('dishwasher_label_gas_rate', Constants.Auto)
@@ -1752,7 +1760,6 @@ def get_values(osw_file, step)
     step.setArgument('shared_mech_vent_precooling_efficiency', 4.0)
     step.setArgument('shared_mech_vent_precooling_fraction_cool_load_served', 0.8)
   elsif ['extra-vacancy-6-months.osw'].include? osw_file
-    step.setArgument('schedules_type', 'stochastic')
     step.setArgument('schedules_vacancy_begin_month', 1)
     step.setArgument('schedules_vacancy_begin_day_of_month', 1)
     step.setArgument('schedules_vacancy_end_month', 6)
@@ -6160,7 +6167,9 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
                              combined_energy_factor: 3.73,
-                             control_type: HPXML::ClothesDryerControlTypeTimer)
+                             control_type: HPXML::ClothesDryerControlTypeTimer,
+                             is_vented: true,
+                             vented_flow_rate: 150)
   elsif ['base-appliances-none.xml',
          'base-dhw-none.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear
@@ -6186,11 +6195,13 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
                              energy_factor: HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(cef).round(2),
-                             control_type: HPXML::ClothesDryerControlTypeMoisture)
+                             control_type: HPXML::ClothesDryerControlTypeMoisture,
+                             is_vented: false)
   elsif ['base-appliances-coal.xml',
          'base-appliances-gas.xml',
          'base-appliances-propane.xml',
-         'base-appliances-oil.xml'].include? hpxml_file
+         'base-appliances-oil.xml',
+         'base-appliances-wood.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
@@ -6204,14 +6215,9 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
       hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypePropane
     elsif hpxml_file == 'base-appliances-oil.xml'
       hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeOil
+    elsif hpxml_file == 'base-appliances-wood.xml'
+      hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeWoodCord
     end
-  elsif ['base-appliances-wood.xml'].include? hpxml_file
-    hpxml.clothes_dryers.clear
-    hpxml.clothes_dryers.add(id: 'ClothesDryer',
-                             location: HPXML::LocationLivingSpace,
-                             fuel_type: HPXML::FuelTypeWoodCord,
-                             combined_energy_factor: 3.30,
-                             control_type: HPXML::ClothesDryerControlTypeMoisture)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -6226,6 +6232,8 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers[0].energy_factor = nil
     hpxml.clothes_dryers[0].combined_energy_factor = nil
     hpxml.clothes_dryers[0].control_type = nil
+    hpxml.clothes_dryers[0].is_vented = nil
+    hpxml.clothes_dryers[0].vented_flow_rate = nil
   elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].id = 'SharedClothesDryer'
     hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
