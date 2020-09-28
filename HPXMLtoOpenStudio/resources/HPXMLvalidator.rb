@@ -5,7 +5,7 @@ require 'oga'
 
 class HPXMLValidator
   def self.get_elements_from_sample_files()
-    puts 'Getting elements from sample files...'
+    puts 'Identifying elements being used in sample files...'
 
     root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
 
@@ -48,10 +48,11 @@ class HPXMLValidator
     base_elements_xsd = File.read(File.join(File.dirname(__FILE__), 'BaseElements.xsd'))
     base_elements_xsd_doc = Oga.parse_xml(base_elements_xsd)
 
-    hpxml_data_type_xsd = File.read(File.join(File.dirname(__FILE__), 'HPXMLDataTypes.xsd'))
-    hpxml_data_type_xsd_doc = Oga.parse_xml(hpxml_data_type_xsd)
-    hpxml_data_type_dict = {}
-    hpxml_data_type_xsd_doc.xpath('//xs:simpleType').each do |simple_type_element|
+    # construct dictionary for enumerations and min/max values of HPXML data types
+    hpxml_data_types_xsd = File.read(File.join(File.dirname(__FILE__), 'HPXMLDataTypes.xsd'))
+    hpxml_data_types_xsd_doc = Oga.parse_xml(hpxml_data_types_xsd)
+    hpxml_data_types_dict = {}
+    hpxml_data_types_xsd_doc.xpath('//xs:simpleType').each do |simple_type_element|
       enums = []
       simple_type_element.xpath('xs:restriction/xs:enumeration').each do |enum|
         enums << ['_', enum.get('value'), '_'].join() # in "_foo_" format
@@ -69,16 +70,16 @@ class HPXMLValidator
       next if enums.empty? && min_inclusive.nil? && max_inclusive.nil? && min_exclusive.nil? && max_exclusive.nil?
 
       simple_type_element_name = simple_type_element.get('name')
-      hpxml_data_type_dict[simple_type_element_name] = {}
-      hpxml_data_type_dict[simple_type_element_name][:enums] = enums
-      hpxml_data_type_dict[simple_type_element_name][:min_inclusive] = min_inclusive
-      hpxml_data_type_dict[simple_type_element_name][:max_inclusive] = max_inclusive
-      hpxml_data_type_dict[simple_type_element_name][:min_exclusive] = min_exclusive
-      hpxml_data_type_dict[simple_type_element_name][:max_exclusive] = max_exclusive
+      hpxml_data_types_dict[simple_type_element_name] = {}
+      hpxml_data_types_dict[simple_type_element_name][:enums] = enums
+      hpxml_data_types_dict[simple_type_element_name][:min_inclusive] = min_inclusive
+      hpxml_data_types_dict[simple_type_element_name][:max_inclusive] = max_inclusive
+      hpxml_data_types_dict[simple_type_element_name][:min_exclusive] = min_exclusive
+      hpxml_data_types_dict[simple_type_element_name][:max_exclusive] = max_exclusive
     end
 
-    # build schema_validator.xml
-    puts 'Building schema_validator.xml...'
+    # construct schema_validator.xml
+    puts 'Constructing schema_validator.xml...'
 
     schema_validator = XMLHelper.create_doc(version = '1.0', encoding = 'UTF-8')
     root = XMLHelper.add_element(schema_validator, 'sch:schema')
@@ -89,10 +90,10 @@ class HPXMLValidator
     pattern = XMLHelper.add_element(root, 'sch:pattern')
 
     element_xpaths = {}
+    complex_type_or_group_dict = {}
+    # construct complexType and group elements dictionary
     [{ _xpath: '//xs:element', _type: '//xs:complexType', _attr: 'type' },
      { _xpath: '//xs:group', _type: '//xs:group', _attr: 'ref' }].each do |param|
-      # construct complexType and group elements dictionary
-      complex_type_or_group_dict = {}
       base_elements_xsd_doc.xpath(param[:_type]).each do |param_type|
         next if param_type.get('name').nil?
 
@@ -122,11 +123,6 @@ class HPXMLValidator
 
       # expand elements by adding elements based on type/ref
       base_elements_xsd_doc.xpath(param[:_xpath]).each do |element|
-        # exceptions
-        if param[:_xpath] == '//xs:element'
-          next if element.get('name') == 'CoolingSystemInfo' || element.get('name') == 'HeatPumpInfo' || element.get('name') == 'HeatingSystemInfo' || element.get('name') == 'SubContractor'
-          next unless element.name == 'element'
-        end
         next if element.get(param[:_attr]).nil?
 
         ancestors = []
@@ -151,70 +147,9 @@ class HPXMLValidator
         context_xpath = element_xpath_with_prefix.join('/').chomp('/')
         next unless elements_in_sample_files.any? { |item| item.include? context_xpath }
 
-        #   ######################
-        #   # def self.get_expanded_elements(element_xpaths, complex_type_dict, element_xpath, element_type)
-        #   #   if complex_type_dict[element_type].nil?
-        #   #     return element_xpaths
-        #   #   else
-        #   #     expanded_elements = deep_copy_object(complex_type_dict[element_type])
-        #   #     expanded_elements.each do |k, v|
-        #   #       k.push(element_xpath).flatten!
-        #   #       element_xpaths[k] = v
-
-        #   #       return get_expanded_elements(element_xpaths, complex_type_dict, k, v)
-        #   #     end
-        #   #   end
-        #   # end
-
-        #   # expanded_elements = deep_copy_object(complex_type_dict[element_type])
-        #   # if not expanded_elements.nil?
-        #   #   get_expanded_elements(element_xpaths, complex_type_dict, element_xpath, element_type)
-        #   # else
-        #   #   element_xpaths[element_xpath] = element_type
-        #   # end
-        #   ######################
         has_complex_type_or_group_dict = complex_type_or_group_dict[element_type]
         if has_complex_type_or_group_dict
-          expanded_elements = deep_copy_object(complex_type_or_group_dict[element_type])
-          # FIXME: Change it to a recursive loop
-          expanded_elements.each do |k, v|
-            k.push(element_xpath).flatten!
-            if complex_type_or_group_dict[v].nil?
-              element_xpaths.delete(element_xpath)
-              element_xpaths[k] = v
-              next
-            end
-
-            another_expanded_elements = deep_copy_object(complex_type_or_group_dict[v])
-            another_expanded_elements.each do |k2, v2|
-              k2.push(k).flatten!
-              if complex_type_or_group_dict[v2].nil?
-                element_xpaths.delete(k)
-                element_xpaths[k2] = v2
-                next
-              end
-
-              another_another_expanded_elements = deep_copy_object(complex_type_or_group_dict[v2])
-              another_another_expanded_elements.each do |k3, v3|
-                k3.push(k2).flatten!
-                if complex_type_or_group_dict[v3].nil?
-                  element_xpaths.delete(k2)
-                  element_xpaths[k3] = v3
-                  next
-                end
-
-                another_another_expanded_elements = deep_copy_object(complex_type_or_group_dict[v3])
-                another_another_expanded_elements.each do |k4, v4|
-                  k4.push(k3).flatten!
-                  next unless complex_type_or_group_dict[v4].nil?
-
-                  element_xpaths.delete(k3)
-                  element_xpaths[k4] = v4
-                  next
-                end
-              end
-            end
-          end
+          get_expanded_elements(element_xpaths, complex_type_or_group_dict, element_xpath, element_type)
         else
           element_xpaths[element_xpath] = element_type
         end
@@ -222,7 +157,7 @@ class HPXMLValidator
     end
 
     # Add enumeration and min/max numeric values
-    puts 'Adding enueration and min/max numeric values...'
+    puts 'Adding enumeration and min/max numeric values...'
 
     element_xpaths.each do |element_xpath, element_type|
       # exclude duplicated xpaths
@@ -235,7 +170,7 @@ class HPXMLValidator
       next unless elements_in_sample_files.any? { |item| item.include? context_xpath }
 
       hpxml_data_type_name = [element_type, '_simple'].join()
-      hpxml_data_type = hpxml_data_type_dict[hpxml_data_type_name]
+      hpxml_data_type = hpxml_data_types_dict[hpxml_data_type_name]
       next if hpxml_data_type.nil?
 
       rule = XMLHelper.add_element(pattern, 'sch:rule')
@@ -274,6 +209,23 @@ class HPXMLValidator
     end
 
     XMLHelper.write_file(schema_validator, File.join(File.dirname(__FILE__), 'schema_validator.xml'))
+  end
+
+  def self.get_expanded_elements(element_xpaths, complex_type_or_group_dict, element_xpath, element_type)
+    if complex_type_or_group_dict[element_type].nil?
+      return element_xpaths[element_xpath] = element_type
+    else
+      expanded_elements = deep_copy_object(complex_type_or_group_dict[element_type])
+      expanded_elements.each do |k, v|
+        k.push(element_xpath).flatten!
+        if complex_type_or_group_dict[v].nil?
+          element_xpaths[k] = v
+          next
+        end
+
+        get_expanded_elements(element_xpaths, complex_type_or_group_dict, k, v)
+      end
+    end
   end
 
   def self.deep_copy_object(obj)
