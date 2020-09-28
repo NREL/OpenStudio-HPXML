@@ -1702,7 +1702,7 @@ class OSModel
 
     # Create heating season as opposite of cooling season (i.e., with overlap months)
     non_cooling_season = cooling_season.map { |m| (m - 1).abs }
-    @htg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'heating season schedule', Array.new(24, 1), Array.new(24, 1), non_cooling_season, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+    @htg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'heating season schedule', Array.new(24, 1), Array.new(24, 1), non_cooling_season, Constants.ScheduleTypeLimitsFraction)
 
     @clg_ssn_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     @clg_ssn_sensor.setName('cool_season')
