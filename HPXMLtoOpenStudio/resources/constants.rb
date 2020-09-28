@@ -74,7 +74,7 @@ class Constants
   end
 
   def self.ERIVersions
-    return ['2014', '2014A', '2014AD', '2014ADE', '2014ADEG', '2014ADEGL', '2019', '2019A']
+    return ['2014', '2014A', '2014AD', '2014ADE', '2014ADEG', '2014ADEGL', '2019', '2019A', '2019AB']
   end
 
   def self.FluidWater
@@ -105,10 +105,6 @@ class Constants
     return 'backup htg coil'
   end
 
-  def self.ObjectNameBath
-    return 'baths'
-  end
-
   def self.ObjectNameBoiler
     return 'boiler'
   end
@@ -131,6 +127,10 @@ class Constants
 
   def self.ObjectNameClothesDryer
     return 'clothes dryer'
+  end
+
+  def self.ObjectNameClothesDryerExhaust
+    return 'clothes dryer exhaust'
   end
 
   def self.ObjectNameCombiWaterHeatingEnergy(water_heater_name)
@@ -371,14 +371,6 @@ class Constants
 
   def self.ObjectNameSharedPump(hvac_name)
     return "#{hvac_name} shared pump"
-  end
-
-  def self.ObjectNameShower
-    return 'showers'
-  end
-
-  def self.ObjectNameSink
-    return 'sinks'
   end
 
   def self.ObjectNameSolarHotWater

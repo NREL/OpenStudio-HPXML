@@ -200,12 +200,12 @@ class HPXMLValidator
         XMLHelper.add_attribute(assertion, 'test', "number(.) &gt; #{hpxml_data_type[:min_exclusive]}")
         assertion.inner_text = "Expected the value to be greater than #{hpxml_data_type[:min_exclusive]} for xpath: "
       end
-      next unless hpxml_data_type[:max_exclusive]
-
-      assertion = XMLHelper.add_element(rule, 'sch:assert')
-      XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-      XMLHelper.add_attribute(assertion, 'test', "number(.) &lt; #{hpxml_data_type[:max_exclusive]}")
-      assertion.inner_text = "Expected the value to be less than #{hpxml_data_type[:max_exclusive]} for xpath: "
+      if hpxml_data_type[:max_exclusive]
+        assertion = XMLHelper.add_element(rule, 'sch:assert')
+        XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+        XMLHelper.add_attribute(assertion, 'test', "number(.) &lt; #{hpxml_data_type[:max_exclusive]}")
+        assertion.inner_text = "Expected the value to be less than #{hpxml_data_type[:max_exclusive]} for xpath: "
+      end
     end
 
     XMLHelper.write_file(schema_validator, File.join(File.dirname(__FILE__), 'schema_validator.xml'))

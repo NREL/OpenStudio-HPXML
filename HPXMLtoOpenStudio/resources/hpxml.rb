@@ -285,7 +285,6 @@ class HPXML < Object
     from_oga(hpxml)
 
     # Clean up
-    delete_partition_surfaces()
     delete_tiny_surfaces()
     delete_adiabatic_subsurfaces()
     if collapse_enclosure
@@ -1546,6 +1545,10 @@ class HPXML < Object
       return !is_exterior
     end
 
+    def is_adiabatic
+      return HPXML::is_adiabatic(self)
+    end
+
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(self)
     end
@@ -1660,6 +1663,10 @@ class HPXML < Object
 
     def is_interior
       return !is_exterior
+    end
+
+    def is_adiabatic
+      return HPXML::is_adiabatic(self)
     end
 
     def is_thermal_boundary
@@ -1795,6 +1802,10 @@ class HPXML < Object
 
     def is_interior
       return !is_exterior
+    end
+
+    def is_adiabatic
+      return HPXML::is_adiabatic(self)
     end
 
     def is_thermal_boundary
@@ -1935,6 +1946,10 @@ class HPXML < Object
 
     def is_interior
       return !is_exterior
+    end
+
+    def is_adiabatic
+      return HPXML::is_adiabatic(self)
     end
 
     def is_thermal_boundary
@@ -3995,7 +4010,8 @@ class HPXML < Object
 
   class ClothesDryer < BaseElement
     ATTRS = [:id, :location, :fuel_type, :energy_factor, :combined_energy_factor, :control_type,
-             :usage_multiplier, :is_shared_appliance, :number_of_units, :number_of_units_served]
+             :usage_multiplier, :is_shared_appliance, :number_of_units, :number_of_units_served,
+             :is_vented, :vented_flow_rate]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4023,6 +4039,8 @@ class HPXML < Object
       XMLHelper.add_element(clothes_dryer, 'CombinedEnergyFactor', to_float(@combined_energy_factor)) unless @combined_energy_factor.nil?
       XMLHelper.add_element(clothes_dryer, 'ControlType', @control_type) unless @control_type.nil?
       XMLHelper.add_extension(clothes_dryer, 'UsageMultiplier', to_float(@usage_multiplier)) unless @usage_multiplier.nil?
+      XMLHelper.add_extension(clothes_dryer, 'IsVented', to_boolean(@is_vented)) unless @is_vented.nil?
+      XMLHelper.add_extension(clothes_dryer, 'VentedFlowRate', to_float(@vented_flow_rate)) unless @vented_flow_rate.nil?
     end
 
     def from_oga(clothes_dryer)
@@ -4038,6 +4056,8 @@ class HPXML < Object
       @combined_energy_factor = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'CombinedEnergyFactor'))
       @control_type = XMLHelper.get_value(clothes_dryer, 'ControlType')
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/UsageMultiplier'))
+      @is_vented = to_boolean_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/IsVented'))
+      @vented_flow_rate = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/VentedFlowRate'))
     end
   end
 
@@ -4994,18 +5014,6 @@ class HPXML < Object
     end
   end
 
-  def delete_partition_surfaces()
-    (@rim_joists + @walls + @foundation_walls + @frame_floors).reverse_each do |surface|
-      next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
-
-      if surface.interior_adjacent_to == surface.exterior_adjacent_to
-        surface.delete
-      elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].sort == [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].sort
-        surface.delete
-      end
-    end
-  end
-
   def delete_tiny_surfaces()
     (@rim_joists + @walls + @foundation_walls + @frame_floors + @roofs + @windows + @skylights + @doors + @slabs).reverse_each do |surface|
       next if surface.area.nil? || (surface.area > 0.1)
@@ -5160,22 +5168,32 @@ class HPXML < Object
     return errors
   end
 
+  def self.conditioned_locations
+    return [HPXML::LocationLivingSpace,
+            HPXML::LocationBasementConditioned,
+            HPXML::LocationOtherHousingUnit]
+  end
+
+  def self.is_adiabatic(surface)
+    if surface.exterior_adjacent_to == surface.interior_adjacent_to
+      # E.g., wall between unit crawlspace and neighboring unit crawlspace
+      return true
+    elsif conditioned_locations.include?(surface.interior_adjacent_to) &&
+          conditioned_locations.include?(surface.exterior_adjacent_to)
+      # E.g., frame floor between living space and conditioned basement, or
+      # wall between living space and "other housing unit"
+      return true
+    end
+
+    return false
+  end
+
   def self.is_thermal_boundary(surface)
     # Returns true if the surface is between conditioned space and outside/ground/unconditioned space.
     # Note: The location of insulation is not considered here, so an insulated foundation wall of an
     # unconditioned basement, for example, returns false.
-    def self.is_adjacent_to_conditioned(adjacent_to)
-      if [HPXML::LocationLivingSpace,
-          HPXML::LocationBasementConditioned,
-          HPXML::LocationOtherHousingUnit].include? adjacent_to
-        return true
-      else
-        return false
-      end
-    end
-
-    interior_conditioned = is_adjacent_to_conditioned(surface.interior_adjacent_to)
-    exterior_conditioned = is_adjacent_to_conditioned(surface.exterior_adjacent_to)
+    interior_conditioned = conditioned_locations.include? surface.interior_adjacent_to
+    exterior_conditioned = conditioned_locations.include? surface.exterior_adjacent_to
     return (interior_conditioned != exterior_conditioned)
   end
 

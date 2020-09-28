@@ -186,7 +186,7 @@ Fields include:
 - ``NumberofBathrooms``: Optional. If not provided, it is calculated as :math:`\frac{NumberofBedrooms}{2} + 0.5` based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 - ``ConditionedFloorArea``
 - ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``
-- ``extension/HasFlueOrChimney``: Optional. Specifies whether there is a flue (associated with heating system or water heater) or chimney. if not provided, it is assumed to be true if any of the following conditions are met: 
+- ``extension/HasFlueOrChimney``: Optional. Specifies whether there is a flue (associated with heating system or water heater) or chimney. If not provided, it is assumed to be true if any of the following conditions are met: 
 
   - heating system is non-electric ``Furnace``, ``Boiler``, ``WallFurnace``, ``FloorFurnace``, ``Stove``, or ``FixedHeater`` and AFUE/Percent is less than 0.89
   - heating system is non-electric ``Fireplace`` 
@@ -229,6 +229,11 @@ other heated space              E.g., shared laundry/equipment space            
 other multifamily buffer space  E.g., enclosed unconditioned stairwell            Average of conditioned space and outside; minimum of 50F  Attached/Multifamily only
 other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                       Attached/Multifamily only
 ==============================  ================================================  ========================================================  =========================
+
+Interior partition surfaces (e.g., walls between rooms inside conditioned space, or the floor between two conditioned stories) can be excluded.
+
+For Attached/Multifamily buildings, surfaces between unconditioned space and the neigboring unit's same unconditioned space should set ``InteriorAdjacentTo`` and ``ExteriorAdjacentTo`` to the same value.
+For example, a foundation wall between the unit's vented crawlspace and the neighboring unit's vented crawlspace would use ``InteriorAdjacentTo="crawlspace - vented"`` and ``ExteriorAdjacentTo="crawlspace - vented"``.
 
 .. warning::
 
@@ -317,8 +322,7 @@ Rim joists can have an optional element provided for ``Siding``; if not provided
 HPXML Walls
 ***********
 
-Any wall that has no contact with the ground and bounds a space type should be specified as an ``Enclosure/Walls/Wall``. 
-Interior walls (for example, walls solely within the conditioned space of the building) are not required.
+Any wall that has no contact with the ground and bounds a space type should be specified as an ``Enclosure/Walls/Wall``.
 
 Walls are defined by their ``Area`` and ``Insulation/AssemblyEffectiveRValue``.
 The choice of ``WallType`` has a secondary effect on heat transfer in that it informs the assumption of wall thermal mass.
@@ -370,9 +374,10 @@ HPXML Frame Floors
 ******************
 
 Any horizontal floor/ceiling surface that is not in contact with the ground (Slab) nor adjacent to ambient conditions above (Roof) should be specified as an ``Enclosure/FrameFloors/FrameFloor``.
+
 Frame floors in an attached/multifamily building that are adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space" must have the ``extension/OtherSpaceAboveOrBelow`` property set to signify whether the other space is "above" or "below".
 
-Frame floors are primarily defined by their ``Insulation/AssemblyEffectiveRValue``.
+Frame floors are primarily defined by their ``Area`` and ``Insulation/AssemblyEffectiveRValue``.
 
 HPXML Slabs
 ***********
@@ -1022,7 +1027,7 @@ If the location is not specified, the appliance is assumed to be in the living s
 HPXML Clothes Washer
 ********************
 
-An ``Appliances/ClothesWasher`` element can be specified; if not provided, a clothes washer will not be modeled.
+A single ``Appliances/ClothesWasher`` element can be specified; if not provided, a clothes washer will not be modeled.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard clothes washer from 2006 will be used.
@@ -1052,7 +1057,7 @@ If provided and true, ``AttachedToWaterHeatingSystem`` must also be specified an
 HPXML Clothes Dryer
 *******************
 
-An ``Appliances/ClothesDryer`` element can be specified; if not provided, a clothes dryer will not be modeled.
+A single ``Appliances/ClothesDryer`` element can be specified; if not provided, a clothes dryer will not be modeled.
 The dryer's ``FuelType`` must be provided.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
@@ -1071,13 +1076,16 @@ If ``EnergyFactor`` is provided instead of ``CombinedEnergyFactor``, it will be 
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
+An optional ``extension/IsVented`` element can be used to indicate whether the clothes dryer is vented. If not provided, it is assumed that the clothes dryer is vented.
+If the clothes dryer is vented, an optional ``extension/VentedFlowRate`` element can be used to specify the exhaust cfm. If not provided, it is assumed that the clothes dryer vented flow rate is 100 cfm.
+
 The clothes dryer may be optionally described as a shared appliance (i.e., in a shared laundry room) using ``IsSharedAppliance``.
 If not provided, it is assumed to be false.
 
 HPXML Dishwasher
 ****************
 
-An ``Appliances/Dishwasher`` element can be specified; if not provided, a dishwasher will not be modeled.
+A single ``Appliances/Dishwasher`` element can be specified; if not provided, a dishwasher will not be modeled.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard dishwasher from 2006 will be used.
@@ -1143,7 +1151,7 @@ An extension/UsageMultiplier can also be optionally provided that scales energy 
 HPXML Cooking Range/Oven
 ************************
 
-``Appliances/CookingRange`` and ``Appliances/Oven`` elements can be specified; if not provided, a range/oven will not be modeled.
+A single pair of ``Appliances/CookingRange`` and ``Appliances/Oven`` elements can be specified; if not provided, a range/oven will not be modeled.
 The ``FuelType`` of the range must be provided.
 
 Inputs including ``CookingRange/IsInduction`` and ``Oven/IsConvection`` can be optionally provided.
@@ -1162,8 +1170,8 @@ An ``CookingRange/extension/UsageMultiplier`` can also be optionally provided th
 HPXML Dehumidifier
 ******************
 
-An ``Appliance/Dehumidifier`` element can be specified; if not provided, a dehumidifier will not be modeled.
-The ``Capacity``, ``DehumidistatSetpoint`` (relative humidity as a fraction, 0-1), and ``FractionDehumidificationLoadServed`` (0-1) must be provided.
+A single ``Appliance/Dehumidifier`` element can be specified; if not provided, a dehumidifier will not be modeled.
+The ``Capacity`` (pints/day), ``DehumidistatSetpoint`` (relative humidity as a fraction, 0-1), and ``FractionDehumidificationLoadServed`` (0-1) must be provided.
 The efficiency of the dehumidifier can either be entered as an ``IntegratedEnergyFactor`` or ``EnergyFactor``.
 
 HPXML Lighting
