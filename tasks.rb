@@ -4855,7 +4855,6 @@ def set_schema_validator()
   require_relative 'HPXMLtoOpenStudio/resources/HPXMLvalidator'
 
   puts 'Generating HPXML Schema Validator...'
-  HPXMLValidator.get_elements_from_sample_files()
   HPXMLValidator.create_schematron_schema_validator()
 end
 

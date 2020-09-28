@@ -5,6 +5,8 @@ require 'oga'
 
 class HPXMLValidator
   def self.get_elements_from_sample_files()
+    puts 'Getting elements from sample files...'
+
     root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
 
     # Load all HPXMLs
@@ -48,6 +50,35 @@ class HPXMLValidator
 
     hpxml_data_type_xsd = File.read(File.join(File.dirname(__FILE__), 'HPXMLDataTypes.xsd'))
     hpxml_data_type_xsd_doc = Oga.parse_xml(hpxml_data_type_xsd)
+    hpxml_data_type_dict = {}
+    hpxml_data_type_xsd_doc.xpath('//xs:simpleType').each do |simple_type_element|
+      enums = []
+      simple_type_element.xpath('xs:restriction/xs:enumeration').each do |enum|
+        enums << ['_', enum.get('value'), '_'].join() # in "_foo_" format
+      end
+      minInclusive_element = simple_type_element.at_xpath('xs:restriction/xs:minInclusive')
+      min_inclusive = minInclusive_element.get('value') if not minInclusive_element.nil?
+      maxInclusive_element = simple_type_element.at_xpath('xs:restriction/xs:maxInclusive')
+      max_inclusive = maxInclusive_element.get('value') if not maxInclusive_element.nil?
+      minExclusive_element = simple_type_element.at_xpath('xs:restriction/xs:minExclusive')
+      min_exclusive = minExclusive_element.get('value') if not minExclusive_element.nil?
+      maxExclusive_element = simple_type_element.at_xpath('xs:restriction/xs:maxExclusive')
+      max_exclusive = maxExclusive_element.get('value') if not maxExclusive_element.nil?
+
+      # avoid creating empty rules
+      next if enums.empty? && min_inclusive.nil? && max_inclusive.nil? && min_exclusive.nil? && max_exclusive.nil?
+
+      simple_type_element_name = simple_type_element.get('name')
+      hpxml_data_type_dict[simple_type_element_name] = {}
+      hpxml_data_type_dict[simple_type_element_name][:enums] = enums
+      hpxml_data_type_dict[simple_type_element_name][:min_inclusive] = min_inclusive
+      hpxml_data_type_dict[simple_type_element_name][:max_inclusive] = max_inclusive
+      hpxml_data_type_dict[simple_type_element_name][:min_exclusive] = min_exclusive
+      hpxml_data_type_dict[simple_type_element_name][:max_exclusive] = max_exclusive
+    end
+
+    # build schema_validator.xml
+    puts 'Building schema_validator.xml...'
 
     schema_validator = XMLHelper.create_doc(version = '1.0', encoding = 'UTF-8')
     root = XMLHelper.add_element(schema_validator, 'sch:schema')
@@ -57,76 +88,195 @@ class HPXMLValidator
     XMLHelper.add_attribute(name_space, 'prefix', 'h')
     pattern = XMLHelper.add_element(root, 'sch:pattern')
 
-    base_elements_xsd_doc.xpath('//xs:element').each do |element|
-      next if element.get('type').nil? # only checks enumeration values and min/max numerical constraints
+    element_xpaths = {}
+    [{ _xpath: '//xs:element', _type: '//xs:complexType', _attr: 'type' },
+     { _xpath: '//xs:group', _type: '//xs:group', _attr: 'ref' }].each do |param|
+      # construct complexType and group elements dictionary
+      complex_type_or_group_dict = {}
+      base_elements_xsd_doc.xpath(param[:_type]).each do |param_type|
+        next if param_type.get('name').nil?
 
-      ancestors = []
-      element.each_ancestor do |node|
-        # add prefix to element name
-        ancestors << ['h:', node.get('name')].join() if not node.get('name').nil?
+        param_type_name = param_type.get('name')
+        complex_type_or_group_dict[param_type_name] = {}
+
+        param_type_only = deep_copy_object(param_type)
+        param_type_only.each_node do |element|
+          next unless element.is_a?(Oga::XML::Element)
+          next unless element.name == 'element'
+
+          ancestors = []
+          element.each_ancestor do |node|
+            next if node.get('name').nil?
+            next if node.get('name') == param_type_only.get('name') # exclude complexType name from elements' xpath
+
+            ancestors << node.get('name')
+          end
+
+          parent_element_names = ancestors
+          child_element_name = element.get('name')
+          element_xpath = parent_element_names.unshift(child_element_name) # push the element to the front
+          element_type = element.get('type')
+          complex_type_or_group_dict[param_type_name][element_xpath] = element_type
+        end
       end
-      parent_element_xpath = ancestors.reverse.join('/').chomp('/')
-      child_element_xpath = ['h:', element.get('name')].join() if not element.get('name').nil?
-      context_xpath = [parent_element_xpath, child_element_xpath].join('/').chomp('/').delete_prefix('/')
 
-      next unless elements_in_sample_files.any? { |item| item.include? context_xpath }
-
-      hpxml_data_type_xsd_doc.xpath('//xs:simpleType').each do |simple_type_element|
-        hpxml_data_type_name = [element.get('type'), '_simple'].join()
-        next unless simple_type_element.get('name') == hpxml_data_type_name # Check if HPXMLDataTypes.xsd has "foo_simple"
-
-        enums = []
-        simple_type_element.xpath('xs:restriction/xs:enumeration').each do |enum|
-          enums << ['_', enum.get('value'), '_'].join() # in "_foo_" format
+      # expand elements by adding elements based on type/ref
+      base_elements_xsd_doc.xpath(param[:_xpath]).each do |element|
+        # exceptions
+        if param[:_xpath] == '//xs:element'
+          next if element.get('name') == 'CoolingSystemInfo' || element.get('name') == 'HeatPumpInfo' || element.get('name') == 'HeatingSystemInfo' || element.get('name') == 'SubContractor'
+          next unless element.name == 'element'
         end
-        minInclusive_element = simple_type_element.at_xpath('xs:restriction/xs:minInclusive')
-        min_inclusive = minInclusive_element.get('value') if not minInclusive_element.nil?
-        maxInclusive_element = simple_type_element.at_xpath('xs:restriction/xs:maxInclusive')
-        max_inclusive = maxInclusive_element.get('value') if not maxInclusive_element.nil?
-        minExclusive_element = simple_type_element.at_xpath('xs:restriction/xs:minExclusive')
-        min_exclusive = minExclusive_element.get('value') if not minExclusive_element.nil?
-        maxExclusive_element = simple_type_element.at_xpath('xs:restriction/xs:maxExclusive')
-        max_exclusive = maxExclusive_element.get('value') if not maxExclusive_element.nil?
+        next if element.get(param[:_attr]).nil?
 
-        # avoid creating empty rules
-        next if enums.empty? && min_inclusive.nil? && max_inclusive.nil? && min_exclusive.nil? && max_exclusive.nil?
+        ancestors = []
+        element.each_ancestor do |node|
+          next if node.get('name').nil?
+          next if node.get('name') == element.get('name') # exclude complexType name from elements' xpath
 
-        rule = XMLHelper.add_element(pattern, 'sch:rule')
-        XMLHelper.add_attribute(rule, 'context', context_xpath.prepend('//'))
+          ancestors << node.get('name')
+        end
 
-        if not enums.empty?
-          assertion = XMLHelper.add_element(rule, 'sch:assert')
-          XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-          XMLHelper.add_attribute(assertion, 'test', "contains(\"#{enums.join(' ')}\", concat(\"_\", text(), \"_\"))")
-          assertion.inner_text = "Expected \"text()\" for xpath: \"#{enums.join('" or "').gsub!('_', '')}\""
+        parent_element_names = ancestors
+        child_element_name = element.get('name')
+        if param[:_xpath] == '//xs:element'
+          element_xpath = parent_element_names.unshift(child_element_name) # push the element to the front
+        else
+          element_xpath = parent_element_names
         end
-        if not min_inclusive.nil?
-          assertion = XMLHelper.add_element(rule, 'sch:assert')
-          XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-          XMLHelper.add_attribute(assertion, 'test', "number(.) &gt;= #{min_inclusive}")
-          assertion.inner_text = "Expected the value to be greater than or equal to #{min_inclusive} for xpath: "
-        end
-        if not max_inclusive.nil?
-          assertion = XMLHelper.add_element(rule, 'sch:assert')
-          XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-          XMLHelper.add_attribute(assertion, 'test', "number(.) &lt;= #{max_inclusive}")
-          assertion.inner_text = "Expected the value to be less than or equal to #{max_inclusive} for xpath: "
-        end
-        if not min_exclusive.nil?
-          assertion = XMLHelper.add_element(rule, 'sch:assert')
-          XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-          XMLHelper.add_attribute(assertion, 'test', "number(.) &gt; #{min_exclusive}")
-          assertion.inner_text = "Expected the value to be greater than #{min_exclusive} for xpath: "
-        end
-        if not max_exclusive.nil?
-          assertion = XMLHelper.add_element(rule, 'sch:assert')
-          XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-          XMLHelper.add_attribute(assertion, 'test', "number(.) &lt; #{max_exclusive}")
-          assertion.inner_text = "Expected the value to be less than #{max_exclusive} for xpath: "
+        element_type = element.get(param[:_attr])
+
+        # Skip element xpaths not being used in sample files
+        element_xpath_with_prefix = element_xpath.reverse.map { |e| "h:#{e}" }
+        context_xpath = element_xpath_with_prefix.join('/').chomp('/')
+        next unless elements_in_sample_files.any? { |item| item.include? context_xpath }
+
+        #   ######################
+        #   # def self.get_expanded_elements(element_xpaths, complex_type_dict, element_xpath, element_type)
+        #   #   if complex_type_dict[element_type].nil?
+        #   #     return element_xpaths
+        #   #   else
+        #   #     expanded_elements = deep_copy_object(complex_type_dict[element_type])
+        #   #     expanded_elements.each do |k, v|
+        #   #       k.push(element_xpath).flatten!
+        #   #       element_xpaths[k] = v
+
+        #   #       return get_expanded_elements(element_xpaths, complex_type_dict, k, v)
+        #   #     end
+        #   #   end
+        #   # end
+
+        #   # expanded_elements = deep_copy_object(complex_type_dict[element_type])
+        #   # if not expanded_elements.nil?
+        #   #   get_expanded_elements(element_xpaths, complex_type_dict, element_xpath, element_type)
+        #   # else
+        #   #   element_xpaths[element_xpath] = element_type
+        #   # end
+        #   ######################
+        has_complex_type_or_group_dict = complex_type_or_group_dict[element_type]
+        if has_complex_type_or_group_dict
+          expanded_elements = deep_copy_object(complex_type_or_group_dict[element_type])
+          # FIXME: Change it to a recursive loop
+          expanded_elements.each do |k, v|
+            k.push(element_xpath).flatten!
+            if complex_type_or_group_dict[v].nil?
+              element_xpaths.delete(element_xpath)
+              element_xpaths[k] = v
+              next
+            end
+
+            another_expanded_elements = deep_copy_object(complex_type_or_group_dict[v])
+            another_expanded_elements.each do |k2, v2|
+              k2.push(k).flatten!
+              if complex_type_or_group_dict[v2].nil?
+                element_xpaths.delete(k)
+                element_xpaths[k2] = v2
+                next
+              end
+
+              another_another_expanded_elements = deep_copy_object(complex_type_or_group_dict[v2])
+              another_another_expanded_elements.each do |k3, v3|
+                k3.push(k2).flatten!
+                if complex_type_or_group_dict[v3].nil?
+                  element_xpaths.delete(k2)
+                  element_xpaths[k3] = v3
+                  next
+                end
+
+                another_another_expanded_elements = deep_copy_object(complex_type_or_group_dict[v3])
+                another_another_expanded_elements.each do |k4, v4|
+                  k4.push(k3).flatten!
+                  next unless complex_type_or_group_dict[v4].nil?
+
+                  element_xpaths.delete(k3)
+                  element_xpaths[k4] = v4
+                  next
+                end
+              end
+            end
+          end
+        else
+          element_xpaths[element_xpath] = element_type
         end
       end
     end
 
+    # Add enumeration and min/max numeric values
+    puts 'Adding enueration and min/max numeric values...'
+
+    element_xpaths.each do |element_xpath, element_type|
+      # exclude duplicated xpaths
+      result = element_xpaths.keys.select { |k| (element_xpath != k) && (k.each_cons(element_xpath.size).include? element_xpath) } # check if an array contains another array in particular order
+      next unless result.empty?
+
+      # Skip element xpaths not being used in sample files
+      element_xpath_with_prefix = element_xpath.reverse.map { |e| "h:#{e}" }
+      context_xpath = element_xpath_with_prefix.join('/').chomp('/')
+      next unless elements_in_sample_files.any? { |item| item.include? context_xpath }
+
+      hpxml_data_type_name = [element_type, '_simple'].join()
+      hpxml_data_type = hpxml_data_type_dict[hpxml_data_type_name]
+      next if hpxml_data_type.nil?
+
+      rule = XMLHelper.add_element(pattern, 'sch:rule')
+      XMLHelper.add_attribute(rule, 'context', context_xpath.prepend('//'))
+
+      if not hpxml_data_type[:enums].empty?
+        assertion = XMLHelper.add_element(rule, 'sch:assert')
+        XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+        XMLHelper.add_attribute(assertion, 'test', "contains(\"#{hpxml_data_type[:enums].join(' ')}\", concat(\"_\", text(), \"_\"))")
+        assertion.inner_text = "Expected \"text()\" for xpath: \"#{hpxml_data_type[:enums].join('" or "').gsub!('_', '')}\""
+      end
+      if hpxml_data_type[:min_inclusive]
+        assertion = XMLHelper.add_element(rule, 'sch:assert')
+        XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+        XMLHelper.add_attribute(assertion, 'test', "number(.) &gt;= #{hpxml_data_type[:min_inclusive]}")
+        assertion.inner_text = "Expected the value to be greater than or equal to #{hpxml_data_type[:min_inclusive]} for xpath: "
+      end
+      if hpxml_data_type[:max_inclusive]
+        assertion = XMLHelper.add_element(rule, 'sch:assert')
+        XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+        XMLHelper.add_attribute(assertion, 'test', "number(.) &lt;= #{hpxml_data_type[:max_inclusive]}")
+        assertion.inner_text = "Expected the value to be less than or equal to #{hpxml_data_type[:max_inclusive]} for xpath: "
+      end
+      if hpxml_data_type[:min_exclusive]
+        assertion = XMLHelper.add_element(rule, 'sch:assert')
+        XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+        XMLHelper.add_attribute(assertion, 'test', "number(.) &gt; #{hpxml_data_type[:min_exclusive]}")
+        assertion.inner_text = "Expected the value to be greater than #{hpxml_data_type[:min_exclusive]} for xpath: "
+      end
+      next unless hpxml_data_type[:max_exclusive]
+
+      assertion = XMLHelper.add_element(rule, 'sch:assert')
+      XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+      XMLHelper.add_attribute(assertion, 'test', "number(.) &lt; #{hpxml_data_type[:max_exclusive]}")
+      assertion.inner_text = "Expected the value to be less than #{hpxml_data_type[:max_exclusive]} for xpath: "
+    end
+
     XMLHelper.write_file(schema_validator, File.join(File.dirname(__FILE__), 'schema_validator.xml'))
+  end
+
+  def self.deep_copy_object(obj)
+    return Marshal.load(Marshal.dump(obj))
   end
 end
