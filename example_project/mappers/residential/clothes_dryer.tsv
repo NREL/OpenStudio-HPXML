@@ -1,6 +1,0 @@
-Dependency=Template Month	Dependency=Template Year	Dependency=clothes_dryer_fuel_type	clothes_dryer_efficiency_cef	clothes_dryer_control_type	Source
-Sep	2020	electricity	3.93	timer	"ResStock ""Electric, Premium, EnergyStar 100% Usage"""
-Sep	2020	natural gas	3.03	timer	"ResStock ""Gas, Premium, 100% Usage"""
-Sep	2020	fuel oil	3.03	timer	Engineering judgment
-Sep	2020	propane	3.03	timer	Engineering judgment
-Sep	2020	wood	3.03	timer	Engineering judgment
