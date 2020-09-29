@@ -167,7 +167,7 @@ class Geometry
     if not schedules_file.nil?
       people_sch = schedules_file.create_schedule_file(col_name: 'occupants')
     else
-      people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, Constants.ScheduleTypeLimitsFraction)
       people_sch = people_sch.schedule
     end
 
