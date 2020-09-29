@@ -82,15 +82,20 @@ def baseline_scenario(json, csv)
   feature_file_path = File.join(root_dir, json)
   csv_file = File.join(root_dir, csv)
   mapper_files_dir = File.join(root_dir, 'mappers/')
+  reopt_files_dir = File.join(root_dir, 'reopt/')
   scenario_reopt_assumptions_file_name = 'base_assumptions.json'
   num_header_rows = 1
 
   feature_file = URBANopt::GeoJSON::GeoFile.from_file(feature_file_path)
   scenario = URBANopt::Scenario::REoptScenarioCSV.new(
     name, root_dir, run_dir, feature_file, mapper_files_dir, csv_file,
-    num_header_rows, scenario_reopt_assumptions_file_name
+    num_header_rows, reopt_files_dir, scenario_reopt_assumptions_file_name
   )
   return scenario
+end
+
+# Create JSON and CSV config files for running a given scenario.
+def create_aggregated_scenario(occupant_model)
 end
 
 def configure_project
@@ -244,10 +249,10 @@ task :post_process_baseline, [:json, :csv] do |t, args|
     scenario_base.reopt_feature_assumptions, DEVELOPER_NREL_KEY
   )
 
-  # Run Aggregate Scenario
-  scenario_report_scenario = reopt_post_processor.run_scenario_report(
+  # Run house-by-house Scenario
+  scenario_report_scenario = reopt_post_processor.run_scenario_report_features(
     scenario_report: scenario_report,
-    save_name: 'scenario_report_reopt_global_optimization'
+    save_name_scenario_report: 'scenario_report_reopt_by_feature'
   )
 end
 
