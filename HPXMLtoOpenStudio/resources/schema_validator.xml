@@ -3,712 +3,712 @@
   <sch:ns uri='http://hpxmlonline.com/2019/10' prefix='h'/>
   <sch:pattern>
     <sch:rule context='//h:XMLTransactionHeaderInformation/h:Transaction'>
-      <sch:assert role='ERROR' test='contains("_create_ _update_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'create' or 'update'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_create_ _update_", concat("_", text(), "_"))'>Expected value to be: 'create' or 'update'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:ProjectStatus/h:EventType'>
-      <sch:assert role='ERROR' test='contains("_audit_ _proposed workscope_ _approved workscope_ _construction-period testing/daily test out_ _job completion testing/final inspection_ _quality assurance/monitoring_ _preconstruction_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'audit' or 'proposed workscope' or 'approved workscope' or 'construction-period testing/daily test out' or 'job completion testing/final inspection' or 'quality assurance/monitoring' or 'preconstruction'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_audit_ _proposed workscope_ _approved workscope_ _construction-period testing/daily test out_ _job completion testing/final inspection_ _quality assurance/monitoring_ _preconstruction_", concat("_", text(), "_"))'>Expected value to be: 'audit' or 'proposed workscope' or 'approved workscope' or 'construction-period testing/daily test out' or 'job completion testing/final inspection' or 'quality assurance/monitoring' or 'preconstruction'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:BuildingSummary/h:Site/h:SiteType'>
-      <sch:assert role='ERROR' test='contains("_rural_ _suburban_ _urban_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'rural' or 'suburban' or 'urban'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_rural_ _suburban_ _urban_", concat("_", text(), "_"))'>Expected value to be: 'rural' or 'suburban' or 'urban'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:BuildingSummary/h:Site/h:FuelTypesAvailable/h:Fuel'>
-      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected value to be: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingOccupancy/h:NumberofResidents'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingConstruction/h:ResidentialFacilityType'>
-      <sch:assert role='ERROR' test='contains("_single-family detached_ _single-family attached_ _manufactured home_ _2-4 unit building_ _5+ unit building_ _multi-family - uncategorized_ _multi-family - town homes_ _multi-family - condos_ _apartment unit_ _studio unit_ _other_ _unknown_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'single-family detached' or 'single-family attached' or 'manufactured home' or '2-4 unit building' or '5+ unit building' or 'multi-family - uncategorized' or 'multi-family - town homes' or 'multi-family - condos' or 'apartment unit' or 'studio unit' or 'other' or 'unknown'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_single-family detached_ _single-family attached_ _manufactured home_ _2-4 unit building_ _5+ unit building_ _multi-family - uncategorized_ _multi-family - town homes_ _multi-family - condos_ _apartment unit_ _studio unit_ _other_ _unknown_", concat("_", text(), "_"))'>Expected value to be: 'single-family detached' or 'single-family attached' or 'manufactured home' or '2-4 unit building' or '5+ unit building' or 'multi-family - uncategorized' or 'multi-family - town homes' or 'multi-family - condos' or 'apartment unit' or 'studio unit' or 'other' or 'unknown'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingConstruction/h:NumberofConditionedFloors'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingConstruction/h:NumberofConditionedFloorsAboveGrade'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingConstruction/h:AverageCeilingHeight'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingConstruction/h:NumberofBathrooms'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingConstruction/h:ConditionedFloorArea'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingConstruction/h:ConditionedBuildingVolume'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:ClimateandRiskZones/h:ClimateZoneIECC/h:Year'>
-      <sch:assert role='ERROR' test='contains("_2012_ _2009_ _2006_ _2003_", concat("_", text(), "_"))'>Expected 'text()' for xpath: '2012' or '2009' or '2006' or '2003'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_2012_ _2009_ _2006_ _2003_", concat("_", text(), "_"))'>Expected value to be: '2012' or '2009' or '2006' or '2003'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:ClimateandRiskZones/h:ClimateZoneIECC/h:ClimateZone'>
-      <sch:assert role='ERROR' test='contains("_1A_ _1B_ _1C_ _2A_ _2B_ _2C_ _3A_ _3B_ _3C_ _4A_ _4B_ _4C_ _5A_ _5B_ _5C_ _6A_ _6B_ _6C_ _7_ _8_", concat("_", text(), "_"))'>Expected 'text()' for xpath: '1A' or '1B' or '1C' or '2A' or '2B' or '2C' or '3A' or '3B' or '3C' or '4A' or '4B' or '4C' or '5A' or '5B' or '5C' or '6A' or '6B' or '6C' or '7' or '8'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_1A_ _1B_ _1C_ _2A_ _2B_ _2C_ _3A_ _3B_ _3C_ _4A_ _4B_ _4C_ _5A_ _5B_ _5C_ _6A_ _6B_ _6C_ _7_ _8_", concat("_", text(), "_"))'>Expected value to be: '1A' or '1B' or '1C' or '2A' or '2B' or '2C' or '3A' or '3B' or '3C' or '4A' or '4B' or '4C' or '5A' or '5B' or '5C' or '6A' or '6B' or '6C' or '7' or '8'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement/h:HousePressure'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement/h:BuildingAirLeakage/h:UnitofMeasure'>
-      <sch:assert role='ERROR' test='contains("_CFM_ _CFMnatural_ _ACH_ _ACHnatural_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'CFM' or 'CFMnatural' or 'ACH' or 'ACHnatural'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_CFM_ _CFMnatural_ _ACH_ _ACHnatural_", concat("_", text(), "_"))'>Expected value to be: 'CFM' or 'CFMnatural' or 'ACH' or 'ACHnatural'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement/h:BuildingAirLeakage/h:AirLeakage'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Attics/h:Attic/h:VentilationRate/h:UnitofMeasure'>
-      <sch:assert role='ERROR' test='contains("_SLA_ _ACHnatural_ _CFM per sq.ft._", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'SLA' or 'ACHnatural' or 'CFM per sq.ft.'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_SLA_ _ACHnatural_ _CFM per sq.ft._", concat("_", text(), "_"))'>Expected value to be: 'SLA' or 'ACHnatural' or 'CFM per sq.ft.'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Attics/h:Attic/h:VentilationRate/h:Value'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Foundations/h:Foundation/h:VentilationRate/h:UnitofMeasure'>
-      <sch:assert role='ERROR' test='contains("_SLA_ _ACHnatural_ _CFM per sq.ft._", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'SLA' or 'ACHnatural' or 'CFM per sq.ft.'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_SLA_ _ACHnatural_ _CFM per sq.ft._", concat("_", text(), "_"))'>Expected value to be: 'SLA' or 'ACHnatural' or 'CFM per sq.ft.'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Foundations/h:Foundation/h:VentilationRate/h:Value'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof/h:InteriorAdjacentTo'>
-      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof/h:Area'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof/h:Azimuth'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected the value to be less than 360 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected value to be less than 360 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof/h:RoofType'>
-      <sch:assert role='ERROR' test='contains("_shingles_ _slate or tile shingles_ _wood shingles or shakes_ _asphalt or fiberglass shingles_ _metal surfacing_ _expanded polystyrene sheathing_ _plastic/rubber/synthetic sheeting_ _concrete_ _cool roof_ _green roof_ _no one major type_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'shingles' or 'slate or tile shingles' or 'wood shingles or shakes' or 'asphalt or fiberglass shingles' or 'metal surfacing' or 'expanded polystyrene sheathing' or 'plastic/rubber/synthetic sheeting' or 'concrete' or 'cool roof' or 'green roof' or 'no one major type' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_shingles_ _slate or tile shingles_ _wood shingles or shakes_ _asphalt or fiberglass shingles_ _metal surfacing_ _expanded polystyrene sheathing_ _plastic/rubber/synthetic sheeting_ _concrete_ _cool roof_ _green roof_ _no one major type_ _other_", concat("_", text(), "_"))'>Expected value to be: 'shingles' or 'slate or tile shingles' or 'wood shingles or shakes' or 'asphalt or fiberglass shingles' or 'metal surfacing' or 'expanded polystyrene sheathing' or 'plastic/rubber/synthetic sheeting' or 'concrete' or 'cool roof' or 'green roof' or 'no one major type' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof/h:RoofColor'>
-      <sch:assert role='ERROR' test='contains("_light_ _medium_ _medium dark_ _dark_ _reflective_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'light' or 'medium' or 'medium dark' or 'dark' or 'reflective'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_light_ _medium_ _medium dark_ _dark_ _reflective_", concat("_", text(), "_"))'>Expected value to be: 'light' or 'medium' or 'medium dark' or 'dark' or 'reflective'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof/h:SolarAbsorptance'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof/h:Emittance'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof/h:Pitch'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof/h:RadiantBarrierGrade'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 1'>Expected the value to be greater than or equal to 1 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 3'>Expected the value to be less than or equal to 3 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 1'>Expected value to be greater than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 3'>Expected value to be less than or equal to 3 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof/h:Insulation/h:AssemblyEffectiveRValue'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist/h:ExteriorAdjacentTo'>
-      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist/h:InteriorAdjacentTo'>
-      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist/h:Area'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist/h:Azimuth'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected the value to be less than 360 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected value to be less than 360 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist/h:Siding'>
-      <sch:assert role='ERROR' test='contains("_wood siding_ _stucco_ _synthetic stucco_ _vinyl siding_ _aluminum siding_ _brick veneer_ _asbestos siding_ _fiber cement siding_ _composite shingle siding_ _masonite siding_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'wood siding' or 'stucco' or 'synthetic stucco' or 'vinyl siding' or 'aluminum siding' or 'brick veneer' or 'asbestos siding' or 'fiber cement siding' or 'composite shingle siding' or 'masonite siding' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_wood siding_ _stucco_ _synthetic stucco_ _vinyl siding_ _aluminum siding_ _brick veneer_ _asbestos siding_ _fiber cement siding_ _composite shingle siding_ _masonite siding_ _other_", concat("_", text(), "_"))'>Expected value to be: 'wood siding' or 'stucco' or 'synthetic stucco' or 'vinyl siding' or 'aluminum siding' or 'brick veneer' or 'asbestos siding' or 'fiber cement siding' or 'composite shingle siding' or 'masonite siding' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist/h:Color'>
-      <sch:assert role='ERROR' test='contains("_light_ _medium_ _medium dark_ _dark_ _reflective_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'light' or 'medium' or 'medium dark' or 'dark' or 'reflective'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_light_ _medium_ _medium dark_ _dark_ _reflective_", concat("_", text(), "_"))'>Expected value to be: 'light' or 'medium' or 'medium dark' or 'dark' or 'reflective'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist/h:SolarAbsorptance'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist/h:Emittance'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist/h:Insulation/h:AssemblyEffectiveRValue'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall/h:ExteriorAdjacentTo'>
-      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall/h:InteriorAdjacentTo'>
-      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall/h:Area'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall/h:Azimuth'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected the value to be less than 360 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected value to be less than 360 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall/h:Siding'>
-      <sch:assert role='ERROR' test='contains("_wood siding_ _stucco_ _synthetic stucco_ _vinyl siding_ _aluminum siding_ _brick veneer_ _asbestos siding_ _fiber cement siding_ _composite shingle siding_ _masonite siding_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'wood siding' or 'stucco' or 'synthetic stucco' or 'vinyl siding' or 'aluminum siding' or 'brick veneer' or 'asbestos siding' or 'fiber cement siding' or 'composite shingle siding' or 'masonite siding' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_wood siding_ _stucco_ _synthetic stucco_ _vinyl siding_ _aluminum siding_ _brick veneer_ _asbestos siding_ _fiber cement siding_ _composite shingle siding_ _masonite siding_ _other_", concat("_", text(), "_"))'>Expected value to be: 'wood siding' or 'stucco' or 'synthetic stucco' or 'vinyl siding' or 'aluminum siding' or 'brick veneer' or 'asbestos siding' or 'fiber cement siding' or 'composite shingle siding' or 'masonite siding' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall/h:Color'>
-      <sch:assert role='ERROR' test='contains("_light_ _medium_ _medium dark_ _dark_ _reflective_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'light' or 'medium' or 'medium dark' or 'dark' or 'reflective'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_light_ _medium_ _medium dark_ _dark_ _reflective_", concat("_", text(), "_"))'>Expected value to be: 'light' or 'medium' or 'medium dark' or 'dark' or 'reflective'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall/h:SolarAbsorptance'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall/h:Emittance'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall/h:Insulation/h:AssemblyEffectiveRValue'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:ExteriorAdjacentTo'>
-      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:InteriorAdjacentTo'>
-      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:Height'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:Area'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:Azimuth'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected the value to be less than 360 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected value to be less than 360 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:Thickness'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:DepthBelowGrade'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:Insulation/h:AssemblyEffectiveRValue'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:Insulation/h:Layer/h:InstallationType'>
-      <sch:assert role='ERROR' test='contains("_cavity_ _continuous_ _continuous - interior_ _continuous - exterior_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'cavity' or 'continuous' or 'continuous - interior' or 'continuous - exterior'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_cavity_ _continuous_ _continuous - interior_ _continuous - exterior_", concat("_", text(), "_"))'>Expected value to be: 'cavity' or 'continuous' or 'continuous - interior' or 'continuous - exterior'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:Insulation/h:Layer/h:NominalRValue'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:FrameFloors/h:FrameFloor/h:ExteriorAdjacentTo'>
-      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:FrameFloors/h:FrameFloor/h:InteriorAdjacentTo'>
-      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:FrameFloors/h:FrameFloor/h:Area'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:FrameFloors/h:FrameFloor/h:Insulation/h:AssemblyEffectiveRValue'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Slabs/h:Slab/h:InteriorAdjacentTo'>
-      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_adiabatic_ _attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _ground_ _living space_ _other_ _other heated space_ _other housing unit_ _other housing unit above_ _other housing unit below_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'adiabatic' or 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'ground' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other housing unit above' or 'other housing unit below' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Slabs/h:Slab/h:Area'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Slabs/h:Slab/h:Thickness'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Slabs/h:Slab/h:Perimeter'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Slabs/h:Slab/h:ExposedPerimeter'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Slabs/h:Slab/h:PerimeterInsulationDepth'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Slabs/h:Slab/h:UnderSlabInsulationWidth'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Slabs/h:Slab/h:DepthBelowGrade'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Slabs/h:Slab/h:PerimeterInsulation/h:Layer/h:InstallationType'>
-      <sch:assert role='ERROR' test='contains("_cavity_ _continuous_ _continuous - interior_ _continuous - exterior_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'cavity' or 'continuous' or 'continuous - interior' or 'continuous - exterior'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_cavity_ _continuous_ _continuous - interior_ _continuous - exterior_", concat("_", text(), "_"))'>Expected value to be: 'cavity' or 'continuous' or 'continuous - interior' or 'continuous - exterior'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Slabs/h:Slab/h:PerimeterInsulation/h:Layer/h:NominalRValue'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Slabs/h:Slab/h:UnderSlabInsulation/h:Layer/h:InstallationType'>
-      <sch:assert role='ERROR' test='contains("_cavity_ _continuous_ _continuous - interior_ _continuous - exterior_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'cavity' or 'continuous' or 'continuous - interior' or 'continuous - exterior'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_cavity_ _continuous_ _continuous - interior_ _continuous - exterior_", concat("_", text(), "_"))'>Expected value to be: 'cavity' or 'continuous' or 'continuous - interior' or 'continuous - exterior'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Slabs/h:Slab/h:UnderSlabInsulation/h:Layer/h:NominalRValue'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Doors/h:Door/h:Area'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Doors/h:Door/h:Azimuth'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected the value to be less than 360 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected value to be less than 360 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Enclosure/h:Doors/h:Door/h:RValue'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem/h:HeatingSystemFuel'>
-      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected value to be: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem/h:AnnualHeatingEfficiency/h:Units'>
-      <sch:assert role='ERROR' test='contains("_HSPF_ _COP_ _AFUE_ _Percent_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'HSPF' or 'COP' or 'AFUE' or 'Percent'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_HSPF_ _COP_ _AFUE_ _Percent_", concat("_", text(), "_"))'>Expected value to be: 'HSPF' or 'COP' or 'AFUE' or 'Percent'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem/h:AnnualHeatingEfficiency/h:Value'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem/h:FractionHeatLoadServed'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem/h:CoolingSystemType'>
-      <sch:assert role='ERROR' test='contains("_central air conditioner_ _mini-split_ _room air conditioner_ _evaporative cooler_ _chiller_ _cooling tower_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'central air conditioner' or 'mini-split' or 'room air conditioner' or 'evaporative cooler' or 'chiller' or 'cooling tower' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_central air conditioner_ _mini-split_ _room air conditioner_ _evaporative cooler_ _chiller_ _cooling tower_ _other_", concat("_", text(), "_"))'>Expected value to be: 'central air conditioner' or 'mini-split' or 'room air conditioner' or 'evaporative cooler' or 'chiller' or 'cooling tower' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem/h:CoolingSystemFuel'>
-      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected value to be: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem/h:CompressorType'>
-      <sch:assert role='ERROR' test='contains("_single stage_ _two stage_ _variable speed_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'single stage' or 'two stage' or 'variable speed'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_single stage_ _two stage_ _variable speed_", concat("_", text(), "_"))'>Expected value to be: 'single stage' or 'two stage' or 'variable speed'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem/h:FractionCoolLoadServed'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem/h:AnnualCoolingEfficiency/h:Units'>
-      <sch:assert role='ERROR' test='contains("_SEER_ _EER_ _COP_ _kW/ton_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'SEER' or 'EER' or 'COP' or 'kW/ton'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_SEER_ _EER_ _COP_ _kW/ton_", concat("_", text(), "_"))'>Expected value to be: 'SEER' or 'EER' or 'COP' or 'kW/ton'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem/h:AnnualCoolingEfficiency/h:Value'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem/h:SensibleHeatFraction'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:HeatPumpType'>
-      <sch:assert role='ERROR' test='contains("_water-to-air_ _water-to-water_ _air-to-air_ _air-to-water_ _mini-split_ _ground-to-air_ _ground-to-water_ _water-loop-to-air_ _variable refrigerant flow_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'water-to-air' or 'water-to-water' or 'air-to-air' or 'air-to-water' or 'mini-split' or 'ground-to-air' or 'ground-to-water' or 'water-loop-to-air' or 'variable refrigerant flow'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_water-to-air_ _water-to-water_ _air-to-air_ _air-to-water_ _mini-split_ _ground-to-air_ _ground-to-water_ _water-loop-to-air_ _variable refrigerant flow_", concat("_", text(), "_"))'>Expected value to be: 'water-to-air' or 'water-to-water' or 'air-to-air' or 'air-to-water' or 'mini-split' or 'ground-to-air' or 'ground-to-water' or 'water-loop-to-air' or 'variable refrigerant flow'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:HeatPumpFuel'>
-      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected value to be: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:CompressorType'>
-      <sch:assert role='ERROR' test='contains("_single stage_ _two stage_ _variable speed_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'single stage' or 'two stage' or 'variable speed'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_single stage_ _two stage_ _variable speed_", concat("_", text(), "_"))'>Expected value to be: 'single stage' or 'two stage' or 'variable speed'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:CoolingSensibleHeatFraction'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:BackupSystemFuel'>
-      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected value to be: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:BackupAnnualHeatingEfficiency/h:Units'>
-      <sch:assert role='ERROR' test='contains("_HSPF_ _COP_ _AFUE_ _Percent_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'HSPF' or 'COP' or 'AFUE' or 'Percent'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_HSPF_ _COP_ _AFUE_ _Percent_", concat("_", text(), "_"))'>Expected value to be: 'HSPF' or 'COP' or 'AFUE' or 'Percent'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:BackupAnnualHeatingEfficiency/h:Value'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:FractionHeatLoadServed'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:FractionCoolLoadServed'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:AnnualCoolingEfficiency/h:Units'>
-      <sch:assert role='ERROR' test='contains("_SEER_ _EER_ _COP_ _kW/ton_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'SEER' or 'EER' or 'COP' or 'kW/ton'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_SEER_ _EER_ _COP_ _kW/ton_", concat("_", text(), "_"))'>Expected value to be: 'SEER' or 'EER' or 'COP' or 'kW/ton'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:AnnualCoolingEfficiency/h:Value'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:AnnualHeatingEfficiency/h:Units'>
-      <sch:assert role='ERROR' test='contains("_HSPF_ _COP_ _AFUE_ _Percent_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'HSPF' or 'COP' or 'AFUE' or 'Percent'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_HSPF_ _COP_ _AFUE_ _Percent_", concat("_", text(), "_"))'>Expected value to be: 'HSPF' or 'COP' or 'AFUE' or 'Percent'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:AnnualHeatingEfficiency/h:Value'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl/h:ControlType'>
-      <sch:assert role='ERROR' test='contains("_programmable thermostat_ _manual thermostat_ _digital thermostat_ _timer_ _EMCS_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'programmable thermostat' or 'manual thermostat' or 'digital thermostat' or 'timer' or 'EMCS' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_programmable thermostat_ _manual thermostat_ _digital thermostat_ _timer_ _EMCS_ _other_", concat("_", text(), "_"))'>Expected value to be: 'programmable thermostat' or 'manual thermostat' or 'digital thermostat' or 'timer' or 'EMCS' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:DuctLeakageMeasurement/h:DuctType'>
-      <sch:assert role='ERROR' test='contains("_supply_ _return_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'supply' or 'return'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_supply_ _return_", concat("_", text(), "_"))'>Expected value to be: 'supply' or 'return'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:DuctLeakageMeasurement/h:DuctLeakage/h:Units'>
-      <sch:assert role='ERROR' test='contains("_CFM50_ _CFM25_ _CFM per Std 152_ _Percent_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'CFM50' or 'CFM25' or 'CFM per Std 152' or 'Percent'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_CFM50_ _CFM25_ _CFM per Std 152_ _Percent_", concat("_", text(), "_"))'>Expected value to be: 'CFM50' or 'CFM25' or 'CFM per Std 152' or 'Percent'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:DuctLeakageMeasurement/h:DuctLeakage/h:TotalOrToOutside'>
-      <sch:assert role='ERROR' test='contains("_to outside_ _total_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'to outside' or 'total'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_to outside_ _total_", concat("_", text(), "_"))'>Expected value to be: 'to outside' or 'total'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:Ducts/h:DuctType'>
-      <sch:assert role='ERROR' test='contains("_supply_ _return_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'supply' or 'return'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_supply_ _return_", concat("_", text(), "_"))'>Expected value to be: 'supply' or 'return'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:Ducts/h:DuctInsulationRValue'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:Ducts/h:DuctLocation'>
-      <sch:assert role='ERROR' test='contains("_attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _exterior wall_ _garage_ _garage - conditioned_ _garage - unconditioned_ _interstitial space_ _living space_ _other heated space_ _other housing unit_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _roof deck_ _unconditioned space_ _under slab_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'exterior wall' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'interstitial space' or 'living space' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'roof deck' or 'unconditioned space' or 'under slab'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _exterior wall_ _garage_ _garage - conditioned_ _garage - unconditioned_ _interstitial space_ _living space_ _other heated space_ _other housing unit_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _roof deck_ _unconditioned space_ _under slab_", concat("_", text(), "_"))'>Expected value to be: 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'exterior wall' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'interstitial space' or 'living space' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'roof deck' or 'unconditioned space' or 'under slab'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:Ducts/h:DuctSurfaceArea'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:NumberofReturnRegisters'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:HydronicDistribution/h:HydronicDistributionType'>
-      <sch:assert role='ERROR' test='contains("_radiator_ _baseboard_ _radiant floor_ _radiant ceiling_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'radiator' or 'baseboard' or 'radiant floor' or 'radiant ceiling' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_radiator_ _baseboard_ _radiant floor_ _radiant ceiling_ _other_", concat("_", text(), "_"))'>Expected value to be: 'radiator' or 'baseboard' or 'radiant floor' or 'radiant ceiling' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:HydronicAndAirDistribution/h:HydronicAndAirDistributionType'>
-      <sch:assert role='ERROR' test='contains("_fan coil_ _water loop heat pump_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'fan coil' or 'water loop heat pump' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_fan coil_ _water loop heat pump_ _other_", concat("_", text(), "_"))'>Expected value to be: 'fan coil' or 'water loop heat pump' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:HydronicAndAirDistribution/h:DuctLeakageMeasurement/h:DuctType'>
-      <sch:assert role='ERROR' test='contains("_supply_ _return_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'supply' or 'return'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_supply_ _return_", concat("_", text(), "_"))'>Expected value to be: 'supply' or 'return'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:HydronicAndAirDistribution/h:DuctLeakageMeasurement/h:DuctLeakage/h:Units'>
-      <sch:assert role='ERROR' test='contains("_CFM50_ _CFM25_ _CFM per Std 152_ _Percent_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'CFM50' or 'CFM25' or 'CFM per Std 152' or 'Percent'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_CFM50_ _CFM25_ _CFM per Std 152_ _Percent_", concat("_", text(), "_"))'>Expected value to be: 'CFM50' or 'CFM25' or 'CFM per Std 152' or 'Percent'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:HydronicAndAirDistribution/h:DuctLeakageMeasurement/h:DuctLeakage/h:TotalOrToOutside'>
-      <sch:assert role='ERROR' test='contains("_to outside_ _total_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'to outside' or 'total'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_to outside_ _total_", concat("_", text(), "_"))'>Expected value to be: 'to outside' or 'total'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:HydronicAndAirDistribution/h:Ducts/h:DuctType'>
-      <sch:assert role='ERROR' test='contains("_supply_ _return_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'supply' or 'return'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_supply_ _return_", concat("_", text(), "_"))'>Expected value to be: 'supply' or 'return'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:HydronicAndAirDistribution/h:Ducts/h:DuctInsulationRValue'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:HydronicAndAirDistribution/h:Ducts/h:DuctLocation'>
-      <sch:assert role='ERROR' test='contains("_attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _exterior wall_ _garage_ _garage - conditioned_ _garage - unconditioned_ _interstitial space_ _living space_ _other heated space_ _other housing unit_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _roof deck_ _unconditioned space_ _under slab_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'exterior wall' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'interstitial space' or 'living space' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'roof deck' or 'unconditioned space' or 'under slab'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _exterior wall_ _garage_ _garage - conditioned_ _garage - unconditioned_ _interstitial space_ _living space_ _other heated space_ _other housing unit_ _other multifamily buffer space_ _other non-freezing space_ _outside_ _roof deck_ _unconditioned space_ _under slab_", concat("_", text(), "_"))'>Expected value to be: 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'exterior wall' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'interstitial space' or 'living space' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'outside' or 'roof deck' or 'unconditioned space' or 'under slab'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:HydronicAndAirDistribution/h:Ducts/h:DuctSurfaceArea'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:HydronicAndAirDistribution/h:NumberofReturnRegisters'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:ConditionedFloorAreaServed'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan/h:Quantity'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan/h:FanType'>
-      <sch:assert role='ERROR' test='contains("_exhaust only_ _supply only_ _heat recovery ventilator_ _energy recovery ventilator_ _balanced_ _central fan integrated supply_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'exhaust only' or 'supply only' or 'heat recovery ventilator' or 'energy recovery ventilator' or 'balanced' or 'central fan integrated supply'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_exhaust only_ _supply only_ _heat recovery ventilator_ _energy recovery ventilator_ _balanced_ _central fan integrated supply_", concat("_", text(), "_"))'>Expected value to be: 'exhaust only' or 'supply only' or 'heat recovery ventilator' or 'energy recovery ventilator' or 'balanced' or 'central fan integrated supply'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan/h:HoursInOperation'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 24'>Expected the value to be less than or equal to 24 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 24'>Expected value to be less than or equal to 24 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan/h:FanLocation'>
-      <sch:assert role='ERROR' test='contains("_bath_ _garage_ _garage - conditioned_ _garage - unconditioned_ _hallway_ _kitchen_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'bath' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'hallway' or 'kitchen' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_bath_ _garage_ _garage - conditioned_ _garage - unconditioned_ _hallway_ _kitchen_ _other_", concat("_", text(), "_"))'>Expected value to be: 'bath' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'hallway' or 'kitchen' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan/h:FractionRecirculation'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan/h:TotalRecoveryEfficiency'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan/h:SensibleRecoveryEfficiency'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan/h:AdjustedTotalRecoveryEfficiency'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan/h:AdjustedSensibleRecoveryEfficiency'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:FuelType'>
-      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected value to be: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:WaterHeaterType'>
-      <sch:assert role='ERROR' test='contains("_storage water heater_ _dedicated boiler with storage tank_ _instantaneous water heater_ _heat pump water heater_ _space-heating boiler with storage tank_ _space-heating boiler with tankless coil_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'storage water heater' or 'dedicated boiler with storage tank' or 'instantaneous water heater' or 'heat pump water heater' or 'space-heating boiler with storage tank' or 'space-heating boiler with tankless coil'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_storage water heater_ _dedicated boiler with storage tank_ _instantaneous water heater_ _heat pump water heater_ _space-heating boiler with storage tank_ _space-heating boiler with tankless coil_", concat("_", text(), "_"))'>Expected value to be: 'storage water heater' or 'dedicated boiler with storage tank' or 'instantaneous water heater' or 'heat pump water heater' or 'space-heating boiler with storage tank' or 'space-heating boiler with tankless coil'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:Location'>
-      <sch:assert role='ERROR' test='contains("_attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _living space_ _mechanical closet_ _other exterior_ _other heated space_ _other housing unit_ _other interior_ _other multifamily buffer space_ _other non-freezing space_ _roof deck_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'living space' or 'mechanical closet' or 'other exterior' or 'other heated space' or 'other housing unit' or 'other interior' or 'other multifamily buffer space' or 'other non-freezing space' or 'roof deck' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_attic_ _attic - conditioned_ _attic - unconditioned_ _attic - unvented_ _attic - vented_ _basement_ _basement - conditioned_ _basement - unconditioned_ _crawlspace_ _crawlspace - conditioned_ _crawlspace - unconditioned_ _crawlspace - unvented_ _crawlspace - vented_ _garage_ _garage - conditioned_ _garage - unconditioned_ _living space_ _mechanical closet_ _other exterior_ _other heated space_ _other housing unit_ _other interior_ _other multifamily buffer space_ _other non-freezing space_ _roof deck_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'attic' or 'attic - conditioned' or 'attic - unconditioned' or 'attic - unvented' or 'attic - vented' or 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace' or 'crawlspace - conditioned' or 'crawlspace - unconditioned' or 'crawlspace - unvented' or 'crawlspace - vented' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'living space' or 'mechanical closet' or 'other exterior' or 'other heated space' or 'other housing unit' or 'other interior' or 'other multifamily buffer space' or 'other non-freezing space' or 'roof deck' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:PerformanceAdjustment'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:TankVolume'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:FractionDHWLoadServed'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:EnergyFactor'>
-      <sch:assert role='ERROR' test='number(.) &lt;= 5'>Expected the value to be less than or equal to 5 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 5'>Expected value to be less than or equal to 5 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:UniformEnergyFactor'>
-      <sch:assert role='ERROR' test='number(.) &lt;= 5'>Expected the value to be less than or equal to 5 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 5'>Expected value to be less than or equal to 5 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:RecoveryEfficiency'>
-      <sch:assert role='ERROR' test='number(.) &lt;= 5'>Expected the value to be less than or equal to 5 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 5'>Expected value to be less than or equal to 5 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:WaterHeaterInsulation/h:Jacket/h:JacketRValue'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution/h:SystemType/h:Standard/h:PipingLength'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution/h:SystemType/h:Recirculation/h:ControlType'>
-      <sch:assert role='ERROR' test='contains("_no control_ _timer_ _temperature_ _presence sensor demand control_ _manual demand control_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'no control' or 'timer' or 'temperature' or 'presence sensor demand control' or 'manual demand control'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_no control_ _timer_ _temperature_ _presence sensor demand control_ _manual demand control_", concat("_", text(), "_"))'>Expected value to be: 'no control' or 'timer' or 'temperature' or 'presence sensor demand control' or 'manual demand control'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution/h:SystemType/h:Recirculation/h:RecirculationPipingLoopLength'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution/h:SystemType/h:Recirculation/h:BranchPipingLoopLength'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution/h:SystemType/h:Recirculation/h:PumpPower'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution/h:PipeInsulation/h:PipeRValue'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution/h:DrainWaterHeatRecovery/h:FacilitiesConnected'>
-      <sch:assert role='ERROR' test='contains("_one_ _all_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'one' or 'all'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_one_ _all_", concat("_", text(), "_"))'>Expected value to be: 'one' or 'all'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution/h:DrainWaterHeatRecovery/h:Efficiency'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterFixture/h:WaterFixtureType'>
-      <sch:assert role='ERROR' test='contains("_faucet_ _shower head_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'faucet' or 'shower head' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_faucet_ _shower head_ _other_", concat("_", text(), "_"))'>Expected value to be: 'faucet' or 'shower head' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:SolarThermal/h:SolarThermalSystem/h:SystemType'>
-      <sch:assert role='ERROR' test='contains("_hot water_ _hot water and space heating_ _space heating_ _hybrid system_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'hot water' or 'hot water and space heating' or 'space heating' or 'hybrid system'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_hot water_ _hot water and space heating_ _space heating_ _hybrid system_", concat("_", text(), "_"))'>Expected value to be: 'hot water' or 'hot water and space heating' or 'space heating' or 'hybrid system'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:SolarThermal/h:SolarThermalSystem/h:CollectorArea'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:SolarThermal/h:SolarThermalSystem/h:CollectorLoopType'>
-      <sch:assert role='ERROR' test='contains("_air direct_ _air indirect_ _liquid direct_ _liquid indirect_ _passive thermosyphon_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'air direct' or 'air indirect' or 'liquid direct' or 'liquid indirect' or 'passive thermosyphon'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_air direct_ _air indirect_ _liquid direct_ _liquid indirect_ _passive thermosyphon_", concat("_", text(), "_"))'>Expected value to be: 'air direct' or 'air indirect' or 'liquid direct' or 'liquid indirect' or 'passive thermosyphon'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:SolarThermal/h:SolarThermalSystem/h:CollectorType'>
-      <sch:assert role='ERROR' test='contains("_single glazing black_ _single glazing selective_ _double glazing black_ _double glazing selective_ _evacuated tube_ _integrated collector storage_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'single glazing black' or 'single glazing selective' or 'double glazing black' or 'double glazing selective' or 'evacuated tube' or 'integrated collector storage'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_single glazing black_ _single glazing selective_ _double glazing black_ _double glazing selective_ _evacuated tube_ _integrated collector storage_", concat("_", text(), "_"))'>Expected value to be: 'single glazing black' or 'single glazing selective' or 'double glazing black' or 'double glazing selective' or 'evacuated tube' or 'integrated collector storage'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:SolarThermal/h:SolarThermalSystem/h:CollectorAzimuth'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected the value to be less than 360 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected value to be less than 360 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:SolarThermal/h:SolarThermalSystem/h:CollectorTilt'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 90'>Expected the value to be less than or equal to 90 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 90'>Expected value to be less than or equal to 90 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:SolarThermal/h:SolarThermalSystem/h:CollectorRatedOpticalEfficiency'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt; 1'>Expected the value to be less than 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt; 1'>Expected value to be less than 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:SolarThermal/h:SolarThermalSystem/h:CollectorRatedThermalLosses'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:SolarThermal/h:SolarThermalSystem/h:StorageVolume'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:SolarThermal/h:SolarThermalSystem/h:SolarFraction'>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:Photovoltaics/h:PVSystem/h:Location'>
-      <sch:assert role='ERROR' test='contains("_roof_ _ground_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'roof' or 'ground' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_roof_ _ground_ _other_", concat("_", text(), "_"))'>Expected value to be: 'roof' or 'ground' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:Photovoltaics/h:PVSystem/h:ModuleType'>
-      <sch:assert role='ERROR' test='contains("_standard_ _premium_ _thin film_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'standard' or 'premium' or 'thin film'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_standard_ _premium_ _thin film_", concat("_", text(), "_"))'>Expected value to be: 'standard' or 'premium' or 'thin film'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:Photovoltaics/h:PVSystem/h:Tracking'>
-      <sch:assert role='ERROR' test='contains("_fixed_ _1-axis_ _1-axis backtracked_ _2-axis_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'fixed' or '1-axis' or '1-axis backtracked' or '2-axis'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_fixed_ _1-axis_ _1-axis backtracked_ _2-axis_", concat("_", text(), "_"))'>Expected value to be: 'fixed' or '1-axis' or '1-axis backtracked' or '2-axis'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:Photovoltaics/h:PVSystem/h:ArrayAzimuth'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected the value to be less than 360 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected value to be less than 360 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:Photovoltaics/h:PVSystem/h:ArrayTilt'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 90'>Expected the value to be less than or equal to 90 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 90'>Expected value to be less than or equal to 90 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:Photovoltaics/h:PVSystem/h:MaxPowerOutput'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:Photovoltaics/h:PVSystem/h:InverterEfficiency'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Systems/h:Photovoltaics/h:PVSystem/h:SystemLossesFraction'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:ClothesWasher/h:Location'>
-      <sch:assert role='ERROR' test='contains("_basement_ _basement - conditioned_ _basement - unconditioned_ _garage_ _garage - conditioned_ _garage - unconditioned_ _laundry room_ _living space_ _other_ _other heated space_ _other housing unit_ _other multifamily buffer space_ _other non-freezing space_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'laundry room' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_basement_ _basement - conditioned_ _basement - unconditioned_ _garage_ _garage - conditioned_ _garage - unconditioned_ _laundry room_ _living space_ _other_ _other heated space_ _other housing unit_ _other multifamily buffer space_ _other non-freezing space_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'laundry room' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:ClothesWasher/h:RatedAnnualkWh'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer/h:Location'>
-      <sch:assert role='ERROR' test='contains("_basement_ _basement - conditioned_ _basement - unconditioned_ _garage_ _garage - conditioned_ _garage - unconditioned_ _laundry room_ _living space_ _other_ _other heated space_ _other housing unit_ _other multifamily buffer space_ _other non-freezing space_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'laundry room' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_basement_ _basement - conditioned_ _basement - unconditioned_ _garage_ _garage - conditioned_ _garage - unconditioned_ _laundry room_ _living space_ _other_ _other heated space_ _other housing unit_ _other multifamily buffer space_ _other non-freezing space_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'laundry room' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer/h:FuelType'>
-      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected value to be: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer/h:ControlType'>
-      <sch:assert role='ERROR' test='contains("_timer_ _moisture_ _temperature_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'timer' or 'moisture' or 'temperature'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_timer_ _moisture_ _temperature_", concat("_", text(), "_"))'>Expected value to be: 'timer' or 'moisture' or 'temperature'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:Dishwasher/h:Location'>
-      <sch:assert role='ERROR' test='contains("_basement_ _basement - conditioned_ _basement - unconditioned_ _garage_ _garage - conditioned_ _garage - unconditioned_ _kitchen_ _living space_ _other_ _other heated space_ _other housing unit_ _other multifamily buffer space_ _other non-freezing space_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'kitchen' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_basement_ _basement - conditioned_ _basement - unconditioned_ _garage_ _garage - conditioned_ _garage - unconditioned_ _kitchen_ _living space_ _other_ _other heated space_ _other housing unit_ _other multifamily buffer space_ _other non-freezing space_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'kitchen' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:Dishwasher/h:RatedAnnualkWh'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:Dishwasher/h:EnergyFactor'>
-      <sch:assert role='ERROR' test='number(.) &lt;= 5'>Expected the value to be less than or equal to 5 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 5'>Expected value to be less than or equal to 5 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:Dishwasher/h:PlaceSettingCapacity'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:Refrigerator/h:Location'>
-      <sch:assert role='ERROR' test='contains("_basement_ _basement - conditioned_ _basement - unconditioned_ _garage_ _garage - conditioned_ _garage - unconditioned_ _kitchen_ _living space_ _other_ _other heated space_ _other housing unit_ _other multifamily buffer space_ _other non-freezing space_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'kitchen' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_basement_ _basement - conditioned_ _basement - unconditioned_ _garage_ _garage - conditioned_ _garage - unconditioned_ _kitchen_ _living space_ _other_ _other heated space_ _other housing unit_ _other multifamily buffer space_ _other non-freezing space_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'kitchen' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:Refrigerator/h:RatedAnnualkWh'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:Freezer/h:Location'>
-      <sch:assert role='ERROR' test='contains("_basement_ _basement - conditioned_ _basement - unconditioned_ _garage_ _garage - conditioned_ _garage - unconditioned_ _kitchen_ _living space_ _other_ _other heated space_ _other housing unit_ _other multifamily buffer space_ _other non-freezing space_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'kitchen' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_basement_ _basement - conditioned_ _basement - unconditioned_ _garage_ _garage - conditioned_ _garage - unconditioned_ _kitchen_ _living space_ _other_ _other heated space_ _other housing unit_ _other multifamily buffer space_ _other non-freezing space_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'kitchen' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:Freezer/h:RatedAnnualkWh'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:Dehumidifier/h:DehumidistatSetpoint'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:Dehumidifier/h:FractionDehumidificationLoadServed'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:CookingRange/h:Location'>
-      <sch:assert role='ERROR' test='contains("_basement_ _basement - conditioned_ _basement - unconditioned_ _garage_ _garage - conditioned_ _garage - unconditioned_ _kitchen_ _living space_ _other_ _other heated space_ _other housing unit_ _other multifamily buffer space_ _other non-freezing space_ _unconditioned space_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'kitchen' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'unconditioned space'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_basement_ _basement - conditioned_ _basement - unconditioned_ _garage_ _garage - conditioned_ _garage - unconditioned_ _kitchen_ _living space_ _other_ _other heated space_ _other housing unit_ _other multifamily buffer space_ _other non-freezing space_ _unconditioned space_", concat("_", text(), "_"))'>Expected value to be: 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'kitchen' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'unconditioned space'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Appliances/h:CookingRange/h:FuelType'>
-      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected value to be: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Lighting/h:LightingGroup/h:Location'>
-      <sch:assert role='ERROR' test='contains("_interior_ _exterior_ _garage_ _common area_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'interior' or 'exterior' or 'garage' or 'common area'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_interior_ _exterior_ _garage_ _common area_", concat("_", text(), "_"))'>Expected value to be: 'interior' or 'exterior' or 'garage' or 'common area'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Lighting/h:LightingGroup/h:FractionofUnitsInLocation'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Lighting/h:CeilingFan/h:Airflow/h:FanSpeed'>
-      <sch:assert role='ERROR' test='contains("_low_ _medium_ _high_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'low' or 'medium' or 'high'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_low_ _medium_ _high_", concat("_", text(), "_"))'>Expected value to be: 'low' or 'medium' or 'high'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Lighting/h:CeilingFan/h:Quantity'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Pools/h:Pool/h:PoolPumps/h:PoolPump/h:Load/h:Units'>
-      <sch:assert role='ERROR' test='contains("_kWh/year_ _W_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'kWh/year' or 'W'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_kWh/year_ _W_", concat("_", text(), "_"))'>Expected value to be: 'kWh/year' or 'W'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Pools/h:Pool/h:Heater/h:Type'>
-      <sch:assert role='ERROR' test='contains("_gas fired_ _electric resistance_ _heat pump_ _solar_ _other_ _unknown_ _none_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'gas fired' or 'electric resistance' or 'heat pump' or 'solar' or 'other' or 'unknown' or 'none'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_gas fired_ _electric resistance_ _heat pump_ _solar_ _other_ _unknown_ _none_", concat("_", text(), "_"))'>Expected value to be: 'gas fired' or 'electric resistance' or 'heat pump' or 'solar' or 'other' or 'unknown' or 'none'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:Pools/h:Pool/h:Heater/h:Load/h:Units'>
-      <sch:assert role='ERROR' test='contains("_kWh/year_ _therm/year_ _W_ _Btuh_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'kWh/year' or 'therm/year' or 'W' or 'Btuh'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_kWh/year_ _therm/year_ _W_ _Btuh_", concat("_", text(), "_"))'>Expected value to be: 'kWh/year' or 'therm/year' or 'W' or 'Btuh'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:HotTubs/h:HotTub/h:HotTubPumps/h:HotTubPump/h:Load/h:Units'>
-      <sch:assert role='ERROR' test='contains("_kWh/year_ _W_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'kWh/year' or 'W'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_kWh/year_ _W_", concat("_", text(), "_"))'>Expected value to be: 'kWh/year' or 'W'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:HotTubs/h:HotTub/h:Heater/h:Type'>
-      <sch:assert role='ERROR' test='contains("_gas fired_ _electric resistance_ _heat pump_ _solar_ _other_ _unknown_ _none_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'gas fired' or 'electric resistance' or 'heat pump' or 'solar' or 'other' or 'unknown' or 'none'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_gas fired_ _electric resistance_ _heat pump_ _solar_ _other_ _unknown_ _none_", concat("_", text(), "_"))'>Expected value to be: 'gas fired' or 'electric resistance' or 'heat pump' or 'solar' or 'other' or 'unknown' or 'none'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:HotTubs/h:HotTub/h:Heater/h:Load/h:Units'>
-      <sch:assert role='ERROR' test='contains("_kWh/year_ _therm/year_ _W_ _Btuh_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'kWh/year' or 'therm/year' or 'W' or 'Btuh'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_kWh/year_ _therm/year_ _W_ _Btuh_", concat("_", text(), "_"))'>Expected value to be: 'kWh/year' or 'therm/year' or 'W' or 'Btuh'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:MiscLoads/h:PlugLoad/h:PlugLoadType'>
-      <sch:assert role='ERROR' test='contains("_TV plasma_ _TV CRT_ _TV other_ _computer_ _space heater_ _water bed_ _aquarium_ _electric vehicle charging_ _well pump_ _sauna_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'TV plasma' or 'TV CRT' or 'TV other' or 'computer' or 'space heater' or 'water bed' or 'aquarium' or 'electric vehicle charging' or 'well pump' or 'sauna' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_TV plasma_ _TV CRT_ _TV other_ _computer_ _space heater_ _water bed_ _aquarium_ _electric vehicle charging_ _well pump_ _sauna_ _other_", concat("_", text(), "_"))'>Expected value to be: 'TV plasma' or 'TV CRT' or 'TV other' or 'computer' or 'space heater' or 'water bed' or 'aquarium' or 'electric vehicle charging' or 'well pump' or 'sauna' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:MiscLoads/h:PlugLoad/h:Location'>
-      <sch:assert role='ERROR' test='contains("_interior_ _exterior_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'interior' or 'exterior'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_interior_ _exterior_", concat("_", text(), "_"))'>Expected value to be: 'interior' or 'exterior'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:MiscLoads/h:PlugLoad/h:Load/h:Units'>
-      <sch:assert role='ERROR' test='contains("_kWh/year_ _W_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'kWh/year' or 'W'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_kWh/year_ _W_", concat("_", text(), "_"))'>Expected value to be: 'kWh/year' or 'W'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:MiscLoads/h:FuelLoad/h:FuelLoadType'>
-      <sch:assert role='ERROR' test='contains("_grill_ _lighting_ _fireplace_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'grill' or 'lighting' or 'fireplace' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_grill_ _lighting_ _fireplace_ _other_", concat("_", text(), "_"))'>Expected value to be: 'grill' or 'lighting' or 'fireplace' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:MiscLoads/h:FuelLoad/h:Location'>
-      <sch:assert role='ERROR' test='contains("_interior_ _exterior_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'interior' or 'exterior'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_interior_ _exterior_", concat("_", text(), "_"))'>Expected value to be: 'interior' or 'exterior'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:MiscLoads/h:FuelLoad/h:Load/h:Units'>
-      <sch:assert role='ERROR' test='contains("_therm/year_ _Btuh_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'therm/year' or 'Btuh'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_therm/year_ _Btuh_", concat("_", text(), "_"))'>Expected value to be: 'therm/year' or 'Btuh'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:MiscLoads/h:FuelLoad/h:FuelType'>
-      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected 'text()' for xpath: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _renewable electricity_ _natural gas_ _renewable natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _district steam_ _district hot water_ _district chilled water_ _solar hot water_ _propane_ _kerosene_ _diesel_ _coal_ _anthracite coal_ _bituminous coal_ _coke_ _wood_ _wood pellets_ _combination_ _other_", concat("_", text(), "_"))'>Expected value to be: 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='//h:Enclosure/h:Windows/h:Window/h:Area'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Enclosure/h:Windows/h:Window/h:Azimuth'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected the value to be less than 360 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected value to be less than 360 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Enclosure/h:Windows/h:Window/h:UFactor'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Enclosure/h:Windows/h:Window/h:SHGC'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt; 1'>Expected the value to be less than 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt; 1'>Expected value to be less than 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Enclosure/h:Windows/h:Window/h:InteriorShading/h:SummerShadingCoefficient'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Enclosure/h:Windows/h:Window/h:InteriorShading/h:WinterShadingCoefficient'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Enclosure/h:Windows/h:Window/h:Overhangs/h:Depth'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Enclosure/h:Windows/h:Window/h:Overhangs/h:DistanceToTopOfWindow'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Enclosure/h:Windows/h:Window/h:Overhangs/h:DistanceToBottomOfWindow'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Enclosure/h:Windows/h:Window/h:FractionOperable'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Enclosure/h:Skylights/h:Skylight/h:Area'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Enclosure/h:Skylights/h:Skylight/h:Azimuth'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected the value to be less than 360 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt; 360'>Expected value to be less than 360 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Enclosure/h:Skylights/h:Skylight/h:UFactor'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Enclosure/h:Skylights/h:Skylight/h:SHGC'>
-      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected the value to be greater than 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt; 1'>Expected the value to be less than 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt; 0'>Expected value to be greater than 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt; 1'>Expected value to be less than 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Enclosure/h:Skylights/h:Skylight/h:InteriorShading/h:SummerShadingCoefficient'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
     <sch:rule context='//h:Enclosure/h:Skylights/h:Skylight/h:InteriorShading/h:WinterShadingCoefficient'>
-      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected the value to be greater than or equal to 0 for xpath: </sch:assert>
-      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected the value to be less than or equal to 1 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &gt;= 0'>Expected value to be greater than or equal to 0 for xpath: </sch:assert>
+      <sch:assert role='ERROR' test='number(.) &lt;= 1'>Expected value to be less than or equal to 1 for xpath: </sch:assert>
     </sch:rule>
   </sch:pattern>
 </sch:schema>

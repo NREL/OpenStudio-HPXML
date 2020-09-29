@@ -180,31 +180,31 @@ class HPXMLValidator
         assertion = XMLHelper.add_element(rule, 'sch:assert')
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
         XMLHelper.add_attribute(assertion, 'test', "contains(\"#{hpxml_data_type[:enums].join(' ')}\", concat(\"_\", text(), \"_\"))")
-        assertion.inner_text = "Expected \"text()\" for xpath: \"#{hpxml_data_type[:enums].join('" or "').gsub!('_', '')}\""
+        assertion.inner_text = "Expected value to be: \"#{hpxml_data_type[:enums].join('" or "').gsub!('_', '')}\""
       end
       if hpxml_data_type[:min_inclusive]
         assertion = XMLHelper.add_element(rule, 'sch:assert')
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
         XMLHelper.add_attribute(assertion, 'test', "number(.) &gt;= #{hpxml_data_type[:min_inclusive]}")
-        assertion.inner_text = "Expected the value to be greater than or equal to #{hpxml_data_type[:min_inclusive]} for xpath: "
+        assertion.inner_text = "Expected value to be greater than or equal to #{hpxml_data_type[:min_inclusive]} for xpath: "
       end
       if hpxml_data_type[:max_inclusive]
         assertion = XMLHelper.add_element(rule, 'sch:assert')
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
         XMLHelper.add_attribute(assertion, 'test', "number(.) &lt;= #{hpxml_data_type[:max_inclusive]}")
-        assertion.inner_text = "Expected the value to be less than or equal to #{hpxml_data_type[:max_inclusive]} for xpath: "
+        assertion.inner_text = "Expected value to be less than or equal to #{hpxml_data_type[:max_inclusive]} for xpath: "
       end
       if hpxml_data_type[:min_exclusive]
         assertion = XMLHelper.add_element(rule, 'sch:assert')
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
         XMLHelper.add_attribute(assertion, 'test', "number(.) &gt; #{hpxml_data_type[:min_exclusive]}")
-        assertion.inner_text = "Expected the value to be greater than #{hpxml_data_type[:min_exclusive]} for xpath: "
+        assertion.inner_text = "Expected value to be greater than #{hpxml_data_type[:min_exclusive]} for xpath: "
       end
       if hpxml_data_type[:max_exclusive]
         assertion = XMLHelper.add_element(rule, 'sch:assert')
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
         XMLHelper.add_attribute(assertion, 'test', "number(.) &lt; #{hpxml_data_type[:max_exclusive]}")
-        assertion.inner_text = "Expected the value to be less than #{hpxml_data_type[:max_exclusive]} for xpath: "
+        assertion.inner_text = "Expected value to be less than #{hpxml_data_type[:max_exclusive]} for xpath: "
       end
     end
 
