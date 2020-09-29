@@ -3062,7 +3062,7 @@ class OSModel
     ocf.setOutputMTR(false)
     ocf.setOutputRDD(false)
     ocf.setOutputSHD(false)
-    # ocf.setOutputTabular(false) # Cannot disable because it also affects what is populated in the SQL
+    ocf.setOutputTabular(false)
   end
 
   def self.add_ems_debug_output(runner, model)
