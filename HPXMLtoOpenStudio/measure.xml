@@ -3,13 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-<<<<<<< HEAD
-  <version_id>6a9c5a2b-2477-4cc7-8fd5-1e48de9004a7</version_id>
-  <version_modified>20200923T215350Z</version_modified>
-=======
   <version_id>8ed34319-d5ce-45b2-a3ba-22977ed70712</version_id>
   <version_modified>20200923T185236Z</version_modified>
->>>>>>> f7a65baf1cc413f1354adc6efaf4f63cc7ca71bf
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -222,8 +217,6 @@
       <checksum>6CB36D58</checksum>
     </file>
     <file>
-<<<<<<< HEAD
-=======
       <filename>HPXMLDataTypes.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
@@ -236,7 +229,6 @@
       <checksum>2BF2CEB0</checksum>
     </file>
     <file>
->>>>>>> f7a65baf1cc413f1354adc6efaf4f63cc7ca71bf
       <filename>validator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -261,9 +253,6 @@
       <checksum>E64395AB</checksum>
     </file>
     <file>
-<<<<<<< HEAD
-      <filename>test_defaults.rb</filename>
-=======
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -277,7 +266,6 @@
     </file>
     <file>
       <filename>test_airflow.rb</filename>
->>>>>>> f7a65baf1cc413f1354adc6efaf4f63cc7ca71bf
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>DA8AF16A</checksum>
@@ -313,8 +301,6 @@
       <checksum>8A8F0F97</checksum>
     </file>
     <file>
-<<<<<<< HEAD
-=======
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -327,7 +313,6 @@
       <checksum>84EA935D</checksum>
     </file>
     <file>
->>>>>>> f7a65baf1cc413f1354adc6efaf4f63cc7ca71bf
       <filename>EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
@@ -340,15 +325,6 @@
       <checksum>5180C452</checksum>
     </file>
     <file>
-<<<<<<< HEAD
-      <filename>location.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0BCB60EF</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-=======
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.1.1</identifier>
@@ -361,7 +337,6 @@
     </file>
     <file>
       <filename>test_defaults.rb</filename>
->>>>>>> f7a65baf1cc413f1354adc6efaf4f63cc7ca71bf
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>367DF2E2</checksum>
@@ -505,76 +480,10 @@
       <checksum>6BF095D2</checksum>
     </file>
     <file>
-<<<<<<< HEAD
-      <filename>geometry.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B6772F33</checksum>
-    </file>
-    <file>
-      <filename>lighting.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>353D8037</checksum>
-    </file>
-    <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>777478EE</checksum>
-    </file>
-    <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>26D95DD2</checksum>
-    </file>
-    <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>310320E4</checksum>
-    </file>
-    <file>
-      <filename>misc_loads.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BFE6419E</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>51C6BC46</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.1.1</identifier>
-        <min_compatible>2.1.1</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>FFBC37EB</checksum>
-    </file>
-    <file>
-      <filename>weather.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>AC14851E</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>DDA82A78</checksum>
-=======
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>3A98C468</checksum>
->>>>>>> f7a65baf1cc413f1354adc6efaf4f63cc7ca71bf
     </file>
   </files>
 </measure>
