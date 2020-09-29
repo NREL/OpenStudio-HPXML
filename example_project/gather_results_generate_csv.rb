@@ -123,7 +123,7 @@ results_hash.each do |k,v|
   arr_row = []
   headers.each {|header| arr_row.push(v.key?(header) ? v[header] : nil)}
   csv_row = CSV::Row.new(headers, arr_row)
-  csv_rows.push(csv_row)  
+  csv_rows.push(csv_row)
 end
 
 # save csv
