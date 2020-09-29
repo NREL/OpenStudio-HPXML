@@ -283,7 +283,7 @@ class Airflow
     whf_equip_def.setFractionLost(1)
     whf_equip.setSchedule(model.alwaysOnDiscreteSchedule)
     whf_equip.setEndUseSubcategory(Constants.ObjectNameWholeHouseFan)
-    whf_elec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_equip, 'ElectricEquipment', 'Electric Power Level')
+    whf_elec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_equip, 'ElectricEquipment', 'Electricity Rate')
     whf_elec_actuator.setName("#{whf_equip.name} act")
 
     # Assume located in attic floor if attic zone exists; otherwise assume it's through roof/wall.
@@ -1427,7 +1427,7 @@ class Airflow
     vent_mech_fan_actuator = nil
     if is_cfis # actuate its power level in EMS
       equip_def.setFractionLost(0.0) # Fan heat does enter space
-      vent_mech_fan_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(equip, 'ElectricEquipment', 'Electric Power Level')
+      vent_mech_fan_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(equip, 'ElectricEquipment', 'Electricity Rate')
       vent_mech_fan_actuator.setName("#{equip.name} act")
     else
       equip_def.setDesignLevel(pow)
