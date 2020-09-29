@@ -57,17 +57,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('weather')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('random_seed', false)
-    arg.setDisplayName('Random Seed')
-    arg.setDescription('Seed for random number generation.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('building_id', false)
-    arg.setDisplayName('Building ID')
-    arg.setDescription('Building ID, also used for RNG seed if a seed is not provided.')
-    args << arg
-
-
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_program_used', false)
     arg.setDisplayName('Software Program Used')
     arg.setDescription('The name of the software program used.')
@@ -184,6 +173,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('#')
     arg.setDescription("This numeric field should contain the ending day of the ending month (must be valid for month) for the vacancy period desired. Only applies if the schedules type is 'stochastic'.")
     args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('schedules_random_seed', false)
+    arg.setDisplayName('Schedules: Random Seed')
+    arg.setUnits('#')
+    arg.setDescription("This numeric field is the seed for the random number generator. Only applies if the schedules type is 'stochastic'.")
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_station_epw_filepath', true)
     arg.setDisplayName('EnergyPlus Weather (EPW) Filepath')
@@ -3004,9 +2998,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   end
 
   def get_argument_values(runner, user_arguments)
-    return { building_id: runner.getOptionalIntegerArgumentValue('building_id', user_arguments),
-             random_seed: runner.getOptionalIntegerArgumentValue('random_seed', user_arguments),
-             simulation_control_timestep: runner.getOptionalIntegerArgumentValue('simulation_control_timestep', user_arguments),
+    return { simulation_control_timestep: runner.getOptionalIntegerArgumentValue('simulation_control_timestep', user_arguments),
              simulation_control_run_period_begin_month: runner.getOptionalIntegerArgumentValue('simulation_control_run_period_begin_month', user_arguments),
              simulation_control_run_period_begin_day_of_month: runner.getOptionalIntegerArgumentValue('simulation_control_run_period_begin_day_of_month', user_arguments),
              simulation_control_run_period_end_month: runner.getOptionalIntegerArgumentValue('simulation_control_run_period_end_month', user_arguments),
@@ -3022,6 +3014,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              schedules_vacancy_begin_day_of_month: runner.getOptionalIntegerArgumentValue('schedules_vacancy_begin_day_of_month', user_arguments),
              schedules_vacancy_end_month: runner.getOptionalIntegerArgumentValue('schedules_vacancy_end_month', user_arguments),
              schedules_vacancy_end_day_of_month: runner.getOptionalIntegerArgumentValue('schedules_vacancy_end_day_of_month', user_arguments),
+             schedules_random_seed: runner.getOptionalIntegerArgumentValue('schedules_random_seed', user_arguments),
              weather_station_epw_filepath: runner.getStringArgumentValue('weather_station_epw_filepath', user_arguments),
              site_type: runner.getOptionalStringArgumentValue('site_type', user_arguments),
              geometry_unit_type: runner.getStringArgumentValue('geometry_unit_type', user_arguments),
@@ -3639,12 +3632,11 @@ class HPXMLFile
       timestep.setNumberOfTimestepsPerHour(60 / args[:simulation_control_timestep].get)
     end
 
-    building_id = args[:building_id].get if args[:building_id].is_initialized
-    random_seed = args[:random_seed].get if args[:random_seed].is_initialized
+    schedule_seed = args[:schedule_random_seed].get \
+      if args[:schedule_random_seed].is_initialized
 
     schedule_generator = ScheduleGenerator.new(
-      runner: runner, model: model, weather: weather,
-      building_id: building_id, random_seed: random_seed
+      runner: runner, model: model, weather: weather, random_seed: schedule_seed
     )
 
     # create the schedule

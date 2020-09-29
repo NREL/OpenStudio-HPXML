@@ -9,6 +9,9 @@ class ScheduleGenerator
                  building_id: nil,
                  random_seed: nil)
 
+    # TODO: deprecate building ID / merge how the seed is handled since ResStock
+    # uses the legacy way of setting seed by ID?
+
     @runner = runner
     @model = model
     @weather = weather
