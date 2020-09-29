@@ -52,7 +52,7 @@ class ScheduleGenerator
   def get_random_seed
     if @random_seed.nil?
       seed = @model.getBuilding.additionalProperties.getFeatureAsInteger(
-        'Random seed'
+        'Random Seed'
       )
       if seed.is_initialized
         seed = seed.get
