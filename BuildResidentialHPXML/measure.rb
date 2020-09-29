@@ -3632,8 +3632,8 @@ class HPXMLFile
       timestep.setNumberOfTimestepsPerHour(60 / args[:simulation_control_timestep].get)
     end
 
-    schedule_seed = args[:schedule_random_seed].get \
-      if args[:schedule_random_seed].is_initialized
+    schedule_seed = args[:schedules_random_seed].get \
+      if args[:schedules_random_seed].is_initialized
 
     schedule_generator = ScheduleGenerator.new(
       runner: runner, model: model, weather: weather, random_seed: schedule_seed
