@@ -50,7 +50,6 @@
         "pv_name": "Roof - South Face",
         "location":"roof",
         "existing_kw": 0,
-        "existing_kw": 0,
         "min_kw": 0,
         "max_kw": 1000000000.0,
         "installed_cost_us_dollars_per_kw": 1600,
