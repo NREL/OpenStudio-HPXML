@@ -38,18 +38,18 @@ class Lighting
 
     # Create schedule
     if not lighting.interior_weekday_fractions.nil?
-      interior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameInteriorLighting + ' schedule', lighting.interior_weekday_fractions, lighting.interior_weekend_fractions, lighting.interior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      interior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameInteriorLighting + ' schedule', lighting.interior_weekday_fractions, lighting.interior_weekend_fractions, lighting.interior_monthly_multipliers, Constants.ScheduleTypeLimitsFraction)
     else
       lighting_sch = get_schedule(model, weather)
       # Create schedule
-      interior_sch = HourlyByMonthSchedule.new(model, 'lighting schedule', lighting_sch, lighting_sch, true, true, Constants.ScheduleTypeLimitsFraction)
+      interior_sch = HourlyByMonthSchedule.new(model, 'lighting schedule', lighting_sch, lighting_sch, Constants.ScheduleTypeLimitsFraction)
     end
-    exterior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameExteriorLighting + ' schedule', lighting.exterior_weekday_fractions, lighting.exterior_weekend_fractions, lighting.exterior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+    exterior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameExteriorLighting + ' schedule', lighting.exterior_weekday_fractions, lighting.exterior_weekend_fractions, lighting.exterior_monthly_multipliers, Constants.ScheduleTypeLimitsFraction)
     if not garage_space.nil?
-      garage_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameGarageLighting + ' schedule', lighting.garage_weekday_fractions, lighting.garage_weekend_fractions, lighting.garage_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      garage_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameGarageLighting + ' schedule', lighting.garage_weekday_fractions, lighting.garage_weekend_fractions, lighting.garage_monthly_multipliers, Constants.ScheduleTypeLimitsFraction)
     end
     if not lighting.holiday_kwh_per_day.nil?
-      exterior_holiday_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameLightingExteriorHoliday + ' schedule', lighting.holiday_weekday_fractions, lighting.holiday_weekend_fractions, lighting.exterior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction, lighting.holiday_period_begin_month, lighting.holiday_period_begin_day_of_month, lighting.holiday_period_end_month, lighting.holiday_period_end_day_of_month)
+      exterior_holiday_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameLightingExteriorHoliday + ' schedule', lighting.holiday_weekday_fractions, lighting.holiday_weekend_fractions, lighting.exterior_monthly_multipliers, Constants.ScheduleTypeLimitsFraction, true, lighting.holiday_period_begin_month, lighting.holiday_period_begin_day_of_month, lighting.holiday_period_end_month, lighting.holiday_period_end_day_of_month)
     end
 
     # Add lighting to each conditioned space
