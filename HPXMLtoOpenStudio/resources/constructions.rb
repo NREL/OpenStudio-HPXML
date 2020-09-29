@@ -1207,14 +1207,17 @@ class Constructions
       end
 
       if sc.nil?
+        shade_abs = 0.00001
+        shade_ref = 1.0 - shade_mult - shade_abs
+
         # CoolingShade
         sm = OpenStudio::Model::Shade.new(model)
         sm.setName(shade_name)
         sm.setSolarTransmittance(shade_mult)
-        sm.setSolarReflectance(0.0)
+        sm.setSolarReflectance(shade_ref)
         sm.setVisibleTransmittance(shade_mult)
-        sm.setVisibleReflectance(0.0)
-        sm.setThermalHemisphericalEmissivity(0.00001)
+        sm.setVisibleReflectance(shade_ref)
+        sm.setThermalHemisphericalEmissivity(shade_abs)
         sm.setThermalTransmittance(shade_mult)
         sm.setThickness(0.0001)
         sm.setConductivity(10000)
