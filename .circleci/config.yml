@@ -34,7 +34,11 @@ jobs:
       - run:
           name: Plot comparison
           command: |
-            python plots/make_comparison_plots.py /tmp/data/test_results/results.csv
+            python plots/make_comparison_plots.py plots/doe2_enduse_v8_4.csv /tmp/data/test_results/results.csv
+      - run:
+          name: Plot comparison w/ ERI setpoints
+          command: |
+            python plots/make_comparison_plots.py plots/doe2_enduse_v8_4_eri_setpoints.csv /tmp/data/test_results/results.csv
       - store_artifacts:
           path: plots/plots
           destination: plots
