@@ -129,7 +129,7 @@ class ScheduleGenerator
 
     success = create_average_schedules(args: args)
     return false if not success
-    return true
+
     success = create_stochastic_schedules(args: args)
     return false if not success
 
