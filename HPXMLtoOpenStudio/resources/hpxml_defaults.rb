@@ -41,7 +41,7 @@ class HPXMLDefaults
     hpxml.header.sim_end_day_of_month = 31 if hpxml.header.sim_end_day_of_month.nil?
     if epw_file.startDateActualYear.is_initialized # AMY
       if not hpxml.header.sim_calendar_year.nil?
-        runner.registerWarning("Run Period Calendar Year (#{hpxml.header.sim_calendar_year}) inconsistent with AMY year (#{epw_file.startDateActualYear.get}). Overriding.") if hpxml.header.sim_calendar_year != epw_file.startDateActualYear.get
+        runner.registerWarning("Overriding Calendar Year (#{hpxml.header.sim_calendar_year}) with AMY year (#{epw_file.startDateActualYear.get}).") if hpxml.header.sim_calendar_year != epw_file.startDateActualYear.get
       end
       hpxml.header.sim_calendar_year = epw_file.startDateActualYear.get
     else

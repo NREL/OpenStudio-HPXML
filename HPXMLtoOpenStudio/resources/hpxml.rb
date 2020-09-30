@@ -730,7 +730,7 @@ class HPXML < Object
 
       if not @sim_calendar_year.nil?
         if (@sim_calendar_year < 1600) || (@sim_calendar_year > 9999)
-          fail "Run Period Calendar Year (#{@sim_calendar_year}) cannot come before 1600 or after 9999."
+          fail "Calendar Year (#{@sim_calendar_year}) must be between 1600 and 9999."
         end
       end
 

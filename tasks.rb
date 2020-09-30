@@ -212,7 +212,7 @@ def create_osws
     'base-misc-usage-multiplier.osw' => 'base.osw',
     'base-pv.osw' => 'base.osw',
     # 'base-pv-shared.osw' => 'base.osw',
-    'base-simcontrol-calendar-year.osw' => 'base.osw',
+    'base-simcontrol-calendar-year-custom.osw' => 'base.osw',
     'base-simcontrol-daylight-saving-custom.osw' => 'base.osw',
     'base-simcontrol-daylight-saving-disabled.osw' => 'base.osw',
     'base-simcontrol-runperiod-1-month.osw' => 'base.osw',
