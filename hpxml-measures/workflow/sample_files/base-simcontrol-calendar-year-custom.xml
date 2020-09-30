@@ -10,6 +10,7 @@
     <extension>
       <SimulationControl>
         <Timestep>60</Timestep>
+        <CalendarYear>2008</CalendarYear>
       </SimulationControl>
     </extension>
   </SoftwareInfo>
