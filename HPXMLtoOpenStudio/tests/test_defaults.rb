@@ -85,7 +85,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.allow_increased_fixed_capacities = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 11, 11, 4, true, false)
+    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, true, false)
   end
 
   def test_site
