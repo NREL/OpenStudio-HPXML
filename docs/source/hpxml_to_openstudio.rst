@@ -105,11 +105,11 @@ If not provided, the default value of 60 (i.e., 1 hour) is used.
 The simulation run period can be optionally specified with ``BeginMonth``/``BeginDayOfMonth`` and/or ``EndMonth``/``EndDayOfMonth``.
 The ``BeginMonth``/``BeginDayOfMonth`` provided must occur before ``EndMonth``/``EndDayOfMonth`` provided (e.g., a run period from 10/1 to 3/31 is invalid).
 If not provided, default values of January 1st and December 31st will be used.
+
 The simulation run period calendar year can be optionally specified with ``CalendarYear``.
 The calendar year is used to determine the simulation start day of week.
-The calendar year provided must be between 1600 and 9999.
-If not provided, the default value of 2007 will be used.
-If a calendar year is provided that is inconsistent with the AMY year, then the AMY year will be used to override the provided calendar year.
+If the EPW weather file is TMY (Typical Meteorological Year), the default value of 2007 will be used if not specified.
+If the EPW weather file is AMY (Actual Meteorological Year), the AMY year will be used regardless of what is specified.
 
 Whether to apply daylight saving time can be optionally denoted with ``DaylightSaving/Enabled``.
 If either ``DaylightSaving`` or ``DaylightSaving/Enabled`` is not provided, ``DaylightSaving/Enabled`` will default to true.
