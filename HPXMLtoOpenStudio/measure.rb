@@ -1765,7 +1765,7 @@ class OSModel
         # Apply construction
         cool_shade_mult = window.interior_shading_factor_summer
         heat_shade_mult = window.interior_shading_factor_winter
-        Constructions.apply_window(runner, model, [sub_surface], 'WindowConstruction',
+        Constructions.apply_window(runner, model, sub_surface, 'WindowConstruction',
                                    weather, @htg_season_sch, @clg_season_sch, window.ufactor, window.shgc,
                                    heat_shade_mult, cool_shade_mult)
       else
@@ -1838,7 +1838,7 @@ class OSModel
       shgc = skylight.shgc
       cool_shade_mult = skylight.interior_shading_factor_summer
       heat_shade_mult = skylight.interior_shading_factor_winter
-      Constructions.apply_skylight(runner, model, [sub_surface], 'SkylightConstruction',
+      Constructions.apply_skylight(runner, model, sub_surface, 'SkylightConstruction',
                                    weather, @htg_season_sch, @clg_season_sch, ufactor, shgc,
                                    heat_shade_mult, cool_shade_mult)
     end

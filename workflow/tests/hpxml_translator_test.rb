@@ -448,11 +448,6 @@ class HPXMLTest < MiniTest::Test
         next if log_line.include? 'No lighting specified, the model will not include lighting energy use.'
       end
 
-      # TODO: These OS warnings are caused by reusing ShadingControl objects across windows, but results
-      # are correct. To avoid the warnings, we could revert to creating a new ShadingControl objects for
-      # each window, but still reuse Shade objects.
-      next if log_line.include? "Object of type 'OS:ShadingControl'"
-
       flunk "Unexpected warning found in run.log: #{log_line}"
     end
 
@@ -476,6 +471,14 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include?('CheckUsedConstructions') && err_line.include?('nominally unused constructions')
       next if err_line.include?('WetBulb not converged after') && err_line.include?('iterations(PsyTwbFnTdbWPb)')
       next if err_line.include? 'Inside surface heat balance did not converge with Max Temp Difference'
+      next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
+      next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too low) for fluid')
+      next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too high) for fluid')
+      next if err_line.include? 'Plant loop exceeding upper temperature limit'
+      next if err_line.include?('Foundation:Kiva') && err_line.include?('wall surfaces with more than four vertices') # TODO: Check alternative approach
+      next if err_line.include? 'Temperature out of range [-100. to 200.] (PsyPsatFnTemp)'
+      next if err_line.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.'
+      next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
@@ -486,8 +489,6 @@ class HPXMLTest < MiniTest::Test
       if hpxml.heat_pumps.select { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? hp.heat_pump_type }.size > 0
         next if err_line.include?('GetDXCoils: Coil:Heating:DX') && err_line.include?('curve values')
       end
-      next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
-
       if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler }.size > 0
         # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine.
         # OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however it's not required by E+.
@@ -500,24 +501,12 @@ class HPXMLTest < MiniTest::Test
         # input "Autosize" for Fixed Minimum Air Flow Rate is added by OS translation, now set it to 0 to skip potential sizing process, though no way to prevent this warning.
         next if err_line.include? 'Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored'
       end
-      next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too low) for fluid')
-      next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too high) for fluid')
-      next if err_line.include? 'Plant loop exceeding upper temperature limit'
-
       if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeRoomAirConditioner }.size > 0
         next if err_line.include? 'GetDXCoils: Coil:Cooling:DX:SingleSpeed="ROOM AC CLG COIL" curve values' # TODO: Double-check curves
       end
-      next if err_line.include?('Foundation:Kiva') && err_line.include?('wall surfaces with more than four vertices') # TODO: Check alternative approach
-      next if err_line.include? 'Temperature out of range [-100. to 200.] (PsyPsatFnTemp)'
       if hpxml_path.include? 'fan-coil' # Warning for unused coil
         next if err_line.include? 'In calculating the design coil UA for Coil:Cooling:Water'
       end
-
-      # FIXME: Investigate these
-      next if err_line.include? 'Air-cooled condenser inlet dry-bulb temperature below 0 C'
-      next if err_line.include? 'Low condenser dry-bulb temperature error continues'
-      next if err_line.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.'
-      next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
 
       flunk "Unexpected warning found: #{err_line}"
     end

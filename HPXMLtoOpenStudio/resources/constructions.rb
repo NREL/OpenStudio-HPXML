@@ -858,17 +858,17 @@ class Constructions
     constr.create_and_assign_constructions(runner, subsurfaces, model)
   end
 
-  def self.apply_window(runner, model, subsurfaces, constr_name, weather,
+  def self.apply_window(runner, model, subsurface, constr_name, weather,
                         heat_sch, cool_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
 
-    apply_window_skylight(runner, model, 'Window', subsurfaces, constr_name, weather,
+    apply_window_skylight(runner, model, 'Window', subsurface, constr_name, weather,
                           heat_sch, cool_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
   end
 
-  def self.apply_skylight(runner, model, subsurfaces, constr_name, weather,
+  def self.apply_skylight(runner, model, subsurface, constr_name, weather,
                           heat_sch, cool_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
 
-    apply_window_skylight(runner, model, 'Skylight', subsurfaces, constr_name, weather,
+    apply_window_skylight(runner, model, 'Skylight', subsurface, constr_name, weather,
                           heat_sch, cool_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
   end
 
@@ -1178,10 +1178,8 @@ class Constructions
     return mat
   end
 
-  def self.apply_window_skylight(runner, model, type, subsurfaces, constr_name, weather,
+  def self.apply_window_skylight(runner, model, type, subsurface, constr_name, weather,
                                  heat_sch, cool_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
-
-    return if subsurfaces.empty?
 
     # Define shade and schedule
     { 'Cooling' => [cool_sch, cool_shade_mult],
@@ -1189,28 +1187,27 @@ class Constructions
       sch, shade_mult = values
       next if shade_mult >= 1.0
 
-      # EnergyPlus doesn't like shades that absorb no heat, transmit no heat or reflect no heat.
-      if shade_mult == 1
-        shade_mult = 0.999
-      end
       shade_name = "#{type}#{mode}Shade"
       sc_name = "#{type}#{mode}ShadingControl"
 
-      # Reuse existing ShadingControl?
-      sc = nil
-      model.getShadingControls.each do |shading_control|
-        next unless (shading_control.shadingMaterial.get.to_Shade.get.solarTransmittance - shade_mult).abs < 0.0001
-        next unless shading_control.name.to_s.start_with? sc_name
+      # Reuse existing Shade?
+      # Note: We still create a unique ShadingControl per subsurface in order to
+      # prevent the shading control from being used by subsurfaces in different
+      # zones, which is probably not a good idea.
+      sm = nil
+      model.getShades.each do |shade|
+        next unless (shade.solarTransmittance - shade_mult).abs < 0.0001
+        next unless shade.name.to_s.start_with? shade_name
 
-        sc = shading_control
+        sm = shade
         break
       end
 
-      if sc.nil?
+      if sm.nil?
         shade_abs = 0.00001
         shade_ref = 1.0 - shade_mult - shade_abs
 
-        # CoolingShade
+        # Shade
         sm = OpenStudio::Model::Shade.new(model)
         sm.setName(shade_name)
         sm.setSolarTransmittance(shade_mult)
@@ -1227,19 +1224,15 @@ class Constructions
         sm.setLeftSideOpeningMultiplier(0)
         sm.setRightSideOpeningMultiplier(0)
         sm.setAirflowPermeability(0)
-
-        # ShadingControl
-        sc = OpenStudio::Model::ShadingControl.new(sm)
-        sc.setName(sc_name)
-        sc.setShadingType('InteriorShade')
-        sc.setShadingControlType('OnIfScheduleAllows')
-        sc.setSchedule(sch.schedule)
       end
 
-      # Add shading controls
-      subsurfaces.each do |subsurface|
-        subsurface.addShadingControl(sc)
-      end
+      # ShadingControl
+      sc = OpenStudio::Model::ShadingControl.new(sm)
+      sc.setName(sc_name)
+      sc.setShadingType('InteriorShade')
+      sc.setShadingControlType('OnIfScheduleAllows')
+      sc.setSchedule(sch.schedule)
+      subsurface.addShadingControl(sc)
     end
 
     # Define materials
@@ -1261,7 +1254,7 @@ class Constructions
     constr.add_layer(glaz_mat)
 
     # Create and assign construction to subsurfaces
-    constr.create_and_assign_constructions(runner, subsurfaces, model)
+    constr.create_and_assign_constructions(runner, [subsurface], model)
   end
 end
 
