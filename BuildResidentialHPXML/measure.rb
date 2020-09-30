@@ -178,6 +178,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Schedules: Random Seed')
     arg.setUnits('#')
     arg.setDescription("This numeric field is the seed for the random number generator. Only applies if the schedules type is 'stochastic'.")
+    args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_station_epw_filepath', true)
     arg.setDisplayName('EnergyPlus Weather (EPW) Filepath')
@@ -3641,7 +3642,9 @@ class HPXMLFile
 
     # create the schedule
     if args[:geometry_num_occupants] == Constants.Auto
-      args[:geometry_num_occupants] = Geometry.get_occupancy_default_num(args[:geometry_num_bedrooms])
+      args[:geometry_num_occupants] = Geometry.get_occupancy_default_num(
+        args[:geometry_num_bedrooms]
+      )
     else
       args[:geometry_num_occupants] = Integer(args[:geometry_num_occupants])
     end
