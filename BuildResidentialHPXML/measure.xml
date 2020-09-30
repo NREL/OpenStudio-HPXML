@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>4f42c18b-3239-4add-a0a1-b95ca4064453</version_id>
-  <version_modified>20200930T214448Z</version_modified>
+  <version_id>42d9eefb-71b0-4c92-9e28-19db1b7c47d4</version_id>
+  <version_modified>20200930T215339Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -77,6 +77,15 @@
       <description>This numeric field should contain the ending day of the ending month (must be valid for month) for the annual run period desired.</description>
       <type>Integer</type>
       <units>day</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>simulation_control_run_period_calendar_year</name>
+      <display_name>Simulation Control: Run Period Calendar Year</display_name>
+      <description>This numeric field should contain the calendar year that determines the start day of week. If you are running simulations using AMY weather files, the value entered for calendar year will not be used; it will be overridden by the actual year found in the AMY weather file.</description>
+      <type>Integer</type>
+      <units>year</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -7317,7 +7326,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>BEBEDA03</checksum>
+      <checksum>E26CE68C</checksum>
+    </file>
+    <file>
+      <filename>base-simcontrol-calendar-year-custom.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5BAFE978</checksum>
     </file>
   </files>
 </measure>
