@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require 'openstudio/ruleset/ShowRunnerOutput'
+require 'openstudio'
+require 'openstudio/measure/ShowRunnerOutput'
 require 'minitest/autorun'
 require 'fileutils'
 require 'json'
