@@ -10,6 +10,7 @@
     <extension>
       <SimulationControl>
         <Timestep>60</Timestep>
+        <CalendarYear>2008</CalendarYear>
       </SimulationControl>
     </extension>
   </SoftwareInfo>
@@ -54,7 +55,9 @@
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
           <Name>Denver, CO</Name>
-          <WMO>999999</WMO>
+          <extension>
+            <EPWFilePath>USA_CO_Denver.Intl.AP.725650_TMY3.epw</EPWFilePath>
+          </extension>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>
