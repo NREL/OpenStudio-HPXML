@@ -29,6 +29,7 @@
       <sch:assert role='ERROR' test='count(h:Timestep) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Timestep</sch:assert> <!-- minutes; must be a divisor of 60 -->
       <sch:assert role='ERROR' test='(count(h:BeginMonth) + count(h:BeginDayOfMonth) = 0) or (count(h:BeginMonth) + count(h:BeginDayOfMonth) = 2)'>Expected 0 or 2 element(s) for xpath: BeginMonth | BeginDayOfMonth</sch:assert> <!-- integer -->
       <sch:assert role='ERROR' test='(count(h:EndMonth) + count(h:EndDayOfMonth) = 0) or (count(h:EndMonth) + count(h:EndDayOfMonth) = 2)'>Expected 0 or 2 element(s) for xpath: EndMonth | EndDayOfMonth</sch:assert> <!-- integer -->
+      <sch:assert role='ERROR' test='count(h:CalendarYear) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CalendarYear</sch:assert> <!-- integer -->
       <sch:assert role='ERROR' test='count(h:DaylightSaving) &lt;= 1'>Expected 0 or 1 element(s) for xpath: DaylightSaving</sch:assert> <!-- See [DaylightSaving] -->
     </sch:rule>
   </sch:pattern>
