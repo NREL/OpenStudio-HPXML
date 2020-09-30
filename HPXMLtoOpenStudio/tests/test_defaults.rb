@@ -67,7 +67,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, true, 3, 12, 11, 5, true, false)
 
     # Test defaults - DST in weather file
-    hpxml = _create_hpxml('base-location-epw-filepath-AMY-2012.xml')
+    hpxml = _create_hpxml('base-location-AMY-2012.xml')
     hpxml.header.timestep = nil
     hpxml.header.sim_begin_month = nil
     hpxml.header.sim_begin_day_of_month = nil

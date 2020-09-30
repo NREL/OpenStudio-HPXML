@@ -182,7 +182,6 @@ class HPXMLTest < MiniTest::Test
                             'invalid-runperiod.xml' => ['Run Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-window-height.xml' => ["For Window 'WindowEast', overhangs distance to bottom (2.0) must be greater than distance to top (2.0)."],
                             'invalid-window-interior-shading.xml' => ["SummerShadingCoefficient (0.85) must be less than or equal to WinterShadingCoefficient (0.7) for window 'WindowNorth'."],
-                            'invalid-wmo.xml' => ["Weather station WMO '999999' could not be found in"],
                             'invalid-daylight-saving.xml' => ['Daylight Saving End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'lighting-fractions.xml' => ['Sum of fractions of interior lighting (1.15) is greater than 1.'],
                             'mismatched-slab-and-foundation-wall.xml' => ["Foundation wall 'FoundationWall' is adjacent to 'basement - conditioned' but no corresponding slab was found adjacent to"],
@@ -235,7 +234,6 @@ class HPXMLTest < MiniTest::Test
     measure_subdir = 'HPXMLtoOpenStudio'
     args = {}
     args['hpxml_path'] = xml
-    args['weather_dir'] = 'weather'
     args['output_dir'] = File.absolute_path(rundir)
     args['debug'] = true
     update_args_hash(measures, measure_subdir, args)
