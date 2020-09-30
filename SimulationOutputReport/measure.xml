@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>simulation_output_report</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>c4d08a60-c6d0-4984-b5dc-fe7874ed26d2</version_id>
-  <version_modified>20200928T191548Z</version_modified>
+  <version_id>bdf5f621-5d52-4c93-87ed-d66e6798fa35</version_id>
+  <version_modified>20200930T160554Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>SimulationOutputReport</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -842,12 +842,6 @@
       <checksum>73FDADAA</checksum>
     </file>
     <file>
-      <filename>output_report_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>EC14EAF7</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.1</identifier>
@@ -857,6 +851,12 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>D7BE3177</checksum>
+    </file>
+    <file>
+      <filename>output_report_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C893D539</checksum>
     </file>
   </files>
 </measure>
