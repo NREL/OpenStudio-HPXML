@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Debug Open HPXML File",
             "type": "Ruby",
@@ -22,6 +23,17 @@
             "program": "${workspaceRoot}/measures/HEScoreRuleset/tests/test_hescore_ruleset.rb",
             "args": [
                 "-n", "test_foundation_area_lookup"
+            ]
+        },
+        {
+            "name": "Make Plots",
+            "type": "python",
+            "request": "launch",
+            "program": "plots/make_comparison_plots.py",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "plots/doe2_enduse_v8_4.csv",
+                "../results_os.csv"
             ]
         }
     ]
