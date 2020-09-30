@@ -342,10 +342,10 @@ class Waterheater
           tank_spt_sensor.setName("#{sys_id} Setpoint Temperature")
           tank_spt_sensor.setKeyName(object.setpointTemperatureSchedule.get.name.to_s)
           alt_spt_sch = object.indirectAlternateSetpointTemperatureSchedule.get
-          altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alt_spt_sch, 'Schedule:Constant', 'Schedule Value')
+          altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alt_spt_sch, *EPlus::EMSActuatorScheduleConstantValue)
           altsch_actuator.setName("#{sys_id} AltSchedOverride")
         elsif object.is_a? OpenStudio::Model::PumpVariableSpeed
-          pump_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(object, 'Pump', 'Pump Mass Flow Rate')
+          pump_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(object, *EPlus::EMSActuatorPumpMassFlowRate)
           pump_actuator.setName("#{sys_id} Pump MFR")
         elsif object.is_a? OpenStudio::Model::SetpointManagerScheduled
           tank_source_temp = object.schedule.to_ScheduleConstant.get.value
@@ -671,7 +671,7 @@ class Waterheater
     tank_source_sensor.setKeyName("#{storage_tank.demandOutletModelObject.get.to_Node.get.name}")
 
     # Actuators
-    swh_pump_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(pump, 'Pump', 'Pump Mass Flow Rate')
+    swh_pump_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(pump, *EPlus::EMSActuatorPumpMassFlowRate)
     swh_pump_actuator.setName("#{obj_name}_pump")
 
     # Program
@@ -916,10 +916,10 @@ class Waterheater
 
   def self.add_hpwh_inlet_air_and_zone_heat_gain_program(model, obj_name_hpwh, loc_space, loc_schedule, hpwh_tamb, hpwh_rhamb, tank, coil, fan, amb_temp_sensor, amb_rh_sensors)
     # EMS Actuators: Inlet T & RH, sensible and latent gains to the space
-    tamb_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_tamb, 'Schedule:Constant', 'Schedule Value')
+    tamb_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_tamb, *EPlus::EMSActuatorScheduleConstantValue)
     tamb_act_actuator.setName("#{obj_name_hpwh} Tamb act")
 
-    rhamb_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_rhamb, 'Schedule:Constant', 'Schedule Value')
+    rhamb_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_rhamb, *EPlus::EMSActuatorScheduleConstantValue)
     rhamb_act_actuator.setName("#{obj_name_hpwh} RHamb act")
 
     if not loc_space.nil? # If located in space
@@ -946,10 +946,10 @@ class Waterheater
       hpwh_lat_def.setFractionLost(0)
       hpwh_lat.setSchedule(model.alwaysOnDiscreteSchedule)
 
-      sens_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_sens, 'OtherEquipment', 'Power Level')
+      sens_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_sens, *EPlus::EMSActuatorOtherEquipmentPower)
       sens_act_actuator.setName("#{hpwh_sens.name} act")
 
-      lat_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_lat, 'OtherEquipment', 'Power Level')
+      lat_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_lat, *EPlus::EMSActuatorOtherEquipmentPower)
       lat_act_actuator.setName("#{hpwh_lat.name} act")
     end
 
@@ -988,7 +988,7 @@ class Waterheater
 
   def self.add_hpwh_control_program(model, obj_name_hpwh, amb_temp_sensor, hpwh_bottom_element_sp, min_temp, max_temp, tset_C)
     # Lower element is enabled if the ambient air temperature prevents the HP from running
-    leschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_bottom_element_sp, 'Schedule:Constant', 'Schedule Value')
+    leschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_bottom_element_sp, *EPlus::EMSActuatorScheduleConstantValue)
     leschedoverride_actuator.setName("#{obj_name_hpwh} LESchedOverride")
     hpwh_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     hpwh_ctrl_program.setName("#{obj_name_hpwh} Control")
@@ -1315,7 +1315,7 @@ class Waterheater
     ec_adj_offcyc_sensor.setKeyName(tank.name.to_s)
 
     # Actuators
-    ec_adj_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(ec_adj_object, 'OtherEquipment', 'Power Level')
+    ec_adj_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(ec_adj_object, *EPlus::EMSActuatorOtherEquipmentPower)
     ec_adj_actuator.setName("#{heater.name} ec_adj_act")
 
     # Program
