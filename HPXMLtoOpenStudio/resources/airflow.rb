@@ -1461,7 +1461,7 @@ class Airflow
   end
 
   def self.apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, clothes_dryers, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot,
-                                         infil_flow_actuator, cd_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map)
+                                         infil_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map)
     infil_program.addLine('Set Qrange = 0')
     vent_fans_kitchen.each do |vent_kitchen|
       infil_program.addLine("Set Qrange = Qrange + #{UnitConversions.convert(vent_kitchen.rated_flow_rate * vent_kitchen.quantity, 'cfm', 'm^3/s').round(4)} * #{range_sch_sensors_map[vent_kitchen.id].name}")
@@ -1507,7 +1507,6 @@ class Airflow
       infil_program.addLine('Set Qinf_adj = Qtot - Qu - Qb')
     end
     infil_program.addLine("Set #{infil_flow_actuator.name} = Qinf_adj")
-    infil_program.addLine("Set #{cd_flow_actuator.name} = Qdryer")
   end
 
   def self.calculate_fan_loads(model, infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, q_var, preconditioned = false)
@@ -1673,13 +1672,6 @@ class Airflow
     infil_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(infil_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
     infil_flow_actuator.setName("#{infil_flow.name} act")
 
-    cd_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
-    cd_flow.setName(Constants.ObjectNameClothesDryerExhaust + ' flow')
-    cd_flow.setSchedule(model.alwaysOnDiscreteSchedule)
-    cd_flow.setSpace(@living_space)
-    cd_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(cd_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
-    cd_flow_actuator.setName("#{cd_flow.name} act")
-
     # Living Space Infiltration Calculation/Program
     infil_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     infil_program.setName(Constants.ObjectNameInfiltration + ' program')
@@ -1697,7 +1689,7 @@ class Airflow
     # Calculate Qfan, Qinf_adj
     # Calculate adjusted infiltration based on mechanical ventilation system
     apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, clothes_dryers, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot,
-                                  infil_flow_actuator, cd_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map)
+                                  infil_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map)
 
     # Address load of Qfan (Qload)
     # Qload as variable for tracking outdoor air flow rate, excluding recirculation
