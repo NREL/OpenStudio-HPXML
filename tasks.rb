@@ -4320,7 +4320,9 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
                              combined_energy_factor: 3.73,
-                             control_type: HPXML::ClothesDryerControlTypeTimer)
+                             control_type: HPXML::ClothesDryerControlTypeTimer,
+                             is_vented: true,
+                             vented_flow_rate: 150)
   elsif ['base-appliances-none.xml',
          'base-dhw-none.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear
@@ -4346,11 +4348,13 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
                              energy_factor: HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(cef).round(2),
-                             control_type: HPXML::ClothesDryerControlTypeMoisture)
+                             control_type: HPXML::ClothesDryerControlTypeMoisture,
+                             is_vented: false)
   elsif ['base-appliances-coal.xml',
          'base-appliances-gas.xml',
          'base-appliances-propane.xml',
-         'base-appliances-oil.xml'].include? hpxml_file
+         'base-appliances-oil.xml',
+         'base-appliances-wood.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
@@ -4364,14 +4368,9 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
       hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypePropane
     elsif hpxml_file == 'base-appliances-oil.xml'
       hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeOil
+    elsif hpxml_file == 'base-appliances-wood.xml'
+      hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeWoodCord
     end
-  elsif ['base-appliances-wood.xml'].include? hpxml_file
-    hpxml.clothes_dryers.clear
-    hpxml.clothes_dryers.add(id: 'ClothesDryer',
-                             location: HPXML::LocationLivingSpace,
-                             fuel_type: HPXML::FuelTypeWoodCord,
-                             combined_energy_factor: 3.30,
-                             control_type: HPXML::ClothesDryerControlTypeMoisture)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -4386,6 +4385,8 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers[0].energy_factor = nil
     hpxml.clothes_dryers[0].combined_energy_factor = nil
     hpxml.clothes_dryers[0].control_type = nil
+    hpxml.clothes_dryers[0].is_vented = nil
+    hpxml.clothes_dryers[0].vented_flow_rate = nil
   elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].id = 'SharedClothesDryer'
     hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
