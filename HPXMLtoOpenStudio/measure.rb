@@ -1698,11 +1698,11 @@ class OSModel
 
   def self.add_interior_shading_schedule(runner, model, weather)
     heating_season, cooling_season = HVAC.get_default_heating_and_cooling_seasons(weather)
-    @clg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'cooling season schedule', Array.new(24, 1), Array.new(24, 1), cooling_season, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+    @clg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'cooling season schedule', Array.new(24, 1), Array.new(24, 1), cooling_season, Constants.ScheduleTypeLimitsFraction)
 
     # Create heating season as opposite of cooling season (i.e., with overlap months)
     non_cooling_season = cooling_season.map { |m| (m - 1).abs }
-    @htg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'heating season schedule', Array.new(24, 1), Array.new(24, 1), non_cooling_season, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+    @htg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'heating season schedule', Array.new(24, 1), Array.new(24, 1), non_cooling_season, Constants.ScheduleTypeLimitsFraction)
 
     @clg_ssn_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     @clg_ssn_sensor.setName('cool_season')
@@ -1765,7 +1765,7 @@ class OSModel
         # Apply construction
         cool_shade_mult = window.interior_shading_factor_summer
         heat_shade_mult = window.interior_shading_factor_winter
-        Constructions.apply_window(runner, model, [sub_surface], 'WindowConstruction',
+        Constructions.apply_window(runner, model, sub_surface, 'WindowConstruction',
                                    weather, @htg_season_sch, @clg_season_sch, window.ufactor, window.shgc,
                                    heat_shade_mult, cool_shade_mult)
       else
@@ -1838,7 +1838,7 @@ class OSModel
       shgc = skylight.shgc
       cool_shade_mult = skylight.interior_shading_factor_summer
       heat_shade_mult = skylight.interior_shading_factor_winter
-      Constructions.apply_skylight(runner, model, [sub_surface], 'SkylightConstruction',
+      Constructions.apply_skylight(runner, model, sub_surface, 'SkylightConstruction',
                                    weather, @htg_season_sch, @clg_season_sch, ufactor, shgc,
                                    heat_shade_mult, cool_shade_mult)
     end
@@ -2425,7 +2425,7 @@ class OSModel
     shelter_coef = @hpxml.site.shelter_coefficient
     @infil_volume = air_infils.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
     infil_height = @hpxml.inferred_infiltration_height(@infil_volume)
-    Airflow.apply(model, runner, weather, spaces, air_infils, @hpxml.ventilation_fans,
+    Airflow.apply(model, runner, weather, spaces, air_infils, @hpxml.ventilation_fans, @hpxml.clothes_dryers, @nbeds,
                   duct_systems, @infil_volume, infil_height, open_window_area,
                   @clg_ssn_sensor, @min_neighbor_distance, vented_attic, vented_crawl,
                   site_type, shelter_coef, @hpxml.building_construction.has_flue_or_chimney, @hvac_map, @eri_version,
@@ -2724,6 +2724,7 @@ class OSModel
     natvent_flow_actuators = []
     mechvent_flow_actuators = []
     whf_flow_actuators = []
+    cd_flow_actuators = []
 
     model.getEnergyManagementSystemActuators.each do |actuator|
       next unless (actuator.actuatedComponentType == 'Zone Infiltration') && (actuator.actuatedComponentControlType == 'Air Exchange Flow Rate')
@@ -2734,15 +2735,18 @@ class OSModel
         natvent_flow_actuators << actuator
       elsif actuator.name.to_s.start_with? Constants.ObjectNameWholeHouseFan.gsub(' ', '_')
         whf_flow_actuators << actuator
+      elsif actuator.name.to_s.start_with? Constants.ObjectNameClothesDryerExhaust.gsub(' ', '_')
+        cd_flow_actuators << actuator
       end
     end
-    if (infil_flow_actuators.size != 1) || (natvent_flow_actuators.size != 1) || (whf_flow_actuators.size != 1)
+    if (infil_flow_actuators.size != 1) || (natvent_flow_actuators.size != 1) || (whf_flow_actuators.size != 1) || (cd_flow_actuators.size != 1)
       fail 'Could not find actuator for component loads.'
     end
 
     infil_flow_actuator = infil_flow_actuators[0]
     natvent_flow_actuator = natvent_flow_actuators[0]
     whf_flow_actuator = whf_flow_actuators[0]
+    cd_flow_actuator = cd_flow_actuators[0]
 
     # EMS Sensors: Ducts
 
@@ -2920,7 +2924,7 @@ class OSModel
       intgains_dhw_sensors[dhw_sensor] = [offcycle_loss, oncycle_loss, dhw_rtf_sensor]
     end
 
-    nonsurf_names = ['intgains', 'infil', 'mechvent', 'natvent', 'whf', 'ducts']
+    nonsurf_names = ['intgains', 'infil', 'mechvent', 'natvent', 'whf', 'ducts', 'cd']
 
     # EMS program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
@@ -2960,16 +2964,18 @@ class OSModel
     end
 
     # EMS program: Infiltration, Natural Ventilation, Mechanical Ventilation, Ducts
-    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name}")
+    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name} + #{cd_flow_actuator.name}")
     program.addLine('If hr_airflow_rate > 0')
     program.addLine("  Set hr_infil = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{infil_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to infiltration
     program.addLine("  Set hr_natvent = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{natvent_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to natural ventilation
     program.addLine("  Set hr_whf = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{whf_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to whole house fan
+    program.addLine("  Set hr_cd = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{cd_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to clothes dryer exhaust
     program.addLine('Else')
     program.addLine('  Set hr_infil = 0')
     program.addLine('  Set hr_natvent = 0')
     program.addLine('  Set hr_whf = 0')
     program.addLine('  Set hr_mechvent = 0')
+    program.addLine('  Set hr_cd = 0')
     program.addLine('EndIf')
     program.addLine('Set hr_mechvent = 0')
     mechvent_sensors.each do |sensor|
@@ -3056,7 +3062,7 @@ class OSModel
     ocf.setOutputMTR(false)
     ocf.setOutputRDD(false)
     ocf.setOutputSHD(false)
-    # ocf.setOutputTabular(false) # Cannot disable because it also affects what is populated in the SQL
+    ocf.setOutputTabular(false)
   end
 
   def self.add_ems_debug_output(runner, model)
@@ -3552,7 +3558,7 @@ class OSModel
       sensor_gnd.setName('ground_temp')
     end
 
-    actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(sch, 'Schedule:Constant', 'Schedule Value')
+    actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(sch, *EPlus::EMSActuatorScheduleConstantValue)
     actuator.setName("#{location.gsub(' ', '_').gsub('-', '_')}_temp_sch")
 
     # EMS to actuate schedule
