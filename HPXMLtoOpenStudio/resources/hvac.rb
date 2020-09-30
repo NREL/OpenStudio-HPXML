@@ -673,7 +673,7 @@ class HVAC
       equip.setSchedule(model.alwaysOnDiscreteSchedule)
       equip.setEndUseSubcategory(obj_name + ' pan heater')
 
-      pan_heater_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(equip, 'ElectricEquipment', 'Electricity Rate')
+      pan_heater_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(equip, *EPlus::EMSActuatorElectricEquipmentPower)
       pan_heater_actuator.setName("#{obj_name} pan heater actuator")
 
       tout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Outdoor Air Drybulb Temperature')
@@ -1734,12 +1734,12 @@ class HVAC
     pump_mfr_sensor.setKeyName(pump.name.to_s)
 
     # Internal variable
-    pump_rated_mfr_var = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, 'Pump Maximum Mass Flow Rate')
+    pump_rated_mfr_var = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, EPlus::EMSIntVarPumpMFR)
     pump_rated_mfr_var.setName("#{pump.name} rated mfr")
     pump_rated_mfr_var.setInternalDataIndexKeyName(pump.name.to_s)
 
     # Actuator
-    pump_pressure_rise_act = OpenStudio::Model::EnergyManagementSystemActuator.new(pump, 'Pump', 'Pump Pressure Rise')
+    pump_pressure_rise_act = OpenStudio::Model::EnergyManagementSystemActuator.new(pump, *EPlus::EMSActuatorPumpPressureRise)
     pump_pressure_rise_act.setName("#{pump.name} pressure rise act")
 
     # Program
@@ -1910,7 +1910,7 @@ class HVAC
     dehumidifier_load_adj.setSpace(living_space)
     dehumidifier_load_adj.setSchedule(model.alwaysOnDiscreteSchedule)
 
-    dehumidifier_load_adj_act = OpenStudio::Model::EnergyManagementSystemActuator.new(dehumidifier_load_adj, 'OtherEquipment', 'Power Level')
+    dehumidifier_load_adj_act = OpenStudio::Model::EnergyManagementSystemActuator.new(dehumidifier_load_adj, *EPlus::EMSActuatorOtherEquipmentPower)
     dehumidifier_load_adj_act.setName("#{zone_hvac.name} sens htg adj act")
 
     # EMS program
