@@ -928,7 +928,7 @@ class HPXMLTest < MiniTest::Test
       query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electric Power' AND ReportingFrequency='Run Period')"
       avg_w = sqlFile.execAndReturnFirstDouble(query).get
       sql_value = avg_w / avg_plr
-      assert_in_epsilon(sql_value, hpxml_value, 0.02)
+      assert_in_epsilon(sql_value, hpxml_value, 0.03)
     end
 
     # HVAC Capacities
