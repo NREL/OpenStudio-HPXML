@@ -211,6 +211,7 @@ def create_osws
     'base-misc-usage-multiplier.osw' => 'base.osw',
     'base-pv.osw' => 'base.osw',
     # 'base-pv-shared.osw' => 'base.osw',
+    'base-simcontrol-calendar-year-custom.osw' => 'base.osw',
     'base-simcontrol-daylight-saving-custom.osw' => 'base.osw',
     'base-simcontrol-daylight-saving-disabled.osw' => 'base.osw',
     'base-simcontrol-runperiod-1-month.osw' => 'base.osw',
@@ -1808,6 +1809,8 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_module_type_2', HPXML::PVModuleTypePremium)
     step.setArgument('pv_system_array_azimuth_2', 90)
     step.setArgument('pv_system_max_power_output_2', 1500)
+  elsif ['base-simcontrol-calendar-year-custom.osw'].include? osw_file
+    step.setArgument('simulation_control_run_period_calendar_year', 2008)
   elsif ['base-simcontrol-daylight-saving-custom.osw'].include? osw_file
     step.setArgument('simulation_control_daylight_saving_enabled', true)
     step.setArgument('simulation_control_daylight_saving_begin_month', 3)
