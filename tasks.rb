@@ -75,6 +75,7 @@ def create_hpxmls
     'invalid_files/invalid-daylight-saving.xml' => 'base.xml',
     'invalid_files/invalid-epw-filepath.xml' => 'base-location-epw-filepath.xml',
     'invalid_files/invalid-facility-type.xml' => 'base-dhw-shared-laundry-room.xml',
+    'invalid_files/invalid-input-parameters.xml' => 'base.xml',
     'invalid_files/invalid-neighbor-shading-azimuth.xml' => 'base-misc-neighbor-shading.xml',
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/invalid-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
@@ -537,6 +538,8 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.dst_end_day_of_month = 31
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.header.timestep = nil
+  elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
+    hpxml.header.transaction = 'modify'
   end
 end
 
@@ -548,6 +551,8 @@ def set_hpxml_site(hpxml_file, hpxml)
     hpxml.site.shelter_coefficient = 0.8
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.site.site_type = nil
+  elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
+    hpxml.site.site_type = 'mountain'
   end
 end
 
@@ -694,6 +699,8 @@ def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
     hpxml.climate_and_risk_zones.weather_station_wmo = '999999'
   elsif ['invalid_files/invalid-epw-filepath.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'foo.epw'
+  elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.iecc_year = 2020
   end
 end
 
@@ -933,6 +940,9 @@ def set_hpxml_roofs(hpxml_file, hpxml)
       roof.solar_absorptance = nil
       roof.roof_color = HPXML::ColorLight
     end
+  elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
+    hpxml.roofs[0].radiant_barrier_grade = 4
+    hpxml.roofs[0].azimuth = 365
   end
 end
 
@@ -4458,6 +4468,9 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].water_heating_system_idref = 'SharedWaterHeater'
   elsif ['invalid_files/unattached-shared-dishwasher-water-heater.xml'].include? hpxml_file
     hpxml.dishwashers[0].water_heating_system_idref = 'foobar'
+  elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
+    hpxml.dishwashers[0].rated_annual_kwh = nil
+    hpxml.dishwashers[0].energy_factor = 5.1
   end
 end
 
@@ -4916,11 +4929,236 @@ def download_epws
   exit!
 end
 
-def set_schema_validator()
-  require_relative 'HPXMLtoOpenStudio/resources/HPXMLvalidator'
+def set_hpxml_validator()
+  puts 'Generating HPXML Validator...'
 
-  puts 'Generating HPXML Schema Validator...'
-  HPXMLValidator.create_schematron_schema_validator()
+  create_schematron_hpxml_validator()
+end
+
+def get_elements_from_sample_files()
+  puts 'Identifying elements being used in sample files...'
+
+  # Load all HPXMLs
+  hpxml_file_dirs = [File.absolute_path(File.join(File.dirname(__FILE__), 'workflow', 'sample_files')),
+                     File.absolute_path(File.join(File.dirname(__FILE__), 'workflow', 'tests', 'ASHRAE_Standard_140'))]
+  hpxml_docs = {}
+  hpxml_file_dirs.each do |hpxml_file_dir|
+    Dir["#{hpxml_file_dir}/*.xml"].sort.each do |xml|
+      hpxml_docs[File.basename(xml)] = HPXML.new(hpxml_path: File.join(hpxml_file_dir, File.basename(xml))).to_oga()
+    end
+  end
+
+  elements_being_used = []
+  hpxml_docs.each do |xml, hpxml_doc|
+    root = XMLHelper.get_element(hpxml_doc, '/HPXML')
+    root.each_node do |node|
+      next unless node.is_a?(Oga::XML::Element)
+
+      ancestors = []
+      node.each_ancestor do |parent_node|
+        ancestors << ['h:', parent_node.name].join()
+      end
+      parent_element_xpath = ancestors.reverse
+      child_element_xpath = ['h:', node.name].join()
+      element_xpath = [parent_element_xpath, child_element_xpath].join('/')
+
+      next if element_xpath.include? 'extension'
+
+      elements_being_used << element_xpath if not elements_being_used.include? element_xpath
+    end
+  end
+
+  return elements_being_used
+end
+
+def create_schematron_hpxml_validator()
+  elements_in_sample_files = get_elements_from_sample_files()
+
+  base_elements_xsd = File.read(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'BaseElements.xsd'))
+  base_elements_xsd_doc = Oga.parse_xml(base_elements_xsd)
+
+  # construct dictionary for enumerations and min/max values of HPXML data types
+  hpxml_data_types_xsd = File.read(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'HPXMLDataTypes.xsd'))
+  hpxml_data_types_xsd_doc = Oga.parse_xml(hpxml_data_types_xsd)
+  hpxml_data_types_dict = {}
+  hpxml_data_types_xsd_doc.xpath('//xs:simpleType').each do |simple_type_element|
+    enums = []
+    simple_type_element.xpath('xs:restriction/xs:enumeration').each do |enum|
+      enums << ['_', enum.get('value'), '_'].join() # in "_foo_" format
+    end
+    minInclusive_element = simple_type_element.at_xpath('xs:restriction/xs:minInclusive')
+    min_inclusive = minInclusive_element.get('value') if not minInclusive_element.nil?
+    maxInclusive_element = simple_type_element.at_xpath('xs:restriction/xs:maxInclusive')
+    max_inclusive = maxInclusive_element.get('value') if not maxInclusive_element.nil?
+    minExclusive_element = simple_type_element.at_xpath('xs:restriction/xs:minExclusive')
+    min_exclusive = minExclusive_element.get('value') if not minExclusive_element.nil?
+    maxExclusive_element = simple_type_element.at_xpath('xs:restriction/xs:maxExclusive')
+    max_exclusive = maxExclusive_element.get('value') if not maxExclusive_element.nil?
+
+    # avoid creating empty rules
+    next if enums.empty? && min_inclusive.nil? && max_inclusive.nil? && min_exclusive.nil? && max_exclusive.nil?
+
+    simple_type_element_name = simple_type_element.get('name')
+    hpxml_data_types_dict[simple_type_element_name] = {}
+    hpxml_data_types_dict[simple_type_element_name][:enums] = enums
+    hpxml_data_types_dict[simple_type_element_name][:min_inclusive] = min_inclusive
+    hpxml_data_types_dict[simple_type_element_name][:max_inclusive] = max_inclusive
+    hpxml_data_types_dict[simple_type_element_name][:min_exclusive] = min_exclusive
+    hpxml_data_types_dict[simple_type_element_name][:max_exclusive] = max_exclusive
+  end
+
+  # construct HPXMLvalidator.xml
+  puts 'Constructing HPXMLvalidator.xml...'
+
+  hpxml_validator = XMLHelper.create_doc(version = '1.0', encoding = 'UTF-8')
+  root = XMLHelper.add_element(hpxml_validator, 'sch:schema')
+  XMLHelper.add_attribute(root, 'xmlns:sch', 'http://purl.oclc.org/dsdl/schematron')
+  name_space = XMLHelper.add_element(root, 'sch:ns')
+  XMLHelper.add_attribute(name_space, 'uri', 'http://hpxmlonline.com/2019/10')
+  XMLHelper.add_attribute(name_space, 'prefix', 'h')
+  pattern = XMLHelper.add_element(root, 'sch:pattern')
+
+  element_xpaths = {}
+  complex_type_or_group_dict = {}
+  # construct complexType and group elements dictionary
+  [{ _xpath: '//xs:element', _type: '//xs:complexType', _attr: 'type' },
+   { _xpath: '//xs:group', _type: '//xs:group', _attr: 'ref' }].each do |param|
+    base_elements_xsd_doc.xpath(param[:_type]).each do |param_type|
+      next if param_type.get('name').nil?
+
+      param_type_name = param_type.get('name')
+      complex_type_or_group_dict[param_type_name] = {}
+
+      param_type_only = deep_copy_object(param_type)
+      param_type_only.each_node do |element|
+        next unless element.is_a?(Oga::XML::Element)
+        next unless element.name == 'element'
+
+        ancestors = []
+        element.each_ancestor do |node|
+          next if node.get('name').nil?
+          next if node.get('name') == param_type_only.get('name') # exclude complexType name from element xpath
+
+          ancestors << node.get('name')
+        end
+
+        parent_element_names = ancestors
+        child_element_name = element.get('name')
+        element_xpath = parent_element_names.unshift(child_element_name) # push the element to the front
+        element_type = element.get('type')
+        complex_type_or_group_dict[param_type_name][element_xpath] = element_type
+      end
+    end
+
+    # expand elements by adding elements based on type/ref
+    base_elements_xsd_doc.xpath(param[:_xpath]).each do |element|
+      next if element.get(param[:_attr]).nil?
+
+      ancestors = []
+      element.each_ancestor do |node|
+        next if node.get('name').nil?
+        next if node.get('name') == element.get('name') # exclude complexType name from elements' xpath
+
+        ancestors << node.get('name')
+      end
+
+      parent_element_names = ancestors
+      child_element_name = element.get('name')
+      if param[:_xpath] == '//xs:element'
+        element_xpath = parent_element_names.unshift(child_element_name) # push the element to the front
+      else
+        element_xpath = parent_element_names
+      end
+      element_type = element.get(param[:_attr])
+
+      # Skip element xpaths not being used in sample files
+      element_xpath_with_prefix = element_xpath.reverse.map { |e| "h:#{e}" }
+      context_xpath = element_xpath_with_prefix.join('/').chomp('/')
+      next unless elements_in_sample_files.any? { |item| item.include? context_xpath }
+
+      has_complex_type_or_group_dict = complex_type_or_group_dict[element_type]
+      if has_complex_type_or_group_dict
+        get_expanded_elements(element_xpaths, complex_type_or_group_dict, element_xpath, element_type)
+      else
+        element_xpaths[element_xpath] = element_type
+      end
+    end
+  end
+
+  # Add enumeration and min/max numeric values
+  puts 'Adding enumeration and min/max numeric values...'
+
+  element_xpaths.each do |element_xpath, element_type|
+    # exclude duplicated xpaths
+    result = element_xpaths.keys.select { |k| (element_xpath != k) && (k.each_cons(element_xpath.size).include? element_xpath) } # check if an array contains another array in particular order
+    next unless result.empty?
+
+    # Skip element xpaths not being used in sample files
+    element_xpath_with_prefix = element_xpath.reverse.map { |e| "h:#{e}" }
+    context_xpath = element_xpath_with_prefix.join('/').chomp('/')
+    next unless elements_in_sample_files.any? { |item| item.include? context_xpath }
+
+    hpxml_data_type_name = [element_type, '_simple'].join()
+    hpxml_data_type = hpxml_data_types_dict[hpxml_data_type_name]
+    next if hpxml_data_type.nil?
+
+    rule = XMLHelper.add_element(pattern, 'sch:rule')
+    XMLHelper.add_attribute(rule, 'context', context_xpath.prepend('//'))
+
+    if not hpxml_data_type[:enums].empty?
+      assertion = XMLHelper.add_element(rule, 'sch:assert')
+      XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+      XMLHelper.add_attribute(assertion, 'test', "contains(\"#{hpxml_data_type[:enums].join(' ')}\", concat(\"_\", text(), \"_\"))")
+      assertion.inner_text = "Expected value to be: \"#{hpxml_data_type[:enums].join('" or "').gsub!('_', '')}\""
+    end
+    if hpxml_data_type[:min_inclusive]
+      assertion = XMLHelper.add_element(rule, 'sch:assert')
+      XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+      XMLHelper.add_attribute(assertion, 'test', "number(text()) &gt;= #{hpxml_data_type[:min_inclusive]}")
+      assertion.inner_text = "Expected value to be: greater than or equal to #{hpxml_data_type[:min_inclusive]}"
+    end
+    if hpxml_data_type[:max_inclusive]
+      assertion = XMLHelper.add_element(rule, 'sch:assert')
+      XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+      XMLHelper.add_attribute(assertion, 'test', "number(text()) &lt;= #{hpxml_data_type[:max_inclusive]}")
+      assertion.inner_text = "Expected value to be: less than or equal to #{hpxml_data_type[:max_inclusive]}"
+    end
+    if hpxml_data_type[:min_exclusive]
+      assertion = XMLHelper.add_element(rule, 'sch:assert')
+      XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+      XMLHelper.add_attribute(assertion, 'test', "number(text()) &gt; #{hpxml_data_type[:min_exclusive]}")
+      assertion.inner_text = "Expected value to be: greater than #{hpxml_data_type[:min_exclusive]}"
+    end
+    next unless hpxml_data_type[:max_exclusive]
+
+    assertion = XMLHelper.add_element(rule, 'sch:assert')
+    XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+    XMLHelper.add_attribute(assertion, 'test', "number(text()) &lt; #{hpxml_data_type[:max_exclusive]}")
+    assertion.inner_text = "Expected value to be: less than #{hpxml_data_type[:max_exclusive]}"
+  end
+
+  XMLHelper.write_file(hpxml_validator, File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'HPXMLvalidator.xml'))
+end
+
+def get_expanded_elements(element_xpaths, complex_type_or_group_dict, element_xpath, element_type)
+  if complex_type_or_group_dict[element_type].nil?
+    return element_xpaths[element_xpath] = element_type
+  else
+    expanded_elements = deep_copy_object(complex_type_or_group_dict[element_type])
+    expanded_elements.each do |k, v|
+      k.push(element_xpath).flatten!
+      if complex_type_or_group_dict[v].nil?
+        element_xpaths[k] = v
+        next
+      end
+
+      get_expanded_elements(element_xpaths, complex_type_or_group_dict, k, v)
+    end
+  end
+end
+
+def deep_copy_object(obj)
+  return Marshal.load(Marshal.dump(obj))
 end
 
 command_list = [:update_measures, :cache_weather, :create_release_zips, :download_weather]
@@ -4949,7 +5187,7 @@ if ARGV[0].to_sym == :update_measures
   ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
 
   create_hpxmls
-  set_schema_validator
+  set_hpxml_validator
 
   # Apply rubocop
   cops = ['Layout',
