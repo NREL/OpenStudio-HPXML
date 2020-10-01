@@ -14,11 +14,13 @@ import re
 here = os.path.dirname(os.path.abspath(__file__))
 
 
-def get_address_from_hpxml_file(hpxml_filename):
+def get_hpxml_properties(hpxml_filename):
     hpxml_filepath = os.path.join(here, '..', 'workflow', 'sample_files', hpxml_filename)
     tree = etree.parse(hpxml_filepath)
-    address = tree.xpath('//h:Address1/text()', namespaces={'h': 'http://hpxmlonline.com/2019/10'}, smart_strings=False)[0]
-    return address
+    kw = dict(namespaces={'h': 'http://hpxmlonline.com/2019/10'}, smart_strings=False)
+    address = tree.xpath('//h:Address1/text()', **kw)[0]
+    dhw_type = tree.xpath('//h:WaterHeaterType/text()', **kw)[0]
+    return {'address': address, 'dhw_type': dhw_type}
 
 
 def rename_col(colname):
@@ -32,12 +34,34 @@ def rename_col(colname):
 
 def make_comparison_plots(df_doe2, df_os, doe2_csv_filename):
     df_os2 = df_os.rename(columns=rename_col)
-    df_os2['address'] = df_os2['HPXML'].map(get_address_from_hpxml_file)
+
+    # Get some additional columns from the hpxml files
+    hpxml_df = df_os2.apply(
+        lambda row: get_hpxml_properties(row['HPXML']),
+        axis='columns',
+        result_type='expand'
+    )
+    df_os2 = pd.concat([df_os2, hpxml_df], axis='columns')
+
+    # Move the combi water heater energy to the heating for comparison to DOE2
+    df_os2['is_combi'] = df_os2['dhw_type'].str.startswith('space-heating boiler')
+    dhw_cols = list(filter(
+        lambda x: x.startswith('hot_water_') and x.replace('hot_water_', 'heating_') in df_os2.columns,
+        df_os2.columns.values
+    ))
+    heating_cols = [x.replace('hot_water_', 'heating_') for x in dhw_cols]
+    df_os2.loc[df_os2['is_combi'], heating_cols] += df_os2.loc[df_os2['is_combi'], dhw_cols].values
+    df_os2.loc[df_os2['is_combi'], dhw_cols] = 0
+
+    # Join with doe2 data
     df = df_doe2.merge(df_os2, on='address', suffixes=('_doe2', '_os'))
+
+    # Base file difference
     cols_to_diff_against_base = list(filter(re.compile(r'_(doe2|os)$').search, df.columns.values))
     df_diff = df[cols_to_diff_against_base].subtract(df[df['HPXML'] == 'Base_hpxml.xml'][cols_to_diff_against_base].values, axis=1)
     df2 = df.merge(df_diff, left_index=True, right_index=True, suffixes=('', '_basediff'))
 
+    # Make the plots
     plots_dir = os.path.join(here, 'plots')
     if not os.path.exists(plots_dir):
         os.makedirs(plots_dir)
