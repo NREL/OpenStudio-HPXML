@@ -329,8 +329,8 @@
                 <Value>3.6</Value>
               </AnnualHeatingEfficiency>
               <extension>
-                <PumpPowerWattsPerTon>30.0</PumpPowerWattsPerTon>
                 <FanPowerWattsPerCFM>0.5</FanPowerWattsPerCFM>
+                <PumpPowerWattsPerTon>30.0</PumpPowerWattsPerTon>
               </extension>
             </HeatPump>
           </HVACPlant>

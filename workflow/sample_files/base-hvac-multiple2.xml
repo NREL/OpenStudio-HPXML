@@ -331,7 +331,9 @@
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.2</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>700.0</ElectricAuxiliaryEnergy>
+              <extension>
+                <FanPowerWattsPerCFM>0.2</FanPowerWattsPerCFM>
+              </extension>
             </HeatingSystem>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem3'/>

@@ -1022,7 +1022,7 @@ If the location is not specified, the appliance is assumed to be in the living s
 HPXML Clothes Washer
 ********************
 
-A single ``Appliances/ClothesWasher`` element can be specified; if not provided, a clothes washer will not be modeled.
+An ``Appliances/ClothesWasher`` element can be specified; if not provided, a clothes washer will not be modeled.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard clothes washer from 2006 will be used.
@@ -1052,7 +1052,7 @@ If provided and true, ``AttachedToWaterHeatingSystem`` must also be specified an
 HPXML Clothes Dryer
 *******************
 
-A single ``Appliances/ClothesDryer`` element can be specified; if not provided, a clothes dryer will not be modeled.
+An ``Appliances/ClothesDryer`` element can be specified; if not provided, a clothes dryer will not be modeled.
 The dryer's ``FuelType`` must be provided.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
@@ -1077,7 +1077,7 @@ If not provided, it is assumed to be false.
 HPXML Dishwasher
 ****************
 
-A single ``Appliances/Dishwasher`` element can be specified; if not provided, a dishwasher will not be modeled.
+An ``Appliances/Dishwasher`` element can be specified; if not provided, a dishwasher will not be modeled.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard dishwasher from 2006 will be used.
@@ -1143,7 +1143,7 @@ An extension/UsageMultiplier can also be optionally provided that scales energy 
 HPXML Cooking Range/Oven
 ************************
 
-A single pair of ``Appliances/CookingRange`` and ``Appliances/Oven`` elements can be specified; if not provided, a range/oven will not be modeled.
+``Appliances/CookingRange`` and ``Appliances/Oven`` elements can be specified; if not provided, a range/oven will not be modeled.
 The ``FuelType`` of the range must be provided.
 
 Inputs including ``CookingRange/IsInduction`` and ``Oven/IsConvection`` can be optionally provided.
@@ -1162,8 +1162,8 @@ An ``CookingRange/extension/UsageMultiplier`` can also be optionally provided th
 HPXML Dehumidifier
 ******************
 
-A single ``Appliance/Dehumidifier`` element can be specified; if not provided, a dehumidifier will not be modeled.
-The ``Capacity`` (pints/day), ``DehumidistatSetpoint`` (relative humidity as a fraction, 0-1), and ``FractionDehumidificationLoadServed`` (0-1) must be provided.
+An ``Appliance/Dehumidifier`` element can be specified; if not provided, a dehumidifier will not be modeled.
+The ``Capacity``, ``DehumidistatSetpoint`` (relative humidity as a fraction, 0-1), and ``FractionDehumidificationLoadServed`` (0-1) must be provided.
 The efficiency of the dehumidifier can either be entered as an ``IntegratedEnergyFactor`` or ``EnergyFactor``.
 
 HPXML Lighting

@@ -492,7 +492,7 @@ class HPXMLTest < MiniTest::Test
       if (hpxml.solar_thermal_systems.size > 0) || (hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0)
         next if err_line.include? 'More Additional Loss Coefficients were entered than the number of nodes; extra coefficients will not be used'
       end
-      if hpxml_path.include?('base-dhw-tank-heat-pump-outside.xml') || hpxml_path.include?('base-hvac-flowrate.xml')
+      if hpxml_path.include?('base-dhw-tank-heat-pump-outside.xml')
         next if err_line.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.'
         next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
       end
@@ -858,41 +858,22 @@ class HPXMLTest < MiniTest::Test
 
       next unless heating_system.fraction_heat_load_served > 0
 
-      # Electric Auxiliary Energy
-      # For now, skip if multiple equipment
-      next unless (num_htg_sys == 1) && [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove].include?(htg_sys_type) && (htg_sys_fuel != HPXML::FuelTypeElectricity)
+      next unless (num_htg_sys == 1) && (htg_sys_type == HPXML::HVACTypeBoiler) && (htg_sys_fuel != HPXML::FuelTypeElectricity)
+      next if hpxml.water_heating_systems.select { |wh| [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? wh.water_heater_type }.size > 0 # Skip combi systems
 
       if not heating_system.electric_auxiliary_energy.nil?
         hpxml_value = heating_system.electric_auxiliary_energy / 2.08
       else
-        furnace_capacity_kbtuh = nil
-        if htg_sys_type == HPXML::HVACTypeFurnace
-          furnace_capacity_kbtuh = UnitConversions.convert(results['Capacity: Heating (W)'], 'W', 'kBtu/hr')
-        end
-        hpxml_value = HVAC.get_electric_auxiliary_energy(heating_system, furnace_capacity_kbtuh) / 2.08
+        hpxml_value = HVAC.get_default_boiler_eae(heating_system) / 2.08
       end
 
-      if htg_sys_type == HPXML::HVACTypeBoiler
-        next if hpxml.water_heating_systems.select { |wh| [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? wh.water_heater_type }.size > 0 # Skip combi systems
-
-        # Compare pump power from timeseries output
-        query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Boiler Part Load Ratio' AND ReportingFrequency='Run Period')"
-        avg_plr = sqlFile.execAndReturnFirstDouble(query).get
-        query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electric Power' AND ReportingFrequency='Run Period')"
-        avg_w = sqlFile.execAndReturnFirstDouble(query).get
-        sql_value = avg_w / avg_plr
-        assert_in_epsilon(sql_value, hpxml_value, 0.02)
-      else
-        next if hpxml.cooling_systems.size + hpxml.heat_pumps.size > 0 # Skip if other system types (which could result in A) multiple supply fans or B) different supply fan power consumption in the cooling season)
-
-        # Compare fan power from timeseries output
-        query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Runtime Fraction' and KeyValue LIKE '% SUPPLY FAN' AND ReportingFrequency='Run Period')"
-        avg_rtf = sqlFile.execAndReturnFirstDouble(query).get
-        query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Electric Power' and KeyValue LIKE '% SUPPLY FAN' AND ReportingFrequency='Run Period')"
-        avg_w = sqlFile.execAndReturnFirstDouble(query).get
-        sql_value = avg_w / avg_rtf
-        assert_in_epsilon(sql_value, hpxml_value, 0.02)
-      end
+      # Compare pump power from timeseries output
+      query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Boiler Part Load Ratio' AND ReportingFrequency='Run Period')"
+      avg_plr = sqlFile.execAndReturnFirstDouble(query).get
+      query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electric Power' AND ReportingFrequency='Run Period')"
+      avg_w = sqlFile.execAndReturnFirstDouble(query).get
+      sql_value = avg_w / avg_plr
+      assert_in_epsilon(sql_value, hpxml_value, 0.02)
     end
 
     # HVAC Heat Pumps

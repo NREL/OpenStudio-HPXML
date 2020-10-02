@@ -72,7 +72,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('debug', false)
     arg.setDisplayName('Debug Mode?')
-    arg.setDescription('If enabled: 1) Writes in.osm file, 2) Writes in.xml HPXML file with defaults populated, and 3) Generates additional log output. Any files written will be in the output path specified above.')
+    arg.setDescription('If enabled: 1) Writes in.osm file, 2) Writes in.xml HPXML file with defaults filled, and 3) Generates additional log output. Any files written will be in the output path specified above.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -216,6 +216,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
     end
 
+    if not output_dir.nil?
+      epw_output_path = File.join(output_dir, 'in.epw')
+      FileUtils.cp(epw_path, epw_output_path)
+      runner.registerInfo("Copied EPW to: #{epw_output_path}")
+    end
+
     return epw_path, cache_path
   end
 end
@@ -292,7 +298,6 @@ class OSModel
 
     add_airflow(runner, model, weather, spaces)
     add_hvac_sizing(runner, model, weather, spaces)
-    add_furnace_eae(runner, model)
     add_photovoltaics(runner, model)
     add_additional_properties(runner, model, hpxml_path)
     add_component_loads_output(runner, model, spaces)
@@ -2505,19 +2510,6 @@ class OSModel
 
   def self.add_hvac_sizing(runner, model, weather, spaces)
     HVACSizing.apply(model, runner, weather, spaces, @hpxml, @infil_volume, @nbeds, @min_neighbor_distance, @debug)
-  end
-
-  def self.add_furnace_eae(runner, model)
-    # Needs to come after HVAC sizing (needs heating capacity and airflow rate)
-    # FUTURE: Could remove this method and simplify everything if we could autosize via the HPXML file
-
-    @hpxml.heating_systems.each do |heating_system|
-      next unless heating_system.fraction_heat_load_served > 0
-      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove].include? heating_system.heating_system_type
-      next unless heating_system.heating_system_fuel != HPXML::FuelTypeElectricity
-
-      HVAC.apply_eae_to_heating_fan(runner, @hvac_map[heating_system.id], heating_system)
-    end
   end
 
   def self.add_photovoltaics(runner, model)
