@@ -4128,7 +4128,7 @@ class HVAC
     # TEMP: For testing without
     # return
 
-    return if airflow_rated_defect_ratio_cool.nil? && airflow_rated_defect_ratio_heat.nil?
+    return if airflow_rated_defect_ratio_cool.empty? && airflow_rated_defect_ratio_heat.empty?
 
     obj_name = "#{unitary_system.name} install quality"
 
@@ -4146,15 +4146,15 @@ class HVAC
     f_chg = charge_defect_ratio
     fault_program.addLine("Set F_CH = #{f_chg.round(3)}")
 
-    if not airflow_rated_defect_ratio_cool.nil?
+    if not airflow_rated_defect_ratio_cool.empty?
       if clg_coil.is_a? OpenStudio::Model::CoilCoolingDXSingleSpeed
         num_speeds = 1
         cool_cap_fff_curves = [clg_coil.totalCoolingCapacityFunctionOfFlowFractionCurve.to_CurveQuadratic.get]
         cool_eir_fff_curves = [clg_coil.energyInputRatioFunctionOfFlowFractionCurve.to_CurveQuadratic.get]
       elsif clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
         num_speeds = clg_coil.stages.size
-        cool_cap_fff_curves = clg_coil.stages.map { |stage| stage.totalCoolingCapacityFunctionOfFlowFractionCurve.to_CurveQuadratic.get }
-        cool_eir_fff_curves = clg_coil.stages.map { |stage| stage.energyInputRatioFunctionOfFlowFractionCurve.to_CurveQuadratic.get }
+        cool_cap_fff_curves = clg_coil.stages.map { |stage| stage.totalCoolingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get }
+        cool_eir_fff_curves = clg_coil.stages.map { |stage| stage.energyInputRatioFunctionofFlowFractionCurve.to_CurveQuadratic.get }
       else
         puts clg_coil
         fail 'cooling coil not supported'
@@ -4219,7 +4219,7 @@ class HVAC
         fault_program.addLine('Set eir2_AF_CH = a3_AF_EIR_c*FF_CH_c*FF_CH_c')
         fault_program.addLine('Set p_CH_COP_c = Y_CH_COP_c*(eir0_AF_CH+(eir1_AF_CH)+(eir2_AF_CH))')
 
-        ff_af_c = 1.0 + airflow_rated_defect_ratio_cool
+        ff_af_c = 1.0 + airflow_rated_defect_ratio_cool[speed]
         ff_af_comb_c = ff_ch_c * ff_af_c
         fault_program.addLine("Set FF_AF_comb_c = #{ff_af_comb_c.round(3)}")
 
@@ -4238,7 +4238,7 @@ class HVAC
       end
     end
 
-    if not airflow_rated_defect_ratio_heat.nil?
+    if not airflow_rated_defect_ratio_heat.empty?
 
       if htg_coil.is_a? OpenStudio::Model::CoilHeatingDXSingleSpeed
         num_speeds = 1
@@ -4246,7 +4246,7 @@ class HVAC
         heat_eir_fff_curves = [htg_coil.energyInputRatioFunctionofFlowFractionCurve.to_CurveQuadratic.get]
       elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
         num_speeds = htg_coil.stages.size
-        heat_cap_fff_curves = htg_coil.stages.map { |stage| stage.totalHeatingCapacityFunctionOfFlowFractionCurve.to_CurveQuadratic.get }
+        heat_cap_fff_curves = htg_coil.stages.map { |stage| stage.heatingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get }
         heat_eir_fff_curves = htg_coil.stages.map { |stage| stage.energyInputRatioFunctionofFlowFractionCurve.to_CurveQuadratic.get }
       else
         puts htg_coil
@@ -4307,7 +4307,7 @@ class HVAC
         fault_program.addLine('Set eirh2_AF_CH = a3_AF_EIR_h*FF_CH_h*FF_CH_h')
         fault_program.addLine('Set p_CH_COP_h = Y_CH_COP_h*(eirh0_AF_CH + (eirh1_AF_CH) + (eirh2_AF_CH))')
 
-        ff_af_h = 1.0 + airflow_rated_defect_ratio_heat
+        ff_af_h = 1.0 + airflow_rated_defect_ratio_heat[speed]
         ff_af_comb_h = ff_ch_h * ff_af_h
         fault_program.addLine("Set FF_AF_comb_h = #{ff_af_comb_h.round(3)}")
 

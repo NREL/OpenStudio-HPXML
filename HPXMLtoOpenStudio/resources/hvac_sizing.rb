@@ -3268,25 +3268,23 @@ class HVACSizing
 
       clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, object)
 
-      airflow_rated_defect_ratio_cool = nil
+      airflow_rated_defect_ratio_cool = []
       if not clg_coil.nil?
         if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized
-          airflow_rated_defect_ratio_cool = UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / clg_coil.ratedAirFlowRate.get - 1.0
-          # elsif clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
-          # puts hvac_final_values.Cool_Airflow
-          # airflow_rated_defect_ratio_cool = UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / clg_coil.ratedAirFlowRate.get - 1.0
-          # TODO
+          airflow_rated_defect_ratio_cool = [UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / clg_coil.ratedAirFlowRate.get - 1.0]
+        elsif clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
+          airflow_rated_defect_ratio_cool = clg_coil.stages.map{ |stage| UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0}
         else
           #puts clg_coil.stages
         end
       end
 
-      airflow_rated_defect_ratio_heat = nil
+      airflow_rated_defect_ratio_heat = []
       if not htg_coil.nil?
         if htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized
-          airflow_rated_defect_ratio_heat = UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / htg_coil.ratedAirFlowRate.get - 1.0
-          # elsif htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized
-          # airflow_rated_defect_ratio_heat = UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / htg_coil.ratedAirFlowRate.get - 1.0
+          airflow_rated_defect_ratio_heat = [UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / htg_coil.ratedAirFlowRate.get - 1.0]
+        elsif htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized
+          airflow_rated_defect_ratio_heat = htg_coil.stages.map{ |stage| UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0}
         else
           #puts htg_coil
         end
