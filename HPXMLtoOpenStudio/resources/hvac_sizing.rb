@@ -3273,9 +3273,9 @@ class HVACSizing
         if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized
           airflow_rated_defect_ratio_cool = [UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / clg_coil.ratedAirFlowRate.get - 1.0]
         elsif clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
-          airflow_rated_defect_ratio_cool = clg_coil.stages.map{ |stage| UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0}
+          airflow_rated_defect_ratio_cool = clg_coil.stages.map { |stage| UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0 }
         else
-          #puts clg_coil.stages
+          # puts clg_coil.stages
         end
       end
 
@@ -3284,9 +3284,9 @@ class HVACSizing
         if htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized
           airflow_rated_defect_ratio_heat = [UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / htg_coil.ratedAirFlowRate.get - 1.0]
         elsif htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized
-          airflow_rated_defect_ratio_heat = htg_coil.stages.map{ |stage| UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0}
+          airflow_rated_defect_ratio_heat = htg_coil.stages.map { |stage| UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0 }
         else
-          #puts htg_coil
+          # puts htg_coil
         end
       end
 
