@@ -72,8 +72,9 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-cooling.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
+    'invalid_files/invalid-calendar-year.xml' => 'base.xml',
     'invalid_files/invalid-daylight-saving.xml' => 'base.xml',
-    'invalid_files/invalid-epw-filepath.xml' => 'base-location-epw-filepath.xml',
+    'invalid_files/invalid-epw-filepath.xml' => 'base.xml',
     'invalid_files/invalid-facility-type.xml' => 'base-dhw-shared-laundry-room.xml',
     'invalid_files/invalid-neighbor-shading-azimuth.xml' => 'base-misc-neighbor-shading.xml',
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
@@ -82,7 +83,6 @@ def create_hpxmls
     'invalid_files/invalid-timestep.xml' => 'base.xml',
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
     'invalid_files/invalid-window-interior-shading.xml' => 'base.xml',
-    'invalid_files/invalid-wmo.xml' => 'base.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
     'invalid_files/multifamily-reference-appliance.xml' => 'base.xml',
@@ -190,6 +190,7 @@ def create_hpxmls
     'base-enclosure-beds-2.xml' => 'base.xml',
     'base-enclosure-beds-4.xml' => 'base.xml',
     'base-enclosure-beds-5.xml' => 'base.xml',
+    'base-enclosure-common-surfaces.xml' => 'base-enclosure-attached-multifamily.xml',
     'base-enclosure-garage.xml' => 'base.xml',
     'base-enclosure-infil-ach-house-pressure.xml' => 'base.xml',
     'base-enclosure-infil-cfm-house-pressure.xml' => 'base-enclosure-infil-cfm50.xml',
@@ -309,12 +310,11 @@ def create_hpxmls
     'base-lighting-ceiling-fans.xml' => 'base.xml',
     'base-lighting-detailed.xml' => 'base.xml',
     'base-lighting-none.xml' => 'base.xml',
+    'base-location-AMY-2012.xml' => 'base.xml',
     'base-location-baltimore-md.xml' => 'base.xml',
-    'base-location-dallas-tx.xml' => 'base.xml',
+    'base-location-dallas-tx.xml' => 'base-foundation-slab.xml',
     'base-location-duluth-mn.xml' => 'base.xml',
-    'base-location-miami-fl.xml' => 'base.xml',
-    'base-location-epw-filepath.xml' => 'base.xml',
-    'base-location-epw-filepath-AMY-2012.xml' => 'base.xml',
+    'base-location-miami-fl.xml' => 'base-foundation-slab.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-bath-kitchen-fans.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
@@ -341,6 +341,7 @@ def create_hpxmls
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
     'base-pv-shared.xml' => 'base-enclosure-attached-multifamily.xml',
+    'base-simcontrol-calendar-year-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
     'base-simcontrol-runperiod-1-month.xml' => 'base.xml',
@@ -520,6 +521,8 @@ def set_hpxml_header(hpxml_file, hpxml)
     else
       hpxml.header.apply_ashrae140_assumptions = true
     end
+  elsif ['base-simcontrol-calendar-year-custom.xml'].include? hpxml_file
+    hpxml.header.sim_calendar_year = 2008
   elsif ['base-simcontrol-daylight-saving-custom.xml'].include? hpxml_file
     hpxml.header.dst_enabled = true
     hpxml.header.dst_begin_month = 3
@@ -539,6 +542,8 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.allow_increased_fixed_capacities = true
   elsif hpxml_file.include? 'manual-s-oversize-allowances.xml'
     hpxml.header.use_max_load_for_heat_pumps = false
+  elsif ['invalid_files/invalid-calendar-year.xml'].include? hpxml_file
+    hpxml.header.sim_calendar_year = 20018
   elsif ['invalid_files/invalid-timestep.xml'].include? hpxml_file
     hpxml.header.timestep = 45
   elsif ['invalid_files/invalid-runperiod.xml'].include? hpxml_file
@@ -666,44 +671,38 @@ def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
   hpxml.climate_and_risk_zones.iecc_year = 2006
   if hpxml_file == 'ASHRAE_Standard_140/L100AC.xml'
     hpxml.climate_and_risk_zones.weather_station_name = 'Colorado Springs, CO'
-    hpxml.climate_and_risk_zones.weather_station_wmo = '724660'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_CO_Colorado.Springs-Peterson.Field.724660_TMY3.epw'
   elsif hpxml_file == 'ASHRAE_Standard_140/L100AL.xml'
     hpxml.climate_and_risk_zones.weather_station_name = 'Las Vegas, NV'
-    hpxml.climate_and_risk_zones.weather_station_wmo = '723860'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_NV_Las.Vegas-McCarran.Intl.AP.723860_TMY3.epw'
   elsif ['base.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.iecc_zone = '5B'
     hpxml.climate_and_risk_zones.weather_station_name = 'Denver, CO'
-    hpxml.climate_and_risk_zones.weather_station_wmo = '725650'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
     hpxml.header.state_code = 'CO'
   elsif ['base-location-baltimore-md.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.iecc_zone = '4A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Baltimore, MD'
-    hpxml.climate_and_risk_zones.weather_station_wmo = '724060'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw'
     hpxml.header.state_code = 'MD'
   elsif ['base-location-dallas-tx.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.iecc_zone = '3A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Dallas, TX'
-    hpxml.climate_and_risk_zones.weather_station_wmo = '722590'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw'
     hpxml.header.state_code = 'TX'
   elsif ['base-location-duluth-mn.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.iecc_zone = '7'
     hpxml.climate_and_risk_zones.weather_station_name = 'Duluth, MN'
-    hpxml.climate_and_risk_zones.weather_station_wmo = '727450'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_MN_Duluth.Intl.AP.727450_TMY3.epw'
     hpxml.header.state_code = 'MN'
   elsif ['base-location-miami-fl.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.iecc_zone = '1A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Miami, FL'
-    hpxml.climate_and_risk_zones.weather_station_wmo = '722020'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_FL_Miami.Intl.AP.722020_TMY3.epw'
     hpxml.header.state_code = 'FL'
-  elsif ['base-location-epw-filepath.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.weather_station_wmo = nil
-    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
-  elsif ['base-location-epw-filepath-AMY-2012.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.weather_station_wmo = nil
+  elsif ['base-location-AMY-2012.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_name = 'Boulder, CO'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'US_CO_Boulder_AMY_2012.epw'
-  elsif ['invalid_files/invalid-wmo.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.weather_station_wmo = '999999'
   elsif ['invalid_files/invalid-epw-filepath.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'foo.epw'
   end
@@ -1417,6 +1416,15 @@ def set_hpxml_walls(hpxml_file, hpxml)
       wall.solar_absorptance = nil
       wall.color = HPXML::ColorMedium
     end
+  elsif ['base-enclosure-common-surfaces.xml'].include? hpxml_file
+    hpxml.walls.add(id: 'CommonWallUnventedAttic',
+                    exterior_adjacent_to: HPXML::LocationAtticUnvented,
+                    interior_adjacent_to: HPXML::LocationAtticUnvented,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    area: 113,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 4)
   end
   hpxml.walls.each do |wall|
     next unless wall.is_interior
@@ -1729,6 +1737,34 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls[-1].area = 0.05
   elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
     hpxml.foundation_walls[-1].area = 880
+  elsif ['base-enclosure-common-surfaces.xml'].include? hpxml_file
+    hpxml.foundation_walls[1].area = 240
+    hpxml.foundation_walls.add(id: 'FoundationWallCrawlspace',
+                               exterior_adjacent_to: HPXML::LocationGround,
+                               interior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                               height: 4,
+                               area: 240,
+                               thickness: 8,
+                               depth_below_grade: 3,
+                               insulation_interior_r_value: 0,
+                               insulation_interior_distance_to_top: 0,
+                               insulation_interior_distance_to_bottom: 0,
+                               insulation_exterior_distance_to_top: 0,
+                               insulation_exterior_distance_to_bottom: 0,
+                               insulation_exterior_r_value: 0)
+    hpxml.foundation_walls.add(id: 'CommonFoundationWall',
+                               exterior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                               interior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                               height: 4,
+                               area: 240,
+                               thickness: 5.5,
+                               depth_below_grade: 3,
+                               insulation_interior_r_value: 0,
+                               insulation_interior_distance_to_top: 0,
+                               insulation_interior_distance_to_bottom: 0,
+                               insulation_exterior_distance_to_top: 0,
+                               insulation_exterior_distance_to_bottom: 0,
+                               insulation_exterior_r_value: 0)
   elsif ['invalid_files/enclosure-basement-missing-exterior-foundation-wall.xml'].include? hpxml_file
     hpxml.foundation_walls[0].delete
   end
@@ -1865,6 +1901,18 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            area: 150,
                            insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
+  elsif ['base-enclosure-common-surfaces.xml'].include? hpxml_file
+    hpxml.frame_floors[1].area = 650
+    hpxml.frame_floors.add(id: 'FloorAboveVentedCrawlspace',
+                           exterior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
+                           area: 350,
+                           insulation_assembly_r_value: 18.7)
+    hpxml.frame_floors.add(id: 'CommonFrameFloorVentedCrawlspace',
+                           exterior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                           interior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                           area: 350,
+                           insulation_assembly_r_value: 3.0)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.frame_floors.size
       hpxml.frame_floors[n - 1].area /= 9.0
@@ -2050,6 +2098,20 @@ def set_hpxml_slabs(hpxml_file, hpxml)
     hpxml.slabs << hpxml.slabs[-1].dup
     hpxml.slabs[-1].id = 'TinySlab'
     hpxml.slabs[-1].area = 0.05
+  elsif ['base-enclosure-common-surfaces.xml'].include? hpxml_file
+    hpxml.slabs[0].area = 1000
+    hpxml.slabs[0].exposed_perimeter = 111
+    hpxml.slabs.add(id: 'SlabUnderCrawlspace',
+                    interior_adjacent_to: HPXML::LocationCrawlspaceVented,
+                    area: 350,
+                    thickness: 0,
+                    exposed_perimeter: 39,
+                    perimeter_insulation_depth: 0,
+                    under_slab_insulation_width: 0,
+                    perimeter_insulation_r_value: 0,
+                    under_slab_insulation_r_value: 0,
+                    carpet_fraction: 0,
+                    carpet_r_value: 0)
   elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
     hpxml.slabs[0].interior_adjacent_to = HPXML::LocationBasementUnconditioned
     hpxml.slabs[0].depth_below_grade = 7.0
@@ -4296,7 +4358,9 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
                              combined_energy_factor: 3.73,
-                             control_type: HPXML::ClothesDryerControlTypeTimer)
+                             control_type: HPXML::ClothesDryerControlTypeTimer,
+                             is_vented: true,
+                             vented_flow_rate: 150)
   elsif ['base-appliances-none.xml',
          'base-dhw-none.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear
@@ -4322,11 +4386,13 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
                              energy_factor: HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(cef).round(2),
-                             control_type: HPXML::ClothesDryerControlTypeMoisture)
+                             control_type: HPXML::ClothesDryerControlTypeMoisture,
+                             is_vented: false)
   elsif ['base-appliances-coal.xml',
          'base-appliances-gas.xml',
          'base-appliances-propane.xml',
-         'base-appliances-oil.xml'].include? hpxml_file
+         'base-appliances-oil.xml',
+         'base-appliances-wood.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
@@ -4340,14 +4406,9 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
       hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypePropane
     elsif hpxml_file == 'base-appliances-oil.xml'
       hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeOil
+    elsif hpxml_file == 'base-appliances-wood.xml'
+      hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeWoodCord
     end
-  elsif ['base-appliances-wood.xml'].include? hpxml_file
-    hpxml.clothes_dryers.clear
-    hpxml.clothes_dryers.add(id: 'ClothesDryer',
-                             location: HPXML::LocationLivingSpace,
-                             fuel_type: HPXML::FuelTypeWoodCord,
-                             combined_energy_factor: 3.30,
-                             control_type: HPXML::ClothesDryerControlTypeMoisture)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -4362,6 +4423,8 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers[0].energy_factor = nil
     hpxml.clothes_dryers[0].combined_energy_factor = nil
     hpxml.clothes_dryers[0].control_type = nil
+    hpxml.clothes_dryers[0].is_vented = nil
+    hpxml.clothes_dryers[0].vented_flow_rate = nil
   elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].id = 'SharedClothesDryer'
     hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
@@ -5011,7 +5074,7 @@ if ARGV[0].to_sym == :create_release_zips
   end
 
   # Check if we need to download weather files for the full release zip
-  num_epws_expected = File.readlines(File.join('weather', 'data.csv')).size - 1
+  num_epws_expected = 1011
   num_epws_local = 0
   files.each do |f|
     Dir[f].each do |file|

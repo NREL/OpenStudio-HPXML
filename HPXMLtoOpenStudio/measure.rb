@@ -59,12 +59,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative path of the HPXML file.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_dir', true)
-    arg.setDisplayName('Weather Directory')
-    arg.setDescription('Absolute/relative path of the weather directory.')
-    arg.setDefaultValue('weather')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('output_dir', false)
     arg.setDisplayName('Directory for Output Files')
     arg.setDescription('Absolute/relative path for the output files directory.')
@@ -72,7 +66,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('debug', false)
     arg.setDisplayName('Debug Mode?')
-    arg.setDescription('If enabled: 1) Writes in.osm file, 2) Writes in.xml HPXML file with defaults filled, and 3) Generates additional log output. Any files written will be in the output path specified above.')
+    arg.setDescription('If enabled: 1) Writes in.osm file, 2) Writes in.xml HPXML file with defaults populated, and 3) Generates additional log output. Any files written will be in the output path specified above.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -94,7 +88,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # assign the user inputs to variables
     hpxml_path = runner.getStringArgumentValue('hpxml_path', user_arguments)
-    weather_dir = runner.getStringArgumentValue('weather_dir', user_arguments)
     output_dir = runner.getOptionalStringArgumentValue('output_dir', user_arguments)
     debug = runner.getBoolArgumentValue('debug', user_arguments)
 
@@ -105,9 +98,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       fail "'#{hpxml_path}' does not exist or is not an .xml file."
     end
 
-    unless (Pathname.new weather_dir).absolute?
-      weather_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', weather_dir))
-    end
     if output_dir.is_initialized
       output_dir = output_dir.get
       unless (Pathname.new output_dir).absolute?
@@ -124,7 +114,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         return false
       end
 
-      epw_path, cache_path = process_weather(hpxml, runner, model, weather_dir, output_dir)
+      epw_path, cache_path = process_weather(hpxml, runner, model, output_dir, hpxml_path)
 
       OSModel.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, debug)
     rescue Exception => e
@@ -177,31 +167,19 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return is_valid
   end
 
-  def process_weather(hpxml, runner, model, weather_dir, output_dir)
+  def process_weather(hpxml, runner, model, output_dir, hpxml_path)
     epw_path = hpxml.climate_and_risk_zones.weather_station_epw_filepath
 
-    if not epw_path.nil?
-      if not File.exist? epw_path
-        epw_path = File.join(weather_dir, epw_path)
-      end
-      if not File.exist?(epw_path)
-        fail "'#{epw_path}' could not be found."
-      end
-    else
-      weather_wmo = hpxml.climate_and_risk_zones.weather_station_wmo
-      CSV.foreach(File.join(weather_dir, 'data.csv'), headers: true) do |row|
-        next if row['wmo'] != weather_wmo
-
-        epw_path = File.join(weather_dir, row['filename'])
-        if not File.exist?(epw_path)
-          fail "'#{epw_path}' could not be found."
-        end
-
-        break
-      end
-      if epw_path.nil?
-        fail "Weather station WMO '#{weather_wmo}' could not be found in #{File.join(weather_dir, 'data.csv')}."
-      end
+    if not File.exist? epw_path
+      test_epw_path = File.join(File.dirname(hpxml_path), epw_path)
+      epw_path = test_epw_path if File.exist? test_epw_path
+    end
+    if not File.exist? epw_path
+      test_epw_path = File.join(File.dirname(__FILE__), '..', 'weather', epw_path)
+      epw_path = test_epw_path if File.exist? test_epw_path
+    end
+    if not File.exist?(epw_path)
+      fail "'#{epw_path}' could not be found."
     end
 
     cache_path = epw_path.gsub('.epw', '-cache.csv')
@@ -214,12 +192,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       File.open(cache_path, 'wb') do |file|
         weather.dump_to_csv(file)
       end
-    end
-
-    if not output_dir.nil?
-      epw_output_path = File.join(output_dir, 'in.epw')
-      FileUtils.cp(epw_path, epw_output_path)
-      runner.registerInfo("Copied EPW to: #{epw_output_path}")
     end
 
     return epw_path, cache_path
@@ -405,7 +377,7 @@ class OSModel
     end
 
     # Apply defaults to HPXML object
-    HPXMLDefaults.apply(@hpxml, @cfa, @nbeds, @ncfl, @ncfl_ag, @has_uncond_bsmnt, @eri_version, epw_file)
+    HPXMLDefaults.apply(@hpxml, @cfa, @nbeds, @ncfl, @ncfl_ag, @has_uncond_bsmnt, @eri_version, epw_file, runner)
 
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
@@ -1703,7 +1675,7 @@ class OSModel
 
   def self.add_interior_shading_schedule(runner, model, weather)
     heating_season, cooling_season = HVAC.get_default_heating_and_cooling_seasons(weather)
-    @clg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'cooling season schedule', Array.new(24, 1), Array.new(24, 1), cooling_season, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+    @clg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'cooling season schedule', Array.new(24, 1), Array.new(24, 1), cooling_season, Constants.ScheduleTypeLimitsFraction)
 
     @clg_ssn_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     @clg_ssn_sensor.setName('cool_season')
@@ -2420,7 +2392,7 @@ class OSModel
     shelter_coef = @hpxml.site.shelter_coefficient
     @infil_volume = air_infils.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
     infil_height = @hpxml.inferred_infiltration_height(@infil_volume)
-    Airflow.apply(model, runner, weather, spaces, air_infils, @hpxml.ventilation_fans,
+    Airflow.apply(model, runner, weather, spaces, air_infils, @hpxml.ventilation_fans, @hpxml.clothes_dryers, @nbeds,
                   duct_systems, @infil_volume, infil_height, open_window_area,
                   @clg_ssn_sensor, @min_neighbor_distance, vented_attic, vented_crawl,
                   site_type, shelter_coef, @hpxml.building_construction.has_flue_or_chimney, @hvac_map, @eri_version,
@@ -2706,6 +2678,7 @@ class OSModel
     natvent_flow_actuators = []
     mechvent_flow_actuators = []
     whf_flow_actuators = []
+    cd_flow_actuators = []
 
     model.getEnergyManagementSystemActuators.each do |actuator|
       next unless (actuator.actuatedComponentType == 'Zone Infiltration') && (actuator.actuatedComponentControlType == 'Air Exchange Flow Rate')
@@ -2716,15 +2689,18 @@ class OSModel
         natvent_flow_actuators << actuator
       elsif actuator.name.to_s.start_with? Constants.ObjectNameWholeHouseFan.gsub(' ', '_')
         whf_flow_actuators << actuator
+      elsif actuator.name.to_s.start_with? Constants.ObjectNameClothesDryerExhaust.gsub(' ', '_')
+        cd_flow_actuators << actuator
       end
     end
-    if (infil_flow_actuators.size != 1) || (natvent_flow_actuators.size != 1) || (whf_flow_actuators.size != 1)
+    if (infil_flow_actuators.size != 1) || (natvent_flow_actuators.size != 1) || (whf_flow_actuators.size != 1) || (cd_flow_actuators.size != 1)
       fail 'Could not find actuator for component loads.'
     end
 
     infil_flow_actuator = infil_flow_actuators[0]
     natvent_flow_actuator = natvent_flow_actuators[0]
     whf_flow_actuator = whf_flow_actuators[0]
+    cd_flow_actuator = cd_flow_actuators[0]
 
     # EMS Sensors: Ducts
 
@@ -2902,7 +2878,7 @@ class OSModel
       intgains_dhw_sensors[dhw_sensor] = [offcycle_loss, oncycle_loss, dhw_rtf_sensor]
     end
 
-    nonsurf_names = ['intgains', 'infil', 'mechvent', 'natvent', 'whf', 'ducts']
+    nonsurf_names = ['intgains', 'infil', 'mechvent', 'natvent', 'whf', 'ducts', 'cd']
 
     # EMS program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
@@ -2942,16 +2918,18 @@ class OSModel
     end
 
     # EMS program: Infiltration, Natural Ventilation, Mechanical Ventilation, Ducts
-    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name}")
+    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name} + #{cd_flow_actuator.name}")
     program.addLine('If hr_airflow_rate > 0')
     program.addLine("  Set hr_infil = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{infil_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to infiltration
     program.addLine("  Set hr_natvent = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{natvent_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to natural ventilation
     program.addLine("  Set hr_whf = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{whf_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to whole house fan
+    program.addLine("  Set hr_cd = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{cd_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to clothes dryer exhaust
     program.addLine('Else')
     program.addLine('  Set hr_infil = 0')
     program.addLine('  Set hr_natvent = 0')
     program.addLine('  Set hr_whf = 0')
     program.addLine('  Set hr_mechvent = 0')
+    program.addLine('  Set hr_cd = 0')
     program.addLine('EndIf')
     program.addLine('Set hr_mechvent = 0')
     mechvent_sensors.each do |sensor|
@@ -3427,11 +3405,12 @@ class OSModel
   def self.set_surface_exterior(model, spaces, surface, hpxml_surface)
     exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
     interior_adjacent_to = hpxml_surface.interior_adjacent_to
+    is_adiabatic = hpxml_surface.is_adiabatic
     if exterior_adjacent_to == HPXML::LocationOutside
       surface.setOutsideBoundaryCondition('Outdoors')
     elsif exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Foundation')
-    elsif exterior_adjacent_to == HPXML::LocationOtherHousingUnit && [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include?(interior_adjacent_to)
+    elsif is_adiabatic
       surface.setOutsideBoundaryCondition('Adiabatic')
     elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
            HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? exterior_adjacent_to
