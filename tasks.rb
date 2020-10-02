@@ -5055,7 +5055,6 @@ def create_schematron_hpxml_validator()
       ancestors = []
       element.each_ancestor do |node|
         next if node.get('name').nil?
-        next if node.get('name') == element.get('name') # exclude complexType name from elements' xpath
 
         ancestors << node.get('name')
       end
