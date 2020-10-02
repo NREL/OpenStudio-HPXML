@@ -901,7 +901,7 @@ class HPXMLTest < MiniTest::Test
         query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electric Power' AND ReportingFrequency='Run Period')"
         avg_w = sqlFile.execAndReturnFirstDouble(query).get
         sql_value = avg_w / avg_plr
-        assert_in_epsilon(sql_value, hpxml_value, 0.02)
+        assert_in_epsilon(sql_value, hpxml_value, 0.03)
       else
         next if hpxml.cooling_systems.size + hpxml.heat_pumps.size > 0 # Skip if other system types (which could result in A) multiple supply fans or B) different supply fan power consumption in the cooling season)
 
@@ -911,7 +911,7 @@ class HPXMLTest < MiniTest::Test
         query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Electric Power' and KeyValue LIKE '% SUPPLY FAN' AND ReportingFrequency='Run Period')"
         avg_w = sqlFile.execAndReturnFirstDouble(query).get
         sql_value = avg_w / avg_rtf
-        assert_in_epsilon(sql_value, hpxml_value, 0.02)
+        assert_in_epsilon(sql_value, hpxml_value, 0.03)
       end
     end
 
@@ -928,7 +928,7 @@ class HPXMLTest < MiniTest::Test
       query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electric Power' AND ReportingFrequency='Run Period')"
       avg_w = sqlFile.execAndReturnFirstDouble(query).get
       sql_value = avg_w / avg_plr
-      assert_in_epsilon(sql_value, hpxml_value, 0.02)
+      assert_in_epsilon(sql_value, hpxml_value, 0.03)
     end
 
     # HVAC Capacities
