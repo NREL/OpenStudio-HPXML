@@ -4227,7 +4227,7 @@ class HVAC
 
       if htg_coil.is_a? OpenStudio::Model::CoilHeatingDXSingleSpeed
         num_speeds = 1
-        heat_cap_fff_curves = [htg_coil.totalHeatingCapacityFunctionOfFlowFractionCurve.to_CurveQuadratic.get]
+        heat_cap_fff_curves = [htg_coil.totalHeatingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get]
         heat_eir_fff_curves = [htg_coil.energyInputRatioFunctionofFlowFractionCurve.to_CurveQuadratic.get]
       elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
         num_speeds = htg_coil.stages.size
