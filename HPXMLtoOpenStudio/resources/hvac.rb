@@ -1450,14 +1450,28 @@ class HVAC
     htg_setpoint = hvac_control.heating_setpoint_temp
     htg_weekday_setpoints = [[htg_setpoint] * 24] * 12
 
-    # Apply heating setback?
+    # Apply heating setback(s)?
     htg_setback = hvac_control.heating_setback_temp
+    htg_setbacks = hvac_control.heating_setback_temps
     if not htg_setback.nil?
       htg_setback_hrs_per_week = hvac_control.heating_setback_hours_per_week
       htg_setback_start_hr = hvac_control.heating_setback_start_hour
       for m in 1..12
         for hr in htg_setback_start_hr..htg_setback_start_hr + Integer(htg_setback_hrs_per_week / 7.0) - 1
           htg_weekday_setpoints[m - 1][hr % 24] = htg_setback
+        end
+      end
+    elsif not htg_setbacks.nil?
+      htg_setbacks = htg_setbacks.split(', ').map{ |i| i.to_f }
+      htg_setback_hrs_per_periods = hvac_control.heating_setback_hours_per_periods.split(', ').map{ |i| i.to_f }
+      htg_setback_start_hrs = hvac_control.heating_setback_start_hours.split(', ').map{ |i| i.to_f }
+      for m in 1..12
+        htg_setbacks.each_with_index do |htg_setback, i|
+          htg_setback_hrs_per_period = Integer(htg_setback_hrs_per_periods[i])
+          htg_setback_start_hr = Integer(htg_setback_start_hrs[i])
+          for hr in htg_setback_start_hr..htg_setback_start_hr + htg_setback_hrs_per_period - 1
+            htg_weekday_setpoints[m - 1][hr % 24] = htg_setpoint + htg_setback
+          end
         end
       end
     end
@@ -1467,14 +1481,28 @@ class HVAC
     clg_setpoint = hvac_control.cooling_setpoint_temp
     clg_weekday_setpoints = [[clg_setpoint] * 24] * 12
 
-    # Apply cooling setup?
+    # Apply cooling setup(s)?
     clg_setup = hvac_control.cooling_setup_temp
+    clg_setups = hvac_control.cooling_setup_temps
     if not clg_setup.nil?
       clg_setup_hrs_per_week = hvac_control.cooling_setup_hours_per_week
       clg_setup_start_hr = hvac_control.cooling_setup_start_hour
       for m in 1..12
         for hr in clg_setup_start_hr..clg_setup_start_hr + Integer(clg_setup_hrs_per_week / 7.0) - 1
           clg_weekday_setpoints[m - 1][hr % 24] = clg_setup
+        end
+      end
+    elsif not clg_setups.nil?
+      clg_setups = clg_setups.split(', ').map{ |i| i.to_f }
+      clg_setup_hrs_per_periods = hvac_control.cooling_setup_hours_per_periods.split(', ').map{ |i| i.to_f }
+      clg_setup_start_hrs = hvac_control.cooling_setup_start_hours.split(', ').map{ |i| i.to_f }
+      for m in 1..12
+        clg_setups.each_with_index do |clg_setup, i|
+          clg_setup_hrs_per_period = Integer(clg_setup_hrs_per_periods[i])
+          clg_setup_start_hr = Integer(clg_setup_start_hrs[i])
+          for hr in clg_setup_start_hr..clg_setup_start_hr + clg_setup_hrs_per_period - 1
+            clg_weekday_setpoints[m - 1][hr % 24] = clg_setpoint + clg_setup
+          end
         end
       end
     end
@@ -1488,6 +1516,7 @@ class HVAC
         clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
       end
     end
+
     clg_weekend_setpoints = clg_weekday_setpoints
 
     # Create heating season schedule

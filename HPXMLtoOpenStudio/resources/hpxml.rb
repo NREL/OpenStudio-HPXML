@@ -2927,9 +2927,11 @@ class HPXML < Object
   end
 
   class HVACControl < BaseElement
-    ATTRS = [:id, :control_type, :heating_setpoint_temp, :heating_setback_temp,
-             :heating_setback_hours_per_week, :heating_setback_start_hour, :cooling_setpoint_temp,
-             :cooling_setup_temp, :cooling_setup_hours_per_week, :cooling_setup_start_hour,
+    ATTRS = [:id, :control_type,
+             :heating_setpoint_temp, :heating_setback_temp, :heating_setback_hours_per_week, :heating_setback_start_hour,
+             :heating_setback_temps, :heating_setback_hours_per_periods, :heating_setback_start_hours,
+             :cooling_setpoint_temp, :cooling_setup_temp, :cooling_setup_hours_per_week, :cooling_setup_start_hour,
+             :cooling_setup_temps, :cooling_setup_hours_per_periods, :cooling_setup_start_hours,
              :ceiling_fan_cooling_setpoint_temp_offset]
     attr_accessor(*ATTRS)
 
@@ -2958,6 +2960,12 @@ class HPXML < Object
       XMLHelper.add_element(hvac_control, 'TotalSetupHoursperWeekCooling', to_integer(@cooling_setup_hours_per_week)) unless @cooling_setup_hours_per_week.nil?
       XMLHelper.add_extension(hvac_control, 'SetbackStartHourHeating', to_integer(@heating_setback_start_hour)) unless @heating_setback_start_hour.nil?
       XMLHelper.add_extension(hvac_control, 'SetupStartHourCooling', to_integer(@cooling_setup_start_hour)) unless @cooling_setup_start_hour.nil?
+      XMLHelper.add_extension(hvac_control, 'SetbackTempsHeatingSeason', heating_setback_temps) unless @heating_setback_temps.nil?
+      XMLHelper.add_extension(hvac_control, 'SetbackHoursperPeriodsHeating', heating_setback_hours_per_periods) unless @heating_setback_hours_per_periods.nil?
+      XMLHelper.add_extension(hvac_control, 'SetbackStartHoursHeating', heating_setback_start_hours) unless @heating_setback_start_hours.nil?
+      XMLHelper.add_extension(hvac_control, 'SetupTempsCoolingSeason', cooling_setup_temps) unless @cooling_setup_temps.nil?
+      XMLHelper.add_extension(hvac_control, 'SetupHoursperPeriodsCooling', cooling_setup_hours_per_periods) unless @cooling_setup_hours_per_periods.nil?
+      XMLHelper.add_extension(hvac_control, 'SetupStartHoursCooling', cooling_setup_start_hours) unless @cooling_setup_start_hours.nil?
       XMLHelper.add_extension(hvac_control, 'CeilingFanSetpointTempCoolingSeasonOffset', to_float(@ceiling_fan_cooling_setpoint_temp_offset)) unless @ceiling_fan_cooling_setpoint_temp_offset.nil?
     end
 
@@ -2974,6 +2982,12 @@ class HPXML < Object
       @cooling_setup_temp = to_float_or_nil(XMLHelper.get_value(hvac_control, 'SetupTempCoolingSeason'))
       @cooling_setup_hours_per_week = to_integer_or_nil(XMLHelper.get_value(hvac_control, 'TotalSetupHoursperWeekCooling'))
       @cooling_setup_start_hour = to_integer_or_nil(XMLHelper.get_value(hvac_control, 'extension/SetupStartHourCooling'))
+      @heating_setback_temps = XMLHelper.get_value(hvac_control, 'extension/SetbackTempsHeatingSeason')
+      @heating_setback_hours_per_periods = XMLHelper.get_value(hvac_control, 'extension/SetbackHoursperPeriodsHeating')
+      @heating_setback_start_hours = XMLHelper.get_value(hvac_control, 'extension/SetbackStartHoursHeating')
+      @cooling_setup_temps = XMLHelper.get_value(hvac_control, 'extension/SetupTempsCoolingSeason')
+      @cooling_setup_hours_per_periods = XMLHelper.get_value(hvac_control, 'extension/SetupHoursperPeriodsCooling')
+      @cooling_setup_start_hours = XMLHelper.get_value(hvac_control, 'extension/SetupStartHoursCooling')
       @ceiling_fan_cooling_setpoint_temp_offset = to_float_or_nil(XMLHelper.get_value(hvac_control, 'extension/CeilingFanSetpointTempCoolingSeasonOffset'))
     end
   end
