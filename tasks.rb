@@ -270,6 +270,7 @@ def create_hpxmls
     'base-hvac-none.xml' => 'base.xml',
     'base-hvac-portable-heater-gas-only.xml' => 'base.xml',
     'base-hvac-programmable-thermostat.xml' => 'base.xml',
+    'base-hvac-programmable-thermostat-multiple-periods.xml' => 'base.xml',
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
@@ -3181,6 +3182,13 @@ def set_hpxml_hvac_control(hpxml_file, hpxml)
     hpxml.hvac_controls[0].cooling_setup_temp = 80
     hpxml.hvac_controls[0].cooling_setup_hours_per_week = 6 * 7
     hpxml.hvac_controls[0].cooling_setup_start_hour = 9 # 9am
+  elsif ['base-hvac-programmable-thermostat-multiple-periods.xml'].include? hpxml_file
+    hpxml.hvac_controls[0].heating_setback_temps = '-2, -4'
+    hpxml.hvac_controls[0].heating_setback_hours_per_periods = '7, 5'
+    hpxml.hvac_controls[0].heating_setback_start_hours = '23, 10'
+    hpxml.hvac_controls[0].cooling_setup_temps = '2, 4'
+    hpxml.hvac_controls[0].cooling_setup_hours_per_periods = '6, 4'
+    hpxml.hvac_controls[0].cooling_setup_start_hours = '9, 22'
   elsif ['base-hvac-setpoints.xml'].include? hpxml_file
     hpxml.hvac_controls[0].heating_setpoint_temp = 60
     hpxml.hvac_controls[0].cooling_setpoint_temp = 80
