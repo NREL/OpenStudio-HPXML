@@ -196,7 +196,7 @@ class ScheduleGenerator
   end
 
   def create_average_ceiling_fan
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'ceiling_fan', weekday_sch: Schedule.CeilingFanWeekdayFractions, weekend_sch: Schedule.CeilingFanWeekendFractions, monthly_sch: Schedule.CeilingFanMonthlyMultipliers)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'ceiling_fan', weekday_sch: Schedule.CeilingFanWeekdayFractions, weekend_sch: Schedule.CeilingFanWeekendFractions, monthly_sch: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
   end
 
   def create_average_plug_loads_other
