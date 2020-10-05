@@ -320,6 +320,7 @@
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <extension>
                 <FanPowerWattsPerCFM>0.0</FanPowerWattsPerCFM>
+                <AirflowCFMPerTon>0.0</AirflowCFMPerTon>
               </extension>
             </HeatingSystem>
           </HVACPlant>

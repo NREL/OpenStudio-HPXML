@@ -237,14 +237,7 @@ class HVAC
     hvac_map[cooling_system.id] << clg_coil
 
     # Fan
-
-    fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
-    fan.setName(obj_name + ' supply fan')
-    fan.setEndUseSubcategory('supply fan')
-    fan.setFanEfficiency(1)
-    fan.setPressureRise(0)
-    fan.setMotorEfficiency(1)
-    fan.setMotorInAirstreamFraction(0)
+    fan = create_supply_fan(model, obj_name, 1, 0.0)
     hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil)
 
     # Heating Coil (none)
@@ -267,12 +260,6 @@ class HVAC
     ptac.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated.join(','))
     ptac.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, cooling_system.fraction_cool_load_served)
     ptac.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameRoomAirConditioner)
-    if not cooling_system.airflow_cfm_per_ton.nil?
-      ptac.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMperTon, cooling_system.airflow_cfm_per_ton)
-      ptac.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, 0.0) # FIXME: Is this right?
-    else
-      ptac.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, cooling_system.airflow_defect_ratio)
-    end
   end
 
   def self.apply_evaporative_cooler(model, runner, cooling_system,
@@ -652,16 +639,7 @@ class HVAC
     hvac_map[heat_pump.id] << htg_supp_coil
 
     # Fan
-    fan_power_curve = create_curve_exponent(model, [0, 1, 3], obj_name + ' fan power curve', -100, 100)
-    fan_eff_curve = create_curve_cubic(model, [0, 1, 0, 0], obj_name + ' fan eff curve', 0, 1, 0.01, 1)
-    fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule, fan_power_curve, fan_eff_curve)
-    fan_eff = UnitConversions.convert(UnitConversions.convert(0.1, 'inH2O', 'Pa') / heat_pump.fan_watts_per_cfm, 'cfm', 'm^3/s') # Overall Efficiency of the Fan, Motor and Drive
-    fan.setName(obj_name + ' supply fan')
-    fan.setEndUseSubcategory('supply fan')
-    fan.setFanEfficiency(fan_eff)
-    fan.setPressureRise(calc_fan_pressure_rise(fan_eff, heat_pump.fan_watts_per_cfm))
-    fan.setMotorEfficiency(1.0)
-    fan.setMotorInAirstreamFraction(1.0)
+    fan = create_supply_fan(model, obj_name, 4, heat_pump.fan_watts_per_cfm)
     hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
     # Unitary System
@@ -1622,14 +1600,18 @@ class HVAC
     return clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr
   end
 
-  def self.get_default_compressor_type(seer)
-    if seer <= 15
-      return HPXML::HVACCompressorTypeSingleStage
-    elsif seer <= 21
-      return HPXML::HVACCompressorTypeTwoStage
-    elsif seer > 21
-      return HPXML::HVACCompressorTypeVariableSpeed
+  def self.get_default_compressor_type(hvac_type, seer)
+    if [HPXML::HVACTypeCentralAirConditioner,
+        HPXML::HVACTypeHeatPumpAirToAir].include? hvac_type
+      if seer <= 15
+        return HPXML::HVACCompressorTypeSingleStage
+      elsif seer <= 21
+        return HPXML::HVACCompressorTypeTwoStage
+      elsif seer > 21
+        return HPXML::HVACCompressorTypeVariableSpeed
+      end
     end
+    return
   end
 
   def self.get_default_ceiling_fan_power()
@@ -2057,6 +2039,9 @@ class HVAC
   end
 
   def self.get_default_boiler_eae(heating_system)
+    if heating_system.heating_system_type != HPXML::HVACTypeBoiler
+      return
+    end
     if not heating_system.electric_auxiliary_energy.nil?
       return heating_system.electric_auxiliary_energy
     end
@@ -3360,11 +3345,11 @@ class HVAC
     end
   end
 
-  def self.calc_fan_pressure_rise(fan_eff, fan_power)
+  def self.calc_fan_pressure_rise(fan_eff, fan_watts_per_cfm)
     # Calculates needed fan pressure rise to achieve a given fan power with an assumed efficiency.
     # Previously we calculated the fan efficiency from an assumed pressure rise, which could lead to
     # errors (fan efficiencies > 1).
-    return fan_eff * fan_power / UnitConversions.convert(1.0, 'cfm', 'm^3/s') # Pa
+    return fan_eff * fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s') # Pa
   end
 
   def self.calc_pump_rated_flow_rate(pump_eff, pump_w, pump_head_pa)
