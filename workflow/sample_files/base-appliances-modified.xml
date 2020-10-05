@@ -54,7 +54,9 @@
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
           <Name>Denver, CO</Name>
-          <WMO>725650</WMO>
+          <extension>
+            <EPWFilePath>USA_CO_Denver.Intl.AP.725650_TMY3.epw</EPWFilePath>
+          </extension>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>
@@ -429,6 +431,9 @@
           <FuelType>electricity</FuelType>
           <EnergyFactor>4.29</EnergyFactor>
           <ControlType>moisture</ControlType>
+          <extension>
+            <IsVented>false</IsVented>
+          </extension>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
