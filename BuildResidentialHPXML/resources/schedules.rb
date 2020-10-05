@@ -5,12 +5,12 @@ require 'matrix'
 class ScheduleGenerator
   def initialize(runner:,
                  model:,
-                 weather:,
+                 epw_file:,
                  building_id: nil)
 
     @runner = runner
     @model = model
-    @weather = weather
+    @epw_file = epw_file
     @building_id = building_id
   end
 
@@ -144,7 +144,7 @@ class ScheduleGenerator
   end
 
   def create_average_lighting_interior
-    lighting_sch = Lighting.get_schedule(@model, @weather)
+    lighting_sch = Lighting.get_schedule(@model, @epw_file)
     create_timeseries_from_months(sch_name: 'lighting_interior', month_schs: lighting_sch)
   end
 
@@ -196,7 +196,7 @@ class ScheduleGenerator
   end
 
   def create_average_ceiling_fan
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'ceiling_fan', weekday_sch: Schedule.CeilingFanWeekdayFractions, weekend_sch: Schedule.CeilingFanWeekendFractions, monthly_sch: Schedule.CeilingFanMonthlyMultipliers(weather: @weather))
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'ceiling_fan', weekday_sch: Schedule.CeilingFanWeekdayFractions, weekend_sch: Schedule.CeilingFanWeekendFractions, monthly_sch: Schedule.CeilingFanMonthlyMultipliers)
   end
 
   def create_average_plug_loads_other
@@ -439,7 +439,7 @@ class ScheduleGenerator
     holiday_lighting_schedule = schedule_config['lighting']['holiday_sch']
 
     sch_option_type = Constants.OptionTypeLightingScheduleCalculated
-    sch = Lighting.get_schedule(@model, @weather)
+    sch = Lighting.get_schedule(@model, @epw_file)
     interior_lighting_schedule = []
     year_description = @model.getYearDescription
     num_days_in_months = Constants.NumDaysInMonths(year_description.isLeapYear)

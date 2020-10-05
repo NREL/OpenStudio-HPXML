@@ -889,8 +889,8 @@ class Schedule
     return '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0'
   end
 
-  def self.CeilingFanMonthlyMultipliers(weather:)
-    return HVAC.get_default_ceiling_fan_months(weather).join(',')
+  def self.CeilingFanMonthlyMultipliers
+    return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   def self.PlugLoadsOtherWeekdayFractions

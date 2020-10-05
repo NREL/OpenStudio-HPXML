@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # see the URL below for information on how to write OpenStudio measures
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
@@ -22,7 +24,6 @@ require_relative '../HPXMLtoOpenStudio/resources/schedules'
 require_relative '../HPXMLtoOpenStudio/resources/unit_conversions'
 require_relative '../HPXMLtoOpenStudio/resources/validator'
 require_relative '../HPXMLtoOpenStudio/resources/version'
-require_relative '../HPXMLtoOpenStudio/resources/weather'
 require_relative '../HPXMLtoOpenStudio/resources/xmlhelper'
 
 # start the measure
@@ -49,12 +50,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_path', true)
     arg.setDisplayName('HPXML File Path')
     arg.setDescription('Absolute/relative path of the HPXML file.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_dir', true)
-    arg.setDisplayName('Weather Directory')
-    arg.setDescription('Absolute/relative path of the weather directory.')
-    arg.setDefaultValue('weather')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_program_used', false)
@@ -95,6 +90,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Simulation Control: Run Period End Day of Month')
     arg.setUnits('#')
     arg.setDescription('This numeric field should contain the ending day of the ending month (must be valid for month) for the annual run period desired.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_run_period_calendar_year', false)
+    arg.setDisplayName('Simulation Control: Run Period Calendar Year')
+    arg.setUnits('year')
+    arg.setDescription('This numeric field should contain the calendar year that determines the start day of week. If you are running simulations using AMY weather files, the value entered for calendar year will not be used; it will be overridden by the actual year found in the AMY weather file.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('simulation_control_daylight_saving_enabled', false)
@@ -168,7 +169,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_station_epw_filepath', true)
     arg.setDisplayName('EnergyPlus Weather (EPW) Filepath')
-    arg.setDescription('Name of the EPW file.')
+    arg.setDescription('Path of the EPW file.')
     arg.setDefaultValue('USA_CO_Denver.Intl.AP.725650_TMY3.epw')
     args << arg
 
@@ -2181,6 +2182,34 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('holiday_lighting_period_begin_month', true)
+    arg.setDisplayName('Holiday Lighting: Period Begin Month')
+    arg.setUnits('month')
+    arg.setDescription('This numeric field should contain the starting month number (1 = January, 2 = February, etc.) for the holiday lighting period desired.')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('holiday_lighting_period_begin_day_of_month', true)
+    arg.setDisplayName('Holiday Lighting: Period Begin Day of Month')
+    arg.setUnits('day')
+    arg.setDescription('This numeric field should contain the starting day of the starting month (must be valid for month) for the holiday lighting period desired.')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('holiday_lighting_period_end_month', true)
+    arg.setDisplayName('Holiday Lighting: Period End Month')
+    arg.setUnits('month')
+    arg.setDescription('This numeric field should contain the end month number (1 = January, 2 = February, etc.) for the holiday lighting period desired.')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('holiday_lighting_period_end_day_of_month', true)
+    arg.setDisplayName('Holiday Lighting: Period End Day of Month')
+    arg.setUnits('day')
+    arg.setDescription('This numeric field should contain the ending day of the ending month (must be valid for month) for the holiday lighting period desired.')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('dehumidifier_present', true)
     arg.setDisplayName('Dehumidifier: Present')
     arg.setDescription('Whether there is a dehumidifier.')
@@ -2917,7 +2946,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # assign the user inputs to variables
     args = get_argument_values(runner, user_arguments)
     args[:hpxml_path] = runner.getStringArgumentValue('hpxml_path', user_arguments)
-    args[:weather_dir] = runner.getStringArgumentValue('weather_dir', user_arguments)
     args[:software_program_used] = runner.getOptionalStringArgumentValue('software_program_used', user_arguments)
     args[:software_program_version] = runner.getOptionalStringArgumentValue('software_program_version', user_arguments)
     args[:geometry_roof_pitch] = { '1:12' => 1.0 / 12.0, '2:12' => 2.0 / 12.0, '3:12' => 3.0 / 12.0, '4:12' => 4.0 / 12.0, '5:12' => 5.0 / 12.0, '6:12' => 6.0 / 12.0, '7:12' => 7.0 / 12.0, '8:12' => 8.0 / 12.0, '9:12' => 9.0 / 12.0, '10:12' => 10.0 / 12.0, '11:12' => 11.0 / 12.0, '12:12' => 12.0 / 12.0 }[args[:geometry_roof_pitch]]
@@ -2936,32 +2964,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    # Get weather object
-    weather_dir = args[:weather_dir]
-    unless (Pathname.new weather_dir).absolute?
-      weather_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', weather_dir))
+    # Create EpwFile object
+    epw_path = args[:weather_station_epw_filepath]
+    if not File.exist? epw_path
+      epw_path = File.join(File.expand_path(File.join(File.dirname(__FILE__), '..', 'weather')), epw_path) # a filename was entered for weather_station_epw_filepath
     end
-    args[:weather_station_epw_filepath] = File.join(weather_dir, args[:weather_station_epw_filepath])
-    if not File.exist?(args[:weather_station_epw_filepath])
-      runner.registerError("Could not find EPW file at '#{args[:weather_station_epw_filepath]}'.")
+    if not File.exist? epw_path
+      runner.registerError("Could not find EPW file at '#{epw_path}'.")
       return false
     end
-    cache_path = args[:weather_station_epw_filepath].gsub('.epw', '-cache.csv')
-    if not File.exist?(cache_path)
-      # Process weather file to create cache .csv
-      runner.registerWarning("'#{cache_path}' could not be found; regenerating it.")
-      epw_file = OpenStudio::EpwFile.new(args[:weather_station_epw_filepath])
-      OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
-      weather = WeatherProcess.new(model, runner)
-      File.open(cache_path, 'wb') do |file|
-        weather.dump_to_csv(file)
-      end
-    else
-      weather = WeatherProcess.new(nil, nil, cache_path)
-    end
+    epw_file = OpenStudio::EpwFile.new(epw_path)
 
     # Create HPXML file
-    hpxml_doc = HPXMLFile.create(runner, model, args, weather)
+    hpxml_doc = HPXMLFile.create(runner, model, args, epw_file)
     if not hpxml_doc
       runner.registerError('Unsuccessful creation of HPXML file.')
       return false
@@ -2990,6 +3005,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              simulation_control_run_period_begin_day_of_month: runner.getOptionalIntegerArgumentValue('simulation_control_run_period_begin_day_of_month', user_arguments),
              simulation_control_run_period_end_month: runner.getOptionalIntegerArgumentValue('simulation_control_run_period_end_month', user_arguments),
              simulation_control_run_period_end_day_of_month: runner.getOptionalIntegerArgumentValue('simulation_control_run_period_end_day_of_month', user_arguments),
+             simulation_control_run_period_calendar_year: runner.getOptionalIntegerArgumentValue('simulation_control_run_period_calendar_year', user_arguments),
              simulation_control_daylight_saving_enabled: runner.getOptionalStringArgumentValue('simulation_control_daylight_saving_enabled', user_arguments),
              simulation_control_daylight_saving_begin_month: runner.getOptionalIntegerArgumentValue('simulation_control_daylight_saving_begin_month', user_arguments),
              simulation_control_daylight_saving_begin_day_of_month: runner.getOptionalIntegerArgumentValue('simulation_control_daylight_saving_begin_day_of_month', user_arguments),
@@ -3271,6 +3287,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              lighting_usage_multiplier_garage: runner.getDoubleArgumentValue('lighting_usage_multiplier_garage', user_arguments),
              holiday_lighting_present: runner.getBoolArgumentValue('holiday_lighting_present', user_arguments),
              holiday_lighting_daily_kwh: runner.getStringArgumentValue('holiday_lighting_daily_kwh', user_arguments),
+             holiday_lighting_period_begin_month: runner.getStringArgumentValue('holiday_lighting_period_begin_month', user_arguments),
+             holiday_lighting_period_begin_day_of_month: runner.getStringArgumentValue('holiday_lighting_period_begin_day_of_month', user_arguments),
+             holiday_lighting_period_end_month: runner.getStringArgumentValue('holiday_lighting_period_end_month', user_arguments),
+             holiday_lighting_period_end_day_of_month: runner.getStringArgumentValue('holiday_lighting_period_end_day_of_month', user_arguments),
              dehumidifier_present: runner.getBoolArgumentValue('dehumidifier_present', user_arguments),
              dehumidifier_efficiency_type: runner.getStringArgumentValue('dehumidifier_efficiency_type', user_arguments),
              dehumidifier_efficiency_ef: runner.getDoubleArgumentValue('dehumidifier_efficiency_ef', user_arguments),
@@ -3498,13 +3518,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 end
 
 class HPXMLFile
-  def self.create(runner, model, args, weather)
+  def self.create(runner, model, args, epw_file)
     model_geometry = OpenStudio::Model::Model.new
 
     success = create_geometry_envelope(runner, model_geometry, args)
     return false if not success
 
-    success = create_schedules(runner, model, weather, args)
+    success = create_schedules(runner, model, epw_file, args)
     return false if not success
 
     hpxml = HPXML.new
@@ -3514,7 +3534,7 @@ class HPXMLFile
     set_neighbor_buildings(hpxml, runner, args)
     set_building_occupancy(hpxml, runner, args)
     set_building_construction(hpxml, runner, args)
-    set_climate_and_risk_zones(hpxml, runner, args, weather)
+    set_climate_and_risk_zones(hpxml, runner, args, epw_file)
     set_air_infiltration_measurements(hpxml, runner, args)
     set_attics(hpxml, runner, model_geometry, args)
     set_foundations(hpxml, runner, model_geometry, args)
@@ -3536,8 +3556,8 @@ class HPXMLFile
     set_water_heating_systems(hpxml, runner, args)
     set_hot_water_distribution(hpxml, runner, args)
     set_water_fixtures(hpxml, runner, args)
-    set_solar_thermal(hpxml, runner, args, weather)
-    set_pv_systems(hpxml, runner, args, weather)
+    set_solar_thermal(hpxml, runner, args, epw_file)
+    set_pv_systems(hpxml, runner, args, epw_file)
     set_lighting(hpxml, runner, args)
     set_dehumidifier(hpxml, runner, args)
     set_clothes_washer(hpxml, runner, args)
@@ -3593,7 +3613,7 @@ class HPXMLFile
     return true
   end
 
-  def self.create_schedules(runner, model, weather, args)
+  def self.create_schedules(runner, model, epw_file, args)
     if ['default', 'user-specified'].include? args[:schedules_type]
       if args[:schedules_type] == 'user-specified'
         args[:schedules_path] = args[:schedules_path].get
@@ -3606,7 +3626,6 @@ class HPXMLFile
     # set the calendar year
     year_description = model.getYearDescription
     year_description.setCalendarYear(2007) # default to TMY
-    epw_file = OpenStudio::EpwFile.new(args[:weather_station_epw_filepath])
     if epw_file.startDateActualYear.is_initialized # AMY
       year_description.setCalendarYear(epw_file.startDateActualYear.get)
     end
@@ -3618,7 +3637,7 @@ class HPXMLFile
       timestep.setNumberOfTimestepsPerHour(60 / args[:simulation_control_timestep].get)
     end
 
-    schedule_generator = ScheduleGenerator.new(runner: runner, model: model, weather: weather)
+    schedule_generator = ScheduleGenerator.new(runner: runner, model: model, epw_file: epw_file)
 
     # create the schedule
     if args[:geometry_num_occupants] == Constants.Auto
@@ -3666,6 +3685,9 @@ class HPXMLFile
     end
     if args[:simulation_control_run_period_end_day_of_month].is_initialized
       hpxml.header.sim_end_day_of_month = args[:simulation_control_run_period_end_day_of_month].get
+    end
+    if args[:simulation_control_run_period_calendar_year].is_initialized
+      hpxml.header.sim_calendar_year = args[:simulation_control_run_period_calendar_year].get
     end
 
     if args[:simulation_control_daylight_saving_enabled].is_initialized
@@ -3763,16 +3785,17 @@ class HPXMLFile
     end
   end
 
-  def self.set_climate_and_risk_zones(hpxml, runner, args, weather)
+  def self.set_climate_and_risk_zones(hpxml, runner, args, epw_file)
     hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
-    iecc_zone = Location.get_climate_zone_iecc(weather.header.Station)
+    iecc_zone = Location.get_climate_zone_iecc(epw_file.wmoNumber)
 
     unless iecc_zone.nil?
       hpxml.climate_and_risk_zones.iecc_year = 2006
       hpxml.climate_and_risk_zones.iecc_zone = iecc_zone
     end
-    hpxml.climate_and_risk_zones.weather_station_name = File.basename(args[:weather_station_epw_filepath]).gsub('.epw', '')
-    hpxml.climate_and_risk_zones.weather_station_epw_filepath = File.basename(args[:weather_station_epw_filepath])
+    weather_station_name = File.basename(args[:weather_station_epw_filepath]).gsub('.epw', '')
+    hpxml.climate_and_risk_zones.weather_station_name = weather_station_name
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = args[:weather_station_epw_filepath]
   end
 
   def self.set_air_infiltration_measurements(hpxml, runner, args)
@@ -4867,19 +4890,19 @@ class HPXMLFile
     end
   end
 
-  def self.get_absolute_tilt(tilt_str, roof_pitch, weather)
+  def self.get_absolute_tilt(tilt_str, roof_pitch, epw_file)
     tilt_str = tilt_str.downcase
     if tilt_str.start_with? 'roofpitch'
       roof_angle = Math.atan(roof_pitch / 12.0) * 180.0 / Math::PI
       return Float(eval(tilt_str.gsub('roofpitch', roof_angle.to_s)))
     elsif tilt_str.start_with? 'latitude'
-      return Float(eval(tilt_str.gsub('latitude', weather.header.Latitude.to_s)))
+      return Float(eval(tilt_str.gsub('latitude', epw_file.latitude.to_s)))
     else
       return Float(tilt_str)
     end
   end
 
-  def self.set_solar_thermal(hpxml, runner, args, weather)
+  def self.set_solar_thermal(hpxml, runner, args, epw_file)
     return if args[:solar_thermal_system_type] == 'none'
 
     if args[:solar_thermal_solar_fraction] > 0
@@ -4889,7 +4912,7 @@ class HPXMLFile
       collector_loop_type = args[:solar_thermal_collector_loop_type]
       collector_type = args[:solar_thermal_collector_type]
       collector_azimuth = args[:solar_thermal_collector_azimuth]
-      collector_tilt = get_absolute_tilt(args[:solar_thermal_collector_tilt], hpxml.roofs[-1].pitch, weather)
+      collector_tilt = get_absolute_tilt(args[:solar_thermal_collector_tilt], hpxml.roofs[-1].pitch, epw_file)
       collector_frta = args[:solar_thermal_collector_rated_optical_efficiency]
       collector_frul = args[:solar_thermal_collector_rated_thermal_losses]
 
@@ -4916,7 +4939,7 @@ class HPXMLFile
                                     solar_fraction: solar_fraction)
   end
 
-  def self.set_pv_systems(hpxml, runner, args, weather)
+  def self.set_pv_systems(hpxml, runner, args, epw_file)
     [args[:pv_system_module_type_1], args[:pv_system_module_type_2]].each_with_index do |module_type, i|
       next if module_type == 'none'
 
@@ -4940,7 +4963,7 @@ class HPXMLFile
                            module_type: module_type,
                            tracking: [args[:pv_system_tracking_1], args[:pv_system_tracking_2]][i],
                            array_azimuth: [args[:pv_system_array_azimuth_1], args[:pv_system_array_azimuth_2]][i],
-                           array_tilt: get_absolute_tilt([args[:pv_system_array_tilt_1], args[:pv_system_array_tilt_2]][i], hpxml.roofs[-1].pitch, weather),
+                           array_tilt: get_absolute_tilt([args[:pv_system_array_tilt_1], args[:pv_system_array_tilt_2]][i], hpxml.roofs[-1].pitch, epw_file),
                            max_power_output: max_power_output,
                            inverter_efficiency: inverter_efficiency,
                            system_losses_fraction: system_losses_fraction,
@@ -5005,6 +5028,22 @@ class HPXMLFile
 
     if args[:holiday_lighting_daily_kwh] != Constants.Auto
       hpxml.lighting.holiday_kwh_per_day = args[:holiday_lighting_daily_kwh]
+    end
+
+    if args[:holiday_lighting_period_begin_month] != Constants.Auto
+      hpxml.lighting.holiday_period_begin_month = args[:holiday_lighting_period_begin_month]
+    end
+
+    if args[:holiday_lighting_period_begin_day_of_month] != Constants.Auto
+      hpxml.lighting.holiday_period_begin_day_of_month = args[:holiday_lighting_period_begin_day_of_month]
+    end
+
+    if args[:holiday_lighting_period_end_month] != Constants.Auto
+      hpxml.lighting.holiday_period_end_month = args[:holiday_lighting_period_end_month]
+    end
+
+    if args[:holiday_lighting_period_end_day_of_month] != Constants.Auto
+      hpxml.lighting.holiday_period_end_day_of_month = args[:holiday_lighting_period_end_day_of_month]
     end
   end
 
