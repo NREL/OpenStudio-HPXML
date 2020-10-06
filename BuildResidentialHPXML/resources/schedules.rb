@@ -8,10 +8,8 @@ class ScheduleGenerator
                  weather:,
                  building_id: nil,
                  random_seed: nil)
-
     # TODO: deprecate building ID / merge how the seed is handled since ResStock
     # uses the legacy way of setting seed by ID?
-
     @runner = runner
     @model = model
     @weather = weather
@@ -24,6 +22,10 @@ class ScheduleGenerator
     if @model.getSimulationControl.timestep.is_initialized
       @minutes_per_step = 60 / @model.getSimulationControl.timestep.get.numberOfTimestepsPerHour
     end
+    @runner.registerInfo(
+      "Creating the schedule with #{@minutes_per_step} minutes per step"
+    )
+
     @steps_in_day = 24 * 60 / @minutes_per_step
 
     @mkc_ts_per_day = 96
