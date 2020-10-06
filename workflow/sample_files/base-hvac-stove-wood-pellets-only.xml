@@ -319,7 +319,8 @@
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <extension>
-                <FanPowerWattsPerCFM>0.2</FanPowerWattsPerCFM>
+                <FanPowerWattsPerCFM>0.5</FanPowerWattsPerCFM>
+                <AirflowCFMPerTon>100.0</AirflowCFMPerTon>
               </extension>
             </HeatingSystem>
           </HVACPlant>

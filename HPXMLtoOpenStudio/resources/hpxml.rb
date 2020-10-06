@@ -2484,7 +2484,7 @@ class HPXML < Object
              :heating_efficiency_percent, :fraction_heat_load_served, :electric_auxiliary_energy,
              :energy_star, :seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :fan_coil_watts, :wlhp_heating_efficiency_cop, :fan_watts_per_cfm,
-             :airflow_defect_ratio, :airflow_cfm_per_ton]
+             :fan_power_not_tested, :airflow_defect_ratio, :airflow_cfm_per_ton, :airflow_not_tested]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2563,8 +2563,10 @@ class HPXML < Object
       XMLHelper.add_extension(heating_system, 'SharedLoopWatts', to_float(@shared_loop_watts)) unless @shared_loop_watts.nil?
       XMLHelper.add_extension(heating_system, 'FanCoilWatts', to_float(@fan_coil_watts)) unless @fan_coil_watts.nil?
       XMLHelper.add_extension(heating_system, 'FanPowerWattsPerCFM', to_float(@fan_watts_per_cfm)) unless @fan_watts_per_cfm.nil?
+      XMLHelper.add_extension(heating_system, 'FanPowerNotTested', to_boolean(@fan_power_not_tested)) unless @fan_power_not_tested.nil?
       XMLHelper.add_extension(heating_system, 'AirflowDefectRatio', to_float(@airflow_defect_ratio)) unless @airflow_defect_ratio.nil?
       XMLHelper.add_extension(heating_system, 'AirflowCFMPerTon', to_float(@airflow_cfm_per_ton)) unless @airflow_cfm_per_ton.nil?
+      XMLHelper.add_extension(heating_system, 'AirflowNotTested', to_boolean(@airflow_not_tested)) unless @airflow_not_tested.nil?
       XMLHelper.add_extension(heating_system, 'SeedId', @seed_id) unless @seed_id.nil?
       if not @wlhp_heating_efficiency_cop.nil?
         wlhp = XMLHelper.create_elements_as_needed(heating_system, ['extension', 'WaterLoopHeatPump'])
@@ -2595,8 +2597,10 @@ class HPXML < Object
       @energy_star = XMLHelper.get_values(heating_system, 'ThirdPartyCertification').include?('Energy Star')
       @seed_id = XMLHelper.get_value(heating_system, 'extension/SeedId')
       @fan_watts_per_cfm = to_float_or_nil(XMLHelper.get_value(heating_system, 'extension/FanPowerWattsPerCFM'))
+      @fan_power_not_tested = to_boolean_or_nil(XMLHelper.get_value(heating_system, 'extension/FanPowerNotTested'))
       @airflow_cfm_per_ton = to_float_or_nil(XMLHelper.get_value(heating_system, 'extension/AirflowCFMPerTon'))
       @airflow_defect_ratio = to_float_or_nil(XMLHelper.get_value(heating_system, 'extension/AirflowDefectRatio'))
+      @airflow_not_tested = to_boolean_or_nil(XMLHelper.get_value(heating_system, 'extension/AirflowNotTested'))
       @shared_loop_watts = to_float_or_nil(XMLHelper.get_value(heating_system, 'extension/SharedLoopWatts'))
       @fan_coil_watts = to_float_or_nil(XMLHelper.get_value(heating_system, 'extension/FanCoilWatts'))
       @wlhp_heating_efficiency_cop = to_float_or_nil(XMLHelper.get_value(heating_system, "extension/WaterLoopHeatPump/AnnualHeatingEfficiency[Units='#{UnitsCOP}']/Value"))
@@ -2627,8 +2631,8 @@ class HPXML < Object
              :cooling_efficiency_seer, :cooling_efficiency_eer, :cooling_efficiency_kw_per_ton,
              :cooling_shr, :energy_star, :seed_id, :is_shared_system,
              :number_of_units_served, :shared_loop_watts, :fan_coil_watts, :wlhp_cooling_capacity,
-             :wlhp_cooling_efficiency_eer, :airflow_defect_ratio, :charge_defect_ratio, :fan_watts_per_cfm,
-             :airflow_cfm_per_ton]
+             :wlhp_cooling_efficiency_eer, :airflow_defect_ratio, :fan_watts_per_cfm, :fan_power_not_tested,
+             :airflow_cfm_per_ton, :airflow_not_tested, :charge_defect_ratio, :charge_not_tested]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2707,8 +2711,11 @@ class HPXML < Object
       XMLHelper.add_element(cooling_system, 'SensibleHeatFraction', to_float(@cooling_shr)) unless @cooling_shr.nil?
       XMLHelper.add_extension(cooling_system, 'AirflowDefectRatio', to_float(@airflow_defect_ratio)) unless @airflow_defect_ratio.nil?
       XMLHelper.add_extension(cooling_system, 'ChargeDefectRatio', to_float(@charge_defect_ratio)) unless @charge_defect_ratio.nil?
+      XMLHelper.add_extension(cooling_system, 'ChargeNotTested', to_boolean(@charge_not_tested)) unless @charge_not_tested.nil?
       XMLHelper.add_extension(cooling_system, 'FanPowerWattsPerCFM', to_float(@fan_watts_per_cfm)) unless @fan_watts_per_cfm.nil?
+      XMLHelper.add_extension(cooling_system, 'FanPowerNotTested', to_boolean(@fan_power_not_tested)) unless @fan_power_not_tested.nil?
       XMLHelper.add_extension(cooling_system, 'AirflowCFMPerTon', to_float(@airflow_cfm_per_ton)) unless @airflow_cfm_per_ton.nil?
+      XMLHelper.add_extension(cooling_system, 'AirflowNotTested', to_boolean(@airflow_not_tested)) unless @airflow_not_tested.nil?
       XMLHelper.add_extension(cooling_system, 'SharedLoopWatts', to_float(@shared_loop_watts)) unless @shared_loop_watts.nil?
       XMLHelper.add_extension(cooling_system, 'FanCoilWatts', to_float(@fan_coil_watts)) unless @fan_coil_watts.nil?
       XMLHelper.add_extension(cooling_system, 'SeedId', @seed_id) unless @seed_id.nil?
@@ -2748,8 +2755,11 @@ class HPXML < Object
       @seed_id = XMLHelper.get_value(cooling_system, 'extension/SeedId')
       @airflow_defect_ratio = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/AirflowDefectRatio'))
       @charge_defect_ratio = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/ChargeDefectRatio'))
+      @charge_not_tested = to_boolean_or_nil(XMLHelper.get_value(cooling_system, 'extension/ChargeNotTested'))
       @fan_watts_per_cfm = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/FanPowerWattsPerCFM'))
+      @fan_power_not_tested = to_boolean_or_nil(XMLHelper.get_value(cooling_system, 'extension/FanPowerNotTested'))
       @airflow_cfm_per_ton = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/AirflowCFMPerTon'))
+      @airflow_not_tested = to_boolean_or_nil(XMLHelper.get_value(cooling_system, 'extension/AirflowNotTested'))
       @shared_loop_watts = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/SharedLoopWatts'))
       @fan_coil_watts = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/FanCoilWatts'))
       @wlhp_cooling_capacity = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/WaterLoopHeatPump/CoolingCapacity'))
@@ -2787,8 +2797,9 @@ class HPXML < Object
              :backup_heating_switchover_temp, :fraction_heat_load_served, :fraction_cool_load_served,
              :cooling_efficiency_seer, :cooling_efficiency_eer, :heating_efficiency_hspf,
              :heating_efficiency_cop, :energy_star, :seed_id, :pump_watts_per_ton, :fan_watts_per_cfm,
-             :is_shared_system, :number_of_units_served, :shared_loop_watts, :airflow_defect_ratio,
-             :charge_defect_ratio, :airflow_cfm_per_ton]
+             :fan_power_not_tested, :is_shared_system, :number_of_units_served, :shared_loop_watts,
+             :airflow_defect_ratio, :airflow_cfm_per_ton, :airflow_not_tested, :charge_defect_ratio,
+             :charge_not_tested]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2881,8 +2892,11 @@ class HPXML < Object
       end
       XMLHelper.add_extension(heat_pump, 'AirflowDefectRatio', to_float(@airflow_defect_ratio)) unless @airflow_defect_ratio.nil?
       XMLHelper.add_extension(heat_pump, 'ChargeDefectRatio', to_float(@charge_defect_ratio)) unless @charge_defect_ratio.nil?
+      XMLHelper.add_extension(heat_pump, 'ChargeNotTested', to_boolean(@charge_not_tested)) unless @charge_not_tested.nil?
       XMLHelper.add_extension(heat_pump, 'FanPowerWattsPerCFM', to_float(@fan_watts_per_cfm)) unless @fan_watts_per_cfm.nil?
+      XMLHelper.add_extension(heat_pump, 'FanPowerNotTested', to_boolean(@fan_power_not_tested)) unless @fan_power_not_tested.nil?
       XMLHelper.add_extension(heat_pump, 'AirflowCFMPerTon', to_float(@airflow_cfm_per_ton)) unless @airflow_cfm_per_ton.nil?
+      XMLHelper.add_extension(heat_pump, 'AirflowNotTested', to_boolean(@airflow_not_tested)) unless @airflow_not_tested.nil?
       XMLHelper.add_extension(heat_pump, 'PumpPowerWattsPerTon', to_float(@pump_watts_per_ton)) unless @pump_watts_per_ton.nil?
       XMLHelper.add_extension(heat_pump, 'SharedLoopWatts', to_float(@shared_loop_watts)) unless @shared_loop_watts.nil?
       XMLHelper.add_extension(heat_pump, 'SeedId', @seed_id) unless @seed_id.nil?
@@ -2923,10 +2937,13 @@ class HPXML < Object
       @energy_star = XMLHelper.get_values(heat_pump, 'ThirdPartyCertification').include?('Energy Star')
       @pump_watts_per_ton = to_float_or_nil(XMLHelper.get_value(heat_pump, 'extension/PumpPowerWattsPerTon'))
       @fan_watts_per_cfm = to_float_or_nil(XMLHelper.get_value(heat_pump, 'extension/FanPowerWattsPerCFM'))
+      @fan_power_not_tested = to_boolean_or_nil(XMLHelper.get_value(heat_pump, 'extension/FanPowerNotTested'))
       @airflow_cfm_per_ton = to_float_or_nil(XMLHelper.get_value(heat_pump, 'extension/AirflowCFMPerTon'))
+      @airflow_not_tested = to_boolean_or_nil(XMLHelper.get_value(heat_pump, 'extension/AirflowNotTested'))
       @seed_id = XMLHelper.get_value(heat_pump, 'extension/SeedId')
       @airflow_defect_ratio = to_float_or_nil(XMLHelper.get_value(heat_pump, 'extension/AirflowDefectRatio'))
       @charge_defect_ratio = to_float_or_nil(XMLHelper.get_value(heat_pump, 'extension/ChargeDefectRatio'))
+      @charge_not_tested = to_boolean_or_nil(XMLHelper.get_value(heat_pump, 'extension/ChargeNotTested'))
       @shared_loop_watts = to_float_or_nil(XMLHelper.get_value(heat_pump, 'extension/SharedLoopWatts'))
     end
   end
@@ -3282,7 +3299,7 @@ class HPXML < Object
              :fan_power, :fan_power_defaulted, :quantity, :fan_location, :distribution_system_idref, :start_hour,
              :is_shared_system, :in_unit_flow_rate, :fraction_recirculation,
              :preheating_fuel, :preheating_efficiency_cop, :preheating_fraction_load_served, :precooling_fuel,
-             :precooling_efficiency_cop, :precooling_fraction_load_served,]
+             :precooling_efficiency_cop, :precooling_fraction_load_served]
     attr_accessor(*ATTRS)
 
     def distribution_system

@@ -392,7 +392,7 @@
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
               <extension>
-                <FanPowerWattsPerCFM>0.2</FanPowerWattsPerCFM>
+                <FanPowerWattsPerCFM>0.5</FanPowerWattsPerCFM>
               </extension>
             </HeatingSystem>
             <HeatingSystem>
@@ -408,7 +408,7 @@
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
               <extension>
-                <FanPowerWattsPerCFM>0.2</FanPowerWattsPerCFM>
+                <FanPowerWattsPerCFM>0.5</FanPowerWattsPerCFM>
               </extension>
             </HeatingSystem>
             <CoolingSystem>
