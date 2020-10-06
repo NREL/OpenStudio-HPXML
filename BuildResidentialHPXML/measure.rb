@@ -3625,12 +3625,16 @@ class HPXMLFile
     if epw_file.startDateActualYear.is_initialized # AMY
       year_description.setCalendarYear(epw_file.startDateActualYear.get)
     end
-
+    runner.registerInfo(
+      "Creating schedule with CalendarYear=#{year_description.calendarYear}"
+    )
     # set the timestep
     timestep = model.getTimestep
     timestep.setNumberOfTimestepsPerHour(1)
     if args[:simulation_control_timestep].is_initialized
-      timestep.setNumberOfTimestepsPerHour(60 / args[:simulation_control_timestep].get)
+      timestep.setNumberOfTimestepsPerHour(
+        60 / args[:simulation_control_timestep].get
+      )
     end
 
     schedule_seed = args[:schedules_random_seed].get \
