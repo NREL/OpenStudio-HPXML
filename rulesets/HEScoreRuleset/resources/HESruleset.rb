@@ -842,7 +842,9 @@ class HEScoreRuleset
 
   def self.set_appliances_clothes_dryer(orig_hpxml, new_hpxml)
     new_hpxml.clothes_dryers.add(id: 'ClothesDryer',
-                                 fuel_type: HPXML::FuelTypeElectricity)
+                                 fuel_type: HPXML::FuelTypeElectricity,
+                                 is_vented: true,
+                                 vented_flow_rate: 0.0)
   end
 
   def self.set_appliances_dishwasher(orig_hpxml, new_hpxml)
