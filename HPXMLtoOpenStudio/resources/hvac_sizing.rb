@@ -2253,6 +2253,20 @@ class HVACSizing
         capacityRatioHeating = get_feature(equip, Constants.SizingInfoHVACCapacityRatioHeating, 'string')
         hvac.CapacityRatioHeating = capacityRatioHeating.split(',').map(&:to_f)
 
+        if not equip.designSpecificationMultispeedObject.is_initialized
+          fail "DesignSpecificationMultispeedObject not set for #{equip.name}."
+        end
+
+        perf = equip.designSpecificationMultispeedObject.get
+        hvac.FanspeedRatioHeating = []
+        perf.supplyAirflowRatioFields.each do |airflowRatioField|
+          if not airflowRatioField.heatingRatio.is_initialized
+            fail "Heating airflow ratio not set for #{perf.name}"
+          end
+
+          hvac.FanspeedRatioHeating << airflowRatioField.heatingRatio.get
+        end
+
         curves = []
         htg_coil.stages.each_with_index do |stage, speed|
           curves << stage.heatingCapacityFunctionofTemperatureCurve
@@ -3446,6 +3460,7 @@ class HVACInfo
     self.OverSizeLimit = 1.15
     self.OverSizeDelta = 15000.0
     self.FanspeedRatioCooling = [1.0]
+    self.FanspeedRatioHeating = [1.0]
     self.AirflowDefectRatio = 0.0
     self.ChargeDefectRatio = 0.0
     self.Ducts = []
@@ -3468,8 +3483,8 @@ class HVACInfo
                 :RatedCFMperTonCooling, :RatedCFMperTonHeating, :AirflowDefectRatio, :ChargeDefectRatio,
                 :COOL_CAP_FT_SPEC, :HEAT_CAP_FT_SPEC, :COOL_SH_FT_SPEC, :COIL_BF_FT_SPEC,
                 :SHRRated, :CapacityRatioCooling, :CapacityRatioHeating,
-                :HeatingCapacityOffset, :OverSizeLimit, :OverSizeDelta, :FanspeedRatioCooling,
-                :BoilerDesignTemp, :CoilBF, :HeatingEIR, :CoolingEIR, :SizingSpeed,
+                :HeatingCapacityOffset, :OverSizeLimit, :OverSizeDelta, :FanspeedRatioCooling, 
+                :FanspeedRatioHeating, :BoilerDesignTemp, :CoilBF, :HeatingEIR, :CoolingEIR, :SizingSpeed,
                 :GSHP_PumpPower, :GSHP_HXVertical, :GSHP_HXDTDesign, :GSHP_HXCHWDesign, :GSHP_HXHWDesign,
                 :GSHP_BoreSpacing, :GSHP_BoreHoles, :GSHP_BoreDepth, :GSHP_BoreConfig, :GSHP_SpacingType,
                 :HeatingLoadFraction, :CoolingLoadFraction, :SupplyAirTemp, :LeavingAirTemp,
