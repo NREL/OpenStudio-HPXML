@@ -215,11 +215,6 @@ class OSModel
     @apply_ashrae140_assumptions = @hpxml.header.apply_ashrae140_assumptions # Hidden feature
     @apply_ashrae140_assumptions = false if @apply_ashrae140_assumptions.nil?
 
-    @schedules_file = nil
-    if not @hpxml.header.schedules_path.nil?
-      @schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_path, col_names: ScheduleGenerator.col_names)
-    end
-
     # Init
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
@@ -227,6 +222,11 @@ class OSModel
     set_defaults_and_globals(runner, output_dir, epw_file)
     weather = Location.apply(model, runner, weather, epw_file, @hpxml)
     add_simulation_params(model)
+
+    @schedules_file = nil
+    if not @hpxml.header.schedules_path.nil?
+      @schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_path, col_names: ScheduleGenerator.col_names)
+    end
 
     # Conditioned space/zone
 
