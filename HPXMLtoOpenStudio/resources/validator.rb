@@ -26,7 +26,7 @@ class Validator
           next if xpath_result # check if assert_test is false
 
           assert_value = assert_element.children.text # the value of sch:assert
-          error_message = assert_value.gsub(': ', ": #{context_xpath}: ") # insert context xpath into the error message
+          error_message = [assert_value, "[context: #{context_xpath}]"].join(' ') # add context xpath to the error message
           errors << error_message
         end
       end

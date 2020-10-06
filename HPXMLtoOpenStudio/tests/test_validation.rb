@@ -137,7 +137,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     # Validate via schematron-nokogiri gem
     xml_doc = Nokogiri::XML hpxml
     results = stron_doc.validate xml_doc
-    results_msgs = results.map { |i| i[:message].gsub(': ', [': ', i[:context_path].gsub('h:', '').concat(': ')].join('')) }
+    results_msgs = results.map { |i| [i[:message], "[context: #{i[:context_path].gsub('h:', '')}]"].join(' ') }
     idx_of_msg = results_msgs.index { |m| m == expected_error_msg }
     if expected_error_msg.nil?
       assert_nil(idx_of_msg)
@@ -200,7 +200,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     elsif assertion.start_with?('Expected 1 or more') && (mode == 'addition')
       return
     else
-      return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join(': ') # return "Expected x element(s) for xpath: foo: bar"
+      return [assertion, "[context: #{parent_xpath}]"].join(' ') # return "Expected x element(s) for xpath: foo... [context: bar/baz/...]"
     end
   end
 
