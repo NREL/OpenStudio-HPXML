@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>81589d4d-82f9-4394-9ddf-ddd1b91b8fd4</version_id>
-  <version_modified>20201005T211759Z</version_modified>
+  <version_id>c675c806-9d5d-4c71-ac9b-30ace618db00</version_id>
+  <version_modified>20201006T051941Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -194,12 +194,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>AA4E8BA5</checksum>
-    </file>
-    <file>
-      <filename>HPXMLDataTypes.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8CE65B50</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -507,16 +501,22 @@
       <checksum>542F241B</checksum>
     </file>
     <file>
-      <filename>HPXMLvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D0BA7E97</checksum>
-    </file>
-    <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>00C9442D</checksum>
+    </file>
+    <file>
+      <filename>HPXMLDataTypes.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C30C2748</checksum>
+    </file>
+    <file>
+      <filename>HPXMLvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>713B3174</checksum>
     </file>
   </files>
 </measure>
