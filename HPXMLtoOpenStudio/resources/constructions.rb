@@ -972,7 +972,8 @@ class Constructions
   end
 
   def self.create_os_int_mass_and_def(model, object_name, space, area)
-    # create internal mass objects
+    # EnergyPlus documentation: If both sides of the surface exchange energy with the zone
+    # then the user should input twice the area when defining the Internal Mass object.
     imdef = OpenStudio::Model::InternalMassDefinition.new(model)
     imdef.setName(object_name)
     imdef.setSurfaceArea(area)
