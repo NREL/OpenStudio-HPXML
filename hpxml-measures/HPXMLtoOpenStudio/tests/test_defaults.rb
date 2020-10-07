@@ -2,7 +2,7 @@
 
 require_relative '../resources/minitest_helper'
 require 'openstudio'
-require 'openstudio/ruleset/ShowRunnerOutput'
+require 'openstudio/measure/ShowRunnerOutput'
 require 'minitest/autorun'
 require 'fileutils'
 require_relative '../measure.rb'
@@ -38,6 +38,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.sim_begin_day_of_month = 2
     hpxml.header.sim_end_month = 11
     hpxml.header.sim_end_day_of_month = 11
+    hpxml.header.sim_calendar_year = 2008
     hpxml.header.dst_enabled = false
     hpxml.header.dst_begin_month = 3
     hpxml.header.dst_begin_day_of_month = 3
@@ -47,7 +48,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.allow_increased_fixed_capacities = true
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, false, 3, 3, 10, 10, false, true)
+    _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, 2008, false, 3, 3, 10, 10, false, true)
 
     # Test defaults - DST not in weather file
     hpxml.header.timestep = nil
@@ -55,6 +56,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.sim_begin_day_of_month = nil
     hpxml.header.sim_end_month = nil
     hpxml.header.sim_end_day_of_month = nil
+    hpxml.header.sim_calendar_year = nil
     hpxml.header.dst_enabled = nil
     hpxml.header.dst_begin_month = nil
     hpxml.header.dst_begin_day_of_month = nil
@@ -64,15 +66,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.allow_increased_fixed_capacities = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, true, 3, 12, 11, 5, true, false)
+    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, true, false)
 
     # Test defaults - DST in weather file
-    hpxml = _create_hpxml('base-location-epw-filepath-AMY-2012.xml')
+    hpxml = _create_hpxml('base-location-AMY-2012.xml')
     hpxml.header.timestep = nil
     hpxml.header.sim_begin_month = nil
     hpxml.header.sim_begin_day_of_month = nil
     hpxml.header.sim_end_month = nil
     hpxml.header.sim_end_day_of_month = nil
+    hpxml.header.sim_calendar_year = nil
     hpxml.header.dst_enabled = nil
     hpxml.header.dst_begin_month = nil
     hpxml.header.dst_begin_day_of_month = nil
@@ -82,7 +85,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.allow_increased_fixed_capacities = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, true, 3, 11, 11, 4, true, false)
+    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, true, false)
   end
 
   def test_site
@@ -722,6 +725,31 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_kitchen_fan_values(hpxml_default, 1, 100, 1, 30, 18)
     _test_default_bath_fan_values(hpxml_default, 2, 50, 1, 15, 7)
+  end
+
+  def test_clothes_dryer_exhaust
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    clothes_dryer = hpxml.clothes_dryers[0]
+    clothes_dryer.is_vented = true
+    clothes_dryer.vented_flow_rate = 200
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_clothes_dryer_exhaust_values(hpxml_default, true, 200)
+
+    clothes_dryer.is_vented = false
+    clothes_dryer.vented_flow_rate = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_clothes_dryer_exhaust_values(hpxml_default, false, nil)
+
+    # Test defaults
+    clothes_dryer.is_vented = nil
+    clothes_dryer.vented_flow_rate = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_clothes_dryer_exhaust_values(hpxml_default, true, 100)
   end
 
   def test_ceiling_fans
@@ -1386,7 +1414,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     return hpxml_default
   end
 
-  def _test_default_header_values(hpxml, tstep, sim_begin_month, sim_begin_day, sim_end_month, sim_end_day,
+  def _test_default_header_values(hpxml, tstep, sim_begin_month, sim_begin_day, sim_end_month, sim_end_day, sim_calendar_year,
                                   dst_enabled, dst_begin_month, dst_begin_day_of_month, dst_end_month, dst_end_day_of_month,
                                   use_max_load_for_heat_pumps, allow_increased_fixed_capacities)
     assert_equal(tstep, hpxml.header.timestep)
@@ -1394,6 +1422,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(sim_begin_day, hpxml.header.sim_begin_day_of_month)
     assert_equal(sim_end_month, hpxml.header.sim_end_month)
     assert_equal(sim_end_day, hpxml.header.sim_end_day_of_month)
+    assert_equal(sim_calendar_year, hpxml.header.sim_calendar_year)
     assert_equal(dst_enabled, hpxml.header.dst_enabled)
     assert_equal(dst_begin_month, hpxml.header.dst_begin_month)
     assert_equal(dst_begin_day_of_month, hpxml.header.dst_begin_day_of_month)
@@ -1771,6 +1800,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(hours_in_operation, bath_fan.hours_in_operation)
     assert_equal(fan_power, bath_fan.fan_power)
     assert_equal(start_hour, bath_fan.start_hour)
+  end
+
+  def _test_default_clothes_dryer_exhaust_values(hpxml, is_vented, vented_flow_rate)
+    clothes_dryer = hpxml.clothes_dryers[0]
+    assert_equal(is_vented, clothes_dryer.is_vented)
+    if vented_flow_rate.nil?
+      assert_nil(clothes_dryer.vented_flow_rate)
+    else
+      assert_equal(vented_flow_rate, clothes_dryer.vented_flow_rate)
+    end
   end
 
   def _test_default_ceiling_fan_values(hpxml, quantity, efficiency)

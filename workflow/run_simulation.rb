@@ -49,7 +49,6 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
     measure_subdir = 'hpxml-measures/HPXMLtoOpenStudio'
     args = {}
     args['hpxml_path'] = output_hpxml_path
-    args['weather_dir'] = File.absolute_path(File.join(basedir, '..', 'weather'))
     args['output_dir'] = rundir
     args['debug'] = debug
     update_args_hash(measures, measure_subdir, args)
@@ -74,16 +73,17 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
 
   return if skip_simulation
 
+  timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
+  return unless File.exist? timeseries_csv_path
+
   units_map = get_units_map()
   output_map = get_output_map()
-
   results = {}
   output_map.each do |ep_output, hes_output|
     results[hes_output] = []
   end
   row_index = {}
   units = nil
-  timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
   CSV.foreach(timeseries_csv_path).with_index do |row, row_num|
     if row_num == 0 # Header
       output_map.each do |ep_output, hes_output|
@@ -144,7 +144,7 @@ def download_epws
 
   weather_dir = File.join(File.dirname(__FILE__), '..', 'weather')
 
-  num_epws_expected = File.readlines(File.join(weather_dir, 'data.csv')).size - 1
+  num_epws_expected = 1011
   num_epws_actual = Dir[File.join(weather_dir, '*.epw')].count
   num_cache_expcted = num_epws_expected
   num_cache_actual = Dir[File.join(weather_dir, '*-cache.csv')].count

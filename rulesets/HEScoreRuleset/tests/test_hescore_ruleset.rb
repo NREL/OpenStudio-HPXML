@@ -5,7 +5,7 @@ require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/resources/xmlhelper.
 require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/resources/hpxml.rb'
 require_relative '../resources/HESruleset.rb'
 require 'openstudio'
-require 'openstudio/ruleset/ShowRunnerOutput'
+require 'openstudio/measure/ShowRunnerOutput'
 require 'minitest/autorun'
 require_relative '../measure.rb'
 require 'fileutils'

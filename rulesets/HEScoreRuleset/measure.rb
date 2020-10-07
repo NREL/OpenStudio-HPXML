@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'openstudio'
 require 'pathname'
 require 'csv'
 require 'oga'

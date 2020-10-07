@@ -113,6 +113,26 @@ class HEScoreRuleset
     new_hpxml.climate_and_risk_zones.weather_station_id = orig_hpxml.climate_and_risk_zones.weather_station_id
     new_hpxml.climate_and_risk_zones.weather_station_name = orig_hpxml.climate_and_risk_zones.weather_station_name
     new_hpxml.climate_and_risk_zones.weather_station_wmo = orig_hpxml.climate_and_risk_zones.weather_station_wmo
+
+    # Look up EPW path from WMO
+    epw_path = nil
+    weather_wmo = orig_hpxml.climate_and_risk_zones.weather_station_wmo
+    weather_dir = File.join(File.dirname(__FILE__), '..', '..', '..', 'weather')
+    CSV.foreach(File.join(weather_dir, 'data.csv'), headers: true) do |row|
+      next if row['wmo'] != weather_wmo
+
+      epw_path = File.join(weather_dir, row['filename'])
+      if not File.exist?(epw_path)
+        fail "'#{epw_path}' could not be found."
+      end
+
+      break
+    end
+    if epw_path.nil?
+      fail "Weather station WMO '#{weather_wmo}' could not be found in #{File.join(weather_dir, 'data.csv')}."
+    end
+    new_hpxml.climate_and_risk_zones.weather_station_epw_filepath = epw_path
+
     @iecc_zone = orig_hpxml.climate_and_risk_zones.iecc_zone
   end
 
@@ -822,7 +842,9 @@ class HEScoreRuleset
 
   def self.set_appliances_clothes_dryer(orig_hpxml, new_hpxml)
     new_hpxml.clothes_dryers.add(id: 'ClothesDryer',
-                                 fuel_type: HPXML::FuelTypeElectricity)
+                                 fuel_type: HPXML::FuelTypeElectricity,
+                                 is_vented: true,
+                                 vented_flow_rate: 0.0)
   end
 
   def self.set_appliances_dishwasher(orig_hpxml, new_hpxml)

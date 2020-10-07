@@ -285,7 +285,6 @@ class HPXML < Object
     from_oga(hpxml)
 
     # Clean up
-    delete_partition_surfaces()
     delete_tiny_surfaces()
     delete_adiabatic_subsurfaces()
     if collapse_enclosure
@@ -665,7 +664,7 @@ class HPXML < Object
     ATTRS = [:xml_type, :xml_generated_by, :created_date_and_time, :transaction,
              :software_program_used, :software_program_version, :eri_calculation_version,
              :eri_design, :timestep, :building_id, :event_type, :state_code,
-             :sim_begin_month, :sim_begin_day_of_month, :sim_end_month, :sim_end_day_of_month,
+             :sim_begin_month, :sim_begin_day_of_month, :sim_end_month, :sim_end_day_of_month, :sim_calendar_year,
              :dst_enabled, :dst_begin_month, :dst_begin_day_of_month, :dst_end_month, :dst_end_day_of_month,
              :use_max_load_for_heat_pumps, :allow_increased_fixed_capacities,
              :apply_ashrae140_assumptions]
@@ -729,6 +728,12 @@ class HPXML < Object
         end
       end
 
+      if not @sim_calendar_year.nil?
+        if (@sim_calendar_year < 1600) || (@sim_calendar_year > 9999)
+          fail "Calendar Year (#{@sim_calendar_year}) must be between 1600 and 9999."
+        end
+      end
+
       return errors
     end
 
@@ -767,6 +772,7 @@ class HPXML < Object
         XMLHelper.add_element(simulation_control, 'BeginDayOfMonth', to_integer(@sim_begin_day_of_month)) unless @sim_begin_day_of_month.nil?
         XMLHelper.add_element(simulation_control, 'EndMonth', to_integer(@sim_end_month)) unless @sim_end_month.nil?
         XMLHelper.add_element(simulation_control, 'EndDayOfMonth', to_integer(@sim_end_day_of_month)) unless @sim_end_day_of_month.nil?
+        XMLHelper.add_element(simulation_control, 'CalendarYear', to_integer(@sim_calendar_year)) unless @sim_calendar_year.nil?
         if (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day_of_month.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day_of_month.nil?)
           daylight_saving = XMLHelper.add_element(simulation_control, 'DaylightSaving')
           XMLHelper.add_element(daylight_saving, 'Enabled', to_boolean(@dst_enabled)) unless @dst_enabled.nil?
@@ -813,6 +819,7 @@ class HPXML < Object
       @sim_begin_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginDayOfMonth'))
       @sim_end_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndMonth'))
       @sim_end_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndDayOfMonth'))
+      @sim_calendar_year = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/CalendarYear'))
       @dst_enabled = to_boolean_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/Enabled'))
       @dst_begin_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/BeginMonth'))
       @dst_begin_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/BeginDayOfMonth'))
@@ -1546,6 +1553,10 @@ class HPXML < Object
       return !is_exterior
     end
 
+    def is_adiabatic
+      return HPXML::is_adiabatic(self)
+    end
+
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(self)
     end
@@ -1660,6 +1671,10 @@ class HPXML < Object
 
     def is_interior
       return !is_exterior
+    end
+
+    def is_adiabatic
+      return HPXML::is_adiabatic(self)
     end
 
     def is_thermal_boundary
@@ -1795,6 +1810,10 @@ class HPXML < Object
 
     def is_interior
       return !is_exterior
+    end
+
+    def is_adiabatic
+      return HPXML::is_adiabatic(self)
     end
 
     def is_thermal_boundary
@@ -1935,6 +1954,10 @@ class HPXML < Object
 
     def is_interior
       return !is_exterior
+    end
+
+    def is_adiabatic
+      return HPXML::is_adiabatic(self)
     end
 
     def is_thermal_boundary
@@ -2185,12 +2208,6 @@ class HPXML < Object
       if (not @overhangs_distance_to_top_of_window.nil?) && (not @overhangs_distance_to_bottom_of_window.nil?)
         if @overhangs_distance_to_bottom_of_window <= @overhangs_distance_to_top_of_window
           fail "For Window '#{@id}', overhangs distance to bottom (#{@overhangs_distance_to_bottom_of_window}) must be greater than distance to top (#{@overhangs_distance_to_top_of_window})."
-        end
-      end
-      # TODO: Remove this error when we can support it w/ EnergyPlus
-      if (not @interior_shading_factor_summer.nil?) && (not @interior_shading_factor_winter.nil?)
-        if @interior_shading_factor_summer > @interior_shading_factor_winter
-          fail "SummerShadingCoefficient (#{interior_shading_factor_summer}) must be less than or equal to WinterShadingCoefficient (#{interior_shading_factor_winter}) for window '#{@id}'."
         end
       end
 
@@ -3988,7 +4005,8 @@ class HPXML < Object
 
   class ClothesDryer < BaseElement
     ATTRS = [:id, :location, :fuel_type, :energy_factor, :combined_energy_factor, :control_type,
-             :usage_multiplier, :is_shared_appliance, :number_of_units, :number_of_units_served]
+             :usage_multiplier, :is_shared_appliance, :number_of_units, :number_of_units_served,
+             :is_vented, :vented_flow_rate]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4016,6 +4034,8 @@ class HPXML < Object
       XMLHelper.add_element(clothes_dryer, 'CombinedEnergyFactor', to_float(@combined_energy_factor)) unless @combined_energy_factor.nil?
       XMLHelper.add_element(clothes_dryer, 'ControlType', @control_type) unless @control_type.nil?
       XMLHelper.add_extension(clothes_dryer, 'UsageMultiplier', to_float(@usage_multiplier)) unless @usage_multiplier.nil?
+      XMLHelper.add_extension(clothes_dryer, 'IsVented', to_boolean(@is_vented)) unless @is_vented.nil?
+      XMLHelper.add_extension(clothes_dryer, 'VentedFlowRate', to_float(@vented_flow_rate)) unless @vented_flow_rate.nil?
     end
 
     def from_oga(clothes_dryer)
@@ -4031,6 +4051,8 @@ class HPXML < Object
       @combined_energy_factor = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'CombinedEnergyFactor'))
       @control_type = XMLHelper.get_value(clothes_dryer, 'ControlType')
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/UsageMultiplier'))
+      @is_vented = to_boolean_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/IsVented'))
+      @vented_flow_rate = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/VentedFlowRate'))
     end
   end
 
@@ -4987,18 +5009,6 @@ class HPXML < Object
     end
   end
 
-  def delete_partition_surfaces()
-    (@rim_joists + @walls + @foundation_walls + @frame_floors).reverse_each do |surface|
-      next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
-
-      if surface.interior_adjacent_to == surface.exterior_adjacent_to
-        surface.delete
-      elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].sort == [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].sort
-        surface.delete
-      end
-    end
-  end
-
   def delete_tiny_surfaces()
     (@rim_joists + @walls + @foundation_walls + @frame_floors + @roofs + @windows + @skylights + @doors + @slabs).reverse_each do |surface|
       next if surface.area.nil? || (surface.area > 0.1)
@@ -5153,22 +5163,31 @@ class HPXML < Object
     return errors
   end
 
+  def self.conditioned_locations
+    return [HPXML::LocationLivingSpace,
+            HPXML::LocationBasementConditioned,
+            HPXML::LocationOtherHousingUnit]
+  end
+
+  def self.is_adiabatic(surface)
+    if surface.exterior_adjacent_to == surface.interior_adjacent_to
+      # E.g., wall between unit crawlspace and neighboring unit crawlspace
+      return true
+    elsif conditioned_locations.include?(surface.interior_adjacent_to) &&
+          conditioned_locations.include?(surface.exterior_adjacent_to)
+      # E.g., frame floor between living space and conditioned basement, or
+      # wall between living space and "other housing unit"
+      return true
+    end
+    return false
+  end
+
   def self.is_thermal_boundary(surface)
     # Returns true if the surface is between conditioned space and outside/ground/unconditioned space.
     # Note: The location of insulation is not considered here, so an insulated foundation wall of an
     # unconditioned basement, for example, returns false.
-    def self.is_adjacent_to_conditioned(adjacent_to)
-      if [HPXML::LocationLivingSpace,
-          HPXML::LocationBasementConditioned,
-          HPXML::LocationOtherHousingUnit].include? adjacent_to
-        return true
-      else
-        return false
-      end
-    end
-
-    interior_conditioned = is_adjacent_to_conditioned(surface.interior_adjacent_to)
-    exterior_conditioned = is_adjacent_to_conditioned(surface.exterior_adjacent_to)
+    interior_conditioned = conditioned_locations.include? surface.interior_adjacent_to
+    exterior_conditioned = conditioned_locations.include? surface.exterior_adjacent_to
     return (interior_conditioned != exterior_conditioned)
   end
 
