@@ -195,11 +195,10 @@ def create_osws
     'base-lighting-ceiling-fans.osw' => 'base.osw',
     'base-lighting-detailed.osw' => 'base.osw',
     # 'base-lighting-none.osw' => 'base.osw',
+    'base-location-AMY-2012.osw' => 'base.osw',
     'base-location-baltimore-md.osw' => 'base.osw',
     'base-location-dallas-tx.osw' => 'base-foundation-slab.osw',
     'base-location-duluth-mn.osw' => 'base.osw',
-    'base-location-epw-filepath.osw' => 'base.osw',
-    'base-location-epw-filepath-AMY-2012.osw' => 'base.osw',
     'base-location-miami-fl.osw' => 'base-foundation-slab.osw',
     'base-mechvent-balanced.osw' => 'base.osw',
     'base-mechvent-bath-kitchen-fans.osw' => 'base.osw',
@@ -226,10 +225,13 @@ def create_osws
     'base-misc-usage-multiplier.osw' => 'base.osw',
     'base-pv.osw' => 'base.osw',
     # 'base-pv-shared.osw' => 'base.osw',
+    'base-simcontrol-calendar-year-custom.osw' => 'base.osw',
     'base-simcontrol-daylight-saving-custom.osw' => 'base.osw',
     'base-simcontrol-daylight-saving-disabled.osw' => 'base.osw',
     'base-simcontrol-runperiod-1-month.osw' => 'base.osw',
     'base-simcontrol-timestep-10-mins.osw' => 'base.osw',
+    'base-schedules-stochastic.osw' => 'base.osw',
+    'base-schedules-user-specified.osw' => 'base.osw',
 
     # Extra test files that don't correspond with sample files
     'extra-auto.osw' => 'base.osw',
@@ -243,6 +245,7 @@ def create_osws
     'extra-enclosure-garage-partially-protruded.osw' => 'base.osw',
     'extra-mechvent-shared.osw' => 'base-single-family-attached.osw',
     'extra-mechvent-shared-preconditioning.osw' => 'extra-mechvent-shared.osw',
+    'extra-vacancy-6-months.osw' => 'base-schedules-stochastic.osw',
     'extra-hvac-shared-boiler-only-baseboard.osw' => 'base-single-family-attached.osw',
     'extra-hvac-shared-chiller-only-baseboard.osw' => 'base-single-family-attached.osw',
     'extra-hvac-shared-boiler-only-fan-coil.osw' => 'extra-hvac-shared-boiler-only-baseboard.osw',
@@ -355,8 +358,8 @@ def get_values(osw_file, step)
   step.setArgument('hpxml_path', "../BuildResidentialHPXML/tests/built_residential_hpxml/#{File.basename(osw_file, '.*')}.xml")
 
   if ['base.osw'].include? osw_file
-    step.setArgument('weather_dir', 'weather')
     step.setArgument('simulation_control_timestep', '60')
+    step.setArgument('schedules_type', 'default')
     step.setArgument('weather_station_epw_filepath', 'USA_CO_Denver.Intl.AP.725650_TMY3.epw')
     step.setArgument('site_type', HPXML::SiteTypeSuburban)
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFD)
@@ -593,31 +596,20 @@ def get_values(osw_file, step)
     step.setArgument('lighting_fraction_lfl_interior', 0.1)
     step.setArgument('lighting_fraction_led_interior', 0.25)
     step.setArgument('lighting_usage_multiplier_interior', 1.0)
-    step.setArgument('lighting_weekday_fractions_interior', Constants.Auto)
-    step.setArgument('lighting_weekend_fractions_interior', Constants.Auto)
-    step.setArgument('lighting_monthly_multipliers_interior', Constants.Auto)
     step.setArgument('lighting_fraction_cfl_exterior', 0.4)
     step.setArgument('lighting_fraction_lfl_exterior', 0.1)
     step.setArgument('lighting_fraction_led_exterior', 0.25)
     step.setArgument('lighting_usage_multiplier_exterior', 1.0)
-    step.setArgument('lighting_weekday_fractions_exterior', Constants.Auto)
-    step.setArgument('lighting_weekend_fractions_exterior', Constants.Auto)
-    step.setArgument('lighting_monthly_multipliers_exterior', Constants.Auto)
     step.setArgument('lighting_fraction_cfl_garage', 0.4)
     step.setArgument('lighting_fraction_lfl_garage', 0.1)
     step.setArgument('lighting_fraction_led_garage', 0.25)
     step.setArgument('lighting_usage_multiplier_garage', 1.0)
-    step.setArgument('lighting_weekday_fractions_garage', Constants.Auto)
-    step.setArgument('lighting_weekend_fractions_garage', Constants.Auto)
-    step.setArgument('lighting_monthly_multipliers_garage', Constants.Auto)
     step.setArgument('holiday_lighting_present', false)
     step.setArgument('holiday_lighting_daily_kwh', Constants.Auto)
     step.setArgument('holiday_lighting_period_begin_month', Constants.Auto)
     step.setArgument('holiday_lighting_period_begin_day_of_month', Constants.Auto)
     step.setArgument('holiday_lighting_period_end_month', Constants.Auto)
     step.setArgument('holiday_lighting_period_end_day_of_month', Constants.Auto)
-    step.setArgument('holiday_lighting_weekday_fractions_exterior', Constants.Auto)
-    step.setArgument('holiday_lighting_weekend_fractions_exterior', Constants.Auto)
     step.setArgument('dehumidifier_present', false)
     step.setArgument('dehumidifier_efficiency_type', 'EnergyFactor')
     step.setArgument('dehumidifier_efficiency_ef', 1.8)
@@ -661,32 +653,20 @@ def get_values(osw_file, step)
     step.setArgument('refrigerator_location', HPXML::LocationLivingSpace)
     step.setArgument('refrigerator_rated_annual_kwh', '650.0')
     step.setArgument('refrigerator_usage_multiplier', 1.0)
-    step.setArgument('refrigerator_weekday_fractions', Constants.Auto)
-    step.setArgument('refrigerator_weekend_fractions', Constants.Auto)
-    step.setArgument('refrigerator_monthly_multipliers', Constants.Auto)
     step.setArgument('extra_refrigerator_present', false)
     step.setArgument('extra_refrigerator_location', Constants.Auto)
     step.setArgument('extra_refrigerator_rated_annual_kwh', Constants.Auto)
     step.setArgument('extra_refrigerator_usage_multiplier', 1.0)
-    step.setArgument('extra_refrigerator_weekday_fractions', Constants.Auto)
-    step.setArgument('extra_refrigerator_weekend_fractions', Constants.Auto)
-    step.setArgument('extra_refrigerator_monthly_multipliers', Constants.Auto)
     step.setArgument('freezer_present', false)
     step.setArgument('freezer_location', Constants.Auto)
     step.setArgument('freezer_rated_annual_kwh', Constants.Auto)
     step.setArgument('freezer_usage_multiplier', 1.0)
-    step.setArgument('freezer_weekday_fractions', Constants.Auto)
-    step.setArgument('freezer_weekend_fractions', Constants.Auto)
-    step.setArgument('freezer_monthly_multipliers', Constants.Auto)
     step.setArgument('cooking_range_oven_present', true)
     step.setArgument('cooking_range_oven_location', HPXML::LocationLivingSpace)
     step.setArgument('cooking_range_oven_fuel_type', HPXML::FuelTypeElectricity)
     step.setArgument('cooking_range_oven_is_induction', false)
     step.setArgument('cooking_range_oven_is_convection', false)
     step.setArgument('cooking_range_oven_usage_multiplier', 1.0)
-    step.setArgument('cooking_range_oven_weekday_fractions', Constants.Auto)
-    step.setArgument('cooking_range_oven_weekend_fractions', Constants.Auto)
-    step.setArgument('cooking_range_oven_monthly_multipliers', Constants.Auto)
     step.setArgument('ceiling_fan_present', false)
     step.setArgument('ceiling_fan_efficiency', Constants.Auto)
     step.setArgument('ceiling_fan_quantity', Constants.Auto)
@@ -695,76 +675,43 @@ def get_values(osw_file, step)
     step.setArgument('plug_loads_other_frac_sensible', '0.855')
     step.setArgument('plug_loads_other_frac_latent', '0.045')
     step.setArgument('plug_loads_other_usage_multiplier', 1.0)
-    step.setArgument('plug_loads_other_weekday_fractions', Constants.Auto)
-    step.setArgument('plug_loads_other_weekend_fractions', Constants.Auto)
-    step.setArgument('plug_loads_other_monthly_multipliers', Constants.Auto)
     step.setArgument('plug_loads_television_annual_kwh', '620.0')
     step.setArgument('plug_loads_television_usage_multiplier', 1.0)
-    step.setArgument('plug_loads_television_weekday_fractions', Constants.Auto)
-    step.setArgument('plug_loads_television_weekend_fractions', Constants.Auto)
-    step.setArgument('plug_loads_television_monthly_multipliers', Constants.Auto)
     step.setArgument('plug_loads_well_pump_present', false)
     step.setArgument('plug_loads_well_pump_annual_kwh', Constants.Auto)
     step.setArgument('plug_loads_well_pump_usage_multiplier', 1.0)
-    step.setArgument('plug_loads_well_pump_weekday_fractions', Constants.Auto)
-    step.setArgument('plug_loads_well_pump_weekend_fractions', Constants.Auto)
-    step.setArgument('plug_loads_well_pump_monthly_multipliers', Constants.Auto)
     step.setArgument('plug_loads_vehicle_present', false)
     step.setArgument('plug_loads_vehicle_annual_kwh', Constants.Auto)
     step.setArgument('plug_loads_vehicle_usage_multiplier', 1.0)
-    step.setArgument('plug_loads_vehicle_weekday_fractions', Constants.Auto)
-    step.setArgument('plug_loads_vehicle_weekend_fractions', Constants.Auto)
-    step.setArgument('plug_loads_vehicle_monthly_multipliers', Constants.Auto)
     step.setArgument('fuel_loads_grill_present', false)
     step.setArgument('fuel_loads_grill_fuel_type', HPXML::FuelTypeNaturalGas)
     step.setArgument('fuel_loads_grill_annual_therm', Constants.Auto)
     step.setArgument('fuel_loads_grill_location', Constants.Auto)
     step.setArgument('fuel_loads_grill_usage_multiplier', 1.0)
-    step.setArgument('fuel_loads_grill_weekday_fractions', Constants.Auto)
-    step.setArgument('fuel_loads_grill_weekend_fractions', Constants.Auto)
-    step.setArgument('fuel_loads_grill_monthly_multipliers', Constants.Auto)
     step.setArgument('fuel_loads_lighting_present', false)
     step.setArgument('fuel_loads_lighting_fuel_type', HPXML::FuelTypeNaturalGas)
     step.setArgument('fuel_loads_lighting_annual_therm', Constants.Auto)
     step.setArgument('fuel_loads_lighting_location', Constants.Auto)
     step.setArgument('fuel_loads_lighting_usage_multiplier', 1.0)
-    step.setArgument('fuel_loads_lighting_weekday_fractions', Constants.Auto)
-    step.setArgument('fuel_loads_lighting_weekend_fractions', Constants.Auto)
-    step.setArgument('fuel_loads_lighting_monthly_multipliers', Constants.Auto)
     step.setArgument('fuel_loads_fireplace_present', false)
     step.setArgument('fuel_loads_fireplace_fuel_type', HPXML::FuelTypeNaturalGas)
     step.setArgument('fuel_loads_fireplace_annual_therm', Constants.Auto)
     step.setArgument('fuel_loads_fireplace_location', Constants.Auto)
     step.setArgument('fuel_loads_fireplace_usage_multiplier', 1.0)
-    step.setArgument('fuel_loads_fireplace_weekday_fractions', Constants.Auto)
-    step.setArgument('fuel_loads_fireplace_weekend_fractions', Constants.Auto)
-    step.setArgument('fuel_loads_fireplace_monthly_multipliers', Constants.Auto)
     step.setArgument('pool_present', false)
     step.setArgument('pool_pump_annual_kwh', Constants.Auto)
     step.setArgument('pool_pump_usage_multiplier', 1.0)
-    step.setArgument('pool_pump_weekday_fractions', Constants.Auto)
-    step.setArgument('pool_pump_weekend_fractions', Constants.Auto)
-    step.setArgument('pool_pump_monthly_multipliers', Constants.Auto)
     step.setArgument('pool_heater_type', HPXML::HeaterTypeElectricResistance)
     step.setArgument('pool_heater_annual_kwh', Constants.Auto)
     step.setArgument('pool_heater_annual_therm', Constants.Auto)
     step.setArgument('pool_heater_usage_multiplier', 1.0)
-    step.setArgument('pool_heater_weekday_fractions', Constants.Auto)
-    step.setArgument('pool_heater_weekend_fractions', Constants.Auto)
-    step.setArgument('pool_heater_monthly_multipliers', Constants.Auto)
     step.setArgument('hot_tub_present', false)
     step.setArgument('hot_tub_pump_annual_kwh', Constants.Auto)
     step.setArgument('hot_tub_pump_usage_multiplier', 1.0)
-    step.setArgument('hot_tub_pump_weekday_fractions', Constants.Auto)
-    step.setArgument('hot_tub_pump_weekend_fractions', Constants.Auto)
-    step.setArgument('hot_tub_pump_monthly_multipliers', Constants.Auto)
     step.setArgument('hot_tub_heater_type', HPXML::HeaterTypeElectricResistance)
     step.setArgument('hot_tub_heater_annual_kwh', Constants.Auto)
     step.setArgument('hot_tub_heater_annual_therm', Constants.Auto)
     step.setArgument('hot_tub_heater_usage_multiplier', 1.0)
-    step.setArgument('hot_tub_heater_weekday_fractions', Constants.Auto)
-    step.setArgument('hot_tub_heater_weekend_fractions', Constants.Auto)
-    step.setArgument('hot_tub_heater_monthly_multipliers', Constants.Auto)
   elsif ['base-single-family-attached.osw'].include? osw_file
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFA)
     step.setArgument('geometry_cfa', 900.0)
@@ -1549,32 +1496,20 @@ def get_values(osw_file, step)
     step.setArgument('ceiling_fan_quantity', '2')
     step.setArgument('ceiling_fan_cooling_setpoint_temp_offset', 0.5)
   elsif ['base-lighting-detailed.osw'].include? osw_file
-    step.setArgument('lighting_weekday_fractions_interior', '0.124, 0.074, 0.050, 0.050, 0.053, 0.140, 0.330, 0.420, 0.430, 0.424, 0.411, 0.394, 0.382, 0.378, 0.378, 0.379, 0.386, 0.412, 0.484, 0.619, 0.783, 0.880, 0.597, 0.249')
-    step.setArgument('lighting_weekend_fractions_interior', '0.124, 0.074, 0.050, 0.050, 0.053, 0.140, 0.330, 0.420, 0.430, 0.424, 0.411, 0.394, 0.382, 0.378, 0.378, 0.379, 0.386, 0.412, 0.484, 0.619, 0.783, 0.880, 0.597, 0.249')
-    step.setArgument('lighting_monthly_multipliers_interior', '1.075, 1.064951905, 1.0375, 1.0, 0.9625, 0.935048095, 0.925, 0.935048095, 0.9625, 1.0, 1.0375, 1.064951905')
-    step.setArgument('lighting_weekday_fractions_exterior', '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063')
-    step.setArgument('lighting_weekend_fractions_exterior', '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059')
-    step.setArgument('lighting_monthly_multipliers_exterior', '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
-    step.setArgument('lighting_weekday_fractions_garage', '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063')
-    step.setArgument('lighting_weekend_fractions_garage', '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059')
-    step.setArgument('lighting_monthly_multipliers_garage', '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
     step.setArgument('holiday_lighting_present', true)
     step.setArgument('holiday_lighting_daily_kwh', '1.1')
     step.setArgument('holiday_lighting_period_begin_month', '11')
     step.setArgument('holiday_lighting_period_begin_day_of_month', '24')
     step.setArgument('holiday_lighting_period_end_month', '1')
     step.setArgument('holiday_lighting_period_end_day_of_month', '6')
-    step.setArgument('holiday_lighting_weekday_fractions_exterior', '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019')
-    step.setArgument('holiday_lighting_weekend_fractions_exterior', '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019')
+  elsif ['base-location-AMY-2012.osw'].include? osw_file
+    step.setArgument('weather_station_epw_filepath', 'US_CO_Boulder_AMY_2012.epw')
   elsif ['base-location-baltimore-md.osw'].include? osw_file
     step.setArgument('weather_station_epw_filepath', 'USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw')
   elsif ['base-location-dallas-tx.osw'].include? osw_file
     step.setArgument('weather_station_epw_filepath', 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw')
   elsif ['base-location-duluth-mn.osw'].include? osw_file
     step.setArgument('weather_station_epw_filepath', 'USA_MN_Duluth.Intl.AP.727450_TMY3.epw')
-  elsif ['base-location-epw-filepath.osw'].include? osw_file
-  elsif ['base-location-epw-filepath-AMY-2012.osw'].include? osw_file
-    step.setArgument('weather_station_epw_filepath', 'US_CO_Boulder_AMY_2012.epw')
   elsif ['base-location-miami-fl.osw'].include? osw_file
     step.setArgument('weather_station_epw_filepath', 'USA_FL_Miami.Intl.AP.722020_TMY3.epw')
   elsif ['base-mechvent-balanced.osw'].include? osw_file
@@ -1689,77 +1624,32 @@ def get_values(osw_file, step)
     step.setArgument('plug_loads_other_frac_sensible', Constants.Auto)
     step.setArgument('plug_loads_other_frac_latent', Constants.Auto)
   elsif ['base-misc-loads-large-uncommon.osw'].include? osw_file
-    step.setArgument('refrigerator_weekday_fractions', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041')
-    step.setArgument('refrigerator_weekend_fractions', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041')
-    step.setArgument('refrigerator_monthly_multipliers', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
     step.setArgument('extra_refrigerator_present', true)
     step.setArgument('extra_refrigerator_rated_annual_kwh', '700.0')
-    step.setArgument('extra_refrigerator_weekday_fractions', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041')
-    step.setArgument('extra_refrigerator_weekend_fractions', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041')
-    step.setArgument('extra_refrigerator_monthly_multipliers', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
     step.setArgument('freezer_present', true)
     step.setArgument('freezer_location', HPXML::LocationLivingSpace)
     step.setArgument('freezer_rated_annual_kwh', '300.0')
-    step.setArgument('freezer_weekday_fractions', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041')
-    step.setArgument('freezer_weekend_fractions', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041')
-    step.setArgument('freezer_monthly_multipliers', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
-    step.setArgument('cooking_range_oven_weekday_fractions', '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011')
-    step.setArgument('cooking_range_oven_weekend_fractions', '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011')
-    step.setArgument('cooking_range_oven_monthly_multipliers', '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097')
-    step.setArgument('plug_loads_other_weekday_fractions', '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036')
-    step.setArgument('plug_loads_other_weekend_fractions', '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036')
-    step.setArgument('plug_loads_other_monthly_multipliers', '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
-    step.setArgument('plug_loads_television_weekday_fractions', '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.05, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07')
-    step.setArgument('plug_loads_television_weekend_fractions', '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.05, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07')
-    step.setArgument('plug_loads_television_monthly_multipliers', '1.137, 1.129, 0.961, 0.969, 0.961, 0.993, 0.996, 0.96, 0.993, 0.867, 0.86, 1.137')
     step.setArgument('plug_loads_well_pump_present', true)
     step.setArgument('plug_loads_well_pump_annual_kwh', '475.0')
-    step.setArgument('plug_loads_well_pump_weekday_fractions', '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065')
-    step.setArgument('plug_loads_well_pump_weekend_fractions', '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065')
-    step.setArgument('plug_loads_well_pump_monthly_multipliers', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
     step.setArgument('plug_loads_vehicle_present', true)
     step.setArgument('plug_loads_vehicle_annual_kwh', '1500.0')
-    step.setArgument('plug_loads_vehicle_weekday_fractions', '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042')
-    step.setArgument('plug_loads_vehicle_weekend_fractions', '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042')
-    step.setArgument('plug_loads_vehicle_monthly_multipliers', '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
     step.setArgument('fuel_loads_grill_present', true)
     step.setArgument('fuel_loads_grill_fuel_type', HPXML::FuelTypePropane)
     step.setArgument('fuel_loads_grill_annual_therm', '25.0')
     step.setArgument('fuel_loads_grill_location', HPXML::LocationExterior)
-    step.setArgument('fuel_loads_grill_weekday_fractions', '0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007')
-    step.setArgument('fuel_loads_grill_weekend_fractions', '0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007')
-    step.setArgument('fuel_loads_grill_monthly_multipliers', '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097')
     step.setArgument('fuel_loads_lighting_present', true)
     step.setArgument('fuel_loads_lighting_annual_therm', '28.0')
-    step.setArgument('fuel_loads_lighting_weekday_fractions', '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065')
-    step.setArgument('fuel_loads_lighting_weekend_fractions', '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065')
-    step.setArgument('fuel_loads_lighting_monthly_multipliers', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
     step.setArgument('fuel_loads_fireplace_present', true)
     step.setArgument('fuel_loads_fireplace_fuel_type', HPXML::FuelTypeWoodCord)
     step.setArgument('fuel_loads_fireplace_annual_therm', '55.0')
     step.setArgument('fuel_loads_fireplace_location', HPXML::LocationInterior)
-    step.setArgument('fuel_loads_fireplace_weekday_fractions', '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065')
-    step.setArgument('fuel_loads_fireplace_weekend_fractions', '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065')
-    step.setArgument('fuel_loads_fireplace_monthly_multipliers', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
     step.setArgument('pool_present', true)
     step.setArgument('pool_heater_type', HPXML::HeaterTypeGas)
     step.setArgument('pool_pump_annual_kwh', '2700.0')
     step.setArgument('pool_heater_annual_therm', '500.0')
-    step.setArgument('pool_pump_weekday_fractions', '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003')
-    step.setArgument('pool_pump_weekend_fractions', '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003')
-    step.setArgument('pool_pump_monthly_multipliers', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
-    step.setArgument('pool_heater_weekday_fractions', '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003')
-    step.setArgument('pool_heater_weekend_fractions', '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003')
-    step.setArgument('pool_heater_monthly_multipliers', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
     step.setArgument('hot_tub_present', true)
     step.setArgument('hot_tub_pump_annual_kwh', '1000.0')
     step.setArgument('hot_tub_heater_annual_kwh', '1300.0')
-    step.setArgument('hot_tub_pump_weekday_fractions', '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024')
-    step.setArgument('hot_tub_pump_weekend_fractions', '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024')
-    step.setArgument('hot_tub_pump_monthly_multipliers', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
-    step.setArgument('hot_tub_heater_weekday_fractions', '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024')
-    step.setArgument('hot_tub_heater_weekend_fractions', '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024')
-    step.setArgument('hot_tub_heater_monthly_multipliers', '0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921')
   elsif ['base-misc-loads-large-uncommon2.osw'].include? osw_file
     step.setArgument('pool_heater_type', 'none')
     step.setArgument('hot_tub_heater_type', HPXML::HeaterTypeHeatPump)
@@ -1779,58 +1669,34 @@ def get_values(osw_file, step)
     step.setArgument('freezer_location', HPXML::LocationLivingSpace)
     step.setArgument('freezer_rated_annual_kwh', '300.0')
     step.setArgument('freezer_usage_multiplier', 0.9)
-    step.setArgument('freezer_weekday_fractions', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041')
-    step.setArgument('freezer_weekend_fractions', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041')
-    step.setArgument('freezer_monthly_multipliers', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
     step.setArgument('cooking_range_oven_usage_multiplier', 0.9)
     step.setArgument('plug_loads_television_usage_multiplier', 0.9)
     step.setArgument('plug_loads_other_usage_multiplier', 0.9)
     step.setArgument('pool_present', true)
     step.setArgument('pool_pump_annual_kwh', '2700.0')
     step.setArgument('pool_pump_usage_multiplier', 0.9)
-    step.setArgument('pool_pump_weekday_fractions', '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003')
-    step.setArgument('pool_pump_weekend_fractions', '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003')
-    step.setArgument('pool_pump_monthly_multipliers', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
     step.setArgument('pool_heater_type', HPXML::HeaterTypeGas)
     step.setArgument('pool_heater_annual_therm', '500.0')
     step.setArgument('pool_heater_usage_multiplier', 0.9)
-    step.setArgument('pool_heater_weekday_fractions', '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003')
-    step.setArgument('pool_heater_weekend_fractions', '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003')
-    step.setArgument('pool_heater_monthly_multipliers', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
     step.setArgument('hot_tub_present', true)
     step.setArgument('hot_tub_pump_annual_kwh', '1000.0')
     step.setArgument('hot_tub_pump_usage_multiplier', 0.9)
-    step.setArgument('hot_tub_pump_weekday_fractions', '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024')
-    step.setArgument('hot_tub_pump_weekend_fractions', '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024')
-    step.setArgument('hot_tub_pump_monthly_multipliers', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
     step.setArgument('hot_tub_heater_type', HPXML::HeaterTypeElectricResistance)
     step.setArgument('hot_tub_heater_annual_kwh', '1300.0')
     step.setArgument('hot_tub_heater_usage_multiplier', 0.9)
-    step.setArgument('hot_tub_heater_weekday_fractions', '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024')
-    step.setArgument('hot_tub_heater_weekend_fractions', '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024')
-    step.setArgument('hot_tub_heater_monthly_multipliers', '0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921')
     step.setArgument('fuel_loads_grill_present', true)
     step.setArgument('fuel_loads_grill_fuel_type', HPXML::FuelTypePropane)
     step.setArgument('fuel_loads_grill_annual_therm', '25.0')
     step.setArgument('fuel_loads_grill_location', HPXML::LocationExterior)
     step.setArgument('fuel_loads_grill_usage_multiplier', 0.9)
-    step.setArgument('fuel_loads_grill_weekday_fractions', '0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007')
-    step.setArgument('fuel_loads_grill_weekend_fractions', '0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007')
-    step.setArgument('fuel_loads_grill_monthly_multipliers', '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097')
     step.setArgument('fuel_loads_lighting_present', true)
     step.setArgument('fuel_loads_lighting_annual_therm', '28.0')
     step.setArgument('fuel_loads_lighting_usage_multiplier', 0.9)
-    step.setArgument('fuel_loads_lighting_weekday_fractions', '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065')
-    step.setArgument('fuel_loads_lighting_weekend_fractions', '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065')
-    step.setArgument('fuel_loads_lighting_monthly_multipliers', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
     step.setArgument('fuel_loads_fireplace_present', true)
     step.setArgument('fuel_loads_fireplace_fuel_type', HPXML::FuelTypeWoodCord)
     step.setArgument('fuel_loads_fireplace_annual_therm', '55.0')
     step.setArgument('fuel_loads_fireplace_location', HPXML::LocationInterior)
     step.setArgument('fuel_loads_fireplace_usage_multiplier', 0.9)
-    step.setArgument('fuel_loads_fireplace_weekday_fractions', '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065')
-    step.setArgument('fuel_loads_fireplace_weekend_fractions', '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065')
-    step.setArgument('fuel_loads_fireplace_monthly_multipliers', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
   elsif ['base-misc-neighbor-shading.osw'].include? osw_file
     step.setArgument('neighbor_back_distance', 10)
     step.setArgument('neighbor_front_distance', 15)
@@ -1840,6 +1706,8 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_module_type_2', HPXML::PVModuleTypePremium)
     step.setArgument('pv_system_array_azimuth_2', 90)
     step.setArgument('pv_system_max_power_output_2', 1500)
+  elsif ['base-simcontrol-calendar-year-custom.osw'].include? osw_file
+    step.setArgument('simulation_control_run_period_calendar_year', 2008)
   elsif ['base-simcontrol-daylight-saving-custom.osw'].include? osw_file
     step.setArgument('simulation_control_daylight_saving_enabled', true)
     step.setArgument('simulation_control_daylight_saving_begin_month', 3)
@@ -1848,6 +1716,11 @@ def get_values(osw_file, step)
     step.setArgument('simulation_control_daylight_saving_end_day_of_month', 6)
   elsif ['base-simcontrol-daylight-saving-disabled.osw'].include? osw_file
     step.setArgument('simulation_control_daylight_saving_enabled', false)
+  elsif ['base-schedules-stochastic.osw'].include? osw_file
+    step.setArgument('schedules_type', 'stochastic')
+  elsif ['base-schedules-user-specified.osw'].include? osw_file
+    step.setArgument('schedules_type', 'user-specified')
+    step.setArgument('schedules_path', 'BuildResidentialHPXML/tests/schedules/user-specified.csv')
   elsif ['base-simcontrol-runperiod-1-month.osw'].include? osw_file
     step.setArgument('simulation_control_run_period_begin_month', 1)
     step.setArgument('simulation_control_run_period_begin_day_of_month', 1)
@@ -1857,6 +1730,7 @@ def get_values(osw_file, step)
     step.setArgument('simulation_control_timestep', '10')
   end
 
+  # Extras
   if ['extra-auto.osw'].include? osw_file
     step.setArgument('geometry_num_occupants', Constants.Auto)
     step.setArgument('ducts_supply_location', Constants.Auto)
@@ -1922,6 +1796,11 @@ def get_values(osw_file, step)
     step.setArgument('shared_mech_vent_precooling_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('shared_mech_vent_precooling_efficiency', 4.0)
     step.setArgument('shared_mech_vent_precooling_fraction_cool_load_served', 0.8)
+  elsif ['extra-vacancy-6-months.osw'].include? osw_file
+    step.setArgument('schedules_vacancy_begin_month', 1)
+    step.setArgument('schedules_vacancy_begin_day_of_month', 1)
+    step.setArgument('schedules_vacancy_end_month', 6)
+    step.setArgument('schedules_vacancy_end_day_of_month', 30)
   elsif ['extra-hvac-shared-boiler-only-baseboard.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_is_shared_system', true)
@@ -1964,6 +1843,7 @@ def get_values(osw_file, step)
     step.setArgument('shared_hvac_heat_pump_shared_loop_power', 600.0)
   end
 
+  # Warnings/Errors
   if ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
@@ -2082,7 +1962,6 @@ def create_hpxmls
     'invalid_files/clothes-dryer-location.xml' => 'base.xml',
     'invalid_files/cooking-range-location.xml' => 'base.xml',
     'invalid_files/appliances-location-unconditioned-space.xml' => 'base.xml',
-    'invalid_files/coal-for-non-boiler-heating.xml' => 'base-hvac-stove-oil-only.xml',
     'invalid_files/dhw-frac-load-served.xml' => 'base-dhw-multiple.xml',
     'invalid_files/dishwasher-location.xml' => 'base.xml',
     'invalid_files/duct-location.xml' => 'base.xml',
@@ -2106,8 +1985,9 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-cooling.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
+    'invalid_files/invalid-calendar-year.xml' => 'base.xml',
     'invalid_files/invalid-daylight-saving.xml' => 'base.xml',
-    'invalid_files/invalid-epw-filepath.xml' => 'base-location-epw-filepath.xml',
+    'invalid_files/invalid-epw-filepath.xml' => 'base.xml',
     'invalid_files/invalid-facility-type.xml' => 'base-dhw-shared-laundry-room.xml',
     'invalid_files/invalid-neighbor-shading-azimuth.xml' => 'base-misc-neighbor-shading.xml',
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
@@ -2115,8 +1995,6 @@ def create_hpxmls
     'invalid_files/invalid-runperiod.xml' => 'base.xml',
     'invalid_files/invalid-timestep.xml' => 'base.xml',
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
-    'invalid_files/invalid-window-interior-shading.xml' => 'base.xml',
-    'invalid_files/invalid-wmo.xml' => 'base.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
     'invalid_files/multifamily-reference-appliance.xml' => 'base.xml',
@@ -2281,6 +2159,7 @@ def create_hpxmls
     'base-hvac-fixed-heater-gas-only.xml' => 'base.xml',
     'base-hvac-floor-furnace-propane-only.xml' => 'base.xml',
     'base-hvac-flowrate.xml' => 'base.xml',
+    'base-hvac-furnace-coal-only.xml' => 'base.xml',
     'base-hvac-furnace-elec-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-2-speed.xml' => 'base.xml',
@@ -2331,12 +2210,11 @@ def create_hpxmls
     'base-lighting-ceiling-fans.xml' => 'base.xml',
     'base-lighting-detailed.xml' => 'base.xml',
     'base-lighting-none.xml' => 'base.xml',
+    'base-location-AMY-2012.xml' => 'base.xml',
     'base-location-baltimore-md.xml' => 'base.xml',
     'base-location-dallas-tx.xml' => 'base-foundation-slab.xml',
     'base-location-duluth-mn.xml' => 'base.xml',
     'base-location-miami-fl.xml' => 'base-foundation-slab.xml',
-    'base-location-epw-filepath.xml' => 'base.xml',
-    'base-location-epw-filepath-AMY-2012.xml' => 'base.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-bath-kitchen-fans.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
@@ -2363,10 +2241,13 @@ def create_hpxmls
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
     'base-pv-shared.xml' => 'base-enclosure-attached-multifamily.xml',
+    'base-simcontrol-calendar-year-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
     'base-simcontrol-runperiod-1-month.xml' => 'base.xml',
     'base-simcontrol-timestep-10-mins.xml' => 'base.xml',
+    'base-schedules-stochastic.xml' => 'base.xml',
+    'base-schedules-user-specified.xml' => 'base.xml',
 
     'hvac_autosizing/base-autosize.xml' => 'base.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-1-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -2542,6 +2423,8 @@ def set_hpxml_header(hpxml_file, hpxml)
     else
       hpxml.header.apply_ashrae140_assumptions = true
     end
+  elsif ['base-simcontrol-calendar-year-custom.xml'].include? hpxml_file
+    hpxml.header.sim_calendar_year = 2008
   elsif ['base-simcontrol-daylight-saving-custom.xml'].include? hpxml_file
     hpxml.header.dst_enabled = true
     hpxml.header.dst_begin_month = 3
@@ -2561,6 +2444,8 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.allow_increased_fixed_capacities = true
   elsif hpxml_file.include? 'manual-s-oversize-allowances.xml'
     hpxml.header.use_max_load_for_heat_pumps = false
+  elsif ['invalid_files/invalid-calendar-year.xml'].include? hpxml_file
+    hpxml.header.sim_calendar_year = 20018
   elsif ['invalid_files/invalid-timestep.xml'].include? hpxml_file
     hpxml.header.timestep = 45
   elsif ['invalid_files/invalid-runperiod.xml'].include? hpxml_file
@@ -2571,6 +2456,10 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.dst_end_day_of_month = 31
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.header.timestep = nil
+  elsif ['base-schedules-stochastic.xml'].include? hpxml_file
+    hpxml.header.schedules_path = 'BuildResidentialHPXML/tests/schedules/stochastic.csv'
+  elsif ['base-schedules-user-specified.xml'].include? hpxml_file
+    hpxml.header.schedules_path = 'BuildResidentialHPXML/tests/schedules/user-specified.csv'
   end
 end
 
@@ -2688,46 +2577,38 @@ def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
   hpxml.climate_and_risk_zones.iecc_year = 2006
   if hpxml_file == 'ASHRAE_Standard_140/L100AC.xml'
     hpxml.climate_and_risk_zones.weather_station_name = 'Colorado Springs, CO'
-    hpxml.climate_and_risk_zones.weather_station_wmo = '724660'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_CO_Colorado.Springs-Peterson.Field.724660_TMY3.epw'
   elsif hpxml_file == 'ASHRAE_Standard_140/L100AL.xml'
     hpxml.climate_and_risk_zones.weather_station_name = 'Las Vegas, NV'
-    hpxml.climate_and_risk_zones.weather_station_wmo = '723860'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_NV_Las.Vegas-McCarran.Intl.AP.723860_TMY3.epw'
   elsif ['base.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.iecc_zone = '5B'
     hpxml.climate_and_risk_zones.weather_station_name = 'Denver, CO'
-    hpxml.climate_and_risk_zones.weather_station_wmo = '725650'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
     hpxml.header.state_code = 'CO'
   elsif ['base-location-baltimore-md.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.iecc_zone = '4A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Baltimore, MD'
-    hpxml.climate_and_risk_zones.weather_station_wmo = '724060'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw'
     hpxml.header.state_code = 'MD'
   elsif ['base-location-dallas-tx.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.iecc_zone = '3A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Dallas, TX'
-    hpxml.climate_and_risk_zones.weather_station_wmo = '722590'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw'
     hpxml.header.state_code = 'TX'
   elsif ['base-location-duluth-mn.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.iecc_zone = '7'
     hpxml.climate_and_risk_zones.weather_station_name = 'Duluth, MN'
-    hpxml.climate_and_risk_zones.weather_station_wmo = '727450'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_MN_Duluth.Intl.AP.727450_TMY3.epw'
     hpxml.header.state_code = 'MN'
   elsif ['base-location-miami-fl.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.iecc_zone = '1A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Miami, FL'
-    hpxml.climate_and_risk_zones.weather_station_wmo = '722020'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_FL_Miami.Intl.AP.722020_TMY3.epw'
     hpxml.header.state_code = 'FL'
-  elsif ['base-location-epw-filepath.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.weather_station_wmo = nil
-    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
-  elsif ['base-location-epw-filepath-AMY-2012.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_year = nil
-    hpxml.climate_and_risk_zones.iecc_zone = nil
-    hpxml.climate_and_risk_zones.weather_station_wmo = nil
+  elsif ['base-location-AMY-2012.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_name = 'Boulder, CO'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'US_CO_Boulder_AMY_2012.epw'
-  elsif ['invalid_files/invalid-wmo.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.weather_station_wmo = '999999'
   elsif ['invalid_files/invalid-epw-filepath.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'foo.epw'
   end
@@ -4262,13 +4143,10 @@ def set_hpxml_windows(hpxml_file, hpxml)
   elsif ['base-enclosure-windows-interior-shading.xml'].include? hpxml_file
     hpxml.windows[1].interior_shading_factor_summer = 0.01
     hpxml.windows[1].interior_shading_factor_winter = 0.99
-    hpxml.windows[2].interior_shading_factor_summer = 0.0
+    hpxml.windows[2].interior_shading_factor_summer = 0.5
     hpxml.windows[2].interior_shading_factor_winter = 0.5
-    hpxml.windows[3].interior_shading_factor_summer = 1.0
+    hpxml.windows[3].interior_shading_factor_summer = 0.0
     hpxml.windows[3].interior_shading_factor_winter = 1.0
-  elsif ['invalid_files/invalid-window-interior-shading.xml'].include? hpxml_file
-    hpxml.windows[0].interior_shading_factor_summer = 0.85
-    hpxml.windows[0].interior_shading_factor_winter = 0.7
   elsif ['base-enclosure-windows-none.xml'].include? hpxml_file
     hpxml.windows.clear
   elsif ['invalid_files/net-area-negative-wall.xml'].include? hpxml_file
@@ -4635,6 +4513,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeOil
   elsif ['base-hvac-furnace-propane-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypePropane
+  elsif ['base-hvac-furnace-coal-only.xml'].include? hpxml_file
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeCoal
   elsif ['base-hvac-furnace-wood-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWoodCord
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
@@ -4800,8 +4680,6 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].fraction_heat_load_served = 0.5
     hpxml.heating_systems << hpxml.heating_systems[0].dup
     hpxml.heating_systems[1].id += '2'
-  elsif ['invalid_files/coal-for-non-boiler-heating.xml'].include? hpxml_file
-    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeCoal
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_capacity /= 10.0
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
@@ -7075,7 +6953,7 @@ if ARGV[0].to_sym == :create_release_zips
   end
 
   # Check if we need to download weather files for the full release zip
-  num_epws_expected = File.readlines(File.join('weather', 'data.csv')).size - 1
+  num_epws_expected = 1011
   num_epws_local = 0
   files.each do |f|
     Dir[f].each do |file|

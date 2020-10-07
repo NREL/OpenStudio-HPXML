@@ -106,10 +106,39 @@ The simulation run period can be optionally specified with ``BeginMonth``/``Begi
 The ``BeginMonth``/``BeginDayOfMonth`` provided must occur before ``EndMonth``/``EndDayOfMonth`` provided (e.g., a run period from 10/1 to 3/31 is invalid).
 If not provided, default values of January 1st and December 31st will be used.
 
+The simulation run period calendar year can be optionally specified with ``CalendarYear``.
+The calendar year is used to determine the simulation start day of week.
+If the EPW weather file is TMY (Typical Meteorological Year), the default value of 2007 will be used if not specified.
+If the EPW weather file is AMY (Actual Meteorological Year), the AMY year will be used regardless of what is specified.
+
 Whether to apply daylight saving time can be optionally denoted with ``DaylightSaving/Enabled``.
 If either ``DaylightSaving`` or ``DaylightSaving/Enabled`` is not provided, ``DaylightSaving/Enabled`` will default to true.
 If daylight saving is enabled, the daylight saving period can be optionally specified with ``DaylightSaving/BeginMonth``, ``DaylightSaving/BeginDayOfMonth``, ``DaylightSaving/EndMonth``, and ``DaylightSaving/EndDayOfMonth``.
 If not specified, dates will be defined according to the EPW weather file header; if not available there, default values of March 12 and November 5 will be used.
+
+An absolute or relative path can be entered in ``/HPXML/SoftwareInfo/extension/OccupancySchedulesCSVPath``.
+The file that this path points to must be a valid csv file containing column-wise (hourly or sub-hourly) schedules with headers matching column names from `this sample CSV file <https://github.com/NREL/OpenStudio-HPXML/tree/master/BuildResidentialHPXML/tests/schedules/user-specified.csv>`_.
+A valid csv file contains schedules:
+
+- that span the entire year (8760 or 8784 hours)
+- whose values are between only 0 and 1
+- with a minute per item evenly divisible into 60
+
+Note, then, that the shortest schedule may be hourly and the longest (sub-hourly) schedule may be minutely.
+The csv file may optionally contain a "vacancy" column which indicates timestamps for which the building unit is vacant. A value of 0 indicates no vacancy, whereas a value of 1 indicates vacancy. All schedules in the csv file will be set to zero during the vacancy period.
+The following end uses will be zero during the vacancy period:
+
+- occupants
+- lighting
+- appliances
+- fixtures
+- ceiling fan
+- plug loads
+- fuel loads
+- pools
+- hot tubs
+
+If a schedule path is provided, no other weekday/weekend fraction or monthly multipliers may be contained in the HPXML file.
 
 HPXML HVAC Sizing Control
 *************************
@@ -195,12 +224,8 @@ Fields include:
 HPXML Weather Station
 ---------------------
 
-The ``ClimateandRiskZones/WeatherStation`` element specifies the EnergyPlus weather file (EPW) to be used in the simulation.
-The weather file can be entered in one of two ways:
-
-#. Using ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the ``weather/data.csv`` file.
-   The full set of U.S. TMY3 weather files can be `downloaded here <https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip>`_.
-#. Using ``WeatherStation/extension/EPWFilePath``.
+The ``ClimateandRiskZones/WeatherStation/extension/EPWFilePath`` element specifies the path to the EnergyPlus weather file (EPW) to be used by the simulation.
+The full set of U.S. TMY3 weather files can be `downloaded here <https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip>`_.
 
 HPXML Enclosure
 ---------------
@@ -407,7 +432,6 @@ Windows must reference a HPXML ``Enclosures/Walls/Wall`` element via the ``Attac
 Windows must also have an ``Azimuth`` specified, even if the attached wall does not.
 
 In addition, the summer/winter interior shading coefficients can be optionally entered as ``InteriorShading/SummerShadingCoefficient`` and ``InteriorShading/WinterShadingCoefficient``.
-The summer interior shading coefficient must be less than or equal to the winter interior shading coefficient.
 Note that a value of 0.7 indicates a 30% reduction in solar gains (i.e., 30% shading).
 If not provided, default values of 0.70 for summer and 0.85 for winter will be used based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
@@ -1165,7 +1189,7 @@ IsConvection   false
 =============  ==============
 
 Optional ``CookingRange/extension/WeekdayScheduleFractions``, ``CookingRange/extension/WeekendScheduleFractions``, and ``CookingRange/extension/MonthlyScheduleMultipliers`` can be provided; if not provided, values from Figures 22 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
-An ``CookingRange/extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+A ``CookingRange/extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
 HPXML Dehumidifier
 ******************
