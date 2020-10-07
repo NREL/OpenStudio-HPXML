@@ -480,6 +480,7 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.'
       next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
       next if err_line.include? 'Air-cooled condenser inlet dry-bulb temperature below 0 C.'
+      next if err_line.include? 'Low condenser dry-bulb temperature error continues.'
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
