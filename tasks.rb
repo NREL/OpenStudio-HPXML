@@ -48,7 +48,6 @@ def create_hpxmls
     'invalid_files/clothes-dryer-location.xml' => 'base.xml',
     'invalid_files/cooking-range-location.xml' => 'base.xml',
     'invalid_files/appliances-location-unconditioned-space.xml' => 'base.xml',
-    'invalid_files/coal-for-non-boiler-heating.xml' => 'base-hvac-stove-oil-only.xml',
     'invalid_files/dhw-frac-load-served.xml' => 'base-dhw-multiple.xml',
     'invalid_files/dishwasher-location.xml' => 'base.xml',
     'invalid_files/duct-location.xml' => 'base.xml',
@@ -57,6 +56,7 @@ def create_hpxmls
     'invalid_files/enclosure-attic-missing-roof.xml' => 'base.xml',
     'invalid_files/enclosure-basement-missing-exterior-foundation-wall.xml' => 'base-foundation-unconditioned-basement.xml',
     'invalid_files/enclosure-basement-missing-slab.xml' => 'base-foundation-unconditioned-basement.xml',
+    'invalid_files/enclosure-floor-area-exceeds-cfa.xml' => 'base.xml',
     'invalid_files/enclosure-garage-missing-exterior-wall.xml' => 'base-enclosure-garage.xml',
     'invalid_files/enclosure-garage-missing-roof-ceiling.xml' => 'base-enclosure-garage.xml',
     'invalid_files/enclosure-garage-missing-slab.xml' => 'base-enclosure-garage.xml',
@@ -83,7 +83,6 @@ def create_hpxmls
     'invalid_files/invalid-runperiod.xml' => 'base.xml',
     'invalid_files/invalid-timestep.xml' => 'base.xml',
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
-    'invalid_files/invalid-window-interior-shading.xml' => 'base.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
     'invalid_files/multifamily-reference-appliance.xml' => 'base.xml',
@@ -92,6 +91,7 @@ def create_hpxmls
     'invalid_files/multifamily-reference-water-heater.xml' => 'base.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
+    'invalid_files/num-bedrooms-exceeds-limit.xml' => 'base.xml',
     'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'invalid_files/refrigerator-location.xml' => 'base.xml',
     'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
@@ -248,6 +248,7 @@ def create_hpxmls
     'base-hvac-fixed-heater-gas-only.xml' => 'base.xml',
     'base-hvac-floor-furnace-propane-only.xml' => 'base.xml',
     'base-hvac-flowrate.xml' => 'base.xml',
+    'base-hvac-furnace-coal-only.xml' => 'base.xml',
     'base-hvac-furnace-elec-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-2-speed.xml' => 'base.xml',
@@ -643,6 +644,10 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeApartment
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
+  elsif ['invalid_files/enclosure-floor-area-exceeds-cfa.xml'].include? hpxml_file
+    hpxml.building_construction.conditioned_floor_area /= 5.0
+  elsif ['invalid_files/num-bedrooms-exceeds-limit.xml'].include? hpxml_file
+    hpxml.building_construction.number_of_bedrooms = 40
   elsif ['invalid_files/invalid-facility-type.xml'].include? hpxml_file
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFD
   end
@@ -2234,13 +2239,10 @@ def set_hpxml_windows(hpxml_file, hpxml)
   elsif ['base-enclosure-windows-interior-shading.xml'].include? hpxml_file
     hpxml.windows[1].interior_shading_factor_summer = 0.01
     hpxml.windows[1].interior_shading_factor_winter = 0.99
-    hpxml.windows[2].interior_shading_factor_summer = 0.0
+    hpxml.windows[2].interior_shading_factor_summer = 0.5
     hpxml.windows[2].interior_shading_factor_winter = 0.5
-    hpxml.windows[3].interior_shading_factor_summer = 1.0
+    hpxml.windows[3].interior_shading_factor_summer = 0.0
     hpxml.windows[3].interior_shading_factor_winter = 1.0
-  elsif ['invalid_files/invalid-window-interior-shading.xml'].include? hpxml_file
-    hpxml.windows[0].interior_shading_factor_summer = 0.85
-    hpxml.windows[0].interior_shading_factor_winter = 0.7
   elsif ['base-enclosure-windows-none.xml'].include? hpxml_file
     hpxml.windows.clear
   elsif ['invalid_files/net-area-negative-wall.xml'].include? hpxml_file
@@ -2607,6 +2609,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeOil
   elsif ['base-hvac-furnace-propane-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypePropane
+  elsif ['base-hvac-furnace-coal-only.xml'].include? hpxml_file
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeCoal
   elsif ['base-hvac-furnace-wood-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWoodCord
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
@@ -2772,8 +2776,6 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].fraction_heat_load_served = 0.5
     hpxml.heating_systems << hpxml.heating_systems[0].dup
     hpxml.heating_systems[1].id += '2'
-  elsif ['invalid_files/coal-for-non-boiler-heating.xml'].include? hpxml_file
-    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeCoal
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_capacity /= 10.0
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
