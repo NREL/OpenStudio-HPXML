@@ -353,6 +353,13 @@ class OSModel
         fail "There must be at least one floor adjacent to #{location}."
       end
     end
+
+    # Error-checking from RESNET Pub 002: Number of bedrooms
+    nbeds = @hpxml.building_construction.number_of_bedrooms
+    nbeds_limit = (@hpxml.building_construction.conditioned_floor_area - 120.0) / 70.0
+    if nbeds > nbeds_limit
+      fail "Number of bedrooms (#{nbeds}) exceeds limit of (CFA-120)/70=#{nbeds_limit.round(1)}."
+    end
   end
 
   def self.set_defaults_and_globals(runner, output_dir, epw_file)
@@ -1578,7 +1585,8 @@ class OSModel
     sum_cfa = 0.0
     @hpxml.frame_floors.each do |frame_floor|
       next unless frame_floor.is_floor
-      next unless frame_floor.interior_adjacent_to == HPXML::LocationLivingSpace
+      next unless [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include?(frame_floor.interior_adjacent_to) ||
+                  [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include?(frame_floor.exterior_adjacent_to)
 
       sum_cfa += frame_floor.area
     end
@@ -1589,7 +1597,12 @@ class OSModel
     end
 
     addtl_cfa = @cfa - sum_cfa
-    return unless addtl_cfa > 0.1
+
+    if addtl_cfa < -0.1 # Allow some rounding
+      fail "Sum of floor/slab area adjacent to conditioned space (#{sum_cfa.round(1)}) is greater than conditioned floor area (#{@cfa.round(1)})."
+    end
+
+    return unless addtl_cfa > 0.1 # Allow some rounding
 
     floor_width = Math::sqrt(addtl_cfa)
     floor_length = addtl_cfa / floor_width
