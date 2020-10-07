@@ -479,6 +479,8 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'Temperature out of range [-100. to 200.] (PsyPsatFnTemp)'
       next if err_line.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.'
       next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
+      next if err_line.include? 'Air-cooled condenser inlet dry-bulb temperature below 0 C.'
+      next if err_line.include? 'Low condenser dry-bulb temperature error continues.'
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
@@ -502,10 +504,10 @@ class HPXMLTest < MiniTest::Test
         next if err_line.include? 'Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored'
       end
       if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeRoomAirConditioner }.size > 0
-        next if err_line.include? 'GetDXCoils: Coil:Cooling:DX:SingleSpeed="ROOM AC CLG COIL" curve values' # TODO: Double-check curves
+        next if err_line.include? 'GetDXCoils: Coil:Cooling:DX:SingleSpeed="ROOM AC CLG COIL" curve values' # TODO: Double-check Room AC curves
       end
-      if hpxml_path.include? 'fan-coil' # Warning for unused coil
-        next if err_line.include? 'In calculating the design coil UA for Coil:Cooling:Water'
+      if hpxml.hvac_distributions.select { |d| d.hydronic_and_air_type.to_s == HPXML::HydronicAndAirTypeFanCoil }.size > 0
+        next if err_line.include? 'In calculating the design coil UA for Coil:Cooling:Water' # Warning for unused cooling coil for fan coil
       end
 
       flunk "Unexpected warning found: #{err_line}"
