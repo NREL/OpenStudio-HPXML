@@ -11,6 +11,7 @@ def create_hpxmls
 
   this_dir = File.dirname(__FILE__)
   sample_files_dir = File.join(this_dir, 'workflow/sample_files')
+  hpxml_docs = {}
 
   # Hash of HPXML -> Parent HPXML
   hpxmls_files = {
@@ -440,6 +441,7 @@ def create_hpxmls
       end
 
       hpxml_doc = hpxml.to_oga()
+      hpxml_docs[File.basename(derivative)] = hpxml_doc
 
       if ['invalid_files/missing-elements.xml'].include? derivative
         XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors')
@@ -493,6 +495,8 @@ def create_hpxmls
       puts "Warning: Extra HPXML file found at #{File.absolute_path(xml)}"
     end
   end
+
+  return hpxml_docs
 end
 
 def set_hpxml_header(hpxml_file, hpxml)
@@ -4929,25 +4933,7 @@ def download_epws
   exit!
 end
 
-def set_hpxml_validator()
-  puts 'Generating HPXML Validator...'
-
-  create_schematron_hpxml_validator()
-end
-
-def get_elements_from_sample_files()
-  puts 'Identifying elements being used in sample files...'
-
-  # Load all HPXMLs
-  hpxml_file_dirs = [File.absolute_path(File.join(File.dirname(__FILE__), 'workflow', 'sample_files')),
-                     File.absolute_path(File.join(File.dirname(__FILE__), 'workflow', 'tests', 'ASHRAE_Standard_140'))]
-  hpxml_docs = {}
-  hpxml_file_dirs.each do |hpxml_file_dir|
-    Dir["#{hpxml_file_dir}/*.xml"].sort.each do |xml|
-      hpxml_docs[File.basename(xml)] = HPXML.new(hpxml_path: File.join(hpxml_file_dir, File.basename(xml))).to_oga()
-    end
-  end
-
+def get_elements_from_sample_files(hpxml_docs)
   elements_being_used = []
   hpxml_docs.each do |xml, hpxml_doc|
     root = XMLHelper.get_element(hpxml_doc, '/HPXML')
@@ -4971,8 +4957,8 @@ def get_elements_from_sample_files()
   return elements_being_used
 end
 
-def create_schematron_hpxml_validator()
-  elements_in_sample_files = get_elements_from_sample_files()
+def create_schematron_hpxml_validator(hpxml_docs)
+  elements_in_sample_files = get_elements_from_sample_files(hpxml_docs)
 
   base_elements_xsd = File.read(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'BaseElements.xsd'))
   base_elements_xsd_doc = Oga.parse_xml(base_elements_xsd)
@@ -4981,7 +4967,7 @@ def create_schematron_hpxml_validator()
   hpxml_data_types_xsd = File.read(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'HPXMLDataTypes.xsd'))
   hpxml_data_types_xsd_doc = Oga.parse_xml(hpxml_data_types_xsd)
   hpxml_data_types_dict = {}
-  hpxml_data_types_xsd_doc.xpath('//xs:simpleType').each do |simple_type_element|
+  hpxml_data_types_xsd_doc.xpath('//xs:simpleType | //xs:complexType').each do |simple_type_element|
     enums = []
     simple_type_element.xpath('xs:restriction/xs:enumeration').each do |enum|
       enums << ['_', enum.get('value'), '_'].join() # in "_foo_" format
@@ -4995,9 +4981,6 @@ def create_schematron_hpxml_validator()
     maxExclusive_element = simple_type_element.at_xpath('xs:restriction/xs:maxExclusive')
     max_exclusive = maxExclusive_element.get('value') if not maxExclusive_element.nil?
 
-    # avoid creating empty rules
-    next if enums.empty? && min_inclusive.nil? && max_inclusive.nil? && min_exclusive.nil? && max_exclusive.nil?
-
     simple_type_element_name = simple_type_element.get('name')
     hpxml_data_types_dict[simple_type_element_name] = {}
     hpxml_data_types_dict[simple_type_element_name][:enums] = enums
@@ -5008,8 +4991,6 @@ def create_schematron_hpxml_validator()
   end
 
   # construct HPXMLvalidator.xml
-  puts 'Constructing HPXMLvalidator.xml...'
-
   hpxml_validator = XMLHelper.create_doc(version = '1.0', encoding = 'UTF-8')
   root = XMLHelper.add_element(hpxml_validator, 'sch:schema')
   XMLHelper.add_attribute(root, 'xmlns:sch', 'http://purl.oclc.org/dsdl/schematron')
@@ -5029,15 +5010,14 @@ def create_schematron_hpxml_validator()
       param_type_name = param_type.get('name')
       complex_type_or_group_dict[param_type_name] = {}
 
-      param_type_only = deep_copy_object(param_type)
-      param_type_only.each_node do |element|
+      param_type.each_node do |element|
         next unless element.is_a?(Oga::XML::Element)
         next unless element.name == 'element'
 
         ancestors = []
         element.each_ancestor do |node|
           next if node.get('name').nil?
-          next if node.get('name') == param_type_only.get('name') # exclude complexType name from element xpath
+          next if node.get('name') == param_type.get('name') # exclude complexType name from element xpath
 
           ancestors << node.get('name')
         end
@@ -5077,6 +5057,7 @@ def create_schematron_hpxml_validator()
 
       has_complex_type_or_group_dict = complex_type_or_group_dict[element_type]
       if has_complex_type_or_group_dict
+        # FIXME: Improve recursive call so that we only add the "final" xpath
         get_expanded_elements(element_xpaths, complex_type_or_group_dict, element_xpath, element_type)
       else
         element_xpaths[element_xpath] = element_type
@@ -5085,10 +5066,11 @@ def create_schematron_hpxml_validator()
   end
 
   # Add enumeration and min/max numeric values
-  puts 'Adding enumeration and min/max numeric values...'
-
   element_xpaths.each do |element_xpath, element_type|
+    next if element_type.nil?
+
     # exclude duplicated xpaths
+    # FIXME: Remove this check when recursive code above is updated
     has_duplicate = element_xpaths.keys.select { |k| (element_xpath != k) && (k.each_cons(element_xpath.size).include? element_xpath) } # check if an array contains another array in particular order
     next unless has_duplicate.empty?
 
@@ -5099,7 +5081,12 @@ def create_schematron_hpxml_validator()
 
     hpxml_data_type_name = [element_type, '_simple'].join()
     hpxml_data_type = hpxml_data_types_dict[hpxml_data_type_name]
-    next if hpxml_data_type.nil?
+    hpxml_data_type = hpxml_data_types_dict[element_type] if hpxml_data_type.nil? # Backup
+    if hpxml_data_type.nil?
+      fail "Could not find data type name for '#{element_type}'."
+    end
+
+    next if hpxml_data_type[:enums].empty? && hpxml_data_type[:min_inclusive].nil? && hpxml_data_type[:max_inclusive].nil? && hpxml_data_type[:min_exclusive].nil? && hpxml_data_type[:max_exclusive].nil?
 
     rule = XMLHelper.add_element(pattern, 'sch:rule')
     XMLHelper.add_attribute(rule, 'context', context_xpath.prepend('//'))
@@ -5185,8 +5172,12 @@ if ARGV[0].to_sym == :update_measures
   ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
   ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
 
-  create_hpxmls
-  set_hpxml_validator
+  # Create sample/test HPXMLs
+  hpxml_docs = create_hpxmls()
+
+  # Create Schematron file that reflects HPXML schema
+  puts 'Generating HPXMLvalidator.xml...'
+  create_schematron_hpxml_validator(hpxml_docs)
 
   # Apply rubocop
   cops = ['Layout',

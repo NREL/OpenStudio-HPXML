@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>6eb2ea66-ab35-4a15-bf70-3a9b0aa577cf</version_id>
-  <version_modified>20201007T203629Z</version_modified>
+  <version_id>9c6e5f2b-d594-48bc-a475-19f5786362e0</version_id>
+  <version_modified>20201008T010325Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -140,12 +140,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>A951F41D</checksum>
-    </file>
-    <file>
-      <filename>BaseElements.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A737C597</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -454,12 +448,6 @@
       <checksum>12DB5DDD</checksum>
     </file>
     <file>
-      <filename>HPXMLDataTypes.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C30C2748</checksum>
-    </file>
-    <file>
       <filename>validator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -499,6 +487,18 @@
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
       <checksum>713B3174</checksum>
+    </file>
+    <file>
+      <filename>BaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B7D212FC</checksum>
+    </file>
+    <file>
+      <filename>HPXMLDataTypes.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C13E66F3</checksum>
     </file>
   </files>
 </measure>
