@@ -29,6 +29,7 @@
       <sch:assert role='ERROR' test='count(h:Timestep) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Timestep</sch:assert> <!-- minutes; must be a divisor of 60 -->
       <sch:assert role='ERROR' test='(count(h:BeginMonth) + count(h:BeginDayOfMonth) = 0) or (count(h:BeginMonth) + count(h:BeginDayOfMonth) = 2)'>Expected 0 or 2 element(s) for xpath: BeginMonth | BeginDayOfMonth</sch:assert> <!-- integer -->
       <sch:assert role='ERROR' test='(count(h:EndMonth) + count(h:EndDayOfMonth) = 0) or (count(h:EndMonth) + count(h:EndDayOfMonth) = 2)'>Expected 0 or 2 element(s) for xpath: EndMonth | EndDayOfMonth</sch:assert> <!-- integer -->
+      <sch:assert role='ERROR' test='count(h:CalendarYear) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CalendarYear</sch:assert> <!-- integer -->
       <sch:assert role='ERROR' test='count(h:DaylightSaving) &lt;= 1'>Expected 0 or 1 element(s) for xpath: DaylightSaving</sch:assert> <!-- See [DaylightSaving] -->
     </sch:rule>
   </sch:pattern>
@@ -174,7 +175,7 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:ClimateandRiskZones/h:WeatherStation'>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: SystemIdentifier</sch:assert>
       <sch:assert role='ERROR' test='count(h:Name) = 1'>Expected 1 element(s) for xpath: Name</sch:assert>
-      <sch:assert role='ERROR' test='count(h:WMO) + count(h:extension/h:EPWFilePath) = 1'>Expected 1 element(s) for xpath: WMO | extension/EPWFilePath</sch:assert> <!-- Reference weather/data.csv for the list of acceptable WMO station numbers -->
+      <sch:assert role='ERROR' test='count(h:extension/h:EPWFilePath) = 1'>Expected 1 element(s) for xpath: extension/EPWFilePath</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -558,28 +559,28 @@
       <sch:assert role='ERROR' test='contains("_electricity_", concat("_", text(), "_"))'>Expected value to be 'electricity'</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:Furnace]/h:HeatingSystemFuel'>
-      <sch:assert role='ERROR' test='contains("_natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _electricity_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'electricity' or 'wood' or 'wood pellets'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _coal_ _coke_ _bituminous coal_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:WallFurnace]/h:HeatingSystemFuel'>
-      <sch:assert role='ERROR' test='contains("_natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _electricity_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'electricity' or 'wood' or 'wood pellets'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _coal_ _coke_ _bituminous coal_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:FloorFurnace]/h:HeatingSystemFuel'>
-      <sch:assert role='ERROR' test='contains("_natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _electricity_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'electricity' or 'wood' or 'wood pellets'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _coal_ _coke_ _bituminous coal_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:Boiler]/h:HeatingSystemFuel'>
-      <sch:assert role='ERROR' test='contains("_natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _electricity_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'electricity' or 'wood' or 'wood pellets'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _coal_ _coke_ _bituminous coal_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:Stove]/h:HeatingSystemFuel'>
-      <sch:assert role='ERROR' test='contains("_natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _electricity_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'electricity' or 'wood' or 'wood pellets'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _coal_ _coke_ _bituminous coal_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:PortableHeater]/h:HeatingSystemFuel'>
-      <sch:assert role='ERROR' test='contains("_natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _electricity_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'electricity' or 'wood' or 'wood pellets'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _coal_ _coke_ _bituminous coal_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:FixedHeater]/h:HeatingSystemFuel'>
-      <sch:assert role='ERROR' test='contains("_natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _electricity_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'electricity' or 'wood' or 'wood pellets'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _coal_ _coke_ _bituminous coal_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:Fireplace]/h:HeatingSystemFuel'>
-      <sch:assert role='ERROR' test='contains("_natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _electricity_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'electricity' or 'wood' or 'wood pellets'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _coal_ _coke_ _bituminous coal_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -705,7 +706,7 @@
     </sch:rule>
     <!-- [BackupSystemFuel] -->
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:BackupSystemFuel'>
-      <sch:assert role='ERROR' test='contains("_electricity_ _natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'wood' or 'wood pellets'</sch:assert>
+      <sch:assert role='ERROR' test='contains("_electricity_ _natural gas_ _fuel oil_ _fuel oil 1_ _fuel oil 2_ _fuel oil 4_ _fuel oil 5/6_ _diesel_ _propane_ _kerosene_ _coal_ _coke_ _bituminous coal_ _wood_ _wood pellets_", concat("_", text(), "_"))'>Expected value to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -1212,6 +1213,7 @@
       <sch:assert role='ERROR' test='count(h:FuelType) = 1'>Expected 1 element(s) for xpath: FuelType</sch:assert> <!-- See [FuelType] -->
       <sch:assert role='ERROR' test='count(h:EnergyFactor) + count(h:CombinedEnergyFactor) &lt;= 1'>Expected 0 or 1 element(s) for xpath: EnergyFactor | CombinedEnergyFactor</sch:assert> <!-- See [ClothesDryerType=Detailed] -->
       <sch:assert role='ERROR' test='count(h:extension/h:UsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/UsageMultiplier</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:IsVented) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/IsVented</sch:assert> <!-- See [ClothesDryerType=Vented] -->
     </sch:rule>
   </sch:pattern>
 
@@ -1224,6 +1226,12 @@
   <sch:pattern name='[ClothesDryerType=Shared]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer[h:IsSharedAppliance="true"]'>
       <sch:assert role='ERROR' test='count(../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern name='[ClothesDryerType=Vented]'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer[h:extension/h:IsVented="true"]'>
+      <sch:assert role='ERROR' test='count(h:extension/h:VentedFlowRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/VentedFlowRate</sch:assert>
     </sch:rule>
   </sch:pattern>
 
