@@ -866,6 +866,7 @@
 
   <sch:pattern name='[HotWaterDistributionType=Recirculation]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution/h:SystemType/h:Recirculation'>
+      <sch:assert role='ERROR' test='count(../../h:SystemType/h:Standard) = 1'>Expected 1 element(s) for xpath: ../../SystemType/Standard</sch:assert>
       <sch:assert role='ERROR' test='count(h:ControlType[text()="manual demand control" or text()="presence sensor demand control" or text()="temperature" or text()="timer" or text()="no control"]) = 1'>Expected 1 element(s) for xpath: ControlType[text()="manual demand control" or text()="presence sensor demand control" or text()="temperature" or text()="timer" or text()="no control"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:RecirculationPipingLoopLength) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RecirculationPipingLoopLength</sch:assert>
       <sch:assert role='ERROR' test='count(h:BranchPipingLoopLength) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BranchPipingLoopLength</sch:assert>
