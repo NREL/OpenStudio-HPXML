@@ -359,7 +359,7 @@ class HPXMLDefaults
         end
       elsif [HPXML::HVACTypeStove].include? heating_system.heating_system_type
         if heating_system.fan_watts.nil?
-          heating_system.fan_watts = 40.0
+          heating_system.fan_watts = 40.0 # W
         end
       elsif [HPXML::HVACTypeWallFurnace,
              HPXML::HVACTypeFloorFurnace,
@@ -367,19 +367,25 @@ class HPXMLDefaults
              HPXML::HVACTypeFixedHeater,
              HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
         if heating_system.fan_watts.nil?
-          heating_system.fan_watts = 0.0 # Assume no fan power
+          heating_system.fan_watts = 0.0 # W/cfm, assume no fan power
         end
       end
     end
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.fan_watts_per_cfm.nil?
-      next unless [HPXML::HVACTypeCentralAirConditioner,
-                   HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
 
-      if cooling_system.cooling_efficiency_seer <= 15
-        cooling_system.fan_watts_per_cfm = 0.5 # W/cfm
-      else
-        cooling_system.fan_watts_per_cfm = 0.3 # W/cfm
+      if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
+        if cooling_system.cooling_efficiency_seer <= 15
+          cooling_system.fan_watts_per_cfm = 0.5 # W/cfm
+        else
+          cooling_system.fan_watts_per_cfm = 0.3 # W/cfm
+        end
+      elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
+        if not cooling_system.distribution_system.nil?
+          cooling_system.fan_watts_per_cfm = 0.18 # W/cfm, ducted
+        else
+          cooling_system.fan_watts_per_cfm = 0.07 # W/cfm, ductless
+        end
       end
     end
     hpxml.heat_pumps.each do |heat_pump|
