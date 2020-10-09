@@ -4,7 +4,7 @@
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>tasks.rb</XMLGeneratedBy>
     <CreatedDateAndTime>2000-01-01T00:00:00-07:00</CreatedDateAndTime>
-    <Transaction>create</Transaction>
+    <Transaction>modify</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
     <extension>
@@ -27,7 +27,7 @@
     <BuildingDetails>
       <BuildingSummary>
         <Site>
-          <SiteType>suburban</SiteType>
+          <SiteType>mountain</SiteType>
           <FuelTypesAvailable>
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
@@ -48,7 +48,7 @@
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
-          <Year>2006</Year>
+          <Year>2020</Year>
           <ClimateZone>5B</ClimateZone>
         </ClimateZoneIECC>
         <WeatherStation>
@@ -97,11 +97,13 @@
             <SystemIdentifier id='Roof'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <Area>1510.0</Area>
+            <Azimuth>365</Azimuth>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Pitch>6.0</Pitch>
             <RadiantBarrier>false</RadiantBarrier>
+            <RadiantBarrierGrade>4</RadiantBarrierGrade>
             <Insulation>
               <SystemIdentifier id='RoofInsulation'/>
               <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
@@ -308,19 +310,17 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
+              <DistributionSystem idref='HVACDistribution'/>
               <HeatingSystemType>
-                <PortableHeater/>
+                <Furnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
               <HeatingCapacity>64000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
-                <Units>Percent</Units>
-                <Value>1.0</Value>
+                <Units>AFUE</Units>
+                <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-              <extension>
-                <FanPowerWatts>0.0</FanPowerWatts>
-              </extension>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
@@ -441,7 +441,7 @@
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
           <Location>living space</Location>
-          <RatedAnnualkWh>307.0</RatedAnnualkWh>
+          <EnergyFactor>5.1</EnergyFactor>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
           <LabelElectricRate>0.12</LabelElectricRate>
           <LabelGasRate>1.09</LabelGasRate>

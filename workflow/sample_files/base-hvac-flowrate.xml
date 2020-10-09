@@ -320,7 +320,7 @@
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <extension>
-                <AirflowCFMPerTon>360.0</AirflowCFMPerTon>
+                <AirflowCFMPerTon>400.0</AirflowCFMPerTon>
               </extension>
             </HeatingSystem>
             <CoolingSystem>

@@ -445,7 +445,15 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoHVACActualCFMperTon
+  def self.SizingInfoHVACActualCFMPerTonCooling
+    return __method__.to_s
+  end
+
+  def self.SizingInfoHVACActualCFMPerTonHeating
+    return __method__.to_s
+  end
+
+  def self.SizingInfoHVACFanWatts
     return __method__.to_s
   end
 
@@ -509,7 +517,11 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoHVACAirflowDefectRatio
+  def self.SizingInfoHVACAirflowDefectRatioCooling
+    return __method__.to_s
+  end
+
+  def self.SizingInfoHVACAirflowDefectRatioHeating
     return __method__.to_s
   end
 

@@ -40,56 +40,7 @@ class HVAC
       # Cooling Coil
 
       cool_c_d = get_cool_c_d(num_speeds, cooling_system.cooling_efficiency_seer)
-      if num_speeds == 1
-        cool_rated_airflow_rate = 386.1 # cfm/ton
-        cool_capacity_ratios = [1.0]
-        cool_fan_speed_ratios = [1.0]
-        cool_shrs = [cooling_system.cooling_shr]
-        cool_cap_ft_spec = [[3.670270705, -0.098652414, 0.000955906, 0.006552414, -0.0000156, -0.000131877]]
-        cool_eir_ft_spec = [[-3.302695861, 0.137871531, -0.001056996, -0.012573945, 0.000214638, -0.000145054]]
-        cool_cap_fflow_spec = [[0.718605468, 0.410099989, -0.128705457]]
-        cool_eir_fflow_spec = [[1.32299905, -0.477711207, 0.154712157]]
-        cool_eers = [calc_eer_cooling_1speed(cooling_system.cooling_efficiency_seer, fan_power_rated, cool_eir_ft_spec)]
-      elsif num_speeds == 2
-        cool_rated_airflow_rate = 355.2 # cfm/ton
-        cool_capacity_ratios = [0.72, 1.0]
-        cool_fan_speed_ratios = [0.86, 1.0]
-        cool_shrs = [cooling_system.cooling_shr - 0.02, cooling_system.cooling_shr] # TODO: is the following assumption correct (revisit Dylan's data?)? OR should value from HPXML be used for both stages
-        cool_cap_ft_spec = [[3.940185508, -0.104723455, 0.001019298, 0.006471171, -0.00000953, -0.000161658],
-                            [3.109456535, -0.085520461, 0.000863238, 0.00863049, -0.0000210, -0.000140186]]
-        cool_eir_ft_spec = [[-3.877526888, 0.164566276, -0.001272755, -0.019956043, 0.000256512, -0.000133539],
-                            [-1.990708931, 0.093969249, -0.00073335, -0.009062553, 0.000165099, -0.0000997]]
-        cool_cap_fflow_spec = [[0.65673024, 0.516470835, -0.172887149],
-                               [0.690334551, 0.464383753, -0.154507638]]
-        cool_eir_fflow_spec = [[1.562945114, -0.791859997, 0.230030877],
-                               [1.31565404, -0.482467162, 0.166239001]]
-        cool_eers = calc_eers_cooling_2speed(runner, cooling_system.cooling_efficiency_seer, cool_c_d, cool_capacity_ratios, cool_fan_speed_ratios, fan_power_rated, cool_eir_ft_spec, cool_cap_ft_spec)
-      elsif num_speeds == 4
-        cool_rated_airflow_rate = 411.0 # cfm/ton
-        cool_capacity_ratios = [0.36, 0.51, 0.67, 1.0]
-        cool_fan_speed_ratios = [0.42, 0.54, 0.68, 1.0]
-        cool_shrs = [1.115, 1.026, 1.013, 1.0].map { |mult| cooling_system.cooling_shr * mult }
-        # The following coefficients were generated using NREL experimental performance mapping for the Carrier unit
-        cool_cap_coeff_perf_map = [[1.6516044444444447, 0.0698916049382716, -0.0005546296296296296, -0.08870160493827162, 0.0004135802469135802, 0.00029077160493827157],
-                                   [-6.84948049382716, 0.26946, -0.0019413580246913577, -0.03281469135802469, 0.00015694444444444442, 3.32716049382716e-05],
-                                   [-4.53543086419753, 0.15358543209876546, -0.0009345679012345678, 0.002666913580246914, -7.993827160493826e-06, -0.00011617283950617283],
-                                   [-3.500948395061729, 0.11738987654320988, -0.0006580246913580248, 0.007003148148148148, -2.8518518518518517e-05, -0.0001284259259259259],
-                                   [1.8769221728395058, -0.04768641975308643, 0.0006885802469135801, 0.006643395061728395, 1.4209876543209876e-05, -0.00024043209876543206]]
-        cool_cap_ft_spec = cool_cap_coeff_perf_map.select { |i| [0, 1, 2, 4].include? cool_cap_coeff_perf_map.index(i) }
-        cool_cap_ft_spec_3 = cool_cap_coeff_perf_map.select { |i| [0, 1, 4].include? cool_cap_coeff_perf_map.index(i) }
-        cool_eir_coeff_perf_map = [[2.896298765432099, -0.12487654320987657, 0.0012148148148148148, 0.04492037037037037, 8.734567901234567e-05, -0.0006348765432098764],
-                                   [6.428076543209876, -0.20913209876543212, 0.0018521604938271604, 0.024392592592592594, 0.00019691358024691356, -0.0006012345679012346],
-                                   [5.136356049382716, -0.1591530864197531, 0.0014151234567901232, 0.018665555555555557, 0.00020398148148148147, -0.0005407407407407407],
-                                   [1.3823471604938273, -0.02875123456790123, 0.00038302469135802463, 0.006344814814814816, 0.00024836419753086417, -0.00047469135802469134],
-                                   [-1.0411735802469133, 0.055261604938271605, -0.0004404320987654321, 0.0002154938271604939, 0.00017484567901234564, -0.0002017901234567901]]
-        cool_eir_ft_spec = cool_eir_coeff_perf_map.select { |i| [0, 1, 2, 4].include? cool_eir_coeff_perf_map.index(i) }
-        cool_eir_ft_spec_3 = cool_eir_coeff_perf_map.select { |i| [0, 1, 4].include? cool_eir_coeff_perf_map.index(i) }
-        cool_cap_fflow_spec = [[1, 0, 0]] * 4
-        cool_eir_fflow_spec = [[1, 0, 0]] * 4
-        cap_ratio_seer_3 = cool_capacity_ratios.select { |i| [0, 1, 3].include? cool_capacity_ratios.index(i) }
-        fan_speed_seer_3 = cool_fan_speed_ratios.select { |i| [0, 1, 3].include? cool_fan_speed_ratios.index(i) }
-        cool_eers = calc_eers_cooling_4speed(runner, cooling_system.cooling_efficiency_seer, cool_c_d, cap_ratio_seer_3, fan_speed_seer_3, fan_power_rated, cool_eir_ft_spec_3, cool_cap_ft_spec_3)
-      end
+      cool_rated_airflow_rate, cool_fan_speed_ratios, cool_capacity_ratios, cool_shrs, cool_eers, cool_cap_ft_spec, cool_eir_ft_spec, cool_cap_fflow_spec, cool_eir_fflow_spec = get_hp_clg_curves(num_speeds, cooling_system, fan_power_rated, cool_c_d, runner)
       cool_cfms_ton_rated = calc_cfms_ton_rated(cool_rated_airflow_rate, cool_fan_speed_ratios, cool_capacity_ratios)
       cool_shrs_rated_gross = calc_shrs_rated_gross(num_speeds, cool_shrs, fan_power_rated, cool_cfms_ton_rated)
       cool_eirs = calc_cool_eirs(num_speeds, cool_eers, fan_power_rated)
@@ -173,24 +124,21 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, cooling_system.fraction_cool_load_served)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, cooling_system.charge_defect_ratio)
+      if not cooling_system.airflow_cfm_per_ton.nil?
+        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, cooling_system.airflow_cfm_per_ton)
+        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 0.0) # FIXME: Is this right?
+      else
+        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, cooling_system.airflow_defect_ratio)
+      end
     end
     if not heating_system.nil?
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
-    end
-    if not cooling_system.nil?
-      if not cooling_system.airflow_cfm_per_ton.nil?
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMperTon, cooling_system.airflow_cfm_per_ton)
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, 0.0) # FIXME: Is this right?
-      else
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, cooling_system.airflow_defect_ratio)
-      end
-    else
       if not heating_system.airflow_cfm_per_ton.nil?
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMperTon, heating_system.airflow_cfm_per_ton)
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, 0.0) # FIXME: Is this right?
+        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, heating_system.airflow_cfm_per_ton)
+        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, 0.0) # FIXME: Is this right?
       else
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, heating_system.airflow_defect_ratio)
+        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heating_system.airflow_defect_ratio)
       end
     end
   end
@@ -354,56 +302,7 @@ class HVAC
     # Cooling Coil
 
     cool_c_d = get_cool_c_d(num_speeds, heat_pump.cooling_efficiency_seer)
-    if num_speeds == 1
-      cool_rated_airflow_rate = 394.2 # cfm/ton
-      cool_capacity_ratios = [1.0]
-      cool_fan_speed_ratios = [1.0]
-      cool_shrs = [heat_pump.cooling_shr]
-      cool_cap_ft_spec = [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
-      cool_eir_ft_spec = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
-      cool_cap_fflow_spec = [[0.718664047, 0.41797409, -0.136638137]]
-      cool_eir_fflow_spec = [[1.143487507, -0.13943972, -0.004047787]]
-      cool_eers = [calc_eer_cooling_1speed(heat_pump.cooling_efficiency_seer, fan_power_rated, cool_eir_ft_spec)]
-    elsif num_speeds == 2
-      cool_rated_airflow_rate = 344.1 # cfm/ton
-      cool_capacity_ratios = [0.72, 1.0]
-      cool_fan_speed_ratios = [0.86, 1.0]
-      cool_shrs = [heat_pump.cooling_shr - 0.014, heat_pump.cooling_shr] # TODO: is the following assumption correct (revisit Dylan's data?)? OR should value from HPXML be used for both stages?
-      cool_cap_ft_spec = [[3.998418659, -0.108728222, 0.001056818, 0.007512314, -0.0000139, -0.000164716],
-                          [3.466810106, -0.091476056, 0.000901205, 0.004163355, -0.00000919, -0.000110829]]
-      cool_eir_ft_spec = [[-4.282911381, 0.181023691, -0.001357391, -0.026310378, 0.000333282, -0.000197405],
-                          [-3.557757517, 0.112737397, -0.000731381, 0.013184877, 0.000132645, -0.000338716]]
-      cool_cap_fflow_spec = [[0.655239515, 0.511655216, -0.166894731],
-                             [0.618281092, 0.569060264, -0.187341356]]
-      cool_eir_fflow_spec = [[1.639108268, -0.998953996, 0.359845728],
-                             [1.570774717, -0.914152018, 0.343377302]]
-      cool_eers = calc_eers_cooling_2speed(runner, heat_pump.cooling_efficiency_seer, cool_c_d, cool_capacity_ratios, cool_fan_speed_ratios, fan_power_rated, cool_eir_ft_spec, cool_cap_ft_spec, true)
-    elsif num_speeds == 4
-      cool_rated_airflow_rate = 411.0 # cfm/ton
-      cool_capacity_ratios = [0.36, 0.51, 0.67, 1.0]
-      cool_fan_speed_ratios = [0.42, 0.54, 0.68, 1.0]
-      cool_shrs = [1.115, 1.026, 1.013, 1.0].map { |mult| heat_pump.cooling_shr * mult }
-      # The following coefficients were generated using NREL experimental performance mapping for the Carrier unit
-      cool_cap_coeff_perf_map = [[1.6516044444444447, 0.0698916049382716, -0.0005546296296296296, -0.08870160493827162, 0.0004135802469135802, 0.00029077160493827157],
-                                 [-6.84948049382716, 0.26946, -0.0019413580246913577, -0.03281469135802469, 0.00015694444444444442, 3.32716049382716e-05],
-                                 [-4.53543086419753, 0.15358543209876546, -0.0009345679012345678, 0.002666913580246914, -7.993827160493826e-06, -0.00011617283950617283],
-                                 [-3.500948395061729, 0.11738987654320988, -0.0006580246913580248, 0.007003148148148148, -2.8518518518518517e-05, -0.0001284259259259259],
-                                 [1.8769221728395058, -0.04768641975308643, 0.0006885802469135801, 0.006643395061728395, 1.4209876543209876e-05, -0.00024043209876543206]]
-      cool_cap_ft_spec = cool_cap_coeff_perf_map.select { |i| [0, 1, 2, 4].include? cool_cap_coeff_perf_map.index(i) }
-      cool_cap_ft_spec_3 = cool_cap_coeff_perf_map.select { |i| [0, 1, 4].include? cool_cap_coeff_perf_map.index(i) }
-      cool_eir_coeff_perf_map = [[2.896298765432099, -0.12487654320987657, 0.0012148148148148148, 0.04492037037037037, 8.734567901234567e-05, -0.0006348765432098764],
-                                 [6.428076543209876, -0.20913209876543212, 0.0018521604938271604, 0.024392592592592594, 0.00019691358024691356, -0.0006012345679012346],
-                                 [5.136356049382716, -0.1591530864197531, 0.0014151234567901232, 0.018665555555555557, 0.00020398148148148147, -0.0005407407407407407],
-                                 [1.3823471604938273, -0.02875123456790123, 0.00038302469135802463, 0.006344814814814816, 0.00024836419753086417, -0.00047469135802469134],
-                                 [-1.0411735802469133, 0.055261604938271605, -0.0004404320987654321, 0.0002154938271604939, 0.00017484567901234564, -0.0002017901234567901]]
-      cool_eir_ft_spec = cool_eir_coeff_perf_map.select { |i| [0, 1, 2, 4].include? cool_eir_coeff_perf_map.index(i) }
-      cool_eir_ft_spec_3 = cool_eir_coeff_perf_map.select { |i| [0, 1, 4].include? cool_eir_coeff_perf_map.index(i) }
-      cool_eir_fflow_spec = [[1, 0, 0]] * 4
-      cool_cap_fflow_spec = [[1, 0, 0]] * 4
-      cap_ratio_seer_3 = cool_capacity_ratios.select { |i| [0, 1, 3].include? cool_capacity_ratios.index(i) }
-      fan_speed_seer_3 = cool_fan_speed_ratios.select { |i| [0, 1, 3].include? cool_fan_speed_ratios.index(i) }
-      cool_eers = calc_eers_cooling_4speed(runner, heat_pump.cooling_efficiency_seer, cool_c_d, cap_ratio_seer_3, fan_speed_seer_3, fan_power_rated, cool_eir_ft_spec_3, cool_cap_ft_spec_3)
-    end
+    cool_rated_airflow_rate, cool_fan_speed_ratios, cool_capacity_ratios, cool_shrs, cool_eers, cool_cap_ft_spec, cool_eir_ft_spec, cool_cap_fflow_spec, cool_eir_fflow_spec = get_hp_clg_curves(num_speeds, heat_pump, fan_power_rated, cool_c_d, runner)
     cool_cfms_ton_rated = calc_cfms_ton_rated(cool_rated_airflow_rate, cool_fan_speed_ratios, cool_capacity_ratios)
     cool_shrs_rated_gross = calc_shrs_rated_gross(num_speeds, cool_shrs, fan_power_rated, cool_cfms_ton_rated)
     cool_eirs = calc_cool_eirs(num_speeds, cool_eers, fan_power_rated)
@@ -511,10 +410,13 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, heat_pump.charge_defect_ratio)
     if not heat_pump.airflow_cfm_per_ton.nil?
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMperTon, heat_pump.airflow_cfm_per_ton)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, 0.0) # FIXME: Is this right?
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, heat_pump.airflow_cfm_per_ton)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 0.0) # FIXME: Is this right?
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, heat_pump.airflow_cfm_per_ton)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, 0.0) # FIXME: Is this right?
     else
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, heat_pump.airflow_defect_ratio)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, heat_pump.airflow_defect_ratio)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heat_pump.airflow_defect_ratio)
     end
   end
 
@@ -737,11 +639,15 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACSHR, cool_shrs_rated_gross_4.join(','))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameMiniSplitHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameMiniSplitHeatPump)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, heat_pump.charge_defect_ratio)
     if not heat_pump.airflow_cfm_per_ton.nil?
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMperTon, heat_pump.airflow_cfm_per_ton)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, 0.0) # FIXME: Is this right?
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, heat_pump.airflow_cfm_per_ton)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 0.0) # FIXME: Is this right?
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, heat_pump.airflow_cfm_per_ton)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, 0.0) # FIXME: Is this right?
     else
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, heat_pump.airflow_defect_ratio)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, heat_pump.airflow_defect_ratio)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heat_pump.airflow_defect_ratio)
     end
   end
 
@@ -1007,10 +913,13 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameGroundSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACPumpPower, heat_pump.pump_watts_per_ton)
     if not heat_pump.airflow_cfm_per_ton.nil?
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMperTon, heat_pump.airflow_cfm_per_ton)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, 0.0) # FIXME: Is this right?
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, heat_pump.airflow_cfm_per_ton)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 0.0) # FIXME: Is this right?
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, heat_pump.airflow_cfm_per_ton)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, 0.0) # FIXME: Is this right?
     else
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, heat_pump.airflow_defect_ratio)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, heat_pump.airflow_defect_ratio)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heat_pump.airflow_defect_ratio)
     end
   end
 
@@ -1292,7 +1201,7 @@ class HVAC
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameUnitHeater
     sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
-    cfms_ton_rated = [350.0]
+    airflow_cfm_per_ton = 350.0
 
     # Heating Coil
 
@@ -1316,7 +1225,7 @@ class HVAC
 
     # Fan
 
-    fan = create_supply_fan(model, obj_name, 1, heating_system.fan_watts_per_cfm)
+    fan = create_supply_fan(model, obj_name, 1, nil) # Fan power assigned in hvac_sizing.rb
     hvac_map[heating_system.id] += disaggregate_fan_or_pump(model, fan, htg_coil, nil, nil)
 
     # Unitary System
@@ -1330,17 +1239,11 @@ class HVAC
     control_zone.setSequentialCoolingFractionSchedule(unitary_system, get_sequential_load_schedule(model, 0))
 
     # Store info for HVAC Sizing measure
-    unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, cfms_ton_rated.join(','))
+    unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, [airflow_cfm_per_ton].join(','))
+    unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, airflow_cfm_per_ton)
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameUnitHeater)
-    if not heating_system.airflow_cfm_per_ton.nil?
-      unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMperTon, heating_system.airflow_cfm_per_ton)
-      unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, 0.0) # FIXME: Is this right?
-    elsif not heating_system.airflow_defect_ratio.nil?
-      unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, heating_system.airflow_defect_ratio)
-    else
-      unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, 0.0)
-    end
+    unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACFanWatts, heating_system.fan_watts)
   end
 
   def self.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac,
@@ -1598,6 +1501,60 @@ class HVAC
       fail "Unexpected control type #{control_type}."
     end
     return clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr
+  end
+
+  def self.get_hp_clg_curves(num_speeds, heat_pump, fan_power_rated, cool_c_d, runner)
+    if num_speeds == 1
+      cool_rated_airflow_rate = 394.2 # cfm/ton
+      cool_capacity_ratios = [1.0]
+      cool_fan_speed_ratios = [1.0]
+      cool_shrs = [heat_pump.cooling_shr]
+      cool_cap_ft_spec = [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
+      cool_eir_ft_spec = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
+      cool_cap_fflow_spec = [[0.718664047, 0.41797409, -0.136638137]]
+      cool_eir_fflow_spec = [[1.143487507, -0.13943972, -0.004047787]]
+      cool_eers = [calc_eer_cooling_1speed(heat_pump.cooling_efficiency_seer, fan_power_rated, cool_eir_ft_spec)]
+    elsif num_speeds == 2
+      cool_rated_airflow_rate = 344.1 # cfm/ton
+      cool_capacity_ratios = [0.72, 1.0]
+      cool_fan_speed_ratios = [0.86, 1.0]
+      cool_shrs = [heat_pump.cooling_shr - 0.014, heat_pump.cooling_shr] # TODO: is the following assumption correct (revisit Dylan's data?)? OR should value from HPXML be used for both stages?
+      cool_cap_ft_spec = [[3.998418659, -0.108728222, 0.001056818, 0.007512314, -0.0000139, -0.000164716],
+                          [3.466810106, -0.091476056, 0.000901205, 0.004163355, -0.00000919, -0.000110829]]
+      cool_eir_ft_spec = [[-4.282911381, 0.181023691, -0.001357391, -0.026310378, 0.000333282, -0.000197405],
+                          [-3.557757517, 0.112737397, -0.000731381, 0.013184877, 0.000132645, -0.000338716]]
+      cool_cap_fflow_spec = [[0.655239515, 0.511655216, -0.166894731],
+                             [0.618281092, 0.569060264, -0.187341356]]
+      cool_eir_fflow_spec = [[1.639108268, -0.998953996, 0.359845728],
+                             [1.570774717, -0.914152018, 0.343377302]]
+      cool_eers = calc_eers_cooling_2speed(runner, heat_pump.cooling_efficiency_seer, cool_c_d, cool_capacity_ratios, cool_fan_speed_ratios, fan_power_rated, cool_eir_ft_spec, cool_cap_ft_spec, true)
+    elsif num_speeds == 4
+      cool_rated_airflow_rate = 411.0 # cfm/ton
+      cool_capacity_ratios = [0.36, 0.51, 0.67, 1.0]
+      cool_fan_speed_ratios = [0.42, 0.54, 0.68, 1.0]
+      cool_shrs = [1.115, 1.026, 1.013, 1.0].map { |mult| heat_pump.cooling_shr * mult }
+      # The following coefficients were generated using NREL experimental performance mapping for the Carrier unit
+      cool_cap_coeff_perf_map = [[1.6516044444444447, 0.0698916049382716, -0.0005546296296296296, -0.08870160493827162, 0.0004135802469135802, 0.00029077160493827157],
+                                 [-6.84948049382716, 0.26946, -0.0019413580246913577, -0.03281469135802469, 0.00015694444444444442, 3.32716049382716e-05],
+                                 [-4.53543086419753, 0.15358543209876546, -0.0009345679012345678, 0.002666913580246914, -7.993827160493826e-06, -0.00011617283950617283],
+                                 [-3.500948395061729, 0.11738987654320988, -0.0006580246913580248, 0.007003148148148148, -2.8518518518518517e-05, -0.0001284259259259259],
+                                 [1.8769221728395058, -0.04768641975308643, 0.0006885802469135801, 0.006643395061728395, 1.4209876543209876e-05, -0.00024043209876543206]]
+      cool_cap_ft_spec = cool_cap_coeff_perf_map.select { |i| [0, 1, 2, 4].include? cool_cap_coeff_perf_map.index(i) }
+      cool_cap_ft_spec_3 = cool_cap_coeff_perf_map.select { |i| [0, 1, 4].include? cool_cap_coeff_perf_map.index(i) }
+      cool_eir_coeff_perf_map = [[2.896298765432099, -0.12487654320987657, 0.0012148148148148148, 0.04492037037037037, 8.734567901234567e-05, -0.0006348765432098764],
+                                 [6.428076543209876, -0.20913209876543212, 0.0018521604938271604, 0.024392592592592594, 0.00019691358024691356, -0.0006012345679012346],
+                                 [5.136356049382716, -0.1591530864197531, 0.0014151234567901232, 0.018665555555555557, 0.00020398148148148147, -0.0005407407407407407],
+                                 [1.3823471604938273, -0.02875123456790123, 0.00038302469135802463, 0.006344814814814816, 0.00024836419753086417, -0.00047469135802469134],
+                                 [-1.0411735802469133, 0.055261604938271605, -0.0004404320987654321, 0.0002154938271604939, 0.00017484567901234564, -0.0002017901234567901]]
+      cool_eir_ft_spec = cool_eir_coeff_perf_map.select { |i| [0, 1, 2, 4].include? cool_eir_coeff_perf_map.index(i) }
+      cool_eir_ft_spec_3 = cool_eir_coeff_perf_map.select { |i| [0, 1, 4].include? cool_eir_coeff_perf_map.index(i) }
+      cool_eir_fflow_spec = [[1, 0, 0]] * 4
+      cool_cap_fflow_spec = [[1, 0, 0]] * 4
+      cap_ratio_seer_3 = cool_capacity_ratios.select { |i| [0, 1, 3].include? cool_capacity_ratios.index(i) }
+      fan_speed_seer_3 = cool_fan_speed_ratios.select { |i| [0, 1, 3].include? cool_fan_speed_ratios.index(i) }
+      cool_eers = calc_eers_cooling_4speed(runner, heat_pump.cooling_efficiency_seer, cool_c_d, cap_ratio_seer_3, fan_speed_seer_3, fan_power_rated, cool_eir_ft_spec_3, cool_cap_ft_spec_3)
+    end
+    return cool_rated_airflow_rate, cool_fan_speed_ratios, cool_capacity_ratios, cool_shrs, cool_eers, cool_cap_ft_spec, cool_eir_ft_spec, cool_cap_fflow_spec, cool_eir_fflow_spec
   end
 
   def self.get_default_compressor_type(hvac_type, seer)
@@ -1948,13 +1905,15 @@ class HVAC
       fan_eff_curve = create_curve_cubic(model, [0, 1, 0, 0], obj_name + ' fan eff curve', 0, 1, 0.01, 1)
       fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule, fan_power_curve, fan_eff_curve)
     end
-    if fan_watts_per_cfm > 0
-      fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
-      fan.setFanEfficiency(fan_eff)
-      fan.setPressureRise(calc_fan_pressure_rise(fan_eff, fan_watts_per_cfm))
-    else
-      fan.setFanEfficiency(1)
-      fan.setPressureRise(0)
+    if not fan_watts_per_cfm.nil?
+      if fan_watts_per_cfm > 0
+        fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
+        fan.setFanEfficiency(fan_eff)
+        fan.setPressureRise(calc_fan_pressure_rise(fan_eff, fan_watts_per_cfm))
+      else
+        fan.setFanEfficiency(1)
+        fan.setPressureRise(0)
+      end
     end
     fan.setName(obj_name + ' supply fan')
     fan.setEndUseSubcategory('supply fan')

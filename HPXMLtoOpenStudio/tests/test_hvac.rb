@@ -42,7 +42,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
-    cops = [5.0, 4.63] # Expected values
+    cops = [4.77, 4.42] # Expected values
     cops.each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
@@ -418,7 +418,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    cop = 3.67 # Expected value
+    cop = 3.71 # Expected value
     assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.01)
     refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
   end
@@ -435,7 +435,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    cop = 1.34 # Expected value
+    cop = 1.35 # Expected value
     assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.01)
     refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
   end
@@ -452,7 +452,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    cop = 3.94 # Expected value
+    cop = 3.98 # Expected value
     assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.01)
     refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
   end
@@ -561,6 +561,27 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     supp_htg_coil = model.getCoilHeatingElectrics[0]
     assert_in_epsilon(backup_efficiency, supp_htg_coil.efficiency, 0.01)
     assert_in_epsilon(supp_htg_capacity, supp_htg_coil.nominalCapacity.get, 0.01)
+  end
+
+  def test_fixed_flowrate
+    # Test AC & furnace
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-flowrate.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    cooling_system = hpxml.cooling_systems[0]
+    heating_system = hpxml.heating_systems[0]
+    cooling_cfm = cooling_system.airflow_cfm_per_ton * UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton')
+    heating_cfm = heating_system.airflow_cfm_per_ton * UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'ton')
+
+    # Check airflows
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringHeatingOperation.get)
+    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringCoolingOperation.get)
+    assert_in_epsilon(heating_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringHeatingOperation.get, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(cooling_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringCoolingOperation.get, 'm^3/s', 'cfm'), 0.01)
   end
 
   def _test_measure(args_hash)
