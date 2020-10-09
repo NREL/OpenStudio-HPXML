@@ -142,22 +142,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     is_valid = true
 
-    # Validate input HPXML against schema
-    puts 'Validating xml...'
-    errors = Validator.run_validator(hpxml.doc, File.join(File.dirname(__FILE__), 'resources', 'HPXMLvalidator.xml'))
-    errors.each do |error|
-      runner.registerError("#{hpxml_path}: #{error}")
-      is_valid = false
-    end
-
-    XMLHelper.validate(hpxml.doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), runner).each do |error|
-      runner.registerError("#{hpxml_path}: #{error}")
-      is_valid = false
-    end
-
-    # Validate input HPXML against EnergyPlus Use Case
-    stron_path = File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')
-    errors = Validator.run_validator(hpxml.doc, stron_path)
+    # Validate input HPXML against schematron docs
+    stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'HPXMLvalidator.xml'),
+                   File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')]
+    errors = Validator.run_validators(hpxml.doc, stron_paths)
     errors.each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
@@ -668,7 +656,7 @@ class OSModel
         else
           vf = vf_map_cb[from_surface][to_surface]
         end
-        next if vf < 0.01
+        next if vf < 0.05 # Skip small view factors to reduce runtime
 
         os_vf = OpenStudio::Model::ViewFactor.new(from_surface, to_surface, vf.round(10))
         zone_prop.addViewFactor(os_vf)

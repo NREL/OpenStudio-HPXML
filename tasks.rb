@@ -4970,7 +4970,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
   hpxml_data_types_xsd_doc.xpath('//xs:simpleType | //xs:complexType').each do |simple_type_element|
     enums = []
     simple_type_element.xpath('xs:restriction/xs:enumeration').each do |enum|
-      enums << ['_', enum.get('value'), '_'].join() # in "_foo_" format
+      enums << enum.get('value')
     end
     minInclusive_element = simple_type_element.at_xpath('xs:restriction/xs:minInclusive')
     min_inclusive = minInclusive_element.get('value') if not minInclusive_element.nil?
@@ -4994,6 +4994,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
   hpxml_validator = XMLHelper.create_doc(version = '1.0', encoding = 'UTF-8')
   root = XMLHelper.add_element(hpxml_validator, 'sch:schema')
   XMLHelper.add_attribute(root, 'xmlns:sch', 'http://purl.oclc.org/dsdl/schematron')
+  XMLHelper.add_element(root, 'sch:title', 'HPXML Schematron Validator: HPXML.xsd')
   name_space = XMLHelper.add_element(root, 'sch:ns')
   XMLHelper.add_attribute(name_space, 'uri', 'http://hpxmlonline.com/2019/10')
   XMLHelper.add_attribute(name_space, 'prefix', 'h')
@@ -5049,6 +5050,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
   end
 
   # Add enumeration and min/max numeric values
+  rules = {}
   element_xpaths.each do |element_xpath, element_type|
     next if element_type.nil?
 
@@ -5057,7 +5059,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
     context_xpath = element_xpath_with_prefix.join('/').chomp('/')
     next unless elements_in_sample_files.any? { |item| item.include? context_xpath }
 
-    hpxml_data_type_name = [element_type, '_simple'].join() # FIXME: This may need to be improved later since enumeration and minimum/maximum values cannot be guaranteed to always be placed within simpleType.
+    hpxml_data_type_name = [element_type, '_simple'].join() # FUTURE: This may need to be improved later since enumeration and minimum/maximum values cannot be guaranteed to always be placed within simpleType.
     hpxml_data_type = hpxml_data_types_dict[hpxml_data_type_name]
     hpxml_data_type = hpxml_data_types_dict[element_type] if hpxml_data_type.nil? # Backup
     if hpxml_data_type.nil?
@@ -5066,39 +5068,47 @@ def create_schematron_hpxml_validator(hpxml_docs)
 
     next if hpxml_data_type[:enums].empty? && hpxml_data_type[:min_inclusive].nil? && hpxml_data_type[:max_inclusive].nil? && hpxml_data_type[:min_exclusive].nil? && hpxml_data_type[:max_exclusive].nil?
 
-    rule = XMLHelper.add_element(pattern, 'sch:rule')
-    XMLHelper.add_attribute(rule, 'context', context_xpath.prepend('//'))
+    element_name = context_xpath.split('/')[-1]
+    context_xpath = context_xpath.split('/')[0..-2].join('/').chomp('/').prepend('/h:HPXML/')
+    rule = rules[context_xpath]
+    if rule.nil?
+      # Need new rule
+      rule = XMLHelper.add_element(pattern, 'sch:rule')
+      XMLHelper.add_attribute(rule, 'context', context_xpath)
+      rules[context_xpath] = rule
+    end
 
     if not hpxml_data_type[:enums].empty?
       assertion = XMLHelper.add_element(rule, 'sch:assert')
       XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-      XMLHelper.add_attribute(assertion, 'test', "contains(\"#{hpxml_data_type[:enums].join(' ')}\", concat(\"_\", text(), \"_\"))")
-      assertion.inner_text = "Expected value to be \"#{hpxml_data_type[:enums].join('" or "').gsub!('_', '')}\""
+      XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or contains(\"#{hpxml_data_type[:enums].map { |e| "_#{e}_" }.join(' ')}\", concat(\"_\", #{element_name}, \"_\"))")
+      assertion.inner_text = "Expected #{element_name.gsub('h:', '')} to be \"#{hpxml_data_type[:enums].join('" or "')}\""
+    else
+      if hpxml_data_type[:min_inclusive]
+        assertion = XMLHelper.add_element(rule, 'sch:assert')
+        XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+        XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or number(#{element_name}) &gt;= #{hpxml_data_type[:min_inclusive]}")
+        assertion.inner_text = "Expected #{element_name.gsub('h:', '')} to be greater than or equal to #{hpxml_data_type[:min_inclusive]}"
+      end
+      if hpxml_data_type[:max_inclusive]
+        assertion = XMLHelper.add_element(rule, 'sch:assert')
+        XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+        XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or number(#{element_name}) &lt;= #{hpxml_data_type[:max_inclusive]}")
+        assertion.inner_text = "Expected #{element_name.gsub('h:', '')} to be less than or equal to #{hpxml_data_type[:max_inclusive]}"
+      end
+      if hpxml_data_type[:min_exclusive]
+        assertion = XMLHelper.add_element(rule, 'sch:assert')
+        XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+        XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or number(#{element_name}) &gt; #{hpxml_data_type[:min_exclusive]}")
+        assertion.inner_text = "Expected #{element_name.gsub('h:', '')} to be greater than #{hpxml_data_type[:min_exclusive]}"
+      end
+      if hpxml_data_type[:max_exclusive]
+        assertion = XMLHelper.add_element(rule, 'sch:assert')
+        XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+        XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or number(#{element_name}) &lt; #{hpxml_data_type[:max_exclusive]}")
+        assertion.inner_text = "Expected #{element_name.gsub('h:', '')} to be less than #{hpxml_data_type[:max_exclusive]}"
+      end
     end
-    if hpxml_data_type[:min_inclusive]
-      assertion = XMLHelper.add_element(rule, 'sch:assert')
-      XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-      XMLHelper.add_attribute(assertion, 'test', "number(text()) &gt;= #{hpxml_data_type[:min_inclusive]}")
-      assertion.inner_text = "Expected value to be greater than or equal to #{hpxml_data_type[:min_inclusive]}"
-    end
-    if hpxml_data_type[:max_inclusive]
-      assertion = XMLHelper.add_element(rule, 'sch:assert')
-      XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-      XMLHelper.add_attribute(assertion, 'test', "number(text()) &lt;= #{hpxml_data_type[:max_inclusive]}")
-      assertion.inner_text = "Expected value to be less than or equal to #{hpxml_data_type[:max_inclusive]}"
-    end
-    if hpxml_data_type[:min_exclusive]
-      assertion = XMLHelper.add_element(rule, 'sch:assert')
-      XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-      XMLHelper.add_attribute(assertion, 'test', "number(text()) &gt; #{hpxml_data_type[:min_exclusive]}")
-      assertion.inner_text = "Expected value to be greater than #{hpxml_data_type[:min_exclusive]}"
-    end
-    next unless hpxml_data_type[:max_exclusive]
-
-    assertion = XMLHelper.add_element(rule, 'sch:assert')
-    XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-    XMLHelper.add_attribute(assertion, 'test', "number(text()) &lt; #{hpxml_data_type[:max_exclusive]}")
-    assertion.inner_text = "Expected value to be less than #{hpxml_data_type[:max_exclusive]}"
   end
 
   XMLHelper.write_file(hpxml_validator, File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'HPXMLvalidator.xml'))
