@@ -844,7 +844,7 @@
   <sch:pattern name='[HVACDuct]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:Ducts[h:DuctType="supply" or h:DuctType="return"]'>
       <sch:assert role='ERROR' test='count(h:DuctInsulationRValue) = 1'>Expected 1 element(s) for xpath: DuctInsulationRValue</sch:assert>
-      <sch:assert role='ERROR' test='(count(h:DuctSurfaceArea) + count(h:DuctLocation) = 2)'>Expected 0 or 2 element(s) for xpath: DuctSurfaceArea | DuctLocation</sch:assert> <!-- See [DuctLocation] -->
+      <sch:assert role='ERROR' test='(count(h:DuctSurfaceArea) + count(h:DuctLocation) = 0 or count(h:DuctSurfaceArea) + count(h:DuctLocation) = 2)'>Expected 0 or 2 element(s) for xpath: DuctSurfaceArea | DuctLocation</sch:assert> <!-- See [DuctLocation] -->
     </sch:rule>
     <!-- [DuctLocation] -->
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:Ducts[h:DuctType="supply" or h:DuctType="return"]/h:DuctLocation'>

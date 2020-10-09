@@ -26,13 +26,16 @@ class Validator
             rescue
               fail "Invalid xpath: #{test_attr}"
             end
-            next if xpath_result # check if assert_test is false
 
             if element_name == 'sch:assert'
+              next if xpath_result # check if assert_test is false
+
               error_message = element.children.text # the value of sch:assert
               extended_error_message = [error_message, "[context: #{context_xpath}]"].join(' ') # add context xpath to the error message
               errors << extended_error_message
             elsif element_name == 'sch:report'
+              next unless xpath_result # check if assert_test is true
+
               warning_message = element.children.text # the value of sch:report
               warnings << warning_message
             end
