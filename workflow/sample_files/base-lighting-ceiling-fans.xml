@@ -545,7 +545,7 @@
             <FanSpeed>medium</FanSpeed>
             <Efficiency>100.0</Efficiency>
           </Airflow>
-          <Quantity>2</Quantity>
+          <Quantity>4</Quantity>
         </CeilingFan>
       </Lighting>
       <MiscLoads>
