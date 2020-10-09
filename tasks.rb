@@ -4690,7 +4690,7 @@ def set_hpxml_ceiling_fans(hpxml_file, hpxml)
   if ['base-lighting-ceiling-fans.xml'].include? hpxml_file
     hpxml.ceiling_fans.add(id: 'CeilingFan',
                            efficiency: 100,
-                           quantity: 2)
+                           quantity: 4)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.ceiling_fans.add(id: 'CeilingFan',
                            efficiency: nil,
