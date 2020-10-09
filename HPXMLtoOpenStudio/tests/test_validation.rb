@@ -61,7 +61,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         elsif assertion.start_with?('Expected 1 ')
           @expected_assertions_by_deletion[key] = _get_expected_error_msg(context_xpath, assertion, 'deletion')
           @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion, 'addition')
-        elsif assertion.start_with?('Expected "text()"')
+        elsif assertion.start_with?('Expected value to be')
           key = [context_xpath.split('/')[0...-1].reject(&:empty?).join('/').chomp('/'), context_xpath.split('/')[-1]] # override the key
           @expected_assertions_by_alteration[key] = _get_expected_error_msg(context_xpath, assertion, 'alteration')
         else
@@ -186,7 +186,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     # Validate via schematron-nokogiri gem
     xml_doc = Nokogiri::XML hpxml
     errors = stron_doc.validate xml_doc
-    errors_msgs = errors.map { |i| i[:message].gsub(': ', [': ', i[:context_path].gsub('h:', '').concat(': ')].join('')) }
+    errors_msgs = errors.map { |i| [i[:message], "[context: #{i[:context_path].gsub('h:', '')}]"].join(' ') }
     idx_of_msg = errors_msgs.index { |m| m == expected_error_msg }
     if expected_error_msg.nil?
       assert_nil(idx_of_msg)
@@ -249,13 +249,13 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     elsif assertion.start_with?('Expected 1 or more') && (mode == 'addition')
       return
     else
-      return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join(': ') # return "Expected x element(s) for xpath: foo: bar"
+      return [assertion, "[context: #{parent_xpath}]"].join(' ') # return "Expected x element(s) for xpath: foo... [context: bar/baz/...]"
     end
   end
 
   def _get_element_name_for_assertion_test(assertion)
     # From the assertion, get the element name to be added or deleted for the assertion test.
-    if assertion.start_with?('Expected "text()"')
+    if assertion.start_with?('Expected value to be')
       return # the last element in the context_xpath will be used as element_name
     else
       element_name = assertion.partition(': ').last.partition(' | ').first

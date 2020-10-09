@@ -4,7 +4,6 @@ class Validator
   def self.run_validator(hpxml_doc, stron_path)
     errors = []
     warnings = []
-    abstract_assertions = {}
     doc = XMLHelper.parse_file(stron_path)
     XMLHelper.get_elements(doc, '/sch:schema/sch:pattern/sch:rule').each do |rule|
       context_xpath = XMLHelper.get_attribute_value(rule, 'context').gsub('h:', '')
@@ -16,36 +15,28 @@ class Validator
       end
       next if context_elements.empty? # Skip if context element doesn't exist
 
-      XMLHelper.get_elements(rule, 'sch:assert').each do |assert_element|
-        assert_test = XMLHelper.get_attribute_value(assert_element, 'test').gsub('h:', '')
+      ['sch:assert', 'sch:report'].each do |element_name|
+        elements = XMLHelper.get_elements(rule, element_name)
+        elements.each do |element|
+          test_attr = XMLHelper.get_attribute_value(element, 'test').gsub('h:', '')
 
-        context_elements.each do |context_element|
-          begin
-            xpath_result = context_element.xpath(assert_test)
-          rescue
-            fail "Invalid xpath: #{assert_test}"
+          context_elements.each do |context_element|
+            begin
+              xpath_result = context_element.xpath(test_attr)
+            rescue
+              fail "Invalid xpath: #{test_attr}"
+            end
+            next if xpath_result # check if assert_test is false
+
+            if element_name == 'sch:assert'
+              error_message = element.children.text # the value of sch:assert
+              extended_error_message = [error_message, "[context: #{context_xpath}]"].join(' ') # add context xpath to the error message
+              errors << extended_error_message
+            elsif element_name == 'sch:report'
+              warning_message = element.children.text # the value of sch:report
+              warnings << warning_message
+            end
           end
-          next if xpath_result # check if assert_test is false
-
-          assert_value = assert_element.children.text # the value of sch:assert
-          error_message = assert_value.gsub(': ', ": #{context_xpath}: ") # insert context xpath into the error message
-          errors << error_message
-        end
-      end
-
-      XMLHelper.get_elements(rule, 'sch:report').each do |report_element|
-        report_test = XMLHelper.get_attribute_value(report_element, 'test').gsub('h:', '')
-
-        context_elements.each do |context_element|
-          begin
-            xpath_result = context_element.xpath(report_test)
-          rescue
-            fail "Invalid xpath: #{report_test}"
-          end
-          next unless xpath_result # check if report_test is true
-
-          warning_message = report_element.children.text # the value of sch:report
-          warnings << warning_message
         end
       end
     end
