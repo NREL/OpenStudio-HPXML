@@ -23,6 +23,7 @@ HPXML files submitted to OpenStudio-HPXML should undergo a two step validation p
   XSD Schemas are used to validate what elements/attributes/enumerations are available, data types for elements/attributes, the number/order of children elements, etc.
 
   OpenStudio-HPXML **does not** validate the HPXML file against the XSD Schema and assumes the file submitted is valid.
+  However, OpenStudio-HPXML does automatically check for valid data types (e.g., integer vs string), enumeration choices, and numeric values within min/max.
 
 2. Validation using `Schematron <http://schematron.com/>`_
 
