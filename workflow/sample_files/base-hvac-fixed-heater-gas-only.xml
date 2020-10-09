@@ -318,10 +318,7 @@
                 <Value>1.0</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-              <extension>
-                <FanPowerWattsPerCFM>0.5</FanPowerWattsPerCFM>
-                <AirflowCFMPerTon>100.0</AirflowCFMPerTon>
-              </extension>
+              <ElectricAuxiliaryEnergy>100.0</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
