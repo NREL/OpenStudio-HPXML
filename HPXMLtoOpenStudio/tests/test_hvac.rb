@@ -563,10 +563,10 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert_in_epsilon(supp_htg_capacity, supp_htg_coil.nominalCapacity.get, 0.01)
   end
 
-  def test_fixed_flowrate
+  def test_fixed_flowrates
     # Test AC & furnace
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-flowrate.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-airflow-rate.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values

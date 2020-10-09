@@ -441,6 +441,7 @@ class HVAC
     heat_pump.distribution_system_idref = cooling_system.distribution_system_idref
     heat_pump.fan_watts_per_cfm = cooling_system.fan_watts_per_cfm
     heat_pump.airflow_defect_ratio = cooling_system.airflow_defect_ratio
+    heat_pump.airflow_cfm_per_ton = cooling_system.airflow_cfm_per_ton
     heat_pump.charge_defect_ratio = cooling_system.charge_defect_ratio
 
     apply_mini_split_heat_pump(model, runner, heat_pump, 0,
