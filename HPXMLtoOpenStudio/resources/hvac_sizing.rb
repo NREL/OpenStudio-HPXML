@@ -1571,12 +1571,14 @@ class HVACSizing
     end
 
     # Override HVAC airflow rates if values are provided
-    if not hvac.FixedCFMPerTon.nil?
+    if not hvac.FixedCoolingCFMPerTon.nil?
       if hvac_final_values.Cool_Airflow > 0
-        hvac_final_values.Cool_Airflow = hvac.FixedCFMPerTon * UnitConversions.convert(hvac.FixedCoolingCapacity, 'Btu/hr', 'ton')
+        hvac_final_values.Cool_Airflow = hvac.FixedCoolingCFMPerTon * UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'ton')
       end
+    end
+    if not hvac.FixedHeatingCFMPerTon.nil?
       if hvac_final_values.Heat_Airflow > 0
-        hvac_final_values.Heat_Airflow = hvac.FixedCFMPerTon * UnitConversions.convert(hvac.FixedHeatingCapacity, 'Btu/hr', 'ton')
+        hvac_final_values.Heat_Airflow = hvac.FixedHeatingCFMPerTon * UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'ton')
       end
     end
 
@@ -1709,10 +1711,10 @@ class HVACSizing
     # Prevent errors of "has no air flow"
     min_air_flow = 3.0 # cfm; E+ minimum is 0.001 m^3/s"
     if hvac_final_values.Heat_Airflow > 0
-      hvac_final_values.Heat_Airflow = [hvac_final_values.Heat_Airflow, min_air_flow].max * (1.0 + hvac.AirflowDefectRatio)
+      hvac_final_values.Heat_Airflow = [hvac_final_values.Heat_Airflow, min_air_flow].max * (1.0 + hvac.AirflowDefectRatioHeating.to_f)
     end
     if hvac_final_values.Cool_Airflow > 0
-      hvac_final_values.Cool_Airflow = [hvac_final_values.Cool_Airflow, min_air_flow].max * (1.0 + hvac.AirflowDefectRatio)
+      hvac_final_values.Cool_Airflow = [hvac_final_values.Cool_Airflow, min_air_flow].max * (1.0 + hvac.AirflowDefectRatioCooling.to_f)
     end
 
     return hvac_final_values
@@ -2067,7 +2069,12 @@ class HVACSizing
         hvac.EvapCoolerEffectiveness = equip.coolerEffectiveness
       end
 
-      hvac.FixedCFMPerTon = get_feature(equip, Constants.SizingInfoHVACActualCFMperTon, 'double', false)
+      hvac.FixedCoolingCFMPerTon = get_feature(equip, Constants.SizingInfoHVACActualCFMPerTonCooling, 'double', false)
+      hvac.FixedHeatingCFMPerTon = get_feature(equip, Constants.SizingInfoHVACActualCFMPerTonHeating, 'double', false)
+      hvac.AirflowDefectRatioCooling = get_feature(equip, Constants.SizingInfoHVACAirflowDefectRatioCooling, 'double', false)
+      hvac.AirflowDefectRatioHeating = get_feature(equip, Constants.SizingInfoHVACAirflowDefectRatioHeating, 'double', false)
+      hvac.ChargeDefectRatio = get_feature(equip, Constants.SizingInfoHVACChargeDefectRatio, 'double', false)
+      hvac.FanWatts = get_feature(equip, Constants.SizingInfoHVACFanWatts, 'double', false)
 
       if not clg_coil.nil?
         ratedCFMperTonCooling = get_feature(equip, Constants.SizingInfoHVACRatedCFMperTonCooling, 'string', false)
@@ -2085,11 +2092,6 @@ class HVACSizing
           ratedCFMperTonCooling = get_feature(equip, Constants.SizingInfoHVACRatedCFMperTonCooling, 'string')
 
           hvac.RatedCFMperTonCooling = ratedCFMperTonCooling.split(',').map(&:to_f)
-        end
-
-        if hvac.CoolType == Constants.ObjectNameCentralAirConditioner || hvac.CoolType == Constants.ObjectNameAirSourceHeatPump
-          hvac.AirflowDefectRatio = get_feature(equip, Constants.SizingInfoHVACAirflowDefectRatio, 'double')
-          hvac.ChargeDefectRatio = get_feature(equip, Constants.SizingInfoHVACChargeDefectRatio, 'double')
         end
 
         curves = [clg_coil.totalCoolingCapacityFunctionOfTemperatureCurve]
@@ -2309,7 +2311,7 @@ class HVACSizing
           fail 'Could not find GSHP plant loop.'
         end
 
-        hvac.GSHP_PumpPower = get_feature(equip, Constants.SizingInfoHVACPumpPower, 'double')
+        hvac.GSHP_PumpWattsPerTon = get_feature(equip, Constants.SizingInfoHVACPumpPower, 'double')
 
       elsif not htg_coil.nil?
         fail "Unexpected heating coil: #{htg_coil.name}."
@@ -3133,7 +3135,7 @@ class HVACSizing
             next unless plc.to_PumpVariableSpeed.is_initialized
 
             # Pump
-            pump_w = hvac.GSHP_PumpPower * UnitConversions.convert(clg_coil.ratedTotalCoolingCapacity.get, 'W', 'ton')
+            pump_w = hvac.GSHP_PumpWattsPerTon * UnitConversions.convert(clg_coil.ratedTotalCoolingCapacity.get, 'W', 'ton')
             pump = plc.to_PumpVariableSpeed.get
             pump.setRatedPowerConsumption(pump_w)
             pump.setRatedFlowRate(HVAC.calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead))
@@ -3164,6 +3166,15 @@ class HVACSizing
         # Fan
         fanonoff = object.supplyFan.get.to_FanOnOff.get
         fanonoff.setMaximumFlowRate(UnitConversions.convert(fan_airflow + 0.01, 'cfm', 'm^3/s'))
+        fan_watts_per_cfm = hvac.FanWatts / fan_airflow
+        if fan_watts_per_cfm > 0
+          fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
+          fanonoff.setFanEfficiency(fan_eff)
+          fanonoff.setPressureRise(HVAC.calc_fan_pressure_rise(fan_eff, fan_watts_per_cfm))
+        else
+          fanonoff.setFanEfficiency(1)
+          fanonoff.setPressureRise(0)
+        end
 
         # Coils
         setCoilsObjectValues(model, hvac, object, hvac_final_values)
@@ -3277,6 +3288,8 @@ class HVACSizing
   end
 
   def self.set_installation_quality(model, hvac, hvac_final_values)
+    return if hvac.has_type(Constants.ObjectNameWaterLoopHeatPump)
+
     hvac.Objects.each do |object|
       next unless object.is_a?(OpenStudio::Model::AirLoopHVACUnitarySystem) && object.airLoopHVAC.is_initialized
 
@@ -3461,8 +3474,6 @@ class HVACInfo
     self.OverSizeDelta = 15000.0
     self.FanspeedRatioCooling = [1.0]
     self.FanspeedRatioHeating = [1.0]
-    self.AirflowDefectRatio = 0.0
-    self.ChargeDefectRatio = 0.0
     self.Ducts = []
   end
 
@@ -3479,13 +3490,14 @@ class HVACInfo
   end
 
   attr_accessor(:HeatType, :CoolType, :Handle, :Objects, :Ducts, :NumSpeedsCooling, :NumSpeedsHeating,
-                :FixedCoolingCapacity, :FixedHeatingCapacity, :FixedSuppHeatingCapacity, :FixedCFMPerTon,
-                :RatedCFMperTonCooling, :RatedCFMperTonHeating, :AirflowDefectRatio, :ChargeDefectRatio,
+                :FixedCoolingCapacity, :FixedHeatingCapacity, :FixedSuppHeatingCapacity,
+                :FixedCoolingCFMPerTon, :FixedHeatingCFMPerTon, :AirflowDefectRatioCooling, :AirflowDefectRatioHeating,
+                :RatedCFMperTonCooling, :RatedCFMperTonHeating, :ChargeDefectRatio,
                 :COOL_CAP_FT_SPEC, :HEAT_CAP_FT_SPEC, :COOL_SH_FT_SPEC, :COIL_BF_FT_SPEC,
-                :SHRRated, :CapacityRatioCooling, :CapacityRatioHeating,
+                :SHRRated, :CapacityRatioCooling, :CapacityRatioHeating, :FanWatts,
                 :HeatingCapacityOffset, :OverSizeLimit, :OverSizeDelta, :FanspeedRatioCooling,
                 :FanspeedRatioHeating, :BoilerDesignTemp, :CoilBF, :HeatingEIR, :CoolingEIR, :SizingSpeed,
-                :GSHP_PumpPower, :GSHP_HXVertical, :GSHP_HXDTDesign, :GSHP_HXCHWDesign, :GSHP_HXHWDesign,
+                :GSHP_PumpWattsPerTon, :GSHP_HXVertical, :GSHP_HXDTDesign, :GSHP_HXCHWDesign, :GSHP_HXHWDesign,
                 :GSHP_BoreSpacing, :GSHP_BoreHoles, :GSHP_BoreDepth, :GSHP_BoreConfig, :GSHP_SpacingType,
                 :HeatingLoadFraction, :CoolingLoadFraction, :SupplyAirTemp, :LeavingAirTemp,
                 :EvapCoolerEffectiveness)

@@ -325,18 +325,10 @@ class HPXMLDefaults
 
     # Airflow defect ratio
     hpxml.heating_systems.each do |heating_system|
+      next unless [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
       next unless heating_system.airflow_defect_ratio.nil? && heating_system.airflow_cfm_per_ton.nil?
 
-      if [HPXML::HVACTypeFurnace,
-          HPXML::HVACTypeWallFurnace,
-          HPXML::HVACTypeFloorFurnace].include? heating_system.heating_system_type
-        heating_system.airflow_defect_ratio = 0.0
-      elsif [HPXML::HVACTypeStove,
-             HPXML::HVACTypePortableHeater,
-             HPXML::HVACTypeFixedHeater,
-             HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
-        heating_system.airflow_cfm_per_ton = 100.0 # FIXME
-      end
+      heating_system.airflow_defect_ratio = 0.0
     end
     hpxml.cooling_systems.each do |cooling_system|
       next unless [HPXML::HVACTypeCentralAirConditioner,
@@ -356,10 +348,28 @@ class HPXMLDefaults
 
     # Fan power
     hpxml.heating_systems.each do |heating_system|
-      next unless heating_system.fan_watts_per_cfm.nil?
-
-      # TODO: Only set if not attached to an AC?
-      heating_system.fan_watts_per_cfm = 0.5 # W/cfm
+      if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
+        if heating_system.fan_watts_per_cfm.nil?
+          if not heating_system.attached_cooling_system.nil?
+            heating_system.fan_watts_per_cfm = heating_system.attached_cooling_system.fan_watts_per_cfm
+          end
+          if heating_system.fan_watts_per_cfm.nil?
+            heating_system.fan_watts_per_cfm = 0.5 # W/cfm
+          end
+        end
+      elsif [HPXML::HVACTypeStove].include? heating_system.heating_system_type
+        if heating_system.fan_watts.nil?
+          heating_system.fan_watts = 40.0
+        end
+      elsif [HPXML::HVACTypeWallFurnace,
+             HPXML::HVACTypeFloorFurnace,
+             HPXML::HVACTypePortableHeater,
+             HPXML::HVACTypeFixedHeater,
+             HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
+        if heating_system.fan_watts.nil?
+          heating_system.fan_watts = 0.0 # Assume no fan power
+        end
+      end
     end
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.fan_watts_per_cfm.nil?

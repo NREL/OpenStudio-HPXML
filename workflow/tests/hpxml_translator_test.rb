@@ -49,7 +49,7 @@ class HPXMLTest < MiniTest::Test
     Dir.mkdir(results_dir)
     _write_summary_results(results_dir, all_results)
     _write_hvac_sizing_results(results_dir, all_sizing_results)
-    _write_and_check_ashrae_140_results(results_dir, all_results, ashrae_140_dir)
+    _write_ashrae_140_results(results_dir, all_results, ashrae_140_dir)
   end
 
   def test_run_simulation_rb
@@ -261,10 +261,11 @@ class HPXMLTest < MiniTest::Test
                    ['Fan Electricity Rate', 'runperiod', '*'],
                    ['Fan Runtime Fraction', 'runperiod', '*'],
                    ['Electric Equipment Electricity Energy', 'runperiod', Constants.ObjectNameMechanicalVentilationHouseFanCFIS],
-                   ['Boiler Part Load Ratio', 'runperiod', Constants.ObjectNameBoiler],
-                   ['Pump Electricity Rate', 'runperiod', Constants.ObjectNameBoiler + ' hydronic pump'],
-                   ['Unitary System Part Load Ratio', 'runperiod', Constants.ObjectNameGroundSourceHeatPump + ' unitary system'],
-                   ['Pump Electricity Rate', 'runperiod', Constants.ObjectNameGroundSourceHeatPump + ' pump']]
+                   ['Boiler Part Load Ratio', 'runperiod', '*'],
+                   ['Pump Electricity Rate', 'runperiod', '*'],
+                   ['Unitary System Part Load Ratio', 'runperiod', '*'],
+                   ['Pump Runtime Fraction', 'runperiod', '*']]
+
     # Run workflow
     workflow_start = Time.now
     results = run_hpxml_workflow(rundir, xml, measures, measures_dir,
@@ -924,56 +925,74 @@ class HPXMLTest < MiniTest::Test
     end
 
     # HVAC Heating Systems
-    num_htg_sys = hpxml.heating_systems.size
     hpxml.heating_systems.each do |heating_system|
-      htg_sys_type = heating_system.heating_system_type
-      htg_sys_fuel = heating_system.heating_system_fuel
-
       next unless heating_system.fraction_heat_load_served > 0
+      next unless hpxml.heating_systems.size == 1
 
-      next unless (num_htg_sys == 1) && (htg_sys_type == HPXML::HVACTypeBoiler) && (htg_sys_fuel != HPXML::FuelTypeElectricity)
-      next if hpxml.water_heating_systems.select { |wh| [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? wh.water_heater_type }.size > 0 # Skip combi systems
-
-      if not heating_system.electric_auxiliary_energy.nil?
-        hpxml_value = heating_system.electric_auxiliary_energy / 2.08
-      else
-        hpxml_value = HVAC.get_default_boiler_eae(heating_system) / 2.08
-      end
-
-      if htg_sys_type == HPXML::HVACTypeBoiler
-        next if hpxml.water_heating_systems.select { |wh| [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? wh.water_heater_type }.size > 0 # Skip combi systems
-
-        # Compare pump power from timeseries output
-        query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Boiler Part Load Ratio' AND ReportingFrequency='Run Period')"
-        avg_plr = sqlFile.execAndReturnFirstDouble(query).get
-        query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electricity Rate' AND ReportingFrequency='Run Period')"
-        avg_w = sqlFile.execAndReturnFirstDouble(query).get
-        sql_value = avg_w / avg_plr
-        assert_in_epsilon(sql_value, hpxml_value, 0.05)
-      else
+      if (not heating_system.fan_watts.nil?) || (not heating_system.fan_watts_per_cfm.nil?)
+        # Compare fan power from timeseries output
         next if hpxml.cooling_systems.size + hpxml.heat_pumps.size > 0 # Skip if other system types (which could result in A) multiple supply fans or B) different supply fan power consumption in the cooling season)
 
-        # Compare fan power from timeseries output
-        query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Runtime Fraction' and KeyValue LIKE '% SUPPLY FAN' AND ReportingFrequency='Run Period')"
+        if not heating_system.fan_watts.nil?
+          hpxml_value = heating_system.fan_watts
+        else
+          query = "SELECT SUM(Value) FROM ComponentSizes WHERE Description='User-Specified Heating Supply Air Flow Rate'"
+          heating_cfm = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^3/s', 'cfm')
+          hpxml_value = heating_system.fan_watts_per_cfm * heating_cfm
+        end
+        query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Runtime Fraction' AND ReportingFrequency='Run Period')"
         avg_rtf = sqlFile.execAndReturnFirstDouble(query).get
-        query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Electricity Rate' and KeyValue LIKE '% SUPPLY FAN' AND ReportingFrequency='Run Period')"
+        query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Electricity Rate' AND ReportingFrequency='Run Period')"
         avg_w = sqlFile.execAndReturnFirstDouble(query).get
         sql_value = avg_w / avg_rtf
-        assert_in_epsilon(sql_value, hpxml_value, 0.05)
+        assert_in_epsilon(sql_value, hpxml_value, 0.01)
       end
+
+      next unless not heating_system.electric_auxiliary_energy.nil?
+      next if hpxml.water_heating_systems.select { |wh| [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? wh.water_heater_type }.size > 0 # Skip combi systems
+
+      # Compare pump power from timeseries output
+      hpxml_value = heating_system.electric_auxiliary_energy / 2.08
+      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Boiler Part Load Ratio' AND ReportingFrequency='Run Period')"
+      avg_plr = sqlFile.execAndReturnFirstDouble(query).get
+      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electricity Rate' AND ReportingFrequency='Run Period')"
+      avg_w = sqlFile.execAndReturnFirstDouble(query).get
+      sql_value = avg_w / avg_plr
+      assert_in_epsilon(sql_value, hpxml_value, 0.05)
+    end
+
+    # HVAC Cooling Systems
+    hpxml.cooling_systems.each do |cooling_system|
+      next unless cooling_system.fraction_cool_load_served > 0
+      next unless hpxml.cooling_systems.size == 1
+      next unless not cooling_system.fan_watts_per_cfm.nil?
+      next if hpxml.heating_systems.size + hpxml.heat_pumps.size > 0 # Skip if other system types (which could result in A) multiple supply fans or B) different supply fan power consumption in the heating season)
+      next unless cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
+
+      # Compare fan power from timeseries output
+      query = "SELECT SUM(Value) FROM ComponentSizes WHERE Description='User-Specified Cooling Supply Air Flow Rate'"
+      cooling_cfm = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^3/s', 'cfm')
+      hpxml_value = cooling_system.fan_watts_per_cfm * cooling_cfm
+      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Runtime Fraction' AND ReportingFrequency='Run Period')"
+      avg_rtf = sqlFile.execAndReturnFirstDouble(query).get
+      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Electricity Rate' AND ReportingFrequency='Run Period')"
+      avg_w = sqlFile.execAndReturnFirstDouble(query).get
+      sql_value = avg_w / avg_rtf
+      assert_in_epsilon(sql_value, hpxml_value, 0.01)
     end
 
     # HVAC Heat Pumps
-    num_hps = hpxml.heat_pumps.size
     hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump.fraction_heat_load_served > 0
-      next unless (num_hps == 1) && heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      next unless hpxml.heat_pumps.size == 1
+      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      next unless not heat_pump.pump_watts_per_ton.nil?
 
       # Compare pump power from timeseries output
       hpxml_value = heat_pump.pump_watts_per_ton * UnitConversions.convert(results['Capacity: Cooling (W)'], 'W', 'ton')
-      query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Unitary System Part Load Ratio' AND ReportingFrequency='Run Period')"
+      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Unitary System Part Load Ratio' AND ReportingFrequency='Run Period')"
       avg_plr = sqlFile.execAndReturnFirstDouble(query).get
-      query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electricity Rate' AND ReportingFrequency='Run Period')"
+      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electricity Rate' AND ReportingFrequency='Run Period')"
       avg_w = sqlFile.execAndReturnFirstDouble(query).get
       sql_value = avg_w / avg_plr
       assert_in_epsilon(sql_value, hpxml_value, 0.05)
@@ -1310,7 +1329,7 @@ class HPXMLTest < MiniTest::Test
     puts "Wrote HVAC sizing results to #{csv_out}."
   end
 
-  def _write_and_check_ashrae_140_results(results_dir, all_results, ashrae_140_dir)
+  def _write_ashrae_140_results(results_dir, all_results, ashrae_140_dir)
     require 'csv'
     csv_out = File.join(results_dir, 'results_ashrae_140.csv')
 
@@ -1339,41 +1358,5 @@ class HPXMLTest < MiniTest::Test
     end
 
     puts "Wrote ASHRAE 140 results to #{csv_out}."
-
-    # TODO: Add updated HERS acceptance criteria once the E+ simple
-    # window model bugfix is available.
-    # FUTURE: Switch to stringent HERS acceptance criteria once it's based on
-    # TMY3.
   end
-
-  def _display_result_epsilon(xml, result1, result2, key)
-    epsilon = (result1 - result2).abs / [result1, result2].min
-    puts "#{xml}: epsilon=#{epsilon.round(5)} [#{key}]"
-  end
-
-  def _display_result_delta(xml, result1, result2, key)
-    delta = (result1 - result2).abs
-    puts "#{xml}: delta=#{delta.round(5)} [#{key}]"
-  end
-end
-
-def components
-  return { 'Total' => 'tot',
-           'Roofs' => 'roofs',
-           'Ceilings' => 'ceilings',
-           'Walls' => 'walls',
-           'Rim Joists' => 'rim_joists',
-           'Foundation Walls' => 'foundation_walls',
-           'Doors' => 'doors',
-           'Windows' => 'windows',
-           'Skylights' => 'skylights',
-           'Floors' => 'floors',
-           'Slabs' => 'slabs',
-           'Internal Mass' => 'internal_mass',
-           'Infiltration' => 'infil',
-           'Natural Ventilation' => 'natvent',
-           'Mechanical Ventilation' => 'mechvent',
-           'Whole House Fan' => 'whf',
-           'Ducts' => 'ducts',
-           'Internal Gains' => 'intgains' }
 end

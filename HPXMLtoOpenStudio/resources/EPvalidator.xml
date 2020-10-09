@@ -382,8 +382,7 @@
       <sch:assert role='ERROR' test='count(h:HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]) = 1'>Expected 1 element(s) for xpath: HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="AFUE"]/h:Value) = 1'>Expected 1 element(s) for xpath: AnnualHeatingEfficiency[Units="AFUE"]/Value</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWattsPerCFM) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWattsPerCFM</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:AirflowDefectRatio) + count(h:extension/h:AirflowCFMPerTon) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/AirflowDefectRatio | extension/AirflowCFMPerTon</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWatts) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWatts</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -393,8 +392,7 @@
       <sch:assert role='ERROR' test='count(h:HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]) = 1'>Expected 1 element(s) for xpath: HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="AFUE"]/h:Value) = 1'>Expected 1 element(s) for xpath: AnnualHeatingEfficiency[Units="AFUE"]/Value</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWattsPerCFM) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWattsPerCFM</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:AirflowDefectRatio) + count(h:extension/h:AirflowCFMPerTon) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/AirflowDefectRatio | extension/AirflowCFMPerTon</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWatts) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWatts</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -442,8 +440,7 @@
       <sch:assert role='ERROR' test='count(h:HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]) = 1'>Expected 1 element(s) for xpath: HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="Percent"]/h:Value) = 1'>Expected 1 element(s) for xpath: AnnualHeatingEfficiency[Units="Percent"]/Value</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWattsPerCFM) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWattsPerCFM</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:AirflowCFMPerTon) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/AirflowCFMPerTon</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWatts) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWatts</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -453,8 +450,7 @@
       <sch:assert role='ERROR' test='count(h:HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]) = 1'>Expected 1 element(s) for xpath: HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="Percent"]/h:Value) = 1'>Expected 1 element(s) for xpath: AnnualHeatingEfficiency[Units="Percent"]/Value</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWattsPerCFM) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWattsPerCFM</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:AirflowCFMPerTon) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/AirflowCFMPerTon</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWatts) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWatts</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -464,8 +460,7 @@
       <sch:assert role='ERROR' test='count(h:HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]) = 1'>Expected 1 element(s) for xpath: HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="Percent"]/h:Value) = 1'>Expected 1 element(s) for xpath: AnnualHeatingEfficiency[Units="Percent"]/Value</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWattsPerCFM) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWattsPerCFM</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:AirflowCFMPerTon) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/AirflowCFMPerTon</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWatts) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWatts</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -475,8 +470,7 @@
       <sch:assert role='ERROR' test='count(h:HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]) = 1'>Expected 1 element(s) for xpath: HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="Percent"]/h:Value) = 1'>Expected 1 element(s) for xpath: AnnualHeatingEfficiency[Units="Percent"]/Value</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWattsPerCFM) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWattsPerCFM</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:AirflowCFMPerTon) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/AirflowCFMPerTon</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWatts) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWatts</sch:assert>
     </sch:rule>
   </sch:pattern>
 

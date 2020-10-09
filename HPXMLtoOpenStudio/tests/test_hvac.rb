@@ -563,6 +563,27 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert_in_epsilon(supp_htg_capacity, supp_htg_coil.nominalCapacity.get, 0.01)
   end
 
+  def test_fixed_flowrate
+    # Test AC & furnace
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-flowrate.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    cooling_system = hpxml.cooling_systems[0]
+    heating_system = hpxml.heating_systems[0]
+    cooling_cfm = cooling_system.airflow_cfm_per_ton * UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton')
+    heating_cfm = heating_system.airflow_cfm_per_ton * UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'ton')
+
+    # Check airflows
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringHeatingOperation.get)
+    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringCoolingOperation.get)
+    assert_in_epsilon(heating_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringHeatingOperation.get, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(cooling_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringCoolingOperation.get, 'm^3/s', 'cfm'), 0.01)
+  end
+
   def _test_measure(args_hash)
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new

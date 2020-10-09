@@ -124,24 +124,21 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, cooling_system.fraction_cool_load_served)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, cooling_system.charge_defect_ratio)
+      if not cooling_system.airflow_cfm_per_ton.nil?
+        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, cooling_system.airflow_cfm_per_ton)
+        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 0.0) # FIXME: Is this right?
+      else
+        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, cooling_system.airflow_defect_ratio)
+      end
     end
     if not heating_system.nil?
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
-    end
-    if not cooling_system.nil?
-      if not cooling_system.airflow_cfm_per_ton.nil?
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMperTon, cooling_system.airflow_cfm_per_ton)
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, 0.0) # FIXME: Is this right?
-      else
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, cooling_system.airflow_defect_ratio)
-      end
-    else
       if not heating_system.airflow_cfm_per_ton.nil?
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMperTon, heating_system.airflow_cfm_per_ton)
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, 0.0) # FIXME: Is this right?
+        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, heating_system.airflow_cfm_per_ton)
+        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, 0.0) # FIXME: Is this right?
       else
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, heating_system.airflow_defect_ratio)
+        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heating_system.airflow_defect_ratio)
       end
     end
   end
@@ -413,10 +410,13 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, heat_pump.charge_defect_ratio)
     if not heat_pump.airflow_cfm_per_ton.nil?
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMperTon, heat_pump.airflow_cfm_per_ton)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, 0.0) # FIXME: Is this right?
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, heat_pump.airflow_cfm_per_ton)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 0.0) # FIXME: Is this right?
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, heat_pump.airflow_cfm_per_ton)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, 0.0) # FIXME: Is this right?
     else
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, heat_pump.airflow_defect_ratio)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, heat_pump.airflow_defect_ratio)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heat_pump.airflow_defect_ratio)
     end
   end
 
@@ -639,11 +639,15 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACSHR, cool_shrs_rated_gross_4.join(','))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameMiniSplitHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameMiniSplitHeatPump)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, heat_pump.charge_defect_ratio)
     if not heat_pump.airflow_cfm_per_ton.nil?
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMperTon, heat_pump.airflow_cfm_per_ton)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, 0.0) # FIXME: Is this right?
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, heat_pump.airflow_cfm_per_ton)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 0.0) # FIXME: Is this right?
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, heat_pump.airflow_cfm_per_ton)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, 0.0) # FIXME: Is this right?
     else
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, heat_pump.airflow_defect_ratio)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, heat_pump.airflow_defect_ratio)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heat_pump.airflow_defect_ratio)
     end
   end
 
@@ -909,10 +913,13 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameGroundSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACPumpPower, heat_pump.pump_watts_per_ton)
     if not heat_pump.airflow_cfm_per_ton.nil?
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMperTon, heat_pump.airflow_cfm_per_ton)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, 0.0) # FIXME: Is this right?
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, heat_pump.airflow_cfm_per_ton)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 0.0) # FIXME: Is this right?
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, heat_pump.airflow_cfm_per_ton)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, 0.0) # FIXME: Is this right?
     else
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, heat_pump.airflow_defect_ratio)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, heat_pump.airflow_defect_ratio)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heat_pump.airflow_defect_ratio)
     end
   end
 
@@ -1194,7 +1201,7 @@ class HVAC
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameUnitHeater
     sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
-    cfms_ton_rated = [350.0]
+    airflow_cfm_per_ton = 350.0
 
     # Heating Coil
 
@@ -1218,7 +1225,7 @@ class HVAC
 
     # Fan
 
-    fan = create_supply_fan(model, obj_name, 1, heating_system.fan_watts_per_cfm)
+    fan = create_supply_fan(model, obj_name, 1, nil) # Fan power assigned in hvac_sizing.rb
     hvac_map[heating_system.id] += disaggregate_fan_or_pump(model, fan, htg_coil, nil, nil)
 
     # Unitary System
@@ -1232,17 +1239,11 @@ class HVAC
     control_zone.setSequentialCoolingFractionSchedule(unitary_system, get_sequential_load_schedule(model, 0))
 
     # Store info for HVAC Sizing measure
-    unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, cfms_ton_rated.join(','))
+    unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, [airflow_cfm_per_ton].join(','))
+    unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, airflow_cfm_per_ton)
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameUnitHeater)
-    if not heating_system.airflow_cfm_per_ton.nil?
-      unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMperTon, heating_system.airflow_cfm_per_ton)
-      unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, 0.0) # FIXME: Is this right?
-    elsif not heating_system.airflow_defect_ratio.nil?
-      unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, heating_system.airflow_defect_ratio)
-    else
-      unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, 0.0)
-    end
+    unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACFanWatts, heating_system.fan_watts)
   end
 
   def self.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac,
@@ -1904,13 +1905,15 @@ class HVAC
       fan_eff_curve = create_curve_cubic(model, [0, 1, 0, 0], obj_name + ' fan eff curve', 0, 1, 0.01, 1)
       fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule, fan_power_curve, fan_eff_curve)
     end
-    if fan_watts_per_cfm > 0
-      fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
-      fan.setFanEfficiency(fan_eff)
-      fan.setPressureRise(calc_fan_pressure_rise(fan_eff, fan_watts_per_cfm))
-    else
-      fan.setFanEfficiency(1)
-      fan.setPressureRise(0)
+    if not fan_watts_per_cfm.nil?
+      if fan_watts_per_cfm > 0
+        fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
+        fan.setFanEfficiency(fan_eff)
+        fan.setPressureRise(calc_fan_pressure_rise(fan_eff, fan_watts_per_cfm))
+      else
+        fan.setFanEfficiency(1)
+        fan.setPressureRise(0)
+      end
     end
     fan.setName(obj_name + ' supply fan')
     fan.setEndUseSubcategory('supply fan')
