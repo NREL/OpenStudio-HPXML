@@ -2087,7 +2087,7 @@ class HVACSizing
           hvac.RatedCFMperTonCooling = ratedCFMperTonCooling.split(',').map(&:to_f)
         end
 
-        if hvac.CoolType == Constants.ObjectNameCentralAirConditioner || hvac.CoolType == Constants.ObjectNameAirSourceHeatPump
+        if [Constants.ObjectNameCentralAirConditioner, Constants.ObjectNameAirSourceHeatPump].include? hvac.CoolType
           hvac.AirflowDefectRatio = get_feature(equip, Constants.SizingInfoHVACAirflowDefectRatio, 'double')
           hvac.ChargeDefectRatio = get_feature(equip, Constants.SizingInfoHVACChargeDefectRatio, 'double')
         end
@@ -2114,6 +2114,11 @@ class HVACSizing
         capacityRatioCooling = get_feature(equip, Constants.SizingInfoHVACCapacityRatioCooling, 'string')
 
         hvac.CapacityRatioCooling = capacityRatioCooling.split(',').map(&:to_f)
+
+        if [Constants.ObjectNameCentralAirConditioner, Constants.ObjectNameAirSourceHeatPump, Constants.ObjectNameMiniSplitHeatPump].include? hvac.CoolType
+          hvac.AirflowDefectRatio = get_feature(equip, Constants.SizingInfoHVACAirflowDefectRatio, 'double')
+          hvac.ChargeDefectRatio = get_feature(equip, Constants.SizingInfoHVACChargeDefectRatio, 'double')
+        end
 
         if not equip.designSpecificationMultispeedObject.is_initialized
           fail "DesignSpecificationMultispeedObject not set for #{equip.name}."

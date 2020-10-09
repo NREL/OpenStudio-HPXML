@@ -639,6 +639,7 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACSHR, cool_shrs_rated_gross_4.join(','))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameMiniSplitHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameMiniSplitHeatPump)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, heat_pump.charge_defect_ratio)
     if not heat_pump.airflow_cfm_per_ton.nil?
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMperTon, heat_pump.airflow_cfm_per_ton)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, 0.0) # FIXME: Is this right?
