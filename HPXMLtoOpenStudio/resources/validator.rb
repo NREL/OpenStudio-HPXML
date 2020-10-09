@@ -9,7 +9,7 @@ class Validator
       errors += run_validator(hpxml_doc, stron_path, context_elements_cache)
     end
 
-    return errors
+    return errors.uniq
   end
 
   private
