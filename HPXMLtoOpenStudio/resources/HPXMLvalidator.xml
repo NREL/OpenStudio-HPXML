@@ -3,6 +3,9 @@
   <sch:title>HPXML Schematron Validator: HPXML.xsd</sch:title>
   <sch:ns uri='http://hpxmlonline.com/2019/10' prefix='h'/>
   <sch:pattern>
+    <sch:rule context='/h:HPXML/h:XMLTransactionHeaderInformation'>
+      <sch:assert role='ERROR' test='not(h:Transaction) or contains("_create_ _update_", concat("_", h:Transaction, "_"))'>Expected Transaction to be 'create' or 'update'</sch:assert>
+    </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:ProjectStatus'>
       <sch:assert role='ERROR' test='not(h:EventType) or contains("_audit_ _proposed workscope_ _approved workscope_ _construction-period testing/daily test out_ _job completion testing/final inspection_ _quality assurance/monitoring_ _preconstruction_", concat("_", h:EventType, "_"))'>Expected EventType to be 'audit' or 'proposed workscope' or 'approved workscope' or 'construction-period testing/daily test out' or 'job completion testing/final inspection' or 'quality assurance/monitoring' or 'preconstruction'</sch:assert>
     </sch:rule>
@@ -429,9 +432,6 @@
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:MiscLoads/h:FuelLoad/h:Load'>
       <sch:assert role='ERROR' test='not(h:Units) or contains("_therm/year_ _Btuh_", concat("_", h:Units, "_"))'>Expected Units to be 'therm/year' or 'Btuh'</sch:assert>
-    </sch:rule>
-    <sch:rule context='/h:HPXML/h:XMLTransactionHeaderInformation'>
-      <sch:assert role='ERROR' test='not(h:Transaction) or contains("_create_ _update_", concat("_", h:Transaction, "_"))'>Expected Transaction to be 'create' or 'update'</sch:assert>
     </sch:rule>
   </sch:pattern>
 </sch:schema>

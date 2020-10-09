@@ -209,7 +209,7 @@ class OSModel
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
     check_for_errors()
     set_defaults_and_globals(runner, output_dir, epw_file)
-    weather = Location.apply(model, runner, weather, epw_file, @hpxml)
+    Location.apply(model, runner, weather, epw_file, @hpxml)
     add_simulation_params(model)
 
     # Conditioned space/zone

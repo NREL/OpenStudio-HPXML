@@ -5000,12 +5000,11 @@ def create_schematron_hpxml_validator(hpxml_docs)
   XMLHelper.add_attribute(name_space, 'prefix', 'h')
   pattern = XMLHelper.add_element(root, 'sch:pattern')
 
-  element_xpaths = {}
-  complex_type_or_group_dict = {}
   # construct complexType and group elements dictionary
+  complex_type_or_group_dict = {}
   ['//xs:complexType', '//xs:group', '//xs:element'].each do |param|
     base_elements_xsd_doc.xpath(param).each do |param_type|
-      next if param_type.name == 'element' && (not (param_type.get('name') == 'XMLTransactionHeaderInformation' || param_type.get('name') == 'ProjectStatus'))
+      next if param_type.name == 'element' && (not ['XMLTransactionHeaderInformation', 'ProjectStatus', 'SoftwareInfo'].include?(param_type.get('name')))
       next if param_type.get('name').nil?
 
       param_type_name = param_type.get('name')
@@ -5041,7 +5040,8 @@ def create_schematron_hpxml_validator(hpxml_docs)
     end
   end
 
-  top_level_elements_of_interest = ['Building', 'XMLTransactionHeaderInformation']
+  element_xpaths = {}
+  top_level_elements_of_interest = elements_in_sample_files.map { |e| e.split('/')[1].gsub('h:', '') }.uniq
   top_level_elements_of_interest.each do |element|
     top_level_element = []
     top_level_element << element
