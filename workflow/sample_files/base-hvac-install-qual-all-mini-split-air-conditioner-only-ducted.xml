@@ -319,9 +319,9 @@
               </AnnualCoolingEfficiency>
               <SensibleHeatFraction>0.73</SensibleHeatFraction>
               <extension>
-                <AirflowDefectRatio>-0.25</AirflowDefectRatio>
                 <ChargeDefectRatio>-0.25</ChargeDefectRatio>
                 <FanPowerWattsPerCFM>0.365</FanPowerWattsPerCFM>
+                <AirflowCFMPerTon>360.0</AirflowCFMPerTon>
               </extension>
             </CoolingSystem>
           </HVACPlant>
