@@ -5013,7 +5013,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
       param_type.each_node do |element|
         next unless element.is_a? Oga::XML::Element
         next unless (element.name == 'element' || element.name == 'group')
-        next if element.name == 'element' && element.get('name').nil?
+        next if element.name == 'element' && (element.get('name').nil? && element.get('ref').nil?)
         next if element.name == 'group' && element.get('ref').nil?
 
         ancestors = []
@@ -5027,7 +5027,9 @@ def create_schematron_hpxml_validator(hpxml_docs)
         parent_element_names = ancestors.reverse
         if element.name == 'element'
           child_element_name = element.get('name')
+          child_element_name = element.get('ref') if child_element_name.nil? # Backup
           element_type = element.get('type')
+          element_type = element.get('ref') if element_type.nil? # Backup
         elsif element.name == 'group'
           child_element_name = nil # exclude group name from the element's xpath
           element_type = element.get('ref')
@@ -5038,7 +5040,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
     end
   end
 
-  top_level_elements_of_interest = ['Building', 'XMLTransactionHeaderInformation', 'ProjectStatus']
+  top_level_elements_of_interest = ['Building', 'XMLTransactionHeaderInformation']
   top_level_elements_of_interest.each do |element|
     top_level_element = []
     top_level_element << element

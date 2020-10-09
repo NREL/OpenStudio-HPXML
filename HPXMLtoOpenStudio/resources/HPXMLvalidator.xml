@@ -2,6 +2,9 @@
 <sch:schema xmlns:sch='http://purl.oclc.org/dsdl/schematron'>
   <sch:ns uri='http://hpxmlonline.com/2019/10' prefix='h'/>
   <sch:pattern>
+    <sch:rule context='//h:Building/h:ProjectStatus/h:EventType'>
+      <sch:assert role='ERROR' test='contains("_audit_ _proposed workscope_ _approved workscope_ _construction-period testing/daily test out_ _job completion testing/final inspection_ _quality assurance/monitoring_ _preconstruction_", concat("_", text(), "_"))'>Expected value to be 'audit' or 'proposed workscope' or 'approved workscope' or 'construction-period testing/daily test out' or 'job completion testing/final inspection' or 'quality assurance/monitoring' or 'preconstruction'</sch:assert>
+    </sch:rule>
     <sch:rule context='//h:Building/h:BuildingDetails/h:BuildingSummary/h:Site/h:SiteType'>
       <sch:assert role='ERROR' test='contains("_rural_ _suburban_ _urban_", concat("_", text(), "_"))'>Expected value to be 'rural' or 'suburban' or 'urban'</sch:assert>
     </sch:rule>
@@ -706,9 +709,6 @@
     </sch:rule>
     <sch:rule context='//h:XMLTransactionHeaderInformation/h:Transaction'>
       <sch:assert role='ERROR' test='contains("_create_ _update_", concat("_", text(), "_"))'>Expected value to be 'create' or 'update'</sch:assert>
-    </sch:rule>
-    <sch:rule context='//h:ProjectStatus/h:EventType'>
-      <sch:assert role='ERROR' test='contains("_audit_ _proposed workscope_ _approved workscope_ _construction-period testing/daily test out_ _job completion testing/final inspection_ _quality assurance/monitoring_ _preconstruction_", concat("_", text(), "_"))'>Expected value to be 'audit' or 'proposed workscope' or 'approved workscope' or 'construction-period testing/daily test out' or 'job completion testing/final inspection' or 'quality assurance/monitoring' or 'preconstruction'</sch:assert>
     </sch:rule>
   </sch:pattern>
 </sch:schema>
