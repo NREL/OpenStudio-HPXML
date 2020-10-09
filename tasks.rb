@@ -5002,17 +5002,19 @@ def create_schematron_hpxml_validator(hpxml_docs)
   element_xpaths = {}
   complex_type_or_group_dict = {}
   # construct complexType and group elements dictionary
-  [{ _xpath: '//xs:element', _type: '//xs:complexType', _attr: 'type' },
-   { _xpath: '//xs:group', _type: '//xs:group', _attr: 'ref' }].each do |param|
-    base_elements_xsd_doc.xpath(param[:_type]).each do |param_type|
+  ['//xs:complexType', '//xs:group', '//xs:element'].each do |param|
+    base_elements_xsd_doc.xpath(param).each do |param_type|
+      next if param_type.name == 'element' && (not (param_type.get('name') == 'XMLTransactionHeaderInformation' || param_type.get('name') == 'ProjectStatus'))
       next if param_type.get('name').nil?
 
       param_type_name = param_type.get('name')
       complex_type_or_group_dict[param_type_name] = {}
 
       param_type.each_node do |element|
-        next unless element.is_a?(Oga::XML::Element)
-        next unless element.name == 'element'
+        next unless element.is_a? Oga::XML::Element
+        next unless (element.name == 'element' || element.name == 'group')
+        next if element.name == 'element' && element.get('name').nil?
+        next if element.name == 'group' && element.get('ref').nil?
 
         ancestors = []
         element.each_ancestor do |node|
@@ -5022,64 +5024,38 @@ def create_schematron_hpxml_validator(hpxml_docs)
           ancestors << node.get('name')
         end
 
-        parent_element_names = ancestors
-        child_element_name = element.get('name')
-        element_xpath = parent_element_names.unshift(child_element_name) # push the element to the front
-        element_type = element.get('type')
+        parent_element_names = ancestors.reverse
+        if element.name == 'element'
+          child_element_name = element.get('name')
+          element_type = element.get('type')
+        elsif element.name == 'group'
+          child_element_name = nil # exclude group name from the element's xpath
+          element_type = element.get('ref')
+        end
+        element_xpath = parent_element_names.push(child_element_name)
         complex_type_or_group_dict[param_type_name][element_xpath] = element_type
       end
     end
+  end
 
-    # expand elements by adding elements based on type/ref
-    base_elements_xsd_doc.xpath(param[:_xpath]).each do |element|
-      next if element.get(param[:_attr]).nil?
-
-      ancestors = []
-      element.each_ancestor do |node|
-        next if node.get('name').nil?
-
-        ancestors << node.get('name')
-      end
-
-      parent_element_names = ancestors
-      child_element_name = element.get('name')
-      if param[:_xpath] == '//xs:element'
-        element_xpath = parent_element_names.unshift(child_element_name) # push the element to the front
-      else
-        element_xpath = parent_element_names
-      end
-      element_type = element.get(param[:_attr])
-
-      # Skip element xpaths not being used in sample files
-      element_xpath_with_prefix = element_xpath.reverse.map { |e| "h:#{e}" }
-      context_xpath = element_xpath_with_prefix.join('/').chomp('/')
-      next unless elements_in_sample_files.any? { |item| item.include? context_xpath }
-
-      has_complex_type_or_group_dict = complex_type_or_group_dict[element_type]
-      if has_complex_type_or_group_dict
-        # FIXME: Improve recursive call so that we only add the "final" xpath
-        get_expanded_elements(element_xpaths, complex_type_or_group_dict, element_xpath, element_type)
-      else
-        element_xpaths[element_xpath] = element_type
-      end
-    end
+  top_level_elements_of_interest = ['Building', 'XMLTransactionHeaderInformation', 'ProjectStatus']
+  top_level_elements_of_interest.each do |element|
+    top_level_element = []
+    top_level_element << element
+    top_level_element_type = element
+    get_element_full_xpaths(element_xpaths, complex_type_or_group_dict, top_level_element, top_level_element_type)
   end
 
   # Add enumeration and min/max numeric values
   element_xpaths.each do |element_xpath, element_type|
     next if element_type.nil?
 
-    # exclude duplicated xpaths
-    # FIXME: Remove this check when recursive code above is updated
-    has_duplicate = element_xpaths.keys.select { |k| (element_xpath != k) && (k.each_cons(element_xpath.size).include? element_xpath) } # check if an array contains another array in particular order
-    next unless has_duplicate.empty?
-
     # Skip element xpaths not being used in sample files
-    element_xpath_with_prefix = element_xpath.compact.reverse.map { |e| "h:#{e}" }
+    element_xpath_with_prefix = element_xpath.compact.map { |e| "h:#{e}" }
     context_xpath = element_xpath_with_prefix.join('/').chomp('/')
     next unless elements_in_sample_files.any? { |item| item.include? context_xpath }
 
-    hpxml_data_type_name = [element_type, '_simple'].join()
+    hpxml_data_type_name = [element_type, '_simple'].join() # FIXME: This may need to be improved later since enumeration and minimum/maximum values cannot be guaranteed to always be placed within simpleType.
     hpxml_data_type = hpxml_data_types_dict[hpxml_data_type_name]
     hpxml_data_type = hpxml_data_types_dict[element_type] if hpxml_data_type.nil? # Backup
     if hpxml_data_type.nil?
@@ -5126,19 +5102,21 @@ def create_schematron_hpxml_validator(hpxml_docs)
   XMLHelper.write_file(hpxml_validator, File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'HPXMLvalidator.xml'))
 end
 
-def get_expanded_elements(element_xpaths, complex_type_or_group_dict, element_xpath, element_type)
-  if complex_type_or_group_dict[element_type].nil?
+def get_element_full_xpaths(element_xpaths, complex_type_or_group_dict, element_xpath, element_type)
+  if not complex_type_or_group_dict.keys.include? element_type
     return element_xpaths[element_xpath] = element_type
   else
-    expanded_elements = deep_copy_object(complex_type_or_group_dict[element_type])
-    expanded_elements.each do |k, v|
-      k.push(element_xpath).flatten!
-      if complex_type_or_group_dict[v].nil?
-        element_xpaths[k] = v
+    complex_type_or_group = deep_copy_object(complex_type_or_group_dict[element_type])
+    complex_type_or_group.each do |k, v|
+      child_element_xpath = k.unshift(element_xpath).flatten!
+      child_element_type = v
+
+      if not complex_type_or_group_dict.keys.include? child_element_type
+        element_xpaths[child_element_xpath] = child_element_type
         next
       end
 
-      get_expanded_elements(element_xpaths, complex_type_or_group_dict, k, v)
+      get_element_full_xpaths(element_xpaths, complex_type_or_group_dict, child_element_xpath, child_element_type)
     end
   end
 end
