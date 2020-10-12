@@ -38,28 +38,23 @@ class HVACSizing
     hvacs = get_hvacs(model)
 
     hvacs.each do |hvac|
-      hvac = calculate_hvac_temperatures(init_loads, hvac)
+      # Init
+      hvac_init_loads = init_loads.dup
+      calculate_hvac_temperatures(hvac_init_loads, hvac)
+      apply_hvac_load_fractions(hvac_init_loads, hvac)
+      apply_hp_sizing_logic(hvac_init_loads, hvac)
 
-      hvac_init_loads = apply_hvac_load_fractions(init_loads, hvac)
-      hvac_init_loads = apply_hp_sizing_logic(hvac_init_loads, hvac)
-
+      # Calculate final HVAC capacity/airflow
       hvac_final_values = FinalValues.new
-
-      # Calculate heating ducts load
-      hvac_final_values = process_duct_loads_heating(hvac_final_values, weather, hvac, hvac_init_loads.Heat)
-
-      # Calculate cooling ducts load
-      hvac_final_values = process_duct_loads_cooling(hvac_final_values, weather, hvac, hvac_init_loads.Cool_Sens, hvac_init_loads.Cool_Lat)
-      hvac_final_values = process_equipment_adjustments(hvac_final_values, weather, hvac)
-      hvac_final_values = process_fixed_equipment(hvac_final_values, hvac)
-      hvac_final_values = process_ground_loop(hvac_final_values, weather, hvac)
-      hvac_final_values = process_finalize(hvac_final_values, zone_loads, weather, hvac)
+      process_duct_loads_heating(hvac_final_values, weather, hvac, hvac_init_loads.Heat)
+      process_duct_loads_cooling(hvac_final_values, weather, hvac, hvac_init_loads.Cool_Sens, hvac_init_loads.Cool_Lat)
+      process_equipment_adjustments(hvac_final_values, weather, hvac)
+      process_fixed_equipment(hvac_final_values, hvac)
+      process_ground_loop(hvac_final_values, weather, hvac)
+      process_finalize(hvac_final_values, zone_loads, weather, hvac)
 
       # Set OpenStudio object values
       set_object_values(model, hvac, hvac_final_values)
-
-      # Create installation quality EMS program
-      set_installation_quality(model, hvac, hvac_final_values)
 
       # Display debug info
       display_hvac_final_values_results(hvac_final_values, hvac) if debug
@@ -961,7 +956,7 @@ class HVACSizing
     return init_loads
   end
 
-  def self.calculate_hvac_temperatures(init_loads, hvac)
+  def self.calculate_hvac_temperatures(hvac_init_loads, hvac)
     '''
     HVAC Temperatures
     '''
@@ -972,7 +967,7 @@ class HVACSizing
       hvac.LeavingAirTemp = @cool_design_temps[HPXML::LocationOutside] - td
     else
       # Calculate Leaving Air Temperature
-      shr = [init_loads.Cool_Sens / init_loads.Cool_Tot, 1.0].min
+      shr = [hvac_init_loads.Cool_Sens / hvac_init_loads.Cool_Tot, 1.0].min
       # Determine the Leaving Air Temperature (LAT) based on Manual S Table 1-4
       if shr < 0.80
         hvac.LeavingAirTemp = 54.0 # F
@@ -991,15 +986,12 @@ class HVACSizing
     else
       hvac.SupplyAirTemp = 105.0 # F
     end
-
-    return hvac
   end
 
-  def self.apply_hvac_load_fractions(init_loads, hvac)
+  def self.apply_hvac_load_fractions(hvac_init_loads, hvac)
     '''
     Intermediate Loads (HVAC-specific)
     '''
-    hvac_init_loads = init_loads.dup
     hvac_init_loads.Heat *= hvac.HeatingLoadFraction
     hvac_init_loads.Cool_Sens *= hvac.CoolingLoadFraction
     hvac_init_loads.Cool_Lat *= hvac.CoolingLoadFraction
@@ -1010,8 +1002,6 @@ class HVACSizing
     hvac_init_loads.Cool_Sens = [hvac_init_loads.Cool_Sens, 0.001].max
     hvac_init_loads.Cool_Lat = [hvac_init_loads.Cool_Lat, 0.001].max
     hvac_init_loads.Cool_Tot = [hvac_init_loads.Cool_Tot, 0.001].max
-
-    return hvac_init_loads
   end
 
   def self.apply_hp_sizing_logic(hvac_init_loads, hvac)
@@ -1033,8 +1023,6 @@ class HVACSizing
         hvac.OverSizeDelta = 0.0
       end
     end
-
-    return hvac_init_loads
   end
 
   def self.get_duct_regain_factor(duct)
@@ -1159,8 +1147,6 @@ class HVACSizing
       hvac_final_values.Heat_Load_Ducts = heatingLoad_Next - init_heat_load
       hvac_final_values.Heat_Load = init_heat_load + hvac_final_values.Heat_Load_Ducts
     end
-
-    return hvac_final_values
   end
 
   def self.process_duct_loads_cooling(hvac_final_values, weather, hvac, init_cool_load_sens, init_cool_load_lat)
@@ -1237,8 +1223,6 @@ class HVACSizing
     hvac_final_values.Cool_Airflow = calc_airflow_rate(hvac_final_values.Cool_Load_Sens, (@cool_setpoint - hvac.LeavingAirTemp))
 
     hvac_final_values.Cool_Load_Ducts_Lat = hvac_final_values.Cool_Load_Ducts_Tot - hvac_final_values.Cool_Load_Ducts_Sens
-
-    return hvac_final_values
   end
 
   def self.process_equipment_adjustments(hvac_final_values, weather, hvac)
@@ -1259,7 +1243,6 @@ class HVACSizing
         hvac_final_values.Cool_Capacity = @min_cooling_capacity
         hvac_final_values.Cool_Capacity_Sens = 0.78 * @min_cooling_capacity
         hvac_final_values.Cool_Airflow = 400.0 * UnitConversions.convert(@min_cooling_capacity, 'Btu/hr', 'ton')
-        return hvac_final_values
       end
 
       # Adjust the total cooling capacity to the rated conditions using performance curves
@@ -1527,8 +1510,6 @@ class HVACSizing
       hvac_final_values.Heat_Airflow = 0.0
 
     end
-
-    return hvac_final_values
   end
 
   def self.process_fixed_equipment(hvac_final_values, hvac)
@@ -1581,8 +1562,6 @@ class HVACSizing
         hvac_final_values.Heat_Airflow = hvac.FixedHeatingCFMPerTon * UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'ton')
       end
     end
-
-    return hvac_final_values
   end
 
   def self.process_ground_loop(hvac_final_values, weather, hvac)
@@ -1700,7 +1679,6 @@ class HVACSizing
       hvac_final_values.GSHP_Bore_Holes = hvac.GSHP_BoreHoles
       hvac_final_values.GSHP_G_Functions = [lntts, gfnc_coeff]
     end
-    return hvac_final_values
   end
 
   def self.process_finalize(hvac_final_values, zone_loads, weather, hvac)
@@ -1711,13 +1689,13 @@ class HVACSizing
     # Prevent errors of "has no air flow"
     min_air_flow = 3.0 # cfm; E+ minimum is 0.001 m^3/s"
     if hvac_final_values.Heat_Airflow > 0
-      hvac_final_values.Heat_Airflow = [hvac_final_values.Heat_Airflow, min_air_flow].max * (1.0 + hvac.AirflowDefectRatioHeating.to_f)
+      hvac_final_values.Heat_Airflow *= (1.0 + hvac.AirflowDefectRatioHeating.to_f)
+      hvac_final_values.Heat_Airflow = [hvac_final_values.Heat_Airflow, min_air_flow].max
     end
     if hvac_final_values.Cool_Airflow > 0
-      hvac_final_values.Cool_Airflow = [hvac_final_values.Cool_Airflow, min_air_flow].max * (1.0 + hvac.AirflowDefectRatioCooling.to_f)
+      hvac_final_values.Cool_Airflow *= (1.0 + hvac.AirflowDefectRatioCooling.to_f)
+      hvac_final_values.Cool_Airflow = [hvac_final_values.Cool_Airflow, min_air_flow].max
     end
-
-    return hvac_final_values
   end
 
   def self.process_heat_pump_adjustment(hvac_final_values, weather, hvac, totalCap_CurveValue)
@@ -3285,9 +3263,12 @@ class HVACSizing
 
       end # object type
     end # hvac Object
+
+    set_installation_quality(model, hvac, hvac_final_values)
   end
 
   def self.set_installation_quality(model, hvac, hvac_final_values)
+    # Installation quality EMS program
     return if hvac.has_type(Constants.ObjectNameWaterLoopHeatPump)
 
     hvac.Objects.each do |object|

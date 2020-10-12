@@ -323,7 +323,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].airflow_cfm_per_ton = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_central_air_conditioner_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, 0, 0, nil)
+    _test_default_central_air_conditioner_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage, 0.375, 0, 0, nil)
   end
 
   def test_room_air_conditioners
@@ -392,7 +392,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].airflow_cfm_per_ton = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_furnace_values(hpxml_default, 0.5, 0, nil)
+    _test_default_furnace_values(hpxml_default, 0.375, 0, nil)
   end
 
   def test_wall_furnaces
@@ -598,7 +598,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].airflow_cfm_per_ton = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_ground_to_air_heat_pump_values(hpxml_default, 30.0, 0.5, 0, nil)
+    _test_default_ground_to_air_heat_pump_values(hpxml_default, 30.0, 0.375, 0, nil)
   end
 
   def test_hvac_distribution
