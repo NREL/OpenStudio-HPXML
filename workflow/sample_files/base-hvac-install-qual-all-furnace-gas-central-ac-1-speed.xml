@@ -336,6 +336,7 @@
               <extension>
                 <AirflowDefectRatio>-0.25</AirflowDefectRatio>
                 <ChargeDefectRatio>-0.25</ChargeDefectRatio>
+                <FanPowerWattsPerCFM>0.365</FanPowerWattsPerCFM>
               </extension>
             </CoolingSystem>
           </HVACPlant>
