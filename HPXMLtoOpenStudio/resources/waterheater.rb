@@ -11,14 +11,11 @@ class Waterheater
         use_uef = false
     elsif water_heating_system.energy_factor.nil?
         use_uef = true
-        water_heating_system.energy_factor = calc_ef_from_uef(water_heating_system)
         if water_heating_system.first_hour_rating.nil?
-            fail "When using uniform energy factor, first hour rating is required."
+          fail "When using uniform energy factor, first hour rating is required."
+        end
+      water_heating_system.energy_factor = calc_ef_from_uef(water_heating_system)
     end
-    
-    #if water_heating_system.energy_factor.nil?
-    #  water_heating_system.energy_factor = calc_ef_from_uef(water_heating_system)
-    #end
 
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
@@ -36,7 +33,8 @@ class Waterheater
         u, ua, eta_c = calc_tank_UA(act_vol, water_heating_system, solar_fraction)
     else
         u, ua, eta_c = calc_tank_UA_from_UEF(act_vol, water_heating_system, solar_fraction)
-    endnew_heater = create_new_heater(name: Constants.ObjectNameWaterHeater,
+    end
+    new_heater = create_new_heater(name: Constants.ObjectNameWaterHeater,
                                    water_heating_system: water_heating_system,
                                    act_vol: act_vol,
                                    t_set_c: set_temp_c,
@@ -1406,6 +1404,7 @@ class Waterheater
         return 0.94 # Applies UEF, updated per 301-2019
     else
         fail "Invalid rated efficiency type. Set either an EF or UEF for the water heater"
+    end
   end
 
   def self.get_default_location(hpxml, iecc_zone)
@@ -1535,6 +1534,7 @@ class Waterheater
     end
     ua *= (1.0 - solar_fraction)
     u = ua / surface_area # Btu/hr-ft^2-F
+    
     if eta_c > 1.0
       fail 'A water heater heat source (either burner or element) efficiency of > 1 has been calculated, double check water heater inputs.'
     end
@@ -1734,7 +1734,7 @@ class Waterheater
   end
 
   def self.get_set_temp_c(t_set, wh_type)
-    return UnitConversions.convert(t_set, 'F', 'C')# Half the deadband to account for E+ deadband
+    return UnitConversions.convert(t_set, 'F', 'C')
   end
 
   def self.create_new_loop(model, name, t_set)
