@@ -144,7 +144,7 @@ class HPXMLTest < MiniTest::Test
                             'dhw-frac-load-served.xml' => ['Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15.'],
                             'duct-location.xml' => ["Duct location is 'garage' but building does not have this location specified."],
                             'duct-location-unconditioned-space.xml' => ['Expected 0 or 2 element(s) for xpath: DuctSurfaceArea | DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="exterior wall" or text()="under slab" or text()="roof deck" or text()="outside" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"] [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]]'],
-                            'duplicate-id.xml' => ["Duplicate SystemIdentifier IDs detected for 'Wall'."],
+                            'duplicate-id.xml' => ["Duplicate SystemIdentifier IDs detected for 'WindowNorth'."],
                             'enclosure-attic-missing-roof.xml' => ['There must be at least one roof adjacent to attic - unvented.'],
                             'enclosure-basement-missing-exterior-foundation-wall.xml' => ['There must be at least one exterior foundation wall adjacent to basement - unconditioned.'],
                             'enclosure-basement-missing-slab.xml' => ['There must be at least one slab adjacent to basement - unconditioned.'],
@@ -166,6 +166,13 @@ class HPXMLTest < MiniTest::Test
                                                             'Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1.'],
                             'hvac-distribution-return-duct-leakage-missing.xml' => ["Return ducts exist but leakage was not specified for distribution system 'HVACDistribution'."],
                             'invalid-calendar-year.xml' => ['Calendar Year (20018) must be between 1600 and 9999.'],
+                            'invalid-datatype-boolean.xml' => ["Cannot convert 'FOOBAR' to boolean."],
+                            'invalid-datatype-boolean2.xml' => ["Cannot convert '' to boolean."],
+                            'invalid-datatype-integer.xml' => ["Cannot convert 'FOOBAR' to integer."],
+                            'invalid-datatype-integer2.xml' => ["Cannot convert '' to integer."],
+                            'invalid-datatype-float.xml' => ["Cannot convert 'FOOBAR' to float."],
+                            'invalid-datatype-float2.xml' => ["Cannot convert '' to float."],
+                            'invalid-daylight-saving.xml' => ['Daylight Saving End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-distribution-cfa-served.xml' => ['The total conditioned floor area served by the HVAC distribution system(s) for heating is larger than the conditioned floor area of the building.',
                                                                       'The total conditioned floor area served by the HVAC distribution system(s) for cooling is larger than the conditioned floor area of the building.'],
                             'invalid-epw-filepath.xml' => ["foo.epw' could not be found."],
@@ -173,9 +180,22 @@ class HPXMLTest < MiniTest::Test
                                                             'Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher[IsSharedAppliance="true"]]',
                                                             'Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer[IsSharedAppliance="true"]]',
                                                             'Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher[IsSharedAppliance="true"]]',
-                                                            "The building is of type 'single-family detached' but the surface",
-                                                            "The building is of type 'single-family detached' but the object",
-                                                            "The building is of type 'single-family detached' but the HVAC distribution"],
+                                                            "The building is of type 'single-family detached' but the surface 'RimJoistFoundation' is adjacent to Attached/Multifamily space 'other non-freezing space'.",
+                                                            "The building is of type 'single-family detached' but the surface 'WallOtherHeatedSpace' is adjacent to Attached/Multifamily space 'other heated space'.",
+                                                            "The building is of type 'single-family detached' but the surface 'WallOtherMultifamilyBufferSpace' is adjacent to Attached/Multifamily space 'other multifamily buffer space'.",
+                                                            "The building is of type 'single-family detached' but the surface 'WallOtherNonFreezingSpace' is adjacent to Attached/Multifamily space 'other non-freezing space'.",
+                                                            "The building is of type 'single-family detached' but the surface 'WallOtherHousingUnit' is adjacent to Attached/Multifamily space 'other housing unit'.",
+                                                            "The building is of type 'single-family detached' but the surface 'FoundationWallOtherNonFreezingSpace' is adjacent to Attached/Multifamily space 'other non-freezing space'.",
+                                                            "The building is of type 'single-family detached' but the surface 'FoundationWallOtherMultifamilyBufferSpace' is adjacent to Attached/Multifamily space 'other multifamily buffer space'.",
+                                                            "The building is of type 'single-family detached' but the surface 'FoundationWallOtherHeatedSpace' is adjacent to Attached/Multifamily space 'other heated space'.",
+                                                            "The building is of type 'single-family detached' but the surface 'FloorAboveNonFreezingSpace' is adjacent to Attached/Multifamily space 'other non-freezing space'.",
+                                                            "The building is of type 'single-family detached' but the surface 'FloorAboveMultifamilyBuffer' is adjacent to Attached/Multifamily space 'other multifamily buffer space'.",
+                                                            "The building is of type 'single-family detached' but the surface 'FloorAboveOtherHeatedSpace' is adjacent to Attached/Multifamily space 'other heated space'.",
+                                                            "The building is of type 'single-family detached' but the object 'SharedWaterHeater' is located in Attached/Multifamily space 'other heated space'.",
+                                                            "The building is of type 'single-family detached' but the object 'SharedClothesWasher' is located in Attached/Multifamily space 'other heated space'.",
+                                                            "The building is of type 'single-family detached' but the object 'SharedClothesDryer' is located in Attached/Multifamily space 'other heated space'.",
+                                                            "The building is of type 'single-family detached' but the object 'SharedDishwasher' is located in Attached/Multifamily space 'other heated space'.",
+                                                            "The building is of type 'single-family detached' but the HVAC distribution 'HVACDistribution' has a duct located in Attached/Multifamily space 'other housing unit'."],
                             'invalid-input-parameters.xml' => ["Expected Transaction to be 'create' or 'update' [context: /HPXML/XMLTransactionHeaderInformation]",
                                                                "Expected SiteType to be 'rural' or 'suburban' or 'urban' [context: /HPXML/Building/BuildingDetails/BuildingSummary/Site]",
                                                                "Expected Year to be '2012' or '2009' or '2006' or '2003' [context: /HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC]",
@@ -188,7 +208,6 @@ class HPXMLTest < MiniTest::Test
                             'invalid-timestep.xml' => ['Timestep (45) must be one of: 60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1.'],
                             'invalid-runperiod.xml' => ['Run Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-window-height.xml' => ["For Window 'WindowEast', overhangs distance to bottom (2.0) must be greater than distance to top (2.0)."],
-                            'invalid-daylight-saving.xml' => ['Daylight Saving End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'lighting-fractions.xml' => ['Sum of fractions of interior lighting (1.15) is greater than 1.'],
                             'mismatched-slab-and-foundation-wall.xml' => ["Foundation wall 'FoundationWall' is adjacent to 'basement - conditioned' but no corresponding slab was found adjacent to"],
                             'missing-elements.xml' => ['Expected 1 element(s) for xpath: NumberofConditionedFloors [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]',
@@ -291,16 +310,20 @@ class HPXMLTest < MiniTest::Test
         flunk "No error message defined for #{File.basename(xml)}."
       else
         run_log = File.readlines(File.join(rundir, 'run.log')).map(&:strip)
-        expect_error_msgs.each do |error_msg|
+        n_errors = 0
+        expect_error_msgs.each_with_index do |error_msg, i|
           found_error_msg = false
           run_log.each do |run_line|
+            next unless run_line.start_with? 'Error: '
+            n_errors += 1 if i == 0
+
             next unless run_line.include? error_msg
 
             found_error_msg = true
-            break
           end
           assert(found_error_msg)
         end
+        assert_equal(n_errors, expect_error_msgs.size)
       end
 
       return
