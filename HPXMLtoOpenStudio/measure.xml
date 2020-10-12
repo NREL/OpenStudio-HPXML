@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>ea66a685-489c-4539-8121-c0e5c27f3b39</version_id>
-  <version_modified>20201007T202553Z</version_modified>
+  <version_id>049f80d1-3674-459a-9871-31536eb5e18d</version_id>
+  <version_modified>20201012T203721Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -322,12 +322,6 @@
       <checksum>0017D20D</checksum>
     </file>
     <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6085A81C</checksum>
-    </file>
-    <file>
       <filename>test_location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -430,12 +424,6 @@
       <checksum>AA592D20</checksum>
     </file>
     <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6D295B81</checksum>
-    </file>
-    <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -452,12 +440,6 @@
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
       <checksum>036F975F</checksum>
-    </file>
-    <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>04958E8F</checksum>
     </file>
     <file>
       <filename>test_constructions.rb</filename>
@@ -493,6 +475,24 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>E0FD4CCE</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>72AA932A</checksum>
+    </file>
+    <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C4B1B51D</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B5AB2DC3</checksum>
     </file>
   </files>
 </measure>
