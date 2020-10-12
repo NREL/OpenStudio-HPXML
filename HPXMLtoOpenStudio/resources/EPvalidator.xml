@@ -890,6 +890,7 @@
   <sch:pattern name='[HotWaterDistributionType=SharedRecirculation]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution[h:extension/h:SharedRecirculation]'>
       <sch:assert role='ERROR' test='count(../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected 1 element(s) for xpath: ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]</sch:assert>
+      <sch:assert role='ERROR' test='count(h:SystemType/h:Standard) = 1'>Expected 1 element(s) for xpath: SystemType/Standard</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:SharedRecirculation/h:NumberofUnitsServed) = 1'>Expected 1 element(s) for xpath: extension/SharedRecirculation/NumberofUnitsServed</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:SharedRecirculation/h:PumpPower) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/SharedRecirculation/PumpPower</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:SharedRecirculation/h:ControlType[text()="manual demand control" or text()="presence sensor demand control" or text()="timer" or text()="no control"]) = 1'>Expected 1 element(s) for xpath: extension/SharedRecirculation/ControlType[text()="manual demand control" or text()="presence sensor demand control" or text()="timer" or text()="no control"]</sch:assert>
