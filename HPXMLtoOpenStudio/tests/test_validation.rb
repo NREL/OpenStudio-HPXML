@@ -42,12 +42,12 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         if assertion_message.start_with?('Expected 0 element')
           # Skipping for now
         elsif assertion_message.start_with?('Expected 0 or ')
-          @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion, 'addition')
+          @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion_message, 'addition')
         elsif assertion_message.start_with?('Expected 1 ')
-          @expected_assertions_by_deletion[key] = _get_expected_error_msg(context_xpath, assertion, 'deletion')
-          @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion, 'addition')
+          @expected_assertions_by_deletion[key] = _get_expected_error_msg(context_xpath, assertion_message, 'deletion')
+          @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion_message, 'addition')
         elsif assertion_message.start_with?('Expected value to be')
-          @expected_assertions_by_alteration[key] = _get_expected_error_msg(context_xpath, assertion, 'alteration')
+          @expected_assertions_by_alteration[key] = _get_expected_error_msg(context_xpath, assertion_message, 'alteration')
         else
           fail "Unexpected assertion: '#{assertion_message}'."
         end
@@ -207,13 +207,13 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     fail "Could not find an HPXML file with #{element_name} in #{context_xpath}. Add this to a HPXML file so that it's tested."
   end
 
-  def _get_expected_error_msg(parent_xpath, assertion, mode)
-    if assertion.inner_text.start_with?('Expected 0 or more')
+  def _get_expected_error_msg(parent_xpath, assertion_message, mode)
+    if assertion_message.start_with?('Expected 0 or more')
       return
-    elsif assertion.inner_text.start_with?('Expected 1 or more') && (mode == 'addition')
+    elsif assertion_message.start_with?('Expected 1 or more') && (mode == 'addition')
       return
     else
-      return [assertion.inner_text, "[context: #{parent_xpath}]"].join(' ') # return "Expected x element(s) for xpath: foo... [context: bar/baz/...]"
+      return [assertion_message, "[context: #{parent_xpath}]"].join(' ') # return "Expected x element(s) for xpath: foo... [context: bar/baz/...]"
     end
   end
 

@@ -110,7 +110,7 @@
   <sch:pattern name='[Site]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:Site'>
       <sch:assert role='ERROR' test='count(h:SiteType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SiteType</sch:assert>
-      <!-- <sch:assert role='ERROR' test='not(h:SiteType) or contains("_urban_ _suburban_ _rural_", concat("_", h:SiteType, "_"))'>Expected value to be 'urban' or 'suburban' or 'rural'</sch:assert> -->
+      <sch:assert role='ERROR' test='not(h:SiteType) or contains("_urban_ _suburban_ _rural_", concat("_", h:SiteType, "_"))'>Expected value to be 'urban' or 'suburban' or 'rural'</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:ShelterCoefficient) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ShelterCoefficient</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:Neighbors) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/Neighbors</sch:assert> <!-- See [Neighbors] -->
     </sch:rule>
@@ -929,6 +929,7 @@
   <sch:pattern name='[HotWaterDistributionType=SharedRecirculation]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution[h:extension/h:SharedRecirculation]'>
       <sch:assert role='ERROR' test='count(../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected 1 element(s) for xpath: ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]</sch:assert>
+      <sch:assert role='ERROR' test='count(h:SystemType/h:Standard) = 1'>Expected 1 element(s) for xpath: SystemType/Standard</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:SharedRecirculation/h:NumberofUnitsServed) = 1'>Expected 1 element(s) for xpath: extension/SharedRecirculation/NumberofUnitsServed</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:SharedRecirculation/h:PumpPower) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/SharedRecirculation/PumpPower</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:SharedRecirculation/h:ControlType) = 1'>Expected 1 element(s) for xpath: extension/SharedRecirculation/ControlType</sch:assert>
