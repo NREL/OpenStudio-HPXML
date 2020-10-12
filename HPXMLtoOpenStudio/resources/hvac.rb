@@ -4164,9 +4164,8 @@ class HVAC
         fault_program.addLine('Set eir2_AF_CH = a3_AF_EIR_c*FF_CH_c*FF_CH_c')
         fault_program.addLine('Set p_CH_COP_c = Y_CH_COP_c*(eir0_AF_CH+(eir1_AF_CH)+(eir2_AF_CH))')
 
-        ff_af_c = 1.0 + airflow_rated_defect_ratio_cool[speed]
-        ff_af_comb_c = ff_ch_c * ff_af_c
-        fault_program.addLine("Set FF_AF_comb_c = #{ff_af_comb_c.round(3)}")
+        fault_program.addLine("Set FF_AF_c = 1.0 + #{airflow_rated_defect_ratio_cool[speed].round(3)}")
+        fault_program.addLine('Set FF_AF_comb_c = FF_CH_c * FF_AF_c')
 
         fault_program.addLine('Set q0_AF_comb = a1_AF_Qgr_c')
         fault_program.addLine('Set q1_AF_comb = a2_AF_Qgr_c*FF_AF_comb_c')
@@ -4252,9 +4251,8 @@ class HVAC
         fault_program.addLine('Set eirh2_AF_CH = a3_AF_EIR_h*FF_CH_h*FF_CH_h')
         fault_program.addLine('Set p_CH_COP_h = Y_CH_COP_h*(eirh0_AF_CH + (eirh1_AF_CH) + (eirh2_AF_CH))')
 
-        ff_af_h = 1.0 + airflow_rated_defect_ratio_heat[speed]
-        ff_af_comb_h = ff_ch_h * ff_af_h
-        fault_program.addLine("Set FF_AF_comb_h = #{ff_af_comb_h.round(3)}")
+        fault_program.addLine("Set FF_AF_h = 1.0 + #{airflow_rated_defect_ratio_heat[speed].round(3)}")
+        fault_program.addLine('Set FF_AF_comb_h = FF_CH_h * FF_AF_h')
 
         fault_program.addLine('Set qh0_AF_comb = a1_AF_Qgr_h')
         fault_program.addLine('Set qh1_AF_comb = a2_AF_Qgr_h*FF_AF_comb_h')

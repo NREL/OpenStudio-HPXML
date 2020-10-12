@@ -13,6 +13,32 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
 
+  def get_ems_values(ems_objects, name)
+    values = {}
+    ems_objects.each do |ems_object|
+      next unless ems_object.name.to_s.include? name.gsub(' ', '_')
+
+      ems_object.lines.each do |line|
+        next unless line.downcase.start_with? 'set'
+
+        lhs, rhs = line.split('=')
+        lhs = lhs.gsub('Set', '').gsub('set', '').strip
+        rhs = rhs.gsub(',', '').gsub(';', '').strip
+        values[lhs] = [] if values[lhs].nil?
+        # eg. "Q = Q + 1.5"
+        if rhs.include? '+'
+          rhs_els = rhs.split('+')
+          rhs = rhs_els.map { |s| s.to_f }.sum(0.0)
+        else
+          rhs = rhs.to_f
+        end
+        values[lhs] << rhs
+      end
+    end
+    assert_operator(values.size, :>, 0)
+    return values
+  end
+
   def test_central_air_conditioner_1_speed
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-central-ac-only-1-speed.xml'))
@@ -68,6 +94,256 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert_in_epsilon(capacity, clg_coil.stages[-1].grossRatedTotalCoolingCapacity.get, 0.01)
   end
 
+  def test_install_quality_furnace_central_ac_1_speed_fixed_flowrates
+    # Test AC & furnace
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-airflow-rate-furnace-gas-central-ac-1-speed.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    cooling_system = hpxml.cooling_systems[0]
+    heating_system = hpxml.heating_systems[0]
+    cooling_cfm = cooling_system.airflow_cfm_per_ton * UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton')
+    heating_cfm = heating_system.airflow_cfm_per_ton * UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'ton')
+
+    # Check airflows
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringHeatingOperation.get)
+    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringCoolingOperation.get)
+    assert_in_epsilon(heating_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringHeatingOperation.get, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(cooling_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringCoolingOperation.get, 'm^3/s', 'cfm'), 0.01)
+
+    # Cooling coil
+    assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
+    clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
+    rated_airflow_cfm_clg = UnitConversions.convert(clg_coil.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+
+    # Check EMS
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
+    assert_in_epsilon(program_values['F_CH'].sum, 0.0, 0.01)
+    assert_in_epsilon(program_values['FF_AF_c'].sum, cooling_cfm / rated_airflow_cfm_clg, 0.01)
+  end
+
+  def test_install_quality_furnace_central_ac_1_speed_ratios
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-all-furnace-gas-central-ac-1-speed2.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    cooling_system = hpxml.cooling_systems[0]
+    airflow_defect_clg = cooling_system.airflow_defect_ratio
+    charge_defect = cooling_system.charge_defect_ratio
+    fan_watts_cfm = cooling_system.fan_watts_per_cfm
+    actual_cfm_per_ton = cooling_system.airflow_cfm_per_ton
+
+    # model objects:
+    # Unitary system
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    cooling_cfm = UnitConversions.convert(unitary_system.supplyAirFlowRateDuringCoolingOperation.get, 'm^3/s', 'cfm')
+    # fan
+    fanonoff = unitary_system.supplyFan.get.to_FanOnOff.get
+    # Cooling coil
+    assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
+    clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
+    rated_airflow_cfm = UnitConversions.convert(clg_coil.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+
+    # Check fan power
+    assert_equal(0.75, fanonoff.fanEfficiency)
+    assert_in_epsilon(fanonoff.pressureRise, fanonoff.fanEfficiency * fan_watts_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+
+    # Check installation quality EMS
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
+    # defect ratios in EMS is calculated correctly
+    assert_nil(actual_cfm_per_ton)
+    assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
+    # Fan air flow has already applied air flow defect ratio
+    assert_in_epsilon(program_values['FF_AF_c'].sum, cooling_cfm / rated_airflow_cfm, 0.01)
+  end
+
+  def test_install_quality_furnace_central_ac_2_speed
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-all-furnace-gas-central-ac-2-speed.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    cooling_system = hpxml.cooling_systems[0]
+    airflow_defect = cooling_system.airflow_defect_ratio
+    charge_defect = cooling_system.charge_defect_ratio
+    fan_watts_cfm = cooling_system.fan_watts_per_cfm
+    cooling_cfm = cooling_system.airflow_cfm_per_ton * UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton')
+
+    # model objects:
+    # Unitary system
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    perf = unitary_system.designSpecificationMultispeedObject.get.to_UnitarySystemPerformanceMultispeed.get
+    clg_ratios = perf.supplyAirflowRatioFields.map { |field| field.coolingRatio.get }
+    # Fan
+    fanonoff = unitary_system.supplyFan.get.to_FanOnOff.get
+    fan_flow_rate = UnitConversions.convert(fanonoff.maximumFlowRate.get, 'm^3/s', 'cfm')
+    # Cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    rated_airflow_cfm_clg = []
+    clg_coil.stages.each do |stage|
+      rated_airflow_cfm_clg << UnitConversions.convert(stage.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+    end
+
+    # Check installation quality EMS
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
+
+    # Check fan power
+    assert_equal(0.75, fanonoff.fanEfficiency)
+    assert_in_epsilon(fanonoff.pressureRise, fanonoff.fanEfficiency * fan_watts_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+
+    # fan flow rate is set to fixed flow rate from hpxml
+    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringCoolingOperation.get)
+    assert_in_epsilon(cooling_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringCoolingOperation.get, 'm^3/s', 'cfm'), 0.01)
+    clg_speed_cfms = clg_ratios.map { |ratio| cooling_cfm * ratio }
+
+    # fan flow rate is using cooling fixed flow rate from hpxml
+    assert_in_epsilon(fan_flow_rate, cooling_cfm, 0.01)
+    # defect ratios in EMS is calculated correctly
+    assert_nil(airflow_defect)
+    assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
+    assert_in_epsilon(program_values['FF_AF_c'].sum, clg_speed_cfms.zip(rated_airflow_cfm_clg).map { |cfm, rated_cfm| cfm / rated_cfm }.sum, 0.01)
+  end
+
+  def test_install_quality_furnace_central_ac_2_speed_ratios
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-all-furnace-gas-central-ac-2-speed2.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    cooling_system = hpxml.cooling_systems[0]
+    airflow_defect = cooling_system.airflow_defect_ratio
+    charge_defect = cooling_system.charge_defect_ratio
+    fan_watts_cfm = cooling_system.fan_watts_per_cfm
+    actual_cfm_per_ton = cooling_system.airflow_cfm_per_ton
+
+    # model objects:
+    # Unitary system
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    perf = unitary_system.designSpecificationMultispeedObject.get.to_UnitarySystemPerformanceMultispeed.get
+    clg_ratios = perf.supplyAirflowRatioFields.map { |field| field.coolingRatio.get }
+    cooling_cfm = UnitConversions.convert(unitary_system.supplyAirFlowRateDuringCoolingOperation.get, 'm^3/s', 'cfm')
+    # Fan
+    fanonoff = unitary_system.supplyFan.get.to_FanOnOff.get
+    fan_flow_rate = UnitConversions.convert(fanonoff.maximumFlowRate.get, 'm^3/s', 'cfm')
+    # Cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    rated_airflow_cfm_clg = []
+    clg_coil.stages.each do |stage|
+      rated_airflow_cfm_clg << UnitConversions.convert(stage.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+    end
+
+    # Check fan power
+    assert_equal(0.75, fanonoff.fanEfficiency)
+    assert_in_epsilon(fanonoff.pressureRise, fanonoff.fanEfficiency * fan_watts_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+
+    # Check installation quality EMS
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
+    clg_speed_cfms = clg_ratios.map { |ratio| cooling_cfm * ratio }
+    assert_nil(actual_cfm_per_ton)
+    assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
+    assert_in_epsilon(program_values['FF_AF_c'].sum, clg_speed_cfms.zip(rated_airflow_cfm_clg).map { |cfm, rated_cfm| cfm / rated_cfm }.sum, 0.01)
+  end
+
+  def test_install_quality_furnace_central_ac_var_speed
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-all-furnace-gas-central-ac-var-speed.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    cooling_system = hpxml.cooling_systems[0]
+    airflow_defect = cooling_system.airflow_defect_ratio
+    charge_defect = cooling_system.charge_defect_ratio
+    fan_watts_cfm = cooling_system.fan_watts_per_cfm
+    cooling_cfm = cooling_system.airflow_cfm_per_ton * UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton')
+
+    # model objects:
+    # Unitary system
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    perf = unitary_system.designSpecificationMultispeedObject.get.to_UnitarySystemPerformanceMultispeed.get
+    clg_ratios = perf.supplyAirflowRatioFields.map { |field| field.coolingRatio.get }
+    # Fan
+    fanonoff = unitary_system.supplyFan.get.to_FanOnOff.get
+    fan_flow_rate = UnitConversions.convert(fanonoff.maximumFlowRate.get, 'm^3/s', 'cfm')
+    # Cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    rated_airflow_cfm_clg = []
+    clg_coil.stages.each do |stage|
+      rated_airflow_cfm_clg << UnitConversions.convert(stage.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+    end
+
+    # Check installation quality EMS
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
+
+    # Check fan power
+    assert_equal(0.75, fanonoff.fanEfficiency)
+    assert_in_epsilon(fanonoff.pressureRise, fanonoff.fanEfficiency * fan_watts_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+
+    # fan flow rate is set to fixed flow rate from hpxml
+    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringCoolingOperation.get)
+    assert_in_epsilon(cooling_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringCoolingOperation.get, 'm^3/s', 'cfm'), 0.01)
+    clg_speed_cfms = clg_ratios.map { |ratio| cooling_cfm * ratio }
+
+    # fan flow rate is using cooling fixed flow rate from hpxml
+    assert_in_epsilon(fan_flow_rate, cooling_cfm, 0.01)
+    # defect ratios in EMS is calculated correctly
+    assert_nil(airflow_defect)
+    assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
+    assert_in_epsilon(program_values['FF_AF_c'].sum, clg_speed_cfms.zip(rated_airflow_cfm_clg).map { |cfm, rated_cfm| cfm / rated_cfm }.sum, 0.01)
+  end
+
+  def test_install_quality_furnace_central_ac_var_speed_ratios
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-all-furnace-gas-central-ac-var-speed2.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    cooling_system = hpxml.cooling_systems[0]
+    airflow_defect = cooling_system.airflow_defect_ratio
+    charge_defect = cooling_system.charge_defect_ratio
+    fan_watts_cfm = cooling_system.fan_watts_per_cfm
+    actual_cfm_per_ton = cooling_system.airflow_cfm_per_ton
+
+    # model objects:
+    # Unitary system
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    perf = unitary_system.designSpecificationMultispeedObject.get.to_UnitarySystemPerformanceMultispeed.get
+    clg_ratios = perf.supplyAirflowRatioFields.map { |field| field.coolingRatio.get }
+    cooling_cfm = UnitConversions.convert(unitary_system.supplyAirFlowRateDuringCoolingOperation.get, 'm^3/s', 'cfm')
+    # Fan
+    fanonoff = unitary_system.supplyFan.get.to_FanOnOff.get
+    fan_flow_rate = UnitConversions.convert(fanonoff.maximumFlowRate.get, 'm^3/s', 'cfm')
+    # Cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    rated_airflow_cfm_clg = []
+    clg_coil.stages.each do |stage|
+      rated_airflow_cfm_clg << UnitConversions.convert(stage.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+    end
+
+    # Check fan power
+    assert_equal(0.75, fanonoff.fanEfficiency)
+    assert_in_epsilon(fanonoff.pressureRise, fanonoff.fanEfficiency * fan_watts_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+
+    # Check installation quality EMS
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
+    clg_speed_cfms = clg_ratios.map { |ratio| cooling_cfm * ratio }
+    assert_nil(actual_cfm_per_ton)
+    assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
+    assert_in_epsilon(program_values['FF_AF_c'].sum, clg_speed_cfms.zip(rated_airflow_cfm_clg).map { |cfm, rated_cfm| cfm / rated_cfm }.sum, 0.01)
+  end
+
   def test_room_air_conditioner
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-room-ac-only.xml'))
@@ -103,6 +379,55 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert_in_epsilon(afue, htg_coil.gasBurnerEfficiency, 0.01)
     assert_in_epsilon(capacity, htg_coil.nominalCapacity.get, 0.01)
     assert_equal(EPlus.fuel_type(fuel), htg_coil.fuelType)
+  end
+
+  def test_install_quality_furnace_only_airflow
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-all-furnace-gas-only.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    heating_system = hpxml.heating_systems[0]
+    airflow_defect_htg = heating_system.airflow_defect_ratio
+    fan_watts_cfm = heating_system.fan_watts_per_cfm
+    heating_cfm = heating_system.airflow_cfm_per_ton * UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'ton')
+
+    # Check airflows
+    assert_nil(airflow_defect_htg)
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringHeatingOperation.get)
+    assert_in_epsilon(heating_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringHeatingOperation.get, 'm^3/s', 'cfm'), 0.01)
+
+    # fan
+    fanonoff = unitary_system.supplyFan.get.to_FanOnOff.get
+    # Check fan power
+    assert_equal(0.75, fanonoff.fanEfficiency)
+    assert_in_epsilon(fanonoff.pressureRise, fanonoff.fanEfficiency * fan_watts_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+  end
+
+  def test_install_quality_furnace_only_ratio
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-all-furnace-gas-only.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    heating_system = hpxml.heating_systems[0]
+    airflow_defect_htg = heating_system.airflow_defect_ratio
+    fan_watts_cfm = heating_system.fan_watts_per_cfm
+    actual_cfm_per_ton = heating_system.airflow_cfm_per_ton
+
+    # Fixme: Not able to check whether airflow is correctly appyling defect ratio,
+    # all the values available from the model are all with defect ratio,
+    # only hvac_sizing.rb sees the design airflow without applying defect ratio.
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+
+    # fan
+    fanonoff = unitary_system.supplyFan.get.to_FanOnOff.get
+    # Check fan power
+    assert_equal(0.75, fanonoff.fanEfficiency)
+    assert_in_epsilon(fanonoff.pressureRise, fanonoff.fanEfficiency * fan_watts_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
   end
 
   def test_furnace_electric
@@ -320,6 +645,334 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     supp_htg_coil = model.getCoilHeatingElectrics[0]
     assert_in_epsilon(backup_efficiency, supp_htg_coil.efficiency, 0.01)
     assert_in_epsilon(supp_htg_capacity, supp_htg_coil.nominalCapacity.get, 0.01)
+  end
+
+  def test_install_quality_air_to_air_heat_pump_1_speed
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-all-air-to-air-heat-pump-1-speed.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml.heat_pumps[0]
+    airflow_defect = heat_pump.airflow_defect_ratio
+    charge_defect = heat_pump.charge_defect_ratio
+    fan_watts_cfm = heat_pump.fan_watts_per_cfm
+    cooling_cfm = heat_pump.airflow_cfm_per_ton * UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton')
+    heating_cfm = heat_pump.airflow_cfm_per_ton * UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton')
+
+    # model objects:
+    # Unitary system
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    # Fan
+    fanonoff = unitary_system.supplyFan.get.to_FanOnOff.get
+    fan_flow_rate = UnitConversions.convert(fanonoff.maximumFlowRate.get, 'm^3/s', 'cfm')
+    # Cooling coil
+    assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
+    clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
+    rated_airflow_cfm_clg = UnitConversions.convert(clg_coil.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+    # Heating coil
+    assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
+    htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
+    rated_airflow_cfm_htg = UnitConversions.convert(htg_coil.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+
+    # Check installation quality EMS
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
+
+    # Check fan power
+    assert_equal(0.75, fanonoff.fanEfficiency)
+    assert_in_epsilon(fanonoff.pressureRise, fanonoff.fanEfficiency * fan_watts_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+
+    # fan flow rate is set to fixed flow rate from hpxml
+    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringHeatingOperation.get)
+    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringCoolingOperation.get)
+    assert_in_epsilon(heating_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringHeatingOperation.get, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(cooling_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringCoolingOperation.get, 'm^3/s', 'cfm'), 0.01)
+    # fan flow rate is using cooling fixed flow rate from hpxml
+    assert_in_epsilon(fan_flow_rate, cooling_cfm, 0.01)
+    # defect ratios in EMS is calculated correctly
+    assert_nil(airflow_defect)
+    assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
+    assert_in_epsilon(program_values['FF_AF_c'].sum, cooling_cfm / rated_airflow_cfm_clg, 0.01)
+    assert_in_epsilon(program_values['FF_AF_h'].sum, heating_cfm / rated_airflow_cfm_htg, 0.01)
+  end
+
+  def test_install_quality_air_to_air_heat_pump_1_speed_ratios
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-all-air-to-air-heat-pump-1-speed2.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml.heat_pumps[0]
+    airflow_defect = heat_pump.airflow_defect_ratio
+    charge_defect = heat_pump.charge_defect_ratio
+    fan_watts_cfm = heat_pump.fan_watts_per_cfm
+    actual_cfm_per_ton = heat_pump.airflow_cfm_per_ton
+
+    # model objects:
+    # Unitary system
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    cooling_cfm = UnitConversions.convert(unitary_system.supplyAirFlowRateDuringCoolingOperation.get, 'm^3/s', 'cfm')
+    heating_cfm = UnitConversions.convert(unitary_system.supplyAirFlowRateDuringHeatingOperation.get, 'm^3/s', 'cfm')
+    # fan
+    fanonoff = unitary_system.supplyFan.get.to_FanOnOff.get
+    fan_flow_rate = UnitConversions.convert(fanonoff.maximumFlowRate.get, 'm^3/s', 'cfm')
+    # Cooling coil
+    assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
+    clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
+    rated_airflow_cfm_clg = UnitConversions.convert(clg_coil.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+    # Heating coil
+    assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
+    htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
+    rated_airflow_cfm_htg = UnitConversions.convert(htg_coil.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+
+    # Check fan power
+    assert_equal(0.75, fanonoff.fanEfficiency)
+    assert_in_epsilon(fanonoff.pressureRise, fanonoff.fanEfficiency * fan_watts_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+
+    # Check installation quality EMS
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
+
+    # defect ratios in EMS is calculated correctly
+    assert_nil(actual_cfm_per_ton)
+    assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
+    assert_in_epsilon(program_values['FF_AF_c'].sum, cooling_cfm / rated_airflow_cfm_clg, 0.01)
+    assert_in_epsilon(program_values['FF_AF_h'].sum, heating_cfm / rated_airflow_cfm_htg, 0.01)
+  end
+
+  def test_install_quality_air_to_air_heat_pump_2_speed
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-all-air-to-air-heat-pump-2-speed.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml.heat_pumps[0]
+    airflow_defect = heat_pump.airflow_defect_ratio
+    charge_defect = heat_pump.charge_defect_ratio
+    fan_watts_cfm = heat_pump.fan_watts_per_cfm
+    cooling_cfm = heat_pump.airflow_cfm_per_ton * UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton')
+    heating_cfm = heat_pump.airflow_cfm_per_ton * UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton')
+
+    # model objects:
+    # Unitary system
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    perf = unitary_system.designSpecificationMultispeedObject.get.to_UnitarySystemPerformanceMultispeed.get
+    clg_ratios = perf.supplyAirflowRatioFields.map { |field| field.coolingRatio.get }
+    htg_ratios = perf.supplyAirflowRatioFields.map { |field| field.heatingRatio.get }
+    # Fan
+    fanonoff = unitary_system.supplyFan.get.to_FanOnOff.get
+    fan_flow_rate = UnitConversions.convert(fanonoff.maximumFlowRate.get, 'm^3/s', 'cfm')
+    # Cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    rated_airflow_cfm_clg = []
+    clg_coil.stages.each do |stage|
+      rated_airflow_cfm_clg << UnitConversions.convert(stage.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+    end
+    # Heating coil
+    assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    rated_airflow_cfm_htg = []
+    htg_coil.stages.each do |stage|
+      rated_airflow_cfm_htg << UnitConversions.convert(stage.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+    end
+
+    # Check installation quality EMS
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
+
+    # Check fan power
+    assert_equal(0.75, fanonoff.fanEfficiency)
+    assert_in_epsilon(fanonoff.pressureRise, fanonoff.fanEfficiency * fan_watts_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+
+    # fan flow rate is set to fixed flow rate from hpxml
+    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringCoolingOperation.get)
+    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringCoolingOperation.get)
+    assert_in_epsilon(cooling_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringCoolingOperation.get, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(heating_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringHeatingOperation.get, 'm^3/s', 'cfm'), 0.01)
+    clg_speed_cfms = clg_ratios.map { |ratio| cooling_cfm * ratio }
+    htg_speed_cfms = htg_ratios.map { |ratio| heating_cfm * ratio }
+
+    # fan flow rate is using cooling fixed flow rate from hpxml
+    assert_in_epsilon(fan_flow_rate, cooling_cfm, 0.01)
+    # defect ratios in EMS is calculated correctly
+    assert_nil(airflow_defect)
+    assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
+    assert_in_epsilon(program_values['FF_AF_c'].sum, clg_speed_cfms.zip(rated_airflow_cfm_clg).map { |cfm, rated_cfm| cfm / rated_cfm }.sum, 0.01)
+    assert_in_epsilon(program_values['FF_AF_h'].sum, htg_speed_cfms.zip(rated_airflow_cfm_htg).map { |cfm, rated_cfm| cfm / rated_cfm }.sum, 0.01)
+  end
+
+  def test_install_quality_air_to_air_heat_pump_2_speed_ratios
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-all-air-to-air-heat-pump-2-speed2.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml.heat_pumps[0]
+    airflow_defect = heat_pump.airflow_defect_ratio
+    charge_defect = heat_pump.charge_defect_ratio
+    fan_watts_cfm = heat_pump.fan_watts_per_cfm
+    actual_cfm_per_ton = heat_pump.airflow_cfm_per_ton
+
+    # model objects:
+    # Unitary system
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    perf = unitary_system.designSpecificationMultispeedObject.get.to_UnitarySystemPerformanceMultispeed.get
+    clg_ratios = perf.supplyAirflowRatioFields.map { |field| field.coolingRatio.get }
+    htg_ratios = perf.supplyAirflowRatioFields.map { |field| field.heatingRatio.get }
+    cooling_cfm = UnitConversions.convert(unitary_system.supplyAirFlowRateDuringCoolingOperation.get, 'm^3/s', 'cfm')
+    heating_cfm = UnitConversions.convert(unitary_system.supplyAirFlowRateDuringHeatingOperation.get, 'm^3/s', 'cfm')
+    # fan
+    fanonoff = unitary_system.supplyFan.get.to_FanOnOff.get
+    fan_flow_rate = UnitConversions.convert(fanonoff.maximumFlowRate.get, 'm^3/s', 'cfm')
+    # Cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    rated_airflow_cfm_clg = []
+    clg_coil.stages.each do |stage|
+      rated_airflow_cfm_clg << UnitConversions.convert(stage.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+    end
+    # Heating coil
+    assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    rated_airflow_cfm_htg = []
+    htg_coil.stages.each do |stage|
+      rated_airflow_cfm_htg << UnitConversions.convert(stage.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+    end
+
+    # Check fan power
+    assert_equal(0.75, fanonoff.fanEfficiency)
+    assert_in_epsilon(fanonoff.pressureRise, fanonoff.fanEfficiency * fan_watts_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+
+    # Check installation quality EMS
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
+
+    # defect ratios in EMS is calculated correctly
+    assert_nil(actual_cfm_per_ton)
+    clg_speed_cfms = clg_ratios.map { |ratio| cooling_cfm * ratio }
+    htg_speed_cfms = htg_ratios.map { |ratio| heating_cfm * ratio }
+    assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
+    assert_in_epsilon(program_values['FF_AF_c'].sum, clg_speed_cfms.zip(rated_airflow_cfm_clg).map { |cfm, rated_cfm| cfm / rated_cfm }.sum, 0.01)
+    assert_in_epsilon(program_values['FF_AF_h'].sum, htg_speed_cfms.zip(rated_airflow_cfm_htg).map { |cfm, rated_cfm| cfm / rated_cfm }.sum, 0.01)
+  end
+
+  def test_install_quality_air_to_air_heat_pump_var_speed
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-all-air-to-air-heat-pump-var-speed.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml.heat_pumps[0]
+    airflow_defect = heat_pump.airflow_defect_ratio
+    charge_defect = heat_pump.charge_defect_ratio
+    fan_watts_cfm = heat_pump.fan_watts_per_cfm
+    cooling_cfm = heat_pump.airflow_cfm_per_ton * UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton')
+    heating_cfm = heat_pump.airflow_cfm_per_ton * UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton')
+
+    # model objects:
+    # Unitary system
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    perf = unitary_system.designSpecificationMultispeedObject.get.to_UnitarySystemPerformanceMultispeed.get
+    clg_ratios = perf.supplyAirflowRatioFields.map { |field| field.coolingRatio.get }
+    htg_ratios = perf.supplyAirflowRatioFields.map { |field| field.heatingRatio.get }
+    # Fan
+    fanonoff = unitary_system.supplyFan.get.to_FanOnOff.get
+    fan_flow_rate = UnitConversions.convert(fanonoff.maximumFlowRate.get, 'm^3/s', 'cfm')
+    # Cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    rated_airflow_cfm_clg = []
+    clg_coil.stages.each do |stage|
+      rated_airflow_cfm_clg << UnitConversions.convert(stage.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+    end
+    # Heating coil
+    assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    rated_airflow_cfm_htg = []
+    htg_coil.stages.each do |stage|
+      rated_airflow_cfm_htg << UnitConversions.convert(stage.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+    end
+
+    # Check installation quality EMS
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
+
+    # Check fan power
+    assert_equal(0.75, fanonoff.fanEfficiency)
+    assert_in_epsilon(fanonoff.pressureRise, fanonoff.fanEfficiency * fan_watts_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+
+    # fan flow rate is set to fixed flow rate from hpxml
+    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringCoolingOperation.get)
+    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringCoolingOperation.get)
+    assert_in_epsilon(cooling_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringCoolingOperation.get, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(heating_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringHeatingOperation.get, 'm^3/s', 'cfm'), 0.01)
+    clg_speed_cfms = clg_ratios.map { |ratio| cooling_cfm * ratio }
+    htg_speed_cfms = htg_ratios.map { |ratio| heating_cfm * ratio }
+
+    # fan flow rate is using cooling fixed flow rate from hpxml
+    assert_in_epsilon(fan_flow_rate, cooling_cfm, 0.01)
+    # defect ratios in EMS is calculated correctly
+    assert_nil(airflow_defect)
+    assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
+    assert_in_epsilon(program_values['FF_AF_c'].sum, clg_speed_cfms.zip(rated_airflow_cfm_clg).map { |cfm, rated_cfm| cfm / rated_cfm }.sum, 0.01)
+    assert_in_epsilon(program_values['FF_AF_h'].sum, htg_speed_cfms.zip(rated_airflow_cfm_htg).map { |cfm, rated_cfm| cfm / rated_cfm }.sum, 0.01)
+  end
+
+  def test_install_quality_air_to_air_heat_pump_var_speed_ratios
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-all-air-to-air-heat-pump-var-speed2.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml.heat_pumps[0]
+    airflow_defect = heat_pump.airflow_defect_ratio
+    charge_defect = heat_pump.charge_defect_ratio
+    fan_watts_cfm = heat_pump.fan_watts_per_cfm
+    actual_cfm_per_ton = heat_pump.airflow_cfm_per_ton
+
+    # model objects:
+    # Unitary system
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    perf = unitary_system.designSpecificationMultispeedObject.get.to_UnitarySystemPerformanceMultispeed.get
+    clg_ratios = perf.supplyAirflowRatioFields.map { |field| field.coolingRatio.get }
+    htg_ratios = perf.supplyAirflowRatioFields.map { |field| field.heatingRatio.get }
+    cooling_cfm = UnitConversions.convert(unitary_system.supplyAirFlowRateDuringCoolingOperation.get, 'm^3/s', 'cfm')
+    heating_cfm = UnitConversions.convert(unitary_system.supplyAirFlowRateDuringHeatingOperation.get, 'm^3/s', 'cfm')
+    # fan
+    fanonoff = unitary_system.supplyFan.get.to_FanOnOff.get
+    fan_flow_rate = UnitConversions.convert(fanonoff.maximumFlowRate.get, 'm^3/s', 'cfm')
+    # Cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    rated_airflow_cfm_clg = []
+    clg_coil.stages.each do |stage|
+      rated_airflow_cfm_clg << UnitConversions.convert(stage.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+    end
+    # Heating coil
+    assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    rated_airflow_cfm_htg = []
+    htg_coil.stages.each do |stage|
+      rated_airflow_cfm_htg << UnitConversions.convert(stage.ratedAirFlowRate.get, 'm^3/s', 'cfm')
+    end
+
+    # Check fan power
+    assert_equal(0.75, fanonoff.fanEfficiency)
+    assert_in_epsilon(fanonoff.pressureRise, fanonoff.fanEfficiency * fan_watts_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+
+    # Check installation quality EMS
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
+
+    # defect ratios in EMS is calculated correctly
+    assert_nil(actual_cfm_per_ton)
+    clg_speed_cfms = clg_ratios.map { |ratio| cooling_cfm * ratio }
+    htg_speed_cfms = htg_ratios.map { |ratio| heating_cfm * ratio }
+    assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
+    assert_in_epsilon(program_values['FF_AF_c'].sum, clg_speed_cfms.zip(rated_airflow_cfm_clg).map { |cfm, rated_cfm| cfm / rated_cfm }.sum, 0.01)
+    assert_in_epsilon(program_values['FF_AF_h'].sum, htg_speed_cfms.zip(rated_airflow_cfm_htg).map { |cfm, rated_cfm| cfm / rated_cfm }.sum, 0.01)
   end
 
   def test_mini_split_heat_pump
@@ -561,27 +1214,6 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     supp_htg_coil = model.getCoilHeatingElectrics[0]
     assert_in_epsilon(backup_efficiency, supp_htg_coil.efficiency, 0.01)
     assert_in_epsilon(supp_htg_capacity, supp_htg_coil.nominalCapacity.get, 0.01)
-  end
-
-  def test_fixed_flowrates
-    # Test AC & furnace
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-airflow-rate.xml'))
-    model, hpxml = _test_measure(args_hash)
-
-    # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
-    heating_system = hpxml.heating_systems[0]
-    cooling_cfm = cooling_system.airflow_cfm_per_ton * UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton')
-    heating_cfm = heating_system.airflow_cfm_per_ton * UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'ton')
-
-    # Check airflows
-    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    unitary_system = model.getAirLoopHVACUnitarySystems[0]
-    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringHeatingOperation.get)
-    assert_equal('SupplyAirFlowRate', unitary_system.supplyAirFlowRateMethodDuringCoolingOperation.get)
-    assert_in_epsilon(heating_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringHeatingOperation.get, 'm^3/s', 'cfm'), 0.01)
-    assert_in_epsilon(cooling_cfm, UnitConversions.convert(unitary_system.supplyAirFlowRateDuringCoolingOperation.get, 'm^3/s', 'cfm'), 0.01)
   end
 
   def _test_measure(args_hash)
