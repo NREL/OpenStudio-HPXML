@@ -74,7 +74,13 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/invalid-calendar-year.xml' => 'base.xml',
-    'invalid_files/invalid-daylight-saving.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-boolean.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-boolean2.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-float.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-float2.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-integer.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-integer2.xml' => 'base.xml',
+    'invalid_files/invalid-daylight-saving.xml' => 'base-simcontrol-daylight-saving-custom.xml',
     'invalid_files/invalid-epw-filepath.xml' => 'base.xml',
     'invalid_files/invalid-facility-type.xml' => 'base-dhw-shared-laundry-room.xml',
     'invalid_files/invalid-input-parameters.xml' => 'base.xml',
@@ -446,6 +452,24 @@ def create_hpxmls
       if ['invalid_files/missing-elements.xml'].include? derivative
         XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors')
         XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea')
+      elsif ['invalid_files/invalid-datatype-boolean.xml'].include? derivative
+        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/RadiantBarrier').inner_text = 'FOOBAR'
+      elsif ['invalid_files/invalid-datatype-boolean2.xml'].include? derivative
+        roof = XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof')
+        XMLHelper.delete_element(roof, 'RadiantBarrier')
+        XMLHelper.add_element(roof, 'RadiantBarrier')
+      elsif ['invalid_files/invalid-datatype-float.xml'].include? derivative
+        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea').inner_text = 'FOOBAR'
+      elsif ['invalid_files/invalid-datatype-float2.xml'].include? derivative
+        constr = XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction')
+        XMLHelper.delete_element(constr, 'ConditionedFloorArea')
+        XMLHelper.add_element(constr, 'ConditionedFloorArea')
+      elsif ['invalid_files/invalid-datatype-integer.xml'].include? derivative
+        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors').inner_text = 'FOOBAR'
+      elsif ['invalid_files/invalid-datatype-integer2.xml'].include? derivative
+        constr = XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction')
+        XMLHelper.delete_element(constr, 'NumberofConditionedFloors')
+        XMLHelper.add_element(constr, 'NumberofConditionedFloors')
       end
 
       if derivative.include? 'ASHRAE_Standard_140'
@@ -1410,8 +1434,6 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls << hpxml.walls[-1].dup
     hpxml.walls[-1].id = 'TinyWall'
     hpxml.walls[-1].area = 0.05
-  elsif ['invalid_files/duplicate-id.xml'].include? hpxml_file
-    hpxml.walls[-1].id = hpxml.walls[0].id
   elsif ['invalid_files/enclosure-living-missing-exterior-wall.xml'].include? hpxml_file
     hpxml.walls[0].delete
   elsif ['invalid_files/enclosure-garage-missing-exterior-wall.xml'].include? hpxml_file
@@ -2410,6 +2432,8 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       shgc: 0.45,
                       fraction_operable: 0.67,
                       wall_idref: 'WallOtherMultifamilyBufferSpace')
+  elsif ['invalid_files/duplicate-id.xml'].include? hpxml_file
+    hpxml.windows[-1].id = hpxml.windows[0].id
   end
 end
 
