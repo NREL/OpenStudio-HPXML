@@ -347,19 +347,24 @@ class HPXMLDefaults
     end
 
     # Fan power
+    psc_watts_per_cfm = 0.5 # W/cfm, PSC fan
+    ecm_watts_per_cfm = 0.375 # W/cfm, ECM fan
+    mini_split_ducted_watts_per_cfm = 0.18 # W/cfm, ducted mini split
+    mini_split_ductless_watts_per_cfm = 0.07 # W/cfm, ductless mini split
     hpxml.heating_systems.each do |heating_system|
       if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
         if heating_system.fan_watts_per_cfm.nil?
-          if not heating_system.attached_cooling_system.nil?
-            heating_system.fan_watts_per_cfm = heating_system.attached_cooling_system.fan_watts_per_cfm
-          end
-          if heating_system.fan_watts_per_cfm.nil?
-            heating_system.fan_watts_per_cfm = 0.5 # W/cfm
+          if (not heating_system.heating_efficiency_afue.nil?) && (heating_system.heating_efficiency_afue > 0.9) # HEScore assumption
+            heating_system.fan_watts_per_cfm = ecm_watts_per_cfm
+          elsif (not heating_system.heating_efficiency_percent.nil?) && (heating_system.heating_efficiency_percent > 0.9) # HEScore assumption
+            heating_system.fan_watts_per_cfm = ecm_watts_per_cfm
+          else
+            heating_system.fan_watts_per_cfm = psc_watts_per_cfm
           end
         end
       elsif [HPXML::HVACTypeStove].include? heating_system.heating_system_type
         if heating_system.fan_watts.nil?
-          heating_system.fan_watts = 40.0
+          heating_system.fan_watts = 40.0 # W
         end
       elsif [HPXML::HVACTypeWallFurnace,
              HPXML::HVACTypeFloorFurnace,
@@ -367,39 +372,50 @@ class HPXMLDefaults
              HPXML::HVACTypeFixedHeater,
              HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
         if heating_system.fan_watts.nil?
-          heating_system.fan_watts = 0.0 # Assume no fan power
+          heating_system.fan_watts = 0.0 # W/cfm, assume no fan power
         end
       end
     end
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.fan_watts_per_cfm.nil?
-      next unless [HPXML::HVACTypeCentralAirConditioner,
-                   HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
 
-      if cooling_system.cooling_efficiency_seer <= 15
-        cooling_system.fan_watts_per_cfm = 0.5 # W/cfm
-      else
-        cooling_system.fan_watts_per_cfm = 0.3 # W/cfm
+      if not cooling_system.attached_heating_system.nil?
+        # Note: Requires heating fan W/cfm to have already been defaulted as needed
+        cooling_system.fan_watts_per_cfm = cooling_system.attached_heating_system.fan_watts_per_cfm
+      elsif [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
+        if cooling_system.cooling_efficiency_seer > 13.5 # HEScore assumption
+          cooling_system.fan_watts_per_cfm = ecm_watts_per_cfm
+        else
+          cooling_system.fan_watts_per_cfm = psc_watts_per_cfm
+        end
+      elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
+        if not cooling_system.distribution_system.nil?
+          cooling_system.fan_watts_per_cfm = mini_split_ducted_watts_per_cfm
+        else
+          cooling_system.fan_watts_per_cfm = mini_split_ductless_watts_per_cfm
+        end
       end
     end
     hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump.fan_watts_per_cfm.nil?
 
       if [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
-        if heat_pump.cooling_efficiency_seer <= 15
-          heat_pump.fan_watts_per_cfm = 0.5 # W/cfm
+        if heat_pump.heating_efficiency_hspf > 8.75 # HEScore assumption
+          heat_pump.fan_watts_per_cfm = ecm_watts_per_cfm
         else
-          heat_pump.fan_watts_per_cfm = 0.3 # W/cfm
+          heat_pump.fan_watts_per_cfm = psc_watts_per_cfm
         end
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
-        # Should this be 0.2 W/cfm per ANSI/RESNET/ICC 301-2019 Section 4.4.5? (or is 0.2 W/cfm
-        # interpreted as the _additional_ fan power beyond that captured in the rating test?)
-        heat_pump.fan_watts_per_cfm = 0.5 # W/cfm
+        if heat_pump.heating_efficiency_cop > 8.75 / 3.2 # HEScore assumption
+          heat_pump.fan_watts_per_cfm = ecm_watts_per_cfm
+        else
+          heat_pump.fan_watts_per_cfm = psc_watts_per_cfm
+        end
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
         if not heat_pump.distribution_system.nil?
-          heat_pump.fan_watts_per_cfm = 0.18 # W/cfm, ducted
+          heat_pump.fan_watts_per_cfm = mini_split_ducted_watts_per_cfm
         else
-          heat_pump.fan_watts_per_cfm = 0.07 # W/cfm, ductless
+          heat_pump.fan_watts_per_cfm = mini_split_ductless_watts_per_cfm
         end
       end
     end

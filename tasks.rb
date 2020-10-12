@@ -74,7 +74,13 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/invalid-calendar-year.xml' => 'base.xml',
-    'invalid_files/invalid-daylight-saving.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-boolean.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-boolean2.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-float.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-float2.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-integer.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-integer2.xml' => 'base.xml',
+    'invalid_files/invalid-daylight-saving.xml' => 'base-simcontrol-daylight-saving-custom.xml',
     'invalid_files/invalid-epw-filepath.xml' => 'base.xml',
     'invalid_files/invalid-facility-type.xml' => 'base-dhw-shared-laundry-room.xml',
     'invalid_files/invalid-input-parameters.xml' => 'base.xml',
@@ -261,12 +267,12 @@ def create_hpxmls
     'base-hvac-furnace-x3-dse.xml' => 'base.xml',
     'base-hvac-ground-to-air-heat-pump.xml' => 'base.xml',
     'base-hvac-ideal-air.xml' => 'base.xml',
-    'base-hvac-install-qual-both.xml' => 'base.xml',
-    'base-hvac-install-qual-none.xml' => 'base.xml',
-    'base-hvac-install-qual-airflow-defect.xml' => 'base.xml',
-    'base-hvac-install-qual-airflow-rate.xml' => 'base.xml',
-    'base-hvac-install-qual-charge-defect.xml' => 'base.xml',
-    'base-hvac-install-qual-blower-efficiency.xml' => 'base.xml',
+    'base-hvac-install-qual-all-furnace-gas-central-ac-1-speed2.xml' => 'base.xml',
+    'base-hvac-install-qual-none-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
+    'base-hvac-install-qual-airflow-defect-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
+    'base-hvac-install-qual-airflow-rate-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
+    'base-hvac-install-qual-charge-defect-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
+    'base-hvac-install-qual-blower-efficiency-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-install-qual-all-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-install-qual-all-air-to-air-heat-pump-1-speed2.xml' => 'base-hvac-install-qual-all-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-install-qual-all-air-to-air-heat-pump-2-speed.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
@@ -469,6 +475,24 @@ def create_hpxmls
       if ['invalid_files/missing-elements.xml'].include? derivative
         XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors')
         XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea')
+      elsif ['invalid_files/invalid-datatype-boolean.xml'].include? derivative
+        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/RadiantBarrier').inner_text = 'FOOBAR'
+      elsif ['invalid_files/invalid-datatype-boolean2.xml'].include? derivative
+        roof = XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof')
+        XMLHelper.delete_element(roof, 'RadiantBarrier')
+        XMLHelper.add_element(roof, 'RadiantBarrier')
+      elsif ['invalid_files/invalid-datatype-float.xml'].include? derivative
+        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea').inner_text = 'FOOBAR'
+      elsif ['invalid_files/invalid-datatype-float2.xml'].include? derivative
+        constr = XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction')
+        XMLHelper.delete_element(constr, 'ConditionedFloorArea')
+        XMLHelper.add_element(constr, 'ConditionedFloorArea')
+      elsif ['invalid_files/invalid-datatype-integer.xml'].include? derivative
+        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors').inner_text = 'FOOBAR'
+      elsif ['invalid_files/invalid-datatype-integer2.xml'].include? derivative
+        constr = XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction')
+        XMLHelper.delete_element(constr, 'NumberofConditionedFloors')
+        XMLHelper.add_element(constr, 'NumberofConditionedFloors')
       end
 
       if derivative.include? 'ASHRAE_Standard_140'
@@ -1433,8 +1457,6 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls << hpxml.walls[-1].dup
     hpxml.walls[-1].id = 'TinyWall'
     hpxml.walls[-1].area = 0.05
-  elsif ['invalid_files/duplicate-id.xml'].include? hpxml_file
-    hpxml.walls[-1].id = hpxml.walls[0].id
   elsif ['invalid_files/enclosure-living-missing-exterior-wall.xml'].include? hpxml_file
     hpxml.walls[0].delete
   elsif ['invalid_files/enclosure-garage-missing-exterior-wall.xml'].include? hpxml_file
@@ -2433,6 +2455,8 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       shgc: 0.45,
                       fraction_operable: 0.67,
                       wall_idref: 'WallOtherMultifamilyBufferSpace')
+  elsif ['invalid_files/duplicate-id.xml'].include? hpxml_file
+    hpxml.windows[-1].id = hpxml.windows[0].id
   end
 end
 
@@ -2822,7 +2846,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].fan_coil_watts = nil
     hpxml.heating_systems[0].shared_loop_watts = nil
     hpxml.heating_systems[0].electric_auxiliary_energy = 500.0
-  elsif ['base-hvac-install-qual-airflow-rate.xml'].include? hpxml_file
+  elsif ['base-hvac-install-qual-airflow-rate-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.heating_systems[0].airflow_cfm_per_ton = 400.0
   elsif ['base-hvac-install-qual-all-furnace-gas-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].fan_watts_per_cfm = 0.365
@@ -2956,19 +2980,20 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[1].id += '2'
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_capacity /= 10.0
-  elsif ['base-hvac-install-qual-both.xml'].include? hpxml_file
+  elsif ['base-hvac-install-qual-all-furnace-gas-central-ac-1-speed2.xml'].include? hpxml_file
     hpxml.cooling_systems[0].airflow_defect_ratio = -0.25
     hpxml.cooling_systems[0].charge_defect_ratio = -0.25
-  elsif ['base-hvac-install-qual-none.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].fan_watts_per_cfm = 0.365
+  elsif ['base-hvac-install-qual-none-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].airflow_defect_ratio = 0.0
     hpxml.cooling_systems[0].charge_defect_ratio = 0.0
-  elsif ['base-hvac-install-qual-airflow-rate.xml'].include? hpxml_file
+  elsif ['base-hvac-install-qual-airflow-rate-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].airflow_cfm_per_ton = 360.0
-  elsif ['base-hvac-install-qual-airflow-defect.xml'].include? hpxml_file
+  elsif ['base-hvac-install-qual-airflow-defect-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].airflow_defect_ratio = -0.25
-  elsif ['base-hvac-install-qual-charge-defect.xml'].include? hpxml_file
+  elsif ['base-hvac-install-qual-charge-defect-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].charge_defect_ratio = -0.25
-  elsif ['base-hvac-install-qual-blower-efficiency.xml'].include? hpxml_file
+  elsif ['base-hvac-install-qual-blower-efficiency-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fan_watts_per_cfm = 0.365
   elsif ['base-hvac-install-qual-all-mini-split-air-conditioner-only-ducted.xml',
          'base-hvac-install-qual-all-furnace-gas-central-ac-2-speed.xml',

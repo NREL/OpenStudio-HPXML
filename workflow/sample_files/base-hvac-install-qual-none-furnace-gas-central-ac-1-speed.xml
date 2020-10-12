@@ -10,13 +10,6 @@
     <extension>
       <SimulationControl>
         <Timestep>60</Timestep>
-        <DaylightSaving>
-          <Enabled>true</Enabled>
-          <BeginMonth>3</BeginMonth>
-          <BeginDayOfMonth>10</BeginDayOfMonth>
-          <EndMonth>4</EndMonth>
-          <EndDayOfMonth>31</EndDayOfMonth>
-        </DaylightSaving>
       </SimulationControl>
     </extension>
   </SoftwareInfo>
@@ -340,6 +333,10 @@
                 <Value>13.0</Value>
               </AnnualCoolingEfficiency>
               <SensibleHeatFraction>0.73</SensibleHeatFraction>
+              <extension>
+                <AirflowDefectRatio>0.0</AirflowDefectRatio>
+                <ChargeDefectRatio>0.0</ChargeDefectRatio>
+              </extension>
             </CoolingSystem>
           </HVACPlant>
           <HVACControl>
