@@ -88,6 +88,7 @@ def create_hpxmls
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/invalid-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'invalid_files/invalid-runperiod.xml' => 'base.xml',
+    'invalid_files/invalid-schema-version.xml' => 'base.xml',
     'invalid_files/invalid-timestep.xml' => 'base.xml',
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
@@ -470,6 +471,9 @@ def create_hpxmls
         constr = XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction')
         XMLHelper.delete_element(constr, 'NumberofConditionedFloors')
         XMLHelper.add_element(constr, 'NumberofConditionedFloors')
+      elsif ['invalid_files/invalid-schema-version.xml'].include? derivative
+        root = XMLHelper.get_element(hpxml_doc, '/HPXML')
+        XMLHelper.add_attribute(root, 'schemaVersion', '2.3')
       end
 
       if derivative.include? 'ASHRAE_Standard_140'
