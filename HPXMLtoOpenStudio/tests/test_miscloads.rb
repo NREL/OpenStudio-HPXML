@@ -2,7 +2,7 @@
 
 require_relative '../resources/minitest_helper'
 require 'openstudio'
-require 'openstudio/ruleset/ShowRunnerOutput'
+require 'openstudio/measure/ShowRunnerOutput'
 require 'minitest/autorun'
 require 'fileutils'
 require_relative '../measure.rb'
@@ -71,7 +71,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
 
   def test_large_uncommon_loads
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-misc-large-uncommon-loads.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-misc-loads-large-uncommon.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Check misc plug loads
@@ -132,7 +132,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
 
   def test_large_uncommon_loads2
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-misc-large-uncommon-loads2.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-misc-loads-large-uncommon2.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Check misc plug loads

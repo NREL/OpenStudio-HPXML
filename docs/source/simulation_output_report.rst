@@ -48,6 +48,8 @@ Current end use/fuel type combinations are:
    Electricity: Lighting Garage (MBtu)
    Electricity: Lighting Exterior (MBtu)
    Electricity: Mech Vent (MBtu)
+   Electricity: Mech Vent Preheating (MBtu)
+   Electricity: Mech Vent Precooling (MBtu)
    Electricity: Whole House Fan (MBtu)
    Electricity: Refrigerator (MBtu)
    Electricity: Freezer (MBtu)
@@ -70,6 +72,8 @@ Current end use/fuel type combinations are:
    Natural Gas: Hot Water (MBtu)
    Natural Gas: Clothes Dryer (MBtu)
    Natural Gas: Range/Oven (MBtu)
+   Natural Gas: Mech Vent Preheating (MBtu)
+   Natural Gas: Mech Vent Precooling (MBtu)
    Natural Gas: Pool Heater (MBtu)
    Natural Gas: Hot Tub Heater (MBtu)
    Natural Gas: Grill (MBtu)
@@ -79,6 +83,8 @@ Current end use/fuel type combinations are:
    Fuel Oil: Hot Water (MBtu)
    Fuel Oil: Clothes Dryer (MBtu)
    Fuel Oil: Range/Oven (MBtu)
+   Fuel Oil: Mech Vent Preheating (MBtu)
+   Fuel Oil: Mech Vent Precooling (MBtu)
    Fuel Oil: Grill (MBtu)
    Fuel Oil: Lighting (MBtu)
    Fuel Oil: Fireplace (MBtu)
@@ -86,6 +92,8 @@ Current end use/fuel type combinations are:
    Propane: Hot Water (MBtu)
    Propane: Clothes Dryer (MBtu)
    Propane: Range/Oven (MBtu)
+   Propane: Mech Vent Preheating (MBtu)
+   Propane: Mech Vent Precooling (MBtu)
    Propane: Grill (MBtu)
    Propane: Lighting (MBtu)
    Propane: Fireplace (MBtu)
@@ -93,6 +101,8 @@ Current end use/fuel type combinations are:
    Wood Cord: Hot Water (MBtu)
    Wood Cord: Clothes Dryer (MBtu)
    Wood Cord: Range/Oven (MBtu)
+   Wood Cord: Mech Vent Preheating (MBtu)
+   Wood Cord: Mech Vent Precooling (MBtu)
    Wood Cord: Grill (MBtu)
    Wood Cord: Lighting (MBtu)
    Wood Cord: Fireplace (MBtu)
@@ -100,6 +110,8 @@ Current end use/fuel type combinations are:
    Wood Pellets: Hot Water (MBtu)
    Wood Pellets: Clothes Dryer (MBtu)
    Wood Pellets: Range/Oven (MBtu)
+   Wood Pellets: Mech Vent Preheating (MBtu)
+   Wood Pellets: Mech Vent Precooling (MBtu)
    Wood Pellets: Grill (MBtu)
    Wood Pellets: Lighting (MBtu)
    Wood Pellets: Fireplace (MBtu)
@@ -107,6 +119,8 @@ Current end use/fuel type combinations are:
    Coal: Hot Water (MBtu)
    Coal: Clothes Dryer (MBtu)
    Coal: Range/Oven (MBtu)
+   Coal: Mech Vent Preheating (MBtu)
+   Coal: Mech Vent Precooling (MBtu)
    Coal: Grill (MBtu)
    Coal: Lighting (MBtu)
    Coal: Fireplace (MBtu)
@@ -194,7 +208,7 @@ Current component loads disaggregated by Heating/Cooling are:
    Component Load: \*: Internal Mass (MBtu)          Heat gain/loss from internal mass (e.g., furniture, interior walls/floors) in conditioned space
    Component Load: \*: Infiltration (MBtu)           Heat gain/loss from airflow induced by stack and wind effects
    Component Load: \*: Natural Ventilation (MBtu)    Heat gain/loss from airflow through operable windows
-   Component Load: \*: Mechanical Ventilation (MBtu) Heat gain/loss from airflow/fan energy from a whole house mechanical ventilation system
+   Component Load: \*: Mechanical Ventilation (MBtu) Heat gain/loss from airflow/fan energy from mechanical ventilation systems (including clothes dryer exhaust)
    Component Load: \*: Whole House Fan (MBtu)        Heat gain/loss from airflow due to a whole house fan
    Component Load: \*: Ducts (MBtu)                  Heat gain/loss from conduction and leakage losses through supply/return ducts outside conditioned space
    Component Load: \*: Internal Gains (MBtu)         Heat gain/loss from appliances, lighting, plug loads, water heater tank losses, etc. in the conditioned space
@@ -223,15 +237,15 @@ The timeseries output file is called results_timeseries.csv and co-located with 
 
 Depending on the outputs requested, CSV files may include:
 
-   =================================== =======================================================================================================================
+   =================================== ==================================================================================================================================
    Type                                Notes
-   =================================== =======================================================================================================================
+   =================================== ==================================================================================================================================
    Fuel Consumptions                   Energy use for each fuel type (in kBtu for fossil fuels and kWh for electricity).
    End Use Consumptions                Energy use for each end use type (in kBtu for fossil fuels and kWh for electricity).
    Hot Water Uses                      Water use for each end use type (in gallons).
    Total Loads                         Heating and cooling loads (in kBtu) for the building.
    Component Loads                     Heating and cooling loads (in kBtu) disaggregated by component (e.g., Walls, Windows, Infiltration, Ducts, etc.).
    Zone Temperatures                   Average temperatures (in deg-F) for each space modeled (e.g., living space, attic, garage, basement, crawlspace, etc.).
-   Airflows                            Airflow rates (in cfm) for infiltration, mechanical ventilation, natural ventilation, and whole house fans.
+   Airflows                            Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.
    Weather                             Weather file data including outdoor temperatures, relative humidity, wind speed, and solar.
-   =================================== =======================================================================================================================
+   =================================== ==================================================================================================================================

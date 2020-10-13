@@ -2,7 +2,16 @@
 
 class EPlus
   # Constants
-  FuelTypeElectricity = 'electricity'
+  EMSActuatorElectricEquipmentPower = 'ElectricEquipment', 'Electricity Rate'
+  EMSActuatorOtherEquipmentPower = 'OtherEquipment', 'Power Level'
+  EMSActuatorPumpMassFlowRate = 'Pump', 'Pump Mass Flow Rate'
+  EMSActuatorPumpPressureRise = 'Pump', 'Pump Pressure Rise'
+  EMSActuatorScheduleConstantValue = 'Schedule:Constant', 'Schedule Value'
+  EMSActuatorZoneInfiltrationFlowRate = 'Zone Infiltration', 'Air Exchange Flow Rate'
+  EMSActuatorZoneMixingFlowRate = 'ZoneMixing', 'Air Exchange Flow Rate'
+  EMSIntVarFanMFR = 'Fan Maximum Mass Flow Rate'
+  EMSIntVarPumpMFR = 'Pump Maximum Mass Flow Rate'
+  FuelTypeElectricity = 'Electricity'
   FuelTypeNaturalGas = 'NaturalGas'
   FuelTypeOil = 'FuelOilNo2'
   FuelTypePropane = 'Propane'
@@ -37,49 +46,6 @@ class EPlus
       return FuelTypeCoal
     else
       fail "Unexpected HPXML fuel '#{hpxml_fuel}'."
-    end
-  end
-
-  def self.input_fuel_map(hpxml_fuel)
-    # Name of fuel used as inputs to E+ objects
-    if [HPXML::FuelTypeElectricity].include? hpxml_fuel
-      return FuelTypeElectricity
-    elsif [HPXML::FuelTypeNaturalGas].include? hpxml_fuel
-      return FuelTypeNaturalGas
-    elsif [HPXML::FuelTypeOil,
-           HPXML::FuelTypeOil1,
-           HPXML::FuelTypeOil2,
-           HPXML::FuelTypeOil4,
-           HPXML::FuelTypeOil5or6,
-           HPXML::FuelTypeDiesel,
-           HPXML::FuelTypeKerosene].include? hpxml_fuel
-      return FuelTypeOil
-    elsif [HPXML::FuelTypePropane].include? hpxml_fuel
-      return FuelTypePropane
-    elsif [HPXML::FuelTypeWoodCord].include? hpxml_fuel
-      return FuelTypeWoodCord
-    elsif [HPXML::FuelTypeWoodPellets].include? hpxml_fuel
-      return FuelTypeWoodPellets
-    elsif [HPXML::FuelTypeCoal,
-           HPXML::FuelTypeCoalAnthracite,
-           HPXML::FuelTypeCoalBituminous,
-           HPXML::FuelTypeCoke].include? hpxml_fuel
-      return FuelTypeCoal
-    else
-      fail "Unexpected HPXML fuel '#{hpxml_fuel}'."
-    end
-  end
-
-  def self.output_fuel_map(ep_fuel)
-    # Name of fuel used in E+ outputs
-    if ep_fuel == FuelTypeElectricity
-      return 'Electric'
-    elsif ep_fuel == FuelTypeNaturalGas
-      return 'Gas'
-    elsif ep_fuel == FuelTypeOil
-      return 'FuelOil#2'
-    else
-      return ep_fuel
     end
   end
 end

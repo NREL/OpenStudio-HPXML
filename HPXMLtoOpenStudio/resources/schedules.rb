@@ -5,8 +5,7 @@ class HourlyByMonthSchedule
   # weekday_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
   # weekend_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
   def initialize(model, sch_name, weekday_month_by_hour_values, weekend_month_by_hour_values,
-                 normalize_values = true, create_sch_object = true,
-                 schedule_type_limits_name = nil)
+                 schedule_type_limits_name = nil, normalize_values = true)
     @model = model
     @sch_name = sch_name
     @schedule = nil
@@ -19,9 +18,7 @@ class HourlyByMonthSchedule
     else
       @maxval = 1.0
     end
-    if create_sch_object
-      @schedule = createSchedule()
-    end
+    @schedule = createSchedule()
   end
 
   def calcDesignLevel(val)
@@ -66,7 +63,7 @@ class HourlyByMonthSchedule
   def calcMaxval()
     maxval = [@weekday_month_by_hour_values.flatten.max, @weekend_month_by_hour_values.flatten.max].max
     if maxval == 0.0
-      maxval == 1.0 # Prevent divide by zero
+      maxval = 1.0 # Prevent divide by zero
     end
     return maxval
   end
@@ -180,13 +177,11 @@ class MonthWeekdayWeekendSchedule
   # weekend_hourly_values can either be a comma-separated string of 24 numbers or a 24-element array of numbers.
   # monthly_values can either be a comma-separated string of 12 numbers or a 12-element array of numbers.
   def initialize(model, sch_name, weekday_hourly_values, weekend_hourly_values, monthly_values,
-                 mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true,
-                 schedule_type_limits_name = nil, begin_month = 1, begin_day_of_month = 1, end_month = 12, end_day_of_month = 31)
+                 schedule_type_limits_name = nil, normalize_values = true, begin_month = 1,
+                 begin_day_of_month = 1, end_month = 12, end_day_of_month = 31)
     @model = model
     @sch_name = sch_name
     @schedule = nil
-    @mult_weekday = mult_weekday
-    @mult_weekend = mult_weekend
     @weekday_hourly_values = validateValues(weekday_hourly_values, 24, 'weekday')
     @weekend_hourly_values = validateValues(weekend_hourly_values, 24, 'weekend')
     @monthly_values = validateValues(monthly_values, 12, 'monthly')
@@ -206,9 +201,7 @@ class MonthWeekdayWeekendSchedule
       @maxval = 1.0
       @schadjust = 1.0
     end
-    if create_sch_object
-      @schedule = createSchedule()
-    end
+    @schedule = createSchedule()
   end
 
   def calcDesignLevelFromDailykWh(daily_kwh)
@@ -283,12 +276,12 @@ class MonthWeekdayWeekendSchedule
 
   def calcMaxval()
     if @weekday_hourly_values.max > @weekend_hourly_values.max
-      maxval = @monthly_values.max * @weekday_hourly_values.max * @mult_weekday
+      maxval = @monthly_values.max * @weekday_hourly_values.max
     else
-      maxval = @monthly_values.max * @weekend_hourly_values.max * @mult_weekend
+      maxval = @monthly_values.max * @weekend_hourly_values.max
     end
     if maxval == 0.0
-      maxval == 1.0 # Prevent divide by zero
+      maxval = 1.0 # Prevent divide by zero
     end
     return maxval
   end
@@ -316,15 +309,19 @@ class MonthWeekdayWeekendSchedule
     if year_description.isLeapYear
       leap_offset = 1
     end
+
     num_days_in_each_month = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     num_days_in_each_month[@end_month] = @end_day_of_month
-    num_days_in_each_month.each_index { |i| i > 1 ? num_days_in_each_month[i] + leap_offset : num_days_in_each_month[i] }
+    num_days_in_each_month.each_index do |i|
+      num_days_in_each_month[i] += leap_offset if i == 2
+    end
     orig_day_startm = [0, 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]
+    orig_day_startm.each_index do |i|
+      orig_day_startm[i] += leap_offset if i > 2
+    end
     day_startm = orig_day_startm.map(&:clone)
     day_startm[@begin_month] = orig_day_startm[@begin_month] + @begin_day_of_month - 1
-    day_startm.each_index { |i| i > 1 ? day_startm[i] + leap_offset : day_startm[i] }
     day_endm = [orig_day_startm, num_days_in_each_month].transpose.map { |i| (i != [0, 0]) ? i.reduce(:+) - 1 : 0 }
-
     time = []
     for h in 1..24
       time[h] = OpenStudio::Time.new(0, h, 0, 0)
@@ -355,8 +352,8 @@ class MonthWeekdayWeekendSchedule
         wkdy_vals = []
         wknd_vals = []
         for h in 1..24
-          wkdy_vals[h] = (@monthly_values[m - 1] * @weekday_hourly_values[h - 1] * @mult_weekday) / @maxval
-          wknd_vals[h] = (@monthly_values[m - 1] * @weekend_hourly_values[h - 1] * @mult_weekend) / @maxval
+          wkdy_vals[h] = (@monthly_values[m - 1] * @weekday_hourly_values[h - 1]) / @maxval
+          wknd_vals[h] = (@monthly_values[m - 1] * @weekend_hourly_values[h - 1]) / @maxval
         end
 
         if (wkdy_vals == prev_wkdy_vals) && (wknd_vals == prev_wknd_vals)
@@ -430,7 +427,7 @@ class MonthWeekdayWeekendSchedule
 end
 
 class HotWaterSchedule
-  def initialize(model, obj_name, nbeds, days_shift = 0, create_sch_object = true)
+  def initialize(model, obj_name, nbeds, days_shift = 0, dryer_exhaust_min_runtime = 0)
     @model = model
     @sch_name = "#{obj_name} schedule"
     @schedule = nil
@@ -444,21 +441,17 @@ class HotWaterSchedule
     end
     file_prefixes = { Constants.ObjectNameClothesWasher => 'ClothesWasher',
                       Constants.ObjectNameClothesDryer => 'ClothesWasher',
+                      Constants.ObjectNameClothesDryerExhaust => 'ClothesWasher',
                       Constants.ObjectNameDishwasher => 'Dishwasher',
-                      Constants.ObjectNameShower => 'Shower',
-                      Constants.ObjectNameSink => 'Sink',
-                      Constants.ObjectNameBath => 'Bath',
-                      Constants.ObjectNameFixtures => 'SSB' }
+                      Constants.ObjectNameFixtures => 'Fixtures' }
     @file_prefix = file_prefixes[obj_name]
 
     timestep_minutes = (60 / @model.getTimestep.numberOfTimestepsPerHour).to_i
     weeks = 1 # use a single week that repeats
 
-    data = loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks)
+    data = loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks, dryer_exhaust_min_runtime)
     @totflow, @maxflow, @ontime = loadDrawProfileStatsFromFile()
-    if create_sch_object
-      @schedule = createSchedule(data, timestep_minutes, weeks)
-    end
+    @schedule = createSchedule(data, timestep_minutes, weeks)
   end
 
   def calcDesignLevelFromDailykWh(daily_kWh)
@@ -487,14 +480,14 @@ class HotWaterSchedule
 
   private
 
-  def loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks)
+  def loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks, dryer_exhaust_min_runtime)
     data = []
     if @file_prefix.nil?
       return data
     end
 
     # Get appropriate file
-    minute_draw_profile = File.join(File.dirname(__FILE__), "HotWater#{@file_prefix}Schedule_#{@nbeds}bed.csv")
+    minute_draw_profile = File.join(File.dirname(__FILE__), "data_hot_water_#{@file_prefix.downcase}_schedule_#{@nbeds}bed.csv")
     if not File.file?(minute_draw_profile)
       fail "Unable to find file: #{minute_draw_profile}"
     end
@@ -525,6 +518,18 @@ class HotWaterSchedule
       end
     end
 
+    if dryer_exhaust_min_runtime > 0
+      # Clothes dryer exhaust vent should operate whenever the dryer is operating,
+      # with a minimum runtime in minutes.
+      items.reverse.each_with_index do |val, i|
+        next unless val > 0
+
+        place = (items.length - 1) - i
+        last = place + dryer_exhaust_min_runtime
+        items.fill(1, place...last)
+      end
+    end
+
     # Aggregate minute schedule up to the timestep level to reduce the size
     # and speed of processing.
     for tstep in 0..(minutes_in_year / timestep_minutes).to_i - 1
@@ -550,7 +555,7 @@ class HotWaterSchedule
     maxflow_column_header = "#{column_header} Max"
     ontime_column_header = 'On-time Fraction'
 
-    draw_file = File.join(File.dirname(__FILE__), 'HotWaterMinuteDrawProfilesMaxFlows.csv')
+    draw_file = File.join(File.dirname(__FILE__), 'data_hot_water_max_flows.csv')
 
     datafound = false
     skippedheader = false

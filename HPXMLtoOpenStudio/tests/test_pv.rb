@@ -2,7 +2,7 @@
 
 require_relative '../resources/minitest_helper'
 require 'openstudio'
-require 'openstudio/ruleset/ShowRunnerOutput'
+require 'openstudio/measure/ShowRunnerOutput'
 require 'minitest/autorun'
 require 'fileutils'
 require_relative '../measure.rb'
@@ -44,6 +44,28 @@ class HPXMLtoOpenStudioPVTest < MiniTest::Test
       assert_equal(pv_system.system_losses_fraction, generator.systemLosses)
       assert_equal(pv_system.module_type, generator.moduleType.downcase)
       assert_equal('FixedRoofMounted', generator.arrayType)
+
+      # Check inverter
+      assert_equal(pv_system.inverter_efficiency, inverter.inverterEfficiency)
+    end
+  end
+
+  def test_pv_shared
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-pv-shared.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    hpxml.pv_systems.each do |pv_system|
+      generator, inverter = get_generator_inverter(model, pv_system.id)
+
+      # Check PV
+      max_power = pv_system.max_power_output * hpxml.building_construction.number_of_bedrooms.to_f / pv_system.number_of_bedrooms_served.to_f
+      assert_equal(pv_system.array_tilt, generator.tiltAngle)
+      assert_equal(pv_system.array_azimuth, generator.azimuthAngle)
+      assert_equal(max_power, generator.dcSystemCapacity)
+      assert_equal(pv_system.system_losses_fraction, generator.systemLosses)
+      assert_equal(pv_system.module_type, generator.moduleType.downcase)
+      assert_equal('FixedOpenRack', generator.arrayType)
 
       # Check inverter
       assert_equal(pv_system.inverter_efficiency, inverter.inverterEfficiency)

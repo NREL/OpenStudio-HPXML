@@ -5,7 +5,6 @@ start_time = Time.now
 require 'fileutils'
 require 'optparse'
 require 'pathname'
-require 'openstudio'
 require_relative '../HPXMLtoOpenStudio/resources/meta_measure'
 require_relative '../HPXMLtoOpenStudio/resources/version'
 
@@ -20,7 +19,6 @@ def run_workflow(basedir, rundir, hpxml, debug, hourly_outputs)
   measure_subdir = 'HPXMLtoOpenStudio'
   args = {}
   args['hpxml_path'] = hpxml
-  args['weather_dir'] = 'weather'
   args['output_dir'] = rundir
   args['debug'] = debug
   update_args_hash(measures, measure_subdir, args)
