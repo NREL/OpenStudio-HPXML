@@ -281,10 +281,13 @@ class HPXML < Object
     if not hpxml_path.nil?
       @doc = XMLHelper.parse_file(hpxml_path)
       hpxml = XMLHelper.get_element(@doc, '/HPXML')
+      Version.check_hpxml_version(XMLHelper.get_attribute_value(hpxml, 'schemaVersion'))
     end
     from_oga(hpxml)
 
     # Clean up
+    # TODO: Should really perform validation before we make the following changes,
+    # so that any errors below don't prevent validation from occurring.
     delete_tiny_surfaces()
     delete_adiabatic_subsurfaces()
     if collapse_enclosure
@@ -5026,11 +5029,13 @@ class HPXML < Object
 
   def delete_adiabatic_subsurfaces()
     @doors.reverse_each do |door|
+      next if door.wall.nil?
       next if door.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
 
       door.delete
     end
     @windows.reverse_each do |window|
+      next if window.wall.nil?
       next if window.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
 
       window.delete
