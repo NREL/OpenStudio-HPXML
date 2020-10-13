@@ -46,7 +46,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         elsif assertion_message.start_with?('Expected 1 ')
           @expected_assertions_by_deletion[key] = _get_expected_error_msg(context_xpath, assertion_message, 'deletion')
           @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion_message, 'addition')
-        elsif assertion_message.start_with?('Expected value to be')
+        elsif assertion_message.include?("Expected #{element_name} to be")
           @expected_assertions_by_alteration[key] = _get_expected_error_msg(context_xpath, assertion_message, 'alteration')
         else
           fail "Unexpected assertion: '#{assertion_message}'."
@@ -219,16 +219,16 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
   def _get_element_name_for_assertion_test(assertion)
     # From the assertion, get the element name to be added or deleted for the assertion test.
-    if assertion.inner_text.start_with?('Expected value to be')
+    if assertion.inner_text.start_with?('Expected') && assertion.inner_text.include?('to be')
       test_attr = assertion.get('test')
       element_name = test_attr[/not\((.*?)\)/m, 1].gsub('h:', '') # pull text between "not(" and ")" (i.e. "not(h:foo)")
-      
+
       return element_name
     else
       test_attr = assertion.get('test')
       element_name = test_attr[/(?<=\().*(?=\))/].gsub('h:', '').partition(') + count').first # pull text between the first opening and the last closing parenthesis. If there are multiple "count()" in the text, pull the first one.
       _balance_brackets(element_name)
-      
+
       return element_name
     end
   end
