@@ -118,7 +118,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(5.09, 'Btu/(hr*F)', 'W/K')
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
-    ther_eff = 0.728
+    ther_eff = 0.794
     loc = water_heating_system.location
 
     # Check water heater
