@@ -118,7 +118,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     ua = UnitConversions.convert(5.09, 'Btu/(hr*F)', 'W/K')
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
-    ther_eff = 0.728
+    ther_eff = 0.794
     loc = water_heating_system.location
 
     # Check water heater
@@ -449,36 +449,6 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     ua = 0.0
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     ther_eff = 0.9108
-    loc = water_heating_system.location
-
-    # Check water heater
-    assert_equal(1, model.getWaterHeaterMixeds.size)
-    wh = model.getWaterHeaterMixeds[0]
-    assert_equal(fuel, wh.heaterFuelType)
-    assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
-    assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
-    assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
-    assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
-    assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
-  end
-
-  def test_uef
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-uef.xml'))
-    model, hpxml = _test_measure(args_hash)
-
-    # Get HPXML values
-    water_heating_system = hpxml.water_heating_systems[0]
-
-    # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
-    cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
-    fuel = EPlus.fuel_type(water_heating_system.fuel_type)
-    ua = UnitConversions.convert(1.327, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband+ 1 # setpoint + 1/2 deadband
-    ther_eff = 1.0
     loc = water_heating_system.location
 
     # Check water heater

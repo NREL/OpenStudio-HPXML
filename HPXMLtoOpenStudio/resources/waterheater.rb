@@ -1497,7 +1497,7 @@ class Waterheater
 
   def self.calc_tank_UA_from_UEF(act_vol, water_heating_system, solar_fraction)
     # Calculates the U value, UA of the tank and conversion efficiency (eta_c)
-    # based on the Uniform Energy Factor, First Hour Rating, and Eecovery Efficiency of the tank
+    # based on the Uniform Energy Factor, First Hour Rating, and Recovery Efficiency of the tank
     # Source: Maguire and Roberts 2020
     if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
       eta_c = water_heating_system.energy_factor * water_heating_system.performance_adjustment
@@ -1510,24 +1510,24 @@ class Waterheater
       t_in = 58.0 # F
       t_env = 67.5 # F
       fhr = water_heating_system.first_hour_rating
-      if fhr < 18
-        volume_drawn = 10 # gal
-      elsif fhr < 51 # Includes 18 gal up to (but not including) 51
-        volume_drawn = 38 # gal
-      elsif fhr < 75
-        volume_drawn = 55 # gal
+      if fhr < 18.0
+        volume_drawn = 10.0 # gal
+      elsif fhr < 51.0 # Includes 18 gal up to (but not including) 51
+        volume_drawn = 38.0 # gal
+      elsif fhr < 75.0
+        volume_drawn = 55.0 # gal
       else
-        volume_drawn = 84 # gal
+        volume_drawn = 84.0 # gal
       end
       draw_mass = volume_drawn * density # lb
       q_load = draw_mass * cp * (t - t_in) # Btu/day
-      pow = water_heating_system.heating_capacity / 1000.0 # kbtu/h
+      pow = water_heating_system.heating_capacity # Btu/hr
       surface_area, a_side = calc_tank_areas(act_vol)
       if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
-        ua = (water_heating_system.recovery_efficiency / water_heating_system.energy_factor - 1.0) / ((t - t_env) * (24.0 / q_load - 1.0 / (1000.0 * pow * water_heating_system.uniform_energy_factor))) # Btu/hr-F
-        eta_c = (water_heating_system.recovery_efficiency + ua * (t - t_env) / (1000 * pow)) # conversion efficiency is supposed to be calculated with initial tank ua
+        ua = ((water_heating_system.recovery_efficiency / water_heating_system.uniform_energy_factor) - 1.0) / ((t - t_env) * (24.0 / q_load) - ((t - t_env) / (pow * water_heating_system.uniform_energy_factor))) # Btu/hr-F
+        eta_c = water_heating_system.recovery_efficiency + ((ua * (t - t_env)) / pow) # conversion efficiency is slightly larger than recovery efficiency
       else # is Electric
-        ua = q_load * (1.0 / water_heating_system.uniform_energy_factor - 1.0) / ((24.0 * (t - t_env)) * (0.8 + 0.2 *((t_in - t_env) / (t - t_env))))
+        ua = q_load * (1.0 / water_heating_system.uniform_energy_factor - 1.0) / ((24.0 * (t - t_env)) * (0.8 + 0.2 * ((t_in - t_env) / (t - t_env))))
         eta_c = 1.0
       end
       ua = apply_tank_jacket(water_heating_system, ua, a_side)
@@ -1734,7 +1734,7 @@ class Waterheater
   end
 
   def self.get_set_temp_c(t_set, wh_type)
-    return UnitConversions.convert(t_set, 'F', 'C') + deadband(wh_type) / 2.0 #Half the deadband to account for E+ deadband
+    return UnitConversions.convert(t_set, 'F', 'C') + deadband(wh_type) / 2.0 # Half the deadband to account for E+ deadband
   end
 
   def self.create_new_loop(model, name, t_set)
