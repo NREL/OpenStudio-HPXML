@@ -281,6 +281,7 @@ class HPXML < Object
     if not hpxml_path.nil?
       @doc = XMLHelper.parse_file(hpxml_path)
       hpxml = XMLHelper.get_element(@doc, '/HPXML')
+      Version.check_hpxml_version(XMLHelper.get_attribute_value(hpxml, 'schemaVersion'))
     end
     from_oga(hpxml)
 

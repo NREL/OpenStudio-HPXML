@@ -44,8 +44,6 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         elsif assertion.start_with?('Expected 1 ')
           @expected_assertions_by_deletion[key] = _get_expected_error_msg(context_xpath, assertion, 'deletion')
           @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion, 'addition')
-        elsif assertion.start_with?('Expected @')
-          # TODO: Skipping attributes for now...
         else
           fail "Unexpected assertion: '#{assertion}'."
         end
