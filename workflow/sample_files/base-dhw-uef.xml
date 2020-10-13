@@ -385,6 +385,7 @@
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <HeatingCapacity>18767.0</HeatingCapacity>
             <UniformEnergyFactor>0.93</UniformEnergyFactor>
+            <FirstHourRating>63.0</FirstHourRating>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
@@ -550,6 +551,10 @@
             <Units>kWh/year</Units>
             <Value>620.0</Value>
           </Load>
+          <extension>
+            <FracSensible>1.0</FracSensible>
+            <FracLatent>0.0</FracLatent>
+          </extension>
         </PlugLoad>
       </MiscLoads>
     </BuildingDetails>

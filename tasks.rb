@@ -169,12 +169,12 @@ def create_hpxmls
     'base-dhw-jacket-gas.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-jacket-indirect.xml' => 'base-dhw-indirect.xml',
     'base-dhw-jacket-hpwh.xml' => 'base-dhw-tank-heat-pump.xml',
-    'base-dhw-tank-gas-low-fhr-uef.xml' => 'base.xml',
+    'base-dhw-tank-elec-low-fhr-uef.xml' => 'base.xml',
     'base-dhw-tank-gas-med-fhr-uef.xml' => 'base.xml',
     'base-dhw-tank-gas-high-fhr-uef.xml' => 'base.xml',
     'base-dhw-heat-pump-water-heater-uef.xml' => 'base.xml',
-    'base-dhw-tankless-gas-uef.xml' => 'base.xml',
-    'base-dhw-tankless-electric-uef.xml' => 'base.xml',
+    # 'base-dhw-tankless-gas-uef.xml' => 'base.xml',
+    # 'base-dhw-tankless-electric-uef.xml' => 'base.xml',
     'base-dhw-uef.xml' => 'base.xml',
     'base-enclosure-2stories.xml' => 'base.xml',
     'base-enclosure-2stories-garage.xml' => 'base-enclosure-2stories.xml',
@@ -3504,25 +3504,27 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].uniform_energy_factor = 0.69
     hpxml.water_heating_systems[0].first_hour_rating = 116.0
     hpxml.water_heating_systems[0].tank_volume = 75
-    hpxml.water_heating_systems[0].heating_capacity = 76000 # MBtu/hr
+    hpxml.water_heating_systems[0].heating_capacity = 76000 # Btu/hr
     hpxml.water_heating_systems[0].recovery_efficiency = 0.79
   elsif ['base-dhw-heat-pump-water-heater-uef.xml'].include? hpxml_file
     # Based on Rheem model number XE40T10HS45U0 from AHRI directory
     hpxml.water_heating_systems[0].energy_factor = nil
     hpxml.water_heating_systems[0].uniform_energy_factor = 3.75
     hpxml.water_heating_systems[0].first_hour_rating = 60.0
-    hpxml.water_heating_systems[0].heating_capacity = nil
+    hpxml.water_heating_systems[0].heating_capacity = 76000
     hpxml.water_heating_systems[0].tank_volume = 40
-  elsif ['base-dhw-tankless-gas-uef.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].energy_factor = nil
-    hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
-  elsif ['base-dhw-tankless-electric-uef.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
-    hpxml.water_heating_systems[0].tank_volume = nil
-    hpxml.water_heating_systems[0].heating_capacity = nil
-    hpxml.water_heating_systems[0].energy_factor = nil
-    hpxml.water_heating_systems[0].uniform_energy_factor = 0.98
-    hpxml.water_heating_systems[0].input_energy = 91783
+  # elsif ['base-dhw-tankless-gas-uef.xml'].include? hpxml_file
+  #  hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
+  #  hpxml.water_heating_systems[0].tank_volume = nil
+  #  hpxml.water_heating_systems[0].heating_capacity = nil
+  #  hpxml.water_heating_systems[0].energy_factor = nil
+  #  hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
+  # elsif ['base-dhw-tankless-electric-uef.xml'].include? hpxml_file
+  #  hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
+  #  hpxml.water_heating_systems[0].tank_volume = nil
+  #  hpxml.water_heating_systems[0].heating_capacity = nil
+  #  hpxml.water_heating_systems[0].energy_factor = nil
+  #  hpxml.water_heating_systems[0].uniform_energy_factor = 0.98
   elsif ['base-dhw-desuperheater.xml',
          'base-dhw-desuperheater-2-speed.xml',
          'base-dhw-desuperheater-var-speed.xml',
