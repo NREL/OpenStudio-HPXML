@@ -6,17 +6,6 @@ class Waterheater
 
     dhw_map[water_heating_system.id] = []
 
-    # TODO: Check if we translate from UEF>EF ahead of this code in the workflow!
-    if water_heating_system.uniform_energy_factor.nil?
-      use_uef = false
-    elsif water_heating_system.energy_factor.nil?
-      use_uef = true
-      if water_heating_system.first_hour_rating.nil?
-        fail 'When using uniform energy factor, first hour rating is required.'
-      end
-      water_heating_system.energy_factor = calc_ef_from_uef(water_heating_system)
-    end
-
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
     loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
@@ -29,11 +18,7 @@ class Waterheater
     new_manager.addToNode(loop.supplyOutletNode)
 
     act_vol = calc_storage_tank_actual_vol(water_heating_system.tank_volume, water_heating_system.fuel_type)
-    if use_uef == false
-      u, ua, eta_c = calc_tank_UA(act_vol, water_heating_system, solar_fraction)
-    else
-      u, ua, eta_c = calc_tank_UA_from_UEF(act_vol, water_heating_system, solar_fraction)
-    end
+    u, ua, eta_c = calc_tank_UA(act_vol, water_heating_system, solar_fraction)
     new_heater = create_new_heater(name: Constants.ObjectNameWaterHeater,
                                    water_heating_system: water_heating_system,
                                    act_vol: act_vol,
@@ -1392,12 +1377,10 @@ class Waterheater
 
   def self.get_default_performance_adjustment(water_heating_system)
     return unless water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
-    if rated_eff_type == 'EF'
+    if not water_heating_system.energy_factor.nil?
       return 0.92 # Applies EF, updated per 301-2019
-    elsif rated_eff_type == 'UEF'
+    elsif not water_heating_system.uniform_energy_factor.nil?
       return 0.94 # Applies UEF, updated per 301-2019
-    else
-      fail 'Invalid rated efficiency type. Set either an EF or UEF for the water heater'
     end
   end
 
@@ -1450,29 +1433,63 @@ class Waterheater
   end
 
   def self.calc_tank_UA(act_vol, water_heating_system, solar_fraction)
-    # Calculates the U value, UA of the tank and conversion efficiency (eta_c)
-    # based on the Energy Factor and recovery efficiency of the tank
-    # Source: Burch and Erickson 2004 - http://www.nrel.gov/docs/gen/fy04/36035.pdf
+    # If using EF:
+    #   Calculates the U value, UA of the tank and conversion efficiency (eta_c)
+    #   based on the Energy Factor and recovery efficiency of the tank
+    #   Source: Burch and Erickson 2004 - http://www.nrel.gov/docs/gen/fy04/36035.pdf
+    # IF using UEF:
+    #   Calculates the U value, UA of the tank and conversion efficiency (eta_c)
+    #   based on the Uniform Energy Factor, First Hour Rating, and Recovery Efficiency of the tank
+    #   Source: Maguire and Roberts 2020 - https://www.ashrae.org/file%20library/conferences/specialty%20conferences/2020%20building%20performance/papers/d-bsc20-c039.pdf
     if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
-      eta_c = water_heating_system.energy_factor * water_heating_system.performance_adjustment
+      if not water_heating_system.energy_factor.nil?
+        eta_c = water_heating_system.energy_factor * water_heating_system.performance_adjustment
+      elsif not water_heating_system.uniform_energy_factor.nil?
+        # FIXME
+        eta_c = water_heating_system.uniform_energy_factor * water_heating_system.performance_adjustment
+      end
       ua = 0.0
       surface_area = 1.0
     else
-      volume_drawn = 64.3 # gal/day
       density = 8.2938 # lb/gal
-      draw_mass = volume_drawn * density # lb
       cp = 1.0007 # Btu/lb-F
-      t = 135.0 # F
       t_in = 58.0 # F
       t_env = 67.5 # F
+
+      if not water_heating_system.energy_factor.nil?
+        t = 135.0 # F
+        volume_drawn = 64.3 # gal/day
+      elsif not water_heating_system.uniform_energy_factor.nil?
+        t = 125.0 # F
+        if water_heating_system.first_hour_rating < 18.0
+          volume_drawn = 10.0 # gal
+        elsif water_heating_system.first_hour_rating < 51.0 # Includes 18 gal up to (but not including) 51
+          volume_drawn = 38.0 # gal
+        elsif water_heating_system.first_hour_rating < 75.0
+          volume_drawn = 55.0 # gal
+        else
+          volume_drawn = 84.0 # gal
+        end
+      end
+
+      draw_mass = volume_drawn * density # lb
       q_load = draw_mass * cp * (t - t_in) # Btu/day
-      pow = water_heating_system.heating_capacity / 1000.0 # kbtu/h
+      pow = water_heating_system.heating_capacity # Btu/h
       surface_area, a_side = calc_tank_areas(act_vol)
       if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
-        ua = (water_heating_system.recovery_efficiency / water_heating_system.energy_factor - 1.0) / ((t - t_env) * (24.0 / q_load - 1.0 / (1000.0 * pow * water_heating_system.energy_factor))) # Btu/hr-F
-        eta_c = (water_heating_system.recovery_efficiency + ua * (t - t_env) / (1000 * pow)) # conversion efficiency is supposed to be calculated with initial tank ua
+        if not water_heating_system.energy_factor.nil?
+          ua = (water_heating_system.recovery_efficiency / water_heating_system.energy_factor - 1.0) / ((t - t_env) * (24.0 / q_load - 1.0 / (pow * water_heating_system.energy_factor))) # Btu/hr-F
+          eta_c = (water_heating_system.recovery_efficiency + ua * (t - t_env) / pow) # conversion efficiency is supposed to be calculated with initial tank ua
+        elsif not water_heating_system.uniform_energy_factor.nil?
+          ua = ((water_heating_system.recovery_efficiency / water_heating_system.uniform_energy_factor) - 1.0) / ((t - t_env) * (24.0 / q_load) - ((t - t_env) / (pow * water_heating_system.uniform_energy_factor))) # Btu/hr-F
+          eta_c = water_heating_system.recovery_efficiency + ((ua * (t - t_env)) / pow) # conversion efficiency is slightly larger than recovery efficiency
+        end
       else # is Electric
-        ua = q_load * (1.0 / water_heating_system.energy_factor - 1.0) / ((t - t_env) * 24.0)
+        if not water_heating_system.energy_factor.nil?
+          ua = q_load * (1.0 / water_heating_system.energy_factor - 1.0) / ((t - t_env) * 24.0)
+        elsif not water_heating_system.uniform_energy_factor.nil?
+          ua = q_load * (1.0 / water_heating_system.uniform_energy_factor - 1.0) / ((24.0 * (t - t_env)) * (0.8 + 0.2 * ((t_in - t_env) / (t - t_env))))
+        end
         eta_c = 1.0
       end
       ua = apply_tank_jacket(water_heating_system, ua, a_side)
@@ -1483,56 +1500,6 @@ class Waterheater
       ua /= water_heating_system.number_of_units_served.to_f
     end
     u = ua / surface_area # Btu/hr-ft^2-F
-    if eta_c > 1.0
-      fail 'A water heater heat source (either burner or element) efficiency of > 1 has been calculated, double check water heater inputs.'
-    end
-    if ua < 0.0
-      fail 'A negative water heater standby loss coefficient (UA) was calculated, double check water heater inputs.'
-    end
-
-    return u, ua, eta_c
-  end
-
-  def self.calc_tank_UA_from_UEF(act_vol, water_heating_system, solar_fraction)
-    # Calculates the U value, UA of the tank and conversion efficiency (eta_c)
-    # based on the Uniform Energy Factor, First Hour Rating, and Eecovery Efficiency of the tank
-    # Source: Maguire and Roberts 2020
-    if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
-      eta_c = water_heating_system.energy_factor * water_heating_system.performance_adjustment
-      ua = 0.0
-      surface_area = 1.0
-    else
-      density = 8.2938 # lb/gal
-      cp = 1.0007 # Btu/lb-F
-      t = 125.0 # F
-      t_in = 58.0 # F
-      t_env = 67.5 # F
-      fhr = water_heating_system.first_hour_rating
-      if fhr < 18
-        volume_drawn = 10 # gal
-      elsif fhr < 51 # Includes 18 gal up to (but not including) 51
-        volume_drawn = 38 # gal
-      elsif fhr < 75
-        volume_drawn = 55 # gal
-      else
-        volume_drawn = 84 # gal
-      end
-      draw_mass = volume_drawn * density # lb
-      q_load = draw_mass * cp * (t - t_in) # Btu/day
-      pow = water_heating_system.heating_capacity / 1000.0 # kbtu/h
-      surface_area, a_side = calc_tank_areas(act_vol)
-      if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
-        ua = (water_heating_system.recovery_efficiency / water_heating_system.energy_factor - 1.0) / ((t - t_env) * (24.0 / q_load - 1.0 / (1000.0 * pow * water_heating_system.uniform_energy_factor))) # Btu/hr-F
-        eta_c = (water_heating_system.recovery_efficiency + ua * (t - t_env) / (1000 * pow)) # conversion efficiency is supposed to be calculated with initial tank ua
-      else # is Electric
-        ua = q_load * (1.0 / water_heating_system.uniform_energy_factor - 1.0) / ((24.0 * (t - t_env)) * (0.8 + 0.2 * ((t_in - t_env) / (t - t_env))))
-        eta_c = 1.0
-      end
-      ua = apply_tank_jacket(water_heating_system, ua, a_side)
-    end
-    ua *= (1.0 - solar_fraction)
-    u = ua / surface_area # Btu/hr-ft^2-F
-
     if eta_c > 1.0
       fail 'A water heater heat source (either burner or element) efficiency of > 1 has been calculated, double check water heater inputs.'
     end

@@ -3547,9 +3547,7 @@ class HPXML < Object
       XMLHelper.add_element(water_heating_system, 'HeatingCapacity', to_float(@heating_capacity)) unless @heating_capacity.nil?
       XMLHelper.add_element(water_heating_system, 'EnergyFactor', to_float(@energy_factor)) unless @energy_factor.nil?
       XMLHelper.add_element(water_heating_system, 'UniformEnergyFactor', to_float(@uniform_energy_factor)) unless @uniform_energy_factor.nil?
-      if not @uniform_energy_factor.nil?
-        XMLHelper.add_element(water_heating_system, 'FirstHourRating', to_float(@first_hour_rating))
-      end
+      XMLHelper.add_element(water_heating_system, 'FirstHourRating', to_float(@first_hour_rating)) unless @first_hour_rating.nil?
       XMLHelper.add_element(water_heating_system, 'RecoveryEfficiency', to_float(@recovery_efficiency)) unless @recovery_efficiency.nil?
       if not @jacket_r_value.nil?
         water_heater_insulation = XMLHelper.add_element(water_heating_system, 'WaterHeaterInsulation')
