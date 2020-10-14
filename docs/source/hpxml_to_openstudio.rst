@@ -801,19 +801,20 @@ Inputs including ``WaterHeaterType`` and ``FractionDHWLoadServed`` must be provi
 
 .. warning::
 
-  ``FractionDHWLoadServed`` represents only the fraction of the hot water load associated with the hot water **fixtures**. Additional hot water load from the clothes washer/dishwasher will be automatically assigned to the appropriate water heater(s).
+  ``FractionDHWLoadServed`` represents only the fraction of the hot water load associated with the hot water **fixtures**.
+  Additional hot water load from the clothes washer/dishwasher will be automatically assigned to the appropriate water heater(s).
 
 Depending on the type of water heater specified, additional elements are required/available:
 
-========================================  ===================================  ===========  ==========  ===============  ==================  ===================== =================  =========================================  ==============================
-WaterHeaterType                           UniformEnergyFactor or EnergyFactor  FuelType     TankVolume  HeatingCapacity  RecoveryEfficiency  PerformanceAdjustment UsesDesuperheater  WaterHeaterInsulation/Jacket/JacketRValue  RelatedHVACSystem
-========================================  ===================================  ===========  ==========  ===============  ==================  ===================== =================  =========================================  ==============================
-storage water heater                      required                             <any>        (optional)  (optional)       (optional)                                (optional)         (optional)                                 required if uses desuperheater
-instantaneous water heater                required                             <any>                                                         (optional)            (optional)                                                    required if uses desuperheater
-heat pump water heater                    required                             electricity  required                                                               (optional)         (optional)                                 required if uses desuperheater
-space-heating boiler with storage tank                                                      required                                                                                  (optional)                                 required
-space-heating boiler with tankless coil                                                                                                                                                                                          required
-========================================  ===================================  ===========  ==========  ===============  ==================  ===================== =================  =========================================  ==============================
+========================================  ===================================  ===============  ===========  ==========  ===============  ==================  ===================== =================  =========================================  ==============================
+WaterHeaterType                           UniformEnergyFactor or EnergyFactor  FirstHourRating  FuelType     TankVolume  HeatingCapacity  RecoveryEfficiency  PerformanceAdjustment UsesDesuperheater  WaterHeaterInsulation/Jacket/JacketRValue  RelatedHVACSystem
+========================================  ===================================  ===============  ===========  ==========  ===============  ==================  ===================== =================  =========================================  ==============================
+storage water heater                      required                             required if UEF  <any>        (optional)  (optional)       (optional)                                (optional)         (optional)                                 required if uses desuperheater
+instantaneous water heater                required                                              <any>                                                         (optional)            (optional)                                                    required if uses desuperheater
+heat pump water heater                    required                             required if UEF  electricity  required                                                               (optional)         (optional)                                 required if uses desuperheater
+space-heating boiler with storage tank                                                                       required                                                                                  (optional)                                 required
+space-heating boiler with tankless coil                                                                                                                                                                                                           required
+========================================  ===================================  ===============  ===========  ==========  ===============  ==================  ===================== =================  =========================================  ==============================
 
 For storage water heaters, the tank volume in gallons, heating capacity in Btuh, and recovery efficiency can be optionally provided.
 If not provided, default values for the tank volume and heating capacity will be assumed based on Table 8 in the `2014 Building America House Simulation Protocols <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf#page=22&zoom=100,93,333>`_ 
@@ -827,7 +828,7 @@ EnergyFactor  RecoveryEfficiency (default)
 ============  ======================================
 
 For tankless water heaters, a performance adjustment due to cycling inefficiencies can be provided.
-If not provided, a default value of 0.92 (92%) will apply to the Energy Factor.
+If not provided, a default value of 0.94 will apply if Uniform Energy Factor (UEF) is provided or 0.92 will apply if Energy Factor (EF) is provided.
 
 For combi boiler systems, the ``RelatedHVACSystem`` must point to a ``HeatingSystem`` of type "Boiler".
 For combi boiler systems with a storage tank, the storage tank losses (deg-F/hr) can be entered as ``StandbyLoss``; if not provided, a default value based on the `AHRI Directory of Certified Product Performance <https://www.ahridirectory.org>`_ will be calculated.
