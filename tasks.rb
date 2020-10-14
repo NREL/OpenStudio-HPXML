@@ -183,10 +183,10 @@ def create_hpxmls
     'base-dhw-tank-oil.xml' => 'base.xml',
     'base-dhw-tank-wood.xml' => 'base.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
-    # 'base-dhw-tankless-electric-uef.xml' => 'base.xml',
+    'base-dhw-tankless-electric-uef.xml' => 'base.xml',
     'base-dhw-tankless-electric-outside.xml' => 'base-dhw-tankless-electric.xml',
     'base-dhw-tankless-gas.xml' => 'base.xml',
-    # 'base-dhw-tankless-gas-uef.xml' => 'base.xml',
+    'base-dhw-tankless-gas-uef.xml' => 'base.xml',
     'base-dhw-tankless-gas-with-solar.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-gas-with-solar-fraction.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-propane.xml' => 'base.xml',
@@ -4010,18 +4010,18 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].uniform_energy_factor = 3.75
     hpxml.water_heating_systems[0].first_hour_rating = 60.0
     hpxml.water_heating_systems[0].tank_volume = 40.0
-  # elsif ['base-dhw-tankless-gas-uef.xml'].include? hpxml_file
-  #  hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
-  #  hpxml.water_heating_systems[0].tank_volume = nil
-  #  hpxml.water_heating_systems[0].heating_capacity = nil
-  #  hpxml.water_heating_systems[0].energy_factor = nil
-  #  hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
-  # elsif ['base-dhw-tankless-electric-uef.xml'].include? hpxml_file
-  #  hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
-  #  hpxml.water_heating_systems[0].tank_volume = nil
-  #  hpxml.water_heating_systems[0].heating_capacity = nil
-  #  hpxml.water_heating_systems[0].energy_factor = nil
-  #  hpxml.water_heating_systems[0].uniform_energy_factor = 0.98
+  elsif ['base-dhw-tankless-gas-uef.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
+    hpxml.water_heating_systems[0].tank_volume = nil
+    hpxml.water_heating_systems[0].heating_capacity = nil
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
+  elsif ['base-dhw-tankless-electric-uef.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
+    hpxml.water_heating_systems[0].tank_volume = nil
+    hpxml.water_heating_systems[0].heating_capacity = nil
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 0.98
   elsif ['base-dhw-desuperheater.xml',
          'base-dhw-desuperheater-2-speed.xml',
          'base-dhw-desuperheater-var-speed.xml',

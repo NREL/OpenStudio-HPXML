@@ -805,6 +805,7 @@
       <sch:assert role='ERROR' test='count(h:TankVolume) &lt;= 1'>Expected 0 or 1 element(s) for xpath: TankVolume</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:EnergyFactor) + count(h:UniformEnergyFactor) = 1'>Expected 1 element(s) for xpath: EnergyFactor | UniformEnergyFactor</sch:assert> <!-- See [WaterHeatingSystemType=UniformEnergyFactor] -->
+      <sch:assert role='ERROR' test='count(h:EnergyFactor) + count(h:FirstHourRating) &gt;= 1'>Expected 1 or more element(s) for xpath: EnergyFactor | FirstHourRating</sch:assert>
       <sch:assert role='ERROR' test='count(h:RecoveryEfficiency) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RecoveryEfficiency</sch:assert>
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
     </sch:rule>
@@ -823,6 +824,7 @@
       <sch:assert role='ERROR' test='count(h:FuelType[text()="electricity"]) = 1'>Expected 1 element(s) for xpath: FuelType[text()="electricity"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:TankVolume) = 1'>Expected 1 element(s) for xpath: TankVolume</sch:assert>
       <sch:assert role='ERROR' test='count(h:EnergyFactor) + count(h:UniformEnergyFactor) = 1'>Expected 1 element(s) for xpath: EnergyFactor | UniformEnergyFactor</sch:assert> <!-- See [WaterHeatingSystemType=UniformEnergyFactor] -->
+      <sch:assert role='ERROR' test='count(h:EnergyFactor) + count(h:FirstHourRating) &gt;= 1'>Expected 1 or more element(s) for xpath: EnergyFactor | FirstHourRating</sch:assert>
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -839,12 +841,6 @@
   <sch:pattern name='[WaterHeatingSystemType=CombiTanklessCoil]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType="space-heating boiler with tankless coil"]'>
       <sch:assert role='ERROR' test='count(h:RelatedHVACSystem) = 1'>Expected 1 element(s) for xpath: RelatedHVACSystem</sch:assert> <!-- HeatingSystem (boiler) -->
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern name='[WaterHeatingSystemType=UniformEnergyFactor]'>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:UniformEnergyFactor]'>
-      <sch:assert role='ERROR' test='count(h:FirstHourRating) = 1'>Expected 1 element(s) for xpath: FirstHourRating</sch:assert>
     </sch:rule>
   </sch:pattern>
 

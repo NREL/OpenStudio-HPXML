@@ -47,11 +47,7 @@ class Waterheater
 
     dhw_map[water_heating_system.id] = []
 
-    if water_heating_system.energy_factor.nil?
-      water_heating_system.energy_factor = calc_ef_from_uef(water_heating_system)
-    end
     water_heating_system.heating_capacity = 100000000000.0
-
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
     loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
@@ -92,10 +88,6 @@ class Waterheater
                           ec_adj, dhw_map, hvac_map, solar_thermal_system, living_zone)
 
     dhw_map[water_heating_system.id] = []
-
-    if water_heating_system.energy_factor.nil?
-      water_heating_system.energy_factor = calc_ef_from_uef(water_heating_system)
-    end
 
     obj_name_hpwh = Constants.ObjectNameWaterHeater
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
@@ -766,8 +758,14 @@ class Waterheater
     twb_adj = Psychrometrics.Twb_fT_w_P(rated_edb_F, w_adj, p_atm)
 
     # Calculate the COP based on EF
-    uef = (0.60522 + water_heating_system.energy_factor) / 1.2101
-    cop = 1.174536058 * uef # Based on simulation of the UEF test procedure at varying COPs
+    if not water_heating_system.energy_factor.nil?
+      uef = (0.60522 + water_heating_system.energy_factor) / 1.2101
+      cop = 1.174536058 * uef # Based on simulation of the UEF test procedure at varying COPs
+    elsif not water_heating_system.uniform_energy_factor.nil?
+      uef = water_heating_system.uniform_energy_factor
+      # FIXME: Update correlation and make a function of FHR?
+      cop = 1.174536058 * uef # Based on simulation of the UEF test procedure at varying COPs
+    end
 
     coil = hpwh.dXCoil.to_CoilWaterHeatingAirToWaterHeatPumpWrapped.get
     coil.setName("#{obj_name_hpwh} coil")
@@ -1048,7 +1046,7 @@ class Waterheater
                                      loc_schedule: loc_schedule,
                                      model: model,
                                      ua: assumed_ua,
-                                     is_storage: true)
+                                     is_dsh_storage: true)
     set_parasitic_power_for_storage_wh(water_heater: storage_tank)
 
     loop.addSupplyBranchForComponent(storage_tank)
@@ -1445,7 +1443,6 @@ class Waterheater
       if not water_heating_system.energy_factor.nil?
         eta_c = water_heating_system.energy_factor * water_heating_system.performance_adjustment
       elsif not water_heating_system.uniform_energy_factor.nil?
-        # FIXME
         eta_c = water_heating_system.uniform_energy_factor * water_heating_system.performance_adjustment
       end
       ua = 0.0
@@ -1579,12 +1576,12 @@ class Waterheater
     OpenStudio::Model::SetpointManagerScheduled.new(model, new_schedule)
   end
 
-  def self.create_new_heater(name:, water_heating_system: nil, act_vol:, t_set_c: nil, loc_space:, loc_schedule: nil, model:, ua:, eta_c: nil, oncycle_p: 0.0, is_storage: false, is_combi: false)
-    # storage tank doesn't requier water_heating_system class argument being passed
-    if is_storage || is_combi
+  def self.create_new_heater(name:, water_heating_system: nil, act_vol:, t_set_c: nil, loc_space:, loc_schedule: nil, model:, ua:, eta_c: nil, oncycle_p: 0.0, is_dsh_storage: false, is_combi: false)
+    # storage tank doesn't require water_heating_system class argument being passed
+    if is_dsh_storage || is_combi
       fuel = nil
       cap = 0.0
-      if is_storage
+      if is_dsh_storage
         tank_type = HPXML::WaterHeaterTypeStorage
       else
         tank_type = water_heating_system.water_heater_type
@@ -1611,7 +1608,7 @@ class Waterheater
     new_heater.setHeaterMaximumCapacity(UnitConversions.convert(cap, 'kBtu/hr', 'W'))
     new_heater.setHeaterMinimumCapacity(0.0)
     new_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
-    set_wh_parasitic_parameters(oncycle_p, water_heating_system, new_heater, is_storage)
+    set_wh_parasitic_parameters(oncycle_p, water_heating_system, new_heater, is_dsh_storage)
     set_wh_ambient(loc_space, loc_schedule, model, new_heater)
 
     ua_w_k = UnitConversions.convert(ua, 'Btu/(hr*F)', 'W/K')
@@ -1621,7 +1618,7 @@ class Waterheater
     return new_heater
   end
 
-  def self.set_wh_parasitic_parameters(oncycle_p, water_heating_system, water_heater, is_storage)
+  def self.set_wh_parasitic_parameters(oncycle_p, water_heating_system, water_heater, is_dsh_storage)
     water_heater.setOnCycleParasiticFuelType(EPlus::FuelTypeElectricity)
     water_heater.setOnCycleParasiticHeatFractiontoTank(0)
     water_heater.setOnCycleLossFractiontoThermalZone(1.0)
@@ -1632,15 +1629,14 @@ class Waterheater
     # Set fraction of heat loss from tank to ambient (vs out flue)
     # Based on lab testing done by LBNL
     skinlossfrac = 1.0
-    if not is_storage
-      if (water_heating_system.fuel_type != HPXML::FuelTypeElectricity) && (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage)
-        if oncycle_p == 0.0
-          skinlossfrac = 0.64
-        elsif water_heating_system.energy_factor < 0.8
-          skinlossfrac = 0.91
-        else
-          skinlossfrac = 0.96
-        end
+    if (not is_dsh_storage) && (water_heating_system.fuel_type != HPXML::FuelTypeElectricity) && (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage)
+      # Fuel storage water heater
+      if oncycle_p == 0.0
+        skinlossfrac = 0.64 # Natural draft
+      elsif water_heating_system.energy_factor < 0.8
+        skinlossfrac = 0.91 # Power vent
+      else
+        skinlossfrac = 0.96 # Condensing
       end
     end
     water_heater.setOffCycleLossFractiontoThermalZone(skinlossfrac)
