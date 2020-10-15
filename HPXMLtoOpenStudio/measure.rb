@@ -145,10 +145,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Validate input HPXML against schematron docs
     stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'HPXMLvalidator.xml'),
                    File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')]
-    errors = Validator.run_validators(hpxml.doc, stron_paths)
+    errors, warnings = Validator.run_validators(hpxml.doc, stron_paths)
     errors.each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
+    end
+    warnings.each do |warning|
+      runner.registerWarning("#{warning}")
     end
 
     # Check for additional errors
@@ -1903,25 +1906,6 @@ class OSModel
   end
 
   def self.add_hot_water_and_appliances(runner, model, weather, spaces)
-    if @hpxml.clothes_washers.empty?
-      runner.registerWarning('No clothes washer specified, the model will not include clothes washer energy use.')
-    end
-    if @hpxml.clothes_dryers.empty?
-      runner.registerWarning('No clothes dryer specified, the model will not include clothes dryer energy use.')
-    end
-    if @hpxml.dishwashers.empty?
-      runner.registerWarning('No dishwasher specified, the model will not include dishwasher energy use.')
-    end
-    if @hpxml.refrigerators.empty?
-      runner.registerWarning('No refrigerator specified, the model will not include refrigerator energy use.')
-    end
-    if @hpxml.cooking_ranges.empty?
-      runner.registerWarning('No cooking range specified, the model will not include cooking range/oven energy use.')
-    end
-    if @hpxml.water_heating_systems.empty?
-      runner.registerWarning('No water heater specified, the model will not include water heating energy use.')
-    end
-
     # Assign spaces
     @hpxml.clothes_washers.each do |clothes_washer|
       clothes_washer.additional_properties.space = get_space_from_location(clothes_washer.location, 'ClothesWasher', model, spaces)
@@ -2296,12 +2280,6 @@ class OSModel
       modeled_mels << plug_load.plug_load_type
 
       MiscLoads.apply_plug(model, plug_load, obj_name, spaces[HPXML::LocationLivingSpace])
-    end
-    if not modeled_mels.include? HPXML::PlugLoadTypeOther
-      runner.registerWarning("No '#{HPXML::PlugLoadTypeOther}' plug loads specified, the model will not include misc plug load energy use.")
-    end
-    if not modeled_mels.include? HPXML::PlugLoadTypeTelevision
-      runner.registerWarning("No '#{HPXML::PlugLoadTypeTelevision}' plug loads specified, the model will not include television plug load energy use.")
     end
   end
 
