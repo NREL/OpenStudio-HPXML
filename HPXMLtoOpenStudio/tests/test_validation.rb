@@ -13,6 +13,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
     # load the Schematron xml
     @stron_path = File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'EPvalidator.xml')
+    @stron_doc = XMLHelper.parse_file(@stron_path)
 
     # Load all HPXMLs
     hpxml_file_dirs = [File.absolute_path(File.join(@root_path, 'workflow', 'sample_files')),
@@ -26,11 +27,10 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     end
 
     # Build up expected error messages hashes by parsing EPvalidator.xml
-    doc = XMLHelper.parse_file(@stron_path)
     @expected_assertions_by_addition = {}
     @expected_assertions_by_deletion = {}
     @expected_assertions_by_alteration = {}
-    XMLHelper.get_elements(doc, '/sch:schema/sch:pattern/sch:rule').each do |rule|
+    XMLHelper.get_elements(@stron_doc, '/sch:schema/sch:pattern/sch:rule').each do |rule|
       rule_context = XMLHelper.get_attribute_value(rule, 'context')
       context_xpath = rule_context.gsub('h:', '')
 
@@ -57,25 +57,25 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
   def test_role_attributes
     puts
-    puts 'Checking for role attributes of assert and report elements...'
+    puts 'Checking for correct role attributes...'
 
-    schema_doc = XMLHelper.parse_file(@stron_path)
     # check that every assert element has a role attribute
-    XMLHelper.get_elements(schema_doc, '/sch:schema/sch:pattern/sch:rule/sch:assert').each do |assert_element|
+    XMLHelper.get_elements(@stron_doc, '/sch:schema/sch:pattern/sch:rule/sch:assert').each do |assert_element|
       assert_test = XMLHelper.get_attribute_value(assert_element, 'test').gsub('h:', '')
       role_attribute = XMLHelper.get_attribute_value(assert_element, 'role')
       if role_attribute.nil?
-        fail "No attribute \"role='ERROR'\" has found for assertion test: #{assert_test}"
+        fail "No attribute \"role='ERROR'\" found for assertion test: #{assert_test}"
       end
 
       assert_equal('ERROR', role_attribute)
     end
+
     # check that every report element has a role attribute
-    XMLHelper.get_elements(schema_doc, '/sch:schema/sch:pattern/sch:rule/sch:report').each do |report_element|
+    XMLHelper.get_elements(@stron_doc, '/sch:schema/sch:pattern/sch:rule/sch:report').each do |report_element|
       report_test = XMLHelper.get_attribute_value(report_element, 'test').gsub('h:', '')
       role_attribute = XMLHelper.get_attribute_value(report_element, 'role')
       if role_attribute.nil?
-        fail "No attribute \"role='WARN'\" has found for report test: #{report_test}"
+        fail "No attribute \"role='WARN'\" found for report test: #{report_test}"
       end
 
       assert_equal('WARN', role_attribute)

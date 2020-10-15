@@ -809,7 +809,7 @@
       <sch:assert role='ERROR' test='count(h:Quantity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Quantity</sch:assert>
       <sch:assert role='ERROR' test='count(h:RatedFlowRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RatedFlowRate</sch:assert>
       <sch:assert role='ERROR' test='count(h:HoursInOperation) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HoursInOperation</sch:assert>
-      <sch:assert role='ERROR' test='count(h:FanLocation) &lt;= 1'>Expected 0 or 1 element(s) for xpath: FanLocation</sch:assert>
+      <sch:assert role='ERROR' test='count(h:FanLocation) = 1'>Expected 1 element(s) for xpath: FanLocation</sch:assert>
       <sch:assert role='ERROR' test='not(h:FanLocation) or contains("_kitchen_ _bath_", concat("_", h:FanLocation, "_"))'>Expected FanLocation to be 'kitchen' or 'bath'</sch:assert>
       <sch:assert role='ERROR' test='count(h:FanPower) &lt;= 1'>Expected 0 or 1 element(s) for xpath: FanPower</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:StartHour) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/StartHour</sch:assert> <!-- 0 = midnight. 12 = noon -->
@@ -884,7 +884,7 @@
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
       <sch:assert role='ERROR' test='count(h:StandbyLoss) &lt;= 1'>Expected 0 or 1 element(s) for xpath: StandbyLoss</sch:assert> <!-- deg-F/h, refer to https://www.ahridirectory.org/NewSearch?programId=28&searchTypeId=3 -->
       <!-- Warnings -->
-      <sch:report role='WARN' test='number(h:StandbyLoss) &gt; 10'>Indirect water heater standby loss is over 10.0 F/hr, double check water heater inputs.</sch:report>
+      <sch:report role='WARN' test='number(h:StandbyLoss) &gt; 10'>Standby loss is greater than 10.0 deg-F/hr.</sch:report>
     </sch:rule>
   </sch:pattern>
 
