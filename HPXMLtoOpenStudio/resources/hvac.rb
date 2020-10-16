@@ -652,6 +652,19 @@ class HVAC
     end
   end
 
+  def self.apply_ground_to_water_heat_pump(model, runner, weather, heat_pump,
+                                           remaining_heat_load_frac, remaining_cool_load_frac,
+                                           control_zone, hvac_map)
+
+    # Model as ground-to-air HP w/ zero fan power
+    heat_pump.airflow_defect_ratio = 0.0
+    heat_pump.fan_watts_per_cfm = 0.0
+
+    apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
+                                  remaining_heat_load_frac, remaining_cool_load_frac,
+                                  control_zone, hvac_map)
+  end
+
   def self.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                          remaining_heat_load_frac, remaining_cool_load_frac,
                                          control_zone, hvac_map)
@@ -721,9 +734,11 @@ class HVAC
     gshp_cool_power_fT_coeff = convert_curve_gshp(cool_power_ft_spec, false)
     gshp_cool_SH_fT_coeff = convert_curve_gshp(cool_SH_ft_spec, false)
 
+    # Adjustment per ISO 13256-1
+    # FUTURE: Review this code for ground-to-air (ISO 13256-1) and ground-to-water (ISO 13256-2) cases
     # FUTURE: Reconcile these adjustments with ANSI/RESNET/ICC 301-2019 Section 4.4.5
-    fan_adjust_kw = UnitConversions.convert(400.0, 'Btu/hr', 'ton') * UnitConversions.convert(1.0, 'cfm', 'm^3/s') * 1000.0 * 0.35 * 249.0 / 300.0 # Adjustment per ISO 13256-1 Internal pressure drop across heat pump assumed to be 0.5 in. w.g.
-    pump_adjust_kw = UnitConversions.convert(3.0, 'Btu/hr', 'ton') * UnitConversions.convert(1.0, 'gal/min', 'm^3/s') * 1000.0 * 6.0 * 2990.0 / 3000.0 # Adjustment per ISO 13256-1 Internal Pressure drop across heat pump coil assumed to be 11ft w.g.
+    fan_adjust_kw = UnitConversions.convert(400.0, 'Btu/hr', 'ton') * UnitConversions.convert(1.0, 'cfm', 'm^3/s') * 1000.0 * 0.35 * 249.0 / 300.0 # Internal pressure drop across heat pump assumed to be 0.35 in. w.g w/ 0.2 in. w.g. MERV filter
+    pump_adjust_kw = UnitConversions.convert(3.0, 'Btu/hr', 'ton') * UnitConversions.convert(1.0, 'gal/min', 'm^3/s') * 1000.0 * 6.0 * 2990.0 / 3000.0 # Internal Pressure drop across heat pump coil assumed to be 6.0 ft w.g. average
     cooling_eir = UnitConversions.convert((1.0 - heat_pump.cooling_efficiency_eer * (fan_adjust_kw + pump_adjust_kw)) / (heat_pump.cooling_efficiency_eer * (1.0 + UnitConversions.convert(fan_adjust_kw, 'Wh', 'Btu'))), 'Wh', 'Btu')
 
     clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit.new(model)

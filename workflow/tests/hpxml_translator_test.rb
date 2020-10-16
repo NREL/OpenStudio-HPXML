@@ -1015,7 +1015,7 @@ class HPXMLTest < MiniTest::Test
     hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump.fraction_heat_load_served > 0
       next unless hpxml.heat_pumps.size == 1
-      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      next unless [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpGroundToWater].include? heat_pump.heat_pump_type
       next unless not heat_pump.pump_watts_per_ton.nil?
 
       # Compare pump power from timeseries output

@@ -135,6 +135,7 @@ class HPXML < Object
   HVACTypeFurnace = 'Furnace'
   HVACTypeHeatPumpAirToAir = 'air-to-air'
   HVACTypeHeatPumpGroundToAir = 'ground-to-air'
+  HVACTypeHeatPumpGroundToWater = 'ground-to-water'
   HVACTypeHeatPumpMiniSplit = 'mini-split'
   HVACTypeHeatPumpWaterLoopToAir = 'water-loop-to-air'
   HVACTypeMiniSplitAirConditioner = 'mini-split'
@@ -2874,7 +2875,7 @@ class HPXML < Object
         clg_efficiency_value = @cooling_efficiency_seer
         htg_efficiency_units = UnitsHSPF
         htg_efficiency_value = @heating_efficiency_hspf
-      elsif [HVACTypeHeatPumpGroundToAir].include? @heat_pump_type
+      elsif [HVACTypeHeatPumpGroundToAir, HVACTypeHeatPumpGroundToWater].include? @heat_pump_type
         clg_efficiency_units = UnitsEER
         clg_efficiency_value = @cooling_efficiency_eer
         htg_efficiency_units = UnitsCOP
@@ -2926,12 +2927,12 @@ class HPXML < Object
       @fraction_cool_load_served = to_float_or_nil(XMLHelper.get_value(heat_pump, 'FractionCoolLoadServed'))
       if [HVACTypeHeatPumpAirToAir, HVACTypeHeatPumpMiniSplit].include? @heat_pump_type
         @cooling_efficiency_seer = to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsSEER}']/Value"))
-      elsif [HVACTypeHeatPumpGroundToAir].include? @heat_pump_type
+      elsif [HVACTypeHeatPumpGroundToAir, HVACTypeHeatPumpGroundToWater].include? @heat_pump_type
         @cooling_efficiency_eer = to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsEER}']/Value"))
       end
       if [HVACTypeHeatPumpAirToAir, HVACTypeHeatPumpMiniSplit].include? @heat_pump_type
         @heating_efficiency_hspf = to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='#{UnitsHSPF}']/Value"))
-      elsif [HVACTypeHeatPumpGroundToAir].include? @heat_pump_type
+      elsif [HVACTypeHeatPumpGroundToAir, HVACTypeHeatPumpGroundToWater].include? @heat_pump_type
         @heating_efficiency_cop = to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='#{UnitsCOP}']/Value"))
       end
       @energy_star = XMLHelper.get_values(heat_pump, 'ThirdPartyCertification').include?('Energy Star')

@@ -267,7 +267,7 @@ class HPXMLDefaults
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.cooling_shr.nil?
 
-      if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+      if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
         if cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
           cooling_system.cooling_shr = 0.73
         elsif cooling_system.compressor_type == HPXML::HVACCompressorTypeTwoStage
@@ -275,16 +275,16 @@ class HPXMLDefaults
         elsif cooling_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
           cooling_system.cooling_shr = 0.78
         end
-      elsif cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
+      elsif [HPXML::HVACTypeRoomAirConditioner].include? cooling_system.cooling_system_type
         cooling_system.cooling_shr = 0.65
-      elsif cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner
+      elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
         cooling_system.cooling_shr = 0.73
       end
     end
     hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump.cooling_shr.nil?
 
-      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
+      if [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
         if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
           heat_pump.cooling_shr = 0.73
         elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeTwoStage
@@ -292,19 +292,24 @@ class HPXMLDefaults
         elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
           heat_pump.cooling_shr = 0.78
         end
-      elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
+      elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
         heat_pump.cooling_shr = 0.73
-      elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      elsif [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpGroundToWater].include? heat_pump.heat_pump_type
         heat_pump.cooling_shr = 0.732
       end
     end
 
     # GSHP pump power
     hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      next unless [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpGroundToWater].include? heat_pump.heat_pump_type
       next unless heat_pump.pump_watts_per_ton.nil?
 
-      heat_pump.pump_watts_per_ton = HVAC.get_default_gshp_pump_power()
+      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+        heat_pump.pump_watts_per_ton = HVAC.get_default_gshp_pump_power()
+      elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToWater
+        # FIXME: Add default hydronic pump energy
+        heat_pump.pump_watts_per_ton = HVAC.get_default_gshp_pump_power()
+      end
     end
 
     # Charge defect ratio
@@ -398,6 +403,7 @@ class HPXMLDefaults
     end
     hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump.fan_watts_per_cfm.nil?
+      next if heat_pump.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeHydronic
 
       if [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
         if heat_pump.heating_efficiency_hspf > 8.75 # HEScore assumption
@@ -406,6 +412,7 @@ class HPXMLDefaults
           heat_pump.fan_watts_per_cfm = psc_watts_per_cfm
         end
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
+
         if heat_pump.heating_efficiency_cop > 8.75 / 3.2 # HEScore assumption
           heat_pump.fan_watts_per_cfm = ecm_watts_per_cfm
         else

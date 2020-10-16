@@ -267,6 +267,7 @@ def create_hpxmls
     'base-hvac-furnace-wood-only.xml' => 'base.xml',
     'base-hvac-furnace-x3-dse.xml' => 'base.xml',
     'base-hvac-ground-to-air-heat-pump.xml' => 'base.xml',
+    'base-hvac-ground-to-water-heat-pump.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-hvac-ideal-air.xml' => 'base.xml',
     'base-hvac-install-qual-all-furnace-gas-central-ac-1-speed2.xml' => 'base.xml',
     'base-hvac-install-qual-none-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
@@ -393,6 +394,7 @@ def create_hpxmls
     'hvac_autosizing/base-hvac-furnace-gas-room-ac-autosize.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'hvac_autosizing/base-hvac-ground-to-air-heat-pump-autosize.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'hvac_autosizing/base-hvac-ground-to-air-heat-pump-autosize-manual-s-oversize-allowances.xml' => 'hvac_autosizing/base-hvac-ground-to-air-heat-pump-autosize.xml',
+    'hvac_autosizing/base-hvac-ground-to-water-heat-pump-autosize.xml' => 'base-hvac-ground-to-water-heat-pump.xml',
     'hvac_autosizing/base-hvac-mini-split-heat-pump-ducted-autosize.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'hvac_autosizing/base-hvac-mini-split-heat-pump-ducted-autosize-manual-s-oversize-allowances.xml' => 'hvac_autosizing/base-hvac-mini-split-heat-pump-ducted-autosize.xml',
     'hvac_autosizing/base-hvac-mini-split-heat-pump-ducted-heating-only-autosize.xml' => 'base-hvac-mini-split-heat-pump-ducted-heating-only.xml',
@@ -3121,6 +3123,9 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
       hpxml.heat_pumps[-1].number_of_units_served = 6
       hpxml.heat_pumps[-1].shared_loop_watts = 600
     end
+  elsif ['base-hvac-ground-to-water-heat-pump.xml'].include? hpxml_file
+    hpxml.heat_pumps[0].heat_pump_type = HPXML::HVACTypeHeatPumpGroundToWater
+    hpxml.heat_pumps[0].fan_watts_per_cfm = nil
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     hpxml.heat_pumps.add(id: 'HeatPump',
@@ -3330,6 +3335,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'base-hvac-boiler-oil-only.xml',
          'base-hvac-boiler-propane-only.xml',
          'base-hvac-boiler-wood-only.xml',
+         'base-hvac-ground-to-water-heat-pump.xml',
          'base-hvac-shared-boiler-only-baseboard.xml',
          'base-hvac-shared-chiller-only-baseboard.xml',
          'base-hvac-shared-boiler-chiller-baseboard.xml'].include? hpxml_file

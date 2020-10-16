@@ -574,7 +574,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_mini_split_heat_pump_values(hpxml_default, 0.73, 0.18, 0, 0, nil)
   end
 
-  def test_ground_source_heat_pumps
+  def test_ground_to_air_heat_pumps
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
     hpxml.heat_pumps[0].pump_watts_per_ton = 9.9
@@ -599,6 +599,21 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_ground_to_air_heat_pump_values(hpxml_default, 30.0, 0.375, 0, nil)
+  end
+
+  def test_ground_to_water_heat_pumps
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base-hvac-ground-to-water-heat-pump.xml')
+    hpxml.heat_pumps[0].pump_watts_per_ton = 9.9
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_ground_to_water_heat_pump_values(hpxml_default, 9.9)
+
+    # Test defaults
+    hpxml.heat_pumps[0].pump_watts_per_ton = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_ground_to_water_heat_pump_values(hpxml_default, 30.0)
   end
 
   def test_hvac_distribution
@@ -1830,6 +1845,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_equal(airflow_cfm_per_ton, heat_pump.airflow_cfm_per_ton)
     end
+  end
+
+  def _test_default_ground_to_water_heat_pump_values(hpxml, pump_watts_per_ton)
+    heat_pump = hpxml.heat_pumps[0]
+    assert_equal(pump_watts_per_ton, heat_pump.pump_watts_per_ton)
+    assert_nil(heat_pump.fan_watts_per_cfm)
+    assert_nil(heat_pump.airflow_defect_ratio)
+    assert_nil(heat_pump.airflow_cfm_per_ton)
   end
 
   def _test_default_duct_values(hpxml, supply_locations, return_locations, supply_areas, return_areas, n_return_registers)

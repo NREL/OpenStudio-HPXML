@@ -889,6 +889,44 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert_in_epsilon(supp_htg_capacity, supp_htg_coil.nominalCapacity.get, 0.01)
   end
 
+  def test_ground_to_water_heat_pump
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-ground-to-water-heat-pump.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml.heat_pumps[0]
+    backup_efficiency = heat_pump.backup_heating_efficiency_percent
+    clg_capacity = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W')
+    htg_capacity = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W')
+    supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
+
+    # Check cooling coil
+    assert_equal(1, model.getCoilCoolingWaterToAirHeatPumpEquationFits.size)
+    clg_coil = model.getCoilCoolingWaterToAirHeatPumpEquationFits[0]
+    cop = 5.36 # Expected values
+    assert_in_epsilon(cop, clg_coil.ratedCoolingCoefficientofPerformance, 0.01)
+    assert_in_epsilon(clg_capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
+
+    # Check heating coil
+    assert_equal(1, model.getCoilHeatingWaterToAirHeatPumpEquationFits.size)
+    htg_coil = model.getCoilHeatingWaterToAirHeatPumpEquationFits[0]
+    cop = 3.65 # Expected values
+    assert_in_epsilon(cop, htg_coil.ratedHeatingCoefficientofPerformance, 0.01)
+    assert_in_epsilon(htg_capacity, htg_coil.ratedHeatingCapacity.get, 0.01)
+
+    # Check supp heating coil
+    assert_equal(1, model.getCoilHeatingElectrics.size)
+    supp_htg_coil = model.getCoilHeatingElectrics[0]
+    assert_in_epsilon(backup_efficiency, supp_htg_coil.efficiency, 0.01)
+    assert_in_epsilon(supp_htg_capacity, supp_htg_coil.nominalCapacity.get, 0.01)
+
+    # Check fan power (zero)
+    fanonoff = model.getAirLoopHVACUnitarySystems[0].supplyFan.get.to_FanOnOff.get
+    assert_equal(1, fanonoff.fanEfficiency)
+    assert_equal(0, fanonoff.pressureRise)
+  end
+
   def test_shared_chiller_baseboard
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-shared-chiller-only-baseboard.xml'))

@@ -2139,6 +2139,12 @@ class OSModel
                                            @remaining_cool_load_frac,
                                            living_zone, @hvac_map)
 
+      elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToWater
+
+        HVAC.apply_ground_to_water_heat_pump(model, runner, weather, heat_pump,
+                                             @remaining_heat_load_frac,
+                                             @remaining_cool_load_frac,
+                                             living_zone, @hvac_map)
       end
 
       @remaining_heat_load_frac -= heat_pump.fraction_heat_load_served
@@ -2251,6 +2257,7 @@ class OSModel
                                    HPXML::HVACTypeHeatPumpAirToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeHeatPumpMiniSplit => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeHeatPumpGroundToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
+                                   HPXML::HVACTypeHeatPumpGroundToWater => [HPXML::HVACDistributionTypeHydronic, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeHeatPumpWaterLoopToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir, HPXML::HVACDistributionTypeDSE] }
 
     if not hvac_distribution_type_map[system_type].include? hvac_distribution.distribution_system_type
