@@ -403,7 +403,7 @@ class HPXMLDefaults
     end
     hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump.fan_watts_per_cfm.nil?
-      next if heat_pump.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeHydronic
+      next if (not heat_pump.distribution_system.nil?) && (heat_pump.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeHydronic)
 
       if [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
         if heat_pump.heating_efficiency_hspf > 8.75 # HEScore assumption
