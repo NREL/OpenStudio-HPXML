@@ -37,7 +37,9 @@
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
           <Name>Colorado Springs, CO</Name>
-          <WMO>724660</WMO>
+          <extension>
+            <EPWFilePath>USA_CO_Colorado.Springs-Peterson.Field.724660_TMY3.epw</EPWFilePath>
+          </extension>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>
@@ -264,6 +266,14 @@
             <WeekendScheduleFractions>0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066</WeekendScheduleFractions>
             <MonthlyScheduleMultipliers>1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0</MonthlyScheduleMultipliers>
           </extension>
+        </PlugLoad>
+        <PlugLoad>
+          <SystemIdentifier id='PlugLoadMisc2'/>
+          <PlugLoadType>TV other</PlugLoadType>
+          <Load>
+            <Units>kWh/year</Units>
+            <Value>0.0</Value>
+          </Load>
         </PlugLoad>
       </MiscLoads>
     </BuildingDetails>

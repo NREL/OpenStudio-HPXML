@@ -74,7 +74,7 @@ class Constants
   end
 
   def self.ERIVersions
-    return ['2014', '2014A', '2014AD', '2014ADE', '2014ADEG', '2014ADEGL', '2019', '2019A']
+    return ['2014', '2014A', '2014AD', '2014ADE', '2014ADEG', '2014ADEGL', '2019', '2019A', '2019AB']
   end
 
   def self.FluidWater
@@ -89,20 +89,20 @@ class Constants
     return 'ethylene-glycol'
   end
 
+  def self.IsDuctLoadForReport
+    return __method__.to_s
+  end
+
   def self.ObjectNameAirflow
     return 'airflow'
   end
 
   def self.ObjectNameAirSourceHeatPump
-    return 'ashp'
+    return 'air source heat pump'
   end
 
   def self.ObjectNameBackupHeatingCoil
     return 'backup htg coil'
-  end
-
-  def self.ObjectNameBath
-    return 'baths'
   end
 
   def self.ObjectNameBoiler
@@ -127,6 +127,10 @@ class Constants
 
   def self.ObjectNameClothesDryer
     return 'clothes dryer'
+  end
+
+  def self.ObjectNameClothesDryerExhaust
+    return 'clothes dryer exhaust'
   end
 
   def self.ObjectNameCombiWaterHeatingEnergy(water_heater_name)
@@ -218,7 +222,7 @@ class Constants
   end
 
   def self.ObjectNameGroundSourceHeatPump
-    return 'gshp'
+    return 'ground source heat pump'
   end
 
   def self.ObjectNameHeatingSeason
@@ -257,6 +261,10 @@ class Constants
     return 'mech vent'
   end
 
+  def self.ObjectNameMechanicalVentilationPreconditioning
+    return 'mech vent preconditioning'
+  end
+
   def self.ObjectNameMechanicalVentilationHouseFan
     return 'mech vent house fan'
   end
@@ -274,7 +282,7 @@ class Constants
   end
 
   def self.ObjectNameMiniSplitHeatPump
-    return 'mshp'
+    return 'mini split heat pump'
   end
 
   def self.ObjectNameMiscGrill
@@ -357,12 +365,8 @@ class Constants
     return 'room ac'
   end
 
-  def self.ObjectNameShower
-    return 'showers'
-  end
-
-  def self.ObjectNameSink
-    return 'sinks'
+  def self.ObjectNameSharedPump(hvac_name)
+    return "#{hvac_name} shared pump"
   end
 
   def self.ObjectNameSolarHotWater
@@ -391,6 +395,10 @@ class Constants
 
   def self.ObjectNameWaterHeaterAdjustment(water_heater_name)
     return "#{water_heater_name} EC adjustment"
+  end
+
+  def self.ObjectNameWaterLoopHeatPump
+    return 'water loop heat pump'
   end
 
   def self.ObjectNameWholeHouseFan
@@ -450,6 +458,10 @@ class Constants
   end
 
   def self.SizingInfoHVACHeatType
+    return __method__.to_s
+  end
+
+  def self.SizingInfoHVACPumpPower
     return __method__.to_s
   end
 
@@ -534,6 +546,18 @@ class Constants
   end
 
   def self.SizingInfoMechVentWholeHouseRateUnbalanced
+    return __method__.to_s
+  end
+
+  def self.SizingInfoMechVentWholeHouseRatePreHeated
+    return __method__.to_s
+  end
+
+  def self.SizingInfoMechVentWholeHouseRatePreCooled
+    return __method__.to_s
+  end
+
+  def self.SizingInfoMechVentWholeHouseRateRecirculated
     return __method__.to_s
   end
 

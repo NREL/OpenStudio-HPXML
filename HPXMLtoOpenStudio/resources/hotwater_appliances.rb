@@ -61,9 +61,8 @@ class HotWaterAndAppliances
     # Clothes dryer energy
     if not clothes_dryer.nil?
       cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, clothes_dryer.additional_properties.space.nil?)
-      cd_weekday_sch = '0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024'
-      cd_monthly_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
-      cd_schedule = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesDryer, cd_weekday_sch, cd_weekday_sch, cd_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      days_shift = -1.0 / 24.0 # Shift by 1 hour relative to clothes washer
+      cd_schedule = HotWaterSchedule.new(model, Constants.ObjectNameClothesDryer, nbeds, days_shift)
       cd_design_level_e = cd_schedule.calcDesignLevelFromDailykWh(cd_annual_kwh / 365.0)
       cd_design_level_f = cd_schedule.calcDesignLevelFromDailyTherm(cd_annual_therm / 365.0)
 
@@ -90,7 +89,7 @@ class HotWaterAndAppliances
       fridge_weekday_sch = refrigerator.weekday_fractions
       fridge_weekend_sch = refrigerator.weekend_fractions
       fridge_monthly_sch = refrigerator.monthly_multipliers
-      fridge_schedule = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameRefrigerator, fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      fridge_schedule = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameRefrigerator, fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, Constants.ScheduleTypeLimitsFraction)
       fridge_design_level = fridge_schedule.calcDesignLevelFromDailykWh(rf_annual_kwh / 365.0)
 
       rf_space = refrigerator.additional_properties.space
@@ -104,7 +103,7 @@ class HotWaterAndAppliances
       freezer_weekday_sch = freezer.weekday_fractions
       freezer_weekend_sch = freezer.weekend_fractions
       freezer_monthly_sch = freezer.monthly_multipliers
-      freezer_schedule = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameFreezer, freezer_weekday_sch, freezer_weekend_sch, freezer_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      freezer_schedule = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameFreezer, freezer_weekday_sch, freezer_weekend_sch, freezer_monthly_sch, Constants.ScheduleTypeLimitsFraction)
       freezer_design_level = freezer_schedule.calcDesignLevelFromDailykWh(fz_annual_kwh / 365.0)
 
       fz_space = freezer.additional_properties.space
@@ -118,7 +117,7 @@ class HotWaterAndAppliances
       cook_weekday_sch = cooking_range.weekday_fractions
       cook_weekend_sch = cooking_range.weekend_fractions
       cook_monthly_sch = cooking_range.monthly_multipliers
-      cook_schedule = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameCookingRange, cook_weekday_sch, cook_weekend_sch, cook_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      cook_schedule = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameCookingRange, cook_weekday_sch, cook_weekend_sch, cook_monthly_sch, Constants.ScheduleTypeLimitsFraction)
       cook_design_level_e = cook_schedule.calcDesignLevelFromDailykWh(cook_annual_kwh / 365.0)
       cook_design_level_f = cook_schedule.calcDesignLevelFromDailyTherm(cook_annual_therm / 365.0)
 
@@ -182,7 +181,7 @@ class HotWaterAndAppliances
         if dist_pump_annual_kwh > 0
           dist_pump_weekday_sch = '0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024'
           dist_pump_monthly_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
-          dist_pump_schedule = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameHotWaterRecircPump, dist_pump_weekday_sch, dist_pump_weekday_sch, dist_pump_monthly_sch, 1.0, 1.0)
+          dist_pump_schedule = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameHotWaterRecircPump, dist_pump_weekday_sch, dist_pump_weekday_sch, dist_pump_monthly_sch)
           dist_pump_design_level = dist_pump_schedule.calcDesignLevelFromDailykWh(dist_pump_annual_kwh / 365.0)
           dist_pump = add_electric_equipment(model, Constants.ObjectNameHotWaterRecircPump, living_space, dist_pump_design_level * gpd_frac, 0.0, 0.0, dist_pump_schedule.schedule)
           dhw_map[water_heating_system.id] << dist_pump unless dist_pump.nil?
@@ -205,6 +204,7 @@ class HotWaterAndAppliances
 
       # Dishwasher
       next unless not dishwasher.nil?
+
       gpd_frac = nil
       if dishwasher.is_shared_appliance && dishwasher.water_heating_system.id == water_heating_system.id
         gpd_frac = 1.0 # Shared water heater sees full appliance load
@@ -277,13 +277,22 @@ class HotWaterAndAppliances
     return annual_kwh, annual_therm, frac_sens, frac_lat
   end
 
-  def self.get_dishwasher_default_values()
-    return { rated_annual_kwh: 467.0, # kWh/yr
-             label_electric_rate: 0.12, # $/kWh
-             label_gas_rate: 1.09, # $/therm
-             label_annual_gas_cost: 33.12, # $
-             label_usage: 4.0, # cyc/week
-             place_setting_capacity: 12.0 }
+  def self.get_dishwasher_default_values(eri_version)
+    if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
+      return { rated_annual_kwh: 467.0, # kWh/yr
+               label_electric_rate: 0.12, # $/kWh
+               label_gas_rate: 1.09, # $/therm
+               label_annual_gas_cost: 33.12, # $
+               label_usage: 4.0, # cyc/week
+               place_setting_capacity: 12.0 }
+    else
+      return { rated_annual_kwh: 467.0, # kWh/yr
+               label_electric_rate: 999, # unused
+               label_gas_rate: 999, # unused
+               label_annual_gas_cost: 999, # unused
+               label_usage: 999, # unused
+               place_setting_capacity: 12.0 }
+    end
   end
 
   def self.calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, is_outside = false)
@@ -409,7 +418,10 @@ class HotWaterAndAppliances
     annual_therm *= clothes_dryer.usage_multiplier
 
     if not is_outside
-      frac_lost = 0.85
+      frac_lost = 0.0
+      if clothes_dryer.is_vented
+        frac_lost = 0.85
+      end
       if clothes_dryer.fuel_type == HPXML::FuelTypeElectricity
         frac_sens = (1.0 - frac_lost) * 0.90
       else
@@ -450,11 +462,11 @@ class HotWaterAndAppliances
     else
       return { integrated_modified_energy_factor: 0.331, # ft3/(kWh/cyc)
                rated_annual_kwh: 704.0, # kWh/yr
-               label_electric_rate: 0.08, # $/kWh, unused
-               label_gas_rate: 0.58, # $/therm, unused
-               label_annual_gas_cost: 23.0, # $, unused
+               label_electric_rate: 0.08, # $/kWh
+               label_gas_rate: 0.58, # $/therm
+               label_annual_gas_cost: 23.0, # $
                capacity: 2.874, # ft^3
-               label_usage: 6.0 } # cyc/week, unused
+               label_usage: 999 } # unused
     end
   end
 
@@ -617,7 +629,7 @@ class HotWaterAndAppliances
     if fuel_type.nil?
       oe.setFuelType('None')
     else
-      oe.setFuelType(EPlus.input_fuel_map(fuel_type))
+      oe.setFuelType(EPlus.fuel_type(fuel_type))
     end
     oe.setSpace(space)
     oe_def.setName(obj_name)

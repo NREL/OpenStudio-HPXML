@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class HPXMLDefaults
-  def self.apply(hpxml, cfa, nbeds, ncfl, ncfl_ag, has_uncond_bsmnt, eri_version, epw_file)
-    apply_header(hpxml, epw_file)
+  def self.apply(hpxml, cfa, nbeds, ncfl, ncfl_ag, has_uncond_bsmnt, eri_version, epw_file, runner)
+    apply_header(hpxml, epw_file, runner)
     apply_site(hpxml)
     apply_building_occupancy(hpxml, nbeds)
     apply_building_construction(hpxml, cfa, nbeds)
@@ -32,13 +32,21 @@ class HPXMLDefaults
 
   private
 
-  def self.apply_header(hpxml, epw_file)
+  def self.apply_header(hpxml, epw_file, runner)
     hpxml.header.timestep = 60 if hpxml.header.timestep.nil?
 
     hpxml.header.sim_begin_month = 1 if hpxml.header.sim_begin_month.nil?
     hpxml.header.sim_begin_day_of_month = 1 if hpxml.header.sim_begin_day_of_month.nil?
     hpxml.header.sim_end_month = 12 if hpxml.header.sim_end_month.nil?
     hpxml.header.sim_end_day_of_month = 31 if hpxml.header.sim_end_day_of_month.nil?
+    if epw_file.startDateActualYear.is_initialized # AMY
+      if not hpxml.header.sim_calendar_year.nil?
+        runner.registerWarning("Overriding Calendar Year (#{hpxml.header.sim_calendar_year}) with AMY year (#{epw_file.startDateActualYear.get}).") if hpxml.header.sim_calendar_year != epw_file.startDateActualYear.get
+      end
+      hpxml.header.sim_calendar_year = epw_file.startDateActualYear.get
+    else
+      hpxml.header.sim_calendar_year = 2007 if hpxml.header.sim_calendar_year.nil? # For consistency with SAM utility bill calculations
+    end
 
     hpxml.header.dst_enabled = true if hpxml.header.dst_enabled.nil? # Assume DST since it occurs in most US locations
     if hpxml.header.dst_enabled
@@ -60,6 +68,9 @@ class HPXMLDefaults
         end
       end
     end
+
+    hpxml.header.allow_increased_fixed_capacities = false if hpxml.header.allow_increased_fixed_capacities.nil?
+    hpxml.header.use_max_load_for_heat_pumps = true if hpxml.header.use_max_load_for_heat_pumps.nil?
   end
 
   def self.apply_site(hpxml)
@@ -249,6 +260,14 @@ class HPXMLDefaults
       heat_pump.compressor_type = HVAC.get_default_compressor_type(heat_pump.cooling_efficiency_seer)
     end
 
+    # Default boiler EAE
+    hpxml.heating_systems.each do |heating_system|
+      next unless heating_system.heating_system_type == HPXML::HVACTypeBoiler
+      next unless heating_system.electric_auxiliary_energy.nil?
+
+      heating_system.electric_auxiliary_energy = HVAC.get_electric_auxiliary_energy(heating_system)
+    end
+
     # Default AC/HP sensible heat ratio
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.cooling_shr.nil?
@@ -282,6 +301,18 @@ class HPXMLDefaults
         heat_pump.cooling_shr = 0.73
       elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
         heat_pump.cooling_shr = 0.732
+      end
+    end
+
+    # Default GSHP pump/fan power
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+
+      if heat_pump.fan_watts_per_cfm.nil?
+        heat_pump.fan_watts_per_cfm = HVAC.get_default_gshp_fan_power()
+      end
+      if heat_pump.pump_watts_per_ton.nil?
+        heat_pump.pump_watts_per_ton = HVAC.get_default_gshp_pump_power()
       end
     end
 
@@ -334,7 +365,7 @@ class HPXMLDefaults
     end
 
     hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+      next unless [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? hvac_distribution.distribution_system_type
 
       # Default return registers
       if hvac_distribution.number_of_return_registers.nil?
@@ -454,6 +485,14 @@ class HPXMLDefaults
   end
 
   def self.apply_ventilation_fans(hpxml)
+    # Default mech vent systems
+    hpxml.ventilation_fans.each do |vent_fan|
+      next unless vent_fan.used_for_whole_building_ventilation
+      next unless vent_fan.is_shared_system.nil?
+
+      vent_fan.is_shared_system = false
+    end
+
     # Default kitchen fan
     hpxml.ventilation_fans.each do |vent_fan|
       next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::LocationKitchen))
@@ -800,6 +839,12 @@ class HPXMLDefaults
       if clothes_dryer.usage_multiplier.nil?
         clothes_dryer.usage_multiplier = 1.0
       end
+      if clothes_dryer.is_vented.nil?
+        clothes_dryer.is_vented = true
+      end
+      if clothes_dryer.is_vented && clothes_dryer.vented_flow_rate.nil?
+        clothes_dryer.vented_flow_rate = 100.0
+      end
     end
 
     # Default dishwasher
@@ -812,7 +857,7 @@ class HPXMLDefaults
         dishwasher.location = HPXML::LocationLivingSpace
       end
       if dishwasher.place_setting_capacity.nil?
-        default_values = HotWaterAndAppliances.get_dishwasher_default_values()
+        default_values = HotWaterAndAppliances.get_dishwasher_default_values(eri_version)
         dishwasher.rated_annual_kwh = default_values[:rated_annual_kwh]
         dishwasher.label_electric_rate = default_values[:label_electric_rate]
         dishwasher.label_gas_rate = default_values[:label_gas_rate]
@@ -980,6 +1025,9 @@ class HPXMLDefaults
 
   def self.apply_pv_systems(hpxml)
     hpxml.pv_systems.each do |pv_system|
+      if pv_system.is_shared_system.nil?
+        pv_system.is_shared_system = false
+      end
       if pv_system.inverter_efficiency.nil?
         pv_system.inverter_efficiency = PV.get_default_inv_eff()
       end

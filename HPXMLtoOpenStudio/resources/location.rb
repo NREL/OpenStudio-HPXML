@@ -2,12 +2,11 @@
 
 class Location
   def self.apply(model, runner, weather, epw_file, hpxml)
-    apply_year(model, epw_file)
+    apply_year(model, hpxml)
     apply_site(model, epw_file)
     apply_climate_zones(model, epw_file)
     apply_dst(model, hpxml)
     apply_ground_temps(model, weather)
-    return weather
   end
 
   def self.apply_weather_file(model, runner, weather_file_path, weather_cache_path)
@@ -50,13 +49,9 @@ class Location
     climateZones.setClimateZone(Constants.BuildingAmericaClimateZone, ba_zone)
   end
 
-  def self.apply_year(model, epw_file)
+  def self.apply_year(model, hpxml)
     year_description = model.getYearDescription
-    if epw_file.startDateActualYear.is_initialized # AMY
-      year_description.setCalendarYear(epw_file.startDateActualYear.get)
-    else # TMY
-      year_description.setDayofWeekforStartDay('Monday') # For consistency with SAM utility bill calculations
-    end
+    year_description.setCalendarYear(hpxml.header.sim_calendar_year)
   end
 
   def self.apply_dst(model, hpxml)
@@ -85,9 +80,9 @@ class Location
 
   def self.get_climate_zone_ba(wmo)
     ba_zone = nil
-    zones_csv = File.join(File.dirname(__FILE__), 'climate_zones.csv')
+    zones_csv = File.join(File.dirname(__FILE__), 'data_climate_zones.csv')
     if not File.exist?(zones_csv)
-      fail 'Could not find climate_zones.csv'
+      fail 'Could not find data_climate_zones.csv'
     end
 
     require 'csv'

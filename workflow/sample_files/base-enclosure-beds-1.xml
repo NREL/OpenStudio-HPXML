@@ -41,6 +41,7 @@
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>1</NumberofBedrooms>
+          <NumberofBathrooms>1</NumberofBathrooms>
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
@@ -53,7 +54,9 @@
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
           <Name>Denver, CO</Name>
-          <WMO>725650</WMO>
+          <extension>
+            <EPWFilePath>USA_CO_Denver.Intl.AP.725650_TMY3.epw</EPWFilePath>
+          </extension>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>
@@ -428,6 +431,10 @@
           <FuelType>electricity</FuelType>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
           <ControlType>timer</ControlType>
+          <extension>
+            <IsVented>true</IsVented>
+            <VentedFlowRate>150.0</VentedFlowRate>
+          </extension>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>

@@ -1855,6 +1855,7 @@
 			<xs:enumeration value="mini-split"/>
 			<xs:enumeration value="ground-to-air"/>
 			<xs:enumeration value="ground-to-water"/>
+			<xs:enumeration value="water-loop-to-air"/>
 			<xs:enumeration value="variable refrigerant flow"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -2115,17 +2116,6 @@
 	<xs:complexType name="Capacity">
 		<xs:simpleContent>
 			<xs:extension base="Capacity_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-				<xs:attribute name="scope" type="DataScope"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="WaterHeaterCapacity_simple">
-		<xs:restriction base="xs:double"/>
-	</xs:simpleType>
-	<xs:complexType name="WaterHeaterCapacity">
-		<xs:simpleContent>
-			<xs:extension base="WaterHeaterCapacity_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
@@ -2760,8 +2750,6 @@
 			<xs:enumeration value="baseboard"/>
 			<xs:enumeration value="radiant floor"/>
 			<xs:enumeration value="radiant ceiling"/>
-			<xs:enumeration value="fan coil"/>
-			<xs:enumeration value="water loop heat pump"/>
 			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -2782,6 +2770,20 @@
 	<xs:complexType name="AirDistributionType">
 		<xs:simpleContent>
 			<xs:extension base="AirDistributionType_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="HydronicAndAirDistributionType_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="fan coil"/>
+			<xs:enumeration value="water loop heat pump"/>
+			<xs:enumeration value="other"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="HydronicAndAirDistributionType">
+		<xs:simpleContent>
+			<xs:extension base="HydronicAndAirDistributionType_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
@@ -3821,32 +3823,6 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="VentilationFlowRate_simple">
-		<xs:restriction base="xs:double">
-			<xs:minInclusive value="0"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="VentilationFlowRate">
-		<xs:simpleContent>
-			<xs:extension base="FlowRate_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-				<xs:attribute name="scope" type="DataScope"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="VentilationFanPower_simple">
-		<xs:restriction base="xs:double">
-			<xs:minInclusive value="0"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="VentilationFanPower">
-		<xs:simpleContent>
-			<xs:extension base="VentilationFanPower_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-				<xs:attribute name="scope" type="DataScope"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
 	<xs:simpleType name="eGridRegions_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="Alaska"/>
@@ -4690,7 +4666,6 @@
 		<xs:simpleContent>
 			<xs:extension base="PVSystemMaxPowerOutput_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
-				<xs:attribute name="scope" type="DataScope"/>
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
@@ -4701,7 +4676,6 @@
 		<xs:simpleContent>
 			<xs:extension base="PVSystemCollectorArea_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
-				<xs:attribute name="scope" type="DataScope"/>
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
@@ -4712,14 +4686,7 @@
 		<xs:simpleContent>
 			<xs:extension base="PVSystemNumberOfPanels_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
-				<xs:attribute name="scope" type="DataScope"/>
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="DataScope">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="single unit"/>
-			<xs:enumeration value="multiple units"/>
-		</xs:restriction>
-	</xs:simpleType>
 </xs:schema>
