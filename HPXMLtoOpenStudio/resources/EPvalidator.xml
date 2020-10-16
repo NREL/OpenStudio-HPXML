@@ -192,7 +192,7 @@
       <sch:assert role='ERROR' test='count(h:Area) = 1'>Expected 1 element(s) for xpath: Area</sch:assert>
       <sch:assert role='ERROR' test='count(h:Azimuth) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Azimuth</sch:assert>
       <sch:assert role='ERROR' test='count(h:RoofType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RoofType</sch:assert>
-      <sch:assert role='ERROR' test='not(h:RoofType) or h:RoofType["asphalt or fiberglass shingles" or text()="wood shingles or shakes" or text()="slate or tile shingles" or text()="metal surfacing"]'>Expected RoofType to be 'asphalt or fiberglass shingles' or 'wood shingles or shakes' or 'slate or tile shingles' or 'metal surfacing'</sch:assert>
+      <sch:assert role='ERROR' test='not(h:RoofType) or h:RoofType[text()="asphalt or fiberglass shingles" or text()="wood shingles or shakes" or text()="slate or tile shingles" or text()="metal surfacing"]'>Expected RoofType to be 'asphalt or fiberglass shingles' or 'wood shingles or shakes' or 'slate or tile shingles' or 'metal surfacing'</sch:assert>
       <sch:assert role='ERROR' test='count(h:SolarAbsorptance) + count(h:RoofColor) &gt;= 1'>Expected 1 or more element(s) for xpath: SolarAbsorptance | RoofColor</sch:assert>
       <sch:assert role='ERROR' test='count(h:Emittance) = 1'>Expected 1 element(s) for xpath: Emittance</sch:assert>
       <sch:assert role='ERROR' test='count(h:Pitch) = 1'>Expected 1 element(s) for xpath: Pitch</sch:assert>
