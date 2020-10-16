@@ -5109,7 +5109,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
     if not hpxml_data_type[:enums].empty?
       assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be \"#{hpxml_data_type[:enums].join('" or "')}\"")
       XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-      XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or contains(\"#{hpxml_data_type[:enums].map { |e| "_#{e}_" }.join(' ')}\", concat(\"_\", #{element_name}, \"_\"))")
+      XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or #{element_name}[#{hpxml_data_type[:enums].map { |e| "text()=\"#{e}\"" }.join(' or ')}]")
     else
       if hpxml_data_type[:min_inclusive]
         assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be greater than or equal to #{hpxml_data_type[:min_inclusive]}")
