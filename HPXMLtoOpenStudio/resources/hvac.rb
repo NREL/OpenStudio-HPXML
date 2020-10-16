@@ -3405,9 +3405,9 @@ class HVAC
     eir_curve_var_in.setKeyName(eir_fff_curve.name.get)
 
     if is_cooling
-      coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Electric Energy')
+      coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Electricity Energy')
     else
-      coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electric Energy')
+      coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electricity Energy')
     end
     coil_energy.setName('coil electric energy')
     coil_energy.setKeyName(coil_name)
