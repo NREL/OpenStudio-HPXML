@@ -4,19 +4,12 @@
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>tasks.rb</XMLGeneratedBy>
     <CreatedDateAndTime>2000-01-01T00:00:00-07:00</CreatedDateAndTime>
-    <Transaction>create</Transaction>
+    <Transaction>modify</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
     <extension>
       <SimulationControl>
         <Timestep>60</Timestep>
-        <DaylightSaving>
-          <Enabled>true</Enabled>
-          <BeginMonth>3</BeginMonth>
-          <BeginDayOfMonth>10</BeginDayOfMonth>
-          <EndMonth>4</EndMonth>
-          <EndDayOfMonth>31</EndDayOfMonth>
-        </DaylightSaving>
       </SimulationControl>
     </extension>
   </SoftwareInfo>
@@ -34,7 +27,7 @@
     <BuildingDetails>
       <BuildingSummary>
         <Site>
-          <SiteType>suburban</SiteType>
+          <SiteType>mountain</SiteType>
           <FuelTypesAvailable>
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
@@ -55,7 +48,7 @@
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
-          <Year>2006</Year>
+          <Year>2020</Year>
           <ClimateZone>5B</ClimateZone>
         </ClimateZoneIECC>
         <WeatherStation>
@@ -104,11 +97,13 @@
             <SystemIdentifier id='Roof'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <Area>1510.0</Area>
+            <Azimuth>365</Azimuth>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Pitch>6.0</Pitch>
             <RadiantBarrier>false</RadiantBarrier>
+            <RadiantBarrierGrade>4</RadiantBarrierGrade>
             <Insulation>
               <SystemIdentifier id='RoofInsulation'/>
               <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
@@ -446,7 +441,7 @@
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
           <Location>living space</Location>
-          <RatedAnnualkWh>307.0</RatedAnnualkWh>
+          <EnergyFactor>5.1</EnergyFactor>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
           <LabelElectricRate>0.12</LabelElectricRate>
           <LabelGasRate>1.09</LabelGasRate>
