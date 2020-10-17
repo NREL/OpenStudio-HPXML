@@ -319,6 +319,9 @@
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              <extension>
+                <AirflowDefectRatio>0.0</AirflowDefectRatio>
+              </extension>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
