@@ -71,6 +71,9 @@ class Airflow
       end
     end
 
+    # Vented clothes dryers in conditioned space
+    vented_dryers = clothes_dryers.select { |cd| cd.is_vented && cd.vented_flow_rate.to_f > 0 && [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include?(cd.location) }
+
     # Initialization
     initialize_cfis(model, vent_fans_mech, hvac_map)
     model.getAirLoopHVACs.each do |air_loop|
@@ -90,7 +93,7 @@ class Airflow
 
     @wind_speed = set_wind_speed_correction(model, site_type, shelter_coef, min_neighbor_distance)
     apply_natural_ventilation_and_whole_house_fan(model, weather, vent_fans_whf, open_window_area, nv_clg_ssn_sensor)
-    apply_infiltration_and_ventilation_fans(model, weather, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, clothes_dryers,
+    apply_infiltration_and_ventilation_fans(model, weather, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                             has_flue_chimney, air_infils, vented_attic, vented_crawl, hvac_map, schedules_file)
   end
 
@@ -262,14 +265,14 @@ class Airflow
     nv_flow.setName(Constants.ObjectNameNaturalVentilation + ' flow')
     nv_flow.setSchedule(model.alwaysOnDiscreteSchedule)
     nv_flow.setSpace(@living_space)
-    nv_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(nv_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
+    nv_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(nv_flow, *EPlus::EMSActuatorZoneInfiltrationFlowRate)
     nv_flow_actuator.setName("#{nv_flow.name} act")
 
     whf_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
     whf_flow.setName(Constants.ObjectNameWholeHouseFan + ' flow')
     whf_flow.setSchedule(model.alwaysOnDiscreteSchedule)
     whf_flow.setSpace(@living_space)
-    whf_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
+    whf_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_flow, *EPlus::EMSActuatorZoneInfiltrationFlowRate)
     whf_flow_actuator.setName("#{whf_flow.name} act")
 
     # Electric Equipment (for whole house fan electricity consumption)
@@ -283,7 +286,7 @@ class Airflow
     whf_equip_def.setFractionLost(1)
     whf_equip.setSchedule(model.alwaysOnDiscreteSchedule)
     whf_equip.setEndUseSubcategory(Constants.ObjectNameWholeHouseFan)
-    whf_elec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_equip, 'ElectricEquipment', 'Electric Power Level')
+    whf_elec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_equip, *EPlus::EMSActuatorElectricEquipmentPower)
     whf_elec_actuator.setName("#{whf_equip.name} act")
 
     # Assume located in attic floor if attic zone exists; otherwise assume it's through roof/wall.
@@ -298,7 +301,7 @@ class Airflow
       zone_mixing = OpenStudio::Model::ZoneMixing.new(whf_zone)
       zone_mixing.setName("#{Constants.ObjectNameWholeHouseFan} mix")
       zone_mixing.setSourceZone(@living_zone)
-      liv_to_zone_flow_rate_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, 'ZoneMixing', 'Air Exchange Flow Rate')
+      liv_to_zone_flow_rate_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, *EPlus::EMSActuatorZoneMixingFlowRate)
       liv_to_zone_flow_rate_actuator.setName("#{zone_mixing.name} act")
     end
 
@@ -431,7 +434,7 @@ class Airflow
     if hpxml_fuel_type.nil?
       other_equip.setFuelType('None')
     else
-      other_equip.setFuelType(EPlus.input_fuel_map(hpxml_fuel_type))
+      other_equip.setFuelType(EPlus.fuel_type(hpxml_fuel_type))
     end
     if not end_use.nil?
       other_equip.setEndUseSubcategory(end_use)
@@ -441,7 +444,7 @@ class Airflow
     other_equip_def.setFractionLost(frac_lost)
     other_equip_def.setFractionLatent(frac_lat)
     other_equip_def.setFractionRadiant(0.0)
-    actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, 'OtherEquipment', 'Power Level')
+    actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, *EPlus::EMSActuatorOtherEquipmentPower)
     actuator.setName("#{other_equip.name} act")
     if not is_duct_load_for_report.nil?
       other_equip.additionalProperties.setFeature(Constants.IsDuctLoadForReport, is_duct_load_for_report)
@@ -516,7 +519,7 @@ class Airflow
     @fan_rtf_var[air_loop] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name} Fan RTF".gsub(' ', '_'))
 
     # Supply fan maximum mass flow rate
-    @fan_mfr_max_var[air_loop] = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, 'Fan Maximum Mass Flow Rate')
+    @fan_mfr_max_var[air_loop] = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, EPlus::EMSIntVarFanMFR)
     @fan_mfr_max_var[air_loop].setName("#{air_loop.name} max sup fan mfr")
     @fan_mfr_max_var[air_loop].setInternalDataIndexKeyName(supply_fan.name.to_s)
 
@@ -546,7 +549,7 @@ class Airflow
     @fan_rtf_var[fan_coil] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{fan_coil.name} Fan RTF".gsub(' ', '_'))
 
     # Supply fan maximum mass flow rate
-    @fan_mfr_max_var[fan_coil] = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, 'Fan Maximum Mass Flow Rate')
+    @fan_mfr_max_var[fan_coil] = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, EPlus::EMSIntVarFanMFR)
     @fan_mfr_max_var[fan_coil].setName("#{fan_coil.name} max sup fan mfr")
     @fan_mfr_max_var[fan_coil].setInternalDataIndexKeyName(supply_fan.name.to_s)
 
@@ -866,7 +869,7 @@ class Airflow
           zone_mixing = OpenStudio::Model::ZoneMixing.new(dest_zone)
           zone_mixing.setName("#{object_name} mix")
           zone_mixing.setSourceZone(source_zone)
-          duct_actuators[var_name] = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, 'ZoneMixing', 'Air Exchange Flow Rate')
+          duct_actuators[var_name] = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, *EPlus::EMSActuatorZoneMixingFlowRate)
           duct_actuators[var_name].setName("#{zone_mixing.name} act")
         end
       end
@@ -1254,10 +1257,10 @@ class Airflow
     return obj_sch_sensors
   end
 
-  def self.apply_dryer_exhaust(model, dryer_object_array, schedules_file)
+  def self.apply_dryer_exhaust(model, vented_dryers, schedules_file)
     obj_sch_sensors = {}
     obj_type_name = Constants.ObjectNameClothesDryerExhaust
-    dryer_object_array.each_with_index do |dryer_object, index|
+    vented_dryers.each_with_index do |vented_dryer, index|
       obj_name = "#{obj_type_name} #{index}"
 
       if not schedules_file.nil?
@@ -1274,7 +1277,7 @@ class Airflow
       obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       obj_sch_sensor.setName("#{obj_name} sch s")
       obj_sch_sensor.setKeyName(obj_sch_name)
-      obj_sch_sensors[dryer_object.id] = obj_sch_sensor
+      obj_sch_sensors[vented_dryer.id] = obj_sch_sensor
     end
 
     return obj_sch_sensors
@@ -1436,7 +1439,7 @@ class Airflow
     vent_mech_fan_actuator = nil
     if is_cfis # actuate its power level in EMS
       equip_def.setFractionLost(0.0) # Fan heat does enter space
-      vent_mech_fan_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(equip, 'ElectricEquipment', 'Electric Power Level')
+      vent_mech_fan_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(equip, *EPlus::EMSActuatorElectricEquipmentPower)
       vent_mech_fan_actuator.setName("#{equip.name} act")
     else
       equip_def.setDesignLevel(pow)
@@ -1469,8 +1472,8 @@ class Airflow
     return fan_sens_load_actuator, fan_lat_load_actuator
   end
 
-  def self.apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, clothes_dryers, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot,
-                                         infil_flow_actuator, cd_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map)
+  def self.apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, vented_dryers, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot,
+                                         infil_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map)
     infil_program.addLine('Set Qrange = 0')
     vent_fans_kitchen.each do |vent_kitchen|
       infil_program.addLine("Set Qrange = Qrange + #{UnitConversions.convert(vent_kitchen.rated_flow_rate * vent_kitchen.quantity, 'cfm', 'm^3/s').round(4)} * #{range_sch_sensors_map[vent_kitchen.id].name}")
@@ -1482,10 +1485,8 @@ class Airflow
     end
 
     infil_program.addLine('Set Qdryer = 0')
-    clothes_dryers.each do |clothes_dryer|
-      next unless clothes_dryer.is_vented
-
-      infil_program.addLine("Set Qdryer = Qdryer + #{UnitConversions.convert(clothes_dryer.vented_flow_rate, 'cfm', 'm^3/s').round(4)} * #{dryer_exhaust_sch_sensors_map[clothes_dryer.id].name}")
+    vented_dryers.each do |vented_dryer|
+      infil_program.addLine("Set Qdryer = Qdryer + #{UnitConversions.convert(vented_dryer.vented_flow_rate, 'cfm', 'm^3/s').round(4)} * #{dryer_exhaust_sch_sensors_map[vented_dryer.id].name}")
     end
 
     infil_program.addLine("Set QWHV_sup = #{UnitConversions.convert(sup_cfm_tot, 'cfm', 'm^3/s').round(4)}")
@@ -1516,7 +1517,6 @@ class Airflow
       infil_program.addLine('Set Qinf_adj = Qtot - Qu - Qb')
     end
     infil_program.addLine("Set #{infil_flow_actuator.name} = Qinf_adj")
-    infil_program.addLine("Set #{cd_flow_actuator.name} = Qdryer")
   end
 
   def self.calculate_fan_loads(model, infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, q_var, preconditioned = false)
@@ -1605,7 +1605,7 @@ class Airflow
     end
   end
 
-  def self.apply_mechanical_ventilation(model, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, clothes_dryers,
+  def self.apply_mechanical_ventilation(model, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                         range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map, has_flue_chimney, hvac_map)
     # Categorize fans into different types
     vent_mech_preheat = vent_fans_mech.select { |vent_mech| (not vent_mech.preheating_efficiency_cop.nil?) }
@@ -1679,15 +1679,8 @@ class Airflow
     infil_flow.setName(Constants.ObjectNameInfiltration + ' flow')
     infil_flow.setSchedule(model.alwaysOnDiscreteSchedule)
     infil_flow.setSpace(@living_space)
-    infil_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(infil_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
+    infil_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(infil_flow, *EPlus::EMSActuatorZoneInfiltrationFlowRate)
     infil_flow_actuator.setName("#{infil_flow.name} act")
-
-    cd_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
-    cd_flow.setName(Constants.ObjectNameClothesDryerExhaust + ' flow')
-    cd_flow.setSchedule(model.alwaysOnDiscreteSchedule)
-    cd_flow.setSpace(@living_space)
-    cd_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(cd_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
-    cd_flow_actuator.setName("#{cd_flow.name} act")
 
     # Living Space Infiltration Calculation/Program
     infil_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
@@ -1705,8 +1698,8 @@ class Airflow
 
     # Calculate Qfan, Qinf_adj
     # Calculate adjusted infiltration based on mechanical ventilation system
-    apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, clothes_dryers, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot,
-                                  infil_flow_actuator, cd_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map)
+    apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, vented_dryers, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot,
+                                  infil_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map)
 
     # Address load of Qfan (Qload)
     # Qload as variable for tracking outdoor air flow rate, excluding recirculation
@@ -1726,7 +1719,7 @@ class Airflow
     program_calling_manager.addProgram(infil_program)
   end
 
-  def self.apply_infiltration_and_ventilation_fans(model, weather, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, clothes_dryers,
+  def self.apply_infiltration_and_ventilation_fans(model, weather, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                                    has_flue_chimney, air_infils, vented_attic, vented_crawl, hvac_map, schedules_file)
     # Get living space infiltration
     living_ach50 = nil
@@ -1761,10 +1754,10 @@ class Airflow
     bath_sch_sensors_map = apply_local_ventilation(model, vent_fans_bath, Constants.ObjectNameMechanicalVentilationBathFan)
 
     # Clothes dryer exhaust
-    dryer_exhaust_sch_sensors_map = apply_dryer_exhaust(model, clothes_dryers, schedules_file)
+    dryer_exhaust_sch_sensors_map = apply_dryer_exhaust(model, vented_dryers, schedules_file)
 
     # Get mechanical ventilation
-    apply_mechanical_ventilation(model, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, clothes_dryers,
+    apply_mechanical_ventilation(model, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                  range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map, has_flue_chimney, hvac_map)
   end
 

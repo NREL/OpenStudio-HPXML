@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
 require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
@@ -197,8 +199,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.header.schedules_path = nil
       hpxml.site.fuels = [] # Not used by model
       hpxml.climate_and_risk_zones.weather_station_name = nil
-      hpxml.climate_and_risk_zones.weather_station_wmo = nil
-      hpxml.climate_and_risk_zones.weather_station_epw_filepath = nil
       hpxml.header.state_code = nil
       hpxml.building_construction.conditioned_building_volume = nil
       hpxml.building_construction.average_ceiling_height = nil # Comparing conditioned volume instead
@@ -303,10 +303,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.lighting.garage_weekday_fractions = nil
       hpxml.lighting.garage_weekend_fractions = nil
       hpxml.lighting.garage_monthly_multipliers = nil
-      hpxml.lighting.holiday_period_begin_month = nil
-      hpxml.lighting.holiday_period_begin_day_of_month = nil
-      hpxml.lighting.holiday_period_end_month = nil
-      hpxml.lighting.holiday_period_end_day_of_month = nil
       hpxml.lighting.holiday_weekday_fractions = nil
       hpxml.lighting.holiday_weekend_fractions = nil
       hpxml.plug_loads.each do |plug_load|

@@ -2,7 +2,7 @@
 
 require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
 require 'openstudio'
-require 'openstudio/ruleset/ShowRunnerOutput'
+require 'openstudio/measure/ShowRunnerOutput'
 require 'minitest/autorun'
 require 'fileutils'
 require 'csv'
@@ -126,7 +126,6 @@ class SimulationOutputReportTest < MiniTest::Test
     'Component Load: Heating: Natural Ventilation (MBtu)',
     'Component Load: Heating: Mechanical Ventilation (MBtu)',
     'Component Load: Heating: Whole House Fan (MBtu)',
-    'Component Load: Heating: Clothes Dryer Exhaust (MBtu)',
     'Component Load: Heating: Ducts (MBtu)',
     'Component Load: Heating: Internal Gains (MBtu)',
     'Component Load: Cooling: Roofs (MBtu)',
@@ -144,7 +143,6 @@ class SimulationOutputReportTest < MiniTest::Test
     'Component Load: Cooling: Natural Ventilation (MBtu)',
     'Component Load: Cooling: Mechanical Ventilation (MBtu)',
     'Component Load: Cooling: Whole House Fan (MBtu)',
-    'Component Load: Cooling: Clothes Dryer Exhaust (MBtu)',
     'Component Load: Cooling: Ducts (MBtu)',
     'Component Load: Cooling: Internal Gains (MBtu)',
     'Hot Water: Clothes Washer (gal)',
@@ -267,7 +265,6 @@ class SimulationOutputReportTest < MiniTest::Test
     'Component Load: Heating: Natural Ventilation',
     'Component Load: Heating: Mechanical Ventilation',
     'Component Load: Heating: Whole House Fan',
-    'Component Load: Heating: Clothes Dryer Exhaust',
     'Component Load: Heating: Ducts',
     'Component Load: Heating: Internal Gains',
     'Component Load: Cooling: Roofs',
@@ -285,7 +282,6 @@ class SimulationOutputReportTest < MiniTest::Test
     'Component Load: Cooling: Natural Ventilation',
     'Component Load: Cooling: Mechanical Ventilation',
     'Component Load: Cooling: Whole House Fan',
-    'Component Load: Cooling: Clothes Dryer Exhaust',
     'Component Load: Cooling: Ducts',
     'Component Load: Cooling: Internal Gains',
   ]
@@ -307,7 +303,6 @@ class SimulationOutputReportTest < MiniTest::Test
     'Airflow: Mechanical Ventilation',
     'Airflow: Natural Ventilation',
     'Airflow: Whole House Fan',
-    'Airflow: Clothes Dryer Exhaust'
   ]
 
   TimeseriesColsWeather = [
@@ -658,7 +653,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_nonzero_timeseries_value(timeseries_csv, ['Airflow: Clothes Dryer Exhaust'])
+    _check_for_nonzero_timeseries_value(timeseries_csv, ['Airflow: Mechanical Ventilation'])
   end
 
   def test_timeseries_hourly_airflows_with_balanced_mechvent
@@ -914,7 +909,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_ALL_AMY_2012
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-location-epw-filepath-AMY-2012.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-location-AMY-2012.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => true,
                   'include_timeseries_end_use_consumptions' => true,
@@ -935,7 +930,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_daily_ALL_AMY_2012
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-location-epw-filepath-AMY-2012.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-location-AMY-2012.xml',
                   'timeseries_frequency' => 'daily',
                   'include_timeseries_fuel_consumptions' => true,
                   'include_timeseries_end_use_consumptions' => true,
@@ -956,7 +951,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_timestep_ALL_60min_AMY_2012
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-location-epw-filepath-AMY-2012.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-location-AMY-2012.xml',
                   'timeseries_frequency' => 'timestep',
                   'include_timeseries_fuel_consumptions' => true,
                   'include_timeseries_end_use_consumptions' => true,

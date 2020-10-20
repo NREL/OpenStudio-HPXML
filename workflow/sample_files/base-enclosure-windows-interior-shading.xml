@@ -54,7 +54,9 @@
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
           <Name>Denver, CO</Name>
-          <WMO>725650</WMO>
+          <extension>
+            <EPWFilePath>USA_CO_Denver.Intl.AP.725650_TMY3.epw</EPWFilePath>
+          </extension>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>
@@ -263,7 +265,7 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowEastInteriorShading'/>
-              <SummerShadingCoefficient>0.0</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.5</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.5</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
@@ -277,7 +279,7 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowWestInteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.0</SummerShadingCoefficient>
               <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.67</FractionOperable>

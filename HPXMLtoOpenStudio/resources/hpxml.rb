@@ -281,10 +281,13 @@ class HPXML < Object
     if not hpxml_path.nil?
       @doc = XMLHelper.parse_file(hpxml_path)
       hpxml = XMLHelper.get_element(@doc, '/HPXML')
+      Version.check_hpxml_version(XMLHelper.get_attribute_value(hpxml, 'schemaVersion'))
     end
     from_oga(hpxml)
 
     # Clean up
+    # TODO: Should really perform validation before we make the following changes,
+    # so that any errors below don't prevent validation from occurring.
     delete_tiny_surfaces()
     delete_adiabatic_subsurfaces()
     if collapse_enclosure
@@ -664,7 +667,7 @@ class HPXML < Object
     ATTRS = [:xml_type, :xml_generated_by, :created_date_and_time, :transaction,
              :software_program_used, :software_program_version, :eri_calculation_version,
              :eri_design, :timestep, :building_id, :event_type, :state_code,
-             :sim_begin_month, :sim_begin_day_of_month, :sim_end_month, :sim_end_day_of_month,
+             :sim_begin_month, :sim_begin_day_of_month, :sim_end_month, :sim_end_day_of_month, :sim_calendar_year,
              :dst_enabled, :dst_begin_month, :dst_begin_day_of_month, :dst_end_month, :dst_end_day_of_month,
              :use_max_load_for_heat_pumps, :allow_increased_fixed_capacities,
              :apply_ashrae140_assumptions, :schedules_path]
@@ -728,6 +731,12 @@ class HPXML < Object
         end
       end
 
+      if not @sim_calendar_year.nil?
+        if (@sim_calendar_year < 1600) || (@sim_calendar_year > 9999)
+          fail "Calendar Year (#{@sim_calendar_year}) must be between 1600 and 9999."
+        end
+      end
+
       return errors
     end
 
@@ -766,6 +775,7 @@ class HPXML < Object
         XMLHelper.add_element(simulation_control, 'BeginDayOfMonth', to_integer(@sim_begin_day_of_month)) unless @sim_begin_day_of_month.nil?
         XMLHelper.add_element(simulation_control, 'EndMonth', to_integer(@sim_end_month)) unless @sim_end_month.nil?
         XMLHelper.add_element(simulation_control, 'EndDayOfMonth', to_integer(@sim_end_day_of_month)) unless @sim_end_day_of_month.nil?
+        XMLHelper.add_element(simulation_control, 'CalendarYear', to_integer(@sim_calendar_year)) unless @sim_calendar_year.nil?
         if (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day_of_month.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day_of_month.nil?)
           daylight_saving = XMLHelper.add_element(simulation_control, 'DaylightSaving')
           XMLHelper.add_element(daylight_saving, 'Enabled', to_boolean(@dst_enabled)) unless @dst_enabled.nil?
@@ -781,8 +791,8 @@ class HPXML < Object
         XMLHelper.add_element(hvac_sizing_control, 'UseMaxLoadForHeatPumps', to_boolean(@use_max_load_for_heat_pumps)) unless @use_max_load_for_heat_pumps.nil?
         XMLHelper.add_element(hvac_sizing_control, 'AllowIncreasedFixedCapacities', to_boolean(@allow_increased_fixed_capacities)) unless @allow_increased_fixed_capacities.nil?
       end
-
       if not @schedules_path.nil?
+        extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
         XMLHelper.add_element(extension, 'OccupancySchedulesCSVPath', @schedules_path) unless @schedules_path.nil?
       end
 
@@ -816,6 +826,7 @@ class HPXML < Object
       @sim_begin_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginDayOfMonth'))
       @sim_end_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndMonth'))
       @sim_end_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndDayOfMonth'))
+      @sim_calendar_year = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/CalendarYear'))
       @dst_enabled = to_boolean_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/Enabled'))
       @dst_begin_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/BeginMonth'))
       @dst_begin_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/BeginDayOfMonth'))
@@ -2207,12 +2218,6 @@ class HPXML < Object
           fail "For Window '#{@id}', overhangs distance to bottom (#{@overhangs_distance_to_bottom_of_window}) must be greater than distance to top (#{@overhangs_distance_to_top_of_window})."
         end
       end
-      # TODO: Remove this error when we can support it w/ EnergyPlus
-      if (not @interior_shading_factor_summer.nil?) && (not @interior_shading_factor_winter.nil?)
-        if @interior_shading_factor_summer > @interior_shading_factor_winter
-          fail "SummerShadingCoefficient (#{interior_shading_factor_summer}) must be less than or equal to WinterShadingCoefficient (#{interior_shading_factor_winter}) for window '#{@id}'."
-        end
-      end
 
       return errors
     end
@@ -3308,6 +3313,7 @@ class HPXML < Object
       # Daily-average outdoor air (cfm) associated with the unit
       return if oa_unit_flow_rate.nil?
       return if @hours_in_operation.nil?
+
       return oa_unit_flow_rate * (@hours_in_operation / 24.0)
     end
 
@@ -3315,12 +3321,14 @@ class HPXML < Object
       # Daily-average total air (cfm) associated with the unit
       return if total_unit_flow_rate.nil?
       return if @hours_in_operation.nil?
+
       return total_unit_flow_rate * (@hours_in_operation / 24.0)
     end
 
     def unit_flow_rate_ratio
       return 1.0 unless @is_shared_system
       return if @in_unit_flow_rate.nil?
+
       if not @tested_flow_rate.nil?
         ratio = @in_unit_flow_rate / @tested_flow_rate
       elsif not @rated_flow_rate.nil?
@@ -3330,13 +3338,16 @@ class HPXML < Object
       if ratio >= 1.0
         fail "The in-unit flow rate of shared fan '#{@id}' must be less than the system flow rate."
       end
+
       return ratio
     end
 
     def unit_fan_power
       return if @fan_power.nil?
+
       if @is_shared_system
         return if unit_flow_rate_ratio.nil?
+
         return @fan_power * unit_flow_rate_ratio
       else
         return @fan_power
@@ -3346,6 +3357,7 @@ class HPXML < Object
     def average_unit_fan_power
       return if unit_fan_power.nil?
       return if @hours_in_operation.nil?
+
       return unit_fan_power * (@hours_in_operation / 24.0)
     end
 
@@ -5022,11 +5034,13 @@ class HPXML < Object
 
   def delete_adiabatic_subsurfaces()
     @doors.reverse_each do |door|
+      next if door.wall.nil?
       next if door.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
 
       door.delete
     end
     @windows.reverse_each do |window|
+      next if window.wall.nil?
       next if window.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
 
       window.delete
@@ -5102,26 +5116,28 @@ class HPXML < Object
     end
 
     # Check for the sum of CFA served by distribution systems <= CFA
-    air_distributions = @hvac_distributions.select { |dist| dist if [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? dist.distribution_system_type }
-    heating_dist = []
-    cooling_dist = []
-    air_distributions.each do |dist|
-      heating_systems = dist.hvac_systems.select { |sys| sys if (sys.respond_to? :fraction_heat_load_served) && (sys.fraction_heat_load_served.to_f > 0) }
-      cooling_systems = dist.hvac_systems.select { |sys| sys if (sys.respond_to? :fraction_cool_load_served) && (sys.fraction_cool_load_served.to_f > 0) }
-      if heating_systems.size > 0
-        heating_dist << dist
+    if not @building_construction.conditioned_floor_area.nil?
+      air_distributions = @hvac_distributions.select { |dist| dist if [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? dist.distribution_system_type }
+      heating_dist = []
+      cooling_dist = []
+      air_distributions.each do |dist|
+        heating_systems = dist.hvac_systems.select { |sys| sys if (sys.respond_to? :fraction_heat_load_served) && (sys.fraction_heat_load_served.to_f > 0) }
+        cooling_systems = dist.hvac_systems.select { |sys| sys if (sys.respond_to? :fraction_cool_load_served) && (sys.fraction_cool_load_served.to_f > 0) }
+        if heating_systems.size > 0
+          heating_dist << dist
+        end
+        if cooling_systems.size > 0
+          cooling_dist << dist
+        end
       end
-      if cooling_systems.size > 0
-        cooling_dist << dist
+      heating_total_dist_cfa_served = heating_dist.map { |htg_dist| htg_dist.conditioned_floor_area_served.to_f }.sum(0.0)
+      cooling_total_dist_cfa_served = cooling_dist.map { |clg_dist| clg_dist.conditioned_floor_area_served.to_f }.sum(0.0)
+      if (heating_total_dist_cfa_served > @building_construction.conditioned_floor_area)
+        errors << 'The total conditioned floor area served by the HVAC distribution system(s) for heating is larger than the conditioned floor area of the building.'
       end
-    end
-    heating_total_dist_cfa_served = heating_dist.map { |htg_dist| htg_dist.conditioned_floor_area_served.to_f }.sum(0.0)
-    cooling_total_dist_cfa_served = cooling_dist.map { |clg_dist| clg_dist.conditioned_floor_area_served.to_f }.sum(0.0)
-    if (heating_total_dist_cfa_served > @building_construction.conditioned_floor_area.to_f)
-      errors << 'The total conditioned floor area served by the HVAC distribution system(s) for heating is larger than the conditioned floor area of the building.'
-    end
-    if (cooling_total_dist_cfa_served > @building_construction.conditioned_floor_area.to_f)
-      errors << 'The total conditioned floor area served by the HVAC distribution system(s) for cooling is larger than the conditioned floor area of the building.'
+      if (cooling_total_dist_cfa_served > @building_construction.conditioned_floor_area)
+        errors << 'The total conditioned floor area served by the HVAC distribution system(s) for cooling is larger than the conditioned floor area of the building.'
+      end
     end
 
     # Check for objects referencing SFA/MF spaces where the building type is not SFA/MF
@@ -5182,6 +5198,7 @@ class HPXML < Object
       # wall between living space and "other housing unit"
       return true
     end
+
     return false
   end
 
