@@ -381,7 +381,7 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>
-            <FuelType>electricity</FuelType>
+            <FuelType>natural gas</FuelType>
             <WaterHeaterType>instantaneous water heater</WaterHeaterType>
             <Location>living space</Location>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
