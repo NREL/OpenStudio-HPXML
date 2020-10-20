@@ -4012,6 +4012,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].tank_volume = 40.0
   elsif ['base-dhw-tankless-gas-uef.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
+    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
     hpxml.water_heating_systems[0].tank_volume = nil
     hpxml.water_heating_systems[0].heating_capacity = nil
     hpxml.water_heating_systems[0].energy_factor = nil
