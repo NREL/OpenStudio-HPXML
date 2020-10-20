@@ -170,21 +170,26 @@ def create_hpxmls
     'base-dhw-solar-indirect-flat-plate.xml' => 'base.xml',
     'base-dhw-solar-thermosyphon-flat-plate.xml' => 'base.xml',
     'base-dhw-tank-coal.xml' => 'base.xml',
+    'base-dhw-tank-elec-low-fhr-uef.xml' => 'base.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
+    'base-dhw-tank-gas-high-fhr-uef.xml' => 'base.xml',
+    'base-dhw-tank-gas-med-fhr-uef.xml' => 'base.xml',
     'base-dhw-tank-gas-outside.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-heat-pump.xml' => 'base.xml',
     'base-dhw-tank-heat-pump-outside.xml' => 'base-dhw-tank-heat-pump.xml',
+    'base-dhw-tank-heat-pump-uef.xml' => 'base.xml',
     'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar-fraction.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-oil.xml' => 'base.xml',
     'base-dhw-tank-wood.xml' => 'base.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
+    'base-dhw-tankless-electric-uef.xml' => 'base.xml',
     'base-dhw-tankless-electric-outside.xml' => 'base-dhw-tankless-electric.xml',
     'base-dhw-tankless-gas.xml' => 'base.xml',
+    'base-dhw-tankless-gas-uef.xml' => 'base.xml',
     'base-dhw-tankless-gas-with-solar.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-gas-with-solar-fraction.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-propane.xml' => 'base.xml',
-    'base-dhw-uef.xml' => 'base.xml',
     'base-dhw-jacket-electric.xml' => 'base.xml',
     'base-dhw-jacket-gas.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-jacket-indirect.xml' => 'base-dhw-indirect.xml',
@@ -3972,9 +3977,51 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     elsif hpxml_file == 'base-dhw-tankless-propane.xml'
       hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypePropane
     end
-  elsif ['base-dhw-uef.xml'].include? hpxml_file
+  elsif ['base-dhw-tank-elec-low-fhr-uef.xml'].include? hpxml_file
+    # No low usage gas tank WHs in AHRI, based on Richmond model number 6ESB30-2 in AHR directory
     hpxml.water_heating_systems[0].energy_factor = nil
     hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
+    hpxml.water_heating_systems[0].first_hour_rating = 46.0
+    hpxml.water_heating_systems[0].tank_volume = 30.0
+    hpxml.water_heating_systems[0].heating_capacity = 15354.0 # 4.5 kW
+    hpxml.water_heating_systems[0].recovery_efficiency = 0.98
+  elsif ['base-dhw-tank-gas-med-fhr-uef.xml'].include? hpxml_file
+    # Based on AO Smith model number G6-MH3030NV 400 in AHRI directory
+    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 0.59
+    hpxml.water_heating_systems[0].first_hour_rating = 56.0
+    hpxml.water_heating_systems[0].tank_volume = 30.0
+    hpxml.water_heating_systems[0].heating_capacity = 30000.0
+    hpxml.water_heating_systems[0].recovery_efficiency = 0.75
+  elsif ['base-dhw-tank-gas-high-fhr-uef.xml'].include? hpxml_file
+    # Based on AO Smith model number G6-PVT7576NV 310 in AHRI directory
+    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 0.69
+    hpxml.water_heating_systems[0].first_hour_rating = 116.0
+    hpxml.water_heating_systems[0].tank_volume = 75.0
+    hpxml.water_heating_systems[0].heating_capacity = 76000.0 # Btu/hr
+    hpxml.water_heating_systems[0].recovery_efficiency = 0.79
+  elsif ['base-dhw-tank-heat-pump-uef.xml'].include? hpxml_file
+    # Based on Rheem model number XE40T10HS45U0 from AHRI directory
+    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeHeatPump
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 3.75
+    hpxml.water_heating_systems[0].first_hour_rating = 60.0
+    hpxml.water_heating_systems[0].tank_volume = 40.0
+  elsif ['base-dhw-tankless-gas-uef.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
+    hpxml.water_heating_systems[0].tank_volume = nil
+    hpxml.water_heating_systems[0].heating_capacity = nil
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
+  elsif ['base-dhw-tankless-electric-uef.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
+    hpxml.water_heating_systems[0].tank_volume = nil
+    hpxml.water_heating_systems[0].heating_capacity = nil
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 0.98
   elsif ['base-dhw-desuperheater.xml',
          'base-dhw-desuperheater-2-speed.xml',
          'base-dhw-desuperheater-var-speed.xml',
@@ -5109,27 +5156,27 @@ def create_schematron_hpxml_validator(hpxml_docs)
     if not hpxml_data_type[:enums].empty?
       assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be \"#{hpxml_data_type[:enums].join('" or "')}\"")
       XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-      XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or contains(\"#{hpxml_data_type[:enums].map { |e| "_#{e}_" }.join(' ')}\", concat(\"_\", #{element_name}, \"_\"))")
+      XMLHelper.add_attribute(assertion, 'test', "#{element_name}[#{hpxml_data_type[:enums].map { |e| "text()=\"#{e}\"" }.join(' or ')}] or not(#{element_name})")
     else
       if hpxml_data_type[:min_inclusive]
         assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be greater than or equal to #{hpxml_data_type[:min_inclusive]}")
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-        XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or number(#{element_name}) &gt;= #{hpxml_data_type[:min_inclusive]}")
+        XMLHelper.add_attribute(assertion, 'test', "number(#{element_name}) &gt;= #{hpxml_data_type[:min_inclusive]} or not(#{element_name})")
       end
       if hpxml_data_type[:max_inclusive]
         assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be less than or equal to #{hpxml_data_type[:max_inclusive]}")
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-        XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or number(#{element_name}) &lt;= #{hpxml_data_type[:max_inclusive]}")
+        XMLHelper.add_attribute(assertion, 'test', "number(#{element_name}) &lt;= #{hpxml_data_type[:max_inclusive]} or not(#{element_name})")
       end
       if hpxml_data_type[:min_exclusive]
         assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be greater than #{hpxml_data_type[:min_exclusive]}")
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-        XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or number(#{element_name}) &gt; #{hpxml_data_type[:min_exclusive]}")
+        XMLHelper.add_attribute(assertion, 'test', "number(#{element_name}) &gt; #{hpxml_data_type[:min_exclusive]} or not(#{element_name})")
       end
       if hpxml_data_type[:max_exclusive]
         assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be less than #{hpxml_data_type[:max_exclusive]}")
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-        XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or number(#{element_name}) &lt; #{hpxml_data_type[:max_exclusive]}")
+        XMLHelper.add_attribute(assertion, 'test', "number(#{element_name}) &lt; #{hpxml_data_type[:max_exclusive]} or not(#{element_name})")
       end
     end
   end
