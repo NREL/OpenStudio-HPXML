@@ -3663,7 +3663,10 @@ class HPXMLFile
     schedule_seed = args[:schedules_random_seed].get \
       if args[:schedules_random_seed].is_initialized
 
-    schedule_generator = ScheduleGenerator.new(runner: runner, model: model, epw_file: epw_file)
+    schedule_generator = ScheduleGenerator.new(
+      runner: runner, model: model, epw_file: epw_file,
+      random_seed: schedule_seed
+    )
 
     # create the schedule
     if args[:geometry_num_occupants] == Constants.Auto
