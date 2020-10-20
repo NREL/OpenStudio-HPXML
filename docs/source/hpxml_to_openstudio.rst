@@ -23,6 +23,7 @@ HPXML files submitted to OpenStudio-HPXML should undergo a two step validation p
   XSD Schemas are used to validate what elements/attributes/enumerations are available, data types for elements/attributes, the number/order of children elements, etc.
 
   OpenStudio-HPXML **does not** validate the HPXML file against the XSD Schema and assumes the file submitted is valid.
+  However, OpenStudio-HPXML does automatically check for valid data types (e.g., integer vs string), enumeration choices, and numeric values within min/max.
 
 2. Validation using `Schematron <http://schematron.com/>`_
 
@@ -105,6 +106,11 @@ If not provided, the default value of 60 (i.e., 1 hour) is used.
 The simulation run period can be optionally specified with ``BeginMonth``/``BeginDayOfMonth`` and/or ``EndMonth``/``EndDayOfMonth``.
 The ``BeginMonth``/``BeginDayOfMonth`` provided must occur before ``EndMonth``/``EndDayOfMonth`` provided (e.g., a run period from 10/1 to 3/31 is invalid).
 If not provided, default values of January 1st and December 31st will be used.
+
+The simulation run period calendar year can be optionally specified with ``CalendarYear``.
+The calendar year is used to determine the simulation start day of week.
+If the EPW weather file is TMY (Typical Meteorological Year), the default value of 2007 will be used if not specified.
+If the EPW weather file is AMY (Actual Meteorological Year), the AMY year will be used regardless of what is specified.
 
 Whether to apply daylight saving time can be optionally denoted with ``DaylightSaving/Enabled``.
 If either ``DaylightSaving`` or ``DaylightSaving/Enabled`` is not provided, ``DaylightSaving/Enabled`` will default to true.
@@ -219,12 +225,8 @@ Fields include:
 HPXML Weather Station
 ---------------------
 
-The ``ClimateandRiskZones/WeatherStation`` element specifies the EnergyPlus weather file (EPW) to be used in the simulation.
-The weather file can be entered in one of two ways:
-
-#. Using ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the ``weather/data.csv`` file.
-   The full set of U.S. TMY3 weather files can be `downloaded here <https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip>`_.
-#. Using ``WeatherStation/extension/EPWFilePath``.
+The ``ClimateandRiskZones/WeatherStation/extension/EPWFilePath`` element specifies the path to the EnergyPlus weather file (EPW) to be used by the simulation.
+The full set of U.S. TMY3 weather files can be `downloaded here <https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip>`_.
 
 HPXML Enclosure
 ---------------
@@ -431,7 +433,6 @@ Windows must reference a HPXML ``Enclosures/Walls/Wall`` element via the ``Attac
 Windows must also have an ``Azimuth`` specified, even if the attached wall does not.
 
 In addition, the summer/winter interior shading coefficients can be optionally entered as ``InteriorShading/SummerShadingCoefficient`` and ``InteriorShading/WinterShadingCoefficient``.
-The summer interior shading coefficient must be less than or equal to the winter interior shading coefficient.
 Note that a value of 0.7 indicates a 30% reduction in solar gains (i.e., 30% shading).
 If not provided, default values of 0.70 for summer and 0.85 for winter will be used based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
@@ -936,7 +937,7 @@ For a ``SystemType/Recirculation`` system within the dwelling unit, the followin
 Shared Recirculation
 ~~~~~~~~~~~~~~~~~~~~
 
-In addition to the hot water distribution systems within the dwelling unit, the pump energy use of a shared recirculation system can also be described using the following elements:
+In addition to the hot water distribution systems within the dwelling unit, the pump energy use of a shared recirculation system in an Attached/Multifamily building can also be described using the following elements:
 
 - `extension/SharedRecirculation/NumberofUnitsServed`: Number of dwelling units served by the shared pump.
 - `extension/SharedRecirculation/PumpPower`: Optional. If not provided, the default value will be assumed as shown in the table below. Shared pump power in Watts.
@@ -947,6 +948,9 @@ In addition to the hot water distribution systems within the dwelling unit, the 
   ==================================  ==========================================
   Pump Power [W]                      220 (0.25 HP pump w/ 85% motor efficiency)
   ==================================  ==========================================
+
+Note that when defining a shared recirculation system, the hot water distribution system type within the dwelling unit must be standard (``SystemType/Standard``).
+This is because a stacked recirculation system (i.e., shared recirculation loop plus an additional recirculation system within the dwelling unit) is more likely to indicate input errors than reflect an actual real-world scenario.
 
 Drain Water Heat Recovery
 ~~~~~~~~~~~~~~~~~~~~~~~~~

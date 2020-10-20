@@ -54,7 +54,9 @@
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
           <Name>Denver, CO</Name>
-          <WMO>725650</WMO>
+          <extension>
+            <EPWFilePath>USA_CO_Denver.Intl.AP.725650_TMY3.epw</EPWFilePath>
+          </extension>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>
@@ -543,7 +545,7 @@
             <FanSpeed>medium</FanSpeed>
             <Efficiency>100.0</Efficiency>
           </Airflow>
-          <Quantity>2</Quantity>
+          <Quantity>4</Quantity>
         </CeilingFan>
       </Lighting>
       <MiscLoads>
