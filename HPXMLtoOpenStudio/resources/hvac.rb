@@ -1465,12 +1465,10 @@ class HVAC
     htg_weekend_setpoints = htg_weekday_setpoints
 
     # Optionally apply 24-hr heating setpoint schedules
-    if not hvac_control.weekday_heating_setpoints.nil?
+    if (not hvac_control.weekday_heating_setpoints.nil?) && (not hvac_control.weekend_heating_setpoints.nil?)
       htg_weekday_setpoints = hvac_control.weekday_heating_setpoints.split(', ').map { |i| i.to_f }
       htg_weekday_setpoints = [htg_weekday_setpoints] * 12
-      htg_weekend_setpoints = htg_weekday_setpoints
-    end
-    if not hvac_control.weekend_heating_setpoints.nil?
+
       htg_weekend_setpoints = hvac_control.weekend_heating_setpoints.split(', ').map { |i| i.to_f }
       htg_weekend_setpoints = [htg_weekend_setpoints] * 12
     end
@@ -1503,7 +1501,7 @@ class HVAC
     clg_weekend_setpoints = clg_weekday_setpoints
 
     # Optionally apply 24-hr cooling setpoint schedules
-    if not hvac_control.weekday_cooling_setpoints.nil?
+    if (not hvac_control.weekday_cooling_setpoints.nil?) && (not hvac_control.weekend_cooling_setpoints.nil?)
       clg_weekday_setpoints = hvac_control.weekday_cooling_setpoints.split(', ').map { |i| i.to_f }
       clg_weekday_setpoints = [clg_weekday_setpoints] * 12
       if not clg_ceiling_fan_offset.nil?
@@ -1513,9 +1511,7 @@ class HVAC
           clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
         end
       end
-      clg_weekend_setpoints = clg_weekday_setpoints
-    end
-    if not hvac_control.weekend_cooling_setpoints.nil?
+
       clg_weekend_setpoints = hvac_control.weekend_cooling_setpoints.split(', ').map { |i| i.to_f }
       clg_weekend_setpoints = [clg_weekend_setpoints] * 12
       if not clg_ceiling_fan_offset.nil?
