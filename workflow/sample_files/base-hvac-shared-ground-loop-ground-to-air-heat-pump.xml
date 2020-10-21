@@ -568,7 +568,6 @@
               </AnnualHeatingEfficiency>
               <extension>
                 <PumpPowerWattsPerTon>30.0</PumpPowerWattsPerTon>
-                <FanPowerWattsPerCFM>0.5</FanPowerWattsPerCFM>
                 <SharedLoopWatts>600.0</SharedLoopWatts>
               </extension>
             </HeatPump>

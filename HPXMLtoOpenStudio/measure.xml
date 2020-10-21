@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5546cbfd-7924-406b-97b8-fd061a80fa47</version_id>
-  <version_modified>20201019T175502Z</version_modified>
+  <version_id>c200412c-6fe3-450e-a23c-dd6a21496325</version_id>
+  <version_modified>20201021T195758Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -140,12 +140,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>A951F41D</checksum>
-    </file>
-    <file>
-      <filename>hvac_sizing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>5180C452</checksum>
     </file>
     <file>
       <filename>data_ashrae_622_wsf.csv</filename>
@@ -334,12 +328,6 @@
       <checksum>B01378F4</checksum>
     </file>
     <file>
-      <filename>test_hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>9D5E9D5F</checksum>
-    </file>
-    <file>
       <filename>meta_measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -364,12 +352,6 @@
       <checksum>2B2F8169</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1204881E</checksum>
-    </file>
-    <file>
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -388,22 +370,10 @@
       <checksum>BA0409DC</checksum>
     </file>
     <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>2949040F</checksum>
-    </file>
-    <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>1A6416EF</checksum>
-    </file>
-    <file>
-      <filename>xmlhelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>12DB5DDD</checksum>
     </file>
     <file>
       <filename>schedules.rb</filename>
@@ -430,22 +400,10 @@
       <checksum>AF3AF52D</checksum>
     </file>
     <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>72AA932A</checksum>
-    </file>
-    <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>C4B1B51D</checksum>
-    </file>
-    <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B5AB2DC3</checksum>
     </file>
     <file>
       <filename>version.rb</filename>
@@ -454,27 +412,10 @@
       <checksum>2C7C96FA</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>28ABDB0A</checksum>
-    </file>
-    <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>94721953</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.1.1</identifier>
-        <min_compatible>2.1.1</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>665E6D3A</checksum>
     </file>
     <file>
       <filename>validator.rb</filename>
@@ -495,10 +436,75 @@
       <checksum>ACB68AE4</checksum>
     </file>
     <file>
+      <filename>hvac_sizing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9FE8476E</checksum>
+    </file>
+    <file>
+      <filename>test_hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FEA1DB05</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>04551982</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>15970DC1</checksum>
+    </file>
+    <file>
+      <filename>xmlhelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>942C3E5E</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C06CE412</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A8AFAEBB</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>438C4D15</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.1.1</identifier>
+        <min_compatible>2.1.1</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>B75BEFF2</checksum>
+    </file>
+    <file>
       <filename>EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BF102EE5</checksum>
+      <checksum>4F0F41FC</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.xml.bak</filename>
+      <filetype>bak</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>39C6471B</checksum>
     </file>
   </files>
 </measure>
