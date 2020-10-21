@@ -1550,18 +1550,6 @@ class HVACSizing
         hvac_final_values.Heat_Capacity_Supp = [hvac_final_values.Heat_Capacity_Supp, prev_capacity].max
       end
     end
-
-    # Override HVAC airflow rates if values are provided
-    if not hvac.FixedCoolingCFMPerTon.nil?
-      if hvac_final_values.Cool_Airflow > 0
-        hvac_final_values.Cool_Airflow = hvac.FixedCoolingCFMPerTon * UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'ton')
-      end
-    end
-    if not hvac.FixedHeatingCFMPerTon.nil?
-      if hvac_final_values.Heat_Airflow > 0
-        hvac_final_values.Heat_Airflow = hvac.FixedHeatingCFMPerTon * UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'ton')
-      end
-    end
   end
 
   def self.process_ground_loop(hvac_final_values, weather, hvac)
@@ -2045,8 +2033,6 @@ class HVACSizing
         hvac.EvapCoolerEffectiveness = equip.coolerEffectiveness
       end
 
-      hvac.FixedCoolingCFMPerTon = get_feature(equip, Constants.SizingInfoHVACActualCFMPerTonCooling, 'double', false)
-      hvac.FixedHeatingCFMPerTon = get_feature(equip, Constants.SizingInfoHVACActualCFMPerTonHeating, 'double', false)
       hvac.FanWatts = get_feature(equip, Constants.SizingInfoHVACFanWatts, 'double', false)
       if not clg_coil.nil?
         ratedCFMperTonCooling = get_feature(equip, Constants.SizingInfoHVACRatedCFMperTonCooling, 'string', false)
@@ -3414,7 +3400,6 @@ class HVACInfo
 
   attr_accessor(:HeatType, :CoolType, :Handle, :Objects, :Ducts, :NumSpeedsCooling, :NumSpeedsHeating,
                 :FixedCoolingCapacity, :FixedHeatingCapacity, :FixedSuppHeatingCapacity,
-                :FixedCoolingCFMPerTon, :FixedHeatingCFMPerTon,
                 :RatedCFMperTonCooling, :RatedCFMperTonHeating,
                 :COOL_CAP_FT_SPEC, :HEAT_CAP_FT_SPEC, :COOL_SH_FT_SPEC, :COIL_BF_FT_SPEC,
                 :SHRRated, :CapacityRatioCooling, :CapacityRatioHeating, :FanWatts,

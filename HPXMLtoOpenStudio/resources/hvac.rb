@@ -123,16 +123,10 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cool_cfms_ton_rated.join(','))
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, cooling_system.fraction_cool_load_served)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
-      if not cooling_system.airflow_cfm_per_ton.nil?
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, cooling_system.airflow_cfm_per_ton)
-      end
     end
     if not heating_system.nil?
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
-      if not heating_system.airflow_cfm_per_ton.nil?
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, heating_system.airflow_cfm_per_ton)
-      end
     end
   end
 
@@ -401,10 +395,6 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, heat_pump.fraction_cool_load_served)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
-    if not heat_pump.airflow_cfm_per_ton.nil?
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, heat_pump.airflow_cfm_per_ton)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, heat_pump.airflow_cfm_per_ton)
-    end
   end
 
   def self.apply_mini_split_air_conditioner(model, runner, cooling_system,
@@ -427,7 +417,6 @@ class HVAC
     heat_pump.heating_efficiency_hspf = 7.7 # Arbitrary; shouldn't affect energy use  TODO: Allow nil
     heat_pump.distribution_system_idref = cooling_system.distribution_system_idref
     heat_pump.fan_watts_per_cfm = cooling_system.fan_watts_per_cfm
-    heat_pump.airflow_cfm_per_ton = cooling_system.airflow_cfm_per_ton
 
     apply_mini_split_heat_pump(model, runner, heat_pump, 0,
                                remaining_cool_load_frac,
@@ -625,10 +614,6 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACSHR, cool_shrs_rated_gross_4.join(','))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameMiniSplitHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameMiniSplitHeatPump)
-    if not heat_pump.airflow_cfm_per_ton.nil?
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, heat_pump.airflow_cfm_per_ton)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, heat_pump.airflow_cfm_per_ton)
-    end
   end
 
   def self.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
@@ -892,10 +877,6 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameGroundSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameGroundSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACPumpPower, heat_pump.pump_watts_per_ton)
-    if not heat_pump.airflow_cfm_per_ton.nil?
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, heat_pump.airflow_cfm_per_ton)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, heat_pump.airflow_cfm_per_ton)
-    end
   end
 
   def self.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
@@ -1215,7 +1196,6 @@ class HVAC
 
     # Store info for HVAC Sizing measure
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, [airflow_cfm_per_ton].join(','))
-    unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, airflow_cfm_per_ton)
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameUnitHeater)
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACFanWatts, heating_system.fan_watts)

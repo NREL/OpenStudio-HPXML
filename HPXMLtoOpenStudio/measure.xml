@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>c200412c-6fe3-450e-a23c-dd6a21496325</version_id>
-  <version_modified>20201021T195758Z</version_modified>
+  <version_id>4cad511e-fa86-4425-9b7d-c1d37fd8886e</version_id>
+  <version_modified>20201021T201123Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -436,28 +436,10 @@
       <checksum>ACB68AE4</checksum>
     </file>
     <file>
-      <filename>hvac_sizing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9FE8476E</checksum>
-    </file>
-    <file>
       <filename>test_hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>FEA1DB05</checksum>
-    </file>
-    <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>04551982</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>15970DC1</checksum>
     </file>
     <file>
       <filename>xmlhelper.rb</filename>
@@ -478,12 +460,6 @@
       <checksum>A8AFAEBB</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>438C4D15</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.1.1</identifier>
@@ -501,10 +477,28 @@
       <checksum>4F0F41FC</checksum>
     </file>
     <file>
-      <filename>EPvalidator.xml.bak</filename>
-      <filetype>bak</filetype>
+      <filename>hvac_sizing.rb</filename>
+      <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>39C6471B</checksum>
+      <checksum>A6662A94</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>09CAE519</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E4CE9FD0</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>EFE05F4C</checksum>
     </file>
   </files>
 </measure>

@@ -2605,6 +2605,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml',
          'invalid_files/orphaned-hvac-distribution.xml'].include? hpxml_file
     hpxml.heating_systems.clear
+  elsif ['base-hvac-furnace-gas-only.xml'].include? hpxml_file
+    hpxml.heating_systems[0].fan_watts_per_cfm = 0.45
   elsif ['base-hvac-boiler-elec-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
@@ -2866,6 +2868,8 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-shared-boiler-only-baseboard.xml',
          'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml'].include? hpxml_file
     hpxml.cooling_systems.clear
+  elsif ['base-hvac-central-ac-only-1-speed.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].fan_watts_per_cfm = 0.45
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].distribution_system_idref = 'HVACDistribution2'
   elsif ['base-hvac-furnace-gas-central-ac-2-speed.xml',
@@ -2883,6 +2887,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].cooling_efficiency_seer = 19
     hpxml.cooling_systems[0].cooling_shr = 0.73
     hpxml.cooling_systems[0].compressor_type = nil
+    hpxml.cooling_systems[0].fan_watts_per_cfm = 0.2
   elsif ['base-hvac-mini-split-air-conditioner-only-ductless.xml'].include? hpxml_file
     hpxml.cooling_systems[0].distribution_system_idref = nil
   elsif ['base-hvac-furnace-gas-room-ac.xml',
@@ -3000,7 +3005,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          cooling_efficiency_seer: 13,
                          heating_capacity_17F: 42000 * 0.630, # Based on OAT slope of default curves
                          cooling_shr: 0.73,
-                         compressor_type: HPXML::HVACCompressorTypeSingleStage)
+                         compressor_type: HPXML::HVACCompressorTypeSingleStage,
+                         fan_watts_per_cfm: 0.45)
     if hpxml_file == 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'
       hpxml.heat_pumps[0].fraction_cool_load_served = 0
     end
@@ -3054,7 +3060,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
                          cooling_shr: 0.73,
-                         pump_watts_per_ton: 30.0)
+                         pump_watts_per_ton: 30.0,
+                         fan_watts_per_cfm: 0.45)
     if hpxml_file == 'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml'
       hpxml.heat_pumps[-1].is_shared_system = true
       hpxml.heat_pumps[-1].number_of_units_served = 6
@@ -3076,7 +3083,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 19,
                          heating_capacity_17F: 52000 * f,
-                         cooling_shr: 0.73)
+                         cooling_shr: 0.73,
+                         fan_watts_per_cfm: 0.2)
   elsif ['base-hvac-mini-split-heat-pump-ducted-heating-only.xml'].include? hpxml_file
     hpxml.heat_pumps[0].cooling_capacity = 0
     hpxml.heat_pumps[0].fraction_cool_load_served = 0
