@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>c39a7163-1657-49a0-ac27-03b24e133bb7</version_id>
-  <version_modified>20201019T163321Z</version_modified>
+  <version_id>90d4fe35-9cac-4eaf-ad7e-37b25deecd07</version_id>
+  <version_modified>20201021T162250Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -364,12 +364,6 @@
       <checksum>2949040F</checksum>
     </file>
     <file>
-      <filename>xmlhelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>12DB5DDD</checksum>
-    </file>
-    <file>
       <filename>BaseElements.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
@@ -386,12 +380,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>AF3AF52D</checksum>
-    </file>
-    <file>
-      <filename>HPXMLvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1A6E5E9F</checksum>
     </file>
     <file>
       <filename>test_defaults.rb</filename>
@@ -418,16 +406,22 @@
       <checksum>7039FF35</checksum>
     </file>
     <file>
-      <filename>EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BA0BB90B</checksum>
-    </file>
-    <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>DF4C6299</checksum>
+    </file>
+    <file>
+      <filename>HPXMLvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>ACB68AE4</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BF102EE5</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -464,6 +458,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>C58C7B84</checksum>
+    </file>
+    <file>
+      <filename>xmlhelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>942C3E5E</checksum>
     </file>
     <file>
       <filename>schedules.rb</filename>
