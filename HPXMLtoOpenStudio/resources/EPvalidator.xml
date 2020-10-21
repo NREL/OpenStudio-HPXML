@@ -684,7 +684,8 @@
 
   <sch:pattern name='[HVACControlType=Heating24Hr]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl[h:extension/h:HeatingSetpointSchedules]'>
-      <sch:assert role='ERROR' test='count(h:extension/h:HeatingSetpointSchedules/h:Weekday) + count(h:extension/h:HeatingSetpointSchedules/h:Weekend) = 2'>Expected 2 element(s) for xpath: Weekday | Weekend</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:HeatingSetpointSchedules/h:Weekday) = 1'>Expected 1 element(s) for xpath: Weekday</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:HeatingSetpointSchedules/h:Weekend) = 1'>Expected 1 element(s) for xpath: Weekend</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -697,7 +698,8 @@
 
   <sch:pattern name='[HVACControlType=Cooling24Hr]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl[h:extension/h:CoolingSetpointSchedules]'>
-      <sch:assert role='ERROR' test='count(h:extension/h:CoolingSetpointSchedules/h:Weekday) + count(h:extension/h:CoolingSetpointSchedules/h:Weekend) = 2'>Expected 2 element(s) for xpath: Weekday | Weekend</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:CoolingSetpointSchedules/h:Weekday) = 1'>Expected 1 element(s) for xpath: Weekday | Weekend</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:CoolingSetpointSchedules/h:Weekend) = 1'>Expected 1 element(s) for xpath: Weekday | Weekend</sch:assert>
     </sch:rule>
   </sch:pattern>
 
