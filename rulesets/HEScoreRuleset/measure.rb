@@ -12,6 +12,7 @@ require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/hvac'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/lighting'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/pv'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/unit_conversions'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/waterheater'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/xmlhelper'
 require_relative 'resources/HESruleset'
 
