@@ -3600,10 +3600,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # Validate input HPXML against schematron docs
     stron_paths = [File.join(schemas_dir, 'HPXMLvalidator.xml'),
                    File.join(schemas_dir, 'EPvalidator.xml')]
-    errors = Validator.run_validators(hpxml_doc, stron_paths)
+    errors, warnings = Validator.run_validators(hpxml_doc, stron_paths)
     errors.each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
+    end
+    warnings.each do |warning|
+      runner.registerWarning("#{warning}")
     end
 
     return is_valid
@@ -4962,6 +4965,10 @@ class HPXMLFile
       if args[:water_heater_recovery_efficiency] != Constants.Auto
         recovery_efficiency = args[:water_heater_recovery_efficiency]
       end
+    end
+
+    if [HPXML::WaterHeaterTypeTankless, HPXML::WaterHeaterTypeCombiTankless].include? water_heater_type
+      tank_volume = nil
     end
 
     if [HPXML::WaterHeaterTypeTankless].include? water_heater_type

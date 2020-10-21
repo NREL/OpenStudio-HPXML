@@ -1988,7 +1988,13 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/invalid-calendar-year.xml' => 'base.xml',
-    'invalid_files/invalid-daylight-saving.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-boolean.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-boolean2.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-float.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-float2.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-integer.xml' => 'base.xml',
+    'invalid_files/invalid-datatype-integer2.xml' => 'base.xml',
+    'invalid_files/invalid-daylight-saving.xml' => 'base-simcontrol-daylight-saving-custom.xml',
     'invalid_files/invalid-epw-filepath.xml' => 'base.xml',
     'invalid_files/invalid-facility-type.xml' => 'base-dhw-shared-laundry-room.xml',
     'invalid_files/invalid-input-parameters.xml' => 'base.xml',
@@ -1996,6 +2002,7 @@ def create_hpxmls
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/invalid-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'invalid_files/invalid-runperiod.xml' => 'base.xml',
+    'invalid_files/invalid-schema-version.xml' => 'base.xml',
     'invalid_files/invalid-timestep.xml' => 'base.xml',
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
@@ -2362,6 +2369,27 @@ def create_hpxmls
       if ['invalid_files/missing-elements.xml'].include? derivative
         XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors')
         XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea')
+      elsif ['invalid_files/invalid-datatype-boolean.xml'].include? derivative
+        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/RadiantBarrier').inner_text = 'FOOBAR'
+      elsif ['invalid_files/invalid-datatype-boolean2.xml'].include? derivative
+        roof = XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof')
+        XMLHelper.delete_element(roof, 'RadiantBarrier')
+        XMLHelper.add_element(roof, 'RadiantBarrier')
+      elsif ['invalid_files/invalid-datatype-float.xml'].include? derivative
+        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea').inner_text = 'FOOBAR'
+      elsif ['invalid_files/invalid-datatype-float2.xml'].include? derivative
+        constr = XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction')
+        XMLHelper.delete_element(constr, 'ConditionedFloorArea')
+        XMLHelper.add_element(constr, 'ConditionedFloorArea')
+      elsif ['invalid_files/invalid-datatype-integer.xml'].include? derivative
+        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors').inner_text = 'FOOBAR'
+      elsif ['invalid_files/invalid-datatype-integer2.xml'].include? derivative
+        constr = XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction')
+        XMLHelper.delete_element(constr, 'NumberofConditionedFloors')
+        XMLHelper.add_element(constr, 'NumberofConditionedFloors')
+      elsif ['invalid_files/invalid-schema-version.xml'].include? derivative
+        root = XMLHelper.get_element(hpxml_doc, '/HPXML')
+        XMLHelper.add_attribute(root, 'schemaVersion', '2.3')
       end
 
       if derivative.include? 'ASHRAE_Standard_140'
@@ -3330,8 +3358,6 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls << hpxml.walls[-1].dup
     hpxml.walls[-1].id = 'TinyWall'
     hpxml.walls[-1].area = 0.05
-  elsif ['invalid_files/duplicate-id.xml'].include? hpxml_file
-    hpxml.walls[-1].id = hpxml.walls[0].id
   elsif ['invalid_files/enclosure-living-missing-exterior-wall.xml'].include? hpxml_file
     hpxml.walls[0].delete
   elsif ['invalid_files/enclosure-garage-missing-exterior-wall.xml'].include? hpxml_file
@@ -4330,6 +4356,8 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       shgc: 0.45,
                       fraction_operable: 0.67,
                       wall_idref: 'WallOtherMultifamilyBufferSpace')
+  elsif ['invalid_files/duplicate-id.xml'].include? hpxml_file
+    hpxml.windows[-1].id = hpxml.windows[0].id
   end
 end
 
@@ -6999,27 +7027,27 @@ def create_schematron_hpxml_validator(hpxml_docs)
     if not hpxml_data_type[:enums].empty?
       assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be \"#{hpxml_data_type[:enums].join('" or "')}\"")
       XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-      XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or contains(\"#{hpxml_data_type[:enums].map { |e| "_#{e}_" }.join(' ')}\", concat(\"_\", #{element_name}, \"_\"))")
+      XMLHelper.add_attribute(assertion, 'test', "#{element_name}[#{hpxml_data_type[:enums].map { |e| "text()=\"#{e}\"" }.join(' or ')}] or not(#{element_name})")
     else
       if hpxml_data_type[:min_inclusive]
         assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be greater than or equal to #{hpxml_data_type[:min_inclusive]}")
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-        XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or number(#{element_name}) &gt;= #{hpxml_data_type[:min_inclusive]}")
+        XMLHelper.add_attribute(assertion, 'test', "number(#{element_name}) &gt;= #{hpxml_data_type[:min_inclusive]} or not(#{element_name})")
       end
       if hpxml_data_type[:max_inclusive]
         assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be less than or equal to #{hpxml_data_type[:max_inclusive]}")
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-        XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or number(#{element_name}) &lt;= #{hpxml_data_type[:max_inclusive]}")
+        XMLHelper.add_attribute(assertion, 'test', "number(#{element_name}) &lt;= #{hpxml_data_type[:max_inclusive]} or not(#{element_name})")
       end
       if hpxml_data_type[:min_exclusive]
         assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be greater than #{hpxml_data_type[:min_exclusive]}")
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-        XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or number(#{element_name}) &gt; #{hpxml_data_type[:min_exclusive]}")
+        XMLHelper.add_attribute(assertion, 'test', "number(#{element_name}) &gt; #{hpxml_data_type[:min_exclusive]} or not(#{element_name})")
       end
       if hpxml_data_type[:max_exclusive]
         assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be less than #{hpxml_data_type[:max_exclusive]}")
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-        XMLHelper.add_attribute(assertion, 'test', "not(#{element_name}) or number(#{element_name}) &lt; #{hpxml_data_type[:max_exclusive]}")
+        XMLHelper.add_attribute(assertion, 'test', "number(#{element_name}) &lt; #{hpxml_data_type[:max_exclusive]} or not(#{element_name})")
       end
     end
   end

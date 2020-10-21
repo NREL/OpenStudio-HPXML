@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>546ad92b-ec6f-4176-a186-99fe8defb234</version_id>
-  <version_modified>20201012T154201Z</version_modified>
+  <version_id>980fcf26-aaea-4bd3-8640-b126abc7978c</version_id>
+  <version_modified>20201021T162603Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -6784,18 +6784,6 @@
       <checksum>37C8C499</checksum>
     </file>
     <file>
-      <filename>test_measure.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>15CEA27B</checksum>
-    </file>
-    <file>
-      <filename>test_rakefile.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>DF66BB53</checksum>
-    </file>
-    <file>
       <filename>base-hvac-dual-fuel-mini-split-heat-pump-ducted.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -7854,7 +7842,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>09AED8FD</checksum>
+      <checksum>569050BF</checksum>
     </file>
     <file>
       <filename>extra-hvac-shared-boiler-chiller-baseboard.osw</filename>
