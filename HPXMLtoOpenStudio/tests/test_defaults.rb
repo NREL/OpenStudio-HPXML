@@ -301,19 +301,17 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].cooling_shr = 0.88
     hpxml.cooling_systems[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
     hpxml.cooling_systems[0].fan_watts_per_cfm = 0.66
-    hpxml.cooling_systems[0].airflow_cfm_per_ton = 333
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_central_air_conditioner_values(hpxml_default, 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 333)
+    _test_default_central_air_conditioner_values(hpxml_default, 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66)
 
     # Test defaults
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].compressor_type = nil
     hpxml.cooling_systems[0].fan_watts_per_cfm = nil
-    hpxml.cooling_systems[0].airflow_cfm_per_ton = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_central_air_conditioner_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage, 0.375, nil)
+    _test_default_central_air_conditioner_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage, 0.375)
   end
 
   def test_room_air_conditioners
@@ -336,35 +334,31 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = _create_hpxml('base-hvac-mini-split-air-conditioner-only-ducted.xml')
     hpxml.cooling_systems[0].cooling_shr = 0.78
     hpxml.cooling_systems[0].fan_watts_per_cfm = 0.66
-    hpxml.cooling_systems[0].airflow_cfm_per_ton = 333
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_air_conditioner_values(hpxml_default, 0.78, 0.66, 333)
+    _test_default_mini_split_air_conditioner_values(hpxml_default, 0.78, 0.66)
 
     # Test defaults
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].fan_watts_per_cfm = nil
-    hpxml.cooling_systems[0].airflow_cfm_per_ton = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_air_conditioner_values(hpxml_default, 0.73, 0.18, nil)
+    _test_default_mini_split_air_conditioner_values(hpxml_default, 0.73, 0.18)
   end
 
   def test_furnaces
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
     hpxml.heating_systems[0].fan_watts_per_cfm = 0.66
-    hpxml.heating_systems[0].airflow_cfm_per_ton = 333
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_furnace_values(hpxml_default, 0.66, 333)
+    _test_default_furnace_values(hpxml_default, 0.66)
 
     # Test defaults
     hpxml.heating_systems[0].fan_watts_per_cfm = nil
-    hpxml.heating_systems[0].airflow_cfm_per_ton = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_furnace_values(hpxml_default, 0.375, nil)
+    _test_default_furnace_values(hpxml_default, 0.375)
   end
 
   def test_wall_furnaces
@@ -492,19 +486,17 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].cooling_shr = 0.88
     hpxml.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
     hpxml.heat_pumps[0].fan_watts_per_cfm = 0.66
-    hpxml.heat_pumps[0].airflow_cfm_per_ton = 333
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_air_to_air_heat_pump_values(hpxml_default, 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 333)
+    _test_default_air_to_air_heat_pump_values(hpxml_default, 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66)
 
     # Test defaults
     hpxml.heat_pumps[0].cooling_shr = nil
     hpxml.heat_pumps[0].compressor_type = nil
     hpxml.heat_pumps[0].fan_watts_per_cfm = nil
-    hpxml.heat_pumps[0].airflow_cfm_per_ton = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_air_to_air_heat_pump_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, nil)
+    _test_default_air_to_air_heat_pump_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5)
   end
 
   def test_mini_split_heat_pumps
@@ -512,18 +504,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = _create_hpxml('base-hvac-mini-split-heat-pump-ducted.xml')
     hpxml.heat_pumps[0].cooling_shr = 0.78
     hpxml.heat_pumps[0].fan_watts_per_cfm = 0.66
-    hpxml.heat_pumps[0].airflow_cfm_per_ton = 333
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_heat_pump_values(hpxml_default, 0.78, 0.66, 333)
+    _test_default_mini_split_heat_pump_values(hpxml_default, 0.78, 0.66)
 
     # Test defaults
     hpxml.heat_pumps[0].cooling_shr = nil
     hpxml.heat_pumps[0].fan_watts_per_cfm = nil
-    hpxml.heat_pumps[0].airflow_cfm_per_ton = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mini_split_heat_pump_values(hpxml_default, 0.73, 0.18, nil)
+    _test_default_mini_split_heat_pump_values(hpxml_default, 0.73, 0.18)
   end
 
   def test_ground_to_air_heat_pumps
@@ -531,18 +521,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
     hpxml.heat_pumps[0].pump_watts_per_ton = 9.9
     hpxml.heat_pumps[0].fan_watts_per_cfm = 0.99
-    hpxml.heat_pumps[0].airflow_cfm_per_ton = 333
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_ground_to_air_heat_pump_values(hpxml_default, 9.9, 0.99, 333)
+    _test_default_ground_to_air_heat_pump_values(hpxml_default, 9.9, 0.99)
 
     # Test defaults
     hpxml.heat_pumps[0].pump_watts_per_ton = nil
     hpxml.heat_pumps[0].fan_watts_per_cfm = nil
-    hpxml.heat_pumps[0].airflow_cfm_per_ton = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_ground_to_air_heat_pump_values(hpxml_default, 30.0, 0.375, nil)
+    _test_default_ground_to_air_heat_pump_values(hpxml_default, 30.0, 0.375)
   end
 
   def test_hvac_distribution
@@ -1630,16 +1618,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(num_occupants, hpxml.building_occupancy.number_of_residents)
   end
 
-  def _test_default_central_air_conditioner_values(hpxml, shr, compressor_type, fan_watts_per_cfm, airflow_cfm_per_ton = nil)
+  def _test_default_central_air_conditioner_values(hpxml, shr, compressor_type, fan_watts_per_cfm)
     cooling_system = hpxml.cooling_systems[0]
     assert_equal(shr, cooling_system.cooling_shr)
     assert_equal(compressor_type, cooling_system.compressor_type)
     assert_equal(fan_watts_per_cfm, cooling_system.fan_watts_per_cfm)
-    if airflow_cfm_per_ton.nil?
-      assert_nil(cooling_system.airflow_cfm_per_ton)
-    else
-      assert_equal(airflow_cfm_per_ton, cooling_system.airflow_cfm_per_ton)
-    end
   end
 
   def _test_default_room_air_conditioner_values(hpxml, shr)
@@ -1647,25 +1630,15 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(shr, cooling_system.cooling_shr)
   end
 
-  def _test_default_mini_split_air_conditioner_values(hpxml, shr, fan_watts_per_cfm, airflow_cfm_per_ton = nil)
+  def _test_default_mini_split_air_conditioner_values(hpxml, shr, fan_watts_per_cfm)
     cooling_system = hpxml.cooling_systems[0]
     assert_equal(shr, cooling_system.cooling_shr)
     assert_equal(fan_watts_per_cfm, cooling_system.fan_watts_per_cfm)
-    if airflow_cfm_per_ton.nil?
-      assert_nil(cooling_system.airflow_cfm_per_ton)
-    else
-      assert_equal(airflow_cfm_per_ton, cooling_system.airflow_cfm_per_ton)
-    end
   end
 
-  def _test_default_furnace_values(hpxml, fan_watts_per_cfm, airflow_cfm_per_ton = nil)
+  def _test_default_furnace_values(hpxml, fan_watts_per_cfm)
     heating_system = hpxml.heating_systems[0]
     assert_equal(fan_watts_per_cfm, heating_system.fan_watts_per_cfm)
-    if airflow_cfm_per_ton.nil?
-      assert_nil(heating_system.airflow_cfm_per_ton)
-    else
-      assert_equal(airflow_cfm_per_ton, heating_system.airflow_cfm_per_ton)
-    end
   end
 
   def _test_default_wall_furnace_values(hpxml, fan_watts)
@@ -1703,38 +1676,23 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(eae, heating_system.electric_auxiliary_energy)
   end
 
-  def _test_default_air_to_air_heat_pump_values(hpxml, shr, compressor_type, fan_watts_per_cfm, airflow_cfm_per_ton = nil)
+  def _test_default_air_to_air_heat_pump_values(hpxml, shr, compressor_type, fan_watts_per_cfm)
     heat_pump = hpxml.heat_pumps[0]
     assert_equal(shr, heat_pump.cooling_shr)
     assert_equal(compressor_type, heat_pump.compressor_type)
     assert_equal(fan_watts_per_cfm, heat_pump.fan_watts_per_cfm)
-    if airflow_cfm_per_ton.nil?
-      assert_nil(heat_pump.airflow_cfm_per_ton)
-    else
-      assert_equal(airflow_cfm_per_ton, heat_pump.airflow_cfm_per_ton)
-    end
   end
 
-  def _test_default_mini_split_heat_pump_values(hpxml, shr, fan_watts_per_cfm, airflow_cfm_per_ton = nil)
+  def _test_default_mini_split_heat_pump_values(hpxml, shr, fan_watts_per_cfm)
     heat_pump = hpxml.heat_pumps[0]
     assert_equal(shr, heat_pump.cooling_shr)
     assert_equal(fan_watts_per_cfm, heat_pump.fan_watts_per_cfm)
-    if airflow_cfm_per_ton.nil?
-      assert_nil(heat_pump.airflow_cfm_per_ton)
-    else
-      assert_equal(airflow_cfm_per_ton, heat_pump.airflow_cfm_per_ton)
-    end
   end
 
-  def _test_default_ground_to_air_heat_pump_values(hpxml, pump_watts_per_ton, fan_watts_per_cfm, airflow_cfm_per_ton = nil)
+  def _test_default_ground_to_air_heat_pump_values(hpxml, pump_watts_per_ton, fan_watts_per_cfm)
     heat_pump = hpxml.heat_pumps[0]
     assert_equal(pump_watts_per_ton, heat_pump.pump_watts_per_ton)
     assert_equal(fan_watts_per_cfm, heat_pump.fan_watts_per_cfm)
-    if airflow_cfm_per_ton.nil?
-      assert_nil(heat_pump.airflow_cfm_per_ton)
-    else
-      assert_equal(airflow_cfm_per_ton, heat_pump.airflow_cfm_per_ton)
-    end
   end
 
   def _test_default_duct_values(hpxml, supply_locations, return_locations, supply_areas, return_areas, n_return_registers)
