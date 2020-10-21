@@ -341,10 +341,14 @@
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
             <extension>
-              <WeekdayHeatingSetpoints>64, 64, 64, 64, 64, 64, 64, 74, 74, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64</WeekdayHeatingSetpoints>
-              <WeekendHeatingSetpoints>64, 64, 64, 64, 64, 64, 64, 74, 74, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64</WeekendHeatingSetpoints>
-              <WeekdayCoolingSetpoints>82, 82, 82, 82, 82, 82, 82, 72, 72, 80, 80, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 82, 82</WeekdayCoolingSetpoints>
-              <WeekendCoolingSetpoints>82, 82, 82, 82, 82, 82, 82, 72, 72, 80, 80, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 82, 82</WeekendCoolingSetpoints>
+              <HeatingSetpointSchedules>
+                <Weekday>64, 64, 64, 64, 64, 64, 64, 74, 74, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64</Weekday>
+                <Weekend>64, 64, 64, 64, 64, 64, 64, 74, 74, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64</Weekend>
+              </HeatingSetpointSchedules>
+              <CoolingSetpointSchedules>
+                <Weekday>82, 82, 82, 82, 82, 82, 82, 72, 72, 80, 80, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 82, 82</Weekday>
+                <Weekend>82, 82, 82, 82, 82, 82, 82, 72, 72, 80, 80, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 82, 82</Weekend>
+              </CoolingSetpointSchedules>
             </extension>
           </HVACControl>
           <HVACDistribution>
