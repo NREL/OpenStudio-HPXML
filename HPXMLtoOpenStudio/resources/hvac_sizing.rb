@@ -3140,11 +3140,13 @@ class HVACSizing
         oa_controller = oa_system.getControllerOutdoorAir
         oa_controller.setMaximumOutdoorAirFlowRate(vfr)
 
-        # Fan pressure rise calculation (based on design cfm)
-        fan_watts_per_cfm = [2.79 * hvac_final_values.Cool_Airflow**-0.29, 0.6].min # fit of efficacy to air flow from the CEC listed equipment  W/cfm
-        fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
-        fan.setFanEfficiency(fan_eff)
-        fan.setPressureRise(HVAC.calc_fan_pressure_rise(fan_eff, fan_watts_per_cfm))
+        # Fan power
+        if fan.fanEfficiency == 1 # I.e., not user specified, so default here
+          fan_watts_per_cfm = [2.79 * hvac_final_values.Cool_Airflow**-0.29, 0.6].min # fit of efficacy to air flow from the CEC listed equipment  W/cfm
+          fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
+          fan.setFanEfficiency(fan_eff)
+          fan.setPressureRise(HVAC.calc_fan_pressure_rise(fan_eff, fan_watts_per_cfm))
+        end
 
         @cond_zone.airLoopHVACTerminals.each do |aterm|
           next if air_loop != aterm.airLoopHVAC.get

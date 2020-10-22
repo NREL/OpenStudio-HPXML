@@ -223,11 +223,10 @@ class HVAC
     hvac_map[cooling_system.id] << air_loop
 
     # Fan
-
+    # Use VariableVolume object
     fan = OpenStudio::Model::FanVariableVolume.new(model, model.alwaysOnDiscreteSchedule)
     fan.setName(obj_name + ' supply fan')
     fan.setEndUseSubcategory('supply fan')
-    fan.setFanEfficiency(1)
     fan.setMotorEfficiency(1)
     fan.setMotorInAirstreamFraction(0)
     fan.setFanPowerCoefficient1(0)
@@ -235,6 +234,14 @@ class HVAC
     fan.setFanPowerCoefficient3(0)
     fan.setFanPowerCoefficient4(0)
     fan.setFanPowerCoefficient5(0)
+    if not cooling_system.fan_watts_per_cfm.nil?
+      fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
+      fan.setFanEfficiency(fan_eff)
+      fan.setPressureRise(calc_fan_pressure_rise(fan_eff, cooling_system.fan_watts_per_cfm))
+    else
+      # Will be specified in hvac_sizing.rb based on flow rate
+      fan.setFanEfficiency(1)
+    end
     fan.addToNode(air_loop.supplyInletNode)
     hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, evap_cooler, nil)
 
