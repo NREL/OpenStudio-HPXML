@@ -443,7 +443,11 @@ class HVAC
     mshp_indices = [1, 3, 5, 9]
     hp_min_temp, supp_max_temp = get_heat_pump_temp_assumptions(heat_pump)
     pan_heater_power = 0.0 # W, disabled
-    fan_power_rated = 0.07 # W/cfm
+    if not heat_pump.distribution_system.nil?
+      fan_power_rated = 0.18 # W/cfm, ducted
+    else
+      fan_power_rated = heat_pump.fan_watts_per_cfm # ductless, installed and rated value should be equal
+    end
 
     # Calculate generic inputs
     min_cooling_capacity = 0.4 # frac
