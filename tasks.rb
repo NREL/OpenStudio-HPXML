@@ -281,6 +281,7 @@ def create_hpxmls
     'base-hvac-portable-heater-gas-only.xml' => 'base.xml',
     'base-hvac-programmable-thermostat.xml' => 'base.xml',
     'base-hvac-onoff-thermostat-deadband.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-realistic-control-2-speed.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
@@ -577,6 +578,8 @@ def set_hpxml_header(hpxml_file, hpxml)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.header.timestep = nil
   elsif ['base-hvac-onoff-thermostat-deadband.xml'].include? hpxml_file
+    hpxml.header.timestep = 1
+  elsif ['base-hvac-realistic-control-2-speed.xml'].include? hpxml_file
     hpxml.header.timestep = 1
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
     hpxml.header.transaction = 'modify'
@@ -3234,6 +3237,8 @@ def set_hpxml_hvac_control(hpxml_file, hpxml)
   elsif ['base-lighting-ceiling-fans.xml'].include? hpxml_file
     hpxml.hvac_controls[0].ceiling_fan_cooling_setpoint_temp_offset = 0.5
   elsif ['base-hvac-onoff-thermostat-deadband.xml'].include? hpxml_file
+    hpxml.hvac_controls[0].onoff_thermostat_deadband = 2.0
+  elsif ['base-hvac-realistic-control-2-speed.xml'].include? hpxml_file
     hpxml.hvac_controls[0].onoff_thermostat_deadband = 2.0
   end
 end
