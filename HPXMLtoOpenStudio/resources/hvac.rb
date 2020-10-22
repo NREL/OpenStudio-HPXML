@@ -409,7 +409,7 @@ class HVAC
                                             control_zone, hvac_map)
 
     # Shoehorn cooling_system object into a corresponding heat_pump object
-    heat_pump = HPXML::HeatPump.new(nil)
+    heat_pump = HPXML::HeatPump.new(cooling_system.hpxml_object)
     heat_pump.id = cooling_system.id
     heat_pump.heat_pump_type = HPXML::HVACTypeHeatPumpMiniSplit
     heat_pump.heat_pump_fuel = cooling_system.cooling_system_fuel
