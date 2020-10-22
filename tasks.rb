@@ -2915,6 +2915,9 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
         'base-hvac-evap-cooler-only.xml'].include? hpxml_file
       hpxml.cooling_systems[0].distribution_system_idref = nil
     end
+    if ['base-hvac-evap-cooler-only.xml'].include? hpxml_file
+      hpxml.cooling_systems[0].fan_watts_per_cfm = 0.3
+    end
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.cooling_systems[0].distribution_system_idref = 'HVACDistribution2'
     hpxml.cooling_systems[0].fraction_cool_load_served = 0.2
