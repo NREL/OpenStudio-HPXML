@@ -315,9 +315,7 @@ class HPXMLDefaults
     hpxml.heating_systems.each do |heating_system|
       if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
         if heating_system.fan_watts_per_cfm.nil?
-          if (not heating_system.heating_efficiency_afue.nil?) && (heating_system.heating_efficiency_afue > 0.9) # HEScore assumption
-            heating_system.fan_watts_per_cfm = ecm_watts_per_cfm
-          elsif (not heating_system.heating_efficiency_percent.nil?) && (heating_system.heating_efficiency_percent > 0.9) # HEScore assumption
+          if heating_system.heating_efficiency_afue > 0.9 # HEScore assumption
             heating_system.fan_watts_per_cfm = ecm_watts_per_cfm
           else
             heating_system.fan_watts_per_cfm = psc_watts_per_cfm
@@ -355,6 +353,8 @@ class HPXMLDefaults
         else
           cooling_system.fan_watts_per_cfm = mini_split_ductless_watts_per_cfm
         end
+      elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
+        # Depends on airflow rate, so defaulted in hvac_sizing.rb
       end
     end
     hpxml.heat_pumps.each do |heat_pump|
