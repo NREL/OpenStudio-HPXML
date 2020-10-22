@@ -491,6 +491,8 @@ Stove        40 W
 all others   0 W
 ===========  ==============================
 
+For a furnace connected to an air conditioner, the fan power may only be provided for one of the two systems.
+
 For boilers, the ``ElectricAuxiliaryEnergy`` element may be provided if available.
 For shared boilers (i.e., serving multiple dwelling units), the electric auxiliary energy can alternatively be calculated as follows per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
 
@@ -551,6 +553,8 @@ central air conditioner     Attached furnace W/cfm if available, else 0.5 W/cfm 
 evaporative cooler          MIN(2.79 * cfm^-0.29, 0.6) W/cfm
 mini-split                  0.07 W/cfm if ductless, else 0.18 W/cfm
 ==========================  ==============================
+
+For an air conditioner connect to a furnace, the fan power may only be provided for one of the two systems.
 
 Shared chillers (i.e., serving multiple dwelling units) are modeled with a SEER equivalent using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
 

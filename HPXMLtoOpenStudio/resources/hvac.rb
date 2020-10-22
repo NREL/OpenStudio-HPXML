@@ -74,8 +74,7 @@ class HVAC
 
     if not cooling_system.nil?
       fan_watts_per_cfm = cooling_system.fan_watts_per_cfm
-    end
-    if fan_watts_per_cfm.nil? && (not heating_system.nil?)
+    elsif not heating_system.nil?
       fan_watts_per_cfm = heating_system.fan_watts_per_cfm
     end
     fan = create_supply_fan(model, obj_name, num_speeds, fan_watts_per_cfm)
