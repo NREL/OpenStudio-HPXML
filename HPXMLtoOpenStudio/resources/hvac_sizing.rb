@@ -1373,11 +1373,17 @@ class HVACSizing
         hvac_final_values.Cool_Airflow = hvac.RatedCFMperTonCooling[hvac.SizingSpeed] * UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'ton')
 
       elsif hvac.has_type(Constants.ObjectNameGroundSourceHeatPump)
-
         # Single speed as current
         hvac.SizingSpeed = 0
-        totalCap_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, enteringTemp, hvac.COOL_CAP_FT_SPEC[hvac.SizingSpeed])
-        sensibleCap_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, enteringTemp, hvac.COOL_SH_FT_SPEC[hvac.SizingSpeed])
+        # Neglecting the water flow rate for now because it's not available yet. Air flow rate is pre-adjusted values.
+        # Reference conditions in thesis with largest capacity:
+        # See Appendix B Figure B.3 of  https://hvac.okstate.edu/sites/default/files/pubs/theses/MS/27-Tang_Thesis_05.pdf
+        ref_temp = 283 # K
+        ref_wb_temp = UnitConversions.convert(67, 'f', 'k')
+        ref_w_temp = UnitConversions.convert(30, 'f', 'k')
+        ref_vfr_air = UnitConversions.convert(1200, 'cfm', 'm^3/s')
+        totalCap_CurveValue = hvac.COOL_CAP_FT_SPEC[hvac.SizingSpeed][0] + UnitConversions.convert(@wetbulb_indoor_cooling, 'f', 'k') / ref_wb_temp * hvac.COOL_CAP_FT_SPEC[hvac.SizingSpeed][1] + UnitConversions.convert(enteringTemp, 'f', 'k') / ref_w_temp * hvac.COOL_CAP_FT_SPEC[hvac.SizingSpeed][2] + UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / ref_vfr_air * hvac.COOL_CAP_FT_SPEC[hvac.SizingSpeed][3]
+        sensibleCap_CurveValue =  hvac.COOL_SH_FT_SPEC[hvac.SizingSpeed][0] + UnitConversions.convert(@cool_setpoint, 'f', 'k') / ref_temp * hvac.COOL_SH_FT_SPEC[hvac.SizingSpeed][1] + UnitConversions.convert(@wetbulb_indoor_cooling, 'f', 'k') / ref_wb_temp * hvac.COOL_SH_FT_SPEC[hvac.SizingSpeed][2] + UnitConversions.convert(enteringTemp, 'f', 'k') / ref_w_temp * hvac.COOL_SH_FT_SPEC[hvac.SizingSpeed][3] + UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / ref_vfr_air * hvac.COOL_SH_FT_SPEC[hvac.SizingSpeed][4]
         bypassFactor_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, @cool_setpoint, hvac.COIL_BF_FT_SPEC[hvac.SizingSpeed])
 
         hvac_final_values.Cool_Capacity = hvac_final_values.Cool_Load_Tot / totalCap_CurveValue # Note: cool_Capacity_Design = hvac_final_values.Cool_Load_Tot
@@ -1403,6 +1409,7 @@ class HVACSizing
                                    (1.0 + (1.0 - hvac.CoilBF * bypassFactor_CurveValue) *
                                    (80.0 - @cool_setpoint) / (@cool_setpoint - hvac.LeavingAirTemp)))
         hvac_final_values.Cool_Airflow = calc_airflow_rate(cool_Load_SensCap_Design, (@cool_setpoint - hvac.LeavingAirTemp))
+        # FIXME: the airflow was adjusted to about 1.7 * airflow_preadjusted, please verify it.
       else
 
         fail 'Unexpected cooling system.'
@@ -1692,6 +1699,7 @@ class HVACSizing
       hvac_final_values.Heat_Airflow *= (1.0 + hvac.AirflowDefectRatioHeating.to_f)
       hvac_final_values.Heat_Airflow = [hvac_final_values.Heat_Airflow, min_air_flow].max
     end
+
     if hvac_final_values.Cool_Airflow > 0
       hvac_final_values.Cool_Airflow *= (1.0 + hvac.AirflowDefectRatioCooling.to_f)
       hvac_final_values.Cool_Airflow = [hvac_final_values.Cool_Airflow, min_air_flow].max
@@ -2137,14 +2145,15 @@ class HVACSizing
                             clg_coil.totalCoolingCapacityCoefficient3,
                             clg_coil.totalCoolingCapacityCoefficient4,
                             clg_coil.totalCoolingCapacityCoefficient5]
-        hvac.COOL_CAP_FT_SPEC = [HVAC.convert_curve_gshp(cOOL_CAP_FT_SPEC, true)]
+        hvac.COOL_CAP_FT_SPEC = [cOOL_CAP_FT_SPEC]
 
         cOOL_SH_FT_SPEC = [clg_coil.sensibleCoolingCapacityCoefficient1,
+                           clg_coil.sensibleCoolingCapacityCoefficient2,
                            clg_coil.sensibleCoolingCapacityCoefficient3,
                            clg_coil.sensibleCoolingCapacityCoefficient4,
                            clg_coil.sensibleCoolingCapacityCoefficient5,
                            clg_coil.sensibleCoolingCapacityCoefficient6]
-        hvac.COOL_SH_FT_SPEC = [HVAC.convert_curve_gshp(cOOL_SH_FT_SPEC, true)]
+        hvac.COOL_SH_FT_SPEC = [cOOL_SH_FT_SPEC]
 
         cOIL_BF_FT_SPEC = get_feature(equip, Constants.SizingInfoGSHPCoil_BF_FT_SPEC, 'string')
         hvac.COIL_BF_FT_SPEC = [cOIL_BF_FT_SPEC.split(',').map(&:to_f)]
@@ -3275,8 +3284,6 @@ class HVACSizing
           airflow_rated_defect_ratio_cool = [UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / clg_coil.ratedAirFlowRate.get - 1.0]
         elsif clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
           airflow_rated_defect_ratio_cool = clg_coil.stages.zip(hvac.FanspeedRatioCooling).map { |stage, speed_ratio| UnitConversions.convert(hvac_final_values.Cool_Airflow * speed_ratio, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0 }
-        else
-          # puts clg_coil.stages
         end
       end
 
@@ -3286,8 +3293,6 @@ class HVACSizing
           airflow_rated_defect_ratio_heat = [UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / htg_coil.ratedAirFlowRate.get - 1.0]
         elsif htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized
           airflow_rated_defect_ratio_heat = htg_coil.stages.zip(hvac.FanspeedRatioHeating).map { |stage, speed_ratio| UnitConversions.convert(hvac_final_values.Heat_Airflow * speed_ratio, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0 }
-        else
-          # puts htg_coil
         end
       end
 
