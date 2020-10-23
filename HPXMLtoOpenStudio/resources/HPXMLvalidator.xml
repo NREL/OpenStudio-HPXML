@@ -299,6 +299,7 @@
       <sch:assert role='ERROR' test='number(h:EnergyFactor) &gt; 0 or not(h:EnergyFactor)'>Expected EnergyFactor to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:UniformEnergyFactor) &lt;= 5 or not(h:UniformEnergyFactor)'>Expected UniformEnergyFactor to be less than or equal to 5</sch:assert>
       <sch:assert role='ERROR' test='number(h:UniformEnergyFactor) &gt; 0 or not(h:UniformEnergyFactor)'>Expected UniformEnergyFactor to be greater than 0</sch:assert>
+      <sch:assert role='ERROR' test='number(h:FirstHourRating) &gt; 0 or not(h:FirstHourRating)'>Expected FirstHourRating to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:RecoveryEfficiency) &lt;= 5 or not(h:RecoveryEfficiency)'>Expected RecoveryEfficiency to be less than or equal to 5</sch:assert>
       <sch:assert role='ERROR' test='number(h:RecoveryEfficiency) &gt; 0 or not(h:RecoveryEfficiency)'>Expected RecoveryEfficiency to be greater than 0</sch:assert>
     </sch:rule>

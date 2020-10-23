@@ -72,10 +72,12 @@ class HVAC
 
     # Fan
 
-    if not cooling_system.nil?
-      fan_watts_per_cfm = cooling_system.fan_watts_per_cfm
+    if (not cooling_system.nil?) && (not heating_system.nil?) && (cooling_system.fan_watts_per_cfm.to_f != heating_system.fan_watts_per_cfm.to_f)
+      fail "Fan powers for heating system '#{heating_system.id}' and cooling system '#{cooling_system.id}' must be the same."
     end
-    if fan_watts_per_cfm.nil? && (not heating_system.nil?)
+    if (not cooling_system.nil?) && (not cooling_system.fan_watts_per_cfm.nil?)
+      fan_watts_per_cfm = cooling_system.fan_watts_per_cfm
+    else
       fan_watts_per_cfm = heating_system.fan_watts_per_cfm
     end
     fan = create_supply_fan(model, obj_name, num_speeds, fan_watts_per_cfm)
@@ -185,7 +187,7 @@ class HVAC
     hvac_map[cooling_system.id] << clg_coil
 
     # Fan
-    fan = create_supply_fan(model, obj_name, 1, 0.0)
+    fan = create_supply_fan(model, obj_name, 1, 0.0) # Fan power included in EER (net COP) above
     hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil)
 
     # Heating Coil (none)
@@ -236,11 +238,10 @@ class HVAC
     hvac_map[cooling_system.id] << air_loop
 
     # Fan
-
+    # Use VariableVolume object
     fan = OpenStudio::Model::FanVariableVolume.new(model, model.alwaysOnDiscreteSchedule)
     fan.setName(obj_name + ' supply fan')
     fan.setEndUseSubcategory('supply fan')
-    fan.setFanEfficiency(1)
     fan.setMotorEfficiency(1)
     fan.setMotorInAirstreamFraction(0)
     fan.setFanPowerCoefficient1(0)
@@ -248,6 +249,7 @@ class HVAC
     fan.setFanPowerCoefficient3(0)
     fan.setFanPowerCoefficient4(0)
     fan.setFanPowerCoefficient5(0)
+    set_fan_power(fan, cooling_system.fan_watts_per_cfm.to_f)
     fan.addToNode(air_loop.supplyInletNode)
     hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, evap_cooler, nil)
 
@@ -425,7 +427,7 @@ class HVAC
                                             control_zone, hvac_map)
 
     # Shoehorn cooling_system object into a corresponding heat_pump object
-    heat_pump = HPXML::HeatPump.new(nil)
+    heat_pump = HPXML::HeatPump.new(cooling_system.hpxml_object)
     heat_pump.id = cooling_system.id
     heat_pump.heat_pump_type = HPXML::HVACTypeHeatPumpMiniSplit
     heat_pump.heat_pump_fuel = cooling_system.cooling_system_fuel
@@ -462,7 +464,11 @@ class HVAC
     mshp_indices = [1, 3, 5, 9]
     hp_min_temp, supp_max_temp = get_heat_pump_temp_assumptions(heat_pump)
     pan_heater_power = 0.0 # W, disabled
-    fan_power_rated = 0.07 # W/cfm
+    if not heat_pump.distribution_system.nil?
+      fan_power_rated = 0.18 # W/cfm, ducted
+    else
+      fan_power_rated = heat_pump.fan_watts_per_cfm # ductless, installed and rated value should be equal
+    end
 
     # Calculate generic inputs
     min_cooling_capacity = 0.4 # frac
@@ -1226,7 +1232,7 @@ class HVAC
 
     # Fan
 
-    fan = create_supply_fan(model, obj_name, 1, nil) # Fan power assigned in hvac_sizing.rb
+    fan = create_supply_fan(model, obj_name, 1, 0.0) # Fan power assigned in hvac_sizing.rb
     hvac_map[heating_system.id] += disaggregate_fan_or_pump(model, fan, htg_coil, nil, nil)
 
     # Unitary System
@@ -1906,16 +1912,7 @@ class HVAC
       fan_eff_curve = create_curve_cubic(model, [0, 1, 0, 0], obj_name + ' fan eff curve', 0, 1, 0.01, 1)
       fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule, fan_power_curve, fan_eff_curve)
     end
-    if not fan_watts_per_cfm.nil?
-      if fan_watts_per_cfm > 0
-        fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
-        fan.setFanEfficiency(fan_eff)
-        fan.setPressureRise(calc_fan_pressure_rise(fan_eff, fan_watts_per_cfm))
-      else
-        fan.setFanEfficiency(1)
-        fan.setPressureRise(0)
-      end
-    end
+    set_fan_power(fan, fan_watts_per_cfm)
     fan.setName(obj_name + ' supply fan')
     fan.setEndUseSubcategory('supply fan')
     fan.setMotorEfficiency(1.0)
@@ -3305,11 +3302,15 @@ class HVAC
     end
   end
 
-  def self.calc_fan_pressure_rise(fan_eff, fan_watts_per_cfm)
-    # Calculates needed fan pressure rise to achieve a given fan power with an assumed efficiency.
-    # Previously we calculated the fan efficiency from an assumed pressure rise, which could lead to
-    # errors (fan efficiencies > 1).
-    return fan_eff * fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s') # Pa
+  def self.set_fan_power(fan, fan_watts_per_cfm)
+    if fan_watts_per_cfm > 0
+      fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
+      fan.setFanEfficiency(fan_eff)
+      fan.setPressureRise(fan_eff * fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s')) # Pa
+    else
+      fan.setFanEfficiency(1)
+      fan.setPressureRise(0)
+    end
   end
 
   def self.calc_pump_rated_flow_rate(pump_eff, pump_w, pump_head_pa)
