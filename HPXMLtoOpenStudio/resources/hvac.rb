@@ -72,7 +72,7 @@ class HVAC
 
     # Fan
 
-    if not cooling_system.nil?
+    if (not cooling_system.nil?) && (not cooling_system.fan_watts_per_cfm.nil?)
       fan_watts_per_cfm = cooling_system.fan_watts_per_cfm
     elsif not heating_system.nil?
       fan_watts_per_cfm = heating_system.fan_watts_per_cfm
@@ -171,7 +171,7 @@ class HVAC
     hvac_map[cooling_system.id] << clg_coil
 
     # Fan
-    fan = create_supply_fan(model, obj_name, 1, 0.0)
+    fan = create_supply_fan(model, obj_name, 1, 0.0) # Fan power included in EER (net COP) above
     hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil)
 
     # Heating Coil (none)
