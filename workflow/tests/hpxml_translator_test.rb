@@ -27,11 +27,10 @@ class HPXMLTest < MiniTest::Test
     autosize_dir = File.absolute_path(File.join(this_dir, '..', 'sample_files', 'hvac_autosizing'))
     ashrae_140_dir = File.absolute_path(File.join(this_dir, 'ASHRAE_Standard_140'))
 
-    # test_dirs = [sample_files_dir,
-    #              autosize_dir,
-    #              ashrae_140_dir]
-    test_dirs = [ashrae_140_dir]
-
+    test_dirs = [sample_files_dir,
+                 autosize_dir,
+                 ashrae_140_dir]
+    
     xmls = []
     test_dirs.each do |test_dir|
       Dir["#{test_dir}/*.xml"].sort.each do |xml|
