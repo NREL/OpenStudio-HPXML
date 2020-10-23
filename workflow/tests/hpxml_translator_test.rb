@@ -518,6 +518,8 @@ class HPXMLTest < MiniTest::Test
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
         next if err_line.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
         next if err_line.include? 'SimHVAC: Maximum iterations (20) exceeded for all HVAC loops'
+        next if err_line.include? 'Rated air volume flow rate per watt of rated total water heating capacity is out of range'
+        next if err_line.include? 'For object = Coil:WaterHeating:AirToWaterHeatPump:Wrapped'
       end
       # HP defrost curves
       if hpxml.heat_pumps.select { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? hp.heat_pump_type }.size > 0
