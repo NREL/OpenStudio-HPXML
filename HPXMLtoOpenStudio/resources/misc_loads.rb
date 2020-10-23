@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class MiscLoads
-  def self.apply_plug(model, plug_load, obj_name, living_space)
+  def self.apply_plug(model, plug_load, obj_name, living_space, apply_ashrae140_assumptions)
     kwh = 0
     if not plug_load.nil?
       kwh = plug_load.kWh_per_year * plug_load.usage_multiplier
@@ -27,7 +27,15 @@ class MiscLoads
     if plug_load.location == HPXML::LocationExterior
       # Set all heat gain as lost
       sens_frac = 0.0
-      lat_fract = 0.0
+      lat_frac = 0.0 # FIXME: is lat_fract intended?
+    end
+
+    if apply_ashrae140_assumptions
+      # ASHRAE 140, Table 7-9: Sensible load accounts for 0.822 of the total load and latent load accounts for 0.178. Sensible loads are 70% radiative and 30% convective.
+      rad_frac = 0.7 * 0.822
+      lat_frac = 0.178
+    else
+      rad_frac = 0.6 * sens_frac
     end
 
     space_design_level = sch.calcDesignLevelFromDailykWh(kwh / 365.0)
@@ -40,7 +48,7 @@ class MiscLoads
     mel.setSpace(living_space)
     mel_def.setName(obj_name)
     mel_def.setDesignLevel(space_design_level)
-    mel_def.setFractionRadiant(0.6 * sens_frac)
+    mel_def.setFractionRadiant(rad_frac)
     mel_def.setFractionLatent(lat_frac)
     mel_def.setFractionLost(1 - sens_frac - lat_frac)
     mel.setSchedule(sch.schedule)
@@ -72,7 +80,7 @@ class MiscLoads
     if fuel_load.location == HPXML::LocationExterior
       # Set all heat gain as lost
       sens_frac = 0.0
-      lat_fract = 0.0
+      lat_frac = 0.0 # FIXME: is lat_fract intended?
     end
 
     space_design_level = sch.calcDesignLevelFromDailyTherm(therm / 365.0)

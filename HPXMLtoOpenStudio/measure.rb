@@ -2280,7 +2280,7 @@ class OSModel
       end
       modeled_mels << plug_load.plug_load_type
 
-      MiscLoads.apply_plug(model, plug_load, obj_name, spaces[HPXML::LocationLivingSpace])
+      MiscLoads.apply_plug(model, plug_load, obj_name, spaces[HPXML::LocationLivingSpace], @apply_ashrae140_assumptions)
     end
   end
 
