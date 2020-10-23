@@ -3503,7 +3503,7 @@ class HPXML < Object
   class WaterHeatingSystem < BaseElement
     ATTRS = [:id, :year_installed, :fuel_type, :water_heater_type, :location, :performance_adjustment,
              :tank_volume, :fraction_dhw_load_served, :heating_capacity, :energy_factor,
-             :uniform_energy_factor, :recovery_efficiency, :uses_desuperheater, :jacket_r_value,
+             :uniform_energy_factor, :first_hour_rating, :recovery_efficiency, :uses_desuperheater, :jacket_r_value,
              :related_hvac_idref, :energy_star, :standby_loss, :temperature, :is_shared_system,
              :number_of_units_served]
     attr_accessor(*ATTRS)
@@ -3552,6 +3552,7 @@ class HPXML < Object
       XMLHelper.add_element(water_heating_system, 'HeatingCapacity', to_float(@heating_capacity)) unless @heating_capacity.nil?
       XMLHelper.add_element(water_heating_system, 'EnergyFactor', to_float(@energy_factor)) unless @energy_factor.nil?
       XMLHelper.add_element(water_heating_system, 'UniformEnergyFactor', to_float(@uniform_energy_factor)) unless @uniform_energy_factor.nil?
+      XMLHelper.add_element(water_heating_system, 'FirstHourRating', to_float(@first_hour_rating)) unless @first_hour_rating.nil?
       XMLHelper.add_element(water_heating_system, 'RecoveryEfficiency', to_float(@recovery_efficiency)) unless @recovery_efficiency.nil?
       if not @jacket_r_value.nil?
         water_heater_insulation = XMLHelper.add_element(water_heating_system, 'WaterHeaterInsulation')
@@ -3583,6 +3584,7 @@ class HPXML < Object
       @heating_capacity = to_float_or_nil(XMLHelper.get_value(water_heating_system, 'HeatingCapacity'))
       @energy_factor = to_float_or_nil(XMLHelper.get_value(water_heating_system, 'EnergyFactor'))
       @uniform_energy_factor = to_float_or_nil(XMLHelper.get_value(water_heating_system, 'UniformEnergyFactor'))
+      @first_hour_rating = to_float_or_nil(XMLHelper.get_value(water_heating_system, 'FirstHourRating'))
       @recovery_efficiency = to_float_or_nil(XMLHelper.get_value(water_heating_system, 'RecoveryEfficiency'))
       @uses_desuperheater = to_boolean_or_nil(XMLHelper.get_value(water_heating_system, 'UsesDesuperheater'))
       @jacket_r_value = to_float_or_nil(XMLHelper.get_value(water_heating_system, 'WaterHeaterInsulation/Jacket/JacketRValue'))
