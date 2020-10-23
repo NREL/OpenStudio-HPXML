@@ -339,7 +339,7 @@ class HPXMLDefaults
       next unless cooling_system.fan_watts_per_cfm.nil?
 
       if (not cooling_system.attached_heating_system.nil?) && (not cooling_system.attached_heating_system.fan_watts_per_cfm.nil?)
-        # Will use attached heating system fan W/cfm
+        cooling_system.fan_watts_per_cfm = cooling_system.attached_heating_system.fan_watts_per_cfm
       elsif [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
         if cooling_system.cooling_efficiency_seer > 13.5 # HEScore assumption
           cooling_system.fan_watts_per_cfm = ecm_watts_per_cfm
