@@ -183,6 +183,9 @@ class Waterheater
         fail 'Indirect water heater standby loss is negative, double check TankVolume to be <829 gal or StandbyLoss to be >0.0 F/hr.'
       end
 
+      if water_heating_system.standby_loss > 10.0
+        runner.registerWarning('Indirect water heater standby loss is over 10.0 F/hr, double check water heater inputs.')
+      end
       act_vol = calc_storage_tank_actual_vol(water_heating_system.tank_volume, nil)
       a_side = calc_tank_areas(act_vol)[1]
       ua = calc_indirect_ua_with_standbyloss(act_vol, water_heating_system, a_side, solar_fraction)
@@ -760,8 +763,15 @@ class Waterheater
       cop = 1.174536058 * uef # Based on simulation of the UEF test procedure at varying COPs
     elsif not water_heating_system.uniform_energy_factor.nil?
       uef = water_heating_system.uniform_energy_factor
-      # FIXME: Update correlation and make a function of FHR?
-      cop = 1.174536058 * uef # Based on simulation of the UEF test procedure at varying COPs
+      if water_heating_system.first_hour_rating < 18.0
+        runner.registerError('There are no heat pump water heaters that fall into the very small bin of the FHR test. Double check first hour rating input.')
+      elsif water_heating_system.first_hour_rating < 51.0 # Includes 18 gal up to (but not including) 51
+        cop = 1.0005 * uef - 0.0789
+      elsif water_heating_system.first_hour_rating < 75.0
+        cop = 1.0909 * uef - 0.0868
+      else
+        cop = 1.1022 * uef - 0.0877
+      end
     end
 
     coil = hpwh.dXCoil.to_CoilWaterHeatingAirToWaterHeatPumpWrapped.get
