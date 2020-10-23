@@ -424,10 +424,15 @@ class OSModel
       roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }
       avg_pitch = roofs.map { |r| r.pitch }.sum(0.0) / roofs.size
 
-      # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
-      length = floor_area**0.5
-      height = 0.5 * Math.sin(Math.atan(avg_pitch / 12.0)) * length
-      volume = [floor_area * height / 3.0, 0.01].max
+      if @apply_ashrae140_assumptions
+        # Hardcode the attic volume to match ASHRAE 140 Table 7-2 specification 
+        volume = 3463 
+      else
+        # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
+        length = floor_area**0.5
+        height = 0.5 * Math.sin(Math.atan(avg_pitch / 12.0)) * length
+        volume = [floor_area * height / 3.0, 0.01].max
+      end
 
       spaces[space_type].thermalZone.get.setVolume(UnitConversions.convert(volume, 'ft^3', 'm^3'))
     end
