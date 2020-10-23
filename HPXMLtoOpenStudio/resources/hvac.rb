@@ -72,9 +72,12 @@ class HVAC
 
     # Fan
 
+    if (not cooling_system.nil?) && (not heating_system.nil?) && (cooling_system.fan_watts_per_cfm.to_f != heating_system.fan_watts_per_cfm.to_f)
+      fail "Fan powers for heating system '#{heating_system.id}' and cooling system '#{cooling_system.id}' must be the same."
+    end
     if (not cooling_system.nil?) && (not cooling_system.fan_watts_per_cfm.nil?)
       fan_watts_per_cfm = cooling_system.fan_watts_per_cfm
-    elsif not heating_system.nil?
+    else
       fan_watts_per_cfm = heating_system.fan_watts_per_cfm
     end
     fan = create_supply_fan(model, obj_name, num_speeds, fan_watts_per_cfm)
