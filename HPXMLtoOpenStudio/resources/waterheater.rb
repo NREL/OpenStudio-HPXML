@@ -180,9 +180,8 @@ class Waterheater
 
     if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage
       if water_heating_system.standby_loss <= 0
-        fail 'Indirect water heater standby loss is negative, double check TankVolume to be <829 gal or StandbyLoss to be >0.0 F/hr.'
+        fail 'A negative indirect water heater standby loss was calculated, double check water heater inputs.'
       end
-
       act_vol = calc_storage_tank_actual_vol(water_heating_system.tank_volume, nil)
       a_side = calc_tank_areas(act_vol)[1]
       ua = calc_indirect_ua_with_standbyloss(act_vol, water_heating_system, a_side, solar_fraction)
@@ -760,8 +759,15 @@ class Waterheater
       cop = 1.174536058 * uef # Based on simulation of the UEF test procedure at varying COPs
     elsif not water_heating_system.uniform_energy_factor.nil?
       uef = water_heating_system.uniform_energy_factor
-      # FIXME: Update correlation and make a function of FHR?
-      cop = 1.174536058 * uef # Based on simulation of the UEF test procedure at varying COPs
+      if water_heating_system.first_hour_rating < 18.0
+        fail 'It is unlikely that a heat pump water heater falls into the very small bin of the First Hour Rating (FHR) test. Double check FHR input.'
+      elsif water_heating_system.first_hour_rating < 51.0 # Includes 18 gal up to (but not including) 51
+        cop = 1.0005 * uef - 0.0789
+      elsif water_heating_system.first_hour_rating < 75.0
+        cop = 1.0909 * uef - 0.0868
+      else
+        cop = 1.1022 * uef - 0.0877
+      end
     end
 
     coil = hpwh.dXCoil.to_CoilWaterHeatingAirToWaterHeatPumpWrapped.get
@@ -1179,7 +1185,7 @@ class Waterheater
     if water_heating_system.fuel_type == HPXML::FuelTypeElectricity
       return 0.98
     else
-      # TODO: For UEF, need a default method for fuel type water heaters
+      # FUTURE: Develop a separate algorithm specific to UEF.
       ef = water_heating_system.energy_factor
       if ef.nil?
         ef = calc_ef_from_uef(water_heating_system)
@@ -1628,6 +1634,7 @@ class Waterheater
     skinlossfrac = 1.0
     if (not is_dsh_storage) && (water_heating_system.fuel_type != HPXML::FuelTypeElectricity) && (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage)
       # Fuel storage water heater
+      # FUTURE: We currently always end up with oncycle_p (i.e., natural draft); revise this algorithm.
       if oncycle_p == 0.0
         skinlossfrac = 0.64 # Natural draft
       elsif water_heating_system.energy_factor < 0.8
@@ -1657,12 +1664,14 @@ class Waterheater
     end
     avg_elec = oncycle_p * runtime_frac + offcycle_p * (1 - runtime_frac)
 
+    # FUTURE: These are always zero right now; develop smart defaults.
     water_heater.setOnCycleParasiticFuelConsumptionRate(avg_elec)
     water_heater.setOffCycleParasiticFuelConsumptionRate(avg_elec)
   end
 
   def self.set_parasitic_power_for_storage_wh(oncycle_p: 0.0, offcycle_p: 0.0, water_heater:)
     # Set parasitic power consumption
+    # FUTURE: These are always zero right now; develop smart defaults.
     water_heater.setOnCycleParasiticFuelConsumptionRate(oncycle_p)
     water_heater.setOffCycleParasiticFuelConsumptionRate(offcycle_p)
   end
