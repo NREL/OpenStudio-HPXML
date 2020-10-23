@@ -233,14 +233,7 @@ class HVAC
     fan.setFanPowerCoefficient3(0)
     fan.setFanPowerCoefficient4(0)
     fan.setFanPowerCoefficient5(0)
-    if not cooling_system.fan_watts_per_cfm.nil?
-      fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
-      fan.setFanEfficiency(fan_eff)
-      fan.setPressureRise(calc_fan_pressure_rise(fan_eff, cooling_system.fan_watts_per_cfm))
-    else
-      # Will be specified in hvac_sizing.rb based on flow rate
-      fan.setFanEfficiency(1)
-    end
+    set_fan_power(fan, cooling_system.fan_watts_per_cfm)
     fan.addToNode(air_loop.supplyInletNode)
     hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, evap_cooler, nil)
 
@@ -1870,16 +1863,7 @@ class HVAC
       fan_eff_curve = create_curve_cubic(model, [0, 1, 0, 0], obj_name + ' fan eff curve', 0, 1, 0.01, 1)
       fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule, fan_power_curve, fan_eff_curve)
     end
-    if not fan_watts_per_cfm.nil?
-      if fan_watts_per_cfm > 0
-        fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
-        fan.setFanEfficiency(fan_eff)
-        fan.setPressureRise(calc_fan_pressure_rise(fan_eff, fan_watts_per_cfm))
-      else
-        fan.setFanEfficiency(1)
-        fan.setPressureRise(0)
-      end
-    end
+    set_fan_power(fan, fan_watts_per_cfm)
     fan.setName(obj_name + ' supply fan')
     fan.setEndUseSubcategory('supply fan')
     fan.setMotorEfficiency(1.0)
@@ -3269,11 +3253,15 @@ class HVAC
     end
   end
 
-  def self.calc_fan_pressure_rise(fan_eff, fan_watts_per_cfm)
-    # Calculates needed fan pressure rise to achieve a given fan power with an assumed efficiency.
-    # Previously we calculated the fan efficiency from an assumed pressure rise, which could lead to
-    # errors (fan efficiencies > 1).
-    return fan_eff * fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s') # Pa
+  def self.set_fan_power(fan, fan_watts_per_cfm)
+    if fan_watts_per_cfm.to_f > 0
+      fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
+      fan.setFanEfficiency(fan_eff)
+      fan.setPressureRise(fan_eff * fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s')) # Pa
+    else
+      fan.setFanEfficiency(1)
+      fan.setPressureRise(0)
+    end
   end
 
   def self.calc_pump_rated_flow_rate(pump_eff, pump_w, pump_head_pa)
