@@ -425,8 +425,8 @@ class OSModel
       avg_pitch = roofs.map { |r| r.pitch }.sum(0.0) / roofs.size
 
       if @apply_ashrae140_assumptions
-        # Hardcode the attic volume to match ASHRAE 140 Table 7-2 specification 
-        volume = 3463 
+        # Hardcode the attic volume to match ASHRAE 140 Table 7-2 specification
+        volume = 3463
       else
         # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
         length = floor_area**0.5
