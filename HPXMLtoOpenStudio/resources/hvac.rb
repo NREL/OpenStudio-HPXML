@@ -233,7 +233,7 @@ class HVAC
     fan.setFanPowerCoefficient3(0)
     fan.setFanPowerCoefficient4(0)
     fan.setFanPowerCoefficient5(0)
-    set_fan_power(fan, cooling_system.fan_watts_per_cfm)
+    set_fan_power(fan, cooling_system.fan_watts_per_cfm.to_f)
     fan.addToNode(air_loop.supplyInletNode)
     hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, evap_cooler, nil)
 
@@ -1184,7 +1184,7 @@ class HVAC
 
     # Fan
 
-    fan = create_supply_fan(model, obj_name, 1, nil) # Fan power assigned in hvac_sizing.rb
+    fan = create_supply_fan(model, obj_name, 1, 0.0) # Fan power assigned in hvac_sizing.rb
     hvac_map[heating_system.id] += disaggregate_fan_or_pump(model, fan, htg_coil, nil, nil)
 
     # Unitary System
@@ -3254,7 +3254,7 @@ class HVAC
   end
 
   def self.set_fan_power(fan, fan_watts_per_cfm)
-    if fan_watts_per_cfm.to_f > 0
+    if fan_watts_per_cfm > 0
       fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
       fan.setFanEfficiency(fan_eff)
       fan.setPressureRise(fan_eff * fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s')) # Pa
