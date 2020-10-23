@@ -167,7 +167,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     hpxml.heating_systems.each do |heating_system|
       next unless heating_system.fraction_heat_load_served > 0
       htg_fuels << fuel_map[heating_system.heating_system_fuel]
-      if [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
+      if [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler, HPXML::HVACTypeStove].include? heating_system.heating_system_type
         htg_fuels << fuel_map[HPXML::FuelTypeElectricity] # fan/pump
       end
     end
