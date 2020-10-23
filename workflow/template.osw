@@ -6,7 +6,7 @@
   "steps": [
     {
       "arguments": {
-        "hpxml_path": "../workflow/sample_files/base-dhw-tank-heat-pump.xml",
+        "hpxml_path": "../workflow/sample_files/base.xml",
         "output_dir": "../workflow/run",
         "debug": false
       },
