@@ -297,7 +297,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_central_air_conditioners
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base.xml')
+    hpxml = _create_hpxml('base-hvac-central-ac-only-1-speed.xml')
     hpxml.cooling_systems[0].cooling_shr = 0.88
     hpxml.cooling_systems[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
     hpxml.cooling_systems[0].fan_watts_per_cfm = 0.66
@@ -311,7 +311,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].fan_watts_per_cfm = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_central_air_conditioner_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage, 0.375)
+    _test_default_central_air_conditioner_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5)
   end
 
   def test_room_air_conditioners
