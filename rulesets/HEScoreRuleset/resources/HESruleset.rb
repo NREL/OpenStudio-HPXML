@@ -741,14 +741,17 @@ class HEScoreRuleset
   def self.set_systems_water_heater(orig_hpxml, new_hpxml)
     orig_hpxml.water_heating_systems.each do |orig_water_heater|
       energy_factor = orig_water_heater.energy_factor
-      uniform_energy_factor = orig_water_heater.uniform_energy_factor
       fuel_type = orig_water_heater.fuel_type
       water_heater_type = orig_water_heater.water_heater_type
       year_installed = orig_water_heater.year_installed
       energy_star = orig_water_heater.energy_star
 
-      if (not energy_factor.nil?) || (not uniform_energy_factor.nil?)
+      if not energy_factor.nil?
         # Do nothing, we already have the energy factor
+      elsif not orig_water_heater.uniform_energy_factor.nil?
+        # Convert to EF
+        # FUTURE: Remove this conversion and use UEF directly; requires FHR input/assumption for storage water heaters
+        energy_factor = Waterheater.calc_ef_from_uef(orig_water_heater)
       elsif energy_star
         energy_factor = lookup_water_heater_efficiency(year_installed,
                                                        fuel_type,
@@ -764,14 +767,6 @@ class HEScoreRuleset
       heating_capacity = nil
       if water_heater_type == HPXML::WaterHeaterTypeStorage
         heating_capacity = get_default_water_heater_capacity(fuel_type)
-      end
-      recovery_efficiency = nil
-      if (water_heater_type == HPXML::WaterHeaterTypeStorage) && (fuel_type != HPXML::FuelTypeElectricity)
-        ef = energy_factor
-        if ef.nil?
-          ef = 0.9066 * uniform_energy_factor + 0.0711 # RESNET equation for Consumer Gas-Fired Water Heater
-        end
-        recovery_efficiency = get_default_water_heater_re(fuel_type, ef)
       end
       tank_volume = nil
       if water_heater_type == HPXML::WaterHeaterTypeCombiStorage
@@ -798,8 +793,6 @@ class HEScoreRuleset
                                           fraction_dhw_load_served: 1.0,
                                           heating_capacity: heating_capacity,
                                           energy_factor: energy_factor,
-                                          uniform_energy_factor: uniform_energy_factor,
-                                          recovery_efficiency: recovery_efficiency,
                                           related_hvac_idref: orig_water_heater.related_hvac_idref)
     end
   end
@@ -993,21 +986,6 @@ def get_default_water_heater_volume(fuel)
   return val if not val.nil?
 
   fail "Could not get default water heater volume for fuel '#{fuel}'"
-end
-
-def get_default_water_heater_re(fuel, ef)
-  # Water Heater Recovery Efficiency by fuel and energy factor
-  val = nil
-  if fuel == HPXML::FuelTypeElectricity
-    val = 0.98
-  elsif ef >= 0.75
-    val = 0.778114 * ef + 0.276679
-  else
-    val = 0.252117 * ef + 0.607997
-  end
-  return val if not val.nil?
-
-  fail "Could not get default water heater RE for fuel '#{fuel}'"
 end
 
 def get_default_water_heater_capacity(fuel)
