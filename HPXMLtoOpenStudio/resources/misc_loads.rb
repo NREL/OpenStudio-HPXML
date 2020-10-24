@@ -27,7 +27,7 @@ class MiscLoads
     if plug_load.location == HPXML::LocationExterior
       # Set all heat gain as lost
       sens_frac = 0.0
-      lat_frac = 0.0 # FIXME: is lat_fract intended?
+      lat_frac = 0.0
     end
 
     if apply_ashrae140_assumptions
@@ -80,7 +80,7 @@ class MiscLoads
     if fuel_load.location == HPXML::LocationExterior
       # Set all heat gain as lost
       sens_frac = 0.0
-      lat_frac = 0.0 # FIXME: is lat_fract intended?
+      lat_frac = 0.0
     end
 
     space_design_level = sch.calcDesignLevelFromDailyTherm(therm / 365.0)
