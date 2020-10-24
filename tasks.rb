@@ -287,6 +287,7 @@ def create_hpxmls
     'base-hvac-install-qual-all-air-to-air-heat-pump-2-speed2.xml' => 'base-hvac-install-qual-all-air-to-air-heat-pump-2-speed.xml',
     'base-hvac-install-qual-all-air-to-air-heat-pump-var-speed.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-install-qual-all-air-to-air-heat-pump-var-speed2.xml' => 'base-hvac-install-qual-all-air-to-air-heat-pump-var-speed.xml',
+    'base-hvac-install-qual-all-evap-cooler-only.xml' => 'base-hvac-evap-cooler-only.xml',
     'base-hvac-install-qual-all-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-install-qual-all-furnace-gas-central-ac-1-speed2.xml' => 'base-hvac-install-qual-all-furnace-gas-central-ac-1-speed.xml',
     'base-hvac-install-qual-all-furnace-gas-central-ac-2-speed.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
@@ -3029,6 +3030,8 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-install-qual-all-furnace-gas-central-ac-var-speed2.xml'].include? hpxml_file
     hpxml.cooling_systems[0].airflow_cfm_per_ton = nil
     hpxml.cooling_systems[0].airflow_defect_ratio = -0.25
+  elsif ['base-hvac-install-qual-all-evap-cooler-only.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].fan_watts_per_cfm = 0.3
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].compressor_type = nil
