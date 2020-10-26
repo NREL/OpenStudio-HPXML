@@ -273,18 +273,16 @@ class HPXMLTest < MiniTest::Test
     system(command)
     assert_equal(2, Dir["#{top_dir}/*.zip"].size)
 
-    # Check successful running of simulation from release zip
-    unzip_file = OpenStudio::UnzipFile.new(Dir["#{top_dir}/*-minimal.zip"][0])
-    unzip_file.extractAllFiles(OpenStudio::toPath(top_dir))
-    command = 'openstudio OpenStudio-HPXML/workflow/run_simulation.rb -x OpenStudio-HPXML/workflow/sample_files/base.xml'
-    system(command)
-    assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_annual.csv')
-
-    # Cleanup
-    Dir["#{top_dir}/*.zip"].each do |zip|
+    # Check successful running of simulation from release zips
+    Dir["#{top_dir}/OpenStudio-HPXML*.zip"].each do |zip|
+      unzip_file = OpenStudio::UnzipFile.new(zip)
+      unzip_file.extractAllFiles(OpenStudio::toPath(top_dir))
+      command = 'openstudio OpenStudio-HPXML/workflow/run_simulation.rb -x OpenStudio-HPXML/workflow/sample_files/base.xml'
+      system(command)
+      assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_annual.csv')
       File.delete(zip)
+      rm_path('OpenStudio-HPXML')
     end
-    rm_path('OpenStudio-HPXML')
   end
 
   def _run_xml(xml, expect_error = false, expect_error_msgs = nil)
