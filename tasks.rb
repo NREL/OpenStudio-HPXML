@@ -79,7 +79,6 @@ def create_osws
     'base-dhw-tankless-propane.osw' => 'base.osw',
     'base-dhw-tank-oil.osw' => 'base.osw',
     'base-dhw-tank-wood.osw' => 'base.osw',
-    'base-dhw-uef.osw' => 'base.osw',
     'base-enclosure-2stories.osw' => 'base.osw',
     'base-enclosure-2stories-garage.osw' => 'base.osw',
     # 'base-enclosure-attached-multifamily.osw' => 'base.osw',
@@ -460,7 +459,6 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_heating_efficiency', 0.92)
     step.setArgument('heating_system_heating_capacity', '64000.0')
     step.setArgument('heating_system_fraction_heat_load_served', 1)
-    step.setArgument('heating_system_electric_auxiliary_energy', 0)
     step.setArgument('heating_system_has_flue_or_chimney', false)
     step.setArgument('heating_system_is_shared_system', false)
     step.setArgument('cooling_system_type', HPXML::HVACTypeCentralAirConditioner)
@@ -513,7 +511,6 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_heating_efficiency_2', 1.0)
     step.setArgument('heating_system_heating_capacity_2', Constants.Auto)
     step.setArgument('heating_system_fraction_heat_load_served_2', 0.25)
-    step.setArgument('heating_system_electric_auxiliary_energy_2', 0)
     step.setArgument('heating_system_has_flue_or_chimney_2', false)
     step.setArgument('mech_vent_fan_type', 'none')
     step.setArgument('mech_vent_flow_rate', 110)
@@ -1005,9 +1002,6 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_tank_volume', '50')
     step.setArgument('water_heater_heating_capacity', '40000')
     step.setArgument('water_heater_efficiency_ef', 0.59)
-  elsif ['base-dhw-uef.osw'].include? osw_file
-    step.setArgument('water_heater_efficiency_type', 'UniformEnergyFactor')
-    step.setArgument('water_heater_efficiency_uef', 0.93)
   elsif ['base-enclosure-2stories.osw'].include? osw_file
     step.setArgument('geometry_cfa', 4050.0)
     step.setArgument('geometry_num_floors_above_grade', 2)
@@ -1223,6 +1217,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_heating_capacity', '42000.0')
     step.setArgument('heat_pump_heating_capacity_17F', '26460.0')
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('heat_pump_fan_power_watts_per_cfm', 0.45)
   elsif ['base-hvac-air-to-air-heat-pump-2-speed.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', 'none')
@@ -1275,6 +1270,7 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-central-ac-only-1-speed.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
+    step.setArgument('cooling_system_fan_power_watts_per_cfm', 0.45)
   elsif ['base-hvac-central-ac-only-2-speed.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_cooling_efficiency_seer', 18.0)
@@ -1291,6 +1287,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_heating_capacity_17F', '26460.0')
     step.setArgument('heat_pump_fraction_cool_load_served', 0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('heat_pump_fan_power_watts_per_cfm', 0.45)
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.osw'].include? osw_file
     step.setArgument('cooling_system_type', 'none')
     step.setArgument('heat_pump_heating_efficiency_hspf', 7.7)
@@ -1318,6 +1315,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_backup_heating_efficiency', 0.95)
     step.setArgument('heat_pump_backup_heating_capacity', '36000.0')
     step.setArgument('heat_pump_backup_heating_switchover_temp', 25)
+    step.setArgument('heat_pump_fan_power_watts_per_cfm', 0.2)
   elsif ['base-hvac-ducts-leakage-percent.osw'].include? osw_file
     step.setArgument('ducts_supply_leakage_units', HPXML::UnitsPercent)
     step.setArgument('ducts_return_leakage_units', HPXML::UnitsPercent)
@@ -1337,6 +1335,7 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_type', HPXML::HVACTypeEvaporativeCooler)
     step.removeArgument('cooling_system_cooling_compressor_type')
     step.removeArgument('cooling_system_cooling_sensible_heat_fraction')
+    step.setArgument('cooling_system_fan_power_watts_per_cfm', 0.3)
   elsif ['base-hvac-evap-cooler-only-ducted.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', HPXML::HVACTypeEvaporativeCooler)
@@ -1347,17 +1346,17 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_type', HPXML::HVACTypeFireplace)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeWoodCord)
     step.setArgument('heating_system_heating_efficiency', 0.8)
-    step.setArgument('heating_system_electric_auxiliary_energy', 100.0)
+    step.setArgument('heating_system_fan_power_watts', 0.0)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-fixed-heater-gas-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeFixedHeater)
     step.setArgument('heating_system_heating_efficiency', 1.0)
-    step.setArgument('heating_system_electric_auxiliary_energy', 100.0)
+    step.setArgument('heating_system_fan_power_watts', 0.0)
   elsif ['base-hvac-floor-furnace-propane-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeFloorFurnace)
     step.setArgument('heating_system_fuel', HPXML::FuelTypePropane)
     step.setArgument('heating_system_heating_efficiency', 0.8)
-    step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
+    step.setArgument('heating_system_fan_power_watts', 0.0)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-furnace-elec-central-ac-1-speed.osw'].include? osw_file
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
@@ -1374,7 +1373,7 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_cooling_compressor_type', HPXML::HVACCompressorTypeVariableSpeed)
     step.setArgument('cooling_system_cooling_sensible_heat_fraction', 0.78)
   elsif ['base-hvac-furnace-gas-only.osw'].include? osw_file
-    step.setArgument('heating_system_electric_auxiliary_energy', 700.0)
+    step.setArgument('heating_system_fan_power_watts_per_cfm', 0.45)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-furnace-gas-room-ac.osw'].include? osw_file
     step.setArgument('cooling_system_type', HPXML::HVACTypeRoomAirConditioner)
@@ -1395,6 +1394,7 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_cooling_efficiency_seer', 19.0)
     step.removeArgument('cooling_system_cooling_compressor_type')
     step.setArgument('cooling_system_is_ducted', true)
+    step.setArgument('cooling_system_fan_power_watts_per_cfm', 0.2)
     step.setArgument('ducts_supply_leakage_value', 15.0)
     step.setArgument('ducts_return_leakage_value', 5.0)
     step.setArgument('ducts_supply_insulation_r', 0.0)
@@ -1409,8 +1409,8 @@ def get_values(osw_file, step)
     step.removeArgument('heat_pump_cooling_compressor_type')
     step.setArgument('heat_pump_heating_capacity', '42000.0')
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
-    step.setArgument('heat_pump_ground_to_air_pump_power', 30.0)
-    step.setArgument('heat_pump_ground_to_air_fan_power', 0.5)
+    step.setArgument('heat_pump_pump_power_watts_per_ton', 30.0)
+    step.setArgument('heat_pump_fan_power_watts_per_cfm', 0.45)
   elsif ['base-hvac-mini-split-heat-pump-ducted.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', 'none')
@@ -1422,6 +1422,7 @@ def get_values(osw_file, step)
     step.removeArgument('heat_pump_cooling_compressor_type')
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('heat_pump_mini_split_is_ducted', true)
+    step.setArgument('heat_pump_fan_power_watts_per_cfm', 0.2)
     step.setArgument('ducts_supply_leakage_value', 15.0)
     step.setArgument('ducts_return_leakage_value', 5.0)
     step.setArgument('ducts_supply_insulation_r', 0.0)
@@ -1432,10 +1433,12 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_heating_capacity_17F', '0')
     step.setArgument('heat_pump_fraction_heat_load_served', 0)
     step.setArgument('heat_pump_backup_fuel', 'none')
+    step.setArgument('heat_pump_fan_power_watts_per_cfm', 0.2)
   elsif ['base-hvac-mini-split-heat-pump-ducted-heating-only.osw'].include? osw_file
     step.setArgument('heat_pump_cooling_capacity', '0')
     step.setArgument('heat_pump_fraction_cool_load_served', 0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('heat_pump_fan_power_watts_per_cfm', 0.2)
   elsif ['base-hvac-mini-split-heat-pump-ductless.osw'].include? osw_file
     step.setArgument('heat_pump_backup_fuel', 'none')
     step.setArgument('heat_pump_mini_split_is_ducted', false)
@@ -1445,7 +1448,7 @@ def get_values(osw_file, step)
   elsif ['base-hvac-portable-heater-gas-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypePortableHeater)
     step.setArgument('heating_system_heating_efficiency', 1.0)
-    step.setArgument('heating_system_electric_auxiliary_energy', 100.0)
+    step.setArgument('heating_system_fan_power_watts', 0.0)
   elsif ['base-hvac-programmable-thermostat.osw'].include? osw_file
     step.setArgument('setpoint_heating_setback_temp', 66)
     step.setArgument('setpoint_heating_setback_hours_per_week', 49)
@@ -1471,13 +1474,13 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_type', HPXML::HVACTypeStove)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeOil)
     step.setArgument('heating_system_heating_efficiency', 0.8)
-    step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
+    step.setArgument('heating_system_fan_power_watts', 40.0)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-stove-wood-pellets-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeStove)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeWoodPellets)
     step.setArgument('heating_system_heating_efficiency', 0.8)
-    step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
+    step.setArgument('heating_system_fan_power_watts', 40.0)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-undersized.osw'].include? osw_file
     step.setArgument('heating_system_heating_capacity', '6400.0')
@@ -1488,7 +1491,7 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_type', HPXML::HVACTypeWallFurnace)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('heating_system_heating_efficiency', 1.0)
-    step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
+    step.setArgument('heating_system_fan_power_watts', 0.0)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-lighting-ceiling-fans.osw'].include? osw_file
     step.setArgument('ceiling_fan_present', true)
@@ -1987,6 +1990,7 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-cooling.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
+    'invalid_files/hvac-inconsistent-fan-powers.xml' => 'base.xml',
     'invalid_files/invalid-calendar-year.xml' => 'base.xml',
     'invalid_files/invalid-datatype-boolean.xml' => 'base.xml',
     'invalid_files/invalid-datatype-boolean2.xml' => 'base.xml',
@@ -2084,21 +2088,28 @@ def create_hpxmls
     'base-dhw-solar-indirect-flat-plate.xml' => 'base.xml',
     'base-dhw-solar-thermosyphon-flat-plate.xml' => 'base.xml',
     'base-dhw-tank-coal.xml' => 'base.xml',
+    'base-dhw-tank-elec-low-fhr-uef.xml' => 'base.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
+    'base-dhw-tank-gas-high-fhr-uef.xml' => 'base.xml',
+    'base-dhw-tank-gas-med-fhr-uef.xml' => 'base.xml',
     'base-dhw-tank-gas-outside.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-heat-pump.xml' => 'base.xml',
     'base-dhw-tank-heat-pump-outside.xml' => 'base-dhw-tank-heat-pump.xml',
+    'base-dhw-tank-heat-pump-uef-low-fhr.xml' => 'base.xml',
+    'base-dhw-tank-heat-pump-uef-medium-fhr.xml' => 'base.xml',
+    'base-dhw-tank-heat-pump-uef-high-fhr.xml' => 'base.xml',
     'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar-fraction.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-oil.xml' => 'base.xml',
     'base-dhw-tank-wood.xml' => 'base.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
+    'base-dhw-tankless-electric-uef.xml' => 'base.xml',
     'base-dhw-tankless-electric-outside.xml' => 'base-dhw-tankless-electric.xml',
     'base-dhw-tankless-gas.xml' => 'base.xml',
+    'base-dhw-tankless-gas-uef.xml' => 'base.xml',
     'base-dhw-tankless-gas-with-solar.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-gas-with-solar-fraction.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-propane.xml' => 'base.xml',
-    'base-dhw-uef.xml' => 'base.xml',
     'base-dhw-jacket-electric.xml' => 'base.xml',
     'base-dhw-jacket-gas.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-jacket-indirect.xml' => 'base-dhw-indirect.xml',
@@ -2169,7 +2180,6 @@ def create_hpxmls
     'base-hvac-fireplace-wood-only.xml' => 'base.xml',
     'base-hvac-fixed-heater-gas-only.xml' => 'base.xml',
     'base-hvac-floor-furnace-propane-only.xml' => 'base.xml',
-    'base-hvac-flowrate.xml' => 'base.xml',
     'base-hvac-furnace-coal-only.xml' => 'base.xml',
     'base-hvac-furnace-elec-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
@@ -4526,6 +4536,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml',
          'invalid_files/orphaned-hvac-distribution.xml'].include? hpxml_file
     hpxml.heating_systems.clear
+  elsif ['base-hvac-furnace-gas-only.xml'].include? hpxml_file
+    hpxml.heating_systems[0].fan_watts_per_cfm = 0.45
   elsif ['base-hvac-boiler-elec-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
@@ -4555,8 +4567,6 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
   elsif ['base-hvac-furnace-elec-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
     hpxml.heating_systems[0].heating_efficiency_afue = 1
-  elsif ['base-hvac-furnace-gas-only.xml'].include? hpxml_file
-    hpxml.heating_systems[0].electric_auxiliary_energy = 700
   elsif ['base-hvac-furnace-oil-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeOil
   elsif ['base-hvac-furnace-propane-only.xml'].include? hpxml_file
@@ -4580,8 +4590,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_system_fuel: HPXML::FuelTypeNaturalGas,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.92,
-                              fraction_heat_load_served: 0.1,
-                              electric_auxiliary_energy: 700)
+                              fraction_heat_load_served: 0.1)
     hpxml.heating_systems.add(id: 'HeatingSystem3',
                               distribution_system_idref: 'HVACDistribution3',
                               heating_system_type: HPXML::HVACTypeBoiler,
@@ -4609,14 +4618,14 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_capacity: 6400,
                               heating_efficiency_percent: 0.8,
                               fraction_heat_load_served: 0.1,
-                              electric_auxiliary_energy: 200)
+                              fan_watts: 40.0)
     hpxml.heating_systems.add(id: 'HeatingSystem7',
                               heating_system_type: HPXML::HVACTypeWallFurnace,
                               heating_system_fuel: HPXML::FuelTypePropane,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.8,
                               fraction_heat_load_served: 0.1,
-                              electric_auxiliary_energy: 200)
+                              fan_watts: 0.0)
   elsif ['base-hvac-multiple2.xml'].include? hpxml_file
     hpxml.heating_systems.clear
     hpxml.heating_systems.add(id: 'HeatingSystem',
@@ -4632,8 +4641,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.92,
-                              fraction_heat_load_served: 0.2,
-                              electric_auxiliary_energy: 700)
+                              fraction_heat_load_served: 0.2)
     hpxml.heating_systems.add(id: 'HeatingSystem3',
                               distribution_system_idref: 'HVACDistribution3',
                               heating_system_type: HPXML::HVACTypeBoiler,
@@ -4662,34 +4670,34 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWoodCord
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].heating_efficiency_percent = 0.8
-    hpxml.heating_systems[0].electric_auxiliary_energy = 100.0
+    hpxml.heating_systems[0].fan_watts = 0.0
   elsif ['base-hvac-floor-furnace-propane-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].distribution_system_idref = nil
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeFloorFurnace
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypePropane
     hpxml.heating_systems[0].heating_efficiency_afue = 0.8
-    hpxml.heating_systems[0].electric_auxiliary_energy = 200
+    hpxml.heating_systems[0].fan_watts = 0.0
   elsif ['base-hvac-portable-heater-gas-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].distribution_system_idref = nil
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypePortableHeater
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeNaturalGas
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].heating_efficiency_percent = 1.0
-    hpxml.heating_systems[0].electric_auxiliary_energy = 100.0
+    hpxml.heating_systems[0].fan_watts = 0.0
   elsif ['base-hvac-fixed-heater-gas-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].distribution_system_idref = nil
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeFixedHeater
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeNaturalGas
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].heating_efficiency_percent = 1.0
-    hpxml.heating_systems[0].electric_auxiliary_energy = 100.0
+    hpxml.heating_systems[0].fan_watts = 0.0
   elsif ['base-hvac-stove-oil-only.xml',
          'base-hvac-stove-wood-pellets-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].distribution_system_idref = nil
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeStove
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].heating_efficiency_percent = 0.8
-    hpxml.heating_systems[0].electric_auxiliary_energy = 200
+    hpxml.heating_systems[0].fan_watts = 40.0
     if hpxml_file == 'base-hvac-stove-oil-only.xml'
       hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeOil
     elsif hpxml_file == 'base-hvac-stove-wood-pellets-only.xml'
@@ -4700,7 +4708,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeWallFurnace
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
     hpxml.heating_systems[0].heating_efficiency_afue = 1.0
-    hpxml.heating_systems[0].electric_auxiliary_energy = 200
+    hpxml.heating_systems[0].fan_watts = 0.0
   elsif ['base-hvac-furnace-x3-dse.xml'].include? hpxml_file
     hpxml.heating_systems << hpxml.heating_systems[0].dup
     hpxml.heating_systems << hpxml.heating_systems[1].dup
@@ -4728,10 +4736,10 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].fraction_heat_load_served = 0.5
     hpxml.heating_systems << hpxml.heating_systems[0].dup
     hpxml.heating_systems[1].id += '2'
+  elsif ['invalid_files/hvac-inconsistent-fan-powers.xml'].include? hpxml_file
+    hpxml.heating_systems[0].fan_watts_per_cfm = 0.45
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_capacity /= 10.0
-  elsif ['base-hvac-flowrate.xml'].include? hpxml_file
-    hpxml.heating_systems[0].heating_cfm = hpxml.heating_systems[0].heating_capacity * 360.0 / 12000.0
   elsif ['base-hvac-shared-boiler-only-baseboard.xml',
          'base-hvac-shared-boiler-chiller-baseboard.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
@@ -4777,6 +4785,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-elec-resistance-only.xml',
          'base-hvac-fireplace-wood-only.xml',
          'base-hvac-floor-furnace-propane-only.xml',
+         'base-hvac-furnace-coal-only.xml',
          'base-hvac-furnace-elec-only.xml',
          'base-hvac-furnace-gas-only.xml',
          'base-hvac-furnace-oil-only.xml',
@@ -4792,6 +4801,8 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-shared-boiler-only-baseboard.xml',
          'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml'].include? hpxml_file
     hpxml.cooling_systems.clear
+  elsif ['base-hvac-central-ac-only-1-speed.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].fan_watts_per_cfm = 0.45
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].distribution_system_idref = 'HVACDistribution2'
   elsif ['base-hvac-furnace-gas-central-ac-2-speed.xml',
@@ -4809,6 +4820,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].cooling_efficiency_seer = 19
     hpxml.cooling_systems[0].cooling_shr = 0.73
     hpxml.cooling_systems[0].compressor_type = nil
+    hpxml.cooling_systems[0].fan_watts_per_cfm = 0.2
   elsif ['base-hvac-mini-split-air-conditioner-only-ductless.xml'].include? hpxml_file
     hpxml.cooling_systems[0].distribution_system_idref = nil
   elsif ['base-hvac-furnace-gas-room-ac.xml',
@@ -4835,6 +4847,9 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
         'hvac_autosizing/base-hvac-evap-cooler-furnace-gas-autosize.xml',
         'base-hvac-evap-cooler-only.xml'].include? hpxml_file
       hpxml.cooling_systems[0].distribution_system_idref = nil
+    end
+    if ['base-hvac-evap-cooler-only.xml'].include? hpxml_file
+      hpxml.cooling_systems[0].fan_watts_per_cfm = 0.3
     end
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.cooling_systems[0].distribution_system_idref = 'HVACDistribution2'
@@ -4872,6 +4887,8 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].fraction_cool_load_served = 0.5
     hpxml.cooling_systems << hpxml.cooling_systems[0].dup
     hpxml.cooling_systems[1].id += '2'
+  elsif ['invalid_files/hvac-inconsistent-fan-powers.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].fan_watts_per_cfm = 0.55
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_capacity /= 10.0
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
@@ -4926,7 +4943,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          cooling_efficiency_seer: 13,
                          heating_capacity_17F: 42000 * 0.630, # Based on OAT slope of default curves
                          cooling_shr: 0.73,
-                         compressor_type: HPXML::HVACCompressorTypeSingleStage)
+                         compressor_type: HPXML::HVACCompressorTypeSingleStage,
+                         fan_watts_per_cfm: 0.45)
     if hpxml_file == 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'
       hpxml.heat_pumps[0].fraction_cool_load_served = 0
     end
@@ -4981,7 +4999,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          cooling_efficiency_eer: 16.6,
                          cooling_shr: 0.73,
                          pump_watts_per_ton: 30.0,
-                         fan_watts_per_cfm: 0.5)
+                         fan_watts_per_cfm: 0.45)
     if hpxml_file == 'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml'
       hpxml.heat_pumps[-1].is_shared_system = true
       hpxml.heat_pumps[-1].number_of_units_served = 6
@@ -5003,7 +5021,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 19,
                          heating_capacity_17F: 52000 * f,
-                         cooling_shr: 0.73)
+                         cooling_shr: 0.73,
+                         fan_watts_per_cfm: 0.2)
   elsif ['base-hvac-mini-split-heat-pump-ducted-heating-only.xml'].include? hpxml_file
     hpxml.heat_pumps[0].cooling_capacity = 0
     hpxml.heat_pumps[0].fraction_cool_load_served = 0
@@ -5892,9 +5911,66 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     elsif hpxml_file == 'base-dhw-tankless-propane.xml'
       hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypePropane
     end
-  elsif ['base-dhw-uef.xml'].include? hpxml_file
+  elsif ['base-dhw-tank-elec-low-fhr-uef.xml'].include? hpxml_file
+    # No low usage gas tank WHs in AHRI, based on Richmond model number 6ESB30-2 in AHR directory
     hpxml.water_heating_systems[0].energy_factor = nil
     hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
+    hpxml.water_heating_systems[0].first_hour_rating = 46.0
+    hpxml.water_heating_systems[0].tank_volume = 30.0
+    hpxml.water_heating_systems[0].heating_capacity = 15354.0 # 4.5 kW
+    hpxml.water_heating_systems[0].recovery_efficiency = 0.98
+  elsif ['base-dhw-tank-gas-med-fhr-uef.xml'].include? hpxml_file
+    # Based on AO Smith model number G6-MH3030NV 400 in AHRI directory
+    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 0.59
+    hpxml.water_heating_systems[0].first_hour_rating = 56.0
+    hpxml.water_heating_systems[0].tank_volume = 30.0
+    hpxml.water_heating_systems[0].heating_capacity = 30000.0
+    hpxml.water_heating_systems[0].recovery_efficiency = 0.75
+  elsif ['base-dhw-tank-gas-high-fhr-uef.xml'].include? hpxml_file
+    # Based on AO Smith model number G6-PVT7576NV 310 in AHRI directory
+    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 0.69
+    hpxml.water_heating_systems[0].first_hour_rating = 116.0
+    hpxml.water_heating_systems[0].tank_volume = 75.0
+    hpxml.water_heating_systems[0].heating_capacity = 76000.0 # Btu/hr
+    hpxml.water_heating_systems[0].recovery_efficiency = 0.79
+  elsif ['base-dhw-tank-heat-pump-uef-low-fhr.xml'].include? hpxml_file
+    # Based on Rheem model number XE40T10HS45U0 from AHRI directory
+    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeHeatPump
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 3.75
+    hpxml.water_heating_systems[0].first_hour_rating = 50.0
+    hpxml.water_heating_systems[0].tank_volume = 40.0
+  elsif ['base-dhw-tank-heat-pump-uef-medium-fhr.xml'].include? hpxml_file
+    # Based on Rheem model number XE40T10HS45U0 from AHRI directory
+    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeHeatPump
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 3.75
+    hpxml.water_heating_systems[0].first_hour_rating = 60.0
+    hpxml.water_heating_systems[0].tank_volume = 50.0
+  elsif ['base-dhw-tank-heat-pump-uef-high-fhr.xml'].include? hpxml_file
+    # Based on Rheem model number XE40T10HS45U0 from AHRI directory
+    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeHeatPump
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 3.75
+    hpxml.water_heating_systems[0].first_hour_rating = 80.0
+    hpxml.water_heating_systems[0].tank_volume = 80.0
+  elsif ['base-dhw-tankless-gas-uef.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
+    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
+    hpxml.water_heating_systems[0].tank_volume = nil
+    hpxml.water_heating_systems[0].heating_capacity = nil
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
+  elsif ['base-dhw-tankless-electric-uef.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
+    hpxml.water_heating_systems[0].tank_volume = nil
+    hpxml.water_heating_systems[0].heating_capacity = nil
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 0.98
   elsif ['base-dhw-desuperheater.xml',
          'base-dhw-desuperheater-2-speed.xml',
          'base-dhw-desuperheater-var-speed.xml',
