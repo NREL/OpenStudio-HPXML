@@ -5424,7 +5424,9 @@ if ARGV[0].to_sym == :create_release_zips
   end
 
   # Cleanup
-  FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation'))
+  if not ENV['CI']
+    FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation'))
+  end
 
   puts 'Done.'
 end
