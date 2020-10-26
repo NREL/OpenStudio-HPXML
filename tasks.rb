@@ -5339,6 +5339,18 @@ if ARGV[0].to_sym == :create_release_zips
     exit!
   end
 
+  files = ['HPXMLtoOpenStudio/measure.*',
+           'HPXMLtoOpenStudio/resources/*.*',
+           'SimulationOutputReport/measure.*',
+           'SimulationOutputReport/resources/*.*',
+           'weather/*.*',
+           'workflow/*.*',
+           'workflow/sample_files/*.xml',
+           'workflow/tests/*.rb',
+           'workflow/tests/ASHRAE_Standard_140/*.xml',
+           'documentation/index.html',
+           'documentation/_static/**/*.*']
+
   if not ENV['CI']
     # Run ASHRAE 140 files
     puts 'Running ASHRAE 140 tests (this will take a minute)...'
@@ -5383,18 +5395,6 @@ if ARGV[0].to_sym == :create_release_zips
       log = `#{command}`
     end
   end
-
-  files = ['HPXMLtoOpenStudio/measure.*',
-           'HPXMLtoOpenStudio/resources/*.*',
-           'SimulationOutputReport/measure.*',
-           'SimulationOutputReport/resources/*.*',
-           'weather/*.*',
-           'workflow/*.*',
-           'workflow/sample_files/*.xml',
-           'workflow/tests/*.rb',
-           'workflow/tests/ASHRAE_Standard_140/*.xml',
-           'documentation/index.html',
-           'documentation/_static/**/*.*']
 
   # Create zip files
   release_map.each do |zip_path, include_all_epws|
