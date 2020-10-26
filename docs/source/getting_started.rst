@@ -14,7 +14,7 @@ Running
 
 To programatically run simulations, it's recommended to use the OpenStudio `Command Line Interface <http://nrel.github.io/OpenStudio-user-documentation/reference/command_line_interface/>`_.
 Two general approaches (basic and advanced) for running via the CLI are described below.
-The OpenStudio measures can also be run from user interfaces (e.g., the `OpenStudio Application <http://nrel.github.io/OpenStudio-user-documentation/reference/openstudio_application_interface/>`_ or `Parametric Analysis Tool <http://nrel.github.io/OpenStudio-user-documentation/reference/parametric_analysis_tool_2/>`_).
+The OpenStudio measures can also be run from user interfaces (e.g., the OpenStudio Application or OpenStudio Parametric Analysis Tool (PAT)).
 
 .. note:: 
 
