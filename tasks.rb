@@ -5388,7 +5388,7 @@ if ARGV[0].to_sym == :create_release_zips
   end
 
   # Make sure we have the full set of weather files
-  if num_epws_local < num_epws_expected
+  if (num_epws_local < num_epws_expected) && (not ENV['CI'])
     puts 'Fetching all weather files...'
     command = "#{OpenStudio.getOpenStudioCLI} #{__FILE__} download_weather"
     log = `#{command}`

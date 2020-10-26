@@ -30,8 +30,7 @@ class HPXMLTest < MiniTest::Test
     autosize_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files', 'hvac_autosizing'))
 
     test_dirs = [sample_files_dir,
-                 autosize_dir,
-                 ashrae_140_dir]
+                 autosize_dir]
 
     xmls = []
     test_dirs.each do |test_dir|
@@ -265,6 +264,27 @@ class HPXMLTest < MiniTest::Test
     Dir["#{sample_files_dir}/invalid_files/*.xml"].sort.each do |xml|
       _run_xml(File.absolute_path(xml), true, expected_error_msgs[File.basename(xml)])
     end
+  end
+
+  def test_release_zips
+    # Check release zips successfully created
+    top_dir = File.join(@this_dir, '..', '..')
+    command = "openstudio #{File.join(top_dir, 'tasks.rb')} create_release_zips"
+    system(command)
+    assert_equal(2, Dir["#{top_dir}/*.zip"].size)
+
+    # Check successful running of simulation from release zip
+    unzip_file = OpenStudio::UnzipFile.new(Dir["#{top_dir}/*-minimal.zip"][0])
+    unzip_file.extractAllFiles(OpenStudio::toPath(top_dir))
+    command = 'openstudio OpenStudio-HPXML/workflow/run_simulation.rb -x OpenStudio-HPXML/workflow/sample_files/base.xml'
+    system(command)
+    assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_annual.csv')
+
+    # Cleanup
+    Dir["#{top_dir}/*.zip"].each do |zip|
+      File.delete(zip)
+    end
+    rm_path('OpenStudio-HPXML')
   end
 
   def _run_xml(xml, expect_error = false, expect_error_msgs = nil)
