@@ -5354,7 +5354,7 @@ if ARGV[0].to_sym == :create_release_zips
   if not ENV['CI']
     # Run ASHRAE 140 files
     puts 'Running ASHRAE 140 tests (this will take a minute)...'
-    command = 'openstudio workflow/tests/hpxml_translator_test.rb --name=test_ashrae_140 > log.txt'
+    command = "#{OpenStudio.getOpenStudioCLI} workflow/tests/hpxml_translator_test.rb --name=test_ashrae_140 > log.txt"
     system(command)
     results_csv_path = 'workflow/tests/results/results_ashrae_140.csv'
     if not File.exist? results_csv_path
