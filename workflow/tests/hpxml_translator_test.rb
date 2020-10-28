@@ -74,7 +74,7 @@ class HPXMLTest < MiniTest::Test
       all_results[xml], all_sizing_results[xml] = _run_xml(xml)
     end
 
-    _write_ashrae_140_results(all_results, ashrae140_dir)
+    _write_ashrae_140_results(all_results, ashrae140_dir, ashrae140_out)
   end
 
   def test_run_simulation_rb
