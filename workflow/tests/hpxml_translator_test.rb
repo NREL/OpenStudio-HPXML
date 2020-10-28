@@ -27,7 +27,7 @@ class HPXMLTest < MiniTest::Test
   def test_simulations
     sample_files_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files'))
     autosize_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files', 'hvac_autosizing'))
-    
+
     results_out = File.join(@results_dir, 'results.csv')
     File.delete(results_out) if File.exist? results_out
     sizing_out = File.join(@results_dir, 'results_hvac_sizing.csv')
@@ -57,7 +57,7 @@ class HPXMLTest < MiniTest::Test
 
   def test_ashrae_140
     ashrae140_dir = File.absolute_path(File.join(@this_dir, 'ASHRAE_Standard_140'))
-    
+
     ashrae140_out = File.join(@results_dir, 'results_ashrae_140.csv')
     File.delete(ashrae140_out) if File.exist? ashrae140_out
 
