@@ -31,8 +31,8 @@ class MiscLoads
     end
 
     if apply_ashrae140_assumptions
-      # ASHRAE 140, Table 7-9: Sensible load accounts for 0.822 of the total load and latent load accounts for 0.178. Sensible loads are 70% radiative and 30% convective.
-      rad_frac = 0.7 * 0.822
+      # ASHRAE 140, Table 7-9. Sensible loads are 70% radiative and 30% convective.
+      rad_frac = 0.7 * sens_frac
     else
       rad_frac = 0.6 * sens_frac
     end
