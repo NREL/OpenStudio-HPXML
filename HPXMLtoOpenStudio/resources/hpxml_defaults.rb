@@ -310,7 +310,8 @@ class HPXMLDefaults
     # Charge defect ratio
     hpxml.cooling_systems.each do |cooling_system|
       next unless [HPXML::HVACTypeCentralAirConditioner,
-                   HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
+                   HPXML::HVACTypeMiniSplitAirConditioner,
+                   HPXML::HVACTypeRoomAirConditioner].include? cooling_system.cooling_system_type
       next unless cooling_system.charge_defect_ratio.nil?
 
       cooling_system.charge_defect_ratio = 0.0
@@ -332,7 +333,8 @@ class HPXMLDefaults
     end
     hpxml.cooling_systems.each do |cooling_system|
       next unless [HPXML::HVACTypeCentralAirConditioner,
-                   HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
+                   HPXML::HVACTypeMiniSplitAirConditioner,
+                   HPXML::HVACTypeRoomAirConditioner].include? cooling_system.cooling_system_type
       next unless cooling_system.airflow_defect_ratio.nil? && cooling_system.airflow_cfm_per_ton.nil?
 
       cooling_system.airflow_defect_ratio = 0.0
