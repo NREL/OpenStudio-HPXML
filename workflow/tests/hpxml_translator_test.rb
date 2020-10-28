@@ -269,7 +269,7 @@ class HPXMLTest < MiniTest::Test
   def test_release_zips
     # Check release zips successfully created
     top_dir = File.join(@this_dir, '..', '..')
-    command = "openstudio #{File.join(top_dir, 'tasks.rb')} create_release_zips"
+    command = "#{OpenStudio.getOpenStudioCLI} #{File.join(top_dir, 'tasks.rb')} create_release_zips"
     system(command)
     assert_equal(2, Dir["#{top_dir}/*.zip"].size)
 
@@ -277,7 +277,7 @@ class HPXMLTest < MiniTest::Test
     Dir["#{top_dir}/OpenStudio-HPXML*.zip"].each do |zip|
       unzip_file = OpenStudio::UnzipFile.new(zip)
       unzip_file.extractAllFiles(OpenStudio::toPath(top_dir))
-      command = 'openstudio OpenStudio-HPXML/workflow/run_simulation.rb -x OpenStudio-HPXML/workflow/sample_files/base.xml'
+      command = "#{OpenStudio.getOpenStudioCLI} OpenStudio-HPXML/workflow/run_simulation.rb -x OpenStudio-HPXML/workflow/sample_files/base.xml"
       system(command)
       assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_annual.csv')
       File.delete(zip)
