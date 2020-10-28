@@ -18,18 +18,23 @@ class HPXMLTest < MiniTest::Test
   @@os_log = OpenStudio::StringStreamLogSink.new
   @@os_log.setLogLevel(OpenStudio::Warn)
 
-  def test_simulations
-    this_dir = File.dirname(__FILE__)
-    results_dir = File.join(this_dir, 'results')
-    rm_path(results_dir)
+  def before_setup
+    @this_dir = File.dirname(__FILE__)
+    @results_dir = File.join(@this_dir, 'results')
+    FileUtils.mkdir_p @results_dir
+  end
 
-    sample_files_dir = File.absolute_path(File.join(this_dir, '..', 'sample_files'))
-    autosize_dir = File.absolute_path(File.join(this_dir, '..', 'sample_files', 'hvac_autosizing'))
-    ashrae_140_dir = File.absolute_path(File.join(this_dir, 'ASHRAE_Standard_140'))
+  def test_simulations
+    sample_files_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files'))
+    autosize_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files', 'hvac_autosizing'))
+    
+    results_out = File.join(@results_dir, 'results.csv')
+    File.delete(results_out) if File.exist? results_out
+    sizing_out = File.join(@results_dir, 'results_hvac_sizing.csv')
+    File.delete(sizing_out) if File.exist? sizing_out
 
     test_dirs = [sample_files_dir,
-                 autosize_dir,
-                 ashrae_140_dir]
+                 autosize_dir]
 
     xmls = []
     test_dirs.each do |test_dir|
@@ -43,13 +48,33 @@ class HPXMLTest < MiniTest::Test
     all_results = {}
     all_sizing_results = {}
     xmls.each do |xml|
-      all_results[xml], all_sizing_results[xml] = _run_xml(xml, this_dir)
+      all_results[xml], all_sizing_results[xml] = _run_xml(xml)
     end
 
-    Dir.mkdir(results_dir)
-    _write_summary_results(results_dir, all_results)
-    _write_hvac_sizing_results(results_dir, all_sizing_results)
-    _write_ashrae_140_results(results_dir, all_results, ashrae_140_dir)
+    _write_summary_results(all_results, results_out)
+    _write_hvac_sizing_results(all_sizing_results, sizing_out)
+  end
+
+  def test_ashrae_140
+    ashrae140_dir = File.absolute_path(File.join(@this_dir, 'ASHRAE_Standard_140'))
+    
+    ashrae140_out = File.join(@results_dir, 'results_ashrae_140.csv')
+    File.delete(ashrae140_out) if File.exist? ashrae140_out
+
+    xmls = []
+    Dir["#{ashrae140_dir}/*.xml"].sort.each do |xml|
+      xmls << File.absolute_path(xml)
+    end
+
+    # Test simulations
+    puts "Running #{xmls.size} HPXML files..."
+    all_results = {}
+    all_sizing_results = {}
+    xmls.each do |xml|
+      all_results[xml], all_sizing_results[xml] = _run_xml(xml)
+    end
+
+    _write_ashrae_140_results(all_results, ashrae140_dir)
   end
 
   def test_run_simulation_rb
@@ -119,17 +144,15 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_weather_cache
-    this_dir = File.dirname(__FILE__)
-    cache_orig = File.join(this_dir, '..', '..', 'weather', 'USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv')
+    cache_orig = File.join(@this_dir, '..', '..', 'weather', 'USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv')
     cache_bak = cache_orig + '.bak'
     File.rename(cache_orig, cache_bak)
-    _run_xml(File.absolute_path(File.join(this_dir, '..', 'sample_files', 'base.xml')), this_dir)
+    _run_xml(File.absolute_path(File.join(@this_dir, '..', 'sample_files', 'base.xml')))
     File.rename(cache_bak, cache_orig) # Put original file back
   end
 
   def test_invalid
-    this_dir = File.dirname(__FILE__)
-    sample_files_dir = File.join(this_dir, '..', 'sample_files')
+    sample_files_dir = File.join(@this_dir, '..', 'sample_files')
 
     expected_error_msgs = { 'appliances-location-unconditioned-space.xml' => ["Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher]",
                                                                               "Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer]",
@@ -246,15 +269,34 @@ class HPXMLTest < MiniTest::Test
 
     # Test simulations
     Dir["#{sample_files_dir}/invalid_files/*.xml"].sort.each do |xml|
-      _run_xml(File.absolute_path(xml), this_dir, true, expected_error_msgs[File.basename(xml)])
+      _run_xml(File.absolute_path(xml), true, expected_error_msgs[File.basename(xml)])
     end
   end
 
-  def _run_xml(xml, this_dir, expect_error = false, expect_error_msgs = nil)
-    print "Testing #{File.basename(xml)}...\n"
-    rundir = File.join(this_dir, 'run')
+  def test_release_zips
+    # Check release zips successfully created
+    top_dir = File.join(@this_dir, '..', '..')
+    command = "#{OpenStudio.getOpenStudioCLI} #{File.join(top_dir, 'tasks.rb')} create_release_zips"
+    system(command)
+    assert_equal(2, Dir["#{top_dir}/*.zip"].size)
 
-    measures_dir = File.join(this_dir, '..', '..')
+    # Check successful running of simulation from release zips
+    Dir["#{top_dir}/OpenStudio-HPXML*.zip"].each do |zip|
+      unzip_file = OpenStudio::UnzipFile.new(zip)
+      unzip_file.extractAllFiles(OpenStudio::toPath(top_dir))
+      command = "#{OpenStudio.getOpenStudioCLI} OpenStudio-HPXML/workflow/run_simulation.rb -x OpenStudio-HPXML/workflow/sample_files/base.xml"
+      system(command)
+      assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_annual.csv')
+      File.delete(zip)
+      rm_path('OpenStudio-HPXML')
+    end
+  end
+
+  def _run_xml(xml, expect_error = false, expect_error_msgs = nil)
+    print "Testing #{File.basename(xml)}...\n"
+    rundir = File.join(@this_dir, 'run')
+
+    measures_dir = File.join(@this_dir, '..', '..')
 
     measures = {}
 
@@ -1304,9 +1346,8 @@ class HPXMLTest < MiniTest::Test
     sqlFile.close
   end
 
-  def _write_summary_results(results_dir, results)
+  def _write_summary_results(results, csv_out)
     require 'csv'
-    csv_out = File.join(results_dir, 'results.csv')
 
     output_keys = []
     results.each do |xml, xml_results|
@@ -1337,9 +1378,8 @@ class HPXMLTest < MiniTest::Test
     puts "Wrote summary results to #{csv_out}."
   end
 
-  def _write_hvac_sizing_results(results_dir, all_sizing_results)
+  def _write_hvac_sizing_results(all_sizing_results, csv_out)
     require 'csv'
-    csv_out = File.join(results_dir, 'results_hvac_sizing.csv')
 
     output_keys = nil
     all_sizing_results.each do |xml, xml_results|
@@ -1362,16 +1402,15 @@ class HPXMLTest < MiniTest::Test
     puts "Wrote HVAC sizing results to #{csv_out}."
   end
 
-  def _write_ashrae_140_results(results_dir, all_results, ashrae_140_dir)
+  def _write_ashrae_140_results(all_results, ashrae140_dir, csv_out)
     require 'csv'
-    csv_out = File.join(results_dir, 'results_ashrae_140.csv')
 
     htg_loads = {}
     clg_loads = {}
     CSV.open(csv_out, 'w') do |csv|
       csv << ['Test Case', 'Annual Heating Load [MMBtu]', 'Annual Cooling Load [MMBtu]']
       all_results.sort.each do |xml, xml_results|
-        next unless xml.include? ashrae_140_dir
+        next unless xml.include? ashrae140_dir
         next unless xml.include? 'C.xml'
 
         htg_load = xml_results['Load: Heating (MBtu)'].round(2)
@@ -1380,7 +1419,7 @@ class HPXMLTest < MiniTest::Test
         htg_loads[test_name] = htg_load
       end
       all_results.sort.each do |xml, xml_results|
-        next unless xml.include? ashrae_140_dir
+        next unless xml.include? ashrae140_dir
         next unless xml.include? 'L.xml'
 
         clg_load = xml_results['Load: Cooling (MBtu)'].round(2)
