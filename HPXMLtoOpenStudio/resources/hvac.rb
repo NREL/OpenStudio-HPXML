@@ -210,6 +210,13 @@ class HVAC
     ptac.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated.join(','))
     ptac.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, cooling_system.fraction_cool_load_served)
     ptac.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameRoomAirConditioner)
+    ptac.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, cooling_system.charge_defect_ratio)
+    if not cooling_system.airflow_cfm_per_ton.nil?
+      ptac.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, cooling_system.airflow_cfm_per_ton)
+      ptac.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 0.0) # FIXME: Is this right?
+    else
+      ptac.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, cooling_system.airflow_defect_ratio)
+    end
   end
 
   def self.apply_evaporative_cooler(model, runner, cooling_system,
