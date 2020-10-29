@@ -6820,8 +6820,8 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
     hpxml.plug_loads.add(id: 'PlugLoadMisc',
                          plug_load_type: HPXML::PlugLoadTypeOther,
                          kWh_per_year: 7302,
-                         frac_sensible: 0.82,
-                         frac_latent: 0.18)
+                         frac_sensible: 0.822,
+                         frac_latent: 0.178)
     hpxml.plug_loads.add(id: 'PlugLoadMisc2',
                          plug_load_type: HPXML::PlugLoadTypeTelevision,
                          kWh_per_year: 0)
@@ -6888,8 +6888,8 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
     end
   end
   if hpxml_file.include?('ASHRAE_Standard_140')
-    hpxml.plug_loads[0].weekday_fractions = '0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066'
-    hpxml.plug_loads[0].weekend_fractions = '0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066'
+    hpxml.plug_loads[0].weekday_fractions = '0.0203, 0.0203, 0.0203, 0.0203, 0.0203, 0.0339, 0.0426, 0.0852, 0.0497, 0.0304, 0.0304, 0.0406, 0.0304, 0.0254, 0.0264, 0.0264, 0.0386, 0.0416, 0.0447, 0.0700, 0.0700, 0.0731, 0.0731, 0.0660'
+    hpxml.plug_loads[0].weekend_fractions = '0.0203, 0.0203, 0.0203, 0.0203, 0.0203, 0.0339, 0.0426, 0.0852, 0.0497, 0.0304, 0.0304, 0.0406, 0.0304, 0.0254, 0.0264, 0.0264, 0.0386, 0.0416, 0.0447, 0.0700, 0.0700, 0.0731, 0.0731, 0.0660'
     hpxml.plug_loads[0].monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.plug_loads[0].weekday_fractions = nil
@@ -7245,29 +7245,14 @@ if ARGV[0].to_sym == :download_weather
 end
 
 if ARGV[0].to_sym == :create_release_zips
-  # Generate documentation
-  puts 'Generating documentation...'
-  command = 'sphinx-build -b singlehtml docs/source documentation'
-  begin
-    `#{command}`
-    if not File.exist? File.join(File.dirname(__FILE__), 'documentation', 'index.html')
-      puts 'Documentation was not successfully generated. Aborting...'
-      exit!
-    end
-  rescue
-    puts "Command failed: '#{command}'. Perhaps sphinx needs to be installed?"
-    exit!
-  end
+  require_relative 'HPXMLtoOpenStudio/resources/version'
 
-  files = ['HPXMLtoOpenStudio/measure.*',
-           'HPXMLtoOpenStudio/resources/*.*',
-           'SimulationOutputReport/measure.*',
-           'SimulationOutputReport/resources/*.*',
-           'weather/*.*',
-           'workflow/*.*',
-           'workflow/sample_files/*.xml',
-           'documentation/index.html',
-           'documentation/_static/**/*.*']
+  release_map = { File.join(File.dirname(__FILE__), "OpenStudio-HPXML-v#{Version::OS_HPXML_Version}-minimal.zip") => false,
+                  File.join(File.dirname(__FILE__), "OpenStudio-HPXML-v#{Version::OS_HPXML_Version}-full.zip") => true }
+
+  release_map.keys.each do |zip_path|
+    File.delete(zip_path) if File.exist? zip_path
+  end
 
   # Only include files under git version control
   command = 'git ls-files'
@@ -7278,35 +7263,73 @@ if ARGV[0].to_sym == :create_release_zips
     exit!
   end
 
-  release_map = { File.join(File.dirname(__FILE__), 'release-minimal.zip') => false,
-                  File.join(File.dirname(__FILE__), 'release-full.zip') => true }
+  files = ['HPXMLtoOpenStudio/measure.*',
+           'HPXMLtoOpenStudio/resources/*.*',
+           'SimulationOutputReport/measure.*',
+           'SimulationOutputReport/resources/*.*',
+           'BuildResidentialHPXML/measure.*',
+           'BuildResidentialHPXML/resources/*.*',
+           'weather/*.*',
+           'workflow/*.*',
+           'workflow/sample_files/*.xml',
+           'workflow/tests/*.rb',
+           'workflow/tests/ASHRAE_Standard_140/*.xml',
+           'documentation/index.html',
+           'documentation/_static/**/*.*']
 
-  release_map.keys.each do |zip_path|
-    File.delete(zip_path) if File.exist? zip_path
-  end
-
-  # Check if we need to download weather files for the full release zip
-  num_epws_expected = 1011
-  num_epws_local = 0
-  files.each do |f|
-    Dir[f].each do |file|
-      next unless file.end_with? '.epw'
-
-      num_epws_local += 1
+  if not ENV['CI']
+    # Run ASHRAE 140 files
+    puts 'Running ASHRAE 140 tests (this will take a minute)...'
+    command = "#{OpenStudio.getOpenStudioCLI} workflow/tests/hpxml_translator_test.rb --name=test_ashrae_140 > log.txt"
+    system(command)
+    results_csv_path = 'workflow/tests/results/results_ashrae_140.csv'
+    if not File.exist? results_csv_path
+      puts 'ASHRAE 140 results CSV file not generated. Aborting...'
+      exit!
     end
-  end
+    File.delete('log.txt')
 
-  # Make sure we have the full set of weather files
-  if num_epws_local < num_epws_expected
-    puts 'Fetching all weather files...'
-    command = "#{OpenStudio.getOpenStudioCLI} #{__FILE__} download_weather"
-    log = `#{command}`
+    # Generate documentation
+    puts 'Generating documentation...'
+    command = 'sphinx-build -b singlehtml docs/source documentation'
+    begin
+      `#{command}`
+      if not File.exist? File.join(File.dirname(__FILE__), 'documentation', 'index.html')
+        puts 'Documentation was not successfully generated. Aborting...'
+        exit!
+      end
+    rescue
+      puts "Command failed: '#{command}'. Perhaps sphinx needs to be installed?"
+      exit!
+    end
+    FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation', '_static', 'fonts'))
+
+    # Check if we need to download weather files for the full release zip
+    num_epws_expected = 1011
+    num_epws_local = 0
+    files.each do |f|
+      Dir[f].each do |file|
+        next unless file.end_with? '.epw'
+
+        num_epws_local += 1
+      end
+    end
+
+    # Make sure we have the full set of weather files
+    if num_epws_local < num_epws_expected
+      puts 'Fetching all weather files...'
+      command = "#{OpenStudio.getOpenStudioCLI} #{__FILE__} download_weather"
+      log = `#{command}`
+    end
   end
 
   # Create zip files
   release_map.each do |zip_path, include_all_epws|
     puts "Creating #{zip_path}..."
     zip = OpenStudio::ZipFile.new(zip_path, false)
+    if not ENV['CI']
+      zip.addFile(results_csv_path, File.join('OpenStudio-HPXML', results_csv_path))
+    end
     files.each do |f|
       Dir[f].each do |file|
         if file.start_with? 'documentation'
@@ -7328,7 +7351,9 @@ if ARGV[0].to_sym == :create_release_zips
   end
 
   # Cleanup
-  FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation'))
+  if not ENV['CI']
+    FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation'))
+  end
 
   puts 'Done.'
 end

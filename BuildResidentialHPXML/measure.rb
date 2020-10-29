@@ -3750,6 +3750,9 @@ class HPXMLFile
     # set the calendar year
     year_description = model.getYearDescription
     year_description.setCalendarYear(2007) # default to TMY
+    if args[:simulation_control_run_period_calendar_year].is_initialized
+      year_description.setCalendarYear(args[:simulation_control_run_period_calendar_year].get)
+    end
     if epw_file.startDateActualYear.is_initialized # AMY
       year_description.setCalendarYear(epw_file.startDateActualYear.get)
     end
