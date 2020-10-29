@@ -343,6 +343,10 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     cop = 2.49 # Expected value
     assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.01)
     assert_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
+    # Check EMS
+    assert_equal(1, model.getZoneHVACPackagedTerminalAirConditioners.size)
+    ptac = model.getZoneHVACPackagedTerminalAirConditioners[0]
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{ptac.name} install quality")
     assert_in_epsilon(program_values['F_CH'].sum, 0.0, 0.01)
   end
 
