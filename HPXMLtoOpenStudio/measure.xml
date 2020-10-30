@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>004404fb-8a4e-43fc-a7d0-253018d7bdb4</version_id>
-  <version_modified>20201030T004842Z</version_modified>
+  <version_id>a03407e8-5852-4b65-a25f-c7bc74e65be3</version_id>
+  <version_modified>20201030T202129Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -454,12 +454,6 @@
       <checksum>466F5D83</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4338890B</checksum>
-    </file>
-    <file>
       <filename>EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
@@ -470,17 +464,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>A1532F79</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.1.1</identifier>
-        <min_compatible>2.1.1</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>1F70BAA3</checksum>
     </file>
     <file>
       <filename>misc_loads.rb</filename>
@@ -505,6 +488,23 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>E4CE9FD0</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.1.1</identifier>
+        <min_compatible>2.1.1</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>F81BA51A</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C9CABB8F</checksum>
     </file>
   </files>
 </measure>

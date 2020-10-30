@@ -56,7 +56,7 @@ class HPXML < Object
                  :water_fixtures, :water_heating, :solar_thermal_systems, :pv_systems, :clothes_washers,
                  :clothes_dryers, :dishwashers, :refrigerators, :freezers, :dehumidifiers, :cooking_ranges, :ovens,
                  :lighting_groups, :lighting, :ceiling_fans, :pools, :hot_tubs, :plug_loads, :fuel_loads]
-  attr_reader(*HPXML_ATTRS, :doc)
+  attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings)
 
   # Constants
   AtticTypeCathedral = 'CathedralCeiling'
@@ -274,7 +274,7 @@ class HPXML < Object
   WindowLayersSinglePane = 'single-pane'
   WindowLayersTriplePane = 'triple-pane'
 
-  def initialize(hpxml_path: nil, collapse_enclosure: true)
+  def initialize(hpxml_path: nil, schematron_validators: [], collapse_enclosure: true)
     @doc = nil
     @hpxml_path = hpxml_path
 
@@ -287,9 +287,11 @@ class HPXML < Object
     end
     from_oga(hpxml)
 
+    # Check for errors/warnings
+    @errors, @warnings = check_for_errors_warnings(schematron_validators: schematron_validators)
+    return unless @errors.empty?
+
     # Clean up
-    # TODO: Should really perform validation before we make the following changes,
-    # so that any errors below don't prevent validation from occurring.
     delete_tiny_surfaces()
     delete_adiabatic_subsurfaces()
     if collapse_enclosure
@@ -681,7 +683,7 @@ class HPXML < Object
       if not @timestep.nil?
         valid_tsteps = [60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1]
         if not valid_tsteps.include? @timestep
-          fail "Timestep (#{@timestep}) must be one of: #{valid_tsteps.join(', ')}."
+          errors << "Timestep (#{@timestep}) must be one of: #{valid_tsteps.join(', ')}."
         end
       end
 
@@ -690,7 +692,7 @@ class HPXML < Object
 
         valid_months = (1..12).to_a
         if not valid_months.include? begin_month
-          fail "#{sim_ctl} Begin Month (#{begin_month}) must be one of: #{valid_months.join(', ')}."
+          errors << "#{sim_ctl} Begin Month (#{begin_month}) must be one of: #{valid_months.join(', ')}."
         end
       end
 
@@ -699,7 +701,7 @@ class HPXML < Object
 
         valid_months = (1..12).to_a
         if not valid_months.include? end_month
-          fail "#{sim_ctl} End Month (#{end_month}) must be one of: #{valid_months.join(', ')}."
+          errors << "#{sim_ctl} End Month (#{end_month}) must be one of: #{valid_months.join(', ')}."
         end
       end
 
@@ -709,12 +711,12 @@ class HPXML < Object
           begin_month, begin_day_of_month, end_month, end_day_of_month = months_and_days
           if (not begin_day_of_month.nil?) && (months.include? begin_month)
             if not valid_days.include? begin_day_of_month
-              fail "#{sim_ctl} Begin Day of Month (#{begin_day_of_month}) must be one of: #{valid_days.join(', ')}."
+              errors << "#{sim_ctl} Begin Day of Month (#{begin_day_of_month}) must be one of: #{valid_days.join(', ')}."
             end
           end
           next unless (not end_day_of_month.nil?) && (months.include? end_month)
           if not valid_days.include? end_day_of_month
-            fail "#{sim_ctl} End Day of Month (#{end_day_of_month}) must be one of: #{valid_days.join(', ')}."
+            errors << "#{sim_ctl} End Day of Month (#{end_day_of_month}) must be one of: #{valid_days.join(', ')}."
           end
         end
       end
@@ -723,19 +725,19 @@ class HPXML < Object
         begin_month, begin_day_of_month, end_month, end_day_of_month = months_and_days
         next unless (not begin_month.nil?) && (not end_month.nil?)
         if begin_month > end_month
-          fail "#{sim_ctl} Begin Month (#{begin_month}) cannot come after #{sim_ctl} End Month (#{end_month})."
+          errors << "#{sim_ctl} Begin Month (#{begin_month}) cannot come after #{sim_ctl} End Month (#{end_month})."
         end
 
         next unless (not begin_day_of_month.nil?) && (not end_day_of_month.nil?)
         next unless begin_month == end_month
         if begin_day_of_month > end_day_of_month
-          fail "#{sim_ctl} Begin Day of Month (#{begin_day_of_month}) cannot come after #{sim_ctl} End Day of Month (#{end_day_of_month}) for the same month (#{begin_month})."
+          errors << "#{sim_ctl} Begin Day of Month (#{begin_day_of_month}) cannot come after #{sim_ctl} End Day of Month (#{end_day_of_month}) for the same month (#{begin_month})."
         end
       end
 
       if not @sim_calendar_year.nil?
         if (@sim_calendar_year < 1600) || (@sim_calendar_year > 9999)
-          fail "Calendar Year (#{@sim_calendar_year}) must be between 1600 and 9999."
+          errors << "Calendar Year (#{@sim_calendar_year}) must be between 1600 and 9999."
         end
       end
 
@@ -2081,7 +2083,7 @@ class HPXML < Object
 
       if not @exposed_perimeter.nil?
         if @exposed_perimeter <= 0
-          fail "Exposed perimeter for Slab '#{@id}' must be greater than zero."
+          errors << "Exposed perimeter for Slab '#{@id}' must be greater than zero."
         end
       end
 
@@ -2212,7 +2214,7 @@ class HPXML < Object
       begin; wall; rescue StandardError => e; errors << e.message; end
       if (not @overhangs_distance_to_top_of_window.nil?) && (not @overhangs_distance_to_bottom_of_window.nil?)
         if @overhangs_distance_to_bottom_of_window <= @overhangs_distance_to_top_of_window
-          fail "For Window '#{@id}', overhangs distance to bottom (#{@overhangs_distance_to_bottom_of_window}) must be greater than distance to top (#{@overhangs_distance_to_top_of_window})."
+          errors << "For Window '#{@id}', overhangs distance to bottom (#{@overhangs_distance_to_bottom_of_window}) must be greater than distance to top (#{@overhangs_distance_to_top_of_window})."
         end
       end
 
@@ -4180,18 +4182,6 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
-
-      if @hpxml_object.refrigerators.size > 1
-        primary_indicator = false
-        @hpxml_object.refrigerators.each do |refrigerator|
-          next unless not refrigerator.primary_indicator.nil?
-          fail 'More than one refrigerator designated as the primary.' if refrigerator.primary_indicator && primary_indicator
-
-          primary_indicator = true if refrigerator.primary_indicator
-        end
-        fail 'Could not find a primary refrigerator.' if not primary_indicator
-      end
-
       return errors
     end
 
@@ -5049,8 +5039,31 @@ class HPXML < Object
     end
   end
 
-  def check_for_errors()
-    errors = []
+  def check_for_errors_warnings(schematron_validators: [])
+    # ----------------------------- #
+    # Perform schematron validation #
+    # ----------------------------- #
+
+    if not schematron_validators.empty?
+      errors, warnings = Validator.run_validators(@doc, schematron_validators)
+    else
+      errors = []
+      warnings = []
+    end
+
+    # ------------------------------- #
+    # Check for errors within objects #
+    # ------------------------------- #
+
+    # Ask objects to check for errors
+    self.class::HPXML_ATTRS.each do |attribute|
+      hpxml_obj = send(attribute)
+      if not hpxml_obj.respond_to? :check_for_errors
+        fail "Need to add 'check_for_errors' method to #{hpxml_obj.class} class."
+      end
+
+      errors += hpxml_obj.check_for_errors
+    end
 
     # ------------------------------- #
     # Check for errors across objects #
@@ -5167,21 +5180,19 @@ class HPXML < Object
       end
     end
 
-    # ------------------------------- #
-    # Check for errors within objects #
-    # ------------------------------- #
-
-    # Ask objects to check for errors
-    self.class::HPXML_ATTRS.each do |attribute|
-      hpxml_obj = send(attribute)
-      if not hpxml_obj.respond_to? :check_for_errors
-        fail "Need to add 'check_for_errors' method to #{hpxml_obj.class} class."
+    # Check for correct PrimaryIndicator values across all refrigerators
+    if @refrigerators.size > 1
+      primary_indicators = @refrigerators.select { |r| r.primary_indicator }.size
+      if primary_indicators > 1
+        errors << 'More than one refrigerator designated as the primary.'
+      elsif primary_indicators == 0
+        errors << 'Could not find a primary refrigerator.'
       end
-
-      errors += hpxml_obj.check_for_errors
     end
 
-    return errors
+    errors.map! { |e| "#{@hpxml_path}: #{e}" }
+
+    return errors, warnings
   end
 
   def self.conditioned_locations

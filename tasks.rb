@@ -6,6 +6,7 @@ def create_hpxmls
   require_relative 'HPXMLtoOpenStudio/resources/hotwater_appliances'
   require_relative 'HPXMLtoOpenStudio/resources/hpxml'
   require_relative 'HPXMLtoOpenStudio/resources/misc_loads'
+  require_relative 'HPXMLtoOpenStudio/resources/validator'
   require_relative 'HPXMLtoOpenStudio/resources/waterheater'
   require_relative 'HPXMLtoOpenStudio/resources/xmlhelper'
 
@@ -492,15 +493,10 @@ def create_hpxmls
       XMLHelper.write_file(hpxml_doc, hpxml_path)
 
       if not hpxml_path.include? 'invalid_files'
-        # Validate file against HPXML schema
-        schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources'))
-        errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
-        if errors.size > 0
-          fail "ERRORS: #{errors}"
-        end
-
-        # Check for additional errors
-        errors = hpxml.check_for_errors()
+        # Validate against HPXML/EnergyPlus schematron docs
+        schematron_validators = [File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'HPXMLvalidator.xml'),
+                                 File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'EPvalidator.xml')]
+        errors, warnings = hpxml.check_for_errors_warnings(schematron_validators: schematron_validators)
         if errors.size > 0
           fail "ERRORS: #{errors}"
         end
