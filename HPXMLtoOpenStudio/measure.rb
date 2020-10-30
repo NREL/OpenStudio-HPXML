@@ -175,6 +175,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       test_epw_path = File.join(File.dirname(__FILE__), '..', 'weather', epw_path)
       epw_path = test_epw_path if File.exist? test_epw_path
     end
+    if not File.exist? epw_path
+      test_epw_path = File.join(File.dirname(__FILE__), '..', '..', 'weather', epw_path)
+      epw_path = test_epw_path if File.exist? test_epw_path
+    end
     if not File.exist?(epw_path)
       fail "'#{epw_path}' could not be found."
     end
@@ -267,7 +271,6 @@ class OSModel
 
     add_airflow(runner, model, weather, spaces)
     add_hvac_sizing(runner, model, weather, spaces)
-    add_furnace_eae(runner, model)
     add_photovoltaics(runner, model)
     add_additional_properties(runner, model, hpxml_path)
 
@@ -424,10 +427,15 @@ class OSModel
       roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }
       avg_pitch = roofs.map { |r| r.pitch }.sum(0.0) / roofs.size
 
-      # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
-      length = floor_area**0.5
-      height = 0.5 * Math.sin(Math.atan(avg_pitch / 12.0)) * length
-      volume = [floor_area * height / 3.0, 0.01].max
+      if @apply_ashrae140_assumptions
+        # Hardcode the attic volume to match ASHRAE 140 Table 7-2 specification
+        volume = 3463
+      else
+        # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
+        length = floor_area**0.5
+        height = 0.5 * Math.sin(Math.atan(avg_pitch / 12.0)) * length
+        volume = [floor_area * height / 3.0, 0.01].max
+      end
 
       spaces[space_type].thermalZone.get.setVolume(UnitConversions.convert(volume, 'ft^3', 'm^3'))
     end
@@ -2283,7 +2291,7 @@ class OSModel
       end
       modeled_mels << plug_load.plug_load_type
 
-      MiscLoads.apply_plug(model, plug_load, obj_name, spaces[HPXML::LocationLivingSpace])
+      MiscLoads.apply_plug(model, plug_load, obj_name, spaces[HPXML::LocationLivingSpace], @apply_ashrae140_assumptions)
     end
   end
 
@@ -2482,19 +2490,6 @@ class OSModel
 
   def self.add_hvac_sizing(runner, model, weather, spaces)
     HVACSizing.apply(model, runner, weather, spaces, @hpxml, @infil_volume, @nbeds, @min_neighbor_distance, @debug)
-  end
-
-  def self.add_furnace_eae(runner, model)
-    # Needs to come after HVAC sizing (needs heating capacity and airflow rate)
-    # FUTURE: Could remove this method and simplify everything if we could autosize via the HPXML file
-
-    @hpxml.heating_systems.each do |heating_system|
-      next unless heating_system.fraction_heat_load_served > 0
-      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove].include? heating_system.heating_system_type
-      next unless heating_system.heating_system_fuel != HPXML::FuelTypeElectricity
-
-      HVAC.apply_eae_to_heating_fan(runner, @hvac_map[heating_system.id], heating_system)
-    end
   end
 
   def self.add_photovoltaics(runner, model)
