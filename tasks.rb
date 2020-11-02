@@ -3243,6 +3243,7 @@ def set_hpxml_hvac_control(hpxml_file, hpxml)
     hpxml.hvac_controls[0].cooling_setup_hours_per_week = 6 * 7
     hpxml.hvac_controls[0].cooling_setup_start_hour = 9 # 9am
   elsif ['base-hvac-programmable-thermostat-multiple-periods.xml'].include? hpxml_file
+    hpxml.hvac_controls[0].control_type = HPXML::HVACControlTypeProgrammable
     hpxml.hvac_controls[0].heating_setpoint_temp = nil
     hpxml.hvac_controls[0].cooling_setpoint_temp = nil
     hpxml.hvac_controls[0].weekday_heating_setpoints = '64, 64, 64, 64, 64, 64, 64, 74, 74, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64'
