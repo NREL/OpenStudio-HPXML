@@ -2995,17 +2995,12 @@ class HPXML < Object
         XMLHelper.add_element(extension, 'SetupStartHourCooling', to_integer(@cooling_setup_start_hour)) unless @cooling_setup_start_hour.nil?
         XMLHelper.add_element(extension, 'CeilingFanSetpointTempCoolingSeasonOffset', to_float(@ceiling_fan_cooling_setpoint_temp_offset)) unless @ceiling_fan_cooling_setpoint_temp_offset.nil?
       end
-      if (not @weekday_heating_setpoints.nil?) || (not @weekend_heating_setpoints.nil?)
+      if (not @weekday_heating_setpoints.nil?) || (not @weekend_heating_setpoints.nil?) || (not @weekday_cooling_setpoints.nil?) || (not @weekday_cooling_setpoints.nil?)
         extension = XMLHelper.create_elements_as_needed(hvac_control, ['extension'])
-        heating_setpoint_schedules = XMLHelper.add_element(extension, 'HeatingSetpointSchedules')
-        XMLHelper.add_element(heating_setpoint_schedules, 'Weekday', @weekday_heating_setpoints) unless @weekday_heating_setpoints.nil?
-        XMLHelper.add_element(heating_setpoint_schedules, 'Weekend', @weekend_heating_setpoints) unless @weekend_heating_setpoints.nil?
-      end
-      if (not @weekday_cooling_setpoints.nil?) || (not @weekday_cooling_setpoints.nil?)
-        extension = XMLHelper.create_elements_as_needed(hvac_control, ['extension'])
-        cooling_setpoint_schedules = XMLHelper.add_element(extension, 'CoolingSetpointSchedules')
-        XMLHelper.add_element(cooling_setpoint_schedules, 'Weekday', @weekday_cooling_setpoints) unless @weekday_cooling_setpoints.nil?
-        XMLHelper.add_element(cooling_setpoint_schedules, 'Weekend', @weekend_cooling_setpoints) unless @weekday_cooling_setpoints.nil?
+        XMLHelper.add_element(extension, 'WeekdaySetpointTempsHeatingSeason', @weekday_heating_setpoints) unless @weekday_heating_setpoints.nil?
+        XMLHelper.add_element(extension, 'WeekendSetpointTempsHeatingSeason', @weekend_heating_setpoints) unless @weekend_heating_setpoints.nil?
+        XMLHelper.add_element(extension, 'WeekdaySetpointTempsCoolingSeason', @weekday_cooling_setpoints) unless @weekday_cooling_setpoints.nil?
+        XMLHelper.add_element(extension, 'WeekendSetpointTempsCoolingSeason', @weekend_cooling_setpoints) unless @weekday_cooling_setpoints.nil?
       end
     end
 
@@ -3023,10 +3018,10 @@ class HPXML < Object
       @cooling_setup_hours_per_week = to_integer_or_nil(XMLHelper.get_value(hvac_control, 'TotalSetupHoursperWeekCooling'))
       @cooling_setup_start_hour = to_integer_or_nil(XMLHelper.get_value(hvac_control, 'extension/SetupStartHourCooling'))
       @ceiling_fan_cooling_setpoint_temp_offset = to_float_or_nil(XMLHelper.get_value(hvac_control, 'extension/CeilingFanSetpointTempCoolingSeasonOffset'))
-      @weekday_heating_setpoints = XMLHelper.get_value(hvac_control, 'extension/HeatingSetpointSchedules/Weekday')
-      @weekend_heating_setpoints = XMLHelper.get_value(hvac_control, 'extension/HeatingSetpointSchedules/Weekend')
-      @weekday_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/CoolingSetpointSchedules/Weekday')
-      @weekend_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/CoolingSetpointSchedules/Weekend')
+      @weekday_heating_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekdaySetpointTempsHeatingSeason')
+      @weekend_heating_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekendSetpointTempsHeatingSeason')
+      @weekday_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekdaySetpointTempsCoolingSeason')
+      @weekend_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekendSetpointTempsCoolingSeason')
     end
   end
 

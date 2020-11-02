@@ -339,14 +339,10 @@
             <SystemIdentifier id='HVACControl'/>
             <ControlType>manual thermostat</ControlType>
             <extension>
-              <HeatingSetpointSchedules>
-                <Weekday>64, 64, 64, 64, 64, 64, 64, 74, 74, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64</Weekday>
-                <Weekend>64, 64, 64, 64, 64, 64, 64, 74, 74, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64</Weekend>
-              </HeatingSetpointSchedules>
-              <CoolingSetpointSchedules>
-                <Weekday>82, 82, 82, 82, 82, 82, 82, 72, 72, 80, 80, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 82, 82</Weekday>
-                <Weekend>82, 82, 82, 82, 82, 82, 82, 72, 72, 80, 80, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 82, 82</Weekend>
-              </CoolingSetpointSchedules>
+              <WeekdaySetpointTempsHeatingSeason>64, 64, 64, 64, 64, 64, 64, 74, 74, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64</WeekdaySetpointTempsHeatingSeason>
+              <WeekendSetpointTempsHeatingSeason>64, 64, 64, 64, 64, 64, 64, 74, 74, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64</WeekendSetpointTempsHeatingSeason>
+              <WeekdaySetpointTempsCoolingSeason>82, 82, 82, 82, 82, 82, 82, 72, 72, 80, 80, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 82, 82</WeekdaySetpointTempsCoolingSeason>
+              <WeekendSetpointTempsCoolingSeason>82, 82, 82, 82, 82, 82, 82, 72, 72, 80, 80, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 82, 82</WeekendSetpointTempsCoolingSeason>
             </extension>
           </HVACControl>
           <HVACDistribution>
