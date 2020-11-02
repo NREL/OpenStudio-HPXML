@@ -643,10 +643,10 @@ If there is a cooling setup, it is defined with:
 
 Alternatively, 24-hour weekday and weekend heating/cooling setpoint schedules can be defined with:
 
--- ``extension/HeatingSetpointSchedules/Weekday``
--- ``extension/HeatingSetpointSchedules/Weekend``
--- ``extension/CoolingSetpointSchedules/Weekday``
--- ``extension/CoolingSetpointSchedules/Weekend``
+-- ``extension/WeekdaySetpointTempsHeatingSeason``
+-- ``extension/WeekendSetpointTempsHeatingSeason``
+-- ``extension/WeekdaySetpointTempsCoolingSeason``
+-- ``extension/WeekendSetpointTempsCoolingSeason``
 
 Either single setpoints (with optional setback/setup) or 24-hour setpoint schedules must be defined.
 
