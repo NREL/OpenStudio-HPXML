@@ -106,6 +106,7 @@
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <RoofColor>medium</RoofColor>
             <RadiantBarrier>true</RadiantBarrier>
+            <RadiantBarrierGrade>2</RadiantBarrierGrade>
             <Insulation>
               <SystemIdentifier id="roof1_insulation"/>
               <Layer>

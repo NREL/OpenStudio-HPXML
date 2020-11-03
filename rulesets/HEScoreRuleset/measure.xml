@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>he_score_measure</name>
   <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
-  <version_id>fb743a54-af95-4a86-9378-318a6d4a313e</version_id>
-  <version_modified>20201021T152840Z</version_modified>
+  <version_id>4a38a670-3215-46ef-995a-885523be0a6b</version_id>
+  <version_modified>20201102T201801Z</version_modified>
   <xml_checksum>2AF3A68E</xml_checksum>
   <class_name>HEScoreMeasure</class_name>
   <display_name>Apply Home Energy Score Ruleset</display_name>
@@ -63,12 +63,6 @@
       <checksum>F98E711A</checksum>
     </file>
     <file>
-      <filename>lu_roof_eff_rvalue.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B3D09D4A</checksum>
-    </file>
-    <file>
       <filename>lu_wall_eff_rvalue.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -104,10 +98,16 @@
       <checksum>D412936F</checksum>
     </file>
     <file>
+      <filename>lu_roof_eff_rvalue.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>DB516BAF</checksum>
+    </file>
+    <file>
       <filename>HESruleset.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A1091784</checksum>
+      <checksum>4EE0BA38</checksum>
     </file>
   </files>
 </measure>
