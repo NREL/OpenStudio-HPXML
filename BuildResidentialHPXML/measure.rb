@@ -1259,6 +1259,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(9)
     args << arg
 
+    duct_leakage_total_or_to_outside_choices = OpenStudio::StringVector.new
+    duct_leakage_total_or_to_outside_choices << HPXML::DuctLeakageTotal
+    duct_leakage_total_or_to_outside_choices << HPXML::DuctLeakageToOutside
+
     duct_leakage_units_choices = OpenStudio::StringVector.new
     duct_leakage_units_choices << HPXML::UnitsCFM25
     duct_leakage_units_choices << HPXML::UnitsPercent
@@ -1281,6 +1285,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     duct_location_choices << HPXML::LocationOtherHeatedSpace
     duct_location_choices << HPXML::LocationOtherMultifamilyBufferSpace
     duct_location_choices << HPXML::LocationOtherNonFreezingSpace
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_leakage_total_or_to_outside', duct_leakage_total_or_to_outside_choices, true)
+    arg.setDisplayName('Ducts: Leakage Total or To Outside')
+    arg.setDescription('Whether duct leakage is total or to the outside.')
+    arg.setDefaultValue(HPXML::DuctLeakageToOutside)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_leakage_total', true)
+    arg.setDisplayName('Ducts: Total Leakage')
+    arg.setDescription("The total amount of air flow leakage expressed as a fraction of the total air flow rate. Ignored if duct leakage is '#{HPXML::DuctLeakageToOutside}'.")
+    arg.setUnits('Frac')
+    arg.setDefaultValue(0.3)
+    args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_supply_leakage_units', duct_leakage_units_choices, true)
     arg.setDisplayName('Ducts: Supply Leakage Units')
@@ -3186,6 +3203,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              setpoint_cooling_setup_temp: runner.getDoubleArgumentValue('setpoint_cooling_setup_temp', user_arguments),
              setpoint_cooling_setup_hours_per_week: runner.getDoubleArgumentValue('setpoint_cooling_setup_hours_per_week', user_arguments),
              setpoint_cooling_setup_start_hour: runner.getDoubleArgumentValue('setpoint_cooling_setup_start_hour', user_arguments),
+             ducts_leakage_total_or_to_outside: runner.getStringArgumentValue('ducts_leakage_total_or_to_outside', user_arguments),
+             ducts_leakage_total: runner.getDoubleArgumentValue('ducts_leakage_total', user_arguments),
              ducts_supply_leakage_units: runner.getStringArgumentValue('ducts_supply_leakage_units', user_arguments),
              ducts_return_leakage_units: runner.getStringArgumentValue('ducts_return_leakage_units', user_arguments),
              ducts_supply_leakage_value: runner.getDoubleArgumentValue('ducts_supply_leakage_value', user_arguments),
@@ -3518,6 +3537,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # dhw indirect but no boiler
     error = ((args[:water_heater_type] == HPXML::WaterHeaterTypeCombiStorage) || (args[:water_heater_type] == HPXML::WaterHeaterTypeCombiTankless)) && (args[:heating_system_type] != HPXML::HVACTypeBoiler)
     errors << "water_heater_type=#{args[:water_heater_type]} and heating_system_type=#{args[:heating_system_type]}" if error
+
+    # duct leakage total but supply percent and return percent don't sum to 1
+    warning = (args[:ducts_leakage_total_or_to_outside] == HPXML::DuctLeakageTotal) && (args[:ducts_supply_leakage_units] == HPXML::UnitsPercent) && (args[:ducts_return_leakage_units] == HPXML::UnitsPercent) && (args[:ducts_supply_leakage_value] + args[:ducts_return_leakage_value] != 1.0)
+    warnings << "ducts_leakage_total_or_to_outside=#{args[:ducts_leakage_total_or_to_outside]} and ducts_supply_leakage_units=#{args[:ducts_supply_leakage_units]} and ducts_return_leakage_units=#{args[:ducts_return_leakage_units]} and ducts_supply_leakage_value=#{args[:ducts_supply_leakage_value]} and ducts_return_leakage_value=#{args[:ducts_return_leakage_value]}" if warning
 
     return warnings, errors
   end
@@ -4523,16 +4546,36 @@ class HPXMLFile
     end
 
     # Duct Leakage
+    if args[:ducts_leakage_total_or_to_outside] == HPXML::DuctLeakageTotal
+      ducts_supply_leakage_units = HPXML::UnitsPercent
+      ducts_return_leakage_units = HPXML::UnitsPercent
+
+      # Fraction of primary ducts (ducts outside conditioned space)
+      f_out = (hpxml.building_construction.number_of_conditioned_floors_above_grade == 1) ? 1.0 : 0.75
+
+      # Normalize values in case user inadvertently entered values that add up to the total duct leakage, as opposed to adding up to 1
+      sum_duct_leakage_fracs = args[:ducts_supply_leakage_value] + args[:ducts_return_leakage_value]
+
+      ducts_supply_leakage_value = f_out * args[:ducts_supply_leakage_value] * args[:ducts_leakage_total] / sum_duct_leakage_fracs
+      ducts_return_leakage_value = args[:ducts_return_leakage_value] * args[:ducts_leakage_total] / sum_duct_leakage_fracs
+    elsif args[:ducts_leakage_total_or_to_outside] == HPXML::DuctLeakageToOutside
+      ducts_supply_leakage_units = args[:ducts_supply_leakage_units]
+      ducts_return_leakage_units = args[:ducts_return_leakage_units]
+
+      ducts_supply_leakage_value = args[:ducts_supply_leakage_value]
+      ducts_return_leakage_value = args[:ducts_return_leakage_value]
+    end
+
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                               duct_leakage_units: args[:ducts_supply_leakage_units],
-                                                               duct_leakage_value: args[:ducts_supply_leakage_value],
+                                                               duct_leakage_units: ducts_supply_leakage_units,
+                                                               duct_leakage_value: ducts_supply_leakage_value,
                                                                duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
 
     if not ([HPXML::HVACTypeEvaporativeCooler].include?(args[:cooling_system_type]) && args[:cooling_system_is_ducted])
 
       hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                                 duct_leakage_units: args[:ducts_return_leakage_units],
-                                                                 duct_leakage_value: args[:ducts_return_leakage_value],
+                                                                 duct_leakage_units: ducts_return_leakage_units,
+                                                                 duct_leakage_value: ducts_return_leakage_value,
                                                                  duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     end
 
