@@ -231,6 +231,8 @@ def create_osws
     'extra-mechvent-shared.osw' => 'base-single-family-attached.osw',
     'extra-mechvent-shared-preconditioning.osw' => 'extra-mechvent-shared.osw',
     'extra-vacancy-6-months.osw' => 'base-schedules-stochastic.osw',
+    'extra-duct-leakage-total-percent.osw' => 'base.osw',
+    'extra-duct-leakage-total-cfm25.osw' => 'base.osw',
 
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
     'invalid_files/heating-system-and-heat-pump.osw' => 'base.osw',
@@ -254,7 +256,8 @@ def create_osws
     'invalid_files/unvented-attic-with-floor-and-roof-insulation.osw' => 'base.osw',
     'invalid_files/conditioned-basement-with-ceiling-insulation.osw' => 'base.osw',
     'invalid_files/conditioned-attic-with-floor-insulation.osw' => 'base.osw',
-    'invalid_files/dhw-indirect-without-boiler.osw' => 'base.osw'
+    'invalid_files/dhw-indirect-without-boiler.osw' => 'base.osw',
+    'invalid_files/duct-leakage-total-percent.osw' => 'base.osw'
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -464,6 +467,8 @@ def get_values(osw_file, step)
     step.setArgument('setpoint_cooling_setup_temp', 78)
     step.setArgument('setpoint_cooling_setup_hours_per_week', 0)
     step.setArgument('setpoint_cooling_setup_start_hour', 0)
+    step.setArgument('ducts_leakage_total_or_to_outside', HPXML::DuctLeakageToOutside)
+    step.setArgument('ducts_leakage_total', 0.3)
     step.setArgument('ducts_supply_leakage_units', HPXML::UnitsCFM25)
     step.setArgument('ducts_return_leakage_units', HPXML::UnitsCFM25)
     step.setArgument('ducts_supply_leakage_value', 75.0)
@@ -1775,6 +1780,14 @@ def get_values(osw_file, step)
     step.setArgument('schedules_vacancy_begin_day_of_month', 1)
     step.setArgument('schedules_vacancy_end_month', 6)
     step.setArgument('schedules_vacancy_end_day_of_month', 30)
+  elsif ['extra-duct-leakage-total-percent.osw'].include? osw_file
+    step.setArgument('ducts_leakage_total_or_to_outside', HPXML::DuctLeakageTotal)
+    step.setArgument('ducts_supply_leakage_units', HPXML::UnitsPercent)
+    step.setArgument('ducts_return_leakage_units', HPXML::UnitsPercent)
+    step.setArgument('ducts_supply_leakage_value', 0.667)
+    step.setArgument('ducts_return_leakage_value', 0.333)
+  elsif ['extra-duct-leakage-total-cfm25.osw'].include? osw_file
+    step.setArgument('ducts_leakage_total_or_to_outside', HPXML::DuctLeakageTotal)
   end
 
   # Warnings/Errors
@@ -1844,6 +1857,12 @@ def get_values(osw_file, step)
     step.setArgument('geometry_attic_type', HPXML::AtticTypeConditioned)
   elsif ['invalid_files/dhw-indirect-without-boiler.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeCombiStorage)
+  elsif ['invalid_files/duct-leakage-total-percent.osw'].include? osw_file
+    step.setArgument('ducts_leakage_total_or_to_outside', HPXML::DuctLeakageTotal)
+    step.setArgument('ducts_supply_leakage_units', HPXML::UnitsPercent)
+    step.setArgument('ducts_return_leakage_units', HPXML::UnitsPercent)
+    step.setArgument('ducts_supply_leakage_value', 0.666)
+    step.setArgument('ducts_return_leakage_value', 0.333)
   end
   return step
 end
