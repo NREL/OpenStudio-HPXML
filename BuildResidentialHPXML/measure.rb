@@ -3502,10 +3502,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     warning = (args[:geometry_foundation_type] == HPXML::FoundationTypeSlab) && (args[:geometry_foundation_height_above_grade] > 0)
     warnings << "geometry_foundation_type=#{args[:geometry_foundation_type]} and geometry_foundation_height_above_grade=#{args[:geometry_foundation_height_above_grade]}" if warning
 
-    # duct location and surface area not both auto or not both specified
-    error = ((args[:ducts_supply_location] == Constants.Auto) && (args[:ducts_supply_surface_area] != Constants.Auto)) || ((args[:ducts_supply_location] != Constants.Auto) && (args[:ducts_supply_surface_area] == Constants.Auto)) || ((args[:ducts_return_location] == Constants.Auto) && (args[:ducts_return_surface_area] != Constants.Auto)) || ((args[:ducts_return_location] != Constants.Auto) && (args[:ducts_return_surface_area] == Constants.Auto))
-    errors << "ducts_supply_location=#{args[:ducts_supply_location]} and ducts_supply_surface_area=#{args[:ducts_supply_surface_area]} and ducts_return_location=#{args[:ducts_return_location]} and ducts_return_surface_area=#{args[:ducts_return_surface_area]}" if error
-
     # second heating system fraction heat load served non less than 50%
     warning = (args[:heating_system_type_2] != 'none') && (args[:heating_system_fraction_heat_load_served_2] >= 0.5)
     warnings << "heating_system_type_2=#{args[:heating_system_type_2]} and heating_system_fraction_heat_load_served_2=#{args[:heating_system_fraction_heat_load_served_2]}" if warning
@@ -3538,9 +3534,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = ((args[:water_heater_type] == HPXML::WaterHeaterTypeCombiStorage) || (args[:water_heater_type] == HPXML::WaterHeaterTypeCombiTankless)) && (args[:heating_system_type] != HPXML::HVACTypeBoiler)
     errors << "water_heater_type=#{args[:water_heater_type]} and heating_system_type=#{args[:heating_system_type]}" if error
 
+    # duct location and surface area not both auto or not both specified
+    error = ((args[:ducts_supply_location] == Constants.Auto) && (args[:ducts_supply_surface_area] != Constants.Auto)) || ((args[:ducts_supply_location] != Constants.Auto) && (args[:ducts_supply_surface_area] == Constants.Auto)) || ((args[:ducts_return_location] == Constants.Auto) && (args[:ducts_return_surface_area] != Constants.Auto)) || ((args[:ducts_return_location] != Constants.Auto) && (args[:ducts_return_surface_area] == Constants.Auto))
+    errors << "ducts_supply_location=#{args[:ducts_supply_location]} and ducts_supply_surface_area=#{args[:ducts_supply_surface_area]} and ducts_return_location=#{args[:ducts_return_location]} and ducts_return_surface_area=#{args[:ducts_return_surface_area]}" if error
+
     # duct leakage total but supply percent and return percent don't sum to 1
     warning = (args[:ducts_leakage_total_or_to_outside] == HPXML::DuctLeakageTotal) && (args[:ducts_supply_leakage_units] == HPXML::UnitsPercent) && (args[:ducts_return_leakage_units] == HPXML::UnitsPercent) && (args[:ducts_supply_leakage_value] + args[:ducts_return_leakage_value] != 1.0)
     warnings << "ducts_leakage_total_or_to_outside=#{args[:ducts_leakage_total_or_to_outside]} and ducts_supply_leakage_units=#{args[:ducts_supply_leakage_units]} and ducts_return_leakage_units=#{args[:ducts_return_leakage_units]} and ducts_supply_leakage_value=#{args[:ducts_supply_leakage_value]} and ducts_return_leakage_value=#{args[:ducts_return_leakage_value]}" if warning
+
+    # duct leakage but no unconditioned space
+    warning = ((args[:ducts_supply_leakage_value] > 0) || (args[:ducts_return_leakage_value] > 0)) && ((args[:geometry_foundation_type] == HPXML::FoundationTypeSlab) || (args[:geometry_foundation_type] == HPXML::FoundationTypeBasementConditioned)) && ((args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) || (args[:geometry_roof_type] == 'flat') || (args[:geometry_attic_type] == HPXML::AtticTypeConditioned))
+    warnings << "ducts_supply_leakage_value=#{args[:ducts_supply_leakage_value]} and ducts_return_leakage_value=#{args[:ducts_return_leakage_value]} and geometry_foundation_type=#{args[:geometry_foundation_type]} and geometry_unit_type=#{args[:geometry_unit_type]} and geometry_roof_type=#{args[:geometry_roof_type]} and geometry_attic_type=#{args[:geometry_attic_type]}" if warning
 
     return warnings, errors
   end
@@ -4546,6 +4550,11 @@ class HPXMLFile
     end
 
     # Duct Leakage
+    if ((args[:ducts_supply_leakage_value] > 0) || (args[:ducts_return_leakage_value] > 0)) && ((args[:geometry_foundation_type] == HPXML::FoundationTypeSlab) || (args[:geometry_foundation_type] == HPXML::FoundationTypeBasementConditioned)) && ((args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) || (args[:geometry_roof_type] == 'flat') || (args[:geometry_attic_type] == HPXML::AtticTypeConditioned))
+      args[:ducts_supply_leakage_value] = 0
+      args[:ducts_return_leakage_value] = 0
+    end
+
     if args[:ducts_leakage_total_or_to_outside] == HPXML::DuctLeakageTotal
       ducts_supply_leakage_units = HPXML::UnitsPercent
       ducts_return_leakage_units = HPXML::UnitsPercent
@@ -4556,8 +4565,10 @@ class HPXMLFile
       # Normalize values in case user inadvertently entered values that add up to the total duct leakage, as opposed to adding up to 1
       sum_duct_leakage_fracs = args[:ducts_supply_leakage_value] + args[:ducts_return_leakage_value]
 
-      ducts_supply_leakage_value = f_out * args[:ducts_supply_leakage_value] * args[:ducts_leakage_total] / sum_duct_leakage_fracs
-      ducts_return_leakage_value = args[:ducts_return_leakage_value] * args[:ducts_leakage_total] / sum_duct_leakage_fracs
+      if sum_duct_leakage_fracs > 0
+        ducts_supply_leakage_value = f_out * args[:ducts_supply_leakage_value] * args[:ducts_leakage_total] / sum_duct_leakage_fracs
+        ducts_return_leakage_value = args[:ducts_return_leakage_value] * args[:ducts_leakage_total] / sum_duct_leakage_fracs
+      end
     elsif args[:ducts_leakage_total_or_to_outside] == HPXML::DuctLeakageToOutside
       ducts_supply_leakage_units = args[:ducts_supply_leakage_units]
       ducts_return_leakage_units = args[:ducts_return_leakage_units]

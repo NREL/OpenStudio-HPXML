@@ -112,7 +112,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'unvented-attic-with-floor-and-roof-insulation.osw' => 'geometry_attic_type=UnventedAttic and ceiling_assembly_r=39.3 and roof_assembly_r=10.0',
       'conditioned-basement-with-ceiling-insulation.osw' => 'geometry_foundation_type=ConditionedBasement and floor_assembly_r=10.0',
       'conditioned-attic-with-floor-insulation.osw' => 'geometry_attic_type=ConditionedAttic and ceiling_assembly_r=39.3',
-      'duct-leakage-total-percent.osw' => 'ducts_leakage_total_or_to_outside=total and ducts_supply_leakage_units=Percent and ducts_return_leakage_units=Percent and ducts_supply_leakage_value=0.666 and ducts_return_leakage_value=0.333'
+      'duct-leakage-total-percent-less-than-one.osw' => 'ducts_leakage_total_or_to_outside=total and ducts_supply_leakage_units=Percent and ducts_return_leakage_units=Percent and ducts_supply_leakage_value=0.666 and ducts_return_leakage_value=0.333',
+      'duct-leakage-no-unconditioned-space.osw' => 'ducts_supply_leakage_value=75.0 and ducts_return_leakage_value=25.0 and geometry_foundation_type=SlabOnGrade and geometry_unit_type=apartment unit and geometry_roof_type=flat and geometry_attic_type=UnventedAttic'
     }
 
     expected_error_msgs = {

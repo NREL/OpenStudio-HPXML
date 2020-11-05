@@ -257,7 +257,8 @@ def create_osws
     'invalid_files/conditioned-basement-with-ceiling-insulation.osw' => 'base.osw',
     'invalid_files/conditioned-attic-with-floor-insulation.osw' => 'base.osw',
     'invalid_files/dhw-indirect-without-boiler.osw' => 'base.osw',
-    'invalid_files/duct-leakage-total-percent.osw' => 'base.osw'
+    'invalid_files/duct-leakage-total-percent-less-than-one.osw' => 'base.osw',
+    'invalid_files/duct-leakage-no-unconditioned-space.osw' => 'base-multifamily.osw'
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -1855,14 +1856,23 @@ def get_values(osw_file, step)
     step.setArgument('floor_assembly_r', 10)
   elsif ['invalid_files/conditioned-attic-with-floor-insulation.osw'].include? osw_file
     step.setArgument('geometry_attic_type', HPXML::AtticTypeConditioned)
+    step.setArgument('ducts_supply_leakage_value', 0.0)
+    step.setArgument('ducts_return_leakage_value', 0.0)
   elsif ['invalid_files/dhw-indirect-without-boiler.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeCombiStorage)
-  elsif ['invalid_files/duct-leakage-total-percent.osw'].include? osw_file
+  elsif ['invalid_files/duct-leakage-total-percent-less-than-one.osw'].include? osw_file
     step.setArgument('ducts_leakage_total_or_to_outside', HPXML::DuctLeakageTotal)
     step.setArgument('ducts_supply_leakage_units', HPXML::UnitsPercent)
     step.setArgument('ducts_return_leakage_units', HPXML::UnitsPercent)
     step.setArgument('ducts_supply_leakage_value', 0.666)
     step.setArgument('ducts_return_leakage_value', 0.333)
+  elsif ['invalid_files/duct-leakage-no-unconditioned-space.osw'].include? osw_file
+    step.setArgument('geometry_foundation_type', HPXML::FoundationTypeSlab)
+    step.setArgument('geometry_foundation_height', 0.0)
+    step.setArgument('geometry_foundation_height_above_grade', 0.0)
+    step.setArgument('geometry_roof_type', 'flat')
+    step.setArgument('ducts_supply_leakage_value', 75.0)
+    step.setArgument('ducts_return_leakage_value', 25.0)
   end
   return step
 end

@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>39017be0-c783-4b02-96fc-b2cc04218656</version_id>
-  <version_modified>20201104T183021Z</version_modified>
+  <version_id>4c2d20a0-ec92-4a1e-a18d-fd444b91ee51</version_id>
+  <version_modified>20201105T230142Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -2232,7 +2232,7 @@
     <argument>
       <name>ducts_supply_leakage_value</name>
       <display_name>Ducts: Supply Leakage Value</display_name>
-      <description>The leakage value to outside of the supply ducts.</description>
+      <description>The leakage value 'to outside' or 'total' of the supply ducts.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -2241,7 +2241,7 @@
     <argument>
       <name>ducts_return_leakage_value</name>
       <display_name>Ducts: Return Leakage Value</display_name>
-      <description>The leakage value to outside of the return ducts.</description>
+      <description>The leakage value 'to outside' or 'total' of the return ducts.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -7753,7 +7753,7 @@
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>69A150AD</checksum>
+      <checksum>9A5F6C59</checksum>
     </file>
     <file>
       <version>
@@ -7764,7 +7764,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>54B4DDA8</checksum>
+      <checksum>E0A6B38E</checksum>
     </file>
   </files>
 </measure>
