@@ -1313,13 +1313,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_supply_leakage_value', true)
     arg.setDisplayName('Ducts: Supply Leakage Value')
-    arg.setDescription('The leakage value to outside of the supply ducts.')
+    arg.setDescription("The leakage value '#{HPXML::DuctLeakageToOutside}' or '#{HPXML::DuctLeakageTotal}' of the supply ducts.")
     arg.setDefaultValue(75)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_return_leakage_value', true)
     arg.setDisplayName('Ducts: Return Leakage Value')
-    arg.setDescription('The leakage value to outside of the return ducts.')
+    arg.setDescription("The leakage value '#{HPXML::DuctLeakageToOutside}' or '#{HPXML::DuctLeakageTotal}' of the return ducts.")
     arg.setDefaultValue(25)
     args << arg
 
