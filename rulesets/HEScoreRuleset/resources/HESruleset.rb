@@ -437,7 +437,6 @@ class HEScoreRuleset
 
     # HeatingSystem
     orig_hpxml.heating_systems.each do |orig_heating|
-      heating_capacity = -1 # Use Manual J auto-sizing
       distribution_system_idref = orig_heating.distribution_system_idref
       heating_system_type = orig_heating.heating_system_type
       heating_system_fuel = orig_heating.heating_system_fuel
@@ -509,7 +508,6 @@ class HEScoreRuleset
                                     distribution_system_idref: distribution_system_idref,
                                     heating_system_type: heating_system_type,
                                     heating_system_fuel: heating_system_fuel,
-                                    heating_capacity: heating_capacity,
                                     heating_efficiency_afue: heating_efficiency_afue,
                                     heating_efficiency_percent: heating_efficiency_percent,
                                     fraction_heat_load_served: fraction_heat_load_served)
@@ -525,10 +523,6 @@ class HEScoreRuleset
       year_installed = orig_cooling.year_installed
       energy_star = orig_cooling.energy_star
       fraction_cool_load_served = orig_cooling.fraction_cool_load_served
-      cooling_capacity = nil
-      if cooling_system_type != HPXML::HVACTypeEvaporativeCooler
-        cooling_capacity = -1 # Use Manual J auto-sizing
-      end
 
       if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
         if not cooling_efficiency_seer.nil?
@@ -567,7 +561,6 @@ class HEScoreRuleset
                                     distribution_system_idref: distribution_system_idref,
                                     cooling_system_type: cooling_system_type,
                                     cooling_system_fuel: cooling_system_fuel,
-                                    cooling_capacity: cooling_capacity,
                                     fraction_cool_load_served: fraction_cool_load_served,
                                     cooling_efficiency_seer: cooling_efficiency_seer,
                                     cooling_efficiency_eer: cooling_efficiency_eer)
@@ -576,10 +569,7 @@ class HEScoreRuleset
     # HeatPump
     orig_hpxml.heat_pumps.each do |orig_hp|
       heat_pump_fuel = HPXML::FuelTypeElectricity
-      cooling_capacity = -1 # Use Manual J auto-sizing
-      heating_capacity = -1 # Use Manual J auto-sizing
       backup_heating_fuel = HPXML::FuelTypeElectricity
-      backup_heating_capacity = -1 # Use Manual J auto-sizing
       backup_heating_efficiency_percent = 1.0
       heat_pump_type = orig_hp.heat_pump_type
       cooling_efficiency_seer = orig_hp.cooling_efficiency_seer
@@ -643,10 +633,7 @@ class HEScoreRuleset
                                distribution_system_idref: distribution_system_idref,
                                heat_pump_type: heat_pump_type,
                                heat_pump_fuel: heat_pump_fuel,
-                               heating_capacity: heating_capacity,
-                               cooling_capacity: cooling_capacity,
                                backup_heating_fuel: backup_heating_fuel,
-                               backup_heating_capacity: backup_heating_capacity,
                                backup_heating_efficiency_percent: backup_heating_efficiency_percent,
                                fraction_heat_load_served: fraction_heat_load_served,
                                fraction_cool_load_served: fraction_cool_load_served,
