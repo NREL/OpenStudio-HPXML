@@ -188,7 +188,7 @@ class HEScoreRuleset
                               emittance: 0.9,
                               pitch: Math.tan(@roof_angle_rad) * 12,
                               radiant_barrier: orig_roof.radiant_barrier,
-                              radiant_barrier_grade: orig_roof.radiant_barrier_grade,
+                              radiant_barrier_grade: 1,
                               insulation_assembly_r_value: roof_r)
         end
       end
