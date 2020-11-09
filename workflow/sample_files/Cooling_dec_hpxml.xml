@@ -19,10 +19,10 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 8.137</Address1>
-        <CityMunicipality>St Louis</CityMunicipality>
-        <StateCode>MO</StateCode>
-        <ZipCode>63101</ZipCode>
+        <Address1>Regression run 8.14</Address1>
+        <CityMunicipality>Denver</CityMunicipality>
+        <StateCode>CO</StateCode>
+        <ZipCode>80201</ZipCode>
       </Address>
     </Site>
     <ProjectStatus>
@@ -53,12 +53,12 @@
       <ClimateandRiskZones>
         <ClimateZoneIECC>
           <Year>2012</Year>
-          <ClimateZone>4A</ClimateZone>
+          <ClimateZone>5B</ClimateZone>
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id="wmo"/>
-          <Name>Cahokia St Louis</Name>
-          <WMO>725314</WMO>
+          <Name>Broomfield Jeffco</Name>
+          <WMO>724699</WMO>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>
