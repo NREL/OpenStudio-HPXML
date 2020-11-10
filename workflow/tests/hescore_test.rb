@@ -145,6 +145,19 @@ class HEScoreTest < Minitest::Unit::TestCase
       end
     end
 
+    # Retrieve some additional results from results_annual.csv
+    csv_path = File.join(parent_dir, 'HEScoreDesign', 'results_annual.csv')
+    CSV.read(csv_path, headers: false).each do |row|
+      next if row.empty?
+      next if row.size < 2
+      next unless row[0].include? 'Unmet Load'
+
+      results[row[0]] = row[1]
+    end
+    # Make sure we found the unmet load outputs:
+    assert(results.keys.include? 'Unmet Load: Heating (MBtu)')
+    assert(results.keys.include? 'Unmet Load: Cooling (MBtu)')
+
     results['Runtime'] = runtime
 
     return results
@@ -291,7 +304,9 @@ class HEScoreTest < Minitest::Unit::TestCase
       column_headers << "#{key[0]}: #{key[1]} [#{key[2]}]"
     end
 
-    # Append runtime at the end
+    # Append unmet loads and runtime at the end
+    column_headers << 'Unmet Heating Load [MBtu]'
+    column_headers << 'Unmet Cooling Load [MBtu]'
     column_headers << 'Runtime [s]'
 
     require 'csv'
