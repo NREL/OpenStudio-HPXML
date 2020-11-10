@@ -168,8 +168,7 @@ class HEScoreRuleset
         end
         roof_r = get_roof_assembly_r(orig_roof.insulation_cavity_r_value,
                                      orig_roof.insulation_continuous_r_value,
-                                     orig_roof.roof_type,
-                                     orig_roof.radiant_barrier)
+                                     orig_roof.roof_type)
         if roof_area.nil?
           orig_attic.attached_frame_floors.each do |orig_frame_floor|
             roof_area = orig_frame_floor.area / (2. * Math.cos(@roof_angle_rad))
@@ -188,7 +187,8 @@ class HEScoreRuleset
                               solar_absorptance: roof_solar_abs,
                               emittance: 0.9,
                               pitch: Math.tan(@roof_angle_rad) * 12,
-                              radiant_barrier: false,
+                              radiant_barrier: orig_roof.radiant_barrier,
+                              radiant_barrier_grade: 1,
                               insulation_assembly_r_value: roof_r)
         end
       end
@@ -1064,7 +1064,7 @@ def get_roof_effective_r_from_doe2code(doe2code)
   return val
 end
 
-def get_roof_assembly_r(r_cavity, r_cont, material, has_radiant_barrier)
+def get_roof_assembly_r(r_cavity, r_cont, material)
   # Roof Assembly R-value
   materials_map = {
     HPXML::RoofTypeAsphaltShingles => 'co',  # Composition Shingles
@@ -1074,13 +1074,10 @@ def get_roof_assembly_r(r_cavity, r_cont, material, has_radiant_barrier)
     HPXML::RoofTypePlasticRubber => 'tg'     # Tar and Gravel
   }
   has_r_cont = !r_cont.nil?
-  if (not has_r_cont) && (not has_radiant_barrier)
+  if not has_r_cont
     # Wood Frame
     doe2rooftype = 'wf'
-  elsif (not has_r_cont) && has_radiant_barrier
-    # Wood Frame with Radiant Barrier
-    doe2rooftype = 'rb'
-  elsif has_r_cont && (not has_radiant_barrier)
+  else
     # Wood Frame with Rigid Foam Sheathing
     doe2rooftype = 'ps'
   end
