@@ -547,6 +547,7 @@
       <sch:assert role='ERROR' test='count(../../h:HVACDistribution/h:DistributionSystemType/h:AirDistribution) + count(../../h:HVACDistribution/h:DistributionSystemType/h:Other[text()="DSE"]) &gt;= 0'>Expected 0 or more element(s) for xpath: ../../HVACDistribution/DistributionSystemType/AirDistribution | ../../HVACDistribution/DistributionSystemType/Other[text()="DSE"]</sch:assert> <!-- See [HVACDistribution] -->
       <sch:assert role='ERROR' test='count(h:DistributionSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='count(h:CoolingCapacity) = 0'>Expected 0 element(s) for xpath: CoolingCapacity</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWattsPerCFM) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWattsPerCFM</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -868,6 +869,7 @@
       <sch:assert role='ERROR' test='count(h:TankVolume) &lt;= 1'>Expected 0 or 1 element(s) for xpath: TankVolume</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:EnergyFactor) + count(h:UniformEnergyFactor) = 1'>Expected 1 element(s) for xpath: EnergyFactor | UniformEnergyFactor</sch:assert>
+      <sch:assert role='ERROR' test='count(h:EnergyFactor) + count(h:FirstHourRating) &gt;= 1'>Expected 1 or more element(s) for xpath: EnergyFactor | FirstHourRating</sch:assert> <!-- FirstHourRating required if UniformEnergyFactor provided -->
       <sch:assert role='ERROR' test='count(h:RecoveryEfficiency) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RecoveryEfficiency</sch:assert>
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
     </sch:rule>
@@ -887,6 +889,7 @@
       <sch:assert role='ERROR' test='count(h:FuelType[text()="electricity"]) = 1'>Expected 1 element(s) for xpath: FuelType[text()="electricity"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:TankVolume) = 1'>Expected 1 element(s) for xpath: TankVolume</sch:assert>
       <sch:assert role='ERROR' test='count(h:EnergyFactor) + count(h:UniformEnergyFactor) = 1'>Expected 1 element(s) for xpath: EnergyFactor | UniformEnergyFactor</sch:assert>
+      <sch:assert role='ERROR' test='count(h:EnergyFactor) + count(h:FirstHourRating) &gt;= 1'>Expected 1 or more element(s) for xpath: EnergyFactor | FirstHourRating</sch:assert> <!-- FirstHourRating required if UniformEnergyFactor provided -->
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
     </sch:rule>
   </sch:pattern>

@@ -73,6 +73,7 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-cooling.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
+    'invalid_files/hvac-inconsistent-fan-powers.xml' => 'base.xml',
     'invalid_files/invalid-calendar-year.xml' => 'base.xml',
     'invalid_files/invalid-datatype-boolean.xml' => 'base.xml',
     'invalid_files/invalid-datatype-boolean2.xml' => 'base.xml',
@@ -170,21 +171,28 @@ def create_hpxmls
     'base-dhw-solar-indirect-flat-plate.xml' => 'base.xml',
     'base-dhw-solar-thermosyphon-flat-plate.xml' => 'base.xml',
     'base-dhw-tank-coal.xml' => 'base.xml',
+    'base-dhw-tank-elec-low-fhr-uef.xml' => 'base.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
+    'base-dhw-tank-gas-high-fhr-uef.xml' => 'base.xml',
+    'base-dhw-tank-gas-med-fhr-uef.xml' => 'base.xml',
     'base-dhw-tank-gas-outside.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-heat-pump.xml' => 'base.xml',
     'base-dhw-tank-heat-pump-outside.xml' => 'base-dhw-tank-heat-pump.xml',
+    'base-dhw-tank-heat-pump-uef-low-fhr.xml' => 'base.xml',
+    'base-dhw-tank-heat-pump-uef-medium-fhr.xml' => 'base.xml',
+    'base-dhw-tank-heat-pump-uef-high-fhr.xml' => 'base.xml',
     'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar-fraction.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-oil.xml' => 'base.xml',
     'base-dhw-tank-wood.xml' => 'base.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
+    'base-dhw-tankless-electric-uef.xml' => 'base.xml',
     'base-dhw-tankless-electric-outside.xml' => 'base-dhw-tankless-electric.xml',
     'base-dhw-tankless-gas.xml' => 'base.xml',
+    'base-dhw-tankless-gas-uef.xml' => 'base.xml',
     'base-dhw-tankless-gas-with-solar.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-gas-with-solar-fraction.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-propane.xml' => 'base.xml',
-    'base-dhw-uef.xml' => 'base.xml',
     'base-dhw-jacket-electric.xml' => 'base.xml',
     'base-dhw-jacket-gas.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-jacket-indirect.xml' => 'base-dhw-indirect.xml',
@@ -279,6 +287,9 @@ def create_hpxmls
     'base-hvac-install-qual-all-air-to-air-heat-pump-2-speed2.xml' => 'base-hvac-install-qual-all-air-to-air-heat-pump-2-speed.xml',
     'base-hvac-install-qual-all-air-to-air-heat-pump-var-speed.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-install-qual-all-air-to-air-heat-pump-var-speed2.xml' => 'base-hvac-install-qual-all-air-to-air-heat-pump-var-speed.xml',
+    'base-hvac-install-qual-all-evap-cooler-only.xml' => 'base-hvac-evap-cooler-only.xml',
+    'base-hvac-install-qual-all-room-ac-only.xml' => 'base-hvac-room-ac-only.xml',
+    'base-hvac-install-qual-all-room-ac-only2.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-install-qual-all-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-install-qual-all-furnace-gas-central-ac-1-speed2.xml' => 'base-hvac-install-qual-all-furnace-gas-central-ac-1-speed.xml',
     'base-hvac-install-qual-all-furnace-gas-central-ac-2-speed.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
@@ -2828,6 +2839,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].fraction_heat_load_served = 0.5
     hpxml.heating_systems << hpxml.heating_systems[0].dup
     hpxml.heating_systems[1].id += '2'
+  elsif ['invalid_files/hvac-inconsistent-fan-powers.xml'].include? hpxml_file
+    hpxml.heating_systems[0].fan_watts_per_cfm = 0.45
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_capacity /= 10.0
   elsif ['base-hvac-shared-boiler-only-baseboard.xml',
@@ -2991,6 +3004,8 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].fraction_cool_load_served = 0.5
     hpxml.cooling_systems << hpxml.cooling_systems[0].dup
     hpxml.cooling_systems[1].id += '2'
+  elsif ['invalid_files/hvac-inconsistent-fan-powers.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].fan_watts_per_cfm = 0.55
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_capacity /= 10.0
   elsif ['base-hvac-install-qual-none-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
@@ -3016,6 +3031,14 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-install-qual-all-furnace-gas-central-ac-2-speed2.xml',
          'base-hvac-install-qual-all-furnace-gas-central-ac-var-speed2.xml'].include? hpxml_file
     hpxml.cooling_systems[0].airflow_cfm_per_ton = nil
+    hpxml.cooling_systems[0].airflow_defect_ratio = -0.25
+  elsif ['base-hvac-install-qual-all-evap-cooler-only.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].fan_watts_per_cfm = 0.3
+  elsif ['base-hvac-install-qual-all-room-ac-only.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].charge_defect_ratio = -0.25
+    hpxml.cooling_systems[0].airflow_cfm_per_ton = 360.0
+  elsif ['base-hvac-install-qual-all-room-ac-only2.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].charge_defect_ratio = -0.25
     hpxml.cooling_systems[0].airflow_defect_ratio = -0.25
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_shr = nil
@@ -4049,9 +4072,66 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     elsif hpxml_file == 'base-dhw-tankless-propane.xml'
       hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypePropane
     end
-  elsif ['base-dhw-uef.xml'].include? hpxml_file
+  elsif ['base-dhw-tank-elec-low-fhr-uef.xml'].include? hpxml_file
+    # No low usage gas tank WHs in AHRI, based on Richmond model number 6ESB30-2 in AHR directory
     hpxml.water_heating_systems[0].energy_factor = nil
     hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
+    hpxml.water_heating_systems[0].first_hour_rating = 46.0
+    hpxml.water_heating_systems[0].tank_volume = 30.0
+    hpxml.water_heating_systems[0].heating_capacity = 15354.0 # 4.5 kW
+    hpxml.water_heating_systems[0].recovery_efficiency = 0.98
+  elsif ['base-dhw-tank-gas-med-fhr-uef.xml'].include? hpxml_file
+    # Based on AO Smith model number G6-MH3030NV 400 in AHRI directory
+    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 0.59
+    hpxml.water_heating_systems[0].first_hour_rating = 56.0
+    hpxml.water_heating_systems[0].tank_volume = 30.0
+    hpxml.water_heating_systems[0].heating_capacity = 30000.0
+    hpxml.water_heating_systems[0].recovery_efficiency = 0.75
+  elsif ['base-dhw-tank-gas-high-fhr-uef.xml'].include? hpxml_file
+    # Based on AO Smith model number G6-PVT7576NV 310 in AHRI directory
+    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 0.69
+    hpxml.water_heating_systems[0].first_hour_rating = 116.0
+    hpxml.water_heating_systems[0].tank_volume = 75.0
+    hpxml.water_heating_systems[0].heating_capacity = 76000.0 # Btu/hr
+    hpxml.water_heating_systems[0].recovery_efficiency = 0.79
+  elsif ['base-dhw-tank-heat-pump-uef-low-fhr.xml'].include? hpxml_file
+    # Based on Rheem model number XE40T10HS45U0 from AHRI directory
+    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeHeatPump
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 3.75
+    hpxml.water_heating_systems[0].first_hour_rating = 50.0
+    hpxml.water_heating_systems[0].tank_volume = 40.0
+  elsif ['base-dhw-tank-heat-pump-uef-medium-fhr.xml'].include? hpxml_file
+    # Based on Rheem model number XE40T10HS45U0 from AHRI directory
+    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeHeatPump
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 3.75
+    hpxml.water_heating_systems[0].first_hour_rating = 60.0
+    hpxml.water_heating_systems[0].tank_volume = 50.0
+  elsif ['base-dhw-tank-heat-pump-uef-high-fhr.xml'].include? hpxml_file
+    # Based on Rheem model number XE40T10HS45U0 from AHRI directory
+    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeHeatPump
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 3.75
+    hpxml.water_heating_systems[0].first_hour_rating = 80.0
+    hpxml.water_heating_systems[0].tank_volume = 80.0
+  elsif ['base-dhw-tankless-gas-uef.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
+    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
+    hpxml.water_heating_systems[0].tank_volume = nil
+    hpxml.water_heating_systems[0].heating_capacity = nil
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
+  elsif ['base-dhw-tankless-electric-uef.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
+    hpxml.water_heating_systems[0].tank_volume = nil
+    hpxml.water_heating_systems[0].heating_capacity = nil
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 0.98
   elsif ['base-dhw-desuperheater.xml',
          'base-dhw-desuperheater-2-speed.xml',
          'base-dhw-desuperheater-var-speed.xml',
@@ -4903,8 +4983,8 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
     hpxml.plug_loads.add(id: 'PlugLoadMisc',
                          plug_load_type: HPXML::PlugLoadTypeOther,
                          kWh_per_year: 7302,
-                         frac_sensible: 0.82,
-                         frac_latent: 0.18)
+                         frac_sensible: 0.822,
+                         frac_latent: 0.178)
     hpxml.plug_loads.add(id: 'PlugLoadMisc2',
                          plug_load_type: HPXML::PlugLoadTypeTelevision,
                          kWh_per_year: 0)
@@ -4971,8 +5051,8 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
     end
   end
   if hpxml_file.include?('ASHRAE_Standard_140')
-    hpxml.plug_loads[0].weekday_fractions = '0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066'
-    hpxml.plug_loads[0].weekend_fractions = '0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066'
+    hpxml.plug_loads[0].weekday_fractions = '0.0203, 0.0203, 0.0203, 0.0203, 0.0203, 0.0339, 0.0426, 0.0852, 0.0497, 0.0304, 0.0304, 0.0406, 0.0304, 0.0254, 0.0264, 0.0264, 0.0386, 0.0416, 0.0447, 0.0700, 0.0700, 0.0731, 0.0731, 0.0660'
+    hpxml.plug_loads[0].weekend_fractions = '0.0203, 0.0203, 0.0203, 0.0203, 0.0203, 0.0339, 0.0426, 0.0852, 0.0497, 0.0304, 0.0304, 0.0406, 0.0304, 0.0254, 0.0264, 0.0264, 0.0386, 0.0416, 0.0447, 0.0700, 0.0700, 0.0731, 0.0731, 0.0660'
     hpxml.plug_loads[0].monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.plug_loads[0].weekday_fractions = nil
@@ -5325,29 +5405,14 @@ if ARGV[0].to_sym == :download_weather
 end
 
 if ARGV[0].to_sym == :create_release_zips
-  # Generate documentation
-  puts 'Generating documentation...'
-  command = 'sphinx-build -b singlehtml docs/source documentation'
-  begin
-    `#{command}`
-    if not File.exist? File.join(File.dirname(__FILE__), 'documentation', 'index.html')
-      puts 'Documentation was not successfully generated. Aborting...'
-      exit!
-    end
-  rescue
-    puts "Command failed: '#{command}'. Perhaps sphinx needs to be installed?"
-    exit!
-  end
+  require_relative 'HPXMLtoOpenStudio/resources/version'
 
-  files = ['HPXMLtoOpenStudio/measure.*',
-           'HPXMLtoOpenStudio/resources/*.*',
-           'SimulationOutputReport/measure.*',
-           'SimulationOutputReport/resources/*.*',
-           'weather/*.*',
-           'workflow/*.*',
-           'workflow/sample_files/*.xml',
-           'documentation/index.html',
-           'documentation/_static/**/*.*']
+  release_map = { File.join(File.dirname(__FILE__), "OpenStudio-HPXML-v#{Version::OS_HPXML_Version}-minimal.zip") => false,
+                  File.join(File.dirname(__FILE__), "OpenStudio-HPXML-v#{Version::OS_HPXML_Version}-full.zip") => true }
+
+  release_map.keys.each do |zip_path|
+    File.delete(zip_path) if File.exist? zip_path
+  end
 
   # Only include files under git version control
   command = 'git ls-files'
@@ -5358,35 +5423,71 @@ if ARGV[0].to_sym == :create_release_zips
     exit!
   end
 
-  release_map = { File.join(File.dirname(__FILE__), 'release-minimal.zip') => false,
-                  File.join(File.dirname(__FILE__), 'release-full.zip') => true }
+  files = ['HPXMLtoOpenStudio/measure.*',
+           'HPXMLtoOpenStudio/resources/*.*',
+           'SimulationOutputReport/measure.*',
+           'SimulationOutputReport/resources/*.*',
+           'weather/*.*',
+           'workflow/*.*',
+           'workflow/sample_files/*.xml',
+           'workflow/tests/*.rb',
+           'workflow/tests/ASHRAE_Standard_140/*.xml',
+           'documentation/index.html',
+           'documentation/_static/**/*.*']
 
-  release_map.keys.each do |zip_path|
-    File.delete(zip_path) if File.exist? zip_path
-  end
-
-  # Check if we need to download weather files for the full release zip
-  num_epws_expected = 1011
-  num_epws_local = 0
-  files.each do |f|
-    Dir[f].each do |file|
-      next unless file.end_with? '.epw'
-
-      num_epws_local += 1
+  if not ENV['CI']
+    # Run ASHRAE 140 files
+    puts 'Running ASHRAE 140 tests (this will take a minute)...'
+    command = "#{OpenStudio.getOpenStudioCLI} workflow/tests/hpxml_translator_test.rb --name=test_ashrae_140 > log.txt"
+    system(command)
+    results_csv_path = 'workflow/tests/results/results_ashrae_140.csv'
+    if not File.exist? results_csv_path
+      puts 'ASHRAE 140 results CSV file not generated. Aborting...'
+      exit!
     end
-  end
+    File.delete('log.txt')
 
-  # Make sure we have the full set of weather files
-  if num_epws_local < num_epws_expected
-    puts 'Fetching all weather files...'
-    command = "#{OpenStudio.getOpenStudioCLI} #{__FILE__} download_weather"
-    log = `#{command}`
+    # Generate documentation
+    puts 'Generating documentation...'
+    command = 'sphinx-build -b singlehtml docs/source documentation'
+    begin
+      `#{command}`
+      if not File.exist? File.join(File.dirname(__FILE__), 'documentation', 'index.html')
+        puts 'Documentation was not successfully generated. Aborting...'
+        exit!
+      end
+    rescue
+      puts "Command failed: '#{command}'. Perhaps sphinx needs to be installed?"
+      exit!
+    end
+    FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation', '_static', 'fonts'))
+
+    # Check if we need to download weather files for the full release zip
+    num_epws_expected = 1011
+    num_epws_local = 0
+    files.each do |f|
+      Dir[f].each do |file|
+        next unless file.end_with? '.epw'
+
+        num_epws_local += 1
+      end
+    end
+
+    # Make sure we have the full set of weather files
+    if num_epws_local < num_epws_expected
+      puts 'Fetching all weather files...'
+      command = "#{OpenStudio.getOpenStudioCLI} #{__FILE__} download_weather"
+      log = `#{command}`
+    end
   end
 
   # Create zip files
   release_map.each do |zip_path, include_all_epws|
     puts "Creating #{zip_path}..."
     zip = OpenStudio::ZipFile.new(zip_path, false)
+    if not ENV['CI']
+      zip.addFile(results_csv_path, File.join('OpenStudio-HPXML', results_csv_path))
+    end
     files.each do |f|
       Dir[f].each do |file|
         if file.start_with? 'documentation'
@@ -5408,7 +5509,9 @@ if ARGV[0].to_sym == :create_release_zips
   end
 
   # Cleanup
-  FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation'))
+  if not ENV['CI']
+    FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation'))
+  end
 
   puts 'Done.'
 end
