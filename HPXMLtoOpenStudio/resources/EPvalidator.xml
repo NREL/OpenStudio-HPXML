@@ -660,6 +660,8 @@
       <sch:assert role='ERROR' test='count(h:extension/h:PumpPowerWattsPerTon) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/PumpPowerWattsPerTon</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWattsPerCFM) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWattsPerCFM</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:AirflowDefectRatio) + count(h:extension/h:AirflowCFMPerTon) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/AirflowDefectRatio | extension/AirflowCFMPerTon</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:ChargeDefectRatio) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ChargeDefectRatio</sch:assert>
+      <sch:assert role='ERROR' test='number(h:extension/h:ChargeDefectRatio) = 0'>Only ChargeDefectRatio = 0 is supported so far for HeatPumpType=GroundSource</sch:assert>
     </sch:rule>
   </sch:pattern>
 

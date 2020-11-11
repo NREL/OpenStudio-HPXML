@@ -331,6 +331,7 @@
                 <Value>3.6</Value>
               </AnnualHeatingEfficiency>
               <extension>
+                <ChargeDefectRatio>0.0</ChargeDefectRatio>
                 <FanPowerWattsPerCFM>0.365</FanPowerWattsPerCFM>
                 <AirflowCFMPerTon>375.0</AirflowCFMPerTon>
                 <PumpPowerWattsPerTon>30.0</PumpPowerWattsPerTon>

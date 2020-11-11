@@ -3288,6 +3288,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
     hpxml.heat_pumps[0].fan_watts_per_cfm = 0.365
     if hpxml_file != 'base-hvac-install-qual-all-ground-to-air-heat-pump.xml'
       hpxml.heat_pumps[0].charge_defect_ratio = -0.25
+    else
+      hpxml.heat_pumps[0].charge_defect_ratio = 0.0
     end
   elsif ['base-hvac-install-qual-all-air-to-air-heat-pump-1-speed2.xml',
          'base-hvac-install-qual-all-air-to-air-heat-pump-2-speed2.xml',
