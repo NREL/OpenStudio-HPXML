@@ -321,7 +321,7 @@
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <extension>
                 <FanPowerWattsPerCFM>0.365</FanPowerWattsPerCFM>
-                <AirflowCFMPerTon>400.0</AirflowCFMPerTon>
+                <AirflowDefectRatio>-0.25</AirflowDefectRatio>
               </extension>
             </HeatingSystem>
           </HVACPlant>

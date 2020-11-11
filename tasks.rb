@@ -2873,13 +2873,13 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-install-qual-all-furnace-gas-central-ac-2-speed.xml',
          'base-hvac-install-qual-all-furnace-gas-central-ac-var-speed.xml'].include? hpxml_file
     hpxml.heating_systems[0].fan_watts_per_cfm = 0.365
-    hpxml.heating_systems[0].airflow_cfm_per_ton = 400.0
+    hpxml.heating_systems[0].airflow_defect_ratio = -0.25
   elsif ['base-hvac-install-qual-all-furnace-gas-only2.xml',
          'base-hvac-install-qual-all-furnace-gas-central-ac-1-speed2.xml',
          'base-hvac-install-qual-all-furnace-gas-central-ac-2-speed2.xml',
          'base-hvac-install-qual-all-furnace-gas-central-ac-var-speed2.xml'].include? hpxml_file
-    hpxml.heating_systems[0].airflow_defect_ratio = -0.25
-    hpxml.heating_systems[0].airflow_cfm_per_ton = nil
+    hpxml.heating_systems[0].airflow_defect_ratio = nil
+    hpxml.heating_systems[0].airflow_cfm_per_ton = 400.0
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heating_systems.nil?) && (hpxml.heating_systems.size > 0)
     hpxml.heating_systems[0].heating_capacity = nil
   end
@@ -3025,21 +3025,21 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-install-qual-all-furnace-gas-central-ac-var-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].charge_defect_ratio = -0.25
     hpxml.cooling_systems[0].fan_watts_per_cfm = 0.365
-    hpxml.cooling_systems[0].airflow_cfm_per_ton = 360.0
+    hpxml.cooling_systems[0].airflow_defect_ratio = -0.25
   elsif ['base-hvac-install-qual-all-mini-split-air-conditioner-only-ducted2.xml',
          'base-hvac-install-qual-all-furnace-gas-central-ac-1-speed2.xml',
          'base-hvac-install-qual-all-furnace-gas-central-ac-2-speed2.xml',
          'base-hvac-install-qual-all-furnace-gas-central-ac-var-speed2.xml'].include? hpxml_file
-    hpxml.cooling_systems[0].airflow_cfm_per_ton = nil
-    hpxml.cooling_systems[0].airflow_defect_ratio = -0.25
+    hpxml.cooling_systems[0].airflow_defect_ratio = nil
+    hpxml.cooling_systems[0].airflow_cfm_per_ton = 360.0
   elsif ['base-hvac-install-qual-all-evap-cooler-only.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fan_watts_per_cfm = 0.3
   elsif ['base-hvac-install-qual-all-room-ac-only.xml'].include? hpxml_file
     hpxml.cooling_systems[0].charge_defect_ratio = -0.25
-    hpxml.cooling_systems[0].airflow_cfm_per_ton = 360.0
+    hpxml.cooling_systems[0].airflow_defect_ratio = -0.25
   elsif ['base-hvac-install-qual-all-room-ac-only2.xml'].include? hpxml_file
     hpxml.cooling_systems[0].charge_defect_ratio = -0.25
-    hpxml.cooling_systems[0].airflow_defect_ratio = -0.25
+    hpxml.cooling_systems[0].airflow_cfm_per_ton = 360.0
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].compressor_type = nil
@@ -3284,7 +3284,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
          'base-hvac-install-qual-all-air-to-air-heat-pump-var-speed.xml',
          'base-hvac-install-qual-all-mini-split-heat-pump-ducted.xml',
          'base-hvac-install-qual-all-ground-to-air-heat-pump.xml'].include? hpxml_file
-    hpxml.heat_pumps[0].airflow_cfm_per_ton = 375.0
+    hpxml.heat_pumps[0].airflow_defect_ratio = -0.25
     hpxml.heat_pumps[0].fan_watts_per_cfm = 0.365
     if hpxml_file != 'base-hvac-install-qual-all-ground-to-air-heat-pump.xml'
       hpxml.heat_pumps[0].charge_defect_ratio = -0.25
@@ -3294,8 +3294,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
          'base-hvac-install-qual-all-air-to-air-heat-pump-var-speed2.xml',
          'base-hvac-install-qual-all-mini-split-heat-pump-ducted2.xml',
          'base-hvac-install-qual-all-ground-to-air-heat-pump2.xml'].include? hpxml_file
-    hpxml.heat_pumps[0].airflow_cfm_per_ton = nil
-    hpxml.heat_pumps[0].airflow_defect_ratio = -0.25
+    hpxml.heat_pumps[0].airflow_defect_ratio = nil
+    hpxml.heat_pumps[0].airflow_cfm_per_ton = 375.0
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)
     hpxml.heat_pumps[0].cooling_capacity = nil
     hpxml.heat_pumps[0].heating_capacity = nil
