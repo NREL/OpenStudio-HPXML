@@ -387,17 +387,10 @@
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>living space</Location>
-            <TankVolume>30.0</TankVolume>
+            <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-<<<<<<< HEAD:hpxml-measures/workflow/sample_files/base-hvac-install-qual-charge-defect-furnace-gas-central-ac-1-speed.xml
             <HeatingCapacity>18767.0</HeatingCapacity>
             <EnergyFactor>0.95</EnergyFactor>
-=======
-            <HeatingCapacity>15354.0</HeatingCapacity>
-            <UniformEnergyFactor>0.93</UniformEnergyFactor>
-            <FirstHourRating>46.0</FirstHourRating>
-            <RecoveryEfficiency>0.98</RecoveryEfficiency>
->>>>>>> dd544b3c008c8a9f72d4c469e6e7912f98380867:hpxml-measures/workflow/sample_files/base-dhw-tank-elec-low-fhr-uef.xml
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>

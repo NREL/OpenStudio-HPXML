@@ -320,11 +320,7 @@
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <extension>
-<<<<<<< HEAD:hpxml-measures/workflow/sample_files/base-hvac-install-qual-airflow-rate-furnace-gas-central-ac-1-speed.xml
                 <AirflowCFMPerTon>400.0</AirflowCFMPerTon>
-=======
-                <FanPowerWattsPerCFM>0.45</FanPowerWattsPerCFM>
->>>>>>> dd544b3c008c8a9f72d4c469e6e7912f98380867:hpxml-measures/workflow/sample_files/invalid_files/hvac-inconsistent-fan-powers.xml
               </extension>
             </HeatingSystem>
             <CoolingSystem>
@@ -341,11 +337,7 @@
               </AnnualCoolingEfficiency>
               <SensibleHeatFraction>0.73</SensibleHeatFraction>
               <extension>
-<<<<<<< HEAD:hpxml-measures/workflow/sample_files/base-hvac-install-qual-airflow-rate-furnace-gas-central-ac-1-speed.xml
                 <AirflowCFMPerTon>360.0</AirflowCFMPerTon>
-=======
-                <FanPowerWattsPerCFM>0.55</FanPowerWattsPerCFM>
->>>>>>> dd544b3c008c8a9f72d4c469e6e7912f98380867:hpxml-measures/workflow/sample_files/invalid_files/hvac-inconsistent-fan-powers.xml
               </extension>
             </CoolingSystem>
           </HVACPlant>
