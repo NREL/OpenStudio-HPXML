@@ -2947,28 +2947,28 @@ class HPXML < Object
       if not @weekday_heating_setpoints.nil?
         vals = @weekday_heating_setpoints.split(', ').map { |i| i.to_f }
         if vals.length != 24
-          errors << "Weekday Heating Setpoints (#{vals.length}) must be of length 24."
+          errors << "Weekday Heating Setpoints (#{vals.length}) must be a comma-separated list of 24 numbers."
         end
       end
 
       if not @weekend_heating_setpoints.nil?
         vals = @weekend_heating_setpoints.split(', ').map { |i| i.to_f }
         if vals.length != 24
-          errors << "Weekend Heating Setpoints (#{vals.length}) must be of length 24."
+          errors << "Weekend Heating Setpoints (#{vals.length}) must be a comma-separated list of 24 numbers."
         end
       end
 
       if not @weekday_cooling_setpoints.nil?
         vals = @weekday_cooling_setpoints.split(', ').map { |i| i.to_f }
         if vals.length != 24
-          errors << "Weekday Cooling Setpoints (#{vals.length}) must be of length 24."
+          errors << "Weekday Cooling Setpoints (#{vals.length}) must be a comma-separated list of 24 numbers."
         end
       end
 
       if not @weekend_cooling_setpoints.nil?
         vals = @weekend_cooling_setpoints.split(', ').map { |i| i.to_f }
         if vals.length != 24
-          errors << "Weekend Cooling Setpoints (#{vals.length}) must be of length 24."
+          errors << "Weekend Cooling Setpoints (#{vals.length}) must be a comma-separated list of 24 numbers."
         end
       end
 
@@ -3000,7 +3000,7 @@ class HPXML < Object
         XMLHelper.add_element(extension, 'WeekdaySetpointTempsHeatingSeason', @weekday_heating_setpoints) unless @weekday_heating_setpoints.nil?
         XMLHelper.add_element(extension, 'WeekendSetpointTempsHeatingSeason', @weekend_heating_setpoints) unless @weekend_heating_setpoints.nil?
         XMLHelper.add_element(extension, 'WeekdaySetpointTempsCoolingSeason', @weekday_cooling_setpoints) unless @weekday_cooling_setpoints.nil?
-        XMLHelper.add_element(extension, 'WeekendSetpointTempsCoolingSeason', @weekend_cooling_setpoints) unless @weekday_cooling_setpoints.nil?
+        XMLHelper.add_element(extension, 'WeekendSetpointTempsCoolingSeason', @weekend_cooling_setpoints) unless @weekend_cooling_setpoints.nil?
       end
     end
 
