@@ -332,6 +332,7 @@
               </AnnualHeatingEfficiency>
               <extension>
                 <AirflowDefectRatio>-0.25</AirflowDefectRatio>
+                <ChargeDefectRatio>0.0</ChargeDefectRatio>
                 <FanPowerWattsPerCFM>0.365</FanPowerWattsPerCFM>
                 <PumpPowerWattsPerTon>30.0</PumpPowerWattsPerTon>
               </extension>

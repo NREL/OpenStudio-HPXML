@@ -256,7 +256,6 @@ class HVAC
     fan.setFanPowerCoefficient3(0)
     fan.setFanPowerCoefficient4(0)
     fan.setFanPowerCoefficient5(0)
-    set_fan_power(fan, cooling_system.fan_watts_per_cfm.to_f)
     fan.addToNode(air_loop.supplyInletNode)
     hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, evap_cooler, nil)
 
