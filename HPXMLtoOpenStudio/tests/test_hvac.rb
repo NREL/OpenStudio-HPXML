@@ -110,6 +110,10 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert_in_epsilon(program_values['F_CH'].sum, 0.0, 0.01)
   end
 
+  def test_evap_cooler
+    # TODO
+  end
+
   def test_furnace_gas
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-furnace-gas-only.xml'))
@@ -762,10 +766,6 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Get HPXML values
     heat_pump = hpxml.heat_pumps[0]
     _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-  end
-
-  def test_install_quality_evaporative_cooler
-    # FIXME: TODO
   end
 
   def test_install_quality_furnace_central_air_conditioner_1_speed_cfm
