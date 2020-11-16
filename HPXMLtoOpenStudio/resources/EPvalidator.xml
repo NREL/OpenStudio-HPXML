@@ -547,7 +547,6 @@
       <sch:assert role='ERROR' test='count(../../h:HVACDistribution/h:DistributionSystemType/h:AirDistribution) + count(../../h:HVACDistribution/h:DistributionSystemType/h:Other[text()="DSE"]) &gt;= 0'>Expected 0 or more element(s) for xpath: ../../HVACDistribution/DistributionSystemType/AirDistribution | ../../HVACDistribution/DistributionSystemType/Other[text()="DSE"]</sch:assert> <!-- See [HVACDistribution] -->
       <sch:assert role='ERROR' test='count(h:DistributionSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='count(h:CoolingCapacity) = 0'>Expected 0 element(s) for xpath: CoolingCapacity</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWattsPerCFM) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWattsPerCFM</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -660,8 +659,8 @@
       <sch:assert role='ERROR' test='count(h:extension/h:PumpPowerWattsPerTon) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/PumpPowerWattsPerTon</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWattsPerCFM) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWattsPerCFM</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:AirflowDefectRatio) + count(h:extension/h:AirflowCFMPerTon) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/AirflowDefectRatio | extension/AirflowCFMPerTon</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension[number(h:ChargeDefectRatio) = 0]/h:ChargeDefectRatio) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ChargeDefectRatio</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension[number(h:ChargeDefectRatio) = 0]/h:ChargeDefectRatio) = count(h:extension/h:ChargeDefectRatio)'>Only ChargeDefectRatio = 0 is supported so far for HeatPumpType=GroundSource</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:ChargeDefectRatio) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ChargeDefectRatio</sch:assert>
+      <sch:assert role='ERROR' test='number(h:extension/h:ChargeDefectRatio) = 0 or not(h:extension/h:ChargeDefectRatio)'>Expected extension/ChargeDefectRatio to be 0</sch:assert> <!-- Non-zero charge defect will be supported in the future -->
     </sch:rule>
   </sch:pattern>
 

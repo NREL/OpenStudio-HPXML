@@ -3241,10 +3241,8 @@ class HVACSizing
         oa_controller.setMaximumOutdoorAirFlowRate(vfr)
 
         # Fan power
-        if fan.fanEfficiency == 1 # Not user specified, so default here
-          fan_watts_per_cfm = [2.79 * hvac_final_values.Cool_Airflow**-0.29, 0.6].min # fit of efficacy to air flow from the CEC listed equipment  W/cfm
-          HVAC.set_fan_power(fan, fan_watts_per_cfm)
-        end
+        fan_watts_per_cfm = [2.79 * hvac_final_values.Cool_Airflow**-0.29, 0.6].min # fit of efficacy to air flow from the CEC listed equipment  W/cfm
+        HVAC.set_fan_power(fan, fan_watts_per_cfm)
 
         @cond_zone.airLoopHVACTerminals.each do |aterm|
           next if air_loop != aterm.airLoopHVAC.get

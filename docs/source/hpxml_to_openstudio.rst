@@ -530,7 +530,7 @@ CoolingSystemType        IsSharedSystem  DistributionSystem                     
 =======================  ==============  ==================================================  =================  =======================  ====================  ===============  =============================
 central air conditioner                  AirDistribution or DSE                              electricity        SEER                     (optional)            (optional)       (optional)
 room air conditioner                                                                         electricity        EER                      (optional)            (optional)
-evaporative cooler                       AirDistribution or DSE (optional)                   electricity                                                                        (optional)
+evaporative cooler                       AirDistribution or DSE (optional)                   electricity                                                                        
 mini-split                               AirDistribution or DSE (optional)                   electricity        SEER                     (optional)            (optional)       (optional)
 chiller                  true            HydronicDistribution or HydronicAndAirDistribution  electricity        kW/ton                                         (required)
 cooling tower            true            HydronicAndAirDistribution                          electricity
@@ -550,7 +550,6 @@ If the fan power is not provided (``extension/FanPowerWattsPerCFM``), it will be
 System Type                 Fan Power
 ==========================  ==============================
 central air conditioner     Attached furnace W/cfm if available, else 0.5 W/cfm if SEER <= 13.5, else 0.375 W/cfm
-evaporative cooler          MIN(2.79 * cfm^-0.29, 0.6) W/cfm
 mini-split                  0.07 W/cfm if ductless, else 0.18 W/cfm
 ==========================  ==============================
 

@@ -393,8 +393,6 @@ class HPXMLDefaults
         else
           cooling_system.fan_watts_per_cfm = mini_split_ductless_watts_per_cfm
         end
-      elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
-        # Depends on airflow rate, so defaulted in hvac_sizing.rb
       end
     end
     hpxml.heat_pumps.each do |heat_pump|
