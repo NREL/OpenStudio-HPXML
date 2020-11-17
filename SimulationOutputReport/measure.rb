@@ -2276,7 +2276,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     def self.WaterHeating(fuel)
       return { 'OpenStudio::Model::WaterHeaterMixed' => ["Water Heater #{fuel} Energy", "Water Heater Off Cycle Parasitic #{fuel} Energy", "Water Heater On Cycle Parasitic #{fuel} Energy"],
                'OpenStudio::Model::WaterHeaterStratified' => ["Water Heater #{fuel} Energy", "Water Heater Off Cycle Parasitic #{fuel} Energy", "Water Heater On Cycle Parasitic #{fuel} Energy"],
-               'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => ["Cooling Coil Water Heating #{fuel} Energy"] }
+               'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => ["Cooling Coil Water Heating #{fuel} Energy"],
+               'OpenStudio::Model::FanOnOff' => ["Fan #{fuel} Energy"] }
     end
 
     def self.WaterHeatingLoad
