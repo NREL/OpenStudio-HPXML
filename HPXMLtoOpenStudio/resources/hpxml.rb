@@ -2114,7 +2114,6 @@ class HPXML < Object
         XMLHelper.add_attribute(sys_id, 'id', @id + 'PerimeterInsulation')
       end
       layer = XMLHelper.add_element(insulation, 'Layer')
-      XMLHelper.add_element(layer, 'InstallationType', 'continuous')
       XMLHelper.add_element(layer, 'NominalRValue', to_float(@perimeter_insulation_r_value)) unless @perimeter_insulation_r_value.nil?
       insulation = XMLHelper.add_element(slab, 'UnderSlabInsulation')
       sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
@@ -2124,7 +2123,6 @@ class HPXML < Object
         XMLHelper.add_attribute(sys_id, 'id', @id + 'UnderSlabInsulation')
       end
       layer = XMLHelper.add_element(insulation, 'Layer')
-      XMLHelper.add_element(layer, 'InstallationType', 'continuous')
       XMLHelper.add_element(layer, 'NominalRValue', to_float(@under_slab_insulation_r_value)) unless @under_slab_insulation_r_value.nil?
       XMLHelper.add_extension(slab, 'CarpetFraction', to_float(@carpet_fraction)) unless @carpet_fraction.nil?
       XMLHelper.add_extension(slab, 'CarpetRValue', to_float(@carpet_r_value)) unless @carpet_r_value.nil?
@@ -2147,12 +2145,12 @@ class HPXML < Object
       perimeter_insulation = XMLHelper.get_element(slab, 'PerimeterInsulation')
       if not perimeter_insulation.nil?
         @perimeter_insulation_id = HPXML::get_id(perimeter_insulation)
-        @perimeter_insulation_r_value = to_float_or_nil(XMLHelper.get_value(perimeter_insulation, "Layer[InstallationType='continuous']/NominalRValue"))
+        @perimeter_insulation_r_value = to_float_or_nil(XMLHelper.get_value(perimeter_insulation, 'Layer/NominalRValue'))
       end
       under_slab_insulation = XMLHelper.get_element(slab, 'UnderSlabInsulation')
       if not under_slab_insulation.nil?
         @under_slab_insulation_id = HPXML::get_id(under_slab_insulation)
-        @under_slab_insulation_r_value = to_float_or_nil(XMLHelper.get_value(under_slab_insulation, "Layer[InstallationType='continuous']/NominalRValue"))
+        @under_slab_insulation_r_value = to_float_or_nil(XMLHelper.get_value(under_slab_insulation, 'Layer/NominalRValue'))
       end
     end
   end

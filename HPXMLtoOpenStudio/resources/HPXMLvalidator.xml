@@ -133,11 +133,9 @@
       <sch:assert role='ERROR' test='number(h:DepthBelowGrade) &gt;= 0 or not(h:DepthBelowGrade)'>Expected DepthBelowGrade to be greater than or equal to 0</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Slabs/h:Slab/h:PerimeterInsulation/h:Layer'>
-      <sch:assert role='ERROR' test='h:InstallationType[text()="cavity" or text()="continuous" or text()="continuous - interior" or text()="continuous - exterior"] or not(h:InstallationType)'>Expected InstallationType to be 'cavity' or 'continuous' or 'continuous - interior' or 'continuous - exterior'</sch:assert>
       <sch:assert role='ERROR' test='number(h:NominalRValue) &gt;= 0 or not(h:NominalRValue)'>Expected NominalRValue to be greater than or equal to 0</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Slabs/h:Slab/h:UnderSlabInsulation/h:Layer'>
-      <sch:assert role='ERROR' test='h:InstallationType[text()="cavity" or text()="continuous" or text()="continuous - interior" or text()="continuous - exterior"] or not(h:InstallationType)'>Expected InstallationType to be 'cavity' or 'continuous' or 'continuous - interior' or 'continuous - exterior'</sch:assert>
       <sch:assert role='ERROR' test='number(h:NominalRValue) &gt;= 0 or not(h:NominalRValue)'>Expected NominalRValue to be greater than or equal to 0</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Windows/h:Window'>
