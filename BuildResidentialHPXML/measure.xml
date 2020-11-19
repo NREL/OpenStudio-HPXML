@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>4908166d-ac62-4fd7-91d9-4f161dee9e3a</version_id>
-  <version_modified>20201119T211303Z</version_modified>
+  <version_id>c4e78583-9f67-4056-b79c-31ba35e66241</version_id>
+  <version_modified>20201119T215013Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -205,6 +205,15 @@
       <name>schedules_vacancy_end_day_of_month</name>
       <display_name>Schedules: Vacancy End Day of Month</display_name>
       <description>This numeric field should contain the ending day of the ending month (must be valid for month) for the vacancy period desired. Only applies if the schedules type is 'stochastic'.</description>
+      <type>Integer</type>
+      <units>#</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>schedules_random_seed</name>
+      <display_name>Schedules: Random Seed</display_name>
+      <description>This numeric field is the seed for the random number generator. Only applies if the schedules type is 'stochastic'.</description>
       <type>Integer</type>
       <units>#</units>
       <required>false</required>
@@ -6757,16 +6766,22 @@
       <checksum>F0F0F886</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
+      <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>342E360B</checksum>
+      <usage_type>test</usage_type>
+      <checksum>E6DB7AE7</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>37C8C499</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>2D476B7A</checksum>
     </file>
     <file>
       <filename>base-dhw-indirect-outside.osw</filename>
@@ -7813,6 +7828,23 @@
       <checksum>5C3DA4D1</checksum>
     </file>
     <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>D9254F94</checksum>
+    </file>
+    <file>
+      <filename>extra-schedules-random-seed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D5C5B0C2</checksum>
+    </file>
+    <file>
       <filename>extra-hvac-shared-boiler-chiller-baseboard.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -7837,10 +7869,34 @@
       <checksum>FC147829</checksum>
     </file>
     <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
+      <filename>extra-hvac-shared-boiler-cooling-tower-water-loop-heat-pump.osw</filename>
+      <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>A445FB23</checksum>
+      <checksum>72250C85</checksum>
+    </file>
+    <file>
+      <filename>extra-hvac-shared-boiler-only-baseboard.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B3BEBAD8</checksum>
+    </file>
+    <file>
+      <filename>extra-hvac-shared-boiler-only-fan-coil-ducted.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5D345D98</checksum>
+    </file>
+    <file>
+      <filename>extra-hvac-shared-boiler-only-fan-coil.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>EC7DD271</checksum>
+    </file>
+    <file>
+      <filename>extra-hvac-shared-boiler-only-water-loop-heat-pump.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2D149EC5</checksum>
     </file>
     <file>
       <filename>extra-hvac-shared-chiller-only-baseboard.osw</filename>
@@ -7877,47 +7933,6 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>28E2A798</checksum>
-    </file>
-    <file>
-      <filename>extra-hvac-shared-boiler-only-baseboard.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B3BEBAD8</checksum>
-    </file>
-    <file>
-      <filename>extra-hvac-shared-boiler-only-fan-coil-ducted.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>5D345D98</checksum>
-    </file>
-    <file>
-      <filename>extra-hvac-shared-boiler-only-fan-coil.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>EC7DD271</checksum>
-    </file>
-    <file>
-      <filename>extra-hvac-shared-boiler-only-water-loop-heat-pump.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2D149EC5</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>96AB22C3</checksum>
-    </file>
-    <file>
-      <filename>extra-hvac-shared-boiler-cooling-tower-water-loop-heat-pump.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>72250C85</checksum>
     </file>
   </files>
 </measure>

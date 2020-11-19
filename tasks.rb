@@ -247,6 +247,7 @@ def create_osws
     'extra-mechvent-shared.osw' => 'base-single-family-attached.osw',
     'extra-mechvent-shared-preconditioning.osw' => 'extra-mechvent-shared.osw',
     'extra-vacancy-6-months.osw' => 'base-schedules-stochastic.osw',
+    'extra-schedules-random-seed.osw' => 'base-schedules-stochastic.osw',
     'extra-hvac-shared-boiler-chiller-baseboard.osw' => 'extra-hvac-shared-boiler-only-baseboard.osw',
     'extra-hvac-shared-boiler-chiller-fan-coil.osw' => 'extra-hvac-shared-boiler-chiller-baseboard.osw',
     'extra-hvac-shared-boiler-chiller-fan-coil-ducted.osw' => 'extra-hvac-shared-boiler-chiller-fan-coil.osw',
@@ -1806,6 +1807,8 @@ def get_values(osw_file, step)
     step.setArgument('schedules_vacancy_begin_day_of_month', 1)
     step.setArgument('schedules_vacancy_end_month', 6)
     step.setArgument('schedules_vacancy_end_day_of_month', 30)
+  elsif ['extra-schedules-random-seed.osw'].include? osw_file
+    step.setArgument('schedules_random_seed', 123)
   elsif ['extra-hvac-shared-boiler-chiller-baseboard.osw'].include? osw_file
     step.setArgument('cooling_system_type', "Shared #{HPXML::HVACTypeChiller}")
     step.setArgument('shared_hvac_cooling_loop_power', 600.0)

@@ -271,6 +271,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{load.ems_variable}_timeseries_outvar,#{load.ems_variable},Summed,ZoneTimestep,#{loads_program.name},J;").get
         result << OpenStudio::IdfObject.load("Output:Variable,*,#{load.ems_variable}_timeseries_outvar,#{timeseries_frequency};").get
       end
+      # And add HotWaterDelivered:
+      result << OpenStudio::IdfObject.load("Output:Variable,*,Water Use Connections Plant Hot Water Energy,#{timeseries_frequency};").get
     end
 
     if include_timeseries_component_loads
@@ -648,7 +650,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end
 
       # Loads
-      @loads[LT::HotWaterDelivered].annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, get_all_var_keys(@loads[LT::HotWaterDelivered].variable))
+      load = @loads[LT::HotWaterDelivered]
+      vars = get_all_var_keys(load.variable)
+      load.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars)
+      if include_timeseries_total_loads
+        load.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', load.timeseries_units), 0, timeseries_frequency)
+      end
 
       # Combi boiler water system
       hvac_id = get_combi_hvac_id(sys_id)
