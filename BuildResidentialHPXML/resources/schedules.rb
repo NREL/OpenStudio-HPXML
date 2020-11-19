@@ -22,9 +22,6 @@ class ScheduleGenerator
     if @model.getSimulationControl.timestep.is_initialized
       @minutes_per_step = 60 / @model.getSimulationControl.timestep.get.numberOfTimestepsPerHour
     end
-    @runner.registerInfo(
-      "Creating the schedule with #{@minutes_per_step} minutes per step"
-    )
 
     @steps_in_day = 24 * 60 / @minutes_per_step
 
@@ -34,40 +31,12 @@ class ScheduleGenerator
     @model.getYearDescription.isLeapYear ? @total_days_in_year = 366 : @total_days_in_year = 365
   end
 
-  def get_building_id
-    if @building_id.nil?
-      building_id = @model.getBuilding.additionalProperties.getFeatureAsInteger(
-        'Building ID'
-      )
-      if building_id.is_initialized
-        building_id = building_id.get
-      else
-        @runner.registerWarning(
-          'Unable to retrieve the Building ID; setting it to 1.'
-        )
-        building_id = 1
-      end
-    else
-      building_id = @building_id
-    end
-
-    return building_id
-  end
-
   def get_random_seed
     if @random_seed.nil?
-      seed = @model.getBuilding.additionalProperties.getFeatureAsInteger(
-        'Random Seed'
-      )
-      if seed.is_initialized
-        seed = seed.get
-      else
-        @runner.registerWarning(
-          'Unable to retrieve a random seed, defaulting to using building ID'
-        )
-        seed = get_building_id
-      end
+      @runner.registerInfo('Unable to retrieve the schedules random seed; setting it to 1.')
+      seed = 1
     else
+      @runner.registerInfo("Retrieved the schedules random seed; setting it to #{@random_seed}.")
       seed = @random_seed
     end
     return seed

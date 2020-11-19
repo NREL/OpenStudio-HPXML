@@ -134,15 +134,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('schedules_type', schedules_type_choices, true)
     arg.setDisplayName('Schedules: Type')
-    arg.setDescription(
-      "The type of occupant-related schedules to use. Schedules " \
-      "corresponding to 'default' are average (e.g., Building America). " \
-      "Schedules corresponding to 'stochastic' are generated using " \
-      "time-inhomogenous Markov chains derived from American Time Use Survey " \
-      "data, and supplemented with sampling duration and power level from " \
-      "NEEA RBSA data as well as DHW draw duration and flow rate from " \
-      "Aquacraft/AWWA data."
-    )
+    arg.setDescription("The type of occupant-related schedules to use. Schedules corresponding to 'default' are average (e.g., Building America). Schedules corresponding to 'stochastic' are generated using time-inhomogenous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data.")
     arg.setDefaultValue('default')
     args << arg
 
@@ -3642,37 +3634,33 @@ class HPXMLFile
       return true
     end
 
+    info_msgs = []
+
     # set the calendar year
     year_description = model.getYearDescription
     year_description.setCalendarYear(2007) # default to TMY
     if epw_file.startDateActualYear.is_initialized # AMY
       year_description.setCalendarYear(epw_file.startDateActualYear.get)
     end
-    runner.registerInfo(
-      "Creating schedule with CalendarYear=#{year_description.calendarYear}"
-    )
+    info_msgs << "CalendarYear=#{year_description.calendarYear}"
+
     # set the timestep
     timestep = model.getTimestep
     timestep.setNumberOfTimestepsPerHour(1)
     if args[:simulation_control_timestep].is_initialized
-      timestep.setNumberOfTimestepsPerHour(
-        60 / args[:simulation_control_timestep].get
-      )
+      timestep.setNumberOfTimestepsPerHour(60 / args[:simulation_control_timestep].get)
     end
+    info_msgs << "NumberOfTimestepsPerHour=#{timestep.numberOfTimestepsPerHour}"
 
-    schedule_seed = args[:schedules_random_seed].get \
-      if args[:schedules_random_seed].is_initialized
+    # get the seed
+    random_seed = args[:schedules_random_seed].get if args[:schedules_random_seed].is_initialized
 
-    schedule_generator = ScheduleGenerator.new(
-      runner: runner, model: model, epw_file: epw_file,
-      random_seed: schedule_seed
-    )
+    # instantiate the generator
+    schedule_generator = ScheduleGenerator.new(runner: runner, model: model, epw_file: epw_file, random_seed: random_seed)
 
     # create the schedule
     if args[:geometry_num_occupants] == Constants.Auto
-      args[:geometry_num_occupants] = Geometry.get_occupancy_default_num(
-        args[:geometry_num_bedrooms]
-      )
+      args[:geometry_num_occupants] = Geometry.get_occupancy_default_num(args[:geometry_num_bedrooms])
     else
       args[:geometry_num_occupants] = Integer(args[:geometry_num_occupants])
     end
@@ -3684,6 +3672,8 @@ class HPXMLFile
     args[:schedules_path] = '../schedules.csv'
     success = schedule_generator.export(schedules_path: File.expand_path(args[:schedules_path]))
     return false if not success
+
+    runner.registerInfo("Created schedule with #{info_msgs.join(', ')}")
 
     return true
   end
