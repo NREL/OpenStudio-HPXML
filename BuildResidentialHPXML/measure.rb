@@ -928,6 +928,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_type_choices << HPXML::HVACTypeWallFurnace
     heating_system_type_choices << HPXML::HVACTypeFloorFurnace
     heating_system_type_choices << HPXML::HVACTypeBoiler
+    heating_system_type_choices << "Shared #{HPXML::HVACTypeBoiler}"
     heating_system_type_choices << HPXML::HVACTypeElectricResistance
     heating_system_type_choices << HPXML::HVACTypeStove
     heating_system_type_choices << HPXML::HVACTypePortableHeater
@@ -949,7 +950,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     cooling_system_type_choices << HPXML::HVACTypeRoomAirConditioner
     cooling_system_type_choices << HPXML::HVACTypeEvaporativeCooler
     cooling_system_type_choices << HPXML::HVACTypeMiniSplitAirConditioner
-    cooling_system_type_choices << HPXML::HVACTypeChiller
+    cooling_system_type_choices << "Shared #{HPXML::HVACTypeChiller}"
+    cooling_system_type_choices << "Shared #{HPXML::HVACTypeCoolingTower}"
 
     compressor_type_choices = OpenStudio::StringVector.new
     compressor_type_choices << HPXML::HVACCompressorTypeSingleStage
@@ -1010,12 +1012,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heating_system_has_flue_or_chimney', true)
     arg.setDisplayName('Heating System: Has Flue or Chimney')
     arg.setDescription('Whether the heating system has a flue or chimney.')
-    arg.setDefaultValue(false)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heating_system_is_shared_system', true)
-    arg.setDisplayName('Heating System: Is Shared System')
-    arg.setDescription('Whether the heating system is a shared system. If true, assumed to serve all the units in the building. This is valid only for a boiler.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -1083,17 +1079,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('W/CFM')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('cooling_system_is_shared_system', true)
-    arg.setDisplayName('Cooling System: Is Shared System')
-    arg.setDescription('Whether the cooling system is a shared system. If true, assumed to serve all the units in the building. This is valid only for a chiller.')
-    arg.setDefaultValue(false)
-    args << arg
-
     heat_pump_type_choices = OpenStudio::StringVector.new
     heat_pump_type_choices << 'none'
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpAirToAir
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpMiniSplit
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpGroundToAir
+    heat_pump_type_choices << "Shared #{HPXML::HVACTypeHeatPumpGroundToAir}"
 
     heat_pump_fuel_choices = OpenStudio::StringVector.new
     heat_pump_fuel_choices << HPXML::FuelTypeElectricity
@@ -1225,12 +1216,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heat Pump: Fan Power')
     arg.setDescription('Blower fan power.')
     arg.setUnits('W/CFM')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_is_shared_system', true)
-    arg.setDisplayName('Heat Pump: Is Shared System')
-    arg.setDescription('Whether the heat pump is a shared system. If true, assumed to serve all the units in the building. This is valid only for a ground-to-air heat pump.')
-    arg.setDefaultValue(false)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('shared_hvac_heating_loop_power', false)
@@ -3229,7 +3214,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              heating_system_fan_power_watts_per_cfm: runner.getOptionalDoubleArgumentValue('heating_system_fan_power_watts_per_cfm', user_arguments),
              heating_system_fan_power_watts: runner.getOptionalDoubleArgumentValue('heating_system_fan_power_watts', user_arguments),
              heating_system_has_flue_or_chimney: runner.getBoolArgumentValue('heating_system_has_flue_or_chimney', user_arguments),
-             heating_system_is_shared_system: runner.getBoolArgumentValue('heating_system_is_shared_system', user_arguments),
              cooling_system_type: runner.getStringArgumentValue('cooling_system_type', user_arguments),
              cooling_system_cooling_efficiency_seer: runner.getDoubleArgumentValue('cooling_system_cooling_efficiency_seer', user_arguments),
              cooling_system_cooling_efficiency_eer: runner.getDoubleArgumentValue('cooling_system_cooling_efficiency_eer', user_arguments),
@@ -3240,7 +3224,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              cooling_system_fraction_cool_load_served: runner.getDoubleArgumentValue('cooling_system_fraction_cool_load_served', user_arguments),
              cooling_system_is_ducted: runner.getBoolArgumentValue('cooling_system_is_ducted', user_arguments),
              cooling_system_fan_power_watts_per_cfm: runner.getOptionalDoubleArgumentValue('cooling_system_fan_power_watts_per_cfm', user_arguments),
-             cooling_system_is_shared_system: runner.getBoolArgumentValue('cooling_system_is_shared_system', user_arguments),
              heat_pump_type: runner.getStringArgumentValue('heat_pump_type', user_arguments),
              heat_pump_heating_efficiency_hspf: runner.getDoubleArgumentValue('heat_pump_heating_efficiency_hspf', user_arguments),
              heat_pump_heating_efficiency_cop: runner.getDoubleArgumentValue('heat_pump_heating_efficiency_cop', user_arguments),
@@ -3260,7 +3243,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              heat_pump_mini_split_is_ducted: runner.getOptionalStringArgumentValue('heat_pump_mini_split_is_ducted', user_arguments),
              heat_pump_pump_power_watts_per_ton: runner.getOptionalDoubleArgumentValue('heat_pump_pump_power_watts_per_ton', user_arguments),
              heat_pump_fan_power_watts_per_cfm: runner.getOptionalDoubleArgumentValue('heat_pump_fan_power_watts_per_cfm', user_arguments),
-             heat_pump_is_shared_system: runner.getBoolArgumentValue('heat_pump_is_shared_system', user_arguments),
              shared_hvac_heating_loop_power: runner.getOptionalDoubleArgumentValue('shared_hvac_heating_loop_power', user_arguments),
              shared_hvac_heating_fan_coil_power: runner.getOptionalDoubleArgumentValue('shared_hvac_heating_fan_coil_power', user_arguments),
              shared_hvac_heating_water_loop_heat_pump_heating_efficiency: runner.getOptionalDoubleArgumentValue('shared_hvac_heating_water_loop_heat_pump_heating_efficiency', user_arguments),
@@ -4346,8 +4328,10 @@ class HPXMLFile
 
     return if heating_system_type == 'none'
 
-    if args[:heating_system_heating_capacity] != Constants.Auto
-      heating_capacity = args[:heating_system_heating_capacity]
+    if not ["Shared #{HPXML::HVACTypeBoiler}"].include? heating_system_type
+      if args[:heating_system_heating_capacity] != Constants.Auto
+        heating_capacity = args[:heating_system_heating_capacity]
+      end
     end
 
     if args[:heating_system_electric_auxiliary_energy].is_initialized
@@ -4362,7 +4346,7 @@ class HPXMLFile
       heating_system_fuel = args[:heating_system_fuel]
     end
 
-    if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeBoiler].include? heating_system_type
+    if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeBoiler, "Shared #{HPXML::HVACTypeBoiler}"].include? heating_system_type
       heating_efficiency_afue = args[:heating_system_heating_efficiency]
     elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypeStove, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFireplace, HPXML::HVACTypeFixedHeater].include? heating_system_type
       heating_efficiency_percent = args[:heating_system_heating_efficiency]
@@ -4378,8 +4362,9 @@ class HPXMLFile
       end
     end
 
-    if args[:heating_system_is_shared_system]
-      is_shared_system = args[:heating_system_is_shared_system]
+    if heating_system_type.include? 'Shared'
+      heating_system_type.slice! 'Shared '
+      is_shared_system = true
       number_of_units_served = args[:geometry_building_num_units].get
       shared_loop_watts = args[:shared_hvac_heating_loop_power].get
       if args[:shared_hvac_heating_fan_coil_power].is_initialized
@@ -4452,7 +4437,7 @@ class HPXMLFile
 
     return if cooling_system_type == 'none'
 
-    if cooling_system_type != HPXML::HVACTypeEvaporativeCooler
+    if not [HPXML::HVACTypeEvaporativeCooler, "Shared #{HPXML::HVACTypeCoolingTower}"].include? cooling_system_type
       if args[:cooling_system_cooling_capacity] != Constants.Auto
         cooling_capacity = args[:cooling_system_cooling_capacity]
       end
@@ -4465,7 +4450,7 @@ class HPXMLFile
     end
 
     if args[:cooling_system_cooling_sensible_heat_fraction].is_initialized
-      if cooling_system_type != HPXML::HVACTypeEvaporativeCooler
+      if not [HPXML::HVACTypeEvaporativeCooler, "Shared #{HPXML::HVACTypeChiller}", "Shared #{HPXML::HVACTypeCoolingTower}"].include? cooling_system_type
         cooling_shr = args[:cooling_system_cooling_sensible_heat_fraction].get
       end
     end
@@ -4474,12 +4459,13 @@ class HPXMLFile
       cooling_efficiency_seer = args[:cooling_system_cooling_efficiency_seer]
     elsif [HPXML::HVACTypeRoomAirConditioner].include? cooling_system_type
       cooling_efficiency_eer = args[:cooling_system_cooling_efficiency_eer]
-    elsif [HPXML::HVACTypeChiller].include? cooling_system_type
+    elsif ["Shared #{HPXML::HVACTypeChiller}"].include? cooling_system_type
       cooling_efficiency_kw_per_ton = args[:cooling_system_cooling_efficiency_kw_per_ton]
     end
 
-    if args[:cooling_system_is_shared_system]
-      is_shared_system = args[:cooling_system_is_shared_system]
+    if cooling_system_type.include? 'Shared'
+      cooling_system_type.slice! 'Shared '
+      is_shared_system = true
       number_of_units_served = args[:geometry_building_num_units].get
       shared_loop_watts = args[:shared_hvac_cooling_loop_power].get
       if args[:shared_hvac_cooling_fan_coil_power].is_initialized
@@ -4567,7 +4553,7 @@ class HPXMLFile
     if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
       heating_efficiency_hspf = args[:heat_pump_heating_efficiency_hspf]
       cooling_efficiency_seer = args[:heat_pump_cooling_efficiency_seer]
-    elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump_type
+    elsif [HPXML::HVACTypeHeatPumpGroundToAir, "Shared #{HPXML::HVACTypeHeatPumpGroundToAir}"].include? heat_pump_type
       heating_efficiency_cop = args[:heat_pump_heating_efficiency_cop]
       cooling_efficiency_eer = args[:heat_pump_cooling_efficiency_eer]
 
@@ -4580,8 +4566,9 @@ class HPXMLFile
       fan_watts_per_cfm = args[:heat_pump_fan_power_watts_per_cfm].get
     end
 
-    if args[:heat_pump_is_shared_system]
-      is_shared_system = args[:heat_pump_is_shared_system]
+    if heat_pump_type.include? 'Shared'
+      heat_pump_type.slice! 'Shared '
+      is_shared_system = true
       number_of_units_served = args[:geometry_building_num_units].get
       shared_loop_watts = args[:shared_hvac_heat_pump_shared_loop_power].get
     end
@@ -4655,7 +4642,7 @@ class HPXMLFile
       hydronic_distribution_systems << heating_system
     end
     hpxml.cooling_systems.each do |cooling_system|
-      next unless [HPXML::HVACTypeChiller].include? cooling_system.cooling_system_type
+      next unless [HPXML::HVACTypeChiller, HPXML::HVACTypeCoolingTower].include? cooling_system.cooling_system_type
       next if hydronic_and_air_distribution_systems.size > 0
 
       hydronic_distribution_systems << cooling_system
