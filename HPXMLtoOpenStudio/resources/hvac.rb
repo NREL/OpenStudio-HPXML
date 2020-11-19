@@ -1324,6 +1324,18 @@ class HVAC
     equip.setSchedule(ceiling_fan_sch.schedule)
   end
 
+  def self.apply_clg_ceiling_fan_offset(weather, hvac_control, clg_setpoints)
+    clg_ceiling_fan_offset = hvac_control.ceiling_fan_cooling_setpoint_temp_offset
+    if not clg_ceiling_fan_offset.nil?
+      HVAC.get_default_ceiling_fan_months(weather).each_with_index do |operation, m|
+        next unless operation == 1
+
+        clg_setpoints[m] = [clg_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
+      end
+    end
+    return clg_setpoints
+  end
+
   def self.apply_setpoints(model, runner, weather, hvac_control, living_zone)
     # Assume heating/cooling seasons are year-round
     htg_start_month = 1
@@ -1375,37 +1387,18 @@ class HVAC
     end
 
     # Apply cooling setpoint offset due to ceiling fan?
-    clg_ceiling_fan_offset = hvac_control.ceiling_fan_cooling_setpoint_temp_offset
-    if not clg_ceiling_fan_offset.nil?
-      HVAC.get_default_ceiling_fan_months(weather).each_with_index do |operation, m|
-        next unless operation == 1
-
-        clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
-      end
-    end
+    clg_weekday_setpoints = apply_clg_ceiling_fan_offset(weather, hvac_control, clg_weekday_setpoints)
     clg_weekend_setpoints = clg_weekday_setpoints
 
     # Optionally apply 24-hr cooling setpoint schedules
     if (not hvac_control.weekday_cooling_setpoints.nil?) && (not hvac_control.weekend_cooling_setpoints.nil?)
       clg_weekday_setpoints = hvac_control.weekday_cooling_setpoints.split(', ').map { |i| i.to_f }
       clg_weekday_setpoints = [clg_weekday_setpoints] * 12
-      if not clg_ceiling_fan_offset.nil?
-        HVAC.get_default_ceiling_fan_months(weather).each_with_index do |operation, m|
-          next unless operation == 1
-
-          clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
-        end
-      end
+      clg_weekday_setpoints = apply_clg_ceiling_fan_offset(weather, hvac_control, clg_weekday_setpoints)
 
       clg_weekend_setpoints = hvac_control.weekend_cooling_setpoints.split(', ').map { |i| i.to_f }
       clg_weekend_setpoints = [clg_weekend_setpoints] * 12
-      if not clg_ceiling_fan_offset.nil?
-        HVAC.get_default_ceiling_fan_months(weather).each_with_index do |operation, m|
-          next unless operation == 1
-
-          clg_weekend_setpoints[m] = [clg_weekend_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
-        end
-      end
+      clg_weekend_setpoints = apply_clg_ceiling_fan_offset(weather, hvac_control, clg_weekend_setpoints)
     end
 
     # Create heating season schedule
