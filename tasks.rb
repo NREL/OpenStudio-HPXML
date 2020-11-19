@@ -172,6 +172,7 @@ def create_osws
     'base-hvac-room-ac-only.osw' => 'base.osw',
     'base-hvac-room-ac-only-33percent.osw' => 'base.osw',
     'base-hvac-setpoints.osw' => 'base.osw',
+    # 'base-hvac-shared-boiler-chiller-baseboard.osw' => 'base.osw',
     # 'base-hvac-shared-boiler-chiller-fan-coil.osw' => 'base.osw',
     # 'base-hvac-shared-boiler-chiller-fan-coil-ducted.osw' => 'base.osw',
     # 'base-hvac-shared-boiler-chiller-water-loop-heat-pump.osw' => 'base.osw',
@@ -179,6 +180,7 @@ def create_osws
     # 'base-hvac-shared-boiler-only-baseboard.osw' => 'base.osw',
     # 'base-hvac-shared-boiler-only-fan-coil.osw' => 'base.osw',
     # 'base-hvac-shared-boiler-only-fan-coil-ducted.osw' => 'base.osw',
+    # 'base-hvac-shared-boiler-only-fan-coil-eae.osw' => 'base.osw',
     # 'base-hvac-shared-boiler-only-water-loop-heat-pump.osw' => 'base.osw',
     # 'base-hvac-shared-chiller-only-baseboard.osw' => 'base.osw',
     # 'base-hvac-shared-chiller-only-fan-coil.osw' => 'base.osw',
@@ -245,18 +247,21 @@ def create_osws
     'extra-mechvent-shared.osw' => 'base-single-family-attached.osw',
     'extra-mechvent-shared-preconditioning.osw' => 'extra-mechvent-shared.osw',
     'extra-vacancy-6-months.osw' => 'base-schedules-stochastic.osw',
-    'extra-hvac-shared-boiler-only-baseboard.osw' => 'base-single-family-attached.osw',
-    'extra-hvac-shared-chiller-only-baseboard.osw' => 'base-single-family-attached.osw',
-    'extra-hvac-shared-boiler-only-fan-coil.osw' => 'extra-hvac-shared-boiler-only-baseboard.osw',
-    'extra-hvac-shared-chiller-only-fan-coil.osw' => 'extra-hvac-shared-chiller-only-baseboard.osw',
-    'extra-hvac-shared-boiler-only-fan-coil-ducted.osw' => 'extra-hvac-shared-boiler-only-fan-coil.osw',
-    'extra-hvac-shared-chiller-only-fan-coil-ducted.osw' => 'extra-hvac-shared-chiller-only-fan-coil.osw',
-    'extra-hvac-shared-boiler-only-water-loop-heat-pump.osw' => 'extra-hvac-shared-boiler-only-baseboard.osw',
-    'extra-hvac-shared-chiller-only-water-loop-heat-pump.osw' => 'extra-hvac-shared-chiller-only-baseboard.osw',
     'extra-hvac-shared-boiler-chiller-baseboard.osw' => 'extra-hvac-shared-boiler-only-baseboard.osw',
     'extra-hvac-shared-boiler-chiller-fan-coil.osw' => 'extra-hvac-shared-boiler-chiller-baseboard.osw',
     'extra-hvac-shared-boiler-chiller-fan-coil-ducted.osw' => 'extra-hvac-shared-boiler-chiller-fan-coil.osw',
     'extra-hvac-shared-boiler-chiller-water-loop-heat-pump.osw' => 'extra-hvac-shared-boiler-chiller-baseboard.osw',
+    'extra-hvac-shared-boiler-cooling-tower-water-loop-heat-pump.osw' => 'extra-hvac-shared-cooling-tower-only-water-loop-heat-pump.osw',
+    'extra-hvac-shared-boiler-only-baseboard.osw' => 'base-single-family-attached.osw',
+    'extra-hvac-shared-boiler-only-fan-coil.osw' => 'extra-hvac-shared-boiler-only-baseboard.osw',
+    'extra-hvac-shared-boiler-only-fan-coil-ducted.osw' => 'extra-hvac-shared-boiler-only-fan-coil.osw',
+    # 'extra-hvac-shared-boiler-only-fan-coil-eae.osw' => 'extra-hvac-shared-boiler-only-baseboard.osw',
+    'extra-hvac-shared-boiler-only-water-loop-heat-pump.osw' => 'extra-hvac-shared-boiler-only-baseboard.osw',
+    'extra-hvac-shared-chiller-only-baseboard.osw' => 'base-single-family-attached.osw',
+    'extra-hvac-shared-chiller-only-fan-coil.osw' => 'extra-hvac-shared-chiller-only-baseboard.osw',
+    'extra-hvac-shared-chiller-only-fan-coil-ducted.osw' => 'extra-hvac-shared-chiller-only-fan-coil.osw',
+    'extra-hvac-shared-chiller-only-water-loop-heat-pump.osw' => 'extra-hvac-shared-chiller-only-baseboard.osw',
+    'extra-hvac-shared-cooling-tower-only-water-loop-heat-pump.osw' => 'base-single-family-attached.osw',
     'extra-hvac-shared-ground-loop-ground-to-air-heat-pump.osw' => 'base-single-family-attached.osw',
 
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
@@ -460,7 +465,6 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_heating_capacity', '64000.0')
     step.setArgument('heating_system_fraction_heat_load_served', 1)
     step.setArgument('heating_system_has_flue_or_chimney', false)
-    step.setArgument('heating_system_is_shared_system', false)
     step.setArgument('cooling_system_type', HPXML::HVACTypeCentralAirConditioner)
     step.setArgument('cooling_system_cooling_efficiency_seer', 13.0)
     step.setArgument('cooling_system_cooling_efficiency_eer', 8.5)
@@ -470,7 +474,6 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_cooling_capacity', '48000.0')
     step.setArgument('cooling_system_fraction_cool_load_served', 1)
     step.setArgument('cooling_system_is_ducted', false)
-    step.setArgument('cooling_system_is_shared_system', false)
     step.setArgument('heat_pump_type', 'none')
     step.setArgument('heat_pump_heating_efficiency_hspf', 7.7)
     step.setArgument('heat_pump_heating_efficiency_cop', 3.6)
@@ -486,7 +489,6 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_backup_fuel', 'none')
     step.setArgument('heat_pump_backup_heating_efficiency', 1)
     step.setArgument('heat_pump_backup_heating_capacity', '34121.0')
-    step.setArgument('heat_pump_is_shared_system', false)
     step.setArgument('setpoint_heating_temp', 68)
     step.setArgument('setpoint_heating_setback_temp', 68)
     step.setArgument('setpoint_heating_setback_hours_per_week', 0)
@@ -1804,30 +1806,8 @@ def get_values(osw_file, step)
     step.setArgument('schedules_vacancy_begin_day_of_month', 1)
     step.setArgument('schedules_vacancy_end_month', 6)
     step.setArgument('schedules_vacancy_end_day_of_month', 30)
-  elsif ['extra-hvac-shared-boiler-only-baseboard.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
-    step.setArgument('heating_system_is_shared_system', true)
-    step.setArgument('shared_hvac_heating_loop_power', 600.0)
-  elsif ['extra-hvac-shared-chiller-only-baseboard.osw'].include? osw_file
-    step.setArgument('cooling_system_type', HPXML::HVACTypeChiller)
-    step.setArgument('cooling_system_is_shared_system', true)
-    step.setArgument('shared_hvac_cooling_loop_power', 600.0)
-  elsif ['extra-hvac-shared-boiler-only-fan-coil.osw'].include? osw_file
-    step.setArgument('shared_hvac_heating_fan_coil_power', 150.0)
-  elsif ['extra-hvac-shared-chiller-only-fan-coil.osw'].include? osw_file
-    step.setArgument('shared_hvac_cooling_fan_coil_power', 150.0)
-  elsif ['extra-hvac-shared-boiler-only-fan-coil-ducted.osw'].include? osw_file
-    step.setArgument('shared_hvac_fan_coil_is_ducted', true)
-  elsif ['extra-hvac-shared-chiller-only-fan-coil-ducted.osw'].include? osw_file
-    step.setArgument('shared_hvac_fan_coil_is_ducted', true)
-  elsif ['extra-hvac-shared-boiler-only-water-loop-heat-pump.osw'].include? osw_file
-    step.setArgument('shared_hvac_heating_water_loop_heat_pump_heating_efficiency', 4.4)
-  elsif ['extra-hvac-shared-chiller-only-water-loop-heat-pump.osw'].include? osw_file
-    step.setArgument('shared_hvac_cooling_water_loop_heat_pump_cooling_capacity', 24000.0)
-    step.setArgument('shared_hvac_cooling_water_loop_heat_pump_cooling_efficiency', 12.8)
   elsif ['extra-hvac-shared-boiler-chiller-baseboard.osw'].include? osw_file
-    step.setArgument('cooling_system_type', HPXML::HVACTypeChiller)
-    step.setArgument('cooling_system_is_shared_system', true)
+    step.setArgument('cooling_system_type', "Shared #{HPXML::HVACTypeChiller}")
     step.setArgument('shared_hvac_cooling_loop_power', 600.0)
   elsif ['extra-hvac-shared-boiler-chiller-fan-coil.osw'].include? osw_file
     step.setArgument('shared_hvac_heating_fan_coil_power', 150.0)
@@ -1838,11 +1818,44 @@ def get_values(osw_file, step)
     step.setArgument('shared_hvac_heating_water_loop_heat_pump_heating_efficiency', 4.4)
     step.setArgument('shared_hvac_cooling_water_loop_heat_pump_cooling_capacity', 24000.0)
     step.setArgument('shared_hvac_cooling_water_loop_heat_pump_cooling_efficiency', 12.8)
+  elsif ['extra-hvac-shared-boiler-cooling-tower-water-loop-heat-pump.osw'].include? osw_file
+    step.setArgument('heating_system_type', "Shared #{HPXML::HVACTypeBoiler}")
+    step.setArgument('shared_hvac_heating_loop_power', 600.0)
+    step.setArgument('shared_hvac_heating_water_loop_heat_pump_heating_efficiency', 4.4)
+  elsif ['extra-hvac-shared-boiler-only-baseboard.osw'].include? osw_file
+    step.setArgument('heating_system_type', "Shared #{HPXML::HVACTypeBoiler}")
+    step.setArgument('cooling_system_type', 'none')
+    step.setArgument('shared_hvac_heating_loop_power', 600.0)
+  elsif ['extra-hvac-shared-boiler-only-fan-coil.osw'].include? osw_file
+    step.setArgument('shared_hvac_heating_fan_coil_power', 150.0)
+  elsif ['extra-hvac-shared-boiler-only-fan-coil-ducted.osw'].include? osw_file
+    step.setArgument('shared_hvac_fan_coil_is_ducted', true)
+  elsif ['extra-hvac-shared-boiler-only-water-loop-heat-pump.osw'].include? osw_file
+    step.setArgument('shared_hvac_heating_water_loop_heat_pump_heating_efficiency', 4.4)
+  elsif ['extra-hvac-shared-chiller-only-baseboard.osw'].include? osw_file
+    step.setArgument('heating_system_type', 'none')
+    step.setArgument('cooling_system_type', "Shared #{HPXML::HVACTypeChiller}")
+    step.setArgument('shared_hvac_cooling_loop_power', 600.0)
+  elsif ['extra-hvac-shared-chiller-only-fan-coil.osw'].include? osw_file
+    step.setArgument('shared_hvac_cooling_fan_coil_power', 150.0)
+  elsif ['extra-hvac-shared-chiller-only-fan-coil-ducted.osw'].include? osw_file
+    step.setArgument('shared_hvac_fan_coil_is_ducted', true)
+  elsif ['extra-hvac-shared-chiller-only-water-loop-heat-pump.osw'].include? osw_file
+    step.setArgument('shared_hvac_cooling_water_loop_heat_pump_cooling_capacity', 24000.0)
+    step.setArgument('shared_hvac_cooling_water_loop_heat_pump_cooling_efficiency', 12.8)
+  elsif ['extra-hvac-shared-cooling-tower-only-water-loop-heat-pump.osw'].include? osw_file
+    step.setArgument('heating_system_type', 'none')
+    step.setArgument('cooling_system_type', "Shared #{HPXML::HVACTypeCoolingTower}")
+    step.setArgument('shared_hvac_cooling_loop_power', 600.0)
+    step.setArgument('shared_hvac_cooling_water_loop_heat_pump_cooling_capacity', 24000.0)
+    step.setArgument('shared_hvac_cooling_water_loop_heat_pump_cooling_efficiency', 12.8)
   elsif ['extra-hvac-shared-ground-loop-ground-to-air-heat-pump.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', 'none')
-    step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpGroundToAir)
-    step.setArgument('heat_pump_is_shared_system', true)
+    step.setArgument('heat_pump_type', "Shared #{HPXML::HVACTypeHeatPumpGroundToAir}")
+    step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('heat_pump_pump_power_watts_per_ton', 30.0)
+    step.setArgument('heat_pump_fan_power_watts_per_cfm', 0.45)
     step.setArgument('shared_hvac_heat_pump_shared_loop_power', 600.0)
   end
 
