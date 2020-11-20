@@ -632,7 +632,7 @@ Setpoints can be provided using either simple inputs or detailed inputs:
 
 1. **Simple inputs**
 
-  Provid the heating setpoint (``SetpointTempHeatingSeason``) and cooling setpoint (``SetpointTempCoolingSeason``) elements.
+  Provide the heating setpoint (``SetpointTempHeatingSeason``) and cooling setpoint (``SetpointTempCoolingSeason``) elements.
 
   If there is a heating setback, it is defined with:
 
@@ -648,7 +648,7 @@ Setpoints can be provided using either simple inputs or detailed inputs:
 
 2. **Detailed inputs**
 
-  Provide 24-hour comma-separate values for weekday and weekend heating/cooling setpoint schedules:
+  Provide 24-hour comma-separated values for weekday and weekend heating/cooling setpoint schedules:
 
   - ``extension/WeekdaySetpointTempsHeatingSeason``
   - ``extension/WeekendSetpointTempsHeatingSeason``
