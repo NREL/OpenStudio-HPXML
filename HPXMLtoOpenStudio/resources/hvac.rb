@@ -1338,7 +1338,6 @@ class HVAC
 
       # Apply heating setback?
       htg_setback = hvac_control.heating_setback_temp
-
       if not htg_setback.nil?
         htg_setback_hrs_per_week = hvac_control.heating_setback_hours_per_week
         htg_setback_start_hr = hvac_control.heating_setback_start_hour
@@ -1350,7 +1349,7 @@ class HVAC
       end
       htg_weekend_setpoints = htg_weekday_setpoints
     else
-      # 24-hr heating setpoint schedules
+      # 24-hr weekday/weekend heating setpoint schedules
       htg_weekday_setpoints = hvac_control.weekday_heating_setpoints.split(', ').map { |i| Float(i) }
       htg_weekday_setpoints = [htg_weekday_setpoints] * 12
 
@@ -1374,8 +1373,9 @@ class HVAC
           end
         end
       end
+      clg_weekend_setpoints = clg_weekday_setpoints
     else
-      # 24-hr cooling setpoint schedules
+      # 24-hr weekday/weekend cooling setpoint schedules
       clg_weekday_setpoints = hvac_control.weekday_cooling_setpoints.split(', ').map { |i| Float(i) }
       clg_weekday_setpoints = [clg_weekday_setpoints] * 12
 
