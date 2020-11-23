@@ -4629,53 +4629,32 @@ class HPXMLFile
 
     if args[:setpoint_heating_weekday_offset_magnitude].is_initialized && args[:setpoint_heating_weekday_schedule].is_initialized
       setpoint_heating_weekday_offset_magnitude = args[:setpoint_heating_weekday_offset_magnitude].get
-      setpoint_heating_weekday_schedule = args[:setpoint_heating_weekday_schedule].get.split(', ').map { |i| i.to_f }
-      weekday_heating_setpoints = [args[:setpoint_heating_weekday_temp]] * setpoint_heating_weekday_schedule.length
+      setpoint_heating_weekday_schedule = args[:setpoint_heating_weekday_schedule].get.split(', ').map { |i| Float(i) }
       weekday_heating_setpoints = modify_setpoint_schedule(weekday_heating_setpoints, setpoint_heating_weekday_offset_magnitude, setpoint_heating_weekday_schedule)
     end
 
     if args[:setpoint_heating_weekend_offset_magnitude].is_initialized && args[:setpoint_heating_weekend_schedule].is_initialized
       setpoint_heating_weekend_offset_magnitude = args[:setpoint_heating_weekend_offset_magnitude].get
-      setpoint_heating_weekend_schedule = args[:setpoint_heating_weekend_schedule].get.split(', ').map { |i| i.to_f }
-      weekend_heating_setpoints = [args[:setpoint_heating_weekend_temp]] * setpoint_heating_weekend_schedule.length
+      setpoint_heating_weekend_schedule = args[:setpoint_heating_weekend_schedule].get.split(', ').map { |i| Float(i) }
       weekend_heating_setpoints = modify_setpoint_schedule(weekend_heating_setpoints, setpoint_heating_weekend_offset_magnitude, setpoint_heating_weekend_schedule)
     end
 
     if args[:setpoint_cooling_weekday_offset_magnitude].is_initialized && args[:setpoint_cooling_weekday_schedule].is_initialized
       setpoint_cooling_weekday_offset_magnitude = args[:setpoint_cooling_weekday_offset_magnitude].get
-      setpoint_cooling_weekday_schedule = args[:setpoint_cooling_weekday_schedule].get.split(', ').map { |i| i.to_f }
-      weekday_cooling_setpoints = [args[:setpoint_cooling_weekday_temp]] * setpoint_cooling_weekday_schedule.length
+      setpoint_cooling_weekday_schedule = args[:setpoint_cooling_weekday_schedule].get.split(', ').map { |i| Float(i) }
       weekday_cooling_setpoints = modify_setpoint_schedule(weekday_cooling_setpoints, setpoint_cooling_weekday_offset_magnitude, setpoint_cooling_weekday_schedule)
     end
 
     if args[:setpoint_cooling_weekend_offset_magnitude].is_initialized && args[:setpoint_cooling_weekend_schedule].is_initialized
       setpoint_cooling_weekend_offset_magnitude = args[:setpoint_cooling_weekend_offset_magnitude].get
-      setpoint_cooling_weekend_schedule = args[:setpoint_cooling_weekend_schedule].get.split(', ').map { |i| i.to_f }
-      weekend_cooling_setpoints = [args[:setpoint_cooling_weekend_temp]] * setpoint_cooling_weekend_schedule.length
+      setpoint_cooling_weekend_schedule = args[:setpoint_cooling_weekend_schedule].get.split(', ').map { |i| Float(i) }
       weekend_cooling_setpoints = modify_setpoint_schedule(weekend_cooling_setpoints, setpoint_cooling_weekend_offset_magnitude, setpoint_cooling_weekend_schedule)
     end
 
-    heating_setpoint_temp = nil
-    if weekday_heating_setpoints.uniq.length == 1 && weekend_heating_setpoints.uniq.length == 1 && weekday_heating_setpoints[0] == weekend_heating_setpoints[0]
-      heating_setpoint_temp = weekday_heating_setpoints[0]
-    end
-
-    cooling_setpoint_temp = nil
-    if weekday_cooling_setpoints.uniq.length == 1 && weekend_cooling_setpoints.uniq.length == 1 && weekday_cooling_setpoints[0] == weekend_cooling_setpoints[0]
-      cooling_setpoint_temp = weekday_cooling_setpoints[0]
-    end
-
-    if heating_setpoint_temp.nil? && cooling_setpoint_temp.nil?
-      weekday_heating_setpoints = weekday_heating_setpoints.join(', ')
-      weekend_heating_setpoints = weekend_heating_setpoints.join(', ')
-      weekday_cooling_setpoints = weekday_cooling_setpoints.join(', ')
-      weekend_cooling_setpoints = weekend_cooling_setpoints.join(', ')
-    else
-      weekday_heating_setpoints = nil
-      weekend_heating_setpoints = nil
-      weekday_cooling_setpoints = nil
-      weekend_cooling_setpoints = nil
-    end
+    weekday_heating_setpoints = weekday_heating_setpoints.join(', ')
+    weekend_heating_setpoints = weekend_heating_setpoints.join(', ')
+    weekday_cooling_setpoints = weekday_cooling_setpoints.join(', ')
+    weekend_cooling_setpoints = weekend_cooling_setpoints.join(', ')
 
     ceiling_fan_quantity = nil
     if args[:ceiling_fan_quantity] != Constants.Auto
@@ -4687,8 +4666,6 @@ class HPXMLFile
     end
 
     hpxml.hvac_controls.add(id: 'HVACControl',
-                            heating_setpoint_temp: heating_setpoint_temp,
-                            cooling_setpoint_temp: cooling_setpoint_temp,
                             weekday_heating_setpoints: weekday_heating_setpoints,
                             weekend_heating_setpoints: weekend_heating_setpoints,
                             weekday_cooling_setpoints: weekday_cooling_setpoints,
