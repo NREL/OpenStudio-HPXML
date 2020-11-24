@@ -47,8 +47,7 @@ div.math {
     overflow-y: hidden;
 }
 
-/* override table no-wrap
-.wy-table-responsive table td, .wy-table-responsive table th {
-    white-space: normal;
+table th, table td {
+    /* Apply cell padding */
+    padding: 4px !important;
 }
-*/

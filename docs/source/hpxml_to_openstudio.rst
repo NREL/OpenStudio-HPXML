@@ -96,7 +96,7 @@ High-level simulation inputs are entered in ``/HPXML/SoftwareInfo``.
 HPXML Simulation Control
 ************************
 
-EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/SimulationControl``:
+EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/SimulationControl``.
 
   ==================================  ========  =======  =============  ========  ===========================  =====================================
   Element                             Type      Units    Constraints    Required  Default                      Description
@@ -106,14 +106,14 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
   ``BeginDayOfMonth``                 integer            1-31           No        1                            Run period start date
   ``EndMonth``                        integer            1-12           No        12 (December)                Run period end date
   ``EndDayOfMonth``                   integer            1-31           No                                     Run period end date
-  ``CalendarYear``                    integer            1600-9999      No        2007 (for TMY weather) [#]_  Calendar year (for start day of week)
+  ``CalendarYear``                    integer            > 1600         No        2007 (for TMY weather) [#]_  Calendar year (for start day of week)
   ``DaylightSaving/Enabled``          boolean                           No        true                         Daylight savings enabled?
   ==================================  ========  =======  =============  ========  ===========================  =====================================
 
   .. [#] BeginMonth/BeginDayOfMonth date must occur before EndMonth/EndDayOfMonth date (e.g., a run period from 10/1 to 3/31 is invalid).
   .. [#] CalendarYear only applies to TMY (Typical Meteorological Year) weather. For AMY (Actual Meteorological Year) weather, the AMY year will be used regardless of what is specified.
 
-If daylight saving is enabled, additional information is specified in ``DaylightSaving``:
+If daylight saving is enabled, additional information is specified in ``DaylightSaving``.
 
   ======================================  ========  =====  =============  ========  =============================  ===========
   Element                                 Type      Units  Constraints    Required  Default                        Description
@@ -127,7 +127,7 @@ If daylight saving is enabled, additional information is specified in ``Daylight
 HPXML HVAC Sizing Control
 *************************
 
-HVAC equipment sizing controls are entered in ``/HPXML/SoftwareInfo/extension/HVACSizingControl``:
+HVAC equipment sizing controls are entered in ``/HPXML/SoftwareInfo/extension/HVACSizingControl``.
 
   =================================  ========  =====  ===========  ========  =======  ============================================
   Element                            Type      Units  Constraints  Required  Default  Description
@@ -147,7 +147,7 @@ High-level building summary information is entered in ``/HPXML/Building/Building
 HPXML Site
 **********
 
-Building site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/Site``:
+Building site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/Site``.
 
   ========================================  ========  =====  ===========  ========  ========  ============================================================
   Element                                   Type      Units  Constraints  Required  Default   Notes
@@ -158,7 +158,7 @@ Building site information is entered in ``/HPXML/Building/BuildingDetails/Buildi
   ========================================  ========  =====  ===========  ========  ========  ============================================================
 
   .. [#] SiteType choices are "rural", "suburban", or "urban".
-  .. [#] ShelterCoefficient values are described as follows:
+  .. [#] | ShelterCoefficient values are described as follows:
 
          ===================  =========================================================================
          Shelter Coefficient  Description
@@ -170,20 +170,20 @@ Building site information is entered in ``/HPXML/Building/BuildingDetails/Buildi
          0.3                  Complete shielding with large buildings immediately adjacent
          ===================  =========================================================================
 
-For each neighboring building defined, additional information is entered in ``extension/Neighbors/NeighborBuilding``:
+For each neighboring building defined, additional information is entered in ``extension/Neighbors/NeighborBuilding``.
 
-  ============  ========  =======  ===========  ========  =======================  ====================================================
+  ============  ========  =======  ===========  ========  =======================  =============================================
   Element       Type      Units    Constraints  Required  Default                  Notes
-  ============  ========  =======  ===========  ========  =======================  ====================================================
-  ``Azimuth``   integer   degrees  0-359        Yes                                Direction of neighbors relative to the dwelling unit
+  ============  ========  =======  ===========  ========  =======================  =============================================
+  ``Azimuth``   integer   deg      0-359        Yes                                Direction of neighbors (clockwise from North)
   ``Distance``  double    ft       > 0          Yes                                Distance of neighbor from the dwelling unit
   ``Height``    double    ft       > 0          No        <same as dwelling unit>  Height of neighbor
-  ============  ========  =======  ===========  ========  =======================  ====================================================
+  ============  ========  =======  ===========  ========  =======================  =============================================
 
 HPXML Building Occupancy
 ************************
 
-Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy``:
+Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy``.
 
   =====================  ========  =====  ===========  ========  ====================  ========================
   Element                Type      Units  Constraints  Required  Default               Notes
@@ -191,12 +191,12 @@ Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSumma
   ``NumberofResidents``  integer          >= 0         No        <number of bedrooms>  Number of occupants [#]_
   =====================  ========  =====  ===========  ========  ====================  ========================
 
-  .. [#] NumberofResidents is only used for occupant heat gain. Most occupancy assumptions (e.g., usage of plug loads, appliances, hot water, etc.) are drive by the number of bedrooms, not number of occupants.
+  .. [#] NumberofResidents is only used for occupant heat gain. Most occupancy assumptions (e.g., usage of plug loads, appliances, hot water, etc.) are driven by the number of bedrooms, not number of occupants.
 
 HPXML Building Construction
 ***************************
 
-Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction``:
+Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction``.
 
   =========================================================  ========  =========  ===========  ========  ========  =======================================================================
   Element                                                    Type      Units      Constraints  Required  Default   Notes
@@ -214,15 +214,15 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If ConditionedBuildingVolume not provided, calculated as AverageCeilingHeight * ConditionedFloorArea.
-  .. [#] If HasFlueOrChimney not provided, assumed to be true if any of the following conditions are met: 
-         A) heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, PortableHeater, or FixedHeater and AFUE/Percent is less than 0.89,
-         B) heating system is non-electric Fireplace, or
-         C) water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63.
+  .. [#] | If HasFlueOrChimney not provided, assumed to be true if any of the following conditions are met: 
+         | A) heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, PortableHeater, or FixedHeater and AFUE/Percent is less than 0.89,
+         | B) heating system is non-electric Fireplace, or
+         | C) water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63.
 
 HPXML Weather Station
 ---------------------
 
-Weather information is entered in ``/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation``:
+Weather information is entered in ``/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation``.
 
   =========================  ======  =======  ===========  ========  =======  ==============================================
   Element                    Type    Units    Constraints  Required  Default  Notes
@@ -237,13 +237,13 @@ HPXML Enclosure
 
 The dwelling unit's enclosure is entered in ``/HPXML/Building/BuildingDetails/Enclosure``.
 
-All surfaces that bound different space types in the building (i.e., not just thermal boundary surfaces) must be specified in the HPXML file.
+All surfaces that bound different space types of the dwelling unit (i.e., not just thermal boundary surfaces) must be specified in the HPXML file.
 For example, an attached garage would generally be defined by walls adjacent to conditioned space, walls adjacent to outdoors, a slab, and a roof or ceiling.
 For software tools that do not collect sufficient inputs for every required surface, the software developers will need to make assumptions about these surfaces or collect additional input.
 
 Interior partition surfaces (e.g., walls between rooms inside conditioned space, or the floor between two conditioned stories) can be excluded.
 
-For Attached/Multifamily buildings, surfaces between unconditioned space and the neigboring unit's same unconditioned space should set ``InteriorAdjacentTo`` and ``ExteriorAdjacentTo`` to the same value.
+For single-family attached (SFA) or multifamily (MF) buildings, surfaces between unconditioned space and the neigboring unit's same unconditioned space should set ``InteriorAdjacentTo`` and ``ExteriorAdjacentTo`` to the same value.
 For example, a foundation wall between the unit's vented crawlspace and the neighboring unit's vented crawlspace would use ``InteriorAdjacentTo="crawlspace - vented"`` and ``ExteriorAdjacentTo="crawlspace - vented"``.
 
 .. warning::
@@ -255,34 +255,10 @@ Also note that wall and roof surfaces do not require an azimuth to be specified.
 Rather, only the windows/skylights themselves require an azimuth. 
 Thus, software tools can choose to use a single wall (or roof) surface to represent multiple wall (or roof) surfaces for the entire building if all their other properties (construction type, interior/exterior adjacency, etc.) are identical.
 
-.. _spaces:
-
-Space Types
-***********
-
-The space types used in the HPXML building description are:
-
-  ==============================  ================================================  ========================================================  =========================
-  Space Type                      Description                                       Temperature                                               Building Type
-  ==============================  ================================================  ========================================================  =========================
-  living space                    Above-grade conditioned floor area                EnergyPlus calculation                                    Any
-  attic - vented                                                                    EnergyPlus calculation                                    Any
-  attic - unvented                                                                  EnergyPlus calculation                                    Any
-  basement - conditioned          Below-grade conditioned floor area                EnergyPlus calculation                                    Any
-  basement - unconditioned                                                          EnergyPlus calculation                                    Any
-  crawlspace - vented                                                               EnergyPlus calculation                                    Any
-  crawlspace - unvented                                                             EnergyPlus calculation                                    Any
-  garage                          Single-family garage (not shared parking garage)  EnergyPlus calculation                                    Any
-  other housing unit              E.g., conditioned adjacent unit or corridor       Same as conditioned space                                 Attached/Multifamily only
-  other heated space              E.g., shared laundry/equipment space              Average of conditioned space and outside; minimum of 68F  Attached/Multifamily only
-  other multifamily buffer space  E.g., enclosed unconditioned stairwell            Average of conditioned space and outside; minimum of 50F  Attached/Multifamily only
-  other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                       Attached/Multifamily only
-  ==============================  ================================================  ========================================================  =========================
-
 HPXML Air Infiltration
 **********************
 
-Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``:
+Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
 
   ====================================  ======  =====  ===========  =============  ====================  ========================================================
   Element                               Type    Units  Constraints  Required       Default               Notes
@@ -299,32 +275,32 @@ Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/A
 HPXML Attics
 ************
 
-If the dwelling unit has a vented attic, attic ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="true"]]/VentilationRate``:
+If the dwelling unit has a vented attic, attic ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="true"]]/VentilationRate``.
 
-  =================  ======  =====  ===========  ========  ========  ==========================
-  Element            Type    Units  Constraints  Required  Default   Notes
-  =================  ======  =====  ===========  ========  ========  ==========================
-  ``UnitofMeasure``  string         See [#]_     No                  Units for ventilation rate
-  ``Value``          double         > 0          No        See [#]_  Value for ventilation rate
-  =================  ======  =====  ===========  ========  ========  ==========================
+  =================  ======  =====  ===========  ========  ==========  ==========================
+  Element            Type    Units  Constraints  Required  Default     Notes
+  =================  ======  =====  ===========  ========  ==========  ==========================
+  ``UnitofMeasure``  string         See [#]_     No                    Units for ventilation rate
+  ``Value``          double         > 0          No        1/300 [#]_  Value for ventilation rate
+  =================  ======  =====  ===========  ========  ==========  ==========================
 
   .. [#] UnitofMeasure choices are "SLA" (specific leakage area) or "ACHnatural" (natural air changes per hour).
-  .. [#] If Value not provided, calculated as SLA=1/300 based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+  .. [#] Value default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 HPXML Foundations
 *****************
 
-If the dwelling unit has a vented crawlspace, crawlspace ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented="true"]]/VentilationRate``:
+If the dwelling unit has a vented crawlspace, crawlspace ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented="true"]]/VentilationRate``.
 
-  =================  ======  =====  ===========  ========  ========  ==========================
-  Element            Type    Units  Constraints  Required  Default   Notes
-  =================  ======  =====  ===========  ========  ========  ==========================
-  ``UnitofMeasure``  string         See [#]_     No                  Units for ventilation rate
-  ``Value``          double         > 0          No        See [#]_  Value for ventilation rate
-  =================  ======  =====  ===========  ========  ========  ==========================
+  =================  ======  =====  ===========  ========  ==========  ==========================
+  Element            Type    Units  Constraints  Required  Default     Notes
+  =================  ======  =====  ===========  ========  ==========  ==========================
+  ``UnitofMeasure``  string         See [#]_     No                    Units for ventilation rate
+  ``Value``          double         > 0          No        1/150 [#]_  Value for ventilation rate
+  =================  ======  =====  ===========  ========  ==========  ==========================
 
   .. [#] UnitofMeasure only choice is "SLA" (specific leakage area).
-  .. [#] If Value not provided, calculated as SLA=1/150 based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+  .. [#] Value default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 HPXML Roofs
 ***********
@@ -336,9 +312,9 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   ======================================  ================  ============  ===============  =============  ==============================  ==================================
   Element                                 Type              Units         Constraints      Required       Default                         Notes
   ======================================  ================  ============  ===============  =============  ==============================  ==================================
-  ``InteriorAdjacentTo``                  string                          :ref:`spaces`    Yes                                            Interior adjacent space type
+  ``InteriorAdjacentTo``                  string                          See [#]_         Yes                                            Interior adjacent space type
   ``Area``                                double            ft2           > 0              Yes                                            Gross area (including skylights)
-  ``Azimuth``                             integer           degrees       0-359            No             See [#]_                        Azimuth
+  ``Azimuth``                             integer           deg           0-359            No             See [#]_                        Azimuth (clockwise from North)
   ``RoofType``                            string                          See [#]_         No             asphalt or fiberglass shingles  Roof type
   ``SolarAbsorptance`` or ``RoofColor``   double or string                0-1 or See [#]_  Yes            See [#]_                        Solar absorptance or color
   ``Emittance``                           double                          0-1              Yes                                            Emittance
@@ -348,9 +324,11 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0              Yes                                            Assembly R-value [#]_
   ======================================  ================  ============  ===============  =============  ==============================  ==================================
 
+  .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", or "garage".
+         See :ref:`hpxmllocations` for descriptions.
   .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
   .. [#] RoofType choices are "asphalt or fiberglass shingles", "wood shingles or shakes", "slate or tile shingles", or "metal surfacing".
-  .. [#] If SolarAbsorptance not provided, defaulted based on color/material as shown below:
+  .. [#] | If SolarAbsorptance not provided, defaulted based on color/material as shown below:
 
          ===========  =======================================================  ================
          RoofColor    RoofMaterial                                             SolarAbsorptance
@@ -376,22 +354,26 @@ HPXML Rim Joists
 
 Each rim joist surface (i.e., the perimeter of floor joists typically found between stories of a building or on top of a foundation wall) are entered as an ``/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist``.
 
-  ======================================  ================  ============  ==============  =============  ===========  ============================
-  Element                                 Type              Units         Constraints     Required       Default      Notes
-  ======================================  ================  ============  ==============  =============  ===========  ============================
-  ``ExteriorAdjacentTo``                  string                          :ref:`spaces`   Yes                         Exterior adjacent space type
-  ``InteriorAdjacentTo``                  string                          :ref:`spaces`   Yes                         Interior adjacent space type
-  ``Area``                                double            ft2           > 0             Yes                         Gross area
-  ``Azimuth``                             integer           degrees       0-359           No             See [#]_     Azimuth
-  ``Siding``                              string                          See [#]_        No             wood siding  Siding material
-  ``SolarAbsorptance`` or ``Color``       double or string                0-1             Yes            See [#]_     Solar absorptance or color
-  ``Emittance``                           double                          0-1             Yes                         Emittance
-  ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0             Yes                         Assembly R-value [#]_
-  ======================================  ================  ============  ==============  =============  ===========  ============================
+  ======================================  ================  ============  ===========  ========  ===========  ==============================
+  Element                                 Type              Units         Constraints  Required  Default      Notes
+  ======================================  ================  ============  ===========  ========  ===========  ==============================
+  ``ExteriorAdjacentTo``                  string                          See [#]_     Yes                    Exterior adjacent space type
+  ``InteriorAdjacentTo``                  string                          See [#]_     Yes                    Interior adjacent space type
+  ``Area``                                double            ft2           > 0          Yes                    Gross area
+  ``Azimuth``                             integer           deg           0-359        No        See [#]_     Azimuth (clockwise from North)
+  ``Siding``                              string                          See [#]_     No        wood siding  Siding material
+  ``SolarAbsorptance`` or ``Color``       double or string                0-1          Yes       See [#]_     Solar absorptance or color
+  ``Emittance``                           double                          0-1          Yes                    Emittance
+  ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0          Yes                    Assembly R-value [#]_
+  ======================================  ================  ============  ===========  ========  ===========  ==============================
 
+  .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+         See :ref:`hpxmllocations` for descriptions.
+  .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
+         See :ref:`hpxmllocations` for descriptions.
   .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
   .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", or "aluminum siding".
-  .. [#] If SolarAbsorptance not provided, defaulted based on color as shown below:
+  .. [#] | If SolarAbsorptance not provided, defaulted based on color as shown below:
           
          =========== ================
          Color       SolarAbsorptance
@@ -414,11 +396,11 @@ Each wall that has no contact with the ground and bounds a space type is entered
   ======================================  ================  ============  =============  =============  ===========  ====================================
   Element                                 Type              Units         Constraints    Required       Default      Notes
   ======================================  ================  ============  =============  =============  ===========  ====================================
-  ``ExteriorAdjacentTo``                  string                          :ref:`spaces`  Yes                         Exterior adjacent space type
-  ``InteriorAdjacentTo``                  string                          :ref:`spaces`  Yes                         Interior adjacent space type
+  ``ExteriorAdjacentTo``                  string                          See [#]_       Yes                         Exterior adjacent space type
+  ``InteriorAdjacentTo``                  string                          See [#]_       Yes                         Interior adjacent space type
   ``WallType``                            element                         See [#]_       Yes                         Wall type (for thermal mass)
   ``Area``                                double            ft2           > 0            Yes                         Gross area (including doors/windows)
-  ``Azimuth``                             integer           degrees       0-359          No             See [#]_     Azimuth
+  ``Azimuth``                             integer           deg           0-359          No             See [#]_     Azimuth (clockwise from North)
   ``Siding``                              string                          See [#]_       No             wood siding  Siding material
   ``SolarAbsorptance`` or ``Color``       double or string                0-1            Yes            See [#]_     Solar absorptance or color
   ``Color``                               string                          See [#]_       Depends [#]_                Color
@@ -426,10 +408,14 @@ Each wall that has no contact with the ground and bounds a space type is entered
   ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0            Yes                         Assembly R-value [#]_
   ======================================  ================  ============  =============  =============  ===========  ====================================
 
+  .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+         See :ref:`hpxmllocations` for descriptions.
+  .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
+         See :ref:`hpxmllocations` for descriptions.
   .. [#] WallType child element choices are ``WoodStud``, ``DoubleWoodStud``, ``ConcreteMasonryUnit``, ``StructurallyInsulatedPanel``, ``InsulatedConcreteForms``, ``SteelFrame``, ``SolidConcrete``, ``StructuralBrick``, ``StrawBale``, ``Stone``, ``LogWall``, or ``Adobe``.
   .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
   .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", or "aluminum siding".
-  .. [#] If SolarAbsorptance not provided, defaulted based on color as shown below:
+  .. [#] | If SolarAbsorptance not provided, defaulted based on color as shown below:
           
          =========== ================
          Color       SolarAbsorptance
@@ -451,21 +437,25 @@ Each wall that is in contact with the ground should be specified as an ``/HPXML/
 
 Other walls (e.g., wood framed walls) that are connected to a below-grade space but have no contact with the ground should be specified as a ``Wall`` and not a ``FoundationWall``.
 
-  ==============================================================  ========  ============  ==============  =============  ========  ====================================
-  Element                                                         Type      Units         Constraints     Required       Default   Notes
-  ==============================================================  ========  ============  ==============  =============  ========  ====================================
-  ``ExteriorAdjacentTo``                                          string                  :ref:`spaces`   Yes                      Exterior adjacent space type [#]_
-  ``InteriorAdjacentTo``                                          string                  :ref:`spaces`   Yes                      Interior adjacent space type
-  ``Height``                                                      double    ft            > 0             Yes                      Total height
-  ``Area``                                                        double    ft2           > 0             Yes                      Gross area (including doors/windows)
-  ``Azimuth``                                                     integer   degrees       0-359           No             See [#]_  Azimuth
-  ``Thickness``                                                   double    inches        > 0             Yes                      Thickness excluding interior framing
-  ``DepthBelowGrade``                                             double    ft            >= 0            Yes                      Depth below grade [#]_
-  ``Insulation/Layer[InstallationType="continuous - interior"]``  element                                 Depends [#]_             Interior insulation layer
-  ``Insulation/Layer[InstallationType="continuous - exterior"]``  element                                 Depends [#]_             Exterior insulation layer
-  ``Insulation/AssemblyEffectiveRValue``                          double    F-ft2-hr/Btu  > 0             Depends [#]_             Assembly R-value [#]_
-  ==============================================================  ========  ============  ==============  =============  ========  ====================================
+  ==============================================================  ========  ============  ===========  =============  ========  ====================================
+  Element                                                         Type      Units         Constraints  Required       Default   Notes
+  ==============================================================  ========  ============  ===========  =============  ========  ====================================
+  ``ExteriorAdjacentTo``                                          string                  See [#]_     Yes                      Exterior adjacent space type [#]_
+  ``InteriorAdjacentTo``                                          string                  See [#]_     Yes                      Interior adjacent space type
+  ``Height``                                                      double    ft            > 0          Yes                      Total height
+  ``Area``                                                        double    ft2           > 0          Yes                      Gross area (including doors/windows)
+  ``Azimuth``                                                     integer   deg           0-359        No             See [#]_  Azimuth (clockwise from North)
+  ``Thickness``                                                   double    inches        > 0          Yes                      Thickness excluding interior framing
+  ``DepthBelowGrade``                                             double    ft            >= 0         Yes                      Depth below grade [#]_
+  ``Insulation/Layer[InstallationType="continuous - interior"]``  element                              Depends [#]_             Interior insulation layer
+  ``Insulation/Layer[InstallationType="continuous - exterior"]``  element                              Depends [#]_             Exterior insulation layer
+  ``Insulation/AssemblyEffectiveRValue``                          double    F-ft2-hr/Btu  > 0          Depends [#]_             Assembly R-value [#]_
+  ==============================================================  ========  ============  ===========  =============  ========  ====================================
 
+  .. [#] ExteriorAdjacentTo choices are "ground", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+         See :ref:`hpxmllocations` for descriptions.
+  .. [#] InteriorAdjacentTo choices are "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
+         See :ref:`hpxmllocations` for descriptions.
   .. [#] Interior foundation walls (e.g., between basement and crawlspace) should **not** use "ground" even if the foundation wall has some contact with the ground due to the difference in below-grade depths of the two adjacent spaces.
   .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
   .. [#] For exterior foundation walls, depth below grade is relative to the ground plane.
@@ -478,7 +468,7 @@ Other walls (e.g., wood framed walls) that are connected to a below-grade space 
   .. [#] AssemblyEffectiveRValue includes all material layers, interior air film, and insulation installation grade.
          R-value should **not** include exterior air film (for any above-grade exposure) or any soil thermal resistance.
 
-If insulation layers are provided, additional information is entered in each ``FoundationWall/Insulation/Layer``:
+If insulation layers are provided, additional information is entered in each ``FoundationWall/Insulation/Layer``.
 
   ==========================================  ========  ============  ===========  ========  =======  ======================================================================
   Element                                     Type      Units         Constraints  Required  Default  Notes
@@ -493,18 +483,22 @@ HPXML Frame Floors
 
 Each horizontal floor/ceiling surface that is not in contact with the ground (Slab) nor adjacent to ambient conditions above (Roof) is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor``.
 
-  ======================================  ========  ============  ==============  ========  =======  ============================
-  Element                                 Type      Units         Constraints     Required  Default  Notes
-  ======================================  ========  ============  ==============  ========  =======  ============================
-  ``ExteriorAdjacentTo``                  string                  :ref:`spaces`   Yes                Exterior adjacent space type
-  ``InteriorAdjacentTo``                  string                  :ref:`spaces`   Yes                Interior adjacent space type
-  ``Area``                                double    ft2           > 0             Yes                Gross area
-  ``Insulation/AssemblyEffectiveRValue``  double    F-ft2-hr/Btu  > 0             Yes                Assembly R-value [#]_
-  ======================================  ========  ============  ==============  ========  =======  ============================
+  ======================================  ========  ============  ===========  ========  =======  ============================
+  Element                                 Type      Units         Constraints  Required  Default  Notes
+  ======================================  ========  ============  ===========  ========  =======  ============================
+  ``ExteriorAdjacentTo``                  string                  See [#]_     Yes                Exterior adjacent space type
+  ``InteriorAdjacentTo``                  string                  See [#]_     Yes                Interior adjacent space type
+  ``Area``                                double    ft2           > 0          Yes                Gross area
+  ``Insulation/AssemblyEffectiveRValue``  double    F-ft2-hr/Btu  > 0          Yes                Assembly R-value [#]_
+  ======================================  ========  ============  ===========  ========  =======  ============================
 
+  .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+         See :ref:`hpxmllocations` for descriptions.
+  .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
+         See :ref:`hpxmllocations` for descriptions.
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
-For frame floors adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space", additional information is entered in ``FrameFloor``:
+For frame floors adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space", additional information is entered in ``FrameFloor``.
 
   ======================================  ========  =====  ==============  ========  =======  ==========================================
   Element                                 Type      Units  Constraints     Required  Default  Notes
@@ -517,25 +511,27 @@ For frame floors adjacent to "other housing unit", "other heated space", "other 
 HPXML Slabs
 ***********
 
-Each space type that borders the ground (i.e., basements, crawlspaces, garages, and slab-on-grade foundations) should have a slab entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab``:
+Each space type that borders the ground (i.e., basements, crawlspaces, garages, and slab-on-grade foundations) should have a slab entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab``.
 
-  ===========================================  ========  ============  ==============  =============  =======  ====================================================
-  Element                                      Type      Units         Constraints     Required       Default  Notes
-  ===========================================  ========  ============  ==============  =============  =======  ====================================================
-  ``InteriorAdjacentTo``                       string                  :ref:`spaces`   Yes                     Interior adjacent space type
-  ``Area``                                     double    ft2           > 0             Yes                     Gross area
-  ``Thickness``                                double    inches        >= 0            Yes                     Thickness [#]_
-  ``ExposedPerimeter``                         double    ft            > 0             Yes                     Perimeter exposed to ambient conditions [#]_
-  ``PerimeterInsulationDepth``                 double    ft            >= 0            Yes                     Depth from grade to bottom of vertical insulation
-  ``UnderSlabInsulationWidth``                 double    ft            >= 0            Depends [#]_            Width from slab edge inward of horizontal insulation
-  ``UnderSlabInsulationSpansEntireSlab``       boolean                                 Depends [#]_            Whether horizontal insulation spans entire slab
-  ``DepthBelowGrade``                          double    ft            >= 0            Depends [#]_            Depth from the top of the slab surface to grade
-  ``PerimeterInsulation/Layer/NominalRValue``  double    F-ft2-hr/Btu  >= 0            Yes                     R-value of vertical insulation
-  ``UnderSlabInsulation/Layer/NominalRValue``  double    F-ft2-hr/Btu  >= 0            Yes                     R-value of horizontal insulation
-  ``extension/CarpetFraction``                 double    frac          0-1             Yes                     Fraction of slab covered by carpet
-  ``extension/CarpetRValue``                   double    F-ft2-hr/Btu  >= 0            Yes                     Carpet R-value
-  ===========================================  ========  ============  ==============  =============  =======  ====================================================
+  ===========================================  ========  ============  ===========  =============  =======  ====================================================
+  Element                                      Type      Units         Constraints  Required       Default  Notes
+  ===========================================  ========  ============  ===========  =============  =======  ====================================================
+  ``InteriorAdjacentTo``                       string                  See [#]_     Yes                     Interior adjacent space type
+  ``Area``                                     double    ft2           > 0          Yes                     Gross area
+  ``Thickness``                                double    inches        >= 0         Yes                     Thickness [#]_
+  ``ExposedPerimeter``                         double    ft            > 0          Yes                     Perimeter exposed to ambient conditions [#]_
+  ``PerimeterInsulationDepth``                 double    ft            >= 0         Yes                     Depth from grade to bottom of vertical insulation
+  ``UnderSlabInsulationWidth``                 double    ft            >= 0         Depends [#]_            Width from slab edge inward of horizontal insulation
+  ``UnderSlabInsulationSpansEntireSlab``       boolean                              Depends [#]_            Whether horizontal insulation spans entire slab
+  ``DepthBelowGrade``                          double    ft            >= 0         Depends [#]_            Depth from the top of the slab surface to grade
+  ``PerimeterInsulation/Layer/NominalRValue``  double    F-ft2-hr/Btu  >= 0         Yes                     R-value of vertical insulation
+  ``UnderSlabInsulation/Layer/NominalRValue``  double    F-ft2-hr/Btu  >= 0         Yes                     R-value of horizontal insulation
+  ``extension/CarpetFraction``                 double    frac          0-1          Yes                     Fraction of slab covered by carpet
+  ``extension/CarpetRValue``                   double    F-ft2-hr/Btu  >= 0         Yes                     Carpet R-value
+  ===========================================  ========  ============  ===========  =============  =======  ====================================================
 
+  .. [#] InteriorAdjacentTo choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
+         See :ref:`hpxmllocations` for descriptions.
   .. [#] For a crawlspace with a dirt floor, use a thickness of zero.
   .. [#] ExposedPerimeter includes any slab length that falls along the perimeter of the building's footprint (i.e., is exposed to ambient conditions).
          So a basement slab edge adjacent to a garage or crawlspace, for example, should not be included.
@@ -549,13 +545,13 @@ Each space type that borders the ground (i.e., basements, crawlspaces, garages, 
 HPXML Windows
 *************
 
-Each window or glass door area is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Windows/Window``:
+Each window or glass door area is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Windows/Window``.
 
   ============================================  ========  ============  ===========  ========  =========  ==============================================
   Element                                       Type      Units         Constraints  Required  Default    Notes
   ============================================  ========  ============  ===========  ========  =========  ==============================================
   ``Area``                                      double    ft2           > 0          Yes                  Total area
-  ``Azimuth``                                   integer   degrees       0-359        Yes                  Azimuth
+  ``Azimuth``                                   integer   deg           0-359        Yes                  Azimuth (clockwise from North)
   ``UFactor``                                   double    Btu/F-ft2-hr  > 0          Yes                  Full-assembly NFRC U-factor
   ``SHGC``                                      double                  0-1          Yes                  Full-assembly NFRC solar heat gain coefficient
   ``InteriorShading/SummerShadingCoefficient``  double    frac          0-1          No        0.70 [#]_  Summer interior shading coefficient
@@ -573,7 +569,7 @@ Each window or glass door area is entered as an ``/HPXML/Building/BuildingDetail
          The total open window area for natural ventilation is calculated using A) the operable fraction, B) the assumption that 50% of the area of operable windows can be open, and C) the assumption that 20% of that openable area is actually opened by occupants whenever outdoor conditions are favorable for cooling.
   .. [#] AttachedToWall must reference a ``Wall`` or ``FoundationWall``.
 
-If overhangs are specified, additional information is entered in ``Overhangs``:
+If overhangs are specified, additional information is entered in ``Overhangs``.
 
   ============================  ========  ======  ===========  ========  =======  ========================================================
   Element                       Type      Units   Constraints  Required  Default  Notes
@@ -588,13 +584,13 @@ If overhangs are specified, additional information is entered in ``Overhangs``:
 HPXML Skylights
 ***************
 
-Each skylight is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight``:
+Each skylight is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight``.
 
   ============================================  ========  ============  ===========  ========  =========  ==============================================
   Element                                       Type      Units         Constraints  Required  Default    Notes
   ============================================  ========  ============  ===========  ========  =========  ==============================================
   ``Area``                                      double    ft2           > 0          Yes                  Total area
-  ``Azimuth``                                   integer   degrees       0-359        Yes                  Azimuth
+  ``Azimuth``                                   integer   deg           0-359        Yes                  Azimuth (clockwise from North)
   ``UFactor``                                   double    Btu/F-ft2-hr  > 0          Yes                  Full-assembly NFRC U-factor
   ``SHGC``                                      double                  0-1          Yes                  Full-assembly NFRC solar heat gain coefficient
   ``InteriorShading/SummerShadingCoefficient``  double    frac          0-1          No        1.0 [#]_   Summer interior shading coefficient
@@ -609,16 +605,16 @@ Each skylight is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Skyli
 HPXML Doors
 ***********
 
-Each opaque door is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Doors/Door``:
+Each opaque door is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Doors/Door``.
 
-  ============================================  ========  ============  ===========  ========  =========  ===================
+  ============================================  ========  ============  ===========  ========  =========  ==============================
   Element                                       Type      Units         Constraints  Required  Default    Notes
-  ============================================  ========  ============  ===========  ========  =========  ===================
+  ============================================  ========  ============  ===========  ========  =========  ==============================
   ``AttachedToWall``                            idref                   See [#]_     Yes                  ID of attached wall
   ``Area``                                      double    ft2           > 0          Yes                  Total area
-  ``Azimuth``                                   integer   degrees       0-359        Yes                  Azimuth
+  ``Azimuth``                                   integer   deg           0-359        Yes                  Azimuth (clockwise from North)
   ``RValue``                                    double    F-ft2-hr/Btu  > 0          Yes                  R-value
-  ============================================  ========  ============  ===========  ========  =========  ===================
+  ============================================  ========  ============  ===========  ========  =========  ==============================
 
   .. [#] AttachedToWall must reference a ``Wall`` or ``FoundationWall``.
 
@@ -630,7 +626,7 @@ The dwelling unit's systems are entered in ``/HPXML/Building/BuildingDetails/Sys
 HPXML Heating Systems
 *********************
 
-Each heating system (other than heat pumps) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``:
+Each heating system (other than heat pumps) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   =================================  ========  ======  ===========  ========  =========  ====================================
   Element                            Type      Units   Constraints  Required  Default    Notes
@@ -646,13 +642,21 @@ Each heating system (other than heat pumps) is entered as an ``/HPXML/Building/B
   .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``PortableHeater``, ``FixedHeater``, or ``Fireplace``.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across both HeatingSystems and HeatPumps) must be less than or equal to 1.
          For example, the dwelling unit could have a boiler heating system and a heat pump with values of 0.4 (40%) and 0.6 (60%), respectively.
-  .. [#] HeatingSystemFuel "electricity" required for ``Resistance`` heating systems.
-         Choices for all other systems are  "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
+  .. [#] HeatingSystemFuel choices are  "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
+         For ``ElectricResistance``, "electricity" is required.
   .. [#] AnnualHeatingEfficiency/Value "AFUE" required for ``Furnace``, ``WallFurnace``, ``FloorFurnace``, and ``Boiler``.
          "Percent" required for all other systems.
   .. [#] HeatingCapacity not applicable to shared boilers.
 
-If a **Furnace** is specified, additional information is entered in ``HeatingSystem``:
+Electric Resistance
+~~~~~~~~~~~~~~~~~~~
+
+If electric resistance heating is specified, no additional information is entered.
+
+Furnace
+~~~~~~~
+
+If a furnace is specified, additional information is entered in ``HeatingSystem``.
 
   =================================  ========  =====  ===========  ========  =========  ==================================
   Element                            Type      Units  Constraints  Required  Default    Notes
@@ -664,17 +668,21 @@ If a **Furnace** is specified, additional information is entered in ``HeatingSys
   .. [#] HVACDistribution type must be AirDistribution or DSE.
   .. [#] If FanPowerWattsPerCFM not provided, defaulted as 0.5 W/cfm if AFUE <= 0.9, else 0.375 W/cfm.
 
-If a **WallFurnace**, **FloorFurnace**, **Stove**, **PortableHeater**, **FixedHeater**, or **Fireplace** is specified, additional information is entered in ``HeatingSystem``:
+Wall/Floor Furnace
+~~~~~~~~~~~~~~~~~~
+
+If a wall furnace or floor furnace is specified, additional information is entered in ``HeatingSystem``.
 
   ===========================  ========  =====  ===========  ============  =========  ===================
   Element                      Type      Units  Constraints  Required      Default    Notes
   ===========================  ========  =====  ===========  ============  =========  ===================
-  ``extension/FanPowerWatts``  double    W      >= 0         No            See [#]_   Installed fan power
+  ``extension/FanPowerWatts``  double    W      >= 0         No            0          Installed fan power
   ===========================  ========  =====  ===========  ============  =========  ===================
 
-  .. [#] If FanPowerWatts not provided, defaulted as 40 W for ``Stove`` and 0 W for all other systems.
+Boiler
+~~~~~~
 
-If a **Boiler** is specified, additional information is entered in ``HeatingSystem``:
+If a boiler is specified, additional information is entered in ``HeatingSystem``.
 
   ===========================  ========  ======  ===========  ========  ========  =========================================
   Element                      Type      Units   Constraints  Required  Default   Notes
@@ -685,16 +693,14 @@ If a **Boiler** is specified, additional information is entered in ``HeatingSyst
   ===========================  ========  ======  ===========  ========  ========  =========================================
 
   .. [#] HVACDistribution type must be HydronicDistribution or DSE for in-unit boilers and HydronicDistribution or HydronicAndAirDistribution for shared boilers.
-  .. [#] For shared boilers, ElectricAuxiliaryEnergy can alternatively be calculated as follows per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
-
+  .. [#] | For shared boilers, ElectricAuxiliaryEnergy can alternatively be calculated as follows per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
          | :math:`EAE = (\frac{SP}{N_{dweq}} + aux_{in}) \cdot HLH`
          | where, 
-         |   :math:`SP` = Shared pump power [W], provided as ``extension/SharedLoopWatts``
-         |   :math:`N_{dweq}` = Number of units served by the shared system, provided as ``NumberofUnitsServed``
-         |   :math:`aux_{in}` = In-unit fan coil power [W], provided as ``extension/FanCoilWatts``
-         |   :math:`HLH` = Annual heating load hours
-
-  .. [#] If ElectricAuxiliaryEnergy not provided (or calculated for shared boilers), defaults as follows per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+         |   SP = Shared pump power [W], provided as ``extension/SharedLoopWatts``
+         |   N_dweq = Number of units served by the shared system, provided as ``NumberofUnitsServed``
+         |   aux_in = In-unit fan coil power [W], provided as ``extension/FanCoilWatts``
+         |   HLH = Annual heating load hours
+  .. [#] | If ElectricAuxiliaryEnergy not provided (or calculated for shared boilers), defaults as follows per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
 
          ============================================  ==============================
          System Type                                   Electric Auxiliary Energy
@@ -706,12 +712,45 @@ If a **Boiler** is specified, additional information is entered in ``HeatingSyst
          Gas boiler (shared, w/ fan coil)              438
          ============================================  ==============================
 
-For shared boilers connected to a water loop heat pump, the heat pump's heating COP must be provided as ``extension/WaterLoopHeatPump/AnnualHeatingEfficiency[Units="COP"]/Value``.
+  For shared boilers connected to a water loop heat pump, the heat pump's heating COP must be provided as ``extension/WaterLoopHeatPump/AnnualHeatingEfficiency[Units="COP"]/Value``.
+
+Stove
+~~~~~
+
+If a stove is specified, additional information is entered in ``HeatingSystem``.
+
+  ===========================  ========  =====  ===========  ============  =========  ===================
+  Element                      Type      Units  Constraints  Required      Default    Notes
+  ===========================  ========  =====  ===========  ============  =========  ===================
+  ``extension/FanPowerWatts``  double    W      >= 0         No            40         Installed fan power
+  ===========================  ========  =====  ===========  ============  =========  ===================
+
+Portable/Fixed Heater
+~~~~~~~~~~~~~~~~~~~~~
+
+If a portable heater or fixed heater is specified, additional information is entered in ``HeatingSystem``.
+
+  ===========================  ========  =====  ===========  ============  =========  ===================
+  Element                      Type      Units  Constraints  Required      Default    Notes
+  ===========================  ========  =====  ===========  ============  =========  ===================
+  ``extension/FanPowerWatts``  double    W      >= 0         No            0          Installed fan power
+  ===========================  ========  =====  ===========  ============  =========  ===================
+
+Fireplace
+~~~~~~~~~
+
+If a fireplace is specified, additional information is entered in ``HeatingSystem``.
+
+  ===========================  ========  =====  ===========  ============  =========  ===================
+  Element                      Type      Units  Constraints  Required      Default    Notes
+  ===========================  ========  =====  ===========  ============  =========  ===================
+  ``extension/FanPowerWatts``  double    W      >= 0         No            0          Installed fan power
+  ===========================  ========  =====  ===========  ============  =========  ===================
 
 HPXML Cooling Systems
 *********************
 
-Each cooling system (other than heat pumps) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``:
+Each cooling system (other than heat pumps) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
   ==========================  ========  ======  ===========  ========  =======  ====================================
   Element                     Type      Units   Constraints  Required  Default  Notes
@@ -725,7 +764,10 @@ Each cooling system (other than heat pumps) is entered as an ``/HPXML/Building/B
   .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
          For example, the dwelling unit could have two room air conditioners with values of 0.1 (10%) and 0.2 (20%), respectively, with the rest of the home (70%) uncooled.
 
-If a **central air conditioner** is specified, additional information is entered in ``CoolingSystem``:
+Central Air Conditioner
+~~~~~~~~~~~~~~~~~~~~~~~
+
+If a central air conditioner is specified, additional information is entered in ``CoolingSystem``.
 
   =================================  ========  ======  ===========  ========  =========  ==================================
   Element                            Type      Units   Constraints  Required  Default    Notes
@@ -744,7 +786,10 @@ If a **central air conditioner** is specified, additional information is entered
   .. [#] If CompressorType not provided, defaults to "single stage" if SEER <= 15, else "two stage" if SEER <= 21, else "variable speed".
   .. [#] If FanPowerWattsPerCFM not provided, defaults to using attached furnace W/cfm if available, else 0.5 W/cfm if SEER <= 13.5, else 0.375 W/cfm.
 
-If a **room air conditioner** is specified, additional information is entered in ``CoolingSystem``:
+Room Air Conditioner
+~~~~~~~~~~~~~~~~~~~~
+
+If a room air conditioner is specified, additional information is entered in ``CoolingSystem``.
 
   =================================  ========  ======  ===========  ========  =========  ======================
   Element                            Type      Units   Constraints  Required  Default    Notes
@@ -755,7 +800,10 @@ If a **room air conditioner** is specified, additional information is entered in
   ``SensibleHeatFraction``           double    frac    0-1          No        <TODO>     Sensible heat fraction
   =================================  ========  ======  ===========  ========  =========  ======================
 
-If an **evaporative cooler** is specified, additional information is entered in ``CoolingSystem``:
+Evaporative Cooler
+~~~~~~~~~~~~~~~~~~
+
+If an evaporative cooler is specified, additional information is entered in ``CoolingSystem``.
 
   =================================  ========  ======  ===========  ========  =========  ==================================
   Element                            Type      Units   Constraints  Required  Default    Notes
@@ -767,7 +815,10 @@ If an **evaporative cooler** is specified, additional information is entered in 
   .. [#] HVACDistribution type must be AirDistribution or DSE.
   .. [#] If FanPowerWattsPerCFM not provided, defaults to MIN(2.79 * cfm^-0.29, 0.6) W/cfm.
 
-If a **mini-split** is specified, additional information is entered in ``CoolingSystem``:
+Mini-Split
+~~~~~~~~~~
+
+If a mini-split is specified, additional information is entered in ``CoolingSystem``.
 
   =================================  ========  ======  ===========  ========  =========  ==================================
   Element                            Type      Units   Constraints  Required  Default    Notes
@@ -781,7 +832,10 @@ If a **mini-split** is specified, additional information is entered in ``Cooling
   .. [#] HVACDistribution type must be AirDistribution or DSE.
   .. [#] If FanPowerWattsPerCFM not provided, defaults to 0.07 W/cfm if ductless, else 0.18 W/cfm.
 
-If a **chiller** is specified, additional information is entered in ``CoolingSystem``:
+Chiller
+~~~~~~~
+
+If a chiller is specified, additional information is entered in ``CoolingSystem``.
 
   ======================  ========  ======  ===========  ========  =========  =========================================
   Element                 Type      Units   Constraints  Required  Default    Notes
@@ -792,17 +846,20 @@ If a **chiller** is specified, additional information is entered in ``CoolingSys
 
   .. [#] HVACDistribution type must be HydronicDistribution or HydronicAndAirDistribution.
 
-Chillers are modeled with a SEER equivalent using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+  Chillers are modeled with a SEER equivalent using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
 
-  | :math:`SEER_{eq} = \frac{(Cap - (aux \cdot 3.41)) - (aux_{dweq} \cdot 3.41 \cdot N_{dweq})}{(Input \cdot aux) + (aux_{dweq} \cdot N_{dweq})}`
-  | where, 
-  |   :math:`Cap` = Chiller system output [Btu/hour], provided as ``CoolingCapacity``
-  |   :math:`aux` = Total of the pumping and fan power serving the system [W], provided as ``extension/SharedLoopWatts``
-  |   :math:`aux_{dweq}` = Total of the in-unit cooling equipment power serving the unit; for example, includes all power to run a Water Loop Heat Pump within the unit, not just air handler power [W], provided as ``extension/FanCoilWatts`` for fan coils, or calculated as ``extension/WaterLoopHeatPump/CoolingCapacity`` divided by ``extension/WaterLoopHeatPump/AnnualCoolingEfficiency[Units="EER"]/Value`` for cooling towers, or zero for baseboard/radiators
-  |   :math:`Input` = Chiller system power [W], calculated using ``AnnualCoolingEfficiency[Units="kW/ton"]/Value``
-  |   :math:`N_{dweq}` = Number of units served by the shared system, provided as ``NumberofUnitsServed``
+    | :math:`SEER_{eq} = \frac{(Cap - (aux \cdot 3.41)) - (aux_{dweq} \cdot 3.41 \cdot N_{dweq})}{(Input \cdot aux) + (aux_{dweq} \cdot N_{dweq})}`
+    | where, 
+    |   Cap = Chiller system output [Btu/hour], provided as ``CoolingCapacity``
+    |   aux = Total of the pumping and fan power serving the system [W], provided as ``extension/SharedLoopWatts``
+    |   aux_dweq = Total of the in-unit cooling equipment power serving the unit; for example, includes all power to run a Water Loop Heat Pump within the unit, not just air handler power [W], provided as ``extension/FanCoilWatts`` for fan coils, or calculated as ``extension/WaterLoopHeatPump/CoolingCapacity`` divided by ``extension/WaterLoopHeatPump/AnnualCoolingEfficiency[Units="EER"]/Value`` for cooling towers, or zero for baseboard/radiators
+    |   Input = Chiller system power [W], calculated using ``AnnualCoolingEfficiency[Units="kW/ton"]/Value``
+    |   N_dweq = Number of units served by the shared system, provided as ``NumberofUnitsServed``
 
-If a **cooling tower** is specified, additional information is entered in ``CoolingSystem``:
+Cooling Tower
+~~~~~~~~~~~~~
+
+If a **cooling tower** is specified, additional information is entered in ``CoolingSystem``.
 
   ======================  ========  ======  ===========  ========  =========  =========================================
   Element                 Type      Units   Constraints  Required  Default    Notes
@@ -813,17 +870,19 @@ If a **cooling tower** is specified, additional information is entered in ``Cool
 
   .. [#] HVACDistribution type must be HydronicAndAirDistribution.
 
-Cooling towers with water loop heat pumps are modeled with a SEER equivalent using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+  Cooling towers with water loop heat pumps are modeled with a SEER equivalent using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
 
-  | :math:`SEER_{eq} = \frac{WLHP_{cap} - \frac{aux \cdot 3.41}{N_{dweq}}}{Input + \frac{aux}{N_{dweq}}}`
-  | where, 
-  |   :math:`WLHP_{cap}` = WLHP cooling capacity [Btu/hr], provided as ``extension/WaterLoopHeatPump/CoolingCapacity``
-  |   :math:`aux` = Total of the pumping and fan power serving the system [W], provided as ``extension/SharedLoopWatts``
-  |   :math:`N_{dweq}` = Number of units served by the shared system, provided as ``NumberofUnitsServed``
-  |   :math:`Input` = WLHP system power [W], calculated as ``extension/WaterLoopHeatPump/CoolingCapacity`` divided by ``extension/WaterLoopHeatPump/AnnualCoolingEfficiency[Units="EER"]/Value``
+    | :math:`SEER_{eq} = \frac{WLHP_{cap} - \frac{aux \cdot 3.41}{N_{dweq}}}{Input + \frac{aux}{N_{dweq}}}`
+    | where, 
+    |   WLHP_cap = WLHP cooling capacity [Btu/hr], provided as ``extension/WaterLoopHeatPump/CoolingCapacity``
+    |   aux = Total of the pumping and fan power serving the system [W], provided as ``extension/SharedLoopWatts``
+    |   N_dweq = Number of units served by the shared system, provided as ``NumberofUnitsServed``
+    |   Input = WLHP system power [W], calculated as ``extension/WaterLoopHeatPump/CoolingCapacity`` divided by ``extension/WaterLoopHeatPump/AnnualCoolingEfficiency[Units="EER"]/Value``
 
 HPXML Heat Pumps
 ****************
+
+FIXME FIXME FIXME
 
 Each heat pump is entered as a ``Systems/HVAC/HVACPlant/HeatPump``.
 Inputs including ``HeatPumpType``, ``FractionHeatLoadServed``, and ``FractionCoolLoadServed`` must be provided.
@@ -867,31 +926,73 @@ For multiple ground source heat pumps on a shared hydronic circulation loop (``I
 
   | :math:`Eae = \frac{SP}{N_{dweq}} \cdot 8.760`
   | where, 
-  |   :math:`SP` = Shared pump power [W], provided as ``extension/SharedLoopWatts``
-  |   :math:`N_{dweq}` = Number of units served by the shared system, provided as ``NumberofUnitsServed``
+  |   SP = Shared pump power [W], provided as ``extension/SharedLoopWatts``
+  |   N_dweq = Number of units served by the shared system, provided as ``NumberofUnitsServed``
 
 HPXML HVAC Control
 ******************
 
-A ``Systems/HVAC/HVACControl`` must be provided if any HVAC systems are specified.
-The heating setpoint (``SetpointTempHeatingSeason``) and cooling setpoint (``SetpointTempCoolingSeason``) are required elements.
+If any HVAC systems are specified, a single thermostat is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl``.
+Thermostat setpoints must be entered using either simple inputs or detailed inputs.
 
-If there is a heating setback, it is defined with:
+In addition to the setpoint inputs below, if there are sufficient ceiling fans present that result in a reduced cooling setpoint, this information can be entered in ``HVACControl``.
 
-- ``SetbackTempHeatingSeason``: Temperature during heating setback
-- ``extension/SetbackStartHourHeating``: The start hour of the heating setback where 0=midnight and 12=noon
-- ``TotalSetbackHoursperWeekHeating``: The number of hours of heating setback per week
+  =======================================================  ========  =======  ===========  ========  =========  ===================================
+  Element                                                  Type      Units    Constraints  Required  Default    Notes
+  =======================================================  ========  =======  ===========  ========  =========  ===================================
+  ``extension/CeilingFanSetpointTempCoolingSeasonOffset``  double    deg-F    >= 0         No        0          Cooling setpoint temperature offset
+  =======================================================  ========  =======  ===========  ========  =========  ===================================
 
-If there is a cooling setup, it is defined with:
+Simple Inputs
+~~~~~~~~~~~~~
 
-- ``SetupTempCoolingSeason``: Temperature during cooling setup
-- ``extension/SetupStartHourCooling``: The start hour of the cooling setup where 0=midnight and 12=noon
-- ``TotalSetupHoursperWeekCooling``: The number of hours of cooling setup per week
+To define simple thermostat setpoints, additional information is entered in ``HVACControl``.
 
-Finally, if there are sufficient ceiling fans present that result in a reduced cooling setpoint, this offset can be specified with ``extension/CeilingFanSetpointTempCoolingSeasonOffset``.
+  =============================  ========  =======  ===========  ========  =========  ============================
+  Element                        Type      Units    Constraints  Required  Default    Notes
+  =============================  ========  =======  ===========  ========  =========  ============================
+  ``SetpointTempHeatingSeason``  double    deg-F                 Yes                  Heating setpoint temperature
+  ``SetpointTempCoolingSeason``  double    deg-F                 Yes                  Cooling setpoint temperature
+  =============================  ========  =======  ===========  ========  =========  ============================
+
+If there is a heating temperature setback, additional information is entered in ``HVACControl``.
+
+  =====================================  ========  ========  ===========  ========  =========  =========================================
+  Element                                Type      Units     Constraints  Required  Default    Notes
+  =====================================  ========  ========  ===========  ========  =========  =========================================
+  ``SetbackTempHeatingSeason``           double    deg-F                  Yes                  Heating setback temperature
+  ``TotalSetbackHoursperWeekHeating``    integer   hrs/week  > 0          Yes                  Hours/week of heating temperature setback
+  ``extension/SetbackStartHourHeating``  integer             0-23         Yes                  Daily setback start hour
+  =====================================  ========  ========  ===========  ========  =========  =========================================
+
+If there is a cooling temperature setup, additional information is entered in ``HVACControl``.
+
+  =====================================  ========  ========  ===========  ========  =========  =========================================
+  Element                                Type      Units     Constraints  Required  Default    Notes
+  =====================================  ========  ========  ===========  ========  =========  =========================================
+  ``SetupTempCoolingSeason``             double    deg-F                  Yes                  Cooling setup temperature
+  ``TotalSetupHoursperWeekCooling``      integer   hrs/week  > 0          Yes                  Hours/week of cooling temperature setup
+  ``extension/SetupStartHourCooling``    integer             0-23         Yes                  Daily setup start hour
+  =====================================  ========  ========  ===========  ========  =========  =========================================
+
+Detailed Inputs
+~~~~~~~~~~~~~~~
+
+To define detailed thermostat setpoints, additional information is entered in ``HVACControl``.
+
+  ===============================================  =====  =======  ===========  ========  =========  ============================================
+  Element                                          Type   Units    Constraints  Required  Default    Notes
+  ===============================================  =====  =======  ===========  ========  =========  ============================================
+  ``extension/WeekdaySetpointTempsHeatingSeason``  array  deg-F                 Yes                  24 comma-separated weekday heating setpoints
+  ``extension/WeekendSetpointTempsHeatingSeason``  array  deg-F                 Yes                  24 comma-separated weekend heating setpoints
+  ``extension/WeekdaySetpointTempsCoolingSeason``  array  deg-F                 Yes                  24 comma-separated weekday cooling setpoints
+  ``extension/WeekendSetpointTempsCoolingSeason``  array  deg-F                 Yes                  24 comma-separated weekend cooling setpoints
+  ===============================================  =====  =======  ===========  ========  =========  ============================================
 
 HPXML HVAC Distribution
 ***********************
+
+FIXME FIXME FIXME
 
 Each separate HVAC distribution system should be specified as a ``Systems/HVAC/HVACDistribution``.
 The four types of HVAC distribution systems allowed are ``AirDistribution``, ``HydronicDistribution``, ``HydronicAndAirDistribution``, and ``DSE``.
@@ -927,30 +1028,24 @@ Secondary return ducts  :math:`b_r \cdot (1 - F_{out}) \cdot CFA_{ServedByAirDis
 
 where F\ :sub:`out` is 1.0 when ``NumberofConditionedFloorsAboveGrade`` <= 1 and 0.75 when ``NumberofConditionedFloorsAboveGrade`` > 1, and b\ :sub:`r` is 0.05 * ``NumberofReturnRegisters`` with a maximum value of 0.25.
 
-If ``DuctLocation`` is provided, it can be one of the following:
+If ``DuctLocation`` is provided, it can be one of "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - unvented", "crawlspace - vented", "attic - unvented", "attic - vented", "garage", "outside", "exterior wall", "under slab", "roof deck", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space".
+See :ref:`hpxmllocations` for descriptions.
 
-==============================  ================================================  =========================================================  =========================  ================
-Location                        Description                                       Temperature                                                Building Type              Default Priority
-==============================  ================================================  =========================================================  =========================  ================
-living space                    Above-grade conditioned floor area                EnergyPlus calculation                                     Any                        8
-basement - conditioned          Below-grade conditioned floor area                EnergyPlus calculation                                     Any                        1
-basement - unconditioned                                                          EnergyPlus calculation                                     Any                        2
-crawlspace - unvented                                                             EnergyPlus calculation                                     Any                        4
-crawlspace - vented                                                               EnergyPlus calculation                                     Any                        3
-attic - unvented                                                                  EnergyPlus calculation                                     Any                        6
-attic - vented                                                                    EnergyPlus calculation                                     Any                        5
-garage                          Single-family garage (not shared parking garage)  EnergyPlus calculation                                     Any                        7
-outside                                                                           Outside                                                    Any
-exterior wall                                                                     Average of conditioned space and outside                   Any
-under slab                                                                        Ground                                                     Any
-roof deck                                                                         Outside                                                    Any
-other housing unit              E.g., conditioned adjacent unit or corridor       Same as conditioned space                                  Attached/Multifamily only
-other heated space              E.g., shared laundry/equipment space              Average of conditioned space and outside; minimum of 68F   Attached/Multifamily only
-other multifamily buffer space  E.g., enclosed unconditioned stairwell            Average of conditioned space and outside; minimum of 50F   Attached/Multifamily only
-other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                        Attached/Multifamily only
-==============================  ================================================  =========================================================  =========================  ================
+If ``DuctLocation`` is not provided, it will be chosen based on the presence of spaces and the "Default Priority" indicated below.
 
-If ``DuctLocation`` is not provided, the location for primary ducts will be chosen based on the presence of spaces and the "Default Priority" indicated above.
+==========================  ================
+Value                       Default Priority
+==========================  ================
+"basement - conditioned"    1
+"basement - unconditioned"  2
+"crawlspace - vented"       3
+"crawlspace - unvented"     4
+"attic - vented"            5
+"attic - unvented"          6
+"garage"                    7
+"living space"              8
+==========================  ================
+
 Any secondary ducts (when ``NumberofConditionedFloorsAboveGrade`` > 1) will always be located in the living space.
 
 Hydronic Distribution
@@ -986,7 +1081,7 @@ Each ventilation fan system is entered as an ``/HPXML/Building/BuildingDetails/S
 Whole Home Ventilation
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Each mechanical ventilation systems that provide whole home ventilation is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``:
+Each mechanical ventilation systems that provide whole home ventilation is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 
   =======================================  ========  =======  ===========  ========  =========  =========================================
   Element                                  Type      Units    Constraints  Required  Default    Notes
@@ -1005,7 +1100,7 @@ Each mechanical ventilation systems that provide whole home ventilation is enter
   .. [#] Typically 24 hrs/day (i.e., running continuously) for all system types other than central fan integrated supply (CFIS).
          Typically less than 24 hrs/day (i.e., running intermittently) for CFIS systems.
 
-If a **heat recovery ventilator** system is specified, additional information is entered in ``VentilationFan``:
+If a **heat recovery ventilator** system is specified, additional information is entered in ``VentilationFan``.
 
   ========================================================================  ======  =====  ===========  ========  =======  ============================
   Element                                                                   Type    Units  Constraints  Required  Default  Notes
@@ -1013,7 +1108,7 @@ If a **heat recovery ventilator** system is specified, additional information is
   ``SensibleRecoveryEfficiency`` or ``AdjustedSensibleRecoveryEfficiency``  double  frac   0-1          Yes                Sensible recovery efficiency
   ========================================================================  ======  =====  ===========  ========  =======  ============================
 
-If an **energy recovery ventilator** system is specified, additional information is entered in ``VentilationFan``:
+If an **energy recovery ventilator** system is specified, additional information is entered in ``VentilationFan``.
 
   ========================================================================  ======  =====  ===========  ========  =======  ============================
   Element                                                                   Type    Units  Constraints  Required  Default  Notes
@@ -1022,7 +1117,7 @@ If an **energy recovery ventilator** system is specified, additional information
   ``SensibleRecoveryEfficiency`` or ``AdjustedSensibleRecoveryEfficiency``  double  frac   0-1          Yes                Sensible recovery efficiency
   ========================================================================  ======  =====  ===========  ========  =======  ============================
 
-If a **central fan integrated supply** system is specified, additional information is entered in ``VentilationFan``:
+If a **central fan integrated supply** system is specified, additional information is entered in ``VentilationFan``.
 
   ====================================  ======  =====  ===========  ========  =======  ==================================
   Element                               Type    Units  Constraints  Required  Default  Notes
@@ -1032,23 +1127,23 @@ If a **central fan integrated supply** system is specified, additional informati
 
   .. [#] HVACDistribution type cannot be HydronicDistribution.
 
-If a **shared** system is specified, additional information is entered in ``VentilationFan``:
+If a **shared** system is specified, additional information is entered in ``VentilationFan``.
 
-  ====================================  =======  =====  ===========  ========  =======  ====================================================
-  Element                               Type     Units  Constraints  Required  Default  Notes
-  ====================================  =======  =====  ===========  ========  =======  ====================================================
-  ``FractionRecirculation``             double   frac   0-1          Yes                Fraction of supply air that is recirculated [#]_
-  ``extension/InUnitFlowRate``          double   cfm    >= 0         Yes                Total flow rate delivered to the dwelling unit
-  ``extension/PreHeating``              element                      No        <none>   Supply air preconditioned by heating equipment? [#]_
-  ``extension/PreCooling``              element                      No        <none>   Supply air preconditioned by cooling equipment? [#]_
-  ====================================  =======  =====  ===========  ========  =======  ====================================================
+  ============================  =======  =====  ===========  ========  =======  ====================================================
+  Element                       Type     Units  Constraints  Required  Default  Notes
+  ============================  =======  =====  ===========  ========  =======  ====================================================
+  ``FractionRecirculation``     double   frac   0-1          Yes                Fraction of supply air that is recirculated [#]_
+  ``extension/InUnitFlowRate``  double   cfm    >= 0         Yes                Total flow rate delivered to the dwelling unit
+  ``extension/PreHeating``      element                      No        <none>   Supply air preconditioned by heating equipment? [#]_
+  ``extension/PreCooling``      element                      No        <none>   Supply air preconditioned by cooling equipment? [#]_
+  ============================  =======  =====  ===========  ========  =======  ====================================================
 
   .. [#] 1-FractionRecirculation is assumed to be the fraction of supply air that is provided from outside.
          The value must be 0 for exhaust only systems.
   .. [#] PreHeating not allowed for exhaust only systems.
   .. [#] PreCooling not allowed for exhaust only systems.
 
-If a **shared system with preheating** is specified, additional information is entered in ``extension/PreHeating``:
+If a **shared system with preheating** is specified, additional information is entered in ``extension/PreHeating``.
 
   ==============================================  =======  =====  ===========  ========  =======  ===================================================================
   Element                                         Type     Units  Constraints  Required  Default  Notes
@@ -1060,7 +1155,7 @@ If a **shared system with preheating** is specified, additional information is e
 
   .. [#] Fuel choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
 
-If a **shared system with precooling** is specified, additional information is entered in ``extension/PreCooling``:
+If a **shared system with precooling** is specified, additional information is entered in ``extension/PreCooling``.
 
   ==============================================  =======  =====  ===========  ========  =======  ===================================================================
   Element                                         Type     Units  Constraints  Required  Default  Notes
@@ -1075,44 +1170,46 @@ If a **shared system with precooling** is specified, additional information is e
 Local Ventilation
 ~~~~~~~~~~~~~~~~~
 
-Kitchen range fans that provide local ventilation may each be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``FanLocation='kitchen'`` and ``UsedForLocalVentilation='true'``.
+Each kitchen range fan or bathroom fan that provides local ventilation is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 
-Additional fields may be provided per the table below. If not provided, default values will be assumed based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+  ===========================  =======  =======  ===========  ========  ========  =============================
+  Element                      Type     Units    Constraints  Required  Default   Notes
+  ===========================  =======  =======  ===========  ========  ========  =============================
+  ``UsedForLocalVentilation``  boolean           true         Yes                 Must be set to true
+  ``Quantity``                 integer           >= 0         No        See [#]_  Number of identical fans
+  ``RatedFlowRate``            double   cfm      >= 0         No        See [#]_  Flow rate
+  ``HoursInOperation``         double   hrs/day  0-24         No        See [#]_  Hours per day of operation
+  ``FanLocation``              string            See [#]_     Yes                 Location of the fan
+  ``FanPower``                 double   W        >= 0         No        See [#]_  Fan power
+  ``extension/StartHour``      integer           0-23         No        See [#]_  Daily start hour of operation
+  ===========================  =======  =======  ===========  ========  ========  =============================
 
-=========================== ========================
-Element Name                Default Value
-=========================== ========================
-Quantity [#]                1
-RatedFlowRate [cfm]         100
-HoursInOperation [hrs/day]  1
-FanPower [W]                0.3 * RatedFlowRate
-extension/StartHour [0-23]  18
-=========================== ========================
-
-Bathroom fans that provide local ventilation may each be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``FanLocation='bath'`` and ``UsedForLocalVentilation='true'``.
-
-Additional fields may be provided per the table below. If not provided, default values will be assumed based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
-
-=========================== ========================
-Element Name                Default Value
-=========================== ========================
-Quantity [#]                NumberofBathrooms
-RatedFlowRate [cfm]         50
-HoursInOperation [hrs/day]  1
-FanPower [W]                0.3 * RatedFlowRate
-extension/StartHour [0-23]  7
-=========================== ========================
+  .. [#] If Quantity not provided, defaults to 1 for kitchen fans and NumberofBathrooms for bath fans based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+  .. [#] If RatedFlowRate not provided, defaults to 100 cfm for kitchen fans and 50 cfm for bath fans based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+  .. [#] If HoursInOperation not provided, defaults to 1 based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+  .. [#] FanLocation choices are "kitchen" or "bath".
+  .. [#] If FanPower not provided, defaults to 0.3 W/cfm * RatedFlowRate based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+  .. [#] If StartHour not provided, defaults to 18 for kitchen fans and 7 for bath fans  based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
 Cooling Load Reduction
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Whole house fans that provide cooling load reduction may each be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``UsedForSeasonalCoolingLoadReduction='true'``.
-Required elements include ``RatedFlowRate`` and ``FanPower``.
+Each whole house fans that provides cooling load reduction is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+
+  =======================================  =======  =======  ===========  ========  ========  ==========================
+  Element                                  Type     Units    Constraints  Required  Default   Notes
+  =======================================  =======  =======  ===========  ========  ========  ==========================
+  ``UsedForSeasonalCoolingLoadReduction``  boolean           true         Yes                 Must be set to true
+  ``RatedFlowRate``                        double   cfm      >= 0         Yes                 Flow rate
+  ``FanPower``                             double   W        >= 0         Yes                 Fan power
+  =======================================  =======  =======  ===========  ========  ========  ==========================
 
 The whole house fan is assumed to operate during hours of favorable outdoor conditions and will take priority over operable windows (natural ventilation).
 
 HPXML Water Heating Systems
 ***************************
+
+FIXME FIXME FIXME
 
 Each water heater is entered as a ``Systems/WaterHeating/WaterHeatingSystem``.
 Inputs including ``WaterHeaterType`` and ``FractionDHWLoadServed`` must be provided.
@@ -1153,25 +1250,8 @@ For combi boiler systems with a storage tank, the storage tank losses (deg-F/hr)
 
 For water heaters that are connected to a desuperheater, the ``RelatedHVACSystem`` must either point to a ``HeatPump`` or a ``CoolingSystem``.
 
-The water heater ``Location`` can be optionally entered as one of the following:
-
-==============================  ================================================  =========================================================  =========================
-Location                        Description                                       Temperature                                                Building Type
-==============================  ================================================  =========================================================  =========================
-living space                    Above-grade conditioned floor area                EnergyPlus calculation                                     Any
-basement - conditioned          Below-grade conditioned floor area                EnergyPlus calculation                                     Any
-basement - unconditioned                                                          EnergyPlus calculation                                     Any
-attic - unvented                                                                  EnergyPlus calculation                                     Any
-attic - vented                                                                    EnergyPlus calculation                                     Any
-garage                          Single-family garage (not shared parking garage)  EnergyPlus calculation                                     Any
-crawlspace - unvented                                                             EnergyPlus calculation                                     Any
-crawlspace - vented                                                               EnergyPlus calculation                                     Any
-other exterior                  Outside                                           EnergyPlus calculation                                     Any
-other housing unit              E.g., conditioned adjacent unit or corridor       Same as conditioned space                                  Attached/Multifamily only
-other heated space              E.g., shared laundry/equipment space              Average of conditioned space and outside; minimum of 68F   Attached/Multifamily only
-other multifamily buffer space  E.g., enclosed unconditioned stairwell            Average of conditioned space and outside; minimum of 50F   Attached/Multifamily only
-other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                        Attached/Multifamily only
-==============================  ================================================  =========================================================  =========================
+The water heater ``Location`` can be optionally entered as one of: "living space", "basement - conditioned", "basement - unconditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space".
+See :ref:`hpxmllocations` for descriptions.
 
 If the location is not provided, a default water heater location will be assumed based on IECC climate zone:
 
@@ -1191,319 +1271,512 @@ If provided and true, ``NumberofUnitsServed`` must also be specified, where the 
 HPXML Hot Water Distribution
 ****************************
 
-A single ``Systems/WaterHeating/HotWaterDistribution`` must be provided if any water heating systems are specified.
-Inputs including ``SystemType`` and ``PipeInsulation/PipeRValue`` must be provided.
-Note: Any hot water distribution associated with a shared laundry room in attached/multifamily buildings should not be defined.
+If any water heating systems are provided, a single hot water distribution system is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution``.
+
+  =================================  =======  ============  ===========  ========  ========  =======================================================================
+  Element                            Type     Units         Constraints  Required  Default   Notes
+  =================================  =======  ============  ===========  ========  ========  =======================================================================
+  ``SystemType``                     element                See [#]_     Yes                 Type of in-unit distribution system serving the dwelling unit
+  ``PipeInsulation/PipeRValue``      double   F-ft2-hr/Btu  >= 0         Yes                 Pipe insulation R-value
+  ``DrainWaterHeatRecovery``         element                             No        <none>    Presence of drain water heat recovery device
+  ``extension/SharedRecirculation``  element                See [#]_     No        <none>    Presence of shared recirculation system serving multiple dwelling units
+  =================================  =======  ============  ===========  ========  ========  =======================================================================
+
+  .. [#] SystemType child element choices are ``Standard`` and ``Recirculation``.
+  .. [#] If SharedRecirculation is provided, SystemType must be ``Standard``.
+         This is because a stacked recirculation system (i.e., shared recirculation loop plus an additional in-unit recirculation system) is more likely to indicate input errors than reflect an actual real-world scenario.
+
+  .. note::
+
+    In attached/multifamily buildings, only the hot water distribution system serving the dwelling unit should be fined.
+    The hot water distribution associated with, e.g., a shared laundry room should not be defined.
 
 Standard
 ~~~~~~~~
 
-For a ``SystemType/Standard`` (non-recirculating) system within the dwelling unit, the following element are used:
+If the in-unit distribution system is specified as standard, additional information is entered in ``SystemType/Standard``.
 
-- ``PipingLength``: Optional. Measured length of hot water piping from the hot water heater (or from a shared recirculation loop serving multiple dwelling units) to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any)
-  If not provided, a default ``PipingLength`` will be calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+  ================  =======  =====  ===========  ========  ========  =====================
+  Element           Type     Units  Constraints  Required  Default   Notes
+  ================  =======  =====  ===========  ========  ========  =====================
+  ``PipingLength``  double   ft     > 0          No        See [#]_  Length of piping [#]_
+  ================  =======  =====  ===========  ========  ========  =====================
 
-  .. math:: PipeL = 2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt
-
-  Where, 
-  PipeL = piping length [ft], 
-  CFA = conditioned floor area [ft²],
-  NCfl = number of conditioned floor levels number of conditioned floor levels in the residence including conditioned basements, 
-  bsmnt = presence = 1.0 or absence = 0.0 of an unconditioned basement in the residence.
+  .. [#] | If PipingLength not provided, calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+         | :math:`PipeL = 2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot Bsmnt`
+         | where,
+         |   CFA = conditioned floor area [ft2],
+         |   NCfl = number of conditioned floor levels number of conditioned floor levels in the residence including conditioned basements,
+         |   Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence.
+  .. [#] PipingLength is the length of hot water piping from the hot water heater (or from a shared recirculation loop serving multiple dwelling units) to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any).
 
 Recirculation
 ~~~~~~~~~~~~~
 
-For a ``SystemType/Recirculation`` system within the dwelling unit, the following elements are used:
+If the in-unit distribution system is specified as recirculation, additional information is entered in ``SystemType/Recirculation``.
 
-- ``ControlType``: One of "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
-- ``RecirculationPipingLoopLength``: Optional. If not provided, the default value will be calculated by using the equation shown in the table below. Measured recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for unconditioned basements.
-- ``BranchPipingLoopLength``: Optional. If not provided, the default value will be assumed as shown in the table below. Measured length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally.
-- ``PumpPower``: Optional. If not provided, the default value will be assumed as shown in the table below. Pump Power in Watts.
+  =================================  =======  =====  ===========  ========  ========  =====================================
+  Element                            Type     Units  Constraints  Required  Default   Notes
+  =================================  =======  =====  ===========  ========  ========  =====================================
+  ``ControlType``                    string          See [#]_     Yes                 Recirculation control type
+  ``RecirculationPipingLoopLength``  double   ft     > 0          No        See [#]_  Recirculation piping loop length [#]_
+  ``BranchPipingLoopLength``         double   ft     > 0          No        10        Branch piping loop length [#]_
+  ``PumpPower``                      double   W      >= 0         No        50 [#]_   Recirculation pump power
+  =================================  =======  =====  ===========  ========  ========  =====================================
 
-  ==================================  ====================================================================================================
-  Element Name                        Default Value
-  ==================================  ====================================================================================================
-  RecirculationPipingLoopLength [ft]  :math:`2.0 \cdot (2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt) - 20.0`
-  BranchPipingLoopLength [ft]         10 
-  Pump Power [W]                      50 
-  ==================================  ====================================================================================================
+  .. [#] ControlType choices are "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
+  .. [#] | If RecirculationPipingLoopLength not provided, calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+         | :math:`RecircPipeL = 2.0 \cdot (2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot Bsmnt) - 20.0`
+         | where,
+         |   CFA = conditioned floor area [ft2],
+         |   NCfl = number of conditioned floor levels number of conditioned floor levels in the residence including conditioned basements,
+         |   Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence.
+  .. [#] RecirculationPipingLoopLength is the recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for unconditioned basements.
+  .. [#] BranchPipingLoopLength is the length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally.
+  .. [#] PumpPower default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 Shared Recirculation
 ~~~~~~~~~~~~~~~~~~~~
 
-In addition to the hot water distribution systems within the dwelling unit, the pump energy use of a shared recirculation system in an Attached/Multifamily building can also be described using the following elements:
+If a shared recirculation system is specified, additional information is entered in ``extension/SharedRecirculation``.
 
-- `extension/SharedRecirculation/NumberofUnitsServed`: Number of dwelling units served by the shared pump.
-- `extension/SharedRecirculation/PumpPower`: Optional. If not provided, the default value will be assumed as shown in the table below. Shared pump power in Watts.
-- `extension/SharedRecirculation/ControlType`: One of "manual demand control", "presence sensor demand control", "timer", or "no control".
+  =======================  =======  =====  ===========  ========  ========  =================================
+  Element                  Type     Units  Constraints  Required  Default   Notes
+  =======================  =======  =====  ===========  ========  ========  =================================
+  ``NumberofUnitsServed``  integer         > 1          Yes                 Number of dwelling units served
+  ``PumpPower``            double   W      >= 0         No        220 [#]_  Shared recirculation pump power
+  ``ControlType``          string          See [#]_     Yes                 Shared recirculation control type
+  =======================  =======  =====  ===========  ========  ========  =================================
 
-  ==================================  ==========================================
-  Element Name                        Default Value
-  ==================================  ==========================================
-  Pump Power [W]                      220 (0.25 HP pump w/ 85% motor efficiency)
-  ==================================  ==========================================
-
-Note that when defining a shared recirculation system, the hot water distribution system type within the dwelling unit must be standard (``SystemType/Standard``).
-This is because a stacked recirculation system (i.e., shared recirculation loop plus an additional recirculation system within the dwelling unit) is more likely to indicate input errors than reflect an actual real-world scenario.
+  .. [#] PumpPower default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+  .. [#] ControlType choices are "manual demand control", "presence sensor demand control", "timer", or "no control".
 
 Drain Water Heat Recovery
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In addition, a ``HotWaterDistribution/DrainWaterHeatRecovery`` (DWHR) may be specified.
-The DWHR system is defined by:
+If a drain water heat recovery (DWHR) device is specified, additional information is entered in ``DrainWaterHeatRecovery``.
 
-- ``FacilitiesConnected``: 'one' if there are multiple showers and only one of them is connected to a DWHR; 'all' if there is one shower and it's connected to a DWHR or there are two or more showers connected to a DWHR
-- ``EqualFlow``: 'true' if the DWHR supplies pre-heated water to both the fixture cold water piping and the hot water heater potable supply piping
-- ``Efficiency``: As rated and labeled in accordance with CSA 55.1
+  =======================  =======  =====  ===========  ========  ========  =========================================
+  Element                  Type     Units  Constraints  Required  Default   Notes
+  =======================  =======  =====  ===========  ========  ========  =========================================
+  ``FacilitiesConnected``  string          See [#]_     Yes                 Specifies which facilities are connected
+  ``EqualFlow``            boolean                      Yes                 Specifies how the DHWR is configured [#]_
+  ``Efficiency``           double   frac   0-1          Yes                 Efficiency according to CSA 55.1
+  =======================  =======  =====  ===========  ========  ========  =========================================
+
+  .. [#] FacilitiesConnected choices are "one" or "all".
+         Use "one" if there are multiple showers and only one of them is connected to the DWHR.
+         Use "all" if there is one shower and it's connected to the DWHR or there are two or more showers connected to the DWHR.
+  .. [#] EqualFlow should be true if the DWHR supplies pre-heated water to both the fixture cold water piping *and* the hot water heater potable supply piping.
+
 
 HPXML Water Fixtures
 ********************
 
-Water fixtures is entered as ``Systems/WaterHeating/WaterFixture`` elements.
-Each fixture must have ``WaterFixtureType`` and ``LowFlow`` elements provided.
-Fixtures should be specified as low flow if they are <= 2.0 gpm.
+Each water fixture is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture``.
 
-A ``WaterHeating/extension/WaterFixturesUsageMultiplier`` can also be optionally provided that scales hot water usage; if not provided, it is assumed to be 1.0.
+  ====================  =======  =====  ===========  ========  ========  ===============================================
+  Element               Type     Units  Constraints  Required  Default   Notes
+  ====================  =======  =====  ===========  ========  ========  ===============================================
+  ``WaterFixtureType``  string          See [#]_     Yes                 Type of water fixture
+  ``LowFlow``           boolean                      Yes                 Whether the fixture is considered low-flow [#]_
+  ====================  =======  =====  ===========  ========  ========  ===============================================
+
+  .. [#] WaterFixtureType choices are "shower head" or "faucet".
+  .. [#] LowFlow should be true if the fixture's flow rate (gpm) is <= 2.0.
+
+In addition, a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/extension/WaterFixturesUsageMultiplier`` can be optionally provided that scales hot water usage.
+if not provided, it is assumed to be 1.0.
 
 HPXML Solar Thermal
 *******************
 
-A solar hot water system can be entered as a ``Systems/SolarThermal/SolarThermalSystem``.
-The ``SystemType`` element must be 'hot water'.
+A single solar hot water system can be entered as a ``/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem``.
+
+  ==============  =======  =====  ===========  ========  ========  ============================
+  Element         Type     Units  Constraints  Required  Default   Notes
+  ==============  =======  =====  ===========  ========  ========  ============================
+  ``SystemType``  string          See [#]_     Yes                 Type of solar thermal system
+  ==============  =======  =====  ===========  ========  ========  ============================
+
+  .. [#] SystemType only choice is "hot water".
 
 Solar hot water systems can be described with either simple or detailed inputs.
 
-Simple Model
-~~~~~~~~~~~~
+Simple Inputs
+~~~~~~~~~~~~~
 
-If using simple inputs, the following elements are used:
+To define a simple solar hot water system, additional information is entered in ``SolarThermalSystem``.
 
-- ``SolarFraction``: Portion of total conventional hot water heating load (delivered energy and tank standby losses). Can be obtained from Directory of SRCC OG-300 Solar Water Heating System Ratings or NREL's `System Advisor Model <https://sam.nrel.gov/>`_ or equivalent.
-- ``ConnectedTo``: Optional. If not specified, applies to all water heaters in the building. If specified, must point to a ``WaterHeatingSystem``.
+  =================  =======  =====  ===========  ========  ========  ======================
+  Element            Type     Units  Constraints  Required  Default   Notes
+  =================  =======  =====  ===========  ========  ========  ======================
+  ``SolarFraction``  double   frac   0-1          Yes                 Solar fraction [#]_
+  ``ConnectedTo``    idref           See [#]_     No [#]_   <none>    Connected water heater
+  =================  =======  =====  ===========  ========  ========  ======================
+  
+  .. [#] Portion of total conventional hot water heating load (delivered energy plus tank standby losses).
+         Can be obtained from `Directory of SRCC OG-300 Solar Water Heating System Ratings <https://solar-rating.org/programs/og-300-program/>`_ or NREL's `System Advisor Model <https://sam.nrel.gov/>`_ or equivalent.
+  .. [#] ConnectedTo must reference a ``WaterHeatingSystem``.
+  .. [#] If ConnectedTo not provided, solar fraction will apply to all water heaters in the building.
 
-Detailed Model
-~~~~~~~~~~~~~~
+Detailed Inputs
+~~~~~~~~~~~~~~~
 
-If using detailed inputs, the following elements are used:
+To define a detailed solar hot water system, additional information is entered in ``SolarThermalSystem``.
 
-- ``CollectorArea``: in units of ft²
-- ``CollectorLoopType``: 'liquid indirect' or 'liquid direct' or 'passive thermosyphon'
-- ``CollectorType``: 'single glazing black' or 'double glazing black' or 'evacuated tube' or 'integrated collector storage'
-- ``CollectorAzimuth``
-- ``CollectorTilt``
-- ``CollectorRatedOpticalEfficiency``: FRTA (y-intercept); see Directory of SRCC OG-100 Certified Solar Collector Ratings
-- ``CollectorRatedThermalLosses``: FRUL (slope, in units of Btu/hr-ft²-R); see Directory of SRCC OG-100 Certified Solar Collector Ratings
-- ``StorageVolume``: Optional. If not provided, the default value in gallons will be calculated as 1.5 * CollectorArea
-
-- ``ConnectedTo``: Must point to a ``WaterHeatingSystem``. The connected water heater cannot be of type space-heating boiler or attached to a desuperheater.
+  ===================================  =======  ============  ===========  ========  ========  ==============================
+  Element                              Type     Units         Constraints  Required  Default   Notes
+  ===================================  =======  ============  ===========  ========  ========  ==============================
+  ``CollectorArea``                    double   ft2           > 0          Yes                 Area
+  ``CollectorLoopType``                string                 See [#]_     Yes                 Loop type
+  ``CollectorType``                    string                 See [#]_     Yes                 System type
+  ``CollectorAzimuth``                 integer  deg           0-359        Yes                 Azimuth (clockwise from North)
+  ``CollectorTilt``                    double   deg           0-90         Yes                 Tilt relative to horizontal
+  ``CollectorRatedOpticalEfficiency``  double   frac          0-1          Yes                 Rated optical efficiency [#]_
+  ``CollectorRatedThermalLosses``      double   Btu/hr-ft2-R  > 0          Yes                 Rated thermal losses [#]_
+  ``StorageVolume``                    double   gal           > 0          No        See [#]_  Hot water storage volume
+  ``ConnectedTo``                      idref                  See [#]_     Yes                 Connected water heater
+  ===================================  =======  ============  ===========  ========  ========  ==============================
+  
+  .. [#] CollectorLoopType choices are "liquid indirect", "liquid direct", or "passive thermosyphon".
+  .. [#] CollectorType choices are "single glazing black", "double glazing black", "evacuated tube", or "integrated collector storage".
+  .. [#] CollectorRatedOpticalEfficiency is FRTA (y-intercept) from the `Directory of SRCC OG-100 Certified Solar Collector Ratings <https://solar-rating.org/programs/og-100-program/>`_.
+  .. [#] CollectorRatedThermalLosses is FRUL (slope) from the `Directory of SRCC OG-100 Certified Solar Collector Ratings <https://solar-rating.org/programs/og-100-program/>`_.
+  .. [#] If StorageVolume not provided, calculated as 1.5 gal/ft2 * CollectorArea.
+  .. [#] ConnectedTo must reference a ``WaterHeatingSystem`` that is not of type space-heating boiler nor connected to a desuperheater.
 
 HPXML Photovoltaics
 *******************
 
-Each solar electric (photovoltaic) system is entered as a ``Systems/Photovoltaics/PVSystem``.
-The following elements, some adopted from the `PVWatts model <https://pvwatts.nrel.gov>`_, are required for each PV system:
+Each solar electric photovoltaic (PV) system is entered as a ``/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem``.
 
-- ``Location``: 'ground' or 'roof' mounted
-- ``ModuleType``: 'standard', 'premium', or 'thin film'
-- ``Tracking``: 'fixed' or '1-axis' or '1-axis backtracked' or '2-axis'
-- ``ArrayAzimuth``
-- ``ArrayTilt``
-- ``MaxPowerOutput``
+Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov>`_.
 
-Inputs including ``InverterEfficiency``, ``SystemLossesFraction``, and ``YearModulesManufactured`` can be optionally entered.
-If ``InverterEfficiency`` is not provided, the default value of 0.96 is assumed.
+  =======================================================  =================  =========  =============  ============  ========  ============================================
+  Element                                                  Type               Units      Constraints    Required      Default   Notes
+  =======================================================  =================  =========  =============  ============  ========  ============================================
+  ``IsSharedSystem``                                       boolean                                      No            false     Whether it serves multiple dwelling units
+  ``Location``                                             string                        See [#]_       Yes                     Mounting location
+  ``ModuleType``                                           string                        See [#]_       Yes                     Type of module
+  ``Tracking``                                             string                        See [#]_       Yes                     Type of tracking
+  ``ArrayAzimuth``                                         integer            deg        0-359          Yes                     Direction panels face (clockwise from North)
+  ``ArrayTilt``                                            double             deg        0-90           Yes                     Tilt relative to horizontal
+  ``MaxPowerOutput``                                       double             W          >= 0           Yes                     Peak power
+  ``InverterEfficiency``                                   double             frac       0-1            No            0.96      Inverter efficiency
+  ``SystemLossesFraction`` or ``YearModulesManufactured``  double or integer  frac or #  0-1 or > 1600  No            0.14      System losses [#]_
+  =======================================================  =================  =========  =============  ============  ========  ============================================
+  
+  .. [#] Location choices are "ground" or "roof" mounted.
+  .. [#] ModuleType choices are "standard", "premium", or "thin film".
+  .. [#] Tracking choices are "fixed", "1-axis", "1-axis backtracked", or "2-axis".
+  .. [#] System losses due to soiling, shading, snow, mismatch, wiring, degradation, etc.
+         If YearModulesManufactured provided but not SystemLossesFraction, system losses calculated as:
+         SystemLossesFraction = 1.0 - (1.0 - 0.14) * (1.0 - (1.0 - 0.995^(CurrentYear - YearModulesManufactured))).
 
-``SystemLossesFraction`` includes the effects of soiling, shading, snow, mismatch, wiring, degradation, etc.
-If neither ``SystemLossesFraction`` or ``YearModulesManufactured`` are provided, a default value of 0.14 will be used.
-If ``SystemLossesFraction`` is not provided but ``YearModulesManufactured`` is provided, ``SystemLossesFraction`` will be calculated using the following equation.
+If a shared system is specified, additional information is entered in ``PVSystem``.
 
-.. math:: System Losses Fraction = 1.0 - (1.0 - 0.14) \cdot (1.0 - (1.0 - 0.995^{(CurrentYear - YearModulesManufactured)}))
+  ====================================  =======  =====  ===========  ========  ========  =========================
+  Element                               Type     Units  Constraints  Required  Default   Notes
+  ====================================  =======  =====  ===========  ========  ========  =========================
+  ``extension/NumberofBedroomsServed``  integer         > 1          Yes                 Number of bedrooms served
+  ====================================  =======  =====  ===========  ========  ========  =========================
 
-The PV system may be optionally described as a shared system (i.e., serving multiple dwelling units) using ``IsSharedSystem``.
-If not provided, it is assumed to be false.
-If provided and true, the total number of bedrooms across all dwelling units served by the system must be entered as ``extension/NumberofBedroomsServed``.
-PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms in the building.
+  PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the number of bedrooms served by the PV system.
 
 HPXML Appliances
 ----------------
 
-This section describes elements specified in HPXML's ``Appliances``.
-
-The ``Location`` for each appliance can be optionally provided as one of the following:
-
-==============================  ================================================  =========================
-Location                        Description                                       Building Type
-==============================  ================================================  =========================
-living space                    Above-grade conditioned floor area                Any
-basement - conditioned          Below-grade conditioned floor area                Any
-basement - unconditioned                                                          Any
-garage                          Single-family garage (not shared parking garage)  Any
-other housing unit              E.g., conditioned adjacent unit or corridor       Attached/Multifamily only
-other heated space              E.g., shared laundry/equipment space              Attached/Multifamily only
-other multifamily buffer space  E.g., enclosed unconditioned stairwell            Attached/Multifamily only
-other non-freezing space        E.g., shared parking garage ceiling               Attached/Multifamily only
-==============================  ================================================  =========================
-
-If the location is not specified, the appliance is assumed to be in the living space.
+Appliances entered in ``/HPXML/Building/BuildingDetails/Appliances``.
 
 HPXML Clothes Washer
 ********************
 
-A single ``Appliances/ClothesWasher`` element can be specified; if not provided, a clothes washer will not be modeled.
+A single clothes washer can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/ClothesWasher``.
 
-Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
-If the complete set of efficiency inputs is not provided, the following default values representing a standard clothes washer from 2006 will be used.
+  ==============================================================  =======  =============  ===========  ========  ============  ==============================================
+  Element                                                         Type     Units          Constraints  Required  Default       Notes
+  ==============================================================  =======  =============  ===========  ========  ============  ==============================================
+  ``IsSharedAppliance``                                           boolean                              No        false         Whether it serves multiple dwelling units [#]_
+  ``Location``                                                    string                  See [#]_     No        living space  Location
+  ``IntegratedModifiedEnergyFactor`` or ``ModifiedEnergyFactor``  double   ft3/kWh/cycle  > 0          No        See [#]_      EnergyGuide label efficiency [#]_
+  ``extension/UsageMultiplier``                                   double                  >= 0         No        1.0           Multiplier on energy & hot water usage
+  ==============================================================  =======  =============  ===========  ========  ============  ==============================================
 
-=============================================  ==============
-Element Name                                   Default Value
-=============================================  ==============
-IntegratedModifiedEnergyFactor [ft³/kWh-cyc]   1.0  
-RatedAnnualkWh [kWh/yr]                        400  
-LabelElectricRate [$/kWh]                      0.12  
-LabelGasRate [$/therm]                         1.09  
-LabelAnnualGasCost [$]                         27.0  
-Capacity [ft³]                                 3.0  
-LabelUsage [cyc/week]                          6  
-=============================================  ==============
+  .. [#] For example, a clothes washer in a shared laundry room of a MF building.
+  .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+         See :ref:`hpxmllocations` for descriptions.
+  .. [#] | If IntegratedModifiedEnergyFactor nor ModifiedEnergyFactor provided, the following default values representing a standard clothes washer from 2006 will be used:
+         
+         ==============================  =======
+         Element                         Default
+         ==============================  =======
+         IntegratedModifiedEnergyFactor  1.0  
+         RatedAnnualkWh                  400  
+         LabelElectricRate               0.12  
+         LabelGasRate                    1.09  
+         LabelAnnualGasCost              27.0  
+         LabelUsage                      6  
+         Capacity                        3.0  
+         ==============================  =======
+         
+  .. [#] If ModifiedEnergyFactor (MEF) provided instead of IntegratedModifiedEnergyFactor (IMEF), it will be converted using the `Interpretation on ANSI/RESNET 301-2014 Clothes Washer IMEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-08-sECTION-4.2.2.5.2.8-Clothes-Washers-Eq-4.2-6.pdf>`_:
+         IMEF = (MEF - 0.503) / 0.95.
 
-If ``ModifiedEnergyFactor`` is provided instead of ``IntegratedModifiedEnergyFactor``, it will be converted using the following equation based on the `Interpretation on ANSI/RESNET 301-2014 Clothes Washer IMEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-08-sECTION-4.2.2.5.2.8-Clothes-Washers-Eq-4.2-6.pdf>`_.
+If IntegratedModifiedEnergyFactor or ModifiedEnergyFactor is provided, a complete set of EnergyGuide label information is entered in ``ClothesWasher``.
 
-.. math:: IntegratedModifiedEnergyFactor = \frac{ModifiedEnergyFactor - 0.503}{0.95}
+  ======================  =======  =======  ===========  ========  =======  ====================================
+  Element                 Type     Units    Constraints  Required  Default  Notes
+  ======================  =======  =======  ===========  ========  =======  ====================================
+  ``RatedAnnualkWh``      double   kWh/yr   > 0          Yes                EnergyGuide label annual consumption
+  ``LabelElectricRate``   double   $/kWh    > 0          Yes                EnergyGuide label electricity rate
+  ``LabelGasRate``        double   $/therm  > 0          Yes                EnergyGuide label natural gas rate
+  ``LabelAnnualGasCost``  double   $        > 0          Yes                EnergyGuide label annual gas cost
+  ``LabelUsage``          double   cyc/wk   > 0          Yes                EnergyGuide label number of cycles
+  ``Capacity``            double   ft3      > 0          Yes                Clothes dryer volume
+  ======================  =======  =======  ===========  ========  =======  ====================================
 
-An ``extension/UsageMultiplier`` can also be optionally provided that scales energy and hot water usage; if not provided, it is assumed to be 1.0.
+If a shared clothes washer is specified, additional information is entered in ``ClothesWasher``.
 
-The clothes washer may be optionally described as a shared appliance (i.e., in a shared laundry room) using ``IsSharedAppliance``.
-If not provided, it is assumed to be false.
-If provided and true, ``AttachedToWaterHeatingSystem`` must also be specified and must reference a shared water heater.
+  ================================  =======  =======  ===========  ========  =======  ===========================
+  Element                           Type     Units    Constraints  Required  Default  Notes
+  ================================  =======  =======  ===========  ========  =======  ===========================
+  ``AttachedToWaterHeatingSystem``  idref             See [#]_     Yes                ID of attached water heater
+  ================================  =======  =======  ===========  ========  =======  ===========================
+
+  .. [#] AttachedToWaterHeatingSystem must reference a ``WaterHeatingSystem``.
 
 HPXML Clothes Dryer
 *******************
 
-A single ``Appliances/ClothesDryer`` element can be specified; if not provided, a clothes dryer will not be modeled.
-The dryer's ``FuelType`` must be provided.
+A single clothes dryer can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/ClothesDryer``.
 
-Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
-If the complete set of efficiency inputs is not provided, the following default values representing a standard clothes dryer from 2006 will be used.
+  ============================================  =======  ======  ===========  ========  ============  ==============================================
+  Element                                       Type     Units   Constraints  Required  Default       Notes
+  ============================================  =======  ======  ===========  ========  ============  ==============================================
+  ``IsSharedAppliance``                         boolean                       No        false         Whether it serves multiple dwelling units [#]_
+  ``Location``                                  string           See [#]_     No        living space  Location
+  ``FuelType``                                  string           See [#]_     Yes                     Fuel type
+  ``CombinedEnergyFactor`` or ``EnergyFactor``  double   lb/kWh  > 0          No        See [#]_      EnergyGuide label efficiency [#]_
+  ``extension/UsageMultiplier``                 double           >= 0         No        1.0           Multiplier on energy use
+  ``extension/IsVented``                        boolean                       No        true          Whether dryer is vented
+  ============================================  =======  ======  ===========  ========  ============  ==============================================
 
-==============================  ==============
-Element Name                    Default Value
-==============================  ==============
-CombinedEnergyFactor [lb/kWh]   3.01  
-ControlType                     timer
-==============================  ==============
+  .. [#] For example, a clothes dryer in a shared laundry room of a MF building.
+  .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+         See :ref:`hpxmllocations` for descriptions.
+  .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
+  .. [#] | If CombinedEnergyFactor nor EnergyFactor provided, the following default values representing a standard clothes dryer from 2006 will be used:
+         
+         ==============================  =======
+         Element                         Default
+         ==============================  =======
+         CombinedEnergyFactor            3.01
+         ControlType                     timer
+         ==============================  =======
+         
+  .. [#] If EnergyFactor (EF) provided instead of CombinedEnergyFactor (CEF), it will be converted using the following equation based on the `Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-10-Section-4.2.2.5.2.8-Clothes-Dryer-CEF-Rating.pdf>`_:
+         CEF = EF / 1.15.
 
-If ``EnergyFactor`` is provided instead of ``CombinedEnergyFactor``, it will be converted into ``CombinedEnergyFactor`` using the following equation based on the `Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-10-Section-4.2.2.5.2.8-Clothes-Dryer-CEF-Rating.pdf>`_.
+If the CombinedEnergyFactor or EnergyFactor is provided, a complete set of EnergyGuide label information is entered in ``ClothesDryer``.
 
-.. math:: CombinedEnergyFactor = \frac{EnergyFactor}{1.15}
+  ===============  =======  =======  ===========  ========  =======  ================
+  Element          Type     Units    Constraints  Required  Default  Notes
+  ===============  =======  =======  ===========  ========  =======  ================
+  ``ControlType``  string            See [#]_     Yes                Type of controls
+  ===============  =======  =======  ===========  ========  =======  ================
 
-An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+  .. [#] ControlType choices are "timer" or "moisture".
 
-An optional ``extension/IsVented`` element can be used to indicate whether the clothes dryer is vented. If not provided, it is assumed that the clothes dryer is vented.
-If the clothes dryer is vented, an optional ``extension/VentedFlowRate`` element can be used to specify the exhaust cfm. If not provided, it is assumed that the clothes dryer vented flow rate is 100 cfm.
+If a vented dryer is specified, additional information is entered in ``ClothesDryer``.
 
-The clothes dryer may be optionally described as a shared appliance (i.e., in a shared laundry room) using ``IsSharedAppliance``.
-If not provided, it is assumed to be false.
+  ============================  =======  =======  ===========  ========  ========  =================================
+  Element                       Type     Units    Constraints  Required  Default   Notes
+  ============================  =======  =======  ===========  ========  ========  =================================
+  ``extension/VentedFlowRate``  double   cfm      >= 0         No        100 [#]_  Exhust flow rate during operation
+  ============================  =======  =======  ===========  ========  ========  =================================
+  
+  .. [#] VentedFlowRate default based on `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
 HPXML Dishwasher
 ****************
 
-A single ``Appliances/Dishwasher`` element can be specified; if not provided, a dishwasher will not be modeled.
+A single dishwasher can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/Dishwasher``.
 
-Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
-If the complete set of efficiency inputs is not provided, the following default values representing a standard dishwasher from 2006 will be used.
+  ============================================  =======  ===========  ===========  ========  ============  ==============================================
+  Element                                       Type     Units        Constraints  Required  Default       Notes
+  ============================================  =======  ===========  ===========  ========  ============  ==============================================
+  ``IsSharedAppliance``                         boolean                            No        false         Whether it serves multiple dwelling units [#]_
+  ``Location``                                  string                See [#]_     No        living space  Location
+  ``RatedAnnualkWh`` or ``EnergyFactor``        double   kWh/yr or #  > 0          No        See [#]_      EnergyGuide label consumption/efficiency [#]_
+  ``extension/UsageMultiplier``                 double                >= 0         No        1.0           Multiplier on energy & hot water usage
+  ============================================  =======  ===========  ===========  ========  ============  ==============================================
 
-===============================  =================
-Element Name                     Default Value
-===============================  =================
-RatedAnnualkWh [kwh/yr]          467  
-LabelElectricRate [$/kWh]        0.12  
-LabelGasRate [$/therm]           1.09  
-LabelAnnualGasCost [$]           33.12  
-PlaceSettingCapacity [#]         12  
-LabelUsage [cyc/week]            4  
-===============================  =================
+  .. [#] For example, a dishwasher in a shared mechanical room of a MF building.
+  .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+         See :ref:`hpxmllocations` for descriptions.
+  .. [#] | If RatedAnnualkWh nor EnergyFactor provided, the following default values representing a standard dishwasher from 2006 will be used:
 
-If ``EnergyFactor`` is provided instead of ``RatedAnnualkWh``, it will be converted into ``RatedAnnualkWh`` using the following equation based on `ANSI/RESNET/ICC 301-2014 <https://codes.iccsafe.org/content/document/843>`_.
+         ====================  =======
+         Element               Default
+         ====================  =======
+         RatedAnnualkWh        467  
+         LabelElectricRate     0.12  
+         LabelGasRate          1.09  
+         LabelAnnualGasCost    33.12  
+         LabelUsage            4  
+         PlaceSettingCapacity  12  
+         ====================  =======
 
-.. math:: RatedAnnualkWh = \frac{215.0}{EnergyFactor}
+  .. [#] If EnergyFactor (EF) provided instead of RatedAnnualkWh, it will be converted using the following equation based on `ANSI/RESNET/ICC 301-2014 <https://codes.iccsafe.org/content/document/843>`_:
+         RatedAnnualkWh = 215.0 / EF.
 
-An ``extension/UsageMultiplier`` can also be optionally provided that scales energy and hot water usage; if not provided, it is assumed to be 1.0.
+If the RatedAnnualkWh or EnergyFactor is provided, a complete set of EnergyGuide label information is entered in ``Dishwasher``.
 
-The dishwasher may be optionally described as a shared appliance (i.e., in a shared laundry room) using ``IsSharedAppliance``.
-If not provided, it is assumed to be false.
-If provided and true, ``AttachedToWaterHeatingSystem`` must also be specified and must reference a shared water heater.
+  ========================  =======  =======  ===========  ========  =======  ==================================
+  Element                   Type     Units    Constraints  Required  Default  Notes
+  ========================  =======  =======  ===========  ========  =======  ==================================
+  ``LabelElectricRate``     double   $/kWh    > 0          Yes                EnergyGuide label electricity rate
+  ``LabelGasRate``          double   $/therm  > 0          Yes                EnergyGuide label natural gas rate
+  ``LabelAnnualGasCost``    double   $        > 0          Yes                EnergyGuide label annual gas cost
+  ``LabelUsage``            double   cyc/wk   > 0          Yes                EnergyGuide label number of cycles
+  ``PlaceSettingCapacity``  integer  #        > 0          Yes                Number of place settings
+  ========================  =======  =======  ===========  ========  =======  ==================================
+
+If a shared dishwasher is specified, additional information is entered in ``Dishwasher``.
+
+  ================================  =======  =======  ===========  ========  =======  ===========================
+  Element                           Type     Units    Constraints  Required  Default  Notes
+  ================================  =======  =======  ===========  ========  =======  ===========================
+  ``AttachedToWaterHeatingSystem``  idref             See [#]_     Yes                ID of attached water heater
+  ================================  =======  =======  ===========  ========  =======  ===========================
+
+  .. [#] AttachedToWaterHeatingSystem must reference a ``WaterHeatingSystem``.
 
 HPXML Refrigerators
 *******************
 
-Multiple ``Appliances/Refrigerator`` elements can be specified; if none are provided, refrigerators will not be modeled.
+Each refrigerator can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/Refrigerator``.
 
-The efficiency of the refrigerator can be optionally entered as ``RatedAnnualkWh`` or ``extension/AdjustedAnnualkWh``.
-If neither are provided, ``RatedAnnualkWh`` will be defaulted to represent a standard refrigerator from 2006 using the following equation based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+  =====================================================  =======  ======  ===========  ============  ========  ======================================
+  Element                                                Type     Units   Constraints  Required      Default   Notes
+  =====================================================  =======  ======  ===========  ============  ========  ======================================
+  ``Location``                                           string           See [#]_     No            See [#]_  Location
+  ``RatedAnnualkWh`` or ``extension/AdjustedAnnualkWh``  double   kWh/yr  > 0          No            See [#]_  Annual consumption
+  ``PrimaryIndicator``                                   boolean                       Depends [#]_            Primary refrigerator?
+  ``extension/UsageMultiplier``                          double           >= 0         No            1.0       Multiplier on energy use
+  ``extension/WeekdayScheduleFractions``                 array                         No            See [#]_  24 comma-separated weekday multipliers
+  ``extension/WeekendScheduleFractions``                 array                         No                      24 comma-separated weekend multipliers
+  ``extension/MonthlyScheduleMultipliers``               array                         No            See [#]_  12 comma-separated monthly multipliers
+  =====================================================  =======  ======  ===========  ============  ========  ======================================
 
-.. math:: RatedAnnualkWh = 637.0 + 18.0 \cdot NumberofBedrooms
-
-Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided; if not provided, values from Figures 16 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
-An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
-
-If multiple refrigerators are specified, there must be exactly one refrigerator described with ``PrimaryIndicator='true'``.
-
-The ``Location`` of a primary refrigerator is described in the Appliances section.
-If ``Location`` is not provided for a non-primary refrigerator, its location will be chosen based on the presence of spaces and the "Default Priority" indicated below.
-
-========================  ================
-Location                  Default Priority
-========================  ================
-garage                    1
-basement - unconditioned  2
-basement - conditioned    3
-living space              4
-========================  ================
+  .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+         See :ref:`hpxmllocations` for descriptions.
+  .. [#] | If Location not provided and is the *primary* refrigerator, defaults to "living space".
+           If Location not provided and is a *secondary* refrigerator, defaults based on presence of spaces and the Default Priority listed below:
+  
+         ========================  ================
+         Location                  Default Priority
+         ========================  ================
+         garage                    1
+         basement - unconditioned  2
+         basement - conditioned    3
+         living space              4
+         ========================  ================
+    
+  .. [#] If RatedAnnualkWh nor AdjustedAnnualkWh provided, it will be defaulted to represent a standard refrigerator from 2006 using the following equation based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+         RatedAnnualkWh = 637.0 + 18.0 * NumberofBedrooms.
+  .. [#] If multiple refrigerators are specified, there must be exactly one refrigerator described with PrimaryIndicator=true.
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided, default values from Figure 16 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041".
+  .. [#] If MonthlyScheduleMultipliers not provided, default values from Figure 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837".
 
 HPXML Freezers
 **************
 
-Multiple ``Appliances/Freezer`` elements can be provided; if none provided, standalone freezers will not be modeled.
+Each standalone freezer can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/Freezer``.
 
-The efficiency of the freezer can be optionally entered as RatedAnnualkWh or extension/AdjustedAnnualkWh. If neither are provided, RatedAnnualkWh will be defaulted to represent a benchmark freezer according to the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ (319.8 kWh/year).
+  =====================================================  ======  ======  ===========  ========  ==========  ======================================
+  Element                                                Type    Units   Constraints  Required  Default     Notes
+  =====================================================  ======  ======  ===========  ========  ==========  ======================================
+  ``Location``                                           string          See [#]_     No        See [#]_    Location
+  ``RatedAnnualkWh`` or ``extension/AdjustedAnnualkWh``  double  kWh/yr  > 0          No        319.8 [#]_  Annual consumption
+  ``extension/UsageMultiplier``                          double          >= 0         No        1.0         Multiplier on energy use
+  ``extension/WeekdayScheduleFractions``                 array                        No        See [#]_    24 comma-separated weekday multipliers
+  ``extension/WeekendScheduleFractions``                 array                        No                    24 comma-separated weekend multipliers
+  ``extension/MonthlyScheduleMultipliers``               array                        No        See [#]_    12 comma-separated monthly multipliers
+  =====================================================  ======  ======  ===========  ========  ==========  ======================================
 
-Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided; if not provided, values from Figures 16 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
-An extension/UsageMultiplier can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+  .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+         See :ref:`hpxmllocations` for descriptions.
+  .. [#] | If Location not provided, defaults based on presence of spaces and the Default Priority listed below:
+  
+         ========================  ================
+         Location                  Default Priority
+         ========================  ================
+         garage                    1
+         basement - unconditioned  2
+         basement - conditioned    3
+         living space              4
+         ========================  ================
 
-HPXML Cooking Range/Oven
-************************
-
-A single pair of ``Appliances/CookingRange`` and ``Appliances/Oven`` elements can be specified; if not provided, a range/oven will not be modeled.
-The ``FuelType`` of the range must be provided.
-
-Inputs including ``CookingRange/IsInduction`` and ``Oven/IsConvection`` can be optionally provided.
-The following default values will be assumed unless a complete set of the optional variables is provided.
-
-=============  ==============
-Element Name   Default Value
-=============  ==============
-IsInduction    false
-IsConvection   false
-=============  ==============
-
-Optional ``CookingRange/extension/WeekdayScheduleFractions``, ``CookingRange/extension/WeekendScheduleFractions``, and ``CookingRange/extension/MonthlyScheduleMultipliers`` can be provided; if not provided, values from Figures 22 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
-An ``CookingRange/extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+  .. [#] RatedAnnualkWh default based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided, default values from Figure 16 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041".
+  .. [#] If MonthlyScheduleMultipliers not provided, default values from Figure 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837".
 
 HPXML Dehumidifier
 ******************
 
-A single ``Appliance/Dehumidifier`` element can be specified; if not provided, a dehumidifier will not be modeled.
-The ``Capacity`` (pints/day), ``DehumidistatSetpoint`` (relative humidity as a fraction, 0-1), and ``FractionDehumidificationLoadServed`` (0-1) must be provided.
-The efficiency of the dehumidifier can either be entered as an ``IntegratedEnergyFactor`` or ``EnergyFactor``.
+A single dehumidifier can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/Dehumidifier``.
+
+  ==============================================  ==========  ==========  ===========  ========  =======  ========================================
+  Element                                         Type        Units       Constraints  Required  Default  Notes
+  ==============================================  ==========  ==========  ===========  ========  =======  ========================================
+  ``Capacity``                                    double      pints/day   > 0          Yes                Dehumidification capacity
+  ``IntegratedEnergyFactor`` or ``EnergyFactor``  double      liters/kWh  > 0          Yes                Rated efficiency
+  ``DehumidistatSetpoint``                        double      frac        0-1          Yes                Relative humidity setpoint
+  ``FractionDehumidificationLoadServed``          double      frac        0-1          Yes                Fraction of dehumidification load served
+  ==============================================  ==========  ==========  ===========  ========  =======  ========================================
+
+HPXML Cooking Range/Oven
+************************
+
+A single cooking range can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/CookingRange``.
+
+  ========================================  =======  ======  ===========  ========  ============  ======================================
+  Element                                   Type     Units   Constraints  Required  Default       Notes
+  ========================================  =======  ======  ===========  ========  ============  ======================================
+  ``Location``                              string           See [#]_     No        living space  Location
+  ``FuelType``                              string           See [#]_     Yes                     Fuel type
+  ``IsInduction``                           boolean                       No        false         Induction range?
+  ``extension/UsageMultiplier``             double           >= 0         No        1.0           Multiplier on energy use
+  ``extension/WeekdayScheduleFractions``    array                         No        See [#]_      24 comma-separated weekday multipliers
+  ``extension/WeekendScheduleFractions``    array                         No                      24 comma-separated weekend multipliers
+  ``extension/MonthlyScheduleMultipliers``  array                         No        See [#]_      12 comma-separated monthly multipliers
+  ========================================  =======  ======  ===========  ========  ============  ======================================
+
+  .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+         See :ref:`hpxmllocations` for descriptions.
+  .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided, default values from Figure 22 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011".
+  .. [#] If MonthlyScheduleMultipliers not provided, default values from Figure 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097".
+
+If a cooking range is specified, a single oven is also entered as a ``/HPXML/Building/BuildingDetails/Appliances/Oven``.
+
+  ================  =======  ======  ===========  ========  =======  ================
+  Element           Type     Units   Constraints  Required  Default  Notes
+  ================  =======  ======  ===========  ========  =======  ================
+  ``IsConvection``  boolean                       No        false    Convection oven?
+  ================  =======  ======  ===========  ========  =======  ================
 
 HPXML Lighting
 --------------
 
-This section describes elements specified in HPXML's ``Lighting``.
+Lighting is entered in ``/HPXML/Building/BuildingDetails/Lighting``.
 
 HPXML Lighting Groups
 *********************
+
+FIXME FIXME FIXME
 
 The building's lighting is described by nine ``LightingGroup`` elements, each of which is the combination of:
 
@@ -1515,7 +1788,7 @@ The fractions for a given location cannot sum to greater than 1.
 If the fractions sum to less than 1, the remainder is assumed to be incandescent lighting.
 Garage lighting values are ignored if the building has no garage.
 
-Optional ``extension/InteriorUsageMultiplier``, ``extension/ExteriorUsageMultiplier``, and ``extension/GarageUsageMultiplier`` can be provided that scales energy usage; if not provided, they are assumed to be 1.0.
+Optional ``extension/InteriorUsageMultiplier``, ``extension/ExteriorUsageMultiplier``, and ``extension/GarageUsageMultiplier`` can be provided that scales energy use; if not provided, they are assumed to be 1.0.
 
 An optional ``extension/ExteriorHolidayLighting`` can also be provided to define additional exterior holiday lighting; if not provided, none will be modeled. 
 If provided, child elements ``Load[Units='kWh/day']/Value``, ``PeriodBeginMonth``/``PeriodBeginDayOfMonth``, ``PeriodEndMonth``/``PeriodEndDayOfMonth``, ``WeekdayScheduleFractions``, and ``WeekendScheduleFractions`` can be optionally provided. 
@@ -1541,6 +1814,8 @@ Finally, optional schedules can be defined:
 HPXML Ceiling Fans
 ******************
 
+FIXME FIXME FIXME
+
 Each ceiling fan (or set of identical ceiling fans) is entered as a ``CeilingFan``.
 The ``Airflow/Efficiency`` (at medium speed) and ``Quantity`` can be provided, otherwise the following default assumptions are used from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
@@ -1557,54 +1832,96 @@ See the Thermostat section for more information.
 HPXML Pool
 ----------
 
-A ``Pools/Pool`` element can be specified; if not provided, a pool will not be modeled.
+A single pool can be entered as a ``/HPXML/Building/BuildingDetails/Pools/Pool``.
 
-A ``PoolPumps/PoolPump`` element is required.
-The annual energy consumption of the pool pump (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equation based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+If a pool is specified, a single pool pump must be entered as a ``Pool/PoolPumps/PoolPump``.
 
-.. math:: PoolPumpkWhs = 158.5 / 0.070 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+  ========================================  =======  ======  ===========  ========  ============  ======================================
+  Element                                   Type     Units   Constraints  Required  Default       Notes
+  ========================================  =======  ======  ===========  ========  ============  ======================================
+  ``Load[Units="kWh/year"]/Value``          double   kWh/yr  >= 0         No        See [#]_      Pool pump energy use
+  ``extension/UsageMultiplier``             double           >= 0         No        1.0           Multiplier on pool pump energy use
+  ``extension/WeekdayScheduleFractions``    array                         No        See [#]_      24 comma-separated weekday multipliers
+  ``extension/WeekendScheduleFractions``    array                         No                      24 comma-separated weekend multipliers
+  ``extension/MonthlyScheduleMultipliers``  array                         No        See [#]_      12 comma-separated monthly multipliers
+  ========================================  =======  ======  ===========  ========  ============  ======================================
 
-A ``Heater`` element can be specified; if not provided, a pool heater will not be modeled.
-Currently only pool heaters specified with ``Heater[Type='gas fired' or Type='electric resistance' or Type='heat pump']`` are recognized.
-The annual energy consumption (``Load[Units='kWh/year' or Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+  .. [#] If Value not provided, defaults based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_: 158.5 / 0.070 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.35 * ConditionedFloorArea / 1920).
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided, default values from Figure 23 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003".
+  .. [#] If MonthlyScheduleMultipliers not provided, default values from Figure 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154".
 
-.. math:: GasFiredTherms = 3.0 / 0.014 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
-.. math:: ElectricResistancekWhs = 8.3 / 0.004 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
-.. math:: HeatPumpkWhs = ElectricResistancekWhs / 5.0
+In addition, a pool heater can be entered as a ``Pool/Heater``.
 
-A ``PoolPump/extension/UsageMultiplier`` can also be optionally provided that scales pool pump energy usage; if not provided, it is assumed to be 1.0.
-A ``Heater/extension/UsageMultiplier`` can also be optionally provided that scales pool heater energy usage; if not provided, it is assumed to be 1.0.
-Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided for ``HotTubPump`` and ``Heater``; if not provided, values from Figures 23 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
+  ======================================================  =======  ==================  ===========  ========  ========  ======================================
+  Element                                                 Type     Units               Constraints  Required  Default   Notes
+  ======================================================  =======  ==================  ===========  ========  ========  ======================================
+  ``Type``                                                string                       See [#]_     Yes                 Pool heater type
+  ``Load[Units="kWh/year" or Units="therm/year"]/Value``  double   kWh/yr or therm/yr  >= 0         No        See [#]_  Pool heater energy use
+  ``extension/UsageMultiplier``                           double                       >= 0         No        1.0       Multiplier on pool heater energy use
+  ``extension/WeekdayScheduleFractions``                  array                                     No        See [#]_  24 comma-separated weekday multipliers
+  ``extension/WeekendScheduleFractions``                  array                                     No                  24 comma-separated weekend multipliers
+  ``extension/MonthlyScheduleMultipliers``                array                                     No        See [#]_  12 comma-separated monthly multipliers
+  ======================================================  =======  ==================  ===========  ========  ========  ======================================
+
+  .. [#] Type choices are "gas fired", "electric resistance", or "heat pump".
+  .. [#] | If Value not provided, defaults based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_:
+         | gas fired [therm/year] = 3.0 / 0.014 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.35 * ConditionedFloorArea / 1920)
+         | electric resistance [kWh/year] = 8.3 / 0.004 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.35 * ConditionedFloorArea / 1920)
+         | heat pump [kWh/year] = (electric resistance [kWh/year]) / 5.0
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided, default values from Figure 23 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003".
+  .. [#] If MonthlyScheduleMultipliers not provided, default values from Figure 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154".
 
 HPXML Hot Tub
 -------------
 
-A ``HotTubs/HotTub`` element can be specified; if not provided, a hot tub will not be modeled.
+A single hot tub can be entered as a ``/HPXML/Building/BuildingDetails/HotTubs/HotTub``.
 
-A ``HotTubPumps/HotTubPump`` element is required.
-The annual energy consumption of the hot tub pump (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equation based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+If a hot tub is specified, a single hot tub pump must be entered as a ``HotTub/HotTubPumps/HotTubPump``.
 
-.. math:: HotTubPumpkWhs = 59.5 / 0.059 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+  ========================================  =======  ======  ===========  ========  ============  ======================================
+  Element                                   Type     Units   Constraints  Required  Default       Notes
+  ========================================  =======  ======  ===========  ========  ============  ======================================
+  ``Load[Units="kWh/year"]/Value``          double   kWh/yr  >= 0         No        See [#]_      Hot tub pump energy use
+  ``extension/UsageMultiplier``             double           >= 0         No        1.0           Multiplier on hot tub pump energy use
+  ``extension/WeekdayScheduleFractions``    array                         No        See [#]_      24 comma-separated weekday multipliers
+  ``extension/WeekendScheduleFractions``    array                         No                      24 comma-separated weekend multipliers
+  ``extension/MonthlyScheduleMultipliers``  array                         No        See [#]_      12 comma-separated monthly multipliers
+  ========================================  =======  ======  ===========  ========  ============  ======================================
 
-A ``Heater`` element can be specified; if not provided, a hot tub heater will not be modeled.
-Currently only hot tub heaters specified with ``Heater[Type='gas fired' or Type='electric resistance' or Type='heat pump']`` are recognized.
-The annual energy consumption (``Load[Units='kWh/year' or Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+  .. [#] If Value not provided, defaults based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_: 59.5 / 0.059 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.35 * ConditionedFloorArea / 1920).
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided, default values from Figure 23 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024".
+  .. [#] If MonthlyScheduleMultipliers not provided, default values from Figure 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921".
 
-.. math:: GasFiredTherms = 0.87 / 0.011 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
-.. math:: ElectricResistancekWhs = 49.0 / 0.048 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
-.. math:: HeatPumpkWhs = ElectricResistancekWhs / 5.0
+In addition, a pool heater can be entered as a ``Pool/Heater``.
 
-A ``HotTubPump/extension/UsageMultiplier`` can also be optionally provided that scales hot tub pump energy usage; if not provided, it is assumed to be 1.0.
-A ``Heater/extension/UsageMultiplier`` can also be optionally provided that scales hot tub heater energy usage; if not provided, it is assumed to be 1.0.
-Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided for ``PoolPump`` and ``Heater``; if not provided, values from Figures 23 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
+  ======================================================  =======  ==================  ===========  ========  ========  ======================================
+  Element                                                 Type     Units               Constraints  Required  Default   Notes
+  ======================================================  =======  ==================  ===========  ========  ========  ======================================
+  ``Type``                                                string                       See [#]_     Yes                 Pool heater type
+  ``Load[Units="kWh/year" or Units="therm/year"]/Value``  double   kWh/yr or therm/yr  >= 0         No        See [#]_  Pool heater energy use
+  ``extension/UsageMultiplier``                           double                       >= 0         No        1.0       Multiplier on pool heater energy use
+  ``extension/WeekdayScheduleFractions``                  array                                     No        See [#]_  24 comma-separated weekday multipliers
+  ``extension/WeekendScheduleFractions``                  array                                     No                  24 comma-separated weekend multipliers
+  ``extension/MonthlyScheduleMultipliers``                array                                     No        See [#]_  12 comma-separated monthly multipliers
+  ======================================================  =======  ==================  ===========  ========  ========  ======================================
+
+  .. [#] Type choices are "gas fired", "electric resistance", or "heat pump".
+  .. [#] | If Value not provided, defaults based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_:
+         | gas fired [therm/year] = 0.87 / 0.011 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.35 * ConditionedFloorArea / 1920)
+         | electric resistance [kWh/year] = 49.0 / 0.048 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.35 * ConditionedFloorArea / 1920)
+         | heat pump [kWh/year] = (electric resistance [kWh/year]) / 5.0
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided, default values from Figure 23 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024".
+  .. [#] If MonthlyScheduleMultipliers not provided, default values from Figure 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837".
 
 HPXML Misc Loads
 ----------------
 
-This section describes elements specified in HPXML's ``MiscLoads``.
+Miscellaneous loads are entered in ``/HPXML/Building/BuildingDetails/MiscLoads``.
 
 HPXML Plug Loads
 ****************
+
+FIXME FIXME FIXME
 
 Misc electric plug loads can be provided by entering ``PlugLoad`` elements.
 Currently only plug loads specified with ``PlugLoadType='other'``, ``PlugLoadType='TV other'``, ``PlugLoadType='electric vehicle charging'``, or ``PlugLoadType='well pump'`` are recognized.
@@ -1631,7 +1948,7 @@ The electric vehicle charging default kWh/year is calculated using:
 
 where AnnualMiles=4500, kWhPerMile=0.3, EVChargerEfficiency=0.9, and EVBatteryEfficiency=0.9.
 
-An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy use; if not provided, it is assumed to be 1.0.
 Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided.
 If not provided, values from Figures 23 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used for ``PlugLoadType='other'``, ``PlugLoadType='electric vehicle charging'``, and ``PlugLoadType='well pump'``; values from the `American Time Use Survey <https://www.bls.gov/tus>`_ are used for ``PlugLoadType='TV other'``.
 
@@ -1656,8 +1973,38 @@ fireplace                   1.95/0.032*(0.5 + 0.25*NBr/3 + 0.35*CFA/1920)  inter
 
 where CFA is the conditioned floor area and NBr is the number of bedrooms.
 
-An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy use; if not provided, it is assumed to be 1.0.
 Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided; if not provided, values from Figures 23 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
+
+.. _hpxmllocations:
+
+HPXML Locations
+---------------
+
+The various locations used in an HPXML file are defined as follows:
+
+  ==============================  ===========================================  =======================================  =============
+  Value                           Description                                  Temperature                              Building Type
+  ==============================  ===========================================  =======================================  =============
+  outside                         Ambient environment                          Weather data                             Any
+  ground                                                                       EnergyPlus calculation                   Any
+  living space                    Above-grade conditioned floor area           EnergyPlus calculation                   Any
+  attic - vented                                                               EnergyPlus calculation                   Any
+  attic - unvented                                                             EnergyPlus calculation                   Any
+  basement - conditioned          Below-grade conditioned floor area           EnergyPlus calculation                   Any
+  basement - unconditioned                                                     EnergyPlus calculation                   Any
+  crawlspace - vented                                                          EnergyPlus calculation                   Any
+  crawlspace - unvented                                                        EnergyPlus calculation                   Any
+  garage                          Single-family garage (not shared parking)    EnergyPlus calculation                   Any
+  other housing unit              E.g., conditioned adjacent unit or corridor  Same as living space                     SFA/MF only
+  other heated space              E.g., shared laundry/equipment space         Avg of living space/outside; min of 68F  SFA/MF only
+  other multifamily buffer space  E.g., enclosed unconditioned stairwell       Avg of living space/outside; min of 50F  SFA/MF only
+  other non-freezing space        E.g., shared parking garage ceiling          Floats with outside; minimum of 40F      SFA/MF only
+  other exterior                  Water heater outside                         Weather data                             Any
+  exterior wall                   Ducts in exterior wall                       Avg of living space/outside              Any
+  under slab                      Ducts under slab (ground)                    EnergyPlus calculation                   Any
+  roof deck                       Ducts on roof deck (outside)                 Weather data                             Any
+  ==============================  ===========================================  =======================================  =============
 
 Validating & Debugging Errors
 -----------------------------
