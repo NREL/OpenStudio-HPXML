@@ -328,6 +328,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
   .. [#] RoofType choices are "asphalt or fiberglass shingles", "wood shingles or shakes", "slate or tile shingles", or "metal surfacing".
+  .. [#] RoofColor choices are "light", "medium", "medium dark", "dark", or "reflective".
   .. [#] | If SolarAbsorptance not provided, defaulted based on color/material as shown below:
 
          ===========  =======================================================  ================
@@ -345,7 +346,6 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
          reflective   slate or tile shingles, metal surfacing                  0.30
          ===========  =======================================================  ================
 
-  .. [#] RoofColor choices are "light", "medium", "medium dark", "dark", or "reflective".
   .. [#] RadiantBarrierGrade required if RadiantBarrier is provided.
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
@@ -354,18 +354,18 @@ HPXML Rim Joists
 
 Each rim joist surface (i.e., the perimeter of floor joists typically found between stories of a building or on top of a foundation wall) are entered as an ``/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist``.
 
-  ======================================  ================  ============  ===========  ========  ===========  ==============================
-  Element                                 Type              Units         Constraints  Required  Default      Notes
-  ======================================  ================  ============  ===========  ========  ===========  ==============================
-  ``ExteriorAdjacentTo``                  string                          See [#]_     Yes                    Exterior adjacent space type
-  ``InteriorAdjacentTo``                  string                          See [#]_     Yes                    Interior adjacent space type
-  ``Area``                                double            ft2           > 0          Yes                    Gross area
-  ``Azimuth``                             integer           deg           0-359        No        See [#]_     Azimuth (clockwise from North)
-  ``Siding``                              string                          See [#]_     No        wood siding  Siding material
-  ``SolarAbsorptance`` or ``Color``       double or string                0-1          Yes       See [#]_     Solar absorptance or color
-  ``Emittance``                           double                          0-1          Yes                    Emittance
-  ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0          Yes                    Assembly R-value [#]_
-  ======================================  ================  ============  ===========  ========  ===========  ==============================
+  ======================================  ================  ============  ===============  ========  ===========  ==============================
+  Element                                 Type              Units         Constraints      Required  Default      Notes
+  ======================================  ================  ============  ===============  ========  ===========  ==============================
+  ``ExteriorAdjacentTo``                  string                          See [#]_         Yes                    Exterior adjacent space type
+  ``InteriorAdjacentTo``                  string                          See [#]_         Yes                    Interior adjacent space type
+  ``Area``                                double            ft2           > 0              Yes                    Gross area
+  ``Azimuth``                             integer           deg           0-359            No        See [#]_     Azimuth (clockwise from North)
+  ``Siding``                              string                          See [#]_         No        wood siding  Siding material
+  ``SolarAbsorptance`` or ``Color``       double or string                0-1 or See [#]_  Yes       See [#]_     Solar absorptance or color
+  ``Emittance``                           double                          0-1              Yes                    Emittance
+  ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0              Yes                    Assembly R-value [#]_
+  ======================================  ================  ============  ===============  ========  ===========  ==============================
 
   .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
@@ -373,6 +373,7 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
   .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", or "aluminum siding".
+  .. [#] Color choices are "light", "medium", "medium dark", "dark", or "reflective".
   .. [#] | If SolarAbsorptance not provided, defaulted based on color as shown below:
           
          =========== ================
@@ -385,7 +386,6 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
          reflective  0.30
          =========== ================
 
-  .. [#] Color choices are "light", "medium", "medium dark", "dark", or "reflective".
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
 HPXML Walls
@@ -393,20 +393,19 @@ HPXML Walls
 
 Each wall that has no contact with the ground and bounds a space type is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall``.
 
-  ======================================  ================  ============  =============  =============  ===========  ====================================
-  Element                                 Type              Units         Constraints    Required       Default      Notes
-  ======================================  ================  ============  =============  =============  ===========  ====================================
-  ``ExteriorAdjacentTo``                  string                          See [#]_       Yes                         Exterior adjacent space type
-  ``InteriorAdjacentTo``                  string                          See [#]_       Yes                         Interior adjacent space type
-  ``WallType``                            element                         See [#]_       Yes                         Wall type (for thermal mass)
-  ``Area``                                double            ft2           > 0            Yes                         Gross area (including doors/windows)
-  ``Azimuth``                             integer           deg           0-359          No             See [#]_     Azimuth (clockwise from North)
-  ``Siding``                              string                          See [#]_       No             wood siding  Siding material
-  ``SolarAbsorptance`` or ``Color``       double or string                0-1            Yes            See [#]_     Solar absorptance or color
-  ``Color``                               string                          See [#]_       Depends [#]_                Color
-  ``Emittance``                           double                          0-1            Yes                         Emittance
-  ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0            Yes                         Assembly R-value [#]_
-  ======================================  ================  ============  =============  =============  ===========  ====================================
+  ======================================  ================  ============  ===============  =============  ===========  ====================================
+  Element                                 Type              Units         Constraints      Required       Default      Notes
+  ======================================  ================  ============  ===============  =============  ===========  ====================================
+  ``ExteriorAdjacentTo``                  string                          See [#]_         Yes                         Exterior adjacent space type
+  ``InteriorAdjacentTo``                  string                          See [#]_         Yes                         Interior adjacent space type
+  ``WallType``                            element                         See [#]_         Yes                         Wall type (for thermal mass)
+  ``Area``                                double            ft2           > 0              Yes                         Gross area (including doors/windows)
+  ``Azimuth``                             integer           deg           0-359            No             See [#]_     Azimuth (clockwise from North)
+  ``Siding``                              string                          See [#]_         No             wood siding  Siding material
+  ``SolarAbsorptance`` or ``Color``       double or string                0-1 or See [#]_  Yes            See [#]_     Solar absorptance or color
+  ``Emittance``                           double                          0-1              Yes                         Emittance
+  ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0              Yes                         Assembly R-value [#]_
+  ======================================  ================  ============  ===============  =============  ===========  ====================================
 
   .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
@@ -415,6 +414,7 @@ Each wall that has no contact with the ground and bounds a space type is entered
   .. [#] WallType child element choices are ``WoodStud``, ``DoubleWoodStud``, ``ConcreteMasonryUnit``, ``StructurallyInsulatedPanel``, ``InsulatedConcreteForms``, ``SteelFrame``, ``SolidConcrete``, ``StructuralBrick``, ``StrawBale``, ``Stone``, ``LogWall``, or ``Adobe``.
   .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
   .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", or "aluminum siding".
+  .. [#] Color choices are "light", "medium", "medium dark", "dark", or "reflective".
   .. [#] | If SolarAbsorptance not provided, defaulted based on color as shown below:
           
          =========== ================
@@ -427,7 +427,6 @@ Each wall that has no contact with the ground and bounds a space type is entered
          reflective  0.30
          =========== ================
 
-  .. [#] Color choices are "light", "medium", "medium dark", "dark", or "reflective".
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
 HPXML Foundation Walls
