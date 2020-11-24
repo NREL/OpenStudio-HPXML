@@ -2717,6 +2717,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1.0)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_television_diversity_multiplier', true)
+    arg.setDisplayName('Plug Loads: Television Diversity Multiplier')
+    arg.setDefaultValue(1)
+    arg.setDescription('A diversity multiplier on the television usage multiplier.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('plug_loads_other_annual_kwh', true)
     arg.setDisplayName('Plug Loads: Other Annual kWh')
     arg.setDescription('The annual energy consumption of the other residual plug loads.')
@@ -2742,6 +2748,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Plug Loads: Other Usage Multiplier')
     arg.setDescription('Multiplier on the other energy usage that can reflect, e.g., high/low usage occupants.')
     arg.setDefaultValue(1.0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_other_diversity_multiplier', true)
+    arg.setDisplayName('Plug Loads: Other Diversity Multiplier')
+    arg.setDefaultValue(1)
+    arg.setDescription('A diversity multiplier on the other usage multiplier.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('plug_loads_well_pump_present', true)
@@ -3417,10 +3429,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              ceiling_fan_cooling_setpoint_temp_offset: runner.getDoubleArgumentValue('ceiling_fan_cooling_setpoint_temp_offset', user_arguments),
              plug_loads_television_annual_kwh: runner.getStringArgumentValue('plug_loads_television_annual_kwh', user_arguments),
              plug_loads_television_usage_multiplier: runner.getDoubleArgumentValue('plug_loads_television_usage_multiplier', user_arguments),
+             plug_loads_television_diversity_multiplier: runner.getDoubleArgumentValue('plug_loads_television_diversity_multiplier', user_arguments),
              plug_loads_other_annual_kwh: runner.getStringArgumentValue('plug_loads_other_annual_kwh', user_arguments),
              plug_loads_other_frac_sensible: runner.getStringArgumentValue('plug_loads_other_frac_sensible', user_arguments),
              plug_loads_other_frac_latent: runner.getStringArgumentValue('plug_loads_other_frac_latent', user_arguments),
              plug_loads_other_usage_multiplier: runner.getDoubleArgumentValue('plug_loads_other_usage_multiplier', user_arguments),
+             plug_loads_other_diversity_multiplier: runner.getDoubleArgumentValue('plug_loads_other_diversity_multiplier', user_arguments),
              plug_loads_well_pump_present: runner.getBoolArgumentValue('plug_loads_well_pump_present', user_arguments),
              plug_loads_well_pump_annual_kwh: runner.getStringArgumentValue('plug_loads_well_pump_annual_kwh', user_arguments),
              plug_loads_well_pump_usage_multiplier: runner.getDoubleArgumentValue('plug_loads_well_pump_usage_multiplier', user_arguments),
@@ -4629,25 +4643,25 @@ class HPXMLFile
 
     if args[:setpoint_heating_weekday_offset_magnitude].is_initialized && args[:setpoint_heating_weekday_schedule].is_initialized
       setpoint_heating_weekday_offset_magnitude = args[:setpoint_heating_weekday_offset_magnitude].get
-      setpoint_heating_weekday_schedule = args[:setpoint_heating_weekday_schedule].get.split(', ').map { |i| Float(i) }
+      setpoint_heating_weekday_schedule = args[:setpoint_heating_weekday_schedule].get.split(',').map { |i| Float(i) }
       weekday_heating_setpoints = modify_setpoint_schedule(weekday_heating_setpoints, setpoint_heating_weekday_offset_magnitude, setpoint_heating_weekday_schedule)
     end
 
     if args[:setpoint_heating_weekend_offset_magnitude].is_initialized && args[:setpoint_heating_weekend_schedule].is_initialized
       setpoint_heating_weekend_offset_magnitude = args[:setpoint_heating_weekend_offset_magnitude].get
-      setpoint_heating_weekend_schedule = args[:setpoint_heating_weekend_schedule].get.split(', ').map { |i| Float(i) }
+      setpoint_heating_weekend_schedule = args[:setpoint_heating_weekend_schedule].get.split(',').map { |i| Float(i) }
       weekend_heating_setpoints = modify_setpoint_schedule(weekend_heating_setpoints, setpoint_heating_weekend_offset_magnitude, setpoint_heating_weekend_schedule)
     end
 
     if args[:setpoint_cooling_weekday_offset_magnitude].is_initialized && args[:setpoint_cooling_weekday_schedule].is_initialized
       setpoint_cooling_weekday_offset_magnitude = args[:setpoint_cooling_weekday_offset_magnitude].get
-      setpoint_cooling_weekday_schedule = args[:setpoint_cooling_weekday_schedule].get.split(', ').map { |i| Float(i) }
+      setpoint_cooling_weekday_schedule = args[:setpoint_cooling_weekday_schedule].get.split(',').map { |i| Float(i) }
       weekday_cooling_setpoints = modify_setpoint_schedule(weekday_cooling_setpoints, setpoint_cooling_weekday_offset_magnitude, setpoint_cooling_weekday_schedule)
     end
 
     if args[:setpoint_cooling_weekend_offset_magnitude].is_initialized && args[:setpoint_cooling_weekend_schedule].is_initialized
       setpoint_cooling_weekend_offset_magnitude = args[:setpoint_cooling_weekend_offset_magnitude].get
-      setpoint_cooling_weekend_schedule = args[:setpoint_cooling_weekend_schedule].get.split(', ').map { |i| Float(i) }
+      setpoint_cooling_weekend_schedule = args[:setpoint_cooling_weekend_schedule].get.split(',').map { |i| Float(i) }
       weekend_cooling_setpoints = modify_setpoint_schedule(weekend_cooling_setpoints, setpoint_cooling_weekend_offset_magnitude, setpoint_cooling_weekend_schedule)
     end
 
@@ -5473,8 +5487,9 @@ class HPXMLFile
       kWh_per_year = args[:plug_loads_television_annual_kwh]
     end
 
-    if args[:plug_loads_television_usage_multiplier] != 1.0
-      usage_multiplier = args[:plug_loads_television_usage_multiplier]
+    usage_multiplier = args[:plug_loads_television_usage_multiplier] * args[:plug_loads_television_diversity_multiplier]
+    if usage_multiplier == 1.0
+      usage_multiplier = nil
     end
 
     hpxml.plug_loads.add(id: 'PlugLoadsTelevision',
@@ -5496,8 +5511,9 @@ class HPXMLFile
       frac_latent = args[:plug_loads_other_frac_latent]
     end
 
-    if args[:plug_loads_other_usage_multiplier] != 1.0
-      usage_multiplier = args[:plug_loads_other_usage_multiplier]
+    usage_multiplier = args[:plug_loads_other_usage_multiplier] * args[:plug_loads_other_diversity_multiplier]
+    if usage_multiplier == 1.0
+      usage_multiplier = nil
     end
 
     hpxml.plug_loads.add(id: 'PlugLoadsOther',
