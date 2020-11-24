@@ -159,11 +159,16 @@ Building site information is entered in ``/HPXML/Building/BuildingDetails/Buildi
 
   .. [#] SiteType choices are "rural", "suburban", or "urban".
   .. [#] | ShelterCoefficient values are described as follows:
-         |   1.0 = No obstructions or local shielding
-         |   0.9 = Light local shielding with few obstructions within two building heights
-         |   0.7 = Local shielding with many large obstructions within two building heights
-         |   0.5 = Heavily shielded, many large obstructions within one building height
-         |   0.3 = Complete shielding with large buildings immediately adjacent
+
+         ===================  =========================================================================
+         Shelter Coefficient  Description
+         ===================  =========================================================================
+         1.0                  No obstructions or local shielding
+         0.9                  Light local shielding with few obstructions within two building heights
+         0.7                  Local shielding with many large obstructions within two building heights
+         0.5                  Heavily shielded, many large obstructions within one building height
+         0.3                  Complete shielding with large buildings immediately adjacent
+         ===================  =========================================================================
 
 For each neighboring building defined, additional information is entered in ``extension/Neighbors/NeighborBuilding``.
 
@@ -324,17 +329,23 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
   .. [#] RoofType choices are "asphalt or fiberglass shingles", "wood shingles or shakes", "slate or tile shingles", or "metal surfacing".
   .. [#] RoofColor choices are "light", "medium", "medium dark", "dark", or "reflective".
-  .. [#] | If SolarAbsorptance not provided, defaulted based on color/material:
-         |   dark -- asphalt or fiberglass shingles, wood shingles or shakes = 0.92
-         |   medium dark -- asphalt or fiberglass shingles, wood shingles or shakes = 0.89
-         |   medium -- asphalt or fiberglass shingles, wood shingles or shakes = 0.85
-         |   light -- asphalt or fiberglass shingles, wood shingles or shakes = 0.75
-         |   reflective -- asphalt or fiberglass shingles, wood shingles or shakes = 0.50
-         |   dark -- slate or tile shingles, metal surfacing = 0.90
-         |   medium dark -- slate or tile shingles, metal surfacing = 0.83
-         |   medium -- slate or tile shingles, metal surfacing = 0.75
-         |   light -- slate or tile shingles, metal surfacing = 0.60
-         |   reflective -- slate or tile shingles, metal surfacing = 0.30
+  .. [#] | If SolarAbsorptance not provided, defaulted based on color/material as shown below:
+
+         ===========  =======================================================  ================
+         RoofColor    RoofMaterial                                             SolarAbsorptance
+         ===========  =======================================================  ================
+         dark         asphalt or fiberglass shingles, wood shingles or shakes  0.92
+         medium dark  asphalt or fiberglass shingles, wood shingles or shakes  0.89
+         medium       asphalt or fiberglass shingles, wood shingles or shakes  0.85
+         light        asphalt or fiberglass shingles, wood shingles or shakes  0.75
+         reflective   asphalt or fiberglass shingles, wood shingles or shakes  0.50
+         dark         slate or tile shingles, metal surfacing                  0.90
+         medium dark  slate or tile shingles, metal surfacing                  0.83
+         medium       slate or tile shingles, metal surfacing                  0.75
+         light        slate or tile shingles, metal surfacing                  0.60
+         reflective   slate or tile shingles, metal surfacing                  0.30
+         ===========  =======================================================  ================
+
   .. [#] RadiantBarrierGrade required if RadiantBarrier is provided.
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
@@ -363,12 +374,18 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
   .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
   .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", or "aluminum siding".
   .. [#] Color choices are "light", "medium", "medium dark", "dark", or "reflective".
-  .. [#] | If SolarAbsorptance not provided, defaulted based on color:
-         |   dark = 0.95
-         |   medium dark = 0.85
-         |   medium = 0.70
-         |   light = 0.50
-         |   reflective = 0.30
+  .. [#] | If SolarAbsorptance not provided, defaulted based on color as shown below:
+          
+         =========== ================
+         Color       SolarAbsorptance
+         =========== ================
+         dark        0.95
+         medium dark 0.85
+         medium      0.70
+         light       0.50
+         reflective  0.30
+         =========== ================
+
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
 HPXML Walls
@@ -398,12 +415,18 @@ Each wall that has no contact with the ground and bounds a space type is entered
   .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
   .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", or "aluminum siding".
   .. [#] Color choices are "light", "medium", "medium dark", "dark", or "reflective".
-  .. [#] | If SolarAbsorptance not provided, defaulted based on color:
-         |   dark = 0.95
-         |   medium dark = 0.85
-         |   medium = 0.70
-         |   light = 0.50
-         |   reflective = 0.30
+  .. [#] | If SolarAbsorptance not provided, defaulted based on color as shown below:
+          
+         =========== ================
+         Color       SolarAbsorptance
+         =========== ================
+         dark        0.95
+         medium dark 0.85
+         medium      0.70
+         light       0.50
+         reflective  0.30
+         =========== ================
+
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
 HPXML Foundation Walls
@@ -677,11 +700,16 @@ If a boiler is specified, additional information is entered in ``HeatingSystem``
          |   aux_in = In-unit fan coil power [W], provided as ``extension/FanCoilWatts``
          |   HLH = Annual heating load hours
   .. [#] | If ElectricAuxiliaryEnergy not provided (or calculated for shared boilers), defaults as follows per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
-         |   Oil boiler = 330
-         |   Gas boiler (in-unit) = 170
-         |   Gas boiler (shared, w/ baseboard) = 220
-         |   Gas boiler (shared, w/ water loop heat pump) = 265
-         |   Gas boiler (shared, w/ fan coil) = 438
+
+         ============================================  ==============================
+         System Type                                   Electric Auxiliary Energy
+         ============================================  ==============================
+         Oil boiler                                    330
+         Gas boiler (in-unit)                          170
+         Gas boiler (shared, w/ baseboard)             220
+         Gas boiler (shared, w/ water loop heat pump)  265
+         Gas boiler (shared, w/ fan coil)              438
+         ============================================  ==============================
 
   For shared boilers connected to a water loop heat pump, the heat pump's heating COP must be provided as ``extension/WaterLoopHeatPump/AnnualHeatingEfficiency[Units="COP"]/Value``.
 
@@ -1478,13 +1506,19 @@ A single clothes washer can be entered as a ``/HPXML/Building/BuildingDetails/Ap
   .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] | If IntegratedModifiedEnergyFactor nor ModifiedEnergyFactor provided, the following default values representing a standard clothes washer from 2006 will be used:
-         |   IntegratedModifiedEnergyFactor = 1.0  
-         |   RatedAnnualkWh = 400  
-         |   LabelElectricRate = 0.12  
-         |   LabelGasRate = 1.09  
-         |   LabelAnnualGasCost = 27.0  
-         |   LabelUsage = 6  
-         |   Capacity = 3.0  
+         
+         ==============================  =======
+         Element                         Default
+         ==============================  =======
+         IntegratedModifiedEnergyFactor  1.0  
+         RatedAnnualkWh                  400  
+         LabelElectricRate               0.12  
+         LabelGasRate                    1.09  
+         LabelAnnualGasCost              27.0  
+         LabelUsage                      6  
+         Capacity                        3.0  
+         ==============================  =======
+         
   .. [#] If ModifiedEnergyFactor (MEF) provided instead of IntegratedModifiedEnergyFactor (IMEF), it will be converted using the `Interpretation on ANSI/RESNET 301-2014 Clothes Washer IMEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-08-sECTION-4.2.2.5.2.8-Clothes-Washers-Eq-4.2-6.pdf>`_:
          IMEF = (MEF - 0.503) / 0.95.
 
@@ -1532,8 +1566,14 @@ A single clothes dryer can be entered as a ``/HPXML/Building/BuildingDetails/App
          See :ref:`hpxmllocations` for descriptions.
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
   .. [#] | If CombinedEnergyFactor nor EnergyFactor provided, the following default values representing a standard clothes dryer from 2006 will be used:
-         |   CombinedEnergyFactor = 3.01
-         |   ControlType  = timer
+         
+         ==============================  =======
+         Element                         Default
+         ==============================  =======
+         CombinedEnergyFactor            3.01
+         ControlType                     timer
+         ==============================  =======
+         
   .. [#] If EnergyFactor (EF) provided instead of CombinedEnergyFactor (CEF), it will be converted using the following equation based on the `Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-10-Section-4.2.2.5.2.8-Clothes-Dryer-CEF-Rating.pdf>`_:
          CEF = EF / 1.15.
 
@@ -1575,12 +1615,18 @@ A single dishwasher can be entered as a ``/HPXML/Building/BuildingDetails/Applia
   .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] | If RatedAnnualkWh nor EnergyFactor provided, the following default values representing a standard dishwasher from 2006 will be used:
-         |   RatedAnnualkWh = 467  
-         |   LabelElectricRate = 0.12  
-         |   LabelGasRate = 1.09  
-         |   LabelAnnualGasCost = 33.12  
-         |   LabelUsage = 4  
-         |   PlaceSettingCapacity = 12  
+
+         ====================  =======
+         Element               Default
+         ====================  =======
+         RatedAnnualkWh        467  
+         LabelElectricRate     0.12  
+         LabelGasRate          1.09  
+         LabelAnnualGasCost    33.12  
+         LabelUsage            4  
+         PlaceSettingCapacity  12  
+         ====================  =======
+
   .. [#] If EnergyFactor (EF) provided instead of RatedAnnualkWh, it will be converted using the following equation based on `ANSI/RESNET/ICC 301-2014 <https://codes.iccsafe.org/content/document/843>`_:
          RatedAnnualkWh = 215.0 / EF.
 
@@ -1625,8 +1671,18 @@ Each refrigerator can be entered as a ``/HPXML/Building/BuildingDetails/Applianc
 
   .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] If Location not provided and is the *primary* refrigerator, defaults to "living space".
-         If Location not provided and is a *secondary* refrigerator, defaults based on presence of spaces: "garage", "basement - unconditioned", "basement - conditioned", "living space".
+  .. [#] | If Location not provided and is the *primary* refrigerator, defaults to "living space".
+           If Location not provided and is a *secondary* refrigerator, defaults based on presence of spaces and the Default Priority listed below:
+  
+         ========================  ================
+         Location                  Default Priority
+         ========================  ================
+         garage                    1
+         basement - unconditioned  2
+         basement - conditioned    3
+         living space              4
+         ========================  ================
+    
   .. [#] If RatedAnnualkWh nor AdjustedAnnualkWh provided, it will be defaulted to represent a standard refrigerator from 2006 using the following equation based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
          RatedAnnualkWh = 637.0 + 18.0 * NumberofBedrooms.
   .. [#] If multiple refrigerators are specified, there must be exactly one refrigerator described with PrimaryIndicator=true.
@@ -1651,7 +1707,17 @@ Each standalone freezer can be entered as a ``/HPXML/Building/BuildingDetails/Ap
 
   .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] If Location not provided, defaults based on presence of spaces: "garage", "basement - unconditioned", "basement - conditioned", "living space".
+  .. [#] | If Location not provided, defaults based on presence of spaces and the Default Priority listed below:
+  
+         ========================  ================
+         Location                  Default Priority
+         ========================  ================
+         garage                    1
+         basement - unconditioned  2
+         basement - conditioned    3
+         living space              4
+         ========================  ================
+
   .. [#] RatedAnnualkWh default based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided, default values from Figure 16 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041".
   .. [#] If MonthlyScheduleMultipliers not provided, default values from Figure 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837".
