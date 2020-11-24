@@ -3,20 +3,23 @@
 class XMLHelper
   # Adds the child element with 'element_name' and sets its value. Returns the
   # child element.
-  def self.add_element(parent, element_name, value = nil)
+  def self.add_element(parent, element_name, value = nil, defaulted = false)
     added = Oga::XML::Element.new(name: element_name)
     parent.children << added
     if not value.nil?
       added.inner_text = value.to_s
+    end
+    if defaulted
+      XMLHelper.add_attribute(added, 'dataSource', 'software')
     end
     return added
   end
 
   # Adds the child element with 'element_name' to a single extension element and
   # sets its value. Returns the extension element.
-  def self.add_extension(parent, element_name, value)
+  def self.add_extension(parent, element_name, value, defaulted = false)
     extension = XMLHelper.create_elements_as_needed(parent, ['extension'])
-    return XMLHelper.add_element(extension, element_name, value)
+    return XMLHelper.add_element(extension, element_name, value, defaulted)
   end
 
   # Creates a hierarchy of elements under the parent element based on the supplied
