@@ -1003,9 +1003,9 @@
       <sch:assert role='ERROR' test='count(h:IsSharedSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: IsSharedSystem</sch:assert> <!-- See [PVSystemType=Shared] -->
       <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert>
       <sch:assert role='ERROR' test='h:Location[text()="ground" or text()="roof"] or not(h:Location)'>Expected Location to be 'ground' or 'roof'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:ModuleType) &lt= 1'>Expected 0 or 1 element(s) for xpath: ModuleType</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ModuleType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ModuleType</sch:assert>
       <sch:assert role='ERROR' test='h:ModuleType[text()="standard" or text()="premium" or text()="thin film"] or not(h:ModuleType)'>Expected ModuleType to be 'standard' or 'premium' or 'thin film'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Tracking) &lt= 1'>Expected 0 or 1 element(s) for xpath: Tracking</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Tracking) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Tracking</sch:assert>
       <sch:assert role='ERROR' test='h:Tracking[text()="fixed" or text()="1-axis" or text()="1-axis backtracked" or text()="2-axis"] or not(h:Tracking)'>Expected Tracking to be 'fixed' or '1-axis' or '1-axis backtracked' or '2-axis'</sch:assert>
       <sch:assert role='ERROR' test='count(h:ArrayAzimuth) = 1'>Expected 1 element(s) for xpath: ArrayAzimuth</sch:assert>
       <sch:assert role='ERROR' test='count(h:ArrayTilt) = 1'>Expected 1 element(s) for xpath: ArrayTilt</sch:assert>
