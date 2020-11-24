@@ -12,9 +12,12 @@ class HPXMLDefaults
     apply_roofs(hpxml)
     apply_walls(hpxml)
     apply_rim_joists(hpxml)
+    apply_foundation_walls(hpxml)
+    apply_slabs(hpxml)
     apply_windows(hpxml)
     apply_skylights(hpxml)
     apply_hvac(hpxml)
+    apply_hvac_control(hpxml)
     apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
     apply_water_heaters(hpxml, nbeds, eri_version)
     apply_hot_water_distribution(hpxml, cfa, ncfl, has_uncond_bsmnt)
@@ -181,6 +184,12 @@ class HPXMLDefaults
       if roof.roof_type.nil?
         roof.roof_type = HPXML::RoofTypeAsphaltShingles
       end
+      if roof.emittance.nil?
+        roof.emittance = 0.90
+      end
+      if roof.radiant_barrier.nil?
+        roof.radiant_barrier = false
+      end
       if roof.roof_color.nil?
         roof.roof_color = Constructions.get_default_roof_color(roof.roof_type, roof.solar_absorptance)
       elsif roof.solar_absorptance.nil?
@@ -193,6 +202,9 @@ class HPXMLDefaults
     hpxml.walls.each do |wall|
       next unless wall.is_exterior
 
+      if wall.emittance.nil?
+        wall.emittance = 0.90
+      end
       if wall.siding.nil?
         wall.siding = HPXML::SidingTypeWood
       end
@@ -208,6 +220,9 @@ class HPXMLDefaults
     hpxml.rim_joists.each do |rim_joist|
       next unless rim_joist.is_exterior
 
+      if rim_joist.emittance.nil?
+        rim_joist.emittance = 0.90
+      end
       if rim_joist.siding.nil?
         rim_joist.siding = HPXML::SidingTypeWood
       end
@@ -215,6 +230,38 @@ class HPXMLDefaults
         rim_joist.color = Constructions.get_default_wall_color(rim_joist.solar_absorptance)
       elsif rim_joist.solar_absorptance.nil?
         rim_joist.solar_absorptance = Constructions.get_default_wall_solar_absorptance(rim_joist.color)
+      end
+    end
+  end
+
+  def self.apply_foundation_walls(hpxml)
+    hpxml.foundation_walls.each do |foundation_wall|
+      if foundation_wall.thickness.nil?
+        foundation_wall.thickness = 8.0
+      end
+    end
+  end
+
+  def self.apply_slabs(hpxml)
+    hpxml.slabs.each do |slab|
+      if slab.thickness.nil?
+        slab.thickness = 4.0
+      end
+      conditioned_slab = [HPXML::LocationLivingSpace,
+                          HPXML::LocationBasementConditioned].include?(slab.interior_adjacent_to)
+      if slab.carpet_r_value.nil?
+        if conditioned_slab
+          slab.carpet_r_value = 2.0
+        else
+          slab.carpet_r_value = 0.0
+        end
+      end
+      if slab.carpet_fraction.nil?
+        if conditioned_slab
+          slab.carpet_fraction = 0.8
+        else
+          slab.carpet_fraction = 0.0
+        end
       end
     end
   end
@@ -415,6 +462,21 @@ class HPXMLDefaults
     # TODO: Default HeatingCapacity17F?
   end
 
+  def self.apply_hvac_control(hpxml)
+    hpxml.hvac_controls.each do |hvac_control|
+      if not hvac_control.heating_setback_temp.nil?
+        if hvac_control.heating_setback_start_hour.nil?
+          hvac_control.heating_setback_start_hour = 23 # 11 pm
+        end
+      end
+
+      next unless not hvac_control.cooling_setup_temp.nil?
+      if hvac_control.cooling_setup_start_hour.nil?
+        hvac_control.cooling_setup_start_hour = 9 # 9 am
+      end
+    end
+  end
+
   def self.apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
     # Check either all ducts have location and surface area or all ducts have no location and surface area
     n_ducts = 0
@@ -551,9 +613,17 @@ class HPXMLDefaults
     # Default mech vent systems
     hpxml.ventilation_fans.each do |vent_fan|
       next unless vent_fan.used_for_whole_building_ventilation
-      next unless vent_fan.is_shared_system.nil?
 
-      vent_fan.is_shared_system = false
+      if vent_fan.is_shared_system.nil?
+        vent_fan.is_shared_system = false
+      end
+      if vent_fan.hours_in_operation.nil?
+        if vent_fan.fan_type == HPXML::MechVentTypeCFIS
+          vent_fan.hours_in_operation = 8.0
+        else
+          vent_fan.hours_in_operation = 24.0
+        end
+      end
     end
 
     # Default kitchen fan
@@ -1090,6 +1160,15 @@ class HPXMLDefaults
     hpxml.pv_systems.each do |pv_system|
       if pv_system.is_shared_system.nil?
         pv_system.is_shared_system = false
+      end
+      if pv_system.location.nil?
+        pv_system.location = HPXML::LocationRoof
+      end
+      if pv_system.tracking.nil?
+        pv_system.tracking = HPXML::PVTrackingTypeFixed
+      end
+      if pv_system.module_type.nil?
+        pv_system.module_type = HPXML::PVModuleTypeStandard
       end
       if pv_system.inverter_efficiency.nil?
         pv_system.inverter_efficiency = PV.get_default_inv_eff()

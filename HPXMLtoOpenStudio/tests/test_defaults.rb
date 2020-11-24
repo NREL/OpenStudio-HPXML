@@ -192,21 +192,24 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def test_roofs
     # Test inputs not overridden by defaults
-    hpxml = _create_hpxml('base.xml')
+    hpxml = _create_hpxml('base-atticroof-radiant-barrier.xml')
     hpxml.roofs[0].roof_type = HPXML::RoofTypeMetal
     hpxml.roofs[0].solar_absorptance = 0.77
     hpxml.roofs[0].roof_color = HPXML::ColorDark
+    hpxml.roofs[0].emittance = 0.88
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_roof_values(hpxml_default, HPXML::RoofTypeMetal, 0.77, HPXML::ColorDark)
+    _test_default_roof_values(hpxml_default, HPXML::RoofTypeMetal, 0.77, HPXML::ColorDark, 0.88, true)
 
     # Test defaults
     hpxml.roofs[0].roof_type = nil
     hpxml.roofs[0].solar_absorptance = nil
     hpxml.roofs[0].roof_color = HPXML::ColorLight
+    hpxml.roofs[0].emittance = nil
+    hpxml.roofs[0].radiant_barrier = false
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_roof_values(hpxml_default, HPXML::RoofTypeAsphaltShingles, 0.75, HPXML::ColorLight)
+    _test_default_roof_values(hpxml_default, HPXML::RoofTypeAsphaltShingles, 0.75, HPXML::ColorLight, 0.90, false)
   end
 
   def test_walls
@@ -215,17 +218,19 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.walls[0].siding = HPXML::SidingTypeFiberCement
     hpxml.walls[0].solar_absorptance = 0.66
     hpxml.walls[0].color = HPXML::ColorDark
+    hpxml.walls[0].emittance = 0.88
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_wall_values(hpxml_default, HPXML::SidingTypeFiberCement, 0.66, HPXML::ColorDark)
+    _test_default_wall_values(hpxml_default, HPXML::SidingTypeFiberCement, 0.66, HPXML::ColorDark, 0.88)
 
     # Test defaults
     hpxml.walls[0].siding = nil
     hpxml.walls[0].solar_absorptance = nil
     hpxml.walls[0].color = HPXML::ColorLight
+    hpxml.walls[0].emittance = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_wall_values(hpxml_default, HPXML::SidingTypeWood, 0.5, HPXML::ColorLight)
+    _test_default_wall_values(hpxml_default, HPXML::SidingTypeWood, 0.5, HPXML::ColorLight, 0.90)
   end
 
   def test_rim_joists
@@ -234,17 +239,53 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.rim_joists[0].siding = HPXML::SidingTypeBrick
     hpxml.rim_joists[0].solar_absorptance = 0.55
     hpxml.rim_joists[0].color = HPXML::ColorLight
+    hpxml.rim_joists[0].emittance = 0.88
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_rim_joist_values(hpxml_default, HPXML::SidingTypeBrick, 0.55, HPXML::ColorLight)
+    _test_default_rim_joist_values(hpxml_default, HPXML::SidingTypeBrick, 0.55, HPXML::ColorLight, 0.88)
 
     # Test defaults
     hpxml.rim_joists[0].siding = nil
     hpxml.rim_joists[0].solar_absorptance = nil
     hpxml.rim_joists[0].color = HPXML::ColorDark
+    hpxml.rim_joists[0].emittance = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_rim_joist_values(hpxml_default, HPXML::SidingTypeWood, 0.95, HPXML::ColorDark)
+    _test_default_rim_joist_values(hpxml_default, HPXML::SidingTypeWood, 0.95, HPXML::ColorDark, 0.90)
+  end
+
+  def test_foundation_walls
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base.xml')
+    hpxml.foundation_walls[0].thickness = 7.0
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_foundation_wall_values(hpxml_default, 7.0)
+
+    # Test defaults
+    hpxml.foundation_walls[0].thickness = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_foundation_wall_values(hpxml_default, 8.0)
+  end
+
+  def test_slabs
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base.xml')
+    hpxml.slabs[0].thickness = 7.0
+    hpxml.slabs[0].carpet_r_value = 1.1
+    hpxml.slabs[0].carpet_fraction = 0.5
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_slab_values(hpxml_default, 7.0, 1.1, 0.5)
+
+    # Test defaults
+    hpxml.slabs[0].thickness = nil
+    hpxml.slabs[0].carpet_r_value = nil
+    hpxml.slabs[0].carpet_fraction = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_slab_values(hpxml_default, 4.0, 2.0, 0.8)
   end
 
   def test_windows
@@ -531,6 +572,23 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_ground_to_air_heat_pump_values(hpxml_default, 30.0, 0.375)
+  end
+
+  def test_hvac_controls
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base-hvac-programmable-thermostat.xml')
+    hpxml.hvac_controls[0].heating_setback_start_hour = 12
+    hpxml.hvac_controls[0].cooling_setup_start_hour = 12
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hvac_control_values(hpxml_default, 12, 12)
+
+    # Test defaults
+    hpxml.hvac_controls[0].heating_setback_start_hour = nil
+    hpxml.hvac_controls[0].cooling_setup_start_hour = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hvac_control_values(hpxml_default, 23, 9)
   end
 
   def test_hvac_distribution
@@ -872,9 +930,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     vent_fan.is_shared_system = true
     vent_fan.fraction_recirculation = 0.0
     vent_fan.in_unit_flow_rate = 10.0
+    vent_fan.hours_in_operation = 22.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mech_vent_values(hpxml_default, true)
+    _test_default_mech_vent_values(hpxml_default, true, 22.0)
 
     # Test defaults
     vent_fan.rated_flow_rate = nil
@@ -883,9 +942,24 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     vent_fan.is_shared_system = nil
     vent_fan.fraction_recirculation = nil
     vent_fan.in_unit_flow_rate = nil
+    vent_fan.hours_in_operation = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mech_vent_values(hpxml_default, false)
+    _test_default_mech_vent_values(hpxml_default, false, 24.0)
+
+    # Test inputs not overridden by defaults w/ CFIS
+    hpxml = _create_hpxml('base-mechvent-cfis.xml')
+    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
+    vent_fan.hours_in_operation = 12.0
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_mech_vent_values(hpxml_default, false, 12.0)
+
+    # Test defaults w/ CFIS
+    vent_fan.hours_in_operation = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_mech_vent_values(hpxml_default, false, 8.0)
   end
 
   def test_local_ventilation_fans
@@ -1549,24 +1623,30 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       pv.number_of_bedrooms_served = 20
       pv.inverter_efficiency = 0.90
       pv.system_losses_fraction = 0.20
+      pv.location = HPXML::LocationGround
+      pv.tracking = HPXML::PVTrackingType1Axis
+      pv.module_type = HPXML::PVModuleTypePremium
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     expected_interver_efficiency = [0.90, 0.90]
     expected_system_loss_frac = [0.20, 0.20]
-    _test_default_pv_system_values(hpxml_default, expected_interver_efficiency, expected_system_loss_frac, true)
+    _test_default_pv_system_values(hpxml_default, expected_interver_efficiency, expected_system_loss_frac, true, HPXML::LocationGround, HPXML::PVTrackingType1Axis, HPXML::PVModuleTypePremium)
 
     # Test defaults w/o year modules manufactured
     hpxml.pv_systems.each do |pv|
       pv.is_shared_system = nil
       pv.inverter_efficiency = nil
       pv.system_losses_fraction = nil
+      pv.location = nil
+      pv.tracking = nil
+      pv.module_type = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     expected_interver_efficiency = [0.96, 0.96]
     expected_system_loss_frac = [0.14, 0.14]
-    _test_default_pv_system_values(hpxml_default, expected_interver_efficiency, expected_system_loss_frac, false)
+    _test_default_pv_system_values(hpxml_default, expected_interver_efficiency, expected_system_loss_frac, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed, HPXML::PVModuleTypeStandard)
 
     # Test defaults w/ year modules manufactured
     hpxml.pv_systems.each do |pv|
@@ -1576,7 +1656,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     expected_interver_efficiency = [0.96, 0.96]
     expected_system_loss_frac = [0.182, 0.182]
-    _test_default_pv_system_values(hpxml_default, expected_interver_efficiency, expected_system_loss_frac, false)
+    _test_default_pv_system_values(hpxml_default, expected_interver_efficiency, expected_system_loss_frac, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed, HPXML::PVModuleTypeStandard)
   end
 
   def _test_measure()
@@ -1718,6 +1798,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(fan_watts_per_cfm, heat_pump.fan_watts_per_cfm)
   end
 
+  def _test_default_hvac_control_values(hpxml, htg_setback_start_hr, clg_setup_start_hr)
+    hvac_control = hpxml.hvac_controls[0]
+    assert_equal(htg_setback_start_hr, hvac_control.heating_setback_start_hour)
+    assert_equal(clg_setup_start_hr, hvac_control.cooling_setup_start_hour)
+  end
+
   def _test_default_duct_values(hpxml, supply_locations, return_locations, supply_areas, return_areas, n_return_registers)
     supply_duct_idx = 0
     return_duct_idx = 0
@@ -1739,12 +1825,15 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_pv_system_values(hpxml, interver_efficiency, system_loss_frac, is_shared_system)
+  def _test_default_pv_system_values(hpxml, interver_efficiency, system_loss_frac, is_shared_system, location, tracking, module_type)
     assert_equal(interver_efficiency.size, hpxml.pv_systems.size)
     hpxml.pv_systems.each_with_index do |pv, idx|
       assert_equal(is_shared_system, pv.is_shared_system)
       assert_equal(interver_efficiency[idx], pv.inverter_efficiency)
       assert_in_epsilon(system_loss_frac[idx], pv.system_losses_fraction, 0.01)
+      assert_equal(location, pv.location)
+      assert_equal(tracking, pv.tracking)
+      assert_equal(module_type, pv.module_type)
     end
   end
 
@@ -1769,25 +1858,41 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(volume, air_infiltration_measurement.infiltration_volume)
   end
 
-  def _test_default_roof_values(hpxml, roof_type, solar_absorptance, roof_color)
+  def _test_default_roof_values(hpxml, roof_type, solar_absorptance, roof_color, emittance, radiant_barrier)
     roof = hpxml.roofs[0]
     assert_equal(roof_type, roof.roof_type)
     assert_equal(solar_absorptance, roof.solar_absorptance)
     assert_equal(roof_color, roof.roof_color)
+    assert_equal(emittance, roof.emittance)
+    assert_equal(radiant_barrier, roof.radiant_barrier)
   end
 
-  def _test_default_wall_values(hpxml, siding, solar_absorptance, color)
+  def _test_default_wall_values(hpxml, siding, solar_absorptance, color, emittance)
     wall = hpxml.walls[0]
     assert_equal(siding, wall.siding)
     assert_equal(solar_absorptance, wall.solar_absorptance)
     assert_equal(color, wall.color)
+    assert_equal(emittance, wall.emittance)
   end
 
-  def _test_default_rim_joist_values(hpxml, siding, solar_absorptance, color)
+  def _test_default_rim_joist_values(hpxml, siding, solar_absorptance, color, emittance)
     rim_joist = hpxml.rim_joists[0]
     assert_equal(siding, rim_joist.siding)
     assert_equal(solar_absorptance, rim_joist.solar_absorptance)
     assert_equal(color, rim_joist.color)
+    assert_equal(emittance, rim_joist.emittance)
+  end
+
+  def _test_default_foundation_wall_values(hpxml, thickness)
+    foundation_wall = hpxml.foundation_walls[0]
+    assert_equal(thickness, foundation_wall.thickness)
+  end
+
+  def _test_default_slab_values(hpxml, thickness, carpet_r_value, carpet_fraction)
+    slab = hpxml.slabs[0]
+    assert_equal(thickness, slab.thickness)
+    assert_equal(carpet_r_value, slab.carpet_r_value)
+    assert_equal(carpet_fraction, slab.carpet_fraction)
   end
 
   def _test_default_window_values(hpxml, summer_shade_coeffs, winter_shade_coeffs, fraction_operable)
@@ -2039,9 +2144,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_in_epsilon(storage_volume, hpxml.solar_thermal_systems[0].storage_volume)
   end
 
-  def _test_default_mech_vent_values(hpxml, is_shared_system)
+  def _test_default_mech_vent_values(hpxml, is_shared_system, hours_in_operation)
     vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
     assert_equal(is_shared_system, vent_fan.is_shared_system)
+    assert_equal(hours_in_operation, vent_fan.hours_in_operation)
   end
 
   def _test_default_kitchen_fan_values(hpxml, quantity, rated_flow_rate, hours_in_operation, fan_power, start_hour)
