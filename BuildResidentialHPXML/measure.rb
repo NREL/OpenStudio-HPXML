@@ -2717,10 +2717,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1.0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_television_diversity_multiplier', true)
-    arg.setDisplayName('Plug Loads: Television Diversity Multiplier')
-    arg.setDefaultValue(1)
-    arg.setDescription('A diversity multiplier on the television usage multiplier.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_television_usage_multiplier_2', true)
+    arg.setDisplayName('Plug Loads: Television Usage Multiplier 2')
+    arg.setDefaultValue(1.0)
+    arg.setDescription('Additional multiplier on the television energy usage that can reflect, e.g., high/low usage occupants.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('plug_loads_other_annual_kwh', true)
@@ -2750,10 +2750,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1.0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_other_diversity_multiplier', true)
-    arg.setDisplayName('Plug Loads: Other Diversity Multiplier')
-    arg.setDefaultValue(1)
-    arg.setDescription('A diversity multiplier on the other usage multiplier.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_other_usage_multiplier_2', true)
+    arg.setDisplayName('Plug Loads: Other Usage Multiplier 2')
+    arg.setDescription('Additional multiplier on the other energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('plug_loads_well_pump_present', true)
@@ -2771,26 +2771,38 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_well_pump_usage_multiplier', true)
     arg.setDisplayName('Plug Loads: Well Pump Usage Multiplier')
-    arg.setDescription('Multiplier on the well_pump energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDescription('Multiplier on the well pump energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_well_pump_usage_multiplier_2', true)
+    arg.setDisplayName('Plug Loads: Well Pump Usage Multiplier 2')
+    arg.setDescription('Additional multiplier on the well pump energy usage that can reflect, e.g., high/low usage occupants.')
     arg.setDefaultValue(1.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('plug_loads_vehicle_present', true)
     arg.setDisplayName('Plug Loads: Vehicle Present')
-    arg.setDescription('Whether there is a vehicle.')
+    arg.setDescription('Whether there is an electric vehicle.')
     arg.setDefaultValue(false)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('plug_loads_vehicle_annual_kwh', true)
     arg.setDisplayName('Plug Loads: Vehicle Annual kWh')
-    arg.setDescription('The annual energy consumption of the well pump plug loads.')
+    arg.setDescription('The annual energy consumption of the electric vehicle plug loads.')
     arg.setUnits('kWh/yr')
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_vehicle_usage_multiplier', true)
     arg.setDisplayName('Plug Loads: Vehicle Usage Multiplier')
-    arg.setDescription('Multiplier on the well_pump energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDescription('Multiplier on the electric vehicle energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_vehicle_usage_multiplier_2', true)
+    arg.setDisplayName('Plug Loads: Vehicle Usage Multiplier 2')
+    arg.setDescription('Additional multiplier on the electric vehicle energy usage that can reflect, e.g., high/low usage occupants.')
     arg.setDefaultValue(1.0)
     args << arg
 
@@ -3429,18 +3441,20 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              ceiling_fan_cooling_setpoint_temp_offset: runner.getDoubleArgumentValue('ceiling_fan_cooling_setpoint_temp_offset', user_arguments),
              plug_loads_television_annual_kwh: runner.getStringArgumentValue('plug_loads_television_annual_kwh', user_arguments),
              plug_loads_television_usage_multiplier: runner.getDoubleArgumentValue('plug_loads_television_usage_multiplier', user_arguments),
-             plug_loads_television_diversity_multiplier: runner.getDoubleArgumentValue('plug_loads_television_diversity_multiplier', user_arguments),
+             plug_loads_television_usage_multiplier_2: runner.getDoubleArgumentValue('plug_loads_television_usage_multiplier_2', user_arguments),
              plug_loads_other_annual_kwh: runner.getStringArgumentValue('plug_loads_other_annual_kwh', user_arguments),
              plug_loads_other_frac_sensible: runner.getStringArgumentValue('plug_loads_other_frac_sensible', user_arguments),
              plug_loads_other_frac_latent: runner.getStringArgumentValue('plug_loads_other_frac_latent', user_arguments),
              plug_loads_other_usage_multiplier: runner.getDoubleArgumentValue('plug_loads_other_usage_multiplier', user_arguments),
-             plug_loads_other_diversity_multiplier: runner.getDoubleArgumentValue('plug_loads_other_diversity_multiplier', user_arguments),
+             plug_loads_other_usage_multiplier_2: runner.getDoubleArgumentValue('plug_loads_other_usage_multiplier_2', user_arguments),
              plug_loads_well_pump_present: runner.getBoolArgumentValue('plug_loads_well_pump_present', user_arguments),
              plug_loads_well_pump_annual_kwh: runner.getStringArgumentValue('plug_loads_well_pump_annual_kwh', user_arguments),
              plug_loads_well_pump_usage_multiplier: runner.getDoubleArgumentValue('plug_loads_well_pump_usage_multiplier', user_arguments),
+             plug_loads_well_pump_usage_multiplier_2: runner.getDoubleArgumentValue('plug_loads_well_pump_usage_multiplier_2', user_arguments),
              plug_loads_vehicle_present: runner.getBoolArgumentValue('plug_loads_vehicle_present', user_arguments),
              plug_loads_vehicle_annual_kwh: runner.getStringArgumentValue('plug_loads_vehicle_annual_kwh', user_arguments),
              plug_loads_vehicle_usage_multiplier: runner.getDoubleArgumentValue('plug_loads_vehicle_usage_multiplier', user_arguments),
+             plug_loads_vehicle_usage_multiplier_2: runner.getDoubleArgumentValue('plug_loads_vehicle_usage_multiplier_2', user_arguments),
              fuel_loads_grill_present: runner.getBoolArgumentValue('fuel_loads_grill_present', user_arguments),
              fuel_loads_grill_fuel_type: runner.getStringArgumentValue('fuel_loads_grill_fuel_type', user_arguments),
              fuel_loads_grill_annual_therm: runner.getStringArgumentValue('fuel_loads_grill_annual_therm', user_arguments),
@@ -3567,6 +3581,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # dhw indirect but no boiler
     error = ((args[:water_heater_type] == HPXML::WaterHeaterTypeCombiStorage) || (args[:water_heater_type] == HPXML::WaterHeaterTypeCombiTankless)) && (args[:heating_system_type] != HPXML::HVACTypeBoiler)
     errors << "water_heater_type=#{args[:water_heater_type]} and heating_system_type=#{args[:heating_system_type]}" if error
+
+    # no plug loads but specifying usage multipliers
+    warning = (args[:plug_loads_television_annual_kwh] == 0.0 && (args[:plug_loads_television_usage_multiplier] != 1.0 || args[:plug_loads_television_usage_multiplier_2] != 1.0)) || (args[:plug_loads_other_annual_kwh] == 0.0 && (args[:plug_loads_other_usage_multiplier] != 1.0 || args[:plug_loads_other_usage_multiplier_2] != 1.0)) || (!args[:plug_loads_well_pump_present] && (args[:plug_loads_well_pump_usage_multiplier] != 1.0 || args[:plug_loads_well_pump_usage_multiplier_2] != 1.0)) || (!args[:plug_loads_vehicle_present] && (args[:plug_loads_vehicle_usage_multiplier] != 1.0 || args[:plug_loads_vehicle_usage_multiplier_2] != 1.0))
+    warnings << "plug_loads_television_annual_kwh=#{args[:plug_loads_television_annual_kwh]} and plug_loads_television_usage_multiplier=#{args[:plug_loads_television_usage_multiplier]} and plug_loads_television_usage_multiplier_2=#{args[:plug_loads_television_usage_multiplier_2]} and plug_loads_other_annual_kwh=#{args[:plug_loads_other_annual_kwh]} and plug_loads_other_usage_multiplier=#{args[:plug_loads_other_usage_multiplier]} and plug_loads_other_usage_multiplier_2=#{args[:plug_loads_other_usage_multiplier_2]} and plug_loads_well_pump_present=#{args[:plug_loads_well_pump_present]} and plug_loads_well_pump_usage_multiplier=#{args[:plug_loads_well_pump_usage_multiplier]} and plug_loads_well_pump_usage_multiplier_2=#{args[:plug_loads_well_pump_usage_multiplier_2]} and plug_loads_vehicle_present=#{args[:plug_loads_vehicle_present]} and plug_loads_vehicle_usage_multiplier=#{args[:plug_loads_vehicle_usage_multiplier]} and plug_loads_vehicle_usage_multiplier_2=#{args[:plug_loads_vehicle_usage_multiplier_2]}" if warning
 
     return warnings, errors
   end
@@ -5487,7 +5505,7 @@ class HPXMLFile
       kWh_per_year = args[:plug_loads_television_annual_kwh]
     end
 
-    usage_multiplier = args[:plug_loads_television_usage_multiplier] * args[:plug_loads_television_diversity_multiplier]
+    usage_multiplier = args[:plug_loads_television_usage_multiplier] * args[:plug_loads_television_usage_multiplier_2]
     if usage_multiplier == 1.0
       usage_multiplier = nil
     end
@@ -5511,7 +5529,7 @@ class HPXMLFile
       frac_latent = args[:plug_loads_other_frac_latent]
     end
 
-    usage_multiplier = args[:plug_loads_other_usage_multiplier] * args[:plug_loads_other_diversity_multiplier]
+    usage_multiplier = args[:plug_loads_other_usage_multiplier] * args[:plug_loads_other_usage_multiplier_2]
     if usage_multiplier == 1.0
       usage_multiplier = nil
     end
@@ -5531,8 +5549,9 @@ class HPXMLFile
       kWh_per_year = args[:plug_loads_well_pump_annual_kwh]
     end
 
-    if args[:plug_loads_well_pump_usage_multiplier] != 1.0
-      usage_multiplier = args[:plug_loads_well_pump_usage_multiplier]
+    usage_multiplier = args[:plug_loads_well_pump_usage_multiplier] * args[:plug_loads_well_pump_usage_multiplier_2]
+    if usage_multiplier == 1.0
+      usage_multiplier = nil
     end
 
     if args[:plug_loads_well_pump_weekday_fractions] != Constants.Auto
@@ -5564,8 +5583,9 @@ class HPXMLFile
       kWh_per_year = args[:plug_loads_vehicle_annual_kwh]
     end
 
-    if args[:plug_loads_vehicle_usage_multiplier] != 1.0
-      usage_multiplier = args[:plug_loads_vehicle_usage_multiplier]
+    usage_multiplier = args[:plug_loads_vehicle_usage_multiplier] * args[:plug_loads_vehicle_usage_multiplier_2]
+    if usage_multiplier == 1.0
+      usage_multiplier = nil
     end
 
     if args[:plug_loads_vehicle_weekday_fractions] != Constants.Auto
