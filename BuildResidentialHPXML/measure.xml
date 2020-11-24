@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>1116be46-4248-4eb1-8a15-195e9a9072ed</version_id>
-  <version_modified>20201123T161621Z</version_modified>
+  <version_id>5255706e-1431-4a79-b643-af79bf75835c</version_id>
+  <version_modified>20201124T000557Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -5954,12 +5954,6 @@
       <checksum>7F0BFEDA</checksum>
     </file>
     <file>
-      <filename>schedules_config.yml</filename>
-      <filetype>yml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7DAD9145</checksum>
-    </file>
-    <file>
       <filename>schedules_cooking_power_consumption_dist.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -6690,12 +6684,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>37C8C499</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>2D476B7A</checksum>
     </file>
     <file>
       <filename>base-dhw-indirect-outside.osw</filename>
@@ -7763,6 +7751,18 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>C393BB55</checksum>
+    </file>
+    <file>
+      <filename>schedules_config.yml</filename>
+      <filetype>yml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>64DD9D54</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>00D7349C</checksum>
     </file>
   </files>
 </measure>
