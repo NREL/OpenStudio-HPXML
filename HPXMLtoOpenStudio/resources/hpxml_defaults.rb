@@ -327,7 +327,7 @@ class HPXMLDefaults
     # Airflow defect ratio
     hpxml.heating_systems.each do |heating_system|
       next unless [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
-      next unless heating_system.airflow_defect_ratio.nil? && heating_system.airflow_cfm_per_ton.nil?
+      next unless heating_system.airflow_defect_ratio.nil?
 
       heating_system.airflow_defect_ratio = 0.0
     end
@@ -335,7 +335,7 @@ class HPXMLDefaults
       next unless [HPXML::HVACTypeCentralAirConditioner,
                    HPXML::HVACTypeMiniSplitAirConditioner,
                    HPXML::HVACTypeRoomAirConditioner].include? cooling_system.cooling_system_type
-      next unless cooling_system.airflow_defect_ratio.nil? && cooling_system.airflow_cfm_per_ton.nil?
+      next unless cooling_system.airflow_defect_ratio.nil?
 
       cooling_system.airflow_defect_ratio = 0.0
     end
@@ -343,7 +343,7 @@ class HPXMLDefaults
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
                    HPXML::HVACTypeHeatPumpGroundToAir,
                    HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
-      next unless heat_pump.airflow_defect_ratio.nil? && heat_pump.airflow_cfm_per_ton.nil?
+      next unless heat_pump.airflow_defect_ratio.nil?
 
       heat_pump.airflow_defect_ratio = 0.0
     end
