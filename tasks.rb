@@ -5104,7 +5104,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
   hpxml_validator = XMLHelper.create_doc(version = '1.0', encoding = 'UTF-8')
   root = XMLHelper.add_element(hpxml_validator, 'sch:schema')
   XMLHelper.add_attribute(root, 'xmlns:sch', 'http://purl.oclc.org/dsdl/schematron')
-  XMLHelper.add_element(root, 'sch:title', 'HPXML Schematron Validator: HPXML.xsd')
+  XMLHelper.add_element(root, 'sch:title', 'HPXML Schematron Validator: HPXML.xsd', :string)
   name_space = XMLHelper.add_element(root, 'sch:ns')
   XMLHelper.add_attribute(name_space, 'uri', 'http://hpxmlonline.com/2019/10')
   XMLHelper.add_attribute(name_space, 'prefix', 'h')
@@ -5189,27 +5189,27 @@ def create_schematron_hpxml_validator(hpxml_docs)
     end
 
     if not hpxml_data_type[:enums].empty?
-      assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be \"#{hpxml_data_type[:enums].join('" or "')}\"")
+      assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be \"#{hpxml_data_type[:enums].join('" or "')}\"", :string)
       XMLHelper.add_attribute(assertion, 'role', 'ERROR')
       XMLHelper.add_attribute(assertion, 'test', "#{element_name}[#{hpxml_data_type[:enums].map { |e| "text()=\"#{e}\"" }.join(' or ')}] or not(#{element_name})")
     else
       if hpxml_data_type[:min_inclusive]
-        assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be greater than or equal to #{hpxml_data_type[:min_inclusive]}")
+        assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be greater than or equal to #{hpxml_data_type[:min_inclusive]}", :string)
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
         XMLHelper.add_attribute(assertion, 'test', "number(#{element_name}) &gt;= #{hpxml_data_type[:min_inclusive]} or not(#{element_name})")
       end
       if hpxml_data_type[:max_inclusive]
-        assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be less than or equal to #{hpxml_data_type[:max_inclusive]}")
+        assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be less than or equal to #{hpxml_data_type[:max_inclusive]}", :string)
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
         XMLHelper.add_attribute(assertion, 'test', "number(#{element_name}) &lt;= #{hpxml_data_type[:max_inclusive]} or not(#{element_name})")
       end
       if hpxml_data_type[:min_exclusive]
-        assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be greater than #{hpxml_data_type[:min_exclusive]}")
+        assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be greater than #{hpxml_data_type[:min_exclusive]}", :string)
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
         XMLHelper.add_attribute(assertion, 'test', "number(#{element_name}) &gt; #{hpxml_data_type[:min_exclusive]} or not(#{element_name})")
       end
       if hpxml_data_type[:max_exclusive]
-        assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be less than #{hpxml_data_type[:max_exclusive]}")
+        assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be less than #{hpxml_data_type[:max_exclusive]}", :string)
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
         XMLHelper.add_attribute(assertion, 'test', "number(#{element_name}) &lt; #{hpxml_data_type[:max_exclusive]} or not(#{element_name})")
       end

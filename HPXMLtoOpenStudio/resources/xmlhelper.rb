@@ -3,10 +3,20 @@
 class XMLHelper
   # Adds the child element with 'element_name' and sets its value. Returns the
   # child element.
-  def self.add_element(parent, element_name, value = nil, defaulted = false)
+  def self.add_element(parent, element_name, value = nil, datatype = nil, defaulted = false)
     added = Oga::XML::Element.new(name: element_name)
     parent.children << added
     if not value.nil?
+      if datatype == :integer
+        value = to_integer(value)
+      elsif datatype == :float
+        value = to_float(value)
+      elsif datatype == :boolean
+        value = to_boolean(value)
+      elsif datatype != :string
+        # If value provided, datatype required
+        fail 'Unexpected datatype.'
+      end
       added.inner_text = value.to_s
     end
     if defaulted
@@ -17,9 +27,9 @@ class XMLHelper
 
   # Adds the child element with 'element_name' to a single extension element and
   # sets its value. Returns the extension element.
-  def self.add_extension(parent, element_name, value, defaulted = false)
+  def self.add_extension(parent, element_name, value, datatype, defaulted = false)
     extension = XMLHelper.create_elements_as_needed(parent, ['extension'])
-    return XMLHelper.add_element(extension, element_name, value, defaulted)
+    return XMLHelper.add_element(extension, element_name, value, datatype, defaulted)
   end
 
   # Creates a hierarchy of elements under the parent element based on the supplied
@@ -47,41 +57,53 @@ class XMLHelper
   end
 
   # Returns the value of 'element_name' in the parent element or nil.
-  def self.get_value(parent, element_name, datatype = nil)
-    val, isdefaulted = get_value_and_defaulted(parent, element_name, datatype)
-    return val
+  def self.get_value(parent, element_name, datatype)
+    value, isdefaulted = get_value_and_defaulted(parent, element_name, datatype)
+    return value
   end
 
-  def self.get_value_and_defaulted(parent, element_name, datatype = nil)
+  def self.get_value_and_defaulted(parent, element_name, datatype)
     element = parent.at_xpath(element_name)
     if element.nil?
       return
     end
-    val = element.text
+    value = element.text
 
     if datatype == :integer
-      val = to_integer_or_nil(val)
+      value = to_integer_or_nil(value)
     elsif datatype == :float
-      val = to_float_or_nil(val)
+      value = to_float_or_nil(value)
     elsif datatype == :boolean
-      val = to_boolean_or_nil(val)
-    elsif not datatype.nil?
-      fail "Unexpected datatype: #{datatype}."
+      value = to_boolean_or_nil(value)
+    elsif datatype != :string
+      fail 'Unexpected datatype.'
     end
 
     isdefaulted = get_attribute_value(element, 'dataSource') == 'software'
 
-    return val, isdefaulted
+    return value, isdefaulted
   end
 
   # Returns the value(s) of 'element_name' in the parent element or [].
-  def self.get_values(parent, element_name)
-    vals = []
-    parent.xpath(element_name).each do |val|
-      vals << val.text
+  def self.get_values(parent, element_name, datatype)
+    values = []
+    parent.xpath(element_name).each do |value|
+      value = value.text
+
+      if datatype == :integer
+        value = to_integer_or_nil(value)
+      elsif datatype == :float
+        value = to_float_or_nil(value)
+      elsif datatype == :boolean
+        value = to_boolean_or_nil(value)
+      elsif datatype != :string
+        fail 'Unexpected datatype.'
+      end
+
+      values << value
     end
 
-    return vals
+    return values
   end
 
   # Returns the element in the parent element.
