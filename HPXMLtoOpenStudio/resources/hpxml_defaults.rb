@@ -45,17 +45,17 @@ class HPXMLDefaults
       hpxml.header.sim_begin_month = 1
       hpxml.header.sim_begin_month_isdefaulted = true
     end
-    if hpxml.header.sim_begin_day_of_month.nil?
-      hpxml.header.sim_begin_day_of_month = 1
-      hpxml.header.sim_begin_day_of_month_isdefaulted = true
+    if hpxml.header.sim_begin_day.nil?
+      hpxml.header.sim_begin_day = 1
+      hpxml.header.sim_begin_day_isdefaulted = true
     end
     if hpxml.header.sim_end_month.nil?
       hpxml.header.sim_end_month = 12
       hpxml.header.sim_end_month_isdefaulted = true
     end
-    if hpxml.header.sim_end_day_of_month.nil?
-      hpxml.header.sim_end_day_of_month = 31
-      hpxml.header.sim_end_day_of_month_isdefaulted = true
+    if hpxml.header.sim_end_day.nil?
+      hpxml.header.sim_end_day = 31
+      hpxml.header.sim_end_day_isdefaulted = true
     end
 
     if epw_file.startDateActualYear.is_initialized # AMY
@@ -82,26 +82,26 @@ class HPXMLDefaults
     end
 
     if hpxml.header.dst_enabled
-      if hpxml.header.dst_begin_month.nil? || hpxml.header.dst_begin_day_of_month.nil? || hpxml.header.dst_end_month.nil? || hpxml.header.dst_end_day_of_month.nil?
+      if hpxml.header.dst_begin_month.nil? || hpxml.header.dst_begin_day.nil? || hpxml.header.dst_end_month.nil? || hpxml.header.dst_end_day.nil?
         if epw_file.daylightSavingStartDate.is_initialized && epw_file.daylightSavingEndDate.is_initialized
           # Use weather file DST dates if available
           dst_start_date = epw_file.daylightSavingStartDate.get
           dst_end_date = epw_file.daylightSavingEndDate.get
           hpxml.header.dst_begin_month = dst_start_date.monthOfYear.value
-          hpxml.header.dst_begin_day_of_month = dst_start_date.dayOfMonth
+          hpxml.header.dst_begin_day = dst_start_date.dayOfMonth
           hpxml.header.dst_end_month = dst_end_date.monthOfYear.value
-          hpxml.header.dst_end_day_of_month = dst_end_date.dayOfMonth
+          hpxml.header.dst_end_day = dst_end_date.dayOfMonth
         else
           # Roughly average US dates according to https://en.wikipedia.org/wiki/Daylight_saving_time_in_the_United_States
           hpxml.header.dst_begin_month = 3
-          hpxml.header.dst_begin_day_of_month = 12
+          hpxml.header.dst_begin_day = 12
           hpxml.header.dst_end_month = 11
-          hpxml.header.dst_end_day_of_month = 5
+          hpxml.header.dst_end_day = 5
         end
         hpxml.header.dst_begin_month_isdefaulted = true
-        hpxml.header.dst_begin_day_of_month_isdefaulted = true
+        hpxml.header.dst_begin_day_isdefaulted = true
         hpxml.header.dst_end_month_isdefaulted = true
-        hpxml.header.dst_end_day_of_month_isdefaulted = true
+        hpxml.header.dst_end_day_isdefaulted = true
       end
     end
 
@@ -1092,14 +1092,14 @@ class HPXMLDefaults
       if hpxml.lighting.holiday_period_begin_month.nil?
         hpxml.lighting.holiday_period_begin_month = 11
         hpxml.lighting.holiday_period_begin_month_isdefaulted = true
-        hpxml.lighting.holiday_period_begin_day_of_month = 24
-        hpxml.lighting.holiday_period_begin_day_of_month_isdefaulted = true
+        hpxml.lighting.holiday_period_begin_day = 24
+        hpxml.lighting.holiday_period_begin_day_isdefaulted = true
       end
-      if hpxml.lighting.holiday_period_end_day_of_month.nil?
+      if hpxml.lighting.holiday_period_end_day.nil?
         hpxml.lighting.holiday_period_end_month = 1
         hpxml.lighting.holiday_period_end_month_isdefaulted = true
-        hpxml.lighting.holiday_period_end_day_of_month = 6
-        hpxml.lighting.holiday_period_end_day_of_month_isdefaulted = true
+        hpxml.lighting.holiday_period_end_day = 6
+        hpxml.lighting.holiday_period_end_day_isdefaulted = true
       end
       if hpxml.lighting.holiday_weekday_fractions.nil?
         hpxml.lighting.holiday_weekday_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'

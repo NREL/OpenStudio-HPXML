@@ -555,18 +555,18 @@ def set_hpxml_header(hpxml_file, hpxml)
   elsif ['base-simcontrol-daylight-saving-custom.xml'].include? hpxml_file
     hpxml.header.dst_enabled = true
     hpxml.header.dst_begin_month = 3
-    hpxml.header.dst_begin_day_of_month = 10
+    hpxml.header.dst_begin_day = 10
     hpxml.header.dst_end_month = 11
-    hpxml.header.dst_end_day_of_month = 6
+    hpxml.header.dst_end_day = 6
   elsif ['base-simcontrol-daylight-saving-disabled.xml'].include? hpxml_file
     hpxml.header.dst_enabled = false
   elsif ['base-simcontrol-timestep-10-mins.xml'].include? hpxml_file
     hpxml.header.timestep = 10
   elsif ['base-simcontrol-runperiod-1-month.xml'].include? hpxml_file
     hpxml.header.sim_begin_month = 1
-    hpxml.header.sim_begin_day_of_month = 1
+    hpxml.header.sim_begin_day = 1
     hpxml.header.sim_end_month = 1
-    hpxml.header.sim_end_day_of_month = 31
+    hpxml.header.sim_end_day = 31
   elsif ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
     hpxml.header.allow_increased_fixed_capacities = true
   elsif hpxml_file.include? 'manual-s-oversize-allowances.xml'
@@ -577,10 +577,10 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.timestep = 45
   elsif ['invalid_files/invalid-runperiod.xml'].include? hpxml_file
     hpxml.header.sim_end_month = 4
-    hpxml.header.sim_end_day_of_month = 31
+    hpxml.header.sim_end_day = 31
   elsif ['invalid_files/invalid-daylight-saving.xml'].include? hpxml_file
     hpxml.header.dst_end_month = 4
-    hpxml.header.dst_end_day_of_month = 31
+    hpxml.header.dst_end_day = 31
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.header.timestep = nil
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
@@ -4894,9 +4894,9 @@ def set_hpxml_lighting_schedule(hpxml_file, hpxml)
     hpxml.lighting.holiday_exists = true
     hpxml.lighting.holiday_kwh_per_day = 1.1
     hpxml.lighting.holiday_period_begin_month = 11
-    hpxml.lighting.holiday_period_begin_day_of_month = 24
+    hpxml.lighting.holiday_period_begin_day = 24
     hpxml.lighting.holiday_period_end_month = 1
-    hpxml.lighting.holiday_period_end_day_of_month = 6
+    hpxml.lighting.holiday_period_end_day = 6
     hpxml.lighting.holiday_weekday_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
     hpxml.lighting.holiday_weekend_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
   end

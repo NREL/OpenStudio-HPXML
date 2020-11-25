@@ -35,15 +35,15 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = _create_hpxml('base.xml')
     hpxml.header.timestep = 30
     hpxml.header.sim_begin_month = 2
-    hpxml.header.sim_begin_day_of_month = 2
+    hpxml.header.sim_begin_day = 2
     hpxml.header.sim_end_month = 11
-    hpxml.header.sim_end_day_of_month = 11
+    hpxml.header.sim_end_day = 11
     hpxml.header.sim_calendar_year = 2008
     hpxml.header.dst_enabled = false
     hpxml.header.dst_begin_month = 3
-    hpxml.header.dst_begin_day_of_month = 3
+    hpxml.header.dst_begin_day = 3
     hpxml.header.dst_end_month = 10
-    hpxml.header.dst_end_day_of_month = 10
+    hpxml.header.dst_end_day = 10
     hpxml.header.use_max_load_for_heat_pumps = false
     hpxml.header.allow_increased_fixed_capacities = true
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -53,15 +53,15 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test defaults - DST not in weather file
     hpxml.header.timestep = nil
     hpxml.header.sim_begin_month = nil
-    hpxml.header.sim_begin_day_of_month = nil
+    hpxml.header.sim_begin_day = nil
     hpxml.header.sim_end_month = nil
-    hpxml.header.sim_end_day_of_month = nil
+    hpxml.header.sim_end_day = nil
     hpxml.header.sim_calendar_year = nil
     hpxml.header.dst_enabled = nil
     hpxml.header.dst_begin_month = nil
-    hpxml.header.dst_begin_day_of_month = nil
+    hpxml.header.dst_begin_day = nil
     hpxml.header.dst_end_month = nil
-    hpxml.header.dst_end_day_of_month = nil
+    hpxml.header.dst_end_day = nil
     hpxml.header.use_max_load_for_heat_pumps = nil
     hpxml.header.allow_increased_fixed_capacities = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -72,15 +72,15 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = _create_hpxml('base-location-AMY-2012.xml')
     hpxml.header.timestep = nil
     hpxml.header.sim_begin_month = nil
-    hpxml.header.sim_begin_day_of_month = nil
+    hpxml.header.sim_begin_day = nil
     hpxml.header.sim_end_month = nil
-    hpxml.header.sim_end_day_of_month = nil
+    hpxml.header.sim_end_day = nil
     hpxml.header.sim_calendar_year = nil
     hpxml.header.dst_enabled = nil
     hpxml.header.dst_begin_month = nil
-    hpxml.header.dst_begin_day_of_month = nil
+    hpxml.header.dst_begin_day = nil
     hpxml.header.dst_end_month = nil
-    hpxml.header.dst_end_day_of_month = nil
+    hpxml.header.dst_end_day = nil
     hpxml.header.use_max_load_for_heat_pumps = nil
     hpxml.header.allow_increased_fixed_capacities = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -1392,9 +1392,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.lighting.holiday_exists = true
     hpxml.lighting.holiday_kwh_per_day = 0.7
     hpxml.lighting.holiday_period_begin_month = 11
-    hpxml.lighting.holiday_period_begin_day_of_month = 19
+    hpxml.lighting.holiday_period_begin_day = 19
     hpxml.lighting.holiday_period_end_month = 12
-    hpxml.lighting.holiday_period_end_day_of_month = 31
+    hpxml.lighting.holiday_period_end_day = 31
     hpxml.lighting.holiday_weekday_fractions = ConstantDaySchedule
     hpxml.lighting.holiday_weekend_fractions = ConstantDaySchedule
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -1411,9 +1411,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
                                     grg_month_mult: ConstantMonthSchedule,
                                     hol_kwh_per_day: 0.7,
                                     hol_begin_month: 11,
-                                    hol_begin_day_of_month: 19,
+                                    hol_begin_day: 19,
                                     hol_end_month: 12,
-                                    hol_end_day_of_month: 31,
+                                    hol_end_day: 31,
                                     hol_wk_sch: ConstantDaySchedule,
                                     hol_wknd_sch: ConstantDaySchedule })
 
@@ -1744,7 +1744,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_header_values(hpxml, isdefaulted, tstep, sim_begin_month, sim_begin_day, sim_end_month, sim_end_day, sim_calendar_year,
-                                  dst_enabled, dst_begin_month, dst_begin_day_of_month, dst_end_month, dst_end_day_of_month,
+                                  dst_enabled, dst_begin_month, dst_begin_day, dst_end_month, dst_end_day,
                                   use_max_load_for_heat_pumps, allow_increased_fixed_capacities)
     assert_equal(tstep, hpxml.header.timestep)
     assert_equal(isdefaulted, hpxml.header.timestep_isdefaulted)
@@ -1752,14 +1752,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(sim_begin_month, hpxml.header.sim_begin_month)
     assert_equal(isdefaulted, hpxml.header.sim_begin_month_isdefaulted)
 
-    assert_equal(sim_begin_day, hpxml.header.sim_begin_day_of_month)
-    assert_equal(isdefaulted, hpxml.header.sim_begin_day_of_month_isdefaulted)
+    assert_equal(sim_begin_day, hpxml.header.sim_begin_day)
+    assert_equal(isdefaulted, hpxml.header.sim_begin_day_isdefaulted)
 
     assert_equal(sim_end_month, hpxml.header.sim_end_month)
     assert_equal(isdefaulted, hpxml.header.sim_end_month_isdefaulted)
 
-    assert_equal(sim_end_day, hpxml.header.sim_end_day_of_month)
-    assert_equal(isdefaulted, hpxml.header.sim_end_day_of_month_isdefaulted)
+    assert_equal(sim_end_day, hpxml.header.sim_end_day)
+    assert_equal(isdefaulted, hpxml.header.sim_end_day_isdefaulted)
 
     assert_equal(sim_calendar_year, hpxml.header.sim_calendar_year)
     assert_equal(isdefaulted, hpxml.header.sim_calendar_year_isdefaulted)
@@ -1770,14 +1770,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(dst_begin_month, hpxml.header.dst_begin_month)
     assert_equal(isdefaulted, hpxml.header.dst_begin_month_isdefaulted)
 
-    assert_equal(dst_begin_day_of_month, hpxml.header.dst_begin_day_of_month)
-    assert_equal(isdefaulted, hpxml.header.dst_begin_day_of_month_isdefaulted)
+    assert_equal(dst_begin_day, hpxml.header.dst_begin_day)
+    assert_equal(isdefaulted, hpxml.header.dst_begin_day_isdefaulted)
 
     assert_equal(dst_end_month, hpxml.header.dst_end_month)
     assert_equal(isdefaulted, hpxml.header.dst_end_month_isdefaulted)
 
-    assert_equal(dst_end_day_of_month, hpxml.header.dst_end_day_of_month)
-    assert_equal(isdefaulted, hpxml.header.dst_end_day_of_month_isdefaulted)
+    assert_equal(dst_end_day, hpxml.header.dst_end_day)
+    assert_equal(isdefaulted, hpxml.header.dst_end_day_isdefaulted)
 
     assert_equal(use_max_load_for_heat_pumps, hpxml.header.use_max_load_for_heat_pumps)
     assert_equal(isdefaulted, hpxml.header.use_max_load_for_heat_pumps_isdefaulted)
@@ -2550,11 +2550,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       assert_nil(hpxml.lighting.holiday_period_begin_month)
     end
 
-    if not schedules[:hol_begin_day_of_month].nil?
-      assert_equal(schedules[:hol_begin_day_of_month], hpxml.lighting.holiday_period_begin_day_of_month)
-      assert_equal(isdefaulted, hpxml.lighting.holiday_period_begin_day_of_month_isdefaulted)
+    if not schedules[:hol_begin_day].nil?
+      assert_equal(schedules[:hol_begin_day], hpxml.lighting.holiday_period_begin_day)
+      assert_equal(isdefaulted, hpxml.lighting.holiday_period_begin_day_isdefaulted)
     else
-      assert_nil(hpxml.lighting.holiday_period_begin_day_of_month)
+      assert_nil(hpxml.lighting.holiday_period_begin_day)
     end
 
     if not schedules[:hol_end_month].nil?
@@ -2564,11 +2564,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       assert_nil(hpxml.lighting.holiday_period_end_month)
     end
 
-    if not schedules[:hol_end_day_of_month].nil?
-      assert_equal(schedules[:hol_end_day_of_month], hpxml.lighting.holiday_period_end_day_of_month)
-      assert_equal(isdefaulted, hpxml.lighting.holiday_period_end_day_of_month_isdefaulted)
+    if not schedules[:hol_end_day].nil?
+      assert_equal(schedules[:hol_end_day], hpxml.lighting.holiday_period_end_day)
+      assert_equal(isdefaulted, hpxml.lighting.holiday_period_end_day_isdefaulted)
     else
-      assert_nil(hpxml.lighting.holiday_period_end_day_of_month)
+      assert_nil(hpxml.lighting.holiday_period_end_day)
     end
 
     if not schedules[:hol_wk_sch].nil?
