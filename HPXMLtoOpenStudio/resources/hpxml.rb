@@ -988,7 +988,7 @@ class HPXML < Object
       XMLHelper.add_element(building_construction, 'ResidentialFacilityType', @residential_facility_type, :string) unless @residential_facility_type.nil?
       XMLHelper.add_element(building_construction, 'NumberofConditionedFloors', @number_of_conditioned_floors, :integer) unless @number_of_conditioned_floors.nil?
       XMLHelper.add_element(building_construction, 'NumberofConditionedFloorsAboveGrade', @number_of_conditioned_floors_above_grade, :integer) unless @number_of_conditioned_floors_above_grade.nil?
-      XMLHelper.add_element(building_construction, 'AverageCeilingHeight', @average_ceiling_height, :float) unless @average_ceiling_height.nil?
+      XMLHelper.add_element(building_construction, 'AverageCeilingHeight', @average_ceiling_height, :float, @average_ceiling_height_isdefaulted) unless @average_ceiling_height.nil?
       XMLHelper.add_element(building_construction, 'NumberofBedrooms', @number_of_bedrooms, :integer) unless @number_of_bedrooms.nil?
       XMLHelper.add_element(building_construction, 'NumberofBathrooms', @number_of_bathrooms, :integer, @number_of_bathrooms_isdefaulted) unless @number_of_bathrooms.nil?
       XMLHelper.add_element(building_construction, 'ConditionedFloorArea', @conditioned_floor_area, :float) unless @conditioned_floor_area.nil?
@@ -1006,7 +1006,7 @@ class HPXML < Object
       @year_built = XMLHelper.get_value(building_construction, 'YearBuilt', :integer)
       @number_of_conditioned_floors = XMLHelper.get_value(building_construction, 'NumberofConditionedFloors', :integer)
       @number_of_conditioned_floors_above_grade = XMLHelper.get_value(building_construction, 'NumberofConditionedFloorsAboveGrade', :integer)
-      @average_ceiling_height = XMLHelper.get_value(building_construction, 'AverageCeilingHeight', :float)
+      @average_ceiling_height, @average_ceiling_height_isdefaulted = XMLHelper.get_value_and_defaulted(building_construction, 'AverageCeilingHeight', :float)
       @number_of_bedrooms = XMLHelper.get_value(building_construction, 'NumberofBedrooms', :integer)
       @number_of_bathrooms, @number_of_bathrooms_isdefaulted = XMLHelper.get_value_and_defaulted(building_construction, 'NumberofBathrooms', :integer)
       @conditioned_floor_area = XMLHelper.get_value(building_construction, 'ConditionedFloorArea', :float)
@@ -3686,7 +3686,7 @@ class HPXML < Object
       end
       if not @pipe_r_value.nil?
         pipe_insulation = XMLHelper.add_element(hot_water_distribution, 'PipeInsulation')
-        XMLHelper.add_element(pipe_insulation, 'PipeRValue', @pipe_r_value, :float)
+        XMLHelper.add_element(pipe_insulation, 'PipeRValue', @pipe_r_value, :float, @pipe_r_value_isdefaulted)
       end
       if (not @dwhr_facilities_connected.nil?) || (not @dwhr_equal_flow.nil?) || (not @dwhr_efficiency.nil?)
         drain_water_heat_recovery = XMLHelper.add_element(hot_water_distribution, 'DrainWaterHeatRecovery')
@@ -3708,7 +3708,7 @@ class HPXML < Object
 
       @id = HPXML::get_id(hot_water_distribution)
       @system_type = XMLHelper.get_child_name(hot_water_distribution, 'SystemType')
-      @pipe_r_value = XMLHelper.get_value(hot_water_distribution, 'PipeInsulation/PipeRValue', :float)
+      @pipe_r_value, @pipe_r_value_isdefaulted = XMLHelper.get_value_and_defaulted(hot_water_distribution, 'PipeInsulation/PipeRValue', :float)
       if @system_type == 'Standard'
         @standard_piping_length, @standard_piping_length_isdefaulted = XMLHelper.get_value_and_defaulted(hot_water_distribution, 'SystemType/Standard/PipingLength', :float)
       elsif @system_type == 'Recirculation'

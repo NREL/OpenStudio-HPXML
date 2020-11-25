@@ -135,9 +135,17 @@ class HPXMLDefaults
   end
 
   def self.apply_building_construction(hpxml, cfa, nbeds)
-    if hpxml.building_construction.conditioned_building_volume.nil?
+    if hpxml.building_construction.conditioned_building_volume.nil? && hpxml.building_construction.average_ceiling_height.nil?
+      hpxml.building_construction.average_ceiling_height = 8.0
+      hpxml.building_construction.average_ceiling_height_isdefaulted = true
       hpxml.building_construction.conditioned_building_volume = cfa * hpxml.building_construction.average_ceiling_height
       hpxml.building_construction.conditioned_building_volume_isdefaulted = true
+    elsif hpxml.building_construction.conditioned_building_volume.nil?
+      hpxml.building_construction.conditioned_building_volume = cfa * hpxml.building_construction.average_ceiling_height
+      hpxml.building_construction.conditioned_building_volume_isdefaulted = true
+    elsif hpxml.building_construction.average_ceiling_height.nil?
+      hpxml.building_construction.average_ceiling_height = hpxml.building_construction.conditioned_building_volume / cfa
+      hpxml.building_construction.average_ceiling_height_isdefaulted = true
     end
 
     if hpxml.building_construction.number_of_bathrooms.nil?
@@ -744,6 +752,12 @@ class HPXMLDefaults
     return if hpxml.hot_water_distributions.size == 0
 
     hot_water_distribution = hpxml.hot_water_distributions[0]
+
+    if hot_water_distribution.pipe_r_value.nil?
+      hot_water_distribution.pipe_r_value = 0.0
+      hot_water_distribution.pipe_r_value_isdefaulted = true
+    end
+
     if hot_water_distribution.system_type == HPXML::DHWDistTypeStandard
       if hot_water_distribution.standard_piping_length.nil?
         hot_water_distribution.standard_piping_length = HotWaterAndAppliances.get_default_std_pipe_length(has_uncond_bsmnt, cfa, ncfl)

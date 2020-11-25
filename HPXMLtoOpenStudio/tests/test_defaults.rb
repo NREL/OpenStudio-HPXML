@@ -123,19 +123,35 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_building_construction
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-enclosure-infil-flue.xml')
-    hpxml.building_construction.number_of_bathrooms = 4.0
+    hpxml.building_construction.number_of_bathrooms = 4
+    hpxml.building_construction.conditioned_building_volume = 20000
+    hpxml.building_construction.average_ceiling_height = 7
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_building_construction_values(hpxml_default, false, 21600, true, 4)
+    _test_default_building_construction_values(hpxml_default, false, 20000, 7, true, 4)
 
-    # Test defaults w/ average ceiling height
+    # Test defaults
     hpxml.building_construction.conditioned_building_volume = nil
-    hpxml.building_construction.average_ceiling_height = 10
+    hpxml.building_construction.average_ceiling_height = nil
     hpxml.building_construction.has_flue_or_chimney = nil
     hpxml.building_construction.number_of_bathrooms = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_building_construction_values(hpxml_default, true, 27000, false, 2)
+    _test_default_building_construction_values(hpxml_default, true, 21600, 8, false, 2)
+
+    # Test defaults w/ average ceiling height
+    hpxml.building_construction.conditioned_building_volume = nil
+    hpxml.building_construction.average_ceiling_height = 10
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_building_construction_values(hpxml_default, true, 27000, 10, false, 2)
+
+    # Test defaults w/ average ceiling height
+    hpxml.building_construction.conditioned_building_volume = 27000
+    hpxml.building_construction.average_ceiling_height = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_building_construction_values(hpxml_default, true, 27000, 10, false, 2)
   end
 
   def test_infiltration
@@ -917,16 +933,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_hot_water_distribution
     # Test inputs not overridden by defaults -- standard
     hpxml = _create_hpxml('base.xml')
+    hpxml.hot_water_distributions[0].pipe_r_value = 2.5
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_standard_distribution_values(hpxml_default, false, 50.0)
+    _test_default_standard_distribution_values(hpxml_default, false, 50.0, 2.5)
 
     # Test inputs not overridden by defaults -- recirculation
     hpxml = _create_hpxml('base-dhw-recirc-demand.xml')
     hpxml.hot_water_distributions[0].recirculation_pump_power = 65.0
+    hpxml.hot_water_distributions[0].pipe_r_value = 2.5
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_recirc_distribution_values(hpxml_default, false, 50.0, 50.0, 65.0)
+    _test_default_recirc_distribution_values(hpxml_default, false, 50.0, 50.0, 65.0, 2.5)
 
     # Test inputs not overridden by defaults -- shared recirculation
     hpxml = _create_hpxml('base-dhw-shared-water-heater-recirc.xml')
@@ -938,54 +956,56 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test defaults w/ conditioned basement
     hpxml = _create_hpxml('base.xml')
     hpxml.hot_water_distributions[0].standard_piping_length = nil
+    hpxml.hot_water_distributions[0].pipe_r_value = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_standard_distribution_values(hpxml_default, true, 93.48)
+    _test_default_standard_distribution_values(hpxml_default, true, 93.48, 0.0)
 
     # Test defaults w/ unconditioned basement
     hpxml = _create_hpxml('base-foundation-unconditioned-basement.xml')
     hpxml.hot_water_distributions[0].standard_piping_length = nil
+    hpxml.hot_water_distributions[0].pipe_r_value = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_standard_distribution_values(hpxml_default, true, 88.48)
+    _test_default_standard_distribution_values(hpxml_default, true, 88.48, 0.0)
 
     # Test defaults w/ 2-story building
     hpxml = _create_hpxml('base-enclosure-2stories.xml')
     hpxml.hot_water_distributions[0].standard_piping_length = nil
+    hpxml.hot_water_distributions[0].pipe_r_value = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_standard_distribution_values(hpxml_default, true, 103.48)
+    _test_default_standard_distribution_values(hpxml_default, true, 103.48, 0.0)
 
     # Test defaults w/ recirculation & conditioned basement
     hpxml = _create_hpxml('base-dhw-recirc-demand.xml')
     hpxml.hot_water_distributions[0].recirculation_piping_length = nil
     hpxml.hot_water_distributions[0].recirculation_branch_piping_length = nil
     hpxml.hot_water_distributions[0].recirculation_pump_power = nil
+    hpxml.hot_water_distributions[0].pipe_r_value = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_recirc_distribution_values(hpxml_default, true, 166.96, 10.0, 50.0)
+    _test_default_recirc_distribution_values(hpxml_default, true, 166.96, 10.0, 50.0, 0.0)
 
     # Test defaults w/ recirculation & unconditioned basement
     hpxml = _create_hpxml('base-foundation-unconditioned-basement.xml')
     hpxml.hot_water_distributions.clear
     hpxml.hot_water_distributions.add(id: 'HotWaterDistribution',
                                       system_type: HPXML::DHWDistTypeRecirc,
-                                      recirculation_control_type: HPXML::DHWRecirControlTypeSensor,
-                                      pipe_r_value: 3.0)
+                                      recirculation_control_type: HPXML::DHWRecirControlTypeSensor)
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_recirc_distribution_values(hpxml_default, true, 156.96, 10.0, 50.0)
+    _test_default_recirc_distribution_values(hpxml_default, true, 156.96, 10.0, 50.0, 0.0)
 
     # Test defaults w/ recirculation & 2-story building
     hpxml = _create_hpxml('base-enclosure-2stories.xml')
     hpxml.hot_water_distributions.clear
     hpxml.hot_water_distributions.add(id: 'HotWaterDistribution',
                                       system_type: HPXML::DHWDistTypeRecirc,
-                                      recirculation_control_type: HPXML::DHWRecirControlTypeSensor,
-                                      pipe_r_value: 3.0)
+                                      recirculation_control_type: HPXML::DHWRecirControlTypeSensor)
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_recirc_distribution_values(hpxml_default, true, 186.96, 10.0, 50.0)
+    _test_default_recirc_distribution_values(hpxml_default, true, 186.96, 10.0, 50.0, 0.0)
 
     # Test defaults w/ shared recirculation
     hpxml = _create_hpxml('base-dhw-shared-water-heater-recirc.xml')
@@ -1799,9 +1819,15 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(isdefaulted, hpxml.building_occupancy.number_of_residents_isdefaulted)
   end
 
-  def _test_default_building_construction_values(hpxml, isdefaulted, building_volume, has_flue_or_chimney, n_bathrooms)
+  def _test_default_building_construction_values(hpxml, isdefaulted, building_volume, average_ceiling_height, has_flue_or_chimney, n_bathrooms)
     assert_equal(building_volume, hpxml.building_construction.conditioned_building_volume)
-    assert_equal(isdefaulted, hpxml.building_construction.conditioned_building_volume_isdefaulted)
+    assert_equal(average_ceiling_height, hpxml.building_construction.average_ceiling_height)
+    if isdefaulted
+      assert_equal(isdefaulted, hpxml.building_construction.conditioned_building_volume_isdefaulted || hpxml.building_construction.average_ceiling_height_isdefaulted)
+    else
+      assert_equal(isdefaulted, hpxml.building_construction.conditioned_building_volume_isdefaulted)
+      assert_equal(isdefaulted, hpxml.building_construction.average_ceiling_height_isdefaulted)
+    end
 
     assert_equal(has_flue_or_chimney, hpxml.building_construction.has_flue_or_chimney)
     assert_equal(isdefaulted, hpxml.building_construction.has_flue_or_chimney_isdefaulted)
@@ -2178,14 +2204,17 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_standard_distribution_values(hpxml, isdefaulted, piping_length)
+  def _test_default_standard_distribution_values(hpxml, isdefaulted, piping_length, pipe_r_value)
     hot_water_distribution = hpxml.hot_water_distributions[0]
 
     assert_in_epsilon(piping_length, hot_water_distribution.standard_piping_length, 0.01)
     assert_equal(isdefaulted, hot_water_distribution.standard_piping_length_isdefaulted)
+
+    assert_equal(pipe_r_value, hot_water_distribution.pipe_r_value)
+    assert_equal(isdefaulted, hot_water_distribution.pipe_r_value_isdefaulted)
   end
 
-  def _test_default_recirc_distribution_values(hpxml, isdefaulted, piping_length, branch_piping_length, pump_power)
+  def _test_default_recirc_distribution_values(hpxml, isdefaulted, piping_length, branch_piping_length, pump_power, pipe_r_value)
     hot_water_distribution = hpxml.hot_water_distributions[0]
 
     assert_in_epsilon(piping_length, hot_water_distribution.recirculation_piping_length, 0.01)
@@ -2196,6 +2225,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
     assert_in_epsilon(pump_power, hot_water_distribution.recirculation_pump_power, 0.01)
     assert_equal(isdefaulted, hot_water_distribution.recirculation_pump_power_isdefaulted)
+
+    assert_equal(pipe_r_value, hot_water_distribution.pipe_r_value)
+    assert_equal(isdefaulted, hot_water_distribution.pipe_r_value_isdefaulted)
   end
 
   def _test_default_shared_recirc_distribution_values(hpxml, isdefaulted, pump_power)
