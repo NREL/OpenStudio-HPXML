@@ -5027,11 +5027,13 @@ class HPXML < Object
 
           match = true
           surf.class::ATTRS.each do |attribute|
+            next if attribute.to_s.end_with? '_isdefaulted'
             next if attrs_to_ignore.include? attribute
             next if (surf_type == :foundation_walls) && (attribute == :azimuth) # Azimuth of foundation walls is irrelevant
             next if surf.send(attribute) == surf2.send(attribute)
 
             match = false
+            break
           end
           next unless match
 
