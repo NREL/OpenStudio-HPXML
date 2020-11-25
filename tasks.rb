@@ -670,7 +670,7 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.conditioned_building_volume -= 400 * 2 * 8
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.building_construction.conditioned_building_volume = nil
-    hpxml.building_construction.average_ceiling_height = 8
+    hpxml.building_construction.average_ceiling_height = nil
     hpxml.building_construction.number_of_bathrooms = nil
   elsif ['base-enclosure-attached-multifamily.xml',
          'base-enclosure-other-housing-unit.xml',
@@ -978,6 +978,8 @@ def set_hpxml_roofs(hpxml_file, hpxml)
       roof.roof_type = nil
       roof.solar_absorptance = nil
       roof.roof_color = HPXML::ColorLight
+      roof.emittance = nil
+      roof.radiant_barrier = nil
     end
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
     hpxml.roofs[0].radiant_barrier_grade = 4
@@ -1114,6 +1116,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
       rim_joist.siding = nil
       rim_joist.solar_absorptance = nil
       rim_joist.color = HPXML::ColorMedium
+      rim_joist.emittance = nil
     end
   end
   hpxml.rim_joists.each do |rim_joist|
@@ -1451,6 +1454,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
       wall.siding = nil
       wall.solar_absorptance = nil
       wall.color = HPXML::ColorMedium
+      wall.emittance = nil
     end
   elsif ['base-enclosure-common-surfaces.xml'].include? hpxml_file
     hpxml.walls.add(id: 'CommonWallUnventedAttic',
@@ -1801,6 +1805,10 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 0,
                                insulation_exterior_r_value: 0)
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.foundation_walls.each do |fwall|
+      fwall.thickness = nil
+    end
   elsif ['invalid_files/enclosure-basement-missing-exterior-foundation-wall.xml'].include? hpxml_file
     hpxml.foundation_walls[0].delete
   end
@@ -2148,6 +2156,12 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                     under_slab_insulation_r_value: 0,
                     carpet_fraction: 0,
                     carpet_r_value: 0)
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.slabs.each do |slab|
+      slab.thickness = nil
+      slab.carpet_fraction = nil
+      slab.carpet_fraction = nil
+    end
   elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
     hpxml.slabs[0].interior_adjacent_to = HPXML::LocationBasementUnconditioned
     hpxml.slabs[0].depth_below_grade = 7.0
@@ -4229,6 +4243,7 @@ def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hpxml.hot_water_distributions.clear
   elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.hot_water_distributions[0].pipe_r_value = nil
     hpxml.hot_water_distributions[0].standard_piping_length = nil
   end
 end
@@ -4350,9 +4365,6 @@ def set_hpxml_pv_systems(hpxml_file, hpxml)
                          system_losses_fraction: 0.14)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.pv_systems.add(id: 'PVSystem',
-                         module_type: HPXML::PVModuleTypeStandard,
-                         location: HPXML::LocationRoof,
-                         tracking: HPXML::PVTrackingTypeFixed,
                          array_azimuth: 180,
                          array_tilt: 20,
                          max_power_output: 4000,
@@ -4563,6 +4575,7 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].label_annual_gas_cost = nil
     hpxml.dishwashers[0].place_setting_capacity = nil
     hpxml.dishwashers[0].label_usage = nil
+    hpxml.dishwashers[0].location = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.dishwashers[0].usage_multiplier = 0.9
   elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
@@ -4730,6 +4743,7 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
     hpxml.cooking_ranges[0].location = HPXML::LocationGarage
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].is_induction = nil
+    hpxml.cooking_ranges[0].location = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].usage_multiplier = 0.9
   elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file

@@ -316,13 +316,22 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_slab_values(hpxml_default, false, 7.0, 1.1, 0.5)
 
-    # Test defaults
+    # Test defaults w/ conditioned basement
     hpxml.slabs[0].thickness = nil
     hpxml.slabs[0].carpet_r_value = nil
     hpxml.slabs[0].carpet_fraction = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_slab_values(hpxml_default, true, 4.0, 2.0, 0.8)
+
+    # Test defaults w/ crawlspace
+    hpxml = _create_hpxml('base-foundation-unvented-crawlspace.xml')
+    hpxml.slabs[0].thickness = nil
+    hpxml.slabs[0].carpet_r_value = nil
+    hpxml.slabs[0].carpet_fraction = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_slab_values(hpxml_default, true, 0.0, 0.0, 0.0)
   end
 
   def test_windows

@@ -326,7 +326,8 @@ class HPXMLDefaults
   def self.apply_slabs(hpxml)
     hpxml.slabs.each do |slab|
       if slab.thickness.nil?
-        slab.thickness = 4.0
+        crawl_slab = [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include?(slab.interior_adjacent_to)
+        slab.thickness = crawl_slab ? 0.0 : 4.0
         slab.thickness_isdefaulted = true
       end
       conditioned_slab = [HPXML::LocationLivingSpace,

@@ -207,13 +207,15 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   ``NumberofBedrooms``                                       integer              > 0          Yes                 Number of bedrooms
   ``NumberofBathrooms``                                      integer              > 0          No        See [#]_  Number of bathrooms
   ``ConditionedFloorArea``                                   double    ft2        > 0          Yes                 Floor area within conditioned space boundary
-  ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``  double    ft3 or ft  > 0          Yes       See [#]_  Volume/ceiling height within conditioned space boundary
+  ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``  double    ft3 or ft  > 0          No        See [#]_  Volume/ceiling height within conditioned space boundary
   ``extension/HasFlueOrChimney``                             boolean                           No        See [#]_  Presence of flue or chimney for infiltration model
   =========================================================  ========  =========  ===========  ========  ========  =======================================================================
 
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
-  .. [#] If ConditionedBuildingVolume not provided, calculated as AverageCeilingHeight * ConditionedFloorArea.
+  .. [#] If ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to 8.0 and ConditionedBuildingVolume calculated as 8.0 * ConditionedFloorArea.
+         If ConditionedBuildingVolume provided but not AverageCeilingHeight, AverageCeilingHeight calculated as ConditionedBuildingVolume / ConditionedFloorArea.
+         If AverageCeilingHeight provided but not ConditionedBuildingVolume, ConditionedBuildingVolume calculated as AverageCeilingHeight * ConditionedFloorArea.
   .. [#] | If HasFlueOrChimney not provided, assumed to be true if any of the following conditions are met: 
          | A) heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, PortableHeater, or FixedHeater and AFUE/Percent is less than 0.89,
          | B) heating system is non-electric Fireplace, or
@@ -317,9 +319,9 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   ``Azimuth``                             integer           deg           0-359            No             See [#]_                        Azimuth (clockwise from North)
   ``RoofType``                            string                          See [#]_         No             asphalt or fiberglass shingles  Roof type
   ``SolarAbsorptance`` or ``RoofColor``   double or string                0-1 or See [#]_  Yes            See [#]_                        Solar absorptance or color
-  ``Emittance``                           double                          0-1              Yes                                            Emittance
+  ``Emittance``                           double                          0-1              No             0.90                            Emittance
   ``Pitch``                               integer           ?:12          >= 0             Yes                                            Pitch
-  ``RadiantBarrier``                      boolean                                          Yes                                            Presence of radiant barrier
+  ``RadiantBarrier``                      boolean                                          No             false                           Presence of radiant barrier
   ``RadiantBarrier/RadiantBarrierGrade``  integer                         1-3              Depends [#]_                                   Radiant barrier installation grade
   ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0              Yes                                            Assembly R-value [#]_
   ======================================  ================  ============  ===============  =============  ==============================  ==================================
@@ -363,7 +365,7 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
   ``Azimuth``                             integer           deg           0-359            No        See [#]_     Azimuth (clockwise from North)
   ``Siding``                              string                          See [#]_         No        wood siding  Siding material
   ``SolarAbsorptance`` or ``Color``       double or string                0-1 or See [#]_  Yes       See [#]_     Solar absorptance or color
-  ``Emittance``                           double                          0-1              Yes                    Emittance
+  ``Emittance``                           double                          0-1              No        0.90         Emittance
   ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0              Yes                    Assembly R-value [#]_
   ======================================  ================  ============  ===============  ========  ===========  ==============================
 
@@ -403,7 +405,7 @@ Each wall that has no contact with the ground and bounds a space type is entered
   ``Azimuth``                             integer           deg           0-359            No             See [#]_     Azimuth (clockwise from North)
   ``Siding``                              string                          See [#]_         No             wood siding  Siding material
   ``SolarAbsorptance`` or ``Color``       double or string                0-1 or See [#]_  Yes            See [#]_     Solar absorptance or color
-  ``Emittance``                           double                          0-1              Yes                         Emittance
+  ``Emittance``                           double                          0-1              No             0.90         Emittance
   ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0              Yes                         Assembly R-value [#]_
   ======================================  ================  ============  ===============  =============  ===========  ====================================
 
@@ -444,7 +446,7 @@ Other walls (e.g., wood framed walls) that are connected to a below-grade space 
   ``Height``                                                      double    ft            > 0          Yes                      Total height
   ``Area``                                                        double    ft2           > 0          Yes                      Gross area (including doors/windows)
   ``Azimuth``                                                     integer   deg           0-359        No             See [#]_  Azimuth (clockwise from North)
-  ``Thickness``                                                   double    inches        > 0          Yes                      Thickness excluding interior framing
+  ``Thickness``                                                   double    inches        > 0          No             8.0       Thickness excluding interior framing
   ``DepthBelowGrade``                                             double    ft            >= 0         Yes                      Depth below grade [#]_
   ``Insulation/Layer[InstallationType="continuous - interior"]``  element                              Depends [#]_             Interior insulation layer
   ``Insulation/Layer[InstallationType="continuous - exterior"]``  element                              Depends [#]_             Exterior insulation layer
@@ -512,25 +514,26 @@ HPXML Slabs
 
 Each space type that borders the ground (i.e., basements, crawlspaces, garages, and slab-on-grade foundations) should have a slab entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab``.
 
-  ===========================================  ========  ============  ===========  =============  =======  ====================================================
-  Element                                      Type      Units         Constraints  Required       Default  Notes
-  ===========================================  ========  ============  ===========  =============  =======  ====================================================
-  ``InteriorAdjacentTo``                       string                  See [#]_     Yes                     Interior adjacent space type
-  ``Area``                                     double    ft2           > 0          Yes                     Gross area
-  ``Thickness``                                double    inches        >= 0         Yes                     Thickness [#]_
-  ``ExposedPerimeter``                         double    ft            > 0          Yes                     Perimeter exposed to ambient conditions [#]_
-  ``PerimeterInsulationDepth``                 double    ft            >= 0         Yes                     Depth from grade to bottom of vertical insulation
-  ``UnderSlabInsulationWidth``                 double    ft            >= 0         Depends [#]_            Width from slab edge inward of horizontal insulation
-  ``UnderSlabInsulationSpansEntireSlab``       boolean                              Depends [#]_            Whether horizontal insulation spans entire slab
-  ``DepthBelowGrade``                          double    ft            >= 0         Depends [#]_            Depth from the top of the slab surface to grade
-  ``PerimeterInsulation/Layer/NominalRValue``  double    F-ft2-hr/Btu  >= 0         Yes                     R-value of vertical insulation
-  ``UnderSlabInsulation/Layer/NominalRValue``  double    F-ft2-hr/Btu  >= 0         Yes                     R-value of horizontal insulation
-  ``extension/CarpetFraction``                 double    frac          0-1          Yes                     Fraction of slab covered by carpet
-  ``extension/CarpetRValue``                   double    F-ft2-hr/Btu  >= 0         Yes                     Carpet R-value
-  ===========================================  ========  ============  ===========  =============  =======  ====================================================
+  ===========================================  ========  ============  ===========  =============  ========  ====================================================
+  Element                                      Type      Units         Constraints  Required       Default   Notes
+  ===========================================  ========  ============  ===========  =============  ========  ====================================================
+  ``InteriorAdjacentTo``                       string                  See [#]_     Yes                      Interior adjacent space type
+  ``Area``                                     double    ft2           > 0          Yes                      Gross area
+  ``Thickness``                                double    inches        >= 0         No             See [#]_  Thickness [#]_
+  ``ExposedPerimeter``                         double    ft            > 0          Yes                      Perimeter exposed to ambient conditions [#]_
+  ``PerimeterInsulationDepth``                 double    ft            >= 0         Yes                      Depth from grade to bottom of vertical insulation
+  ``UnderSlabInsulationWidth``                 double    ft            >= 0         Depends [#]_             Width from slab edge inward of horizontal insulation
+  ``UnderSlabInsulationSpansEntireSlab``       boolean                              Depends [#]_             Whether horizontal insulation spans entire slab
+  ``DepthBelowGrade``                          double    ft            >= 0         Depends [#]_             Depth from the top of the slab surface to grade
+  ``PerimeterInsulation/Layer/NominalRValue``  double    F-ft2-hr/Btu  >= 0         Yes                      R-value of vertical insulation
+  ``UnderSlabInsulation/Layer/NominalRValue``  double    F-ft2-hr/Btu  >= 0         Yes                      R-value of horizontal insulation
+  ``extension/CarpetFraction``                 double    frac          0-1          No             See [#]_  Fraction of slab covered by carpet
+  ``extension/CarpetRValue``                   double    F-ft2-hr/Btu  >= 0         No             See [#]_  Carpet R-value
+  ===========================================  ========  ============  ===========  =============  ========  ====================================================
 
   .. [#] InteriorAdjacentTo choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
          See :ref:`hpxmllocations` for descriptions.
+  .. [#] If Thickness not provided, defaults to 0 when adjacent to crawlspace and 4 inches for all other cases.
   .. [#] For a crawlspace with a dirt floor, use a thickness of zero.
   .. [#] ExposedPerimeter includes any slab length that falls along the perimeter of the building's footprint (i.e., is exposed to ambient conditions).
          So a basement slab edge adjacent to a garage or crawlspace, for example, should not be included.
@@ -538,7 +541,9 @@ Each space type that borders the ground (i.e., basements, crawlspaces, garages, 
   .. [#] UnderSlabInsulationSpansEntireSlab=true required if UnderSlabInsulationWidth is not provided.
   .. [#] DepthBelowGrade required if the attached foundation has no ``FoundationWalls``.
          For foundation types with walls, the the slab's position relative to grade is determined by the ``FoundationWall/DepthBelowGrade`` value.
-
+  .. [#] If CarpetFraction not provided, defaults to 0.8 when adjacent to conditioned space, otherwise 0.0.
+  .. [#] If CarpetRValue not provided, defaults to 2.0 when adjacent to conditioned space, otherwise 0.0.
+  
 .. _windowinputs:
 
 HPXML Windows
@@ -961,7 +966,7 @@ If there is a heating temperature setback, additional information is entered in 
   =====================================  ========  ========  ===========  ========  =========  =========================================
   ``SetbackTempHeatingSeason``           double    deg-F                  Yes                  Heating setback temperature
   ``TotalSetbackHoursperWeekHeating``    integer   hrs/week  > 0          Yes                  Hours/week of heating temperature setback
-  ``extension/SetbackStartHourHeating``  integer             0-23         Yes                  Daily setback start hour
+  ``extension/SetbackStartHourHeating``  integer             0-23         No        23 (11pm)  Daily setback start hour
   =====================================  ========  ========  ===========  ========  =========  =========================================
 
 If there is a cooling temperature setup, additional information is entered in ``HVACControl``.
@@ -971,7 +976,7 @@ If there is a cooling temperature setup, additional information is entered in ``
   =====================================  ========  ========  ===========  ========  =========  =========================================
   ``SetupTempCoolingSeason``             double    deg-F                  Yes                  Cooling setup temperature
   ``TotalSetupHoursperWeekCooling``      integer   hrs/week  > 0          Yes                  Hours/week of cooling temperature setup
-  ``extension/SetupStartHourCooling``    integer             0-23         Yes                  Daily setup start hour
+  ``extension/SetupStartHourCooling``    integer             0-23         No        9 (9am)    Daily setup start hour
   =====================================  ========  ========  ===========  ========  =========  =========================================
 
 Detailed Inputs
@@ -1089,15 +1094,14 @@ Each mechanical ventilation systems that provide whole home ventilation is enter
   ``IsSharedSystem``                       boolean            See [#]_     No        false      Whether it serves multiple dwelling units
   ``FanType``                              string             See [#]_     Yes                  Type of ventilation system
   ``TestedFlowRate`` or ``RatedFlowRate``  double    cfm      >= 0         Yes                  Flow rate [#]_
-  ``HoursInOperation``                     double    hrs/day  0-24         Yes                  Hours per day of operation [#]_
+  ``HoursInOperation``                     double    hrs/day  0-24         No        See [#]_   Hours per day of operation
   ``FanPower``                             double    W        >= 0         Yes                  Fan power
   =======================================  ========  =======  ===========  ========  =========  =========================================
 
   .. [#] For central fan integrated supply systems, IsSharedSystem must be false.
   .. [#] FanType choices are "energy recovery ventilator", "heat recovery ventilator", "exhaust only", "supply only", "balanced", or "central fan integrated supply".
   .. [#] For a central fan integrated supply system, the flow rate should equal the amount of outdoor air provided to the distribution system.
-  .. [#] Typically 24 hrs/day (i.e., running continuously) for all system types other than central fan integrated supply (CFIS).
-         Typically less than 24 hrs/day (i.e., running intermittently) for CFIS systems.
+  .. [#] If HoursInOperation not provided, defaults to 24 (i.e., running continuously) for all system types other than central fan integrated supply (CFIS), and 8.0 (i.e., running intermittently) for CFIS systems.
 
 If a **heat recovery ventilator** system is specified, additional information is entered in ``VentilationFan``.
 
@@ -1276,7 +1280,7 @@ If any water heating systems are provided, a single hot water distribution syste
   Element                            Type     Units         Constraints  Required  Default   Notes
   =================================  =======  ============  ===========  ========  ========  =======================================================================
   ``SystemType``                     element                See [#]_     Yes                 Type of in-unit distribution system serving the dwelling unit
-  ``PipeInsulation/PipeRValue``      double   F-ft2-hr/Btu  >= 0         Yes                 Pipe insulation R-value
+  ``PipeInsulation/PipeRValue``      double   F-ft2-hr/Btu  >= 0         No        0.0       Pipe insulation R-value
   ``DrainWaterHeatRecovery``         element                             No        <none>    Presence of drain water heat recovery device
   ``extension/SharedRecirculation``  element                See [#]_     No        <none>    Presence of shared recirculation system serving multiple dwelling units
   =================================  =======  ============  ===========  ========  ========  =======================================================================
@@ -1456,9 +1460,9 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
   Element                                                  Type               Units      Constraints    Required      Default   Notes
   =======================================================  =================  =========  =============  ============  ========  ============================================
   ``IsSharedSystem``                                       boolean                                      No            false     Whether it serves multiple dwelling units
-  ``Location``                                             string                        See [#]_       Yes                     Mounting location
-  ``ModuleType``                                           string                        See [#]_       Yes                     Type of module
-  ``Tracking``                                             string                        See [#]_       Yes                     Type of tracking
+  ``Location``                                             string                        See [#]_       No            roof      Mounting location
+  ``ModuleType``                                           string                        See [#]_       No            standard  Type of module
+  ``Tracking``                                             string                        See [#]_       No            fixed     Type of tracking
   ``ArrayAzimuth``                                         integer            deg        0-359          Yes                     Direction panels face (clockwise from North)
   ``ArrayTilt``                                            double             deg        0-90           Yes                     Tilt relative to horizontal
   ``MaxPowerOutput``                                       double             W          >= 0           Yes                     Peak power
