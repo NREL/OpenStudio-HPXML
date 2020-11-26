@@ -674,7 +674,6 @@
         <FuelLoad>
           <SystemIdentifier id='FuelLoadMisc'/>
           <FuelLoadType>grill</FuelLoadType>
-          <Location>exterior</Location>
           <Load>
             <Units>therm/year</Units>
             <Value>25.0</Value>
@@ -705,7 +704,6 @@
         <FuelLoad>
           <SystemIdentifier id='FuelLoadMisc3'/>
           <FuelLoadType>fireplace</FuelLoadType>
-          <Location>interior</Location>
           <Load>
             <Units>therm/year</Units>
             <Value>55.0</Value>

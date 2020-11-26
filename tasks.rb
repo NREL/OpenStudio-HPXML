@@ -4910,9 +4910,6 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
                          kWh_per_year: 7302,
                          frac_sensible: 0.822,
                          frac_latent: 0.178)
-    hpxml.plug_loads.add(id: 'PlugLoadMisc2',
-                         plug_load_type: HPXML::PlugLoadTypeTelevision,
-                         kWh_per_year: 0)
   elsif ['ASHRAE_Standard_140/L170AC.xml',
          'ASHRAE_Standard_140/L170AL.xml'].include? hpxml_file
     hpxml.plug_loads[0].kWh_per_year = 0
@@ -4938,9 +4935,6 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
       hpxml.plug_loads.add(id: 'PlugLoadMisc',
                            plug_load_type: HPXML::PlugLoadTypeOther,
                            kWh_per_year: 0)
-      hpxml.plug_loads.add(id: 'PlugLoadMisc2',
-                           plug_load_type: HPXML::PlugLoadTypeTelevision,
-                           kWh_per_year: 0)
     elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
       hpxml.plug_loads[0].weekday_fractions = '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036'
       hpxml.plug_loads[0].weekend_fractions = '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036'
@@ -4949,14 +4943,12 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
       hpxml.plug_loads[1].weekend_fractions = '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.05, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07'
       hpxml.plug_loads[1].monthly_multipliers = '1.137, 1.129, 0.961, 0.969, 0.961, 0.993, 0.996, 0.96, 0.993, 0.867, 0.86, 1.137'
       hpxml.plug_loads.add(id: 'PlugLoadMisc3',
-                           location: HPXML::LocationExterior,
                            plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging,
                            kWh_per_year: 1500,
                            weekday_fractions: '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042',
                            weekend_fractions: '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042',
                            monthly_multipliers: '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
       hpxml.plug_loads.add(id: 'PlugLoadMisc4',
-                           location: HPXML::LocationExterior,
                            plug_load_type: HPXML::PlugLoadTypeWellPump,
                            kWh_per_year: 475,
                            weekday_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',
@@ -4983,7 +4975,6 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
     hpxml.plug_loads[0].weekday_fractions = nil
     hpxml.plug_loads[0].weekend_fractions = nil
     hpxml.plug_loads[0].monthly_multipliers = nil
-    hpxml.plug_loads[0].location = nil
   end
 end
 
@@ -4991,7 +4982,6 @@ def set_hpxml_fuel_loads(hpxml_file, hpxml)
   if ['base-misc-loads-large-uncommon.xml',
       'base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.fuel_loads.add(id: 'FuelLoadMisc',
-                         location: HPXML::LocationExterior,
                          fuel_load_type: HPXML::FuelLoadTypeGrill,
                          fuel_type: HPXML::FuelTypePropane,
                          therm_per_year: 25,
@@ -5006,7 +4996,6 @@ def set_hpxml_fuel_loads(hpxml_file, hpxml)
                          weekend_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',
                          monthly_multipliers: '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
     hpxml.fuel_loads.add(id: 'FuelLoadMisc3',
-                         location: HPXML::LocationInterior,
                          fuel_load_type: HPXML::FuelLoadTypeFireplace,
                          fuel_type: HPXML::FuelTypeWoodCord,
                          therm_per_year: 55,

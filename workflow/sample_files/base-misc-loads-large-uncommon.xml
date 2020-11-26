@@ -755,7 +755,6 @@
         <PlugLoad>
           <SystemIdentifier id='PlugLoadMisc3'/>
           <PlugLoadType>electric vehicle charging</PlugLoadType>
-          <Location>exterior</Location>
           <Load>
             <Units>kWh/year</Units>
             <Value>1500.0</Value>
@@ -769,7 +768,6 @@
         <PlugLoad>
           <SystemIdentifier id='PlugLoadMisc4'/>
           <PlugLoadType>well pump</PlugLoadType>
-          <Location>exterior</Location>
           <Load>
             <Units>kWh/year</Units>
             <Value>475.0</Value>
@@ -783,7 +781,6 @@
         <FuelLoad>
           <SystemIdentifier id='FuelLoadMisc'/>
           <FuelLoadType>grill</FuelLoadType>
-          <Location>exterior</Location>
           <Load>
             <Units>therm/year</Units>
             <Value>25.0</Value>
@@ -812,7 +809,6 @@
         <FuelLoad>
           <SystemIdentifier id='FuelLoadMisc3'/>
           <FuelLoadType>fireplace</FuelLoadType>
-          <Location>interior</Location>
           <Load>
             <Units>therm/year</Units>
             <Value>55.0</Value>

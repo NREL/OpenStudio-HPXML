@@ -418,14 +418,12 @@
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:MiscLoads/h:PlugLoad'>
       <sch:assert role='ERROR' test='h:PlugLoadType[text()="TV plasma" or text()="TV CRT" or text()="TV other" or text()="computer" or text()="space heater" or text()="water bed" or text()="aquarium" or text()="electric vehicle charging" or text()="well pump" or text()="sauna" or text()="other"] or not(h:PlugLoadType)'>Expected PlugLoadType to be 'TV plasma' or 'TV CRT' or 'TV other' or 'computer' or 'space heater' or 'water bed' or 'aquarium' or 'electric vehicle charging' or 'well pump' or 'sauna' or 'other'</sch:assert>
-      <sch:assert role='ERROR' test='h:Location[text()="interior" or text()="exterior"] or not(h:Location)'>Expected Location to be 'interior' or 'exterior'</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:MiscLoads/h:PlugLoad/h:Load'>
       <sch:assert role='ERROR' test='h:Units[text()="kWh/year" or text()="W"] or not(h:Units)'>Expected Units to be 'kWh/year' or 'W'</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:MiscLoads/h:FuelLoad'>
       <sch:assert role='ERROR' test='h:FuelLoadType[text()="grill" or text()="lighting" or text()="fireplace" or text()="other"] or not(h:FuelLoadType)'>Expected FuelLoadType to be 'grill' or 'lighting' or 'fireplace' or 'other'</sch:assert>
-      <sch:assert role='ERROR' test='h:Location[text()="interior" or text()="exterior"] or not(h:Location)'>Expected Location to be 'interior' or 'exterior'</sch:assert>
       <sch:assert role='ERROR' test='h:FuelType[text()="electricity" or text()="renewable electricity" or text()="natural gas" or text()="renewable natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="district steam" or text()="district hot water" or text()="district chilled water" or text()="solar hot water" or text()="propane" or text()="kerosene" or text()="diesel" or text()="coal" or text()="anthracite coal" or text()="bituminous coal" or text()="coke" or text()="wood" or text()="wood pellets" or text()="combination" or text()="other"] or not(h:FuelType)'>Expected FuelType to be 'electricity' or 'renewable electricity' or 'natural gas' or 'renewable natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'district steam' or 'district hot water' or 'district chilled water' or 'solar hot water' or 'propane' or 'kerosene' or 'diesel' or 'coal' or 'anthracite coal' or 'bituminous coal' or 'coke' or 'wood' or 'wood pellets' or 'combination' or 'other'</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:MiscLoads/h:FuelLoad/h:Load'>
