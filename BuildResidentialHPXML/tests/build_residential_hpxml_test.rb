@@ -111,7 +111,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'vented-attic-with-floor-and-roof-insulation.osw' => 'geometry_attic_type=VentedAttic and ceiling_assembly_r=39.3 and roof_assembly_r=10.0',
       'unvented-attic-with-floor-and-roof-insulation.osw' => 'geometry_attic_type=UnventedAttic and ceiling_assembly_r=39.3 and roof_assembly_r=10.0',
       'conditioned-basement-with-ceiling-insulation.osw' => 'geometry_foundation_type=ConditionedBasement and floor_assembly_r=10.0',
-      'conditioned-attic-with-floor-insulation.osw' => 'geometry_attic_type=ConditionedAttic and ceiling_assembly_r=39.3'
+      'conditioned-attic-with-floor-insulation.osw' => 'geometry_attic_type=ConditionedAttic and ceiling_assembly_r=39.3',
+      'multipliers-without-plug-loads.osw' => 'plug_loads_television_annual_kwh=0.0 and plug_loads_television_usage_multiplier=1.5 and plug_loads_television_usage_multiplier_2=1.5 and plug_loads_other_annual_kwh=0.0 and plug_loads_other_usage_multiplier=1.5 and plug_loads_other_usage_multiplier_2=1.5 and plug_loads_well_pump_present=false and plug_loads_well_pump_usage_multiplier=1.5 and plug_loads_well_pump_usage_multiplier_2=1.5 and plug_loads_vehicle_present=false and plug_loads_vehicle_usage_multiplier=1.5 and plug_loads_vehicle_usage_multiplier_2=1.5'
     }
 
     expected_error_msgs = {
@@ -246,6 +247,12 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       end
       hpxml.hvac_controls.each do |hvac_control|
         hvac_control.control_type = nil # Not used by model
+        hvac_control.heating_setpoint_temp = nil
+        hvac_control.cooling_setpoint_temp = nil
+        hvac_control.weekday_heating_setpoints = nil
+        hvac_control.weekend_heating_setpoints = nil
+        hvac_control.weekday_cooling_setpoints = nil
+        hvac_control.weekend_cooling_setpoints = nil
       end
       if hpxml.hvac_distributions.length > 0
         (2..hpxml.hvac_distributions[0].ducts.length).to_a.reverse.each do |i|

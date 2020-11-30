@@ -1277,56 +1277,80 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_heating_temp', true)
-    arg.setDisplayName('Setpoint: Heating Temperature')
-    arg.setDescription('Specify the heating setpoint temperature.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_heating_weekday_temp', true)
+    arg.setDisplayName('Heating Setpoint: Weekday Temperature')
+    arg.setDescription('Specify the weekday heating setpoint temperature.')
     arg.setUnits('deg-F')
     arg.setDefaultValue(71)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_heating_setback_temp', true)
-    arg.setDisplayName('Setpoint: Heating Setback Temperature')
-    arg.setDescription('Specify the heating setback temperature.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_heating_weekend_temp', true)
+    arg.setDisplayName('Heating Setpoint: Weekend Temperature')
+    arg.setDescription('Specify the weekend heating setpoint temperature.')
     arg.setUnits('deg-F')
     arg.setDefaultValue(71)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_heating_setback_hours_per_week', true)
-    arg.setDisplayName('Setpoint: Heating Setback Hours per Week')
-    arg.setDescription('Specify the heating setback number of hours per week value.')
-    arg.setDefaultValue(0)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_heating_weekday_offset_magnitude', false)
+    arg.setDisplayName('Heating Setpoint: Weekday Offset Magnitude')
+    arg.setDescription('Specify the weekday heating offset magnitude.')
+    arg.setUnits('deg-F')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_heating_setback_start_hour', true)
-    arg.setDisplayName('Setpoint: Heating Setback Start Hour')
-    arg.setDescription('Specify the heating setback start hour value. 0 = midnight, 12 = noon')
-    arg.setDefaultValue(23)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_heating_weekend_offset_magnitude', false)
+    arg.setDisplayName('Heating Setpoint: Weekend Offset Magnitude')
+    arg.setDescription('Specify the weekend heating offset magnitude.')
+    arg.setUnits('deg-F')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_cooling_temp', true)
-    arg.setDisplayName('Setpoint: Cooling Temperature')
-    arg.setDescription('Specify the cooling setpoint temperature.')
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('setpoint_heating_weekday_schedule', false)
+    arg.setDisplayName('Heating Setpoint: Weekday Schedule')
+    arg.setDescription('Specify the 24-hour comma-separated weekday heating schedule of 0s and 1s.')
+    arg.setUnits('deg-F')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('setpoint_heating_weekend_schedule', false)
+    arg.setDisplayName('Heating Setpoint: Weekend Schedule')
+    arg.setDescription('Specify the 24-hour comma-separated weekend heating schedule of 0s and 1s.')
+    arg.setUnits('deg-F')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_cooling_weekday_temp', true)
+    arg.setDisplayName('Cooling Setpoint: Weekday Temperature')
+    arg.setDescription('Specify the weekday cooling setpoint temperature.')
     arg.setUnits('deg-F')
     arg.setDefaultValue(76)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_cooling_setup_temp', true)
-    arg.setDisplayName('Setpoint: Cooling Setup Temperature')
-    arg.setDescription('Specify the cooling setup temperature.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_cooling_weekend_temp', true)
+    arg.setDisplayName('Cooling Setpoint: Weekend Temperature')
+    arg.setDescription('Specify the weekend cooling setpoint temperature.')
     arg.setUnits('deg-F')
     arg.setDefaultValue(76)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_cooling_setup_hours_per_week', true)
-    arg.setDisplayName('Setpoint: Cooling Setup Hours per Week')
-    arg.setDescription('Specify the cooling setup number of hours per week value.')
-    arg.setDefaultValue(0)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_cooling_weekday_offset_magnitude', false)
+    arg.setDisplayName('Cooling Setpoint: Weekday Offset Magnitude')
+    arg.setDescription('Specify the weekday cooling offset magnitude.')
+    arg.setUnits('deg-F')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_cooling_setup_start_hour', true)
-    arg.setDisplayName('Setpoint: Cooling Setup Start Hour')
-    arg.setDescription('Specify the cooling setup start hour value. 0 = midnight, 12 = noon')
-    arg.setDefaultValue(9)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_cooling_weekend_offset_magnitude', false)
+    arg.setDisplayName('Cooling Setpoint: Weekend Offset Magnitude')
+    arg.setDescription('Specify the weekend cooling offset magnitude.')
+    arg.setUnits('deg-F')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('setpoint_cooling_weekday_schedule', false)
+    arg.setDisplayName('Cooling Setpoint: Weekday Schedule')
+    arg.setDescription('Specify the 24-hour comma-separated weekday cooling schedule of 0s and 1s.')
+    arg.setUnits('deg-F')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('setpoint_cooling_weekend_schedule', false)
+    arg.setDisplayName('Cooling Setpoint: Weekend Schedule')
+    arg.setDescription('Specify the 24-hour comma-separated weekend cooling schedule of 0s and 1s.')
+    arg.setUnits('deg-F')
     args << arg
 
     duct_leakage_units_choices = OpenStudio::StringVector.new
@@ -2757,6 +2781,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1.0)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_television_usage_multiplier_2', true)
+    arg.setDisplayName('Plug Loads: Television Usage Multiplier 2')
+    arg.setDefaultValue(1.0)
+    arg.setDescription('Additional multiplier on the television energy usage that can reflect, e.g., high/low usage occupants.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('plug_loads_other_annual_kwh', true)
     arg.setDisplayName('Plug Loads: Other Annual kWh')
     arg.setDescription('The annual energy consumption of the other residual plug loads.')
@@ -2784,6 +2814,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1.0)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_other_usage_multiplier_2', true)
+    arg.setDisplayName('Plug Loads: Other Usage Multiplier 2')
+    arg.setDescription('Additional multiplier on the other energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('plug_loads_well_pump_present', true)
     arg.setDisplayName('Plug Loads: Well Pump Present')
     arg.setDescription('Whether there is a well pump.')
@@ -2799,26 +2835,38 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_well_pump_usage_multiplier', true)
     arg.setDisplayName('Plug Loads: Well Pump Usage Multiplier')
-    arg.setDescription('Multiplier on the well_pump energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDescription('Multiplier on the well pump energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_well_pump_usage_multiplier_2', true)
+    arg.setDisplayName('Plug Loads: Well Pump Usage Multiplier 2')
+    arg.setDescription('Additional multiplier on the well pump energy usage that can reflect, e.g., high/low usage occupants.')
     arg.setDefaultValue(1.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('plug_loads_vehicle_present', true)
     arg.setDisplayName('Plug Loads: Vehicle Present')
-    arg.setDescription('Whether there is a vehicle.')
+    arg.setDescription('Whether there is an electric vehicle.')
     arg.setDefaultValue(false)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('plug_loads_vehicle_annual_kwh', true)
     arg.setDisplayName('Plug Loads: Vehicle Annual kWh')
-    arg.setDescription('The annual energy consumption of the well pump plug loads.')
+    arg.setDescription('The annual energy consumption of the electric vehicle plug loads.')
     arg.setUnits('kWh/yr')
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_vehicle_usage_multiplier', true)
     arg.setDisplayName('Plug Loads: Vehicle Usage Multiplier')
-    arg.setDescription('Multiplier on the well_pump energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDescription('Multiplier on the electric vehicle energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_vehicle_usage_multiplier_2', true)
+    arg.setDisplayName('Plug Loads: Vehicle Usage Multiplier 2')
+    arg.setDescription('Additional multiplier on the electric vehicle energy usage that can reflect, e.g., high/low usage occupants.')
     arg.setDefaultValue(1.0)
     args << arg
 
@@ -3259,14 +3307,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              shared_hvac_cooling_water_loop_heat_pump_cooling_efficiency: runner.getOptionalDoubleArgumentValue('shared_hvac_cooling_water_loop_heat_pump_cooling_efficiency', user_arguments),
              shared_hvac_fan_coil_is_ducted: runner.getOptionalStringArgumentValue('shared_hvac_fan_coil_is_ducted', user_arguments),
              shared_hvac_heat_pump_shared_loop_power: runner.getOptionalDoubleArgumentValue('shared_hvac_heat_pump_shared_loop_power', user_arguments),
-             setpoint_heating_temp: runner.getDoubleArgumentValue('setpoint_heating_temp', user_arguments),
-             setpoint_heating_setback_temp: runner.getDoubleArgumentValue('setpoint_heating_setback_temp', user_arguments),
-             setpoint_heating_setback_hours_per_week: runner.getDoubleArgumentValue('setpoint_heating_setback_hours_per_week', user_arguments),
-             setpoint_heating_setback_start_hour: runner.getDoubleArgumentValue('setpoint_heating_setback_start_hour', user_arguments),
-             setpoint_cooling_temp: runner.getDoubleArgumentValue('setpoint_cooling_temp', user_arguments),
-             setpoint_cooling_setup_temp: runner.getDoubleArgumentValue('setpoint_cooling_setup_temp', user_arguments),
-             setpoint_cooling_setup_hours_per_week: runner.getDoubleArgumentValue('setpoint_cooling_setup_hours_per_week', user_arguments),
-             setpoint_cooling_setup_start_hour: runner.getDoubleArgumentValue('setpoint_cooling_setup_start_hour', user_arguments),
+             setpoint_heating_weekday_temp: runner.getDoubleArgumentValue('setpoint_heating_weekday_temp', user_arguments),
+             setpoint_heating_weekend_temp: runner.getDoubleArgumentValue('setpoint_heating_weekend_temp', user_arguments),
+             setpoint_heating_weekday_offset_magnitude: runner.getOptionalDoubleArgumentValue('setpoint_heating_weekday_offset_magnitude', user_arguments),
+             setpoint_heating_weekend_offset_magnitude: runner.getOptionalDoubleArgumentValue('setpoint_heating_weekend_offset_magnitude', user_arguments),
+             setpoint_heating_weekday_schedule: runner.getOptionalStringArgumentValue('setpoint_heating_weekday_schedule', user_arguments),
+             setpoint_heating_weekend_schedule: runner.getOptionalStringArgumentValue('setpoint_heating_weekend_schedule', user_arguments),
+             setpoint_cooling_weekday_temp: runner.getDoubleArgumentValue('setpoint_cooling_weekday_temp', user_arguments),
+             setpoint_cooling_weekend_temp: runner.getDoubleArgumentValue('setpoint_cooling_weekend_temp', user_arguments),
+             setpoint_cooling_weekday_offset_magnitude: runner.getOptionalDoubleArgumentValue('setpoint_cooling_weekday_offset_magnitude', user_arguments),
+             setpoint_cooling_weekend_offset_magnitude: runner.getOptionalDoubleArgumentValue('setpoint_cooling_weekend_offset_magnitude', user_arguments),
+             setpoint_cooling_weekday_schedule: runner.getOptionalStringArgumentValue('setpoint_cooling_weekday_schedule', user_arguments),
+             setpoint_cooling_weekend_schedule: runner.getOptionalStringArgumentValue('setpoint_cooling_weekend_schedule', user_arguments),
              ducts_supply_leakage_units: runner.getStringArgumentValue('ducts_supply_leakage_units', user_arguments),
              ducts_return_leakage_units: runner.getStringArgumentValue('ducts_return_leakage_units', user_arguments),
              ducts_supply_leakage_value: runner.getDoubleArgumentValue('ducts_supply_leakage_value', user_arguments),
@@ -3463,16 +3515,20 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              ceiling_fan_cooling_setpoint_temp_offset: runner.getDoubleArgumentValue('ceiling_fan_cooling_setpoint_temp_offset', user_arguments),
              plug_loads_television_annual_kwh: runner.getStringArgumentValue('plug_loads_television_annual_kwh', user_arguments),
              plug_loads_television_usage_multiplier: runner.getDoubleArgumentValue('plug_loads_television_usage_multiplier', user_arguments),
+             plug_loads_television_usage_multiplier_2: runner.getDoubleArgumentValue('plug_loads_television_usage_multiplier_2', user_arguments),
              plug_loads_other_annual_kwh: runner.getStringArgumentValue('plug_loads_other_annual_kwh', user_arguments),
              plug_loads_other_frac_sensible: runner.getStringArgumentValue('plug_loads_other_frac_sensible', user_arguments),
              plug_loads_other_frac_latent: runner.getStringArgumentValue('plug_loads_other_frac_latent', user_arguments),
              plug_loads_other_usage_multiplier: runner.getDoubleArgumentValue('plug_loads_other_usage_multiplier', user_arguments),
+             plug_loads_other_usage_multiplier_2: runner.getDoubleArgumentValue('plug_loads_other_usage_multiplier_2', user_arguments),
              plug_loads_well_pump_present: runner.getBoolArgumentValue('plug_loads_well_pump_present', user_arguments),
              plug_loads_well_pump_annual_kwh: runner.getStringArgumentValue('plug_loads_well_pump_annual_kwh', user_arguments),
              plug_loads_well_pump_usage_multiplier: runner.getDoubleArgumentValue('plug_loads_well_pump_usage_multiplier', user_arguments),
+             plug_loads_well_pump_usage_multiplier_2: runner.getDoubleArgumentValue('plug_loads_well_pump_usage_multiplier_2', user_arguments),
              plug_loads_vehicle_present: runner.getBoolArgumentValue('plug_loads_vehicle_present', user_arguments),
              plug_loads_vehicle_annual_kwh: runner.getStringArgumentValue('plug_loads_vehicle_annual_kwh', user_arguments),
              plug_loads_vehicle_usage_multiplier: runner.getDoubleArgumentValue('plug_loads_vehicle_usage_multiplier', user_arguments),
+             plug_loads_vehicle_usage_multiplier_2: runner.getDoubleArgumentValue('plug_loads_vehicle_usage_multiplier_2', user_arguments),
              fuel_loads_grill_present: runner.getBoolArgumentValue('fuel_loads_grill_present', user_arguments),
              fuel_loads_grill_fuel_type: runner.getStringArgumentValue('fuel_loads_grill_fuel_type', user_arguments),
              fuel_loads_grill_annual_therm: runner.getStringArgumentValue('fuel_loads_grill_annual_therm', user_arguments),
@@ -3599,6 +3655,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # dhw indirect but no boiler
     error = ((args[:water_heater_type] == HPXML::WaterHeaterTypeCombiStorage) || (args[:water_heater_type] == HPXML::WaterHeaterTypeCombiTankless)) && (args[:heating_system_type] != HPXML::HVACTypeBoiler)
     errors << "water_heater_type=#{args[:water_heater_type]} and heating_system_type=#{args[:heating_system_type]}" if error
+
+    # no plug loads but specifying usage multipliers
+    warning = (args[:plug_loads_television_annual_kwh] == 0.0 && (args[:plug_loads_television_usage_multiplier] != 1.0 || args[:plug_loads_television_usage_multiplier_2] != 1.0)) || (args[:plug_loads_other_annual_kwh] == 0.0 && (args[:plug_loads_other_usage_multiplier] != 1.0 || args[:plug_loads_other_usage_multiplier_2] != 1.0)) || (!args[:plug_loads_well_pump_present] && (args[:plug_loads_well_pump_usage_multiplier] != 1.0 || args[:plug_loads_well_pump_usage_multiplier_2] != 1.0)) || (!args[:plug_loads_vehicle_present] && (args[:plug_loads_vehicle_usage_multiplier] != 1.0 || args[:plug_loads_vehicle_usage_multiplier_2] != 1.0))
+    warnings << "plug_loads_television_annual_kwh=#{args[:plug_loads_television_annual_kwh]} and plug_loads_television_usage_multiplier=#{args[:plug_loads_television_usage_multiplier]} and plug_loads_television_usage_multiplier_2=#{args[:plug_loads_television_usage_multiplier_2]} and plug_loads_other_annual_kwh=#{args[:plug_loads_other_annual_kwh]} and plug_loads_other_usage_multiplier=#{args[:plug_loads_other_usage_multiplier]} and plug_loads_other_usage_multiplier_2=#{args[:plug_loads_other_usage_multiplier_2]} and plug_loads_well_pump_present=#{args[:plug_loads_well_pump_present]} and plug_loads_well_pump_usage_multiplier=#{args[:plug_loads_well_pump_usage_multiplier]} and plug_loads_well_pump_usage_multiplier_2=#{args[:plug_loads_well_pump_usage_multiplier_2]} and plug_loads_vehicle_present=#{args[:plug_loads_vehicle_present]} and plug_loads_vehicle_usage_multiplier=#{args[:plug_loads_vehicle_usage_multiplier]} and plug_loads_vehicle_usage_multiplier_2=#{args[:plug_loads_vehicle_usage_multiplier_2]}" if warning
 
     return warnings, errors
   end
@@ -3804,13 +3864,13 @@ class HPXMLFile
       hpxml.header.sim_begin_month = args[:simulation_control_run_period_begin_month].get
     end
     if args[:simulation_control_run_period_begin_day_of_month].is_initialized
-      hpxml.header.sim_begin_day_of_month = args[:simulation_control_run_period_begin_day_of_month].get
+      hpxml.header.sim_begin_day = args[:simulation_control_run_period_begin_day_of_month].get
     end
     if args[:simulation_control_run_period_end_month].is_initialized
       hpxml.header.sim_end_month = args[:simulation_control_run_period_end_month].get
     end
     if args[:simulation_control_run_period_end_day_of_month].is_initialized
-      hpxml.header.sim_end_day_of_month = args[:simulation_control_run_period_end_day_of_month].get
+      hpxml.header.sim_end_day = args[:simulation_control_run_period_end_day_of_month].get
     end
     if args[:simulation_control_run_period_calendar_year].is_initialized
       hpxml.header.sim_calendar_year = args[:simulation_control_run_period_calendar_year].get
@@ -3823,13 +3883,13 @@ class HPXMLFile
       hpxml.header.dst_begin_month = args[:simulation_control_daylight_saving_begin_month].get
     end
     if args[:simulation_control_daylight_saving_begin_day_of_month].is_initialized
-      hpxml.header.dst_begin_day_of_month = args[:simulation_control_daylight_saving_begin_day_of_month].get
+      hpxml.header.dst_begin_day = args[:simulation_control_daylight_saving_begin_day_of_month].get
     end
     if args[:simulation_control_daylight_saving_end_month].is_initialized
       hpxml.header.dst_end_month = args[:simulation_control_daylight_saving_end_month].get
     end
     if args[:simulation_control_daylight_saving_end_day_of_month].is_initialized
-      hpxml.header.dst_end_day_of_month = args[:simulation_control_daylight_saving_end_day_of_month].get
+      hpxml.header.dst_end_day = args[:simulation_control_daylight_saving_end_day_of_month].get
     end
 
     hpxml.header.building_id = 'MyBuilding'
@@ -4762,20 +4822,50 @@ class HPXMLFile
     end
   end
 
+  def self.modify_setpoint_schedule(schedule, offset_magnitude, offset_schedule)
+    offset_schedule.each_with_index do |direction, i|
+      schedule[i] += offset_magnitude * direction
+    end
+    return schedule
+  end
+
   def self.set_hvac_control(hpxml, runner, args)
     return if (args[:heating_system_type] == 'none') && (args[:cooling_system_type] == 'none') && (args[:heat_pump_type] == 'none')
 
-    if (args[:setpoint_heating_temp] != args[:setpoint_heating_setback_temp]) && (args[:setpoint_heating_setback_hours_per_week] > 0)
-      heating_setback_temp = args[:setpoint_heating_setback_temp]
-      heating_setback_hours_per_week = args[:setpoint_heating_setback_hours_per_week]
-      heating_setback_start_hour = args[:setpoint_heating_setback_start_hour]
+    weekday_heating_setpoints = [args[:setpoint_heating_weekday_temp]] * 24
+    weekend_heating_setpoints = [args[:setpoint_heating_weekend_temp]] * 24
+
+    weekday_cooling_setpoints = [args[:setpoint_cooling_weekday_temp]] * 24
+    weekend_cooling_setpoints = [args[:setpoint_cooling_weekend_temp]] * 24
+
+    if args[:setpoint_heating_weekday_offset_magnitude].is_initialized && args[:setpoint_heating_weekday_schedule].is_initialized
+      setpoint_heating_weekday_offset_magnitude = args[:setpoint_heating_weekday_offset_magnitude].get
+      setpoint_heating_weekday_schedule = args[:setpoint_heating_weekday_schedule].get.split(',').map { |i| Float(i) }
+      weekday_heating_setpoints = modify_setpoint_schedule(weekday_heating_setpoints, setpoint_heating_weekday_offset_magnitude, setpoint_heating_weekday_schedule)
     end
 
-    if (args[:setpoint_cooling_temp] != args[:setpoint_cooling_setup_temp]) && (args[:setpoint_cooling_setup_hours_per_week] > 0)
-      cooling_setup_temp = args[:setpoint_cooling_setup_temp]
-      cooling_setup_hours_per_week = args[:setpoint_cooling_setup_hours_per_week]
-      cooling_setup_start_hour = args[:setpoint_cooling_setup_start_hour]
+    if args[:setpoint_heating_weekend_offset_magnitude].is_initialized && args[:setpoint_heating_weekend_schedule].is_initialized
+      setpoint_heating_weekend_offset_magnitude = args[:setpoint_heating_weekend_offset_magnitude].get
+      setpoint_heating_weekend_schedule = args[:setpoint_heating_weekend_schedule].get.split(',').map { |i| Float(i) }
+      weekend_heating_setpoints = modify_setpoint_schedule(weekend_heating_setpoints, setpoint_heating_weekend_offset_magnitude, setpoint_heating_weekend_schedule)
     end
+
+    if args[:setpoint_cooling_weekday_offset_magnitude].is_initialized && args[:setpoint_cooling_weekday_schedule].is_initialized
+      setpoint_cooling_weekday_offset_magnitude = args[:setpoint_cooling_weekday_offset_magnitude].get
+      setpoint_cooling_weekday_schedule = args[:setpoint_cooling_weekday_schedule].get.split(',').map { |i| Float(i) }
+      weekday_cooling_setpoints = modify_setpoint_schedule(weekday_cooling_setpoints, setpoint_cooling_weekday_offset_magnitude, setpoint_cooling_weekday_schedule)
+    end
+
+    if args[:setpoint_cooling_weekend_offset_magnitude].is_initialized && args[:setpoint_cooling_weekend_schedule].is_initialized
+      setpoint_cooling_weekend_offset_magnitude = args[:setpoint_cooling_weekend_offset_magnitude].get
+      setpoint_cooling_weekend_schedule = args[:setpoint_cooling_weekend_schedule].get.split(',').map { |i| Float(i) }
+      weekend_cooling_setpoints = modify_setpoint_schedule(weekend_cooling_setpoints, setpoint_cooling_weekend_offset_magnitude, setpoint_cooling_weekend_schedule)
+    end
+
+    weekday_heating_setpoints = weekday_heating_setpoints.join(', ')
+    weekend_heating_setpoints = weekend_heating_setpoints.join(', ')
+    weekday_cooling_setpoints = weekday_cooling_setpoints.join(', ')
+    weekend_cooling_setpoints = weekend_cooling_setpoints.join(', ')
 
     ceiling_fan_quantity = nil
     if args[:ceiling_fan_quantity] != Constants.Auto
@@ -4787,14 +4877,10 @@ class HPXMLFile
     end
 
     hpxml.hvac_controls.add(id: 'HVACControl',
-                            heating_setpoint_temp: args[:setpoint_heating_temp],
-                            cooling_setpoint_temp: args[:setpoint_cooling_temp],
-                            heating_setback_temp: heating_setback_temp,
-                            heating_setback_hours_per_week: heating_setback_hours_per_week,
-                            heating_setback_start_hour: heating_setback_start_hour,
-                            cooling_setup_temp: cooling_setup_temp,
-                            cooling_setup_hours_per_week: cooling_setup_hours_per_week,
-                            cooling_setup_start_hour: cooling_setup_start_hour,
+                            weekday_heating_setpoints: weekday_heating_setpoints,
+                            weekend_heating_setpoints: weekend_heating_setpoints,
+                            weekday_cooling_setpoints: weekday_cooling_setpoints,
+                            weekend_cooling_setpoints: weekend_cooling_setpoints,
                             ceiling_fan_cooling_setpoint_temp_offset: ceiling_fan_cooling_setpoint_temp_offset)
   end
 
@@ -5294,7 +5380,7 @@ class HPXMLFile
     end
 
     if args[:holiday_lighting_period_begin_day_of_month] != Constants.Auto
-      hpxml.lighting.holiday_period_begin_day_of_month = args[:holiday_lighting_period_begin_day_of_month]
+      hpxml.lighting.holiday_period_begin_day = args[:holiday_lighting_period_begin_day_of_month]
     end
 
     if args[:holiday_lighting_period_end_month] != Constants.Auto
@@ -5302,7 +5388,7 @@ class HPXMLFile
     end
 
     if args[:holiday_lighting_period_end_day_of_month] != Constants.Auto
-      hpxml.lighting.holiday_period_end_day_of_month = args[:holiday_lighting_period_end_day_of_month]
+      hpxml.lighting.holiday_period_end_day = args[:holiday_lighting_period_end_day_of_month]
     end
   end
 
@@ -5598,8 +5684,9 @@ class HPXMLFile
       kWh_per_year = args[:plug_loads_television_annual_kwh]
     end
 
-    if args[:plug_loads_television_usage_multiplier] != 1.0
-      usage_multiplier = args[:plug_loads_television_usage_multiplier]
+    usage_multiplier = args[:plug_loads_television_usage_multiplier] * args[:plug_loads_television_usage_multiplier_2]
+    if usage_multiplier == 1.0
+      usage_multiplier = nil
     end
 
     hpxml.plug_loads.add(id: 'PlugLoadsTelevision',
@@ -5621,8 +5708,9 @@ class HPXMLFile
       frac_latent = args[:plug_loads_other_frac_latent]
     end
 
-    if args[:plug_loads_other_usage_multiplier] != 1.0
-      usage_multiplier = args[:plug_loads_other_usage_multiplier]
+    usage_multiplier = args[:plug_loads_other_usage_multiplier] * args[:plug_loads_other_usage_multiplier_2]
+    if usage_multiplier == 1.0
+      usage_multiplier = nil
     end
 
     hpxml.plug_loads.add(id: 'PlugLoadsOther',
@@ -5640,29 +5728,15 @@ class HPXMLFile
       kWh_per_year = args[:plug_loads_well_pump_annual_kwh]
     end
 
-    if args[:plug_loads_well_pump_usage_multiplier] != 1.0
-      usage_multiplier = args[:plug_loads_well_pump_usage_multiplier]
-    end
-
-    if args[:plug_loads_well_pump_weekday_fractions] != Constants.Auto
-      weekday_fractions = args[:plug_loads_well_pump_weekday_fractions]
-    end
-
-    if args[:plug_loads_well_pump_weekend_fractions] != Constants.Auto
-      weekend_fractions = args[:plug_loads_well_pump_weekend_fractions]
-    end
-
-    if args[:plug_loads_well_pump_monthly_multipliers] != Constants.Auto
-      monthly_multipliers = args[:plug_loads_well_pump_monthly_multipliers]
+    usage_multiplier = args[:plug_loads_well_pump_usage_multiplier] * args[:plug_loads_well_pump_usage_multiplier_2]
+    if usage_multiplier == 1.0
+      usage_multiplier = nil
     end
 
     hpxml.plug_loads.add(id: 'PlugLoadsWellPump',
                          plug_load_type: HPXML::PlugLoadTypeWellPump,
                          kWh_per_year: kWh_per_year,
                          usage_multiplier: usage_multiplier,
-                         weekday_fractions: weekday_fractions,
-                         weekend_fractions: weekend_fractions,
-                         monthly_multipliers: monthly_multipliers,
                          location: HPXML::LocationExterior)
   end
 
@@ -5673,29 +5747,15 @@ class HPXMLFile
       kWh_per_year = args[:plug_loads_vehicle_annual_kwh]
     end
 
-    if args[:plug_loads_vehicle_usage_multiplier] != 1.0
-      usage_multiplier = args[:plug_loads_vehicle_usage_multiplier]
-    end
-
-    if args[:plug_loads_vehicle_weekday_fractions] != Constants.Auto
-      weekday_fractions = args[:plug_loads_vehicle_weekday_fractions]
-    end
-
-    if args[:plug_loads_vehicle_weekend_fractions] != Constants.Auto
-      weekend_fractions = args[:plug_loads_vehicle_weekend_fractions]
-    end
-
-    if args[:plug_loads_vehicle_monthly_multipliers] != Constants.Auto
-      monthly_multipliers = args[:plug_loads_vehicle_monthly_multipliers]
+    usage_multiplier = args[:plug_loads_vehicle_usage_multiplier] * args[:plug_loads_vehicle_usage_multiplier_2]
+    if usage_multiplier == 1.0
+      usage_multiplier = nil
     end
 
     hpxml.plug_loads.add(id: 'PlugLoadsVehicle',
                          plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging,
                          kWh_per_year: kWh_per_year,
                          usage_multiplier: usage_multiplier,
-                         weekday_fractions: weekday_fractions,
-                         weekend_fractions: weekend_fractions,
-                         monthly_multipliers: monthly_multipliers,
                          location: HPXML::LocationExterior)
   end
 
