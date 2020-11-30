@@ -112,6 +112,8 @@ htmlhelp_basename = 'OpenStudio-HPXMLdoc'
 # -- Options for LaTeX output ------------------------------------------------
 
 latex_elements = {
+    \usepackage[landscape]{geometry}
+      \geometry{left=49.5pt, right=49.5pt}
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
@@ -134,7 +136,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'OpenStudio-HPXML.tex', u'OpenStudio-HPXML Documentation',
-     u'Scott Horowitz', 'manual'),
+     u'NREL', 'manual'),
 ]
 
 
