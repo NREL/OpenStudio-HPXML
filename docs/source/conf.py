@@ -112,19 +112,19 @@ htmlhelp_basename = 'OpenStudio-HPXMLdoc'
 # -- Options for LaTeX output ------------------------------------------------
 
 latex_elements = {
-    \usepackage[landscape]{geometry}
-      \geometry{left=49.5pt, right=49.5pt}
     # The paper size ('letterpaper' or 'a4paper').
     #
-    # 'papersize': 'letterpaper',
+    'papersize': 'letterpaper',
 
     # The font size ('10pt', '11pt' or '12pt').
     #
-    # 'pointsize': '10pt',
+    'pointsize': '10pt',
 
     # Additional stuff for the LaTeX preamble.
     #
-    # 'preamble': '',
+    'preamble': '''
+      \\usepackage{lscape}
+    '''
 
     # Latex figure (float) alignment
     #
