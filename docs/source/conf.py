@@ -118,12 +118,13 @@ latex_elements = {
 
     # The font size ('10pt', '11pt' or '12pt').
     #
-    'pointsize': '10pt',
+    'pointsize': '8pt',
 
     # Additional stuff for the LaTeX preamble.
     #
     'preamble': '''
-      \\usepackage{lscape}
+      \usepackage[landscape]{geometry}
+        \geometry{left=49.5pt, right=49.5pt}
     '''
 
     # Latex figure (float) alignment
