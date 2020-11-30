@@ -1016,7 +1016,7 @@ class HPXMLDefaults
         freezer.weekend_fractions_isdefaulted = true
       end
       if freezer.monthly_multipliers.nil?
-        freezer.monthly_multipliers = Schedule.FreezerWeekendFractions
+        freezer.monthly_multipliers = Schedule.FreezerMonthlyMultipliers
         freezer.monthly_multipliers_isdefaulted = true
       end
     end
