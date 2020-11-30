@@ -3758,13 +3758,13 @@ class HPXMLFile
       hpxml.header.sim_begin_month = args[:simulation_control_run_period_begin_month].get
     end
     if args[:simulation_control_run_period_begin_day_of_month].is_initialized
-      hpxml.header.sim_begin_day_of_month = args[:simulation_control_run_period_begin_day_of_month].get
+      hpxml.header.sim_begin_day = args[:simulation_control_run_period_begin_day_of_month].get
     end
     if args[:simulation_control_run_period_end_month].is_initialized
       hpxml.header.sim_end_month = args[:simulation_control_run_period_end_month].get
     end
     if args[:simulation_control_run_period_end_day_of_month].is_initialized
-      hpxml.header.sim_end_day_of_month = args[:simulation_control_run_period_end_day_of_month].get
+      hpxml.header.sim_end_day = args[:simulation_control_run_period_end_day_of_month].get
     end
     if args[:simulation_control_run_period_calendar_year].is_initialized
       hpxml.header.sim_calendar_year = args[:simulation_control_run_period_calendar_year].get
@@ -3777,13 +3777,13 @@ class HPXMLFile
       hpxml.header.dst_begin_month = args[:simulation_control_daylight_saving_begin_month].get
     end
     if args[:simulation_control_daylight_saving_begin_day_of_month].is_initialized
-      hpxml.header.dst_begin_day_of_month = args[:simulation_control_daylight_saving_begin_day_of_month].get
+      hpxml.header.dst_begin_day = args[:simulation_control_daylight_saving_begin_day_of_month].get
     end
     if args[:simulation_control_daylight_saving_end_month].is_initialized
       hpxml.header.dst_end_month = args[:simulation_control_daylight_saving_end_month].get
     end
     if args[:simulation_control_daylight_saving_end_day_of_month].is_initialized
-      hpxml.header.dst_end_day_of_month = args[:simulation_control_daylight_saving_end_day_of_month].get
+      hpxml.header.dst_end_day = args[:simulation_control_daylight_saving_end_day_of_month].get
     end
 
     hpxml.header.building_id = 'MyBuilding'
@@ -5169,7 +5169,7 @@ class HPXMLFile
     end
 
     if args[:holiday_lighting_period_begin_day_of_month] != Constants.Auto
-      hpxml.lighting.holiday_period_begin_day_of_month = args[:holiday_lighting_period_begin_day_of_month]
+      hpxml.lighting.holiday_period_begin_day = args[:holiday_lighting_period_begin_day_of_month]
     end
 
     if args[:holiday_lighting_period_end_month] != Constants.Auto
@@ -5177,7 +5177,7 @@ class HPXMLFile
     end
 
     if args[:holiday_lighting_period_end_day_of_month] != Constants.Auto
-      hpxml.lighting.holiday_period_end_day_of_month = args[:holiday_lighting_period_end_day_of_month]
+      hpxml.lighting.holiday_period_end_day = args[:holiday_lighting_period_end_day_of_month]
     end
   end
 
