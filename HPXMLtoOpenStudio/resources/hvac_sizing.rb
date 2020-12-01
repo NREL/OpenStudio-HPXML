@@ -1525,11 +1525,11 @@ class HVACSizing
     # Fixme: GSHP?
     return unless hvac.has_type(Constants.ObjectNameCentralAirConditioner) || hvac.has_type(Constants.ObjectNameAirSourceHeatPump) || hvac.has_type(Constants.ObjectNameMiniSplitHeatPump) || hvac.has_type(Constants.ObjectNameRoomAirConditioner)
 
-    tin_cool = @cool_setpoint
-    tin_heat = @heat_setpoint
+    tin_cool = UnitConversions.convert(@cool_setpoint, 'F', 'C')
+    tin_heat = UnitConversions.convert(@heat_setpoint, 'F', 'C')
 
-    tout_cool = weather.design.CoolingDrybulb
-    tout_heat = weather.design.HeatingDrybulb
+    tout_cool = UnitConversions.convert(weather.design.CoolingDrybulb, 'F', 'C')
+    tout_heat = UnitConversions.convert(weather.design.HeatingDrybulb, 'F', 'C')
 
     # Get cooling coil, heating coil
     clg_coil = nil
