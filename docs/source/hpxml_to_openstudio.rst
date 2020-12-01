@@ -700,7 +700,7 @@ If a boiler is specified, additional information is entered in ``HeatingSystem``
   ``DistributionSystem``                                                      idref             See [#]_     Yes                 ID of attached distribution system
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``                             double    frac    0-1          Yes                 Rated efficiency
   ``ElectricAuxiliaryEnergy``                                                 double    kWh/yr  >= 0         No [#]_   See [#]_  Electric auxiliary energy
-  ``extension/WaterLoopHeatPump/AnnualHeatingEfficiency[Units="COP"]/Value``  double            > 0          See [#]_            COP of the attached water loop heat pump
+  ``extension/WaterLoopHeatPump/AnnualHeatingEfficiency[Units="COP"]/Value``  double    W/W     > 0          See [#]_            COP of the attached water loop heat pump
   ==========================================================================  ========  ======  ===========  ========  ========  =========================================
 
   .. [#] HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", or "radiant ceiling") or DSE for in-unit boilers and HydronicDistribution (type: "radiator", "baseboard", "radiant floor", or "radiant ceiling") or HydronicAndAirDistribution (type: "fan coil" or "water loop heat pump") for shared boilers.
@@ -719,7 +719,7 @@ If a boiler is specified, additional information is entered in ``HeatingSystem``
          - **Gas boiler (shared, w/ water loop heat pump)**: 265
          - **Gas boiler (shared, w/ fan coil)**: 438
 
-  .. [#] WLHP Heating COP only required if a shared boiler connected to a water loop heat pump.
+  .. [#] Water loop heat pump (WLHP) heating COP only required if a shared boiler connected to a water loop heat pump.
 
 Stove
 ~~~~~
@@ -769,11 +769,12 @@ Each cooling system (other than heat pumps) is entered as an ``/HPXML/Building/B
   ==========================  ========  ======  ===========  ========  =======  ===============================
   ``SystemIdentifier``        id                             Yes                Unique identifier
   ``CoolingSystemType``       string            See [#]_     Yes                Type of cooling system
-  ``CoolingSystemFuel``       string            electricity  Yes                Fuel type
+  ``CoolingSystemFuel``       string            See [#]_     Yes                Fuel type
   ``FractionCoolLoadServed``  double    frac    0-1 [#]_     Yes                Fraction of cooling load served
   ==========================  ========  ======  ===========  ========  =======  ===============================
 
   .. [#] CoolingSystemType choices are "central air conditioner", "room air conditioner", "evaporative cooler", "mini-split", "chiller", or "cooling tower".
+  .. [#] CoolingSystemFuel only choice is "electricity".
   .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
          For example, the dwelling unit could have two room air conditioners with values of 0.1 (10%) and 0.2 (20%), respectively, with the rest of the home (70%) uncooled.
 
@@ -786,9 +787,9 @@ If a central air conditioner is specified, additional information is entered in 
   Element                                          Type      Units   Constraints  Required  Default    Notes
   ===============================================  ========  ======  ===========  ========  =========  ==================================
   ``DistributionSystem``                           idref             See [#]_     Yes                  ID of attached distribution system
-  ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double            > 0          Yes                  Rated efficiency
+  ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  > 0          Yes                  Rated efficiency
   ``CoolingCapacity``                              double    Btu/hr  >= 0         No        autosized  Cooling capacity
-  ``SensibleHeatFraction``                         double    frac    0-1          No        <TODO>     Sensible heat fraction
+  ``SensibleHeatFraction``                         double    frac    0-1          No                   Sensible heat fraction
   ``CompressorType``                               string            See [#]_     No        See [#]_   Type of compressor
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Installed fan efficiency
   ===============================================  ========  ======  ===========  ========  =========  ==================================
@@ -806,9 +807,9 @@ If a room air conditioner is specified, additional information is entered in ``C
   ==============================================  ========  ======  ===========  ========  =========  ======================
   Element                                         Type      Units   Constraints  Required  Default    Notes
   ==============================================  ========  ======  ===========  ========  =========  ======================
-  ``AnnualCoolingEfficiency[Units="EER"]/Value``  double            > 0          Yes                  Rated efficiency
+  ``AnnualCoolingEfficiency[Units="EER"]/Value``  double    Btu/Wh  > 0          Yes                  Rated efficiency
   ``CoolingCapacity``                             double    Btu/hr  >= 0         No        autosized  Cooling capacity
-  ``SensibleHeatFraction``                        double    frac    0-1          No        <TODO>     Sensible heat fraction
+  ``SensibleHeatFraction``                        double    frac    0-1          No                   Sensible heat fraction
   ==============================================  ========  ======  ===========  ========  =========  ======================
 
 Evaporative Cooler
@@ -836,7 +837,7 @@ If a mini-split is specified, additional information is entered in ``CoolingSyst
   =================================  ========  ======  ===========  ========  =========  ==================================
   ``DistributionSystem``             idref             See [#]_     No                   ID of attached distribution system
   ``CoolingCapacity``                double    Btu/hr  >= 0         No        autosized  Cooling capacity
-  ``SensibleHeatFraction``           double    frac    0-1          No        <TODO>     Sensible heat fraction
+  ``SensibleHeatFraction``           double    frac    0-1          No                   Sensible heat fraction
   ``extension/FanPowerWattsPerCFM``  double    W/cfm   >= 0         No        See [#]_   Installed fan efficiency
   =================================  ========  ======  ===========  ========  =========  ==================================
 
@@ -859,7 +860,7 @@ If a chiller is specified, additional information is entered in ``CoolingSystem`
   ``extension/SharedLoopWatts``                                               double    W       >= 0         Yes                  Pumping and fan power serving the system
   ``extension/FanCoilWatts``                                                  double    W       >= 0         See [#]_             Fan coil power
   ``extension/WaterLoopHeatPump/CoolingCapacity``                             double    Btu/hr  > 0          See [#]_             Water loop heat pump cooling capacity
-  ``extension/WaterLoopHeatPump/AnnualCoolingEfficiency[Units="EER"]/Value``  double            > 0          See [#]_             Water loop heat pump efficiency
+  ``extension/WaterLoopHeatPump/AnnualCoolingEfficiency[Units="EER"]/Value``  double    Btu/Wh  > 0          See [#]_             Water loop heat pump efficiency
   ==========================================================================  ========  ======  ===========  ========  =========  =========================================
 
   .. [#] HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", or "radiant ceiling") or HydronicAndAirDistribution (type: "fan coil" or "water loop heat pump").
@@ -884,7 +885,7 @@ If a cooling tower w/ water loop heat pump (WLHP) is specified, additional infor
   ``NumberofUnitsServed``                                                     integer           > 1          Yes                  Number of dwelling units served
   ``extension/SharedLoopWatts``                                               double    W       >= 0         Yes                  Pumping and fan power serving the system
   ``extension/WaterLoopHeatPump/CoolingCapacity``                             double    Btu/hr  > 0          Yes                  Water loop heat pump cooling capacity
-  ``extension/WaterLoopHeatPump/AnnualCoolingEfficiency[Units="EER"]/Value``  double            > 0          Yes                  Water loop heat pump efficiency
+  ``extension/WaterLoopHeatPump/AnnualCoolingEfficiency[Units="EER"]/Value``  double    Btu/Wh  > 0          Yes                  Water loop heat pump efficiency
   ==========================================================================  ========  ======  ===========  ========  =========  =========================================
 
   .. [#] HVACDistribution type must be HydronicAndAirDistribution (type: "water loop heat pump").
@@ -898,52 +899,113 @@ If a cooling tower w/ water loop heat pump (WLHP) is specified, additional infor
 HPXML Heat Pumps
 ****************
 
-FIXME FIXME FIXME
+Each heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
 
-Each heat pump is entered as a ``Systems/HVAC/HVACPlant/HeatPump``.
-Inputs including ``HeatPumpType``, ``FractionHeatLoadServed``, and ``FractionCoolLoadServed`` must be provided.
-Note that heat pumps are allowed to provide only heating (``FractionCoolLoadServed`` = 0) or cooling (``FractionHeatLoadServed`` = 0) if appropriate.
 
-Depending on the type of heat pump specified, additional elements are used:
+  =================================  ========  ======  ===========  ========  =========  =======================================
+  Element                            Type      Units   Constraints  Required  Default    Notes
+  =================================  ========  ======  ===========  ========  =========  =======================================
+  ``SystemIdentifier``               id                             Yes                  Unique identifier
+  ``HeatPumpType``                   string            See [#]_     Yes                  Type of heat pump
+  ``HeatPumpFuel``                   string            See [#]_     Yes                  Fuel type
+  ``HeatingCapacity``                double    Btu/hr  >= 0         No        autosized  Heating capacity
+  ``CoolingCapacity``                double    Btu/hr  >= 0         No        autosized  Cooling capacity
+  ``CoolingSensibleHeatFraction``    double    frac    0-1          No                   Sensible heat fraction
+  ``BackupSystemFuel``               string            See [#]_     No                   Fuel type of backup heating, if present
+  ``FractionHeatLoadServed``         double    frac    0-1 [#]_     Yes                  Fraction of heating load served
+  ``FractionCoolLoadServed``         double    frac    0-1 [#]_     Yes                  Fraction of cooling load served
+  =================================  ========  ======  ===========  ========  =========  =======================================
 
-=============  ==============  =================================  ============  =======================  =======================  ===========================  ==================  =============================  ==============================
-HeatPumpType   IsSharedSystem  DistributionSystem                 HeatPumpFuel  AnnualCoolingEfficiency  AnnualHeatingEfficiency  CoolingSensibleHeatFraction  HeatingCapacity17F  extension/FanPowerWattsPerCFM  extension/PumpPowerWattsPerTon
-=============  ==============  =================================  ============  =======================  =======================  ===========================  ==================  =============================  ==============================
-air-to-air                     AirDistribution or DSE             electricity   SEER                     HSPF                     (optional)                   (optional)          (optional)
-mini-split                     AirDistribution or DSE (optional)  electricity   SEER                     HSPF                     (optional)                   (optional)          (optional)
-ground-to-air  false           AirDistribution or DSE             electricity   EER                      COP                      (optional)                                       (optional)                     (optional)
-ground-to-air  true            AirDistribution or DSE             electricity   EER                      COP                      (optional)                                       (optional)                     (optional)
-=============  ==============  =================================  ============  =======================  =======================  ===========================  ==================  =============================  ==============================
+  .. [#] HeatPumpType choices are "air-to-air", "mini-split", or "ground-to-air".
+  .. [#] HeatPumpFuel only choice is "electricity".
+  .. [#] BackupSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
+  .. [#] The sum of all ``FractionHeatLoadServed`` (across both HeatingSystems and HeatPumps) must be less than or equal to 1.
+         For example, the dwelling unit could have a heat pump and a boiler heating system with values of 0.4 (40%) and 0.6 (60%), respectively.
+  .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
+         For example, the dwelling unit could have two mini-split heat pumps with values of 0.1 (10%) and 0.2 (20%), respectively, with the rest of the home (70%) uncooled.
 
-When ``HeatingCapacity`` and ``CoolingCapacity`` are not provided, the system will be auto-sized via ACCA Manual J/S.
+If a backup system fuel is provided, additional information is entered in ``HeatPump``.
 
-Air-to-air heat pumps can also have the ``CompressorType`` specified; if not provided, it is assumed as follows:
+  ========================================================================  ========  ======  ===========  ========  =========  ==========================================
+  Element                                                                   Type      Units   Constraints  Required  Default    Notes
+  ========================================================================  ========  ======  ===========  ========  =========  ==========================================
+  ``BackupAnnualHeatingEfficiency[Units="Percent" or Units="AFUE"]/Value``  double    frac    0-1          Yes                  Backup heating efficiency
+  ``BackupHeatingCapacity``                                                 double    Btu/hr  >= 0         No        autosized  Backup heating capacity
+  ``BackupHeatingSwitchoverTemperature``                                    double    F                    No        <none>     Backup heating switchover temperature [#]_
+  ========================================================================  ========  ======  ===========  ========  =========  ==========================================
 
-- "single stage": SEER <= 15
-- "two stage": 15 < SEER <= 21
-- "variable speed": SEER > 21
+  .. [#] Provide BackupHeatingSwitchoverTemperature for, e.g., a dual-fuel heat pump, in which there is a discrete outdoor temperature when the heat pump stops operating and the backup heating system starts operating.
+         If not provided, the backup heating system will operate as needed when the heat pump has insufficient capacity.
 
-If the fan power is not provided (``extension/FanPowerWattsPerCFM``), it will be defaulted as follows:
+.. note::
+  
+  Water loop heat pumps in multifamily buildings should not be entered as a HeatPump.
+  Rather, enter them as a :ref:`hvac_heating` (shared boiler) and/or :ref:`hvac_cooling` (shared chiller or cooling tower).
 
-==========================  ==============================
-System Type                 Fan Power
-==========================  ==============================
-air-to-air, ground-to-air   0.5 W/cfm if HSPF <= 8.75 W/cfm, else 0.375 W/cfm
-mini-split                  0.07 W/cfm if ductless, else 0.18 W/cfm
-==========================  ==============================
+Air-to-Air Heat Pump
+~~~~~~~~~~~~~~~~~~~~
 
-If the heat pump has backup heating, it can be specified with ``BackupSystemFuel``, ``BackupAnnualHeatingEfficiency``, and (optionally) ``BackupHeatingCapacity``.
-If the heat pump has a switchover temperature (e.g., dual-fuel heat pump) where the heat pump stops operating and the backup heating system starts running, it can be specified with ``BackupHeatingSwitchoverTemperature``.
-If ``BackupHeatingSwitchoverTemperature`` is not provided, the backup heating system will operate as needed when the heat pump has insufficient capacity.
+If an air-to-air heat pump is specified, additional information is entered in ``HeatPump``.
 
-If the pump power for ground-to-air heat pumps is not provided (``extension/PumpPowerWattsPerTon``), it will be defaulted as 30 W/ton of cooling capacity per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ for a closed loop system
+  ===============================================  ========  ======  ===========  ========  =========  =====================================
+  Element                                          Type      Units   Constraints  Required  Default    Notes
+  ===============================================  ========  ======  ===========  ========  =========  =====================================
+  ``DistributionSystem``                           idref             See [#]_     Yes                  ID of attached distribution system
+  ``CompressorType``                               string            See [#]_     No        See [#]_   Type of compressor
+  ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  > 0          Yes                  Rated cooling efficiency
+  ``AnnualHeatingEfficiency[Units="HSPF"]/Value``  double    Btu/Wh  > 0          Yes                  Rated heating efficiency
+  ``HeatingCapacity17F``                           double    Btu/hr  >= 0         No                   Heating capacity at 17F, if available
+  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Installed fan efficiency
+  ===============================================  ========  ======  ===========  ========  =========  =====================================
 
-For multiple ground source heat pumps on a shared hydronic circulation loop (``IsSharedSystem="true"``), the loop's annual electric consumption is calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+  .. [#] HVACDistribution type must be AirDistribution or DSE.
+  .. [#] CompressorType choices are "single stage", "two stage", or "variable speed".
+  .. [#] If CompressorType not provided, defaults to "single stage" if SEER <= 15, else "two stage" if SEER <= 21, else "variable speed".
+  .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0.5 W/cfm if HSPF <= 8.75, else 0.375 W/cfm.
 
-  | :math:`Eae = \frac{SP}{N_{dweq}} \cdot 8.760`
-  | where, 
-  |   SP = Shared pump power [W], provided as ``extension/SharedLoopWatts``
-  |   N_dweq = Number of units served by the shared system, provided as ``NumberofUnitsServed``
+Mini-Split Heat Pump
+~~~~~~~~~~~~~~~~~~~~
+
+If a mini-split heat pump is specified, additional information is entered in ``HeatPump``.
+
+  ===============================================  ========  ======  ===========  ========  =========  ==============================================
+  Element                                          Type      Units   Constraints  Required  Default    Notes
+  ===============================================  ========  ======  ===========  ========  =========  ==============================================
+  ``DistributionSystem``                           idref             See [#]_     No                   ID of attached distribution system, if present
+  ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  > 0          Yes                  Rated cooling efficiency
+  ``AnnualHeatingEfficiency[Units="HSPF"]/Value``  double    Btu/Wh  > 0          Yes                  Rated heating efficiency
+  ``HeatingCapacity17F``                           double    Btu/hr  >= 0         No                   Heating capacity at 17F, if available
+  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Installed fan efficiency
+  ===============================================  ========  ======  ===========  ========  =========  ==============================================
+
+  .. [#] HVACDistribution type must be AirDistribution or DSE.
+  .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0.07 W/cfm if ductless, else 0.18 W/cfm.
+
+Ground-to-Air Heat Pump
+~~~~~~~~~~~~~~~~~~~~~~~
+
+If a ground-to-air heat pump is specified, additional information is entered in ``HeatPump``.
+
+  ===============================================  ========  ======  ===========  ========  =========  ==============================================
+  Element                                          Type      Units   Constraints  Required  Default    Notes
+  ===============================================  ========  ======  ===========  ========  =========  ==============================================
+  ``IsSharedSystem``                               boolean                        No        false      Whether it serves multiple dwelling units [#]_
+  ``DistributionSystem``                           idref             See [#]_     Yes                  ID of attached distribution system
+  ``AnnualCoolingEfficiency[Units="EER"]/Value``   double    Btu/Wh  > 0          Yes                  Rated cooling efficiency
+  ``AnnualHeatingEfficiency[Units="COP"]/Value``   double    W/W     > 0          Yes                  Rated heating efficiency
+  ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0         No        See [#]_   Installed pump efficiency
+  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Installed fan efficiency
+  ``NumberofUnitsServed``                          integer           > 1          See [#]_             Number of dwelling units served
+  ``extension/SharedLoopWatts``                    double    W       >= 0         See [#]_             Shared pump power [#]_
+  ===============================================  ========  ======  ===========  ========  =========  ==============================================
+
+  .. [#] IsSharedSystem should be true if the SFA/MF building has multiple ground source heat pumps connected to a shared hydronic circulation loop.
+  .. [#] HVACDistribution type must be AirDistribution or DSE.
+  .. [#] If PumpPowerWattsPerTon not provided, defaults to 30 W/ton of cooling capacity per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ for a closed loop system.
+  .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0.5 W/cfm if COP <= 8.75/3.2, else 0.375 W/cfm.
+  .. [#] NumberofUnitsServed only required if IsSharedSystem is true.
+  .. [#] SharedLoopWatts only required if IsSharedSystem is true.
+  .. [#] Shared loop pump power attributed to the dwelling unit is calculated as SharedLoopWatts / NumberofUnitsServed.
 
 .. _hvac_control:
 
@@ -1027,11 +1089,11 @@ Each separate HVAC distribution system is entered as a ``/HPXML/Building/Buildin
   .. [#] DistributionSystemType child element choices are ``AirDistribution``, ``HydronicDistribution``, ``HydronicAndAirDistribution``, or ``Other=DSE``.
   .. [#] ConditionedFloorAreaServed is required for AirDistribution and HydronicAndAir types.
 
-  .. note::
+.. note::
   
-    There should be at most one heating system and one cooling system attached to a distribution system.
-    See :ref:`hvac_heating`, :ref:`hvac_cooling`, and :ref:`hvac_heatpump` for information on which DistributionSystemType is allowed for which HVAC system.
-    Also note that some HVAC systems (e.g., room air conditioners) are not allowed to be attached to a distribution system.
+  There should be at most one heating system and one cooling system attached to a distribution system.
+  See :ref:`hvac_heating`, :ref:`hvac_cooling`, and :ref:`hvac_heatpump` for information on which DistributionSystemType is allowed for which HVAC system.
+  Also note that some HVAC systems (e.g., room air conditioners) are not allowed to be attached to a distribution system.
 
 .. _air_distribution:
 
@@ -1233,7 +1295,7 @@ If preheating is specified, additional information is entered in ``extension/Pre
   Element                                         Type     Units  Constraints  Required  Default  Notes
   ==============================================  =======  =====  ===========  ========  =======  ===================================================================
   ``Fuel``                                        string          See [#]_     Yes                Preheating equipment fuel type
-  ``AnnualHeatingEfficiency[Units="COP"]/Value``  double          > 0          Yes                Preheating equipment annual COP
+  ``AnnualHeatingEfficiency[Units="COP"]/Value``  double   W/W    > 0          Yes                Preheating equipment annual COP
   ``FractionVentilationHeatLoadServed``           double   frac   0-1          Yes                Fraction of ventilation heating load served by preheating equipment
   ==============================================  =======  =====  ===========  ========  =======  ===================================================================
 
@@ -1245,7 +1307,7 @@ If precooling is specified, additional information is entered in ``extension/Pre
   Element                                         Type     Units  Constraints  Required  Default  Notes
   ==============================================  =======  =====  ===========  ========  =======  ===================================================================
   ``Fuel``                                        string          See [#]_     Yes                Precooling equipment fuel type
-  ``AnnualCoolingEfficiency[Units="COP"]/Value``  double          > 0          Yes                Precooling equipment annual COP
+  ``AnnualCoolingEfficiency[Units="COP"]/Value``  double   W/W    > 0          Yes                Precooling equipment annual COP
   ``FractionVentilationCoolLoadServed``           double   frac   0-1          Yes                Fraction of ventilation cooling load served by precooling equipment
   ==============================================  =======  =====  ===========  ========  =======  ===================================================================
 
@@ -1445,10 +1507,10 @@ If any water heating systems are provided, a single hot water distribution syste
   .. [#] If SharedRecirculation is provided, SystemType must be ``Standard``.
          This is because a stacked recirculation system (i.e., shared recirculation loop plus an additional in-unit recirculation system) is more likely to indicate input errors than reflect an actual real-world scenario.
 
-  .. note::
+.. note::
 
-    In attached/multifamily buildings, only the hot water distribution system serving the dwelling unit should be fined.
-    The hot water distribution associated with, e.g., a shared laundry room should not be defined.
+  In attached/multifamily buildings, only the hot water distribution system serving the dwelling unit should be defined.
+  The hot water distribution associated with, e.g., a shared laundry room should not be defined.
 
 Standard
 ~~~~~~~~
@@ -1960,10 +2022,10 @@ Each ceiling fan is entered as a ``/HPXML/Building/BuildingDetails/Lighting/Ceil
   .. [#] If Efficiency not provided, defaults to 3000 / 42.6 based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
   .. [#] If Quantity not provided, defaults to NumberofBedrooms + 1 based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
-  .. note::
+.. note::
 
-    A reduced cooling setpoint can be specified for summer months when ceiling fans are operating.
-    See :ref:`hvac_control` for more information.
+  A reduced cooling setpoint can be specified for summer months when ceiling fans are operating.
+  See :ref:`hvac_control` for more information.
 
 HPXML Pools & Hot Tubs
 ----------------------
