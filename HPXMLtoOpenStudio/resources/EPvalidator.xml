@@ -59,8 +59,8 @@
       <sch:assert role='ERROR' test='count(h:ClimateandRiskZones/h:WeatherStation) = 1'>Expected 1 element(s) for xpath: ClimateandRiskZones/WeatherStation</sch:assert> <!-- See [WeatherStation] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement/h:BuildingAirLeakage/h:UnitofMeasure[text()="ACH" or text()="CFM" or text()="ACHnatural"]) = 1'>Expected 1 element(s) for xpath: Enclosure/AirInfiltration/AirInfiltrationMeasurement/BuildingAirLeakage/UnitofMeasure[text()="ACH" or text()="CFM" or text()="ACHnatural"]</sch:assert> <!-- see [AirInfiltrationUnits=ACHorCFM] or [AirInfiltrationUnits=ACHnatural] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Roofs/h:Roof) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Roofs/Roof</sch:assert> <!-- see [Roof] -->
-      <sch:assert role='ERROR' test='count(h:Enclosure/h:Walls/h:Wall) &gt;= 1'>Expected 1 or more element(s) for xpath: Enclosure/Walls/Wall</sch:assert> <!-- see [Wall] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:RimJoists/h:RimJoist) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/RimJoists/RimJoist</sch:assert> <!-- see [RimJoist] -->
+      <sch:assert role='ERROR' test='count(h:Enclosure/h:Walls/h:Wall) &gt;= 1'>Expected 1 or more element(s) for xpath: Enclosure/Walls/Wall</sch:assert> <!-- see [Wall] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:FoundationWalls/h:FoundationWall) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/FoundationWalls/FoundationWall</sch:assert> <!-- see [FoundationWall] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:FrameFloors/h:FrameFloor) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/FrameFloors/FrameFloor</sch:assert> <!-- see [FrameFloor] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Slabs/h:Slab) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Slabs/Slab</sch:assert> <!-- see [Slab] -->
@@ -1159,6 +1159,7 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Dehumidifier'>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: SystemIdentifier</sch:assert>
       <sch:assert role='ERROR' test='count(h:Type) = 1'>Expected 1 element(s) for xpath: Type</sch:assert>
+      <sch:assert role='ERROR' test='h:Type[text()="portable" or text()="whole-home"] or not(h:Type)'>Expected Type to be 'portable' or 'whole-home'</sch:assert>
       <sch:assert role='ERROR' test='count(h:Capacity) = 1'>Expected 1 element(s) for xpath: Capacity</sch:assert> <!-- pints/day -->
       <sch:assert role='ERROR' test='count(h:IntegratedEnergyFactor) + count(h:EnergyFactor) = 1'>Expected 1 element(s) for xpath: IntegratedEnergyFactor | EnergyFactor</sch:assert> <!-- liters/kWh -->
       <sch:assert role='ERROR' test='count(h:DehumidistatSetpoint) = 1'>Expected 1 element(s) for xpath: DehumidistatSetpoint</sch:assert> <!-- RH, fraction -->
