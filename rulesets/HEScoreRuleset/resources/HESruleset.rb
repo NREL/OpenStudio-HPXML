@@ -1295,6 +1295,11 @@ def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fn
   c_foundation /= sum_fnd_area
 
   # Ducts (weighted by duct fraction and hvac fraction)
+  if ducts.empty?
+    # Ensure same result as ducts in conditioned space
+    # See https://github.com/NREL/OpenStudio-HEScore/issues/211
+    ducts = [[1.0, 1.0, HPXML::LocationLivingSpace]]
+  end
   c_duct = 0.0
   ducts.each do |hvac_frac, duct_frac, duct_location|
     if duct_location == HPXML::LocationLivingSpace
