@@ -1,15 +1,14 @@
-HPXMLtoOpenStudio Measure
-=========================
+.. _workflow_inputs:
 
-Introduction
-------------
+Workflow Inputs
+===============
 
-The HPXMLtoOpenStudio measure requires a building description in an `HPXML file <https://hpxml.nrel.gov/>`_ format.
+OpenStudio-HPXML requires a building description in an `HPXML file <https://hpxml.nrel.gov/>`_ format.
 HPXML is an open data standard for collecting and transferring home energy data. 
 Using HPXML files reduces the complexity and effort for software developers to leverage the EnergyPlus simulation engine.
 
-HPXML Inputs
-------------
+Using HPXML
+-----------
 
 HPXML is an flexible and extensible format, where nearly all elements in the schema are optional and custom elements can be included.
 Because of this, a stricter set of requirements for the HPXML file have been developed for purposes of running EnergyPlus simulations.
@@ -1189,7 +1188,7 @@ Distribution System Efficiency (DSE)
 .. warning::
 
   A simplified DSE model is provided for flexibility, but it is generally recommended to use one of the other detailed distribution system types for better accuracy.
-  Also note that when specifying a DSE system, its effect is reflected in the SimulationOutputReport reporting measure outputs but is **not** reflected in the raw EnergyPlus simulation outputs.
+  Also note that when specifying a DSE system, its effect is reflected in the :ref:`workflow_outputs` but is **not** reflected in the raw EnergyPlus simulation outputs.
 
 To define a DSE system, additional information is entered in ``HVACDistribution``.
 
