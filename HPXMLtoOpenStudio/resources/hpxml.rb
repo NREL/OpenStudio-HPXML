@@ -647,6 +647,7 @@ class HPXML < Object
     def nil?
       # Returns true if all attributes are nil
       to_h.each do |k, v|
+        next if k.to_s.end_with? '_isdefaulted'
         return false if not v.nil?
       end
       return true
