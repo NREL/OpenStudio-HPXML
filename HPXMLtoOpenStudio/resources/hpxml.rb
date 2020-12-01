@@ -758,12 +758,6 @@ class HPXML < Object
         end
       end
 
-      if not @sim_calendar_year.nil?
-        if (@sim_calendar_year < 1600) || (@sim_calendar_year > 9999)
-          fail "Calendar Year (#{@sim_calendar_year}) must be between 1600 and 9999."
-        end
-      end
-
       return errors
     end
 
@@ -2139,7 +2133,6 @@ class HPXML < Object
         XMLHelper.add_attribute(sys_id, 'id', @id + 'PerimeterInsulation')
       end
       layer = XMLHelper.add_element(insulation, 'Layer')
-      XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
       XMLHelper.add_element(layer, 'NominalRValue', @perimeter_insulation_r_value, :float) unless @perimeter_insulation_r_value.nil?
       insulation = XMLHelper.add_element(slab, 'UnderSlabInsulation')
       sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
@@ -2149,7 +2142,6 @@ class HPXML < Object
         XMLHelper.add_attribute(sys_id, 'id', @id + 'UnderSlabInsulation')
       end
       layer = XMLHelper.add_element(insulation, 'Layer')
-      XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
       XMLHelper.add_element(layer, 'NominalRValue', @under_slab_insulation_r_value, :float) unless @under_slab_insulation_r_value.nil?
       XMLHelper.add_extension(slab, 'CarpetFraction', @carpet_fraction, :float, @carpet_fraction_isdefaulted) unless @carpet_fraction.nil?
       XMLHelper.add_extension(slab, 'CarpetRValue', @carpet_r_value, :float, @carpet_r_value_isdefaulted) unless @carpet_r_value.nil?
@@ -2172,12 +2164,12 @@ class HPXML < Object
       perimeter_insulation = XMLHelper.get_element(slab, 'PerimeterInsulation')
       if not perimeter_insulation.nil?
         @perimeter_insulation_id = HPXML::get_id(perimeter_insulation)
-        @perimeter_insulation_r_value = XMLHelper.get_value(perimeter_insulation, "Layer[InstallationType='continuous']/NominalRValue", :float)
+        @perimeter_insulation_r_value = XMLHelper.get_value(perimeter_insulation, 'Layer/NominalRValue', :float)
       end
       under_slab_insulation = XMLHelper.get_element(slab, 'UnderSlabInsulation')
       if not under_slab_insulation.nil?
         @under_slab_insulation_id = HPXML::get_id(under_slab_insulation)
-        @under_slab_insulation_r_value = XMLHelper.get_value(under_slab_insulation, "Layer[InstallationType='continuous']/NominalRValue", :float)
+        @under_slab_insulation_r_value = XMLHelper.get_value(under_slab_insulation, 'Layer/NominalRValue', :float)
       end
     end
   end
@@ -4873,7 +4865,7 @@ class HPXML < Object
 
   class PlugLoad < BaseElement
     ATTRS = [:id, :plug_load_type, :kWh_per_year, :frac_sensible, :frac_latent, :usage_multiplier,
-             :weekday_fractions, :weekend_fractions, :monthly_multipliers, :location]
+             :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4893,7 +4885,6 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(plug_load, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(plug_load, 'PlugLoadType', @plug_load_type, :string) unless @plug_load_type.nil?
-      XMLHelper.add_element(plug_load, 'Location', @location, :string, @location_isdefaulted) unless @location.nil?
       if not @kWh_per_year.nil?
         load = XMLHelper.add_element(plug_load, 'Load')
         XMLHelper.add_element(load, 'Units', UnitsKwhPerYear, :string)
@@ -4910,7 +4901,6 @@ class HPXML < Object
     def from_oga(plug_load)
       @id = HPXML::get_id(plug_load)
       @plug_load_type = XMLHelper.get_value(plug_load, 'PlugLoadType', :string)
-      @location, @location_isdefaulted = XMLHelper.get_value_and_defaulted(plug_load, 'Location', :string)
       @kWh_per_year, @kWh_per_year_isdefaulted = XMLHelper.get_value_and_defaulted(plug_load, "Load[Units='#{UnitsKwhPerYear}']/Value", :float)
       @frac_sensible, @frac_sensible_isdefaulted = XMLHelper.get_value_and_defaulted(plug_load, 'extension/FracSensible', :float)
       @frac_latent, @frac_latent_isdefaulted = XMLHelper.get_value_and_defaulted(plug_load, 'extension/FracLatent', :float)
@@ -4937,7 +4927,7 @@ class HPXML < Object
 
   class FuelLoad < BaseElement
     ATTRS = [:id, :fuel_load_type, :fuel_type, :therm_per_year, :frac_sensible, :frac_latent, :usage_multiplier,
-             :weekday_fractions, :weekend_fractions, :monthly_multipliers, :location]
+             :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4957,7 +4947,6 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(fuel_load, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(fuel_load, 'FuelLoadType', @fuel_load_type, :string) unless @fuel_load_type.nil?
-      XMLHelper.add_element(fuel_load, 'Location', @location, :string, @location_isdefaulted) unless @location.nil?
       if not @therm_per_year.nil?
         load = XMLHelper.add_element(fuel_load, 'Load')
         XMLHelper.add_element(load, 'Units', UnitsThermPerYear, :string)
@@ -4975,7 +4964,6 @@ class HPXML < Object
     def from_oga(fuel_load)
       @id = HPXML::get_id(fuel_load)
       @fuel_load_type = XMLHelper.get_value(fuel_load, 'FuelLoadType', :string)
-      @location, @location_isdefaulted = XMLHelper.get_value_and_defaulted(fuel_load, 'Location', :string)
       @therm_per_year, @therm_per_year_isdefaulted = XMLHelper.get_value_and_defaulted(fuel_load, "Load[Units='#{UnitsThermPerYear}']/Value", :float)
       @fuel_type = XMLHelper.get_value(fuel_load, 'FuelType', :string)
       @frac_sensible, @frac_sensible_isdefaulted = XMLHelper.get_value_and_defaulted(fuel_load, 'extension/FracSensible', :float)
