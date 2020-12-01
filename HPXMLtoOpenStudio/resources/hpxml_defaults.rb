@@ -326,7 +326,8 @@ class HPXMLDefaults
   def self.apply_slabs(hpxml)
     hpxml.slabs.each do |slab|
       if slab.thickness.nil?
-        slab.thickness = 4.0
+        crawl_slab = [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include?(slab.interior_adjacent_to)
+        slab.thickness = crawl_slab ? 0.0 : 4.0
         slab.thickness_isdefaulted = true
       end
       conditioned_slab = [HPXML::LocationLivingSpace,
@@ -1249,10 +1250,6 @@ class HPXMLDefaults
           plug_load.frac_latent = default_lat_frac
           plug_load.frac_latent_isdefaulted = true
         end
-        if plug_load.location.nil?
-          plug_load.location = HPXML::LocationInterior
-          plug_load.location_isdefaulted = true
-        end
         if plug_load.weekday_fractions.nil?
           plug_load.weekday_fractions = '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036'
           plug_load.weekday_fractions_isdefaulted = true
@@ -1278,10 +1275,6 @@ class HPXMLDefaults
         if plug_load.frac_latent.nil?
           plug_load.frac_latent = default_lat_frac
           plug_load.frac_latent_isdefaulted = true
-        end
-        if plug_load.location.nil?
-          plug_load.location = HPXML::LocationInterior
-          plug_load.location_isdefaulted = true
         end
         if plug_load.weekday_fractions.nil?
           plug_load.weekday_fractions = '0.037, 0.018, 0.009, 0.007, 0.011, 0.018, 0.029, 0.040, 0.049, 0.058, 0.065, 0.072, 0.076, 0.086, 0.091, 0.102, 0.127, 0.156, 0.210, 0.294, 0.363, 0.344, 0.208, 0.090'
@@ -1309,10 +1302,6 @@ class HPXMLDefaults
           plug_load.frac_latent = 0.0
           plug_load.frac_latent_isdefaulted = true
         end
-        if plug_load.location.nil?
-          plug_load.location = HPXML::LocationExterior
-          plug_load.location_isdefaulted = true
-        end
         if plug_load.weekday_fractions.nil?
           plug_load.weekday_fractions = '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042'
           plug_load.weekday_fractions_isdefaulted = true
@@ -1338,10 +1327,6 @@ class HPXMLDefaults
         if plug_load.frac_latent.nil?
           plug_load.frac_latent = 0.0
           plug_load.frac_latent_isdefaulted = true
-        end
-        if plug_load.location.nil?
-          plug_load.location = HPXML::LocationExterior
-          plug_load.location_isdefaulted = true
         end
         if plug_load.weekday_fractions.nil?
           plug_load.weekday_fractions = '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
@@ -1378,10 +1363,6 @@ class HPXMLDefaults
           fuel_load.frac_latent = 0.0
           fuel_load.frac_latent_isdefaulted = true
         end
-        if fuel_load.location.nil?
-          fuel_load.location = HPXML::LocationExterior
-          fuel_load.location_isdefaulted = true
-        end
         if fuel_load.weekday_fractions.nil?
           fuel_load.weekday_fractions = '0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007'
           fuel_load.weekday_fractions_isdefaulted = true
@@ -1407,10 +1388,6 @@ class HPXMLDefaults
           fuel_load.frac_latent = 0.0
           fuel_load.frac_latent_isdefaulted = true
         end
-        if fuel_load.location.nil?
-          fuel_load.location = HPXML::LocationExterior
-          fuel_load.location_isdefaulted = true
-        end
         if fuel_load.weekday_fractions.nil?
           fuel_load.weekday_fractions = '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
           fuel_load.weekday_fractions_isdefaulted = true
@@ -1435,10 +1412,6 @@ class HPXMLDefaults
         if fuel_load.frac_latent.nil?
           fuel_load.frac_latent = 0.1
           fuel_load.frac_latent_isdefaulted = true
-        end
-        if fuel_load.location.nil?
-          fuel_load.location = HPXML::LocationInterior
-          fuel_load.location_isdefaulted = true
         end
         if fuel_load.weekday_fractions.nil?
           fuel_load.weekday_fractions = '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'

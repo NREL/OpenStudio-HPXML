@@ -24,12 +24,6 @@ class MiscLoads
       fail 'Sum of sensible and latent fractions must be less than or equal to 1.'
     end
 
-    if plug_load.location == HPXML::LocationExterior
-      # Set all heat gain as lost
-      sens_frac = 0.0
-      lat_frac = 0.0
-    end
-
     if apply_ashrae140_assumptions
       # ASHRAE 140, Table 7-9. Sensible loads are 70% radiative and 30% convective.
       rad_frac = 0.7 * sens_frac
@@ -74,12 +68,6 @@ class MiscLoads
     end
     if lat_frac + sens_frac > 1
       fail 'Sum of sensible and latent fractions must be less than or equal to 1.'
-    end
-
-    if fuel_load.location == HPXML::LocationExterior
-      # Set all heat gain as lost
-      sens_frac = 0.0
-      lat_frac = 0.0
     end
 
     space_design_level = sch.calcDesignLevelFromDailyTherm(therm / 365.0)
