@@ -125,8 +125,9 @@ def create_hpxmls
     'invalid_files/refrigerators-no-primary.xml' => 'base.xml',
     'base-appliances-coal.xml' => 'base.xml',
     'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
-    'base-appliances-dehumidifier-ief.xml' => 'base-appliances-dehumidifier.xml',
     'base-appliances-dehumidifier-50percent.xml' => 'base-appliances-dehumidifier.xml',
+    'base-appliances-dehumidifier-ief-portable.xml' => 'base-appliances-dehumidifier.xml',
+    'base-appliances-dehumidifier-ief-whole-home.xml' => 'base-appliances-dehumidifier-ief-portable.xml',
     'base-appliances-gas.xml' => 'base.xml',
     'base-appliances-modified.xml' => 'base.xml',
     'base-appliances-none.xml' => 'base.xml',
@@ -4685,15 +4686,18 @@ end
 def set_hpxml_dehumidifier(hpxml_file, hpxml)
   if ['base-appliances-dehumidifier.xml'].include? hpxml_file
     hpxml.dehumidifiers.add(id: 'Dehumidifier',
+                            type: HPXML::DehumidifierTypePortable,
                             capacity: 40,
                             energy_factor: 1.8,
                             rh_setpoint: 0.5,
                             fraction_served: 1.0)
-  elsif ['base-appliances-dehumidifier-ief.xml'].include? hpxml_file
-    hpxml.dehumidifiers[0].energy_factor = nil
-    hpxml.dehumidifiers[0].integrated_energy_factor = 1.5
   elsif ['base-appliances-dehumidifier-50percent.xml'].include? hpxml_file
     hpxml.dehumidifiers[0].fraction_served = 0.5
+  elsif ['base-appliances-dehumidifier-ief-portable.xml'].include? hpxml_file
+    hpxml.dehumidifiers[0].energy_factor = nil
+    hpxml.dehumidifiers[0].integrated_energy_factor = 1.5
+  elsif ['base-appliances-dehumidifier-ief-whole-home.xml'].include? hpxml_file
+    hpxml.dehumidifiers[0].type = HPXML::DehumidifierTypeWholeHome
   end
 end
 

@@ -71,6 +71,8 @@ class HPXML < Object
   ColorMedium = 'medium'
   ColorMediumDark = 'medium dark'
   ColorReflective = 'reflective'
+  DehumidifierTypePortable = 'portable'
+  DehumidifierTypeWholeHome = 'whole-home'
   DHWRecirControlTypeManual = 'manual demand control'
   DHWRecirControlTypeNone = 'no control'
   DHWRecirControlTypeSensor = 'presence sensor demand control'
@@ -4336,7 +4338,7 @@ class HPXML < Object
   end
 
   class Dehumidifier < BaseElement
-    ATTRS = [:id, :capacity, :energy_factor, :integrated_energy_factor, :rh_setpoint, :fraction_served]
+    ATTRS = [:id, :type, :capacity, :energy_factor, :integrated_energy_factor, :rh_setpoint, :fraction_served]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4355,6 +4357,7 @@ class HPXML < Object
       dehumidifier = XMLHelper.add_element(appliances, 'Dehumidifier')
       sys_id = XMLHelper.add_element(dehumidifier, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(dehumidifier, 'Type', @type, :string) unless @type.nil?
       XMLHelper.add_element(dehumidifier, 'Capacity', @capacity, :float) unless @capacity.nil?
       XMLHelper.add_element(dehumidifier, 'EnergyFactor', @energy_factor, :float) unless @energy_factor.nil?
       XMLHelper.add_element(dehumidifier, 'IntegratedEnergyFactor', @integrated_energy_factor, :float) unless @integrated_energy_factor.nil?
@@ -4366,6 +4369,7 @@ class HPXML < Object
       return if dehumidifier.nil?
 
       @id = HPXML::get_id(dehumidifier)
+      @type = XMLHelper.get_value(dehumidifier, 'Type', :string)
       @capacity = XMLHelper.get_value(dehumidifier, 'Capacity', :float)
       @energy_factor = XMLHelper.get_value(dehumidifier, 'EnergyFactor', :float)
       @integrated_energy_factor = XMLHelper.get_value(dehumidifier, 'IntegratedEnergyFactor', :float)

@@ -1220,7 +1220,7 @@ HPXML Dehumidifier
 ******************
 
 A single ``Appliance/Dehumidifier`` element can be specified; if not provided, a dehumidifier will not be modeled.
-The ``Capacity`` (pints/day), ``DehumidistatSetpoint`` (relative humidity as a fraction, 0-1), and ``FractionDehumidificationLoadServed`` (0-1) must be provided.
+The ``Type`` (portable or whole-home), ``Capacity`` (pints/day), ``DehumidistatSetpoint`` (relative humidity as a fraction, 0-1), and ``FractionDehumidificationLoadServed`` (0-1) must be provided.
 The efficiency of the dehumidifier can either be entered as an ``IntegratedEnergyFactor`` or ``EnergyFactor``.
 
 HPXML Lighting

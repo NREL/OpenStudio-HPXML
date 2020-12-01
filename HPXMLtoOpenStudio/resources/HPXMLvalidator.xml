@@ -381,6 +381,7 @@
       <sch:assert role='ERROR' test='number(h:RatedAnnualkWh) &gt; 0 or not(h:RatedAnnualkWh)'>Expected RatedAnnualkWh to be greater than 0</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Dehumidifier'>
+      <sch:assert role='ERROR' test='h:Type[text()="portable" or text()="whole-home"] or not(h:Type)'>Expected Type to be 'portable' or 'whole-home'</sch:assert>
       <sch:assert role='ERROR' test='number(h:DehumidistatSetpoint) &gt;= 0 or not(h:DehumidistatSetpoint)'>Expected DehumidistatSetpoint to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:DehumidistatSetpoint) &lt;= 1 or not(h:DehumidistatSetpoint)'>Expected DehumidistatSetpoint to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='number(h:FractionDehumidificationLoadServed) &gt;= 0 or not(h:FractionDehumidificationLoadServed)'>Expected FractionDehumidificationLoadServed to be greater than or equal to 0</sch:assert>
