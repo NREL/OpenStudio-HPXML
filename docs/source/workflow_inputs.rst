@@ -1895,11 +1895,14 @@ A single dehumidifier can be entered as a ``/HPXML/Building/BuildingDetails/Appl
   Element                                         Type        Units       Constraints  Required  Default  Notes
   ==============================================  ==========  ==========  ===========  ========  =======  ========================================
   ``SystemIdentifier``                            id                                   Yes                Unique identifier
+  ``Type``                                        string                  See [#]_     Yes                Type of dehumidifier
   ``Capacity``                                    double      pints/day   > 0          Yes                Dehumidification capacity
   ``IntegratedEnergyFactor`` or ``EnergyFactor``  double      liters/kWh  > 0          Yes                Rated efficiency
   ``DehumidistatSetpoint``                        double      frac        0-1          Yes                Relative humidity setpoint
   ``FractionDehumidificationLoadServed``          double      frac        0-1          Yes                Fraction of dehumidification load served
   ==============================================  ==========  ==========  ===========  ========  =======  ========================================
+  
+  .. [#] Type choices are "portable" or "whole-home".
 
 HPXML Cooking Range/Oven
 ************************
