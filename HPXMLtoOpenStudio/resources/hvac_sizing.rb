@@ -1547,6 +1547,7 @@ class HVACSizing
     num_speeds_htg = nil
     cool_cap_fff_curves = []
     heat_cap_fff_curves = []
+    if not clg_coil.nil?
     if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized
       num_speeds_clg = 1
       cool_cap_fff_curves = [clg_coil.totalCoolingCapacityFunctionOfFlowFractionCurve.to_CurveQuadratic.get]
@@ -1565,6 +1566,8 @@ class HVACSizing
         end
       end
     end
+    end
+    if not htg_coil.nil?
     if htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized
       num_speeds_htg = 1
       heat_cap_fff_curves = [clg_coil.totalCoolingCapacityFunctionOfFlowFractionCurve.to_CurveQuadratic.get]
@@ -1582,6 +1585,7 @@ class HVACSizing
           airflow_rated_defect_ratio_heat << UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioHeating) / calc_rated_airflow_htg(hvac_final_values, speed, hvac)
         end
       end
+    end
     end
 
     f_ch = hvac.ChargeDefectRatio.round(3)
@@ -3477,11 +3481,7 @@ class HVACSizing
           if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized
             airflow_rated_defect_ratio_cool = [UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / clg_coil.ratedAirFlowRate.get - 1.0]
           elsif clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
-            if hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
-              airflow_rated_defect_ratio_cool = clg_coil.stages.map { |stage| UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0 }
-            elsif hvac.has_type(Constants.ObjectNameAirSourceHeatPump) || hvac.has_type(Constants.ObjectNameCentralAirConditioner)
-              airflow_rated_defect_ratio_cool = clg_coil.stages.zip(hvac.FanspeedRatioCooling).map { |stage, speed_ratio| UnitConversions.convert(hvac_final_values.Cool_Airflow * speed_ratio, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0 }
-            end
+            airflow_rated_defect_ratio_cool = clg_coil.stages.zip(hvac.FanspeedRatioCooling).map { |stage, speed_ratio| UnitConversions.convert(hvac_final_values.Cool_Airflow * speed_ratio, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0 }
           end
         end
 
@@ -3490,11 +3490,7 @@ class HVACSizing
           if htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized
             airflow_rated_defect_ratio_heat = [UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / htg_coil.ratedAirFlowRate.get - 1.0]
           elsif htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized
-            if hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
-              airflow_rated_defect_ratio_heat = htg_coil.stages.map { |stage| UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0 }
-            elsif hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
-              airflow_rated_defect_ratio_heat = htg_coil.stages.zip(hvac.FanspeedRatioHeating).map { |stage, speed_ratio| UnitConversions.convert(hvac_final_values.Heat_Airflow * speed_ratio, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0 }
-            end
+            airflow_rated_defect_ratio_heat = htg_coil.stages.zip(hvac.FanspeedRatioHeating).map { |stage, speed_ratio| UnitConversions.convert(hvac_final_values.Heat_Airflow * speed_ratio, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0 }
           end
         end
       elsif object.is_a? OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner
