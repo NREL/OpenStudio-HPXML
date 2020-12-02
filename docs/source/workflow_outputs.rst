@@ -1,14 +1,14 @@
-.. _simreport:
+.. _workflow_outputs:
 
-SimulationOutputReport Measure
-==============================
+Workflow Outputs
+================
 
-The SimulationOutputReport reporting measure generates a variety of annual (and optionally, timeseries) outputs for a residential HPXML-based model.
+OpenStudio-HPXML generates a variety of annual (and optionally, timeseries) outputs for a residential HPXML-based model.
 
 Annual Outputs
 --------------
 
-The measure will always generate an annual CSV output file called results_annual.csv, co-located with the EnergyPlus output.
+OpenStudio-HPXML will always generate an annual CSV output file called results_annual.csv, co-located with the EnergyPlus output.
 The CSV file includes the following sections of output:
 
 Annual Energy Consumption by Fuel Type
@@ -232,7 +232,7 @@ Current annual hot water uses are:
 Timeseries Outputs
 ------------------
 
-The measure will generate a timeseries CSV output file if the Timeseries Reporting Frequency argument is specified and one or more Generate Timeseries Output arguments are true.
+OpenStudio-HPXML can optionally generate a timeseries CSV output file.
 The timeseries output file is called results_timeseries.csv and co-located with the EnergyPlus output.
 
 Depending on the outputs requested, CSV files may include:
@@ -243,7 +243,7 @@ Depending on the outputs requested, CSV files may include:
    Fuel Consumptions                   Energy use for each fuel type (in kBtu for fossil fuels and kWh for electricity).
    End Use Consumptions                Energy use for each end use type (in kBtu for fossil fuels and kWh for electricity).
    Hot Water Uses                      Water use for each end use type (in gallons).
-   Total Loads                         Heating and cooling loads (in kBtu) for the building.
+   Total Loads                         Heating, cooling, and hot water loads (in kBtu) for the building.
    Component Loads                     Heating and cooling loads (in kBtu) disaggregated by component (e.g., Walls, Windows, Infiltration, Ducts, etc.).
    Zone Temperatures                   Average temperatures (in deg-F) for each space modeled (e.g., living space, attic, garage, basement, crawlspace, etc.).
    Airflows                            Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.
