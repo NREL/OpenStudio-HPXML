@@ -244,7 +244,7 @@ For software tools that do not collect sufficient inputs for every required surf
 
 Interior partition surfaces (e.g., walls between rooms inside conditioned space, or the floor between two conditioned stories) can be excluded.
 
-For single-family attached (SFA) or multifamily (MF) buildings, surfaces between unconditioned space and the neigboring unit's same unconditioned space should set ``InteriorAdjacentTo`` and ``ExteriorAdjacentTo`` to the same value.
+For single-family attached (SFA) or multifamily (MF) buildings, surfaces between unconditioned space and the neighboring unit's same unconditioned space should set ``InteriorAdjacentTo`` and ``ExteriorAdjacentTo`` to the same value.
 For example, a foundation wall between the unit's vented crawlspace and the neighboring unit's vented crawlspace would use ``InteriorAdjacentTo="crawlspace - vented"`` and ``ExteriorAdjacentTo="crawlspace - vented"``.
 
 .. warning::
@@ -265,7 +265,7 @@ Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/A
   Element                               Type    Units  Constraints  Required   Default            Notes
   ====================================  ======  =====  ===========  =========  =================  ========================================================
   ``SystemIdentifier``                  id                          Yes                           Unique identifier
-  ``BuildingAirLeakage/UnitofMeasure``  string         See [#]_                                   Units for air leakage
+  ``BuildingAirLeakage/UnitofMeasure``  string         See [#]_     Yes                           Units for air leakage
   ``HousePressure``                     double  Pa     > 0          See [#]_                      House pressure with respect to outside, typically ~50 Pa
   ``BuildingAirLeakage/AirLeakage``     double         > 0          Yes                           Value for air leakage
   ``InfiltrationVolume``                double  ft3    > 0          No         ConditionedVolume  Volume associated with the air leakage measurement
@@ -282,7 +282,7 @@ If the dwelling unit has a vented attic, attic ventilation information can be op
   =================  ======  =====  ===========  ========  ==========  ==========================
   Element            Type    Units  Constraints  Required  Default     Notes
   =================  ======  =====  ===========  ========  ==========  ==========================
-  ``UnitofMeasure``  string         See [#]_     No                    Units for ventilation rate
+  ``UnitofMeasure``  string         See [#]_     No        SLA         Units for ventilation rate
   ``Value``          double         > 0          No        1/300 [#]_  Value for ventilation rate
   =================  ======  =====  ===========  ========  ==========  ==========================
 
@@ -297,7 +297,7 @@ If the dwelling unit has a vented crawlspace, crawlspace ventilation information
   =================  ======  =====  ===========  ========  ==========  ==========================
   Element            Type    Units  Constraints  Required  Default     Notes
   =================  ======  =====  ===========  ========  ==========  ==========================
-  ``UnitofMeasure``  string         See [#]_     No                    Units for ventilation rate
+  ``UnitofMeasure``  string         See [#]_     No        SLA         Units for ventilation rate
   ``Value``          double         > 0          No        1/150 [#]_  Value for ventilation rate
   =================  ======  =====  ===========  ========  ==========  ==========================
 
@@ -328,7 +328,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0              Yes                                        Assembly R-value [#]_
   ======================================  ================  ============  ===============  =========  ==============================  ==================================
 
-  .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", or "garage".
+  .. [#] InteriorAdjacentTo choices are "attic - vented", "attic - unvented", "living space", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
   .. [#] RoofType choices are "asphalt or fiberglass shingles", "wood shingles or shakes", "slate or tile shingles", or "metal surfacing".
@@ -464,7 +464,7 @@ If insulation layers are provided, additional information is entered in each ``F
   ==========================================  ========  ============  ===========  ========  =======  ======================================================================
   Element                                     Type      Units         Constraints  Required  Default  Notes
   ==========================================  ========  ============  ===========  ========  =======  ======================================================================
-  ``NominalRValue``                           double    F-ft2-hr/Btu  >= 0         Yes                R-value of the foundatation wall insulation; use zero if no insulation
+  ``NominalRValue``                           double    F-ft2-hr/Btu  >= 0         Yes                R-value of the foundation wall insulation; use zero if no insulation
   ``extension/DistanceToTopOfInsulation``     double    ft            >= 0         Yes                Vertical distance from top of foundation wall to top of insulation
   ``extension/DistanceToBottomOfInsulation``  double    ft            >= 0         Yes                Vertical distance from top of foundation wall to bottom of insulation
   ==========================================  ========  ============  ===========  ========  =======  ======================================================================
@@ -529,7 +529,7 @@ Each space type that borders the ground (i.e., basements, crawlspaces, garages, 
   .. [#] InteriorAdjacentTo choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If Thickness not provided, defaults to 0 when adjacent to crawlspace and 4 inches for all other cases.
-  .. [#] For a crawlspace with a dirt floor, use a thickness of zero.
+  .. [#] For a crawlspace with a dirt floor, enter a thickness of zero.
   .. [#] ExposedPerimeter includes any slab length that falls along the perimeter of the building's footprint (i.e., is exposed to ambient conditions).
          So a basement slab edge adjacent to a garage or crawlspace, for example, should not be included.
   .. [#] UnderSlabInsulationWidth only required if UnderSlabInsulationSpansEntireSlab=true is not provided.
@@ -702,7 +702,7 @@ If a boiler is specified, additional information is entered in ``HeatingSystem``
   ``extension/WaterLoopHeatPump/AnnualHeatingEfficiency[Units="COP"]/Value``  double    W/W     > 0          See [#]_            COP of the attached water loop heat pump
   ==========================================================================  ========  ======  ===========  ========  ========  =========================================
 
-  .. [#] HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", or "radiant ceiling") or DSE for in-unit boilers and HydronicDistribution (type: "radiator", "baseboard", "radiant floor", or "radiant ceiling") or HydronicAndAirDistribution (type: "fan coil" or "water loop heat pump") for shared boilers.
+  .. [#] HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", or "radiant ceiling") or DSE for in-unit boilers, and HydronicDistribution (type: "radiator", "baseboard", "radiant floor", or "radiant ceiling") or HydronicAndAirDistribution (type: "fan coil" or "water loop heat pump") for shared boilers.
   .. [#] | For shared boilers, ElectricAuxiliaryEnergy can alternatively be calculated as follows per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
          | EAE = (SP / N_dweq + aux_in) * HLH
          | where
@@ -900,20 +900,19 @@ HPXML Heat Pumps
 
 Each heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
 
-
-  =================================  ========  ======  ===========  ========  =========  =======================================
+  =================================  ========  ======  ===========  ========  =========  ===============================================
   Element                            Type      Units   Constraints  Required  Default    Notes
-  =================================  ========  ======  ===========  ========  =========  =======================================
+  =================================  ========  ======  ===========  ========  =========  ===============================================
   ``SystemIdentifier``               id                             Yes                  Unique identifier
   ``HeatPumpType``                   string            See [#]_     Yes                  Type of heat pump
   ``HeatPumpFuel``                   string            See [#]_     Yes                  Fuel type
-  ``HeatingCapacity``                double    Btu/hr  >= 0         No        autosized  Heating capacity
+  ``HeatingCapacity``                double    Btu/hr  >= 0         No        autosized  Heating capacity (excluding any backup heating)
   ``CoolingCapacity``                double    Btu/hr  >= 0         No        autosized  Cooling capacity
   ``CoolingSensibleHeatFraction``    double    frac    0-1          No                   Sensible heat fraction
   ``BackupSystemFuel``               string            See [#]_     No                   Fuel type of backup heating, if present
   ``FractionHeatLoadServed``         double    frac    0-1 [#]_     Yes                  Fraction of heating load served
   ``FractionCoolLoadServed``         double    frac    0-1 [#]_     Yes                  Fraction of cooling load served
-  =================================  ========  ======  ===========  ========  =========  =======================================
+  =================================  ========  ======  ===========  ========  =========  ===============================================
 
   .. [#] HeatPumpType choices are "air-to-air", "mini-split", or "ground-to-air".
   .. [#] HeatPumpFuel only choice is "electricity".
@@ -1012,8 +1011,6 @@ HPXML HVAC Control
 ******************
 
 If any HVAC systems are specified, a single thermostat is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl``.
-
-In addition to the setpoint inputs below, , this information can be entered in ``HVACControl``.
 
   =======================================================  ========  =======  ===========  ========  =========  ========================================
   Element                                                  Type      Units    Constraints  Required  Default    Notes
@@ -1187,7 +1184,7 @@ Distribution System Efficiency (DSE)
 
 .. warning::
 
-  A simplified DSE model is provided for flexibility, but it is generally recommended to use one of the other detailed distribution system types for better accuracy.
+  A simplified DSE model is provided for flexibility, but it is **strongly** recommended to use one of the other detailed distribution system types for better accuracy.
   Also note that when specifying a DSE system, its effect is reflected in the :ref:`workflow_outputs` but is **not** reflected in the raw EnergyPlus simulation outputs.
 
 To define a DSE system, additional information is entered in ``HVACDistribution``.
@@ -1278,7 +1275,7 @@ If the specified system is a shared system (i.e., serving multiple dwelling unit
   Element                       Type     Units  Constraints  Required  Default  Notes
   ============================  =======  =====  ===========  ========  =======  ====================================================
   ``FractionRecirculation``     double   frac   0-1          Yes                Fraction of supply air that is recirculated [#]_
-  ``extension/InUnitFlowRate``  double   cfm    >= 0         Yes                Total flow rate delivered to the dwelling unit
+  ``extension/InUnitFlowRate``  double   cfm    >= 0         Yes                Flow rate delivered to the dwelling unit
   ``extension/PreHeating``      element         0-1          No        <none>   Supply air preconditioned by heating equipment? [#]_
   ``extension/PreCooling``      element         0-1          No        <none>   Supply air preconditioned by cooling equipment? [#]_
   ============================  =======  =====  ===========  ========  =======  ====================================================
@@ -1288,27 +1285,27 @@ If the specified system is a shared system (i.e., serving multiple dwelling unit
   .. [#] PreHeating not allowed for exhaust only systems.
   .. [#] PreCooling not allowed for exhaust only systems.
 
-If preheating is specified, additional information is entered in ``extension/PreHeating``.
+If pre-heating is specified, additional information is entered in ``extension/PreHeating``.
 
-  ==============================================  =======  =====  ===========  ========  =======  ===================================================================
+  ==============================================  =======  =====  ===========  ========  =======  ====================================================================
   Element                                         Type     Units  Constraints  Required  Default  Notes
-  ==============================================  =======  =====  ===========  ========  =======  ===================================================================
-  ``Fuel``                                        string          See [#]_     Yes                Preheating equipment fuel type
-  ``AnnualHeatingEfficiency[Units="COP"]/Value``  double   W/W    > 0          Yes                Preheating equipment annual COP
-  ``FractionVentilationHeatLoadServed``           double   frac   0-1          Yes                Fraction of ventilation heating load served by preheating equipment
-  ==============================================  =======  =====  ===========  ========  =======  ===================================================================
+  ==============================================  =======  =====  ===========  ========  =======  ====================================================================
+  ``Fuel``                                        string          See [#]_     Yes                Pre-heating equipment fuel type
+  ``AnnualHeatingEfficiency[Units="COP"]/Value``  double   W/W    > 0          Yes                Pre-heating equipment annual COP
+  ``FractionVentilationHeatLoadServed``           double   frac   0-1          Yes                Fraction of ventilation heating load served by pre-heating equipment
+  ==============================================  =======  =====  ===========  ========  =======  ====================================================================
 
   .. [#] Fuel choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
 
-If precooling is specified, additional information is entered in ``extension/PreCooling``.
+If pre-cooling is specified, additional information is entered in ``extension/PreCooling``.
 
-  ==============================================  =======  =====  ===========  ========  =======  ===================================================================
+  ==============================================  =======  =====  ===========  ========  =======  ====================================================================
   Element                                         Type     Units  Constraints  Required  Default  Notes
-  ==============================================  =======  =====  ===========  ========  =======  ===================================================================
-  ``Fuel``                                        string          See [#]_     Yes                Precooling equipment fuel type
-  ``AnnualCoolingEfficiency[Units="COP"]/Value``  double   W/W    > 0          Yes                Precooling equipment annual COP
-  ``FractionVentilationCoolLoadServed``           double   frac   0-1          Yes                Fraction of ventilation cooling load served by precooling equipment
-  ==============================================  =======  =====  ===========  ========  =======  ===================================================================
+  ==============================================  =======  =====  ===========  ========  =======  ====================================================================
+  ``Fuel``                                        string          See [#]_     Yes                Pre-cooling equipment fuel type
+  ``AnnualCoolingEfficiency[Units="COP"]/Value``  double   W/W    > 0          Yes                Pre-cooling equipment annual COP
+  ``FractionVentilationCoolLoadServed``           double   frac   0-1          Yes                Fraction of ventilation cooling load served by pre-cooling equipment
+  ==============================================  =======  =====  ===========  ========  =======  ====================================================================
 
   .. [#] Fuel only choice is "electricity".
 
@@ -1351,7 +1348,9 @@ Each whole house fans that provides cooling load reduction is entered as a ``/HP
   ``FanPower``                             double   W        >= 0         Yes                 Fan power
   =======================================  =======  =======  ===========  ========  ========  ==========================
 
-The whole house fan is assumed to operate during hours of favorable outdoor conditions and will take priority over operable windows (natural ventilation).
+.. note::
+
+  The whole house fan is assumed to operate during hours of favorable outdoor conditions and will take priority over operable windows (natural ventilation).
 
 HPXML Water Heating Systems
 ***************************
@@ -1407,8 +1406,9 @@ If a conventional storage water heater is specified, additional information is e
   .. [#] FirstHourRating only required if UniformEnergyFactor provided.
   .. [#] If RecoveryEfficiency not provided, defaults as follows based on a regression analysis of `AHRI certified water heaters <https://www.ahridirectory.org/NewSearch?programId=24&searchTypeId=3>`_:
   
-         - **EnergyFactor <= 0.75**: 0.778114 * EnergyFactor + 0.276679
-         - **EnergyFactor > 0.75**: 0.252117 * EnergyFactor + 0.607997
+         - **Electric**: 0.98
+         - **Non-electric, EnergyFactor <= 0.75**: 0.778114 * EnergyFactor + 0.276679
+         - **Non-electric, EnergyFactor > 0.75**: 0.252117 * EnergyFactor + 0.607997
 
 Tankless
 ~~~~~~~~
@@ -1466,11 +1466,11 @@ Combi Boiler w/ Tankless Coil
 
 If a combination boiler w/ tankless coil is specified, additional information is entered in ``WaterHeatingSystem``.
 
-  =============================================  =======  ============  ===========  ============  ========  ==================================================
-  Element                                        Type     Units         Constraints  Required      Default   Notes
-  =============================================  =======  ============  ===========  ============  ========  ==================================================
-  ``RelatedHVACSystem``                          idref                  See [#]_     Yes                     ID of boiler
-  =============================================  =======  ============  ===========  ============  ========  ==================================================
+  =====================  =======  ============  ===========  ============  ========  ==================================================
+  Element                Type     Units         Constraints  Required      Default   Notes
+  =====================  =======  ============  ===========  ============  ========  ==================================================
+  ``RelatedHVACSystem``  idref                  See [#]_     Yes                     ID of boiler
+  =====================  =======  ============  ===========  ============  ========  ==================================================
 
   .. [#] RelatedHVACSystem must reference a ``HeatingSystem`` (Boiler).
 
@@ -1479,11 +1479,11 @@ Desuperheater
 
 If the water heater uses a desuperheater, additional information is entered in ``WaterHeatingSystem``.
 
-  =============================================  =======  ============  ===========  ============  ========  ==================================
-  Element                                        Type     Units         Constraints  Required      Default   Notes
-  =============================================  =======  ============  ===========  ============  ========  ==================================
-  ``RelatedHVACSystem``                          idref                  See [#]_     Yes                     ID of heat pump or air conditioner
-  =============================================  =======  ============  ===========  ============  ========  ==================================
+  =====================  =======  ============  ===========  ============  ========  ==================================
+  Element                Type     Units         Constraints  Required      Default   Notes
+  =====================  =======  ============  ===========  ============  ========  ==================================
+  ``RelatedHVACSystem``  idref                  See [#]_     Yes                     ID of heat pump or air conditioner
+  =====================  =======  ============  ===========  ============  ========  ==================================
 
   .. [#] RelatedHVACSystem must reference a ``HeatPump`` (air-to-air, mini-split, or ground-to-air) or ``CoolingSystem`` (central air conditioner or mini-split).
 
@@ -1588,7 +1588,6 @@ If a drain water heat recovery (DWHR) device is specified, additional informatio
          Use "one" if there are multiple showers and only one of them is connected to the DWHR.
          Use "all" if there is one shower and it's connected to the DWHR or there are two or more showers connected to the DWHR.
   .. [#] EqualFlow should be true if the DWHR supplies pre-heated water to both the fixture cold water piping *and* the hot water heater potable supply piping.
-
 
 HPXML Water Fixtures
 ********************
@@ -1699,7 +1698,7 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
          If YearModulesManufactured provided but not SystemLossesFraction, system losses calculated as:
          SystemLossesFraction = 1.0 - (1.0 - 0.14) * (1.0 - (1.0 - 0.995^(CurrentYear - YearModulesManufactured))).
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
-         PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the number of bedrooms served by the PV system.
+         PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the PV system.
 
 HPXML Appliances
 ----------------
@@ -1711,16 +1710,16 @@ HPXML Clothes Washer
 
 A single clothes washer can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/ClothesWasher``.
 
-  ==============================================================  =======  =============  ===========  ========  ============  ==============================================
-  Element                                                         Type     Units          Constraints  Required  Default       Notes
-  ==============================================================  =======  =============  ===========  ========  ============  ==============================================
-  ``SystemIdentifier``                                            id                                   Yes                     Unique identifier
-  ``IsSharedAppliance``                                           boolean                              No        false         Whether it serves multiple dwelling units [#]_
-  ``Location``                                                    string                  See [#]_     No        living space  Location
-  ``IntegratedModifiedEnergyFactor`` or ``ModifiedEnergyFactor``  double   ft3/kWh/cycle  > 0          No        See [#]_      EnergyGuide label efficiency [#]_
-  ``AttachedToWaterHeatingSystem``                                idref                   See [#]_     See [#]_                ID of attached water heater
-  ``extension/UsageMultiplier``                                   double                  >= 0         No        1.0           Multiplier on energy & hot water usage
-  ==============================================================  =======  =============  ===========  ========  ============  ==============================================
+  ==============================================================  =======  ===========  ===========  ========  ============  ==============================================
+  Element                                                         Type     Units        Constraints  Required  Default       Notes
+  ==============================================================  =======  ===========  ===========  ========  ============  ==============================================
+  ``SystemIdentifier``                                            id                                 Yes                     Unique identifier
+  ``IsSharedAppliance``                                           boolean                            No        false         Whether it serves multiple dwelling units [#]_
+  ``Location``                                                    string                See [#]_     No        living space  Location
+  ``IntegratedModifiedEnergyFactor`` or ``ModifiedEnergyFactor``  double   ft3/kWh/cyc  > 0          No        See [#]_      EnergyGuide label efficiency [#]_
+  ``AttachedToWaterHeatingSystem``                                idref                 See [#]_     See [#]_                ID of attached water heater
+  ``extension/UsageMultiplier``                                   double                >= 0         No        1.0           Multiplier on energy & hot water usage
+  ==============================================================  =======  ===========  ===========  ========  ============  ==============================================
 
   .. [#] For example, a clothes washer in a shared laundry room of a MF building.
   .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
