@@ -1548,49 +1548,49 @@ class HVACSizing
     cool_cap_fff_curves = []
     heat_cap_fff_curves = []
     if not clg_coil.nil?
-    if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized
-      num_speeds_clg = 1
-      cool_cap_fff_curves = [clg_coil.totalCoolingCapacityFunctionOfFlowFractionCurve.to_CurveQuadratic.get]
-      airflow_rated_ratio_cool = [UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / calc_rated_airflow_clg(hvac_final_values, 0, hvac)]
-      airflow_rated_defect_ratio_cool = [UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioCooling) / calc_rated_airflow_clg(hvac_final_values, 0, hvac, true)]
-    elsif clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
-      num_speeds_clg = clg_coil.stages.size
-      cool_cap_fff_curves = clg_coil.stages.map { |stage| stage.totalCoolingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get }
-      clg_coil.stages.each_with_index do |stage, speed|
-        if hvac.has_type(Constants.ObjectNameAirSourceHeatPump) || hvac.has_type(Constants.ObjectNameCentralAirConditioner)
-          airflow_rated_ratio_cool << UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / calc_rated_airflow_clg(hvac_final_values, speed, hvac, true)
-          airflow_rated_defect_ratio_cool << UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioCooling) / calc_rated_airflow_clg(hvac_final_values, speed, hvac, true)
-        else
-          airflow_rated_ratio_cool << UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / calc_rated_airflow_clg(hvac_final_values, speed, hvac)
-          airflow_rated_defect_ratio_cool << UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioCooling) / calc_rated_airflow_clg(hvac_final_values, speed, hvac)
+      if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized
+        num_speeds_clg = 1
+        cool_cap_fff_curves = [clg_coil.totalCoolingCapacityFunctionOfFlowFractionCurve.to_CurveQuadratic.get]
+        airflow_rated_ratio_cool = [UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / calc_rated_airflow_clg(hvac_final_values, 0, hvac)]
+        airflow_rated_defect_ratio_cool = [UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioCooling) / calc_rated_airflow_clg(hvac_final_values, 0, hvac, true)]
+      elsif clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
+        num_speeds_clg = clg_coil.stages.size
+        cool_cap_fff_curves = clg_coil.stages.map { |stage| stage.totalCoolingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get }
+        clg_coil.stages.each_with_index do |stage, speed|
+          if hvac.has_type(Constants.ObjectNameAirSourceHeatPump) || hvac.has_type(Constants.ObjectNameCentralAirConditioner)
+            airflow_rated_ratio_cool << UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / calc_rated_airflow_clg(hvac_final_values, speed, hvac, true)
+            airflow_rated_defect_ratio_cool << UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioCooling) / calc_rated_airflow_clg(hvac_final_values, speed, hvac, true)
+          else
+            airflow_rated_ratio_cool << UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / calc_rated_airflow_clg(hvac_final_values, speed, hvac)
+            airflow_rated_defect_ratio_cool << UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioCooling) / calc_rated_airflow_clg(hvac_final_values, speed, hvac)
+          end
         end
       end
-    end
     end
     if not htg_coil.nil?
-    if htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized
-      num_speeds_htg = 1
-      heat_cap_fff_curves = [clg_coil.totalCoolingCapacityFunctionOfFlowFractionCurve.to_CurveQuadratic.get]
-      airflow_rated_ratio_heat = [UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / calc_rated_airflow_htg(hvac_final_values, 0, hvac, true)]
-      airflow_rated_defect_ratio_heat = [UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioHeating) / calc_rated_airflow_htg(hvac_final_values, 0, hvac, true)]
-    elsif htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized
-      num_speeds_htg = htg_coil.stages.size
-      heat_cap_fff_curves = htg_coil.stages.map { |stage| stage.heatingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get }
-      htg_coil.stages.each_with_index do |stage, speed|
-        if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
-          airflow_rated_ratio_heat << UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / calc_rated_airflow_htg(hvac_final_values, speed, hvac, true)
-          airflow_rated_defect_ratio_heat << UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioHeating) / calc_rated_airflow_htg(hvac_final_values, speed, hvac, true)
-        else
-          airflow_rated_ratio_heat << UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / calc_rated_airflow_htg(hvac_final_values, speed, hvac)
-          airflow_rated_defect_ratio_heat << UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioHeating) / calc_rated_airflow_htg(hvac_final_values, speed, hvac)
+      if htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized
+        num_speeds_htg = 1
+        heat_cap_fff_curves = [clg_coil.totalCoolingCapacityFunctionOfFlowFractionCurve.to_CurveQuadratic.get]
+        airflow_rated_ratio_heat = [UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / calc_rated_airflow_htg(hvac_final_values, 0, hvac, true)]
+        airflow_rated_defect_ratio_heat = [UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioHeating) / calc_rated_airflow_htg(hvac_final_values, 0, hvac, true)]
+      elsif htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized
+        num_speeds_htg = htg_coil.stages.size
+        heat_cap_fff_curves = htg_coil.stages.map { |stage| stage.heatingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get }
+        htg_coil.stages.each_with_index do |stage, speed|
+          if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
+            airflow_rated_ratio_heat << UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / calc_rated_airflow_htg(hvac_final_values, speed, hvac, true)
+            airflow_rated_defect_ratio_heat << UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioHeating) / calc_rated_airflow_htg(hvac_final_values, speed, hvac, true)
+          else
+            airflow_rated_ratio_heat << UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / calc_rated_airflow_htg(hvac_final_values, speed, hvac)
+            airflow_rated_defect_ratio_heat << UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioHeating) / calc_rated_airflow_htg(hvac_final_values, speed, hvac)
+          end
         end
       end
-    end
     end
 
     f_ch = hvac.ChargeDefectRatio.round(3)
-
     if not airflow_rated_defect_ratio_cool.empty?
+      cap_clg_ratios = []
       for speed in 0..(num_speeds_clg - 1)
         cool_cap_fff_curve = cool_cap_fff_curves[speed]
 
@@ -1634,11 +1634,13 @@ class HVACSizing
         cool_cap_fff = (p_CH_Q_c * p_AF_Q_c)
         cool_cap_fff_pre = a1_AF_Qgr_c + a2_AF_Qgr_c * ff_AF_c_pre + a3_AF_Qgr_c * ff_AF_c_pre * ff_AF_c_pre
         cap_clg_ratio = 1 / (cool_cap_fff / cool_cap_fff_pre)
-        hvac.CapacityRatioCooling[speed] *= cap_clg_ratio
+        cap_clg_ratios << cap_clg_ratio
       end
+      hvac_final_values.Cool_Capacity *= cap_clg_ratios.max
     end
 
     if not airflow_rated_defect_ratio_heat.empty?
+      cap_htg_ratios = []
       for speed in 0..(num_speeds_htg - 1)
         heat_cap_fff_curve = heat_cap_fff_curves[speed]
 
@@ -1680,8 +1682,9 @@ class HVACSizing
         heat_cap_fff = (p_CH_Q_h * p_AF_Q_h)
         heat_cap_fff_pre = a1_AF_Qgr_h + a2_AF_Qgr_h * ff_AF_h_pre + a3_AF_Qgr_h * ff_AF_h_pre * ff_AF_h_pre
         cap_htg_ratio = 1 / (heat_cap_fff / heat_cap_fff_pre)
-        hvac.CapacityRatioHeating[speed] *= cap_htg_ratio
+        cap_htg_ratios << cap_htg_ratio
       end
+      hvac_final_values.Heat_Capacity *= cap_htg_ratios.max
     end
   end
 
