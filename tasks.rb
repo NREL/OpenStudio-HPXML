@@ -1242,7 +1242,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls.clear
     hpxml.walls.add(id: 'WallExterior',
                     exterior_adjacent_to: HPXML::LocationOutside,
-                    interior_adjacent_to: HPXML::LocationAtticUnvented,
+                    interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
                     siding: HPXML::SidingTypeWood,
                     area: 196,
@@ -2588,7 +2588,7 @@ def set_hpxml_doors(hpxml_file, hpxml)
     # FIXME: Door should be to interior corridor or exterior?
     hpxml.doors.add(id: 'Door',
                     wall_idref: 'WallExterior',
-                    area: 80, # FIXME: Why so large?
+                    area: 20,
                     azimuth: 180,
                     r_value: 4.4)
   elsif ['base-enclosure-garage.xml',
@@ -3359,6 +3359,15 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                           duct_insulation_r_value: 0,
                                           duct_location: HPXML::LocationAtticUnvented,
                                           duct_surface_area: 50)
+  elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
+    hpxml.hvac_distributions.each do |hvac_distribution|
+      hvac_distribution.duct_leakage_measurements.each do |duct_leakage_measurement|
+        duct_leakage_measurement.duct_leakage_value = 0
+      end
+      hvac_distribution.ducts.each do |duct|
+        duct.duct_location = HPXML::LocationLivingSpace
+      end
+    end
   elsif ['base-hvac-boiler-coal-only.xml',
          'base-hvac-boiler-elec-only.xml',
          'base-hvac-boiler-gas-only.xml',
