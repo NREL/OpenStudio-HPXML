@@ -656,26 +656,30 @@ class HPXMLTest < MiniTest::Test
       num_kiva_instances += 1
     end
 
-    num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,                       # no foundation in contact w/ ground
-                                    'base-foundation-multiple.xml' => 2,                      # additional instance for 2nd foundation type
-                                    'base-enclosure-2stories-garage.xml' => 2,                # additional instance for garage
-                                    'base-enclosure-garage.xml' => 2,                         # additional instance for garage
-                                    'base-enclosure-other-housing-unit.xml' => 0,             # no foundation in contact w/ ground
-                                    'base-enclosure-other-heated-space.xml' => 0,             # no foundation in contact w/ ground
-                                    'base-enclosure-other-non-freezing-space.xml' => 0,       # no foundation in contact w/ ground
-                                    'base-enclosure-other-multifamily-buffer-space.xml' => 0, # no foundation in contact w/ ground
-                                    'base-enclosure-common-surfaces.xml' => 2,                # additional instance for vented crawlspace
-                                    'base-foundation-walkout-basement.xml' => 4,              # 3 foundation walls plus a no-wall exposed perimeter
-                                    'base-foundation-complex.xml' => 10,
-                                    'base-misc-loads-large-uncommon.xml' => 2,
-                                    'base-misc-loads-large-uncommon2.xml' => 2 }
-
     if hpxml_path.include? 'ASHRAE_Standard_140'
       # nop
-    elsif not num_expected_kiva_instances[File.basename(hpxml_path)].nil?
-      assert_equal(num_expected_kiva_instances[File.basename(hpxml_path)], num_kiva_instances)
+    elsif hpxml_path.include? 'base-bldgtype-multifamily'
+      assert_equal(0, num_kiva_instances)                                                       # no foundation, above dwelling unit
     else
-      assert_equal(1, num_kiva_instances)
+      num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,                       # no foundation in contact w/ ground
+                                      'base-foundation-multiple.xml' => 2,                      # additional instance for 2nd foundation type
+                                      'base-enclosure-2stories-garage.xml' => 2,                # additional instance for garage
+                                      'base-enclosure-garage.xml' => 2,                         # additional instance for garage
+                                      'base-enclosure-other-housing-unit.xml' => 0,             # no foundation in contact w/ ground
+                                      'base-enclosure-other-heated-space.xml' => 0,             # no foundation in contact w/ ground
+                                      'base-enclosure-other-non-freezing-space.xml' => 0,       # no foundation in contact w/ ground
+                                      'base-enclosure-other-multifamily-buffer-space.xml' => 0, # no foundation in contact w/ ground
+                                      'base-enclosure-common-surfaces.xml' => 2,                # additional instance for vented crawlspace
+                                      'base-foundation-walkout-basement.xml' => 4,              # 3 foundation walls plus a no-wall exposed perimeter
+                                      'base-foundation-complex.xml' => 10,                      # lots of foundations for testing
+                                      'base-misc-loads-large-uncommon.xml' => 2,                # additional instance for garage
+                                      'base-misc-loads-large-uncommon2.xml' => 2 }              # additional instance for garage
+
+      if not num_expected_kiva_instances[File.basename(hpxml_path)].nil?
+        assert_equal(num_expected_kiva_instances[File.basename(hpxml_path)], num_kiva_instances)
+      else
+        assert_equal(1, num_kiva_instances)
+      end
     end
 
     # Enclosure Foundation Slabs
