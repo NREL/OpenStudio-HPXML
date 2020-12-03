@@ -134,13 +134,41 @@
         </FrameFloors>
         <Windows>
           <Window>
-            <SystemIdentifier id='Windows'/>
-            <Area>35.4</Area>
+            <SystemIdentifier id='WindowNorth'/>
+            <Area>35.0</Area>
+            <Azimuth>0</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='WindowNorthInteriorShading'/>
+              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.67</FractionOperable>
+            <AttachedToWall idref='WallExterior'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='WindowSouth'/>
+            <Area>35.0</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='WindowsInteriorShading'/>
+              <SystemIdentifier id='WindowSouthInteriorShading'/>
+              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+            </InteriorShading>
+            <FractionOperable>0.67</FractionOperable>
+            <AttachedToWall idref='WallExterior'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='WindowWest'/>
+            <Area>35.0</Area>
+            <Azimuth>270</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='WindowWestInteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
@@ -151,7 +179,7 @@
         <Doors>
           <Door>
             <SystemIdentifier id='Door'/>
-            <AttachedToWall idref='WallAdiabatic'/>
+            <AttachedToWall idref='WallExterior'/>
             <Area>20.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>

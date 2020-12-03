@@ -992,24 +992,23 @@ class HPXMLTest < MiniTest::Test
       next unless heating_system.fraction_heat_load_served > 0
       next unless hpxml.heating_systems.size == 1
 
-      if (not heating_system.fan_watts.nil?) || (not heating_system.fan_watts_per_cfm.nil?)
-        # Compare fan power from timeseries output
-        next if hpxml.cooling_systems.size + hpxml.heat_pumps.size > 0 # Skip if other system types (which could result in A) multiple supply fans or B) different supply fan power consumption in the cooling season)
+      next unless (not heating_system.fan_watts.nil?) || (not heating_system.fan_watts_per_cfm.nil?)
+      # Compare fan power from timeseries output
+      next if hpxml.cooling_systems.size + hpxml.heat_pumps.size > 0 # Skip if other system types (which could result in A) multiple supply fans or B) different supply fan power consumption in the cooling season)
 
-        if not heating_system.fan_watts.nil?
-          hpxml_value = heating_system.fan_watts
-        else
-          query = "SELECT SUM(Value) FROM ComponentSizes WHERE Description='User-Specified Heating Supply Air Flow Rate'"
-          heating_cfm = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^3/s', 'cfm')
-          hpxml_value = heating_system.fan_watts_per_cfm * heating_cfm
-        end
-        query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Runtime Fraction' AND ReportingFrequency='Run Period')"
-        avg_rtf = sqlFile.execAndReturnFirstDouble(query).get
-        query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Electricity Rate' AND ReportingFrequency='Run Period')"
-        avg_w = sqlFile.execAndReturnFirstDouble(query).get
-        sql_value = avg_w / avg_rtf
-        assert_in_epsilon(sql_value, hpxml_value, 0.01)
+      if not heating_system.fan_watts.nil?
+        hpxml_value = heating_system.fan_watts
+      else
+        query = "SELECT SUM(Value) FROM ComponentSizes WHERE Description='User-Specified Heating Supply Air Flow Rate'"
+        heating_cfm = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^3/s', 'cfm')
+        hpxml_value = heating_system.fan_watts_per_cfm * heating_cfm
       end
+      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Runtime Fraction' AND ReportingFrequency='Run Period')"
+      avg_rtf = sqlFile.execAndReturnFirstDouble(query).get
+      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Electricity Rate' AND ReportingFrequency='Run Period')"
+      avg_w = sqlFile.execAndReturnFirstDouble(query).get
+      sql_value = avg_w / avg_rtf
+      assert_in_epsilon(sql_value, hpxml_value, 0.01)
     end
 
     # HVAC Cooling Systems
