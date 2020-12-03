@@ -3863,23 +3863,19 @@ class HPXMLFile
   end
 
   def self.set_neighbor_buildings(hpxml, runner, args)
-    [args[:neighbor_front_distance], args[:neighbor_back_distance], args[:neighbor_left_distance], args[:neighbor_right_distance]].each_with_index do |distance, i|
+    nbr_map = { Constants.FacadeFront => [args[:neighbor_front_distance], args[:neighbor_front_height]],
+                Constants.FacadeBack => [args[:neighbor_back_distance], args[:neighbor_back_height]],
+                Constants.FacadeLeft => [args[:neighbor_left_distance], args[:neighbor_left_height]],
+                Constants.FacadeRight => [args[:neighbor_right_distance], args[:neighbor_right_height]] }
+
+    nbr_map.each do |facade, data|
+      distance, neighbor_height = data
       next if distance == 0
 
-      if i == 0 # front
-        azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 0, args[:geometry_orientation], 0)
-      elsif i == 1 # back
-        azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 180, args[:geometry_orientation], 0)
-      elsif i == 2 # left
-        azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 90, args[:geometry_orientation], 0)
-      elsif i == 3 # right
-        azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 270, args[:geometry_orientation], 0)
-      end
+      azimuth = get_azimuth_from_facade(facade, args)
 
-      neighbor_height = [args[:neighbor_front_height], args[:neighbor_back_height], args[:neighbor_left_height], args[:neighbor_right_height]]
-
-      if (distance > 0) && (neighbor_height[i] != Constants.Auto)
-        height = Float(neighbor_height[i])
+      if (distance > 0) && (neighbor_height != Constants.Auto)
+        height = Float(neighbor_height)
       end
 
       hpxml.neighbor_buildings.add(azimuth: azimuth,
@@ -3895,11 +3891,15 @@ class HPXMLFile
   end
 
   def self.set_building_construction(hpxml, runner, args)
-    number_of_conditioned_floors_above_grade = args[:geometry_num_floors_above_grade]
-
-    number_of_conditioned_floors = number_of_conditioned_floors_above_grade
-    if args[:geometry_foundation_type] == HPXML::FoundationTypeBasementConditioned
-      number_of_conditioned_floors += 1
+    if args[:geometry_unit_type] == HPXML::ResidentialTypeApartment
+      number_of_conditioned_floors_above_grade = 1
+      number_of_conditioned_floors = 1
+    else
+      number_of_conditioned_floors_above_grade = args[:geometry_num_floors_above_grade]
+      number_of_conditioned_floors = number_of_conditioned_floors_above_grade
+      if args[:geometry_foundation_type] == HPXML::FoundationTypeBasementConditioned
+        number_of_conditioned_floors += 1
+      end
     end
 
     if args[:geometry_num_bathrooms] != Constants.Auto
@@ -4017,8 +4017,15 @@ class HPXMLFile
         end
       end
 
+      if args[:geometry_roof_type] == 'flat'
+        azimuth = nil
+      else
+        azimuth = get_surface_azimuth(surface, args)
+      end
+
       hpxml.roofs.add(id: valid_attr(surface.name),
                       interior_adjacent_to: get_adjacent_to(surface),
+                      azimuth: azimuth,
                       area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round,
                       roof_type: roof_type,
                       roof_color: roof_color,
@@ -4094,9 +4101,12 @@ class HPXMLFile
         emittance = args[:wall_emittance]
       end
 
+      azimuth = get_surface_azimuth(surface, args)
+
       hpxml.walls.add(id: valid_attr(surface.name),
                       exterior_adjacent_to: exterior_adjacent_to,
                       interior_adjacent_to: interior_adjacent_to,
+                      azimuth: azimuth,
                       wall_type: wall_type,
                       siding: siding,
                       color: color,
@@ -4308,15 +4318,7 @@ class HPXMLFile
           overhangs_distance_to_bottom_of_window = (overhangs_distance_to_top_of_window + sub_surface_height).round
         end
 
-        if sub_surface_facade == Constants.FacadeFront
-          azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 0, args[:geometry_orientation], 0)
-        elsif sub_surface_facade == Constants.FacadeBack
-          azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 180, args[:geometry_orientation], 0)
-        elsif sub_surface_facade == Constants.FacadeLeft
-          azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 90, args[:geometry_orientation], 0)
-        elsif sub_surface_facade == Constants.FacadeRight
-          azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 270, args[:geometry_orientation], 0)
-        end
+        azimuth = get_azimuth_from_facade(sub_surface_facade, args)
 
         if args[:window_interior_shading_winter].is_initialized
           interior_shading_factor_winter = args[:window_interior_shading_winter].get
@@ -5824,6 +5826,25 @@ class HPXMLFile
       return HPXML::LocationOutside
     else
       fail "Unhandled SpaceType value (#{space_type}) for surface '#{surface.name}'."
+    end
+  end
+
+  def self.get_surface_azimuth(surface, args)
+    facade = Geometry.get_facade_for_surface(surface)
+    return get_azimuth_from_facade(facade, args)
+  end
+
+  def self.get_azimuth_from_facade(facade, args)
+    if facade == Constants.FacadeFront
+      azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 0, args[:geometry_orientation], 0)
+    elsif facade == Constants.FacadeBack
+      azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 180, args[:geometry_orientation], 0)
+    elsif facade == Constants.FacadeLeft
+      azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 90, args[:geometry_orientation], 0)
+    elsif facade == Constants.FacadeRight
+      azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 270, args[:geometry_orientation], 0)
+    else
+      fail 'Unexpected facade.'
     end
   end
 end

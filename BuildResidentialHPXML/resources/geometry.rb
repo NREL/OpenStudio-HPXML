@@ -1992,7 +1992,6 @@ class Geometry
     end
 
     num_units_per_floor = num_units / num_floors
-    num_units_per_floor_actual = num_units_per_floor
 
     if (num_floors > 1) && (level != 'Bottom') && (foundation_height != 0.0)
       runner.registerWarning('Unit is not on the bottom floor, setting foundation height to 0.')
