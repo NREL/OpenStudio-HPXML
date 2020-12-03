@@ -151,7 +151,7 @@
         <Doors>
           <Door>
             <SystemIdentifier id='Door'/>
-            <AttachedToWall idref='WallExterior'/>
+            <AttachedToWall idref='WallAdiabatic'/>
             <Area>20.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
