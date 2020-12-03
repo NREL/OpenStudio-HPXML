@@ -163,7 +163,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowWest'/>
-            <Area>35.0</Area>
+            <Area>53.0</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
