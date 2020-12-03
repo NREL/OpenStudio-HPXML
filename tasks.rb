@@ -58,8 +58,8 @@ def create_osws
     'base-dhw-recirc-temperature.osw' => 'base.osw',
     'base-dhw-recirc-timer.osw' => 'base.osw',
     # 'base-dhw-shared-laundry-room.osw' => 'base.osw',
-    # 'base-dhw-shared-water-heater.osw' => 'base.osw',
-    # 'base-dhw-shared-water-heater-recirc.osw' => 'base.osw',
+    'base-dhw-shared-water-heater.osw' => 'base-bldgtype-multifamily.osw',
+    # 'base-dhw-shared-water-heater-recirc.osw' => 'base.osw', $ Not supporting shared recirculation for now
     'base-dhw-solar-direct-evacuated-tube.osw' => 'base.osw',
     'base-dhw-solar-direct-flat-plate.osw' => 'base.osw',
     'base-dhw-solar-direct-ics.osw' => 'base.osw',
@@ -83,7 +83,6 @@ def create_osws
     'base-dhw-tank-wood.osw' => 'base.osw',
     'base-enclosure-2stories.osw' => 'base.osw',
     'base-enclosure-2stories-garage.osw' => 'base.osw',
-    # 'base-enclosure-attached-multifamily.osw' => 'base.osw',
     'base-enclosure-beds-1.osw' => 'base.osw',
     'base-enclosure-beds-2.osw' => 'base.osw',
     'base-enclosure-beds-4.osw' => 'base.osw',
@@ -95,10 +94,10 @@ def create_osws
     'base-enclosure-infil-cfm50.osw' => 'base.osw',
     'base-enclosure-infil-flue.osw' => 'base.osw',
     'base-enclosure-infil-natural-ach.osw' => 'base.osw',
-    # 'base-enclosure-other-heated-space.osw' => 'base.osw', # TODO: uncomment when we can model multifamily with ambient foundation?
-    # 'base-enclosure-other-housing-unit.osw' => 'base-foundation-ambient.osw', # TODO: uncomment when we can model multifamily with ambient foundation?
-    # 'base-enclosure-other-multifamily-buffer-space.osw' => 'base.osw', # TODO: uncomment when we can model multifamily with ambient foundation?
-    # 'base-enclosure-other-non-freezing-space.osw' => 'base.osw', # TODO: uncomment when we can model multifamily with ambient foundation?
+    # 'base-enclosure-other-heated-space.osw' => 'base.osw', # Not supporting units adjacent to "other heated space" for now
+    # 'base-enclosure-other-housing-unit.osw' => 'base.osw', # Not supporting units adjacent to "other housing unit" for now
+    # 'base-enclosure-other-multifamily-buffer-space.osw' => 'base.osw', # Not supporting units adjacent to "multifamily buffer space" for now
+    # 'base-enclosure-other-non-freezing-space.osw' => 'base.osw', # Not supporting units adjacent to "non freezing space" for now
     'base-enclosure-overhangs.osw' => 'base.osw',
     # 'base-enclosure-rooftypes.osw' => 'base.osw',
     # 'base-enclosure-skylights.osw' => 'base.osw', # There are no front roof surfaces, but 15.0 ft^2 of skylights were specified.
@@ -147,7 +146,6 @@ def create_osws
     'base-hvac-fireplace-wood-only.osw' => 'base.osw',
     'base-hvac-fixed-heater-gas-only.osw' => 'base.osw',
     'base-hvac-floor-furnace-propane-only.osw' => 'base.osw',
-    # 'base-hvac-flowrate.osw' => 'base.osw', # Not going to support in the measure
     'base-hvac-furnace-elec-central-ac-1-speed.osw' => 'base.osw',
     'base-hvac-furnace-elec-only.osw' => 'base.osw',
     'base-hvac-furnace-gas-central-ac-2-speed.osw' => 'base.osw',
@@ -196,13 +194,12 @@ def create_osws
     'base-mechvent-erv.osw' => 'base.osw',
     'base-mechvent-erv-atre-asre.osw' => 'base.osw',
     'base-mechvent-exhaust.osw' => 'base.osw',
-    # 'base-mechvent-exhaust-rated-flow-rate.osw' => 'base.osw', # No difference
     'base-mechvent-hrv.osw' => 'base.osw',
     'base-mechvent-hrv-asre.osw' => 'base.osw',
-    # 'base-mechvent-multiple.osw' => 'base.osw',
-    # 'base-mechvent-shared.osw' => 'base.osw',
-    # 'base-mechvent-shared-multiple.osw' => 'base.osw',
-    # 'base-mechvent-shared-preconditioning.osw' => 'base.osw',
+    # 'base-mechvent-multiple.osw' => 'base.osw', # Not going to support > 2 MV systems
+    'base-mechvent-shared.osw' => 'base-bldgtype-multifamily.osw',
+    # 'base-mechvent-shared-multiple.osw' => 'base.osw', # Not going to support > 2 MV systems
+    'base-mechvent-shared-preconditioning.osw' => 'base-mechvent-shared.osw',
     'base-mechvent-supply.osw' => 'base.osw',
     'base-mechvent-whole-house-fan.osw' => 'base.osw',
     'base-misc-defaults.osw' => 'base.osw',
@@ -212,7 +209,7 @@ def create_osws
     'base-misc-neighbor-shading.osw' => 'base.osw',
     'base-misc-usage-multiplier.osw' => 'base.osw',
     'base-pv.osw' => 'base.osw',
-    # 'base-pv-shared.osw' => 'base.osw',
+    'base-pv-shared.osw' => 'base-bldgtype-multifamily.osw',
     'base-simcontrol-calendar-year-custom.osw' => 'base.osw',
     'base-simcontrol-daylight-saving-custom.osw' => 'base.osw',
     'base-simcontrol-daylight-saving-disabled.osw' => 'base.osw',
@@ -225,14 +222,10 @@ def create_osws
     'extra-auto.osw' => 'base.osw',
     'extra-pv-roofpitch.osw' => 'base.osw',
     'extra-dhw-solar-latitude.osw' => 'base.osw',
-    'extra-dhw-shared-water-heater.osw' => 'base-bldgtype-single-family-attached.osw',
     'extra-second-refrigerator.osw' => 'base.osw',
     'extra-second-heating-system-portable-heater.osw' => 'base.osw',
     'extra-second-heating-system-fireplace.osw' => 'base.osw',
-    'extra-pv-shared.osw' => 'base-bldgtype-single-family-attached.osw',
     'extra-enclosure-garage-partially-protruded.osw' => 'base.osw',
-    'extra-mechvent-shared.osw' => 'base-bldgtype-single-family-attached.osw',
-    'extra-mechvent-shared-preconditioning.osw' => 'extra-mechvent-shared.osw',
     'extra-vacancy-6-months.osw' => 'base-schedules-stochastic.osw',
     'extra-schedules-random-seed.osw' => 'base-schedules-stochastic.osw',
     'extra-hvac-programmable-thermostat.osw' => 'base.osw',
@@ -495,7 +488,7 @@ def get_values(osw_file, step)
     step.setArgument('mech_vent_sensible_recovery_efficiency_type', 'Unadjusted')
     step.setArgument('mech_vent_sensible_recovery_efficiency', 0.72)
     step.setArgument('mech_vent_fan_power', 30)
-    step.setArgument('mech_vent_is_shared_system', false)
+    step.setArgument('mech_vent_num_units_served', 1)
     step.setArgument('mech_vent_fan_type_2', 'none')
     step.setArgument('mech_vent_flow_rate_2', 110)
     step.setArgument('mech_vent_hours_in_operation_2', 24)
@@ -522,7 +515,7 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_jacket_rvalue', 0)
     step.setArgument('water_heater_setpoint_temperature', '125')
     step.setArgument('water_heater_has_flue_or_chimney', false)
-    step.setArgument('water_heater_is_shared_system', false)
+    step.setArgument('water_heater_num_units_served', 1)
     step.setArgument('dhw_distribution_system_type', HPXML::DHWDistTypeStandard)
     step.setArgument('dhw_distribution_standard_piping_length', '50')
     step.setArgument('dhw_distribution_recirc_control_type', HPXML::DHWRecirControlTypeNone)
@@ -554,7 +547,7 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_max_power_output_1', 4000)
     step.setArgument('pv_system_inverter_efficiency_1', 0.96)
     step.setArgument('pv_system_system_losses_fraction_1', 0.14)
-    step.setArgument('pv_system_is_shared_1', false)
+    step.setArgument('pv_system_num_units_served_1', 1)
     step.setArgument('pv_system_module_type_2', 'none')
     step.setArgument('pv_system_location_2', Constants.Auto)
     step.setArgument('pv_system_tracking_2', Constants.Auto)
@@ -563,7 +556,7 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_max_power_output_2', 4000)
     step.setArgument('pv_system_inverter_efficiency_2', 0.96)
     step.setArgument('pv_system_system_losses_fraction_2', 0.14)
-    step.setArgument('pv_system_is_shared_2', false)
+    step.setArgument('pv_system_num_units_served_2', 1)
     step.setArgument('lighting_fraction_cfl_interior', 0.4)
     step.setArgument('lighting_fraction_lfl_interior', 0.1)
     step.setArgument('lighting_fraction_led_interior', 0.25)
@@ -710,6 +703,7 @@ def get_values(osw_file, step)
     step.setArgument('geometry_level', 'Middle')
     step.setArgument('geometry_horizontal_location', 'Middle')
     step.setArgument('geometry_building_num_units', 50)
+    step.setArgument('geometry_building_num_bedrooms', 50 * 3)
     step.setArgument('geometry_num_floors_above_grade', 5)
     step.setArgument('window_front_wwr', 0.18)
     step.setArgument('window_back_wwr', 0.18)
@@ -865,6 +859,13 @@ def get_values(osw_file, step)
   elsif ['base-dhw-recirc-timer.osw'].include? osw_file
     step.setArgument('dhw_distribution_system_type', HPXML::DHWDistTypeRecirc)
     step.setArgument('dhw_distribution_recirc_control_type', HPXML::DHWRecirControlTypeTimer)
+  elsif ['base-dhw-shared-water-heater.osw'].include? osw_file
+    step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
+    step.setArgument('water_heater_num_units_served', 6)
+    step.setArgument('water_heater_tank_volume', '120')
+    step.setArgument('water_heater_heating_capacity', '40000')
+    step.setArgument('water_heater_efficiency_ef', 0.59)
+    step.setArgument('water_heater_recovery_efficiency', '0.76')
   elsif ['base-dhw-solar-direct-evacuated-tube.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_storage_volume', '60')
@@ -1009,8 +1010,6 @@ def get_values(osw_file, step)
     step.setArgument('ducts_supply_surface_area', '112.5')
     step.setArgument('ducts_return_surface_area', '37.5')
     step.setArgument('plug_loads_other_annual_kwh', '2957.5')
-  elsif ['base-enclosure-attached-multifamily.osw'].include? osw_file
-
   elsif ['base-enclosure-beds-1.osw'].include? osw_file
     step.setArgument('geometry_num_bedrooms', 1)
     step.setArgument('geometry_num_bathrooms', '1')
@@ -1546,6 +1545,22 @@ def get_values(osw_file, step)
     step.setArgument('mech_vent_sensible_recovery_efficiency_type', 'Adjusted')
     step.setArgument('mech_vent_sensible_recovery_efficiency', 0.79)
     step.setArgument('mech_vent_fan_power', 60)
+  elsif ['base-mechvent-shared.osw'].include? osw_file
+    step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeSupply)
+    step.setArgument('mech_vent_flow_rate', 800)
+    step.setArgument('mech_vent_fan_power', 240)
+    step.setArgument('mech_vent_num_units_served', 10)
+    step.setArgument('shared_mech_vent_frac_recirculation', 0.5)
+    step.setArgument('mech_vent_fan_type_2', HPXML::MechVentTypeExhaust)
+    step.setArgument('mech_vent_flow_rate_2', 72)
+    step.setArgument('mech_vent_fan_power_2', 26)
+  elsif ['base-mechvent-shared-preconditioning.osw'].include? osw_file
+    step.setArgument('shared_mech_vent_preheating_fuel', HPXML::FuelTypeNaturalGas)
+    step.setArgument('shared_mech_vent_preheating_efficiency', 0.92)
+    step.setArgument('shared_mech_vent_preheating_fraction_heat_load_served', 0.7)
+    step.setArgument('shared_mech_vent_precooling_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('shared_mech_vent_precooling_efficiency', 4.0)
+    step.setArgument('shared_mech_vent_precooling_fraction_cool_load_served', 0.8)
   elsif ['base-mechvent-supply.osw'].include? osw_file
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeSupply)
   elsif ['base-mechvent-whole-house-fan.osw'].include? osw_file
@@ -1714,6 +1729,16 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_tracking_2', HPXML::PVTrackingTypeFixed)
     step.setArgument('pv_system_array_azimuth_2', 90)
     step.setArgument('pv_system_max_power_output_2', 1500)
+  elsif ['base-pv-shared.osw'].include? osw_file
+    step.setArgument('pv_system_num_units_served_1', 6)
+    step.setArgument('pv_system_location_1', HPXML::LocationGround)
+    step.setArgument('pv_system_module_type_1', HPXML::PVModuleTypeStandard)
+    step.setArgument('pv_system_tracking_1', HPXML::PVTrackingTypeFixed)
+    step.setArgument('pv_system_array_azimuth_1', 225)
+    step.setArgument('pv_system_array_tilt_1', '30')
+    step.setArgument('pv_system_max_power_output_1', 30000)
+    step.setArgument('pv_system_inverter_efficiency_1', 0.96)
+    step.setArgument('pv_system_system_losses_fraction_1', 0.14)
   elsif ['base-simcontrol-calendar-year-custom.osw'].include? osw_file
     step.setArgument('simulation_control_run_period_calendar_year', 2008)
   elsif ['base-simcontrol-daylight-saving-custom.osw'].include? osw_file
@@ -1759,8 +1784,6 @@ def get_values(osw_file, step)
   elsif ['extra-dhw-solar-latitude.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_tilt', 'latitude-15')
-  elsif ['extra-dhw-shared-water-heater.osw'].include? osw_file
-    step.setArgument('water_heater_is_shared_system', true)
   elsif ['extra-second-refrigerator.osw'].include? osw_file
     step.setArgument('extra_refrigerator_present', true)
   elsif ['extra-second-heating-system-portable-heater.osw'].include? osw_file
@@ -1780,30 +1803,9 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_fraction_heat_load_served', 0.75)
     step.setArgument('heating_system_type_2', HPXML::HVACTypeFireplace)
     step.setArgument('heating_system_heating_capacity_2', '16000.0')
-  elsif ['extra-pv-shared.osw'].include? osw_file
-    step.setArgument('geometry_building_num_bedrooms', 9)
-    step.setArgument('pv_system_module_type_1', HPXML::PVModuleTypeStandard)
-    step.setArgument('pv_system_is_shared_1', true)
   elsif ['extra-enclosure-garage-partially-protruded.osw'].include? osw_file
     step.setArgument('geometry_garage_width', 12)
     step.setArgument('geometry_garage_protrusion', 0.5)
-  elsif ['extra-mechvent-shared.osw'].include? osw_file
-    step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeSupply)
-    step.setArgument('mech_vent_flow_rate', 800)
-    step.setArgument('mech_vent_fan_power', 240)
-    step.setArgument('mech_vent_is_shared_system', true)
-    step.setArgument('shared_mech_vent_in_unit_flow_rate', 80.0)
-    step.setArgument('shared_mech_vent_frac_recirculation', 0.5)
-    step.setArgument('mech_vent_fan_type_2', HPXML::MechVentTypeExhaust)
-    step.setArgument('mech_vent_flow_rate_2', 72)
-    step.setArgument('mech_vent_fan_power_2', 26)
-  elsif ['extra-mechvent-shared-preconditioning.osw'].include? osw_file
-    step.setArgument('shared_mech_vent_preheating_fuel', HPXML::FuelTypeNaturalGas)
-    step.setArgument('shared_mech_vent_preheating_efficiency', 0.92)
-    step.setArgument('shared_mech_vent_preheating_fraction_heat_load_served', 0.7)
-    step.setArgument('shared_mech_vent_precooling_fuel', HPXML::FuelTypeElectricity)
-    step.setArgument('shared_mech_vent_precooling_efficiency', 4.0)
-    step.setArgument('shared_mech_vent_precooling_fraction_cool_load_served', 0.8)
   elsif ['extra-vacancy-6-months.osw'].include? osw_file
     step.setArgument('schedules_vacancy_begin_month', 1)
     step.setArgument('schedules_vacancy_begin_day_of_month', 1)
