@@ -138,6 +138,7 @@ def create_hpxmls
     'base-atticroof-radiant-barrier.xml' => 'base-location-dallas-tx.xml',
     'base-atticroof-vented.xml' => 'base.xml',
     'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
+    'base-bldgtype-multifamily.xml' => 'base.xml',
     'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
     'base-dhw-combi-tankless-outside.xml' => 'base-dhw-combi-tankless.xml',
     'base-dhw-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
@@ -632,6 +633,11 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_bathrooms = 2
     hpxml.building_construction.conditioned_floor_area = 2700
     hpxml.building_construction.conditioned_building_volume = 2700 * 8
+  elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
+    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeApartment
+    hpxml.building_construction.number_of_conditioned_floors = 1
+    hpxml.building_construction.conditioned_floor_area = 900
+    hpxml.building_construction.conditioned_building_volume = 900 * 8
   elsif ['base-enclosure-beds-1.xml'].include? hpxml_file
     hpxml.building_construction.number_of_bedrooms = 1
     hpxml.building_construction.number_of_bathrooms = 1
@@ -797,6 +803,8 @@ def set_hpxml_attics(hpxml_file, hpxml)
     hpxml.attics.add(id: 'UnventedAttic',
                      attic_type: HPXML::AtticTypeUnvented,
                      within_infiltration_volume: false)
+  elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
+    hpxml.attics.clear
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
     hpxml.attics.clear
     hpxml.attics.add(id: 'CathedralCeiling',
@@ -827,6 +835,8 @@ def set_hpxml_foundations(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.foundations.add(id: 'ConditionedBasement',
                           foundation_type: HPXML::FoundationTypeBasementConditioned)
+  elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
+    hpxml.foundations.clear
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
     hpxml.foundations.clear
     hpxml.foundations.add(id: 'VentedCrawlspace',
@@ -897,6 +907,8 @@ def set_hpxml_roofs(hpxml_file, hpxml)
                     pitch: 6,
                     radiant_barrier: false,
                     insulation_assembly_r_value: 2.3)
+  elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
+    hpxml.roofs.clear
   elsif ['base-enclosure-rooftypes.xml'].include? hpxml_file
     roof_types = [[HPXML::RoofTypeClayTile, HPXML::ColorLight],
                   [HPXML::RoofTypeMetal, HPXML::ColorReflective],
@@ -1041,6 +1053,8 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                          solar_absorptance: 0.7,
                          emittance: 0.92,
                          insulation_assembly_r_value: 23.0)
+  elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
+    hpxml.rim_joists.clear
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
     siding_types = [[HPXML::SidingTypeAluminum, HPXML::ColorDark],
                     [HPXML::SidingTypeBrick, HPXML::ColorReflective],
@@ -1221,6 +1235,25 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     wall_type: HPXML::WallTypeWoodStud,
                     siding: HPXML::SidingTypeWood,
                     area: 290,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 4.0)
+  elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
+    hpxml.walls.clear
+    hpxml.walls.add(id: 'WallExterior',
+                    exterior_adjacent_to: HPXML::LocationOutside,
+                    interior_adjacent_to: HPXML::LocationAtticUnvented,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
+                    area: 196,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 23.0)
+    hpxml.walls.add(id: 'WallAdiabatic',
+                    exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
+                    interior_adjacent_to: HPXML::LocationLivingSpace,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    area: 784,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 4.0)
@@ -1539,19 +1572,21 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
       hpxml.foundation_walls[i].insulation_interior_distance_to_bottom = 7.25
     end
   elsif ['base.xml'].include? hpxml_file
-    hpxml. foundation_walls.add(id: 'FoundationWall',
-                                exterior_adjacent_to: HPXML::LocationGround,
-                                interior_adjacent_to: HPXML::LocationBasementConditioned,
-                                height: 8,
-                                area: 1200,
-                                thickness: 8,
-                                depth_below_grade: 7,
-                                insulation_interior_r_value: 0,
-                                insulation_interior_distance_to_top: 0,
-                                insulation_interior_distance_to_bottom: 0,
-                                insulation_exterior_distance_to_top: 0,
-                                insulation_exterior_distance_to_bottom: 8,
-                                insulation_exterior_r_value: 8.9)
+    hpxml.foundation_walls.add(id: 'FoundationWall',
+                               exterior_adjacent_to: HPXML::LocationGround,
+                               interior_adjacent_to: HPXML::LocationBasementConditioned,
+                               height: 8,
+                               area: 1200,
+                               thickness: 8,
+                               depth_below_grade: 7,
+                               insulation_interior_r_value: 0,
+                               insulation_interior_distance_to_top: 0,
+                               insulation_interior_distance_to_bottom: 0,
+                               insulation_exterior_distance_to_top: 0,
+                               insulation_exterior_distance_to_bottom: 8,
+                               insulation_exterior_r_value: 8.9)
+  elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
+    hpxml.foundation_walls.clear
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
     hpxml.foundation_walls.add(id: 'FoundationWallOtherNonFreezingSpace',
                                exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
@@ -1845,6 +1880,20 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1350,
                            insulation_assembly_r_value: 39.3)
+  elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
+    hpxml.frame_floors.clear
+    hpxml.frame_floors.add(id: 'FloorAdiabatic',
+                           exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
+                           area: 900,
+                           insulation_assembly_r_value: 2.1,
+                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
+    hpxml.frame_floors.add(id: 'CeilingAdiabatic',
+                           exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
+                           area: 900,
+                           insulation_assembly_r_value: 2.1,
+                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceAbove)
   elsif ['base-atticroof-flat.xml',
          'base-atticroof-cathedral.xml'].include? hpxml_file
     hpxml.frame_floors.delete_at(0)
@@ -2029,6 +2078,8 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                     under_slab_insulation_r_value: 0,
                     carpet_fraction: 0,
                     carpet_r_value: 0)
+  elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
+    hpxml.slabs.clear
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.slabs[0].interior_adjacent_to = HPXML::LocationBasementUnconditioned
   elsif ['base-foundation-conditioned-basement-slab-insulation.xml'].include? hpxml_file
@@ -2275,6 +2326,17 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
+  elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
+    hpxml.windows.clear
+    hpxml.windows.add(id: 'Windows',
+                      area: 35.4,
+                      azimuth: 180,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'WallExterior')
   elsif ['base-enclosure-overhangs.xml'].include? hpxml_file
     hpxml.windows[0].overhangs_depth = 2.5
     hpxml.windows[0].overhangs_distance_to_top_of_window = 0
@@ -2519,6 +2581,14 @@ def set_hpxml_doors(hpxml_file, hpxml)
     hpxml.doors.add(id: 'DoorSouth',
                     wall_idref: 'Wall',
                     area: 40,
+                    azimuth: 180,
+                    r_value: 4.4)
+  elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
+    hpxml.doors.clear
+    # FIXME: Door should be to interior corridor or exterior?
+    hpxml.doors.add(id: 'Door',
+                    wall_idref: 'WallExterior',
+                    area: 80, # FIXME: Why so large?
                     azimuth: 180,
                     r_value: 4.4)
   elsif ['base-enclosure-garage.xml',
