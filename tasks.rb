@@ -2054,6 +2054,11 @@ def create_hpxmls
     'base-atticroof-vented.xml' => 'base.xml',
     'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
     'base-bldgtype-multifamily.xml' => 'base.xml',
+    'base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-adjacent-to-other-heated-space.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-adjacent-to-multiple.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-boiler-chiller-baseboard.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml' => 'base-bldgtype-multifamily-shared-boiler-chiller-baseboard.xml',
     'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil-ducted.xml' => 'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml',
@@ -2134,15 +2139,11 @@ def create_hpxmls
     'base-dhw-jacket-hpwh.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-enclosure-2stories.xml' => 'base.xml',
     'base-enclosure-2stories-garage.xml' => 'base-enclosure-2stories.xml',
-    'base-enclosure-other-housing-unit.xml' => 'base-foundation-ambient.xml',
-    'base-enclosure-other-heated-space.xml' => 'base-foundation-ambient.xml',
-    'base-enclosure-other-non-freezing-space.xml' => 'base-foundation-ambient.xml',
-    'base-enclosure-other-multifamily-buffer-space.xml' => 'base-foundation-ambient.xml',
     'base-enclosure-beds-1.xml' => 'base.xml',
     'base-enclosure-beds-2.xml' => 'base.xml',
     'base-enclosure-beds-4.xml' => 'base.xml',
     'base-enclosure-beds-5.xml' => 'base.xml',
-    # 'base-enclosure-common-surfaces.xml' => 'base-enclosure-attached-multifamily.xml', # TODO: Use SFA model instead
+    # 'base-enclosure-common-surfaces.xml' => 'base-enclosure-attached-multifamily.xml', # TODO: Use base-foundation-vented-crawlspace.xml instead
     'base-enclosure-garage.xml' => 'base.xml',
     'base-enclosure-infil-ach-house-pressure.xml' => 'base.xml',
     'base-enclosure-infil-cfm-house-pressure.xml' => 'base-enclosure-infil-cfm50.xml',
@@ -2156,7 +2157,6 @@ def create_hpxmls
     'base-enclosure-walltypes.xml' => 'base.xml',
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
-    # 'base-enclosure-attached-multifamily.xml' => 'base.xml', # TODO: Change to e.g. base-bldgtype-multifamily-all-space-types.xml
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-conditioned-basement-slab-insulation.xml' => 'base.xml',
@@ -2254,7 +2254,7 @@ def create_hpxmls
     'base-mechvent-supply.xml' => 'base.xml',
     'base-mechvent-whole-house-fan.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
-    'base-misc-loads-large-uncommon.xml' => 'base-enclosure-garage.xml',
+    'base-misc-loads-large-uncommon.xml' => 'base.xml',
     'base-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-misc-loads-none.xml' => 'base.xml',
     'base-misc-neighbor-shading.xml' => 'base.xml',
@@ -2600,12 +2600,6 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.conditioned_building_volume = nil
     hpxml.building_construction.average_ceiling_height = nil
     hpxml.building_construction.number_of_bathrooms = nil
-  elsif ['base-enclosure-attached-multifamily.xml',
-         'base-enclosure-other-housing-unit.xml',
-         'base-enclosure-other-heated-space.xml',
-         'base-enclosure-other-non-freezing-space.xml',
-         'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeApartment
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
   elsif ['invalid_files/enclosure-floor-area-exceeds-cfa.xml'].include? hpxml_file
@@ -2737,11 +2731,6 @@ def set_hpxml_attics(hpxml_file, hpxml)
     hpxml.attics.clear
     hpxml.attics.add(id: 'FlatRoof',
                      attic_type: HPXML::AtticTypeFlatRoof)
-  elsif ['base-enclosure-other-housing-unit.xml',
-         'base-enclosure-other-heated-space.xml',
-         'base-enclosure-other-non-freezing-space.xml',
-         'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    hpxml.attics.clear
   elsif ['base-atticroof-vented.xml'].include? hpxml_file
     hpxml.attics.clear
     hpxml.attics.add(id: 'VentedAttic',
@@ -2886,11 +2875,6 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs[0].area += 670
   elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
     hpxml.roofs[0].insulation_assembly_r_value = 25.8
-  elsif ['base-enclosure-other-housing-unit.xml',
-         'base-enclosure-other-heated-space.xml',
-         'base-enclosure-other-non-freezing-space.xml',
-         'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    hpxml.roofs.clear
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.roofs.size
       hpxml.roofs[n - 1].area /= 9.0
@@ -2996,9 +2980,6 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
   elsif ['base-foundation-ambient.xml',
          'base-foundation-slab.xml'].include? hpxml_file
     hpxml.rim_joists.clear
-  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.rim_joists[0].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
-    hpxml.rim_joists[0].siding = nil
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     for i in 0..hpxml.rim_joists.size - 1
       hpxml.rim_joists[i].interior_adjacent_to = HPXML::LocationBasementUnconditioned
@@ -3161,7 +3142,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     insulation_assembly_r_value: 4.0)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.walls.clear
-    hpxml.walls.add(id: 'WallExterior',
+    hpxml.walls.add(id: 'Wall',
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -3170,7 +3151,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 23.0)
-    hpxml.walls.add(id: 'WallAdiabatic',
+    hpxml.walls.add(id: 'WallOther',
                     exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -3213,7 +3194,8 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 4.0)
-  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
+    hpxml.walls[1].delete
     hpxml.walls.add(id: 'WallOtherHeatedSpace',
                     exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -3243,14 +3225,6 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
                     area: 100,
-                    solar_absorptance: 0.7,
-                    emittance: 0.92,
-                    insulation_assembly_r_value: 4.0)
-    hpxml.walls.add(id: 'WallAtticLivingWall',
-                    exterior_adjacent_to: HPXML::LocationAtticUnvented,
-                    interior_adjacent_to: HPXML::LocationLivingSpace,
-                    wall_type: HPXML::WallTypeWoodStud,
-                    area: 50,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 4.0)
@@ -3363,32 +3337,18 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     insulation_assembly_r_value: 4)
   elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
     hpxml.walls[1].insulation_assembly_r_value = 23
-  elsif ['base-enclosure-other-housing-unit.xml',
-         'base-enclosure-other-heated-space.xml',
-         'base-enclosure-other-non-freezing-space.xml',
-         'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    hpxml.walls.delete_at(1)
-    hpxml.walls << hpxml.walls[0].dup
-    hpxml.walls[0].area *= 0.35
-    hpxml.walls[-1].area *= 0.65
-    hpxml.walls[-1].siding = nil
-    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
-      hpxml.walls[-1].id = 'WallOtherHousingUnit'
-      hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherHousingUnit
-      hpxml.walls[-1].insulation_assembly_r_value = 4
-    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
-      hpxml.walls[-1].id = 'WallOtherHeatedSpace'
-      hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
-      hpxml.walls[-1].insulation_assembly_r_value = 23
-    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
-      hpxml.walls[-1].id = 'WallOtherNonFreezingSpace'
-      hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
-      hpxml.walls[-1].insulation_assembly_r_value = 23
-    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-      hpxml.walls[-1].id = 'WallOtherMultifamilyBufferSpace'
-      hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
-      hpxml.walls[-1].insulation_assembly_r_value = 23
-    end
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'].include? hpxml_file
+    hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherHousingUnit
+    hpxml.walls[-1].insulation_assembly_r_value = 4
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-heated-space.xml'].include? hpxml_file
+    hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
+    hpxml.walls[-1].insulation_assembly_r_value = 23
+  elsif ['base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml'].include? hpxml_file
+    hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
+    hpxml.walls[-1].insulation_assembly_r_value = 23
+  elsif ['base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml'].include? hpxml_file
+    hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
+    hpxml.walls[-1].insulation_assembly_r_value = 23
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.walls.size
       hpxml.walls[n - 1].area /= 9.0
@@ -3508,46 +3468,6 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_r_value: 8.9)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.foundation_walls.clear
-  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.foundation_walls.add(id: 'FoundationWallOtherNonFreezingSpace',
-                               exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
-                               interior_adjacent_to: HPXML::LocationBasementConditioned,
-                               height: 8,
-                               area: 480,
-                               thickness: 8,
-                               depth_below_grade: 7,
-                               insulation_interior_r_value: 0,
-                               insulation_interior_distance_to_top: 0,
-                               insulation_interior_distance_to_bottom: 0,
-                               insulation_exterior_distance_to_top: 0,
-                               insulation_exterior_distance_to_bottom: 8,
-                               insulation_exterior_r_value: 8.9)
-    hpxml.foundation_walls.add(id: 'FoundationWallOtherMultifamilyBufferSpace',
-                               exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
-                               interior_adjacent_to: HPXML::LocationBasementConditioned,
-                               height: 4,
-                               area: 120,
-                               thickness: 8,
-                               depth_below_grade: 3,
-                               insulation_interior_r_value: 0,
-                               insulation_interior_distance_to_top: 0,
-                               insulation_interior_distance_to_bottom: 0,
-                               insulation_exterior_distance_to_top: 0,
-                               insulation_exterior_distance_to_bottom: 4,
-                               insulation_exterior_r_value: 8.9)
-    hpxml.foundation_walls.add(id: 'FoundationWallOtherHeatedSpace',
-                               exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
-                               interior_adjacent_to: HPXML::LocationBasementConditioned,
-                               height: 2,
-                               area: 60,
-                               thickness: 8,
-                               depth_below_grade: 1,
-                               insulation_interior_r_value: 0,
-                               insulation_interior_distance_to_top: 0,
-                               insulation_interior_distance_to_bottom: 0,
-                               insulation_exterior_distance_to_top: 0,
-                               insulation_exterior_distance_to_bottom: 2,
-                               insulation_exterior_r_value: 8.9)
   elsif ['base-foundation-conditioned-basement-wall-interior-insulation.xml'].include? hpxml_file
     hpxml.foundation_walls[0].insulation_interior_distance_to_top = 0
     hpxml.foundation_walls[0].insulation_interior_distance_to_bottom = 8
@@ -3869,39 +3789,12 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            insulation_assembly_r_value: 39.3)
   elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
     hpxml.frame_floors[0].insulation_assembly_r_value = 2.1
-  elsif ['base-enclosure-other-housing-unit.xml',
-         'base-enclosure-other-heated-space.xml',
-         'base-enclosure-other-non-freezing-space.xml',
-         'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    hpxml.frame_floors.clear
-    hpxml.frame_floors.add(interior_adjacent_to: HPXML::LocationLivingSpace,
-                           area: 1350,
-                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceAbove)
-    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
-      hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHousingUnit
-      hpxml.frame_floors[0].id = 'FloorBelowOtherHousingUnit'
-      hpxml.frame_floors[0].insulation_assembly_r_value = 2.1
-    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
-      hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
-      hpxml.frame_floors[0].id = 'FloorBelowOtherHeatedSpace'
-      hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
-    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
-      hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
-      hpxml.frame_floors[0].id = 'FloorBelowOtherNonFreezingSpace'
-      hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
-    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-      hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
-      hpxml.frame_floors[0].id = 'FloorBelowOtherMultifamilyBufferSpace'
-      hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
-    end
-    hpxml.frame_floors << hpxml.frame_floors[0].dup
-    hpxml.frame_floors[1].id = hpxml.frame_floors[0].id.gsub('Below', 'Above')
-    hpxml.frame_floors[1].other_space_above_or_below = HPXML::FrameFloorOtherSpaceBelow
-  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
+    hpxml.frame_floors[0].delete
     hpxml.frame_floors.add(id: 'FloorAboveNonFreezingSpace',
                            exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
-                           area: 1000,
+                           area: 550,
                            insulation_assembly_r_value: 18.7,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
     hpxml.frame_floors.add(id: 'FloorAboveMultifamilyBuffer',
@@ -4257,7 +4150,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       fraction_operable: 0.67,
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
-                      wall_idref: 'WallExterior')
+                      wall_idref: 'Wall')
     hpxml.windows.add(id: 'WindowSouth',
                       area: 35.0,
                       azimuth: 180,
@@ -4266,7 +4159,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       fraction_operable: 0.67,
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
-                      wall_idref: 'WallExterior')
+                      wall_idref: 'Wall')
     hpxml.windows.add(id: 'WindowWest',
                       area: 53.0,
                       azimuth: 270,
@@ -4275,7 +4168,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       fraction_operable: 0.67,
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
-                      wall_idref: 'WallExterior')
+                      wall_idref: 'Wall')
   elsif ['base-enclosure-overhangs.xml'].include? hpxml_file
     hpxml.windows[0].overhangs_depth = 2.5
     hpxml.windows[0].overhangs_distance_to_top_of_window = 0
@@ -4376,10 +4269,10 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       shgc: 0.45,
                       fraction_operable: 0.0,
                       wall_idref: 'FoundationWall')
-  elsif ['base-enclosure-other-housing-unit.xml',
-         'base-enclosure-other-heated-space.xml',
-         'base-enclosure-other-non-freezing-space.xml',
-         'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml',
+         'base-bldgtype-multifamily-adjacent-to-other-heated-space.xml',
+         'base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml',
+         'base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml'].include? hpxml_file
     hpxml.windows.each do |window|
       window.area *= 0.35
     end
@@ -4448,8 +4341,8 @@ def set_hpxml_windows(hpxml_file, hpxml)
       window.interior_shading_factor_winter = nil
       window.fraction_operable = nil
     end
-  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.windows.add(id: 'InteriorWindow',
+  elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
+    hpxml.windows.add(id: 'WindowOtherMultifamilyBufferSpace',
                       area: 50,
                       azimuth: 270,
                       ufactor: 0.33,
@@ -4525,7 +4418,7 @@ def set_hpxml_doors(hpxml_file, hpxml)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.doors.clear
     hpxml.doors.add(id: 'Door',
-                    wall_idref: 'WallExterior',
+                    wall_idref: 'Wall',
                     area: 20,
                     azimuth: 180,
                     r_value: 4.4)
@@ -4536,46 +4429,26 @@ def set_hpxml_doors(hpxml_file, hpxml)
                     area: 70,
                     azimuth: 180,
                     r_value: 4.4)
-  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.doors.add(id: 'DoorOnWallOtherHeatedSpace',
+  elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
+    hpxml.doors.add(id: 'DoorOtherHeatedSpace',
                     wall_idref: 'WallOtherHeatedSpace',
-                    area: 40,
+                    area: 20,
                     azimuth: 0,
                     r_value: 4.4)
-    hpxml.doors.add(id: 'DoorOnFoundationWallOtherNonFreezingSpace',
-                    wall_idref: 'FoundationWallOtherNonFreezingSpace',
-                    area: 40,
-                    azimuth: 0,
-                    r_value: 4.4)
-    hpxml.doors.add(id: 'DoorOnWallOtherHousingUnit',
+    hpxml.doors.add(id: 'DoorOtherHousingUnit',
                     wall_idref: 'WallOtherHousingUnit',
-                    area: 40,
+                    area: 20,
                     azimuth: 0,
                     r_value: 4.4)
-    hpxml.doors.add(id: 'DoorOnWallAtticLivingWall',
-                    wall_idref: 'WallAtticLivingWall',
-                    area: 10,
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml',
+         'base-bldgtype-multifamily-adjacent-to-other-heated-space.xml',
+         'base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml',
+         'base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml'].include? hpxml_file
+    hpxml.doors.add(id: 'DoorOther',
+                    wall_idref: 'WallOther',
+                    area: 20,
                     azimuth: 0,
                     r_value: 4.4)
-  elsif ['base-enclosure-other-housing-unit.xml',
-         'base-enclosure-other-heated-space.xml',
-         'base-enclosure-other-non-freezing-space.xml',
-         'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    hpxml.doors.add(id: 'DoorOnWallOtherHousingUnit',
-                    wall_idref: 'WallOtherHousingUnit',
-                    area: 40,
-                    azimuth: 0,
-                    r_value: 4.4)
-    if ['base-enclosure-other-heated-space.xml'].include? hpxml_file
-      hpxml.doors[-1].id = 'DoorOnWallOtherHeatedSpace'
-      hpxml.doors[-1].wall_idref = 'WallOtherHeatedSpace'
-    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
-      hpxml.doors[-1].id = 'DoorOnWallOtherNonFreezingSpace'
-      hpxml.doors[-1].wall_idref = 'WallOtherNonFreezingSpace'
-    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-      hpxml.doors[-1].id = 'DoorOnWallOtherMultifamilyBufferSpace'
-      hpxml.doors[-1].wall_idref = 'WallOtherMultifamilyBufferSpace'
-    end
   elsif ['invalid_files/unattached-door.xml'].include? hpxml_file
     hpxml.doors[0].wall_idref = 'foobar'
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
@@ -5512,7 +5385,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   elsif ['invalid_files/duct-location-unconditioned-space.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_location = 'unconditioned space'
     hpxml.hvac_distributions[0].ducts[1].duct_location = 'unconditioned space'
-  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherHousingUnit
     hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                           duct_insulation_r_value: 4,
@@ -5544,23 +5417,18 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
       hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 1.5
       hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 1.5
     end
-  elsif ['base-enclosure-other-heated-space.xml',
-         'base-enclosure-other-non-freezing-space.xml',
-         'base-enclosure-other-multifamily-buffer-space.xml',
-         'base-enclosure-other-housing-unit.xml'].include? hpxml_file
-    if ['base-enclosure-other-heated-space.xml'].include? hpxml_file
-      hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherHeatedSpace
-      hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherHeatedSpace
-    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
-      hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherNonFreezingSpace
-      hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherNonFreezingSpace
-    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-      hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherMultifamilyBufferSpace
-      hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherMultifamilyBufferSpace
-    elsif ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
-      hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherHousingUnit
-      hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherHousingUnit
-    end
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherHousingUnit
+    hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherHousingUnit
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-heated-space.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherHeatedSpace
+    hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherHeatedSpace
+  elsif ['base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherMultifamilyBufferSpace
+    hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherMultifamilyBufferSpace
+  elsif ['base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherNonFreezingSpace
+    hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherNonFreezingSpace
   elsif ['base-bldgtype-multifamily-shared-boiler-only-water-loop-heat-pump.xml',
          'base-bldgtype-multifamily-shared-chiller-only-water-loop-heat-pump.xml',
          'base-bldgtype-multifamily-shared-boiler-chiller-water-loop-heat-pump.xml',
@@ -6160,21 +6028,16 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[1].id = 'WaterHeater2'
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationGarage
-  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationLivingSpace
-  elsif ['base-enclosure-other-housing-unit.xml',
-         'base-enclosure-other-heated-space.xml',
-         'base-enclosure-other-non-freezing-space.xml',
-         'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
-      hpxml.water_heating_systems[0].location = HPXML::LocationOtherHousingUnit
-    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
-      hpxml.water_heating_systems[0].location = HPXML::LocationOtherHeatedSpace
-    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
-      hpxml.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
-    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-      hpxml.water_heating_systems[0].location = HPXML::LocationOtherMultifamilyBufferSpace
-    end
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].location = HPXML::LocationOtherHousingUnit
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-heated-space.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].location = HPXML::LocationOtherHeatedSpace
+  elsif ['base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+  elsif ['base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hpxml.water_heating_systems.clear
   elsif ['base-misc-defaults.xml'].include? hpxml_file
@@ -6415,21 +6278,16 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
   elsif ['base-appliances-none.xml',
          'base-dhw-none.xml'].include? hpxml_file
     hpxml.clothes_washers.clear
-  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
     hpxml.clothes_washers[0].location = HPXML::LocationLivingSpace
-  elsif ['base-enclosure-other-housing-unit.xml',
-         'base-enclosure-other-heated-space.xml',
-         'base-enclosure-other-non-freezing-space.xml',
-         'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
-      hpxml.clothes_washers[0].location = HPXML::LocationOtherHousingUnit
-    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
-      hpxml.clothes_washers[0].location = HPXML::LocationOtherHeatedSpace
-    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
-      hpxml.clothes_washers[0].location = HPXML::LocationOtherNonFreezingSpace
-    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-      hpxml.clothes_washers[0].location = HPXML::LocationOtherMultifamilyBufferSpace
-    end
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].location = HPXML::LocationOtherHousingUnit
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-heated-space.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].location = HPXML::LocationOtherHeatedSpace
+  elsif ['base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+  elsif ['base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].location = HPXML::LocationOtherNonFreezingSpace
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     imef = hpxml.clothes_washers[0].integrated_modified_energy_factor
     hpxml.clothes_washers[0].integrated_modified_energy_factor = nil
@@ -6477,21 +6335,16 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
   elsif ['base-appliances-none.xml',
          'base-dhw-none.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear
-  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].location = HPXML::LocationLivingSpace
-  elsif ['base-enclosure-other-housing-unit.xml',
-         'base-enclosure-other-heated-space.xml',
-         'base-enclosure-other-non-freezing-space.xml',
-         'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
-      hpxml.clothes_dryers[0].location = HPXML::LocationOtherHousingUnit
-    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
-      hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
-    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
-      hpxml.clothes_dryers[0].location = HPXML::LocationOtherNonFreezingSpace
-    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-      hpxml.clothes_dryers[0].location = HPXML::LocationOtherMultifamilyBufferSpace
-    end
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'].include? hpxml_file
+    hpxml.clothes_dryers[0].location = HPXML::LocationOtherHousingUnit
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-heated-space.xml'].include? hpxml_file
+    hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
+  elsif ['base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml'].include? hpxml_file
+    hpxml.clothes_dryers[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+  elsif ['base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml'].include? hpxml_file
+    hpxml.clothes_dryers[0].location = HPXML::LocationOtherNonFreezingSpace
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     cef = hpxml.clothes_dryers[-1].combined_energy_factor
     hpxml.clothes_dryers.clear
@@ -6560,21 +6413,16 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].rated_annual_kwh = nil
     hpxml.dishwashers[0].energy_factor = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(rated_annual_kwh).round(2)
     hpxml.dishwashers[0].place_setting_capacity = 6 # Compact
-  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
     hpxml.dishwashers[0].location = HPXML::LocationLivingSpace
-  elsif ['base-enclosure-other-housing-unit.xml',
-         'base-enclosure-other-heated-space.xml',
-         'base-enclosure-other-non-freezing-space.xml',
-         'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
-      hpxml.dishwashers[0].location = HPXML::LocationOtherHousingUnit
-    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
-      hpxml.dishwashers[0].location = HPXML::LocationOtherHeatedSpace
-    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
-      hpxml.dishwashers[0].location = HPXML::LocationOtherNonFreezingSpace
-    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-      hpxml.dishwashers[0].location = HPXML::LocationOtherMultifamilyBufferSpace
-    end
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'].include? hpxml_file
+    hpxml.dishwashers[0].location = HPXML::LocationOtherHousingUnit
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-heated-space.xml'].include? hpxml_file
+    hpxml.dishwashers[0].location = HPXML::LocationOtherHeatedSpace
+  elsif ['base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml'].include? hpxml_file
+    hpxml.dishwashers[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+  elsif ['base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml'].include? hpxml_file
+    hpxml.dishwashers[0].location = HPXML::LocationOtherNonFreezingSpace
   elsif ['base-appliances-none.xml',
          'base-dhw-none.xml'].include? hpxml_file
     hpxml.dishwashers.clear
@@ -6618,21 +6466,16 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
     hpxml.refrigerators[0].adjusted_annual_kwh = 600
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.refrigerators.clear
-  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
     hpxml.refrigerators[0].location = HPXML::LocationLivingSpace
-  elsif ['base-enclosure-other-housing-unit.xml',
-         'base-enclosure-other-heated-space.xml',
-         'base-enclosure-other-non-freezing-space.xml',
-         'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
-      hpxml.refrigerators[0].location = HPXML::LocationOtherHousingUnit
-    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
-      hpxml.refrigerators[0].location = HPXML::LocationOtherHeatedSpace
-    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
-      hpxml.refrigerators[0].location = HPXML::LocationOtherNonFreezingSpace
-    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-      hpxml.refrigerators[0].location = HPXML::LocationOtherMultifamilyBufferSpace
-    end
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'].include? hpxml_file
+    hpxml.refrigerators[0].location = HPXML::LocationOtherHousingUnit
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-heated-space.xml'].include? hpxml_file
+    hpxml.refrigerators[0].location = HPXML::LocationOtherHeatedSpace
+  elsif ['base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml'].include? hpxml_file
+    hpxml.refrigerators[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+  elsif ['base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml'].include? hpxml_file
+    hpxml.refrigerators[0].location = HPXML::LocationOtherNonFreezingSpace
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.refrigerators[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -6726,21 +6569,16 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
                              is_induction: false)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.cooking_ranges.clear
-  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].location = HPXML::LocationLivingSpace
-  elsif ['base-enclosure-other-housing-unit.xml',
-         'base-enclosure-other-heated-space.xml',
-         'base-enclosure-other-non-freezing-space.xml',
-         'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
-      hpxml.cooking_ranges[0].location = HPXML::LocationOtherHousingUnit
-    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
-      hpxml.cooking_ranges[0].location = HPXML::LocationOtherHeatedSpace
-    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
-      hpxml.cooking_ranges[0].location = HPXML::LocationOtherNonFreezingSpace
-    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-      hpxml.cooking_ranges[0].location = HPXML::LocationOtherMultifamilyBufferSpace
-    end
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'].include? hpxml_file
+    hpxml.cooking_ranges[0].location = HPXML::LocationOtherHousingUnit
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-heated-space.xml'].include? hpxml_file
+    hpxml.cooking_ranges[0].location = HPXML::LocationOtherHeatedSpace
+  elsif ['base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml'].include? hpxml_file
+    hpxml.cooking_ranges[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+  elsif ['base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml'].include? hpxml_file
+    hpxml.cooking_ranges[0].location = HPXML::LocationOtherNonFreezingSpace
   elsif ['base-appliances-gas.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].fuel_type = HPXML::FuelTypeNaturalGas
     hpxml.cooking_ranges[0].is_induction = false
