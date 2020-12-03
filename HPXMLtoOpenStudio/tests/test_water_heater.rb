@@ -1165,7 +1165,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
   def test_shared_water_heater
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-shared-water-heater.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-water-heater.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
@@ -1195,7 +1195,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
   def test_shared_laundry_room
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-shared-laundry-room.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-laundry-room.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values

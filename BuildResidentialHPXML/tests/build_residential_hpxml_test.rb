@@ -15,7 +15,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     this_dir = File.dirname(__FILE__)
 
-    hvac_partial_dir = File.absolute_path(File.join(this_dir, 'hvac_partial'))
     test_dirs = [
       this_dir,
     ]

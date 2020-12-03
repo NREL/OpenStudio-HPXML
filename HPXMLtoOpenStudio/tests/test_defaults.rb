@@ -493,7 +493,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_boiler_values(hpxml_default, true, 170.0)
 
     # Test inputs not overridden by defaults (shared boiler)
-    hpxml = _create_hpxml('base-hvac-shared-boiler-only-baseboard.xml')
+    hpxml = _create_hpxml('base-bldgtype-multifamily-shared-boiler-only-baseboard.xml')
     hpxml.heating_systems[0].shared_loop_watts = nil
     hpxml.heating_systems[0].electric_auxiliary_energy = 99.9
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -956,7 +956,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_recirc_distribution_values(hpxml_default, false, 50.0, 50.0, 65.0, 2.5)
 
     # Test inputs not overridden by defaults -- shared recirculation
-    hpxml = _create_hpxml('base-dhw-shared-water-heater-recirc.xml')
+    hpxml = _create_hpxml('base-bldgtype-multifamily-shared-water-heater-recirc.xml')
     hpxml.hot_water_distributions[0].shared_recirculation_pump_power = 333.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1017,7 +1017,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_recirc_distribution_values(hpxml_default, true, 186.96, 10.0, 50.0, 0.0)
 
     # Test defaults w/ shared recirculation
-    hpxml = _create_hpxml('base-dhw-shared-water-heater-recirc.xml')
+    hpxml = _create_hpxml('base-bldgtype-multifamily-shared-water-heater-recirc.xml')
     hpxml.hot_water_distributions[0].shared_recirculation_pump_power = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
