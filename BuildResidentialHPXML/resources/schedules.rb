@@ -727,11 +727,11 @@ class ScheduleGenerator
     while step < mkc_steps_in_a_year
       dish_state = sum_across_occupants(all_simulated_values, 4, step, max_clip = 1)
       step_jump = 1
-      if dish_state > 0 and last_state == 0 # last_state == 0 prevents consecutive dishwasher power without gap
-        duration_15min, avg_power = sample_appliance_duration_power(prng, appliance_power_dist_map, "dishwasher")
+      if (dish_state > 0) && (last_state == 0) # last_state == 0 prevents consecutive dishwasher power without gap
+        duration_15min, avg_power = sample_appliance_duration_power(prng, appliance_power_dist_map, 'dishwasher')
 
         month = (start_time + step * 15 * 60).month
-        duration_min = (duration_15min * 15 * schedule_config["dishwasher"]["monthly_multiplier"][month - 1]).to_i
+        duration_min = (duration_15min * 15 * schedule_config['dishwasher']['monthly_multiplier'][month - 1]).to_i
 
         duration = [duration_min, mins_in_year - step * 15].min
         dw_power_sch.fill(avg_power, step * 15, duration)
@@ -751,13 +751,13 @@ class ScheduleGenerator
     while step < mkc_steps_in_a_year
       clothes_state = sum_across_occupants(all_simulated_values, 2, step, max_clip = 1)
       step_jump = 1
-      if clothes_state > 0 and last_state == 0 # last_state == 0 prevents consecutive washer power without gap
-        cw_duration_15min, cw_avg_power = sample_appliance_duration_power(prng, appliance_power_dist_map, "clothes_washer")
-        cd_duration_15min, cd_avg_power = sample_appliance_duration_power(prng, appliance_power_dist_map, "clothes_dryer")
+      if (clothes_state > 0) && (last_state == 0) # last_state == 0 prevents consecutive washer power without gap
+        cw_duration_15min, cw_avg_power = sample_appliance_duration_power(prng, appliance_power_dist_map, 'clothes_washer')
+        cd_duration_15min, cd_avg_power = sample_appliance_duration_power(prng, appliance_power_dist_map, 'clothes_dryer')
 
         month = (start_time + step * 15 * 60).month
-        cd_duration_min = (cd_duration_15min * 15 * schedule_config["clothes_dryer"]["monthly_multiplier"][month - 1]).to_i
-        cw_duration_min = (cw_duration_15min * 15 * schedule_config["clothes_washer"]["monthly_multiplier"][month - 1]).to_i
+        cd_duration_min = (cd_duration_15min * 15 * schedule_config['clothes_dryer']['monthly_multiplier'][month - 1]).to_i
+        cw_duration_min = (cw_duration_15min * 15 * schedule_config['clothes_washer']['monthly_multiplier'][month - 1]).to_i
 
         cw_duration = [cw_duration_min, mins_in_year - step * 15].min
         cw_power_sch.fill(cw_avg_power, step * 15, cw_duration)
@@ -779,10 +779,10 @@ class ScheduleGenerator
     while step < mkc_steps_in_a_year
       cooking_state = sum_across_occupants(all_simulated_values, 3, step, max_clip = 1)
       step_jump = 1
-      if cooking_state > 0 and last_state == 0 # last_state == 0 prevents consecutive cooking power without gap
-        duration_15min, avg_power = sample_appliance_duration_power(prng, appliance_power_dist_map, "cooking")
+      if (cooking_state > 0) && (last_state == 0) # last_state == 0 prevents consecutive cooking power without gap
+        duration_15min, avg_power = sample_appliance_duration_power(prng, appliance_power_dist_map, 'cooking')
         month = (start_time + step * 15 * 60).month
-        duration_min = (duration_15min * 15 * schedule_config["cooking"]["monthly_multiplier"][month - 1]).to_i
+        duration_min = (duration_15min * 15 * schedule_config['cooking']['monthly_multiplier'][month - 1]).to_i
         duration = [duration_min, mins_in_year - step * 15].min
         cooking_power_sch.fill(avg_power, step * 15, duration)
         step_jump = duration_15min
