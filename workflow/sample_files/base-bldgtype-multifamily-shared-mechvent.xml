@@ -233,6 +233,31 @@
             <ConditionedFloorAreaServed>900.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
+        <MechanicalVentilation>
+          <VentilationFans>
+            <VentilationFan>
+              <SystemIdentifier id='SharedSupplyFan'/>
+              <FanType>supply only</FanType>
+              <RatedFlowRate>800.0</RatedFlowRate>
+              <HoursInOperation>24.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <IsSharedSystem>true</IsSharedSystem>
+              <FractionRecirculation>0.5</FractionRecirculation>
+              <FanPower>240.0</FanPower>
+              <extension>
+                <InUnitFlowRate>80.0</InUnitFlowRate>
+              </extension>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='ExhaustFan'/>
+              <FanType>exhaust only</FanType>
+              <TestedFlowRate>72.0</TestedFlowRate>
+              <HoursInOperation>24.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>26.0</FanPower>
+            </VentilationFan>
+          </VentilationFans>
+        </MechanicalVentilation>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>

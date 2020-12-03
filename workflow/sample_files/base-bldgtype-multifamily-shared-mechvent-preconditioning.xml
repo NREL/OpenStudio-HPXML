@@ -233,6 +233,47 @@
             <ConditionedFloorAreaServed>900.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
+        <MechanicalVentilation>
+          <VentilationFans>
+            <VentilationFan>
+              <SystemIdentifier id='SharedSupplyFan'/>
+              <FanType>supply only</FanType>
+              <RatedFlowRate>800.0</RatedFlowRate>
+              <HoursInOperation>24.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <IsSharedSystem>true</IsSharedSystem>
+              <FractionRecirculation>0.5</FractionRecirculation>
+              <FanPower>240.0</FanPower>
+              <extension>
+                <InUnitFlowRate>80.0</InUnitFlowRate>
+                <PreHeating>
+                  <Fuel>natural gas</Fuel>
+                  <AnnualHeatingEfficiency>
+                    <Value>0.92</Value>
+                    <Units>COP</Units>
+                  </AnnualHeatingEfficiency>
+                  <FractionVentilationHeatLoadServed>0.7</FractionVentilationHeatLoadServed>
+                </PreHeating>
+                <PreCooling>
+                  <Fuel>electricity</Fuel>
+                  <AnnualCoolingEfficiency>
+                    <Value>4.0</Value>
+                    <Units>COP</Units>
+                  </AnnualCoolingEfficiency>
+                  <FractionVentilationCoolLoadServed>0.8</FractionVentilationCoolLoadServed>
+                </PreCooling>
+              </extension>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='ExhaustFan'/>
+              <FanType>exhaust only</FanType>
+              <TestedFlowRate>72.0</TestedFlowRate>
+              <HoursInOperation>24.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>26.0</FanPower>
+            </VentilationFan>
+          </VentilationFans>
+        </MechanicalVentilation>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>
