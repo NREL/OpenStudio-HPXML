@@ -81,7 +81,7 @@ def create_hpxmls
     'invalid_files/invalid-datatype-integer2.xml' => 'base.xml',
     'invalid_files/invalid-daylight-saving.xml' => 'base-simcontrol-daylight-saving-custom.xml',
     'invalid_files/invalid-epw-filepath.xml' => 'base.xml',
-    'invalid_files/invalid-facility-type.xml' => 'base-dhw-shared-laundry-room.xml',
+    'invalid_files/invalid-facility-type.xml' => 'base-bldgtype-multifamily-shared-laundry-room.xml',
     'invalid_files/invalid-input-parameters.xml' => 'base.xml',
     'invalid_files/invalid-neighbor-shading-azimuth.xml' => 'base-misc-neighbor-shading.xml',
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
@@ -112,8 +112,8 @@ def create_hpxmls
     'invalid_files/unattached-hvac-distribution.xml' => 'base.xml',
     'invalid_files/unattached-skylight.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/unattached-solar-thermal-system.xml' => 'base-dhw-solar-indirect-flat-plate.xml',
-    'invalid_files/unattached-shared-clothes-washer-water-heater.xml' => 'base-dhw-shared-laundry-room.xml',
-    'invalid_files/unattached-shared-dishwasher-water-heater.xml' => 'base-dhw-shared-laundry-room.xml',
+    'invalid_files/unattached-shared-clothes-washer-water-heater.xml' => 'base-bldgtype-multifamily-shared-laundry-room.xml',
+    'invalid_files/unattached-shared-dishwasher-water-heater.xml' => 'base-bldgtype-multifamily-shared-laundry-room.xml',
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
@@ -139,6 +139,29 @@ def create_hpxmls
     'base-atticroof-vented.xml' => 'base.xml',
     'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
     'base-bldgtype-multifamily.xml' => 'base.xml',
+    'base-bldgtype-multifamily-shared-boiler-chiller-baseboard.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml' => 'base-bldgtype-multifamily-shared-boiler-chiller-baseboard.xml',
+    'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil-ducted.xml' => 'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml',
+    'base-bldgtype-multifamily-shared-boiler-chiller-water-loop-heat-pump.xml' => 'base-bldgtype-multifamily-shared-boiler-chiller-baseboard.xml',
+    'base-bldgtype-multifamily-shared-boiler-cooling-tower-water-loop-heat-pump.xml' => 'base-bldgtype-multifamily-shared-boiler-chiller-water-loop-heat-pump.xml',
+    'base-bldgtype-multifamily-shared-boiler-only-baseboard.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-shared-boiler-only-fan-coil.xml' => 'base-bldgtype-multifamily-shared-boiler-only-baseboard.xml',
+    'base-bldgtype-multifamily-shared-boiler-only-fan-coil-ducted.xml' => 'base-bldgtype-multifamily-shared-boiler-only-fan-coil.xml',
+    'base-bldgtype-multifamily-shared-boiler-only-fan-coil-eae.xml' => 'base-bldgtype-multifamily-shared-boiler-only-fan-coil.xml',
+    'base-bldgtype-multifamily-shared-boiler-only-water-loop-heat-pump.xml' => 'base-bldgtype-multifamily-shared-boiler-only-baseboard.xml',
+    'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-shared-chiller-only-fan-coil.xml' => 'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
+    'base-bldgtype-multifamily-shared-chiller-only-fan-coil-ducted.xml' => 'base-bldgtype-multifamily-shared-chiller-only-fan-coil.xml',
+    'base-bldgtype-multifamily-shared-chiller-only-water-loop-heat-pump.xml' => 'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
+    'base-bldgtype-multifamily-shared-cooling-tower-only-water-loop-heat-pump.xml' => 'base-bldgtype-multifamily-shared-chiller-only-water-loop-heat-pump.xml',
+    'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-shared-laundry-room.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-shared-mechvent.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-shared-mechvent-preconditioning.xml' => 'base-bldgtype-multifamily-shared-mechvent.xml',
+    'base-bldgtype-multifamily-shared-mechvent-multiple.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-shared-pv.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-shared-water-heater.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-shared-water-heater-recirc.xml' => 'base-bldgtype-multifamily-shared-water-heater.xml',
     'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
     'base-dhw-combi-tankless-outside.xml' => 'base-dhw-combi-tankless.xml',
     'base-dhw-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
@@ -161,9 +184,6 @@ def create_hpxmls
     'base-dhw-recirc-nocontrol.xml' => 'base.xml',
     'base-dhw-recirc-temperature.xml' => 'base.xml',
     'base-dhw-recirc-timer.xml' => 'base.xml',
-    'base-dhw-shared-water-heater.xml' => 'base-bldgtype-multifamily.xml',
-    'base-dhw-shared-water-heater-recirc.xml' => 'base-dhw-shared-water-heater.xml',
-    'base-dhw-shared-laundry-room.xml' => 'base-bldgtype-multifamily.xml',
     'base-dhw-solar-direct-evacuated-tube.xml' => 'base.xml',
     'base-dhw-solar-direct-flat-plate.xml' => 'base.xml',
     'base-dhw-solar-direct-ics.xml' => 'base.xml',
@@ -291,22 +311,6 @@ def create_hpxmls
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
-    'base-hvac-shared-boiler-chiller-baseboard.xml' => 'base-bldgtype-multifamily.xml',
-    'base-hvac-shared-boiler-chiller-fan-coil.xml' => 'base-hvac-shared-boiler-chiller-baseboard.xml',
-    'base-hvac-shared-boiler-chiller-fan-coil-ducted.xml' => 'base-hvac-shared-boiler-chiller-fan-coil.xml',
-    'base-hvac-shared-boiler-chiller-water-loop-heat-pump.xml' => 'base-hvac-shared-boiler-chiller-baseboard.xml',
-    'base-hvac-shared-boiler-cooling-tower-water-loop-heat-pump.xml' => 'base-hvac-shared-boiler-chiller-water-loop-heat-pump.xml',
-    'base-hvac-shared-boiler-only-baseboard.xml' => 'base-bldgtype-multifamily.xml',
-    'base-hvac-shared-boiler-only-fan-coil.xml' => 'base-hvac-shared-boiler-only-baseboard.xml',
-    'base-hvac-shared-boiler-only-fan-coil-ducted.xml' => 'base-hvac-shared-boiler-only-fan-coil.xml',
-    'base-hvac-shared-boiler-only-fan-coil-eae.xml' => 'base-hvac-shared-boiler-only-fan-coil.xml',
-    'base-hvac-shared-boiler-only-water-loop-heat-pump.xml' => 'base-hvac-shared-boiler-only-baseboard.xml',
-    'base-hvac-shared-chiller-only-baseboard.xml' => 'base-bldgtype-multifamily.xml',
-    'base-hvac-shared-chiller-only-fan-coil.xml' => 'base-hvac-shared-chiller-only-baseboard.xml',
-    'base-hvac-shared-chiller-only-fan-coil-ducted.xml' => 'base-hvac-shared-chiller-only-fan-coil.xml',
-    'base-hvac-shared-chiller-only-water-loop-heat-pump.xml' => 'base-hvac-shared-chiller-only-baseboard.xml',
-    'base-hvac-shared-cooling-tower-only-water-loop-heat-pump.xml' => 'base-hvac-shared-chiller-only-water-loop-heat-pump.xml',
-    'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml' => 'base-bldgtype-multifamily.xml',
     'base-hvac-stove-oil-only.xml' => 'base.xml',
     'base-hvac-stove-wood-pellets-only.xml' => 'base.xml',
     'base-hvac-undersized.xml' => 'base.xml',
@@ -332,9 +336,6 @@ def create_hpxmls
     'base-mechvent-hrv.xml' => 'base.xml',
     'base-mechvent-hrv-asre.xml' => 'base.xml',
     'base-mechvent-multiple.xml' => 'base-mechvent-bath-kitchen-fans.xml',
-    'base-mechvent-shared.xml' => 'base-bldgtype-multifamily.xml',
-    'base-mechvent-shared-preconditioning.xml' => 'base-mechvent-shared.xml',
-    'base-mechvent-shared-multiple.xml' => 'base-bldgtype-multifamily.xml',
     'base-mechvent-supply.xml' => 'base.xml',
     'base-mechvent-whole-house-fan.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
@@ -345,7 +346,6 @@ def create_hpxmls
     'base-misc-shelter-coefficient.xml' => 'base.xml',
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
-    'base-pv-shared.xml' => 'base-bldgtype-multifamily.xml',
     'base-simcontrol-calendar-year-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
@@ -2690,8 +2690,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
          'base-hvac-room-ac-only.xml',
-         'base-hvac-shared-chiller-only-baseboard.xml',
-         'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml',
+         'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
+         'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml',
          'invalid_files/orphaned-hvac-distribution.xml'].include? hpxml_file
     hpxml.heating_systems.clear
   elsif ['base-hvac-furnace-gas-only.xml'].include? hpxml_file
@@ -2814,7 +2814,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_efficiency_percent: 1,
                               fraction_heat_load_served: 0.1)
   elsif ['base-mechvent-multiple.xml',
-         'base-mechvent-shared-multiple.xml'].include? hpxml_file
+         'base-bldgtype-multifamily-shared-mechvent-multiple.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_capacity /= 2.0
     hpxml.heating_systems[0].fraction_heat_load_served /= 2.0
     hpxml.heating_systems << hpxml.heating_systems[0].dup
@@ -2898,20 +2898,20 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].fan_watts_per_cfm = 0.45
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_capacity /= 10.0
-  elsif ['base-hvac-shared-boiler-only-baseboard.xml',
-         'base-hvac-shared-boiler-chiller-baseboard.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-boiler-only-baseboard.xml',
+         'base-bldgtype-multifamily-shared-boiler-chiller-baseboard.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
     hpxml.heating_systems[0].is_shared_system = true
     hpxml.heating_systems[0].number_of_units_served = 6
     hpxml.heating_systems[0].heating_capacity = nil
     hpxml.heating_systems[0].shared_loop_watts = 600
-  elsif ['base-hvac-shared-boiler-only-fan-coil.xml',
-         'base-hvac-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-boiler-only-fan-coil.xml',
+         'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
     hpxml.heating_systems[0].fan_coil_watts = 150
-  elsif ['base-hvac-shared-boiler-only-water-loop-heat-pump.xml',
-         'base-hvac-shared-boiler-chiller-water-loop-heat-pump.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-boiler-only-water-loop-heat-pump.xml',
+         'base-bldgtype-multifamily-shared-boiler-chiller-water-loop-heat-pump.xml'].include? hpxml_file
     hpxml.heating_systems[0].wlhp_heating_efficiency_cop = 4.4
-  elsif ['base-hvac-shared-boiler-only-fan-coil-eae.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-boiler-only-fan-coil-eae.xml'].include? hpxml_file
     hpxml.heating_systems[0].fan_coil_watts = nil
     hpxml.heating_systems[0].shared_loop_watts = nil
     hpxml.heating_systems[0].electric_auxiliary_energy = 500.0
@@ -2956,8 +2956,8 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-stove-oil-only.xml',
          'base-hvac-stove-wood-pellets-only.xml',
          'base-hvac-wall-furnace-elec-only.xml',
-         'base-hvac-shared-boiler-only-baseboard.xml',
-         'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml'].include? hpxml_file
+         'base-bldgtype-multifamily-shared-boiler-only-baseboard.xml',
+         'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml'].include? hpxml_file
     hpxml.cooling_systems.clear
   elsif ['base-hvac-central-ac-only-1-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fan_watts_per_cfm = 0.45
@@ -3033,7 +3033,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
                               cooling_efficiency_seer: 13,
                               cooling_shr: 0.65)
   elsif ['base-mechvent-multiple.xml',
-         'base-mechvent-shared-multiple.xml'].include? hpxml_file
+         'base-bldgtype-multifamily-shared-mechvent-multiple.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fraction_cool_load_served /= 2.0
     hpxml.cooling_systems[0].cooling_capacity /= 2.0
     hpxml.cooling_systems << hpxml.cooling_systems[0].dup
@@ -3054,10 +3054,10 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].compressor_type = nil
-  elsif ['base-hvac-shared-chiller-only-baseboard.xml',
-         'base-hvac-shared-boiler-chiller-baseboard.xml',
-         'base-hvac-shared-chiller-only-water-loop-heat-pump.xml',
-         'base-hvac-shared-boiler-chiller-water-loop-heat-pump.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
+         'base-bldgtype-multifamily-shared-boiler-chiller-baseboard.xml',
+         'base-bldgtype-multifamily-shared-chiller-only-water-loop-heat-pump.xml',
+         'base-bldgtype-multifamily-shared-boiler-chiller-water-loop-heat-pump.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_system_type = HPXML::HVACTypeChiller
     hpxml.cooling_systems[0].is_shared_system = true
     hpxml.cooling_systems[0].number_of_units_served = 6
@@ -3070,13 +3070,13 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
       hpxml.cooling_systems[0].wlhp_cooling_capacity = 24000
       hpxml.cooling_systems[0].wlhp_cooling_efficiency_eer = 12.8
     end
-  elsif ['base-hvac-shared-cooling-tower-only-water-loop-heat-pump.xml',
-         'base-hvac-shared-boiler-cooling-tower-water-loop-heat-pump.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-cooling-tower-only-water-loop-heat-pump.xml',
+         'base-bldgtype-multifamily-shared-boiler-cooling-tower-water-loop-heat-pump.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_system_type = HPXML::HVACTypeCoolingTower
     hpxml.cooling_systems[0].cooling_capacity = nil
     hpxml.cooling_systems[0].cooling_efficiency_kw_per_ton = nil
-  elsif ['base-hvac-shared-chiller-only-fan-coil.xml',
-         'base-hvac-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-chiller-only-fan-coil.xml',
+         'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fan_coil_watts = 150
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.cooling_systems.nil?) && (hpxml.cooling_systems.size > 0)
     hpxml.cooling_systems[0].cooling_capacity = nil
@@ -3141,7 +3141,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          cooling_shr: 0.78,
                          compressor_type: HPXML::HVACCompressorTypeVariableSpeed)
   elsif ['base-hvac-ground-to-air-heat-pump.xml',
-         'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml'].include? hpxml_file
+         'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml'].include? hpxml_file
     hpxml.heat_pumps.add(id: 'HeatPump',
                          distribution_system_idref: 'HVACDistribution',
                          heat_pump_type: HPXML::HVACTypeHeatPumpGroundToAir,
@@ -3158,7 +3158,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          cooling_shr: 0.73,
                          pump_watts_per_ton: 30.0,
                          fan_watts_per_cfm: 0.45)
-    if hpxml_file == 'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml'
+    if hpxml_file == 'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml'
       hpxml.heat_pumps[-1].is_shared_system = true
       hpxml.heat_pumps[-1].number_of_units_served = 6
       hpxml.heat_pumps[-1].shared_loop_watts = 600
@@ -3374,16 +3374,16 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'base-hvac-boiler-oil-only.xml',
          'base-hvac-boiler-propane-only.xml',
          'base-hvac-boiler-wood-only.xml',
-         'base-hvac-shared-boiler-only-baseboard.xml',
-         'base-hvac-shared-chiller-only-baseboard.xml',
-         'base-hvac-shared-boiler-chiller-baseboard.xml'].include? hpxml_file
+         'base-bldgtype-multifamily-shared-boiler-only-baseboard.xml',
+         'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
+         'base-bldgtype-multifamily-shared-boiler-chiller-baseboard.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronic
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear
     hpxml.hvac_distributions[0].ducts.clear
     hpxml.hvac_distributions[0].hydronic_type = HPXML::HydronicTypeBaseboard
-  elsif ['base-hvac-shared-boiler-only-fan-coil.xml',
-         'base-hvac-shared-chiller-only-fan-coil.xml',
-         'base-hvac-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-boiler-only-fan-coil.xml',
+         'base-bldgtype-multifamily-shared-chiller-only-fan-coil.xml',
+         'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronicAndAir
     hpxml.hvac_distributions[0].hydronic_and_air_type = HPXML::HydronicAndAirTypeFanCoil
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
@@ -3501,7 +3501,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id = 'HVACDistribution5'
   elsif ['base-mechvent-multiple.xml',
-         'base-mechvent-shared-multiple.xml'].include? hpxml_file
+         'base-bldgtype-multifamily-shared-mechvent-multiple.xml'].include? hpxml_file
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[1].id = 'HVACDistribution2'
   elsif ['base-hvac-dse.xml',
@@ -3622,12 +3622,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
       hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherHousingUnit
       hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherHousingUnit
     end
-  elsif ['base-hvac-shared-boiler-only-water-loop-heat-pump.xml',
-         'base-hvac-shared-chiller-only-water-loop-heat-pump.xml',
-         'base-hvac-shared-boiler-chiller-water-loop-heat-pump.xml',
-         'base-hvac-shared-boiler-chiller-fan-coil-ducted.xml',
-         'base-hvac-shared-boiler-only-fan-coil-ducted.xml',
-         'base-hvac-shared-chiller-only-fan-coil-ducted.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-boiler-only-water-loop-heat-pump.xml',
+         'base-bldgtype-multifamily-shared-chiller-only-water-loop-heat-pump.xml',
+         'base-bldgtype-multifamily-shared-boiler-chiller-water-loop-heat-pump.xml',
+         'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil-ducted.xml',
+         'base-bldgtype-multifamily-shared-boiler-only-fan-coil-ducted.xml',
+         'base-bldgtype-multifamily-shared-chiller-only-fan-coil-ducted.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronicAndAir
     if hpxml_file.include? 'fan-coil'
       hpxml.hvac_distributions[0].hydronic_and_air_type = HPXML::HydronicAndAirTypeFanCoil
@@ -3808,7 +3808,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
     hpxml.ventilation_fans.add(id: 'BathFans',
                                fan_location: HPXML::LocationBath,
                                used_for_local_ventilation: true)
-  elsif ['base-mechvent-shared.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-mechvent.xml'].include? hpxml_file
     # Shared supply + in-unit exhaust (roughly balanced)
     hpxml.ventilation_fans.add(id: 'SharedSupplyFan',
                                fan_type: HPXML::MechVentTypeSupply,
@@ -3825,14 +3825,14 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                hours_in_operation: 24,
                                fan_power: 26,
                                used_for_whole_building_ventilation: true)
-  elsif ['base-mechvent-shared-preconditioning.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-mechvent-preconditioning.xml'].include? hpxml_file
     hpxml.ventilation_fans[0].preheating_fuel = HPXML::FuelTypeNaturalGas
     hpxml.ventilation_fans[0].preheating_efficiency_cop = 0.92
     hpxml.ventilation_fans[0].preheating_fraction_load_served = 0.7
     hpxml.ventilation_fans[0].precooling_fuel = HPXML::FuelTypeElectricity
     hpxml.ventilation_fans[0].precooling_efficiency_cop = 4.0
     hpxml.ventilation_fans[0].precooling_fraction_load_served = 0.8
-  elsif ['base-mechvent-shared-multiple.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-mechvent-multiple.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'SharedSupplyPreconditioned',
                                fan_type: HPXML::MechVentTypeSupply,
                                is_shared_system: true,
@@ -4244,7 +4244,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].heating_capacity = nil
     hpxml.water_heating_systems[0].tank_volume = nil
     hpxml.water_heating_systems[0].recovery_efficiency = nil
-  elsif ['base-dhw-shared-water-heater.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-water-heater.xml'].include? hpxml_file
     hpxml.water_heating_systems.clear
     hpxml.water_heating_systems.add(id: 'SharedWaterHeater',
                                     is_shared_system: true,
@@ -4258,7 +4258,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     energy_factor: 0.59,
                                     recovery_efficiency: 0.76,
                                     temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
-  elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationLivingSpace
     hpxml.water_heating_systems << hpxml.water_heating_systems[0].dup
     hpxml.water_heating_systems[1].id = 'SharedWaterHeater'
@@ -4313,9 +4313,9 @@ def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
     hpxml.hot_water_distributions[0].recirculation_piping_length = 50
     hpxml.hot_water_distributions[0].recirculation_branch_piping_length = 50
     hpxml.hot_water_distributions[0].recirculation_pump_power = 50
-  elsif ['base-dhw-shared-water-heater.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-water-heater.xml'].include? hpxml_file
     hpxml.hot_water_distributions[0].id = 'SharedHotWaterDistribution'
-  elsif ['base-dhw-shared-water-heater-recirc.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-water-heater-recirc.xml'].include? hpxml_file
     hpxml.hot_water_distributions[0].has_shared_recirculation = true
     hpxml.hot_water_distributions[0].shared_recirculation_number_of_units_served = 6
     hpxml.hot_water_distributions[0].shared_recirculation_pump_power = 220
@@ -4449,7 +4449,7 @@ def set_hpxml_pv_systems(hpxml_file, hpxml)
                          array_tilt: 20,
                          max_power_output: 4000,
                          year_modules_manufactured: 2015)
-  elsif ['base-pv-shared.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-pv.xml'].include? hpxml_file
     hpxml.pv_systems.add(id: 'PVSystem',
                          is_shared_system: true,
                          module_type: HPXML::PVModuleTypeStandard,
@@ -4460,7 +4460,7 @@ def set_hpxml_pv_systems(hpxml_file, hpxml)
                          max_power_output: 30000,
                          inverter_efficiency: 0.96,
                          system_losses_fraction: 0.14,
-                         number_of_bedrooms_served: 20)
+                         number_of_bedrooms_served: 18)
   end
 end
 
@@ -4516,7 +4516,7 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
     hpxml.clothes_washers[0].label_usage = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_washers[0].usage_multiplier = 0.9
-  elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
     hpxml.clothes_washers[0].is_shared_appliance = true
     hpxml.clothes_washers[0].id = 'SharedClothesWasher'
     hpxml.clothes_washers[0].location = HPXML::LocationOtherHeatedSpace
@@ -4599,7 +4599,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers[0].control_type = nil
     hpxml.clothes_dryers[0].is_vented = nil
     hpxml.clothes_dryers[0].vented_flow_rate = nil
-  elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].id = 'SharedClothesDryer'
     hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
     hpxml.clothes_dryers[0].is_shared_appliance = true
@@ -4658,7 +4658,7 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].location = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.dishwashers[0].usage_multiplier = 0.9
-  elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
     hpxml.dishwashers[0].is_shared_appliance = true
     hpxml.dishwashers[0].id = 'SharedDishwasher'
     hpxml.dishwashers[0].location = HPXML::LocationOtherHeatedSpace
