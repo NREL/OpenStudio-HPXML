@@ -3366,6 +3366,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
       end
       hvac_distribution.ducts.each do |duct|
         duct.duct_location = HPXML::LocationLivingSpace
+        duct.duct_insulation_r_value = 0
       end
     end
   elsif ['base-hvac-boiler-coal-only.xml',
