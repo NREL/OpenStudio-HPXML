@@ -726,6 +726,7 @@ def get_values(osw_file, step)
     step.setArgument('ducts_supply_insulation_r', 0.0)
     step.setArgument('ducts_return_insulation_r', 0.0)
     step.setArgument('door_area', 20.0)
+    step.setArgument('plug_loads_other_annual_kwh', '819.0')
   elsif ['base-appliances-coal.osw'].include? osw_file
     step.setArgument('clothes_dryer_fuel_type', HPXML::FuelTypeCoal)
     step.setArgument('clothes_dryer_efficiency_cef', '3.3')
