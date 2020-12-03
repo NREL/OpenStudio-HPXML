@@ -1245,7 +1245,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
                     siding: HPXML::SidingTypeWood,
-                    area: 196,
+                    area: 686,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 23.0)
@@ -1253,7 +1253,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
-                    area: 784,
+                    area: 294,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 4.0)
