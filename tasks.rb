@@ -2347,7 +2347,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'WallExterior')
     hpxml.windows.add(id: 'WindowWest',
-                      area: 35.0,
+                      area: 53.0,
                       azimuth: 270,
                       ufactor: 0.33,
                       shgc: 0.45,
