@@ -2585,9 +2585,8 @@ def set_hpxml_doors(hpxml_file, hpxml)
                     r_value: 4.4)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.doors.clear
-    # FIXME: Door should be to interior corridor or exterior?
     hpxml.doors.add(id: 'Door',
-                    wall_idref: 'WallExterior',
+                    wall_idref: 'WallAdiabatic',
                     area: 20,
                     azimuth: 180,
                     r_value: 4.4)
