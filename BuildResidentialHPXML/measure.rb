@@ -1842,7 +1842,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('water_heater_num_units_served', true)
     arg.setDisplayName('Water Heater: Number of Units Served')
-    arg.setDescription("Number of dwelling units served (directly or indirectly) by the water heater. Must be 1 if #{HPXML::ResidentialTypeSFD}.")
+    arg.setDescription("Number of dwelling units served (directly or indirectly) by the water heater. Must be 1 if #{HPXML::ResidentialTypeSFD}. Used to apportion water heater tank losses to the unit.")
     arg.setUnits('#')
     arg.setDefaultValue(1)
     args << arg
@@ -2101,7 +2101,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('pv_system_num_units_served_1', true)
     arg.setDisplayName('Photovoltaics 1: Number of Units Served')
-    arg.setDescription("Number of dwelling units served by PV system 1. Must be 1 if #{HPXML::ResidentialTypeSFD}.")
+    arg.setDescription("Number of dwelling units served by PV system 1. Must be 1 if #{HPXML::ResidentialTypeSFD}. Used to apportion PV generation to the unit.")
     arg.setUnits('#')
     arg.setDefaultValue(1)
     args << arg
@@ -2159,7 +2159,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('pv_system_num_units_served_2', true)
     arg.setDisplayName('Photovoltaics 2: Number of Units Served')
-    arg.setDescription("Number of dwelling units served by PV system 2. Must be 1 if #{HPXML::ResidentialTypeSFD}.")
+    arg.setDescription("Number of dwelling units served by PV system 2. Must be 1 if #{HPXML::ResidentialTypeSFD}. Used to apportion PV generation to the unit.")
     arg.setUnits('#')
     arg.setDefaultValue(1)
     args << arg
