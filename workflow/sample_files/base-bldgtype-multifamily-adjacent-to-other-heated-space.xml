@@ -90,7 +90,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallOther'/>
-            <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
+            <ExteriorAdjacentTo>other heated space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <WallType>
               <WoodStud/>
@@ -100,7 +100,7 @@
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='WallOtherInsulation'/>
-              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
         </Walls>
@@ -135,7 +135,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='WindowNorth'/>
-            <Area>35.0</Area>
+            <Area>12.25</Area>
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -149,7 +149,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowSouth'/>
-            <Area>35.0</Area>
+            <Area>12.25</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -163,7 +163,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowWest'/>
-            <Area>53.0</Area>
+            <Area>18.549999999999997</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -182,6 +182,13 @@
             <AttachedToWall idref='Wall'/>
             <Area>20.0</Area>
             <Azimuth>180</Azimuth>
+            <RValue>4.4</RValue>
+          </Door>
+          <Door>
+            <SystemIdentifier id='DoorOther'/>
+            <AttachedToWall idref='WallOther'/>
+            <Area>20.0</Area>
+            <Azimuth>0</Azimuth>
             <RValue>4.4</RValue>
           </Door>
         </Doors>
@@ -247,13 +254,13 @@
                 <Ducts>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>living space</DuctLocation>
+                  <DuctLocation>other heated space</DuctLocation>
                   <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>living space</DuctLocation>
+                  <DuctLocation>other heated space</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
@@ -261,53 +268,12 @@
             <ConditionedFloorAreaServed>900.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
-        <MechanicalVentilation>
-          <VentilationFans>
-            <VentilationFan>
-              <SystemIdentifier id='SharedSupplyFan'/>
-              <FanType>supply only</FanType>
-              <RatedFlowRate>800.0</RatedFlowRate>
-              <HoursInOperation>24.0</HoursInOperation>
-              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <IsSharedSystem>true</IsSharedSystem>
-              <FractionRecirculation>0.5</FractionRecirculation>
-              <FanPower>240.0</FanPower>
-              <extension>
-                <InUnitFlowRate>80.0</InUnitFlowRate>
-                <PreHeating>
-                  <Fuel>natural gas</Fuel>
-                  <AnnualHeatingEfficiency>
-                    <Value>0.92</Value>
-                    <Units>COP</Units>
-                  </AnnualHeatingEfficiency>
-                  <FractionVentilationHeatLoadServed>0.7</FractionVentilationHeatLoadServed>
-                </PreHeating>
-                <PreCooling>
-                  <Fuel>electricity</Fuel>
-                  <AnnualCoolingEfficiency>
-                    <Value>4.0</Value>
-                    <Units>COP</Units>
-                  </AnnualCoolingEfficiency>
-                  <FractionVentilationCoolLoadServed>0.8</FractionVentilationCoolLoadServed>
-                </PreCooling>
-              </extension>
-            </VentilationFan>
-            <VentilationFan>
-              <SystemIdentifier id='ExhaustFan'/>
-              <FanType>exhaust only</FanType>
-              <TestedFlowRate>72.0</TestedFlowRate>
-              <HoursInOperation>24.0</HoursInOperation>
-              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <FanPower>26.0</FanPower>
-            </VentilationFan>
-          </VentilationFans>
-        </MechanicalVentilation>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
-            <Location>living space</Location>
+            <Location>other heated space</Location>
             <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <HeatingCapacity>18767.0</HeatingCapacity>
@@ -340,7 +306,7 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher'/>
-          <Location>living space</Location>
+          <Location>other heated space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -351,7 +317,7 @@
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
-          <Location>living space</Location>
+          <Location>other heated space</Location>
           <FuelType>electricity</FuelType>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
           <ControlType>timer</ControlType>
@@ -362,7 +328,7 @@
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
-          <Location>living space</Location>
+          <Location>other heated space</Location>
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -372,13 +338,13 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>
-          <Location>living space</Location>
+          <Location>other heated space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
           <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
-          <Location>living space</Location>
+          <Location>other heated space</Location>
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
         </CookingRange>
