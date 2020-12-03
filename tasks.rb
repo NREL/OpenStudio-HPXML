@@ -7,12 +7,13 @@ def create_osws
 
   this_dir = File.dirname(__FILE__)
   tests_dir = File.join(this_dir, 'BuildResidentialHPXML/tests')
+  File.delete(*Dir.glob("#{tests_dir}/*.osw"))
 
   # Hash of OSW -> Parent OSW
   osws_files = {
     'base.osw' => nil, # single-family detached
-    'base-single-family-attached.osw' => 'base.osw',
-    'base-multifamily.osw' => 'base.osw',
+    'base-bldgtype-single-family-attached.osw' => 'base.osw',
+    'base-bldgtype-multifamily.osw' => 'base.osw',
     'base-appliances-coal.osw' => 'base.osw',
     'base-appliances-dehumidifier.osw' => 'base-location-dallas-tx.osw',
     'base-appliances-dehumidifier-ief-portable.osw' => 'base-appliances-dehumidifier.osw',
@@ -224,13 +225,13 @@ def create_osws
     'extra-auto.osw' => 'base.osw',
     'extra-pv-roofpitch.osw' => 'base.osw',
     'extra-dhw-solar-latitude.osw' => 'base.osw',
-    'extra-dhw-shared-water-heater.osw' => 'base-single-family-attached.osw',
+    'extra-dhw-shared-water-heater.osw' => 'base-bldgtype-single-family-attached.osw',
     'extra-second-refrigerator.osw' => 'base.osw',
     'extra-second-heating-system-portable-heater.osw' => 'base.osw',
     'extra-second-heating-system-fireplace.osw' => 'base.osw',
-    'extra-pv-shared.osw' => 'base-single-family-attached.osw',
+    'extra-pv-shared.osw' => 'base-bldgtype-single-family-attached.osw',
     'extra-enclosure-garage-partially-protruded.osw' => 'base.osw',
-    'extra-mechvent-shared.osw' => 'base-single-family-attached.osw',
+    'extra-mechvent-shared.osw' => 'base-bldgtype-single-family-attached.osw',
     'extra-mechvent-shared-preconditioning.osw' => 'extra-mechvent-shared.osw',
     'extra-vacancy-6-months.osw' => 'base-schedules-stochastic.osw',
     'extra-schedules-random-seed.osw' => 'base-schedules-stochastic.osw',
@@ -244,14 +245,14 @@ def create_osws
     'invalid_files/non-integer-ceiling-fan-quantity.osw' => 'base.osw',
     'invalid_files/single-family-detached-slab-non-zero-foundation-height.osw' => 'base.osw',
     'invalid_files/single-family-detached-finished-basement-zero-foundation-height.osw' => 'base.osw',
-    'invalid_files/single-family-attached-ambient.osw' => 'base-single-family-attached.osw',
-    'invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw' => 'base-multifamily.osw',
-    'invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw' => 'base-multifamily.osw',
+    'invalid_files/single-family-attached-ambient.osw' => 'base-bldgtype-single-family-attached.osw',
+    'invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw' => 'base-bldgtype-multifamily.osw',
+    'invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw' => 'base-bldgtype-multifamily.osw',
     'invalid_files/slab-non-zero-foundation-height-above-grade.osw' => 'base.osw',
     'invalid_files/ducts-location-and-areas-not-same-type.osw' => 'base.osw',
     'invalid_files/second-heating-system-serves-majority-heat.osw' => 'base.osw',
-    'invalid_files/single-family-attached-no-building-orientation.osw' => 'base-single-family-attached.osw',
-    'invalid_files/multifamily-no-building-orientation.osw' => 'base-multifamily.osw',
+    'invalid_files/single-family-attached-no-building-orientation.osw' => 'base-bldgtype-single-family-attached.osw',
+    'invalid_files/multifamily-no-building-orientation.osw' => 'base-bldgtype-multifamily.osw',
     'invalid_files/vented-crawlspace-with-wall-and-ceiling-insulation.osw' => 'base.osw',
     'invalid_files/unvented-crawlspace-with-wall-and-ceiling-insulation.osw' => 'base.osw',
     'invalid_files/unconditioned-basement-with-wall-and-ceiling-insulation.osw' => 'base.osw',
@@ -687,7 +688,7 @@ def get_values(osw_file, step)
     step.setArgument('hot_tub_heater_annual_kwh', Constants.Auto)
     step.setArgument('hot_tub_heater_annual_therm', Constants.Auto)
     step.setArgument('hot_tub_heater_usage_multiplier', 1.0)
-  elsif ['base-single-family-attached.osw'].include? osw_file
+  elsif ['base-bldgtype-single-family-attached.osw'].include? osw_file
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFA)
     step.setArgument('geometry_cfa', 900.0)
     step.setArgument('geometry_corridor_position', 'None')
@@ -701,7 +702,7 @@ def get_values(osw_file, step)
     step.setArgument('window_area_back', 0)
     step.setArgument('window_area_left', 0)
     step.setArgument('window_area_right', 0)
-  elsif ['base-multifamily.osw'].include? osw_file
+  elsif ['base-bldgtype-multifamily.osw'].include? osw_file
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
     step.setArgument('geometry_cfa', 900.0)
     step.setArgument('geometry_corridor_position', 'Double-Loaded Interior')
@@ -720,6 +721,7 @@ def get_values(osw_file, step)
     step.setArgument('window_area_right', 0)
     step.setArgument('ducts_supply_leakage_value', 0.0)
     step.setArgument('ducts_return_leakage_value', 0.0)
+    step.setArgument('door_area', 20.0)
   elsif ['base-appliances-coal.osw'].include? osw_file
     step.setArgument('clothes_dryer_fuel_type', HPXML::FuelTypeCoal)
     step.setArgument('clothes_dryer_efficiency_cef', '3.3')
@@ -1846,9 +1848,11 @@ def get_values(osw_file, step)
   elsif ['invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw'].include? osw_file
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeSlab)
     step.setArgument('geometry_foundation_height_above_grade', 0.0)
+    step.setArgument('geometry_level', 'Bottom')
   elsif ['invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw'].include? osw_file
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceUnvented)
     step.setArgument('geometry_foundation_height', 0.0)
+    step.setArgument('geometry_level', 'Bottom')
   elsif ['invalid_files/slab-non-zero-foundation-height-above-grade.osw'].include? osw_file
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeSlab)
     step.setArgument('geometry_foundation_height', 0.0)

@@ -64,7 +64,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
         assert(success)
 
-        if ['base-single-family-attached.osw', 'base-multifamily.osw'].include? File.basename(osw)
+        if ['base-bldgtype-single-family-attached.osw', 'base-bldgtype-multifamily.osw'].include? File.basename(osw)
           next # FIXME: should this be temporary?
         end
 
