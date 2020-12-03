@@ -2328,9 +2328,27 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       wall_idref: 'Wall')
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.windows.clear
-    hpxml.windows.add(id: 'Windows',
-                      area: 35.4,
+    hpxml.windows.add(id: 'WindowNorth',
+                      area: 35.0,
+                      azimuth: 0,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'WallExterior')
+    hpxml.windows.add(id: 'WindowSouth',
+                      area: 35.0,
                       azimuth: 180,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'WallExterior')
+    hpxml.windows.add(id: 'WindowWest',
+                      area: 35.0,
+                      azimuth: 270,
                       ufactor: 0.33,
                       shgc: 0.45,
                       fraction_operable: 0.67,
@@ -2586,7 +2604,7 @@ def set_hpxml_doors(hpxml_file, hpxml)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.doors.clear
     hpxml.doors.add(id: 'Door',
-                    wall_idref: 'WallAdiabatic',
+                    wall_idref: 'WallExterior',
                     area: 20,
                     azimuth: 180,
                     r_value: 4.4)
