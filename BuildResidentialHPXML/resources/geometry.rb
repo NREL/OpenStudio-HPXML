@@ -2570,17 +2570,6 @@ class Geometry
     return yValueArray
   end
 
-  # Return an array of z values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
-  def self.getSurfaceZValues(surfaceArray)
-    zValueArray = []
-    surfaceArray.each do |surface|
-      surface.vertices.each do |vertex|
-        zValueArray << UnitConversions.convert(vertex.z, 'm', 'ft')
-      end
-    end
-    return zValueArray
-  end
-
   def self.get_surface_length(surface)
     xvalues = getSurfaceXValues([surface])
     yvalues = getSurfaceYValues([surface])
