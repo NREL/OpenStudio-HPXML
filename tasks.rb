@@ -48,7 +48,6 @@ def create_hpxmls
     'invalid_files/clothes-washer-location.xml' => 'base.xml',
     'invalid_files/clothes-dryer-location.xml' => 'base.xml',
     'invalid_files/cooking-range-location.xml' => 'base.xml',
-    'invalid_files/appliances-location-unconditioned-space.xml' => 'base.xml',
     'invalid_files/dhw-frac-load-served.xml' => 'base-dhw-multiple.xml',
     'invalid_files/dishwasher-location.xml' => 'base.xml',
     'invalid_files/duct-location.xml' => 'base.xml',
@@ -74,7 +73,6 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-inconsistent-fan-powers.xml' => 'base.xml',
-    'invalid_files/invalid-calendar-year.xml' => 'base.xml',
     'invalid_files/invalid-datatype-boolean.xml' => 'base.xml',
     'invalid_files/invalid-datatype-boolean2.xml' => 'base.xml',
     'invalid_files/invalid-datatype-float.xml' => 'base.xml',
@@ -125,8 +123,9 @@ def create_hpxmls
     'invalid_files/refrigerators-no-primary.xml' => 'base.xml',
     'base-appliances-coal.xml' => 'base.xml',
     'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
-    'base-appliances-dehumidifier-ief.xml' => 'base-appliances-dehumidifier.xml',
     'base-appliances-dehumidifier-50percent.xml' => 'base-appliances-dehumidifier.xml',
+    'base-appliances-dehumidifier-ief-portable.xml' => 'base-appliances-dehumidifier.xml',
+    'base-appliances-dehumidifier-ief-whole-home.xml' => 'base-appliances-dehumidifier-ief-portable.xml',
     'base-appliances-gas.xml' => 'base.xml',
     'base-appliances-modified.xml' => 'base.xml',
     'base-appliances-none.xml' => 'base.xml',
@@ -287,6 +286,7 @@ def create_hpxmls
     'base-hvac-none.xml' => 'base.xml',
     'base-hvac-portable-heater-gas-only.xml' => 'base.xml',
     'base-hvac-programmable-thermostat.xml' => 'base.xml',
+    'base-hvac-programmable-thermostat-detailed.xml' => 'base.xml',
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
@@ -554,32 +554,30 @@ def set_hpxml_header(hpxml_file, hpxml)
   elsif ['base-simcontrol-daylight-saving-custom.xml'].include? hpxml_file
     hpxml.header.dst_enabled = true
     hpxml.header.dst_begin_month = 3
-    hpxml.header.dst_begin_day_of_month = 10
+    hpxml.header.dst_begin_day = 10
     hpxml.header.dst_end_month = 11
-    hpxml.header.dst_end_day_of_month = 6
+    hpxml.header.dst_end_day = 6
   elsif ['base-simcontrol-daylight-saving-disabled.xml'].include? hpxml_file
     hpxml.header.dst_enabled = false
   elsif ['base-simcontrol-timestep-10-mins.xml'].include? hpxml_file
     hpxml.header.timestep = 10
   elsif ['base-simcontrol-runperiod-1-month.xml'].include? hpxml_file
     hpxml.header.sim_begin_month = 1
-    hpxml.header.sim_begin_day_of_month = 1
+    hpxml.header.sim_begin_day = 1
     hpxml.header.sim_end_month = 1
-    hpxml.header.sim_end_day_of_month = 31
+    hpxml.header.sim_end_day = 31
   elsif ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
     hpxml.header.allow_increased_fixed_capacities = true
   elsif hpxml_file.include? 'manual-s-oversize-allowances.xml'
     hpxml.header.use_max_load_for_heat_pumps = false
-  elsif ['invalid_files/invalid-calendar-year.xml'].include? hpxml_file
-    hpxml.header.sim_calendar_year = 20018
   elsif ['invalid_files/invalid-timestep.xml'].include? hpxml_file
     hpxml.header.timestep = 45
   elsif ['invalid_files/invalid-runperiod.xml'].include? hpxml_file
     hpxml.header.sim_end_month = 4
-    hpxml.header.sim_end_day_of_month = 31
+    hpxml.header.sim_end_day = 31
   elsif ['invalid_files/invalid-daylight-saving.xml'].include? hpxml_file
     hpxml.header.dst_end_month = 4
-    hpxml.header.dst_end_day_of_month = 31
+    hpxml.header.dst_end_day = 31
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.header.timestep = nil
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
@@ -673,7 +671,7 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.conditioned_building_volume -= 400 * 2 * 8
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.building_construction.conditioned_building_volume = nil
-    hpxml.building_construction.average_ceiling_height = 8
+    hpxml.building_construction.average_ceiling_height = nil
     hpxml.building_construction.number_of_bathrooms = nil
   elsif ['base-enclosure-attached-multifamily.xml',
          'base-enclosure-other-housing-unit.xml',
@@ -981,6 +979,8 @@ def set_hpxml_roofs(hpxml_file, hpxml)
       roof.roof_type = nil
       roof.solar_absorptance = nil
       roof.roof_color = HPXML::ColorLight
+      roof.emittance = nil
+      roof.radiant_barrier = nil
     end
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
     hpxml.roofs[0].radiant_barrier_grade = 4
@@ -1117,6 +1117,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
       rim_joist.siding = nil
       rim_joist.solar_absorptance = nil
       rim_joist.color = HPXML::ColorMedium
+      rim_joist.emittance = nil
     end
   end
   hpxml.rim_joists.each do |rim_joist|
@@ -1454,6 +1455,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
       wall.siding = nil
       wall.solar_absorptance = nil
       wall.color = HPXML::ColorMedium
+      wall.emittance = nil
     end
   elsif ['base-enclosure-common-surfaces.xml'].include? hpxml_file
     hpxml.walls.add(id: 'CommonWallUnventedAttic',
@@ -1804,6 +1806,10 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 0,
                                insulation_exterior_r_value: 0)
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.foundation_walls.each do |fwall|
+      fwall.thickness = nil
+    end
   elsif ['invalid_files/enclosure-basement-missing-exterior-foundation-wall.xml'].include? hpxml_file
     hpxml.foundation_walls[0].delete
   end
@@ -2151,6 +2157,12 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                     under_slab_insulation_r_value: 0,
                     carpet_fraction: 0,
                     carpet_r_value: 0)
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.slabs.each do |slab|
+      slab.thickness = nil
+      slab.carpet_fraction = nil
+      slab.carpet_fraction = nil
+    end
   elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
     hpxml.slabs[0].interior_adjacent_to = HPXML::LocationBasementUnconditioned
     hpxml.slabs[0].depth_below_grade = 7.0
@@ -3241,6 +3253,14 @@ def set_hpxml_hvac_control(hpxml_file, hpxml)
     hpxml.hvac_controls[0].cooling_setup_temp = 80
     hpxml.hvac_controls[0].cooling_setup_hours_per_week = 6 * 7
     hpxml.hvac_controls[0].cooling_setup_start_hour = 9 # 9am
+  elsif ['base-hvac-programmable-thermostat-detailed.xml'].include? hpxml_file
+    hpxml.hvac_controls[0].control_type = HPXML::HVACControlTypeProgrammable
+    hpxml.hvac_controls[0].heating_setpoint_temp = nil
+    hpxml.hvac_controls[0].cooling_setpoint_temp = nil
+    hpxml.hvac_controls[0].weekday_heating_setpoints = '64, 64, 64, 64, 64, 64, 64, 74, 74, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64'
+    hpxml.hvac_controls[0].weekend_heating_setpoints = '74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74'
+    hpxml.hvac_controls[0].weekday_cooling_setpoints = '82, 82, 82, 82, 82, 82, 82, 72, 72, 80, 80, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 82, 82'
+    hpxml.hvac_controls[0].weekend_cooling_setpoints = '78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78'
   elsif ['base-hvac-setpoints.xml'].include? hpxml_file
     hpxml.hvac_controls[0].heating_setpoint_temp = 60
     hpxml.hvac_controls[0].cooling_setpoint_temp = 80
@@ -4224,6 +4244,7 @@ def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hpxml.hot_water_distributions.clear
   elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.hot_water_distributions[0].pipe_r_value = nil
     hpxml.hot_water_distributions[0].standard_piping_length = nil
   end
 end
@@ -4345,9 +4366,6 @@ def set_hpxml_pv_systems(hpxml_file, hpxml)
                          system_losses_fraction: 0.14)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.pv_systems.add(id: 'PVSystem',
-                         module_type: HPXML::PVModuleTypeStandard,
-                         location: HPXML::LocationRoof,
-                         tracking: HPXML::PVTrackingTypeFixed,
                          array_azimuth: 180,
                          array_tilt: 20,
                          max_power_output: 4000,
@@ -4407,8 +4425,6 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
   elsif ['base-enclosure-garage.xml',
          'invalid_files/clothes-washer-location.xml'].include? hpxml_file
     hpxml.clothes_washers[0].location = HPXML::LocationGarage
-  elsif ['invalid_files/appliances-location-unconditioned-space.xml'].include? hpxml_file
-    hpxml.clothes_washers[0].location = 'unconditioned space'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.clothes_washers[0].location = nil
     hpxml.clothes_washers[0].modified_energy_factor = nil
@@ -4497,8 +4513,6 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
   elsif ['base-enclosure-garage.xml',
          'invalid_files/clothes-dryer-location.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].location = HPXML::LocationGarage
-  elsif ['invalid_files/appliances-location-unconditioned-space.xml'].include? hpxml_file
-    hpxml.clothes_dryers[0].location = 'unconditioned space'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].location = nil
     hpxml.clothes_dryers[0].energy_factor = nil
@@ -4555,8 +4569,6 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
   elsif ['base-enclosure-garage.xml',
          'invalid_files/dishwasher-location.xml'].include? hpxml_file
     hpxml.dishwashers[0].location = HPXML::LocationGarage
-  elsif ['invalid_files/appliances-location-unconditioned-space.xml'].include? hpxml_file
-    hpxml.dishwashers[0].location = 'unconditioned space'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.dishwashers[0].rated_annual_kwh = nil
     hpxml.dishwashers[0].label_electric_rate = nil
@@ -4564,6 +4576,7 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].label_annual_gas_cost = nil
     hpxml.dishwashers[0].place_setting_capacity = nil
     hpxml.dishwashers[0].label_usage = nil
+    hpxml.dishwashers[0].location = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.dishwashers[0].usage_multiplier = 0.9
   elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
@@ -4611,8 +4624,6 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
   elsif ['base-enclosure-garage.xml',
          'invalid_files/refrigerator-location.xml'].include? hpxml_file
     hpxml.refrigerators[0].location = HPXML::LocationGarage
-  elsif ['invalid_files/appliances-location-unconditioned-space.xml'].include? hpxml_file
-    hpxml.refrigerators[0].location = 'unconditioned space'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.refrigerators[0].primary_indicator = nil
     hpxml.refrigerators[0].location = nil
@@ -4676,15 +4687,18 @@ end
 def set_hpxml_dehumidifier(hpxml_file, hpxml)
   if ['base-appliances-dehumidifier.xml'].include? hpxml_file
     hpxml.dehumidifiers.add(id: 'Dehumidifier',
+                            type: HPXML::DehumidifierTypePortable,
                             capacity: 40,
                             energy_factor: 1.8,
                             rh_setpoint: 0.5,
                             fraction_served: 1.0)
-  elsif ['base-appliances-dehumidifier-ief.xml'].include? hpxml_file
-    hpxml.dehumidifiers[0].energy_factor = nil
-    hpxml.dehumidifiers[0].integrated_energy_factor = 1.5
   elsif ['base-appliances-dehumidifier-50percent.xml'].include? hpxml_file
     hpxml.dehumidifiers[0].fraction_served = 0.5
+  elsif ['base-appliances-dehumidifier-ief-portable.xml'].include? hpxml_file
+    hpxml.dehumidifiers[0].energy_factor = nil
+    hpxml.dehumidifiers[0].integrated_energy_factor = 1.5
+  elsif ['base-appliances-dehumidifier-ief-whole-home.xml'].include? hpxml_file
+    hpxml.dehumidifiers[0].type = HPXML::DehumidifierTypeWholeHome
   end
 end
 
@@ -4731,10 +4745,9 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
   elsif ['base-enclosure-garage.xml',
          'invalid_files/cooking-range-location.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].location = HPXML::LocationGarage
-  elsif ['invalid_files/appliances-location-unconditioned-space.xml'].include? hpxml_file
-    hpxml.cooking_ranges[0].location = 'unconditioned space'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].is_induction = nil
+    hpxml.cooking_ranges[0].location = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].usage_multiplier = 0.9
   elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
@@ -4885,9 +4898,9 @@ def set_hpxml_lighting_schedule(hpxml_file, hpxml)
     hpxml.lighting.holiday_exists = true
     hpxml.lighting.holiday_kwh_per_day = 1.1
     hpxml.lighting.holiday_period_begin_month = 11
-    hpxml.lighting.holiday_period_begin_day_of_month = 24
+    hpxml.lighting.holiday_period_begin_day = 24
     hpxml.lighting.holiday_period_end_month = 1
-    hpxml.lighting.holiday_period_end_day_of_month = 6
+    hpxml.lighting.holiday_period_end_day = 6
     hpxml.lighting.holiday_weekday_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
     hpxml.lighting.holiday_weekend_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
   end
@@ -4901,9 +4914,6 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
                          kWh_per_year: 7302,
                          frac_sensible: 0.822,
                          frac_latent: 0.178)
-    hpxml.plug_loads.add(id: 'PlugLoadMisc2',
-                         plug_load_type: HPXML::PlugLoadTypeTelevision,
-                         kWh_per_year: 0)
   elsif ['ASHRAE_Standard_140/L170AC.xml',
          'ASHRAE_Standard_140/L170AL.xml'].include? hpxml_file
     hpxml.plug_loads[0].kWh_per_year = 0
@@ -4929,9 +4939,6 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
       hpxml.plug_loads.add(id: 'PlugLoadMisc',
                            plug_load_type: HPXML::PlugLoadTypeOther,
                            kWh_per_year: 0)
-      hpxml.plug_loads.add(id: 'PlugLoadMisc2',
-                           plug_load_type: HPXML::PlugLoadTypeTelevision,
-                           kWh_per_year: 0)
     elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
       hpxml.plug_loads[0].weekday_fractions = '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036'
       hpxml.plug_loads[0].weekend_fractions = '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036'
@@ -4940,14 +4947,12 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
       hpxml.plug_loads[1].weekend_fractions = '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.05, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07'
       hpxml.plug_loads[1].monthly_multipliers = '1.137, 1.129, 0.961, 0.969, 0.961, 0.993, 0.996, 0.96, 0.993, 0.867, 0.86, 1.137'
       hpxml.plug_loads.add(id: 'PlugLoadMisc3',
-                           location: HPXML::LocationExterior,
                            plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging,
                            kWh_per_year: 1500,
                            weekday_fractions: '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042',
                            weekend_fractions: '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042',
                            monthly_multipliers: '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
       hpxml.plug_loads.add(id: 'PlugLoadMisc4',
-                           location: HPXML::LocationExterior,
                            plug_load_type: HPXML::PlugLoadTypeWellPump,
                            kWh_per_year: 475,
                            weekday_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',
@@ -4974,7 +4979,6 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
     hpxml.plug_loads[0].weekday_fractions = nil
     hpxml.plug_loads[0].weekend_fractions = nil
     hpxml.plug_loads[0].monthly_multipliers = nil
-    hpxml.plug_loads[0].location = nil
   end
 end
 
@@ -4982,7 +4986,6 @@ def set_hpxml_fuel_loads(hpxml_file, hpxml)
   if ['base-misc-loads-large-uncommon.xml',
       'base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.fuel_loads.add(id: 'FuelLoadMisc',
-                         location: HPXML::LocationExterior,
                          fuel_load_type: HPXML::FuelLoadTypeGrill,
                          fuel_type: HPXML::FuelTypePropane,
                          therm_per_year: 25,
@@ -4997,9 +5000,10 @@ def set_hpxml_fuel_loads(hpxml_file, hpxml)
                          weekend_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',
                          monthly_multipliers: '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
     hpxml.fuel_loads.add(id: 'FuelLoadMisc3',
-                         location: HPXML::LocationInterior,
                          fuel_load_type: HPXML::FuelLoadTypeFireplace,
                          fuel_type: HPXML::FuelTypeWoodCord,
+                         frac_sensible: 0.5,
+                         frac_latent: 0.1,
                          therm_per_year: 55,
                          weekday_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',
                          weekend_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',
@@ -5095,7 +5099,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
   hpxml_validator = XMLHelper.create_doc(version = '1.0', encoding = 'UTF-8')
   root = XMLHelper.add_element(hpxml_validator, 'sch:schema')
   XMLHelper.add_attribute(root, 'xmlns:sch', 'http://purl.oclc.org/dsdl/schematron')
-  XMLHelper.add_element(root, 'sch:title', 'HPXML Schematron Validator: HPXML.xsd')
+  XMLHelper.add_element(root, 'sch:title', 'HPXML Schematron Validator: HPXML.xsd', :string)
   name_space = XMLHelper.add_element(root, 'sch:ns')
   XMLHelper.add_attribute(name_space, 'uri', 'http://hpxmlonline.com/2019/10')
   XMLHelper.add_attribute(name_space, 'prefix', 'h')
@@ -5180,27 +5184,27 @@ def create_schematron_hpxml_validator(hpxml_docs)
     end
 
     if not hpxml_data_type[:enums].empty?
-      assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be \"#{hpxml_data_type[:enums].join('" or "')}\"")
+      assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be \"#{hpxml_data_type[:enums].join('" or "')}\"", :string)
       XMLHelper.add_attribute(assertion, 'role', 'ERROR')
       XMLHelper.add_attribute(assertion, 'test', "#{element_name}[#{hpxml_data_type[:enums].map { |e| "text()=\"#{e}\"" }.join(' or ')}] or not(#{element_name})")
     else
       if hpxml_data_type[:min_inclusive]
-        assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be greater than or equal to #{hpxml_data_type[:min_inclusive]}")
+        assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be greater than or equal to #{hpxml_data_type[:min_inclusive]}", :string)
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
         XMLHelper.add_attribute(assertion, 'test', "number(#{element_name}) &gt;= #{hpxml_data_type[:min_inclusive]} or not(#{element_name})")
       end
       if hpxml_data_type[:max_inclusive]
-        assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be less than or equal to #{hpxml_data_type[:max_inclusive]}")
+        assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be less than or equal to #{hpxml_data_type[:max_inclusive]}", :string)
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
         XMLHelper.add_attribute(assertion, 'test', "number(#{element_name}) &lt;= #{hpxml_data_type[:max_inclusive]} or not(#{element_name})")
       end
       if hpxml_data_type[:min_exclusive]
-        assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be greater than #{hpxml_data_type[:min_exclusive]}")
+        assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be greater than #{hpxml_data_type[:min_exclusive]}", :string)
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
         XMLHelper.add_attribute(assertion, 'test', "number(#{element_name}) &gt; #{hpxml_data_type[:min_exclusive]} or not(#{element_name})")
       end
       if hpxml_data_type[:max_exclusive]
-        assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be less than #{hpxml_data_type[:max_exclusive]}")
+        assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name.gsub('h:', '')} to be less than #{hpxml_data_type[:max_exclusive]}", :string)
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
         XMLHelper.add_attribute(assertion, 'test', "number(#{element_name}) &lt; #{hpxml_data_type[:max_exclusive]} or not(#{element_name})")
       end
