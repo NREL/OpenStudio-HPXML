@@ -3293,7 +3293,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              mech_vent_sensible_recovery_efficiency_type: runner.getStringArgumentValue('mech_vent_sensible_recovery_efficiency_type', user_arguments),
              mech_vent_sensible_recovery_efficiency: runner.getDoubleArgumentValue('mech_vent_sensible_recovery_efficiency', user_arguments),
              mech_vent_fan_power: runner.getDoubleArgumentValue('mech_vent_fan_power', user_arguments),
-             mech_vent_num_units_served: runner.getIntegerArgumentValueArgumentValue('mech_vent_num_units_served', user_arguments),
+             mech_vent_num_units_served: runner.getIntegerArgumentValue('mech_vent_num_units_served', user_arguments),
              shared_mech_vent_frac_recirculation: runner.getOptionalDoubleArgumentValue('shared_mech_vent_frac_recirculation', user_arguments),
              shared_mech_vent_preheating_fuel: runner.getOptionalStringArgumentValue('shared_mech_vent_preheating_fuel', user_arguments),
              shared_mech_vent_preheating_efficiency: runner.getOptionalDoubleArgumentValue('shared_mech_vent_preheating_efficiency', user_arguments),
@@ -4046,17 +4046,7 @@ class HPXMLFile
       next if surface.surfaceType != 'Wall'
 
       interior_adjacent_to = get_adjacent_to(surface)
-      if [HPXML::LocationOtherHousingUnit].include? interior_adjacent_to
-        has_door = false
-        surface.subSurfaces.each do |sub_surface|
-          next if sub_surface.subSurfaceType != 'Door'
-
-          has_door = true
-        end
-        next unless has_door
-      else
-        next unless [HPXML::LocationLivingSpace, HPXML::LocationAtticUnvented, HPXML::LocationAtticVented, HPXML::LocationGarage].include? interior_adjacent_to
-      end
+      next unless [HPXML::LocationLivingSpace, HPXML::LocationAtticUnvented, HPXML::LocationAtticVented, HPXML::LocationGarage].include? interior_adjacent_to
 
       exterior_adjacent_to = HPXML::LocationOutside
       if surface.adjacentSurface.is_initialized
@@ -4065,12 +4055,7 @@ class HPXMLFile
         exterior_adjacent_to = HPXML::LocationOtherHousingUnit
       end
 
-      if interior_adjacent_to == HPXML::LocationOtherHousingUnit && exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-        interior_adjacent_to = HPXML::LocationLivingSpace
-        exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-      else
-        next if interior_adjacent_to == exterior_adjacent_to
-      end
+      next if interior_adjacent_to == exterior_adjacent_to
       next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? exterior_adjacent_to
 
       wall_type = args[:wall_type]
@@ -4362,15 +4347,36 @@ class HPXMLFile
     end
   end
 
+  def self.get_adiabatic_adjacent_surface(model, surface)
+    return if surface.outsideBoundaryCondition != 'Adiabatic'
+
+    model.getSurfaces.sort.each do |adjacent_surface|
+      next if surface == adjacent_surface
+      next if adjacent_surface.surfaceType != 'Wall'
+      next if adjacent_surface.outsideBoundaryCondition != 'Adiabatic'
+      next if surface.grossArea != adjacent_surface.grossArea
+
+      return adjacent_surface
+    end
+  end
+
   def self.set_doors(hpxml, runner, model, args)
     model.getSurfaces.sort.each do |surface|
+      interior_adjacent_to = get_adjacent_to(surface)
+
+      wall_surface = surface
+      if [HPXML::LocationOtherHousingUnit].include?(interior_adjacent_to)
+        wall_surface = get_adiabatic_adjacent_surface(model, surface)
+        next if wall_surface.nil?
+      end
+
       surface.subSurfaces.sort.each do |sub_surface|
         next if sub_surface.subSurfaceType != 'Door'
 
         sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
 
         hpxml.doors.add(id: "#{valid_attr(sub_surface.name)}_#{sub_surface_facade}",
-                        wall_idref: valid_attr(surface.name),
+                        wall_idref: valid_attr(wall_surface.name),
                         area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round,
                         azimuth: args[:geometry_orientation],
                         r_value: args[:door_rvalue])
