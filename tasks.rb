@@ -76,15 +76,20 @@ def create_osws
     'base-dhw-solar-indirect-flat-plate.osw' => 'base.osw',
     'base-dhw-solar-thermosyphon-flat-plate.osw' => 'base.osw',
     'base-dhw-tank-coal.osw' => 'base.osw',
+    'base-dhw-tank-elec-low-fhr-uef.osw' => 'base.osw',
     'base-dhw-tank-gas.osw' => 'base.osw',
+    'base-dhw-tank-gas-med-fhr-uef.osw' => 'base-dhw-tank-gas.osw',
     'base-dhw-tank-gas-outside.osw' => 'base.osw',
     'base-dhw-tank-heat-pump.osw' => 'base.osw',
     'base-dhw-tank-heat-pump-outside.osw' => 'base.osw',
+    'base-dhw-tank-heat-pump-uef-medium-fhr.osw' => 'base-dhw-tank-heat-pump.osw',
     'base-dhw-tank-heat-pump-with-solar.osw' => 'base.osw',
     'base-dhw-tank-heat-pump-with-solar-fraction.osw' => 'base.osw',
     'base-dhw-tankless-electric.osw' => 'base.osw',
     'base-dhw-tankless-electric-outside.osw' => 'base.osw',
+    'base-dhw-tankless-electric-uef.osw' => 'base-dhw-tankless-electric.osw',
     'base-dhw-tankless-gas.osw' => 'base.osw',
+    'base-dhw-tankless-gas-uef.osw' => 'base-dhw-tankless-gas.osw',
     'base-dhw-tankless-gas-with-solar.osw' => 'base.osw',
     'base-dhw-tankless-gas-with-solar-fraction.osw' => 'base.osw',
     'base-dhw-tankless-propane.osw' => 'base.osw',
@@ -507,8 +512,7 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_tank_volume', '40')
     step.setArgument('water_heater_heating_capacity', '18767')
     step.setArgument('water_heater_efficiency_type', 'EnergyFactor')
-    step.setArgument('water_heater_efficiency_ef', 0.95)
-    step.setArgument('water_heater_efficiency_uef', 0.93)
+    step.setArgument('water_heater_efficiency', 0.95)
     step.setArgument('water_heater_recovery_efficiency', '0.76')
     step.setArgument('water_heater_standby_loss', 0)
     step.setArgument('water_heater_jacket_rvalue', 0)
@@ -864,7 +868,7 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_num_units_served', 6)
     step.setArgument('water_heater_tank_volume', '120')
     step.setArgument('water_heater_heating_capacity', '40000')
-    step.setArgument('water_heater_efficiency_ef', 0.59)
+    step.setArgument('water_heater_efficiency', 0.59)
     step.setArgument('water_heater_recovery_efficiency', '0.76')
   elsif ['base-dhw-solar-direct-evacuated-tube.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
@@ -902,34 +906,54 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeCoal)
     step.setArgument('water_heater_tank_volume', '50')
     step.setArgument('water_heater_heating_capacity', '40000')
-    step.setArgument('water_heater_efficiency_ef', 0.59)
+    step.setArgument('water_heater_efficiency', 0.59)
+  elsif ['base-dhw-tank-elec-low-fhr-uef.osw'].include? osw_file
+    step.setArgument('water_heater_tank_volume', '30')
+    step.setArgument('water_heater_heating_capacity', '15354')
+    step.setArgument('water_heater_efficiency_type', 'UniformEnergyFactor')
+    step.setArgument('water_heater_efficiency', 0.93)
+    step.setArgument('water_heater_first_hour_rating', 46)
+    step.setArgument('water_heater_recovery_efficiency', 0.98)
   elsif ['base-dhw-tank-gas.osw'].include? osw_file
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
     step.setArgument('water_heater_tank_volume', '50')
     step.setArgument('water_heater_heating_capacity', '40000')
-    step.setArgument('water_heater_efficiency_ef', 0.59)
+    step.setArgument('water_heater_efficiency', 0.59)
+  elsif ['base-dhw-tank-gas-med-fhr-uef.osw'].include? osw_file
+    step.setArgument('water_heater_tank_volume', '30')
+    step.setArgument('water_heater_heating_capacity', '30000')
+    step.setArgument('water_heater_efficiency_type', 'UniformEnergyFactor')
+    step.setArgument('water_heater_efficiency', 0.59)
+    step.setArgument('water_heater_first_hour_rating', 56)
+    step.setArgument('water_heater_recovery_efficiency', 0.75)
   elsif ['base-dhw-tank-gas-outside.osw'].include? osw_file
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
     step.setArgument('water_heater_location', HPXML::LocationOtherExterior)
     step.setArgument('water_heater_tank_volume', '50')
     step.setArgument('water_heater_heating_capacity', '40000')
-    step.setArgument('water_heater_efficiency_ef', 0.59)
+    step.setArgument('water_heater_efficiency', 0.59)
   elsif ['base-dhw-tank-heat-pump.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_tank_volume', '80')
     step.setArgument('water_heater_heating_capacity', Constants.Auto)
-    step.setArgument('water_heater_efficiency_ef', 2.3)
+    step.setArgument('water_heater_efficiency', 2.3)
   elsif ['base-dhw-tank-heat-pump-outside.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_location', HPXML::LocationOtherExterior)
     step.setArgument('water_heater_tank_volume', '80')
     step.setArgument('water_heater_heating_capacity', Constants.Auto)
-    step.setArgument('water_heater_efficiency_ef', 2.3)
+    step.setArgument('water_heater_efficiency', 2.3)
+  elsif ['base-dhw-tank-heat-pump-uef-medium-fhr.osw'].include? osw_file
+    step.setArgument('water_heater_tank_volume', '50')
+    step.setArgument('water_heater_heating_capacity', '18767')
+    step.setArgument('water_heater_efficiency_type', 'UniformEnergyFactor')
+    step.setArgument('water_heater_efficiency', 3.75)
+    step.setArgument('water_heater_first_hour_rating', 60)
   elsif ['base-dhw-tank-heat-pump-with-solar.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_tank_volume', '80')
     step.setArgument('water_heater_heating_capacity', Constants.Auto)
-    step.setArgument('water_heater_efficiency_ef', 2.3)
+    step.setArgument('water_heater_efficiency', 2.3)
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_loop_type', HPXML::SolarThermalLoopTypeIndirect)
     step.setArgument('solar_thermal_collector_type', HPXML::SolarThermalTypeSingleGlazing)
@@ -940,29 +964,34 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_tank_volume', '80')
     step.setArgument('water_heater_heating_capacity', Constants.Auto)
-    step.setArgument('water_heater_efficiency_ef', 2.3)
+    step.setArgument('water_heater_efficiency', 2.3)
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_solar_fraction', 0.65)
   elsif ['base-dhw-tankless-electric.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
     step.setArgument('water_heater_tank_volume', Constants.Auto)
-    step.setArgument('water_heater_efficiency_ef', 0.99)
+    step.setArgument('water_heater_efficiency', 0.99)
   elsif ['base-dhw-tankless-electric-outside.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
     step.setArgument('water_heater_location', HPXML::LocationOtherExterior)
     step.setArgument('water_heater_tank_volume', Constants.Auto)
-    step.setArgument('water_heater_efficiency_ef', 0.99)
-    step.setArgument('water_heater_performance_adjustment', 0.92)
+    step.setArgument('water_heater_efficiency', 0.99)
+  elsif ['base-dhw-tankless-electric-uef.osw'].include? osw_file
+    step.setArgument('water_heater_efficiency_type', 'UniformEnergyFactor')
+    step.setArgument('water_heater_efficiency', 0.98)
   elsif ['base-dhw-tankless-gas.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
     step.setArgument('water_heater_tank_volume', Constants.Auto)
-    step.setArgument('water_heater_efficiency_ef', 0.82)
+    step.setArgument('water_heater_efficiency', 0.82)
+  elsif ['base-dhw-tankless-gas-uef.osw'].include? osw_file
+    step.setArgument('water_heater_efficiency_type', 'UniformEnergyFactor')
+    step.setArgument('water_heater_efficiency', 0.93)
   elsif ['base-dhw-tankless-gas-with-solar.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
     step.setArgument('water_heater_tank_volume', Constants.Auto)
-    step.setArgument('water_heater_efficiency_ef', 0.82)
+    step.setArgument('water_heater_efficiency', 0.82)
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_loop_type', HPXML::SolarThermalLoopTypeIndirect)
     step.setArgument('solar_thermal_collector_type', HPXML::SolarThermalTypeSingleGlazing)
@@ -973,24 +1002,24 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
     step.setArgument('water_heater_tank_volume', Constants.Auto)
-    step.setArgument('water_heater_efficiency_ef', 0.82)
+    step.setArgument('water_heater_efficiency', 0.82)
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_solar_fraction', 0.65)
   elsif ['base-dhw-tankless-propane.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypePropane)
     step.setArgument('water_heater_tank_volume', Constants.Auto)
-    step.setArgument('water_heater_efficiency_ef', 0.82)
+    step.setArgument('water_heater_efficiency', 0.82)
   elsif ['base-dhw-tank-oil.osw'].include? osw_file
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeOil)
     step.setArgument('water_heater_tank_volume', '50')
     step.setArgument('water_heater_heating_capacity', '40000')
-    step.setArgument('water_heater_efficiency_ef', 0.59)
+    step.setArgument('water_heater_efficiency', 0.59)
   elsif ['base-dhw-tank-wood.osw'].include? osw_file
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeWoodCord)
     step.setArgument('water_heater_tank_volume', '50')
     step.setArgument('water_heater_heating_capacity', '40000')
-    step.setArgument('water_heater_efficiency_ef', 0.59)
+    step.setArgument('water_heater_efficiency', 0.59)
   elsif ['base-enclosure-2stories.osw'].include? osw_file
     step.setArgument('geometry_cfa', 4050.0)
     step.setArgument('geometry_num_floors_above_grade', 2)

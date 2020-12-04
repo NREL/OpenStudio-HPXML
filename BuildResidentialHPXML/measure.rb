@@ -1780,16 +1780,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('EnergyFactor')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_efficiency_ef', true)
-    arg.setDisplayName('Water Heater: Energy Factor')
-    arg.setDescription('Ratio of useful energy output from water heater to the total amount of energy delivered from the water heater.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_efficiency', true)
+    arg.setDisplayName('Water Heater: Efficiency')
+    arg.setDescription('Rated Energy Factor or Uniform Energy Factor. Does not apply to space-heating boilers.')
     arg.setDefaultValue(0.67)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_efficiency_uef', true)
-    arg.setDisplayName('Water Heater: Uniform Energy Factor')
-    arg.setDescription('The uniform energy factor of water heater. Does not apply to space-heating boilers.')
-    arg.setDefaultValue(0.67)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_first_hour_rating', false)
+    arg.setDisplayName('Water Heater: First Hour Rating')
+    arg.setDescription("Rated gallons of hot water supplied in an hour. Required if Efficiency Type is UniformEnergyFactor and Type is not #{HPXML::WaterHeaterTypeTankless}. Does not apply to space-heating boilers.")
+    arg.setUnits('gal/hr')
+    arg.setDefaultValue(56.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('water_heater_recovery_efficiency', true)
@@ -1816,12 +1817,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The setpoint temperature of water heater.')
     arg.setUnits('deg-F')
     arg.setDefaultValue(Constants.Auto)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_performance_adjustment', false)
-    arg.setDisplayName('Water Heater: Performance Adjustment')
-    arg.setDescription("A performance adjustment due to cycling inefficiencies. Only applies to #{HPXML::WaterHeaterTypeTankless}.")
-    arg.setUnits('Frac')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('water_heater_has_flue_or_chimney', true)
@@ -3319,13 +3314,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              water_heater_tank_volume: runner.getStringArgumentValue('water_heater_tank_volume', user_arguments),
              water_heater_heating_capacity: runner.getStringArgumentValue('water_heater_heating_capacity', user_arguments),
              water_heater_efficiency_type: runner.getStringArgumentValue('water_heater_efficiency_type', user_arguments),
-             water_heater_efficiency_ef: runner.getDoubleArgumentValue('water_heater_efficiency_ef', user_arguments),
-             water_heater_efficiency_uef: runner.getDoubleArgumentValue('water_heater_efficiency_uef', user_arguments),
+             water_heater_efficiency: runner.getDoubleArgumentValue('water_heater_efficiency', user_arguments),
+             water_heater_first_hour_rating: runner.getDoubleArgumentValue('water_heater_first_hour_rating', user_arguments),
              water_heater_recovery_efficiency: runner.getStringArgumentValue('water_heater_recovery_efficiency', user_arguments),
              water_heater_standby_loss: runner.getOptionalDoubleArgumentValue('water_heater_standby_loss', user_arguments),
              water_heater_jacket_rvalue: runner.getOptionalDoubleArgumentValue('water_heater_jacket_rvalue', user_arguments),
              water_heater_setpoint_temperature: runner.getStringArgumentValue('water_heater_setpoint_temperature', user_arguments),
-             water_heater_performance_adjustment: runner.getOptionalDoubleArgumentValue('water_heater_performance_adjustment', user_arguments),
              water_heater_has_flue_or_chimney: runner.getBoolArgumentValue('water_heater_has_flue_or_chimney', user_arguments),
              water_heater_num_units_served: runner.getIntegerArgumentValue('water_heater_num_units_served', user_arguments),
              dhw_distribution_system_type: runner.getStringArgumentValue('dhw_distribution_system_type', user_arguments),
@@ -5009,9 +5003,12 @@ class HPXMLFile
 
     if not [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater_type
       if args[:water_heater_efficiency_type] == 'EnergyFactor'
-        energy_factor = args[:water_heater_efficiency_ef]
+        energy_factor = args[:water_heater_efficiency]
       elsif args[:water_heater_efficiency_type] == 'UniformEnergyFactor'
-        uniform_energy_factor = args[:water_heater_efficiency_uef]
+        uniform_energy_factor = args[:water_heater_efficiency]
+        if water_heater_type != HPXML::WaterHeaterTypeTankless
+          first_hour_rating = args[:water_heater_first_hour_rating]
+        end
       end
     end
 
@@ -5056,12 +5053,6 @@ class HPXMLFile
       end
     end
 
-    if [HPXML::WaterHeaterTypeTankless].include? water_heater_type
-      if args[:water_heater_performance_adjustment].is_initialized
-        performance_adjustment = args[:water_heater_performance_adjustment].get
-      end
-    end
-
     if args[:water_heater_num_units_served] > 1
       is_shared_system = true
       number_of_units_served = args[:water_heater_num_units_served]
@@ -5071,12 +5062,12 @@ class HPXMLFile
                                     water_heater_type: water_heater_type,
                                     fuel_type: fuel_type,
                                     location: location,
-                                    performance_adjustment: performance_adjustment,
                                     tank_volume: tank_volume,
                                     fraction_dhw_load_served: 1.0,
                                     heating_capacity: heating_capacity,
                                     energy_factor: energy_factor,
                                     uniform_energy_factor: uniform_energy_factor,
+                                    first_hour_rating: first_hour_rating,
                                     recovery_efficiency: recovery_efficiency,
                                     related_hvac_idref: related_hvac_idref,
                                     standby_loss: standby_loss,

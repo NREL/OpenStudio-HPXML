@@ -260,6 +260,9 @@ class BuildResidentialHPXMLTest < MiniTest::Test
           hpxml.hvac_distributions[0].ducts.delete_at(i) # Only compare first two ducts
         end
       end
+      hpxml.water_heating_systems.each do |wh|
+        wh.performance_adjustment = nil # Detailed input not exposed
+      end
       if hpxml.refrigerators.length > 0
         (2..hpxml.refrigerators.length).to_a.reverse.each do |i|
           hpxml.refrigerators.delete_at(i) # Only compare first two refrigerators
