@@ -376,16 +376,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('6:12')
     args << arg
 
-    roof_structure_choices = OpenStudio::StringVector.new
-    roof_structure_choices << 'truss, cantilever'
-    roof_structure_choices << 'rafter'
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_roof_structure', roof_structure_choices, true)
-    arg.setDisplayName('Geometry: Roof Structure')
-    arg.setDescription('The roof structure of the building. Ignored if the building has a flat roof.')
-    arg.setDefaultValue('truss, cantilever')
-    args << arg
-
     attic_type_choices = OpenStudio::StringVector.new
     attic_type_choices << HPXML::AtticTypeVented
     attic_type_choices << HPXML::AtticTypeUnvented
@@ -3138,7 +3128,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              geometry_foundation_height_above_grade: runner.getDoubleArgumentValue('geometry_foundation_height_above_grade', user_arguments),
              geometry_roof_type: runner.getStringArgumentValue('geometry_roof_type', user_arguments),
              geometry_roof_pitch: runner.getStringArgumentValue('geometry_roof_pitch', user_arguments),
-             geometry_roof_structure: runner.getStringArgumentValue('geometry_roof_structure', user_arguments),
              geometry_attic_type: runner.getStringArgumentValue('geometry_attic_type', user_arguments),
              geometry_eaves_depth: runner.getDoubleArgumentValue('geometry_eaves_depth', user_arguments),
              geometry_num_bedrooms: runner.getIntegerArgumentValue('geometry_num_bedrooms', user_arguments),

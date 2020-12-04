@@ -36,7 +36,6 @@ class Geometry
                                          geometry_attic_type:,
                                          geometry_roof_type:,
                                          geometry_roof_pitch:,
-                                         geometry_roof_structure:,
                                          **remainder)
     cfa = geometry_cfa
     wall_height = geometry_wall_height
@@ -51,7 +50,6 @@ class Geometry
     attic_type = geometry_attic_type
     roof_type = geometry_roof_type
     roof_pitch = geometry_roof_pitch
-    roof_structure = geometry_roof_structure
 
     # error checking
     if model.getSpaces.size > 0
