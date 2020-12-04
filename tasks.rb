@@ -30,7 +30,12 @@ def create_osws
     'base-atticroof-unvented-insulated-roof.osw' => 'base.osw',
     'base-atticroof-vented.osw' => 'base.osw',
     'base-bldgtype-multifamily.osw' => 'base.osw',
-    # 'base-bldgtype-multifamily-shared-laundry-room.osw' => 'base.osw', # Not going to support shared laundry room for now
+    # 'base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.osw' => 'base.osw', # Not supporting units adjacent to other MF spaces for now
+    # 'base-bldgtype-multifamily-adjacent-to-multiple.osw' => 'base.osw', # Not supporting units adjacent to other MF spaces for now
+    # 'base-bldgtype-multifamily-adjacent-to-non-freezing-space.osw' => 'base.osw', # Not supporting units adjacent to other MF spaces for now
+    # 'base-bldgtype-multifamily-adjacent-to-other-heated-space.osw' => 'base.osw', # Not supporting units adjacent to other MF spaces for now
+    # 'base-bldgtype-multifamily-adjacent-to-other-housing-unit.osw' => 'base.osw', # Not supporting units adjacent to other MF spaces for now
+    # 'base-bldgtype-multifamily-shared-laundry-room.osw' => 'base.osw', # Not going to support shared laundry room
     'base-bldgtype-multifamily-shared-mechvent.osw' => 'base-bldgtype-multifamily.osw',
     # 'base-bldgtype-multifamily-shared-mechvent-multiple.osw' => 'base.osw', # Not going to support > 2 MV systems
     'base-bldgtype-multifamily-shared-mechvent-preconditioning.osw' => 'base-bldgtype-multifamily-shared-mechvent.osw',
@@ -98,10 +103,6 @@ def create_osws
     'base-enclosure-infil-cfm50.osw' => 'base.osw',
     'base-enclosure-infil-flue.osw' => 'base.osw',
     'base-enclosure-infil-natural-ach.osw' => 'base.osw',
-    # 'base-enclosure-other-heated-space.osw' => 'base.osw', # Not supporting units adjacent to "other heated space" for now
-    # 'base-enclosure-other-housing-unit.osw' => 'base.osw', # Not supporting units adjacent to "other housing unit" for now
-    # 'base-enclosure-other-multifamily-buffer-space.osw' => 'base.osw', # Not supporting units adjacent to "multifamily buffer space" for now
-    # 'base-enclosure-other-non-freezing-space.osw' => 'base.osw', # Not supporting units adjacent to "non freezing space" for now
     'base-enclosure-overhangs.osw' => 'base.osw',
     # 'base-enclosure-rooftypes.osw' => 'base.osw',
     # 'base-enclosure-skylights.osw' => 'base.osw', # There are no front roof surfaces, but 15.0 ft^2 of skylights were specified.
@@ -683,7 +684,7 @@ def get_values(osw_file, step)
     step.setArgument('hot_tub_heater_usage_multiplier', 1.0)
   elsif ['base-bldgtype-single-family-attached.osw'].include? osw_file
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFA)
-    step.setArgument('geometry_cfa', 900.0)
+    step.setArgument('geometry_cfa', 1800.0)
     step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('geometry_building_num_units', 3)
     step.setArgument('geometry_horizontal_location', 'Left')

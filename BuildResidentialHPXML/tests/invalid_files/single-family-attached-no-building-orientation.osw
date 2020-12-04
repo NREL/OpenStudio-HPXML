@@ -122,7 +122,7 @@
         "geometry_aspect_ratio": 1.5,
         "geometry_attic_type": "UnventedAttic",
         "geometry_balcony_depth": 0.0,
-        "geometry_cfa": 900.0,
+        "geometry_cfa": 1800.0,
         "geometry_corridor_position": "None",
         "geometry_corridor_width": 10.0,
         "geometry_eaves_depth": 0,
