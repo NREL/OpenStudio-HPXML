@@ -2560,6 +2560,8 @@ class OSModel
     output_diagnostics = model.getOutputDiagnostics
     output_diagnostics.addKey('DisplayAdvancedReportVariables')
 
+    area_tolerance = UnitConversions.convert(1.0, 'ft^2', 'm^2')
+
     model.getSurfaces.sort.each_with_index do |s, idx|
       next unless s.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
 
@@ -2602,7 +2604,7 @@ class OSModel
         end
       end
 
-      next if s.netArea < 1.0 # Skip parent surfaces (of subsurfaces) that have near zero net area
+      next if s.netArea < area_tolerance # Skip parent surfaces (of subsurfaces) that have near zero net area
 
       key = { 'FoundationWall' => :foundation_walls,
               'RimJoist' => :rim_joists,
