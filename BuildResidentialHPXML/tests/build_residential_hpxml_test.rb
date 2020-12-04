@@ -63,10 +63,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
         assert(success)
 
-        if ['base-bldgtype-single-family-attached.osw'].include? File.basename(osw)
-          next # FIXME: should this be temporary?
-        end
-
         if File.basename(osw).start_with? 'extra-'
           next # No corresponding sample file
         end

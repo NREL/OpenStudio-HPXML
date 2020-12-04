@@ -4169,9 +4169,15 @@ class HPXMLFile
       if args[:foundation_wall_assembly_r].is_initialized && (args[:foundation_wall_assembly_r].get > 0)
         insulation_assembly_r_value = args[:foundation_wall_assembly_r]
       else
-        insulation_exterior_r_value = args[:foundation_wall_insulation_r]
-        insulation_exterior_distance_to_top = args[:foundation_wall_insulation_distance_to_top]
-        insulation_exterior_distance_to_bottom = args[:foundation_wall_insulation_distance_to_bottom]
+        if interior_adjacent_to == exterior_adjacent_to # E.g., don't insulate wall between basement and neighbor basement
+          insulation_exterior_r_value = 0
+          insulation_exterior_distance_to_top = 0
+          insulation_exterior_distance_to_bottom = 0
+        else
+          insulation_exterior_r_value = args[:foundation_wall_insulation_r]
+          insulation_exterior_distance_to_top = args[:foundation_wall_insulation_distance_to_top]
+          insulation_exterior_distance_to_bottom = args[:foundation_wall_insulation_distance_to_bottom]
+        end
         insulation_interior_r_value = 0
         insulation_interior_distance_to_top = 0
         insulation_interior_distance_to_bottom = 0

@@ -696,6 +696,7 @@ def get_values(osw_file, step)
     step.setArgument('window_area_back', 0)
     step.setArgument('window_area_left', 0)
     step.setArgument('window_area_right', 0)
+    step.setArgument('plug_loads_other_annual_kwh', '1638.0')
   elsif ['base-bldgtype-multifamily.osw'].include? osw_file
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
     step.setArgument('geometry_cfa', 900.0)
