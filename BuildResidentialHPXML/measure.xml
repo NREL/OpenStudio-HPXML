@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>b5bb1a41-4702-43e1-b3f4-8d2a92947fa2</version_id>
-  <version_modified>20201203T232808Z</version_modified>
+  <version_id>71f13422-73af-481b-8a98-dcb57cb6ed94</version_id>
+  <version_modified>20201204T010118Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -7699,18 +7699,6 @@
       <checksum>90BA3BC5</checksum>
     </file>
     <file>
-      <filename>base-bldgtype-single-family-attached.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>5AFF2C34</checksum>
-    </file>
-    <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>D3DCF92A</checksum>
-    </file>
-    <file>
       <filename>base-bldgtype-multifamily.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -7721,17 +7709,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>557C4F62</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>85F701FA</checksum>
     </file>
     <file>
       <filename>base-bldgtype-multifamily-shared-mechvent-preconditioning.osw</filename>
@@ -7770,16 +7747,39 @@
       <checksum>8632C8AF</checksum>
     </file>
     <file>
+      <filename>base-bldgtype-single-family-attached.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AED2E058</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A5876C02</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>21AD43D8</checksum>
+    </file>
+    <file>
       <filename>test_rakefile.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
-      <checksum>4A435EDF</checksum>
+      <checksum>0CFF98B6</checksum>
     </file>
     <file>
       <filename>test_measure.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
-      <checksum>6C84119D</checksum>
+      <checksum>6797780B</checksum>
     </file>
   </files>
 </measure>
