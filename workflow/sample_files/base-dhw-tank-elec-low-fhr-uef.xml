@@ -387,7 +387,6 @@
             <HeatingCapacity>15354.0</HeatingCapacity>
             <UniformEnergyFactor>0.93</UniformEnergyFactor>
             <FirstHourRating>46.0</FirstHourRating>
-            <RecoveryEfficiency>0.98</RecoveryEfficiency>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>

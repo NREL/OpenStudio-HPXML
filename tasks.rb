@@ -4021,7 +4021,6 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].first_hour_rating = 46.0
     hpxml.water_heating_systems[0].tank_volume = 30.0
     hpxml.water_heating_systems[0].heating_capacity = 15354.0 # 4.5 kW
-    hpxml.water_heating_systems[0].recovery_efficiency = 0.98
   elsif ['base-dhw-tank-gas-med-fhr-uef.xml'].include? hpxml_file
     # Based on AO Smith model number G6-MH3030NV 400 in AHRI directory
     hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
