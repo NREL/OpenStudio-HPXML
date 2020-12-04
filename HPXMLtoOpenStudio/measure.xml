@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>0e577d23-8ad4-466d-a833-2643d182f95c</version_id>
-  <version_modified>20201204T012803Z</version_modified>
+  <version_id>1fb7389d-05ce-4a3c-b3a3-e54df96630fc</version_id>
+  <version_modified>20201204T023712Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -128,6 +128,12 @@
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
       <checksum>BB8F37B8</checksum>
+    </file>
+    <file>
+      <filename>weather.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A951F41D</checksum>
     </file>
     <file>
       <filename>data_ashrae_622_wsf.csv</filename>
@@ -292,6 +298,12 @@
       <checksum>0C040490</checksum>
     </file>
     <file>
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>71BB7398</checksum>
+    </file>
+    <file>
       <filename>test_constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -304,6 +316,12 @@
       <checksum>BA0409DC</checksum>
     </file>
     <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1A6416EF</checksum>
+    </file>
+    <file>
       <filename>BaseElements.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
@@ -314,6 +332,12 @@
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
       <checksum>C13E66F3</checksum>
+    </file>
+    <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C4B1B51D</checksum>
     </file>
     <file>
       <filename>validator.rb</filename>
@@ -364,6 +388,12 @@
       <checksum>1164C9B8</checksum>
     </file>
     <file>
+      <filename>lighting.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4E69B40E</checksum>
+    </file>
+    <file>
       <filename>test_location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -376,6 +406,12 @@
       <checksum>5CEBAA1B</checksum>
     </file>
     <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C2B5A5E7</checksum>
+    </file>
+    <file>
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -386,6 +422,24 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>1932CF82</checksum>
+    </file>
+    <file>
+      <filename>misc_loads.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>EF9CAB5E</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>02459AD2</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>216063F8</checksum>
     </file>
     <file>
       <filename>HPXMLvalidator.xml</filename>
@@ -404,12 +458,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>A751054A</checksum>
-    </file>
-    <file>
-      <filename>test_water_heater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>FE310DB7</checksum>
     </file>
     <file>
       <filename>test_hvac.rb</filename>
@@ -436,58 +484,16 @@
       <checksum>37B8D7C6</checksum>
     </file>
     <file>
-      <filename>weather.rb</filename>
+      <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AC14851E</checksum>
+      <checksum>7E18B5D7</checksum>
     </file>
     <file>
-      <filename>geometry.rb</filename>
+      <filename>test_water_heater.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6B904FD9</checksum>
-    </file>
-    <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C58C7B84</checksum>
-    </file>
-    <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9F302346</checksum>
-    </file>
-    <file>
-      <filename>lighting.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FD083F5C</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C714CC53</checksum>
-    </file>
-    <file>
-      <filename>misc_loads.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>77F89B51</checksum>
-    </file>
-    <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>2F05D89C</checksum>
-    </file>
-    <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7FAEF245</checksum>
+      <usage_type>test</usage_type>
+      <checksum>BE6AB0B7</checksum>
     </file>
     <file>
       <version>
@@ -498,13 +504,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>E6A04B12</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B5B106AC</checksum>
+      <checksum>A869BAD1</checksum>
     </file>
   </files>
 </measure>
