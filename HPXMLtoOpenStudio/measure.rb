@@ -453,7 +453,7 @@ class OSModel
     azimuth_lengths = {}
     model.getSurfaces.sort.each do |surface|
       next unless ['wall', 'roofceiling'].include? surface.surfaceType.downcase
-      next unless ['outdoors', 'foundation'].include? surface.outsideBoundaryCondition.downcase
+      next unless ['outdoors', 'foundation', 'adiabatic'].include? surface.outsideBoundaryCondition.downcase
       next if surface.additionalProperties.getFeatureAsDouble('Tilt').get <= 0 # skip flat roofs
 
       surfaces << surface
@@ -803,10 +803,23 @@ class OSModel
     vertices << OpenStudio::Point3d.new(x / 2, y / 2, z)
     vertices << OpenStudio::Point3d.new(x / 2, 0 - y / 2, z)
 
-    return vertices
+    # Rotate about the z axis
+    # This is not strictly needed, but will make the floor edges
+    # parallel to the walls for a better geometry rendering.
+    azimuth_rad = UnitConversions.convert(@default_azimuths[0], 'deg', 'rad')
+    m = OpenStudio::Matrix.new(4, 4, 0)
+    m[0, 0] = Math::cos(-azimuth_rad)
+    m[1, 1] = Math::cos(-azimuth_rad)
+    m[0, 1] = -Math::sin(-azimuth_rad)
+    m[1, 0] = Math::sin(-azimuth_rad)
+    m[2, 2] = 1
+    m[3, 3] = 1
+    transformation = OpenStudio::Transformation.new(m)
+
+    return transformation * vertices
   end
 
-  def self.add_wall_polygon(x, y, z, azimuth = 0, offsets = [0] * 4, subsurface_area = 0)
+  def self.add_wall_polygon(x, y, z, azimuth, offsets = [0] * 4, subsurface_area = 0)
     x = UnitConversions.convert(x, 'ft', 'm')
     y = UnitConversions.convert(y, 'ft', 'm')
     z = UnitConversions.convert(z, 'ft', 'm')
@@ -844,7 +857,7 @@ class OSModel
     return transformation * vertices
   end
 
-  def self.add_roof_polygon(x, y, z, azimuth = 0, tilt = 0.5)
+  def self.add_roof_polygon(x, y, z, azimuth, tilt)
     x = UnitConversions.convert(x, 'ft', 'm')
     y = UnitConversions.convert(y, 'ft', 'm')
     z = UnitConversions.convert(z, 'ft', 'm')
@@ -960,7 +973,7 @@ class OSModel
         if roof.pitch > 0
           azimuths = @default_azimuths # Model as four directions for average exterior incident solar
         else
-          azimuths = [90] # Arbitrary azimuth for flat roof
+          azimuths = [@default_azimuths[0]] # Arbitrary azimuth for flat roof
         end
       else
         azimuths = [roof.azimuth]
