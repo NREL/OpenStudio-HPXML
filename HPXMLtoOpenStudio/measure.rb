@@ -1637,6 +1637,7 @@ class OSModel
     floor_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
     floor_surface.setOutsideBoundaryCondition('Adiabatic')
     floor_surface.additionalProperties.setFeature('SurfaceType', 'InferredFloor')
+    floor_surface.additionalProperties.setFeature('Tilt', 0.0)
 
     # Add ceiling surface
     ceiling_surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-floor_width, -floor_length, z_origin), model)
@@ -1648,6 +1649,7 @@ class OSModel
     ceiling_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
     ceiling_surface.setOutsideBoundaryCondition('Adiabatic')
     ceiling_surface.additionalProperties.setFeature('SurfaceType', 'InferredCeiling')
+    ceiling_surface.additionalProperties.setFeature('Tilt', 0.0)
 
     if not @cond_bsmnt_surfaces.empty?
       # assuming added ceiling is in conditioned basement
