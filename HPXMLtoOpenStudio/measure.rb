@@ -1231,6 +1231,7 @@ class OSModel
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
         surface.additionalProperties.setFeature('SurfaceType', 'Floor')
       end
+      surface.additionalProperties.setFeature('Tilt', 0.0)
       set_surface_interior(model, spaces, surface, frame_floor)
       set_surface_exterior(model, spaces, surface, frame_floor)
       surface.setName(frame_floor.id)
