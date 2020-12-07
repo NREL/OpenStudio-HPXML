@@ -1295,10 +1295,15 @@ def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fn
   c_foundation /= sum_fnd_area
 
   # Ducts (weighted by duct fraction and hvac fraction)
-  if ducts.empty?
-    # Ensure same result as ducts in conditioned space
+  sum_duct_hvac_frac = 0.0
+  ducts.each do |hvac_frac, duct_frac, duct_location|
+    sum_duct_hvac_frac += (duct_frac * hvac_frac)
+  end
+  if sum_duct_hvac_frac < 1.0 # i.e., there is at least one ductless system
+    # Add 1.0 - sum_duct_hvac_frac as ducts in conditioned space.
+    # This will ensure ductless systems have same result as ducts in conditioned space.
     # See https://github.com/NREL/OpenStudio-HEScore/issues/211
-    ducts = [[1.0, 1.0, HPXML::LocationLivingSpace]]
+    ducts << [1.0 - sum_duct_hvac_frac, 1.0, HPXML::LocationLivingSpace]
   end
   c_duct = 0.0
   ducts.each do |hvac_frac, duct_frac, duct_location|
