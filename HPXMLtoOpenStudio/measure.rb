@@ -107,11 +107,16 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     begin
-      hpxml = HPXML.new(hpxml_path: hpxml_path)
-
-      if not validate_hpxml(runner, hpxml_path, hpxml)
-        return false
+      stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'HPXMLvalidator.xml'),
+                     File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')]
+      hpxml = HPXML.new(hpxml_path: hpxml_path, schematron_validators: stron_paths)
+      hpxml.errors.each do |error|
+        runner.registerError(error)
       end
+      hpxml.warnings.each do |warning|
+        runner.registerWarning(warning)
+      end
+      return false unless hpxml.errors.empty?
 
       epw_path, cache_path = process_weather(hpxml, runner, model, output_dir, hpxml_path)
 
@@ -135,33 +140,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     if has_existing_objects
       runner.registerWarning('The model contains existing objects and is being reset.')
     end
-  end
-
-  def validate_hpxml(runner, hpxml_path, hpxml)
-    schemas_dir = File.join(File.dirname(__FILE__), 'resources')
-
-    is_valid = true
-
-    # Validate input HPXML against schematron docs
-    stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'HPXMLvalidator.xml'),
-                   File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')]
-    errors, warnings = Validator.run_validators(hpxml.doc, stron_paths)
-    errors.each do |error|
-      runner.registerError("#{hpxml_path}: #{error}")
-      is_valid = false
-    end
-    warnings.each do |warning|
-      runner.registerWarning("#{warning}")
-    end
-
-    # Check for additional errors
-    errors = hpxml.check_for_errors()
-    errors.each do |error|
-      runner.registerError("#{hpxml_path}: #{error}")
-      is_valid = false
-    end
-
-    return is_valid
   end
 
   def process_weather(hpxml, runner, model, output_dir, hpxml_path)

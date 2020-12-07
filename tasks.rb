@@ -74,14 +74,12 @@ def create_hpxmls
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-inconsistent-fan-powers.xml' => 'base.xml',
     'invalid_files/invalid-datatype-boolean.xml' => 'base.xml',
-    'invalid_files/invalid-datatype-boolean2.xml' => 'base.xml',
     'invalid_files/invalid-datatype-float.xml' => 'base.xml',
-    'invalid_files/invalid-datatype-float2.xml' => 'base.xml',
     'invalid_files/invalid-datatype-integer.xml' => 'base.xml',
-    'invalid_files/invalid-datatype-integer2.xml' => 'base.xml',
     'invalid_files/invalid-daylight-saving.xml' => 'base-simcontrol-daylight-saving-custom.xml',
     'invalid_files/invalid-epw-filepath.xml' => 'base.xml',
-    'invalid_files/invalid-facility-type.xml' => 'base-bldgtype-multifamily-shared-laundry-room.xml',
+    'invalid_files/invalid-facility-type-equipment.xml' => 'base-bldgtype-multifamily-shared-laundry-room.xml',
+    'invalid_files/invalid-facility-type-surfaces.xml' => 'base.xml',
     'invalid_files/invalid-input-parameters.xml' => 'base.xml',
     'invalid_files/invalid-neighbor-shading-azimuth.xml' => 'base-misc-neighbor-shading.xml',
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
@@ -460,22 +458,10 @@ def create_hpxmls
         XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea')
       elsif ['invalid_files/invalid-datatype-boolean.xml'].include? derivative
         XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/RadiantBarrier').inner_text = 'FOOBAR'
-      elsif ['invalid_files/invalid-datatype-boolean2.xml'].include? derivative
-        roof = XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof')
-        XMLHelper.delete_element(roof, 'RadiantBarrier')
-        XMLHelper.add_element(roof, 'RadiantBarrier')
       elsif ['invalid_files/invalid-datatype-float.xml'].include? derivative
-        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea').inner_text = 'FOOBAR'
-      elsif ['invalid_files/invalid-datatype-float2.xml'].include? derivative
-        constr = XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction')
-        XMLHelper.delete_element(constr, 'ConditionedFloorArea')
-        XMLHelper.add_element(constr, 'ConditionedFloorArea')
+        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/extension/CarpetFraction').inner_text = 'FOOBAR'
       elsif ['invalid_files/invalid-datatype-integer.xml'].include? derivative
-        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors').inner_text = 'FOOBAR'
-      elsif ['invalid_files/invalid-datatype-integer2.xml'].include? derivative
-        constr = XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction')
-        XMLHelper.delete_element(constr, 'NumberofConditionedFloors')
-        XMLHelper.add_element(constr, 'NumberofConditionedFloors')
+        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors').inner_text = '2.5'
       elsif ['invalid_files/invalid-schema-version.xml'].include? derivative
         root = XMLHelper.get_element(hpxml_doc, '/HPXML')
         XMLHelper.add_attribute(root, 'schemaVersion', '2.3')
@@ -496,8 +482,7 @@ def create_hpxmls
         if errors.size > 0
           fail "ERRORS: #{errors}"
         end
-
-        # Check for additional errors
+        # Check for errors
         errors = hpxml.check_for_errors()
         if errors.size > 0
           fail "ERRORS: #{errors}"
@@ -686,7 +671,8 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.conditioned_floor_area /= 5.0
   elsif ['invalid_files/num-bedrooms-exceeds-limit.xml'].include? hpxml_file
     hpxml.building_construction.number_of_bedrooms = 40
-  elsif ['invalid_files/invalid-facility-type.xml'].include? hpxml_file
+  elsif ['invalid_files/invalid-facility-type-equipment.xml',
+         'invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFD
   end
 end
@@ -1110,6 +1096,14 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.rim_joists << hpxml.rim_joists[-1].dup
     hpxml.rim_joists[-1].id = 'TinyRimJoist'
     hpxml.rim_joists[-1].area = 0.05
+  elsif ['invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
+    hpxml.rim_joists.add(id: 'RimJoistOther',
+                         exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
+                         interior_adjacent_to: HPXML::LocationLivingSpace,
+                         area: 116,
+                         solar_absorptance: 0.7,
+                         emittance: 0.92,
+                         insulation_assembly_r_value: 23.0)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.rim_joists.each do |rim_joist|
       rim_joist.siding = nil
@@ -1482,6 +1476,15 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls[0].delete
   elsif ['invalid_files/enclosure-garage-missing-exterior-wall.xml'].include? hpxml_file
     hpxml.walls[-2].delete
+  elsif ['invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
+    hpxml.walls.add(id: 'WallOther',
+                    exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
+                    interior_adjacent_to: HPXML::LocationLivingSpace,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    area: 294,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 4.0)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.walls.each do |wall|
       wall.siding = nil
@@ -1795,6 +1798,20 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls.each do |fwall|
       fwall.thickness = nil
     end
+  elsif ['invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
+    hpxml.foundation_walls.add(id: 'FoundationWallOther',
+                               exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
+                               interior_adjacent_to: HPXML::LocationBasementConditioned,
+                               height: 8,
+                               area: 294,
+                               thickness: 8,
+                               depth_below_grade: 7,
+                               insulation_interior_r_value: 0,
+                               insulation_interior_distance_to_top: 0,
+                               insulation_interior_distance_to_bottom: 0,
+                               insulation_exterior_distance_to_top: 0,
+                               insulation_exterior_distance_to_bottom: 0,
+                               insulation_exterior_r_value: 0)
   elsif ['invalid_files/enclosure-basement-missing-exterior-foundation-wall.xml'].include? hpxml_file
     hpxml.foundation_walls[0].delete
   end
@@ -1945,6 +1962,19 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
   elsif ['invalid_files/multifamily-reference-surface.xml'].include? hpxml_file
     hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
     hpxml.frame_floors[0].other_space_above_or_below = HPXML::FrameFloorOtherSpaceAbove
+  elsif ['invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
+    hpxml.frame_floors.add(id: 'FloorAdiabatic',
+                           exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
+                           area: 900,
+                           insulation_assembly_r_value: 2.1,
+                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
+    hpxml.frame_floors.add(id: 'CeilingAdiabatic',
+                           exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
+                           area: 900,
+                           insulation_assembly_r_value: 2.1,
+                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceAbove)
   end
 end
 
