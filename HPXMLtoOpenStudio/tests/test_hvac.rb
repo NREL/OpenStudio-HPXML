@@ -102,12 +102,6 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     cop = 2.49 # Expected value
     assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.01)
     assert_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
-
-    # Check EMS
-    assert_equal(1, model.getZoneHVACPackagedTerminalAirConditioners.size)
-    ptac = model.getZoneHVACPackagedTerminalAirConditioners[0]
-    program_values = _get_ems_values(model.getEnergyManagementSystemPrograms, "#{ptac.name} install quality")
-    assert_in_epsilon(program_values['F_CH'].sum, 0.0, 0.01)
   end
 
   def test_evap_cooler
@@ -800,31 +794,6 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Get HPXML values
     heat_pump = hpxml.heat_pumps[0]
     _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-  end
-
-  def test_install_quality_room_air_conditioner_ratio
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-qual-all-room-ac-only.xml'))
-    model, hpxml = _test_measure(args_hash)
-
-    # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
-    airflow_defect = cooling_system.airflow_defect_ratio
-    charge_defect = cooling_system.charge_defect_ratio
-
-    assert_equal(1, model.getZoneHVACPackagedTerminalAirConditioners.size)
-    ptac = model.getZoneHVACPackagedTerminalAirConditioners[0]
-    cooling_cfm = UnitConversions.convert(ptac.supplyAirFlowRateDuringCoolingOperation.get, 'm^3/s', 'cfm')
-
-    # Cooling coil
-    assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
-    clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    rated_airflow_cfm_clg = UnitConversions.convert(clg_coil.ratedAirFlowRate.get, 'm^3/s', 'cfm')
-
-    # Check EMS
-    program_values = _get_ems_values(model.getEnergyManagementSystemPrograms, "#{ptac.name} install quality")
-    assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
-    assert_in_epsilon(program_values['FF_AF_c'].sum, cooling_cfm / rated_airflow_cfm_clg, 0.01)
   end
 
   def _test_measure(args_hash)

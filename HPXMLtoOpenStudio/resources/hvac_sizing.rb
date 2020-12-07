@@ -49,7 +49,7 @@ class HVACSizing
       process_duct_loads_heating(hvac_final_values, weather, hvac, hvac_init_loads.Heat)
       process_duct_loads_cooling(hvac_final_values, weather, hvac, hvac_init_loads.Cool_Sens, hvac_init_loads.Cool_Lat)
       process_equipment_adjustments(hvac_final_values, weather, hvac)
-      adjust_sizing_by_installation_quality(hvac_final_values, weather, hvac, model)
+      process_sizing_for_installation_quality(hvac_final_values, weather, hvac, model)
       process_fixed_equipment(hvac_final_values, hvac)
       process_ground_loop(hvac_final_values, weather, hvac)
       process_finalize(hvac_final_values, zone_loads, weather, hvac)
@@ -1521,9 +1521,13 @@ class HVACSizing
     end
   end
 
-  def self.adjust_sizing_by_installation_quality(hvac_final_values, weather, hvac, model)
+  def self.process_sizing_for_installation_quality(hvac_final_values, weather, hvac, model)
+    # Increases the autosized heating/cooling capacities to account for any reduction
+    # in capacity due to HVAC installation quality. This is done to prevent causing
+    # unmet loads.
+
     # Fixme: GSHP?
-    return unless hvac.has_type(Constants.ObjectNameCentralAirConditioner) || hvac.has_type(Constants.ObjectNameAirSourceHeatPump) || hvac.has_type(Constants.ObjectNameMiniSplitHeatPump) || hvac.has_type(Constants.ObjectNameRoomAirConditioner)
+    return unless hvac.has_type(Constants.ObjectNameCentralAirConditioner) || hvac.has_type(Constants.ObjectNameAirSourceHeatPump) || hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
 
     tin_cool = UnitConversions.convert(@cool_setpoint, 'F', 'C')
     tin_heat = UnitConversions.convert(@heat_setpoint, 'F', 'C')
@@ -3496,11 +3500,6 @@ class HVACSizing
             airflow_rated_defect_ratio_heat = htg_coil.stages.zip(hvac.FanspeedRatioHeating).map { |stage, speed_ratio| UnitConversions.convert(hvac_final_values.Heat_Airflow * speed_ratio, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0 }
           end
         end
-      elsif object.is_a? OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner
-        clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, object)
-        # Check defect ratio to be the same after adjustment
-        airflow_rated_defect_ratio_cool = [UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / clg_coil.ratedAirFlowRate.get - 1.0]
-        airflow_rated_defect_ratio_heat = []
       else
         next
       end
