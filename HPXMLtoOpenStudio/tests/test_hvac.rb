@@ -468,7 +468,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
   def test_shared_chiller_baseboard
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-shared-chiller-only-baseboard.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
@@ -485,7 +485,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
   def test_shared_chiller_fan_coil
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-shared-chiller-only-fan-coil.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-chiller-only-fan-coil.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
@@ -502,7 +502,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
   def test_shared_chiller_water_loop_heat_pump
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-shared-chiller-only-water-loop-heat-pump.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-chiller-only-water-loop-heat-pump.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
@@ -519,7 +519,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
   def test_shared_cooling_tower_water_loop_heat_pump
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-shared-cooling-tower-only-water-loop-heat-pump.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-cooling-tower-only-water-loop-heat-pump.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
@@ -536,7 +536,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
   def test_shared_boiler_baseboard
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-shared-boiler-only-baseboard.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-boiler-only-baseboard.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
@@ -555,7 +555,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
   def test_shared_boiler_fan_coil
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-shared-boiler-only-fan-coil.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-boiler-only-fan-coil.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
@@ -574,7 +574,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
   def test_shared_boiler_water_loop_heat_pump
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-shared-boiler-only-water-loop-heat-pump.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-boiler-only-water-loop-heat-pump.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
@@ -609,7 +609,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
   def test_shared_ground_loop_ground_to_air_heat_pump
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
