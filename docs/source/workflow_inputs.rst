@@ -1700,6 +1700,30 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the PV system.
 
+HPXML Generators
+****************
+
+Each generator that provides on-site power is entered as a ``/HPXML/Building/BuildingDetails/Systems/extension/Generators/Generator``.
+
+  ==========================  =======  =======  ===========  ========  =======  ============================================
+  Element                     Type     Units    Constraints  Required  Default  Notes
+  ==========================  =======  =======  ===========  ========  =======  ============================================
+  ``SystemIdentifier``        id                             Yes                Unique identifier
+  ``IsSharedSystem``          boolean                        No        false    Whether it serves multiple dwelling units
+  ``FuelType``                string            See [#]_     Yes                Fuel type
+  ``AnnualConsumptionkBtu``   double   kBtu/yr  > 0          Yes                Annual fuel consumed
+  ``AnnualOutputkWh``         double   kWh/yr   > 0          Yes                Annual electricity produced
+  ``NumberofBedroomsServed``  integer           > 1          See [#]_           Number of bedrooms served
+  ==========================  =======  =======  ===========  ========  =======  ============================================
+
+  .. [#] FuelType choices are "natural gas" or "propane".
+  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
+         Annual consumption and annual production will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the generator.
+
+.. note::
+
+  Generators will be modeled as operating continuously (24/7).
+
 HPXML Appliances
 ----------------
 

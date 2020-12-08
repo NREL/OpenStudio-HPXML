@@ -20,7 +20,7 @@ Current fuel types are:
    Type                       Notes
    ========================== ===========================
    Electricity: Total (MBtu)
-   Electricity: Net (MBtu)    Excludes any PV generation.
+   Electricity: Net (MBtu)    Excludes any power produced by PV or generators.
    Natural Gas: Total (MBtu)
    Fuel Oil: Total (MBtu)     Includes "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "kerosene", and "diesel"
    Propane: Total (MBtu)
@@ -68,6 +68,7 @@ Current end use/fuel type combinations are:
    Electricity: Hot Tub Heater (MBtu)
    Electricity: Hot Tub Pump (MBtu)
    Electricity: PV (MBtu)
+   Electricity: Generator (MBtu)
    Natural Gas: Heating (MBtu)
    Natural Gas: Hot Water (MBtu)
    Natural Gas: Clothes Dryer (MBtu)
@@ -79,6 +80,7 @@ Current end use/fuel type combinations are:
    Natural Gas: Grill (MBtu)
    Natural Gas: Lighting (MBtu)
    Natural Gas: Fireplace (MBtu)
+   Natural Gas: Generator (MBtu)
    Fuel Oil: Heating (MBtu)
    Fuel Oil: Hot Water (MBtu)
    Fuel Oil: Clothes Dryer (MBtu)
@@ -97,6 +99,7 @@ Current end use/fuel type combinations are:
    Propane: Grill (MBtu)
    Propane: Lighting (MBtu)
    Propane: Fireplace (MBtu)
+   Propane: Generator (MBtu)
    Wood Cord: Heating (MBtu)
    Wood Cord: Hot Water (MBtu)
    Wood Cord: Clothes Dryer (MBtu)

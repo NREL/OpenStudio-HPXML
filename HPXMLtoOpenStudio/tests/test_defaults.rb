@@ -1100,6 +1100,26 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_pv_system_values(hpxml_default, true, 0.96, 0.182, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed, HPXML::PVModuleTypeStandard)
   end
 
+  def test_generators
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base-misc-generators.xml')
+    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
+    hpxml.generators.each do |generator|
+      generator.is_shared_system = true
+    end
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_generator_values(hpxml_default, false, true)
+
+    # Test defaults
+    hpxml.generators.each do |generator|
+      generator.is_shared_system = nil
+    end
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_generator_values(hpxml_default, true, false)
+  end
+
   def test_clothes_washers
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
@@ -2268,6 +2288,13 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
       assert_equal(module_type, pv.module_type)
       assert_equal(isdefaulted, pv.module_type_isdefaulted)
+    end
+  end
+
+  def _test_default_generator_values(hpxml, isdefaulted, is_shared_system)
+    hpxml.generators.each_with_index do |generator, idx|
+      assert_equal(is_shared_system, generator.is_shared_system)
+      assert_equal(isdefaulted, generator.is_shared_system_isdefaulted)
     end
   end
 
