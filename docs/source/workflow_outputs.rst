@@ -34,9 +34,9 @@ Annual Energy Consumption By Fuel Type and End Use
 
 Current end use/fuel type combinations are:
 
-   ================================================ =======
-   Type                                             Notes
-   ================================================ =======
+   ========================================================== ====================================================
+   Type                                                       Notes
+   ========================================================== ====================================================
    Electricity: Heating (MBtu)
    Electricity: Heating Fans/Pumps (MBtu)
    Electricity: Cooling (MBtu)
@@ -67,8 +67,8 @@ Current end use/fuel type combinations are:
    Electricity: Pool Pump (MBtu)
    Electricity: Hot Tub Heater (MBtu)
    Electricity: Hot Tub Pump (MBtu)
-   Electricity: PV (MBtu)
-   Electricity: Generator (MBtu)
+   Electricity: PV (MBtu)                                     Negative value for any power produced
+   Electricity: Generator (MBtu)                              Negative value for power produced
    Natural Gas: Heating (MBtu)
    Natural Gas: Hot Water (MBtu)
    Natural Gas: Clothes Dryer (MBtu)
@@ -80,7 +80,7 @@ Current end use/fuel type combinations are:
    Natural Gas: Grill (MBtu)
    Natural Gas: Lighting (MBtu)
    Natural Gas: Fireplace (MBtu)
-   Natural Gas: Generator (MBtu)
+   Natural Gas: Generator (MBtu)                              Positive value for any fuel consumed
    Fuel Oil: Heating (MBtu)
    Fuel Oil: Hot Water (MBtu)
    Fuel Oil: Clothes Dryer (MBtu)
@@ -99,7 +99,7 @@ Current end use/fuel type combinations are:
    Propane: Grill (MBtu)
    Propane: Lighting (MBtu)
    Propane: Fireplace (MBtu)
-   Propane: Generator (MBtu)
+   Propane: Generator (MBtu)                                  Positive value for any fuel consumed
    Wood Cord: Heating (MBtu)
    Wood Cord: Hot Water (MBtu)
    Wood Cord: Clothes Dryer (MBtu)
@@ -127,7 +127,7 @@ Current end use/fuel type combinations are:
    Coal: Grill (MBtu)
    Coal: Lighting (MBtu)
    Coal: Fireplace (MBtu)
-   ================================================ =======
+   ========================================================== ====================================================
 
 Annual Building Loads
 ~~~~~~~~~~~~~~~~~~~~~
