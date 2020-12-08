@@ -1716,7 +1716,7 @@ Each generator that provides on-site power is entered as a ``/HPXML/Building/Bui
   ``NumberofBedroomsServed``  integer           > 1          See [#]_           Number of bedrooms served
   ==========================  =======  =======  ===========  ========  =======  ============================================
 
-  .. [#] FuelType choices are "natural gas" or "propane".
+  .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "wood", or "wood pellets".
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          Annual consumption and annual production will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the generator.
 

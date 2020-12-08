@@ -69,6 +69,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Fuel Oil: Lighting (MBtu)',
     'Fuel Oil: Fireplace (MBtu)',
     'Fuel Oil: Mech Vent Preheating (MBtu)',
+    'Fuel Oil: Generator (MBtu)',
     'Propane: Heating (MBtu)',
     'Propane: Hot Water (MBtu)',
     'Propane: Clothes Dryer (MBtu)',
@@ -86,6 +87,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Wood Cord: Lighting (MBtu)',
     'Wood Cord: Fireplace (MBtu)',
     'Wood Cord: Mech Vent Preheating (MBtu)',
+    'Wood Cord: Generator (MBtu)',
     'Wood Pellets: Heating (MBtu)',
     'Wood Pellets: Hot Water (MBtu)',
     'Wood Pellets: Clothes Dryer (MBtu)',
@@ -94,6 +96,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Wood Pellets: Lighting (MBtu)',
     'Wood Pellets: Fireplace (MBtu)',
     'Wood Pellets: Mech Vent Preheating (MBtu)',
+    'Wood Pellets: Generator (MBtu)',
     'Coal: Heating (MBtu)',
     'Coal: Hot Water (MBtu)',
     'Coal: Clothes Dryer (MBtu)',
@@ -102,6 +105,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Coal: Lighting (MBtu)',
     'Coal: Fireplace (MBtu)',
     'Coal: Mech Vent Preheating (MBtu)',
+    'Coal: Generator (MBtu)',
     'Load: Heating (MBtu)',
     'Load: Cooling (MBtu)',
     'Load: Hot Water: Delivered (MBtu)',
@@ -212,6 +216,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Fuel Oil: Grill',
     'Fuel Oil: Lighting',
     'Fuel Oil: Fireplace',
+    'Fuel Oil: Generator',
     'Propane: Heating',
     'Propane: Hot Water',
     'Propane: Clothes Dryer',
@@ -227,6 +232,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Wood Cord: Grill',
     'Wood Cord: Lighting',
     'Wood Cord: Fireplace',
+    'Wood Cord: Generator',
     'Wood Pellets: Heating',
     'Wood Pellets: Hot Water',
     'Wood Pellets: Clothes Dryer',
@@ -234,6 +240,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Wood Pellets: Grill',
     'Wood Pellets: Lighting',
     'Wood Pellets: Fireplace',
+    'Wood Pellets: Generator',
     'Coal: Heating',
     'Coal: Hot Water',
     'Coal: Clothes Dryer',
@@ -241,6 +248,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Coal: Grill',
     'Coal: Lighting',
     'Coal: Fireplace',
+    'Coal: Generator',
   ]
 
   TimeseriesColsWaterUses = [
@@ -378,6 +386,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'enduseFuelOilClothesDryer',
     'enduseFuelOilRangeOven',
     'enduseFuelOilMechVentPreheating',
+    'enduseFuelOilGenerator',
     'endusePropaneHeating',
     'endusePropaneHotWater',
     'endusePropaneClothesDryer',
@@ -389,16 +398,19 @@ class SimulationOutputReportTest < MiniTest::Test
     'enduseWoodCordClothesDryer',
     'enduseWoodCordRangeOven',
     'enduseWoodCordMechVentPreheating',
+    'enduseWoodCordGenerator',
     'enduseWoodPelletsHeating',
     'enduseWoodPelletsHotWater',
     'enduseWoodPelletsClothesDryer',
     'enduseWoodPelletsRangeOven',
     'enduseWoodPelletsMechVentPreheating',
+    'enduseWoodPelletsGenerator',
     'enduseCoalHeating',
     'enduseCoalHotWater',
     'enduseCoalClothesDryer',
     'enduseCoalRangeOven',
     'enduseCoalMechVentPreheating',
+    'enduseCoalGenerator',
     'loadHeating',
     'loadCooling',
     'loadHotWaterDelivered',
@@ -537,7 +549,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_nonzero_timeseries_value(timeseries_csv, ['Electricity: Generator', 'Natural Gas: Generator', 'Propane: Generator'])
+    _check_for_nonzero_timeseries_value(timeseries_csv, ['Electricity: Generator', 'Natural Gas: Generator', 'Fuel Oil: Generator'])
   end
 
   def test_timeseries_hourly_hotwateruses

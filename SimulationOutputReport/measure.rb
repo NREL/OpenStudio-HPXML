@@ -2046,6 +2046,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       @end_uses[[FT::Oil, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypeOil}")
       @end_uses[[FT::Oil, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypeOil}")
     end
+    @end_uses[[FT::Oil, EUT::Generator]] = EndUse.new(meter: "Cogeneration:#{EPlus::FuelTypeOil}")
     @end_uses[[FT::Propane, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeating(EPlus::FuelTypePropane))
     @end_uses[[FT::Propane, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeating(EPlus::FuelTypePropane))
     @end_uses[[FT::Propane, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypePropane}")
@@ -2067,6 +2068,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       @end_uses[[FT::WoodCord, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypeWoodCord}")
       @end_uses[[FT::WoodCord, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypeWoodCord}")
     end
+    @end_uses[[FT::WoodCord, EUT::Generator]] = EndUse.new(meter: "Cogeneration:#{EPlus::FuelTypeWoodCord}")
     @end_uses[[FT::WoodPellets, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeating(EPlus::FuelTypeWoodPellets))
     @end_uses[[FT::WoodPellets, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeating(EPlus::FuelTypeWoodPellets))
     @end_uses[[FT::WoodPellets, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeWoodPellets}")
@@ -2077,6 +2079,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       @end_uses[[FT::WoodPellets, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypeWoodPellets}")
       @end_uses[[FT::WoodPellets, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypeWoodPellets}")
     end
+    @end_uses[[FT::WoodPellets, EUT::Generator]] = EndUse.new(meter: "Cogeneration:#{EPlus::FuelTypeWoodPellets}")
     @end_uses[[FT::Coal, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeating(EPlus::FuelTypeCoal))
     @end_uses[[FT::Coal, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeating(EPlus::FuelTypeCoal))
     @end_uses[[FT::Coal, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeCoal}")
@@ -2087,6 +2090,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       @end_uses[[FT::Coal, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypeCoal}")
       @end_uses[[FT::Coal, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypeCoal}")
     end
+    @end_uses[[FT::Coal, EUT::Generator]] = EndUse.new(meter: "Cogeneration:#{EPlus::FuelTypeCoal}")
 
     @end_uses.each do |key, end_use|
       fuel_type, end_use_type = key
