@@ -1106,6 +1106,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
     hpxml.generators.each do |generator|
       generator.is_shared_system = true
+      generator.number_of_bedrooms_served = 20
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
