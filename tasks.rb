@@ -1849,18 +1849,36 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            insulation_assembly_r_value: 39.3)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.frame_floors.clear
-    hpxml.frame_floors.add(id: 'FloorAdiabatic',
+    hpxml.frame_floors.add(id: 'FloorOther',
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
                            insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
-    hpxml.frame_floors.add(id: 'CeilingAdiabatic',
+    hpxml.frame_floors.add(id: 'CeilingOther',
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
                            insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceAbove)
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'].include? hpxml_file
+    hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHousingUnit
+    hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherHousingUnit
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-heated-space.xml'].include? hpxml_file
+    hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
+    hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
+    hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
+    hpxml.frame_floors[1].insulation_assembly_r_value = 18.7
+  elsif ['base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml'].include? hpxml_file
+    hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
+    hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
+    hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
+    hpxml.frame_floors[1].insulation_assembly_r_value = 18.7
+  elsif ['base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml'].include? hpxml_file
+    hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
+    hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
+    hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
+    hpxml.frame_floors[1].insulation_assembly_r_value = 18.7
   elsif ['base-bldgtype-single-family-attached.xml'].include? hpxml_file
     hpxml.frame_floors[0].area = 900
   elsif ['base-atticroof-flat.xml',
@@ -1963,13 +1981,13 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
     hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
     hpxml.frame_floors[0].other_space_above_or_below = HPXML::FrameFloorOtherSpaceAbove
   elsif ['invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: 'FloorAdiabatic',
+    hpxml.frame_floors.add(id: 'FloorOther',
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
                            insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
-    hpxml.frame_floors.add(id: 'CeilingAdiabatic',
+    hpxml.frame_floors.add(id: 'CeilingOther',
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
