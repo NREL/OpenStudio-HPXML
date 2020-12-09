@@ -1299,7 +1299,9 @@ def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fn
   ducts.each do |hvac_frac, duct_frac, duct_location|
     sum_duct_hvac_frac += (duct_frac * hvac_frac)
   end
-  if sum_duct_hvac_frac < 1.0 # i.e., there is at least one ductless system
+  if sum_duct_hvac_frac > 1.0
+    fail "Unexpected sum of duct fractions: #{sum_duct_hvac_frac}."
+  elsif sum_duct_hvac_frac < 1.0 # i.e., there is at least one ductless system
     # Add 1.0 - sum_duct_hvac_frac as ducts in conditioned space.
     # This will ensure ductless systems have same result as ducts in conditioned space.
     # See https://github.com/NREL/OpenStudio-HEScore/issues/211
