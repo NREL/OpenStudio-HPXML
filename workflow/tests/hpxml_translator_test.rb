@@ -292,6 +292,8 @@ class HPXMLTest < MiniTest::Test
     update_args_hash(measures, measure_subdir, args)
 
     # Add reporting measure to workflow
+    # Uses 'monthly' to verify timeseries results match annual results via error-checking
+    # inside the SimulationOutputReport measure.
     measure_subdir = 'SimulationOutputReport'
     args = {}
     args['timeseries_frequency'] = 'monthly'

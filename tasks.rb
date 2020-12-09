@@ -157,6 +157,7 @@ def create_hpxmls
     'base-bldgtype-multifamily-shared-chiller-only-fan-coil-ducted.xml' => 'base-bldgtype-multifamily-shared-chiller-only-fan-coil.xml',
     'base-bldgtype-multifamily-shared-chiller-only-water-loop-heat-pump.xml' => 'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
     'base-bldgtype-multifamily-shared-cooling-tower-only-water-loop-heat-pump.xml' => 'base-bldgtype-multifamily-shared-chiller-only-water-loop-heat-pump.xml',
+    'base-bldgtype-multifamily-shared-generator.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-laundry-room.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-mechvent.xml' => 'base-bldgtype-multifamily.xml',
@@ -334,6 +335,7 @@ def create_hpxmls
     'base-mechvent-supply.xml' => 'base.xml',
     'base-mechvent-whole-house-fan.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
+    'base-misc-generators.xml' => 'base.xml',
     'base-misc-loads-large-uncommon.xml' => 'base.xml',
     'base-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-misc-loads-none.xml' => 'base.xml',
@@ -433,6 +435,7 @@ def create_hpxmls
         set_hpxml_water_fixtures(hpxml_file, hpxml)
         set_hpxml_solar_thermal_system(hpxml_file, hpxml)
         set_hpxml_pv_systems(hpxml_file, hpxml)
+        set_hpxml_generators(hpxml_file, hpxml)
         set_hpxml_clothes_washer(hpxml_file, hpxml)
         set_hpxml_clothes_dryer(hpxml_file, hpxml)
         set_hpxml_dishwasher(hpxml_file, hpxml)
@@ -4367,7 +4370,6 @@ end
 def set_hpxml_pv_systems(hpxml_file, hpxml)
   if ['base-pv.xml'].include? hpxml_file
     hpxml.pv_systems.add(id: 'PVSystem',
-                         is_shared_system: false,
                          module_type: HPXML::PVModuleTypeStandard,
                          location: HPXML::LocationRoof,
                          tracking: HPXML::PVTrackingTypeFixed,
@@ -4377,7 +4379,6 @@ def set_hpxml_pv_systems(hpxml_file, hpxml)
                          inverter_efficiency: 0.96,
                          system_losses_fraction: 0.14)
     hpxml.pv_systems.add(id: 'PVSystem2',
-                         is_shared_system: false,
                          module_type: HPXML::PVModuleTypePremium,
                          location: HPXML::LocationRoof,
                          tracking: HPXML::PVTrackingTypeFixed,
@@ -4403,6 +4404,26 @@ def set_hpxml_pv_systems(hpxml_file, hpxml)
                          max_power_output: 30000,
                          inverter_efficiency: 0.96,
                          system_losses_fraction: 0.14,
+                         number_of_bedrooms_served: 18)
+  end
+end
+
+def set_hpxml_generators(hpxml_file, hpxml)
+  if ['base-misc-generators.xml'].include? hpxml_file
+    hpxml.generators.add(id: 'Generator',
+                         fuel_type: HPXML::FuelTypeNaturalGas,
+                         annual_consumption_kbtu: 8500,
+                         annual_output_kwh: 500)
+    hpxml.generators.add(id: 'Generator2',
+                         fuel_type: HPXML::FuelTypePropane,
+                         annual_consumption_kbtu: 8500,
+                         annual_output_kwh: 500)
+  elsif ['base-bldgtype-multifamily-shared-generator.xml'].include? hpxml_file
+    hpxml.generators.add(id: 'Generator',
+                         is_shared_system: true,
+                         fuel_type: HPXML::FuelTypePropane,
+                         annual_consumption_kbtu: 85000,
+                         annual_output_kwh: 5000,
                          number_of_bedrooms_served: 18)
   end
 end
