@@ -42,7 +42,7 @@
           <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>3</NumberofBedrooms>
           <NumberofBathrooms>2</NumberofBathrooms>
-          <ConditionedFloorArea>FOOBAR</ConditionedFloorArea>
+          <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
       </BuildingSummary>
@@ -211,19 +211,17 @@
             <PerimeterInsulation>
               <SystemIdentifier id='SlabPerimeterInsulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabUnderSlabInsulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
               </Layer>
             </UnderSlabInsulation>
             <extension>
-              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetFraction>FOOBAR</CarpetFraction>
               <CarpetRValue>0.0</CarpetRValue>
             </extension>
           </Slab>

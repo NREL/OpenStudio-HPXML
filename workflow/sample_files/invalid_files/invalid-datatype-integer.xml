@@ -38,7 +38,7 @@
         </BuildingOccupancy>
         <BuildingConstruction>
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
-          <NumberofConditionedFloors>FOOBAR</NumberofConditionedFloors>
+          <NumberofConditionedFloors>2.5</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>3</NumberofBedrooms>
           <NumberofBathrooms>2</NumberofBathrooms>
@@ -211,14 +211,12 @@
             <PerimeterInsulation>
               <SystemIdentifier id='SlabPerimeterInsulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabUnderSlabInsulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
               </Layer>
             </UnderSlabInsulation>

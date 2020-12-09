@@ -126,22 +126,12 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, cooling_system.fraction_cool_load_served)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, cooling_system.charge_defect_ratio)
-      if not cooling_system.airflow_cfm_per_ton.nil?
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, cooling_system.airflow_cfm_per_ton)
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 0.0) # FIXME: Is this right?
-      else
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, cooling_system.airflow_defect_ratio)
-      end
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, cooling_system.airflow_defect_ratio)
     end
     if not heating_system.nil?
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
-      if not heating_system.airflow_cfm_per_ton.nil?
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, heating_system.airflow_cfm_per_ton)
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, 0.0) # FIXME: Is this right?
-      else
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heating_system.airflow_defect_ratio)
-      end
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heating_system.airflow_defect_ratio)
     end
   end
 
@@ -210,13 +200,6 @@ class HVAC
     ptac.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated.join(','))
     ptac.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, cooling_system.fraction_cool_load_served)
     ptac.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameRoomAirConditioner)
-    ptac.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, cooling_system.charge_defect_ratio)
-    if not cooling_system.airflow_cfm_per_ton.nil?
-      ptac.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, cooling_system.airflow_cfm_per_ton)
-      ptac.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 0.0) # FIXME: Is this right?
-    else
-      ptac.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, cooling_system.airflow_defect_ratio)
-    end
   end
 
   def self.apply_evaporative_cooler(model, runner, cooling_system,
@@ -417,15 +400,8 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, heat_pump.charge_defect_ratio)
-    if not heat_pump.airflow_cfm_per_ton.nil?
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, heat_pump.airflow_cfm_per_ton)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 0.0) # FIXME: Is this right?
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, heat_pump.airflow_cfm_per_ton)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, 0.0) # FIXME: Is this right?
-    else
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, heat_pump.airflow_defect_ratio)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heat_pump.airflow_defect_ratio)
-    end
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, heat_pump.airflow_defect_ratio)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heat_pump.airflow_defect_ratio)
   end
 
   def self.apply_mini_split_air_conditioner(model, runner, cooling_system,
@@ -449,7 +425,6 @@ class HVAC
     heat_pump.distribution_system_idref = cooling_system.distribution_system_idref
     heat_pump.fan_watts_per_cfm = cooling_system.fan_watts_per_cfm
     heat_pump.airflow_defect_ratio = cooling_system.airflow_defect_ratio
-    heat_pump.airflow_cfm_per_ton = cooling_system.airflow_cfm_per_ton
     heat_pump.charge_defect_ratio = cooling_system.charge_defect_ratio
 
     apply_mini_split_heat_pump(model, runner, heat_pump, 0,
@@ -471,9 +446,12 @@ class HVAC
     hp_min_temp, supp_max_temp = get_heat_pump_temp_assumptions(heat_pump)
     pan_heater_power = 0.0 # W, disabled
     if not heat_pump.distribution_system.nil?
+      # Ducted, installed fan power may differ from rated fan power
       fan_power_rated = 0.18 # W/cfm, ducted
     else
-      fan_power_rated = heat_pump.fan_watts_per_cfm # ductless, installed and rated value should be equal
+      # Ductless, installed and rated value should be equal
+      fan_power_rated = 0.07 # W/cfm
+      heat_pump.fan_watts_per_cfm = fan_power_rated # W/cfm
     end
 
     # Calculate generic inputs
@@ -653,14 +631,14 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameMiniSplitHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameMiniSplitHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, heat_pump.charge_defect_ratio)
-    if not heat_pump.airflow_cfm_per_ton.nil?
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, heat_pump.airflow_cfm_per_ton)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 0.0) # FIXME: Is this right?
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, heat_pump.airflow_cfm_per_ton)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, 0.0) # FIXME: Is this right?
-    else
+    if not heat_pump.distribution_system.nil?
+      # Ducted system
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, heat_pump.airflow_defect_ratio)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heat_pump.airflow_defect_ratio)
+    else
+      # Ductless system
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 1.0)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, 1.0)
     end
   end
 
@@ -927,15 +905,8 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameGroundSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameGroundSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACPumpPower, heat_pump.pump_watts_per_ton)
-    if not heat_pump.airflow_cfm_per_ton.nil?
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonCooling, heat_pump.airflow_cfm_per_ton)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 0.0) # FIXME: Is this right?
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, heat_pump.airflow_cfm_per_ton)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, 0.0) # FIXME: Is this right?
-    else
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, heat_pump.airflow_defect_ratio)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heat_pump.airflow_defect_ratio)
-    end
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, heat_pump.airflow_defect_ratio)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heat_pump.airflow_defect_ratio)
   end
 
   def self.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
@@ -1255,7 +1226,6 @@ class HVAC
 
     # Store info for HVAC Sizing measure
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, [airflow_cfm_per_ton].join(','))
-    unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACActualCFMPerTonHeating, airflow_cfm_per_ton)
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameUnitHeater)
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACFanWatts, heating_system.fan_watts)
@@ -1320,7 +1290,7 @@ class HVAC
     part_load_frac_curve = create_curve_quadratic(model, pl_coeff, 'DXDH-PLF-fPLR', 0, 1, 0.7, 1)
     if energy_factor.nil?
       # shift inputs tested under IEF test conditions to those under EF test conditions with performance curves
-      energy_factor, water_removal_rate = apply_dehumidifier_ief_to_ef_inputs(w_coeff, ef_coeff, dehumidifier.integrated_energy_factor, water_removal_rate)
+      energy_factor, water_removal_rate = apply_dehumidifier_ief_to_ef_inputs(dehumidifier.type, w_coeff, ef_coeff, dehumidifier.integrated_energy_factor, water_removal_rate)
     end
 
     # Calculate air flow rate by assuming 2.75 cfm/pint/day (based on experimental test data)
@@ -1378,56 +1348,77 @@ class HVAC
     equip.setSchedule(ceiling_fan_sch.schedule)
   end
 
-  def self.apply_setpoints(model, runner, weather, hvac_control, living_zone)
+  def self.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan)
     # Assume heating/cooling seasons are year-round
     htg_start_month = 1
     htg_end_month = 12
     clg_start_month = 1
     clg_end_month = 12
 
-    # Base heating setpoint
-    htg_setpoint = hvac_control.heating_setpoint_temp
-    htg_weekday_setpoints = [[htg_setpoint] * 24] * 12
+    if hvac_control.weekday_heating_setpoints.nil? || hvac_control.weekend_heating_setpoints.nil?
+      # Base heating setpoint
+      htg_setpoint = hvac_control.heating_setpoint_temp
+      htg_weekday_setpoints = [[htg_setpoint] * 24] * 12
 
-    # Apply heating setback?
-    htg_setback = hvac_control.heating_setback_temp
-    if not htg_setback.nil?
-      htg_setback_hrs_per_week = hvac_control.heating_setback_hours_per_week
-      htg_setback_start_hr = hvac_control.heating_setback_start_hour
-      for m in 1..12
-        for hr in htg_setback_start_hr..htg_setback_start_hr + Integer(htg_setback_hrs_per_week / 7.0) - 1
-          htg_weekday_setpoints[m - 1][hr % 24] = htg_setback
+      # Apply heating setback?
+      htg_setback = hvac_control.heating_setback_temp
+      if not htg_setback.nil?
+        htg_setback_hrs_per_week = hvac_control.heating_setback_hours_per_week
+        htg_setback_start_hr = hvac_control.heating_setback_start_hour
+        for m in 1..12
+          for hr in htg_setback_start_hr..htg_setback_start_hr + Integer(htg_setback_hrs_per_week / 7.0) - 1
+            htg_weekday_setpoints[m - 1][hr % 24] = htg_setback
+          end
         end
       end
+      htg_weekend_setpoints = htg_weekday_setpoints.dup
+    else
+      # 24-hr weekday/weekend heating setpoint schedules
+      htg_weekday_setpoints = hvac_control.weekday_heating_setpoints.split(',').map { |i| Float(i) }
+      htg_weekday_setpoints = [htg_weekday_setpoints] * 12
+
+      htg_weekend_setpoints = hvac_control.weekend_heating_setpoints.split(',').map { |i| Float(i) }
+      htg_weekend_setpoints = [htg_weekend_setpoints] * 12
     end
-    htg_weekend_setpoints = htg_weekday_setpoints
 
-    # Base cooling setpoint
-    clg_setpoint = hvac_control.cooling_setpoint_temp
-    clg_weekday_setpoints = [[clg_setpoint] * 24] * 12
+    if hvac_control.weekday_cooling_setpoints.nil? || hvac_control.weekend_cooling_setpoints.nil?
+      # Base cooling setpoint
+      clg_setpoint = hvac_control.cooling_setpoint_temp
+      clg_weekday_setpoints = [[clg_setpoint] * 24] * 12
 
-    # Apply cooling setup?
-    clg_setup = hvac_control.cooling_setup_temp
-    if not clg_setup.nil?
-      clg_setup_hrs_per_week = hvac_control.cooling_setup_hours_per_week
-      clg_setup_start_hr = hvac_control.cooling_setup_start_hour
-      for m in 1..12
-        for hr in clg_setup_start_hr..clg_setup_start_hr + Integer(clg_setup_hrs_per_week / 7.0) - 1
-          clg_weekday_setpoints[m - 1][hr % 24] = clg_setup
+      # Apply cooling setup?
+      clg_setup = hvac_control.cooling_setup_temp
+      if not clg_setup.nil?
+        clg_setup_hrs_per_week = hvac_control.cooling_setup_hours_per_week
+        clg_setup_start_hr = hvac_control.cooling_setup_start_hour
+        for m in 1..12
+          for hr in clg_setup_start_hr..clg_setup_start_hr + Integer(clg_setup_hrs_per_week / 7.0) - 1
+            clg_weekday_setpoints[m - 1][hr % 24] = clg_setup
+          end
         end
       end
+      clg_weekend_setpoints = clg_weekday_setpoints.dup
+    else
+      # 24-hr weekday/weekend cooling setpoint schedules
+      clg_weekday_setpoints = hvac_control.weekday_cooling_setpoints.split(',').map { |i| Float(i) }
+      clg_weekday_setpoints = [clg_weekday_setpoints] * 12
+
+      clg_weekend_setpoints = hvac_control.weekend_cooling_setpoints.split(',').map { |i| Float(i) }
+      clg_weekend_setpoints = [clg_weekend_setpoints] * 12
     end
 
     # Apply cooling setpoint offset due to ceiling fan?
-    clg_ceiling_fan_offset = hvac_control.ceiling_fan_cooling_setpoint_temp_offset
-    if not clg_ceiling_fan_offset.nil?
-      HVAC.get_default_ceiling_fan_months(weather).each_with_index do |operation, m|
-        next unless operation == 1
+    if has_ceiling_fan
+      clg_ceiling_fan_offset = hvac_control.ceiling_fan_cooling_setpoint_temp_offset
+      if not clg_ceiling_fan_offset.nil?
+        HVAC.get_default_ceiling_fan_months(weather).each_with_index do |operation, m|
+          next unless operation == 1
 
-        clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
+          clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
+          clg_weekend_setpoints[m] = [clg_weekend_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
+        end
       end
     end
-    clg_weekend_setpoints = clg_weekday_setpoints
 
     # Create heating season schedule
     if htg_start_month <= htg_end_month
@@ -1981,10 +1972,14 @@ class HVAC
     return air_loop
   end
 
-  def self.apply_dehumidifier_ief_to_ef_inputs(w_coeff, ef_coeff, ief, water_removal_rate)
+  def self.apply_dehumidifier_ief_to_ef_inputs(dh_type, w_coeff, ef_coeff, ief, water_removal_rate)
     # Shift inputs under IEF test conditions to E+ supported EF test conditions
     # test conditions
-    ief_db = UnitConversions.convert(65.0, 'F', 'C') # degree C
+    if dh_type == HPXML::DehumidifierTypePortable
+      ief_db = UnitConversions.convert(65.0, 'F', 'C') # degree C
+    elsif dh_type == HPXML::DehumidifierTypeWholeHome
+      ief_db = UnitConversions.convert(73.0, 'F', 'C') # degree C
+    end
     rh = 60.0 # for both EF and IEF test conditions, %
 
     # Independent variables applied to curve equations
@@ -4087,7 +4082,6 @@ class HVAC
         cool_cap_fff_curves = clg_coil.stages.map { |stage| stage.totalCoolingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get }
         cool_eir_fff_curves = clg_coil.stages.map { |stage| stage.energyInputRatioFunctionofFlowFractionCurve.to_CurveQuadratic.get }
       else
-        puts clg_coil
         fail 'cooling coil not supported'
       end
       for speed in 0..(num_speeds - 1)
