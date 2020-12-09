@@ -1536,7 +1536,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
   def get_tabular_data_value(report_name, report_for_string, table_name, row_names, col_name, units)
     rows = "'" + row_names.join("','") + "'"
-    query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='#{report_name}' AND ReportForString='#{report_for_string}' AND TableName='#{table_name}' AND RowName IN ('#{row_names}') AND ColumnName='#{col_name}' AND Units='#{units}'"
+    query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='#{report_name}' AND ReportForString='#{report_for_string}' AND TableName='#{table_name}' AND RowName IN (#{rows}) AND ColumnName='#{col_name}' AND Units='#{units}'"
     result = @sqlFile.execAndReturnFirstDouble(query)
     return result.get
   end
