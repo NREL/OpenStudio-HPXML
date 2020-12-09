@@ -41,7 +41,8 @@ class HEScoreTest < Minitest::Unit::TestCase
     xml = File.absolute_path(File.join(parent_dir, 'sample_files', 'Base_hpxml.xml'))
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" --skip-simulation -x #{xml}"
     start_time = Time.now
-    system(command)
+    success = system(command)
+    assert_equal(true, success)
 
     # Check for output
     hes_hpxml = File.join(parent_dir, 'results', 'HEScoreDesign.xml')
@@ -50,6 +51,15 @@ class HEScoreTest < Minitest::Unit::TestCase
     # Check that IDF wasn't generated
     idf = File.join(parent_dir, 'HEScoreDesign', 'in.idf')
     assert(!File.exist?(idf))
+  end
+
+  def test_invalid_simulation
+    cli_path = OpenStudio.getOpenStudioCLI
+    xml = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..', 'hpxml-measures', 'workflow', 'sample_files', 'base.xml'))
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml}"
+    start_time = Time.now
+    success = system(command)
+    assert_equal(false, success)
   end
 
   private
@@ -63,7 +73,8 @@ class HEScoreTest < Minitest::Unit::TestCase
     cli_path = OpenStudio.getOpenStudioCLI
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml}"
     start_time = Time.now
-    system(command)
+    success = system(command)
+    assert_equal(true, success)
     runtime = Time.now - start_time
 
     results_json = File.join(parent_dir, 'results', 'results.json')
