@@ -53,9 +53,10 @@ class HPXML < Object
                  :roofs, :rim_joists, :walls, :foundation_walls, :frame_floors, :slabs, :windows,
                  :skylights, :doors, :heating_systems, :cooling_systems, :heat_pumps, :hvac_controls,
                  :hvac_distributions, :ventilation_fans, :water_heating_systems, :hot_water_distributions,
-                 :water_fixtures, :water_heating, :solar_thermal_systems, :pv_systems, :clothes_washers,
-                 :clothes_dryers, :dishwashers, :refrigerators, :freezers, :dehumidifiers, :cooking_ranges, :ovens,
-                 :lighting_groups, :lighting, :ceiling_fans, :pools, :hot_tubs, :plug_loads, :fuel_loads]
+                 :water_fixtures, :water_heating, :solar_thermal_systems, :pv_systems, :generators,
+                 :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators, :freezers, :dehumidifiers,
+                 :cooking_ranges, :ovens, :lighting_groups, :lighting, :ceiling_fans, :pools, :hot_tubs,
+                 :plug_loads, :fuel_loads]
   attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings)
 
   # Constants
@@ -525,6 +526,7 @@ class HPXML < Object
     @water_heating.to_oga(@doc)
     @solar_thermal_systems.to_oga(@doc)
     @pv_systems.to_oga(@doc)
+    @generators.to_oga(@doc)
     @clothes_washers.to_oga(@doc)
     @clothes_dryers.to_oga(@doc)
     @dishwashers.to_oga(@doc)
@@ -574,6 +576,7 @@ class HPXML < Object
     @water_heating = WaterHeating.new(self, hpxml)
     @solar_thermal_systems = SolarThermalSystems.new(self, hpxml)
     @pv_systems = PVSystems.new(self, hpxml)
+    @generators = Generators.new(self, hpxml)
     @clothes_washers = ClothesWashers.new(self, hpxml)
     @clothes_dryers = ClothesDryers.new(self, hpxml)
     @dishwashers = Dishwashers.new(self, hpxml)
@@ -3986,6 +3989,59 @@ class HPXML < Object
       @number_of_panels = XMLHelper.get_value(pv_system, 'NumberOfPanels', :integer)
       @year_modules_manufactured = XMLHelper.get_value(pv_system, 'YearModulesManufactured', :integer)
       @number_of_bedrooms_served = XMLHelper.get_value(pv_system, 'extension/NumberofBedroomsServed', :integer)
+    end
+  end
+
+  class Generators < BaseArrayElement
+    def add(**kwargs)
+      self << Generator.new(@hpxml_object, **kwargs)
+    end
+
+    def from_oga(hpxml)
+      return if hpxml.nil?
+
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/extension/Generators/Generator').each do |generator|
+        self << Generator.new(@hpxml_object, generator)
+      end
+    end
+  end
+
+  class Generator < BaseElement
+    ATTRS = [:id, :fuel_type, :annual_consumption_kbtu, :annual_output_kwh, :is_shared_system, :number_of_bedrooms_served]
+    attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.generators.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_oga(doc)
+      return if nil?
+
+      generators = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'extension', 'Generators'])
+      generator = XMLHelper.add_element(generators, 'Generator')
+      sys_id = XMLHelper.add_element(generator, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(generator, 'IsSharedSystem', @is_shared_system, :boolean, @is_shared_system_isdefaulted) unless @is_shared_system.nil?
+      XMLHelper.add_element(generator, 'FuelType', @fuel_type, :string) unless @fuel_type.nil?
+      XMLHelper.add_element(generator, 'AnnualConsumptionkBtu', @annual_consumption_kbtu, :float) unless @annual_consumption_kbtu.nil?
+      XMLHelper.add_element(generator, 'AnnualOutputkWh', @annual_output_kwh, :float) unless @annual_output_kwh.nil?
+      XMLHelper.add_element(generator, 'NumberofBedroomsServed', @number_of_bedrooms_served, :integer) unless @number_of_bedrooms_served.nil?
+    end
+
+    def from_oga(generator)
+      return if generator.nil?
+
+      @id = HPXML::get_id(generator)
+      @is_shared_system, @is_shared_system_isdefaulted = XMLHelper.get_value_and_defaulted(generator, 'IsSharedSystem', :boolean)
+      @fuel_type = XMLHelper.get_value(generator, 'FuelType', :string)
+      @annual_consumption_kbtu = XMLHelper.get_value(generator, 'AnnualConsumptionkBtu', :float)
+      @annual_output_kwh = XMLHelper.get_value(generator, 'AnnualOutputkWh', :float)
+      @number_of_bedrooms_served = XMLHelper.get_value(generator, 'NumberofBedroomsServed', :integer)
     end
   end
 

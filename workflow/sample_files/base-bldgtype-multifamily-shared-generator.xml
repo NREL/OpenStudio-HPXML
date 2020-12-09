@@ -37,7 +37,7 @@
           <NumberofResidents>3.0</NumberofResidents>
         </BuildingOccupancy>
         <BuildingConstruction>
-          <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
+          <ResidentialFacilityType>apartment unit</ResidentialFacilityType>
           <NumberofConditionedFloors>1</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>3</NumberofBedrooms>
@@ -273,19 +273,6 @@
             <EnergyFactor>0.95</EnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
-          <WaterHeatingSystem>
-            <SystemIdentifier id='SharedWaterHeater'/>
-            <FuelType>electricity</FuelType>
-            <WaterHeaterType>storage water heater</WaterHeaterType>
-            <Location>other heated space</Location>
-            <IsSharedSystem>true</IsSharedSystem>
-            <NumberofUnitsServed>6</NumberofUnitsServed>
-            <TankVolume>40.0</TankVolume>
-            <FractionDHWLoadServed>0.0</FractionDHWLoadServed>
-            <HeatingCapacity>18767.0</HeatingCapacity>
-            <EnergyFactor>0.95</EnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
-          </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution'/>
             <SystemType>
@@ -308,13 +295,23 @@
             <LowFlow>false</LowFlow>
           </WaterFixture>
         </WaterHeating>
+        <extension>
+          <Generators>
+            <Generator>
+              <SystemIdentifier id='Generator'/>
+              <IsSharedSystem>true</IsSharedSystem>
+              <FuelType>propane</FuelType>
+              <AnnualConsumptionkBtu>85000.0</AnnualConsumptionkBtu>
+              <AnnualOutputkWh>5000.0</AnnualOutputkWh>
+              <NumberofBedroomsServed>18</NumberofBedroomsServed>
+            </Generator>
+          </Generators>
+        </extension>
       </Systems>
       <Appliances>
         <ClothesWasher>
-          <SystemIdentifier id='SharedClothesWasher'/>
-          <IsSharedAppliance>true</IsSharedAppliance>
-          <AttachedToWaterHeatingSystem idref='SharedWaterHeater'/>
-          <Location>other heated space</Location>
+          <SystemIdentifier id='ClothesWasher'/>
+          <Location>living space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -324,9 +321,8 @@
           <Capacity>3.2</Capacity>
         </ClothesWasher>
         <ClothesDryer>
-          <SystemIdentifier id='SharedClothesDryer'/>
-          <IsSharedAppliance>true</IsSharedAppliance>
-          <Location>other heated space</Location>
+          <SystemIdentifier id='ClothesDryer'/>
+          <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
           <ControlType>timer</ControlType>
@@ -336,10 +332,8 @@
           </extension>
         </ClothesDryer>
         <Dishwasher>
-          <SystemIdentifier id='SharedDishwasher'/>
-          <IsSharedAppliance>true</IsSharedAppliance>
-          <AttachedToWaterHeatingSystem idref='SharedWaterHeater'/>
-          <Location>other heated space</Location>
+          <SystemIdentifier id='Dishwasher'/>
+          <Location>living space</Location>
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
           <LabelElectricRate>0.12</LabelElectricRate>

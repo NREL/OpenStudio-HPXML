@@ -157,6 +157,7 @@ def create_hpxmls
     'base-bldgtype-multifamily-shared-chiller-only-fan-coil-ducted.xml' => 'base-bldgtype-multifamily-shared-chiller-only-fan-coil.xml',
     'base-bldgtype-multifamily-shared-chiller-only-water-loop-heat-pump.xml' => 'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
     'base-bldgtype-multifamily-shared-cooling-tower-only-water-loop-heat-pump.xml' => 'base-bldgtype-multifamily-shared-chiller-only-water-loop-heat-pump.xml',
+    'base-bldgtype-multifamily-shared-generator.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-laundry-room.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-mechvent.xml' => 'base-bldgtype-multifamily.xml',
@@ -348,6 +349,7 @@ def create_hpxmls
     'base-mechvent-supply.xml' => 'base.xml',
     'base-mechvent-whole-house-fan.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
+    'base-misc-generators.xml' => 'base.xml',
     'base-misc-loads-large-uncommon.xml' => 'base.xml',
     'base-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-misc-loads-none.xml' => 'base.xml',
@@ -447,6 +449,7 @@ def create_hpxmls
         set_hpxml_water_fixtures(hpxml_file, hpxml)
         set_hpxml_solar_thermal_system(hpxml_file, hpxml)
         set_hpxml_pv_systems(hpxml_file, hpxml)
+        set_hpxml_generators(hpxml_file, hpxml)
         set_hpxml_clothes_washer(hpxml_file, hpxml)
         set_hpxml_clothes_dryer(hpxml_file, hpxml)
         set_hpxml_dishwasher(hpxml_file, hpxml)
@@ -1863,18 +1866,36 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            insulation_assembly_r_value: 39.3)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.frame_floors.clear
-    hpxml.frame_floors.add(id: 'FloorAdiabatic',
+    hpxml.frame_floors.add(id: 'FloorOther',
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
                            insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
-    hpxml.frame_floors.add(id: 'CeilingAdiabatic',
+    hpxml.frame_floors.add(id: 'CeilingOther',
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
                            insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceAbove)
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'].include? hpxml_file
+    hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHousingUnit
+    hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherHousingUnit
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-heated-space.xml'].include? hpxml_file
+    hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
+    hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
+    hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
+    hpxml.frame_floors[1].insulation_assembly_r_value = 18.7
+  elsif ['base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml'].include? hpxml_file
+    hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
+    hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
+    hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
+    hpxml.frame_floors[1].insulation_assembly_r_value = 18.7
+  elsif ['base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml'].include? hpxml_file
+    hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
+    hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
+    hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
+    hpxml.frame_floors[1].insulation_assembly_r_value = 18.7
   elsif ['base-bldgtype-single-family-attached.xml'].include? hpxml_file
     hpxml.frame_floors[0].area = 900
   elsif ['base-atticroof-flat.xml',
@@ -1977,13 +1998,13 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
     hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
     hpxml.frame_floors[0].other_space_above_or_below = HPXML::FrameFloorOtherSpaceAbove
   elsif ['invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: 'FloorAdiabatic',
+    hpxml.frame_floors.add(id: 'FloorOther',
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
                            insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
-    hpxml.frame_floors.add(id: 'CeilingAdiabatic',
+    hpxml.frame_floors.add(id: 'CeilingOther',
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
@@ -4390,7 +4411,6 @@ end
 def set_hpxml_pv_systems(hpxml_file, hpxml)
   if ['base-pv.xml'].include? hpxml_file
     hpxml.pv_systems.add(id: 'PVSystem',
-                         is_shared_system: false,
                          module_type: HPXML::PVModuleTypeStandard,
                          location: HPXML::LocationRoof,
                          tracking: HPXML::PVTrackingTypeFixed,
@@ -4400,7 +4420,6 @@ def set_hpxml_pv_systems(hpxml_file, hpxml)
                          inverter_efficiency: 0.96,
                          system_losses_fraction: 0.14)
     hpxml.pv_systems.add(id: 'PVSystem2',
-                         is_shared_system: false,
                          module_type: HPXML::PVModuleTypePremium,
                          location: HPXML::LocationRoof,
                          tracking: HPXML::PVTrackingTypeFixed,
@@ -4426,6 +4445,26 @@ def set_hpxml_pv_systems(hpxml_file, hpxml)
                          max_power_output: 30000,
                          inverter_efficiency: 0.96,
                          system_losses_fraction: 0.14,
+                         number_of_bedrooms_served: 18)
+  end
+end
+
+def set_hpxml_generators(hpxml_file, hpxml)
+  if ['base-misc-generators.xml'].include? hpxml_file
+    hpxml.generators.add(id: 'Generator',
+                         fuel_type: HPXML::FuelTypeNaturalGas,
+                         annual_consumption_kbtu: 8500,
+                         annual_output_kwh: 500)
+    hpxml.generators.add(id: 'Generator2',
+                         fuel_type: HPXML::FuelTypePropane,
+                         annual_consumption_kbtu: 8500,
+                         annual_output_kwh: 500)
+  elsif ['base-bldgtype-multifamily-shared-generator.xml'].include? hpxml_file
+    hpxml.generators.add(id: 'Generator',
+                         is_shared_system: true,
+                         fuel_type: HPXML::FuelTypePropane,
+                         annual_consumption_kbtu: 85000,
+                         annual_output_kwh: 5000,
                          number_of_bedrooms_served: 18)
   end
 end
