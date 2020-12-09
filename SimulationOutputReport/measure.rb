@@ -507,14 +507,22 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       next if end_use.meter.nil?
 
       fuel_type, end_use_type = key
+
+      use_negative = false
+      if end_use_type == EUT::PV
+        use_negative = true
+      elsif (end_use_type == EUT::Generator) && (fuel_type == FT::Elec)
+        use_negative = true
+      end
+
       end_use.annual_output = get_report_meter_data_annual(end_use.meter)
-      if (end_use_type == EUT::PV) && (@end_uses[key].annual_output > 0)
+      if use_negative && (@end_uses[key].annual_output > 0)
         end_use.annual_output *= -1.0
       end
       next unless include_timeseries_end_use_consumptions
 
       timeseries_unit_conv = UnitConversions.convert(1.0, 'J', end_use.timeseries_units)
-      if end_use_type == EUT::PV
+      if use_negative
         timeseries_unit_conv *= -1.0
       end
       end_use.timeseries_output = get_report_meter_data_timeseries('', end_use.meter, timeseries_unit_conv, 0, timeseries_frequency)
@@ -830,7 +838,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @fuels.keys.each do |fuel_type|
       sum_categories = @end_uses.select { |k, eu| k[0] == fuel_type }.map { |k, eu| eu.annual_output }.sum(0.0)
       fuel_total = @fuels[fuel_type].annual_output
-      fuel_total += @end_uses[[FT::Elec, EUT::PV]].annual_output if fuel_type == FT::Elec
+      if fuel_type == FT::Elec
+        fuel_total += @end_uses[[FT::Elec, EUT::PV]].annual_output
+        fuel_total += @end_uses[[FT::Elec, EUT::Generator]].annual_output
+      end
       if (fuel_total - sum_categories).abs > 0.1
         runner.registerError("#{fuel_type} category end uses (#{sum_categories}) do not sum to total (#{fuel_total}).")
         return false
@@ -859,13 +870,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
   def write_annual_output_results(runner, outputs, csv_path)
     line_break = nil
-    pv_end_use = @end_uses[[FT::Elec, EUT::PV]]
+    elec_pv_produced = @end_uses[[FT::Elec, EUT::PV]]
+    elec_generator_produced = @end_uses[[FT::Elec, EUT::Generator]]
 
     results_out = []
     @fuels.each do |fuel_type, fuel|
       results_out << ["#{fuel.name} (#{fuel.annual_units})", fuel.annual_output.round(2)]
       if fuel_type == FT::Elec
-        results_out << ['Electricity: Net (MBtu)', (fuel.annual_output + pv_end_use.annual_output).round(2)]
+        results_out << ['Electricity: Net (MBtu)', (fuel.annual_output + elec_pv_produced.annual_output + elec_generator_produced.annual_output).round(2)]
       end
     end
     results_out << [line_break]
@@ -882,7 +894,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
     results_out << [line_break]
     @peak_fuels.each do |key, peak_fuel|
-      results_out << ["#{peak_fuel.name} (#{peak_fuel.annual_units})", peak_fuel.annual_output.round(2)]
+      results_out << ["#{peak_fuel.name} (#{peak_fuel.annual_units})", peak_fuel.annual_output.round(0)]
     end
     results_out << [line_break]
     @peak_loads.each do |load_type, peak_load|
@@ -894,7 +906,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
     results_out << [line_break]
     @hot_water_uses.each do |hot_water_type, hot_water|
-      results_out << ["#{hot_water.name} (#{hot_water.annual_units})", hot_water.annual_output.round(2)]
+      results_out << ["#{hot_water.name} (#{hot_water.annual_units})", hot_water.annual_output.round(0)]
     end
 
     CSV.open(csv_path, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
@@ -2009,7 +2021,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       @end_uses[[FT::Elec, EUT::HotTubHeater]] = EndUse.new(meter: "#{Constants.ObjectNameMiscHotTubHeater}:InteriorEquipment:#{EPlus::FuelTypeElectricity}")
       @end_uses[[FT::Elec, EUT::HotTubPump]] = EndUse.new(meter: "#{Constants.ObjectNameMiscHotTubPump}:InteriorEquipment:#{EPlus::FuelTypeElectricity}")
     end
-    @end_uses[[FT::Elec, EUT::PV]] = EndUse.new(meter: 'ElectricityProduced:Facility')
+    @end_uses[[FT::Elec, EUT::PV]] = EndUse.new(meter: 'Photovoltaic:ElectricityProduced')
+    @end_uses[[FT::Elec, EUT::Generator]] = EndUse.new(meter: 'Cogeneration:ElectricityProduced')
     @end_uses[[FT::Gas, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeating(EPlus::FuelTypeNaturalGas))
     @end_uses[[FT::Gas, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeating(EPlus::FuelTypeNaturalGas))
     @end_uses[[FT::Gas, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}")
@@ -2022,6 +2035,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       @end_uses[[FT::Gas, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}")
       @end_uses[[FT::Gas, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}")
     end
+    @end_uses[[FT::Gas, EUT::Generator]] = EndUse.new(meter: "Cogeneration:#{EPlus::FuelTypeNaturalGas}")
     @end_uses[[FT::Oil, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeating(EPlus::FuelTypeOil))
     @end_uses[[FT::Oil, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeating(EPlus::FuelTypeOil))
     @end_uses[[FT::Oil, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeOil}")
@@ -2042,6 +2056,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       @end_uses[[FT::Propane, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypePropane}")
       @end_uses[[FT::Propane, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypePropane}")
     end
+    @end_uses[[FT::Propane, EUT::Generator]] = EndUse.new(meter: "Cogeneration:#{EPlus::FuelTypePropane}")
     @end_uses[[FT::WoodCord, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeating(EPlus::FuelTypeWoodCord))
     @end_uses[[FT::WoodCord, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeating(EPlus::FuelTypeWoodCord))
     @end_uses[[FT::WoodCord, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeWoodCord}")

@@ -10,6 +10,7 @@ require_relative 'resources/airflow'
 require_relative 'resources/constants'
 require_relative 'resources/constructions'
 require_relative 'resources/energyplus'
+require_relative 'resources/generator'
 require_relative 'resources/geometry'
 require_relative 'resources/hotwater_appliances'
 require_relative 'resources/hpxml'
@@ -250,6 +251,7 @@ class OSModel
     add_airflow(runner, model, weather, spaces)
     add_hvac_sizing(runner, model, weather, spaces)
     add_photovoltaics(runner, model)
+    add_generators(runner, model)
     add_additional_properties(runner, model, hpxml_path)
 
     # Output
@@ -2487,6 +2489,12 @@ class OSModel
   def self.add_photovoltaics(runner, model)
     @hpxml.pv_systems.each do |pv_system|
       PV.apply(model, @nbeds, pv_system)
+    end
+  end
+
+  def self.add_generators(runner, model)
+    @hpxml.generators.each do |generator|
+      Generator.apply(model, @nbeds, generator)
     end
   end
 
