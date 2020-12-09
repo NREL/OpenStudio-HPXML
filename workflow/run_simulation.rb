@@ -68,13 +68,13 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
     update_args_hash(measures, measure_subdir, args)
   end
 
-  run_hpxml_workflow(rundir, hpxml, measures, measures_dir,
-                     debug: debug, run_measures_only: skip_simulation)
+  results = run_hpxml_workflow(rundir, hpxml, measures, measures_dir,
+                               debug: debug, run_measures_only: skip_simulation)
 
-  return if skip_simulation
+  return results[:success] if skip_simulation
 
   timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
-  return unless File.exist? timeseries_csv_path
+  return false unless File.exist? timeseries_csv_path
 
   units_map = get_units_map()
   output_map = get_output_map()
@@ -137,6 +137,8 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
   File.open(File.join(resultsdir, 'results.json'), 'w') do |f|
     f.write(JSON.pretty_generate(data))
   end
+
+  return results[:success]
 end
 
 def download_epws
@@ -239,6 +241,10 @@ puts "HPXML: #{options[:hpxml]}"
 design = 'HEScoreDesign'
 rundir = get_rundir(options[:output_dir], design)
 
-rundir = run_design(basedir, rundir, design, resultsdir, options[:hpxml], options[:debug], options[:skip_simulation])
+success = run_design(basedir, rundir, design, resultsdir, options[:hpxml], options[:debug], options[:skip_simulation])
+
+if not success
+  exit! 1
+end
 
 puts "Completed in #{(Time.now - start_time).round(1)} seconds."
