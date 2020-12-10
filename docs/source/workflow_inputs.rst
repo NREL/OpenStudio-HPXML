@@ -188,7 +188,8 @@ Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSumma
   ``NumberofResidents``  integer          >= 0         No        <number of bedrooms>  Number of occupants [#]_
   =====================  ========  =====  ===========  ========  ====================  ========================
 
-  .. [#] NumberofResidents is only used for occupant heat gain. Most occupancy assumptions (e.g., usage of plug loads, appliances, hot water, etc.) are driven by the number of bedrooms, not number of occupants.
+  .. [#] NumberofResidents is only used for occupant heat gain.
+         Most occupancy assumptions (e.g., usage of plug loads, appliances, hot water, etc.) are driven by the number of bedrooms, not number of occupants.
 
 HPXML Building Construction
 ***************************
@@ -199,9 +200,9 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   Element                                                    Type      Units      Constraints  Required  Default   Notes
   =========================================================  ========  =========  ===========  ========  ========  =======================================================================
   ``ResidentialFacilityType``                                string               See [#]_     Yes                 Type of dwelling unit
-  ``NumberofConditionedFloors``                              integer              > 0          Yes                 Number of conditioned floors (including a basement)
-  ``NumberofConditionedFloorsAboveGrade``                    integer              > 0          Yes                 Number of conditioned floors above grade (including a walkout basement)
-  ``NumberofBedrooms``                                       integer              > 0          Yes                 Number of bedrooms
+  ``NumberofConditionedFloors``                              double               > 0          Yes                 Number of conditioned floors (including a basement)
+  ``NumberofConditionedFloorsAboveGrade``                    double               > 0          Yes                 Number of conditioned floors above grade (including a walkout basement)
+  ``NumberofBedrooms``                                       integer              > 0          Yes                 Number of bedrooms [#]_
   ``NumberofBathrooms``                                      integer              > 0          No        See [#]_  Number of bathrooms
   ``ConditionedFloorArea``                                   double    ft2        > 0          Yes                 Floor area within conditioned space boundary
   ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``  double    ft3 or ft  > 0          No        See [#]_  Volume/ceiling height within conditioned space boundary
@@ -209,6 +210,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   =========================================================  ========  =========  ===========  ========  ========  =======================================================================
 
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
+  .. [#] NumberofBedrooms is currently used to determine usage of plug loads, appliances, hot water, etc.
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to 8.0.
          If needed, additional defaulting is performed using the following relationship: ConditionedBuildingVolume = ConditionedFloorArea * AverageCeilingHeight.
@@ -1108,7 +1110,7 @@ To define an air distribution system, additional information is entered in ``HVA
   
   .. [#] Provide one DuctLeakageMeasurement element for any supply ducts and one for any return ducts.
   .. [#] Provide one or more Ducts elements for any supply ducts and one or more for any return ducts.
-  .. [#] If NumberofReturnRegisters not provided, defaults to one return register per conditioned floor per `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_.
+  .. [#] If NumberofReturnRegisters not provided, defaults to one return register per conditioned floor per `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_, rounded up to the nearest integer if needed.
 
 If there is supply or return duct leakage, additional information is entered in a ``DuctLeakageMeasurement``.
 
@@ -1394,7 +1396,7 @@ If a conventional storage water heater is specified, additional information is e
   ``FuelType``                                   string                 See [#]_     Yes                 Fuel type
   ``TankVolume``                                 double   gal           > 0          No        See [#]_  Tank volume
   ``HeatingCapacity``                            double   Btuh          > 0          No        See [#]_  Heating capacity
-  ``UniformEnergyFactor`` or ``EnergyFactor``    double   frac          0-1          Yes                 EnergyGuide label rated efficiency
+  ``UniformEnergyFactor`` or ``EnergyFactor``    double   frac          < 1          Yes                 EnergyGuide label rated efficiency
   ``FirstHourRating``                            double   gal/hr        > 0          See [#]_            EnergyGuide label first hour rating
   ``RecoveryEfficiency``                         double   frac          0-1          No        See [#]_  Recovery efficiency
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double   F-ft2-hr/Btu  >= 0         No        0         R-value of additional tank insulation wrap
@@ -1420,7 +1422,7 @@ If an instantaneous tankless water heater is specified, additional information i
   ===========================================  =======  ============  ===========  ============  ========  ==========================================================
   ``FuelType``                                 string                 See [#]_     Yes                     Fuel type
   ``PerformanceAdjustment``                    double   frac                       No            See [#]_  Multiplier on efficiency, typically to account for cycling
-  ``UniformEnergyFactor`` or ``EnergyFactor``  double   frac          0-1          Yes                     EnergyGuide label rated efficiency
+  ``UniformEnergyFactor`` or ``EnergyFactor``  double   frac          < 1          Yes                     EnergyGuide label rated efficiency
   ===========================================  =======  ============  ===========  ============  ========  ==========================================================
   
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
@@ -1436,7 +1438,7 @@ If a heat pump water heater is specified, additional information is entered in `
   =============================================  =======  ============  ===========  ========  ========  ==========================================
   ``FuelType``                                   string                 See [#]_     Yes                 Fuel type
   ``TankVolume``                                 double   gal           > 0          Yes                 Tank volume
-  ``UniformEnergyFactor`` or ``EnergyFactor``    double   frac          0-1          Yes                 EnergyGuide label rated efficiency
+  ``UniformEnergyFactor`` or ``EnergyFactor``    double   frac          > 1          Yes                 EnergyGuide label rated efficiency
   ``FirstHourRating``                            double   gal/hr        > 0          See [#]_            EnergyGuide label first hour rating
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double   F-ft2-hr/Btu  >= 0         No        0         R-value of additional tank insulation wrap
   =============================================  =======  ============  ===========  ========  ========  ==========================================
@@ -1699,6 +1701,30 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
          SystemLossesFraction = 1.0 - (1.0 - 0.14) * (1.0 - (1.0 - 0.995^(CurrentYear - YearModulesManufactured))).
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the PV system.
+
+HPXML Generators
+****************
+
+Each generator that provides on-site power is entered as a ``/HPXML/Building/BuildingDetails/Systems/extension/Generators/Generator``.
+
+  ==========================  =======  =======  ===========  ========  =======  ============================================
+  Element                     Type     Units    Constraints  Required  Default  Notes
+  ==========================  =======  =======  ===========  ========  =======  ============================================
+  ``SystemIdentifier``        id                             Yes                Unique identifier
+  ``IsSharedSystem``          boolean                        No        false    Whether it serves multiple dwelling units
+  ``FuelType``                string            See [#]_     Yes                Fuel type
+  ``AnnualConsumptionkBtu``   double   kBtu/yr  > 0          Yes                Annual fuel consumed
+  ``AnnualOutputkWh``         double   kWh/yr   > 0          Yes                Annual electricity produced
+  ``NumberofBedroomsServed``  integer           > 1          See [#]_           Number of bedrooms served
+  ==========================  =======  =======  ===========  ========  =======  ============================================
+
+  .. [#] FuelType choices are "natural gas" or "propane".
+  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
+         Annual consumption and annual production will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the generator.
+
+.. note::
+
+  Generators will be modeled as operating continuously (24/7).
 
 HPXML Appliances
 ----------------

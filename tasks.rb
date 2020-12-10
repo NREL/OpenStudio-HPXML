@@ -1864,6 +1864,7 @@ def get_values(osw_file, step)
   if ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
+    step.setArgument('water_heater_efficiency', 2.3)
   elsif ['invalid_files/heating-system-and-heat-pump.osw'].include? osw_file
     step.setArgument('cooling_system_type', 'none')
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpAirToAir)
@@ -1993,6 +1994,8 @@ def create_hpxmls
     'invalid_files/clothes-dryer-location.xml' => 'base.xml',
     'invalid_files/cooking-range-location.xml' => 'base.xml',
     'invalid_files/dhw-frac-load-served.xml' => 'base-dhw-multiple.xml',
+    'invalid_files/dhw-invalid-ef-tank.xml' => 'base.xml',
+    'invalid_files/dhw-invalid-uef-tank-heat-pump.xml' => 'base-dhw-tank-heat-pump-uef.xml',
     'invalid_files/dishwasher-location.xml' => 'base.xml',
     'invalid_files/duct-location.xml' => 'base.xml',
     'invalid_files/duct-location-unconditioned-space.xml' => 'base.xml',
@@ -2101,6 +2104,7 @@ def create_hpxmls
     'base-bldgtype-multifamily-shared-chiller-only-fan-coil-ducted.xml' => 'base-bldgtype-multifamily-shared-chiller-only-fan-coil.xml',
     'base-bldgtype-multifamily-shared-chiller-only-water-loop-heat-pump.xml' => 'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
     'base-bldgtype-multifamily-shared-cooling-tower-only-water-loop-heat-pump.xml' => 'base-bldgtype-multifamily-shared-chiller-only-water-loop-heat-pump.xml',
+    'base-bldgtype-multifamily-shared-generator.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-laundry-room.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-mechvent.xml' => 'base-bldgtype-multifamily.xml',
@@ -2177,6 +2181,7 @@ def create_hpxmls
     'base-enclosure-overhangs.xml' => 'base.xml',
     'base-enclosure-rooftypes.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
+    'base-enclosure-split-level.xml' => 'base-foundation-slab.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-walltypes.xml' => 'base.xml',
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
@@ -2278,6 +2283,7 @@ def create_hpxmls
     'base-mechvent-supply.xml' => 'base.xml',
     'base-mechvent-whole-house-fan.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
+    'base-misc-generators.xml' => 'base.xml',
     'base-misc-loads-large-uncommon.xml' => 'base.xml',
     'base-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-misc-loads-none.xml' => 'base.xml',
@@ -2379,6 +2385,7 @@ def create_hpxmls
         set_hpxml_water_fixtures(hpxml_file, hpxml)
         set_hpxml_solar_thermal_system(hpxml_file, hpxml)
         set_hpxml_pv_systems(hpxml_file, hpxml)
+        set_hpxml_generators(hpxml_file, hpxml)
         set_hpxml_clothes_washer(hpxml_file, hpxml)
         set_hpxml_clothes_dryer(hpxml_file, hpxml)
         set_hpxml_dishwasher(hpxml_file, hpxml)
@@ -2407,7 +2414,7 @@ def create_hpxmls
       elsif ['invalid_files/invalid-datatype-float.xml'].include? derivative
         XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/extension/CarpetFraction').inner_text = 'FOOBAR'
       elsif ['invalid_files/invalid-datatype-integer.xml'].include? derivative
-        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors').inner_text = '2.5'
+        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms').inner_text = '2.5'
       elsif ['invalid_files/invalid-schema-version.xml'].include? derivative
         root = XMLHelper.get_element(hpxml_doc, '/HPXML')
         XMLHelper.add_attribute(root, 'schemaVersion', '2.3')
@@ -2617,6 +2624,9 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_bathrooms = nil
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
+  elsif ['base-enclosure-split-level.xml'].include? hpxml_file
+    hpxml.building_construction.number_of_conditioned_floors = 1.5
+    hpxml.building_construction.number_of_conditioned_floors_above_grade = 1.5
   elsif ['invalid_files/enclosure-floor-area-exceeds-cfa.xml'].include? hpxml_file
     hpxml.building_construction.conditioned_floor_area /= 5.0
   elsif ['invalid_files/num-bedrooms-exceeds-limit.xml'].include? hpxml_file
@@ -6161,6 +6171,10 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[1].location = HPXML::LocationOtherHeatedSpace
   elsif ['invalid_files/multifamily-reference-water-heater.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
+  elsif ['invalid_files/dhw-invalid-ef-tank.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].energy_factor = 1.0
+  elsif ['invalid_files/dhw-invalid-uef-tank-heat-pump.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].uniform_energy_factor = 1.0
   end
 end
 
@@ -6351,6 +6365,26 @@ def set_hpxml_pv_systems(hpxml_file, hpxml)
                          max_power_output: 30000,
                          inverter_efficiency: 0.96,
                          system_losses_fraction: 0.14,
+                         number_of_bedrooms_served: 18)
+  end
+end
+
+def set_hpxml_generators(hpxml_file, hpxml)
+  if ['base-misc-generators.xml'].include? hpxml_file
+    hpxml.generators.add(id: 'Generator',
+                         fuel_type: HPXML::FuelTypeNaturalGas,
+                         annual_consumption_kbtu: 8500,
+                         annual_output_kwh: 500)
+    hpxml.generators.add(id: 'Generator2',
+                         fuel_type: HPXML::FuelTypePropane,
+                         annual_consumption_kbtu: 8500,
+                         annual_output_kwh: 500)
+  elsif ['base-bldgtype-multifamily-shared-generator.xml'].include? hpxml_file
+    hpxml.generators.add(id: 'Generator',
+                         is_shared_system: true,
+                         fuel_type: HPXML::FuelTypePropane,
+                         annual_consumption_kbtu: 85000,
+                         annual_output_kwh: 5000,
                          number_of_bedrooms_served: 18)
   end
 end
