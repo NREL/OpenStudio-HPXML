@@ -62,6 +62,34 @@ class HEScoreTest < Minitest::Unit::TestCase
     assert_equal(false, success)
   end
 
+  def test_floor_areas
+    # Run modified HES HPXML w/ sum of conditioned floor areas' > CFA.
+    # This file would normally generate errors in OS-HPXML, but the ruleset
+    # now handles it. Check for successful run.
+    parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
+
+    cli_path = OpenStudio.getOpenStudioCLI
+    xml = File.absolute_path(File.join(parent_dir, 'sample_files', 'Floors_1_hpxml.xml'))
+
+    # Create derivative file
+    hpxml = XMLHelper.parse_file(xml)
+    bldg_const = XMLHelper.get_element(hpxml, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea')
+    bldg_const.inner_text = (Float(bldg_const.inner_text) - 5.0).to_s # ft2
+    xml.gsub!('.xml', '_floor_area_test.xml')
+    XMLHelper.write_file(hpxml, xml)
+
+    # Run derivative file
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml}"
+    success = system(command)
+
+    # Check for success
+    assert_equal(true, success)
+    assert(File.exist?(File.join(parent_dir, 'results', 'HEScoreDesign.xml')))
+
+    # Cleanup
+    File.delete(xml)
+  end
+
   private
 
   def run_and_check(xml, parent_dir, expect_error, zipfile)
