@@ -1110,7 +1110,7 @@ To define an air distribution system, additional information is entered in ``HVA
   
   .. [#] Provide one DuctLeakageMeasurement element for any supply ducts and one for any return ducts.
   .. [#] Provide one or more Ducts elements for any supply ducts and one or more for any return ducts.
-  .. [#] If NumberofReturnRegisters not provided, defaults to one return register per conditioned floor per `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_.
+  .. [#] If NumberofReturnRegisters not provided, defaults to one return register per conditioned floor per `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_, rounded up to the nearest integer if needed.
 
 If there is supply or return duct leakage, additional information is entered in a ``DuctLeakageMeasurement``.
 
