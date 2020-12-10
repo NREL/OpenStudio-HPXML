@@ -188,7 +188,8 @@ Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSumma
   ``NumberofResidents``  integer          >= 0         No        <number of bedrooms>  Number of occupants [#]_
   =====================  ========  =====  ===========  ========  ====================  ========================
 
-  .. [#] NumberofResidents is only used for occupant heat gain. Most occupancy assumptions (e.g., usage of plug loads, appliances, hot water, etc.) are driven by the number of bedrooms, not number of occupants.
+  .. [#] NumberofResidents is only used for occupant heat gain.
+         Most occupancy assumptions (e.g., usage of plug loads, appliances, hot water, etc.) are driven by the number of bedrooms, not number of occupants.
 
 HPXML Building Construction
 ***************************
@@ -199,10 +200,10 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   Element                                                    Type      Units      Constraints  Required  Default   Notes
   =========================================================  ========  =========  ===========  ========  ========  =======================================================================
   ``ResidentialFacilityType``                                string               See [#]_     Yes                 Type of dwelling unit
-  ``NumberofConditionedFloors``                              integer              > 0          Yes                 Number of conditioned floors (including a basement)
-  ``NumberofConditionedFloorsAboveGrade``                    integer              > 0          Yes                 Number of conditioned floors above grade (including a walkout basement)
+  ``NumberofConditionedFloors``                              double               > 0          Yes                 Number of conditioned floors (including a basement)
+  ``NumberofConditionedFloorsAboveGrade``                    double               > 0          Yes                 Number of conditioned floors above grade (including a walkout basement)
   ``NumberofBedrooms``                                       integer              > 0          Yes                 Number of bedrooms
-  ``NumberofBathrooms``                                      integer              > 0          No        See [#]_  Number of bathrooms
+  ``NumberofBathrooms``                                      integer              > 0          No        See [#]_  Number of bathrooms [#]_
   ``ConditionedFloorArea``                                   double    ft2        > 0          Yes                 Floor area within conditioned space boundary
   ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``  double    ft3 or ft  > 0          No        See [#]_  Volume/ceiling height within conditioned space boundary
   ``extension/HasFlueOrChimney``                             boolean                           No        See [#]_  Presence of flue or chimney for infiltration model
@@ -210,6 +211,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
 
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+  .. [#] NumberofBedrooms is currently used to determine usage of plug loads, appliances, hot water, etc.
   .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to 8.0.
          If needed, additional defaulting is performed using the following relationship: ConditionedBuildingVolume = ConditionedFloorArea * AverageCeilingHeight.
   .. [#] If HasFlueOrChimney not provided, assumed to be true if any of the following conditions are met: 
@@ -1108,7 +1110,7 @@ To define an air distribution system, additional information is entered in ``HVA
   
   .. [#] Provide one DuctLeakageMeasurement element for any supply ducts and one for any return ducts.
   .. [#] Provide one or more Ducts elements for any supply ducts and one or more for any return ducts.
-  .. [#] If NumberofReturnRegisters not provided, defaults to one return register per conditioned floor per `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_.
+  .. [#] If NumberofReturnRegisters not provided, defaults to one return register per conditioned floor per `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_, rounded up to the nearest integer if needed.
 
 If there is supply or return duct leakage, additional information is entered in a ``DuctLeakageMeasurement``.
 
