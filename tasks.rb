@@ -49,6 +49,8 @@ def create_hpxmls
     'invalid_files/clothes-dryer-location.xml' => 'base.xml',
     'invalid_files/cooking-range-location.xml' => 'base.xml',
     'invalid_files/dhw-frac-load-served.xml' => 'base-dhw-multiple.xml',
+    'invalid_files/dhw-invalid-ef-tank.xml' => 'base.xml',
+    'invalid_files/dhw-invalid-uef-tank-heat-pump.xml' => 'base-dhw-tank-heat-pump-uef.xml',
     'invalid_files/dishwasher-location.xml' => 'base.xml',
     'invalid_files/duct-location.xml' => 'base.xml',
     'invalid_files/duct-location-unconditioned-space.xml' => 'base.xml',
@@ -4218,6 +4220,10 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[1].location = HPXML::LocationOtherHeatedSpace
   elsif ['invalid_files/multifamily-reference-water-heater.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
+  elsif ['invalid_files/dhw-invalid-ef-tank.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].energy_factor = 1.0
+  elsif ['invalid_files/dhw-invalid-uef-tank-heat-pump.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].uniform_energy_factor = 1.0
   end
 end
 
