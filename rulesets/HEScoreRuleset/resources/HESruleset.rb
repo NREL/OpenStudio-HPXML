@@ -51,7 +51,7 @@ class HEScoreRuleset
     set_misc_television(orig_hpxml, new_hpxml)
 
     # Prevent downstream errors in OS-HPXML
-    sync_floor_areas(new_hpxml)
+    adjust_floor_areas(new_hpxml)
 
     return new_hpxml
   end
@@ -870,7 +870,7 @@ class HEScoreRuleset
                              plug_load_type: HPXML::PlugLoadTypeTelevision)
   end
 
-  def self.sync_floor_areas(new_hpxml)
+  def self.adjust_floor_areas(new_hpxml)
     # Gather floors/slabs adjacent to conditioned space
     conditioned_floors = []
     new_hpxml.frame_floors.each do |frame_floor|
