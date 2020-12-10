@@ -236,6 +236,7 @@ def create_hpxmls
     'base-enclosure-overhangs.xml' => 'base.xml',
     'base-enclosure-rooftypes.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
+    'base-enclosure-split-level.xml' => 'base-foundation-slab.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-walltypes.xml' => 'base.xml',
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
@@ -466,7 +467,7 @@ def create_hpxmls
       elsif ['invalid_files/invalid-datatype-float.xml'].include? derivative
         XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/extension/CarpetFraction').inner_text = 'FOOBAR'
       elsif ['invalid_files/invalid-datatype-integer.xml'].include? derivative
-        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors').inner_text = '2.5'
+        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms').inner_text = '2.5'
       elsif ['invalid_files/invalid-schema-version.xml'].include? derivative
         root = XMLHelper.get_element(hpxml_doc, '/HPXML')
         XMLHelper.add_attribute(root, 'schemaVersion', '2.3')
@@ -672,6 +673,9 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_bathrooms = nil
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
+  elsif ['base-enclosure-split-level.xml'].include? hpxml_file
+    hpxml.building_construction.number_of_conditioned_floors = 1.5
+    hpxml.building_construction.number_of_conditioned_floors_above_grade = 1.5
   elsif ['invalid_files/enclosure-floor-area-exceeds-cfa.xml'].include? hpxml_file
     hpxml.building_construction.conditioned_floor_area /= 5.0
   elsif ['invalid_files/num-bedrooms-exceeds-limit.xml'].include? hpxml_file
