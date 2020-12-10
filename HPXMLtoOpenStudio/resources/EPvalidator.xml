@@ -879,6 +879,8 @@
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:UniformEnergyFactor) + count(h:EnergyFactor) = 1'>Expected 1 element(s) for xpath: UniformEnergyFactor | EnergyFactor</sch:assert>
       <sch:assert role='ERROR' test='count(h:FirstHourRating) + count(h:EnergyFactor) &gt;= 1'>Expected 1 or more element(s) for xpath: FirstHourRating | EnergyFactor</sch:assert> <!-- FirstHourRating required if UniformEnergyFactor provided -->
+      <sch:assert role='ERROR' test='number(h:UniformEnergyFactor) &lt; 1 or not(h:UniformEnergyFactor)'>Expected UniformEnergyFactor to be less than 1</sch:assert>
+      <sch:assert role='ERROR' test='number(h:EnergyFactor) &lt; 1 or not(h:EnergyFactor)'>Expected EnergyFactor to be less than 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:RecoveryEfficiency) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RecoveryEfficiency</sch:assert>
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
     </sch:rule>
@@ -890,6 +892,8 @@
       <sch:assert role='ERROR' test='h:FuelType[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="anthracite coal" or text()="electricity" or text()="wood" or text()="wood pellets"] or not(h:FuelType)'>Expected FuelType to be 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'anthracite coal' or 'electricity' or 'wood' or 'wood pellets'</sch:assert>
       <sch:assert role='ERROR' test='count(h:PerformanceAdjustment) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PerformanceAdjustment</sch:assert> <!-- Uses ERI assumption for tankless cycling derate if not provided -->
       <sch:assert role='ERROR' test='count(h:UniformEnergyFactor) + count(h:EnergyFactor) = 1'>Expected 1 element(s) for xpath: UniformEnergyFactor | EnergyFactor</sch:assert>
+      <sch:assert role='ERROR' test='number(h:UniformEnergyFactor) &lt; 1 or not(h:UniformEnergyFactor)'>Expected UniformEnergyFactor to be less than 1</sch:assert>
+      <sch:assert role='ERROR' test='number(h:EnergyFactor) &lt; 1 or not(h:EnergyFactor)'>Expected EnergyFactor to be less than 1</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -899,6 +903,8 @@
       <sch:assert role='ERROR' test='count(h:TankVolume) = 1'>Expected 1 element(s) for xpath: TankVolume</sch:assert>
       <sch:assert role='ERROR' test='count(h:UniformEnergyFactor) + count(h:EnergyFactor) = 1'>Expected 1 element(s) for xpath: UniformEnergyFactor | EnergyFactor</sch:assert>
       <sch:assert role='ERROR' test='count(h:FirstHourRating) + count(h:EnergyFactor) &gt;= 1'>Expected 1 or more element(s) for xpath: FirstHourRating | EnergyFactor</sch:assert> <!-- FirstHourRating required if UniformEnergyFactor provided -->
+      <sch:assert role='ERROR' test='number(h:UniformEnergyFactor) &gt; 1 or not(h:UniformEnergyFactor)'>Expected UniformEnergyFactor to be greater than 1</sch:assert>
+      <sch:assert role='ERROR' test='number(h:EnergyFactor) &gt; 1 or not(h:EnergyFactor)'>Expected EnergyFactor to be greater than 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
     </sch:rule>
   </sch:pattern>

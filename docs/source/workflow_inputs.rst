@@ -1396,7 +1396,7 @@ If a conventional storage water heater is specified, additional information is e
   ``FuelType``                                   string                 See [#]_     Yes                 Fuel type
   ``TankVolume``                                 double   gal           > 0          No        See [#]_  Tank volume
   ``HeatingCapacity``                            double   Btuh          > 0          No        See [#]_  Heating capacity
-  ``UniformEnergyFactor`` or ``EnergyFactor``    double   frac          0-1          Yes                 EnergyGuide label rated efficiency
+  ``UniformEnergyFactor`` or ``EnergyFactor``    double   frac          < 1          Yes                 EnergyGuide label rated efficiency
   ``FirstHourRating``                            double   gal/hr        > 0          See [#]_            EnergyGuide label first hour rating
   ``RecoveryEfficiency``                         double   frac          0-1          No        See [#]_  Recovery efficiency
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double   F-ft2-hr/Btu  >= 0         No        0         R-value of additional tank insulation wrap
@@ -1422,7 +1422,7 @@ If an instantaneous tankless water heater is specified, additional information i
   ===========================================  =======  ============  ===========  ============  ========  ==========================================================
   ``FuelType``                                 string                 See [#]_     Yes                     Fuel type
   ``PerformanceAdjustment``                    double   frac                       No            See [#]_  Multiplier on efficiency, typically to account for cycling
-  ``UniformEnergyFactor`` or ``EnergyFactor``  double   frac          0-1          Yes                     EnergyGuide label rated efficiency
+  ``UniformEnergyFactor`` or ``EnergyFactor``  double   frac          < 1          Yes                     EnergyGuide label rated efficiency
   ===========================================  =======  ============  ===========  ============  ========  ==========================================================
   
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
@@ -1438,7 +1438,7 @@ If a heat pump water heater is specified, additional information is entered in `
   =============================================  =======  ============  ===========  ========  ========  ==========================================
   ``FuelType``                                   string                 See [#]_     Yes                 Fuel type
   ``TankVolume``                                 double   gal           > 0          Yes                 Tank volume
-  ``UniformEnergyFactor`` or ``EnergyFactor``    double   frac          0-1          Yes                 EnergyGuide label rated efficiency
+  ``UniformEnergyFactor`` or ``EnergyFactor``    double   frac          > 1          Yes                 EnergyGuide label rated efficiency
   ``FirstHourRating``                            double   gal/hr        > 0          See [#]_            EnergyGuide label first hour rating
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double   F-ft2-hr/Btu  >= 0         No        0         R-value of additional tank insulation wrap
   =============================================  =======  ============  ===========  ========  ========  ==========================================
