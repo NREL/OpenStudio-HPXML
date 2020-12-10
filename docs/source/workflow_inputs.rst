@@ -202,16 +202,16 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   ``ResidentialFacilityType``                                string               See [#]_     Yes                 Type of dwelling unit
   ``NumberofConditionedFloors``                              double               > 0          Yes                 Number of conditioned floors (including a basement)
   ``NumberofConditionedFloorsAboveGrade``                    double               > 0          Yes                 Number of conditioned floors above grade (including a walkout basement)
-  ``NumberofBedrooms``                                       integer              > 0          Yes                 Number of bedrooms
-  ``NumberofBathrooms``                                      integer              > 0          No        See [#]_  Number of bathrooms [#]_
+  ``NumberofBedrooms``                                       integer              > 0          Yes                 Number of bedrooms [#]_
+  ``NumberofBathrooms``                                      integer              > 0          No        See [#]_  Number of bathrooms
   ``ConditionedFloorArea``                                   double    ft2        > 0          Yes                 Floor area within conditioned space boundary
   ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``  double    ft3 or ft  > 0          No        See [#]_  Volume/ceiling height within conditioned space boundary
   ``extension/HasFlueOrChimney``                             boolean                           No        See [#]_  Presence of flue or chimney for infiltration model
   =========================================================  ========  =========  ===========  ========  ========  =======================================================================
 
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
-  .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] NumberofBedrooms is currently used to determine usage of plug loads, appliances, hot water, etc.
+  .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to 8.0.
          If needed, additional defaulting is performed using the following relationship: ConditionedBuildingVolume = ConditionedFloorArea * AverageCeilingHeight.
   .. [#] If HasFlueOrChimney not provided, assumed to be true if any of the following conditions are met: 
