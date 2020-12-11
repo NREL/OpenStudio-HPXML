@@ -1204,7 +1204,8 @@ To define a DSE system, additional information is entered in ``HVACDistribution`
 HPXML Whole Ventilation Fan
 ***************************
 
-Each mechanical ventilation systems that provide ventilation to the whole dwelling unit is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+Each mechanical ventilation system that provides ventilation to the whole dwelling unit is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+If not entered, the simulation will not include mechanical ventilation.
 
   =======================================  ========  =======  ===========  ========  =========  =========================================
   Element                                  Type      Units    Constraints  Required  Default    Notes
@@ -1319,6 +1320,7 @@ HPXML Local Ventilation Fan
 ***************************
 
 Each kitchen range fan or bathroom fan that provides local ventilation is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+If not entered, the simulation will not include kitchen/bathroom fans.
 
   ===========================  =======  =======  ===========  ========  ========  =============================
   Element                      Type     Units    Constraints  Required  Default   Notes
@@ -1343,7 +1345,8 @@ Each kitchen range fan or bathroom fan that provides local ventilation is entere
 HPXML Whole House Fan
 *********************
 
-Each whole house fans that provides cooling load reduction is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+Each whole house fan that provides cooling load reduction is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+If not entered, the simulation will not include whole house fans.
 
   =======================================  =======  =======  ===========  ========  ========  ==========================
   Element                                  Type     Units    Constraints  Required  Default   Notes
@@ -1362,6 +1365,7 @@ HPXML Water Heating Systems
 ***************************
 
 Each water heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
+If not entered, the simulation will not include water heating.
 
   =========================  =======  =======  ===========  ========  ========  ================================================================
   Element                    Type     Units    Constraints  Required  Default   Notes
@@ -1618,6 +1622,7 @@ HPXML Solar Thermal
 *******************
 
 A single solar hot water system can be entered as a ``/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem``.
+If not entered, the simulation will not include solar hot water.
 
   ====================  =======  =====  ===========  ========  ========  ============================
   Element               Type     Units  Constraints  Required  Default   Notes
@@ -1678,6 +1683,7 @@ HPXML Photovoltaics
 *******************
 
 Each solar electric photovoltaic (PV) system is entered as a ``/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem``.
+If not entered, the simulation will not include photovoltaics.
 
 Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov>`_.
 
@@ -1710,6 +1716,7 @@ HPXML Generators
 ****************
 
 Each generator that provides on-site power is entered as a ``/HPXML/Building/BuildingDetails/Systems/extension/Generators/Generator``.
+If not entered, the simulation will not include generators.
 
   ==========================  =======  =======  ===========  ========  =======  ============================================
   Element                     Type     Units    Constraints  Required  Default  Notes
@@ -1739,6 +1746,7 @@ HPXML Clothes Washer
 ********************
 
 A single clothes washer can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/ClothesWasher``.
+If not entered, the simulation will not include a clothes washer.
 
   ==============================================================  =======  ===========  ===========  ========  ============  ==============================================
   Element                                                         Type     Units        Constraints  Required  Default       Notes
@@ -1784,6 +1792,7 @@ HPXML Clothes Dryer
 *******************
 
 A single clothes dryer can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/ClothesDryer``.
+If not entered, the simulation will not include a clothes dryer.
 
   ============================================  =======  ======  ===========  ========  ============  ==============================================
   Element                                       Type     Units   Constraints  Required  Default       Notes
@@ -1824,6 +1833,7 @@ HPXML Dishwasher
 ****************
 
 A single dishwasher can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/Dishwasher``.
+If not entered, the simulation will not include a dishwasher.
 
   ============================================  =======  ===========  ===========  ========  ============  ==============================================
   Element                                       Type     Units        Constraints  Required  Default       Notes
@@ -1867,6 +1877,7 @@ HPXML Refrigerators
 *******************
 
 Each refrigerator can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/Refrigerator``.
+If not entered, the simulation will not include a refrigerator.
 
   =====================================================  =======  ======  ===========  ========  ========  ======================================
   Element                                                Type     Units   Constraints  Required  Default   Notes
@@ -1895,6 +1906,7 @@ HPXML Freezers
 **************
 
 Each standalone freezer can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/Freezer``.
+If not entered, the simulation will not include a standalone freezer.
 
   =====================================================  ======  ======  ===========  ========  ==========  ======================================
   Element                                                Type    Units   Constraints  Required  Default     Notes
@@ -1919,6 +1931,7 @@ HPXML Dehumidifier
 ******************
 
 A single dehumidifier can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/Dehumidifier``.
+If not entered, the simulation will not include a dehumidifier.
 
   ==============================================  ==========  ==========  ===========  ========  =======  ========================================
   Element                                         Type        Units       Constraints  Required  Default  Notes
@@ -1937,6 +1950,7 @@ HPXML Cooking Range/Oven
 ************************
 
 A single cooking range can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/CookingRange``.
+If not entered, the simulation will not include a cooking range/oven.
 
   ========================================  =======  ======  ===========  ========  ============  ======================================
   Element                                   Type     Units   Constraints  Required  Default       Notes
@@ -1974,7 +1988,7 @@ Lighting and ceiling fans are entered in ``/HPXML/Building/BuildingDetails/Light
 HPXML Lighting
 **************
 
-If the building has lighting, nine ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` elements must be provided, each of which is the combination of:
+Nine ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` elements must be provided, each of which is the combination of:
 
 - ``LightingType``: 'LightEmittingDiode', 'CompactFluorescent', and 'FluorescentTube'
 - ``Location``: 'interior', 'garage', and 'exterior'
@@ -2041,6 +2055,7 @@ HPXML Ceiling Fans
 ******************
 
 Each ceiling fan is entered as a ``/HPXML/Building/BuildingDetails/Lighting/CeilingFan``.
+If not entered, the simulation will not include a ceiling fan.
 
   =========================================  =======  =======  ===========  ========  ========  ==============================
   Element                                    Type     Units    Constraints  Required  Default   Notes
@@ -2065,6 +2080,7 @@ HPXML Pools
 ***********
 
 A single pool can be entered as a ``/HPXML/Building/BuildingDetails/Pools/Pool``.
+If not entered, the simulation will not include a pool.
 
   ====================  =======  ======  ===========  ========  ============  =================
   Element               Type     Units   Constraints  Required  Default       Notes
@@ -2123,6 +2139,7 @@ HPXML Hot Tubs
 **************
 
 A single hot tub can be entered as a ``/HPXML/Building/BuildingDetails/HotTubs/HotTub``.
+If not entered, the simulation will not include a hot tub.
 
   ====================  =======  ======  ===========  ========  ============  =================
   Element               Type     Units   Constraints  Required  Default       Notes
@@ -2186,7 +2203,11 @@ HPXML Plug Loads
 ****************
 
 Each type of plug load can be entered as a ``/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad``.
-It is required that at least a miscellaneous plug load (PlugLoadType="other") is specified to represent all residual plug loads not explicitly captured elsewhere.
+
+It is required to include miscellaneous plug loads (PlugLoadType="other"), which represents all residual plug loads not explicitly captured elsewhere.
+It is common to include television plug loads (PlugLoadType="TV other"), which represents all television energy use in the home.
+It is less common to include the other plug load types, as they are less frequently found in homes.
+If not entered, the simulation will not include that type of plug load.
 
   ========================================  =======  ======  ===========  ========  ========  =============================================================
   Element                                   Type     Units   Constraints  Required  Default   Notes
@@ -2250,6 +2271,9 @@ HPXML Fuel Loads
 ****************
 
 Each fuel load can be entered as a ``/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad``.
+
+It is less common to include fuel load types, as they are less frequently found in homes.
+If not entered, the simulation will not include that type of fuel load.
 
   ========================================  =======  ========  ===========  ========  ========  =============================================================
   Element                                   Type     Units     Constraints  Required  Default   Notes
