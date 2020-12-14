@@ -108,6 +108,9 @@ class HEScoreTest < Minitest::Unit::TestCase
         if hpxml.total_fraction_heat_load_served <= 0
           next if log_line.include?('Warning: No heating system specified, the model will not include space heating energy use.')
         end
+        
+        # Recovery efficiency warning
+        next if log_line.include?('Defaulted recovery efficiency') && xml.include?('DHW_condensing_hpxml.xml')
 
         flunk "Unexpected warning found in run.log: #{log_line}"
       end
