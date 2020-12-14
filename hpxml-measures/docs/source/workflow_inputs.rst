@@ -1417,8 +1417,8 @@ If a conventional storage water heater is specified, additional information is e
   .. [#] If RecoveryEfficiency not provided, defaults as follows based on a regression analysis of `AHRI certified water heaters <https://www.ahridirectory.org/NewSearch?programId=24&searchTypeId=3>`_:
   
          - **Electric**: 0.98
-         - **Non-electric, EnergyFactor <= 0.75**: 0.778114 * EnergyFactor + 0.276679
-         - **Non-electric, EnergyFactor > 0.75**: 0.252117 * EnergyFactor + 0.607997
+         - **Non-electric, EnergyFactor < 0.75**: 0.252 * EnergyFactor + 0.608
+         - **Non-electric, EnergyFactor >= 0.75**: 0.561 * EnergyFactor + 0.439
 
 Tankless
 ~~~~~~~~
