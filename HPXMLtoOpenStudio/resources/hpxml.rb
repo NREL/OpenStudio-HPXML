@@ -467,10 +467,9 @@ class HPXML < Object
     # The WithinInfiltrationVolume properties are intentionally ignored for now.
     # FUTURE: Move into AirInfiltrationMeasurement class?
     cfa = @building_construction.conditioned_floor_area
-    ncfl = @building_construction.number_of_conditioned_floors
     ncfl_ag = @building_construction.number_of_conditioned_floors_above_grade
     if has_walkout_basement()
-      infil_height = Float(ncfl_ag) * infil_volume / cfa
+      infil_height = ncfl_ag * infil_volume / cfa
     else
       # Calculate maximum above-grade height of conditioned basement walls
       max_cond_bsmt_wall_height_ag = 0.0
@@ -489,7 +488,7 @@ class HPXML < Object
 
         cond_bsmt_rim_joist_height = UnitConversions.convert(9, 'in', 'ft')
       end
-      infil_height = Float(ncfl_ag) * infil_volume / cfa + max_cond_bsmt_wall_height_ag + cond_bsmt_rim_joist_height
+      infil_height = ncfl_ag * infil_volume / cfa + max_cond_bsmt_wall_height_ag + cond_bsmt_rim_joist_height
     end
     return infil_height
   end
@@ -997,8 +996,8 @@ class HPXML < Object
 
       building_construction = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'BuildingSummary', 'BuildingConstruction'])
       XMLHelper.add_element(building_construction, 'ResidentialFacilityType', @residential_facility_type, :string) unless @residential_facility_type.nil?
-      XMLHelper.add_element(building_construction, 'NumberofConditionedFloors', @number_of_conditioned_floors, :integer) unless @number_of_conditioned_floors.nil?
-      XMLHelper.add_element(building_construction, 'NumberofConditionedFloorsAboveGrade', @number_of_conditioned_floors_above_grade, :integer) unless @number_of_conditioned_floors_above_grade.nil?
+      XMLHelper.add_element(building_construction, 'NumberofConditionedFloors', @number_of_conditioned_floors, :float) unless @number_of_conditioned_floors.nil?
+      XMLHelper.add_element(building_construction, 'NumberofConditionedFloorsAboveGrade', @number_of_conditioned_floors_above_grade, :float) unless @number_of_conditioned_floors_above_grade.nil?
       XMLHelper.add_element(building_construction, 'AverageCeilingHeight', @average_ceiling_height, :float, @average_ceiling_height_isdefaulted) unless @average_ceiling_height.nil?
       XMLHelper.add_element(building_construction, 'NumberofBedrooms', @number_of_bedrooms, :integer) unless @number_of_bedrooms.nil?
       XMLHelper.add_element(building_construction, 'NumberofBathrooms', @number_of_bathrooms, :integer, @number_of_bathrooms_isdefaulted) unless @number_of_bathrooms.nil?
@@ -1015,8 +1014,8 @@ class HPXML < Object
       return if building_construction.nil?
 
       @year_built = XMLHelper.get_value(building_construction, 'YearBuilt', :integer)
-      @number_of_conditioned_floors = XMLHelper.get_value(building_construction, 'NumberofConditionedFloors', :integer)
-      @number_of_conditioned_floors_above_grade = XMLHelper.get_value(building_construction, 'NumberofConditionedFloorsAboveGrade', :integer)
+      @number_of_conditioned_floors = XMLHelper.get_value(building_construction, 'NumberofConditionedFloors', :float)
+      @number_of_conditioned_floors_above_grade = XMLHelper.get_value(building_construction, 'NumberofConditionedFloorsAboveGrade', :float)
       @average_ceiling_height, @average_ceiling_height_isdefaulted = XMLHelper.get_value_and_defaulted(building_construction, 'AverageCeilingHeight', :float)
       @number_of_bedrooms = XMLHelper.get_value(building_construction, 'NumberofBedrooms', :integer)
       @number_of_bathrooms, @number_of_bathrooms_isdefaulted = XMLHelper.get_value_and_defaulted(building_construction, 'NumberofBathrooms', :integer)
@@ -2115,13 +2114,6 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
-
-      if not @exposed_perimeter.nil?
-        if @exposed_perimeter <= 0
-          errors << "Exposed perimeter for Slab '#{@id}' must be greater than zero."
-        end
-      end
-
       return errors
     end
 
@@ -2245,12 +2237,6 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; wall; rescue StandardError => e; errors << e.message; end
-      if (not @overhangs_distance_to_top_of_window.nil?) && (not @overhangs_distance_to_bottom_of_window.nil?)
-        if @overhangs_distance_to_bottom_of_window <= @overhangs_distance_to_top_of_window
-          errors << "For Window '#{@id}', overhangs distance to bottom (#{@overhangs_distance_to_bottom_of_window}) must be greater than distance to top (#{@overhangs_distance_to_top_of_window})."
-        end
-      end
-
       return errors
     end
 
@@ -3410,9 +3396,6 @@ class HPXML < Object
         ratio = @in_unit_flow_rate / @rated_flow_rate
       end
       return if ratio.nil?
-      if ratio >= 1.0
-        fail "The in-unit flow rate of shared fan '#{@id}' must be less than the system flow rate."
-      end
 
       return ratio
     end
@@ -5248,7 +5231,7 @@ class HPXML < Object
     ltg_fracs.each do |location, sum|
       next if sum <= 1
 
-      fail "Sum of fractions of #{location} lighting (#{sum}) is greater than 1."
+      errors << "Sum of fractions of #{location} lighting (#{sum}) is greater than 1."
     end
 
     # Check for HVAC systems referenced by multiple water heating systems

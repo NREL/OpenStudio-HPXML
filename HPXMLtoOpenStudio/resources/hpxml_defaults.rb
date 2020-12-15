@@ -647,7 +647,7 @@ class HPXMLDefaults
 
       # Default return registers
       if hvac_distribution.number_of_return_registers.nil?
-        hvac_distribution.number_of_return_registers = ncfl # Add 1 return register per conditioned floor if not provided
+        hvac_distribution.number_of_return_registers = ncfl.ceil # Add 1 return register per conditioned floor if not provided
         hvac_distribution.number_of_return_registers_isdefaulted = true
       end
 
