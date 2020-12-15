@@ -2119,13 +2119,6 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
-
-      if not @exposed_perimeter.nil?
-        if @exposed_perimeter <= 0
-          errors << "Exposed perimeter for Slab '#{@id}' must be greater than zero."
-        end
-      end
-
       return errors
     end
 
@@ -2249,12 +2242,6 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; wall; rescue StandardError => e; errors << e.message; end
-      if (not @overhangs_distance_to_top_of_window.nil?) && (not @overhangs_distance_to_bottom_of_window.nil?)
-        if @overhangs_distance_to_bottom_of_window <= @overhangs_distance_to_top_of_window
-          errors << "For Window '#{@id}', overhangs distance to bottom (#{@overhangs_distance_to_bottom_of_window}) must be greater than distance to top (#{@overhangs_distance_to_top_of_window})."
-        end
-      end
-
       return errors
     end
 
@@ -3384,9 +3371,6 @@ class HPXML < Object
         ratio = @in_unit_flow_rate / @rated_flow_rate
       end
       return if ratio.nil?
-      if ratio >= 1.0
-        fail "The in-unit flow rate of shared fan '#{@id}' must be less than the system flow rate."
-      end
 
       return ratio
     end
@@ -5222,7 +5206,7 @@ class HPXML < Object
     ltg_fracs.each do |location, sum|
       next if sum <= 1
 
-      fail "Sum of fractions of #{location} lighting (#{sum}) is greater than 1."
+      errors << "Sum of fractions of #{location} lighting (#{sum}) is greater than 1."
     end
 
     # Check for HVAC systems referenced by multiple water heating systems
