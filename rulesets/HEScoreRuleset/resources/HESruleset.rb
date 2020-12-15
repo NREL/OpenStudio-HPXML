@@ -50,6 +50,9 @@ class HEScoreRuleset
     set_misc_plug_loads(orig_hpxml, new_hpxml)
     set_misc_television(orig_hpxml, new_hpxml)
 
+    # Prevent downstream errors in OS-HPXML
+    adjust_floor_areas(new_hpxml)
+
     return new_hpxml
   end
 
@@ -869,6 +872,33 @@ class HEScoreRuleset
   def self.set_misc_television(orig_hpxml, new_hpxml)
     new_hpxml.plug_loads.add(id: 'PlugLoadTV',
                              plug_load_type: HPXML::PlugLoadTypeTelevision)
+  end
+
+  def self.adjust_floor_areas(new_hpxml)
+    # Gather floors/slabs adjacent to conditioned space
+    conditioned_floors = []
+    new_hpxml.frame_floors.each do |frame_floor|
+      next unless frame_floor.is_floor
+      next unless [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include?(frame_floor.interior_adjacent_to) ||
+                  [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include?(frame_floor.exterior_adjacent_to)
+
+      conditioned_floors << frame_floor
+    end
+    new_hpxml.slabs.each do |slab|
+      next unless [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? slab.interior_adjacent_to
+
+      conditioned_floors << slab
+    end
+
+    # Check if the sum of conditioned floors' area is greater than CFA.
+    # If so, reduce floor areas. Note that the HES API already restricts
+    # these two areas to being close, so any adjustments will be small.
+    sum_cfa = conditioned_floors.map { |f| f.area }.sum
+    if sum_cfa > @cfa
+      conditioned_floors.each do |floor|
+        floor.area *= @cfa / sum_cfa
+      end
+    end
   end
 
   def self.get_foundation_perimeter(orig_hpxml, foundation)
