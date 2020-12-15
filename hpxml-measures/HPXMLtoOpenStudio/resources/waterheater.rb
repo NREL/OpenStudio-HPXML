@@ -1196,7 +1196,6 @@ class Waterheater
       else
         re = 0.252 * ef + 0.608
       end
-      puts "re #{re}"
       return re
     end
   end
