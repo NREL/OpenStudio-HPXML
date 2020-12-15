@@ -74,10 +74,10 @@ In the ``in.xml`` file, the window would have additional elements like so:
     <SHGC>0.45</SHGC>
     <InteriorShading>
       <SystemIdentifier id='WindowInteriorShading'/>
-      <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-      <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+      <SummerShadingCoefficient dataSource='software'>0.7</SummerShadingCoefficient>
+      <WinterShadingCoefficient dataSource='software'>0.85</WinterShadingCoefficient>
     </InteriorShading>
-    <FractionOperable>0.67</FractionOperable>
+    <FractionOperable dataSource='software'>0.67</FractionOperable>
     <AttachedToWall idref='Wall'/>
   </Window>
 
