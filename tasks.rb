@@ -1910,10 +1910,12 @@ def get_values(osw_file, step)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceVented)
     step.setArgument('geometry_foundation_height', 3.0)
     step.setArgument('floor_assembly_r', 10)
+    step.setArgument('foundation_wall_insulation_distance_to_bottom', 0.0)
   elsif ['invalid_files/unvented-crawlspace-with-wall-and-ceiling-insulation.osw'].include? osw_file
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceUnvented)
     step.setArgument('geometry_foundation_height', 3.0)
     step.setArgument('floor_assembly_r', 10)
+    step.setArgument('foundation_wall_insulation_distance_to_bottom', 0.0)
   elsif ['invalid_files/unconditioned-basement-with-wall-and-ceiling-insulation.osw'].include? osw_file
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeBasementUnconditioned)
     step.setArgument('floor_assembly_r', 10)
