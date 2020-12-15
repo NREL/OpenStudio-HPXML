@@ -1257,7 +1257,7 @@ If an energy recovery ventilator system is specified, additional information is 
   ``SensibleRecoveryEfficiency`` or ``AdjustedSensibleRecoveryEfficiency``  double  frac   0-1 [#]_     Yes                Sensible recovery efficiency
   ========================================================================  ======  =====  ===========  ========  =======  ============================
   
-  .. [#] SensibleRecoveryEfficiency must also be >= TotalRecoveryEfficiency.
+  .. [#] SensibleRecoveryEfficiency (or AdjustedSensibleRecoveryEfficiency) must also be >= TotalRecoveryEfficiency (or AdjustedTotalRecoveryEfficiency).
 
 Central Fan Integrated Supply
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
