@@ -182,6 +182,10 @@ class HEScoreRuleset
         else
           roof_azimuths = [@bldg_azimuth, @bldg_azimuth + 180]
         end
+        rb_grade = nil
+        if orig_roof.radiant_barrier
+          rb_grade = 1
+        end
         roof_azimuths.each_with_index do |roof_azimuth, idx|
           new_hpxml.roofs.add(id: "#{orig_roof.id}_#{idx}",
                               interior_adjacent_to: attic_location,
@@ -191,7 +195,7 @@ class HEScoreRuleset
                               emittance: 0.9,
                               pitch: Math.tan(@roof_angle_rad) * 12,
                               radiant_barrier: orig_roof.radiant_barrier,
-                              radiant_barrier_grade: 1,
+                              radiant_barrier_grade: rb_grade,
                               insulation_assembly_r_value: roof_r)
         end
       end

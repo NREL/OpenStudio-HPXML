@@ -154,19 +154,16 @@ class HPXMLTest < MiniTest::Test
   def test_invalid
     sample_files_dir = File.join(@this_dir, '..', 'sample_files')
 
-    expected_error_msgs = { 'appliances-location-unconditioned-space.xml' => ["Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher]",
-                                                                              "Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer]",
-                                                                              "Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher]",
-                                                                              "Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Appliances/Refrigerator]",
-                                                                              "Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Appliances/CookingRange]"],
-                            'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
+    expected_error_msgs = { 'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
                             'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
                             'cooking-range-location.xml' => ["CookingRange location is 'garage' but building does not have this location specified."],
                             'dishwasher-location.xml' => ["Dishwasher location is 'garage' but building does not have this location specified."],
                             'dhw-frac-load-served.xml' => ['Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15.'],
+                            'dhw-invalid-ef-tank.xml' => ['Expected EnergyFactor to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="storage water heater"]]'],
+                            'dhw-invalid-uef-tank-heat-pump.xml' => ['Expected UniformEnergyFactor to be greater than 1 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="heat pump water heater"]]'],
                             'duct-location.xml' => ["Duct location is 'garage' but building does not have this location specified."],
-                            'duct-location-unconditioned-space.xml' => ["Expected DuctLocation to be 'living space' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'attic - vented' or 'attic - unvented' or 'garage' or 'exterior wall' or 'under slab' or 'roof deck' or 'outside' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType=\"supply\" or DuctType=\"return\"]]"],
+                            'duct-location-unconditioned-space.xml' => ["Expected DuctLocation to be 'living space' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'attic - vented' or 'attic - unvented' or 'garage' or 'exterior wall' or 'under slab' or 'roof deck' or 'outside' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/*/Ducts[DuctType=\"supply\" or DuctType=\"return\"]]"],
                             'duplicate-id.xml' => ["Duplicate SystemIdentifier IDs detected for 'WindowNorth'."],
                             'enclosure-attic-missing-roof.xml' => ['There must be at least one roof adjacent to attic - unvented.'],
                             'enclosure-basement-missing-exterior-foundation-wall.xml' => ['There must be at least one exterior foundation wall adjacent to basement - unconditioned.'],
@@ -189,10 +186,10 @@ class HPXMLTest < MiniTest::Test
                                                             'Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1.'],
                             'hvac-distribution-return-duct-leakage-missing.xml' => ["Return ducts exist but leakage was not specified for distribution system 'HVACDistribution'."],
                             'hvac-inconsistent-fan-powers.xml' => ["Fan powers for heating system 'HeatingSystem' and cooling system 'CoolingSystem' must be the same."],
-                            'invalid-calendar-year.xml' => ['Calendar Year (20018) must be between 1600 and 9999.'],
+                            'invalid-assembly-effective-rvalue.xml' => ['Expected Insulation/AssemblyEffectiveRValue to be greater than 0 [context: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall]'],
                             'invalid-datatype-boolean.xml' => ["Cannot convert 'FOOBAR' to boolean."],
                             'invalid-datatype-boolean2.xml' => ["Cannot convert '' to boolean."],
-                            'invalid-datatype-integer.xml' => ["Cannot convert 'FOOBAR' to integer."],
+                            'invalid-datatype-integer.xml' => ["Cannot convert '2.5' to integer."],
                             'invalid-datatype-integer2.xml' => ["Cannot convert '' to integer."],
                             'invalid-datatype-float.xml' => ["Cannot convert 'FOOBAR' to float."],
                             'invalid-datatype-float2.xml' => ["Cannot convert '' to float."],
@@ -200,26 +197,20 @@ class HPXMLTest < MiniTest::Test
                             'invalid-distribution-cfa-served.xml' => ['The total conditioned floor area served by the HVAC distribution system(s) for heating is larger than the conditioned floor area of the building.',
                                                                       'The total conditioned floor area served by the HVAC distribution system(s) for cooling is larger than the conditioned floor area of the building.'],
                             'invalid-epw-filepath.xml' => ["foo.epw' could not be found."],
-                            'invalid-facility-type.xml' => ['Expected 1 element(s) for xpath: ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"]]',
-                                                            'Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher[IsSharedAppliance="true"]]',
-                                                            'Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer[IsSharedAppliance="true"]]',
-                                                            'Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher[IsSharedAppliance="true"]]',
-                                                            "The building is of type 'single-family detached' but the surface 'RimJoistFoundation' is adjacent to Attached/Multifamily space 'other non-freezing space'.",
-                                                            "The building is of type 'single-family detached' but the surface 'WallOtherHeatedSpace' is adjacent to Attached/Multifamily space 'other heated space'.",
-                                                            "The building is of type 'single-family detached' but the surface 'WallOtherMultifamilyBufferSpace' is adjacent to Attached/Multifamily space 'other multifamily buffer space'.",
-                                                            "The building is of type 'single-family detached' but the surface 'WallOtherNonFreezingSpace' is adjacent to Attached/Multifamily space 'other non-freezing space'.",
-                                                            "The building is of type 'single-family detached' but the surface 'WallOtherHousingUnit' is adjacent to Attached/Multifamily space 'other housing unit'.",
-                                                            "The building is of type 'single-family detached' but the surface 'FoundationWallOtherNonFreezingSpace' is adjacent to Attached/Multifamily space 'other non-freezing space'.",
-                                                            "The building is of type 'single-family detached' but the surface 'FoundationWallOtherMultifamilyBufferSpace' is adjacent to Attached/Multifamily space 'other multifamily buffer space'.",
-                                                            "The building is of type 'single-family detached' but the surface 'FoundationWallOtherHeatedSpace' is adjacent to Attached/Multifamily space 'other heated space'.",
-                                                            "The building is of type 'single-family detached' but the surface 'FloorAboveNonFreezingSpace' is adjacent to Attached/Multifamily space 'other non-freezing space'.",
-                                                            "The building is of type 'single-family detached' but the surface 'FloorAboveMultifamilyBuffer' is adjacent to Attached/Multifamily space 'other multifamily buffer space'.",
-                                                            "The building is of type 'single-family detached' but the surface 'FloorAboveOtherHeatedSpace' is adjacent to Attached/Multifamily space 'other heated space'.",
-                                                            "The building is of type 'single-family detached' but the object 'SharedWaterHeater' is located in Attached/Multifamily space 'other heated space'.",
-                                                            "The building is of type 'single-family detached' but the object 'SharedClothesWasher' is located in Attached/Multifamily space 'other heated space'.",
-                                                            "The building is of type 'single-family detached' but the object 'SharedClothesDryer' is located in Attached/Multifamily space 'other heated space'.",
-                                                            "The building is of type 'single-family detached' but the object 'SharedDishwasher' is located in Attached/Multifamily space 'other heated space'.",
-                                                            "The building is of type 'single-family detached' but the HVAC distribution 'HVACDistribution' has a duct located in Attached/Multifamily space 'other housing unit'."],
+                            'invalid-erv-properties.xml' => ['Expected SensibleRecoveryEfficiency to be greater than TotalRecoveryEfficiency [context: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and FanType="energy recovery ventilator"]]'],
+                            'invalid-facility-type-equipment.xml' => ['Expected 1 element(s) for xpath: ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"]]',
+                                                                      'Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher[IsSharedAppliance="true"]]',
+                                                                      'Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer[IsSharedAppliance="true"]]',
+                                                                      'Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher[IsSharedAppliance="true"]]'],
+                            'invalid-facility-type-surfaces.xml' => ["The building is of type 'single-family detached' but the surface 'RimJoistOther' is adjacent to Attached/Multifamily space 'other housing unit'.",
+                                                                     "The building is of type 'single-family detached' but the surface 'WallOther' is adjacent to Attached/Multifamily space 'other housing unit'.",
+                                                                     "The building is of type 'single-family detached' but the surface 'FoundationWallOther' is adjacent to Attached/Multifamily space 'other housing unit'.",
+                                                                     "The building is of type 'single-family detached' but the surface 'FloorOther' is adjacent to Attached/Multifamily space 'other housing unit'.",
+                                                                     "The building is of type 'single-family detached' but the surface 'CeilingOther' is adjacent to Attached/Multifamily space 'other housing unit'."],
+                            'invalid-foundation-wall-properties.xml' => ['Expected DepthBelowGrade to be less than or equal to Height [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall]',
+                                                                         'Expected extension/DistanceToBottomOfInsulation to be greater than or equal to extension/DistanceToTopOfInsulation [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer[InstallationType="continuous - exterior" or InstallationType="continuous - interior"]]',
+                                                                         'Expected extension/DistanceToBottomOfInsulation to be less than or equal to ../../Height [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer[InstallationType="continuous - exterior" or InstallationType="continuous - interior"]]'],
+                            'invalid-infiltration-volume.xml' => ['Expected InfiltrationVolume to be greater than or equal to ../../../BuildingSummary/BuildingConstruction/ConditionedBuildingVolume [context: /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure[text()="ACH" or text()="CFM"]]]'],
                             'invalid-input-parameters.xml' => ["Expected Transaction to be 'create' or 'update' [context: /HPXML/XMLTransactionHeaderInformation]",
                                                                "Expected SiteType to be 'rural' or 'suburban' or 'urban' [context: /HPXML/Building/BuildingDetails/BuildingSummary/Site]",
                                                                "Expected Year to be '2012' or '2009' or '2006' or '2003' [context: /HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC]",
@@ -227,17 +218,21 @@ class HPXMLTest < MiniTest::Test
                                                                'Expected RadiantBarrierGrade to be less than or equal to 3 [context: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof]',
                                                                'Expected EnergyFactor to be less than or equal to 5 [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher]'],
                             'invalid-neighbor-shading-azimuth.xml' => ['A neighbor building has an azimuth (145) not equal to the azimuth of any wall.'],
+                            'invalid-number-of-bedrooms-served.xml' => ['Expected extension/NumberofBedroomsServed to be greater than ../../../BuildingSummary/BuildingConstruction/NumberofBedrooms [context: /HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem[IsSharedSystem="true"]]'],
+                            'invalid-number-of-conditioned-floors.xml' => ['Expected NumberofConditionedFloors to be greater than or equal to NumberofConditionedFloorsAboveGrade [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]'],
+                            'invalid-number-of-units-served.xml' => ['Expected NumberofUnitsServed to be greater than 1 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"]]'],
                             'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
                             'invalid-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem_bad' not found for water heating system 'WaterHeater'."],
                             'invalid-schema-version.xml' => ['HPXML version 3.0 is required.'],
+                            'invalid-shared-vent-in-unit-flowrate.xml' => ['Expected extension/InUnitFlowRate to be less than RatedFlowRate [context: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"]]'],
                             'invalid-timestep.xml' => ['Timestep (45) must be one of: 60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1.'],
                             'invalid-runperiod.xml' => ['Run Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
-                            'invalid-window-height.xml' => ["For Window 'WindowEast', overhangs distance to bottom (2.0) must be greater than distance to top (2.0)."],
+                            'invalid-window-height.xml' => ['Expected DistanceToBottomOfWindow to be greater than DistanceToTopOfWindow [context: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs]'],
                             'lighting-fractions.xml' => ['Sum of fractions of interior lighting (1.15) is greater than 1.'],
                             'mismatched-slab-and-foundation-wall.xml' => ["Foundation wall 'FoundationWall' is adjacent to 'basement - conditioned' but no corresponding slab was found adjacent to"],
                             'missing-elements.xml' => ['Expected 1 element(s) for xpath: NumberofConditionedFloors [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]',
                                                        'Expected 1 element(s) for xpath: ConditionedFloorArea [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]'],
-                            'missing-duct-location.xml' => ['Expected 0 or 2 element(s) for xpath: DuctSurfaceArea | DuctLocation [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]]'],
+                            'missing-duct-location.xml' => ['Expected 0 or 2 element(s) for xpath: DuctSurfaceArea | DuctLocation [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/*/Ducts[DuctType="supply" or DuctType="return"]]'],
                             'missing-duct-location-and-surface-area.xml' => ['Error: The location and surface area of all ducts must be provided or blank.'],
                             'multifamily-reference-appliance.xml' => ["The building is of type 'single-family detached' but"],
                             'multifamily-reference-duct.xml' => ["The building is of type 'single-family detached' but"],
@@ -250,7 +245,7 @@ class HPXMLTest < MiniTest::Test
                             'refrigerator-location.xml' => ["Refrigerator location is 'garage' but building does not have this location specified."],
                             'repeated-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem' is attached to multiple water heating systems."],
                             'repeated-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem' is attached to multiple water heating systems."],
-                            'slab-zero-exposed-perimeter.xml' => ["Exposed perimeter for Slab 'Slab' must be greater than zero."],
+                            'slab-zero-exposed-perimeter.xml' => ['Expected ExposedPerimeter to be greater than 0 [context: /HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab]'],
                             'solar-thermal-system-with-combi-tankless.xml' => ["Water heating system 'WaterHeater' connected to solar thermal system 'SolarThermalSystem' cannot be a space-heating boiler."],
                             'solar-thermal-system-with-desuperheater.xml' => ["Water heating system 'WaterHeater' connected to solar thermal system 'SolarThermalSystem' cannot be attached to a desuperheater."],
                             'solar-thermal-system-with-dhw-indirect.xml' => ["Water heating system 'WaterHeater' connected to solar thermal system 'SolarThermalSystem' cannot be a space-heating boiler."],
@@ -309,6 +304,8 @@ class HPXMLTest < MiniTest::Test
     update_args_hash(measures, measure_subdir, args)
 
     # Add reporting measure to workflow
+    # Uses 'monthly' to verify timeseries results match annual results via error-checking
+    # inside the SimulationOutputReport measure.
     measure_subdir = 'SimulationOutputReport'
     args = {}
     args['timeseries_frequency'] = 'monthly'
@@ -329,11 +326,7 @@ class HPXMLTest < MiniTest::Test
                    ['Fluid Heat Exchanger Heat Transfer Energy', 'runperiod', '*'],
                    ['Fan Electricity Rate', 'runperiod', '*'],
                    ['Fan Runtime Fraction', 'runperiod', '*'],
-                   ['Electric Equipment Electricity Energy', 'runperiod', Constants.ObjectNameMechanicalVentilationHouseFanCFIS],
-                   ['Boiler Part Load Ratio', 'runperiod', '*'],
-                   ['Pump Electricity Rate', 'runperiod', '*'],
-                   ['Unitary System Part Load Ratio', 'runperiod', '*'],
-                   ['Pump Runtime Fraction', 'runperiod', '*']]
+                   ['Electric Equipment Electricity Energy', 'runperiod', Constants.ObjectNameMechanicalVentilationHouseFanCFIS]]
 
     # Run workflow
     workflow_start = Time.now
@@ -671,26 +664,23 @@ class HPXMLTest < MiniTest::Test
       num_kiva_instances += 1
     end
 
-    num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,                       # no foundation in contact w/ ground
-                                    'base-foundation-multiple.xml' => 2,                      # additional instance for 2nd foundation type
-                                    'base-enclosure-2stories-garage.xml' => 2,                # additional instance for garage
-                                    'base-enclosure-garage.xml' => 2,                         # additional instance for garage
-                                    'base-enclosure-other-housing-unit.xml' => 0,             # no foundation in contact w/ ground
-                                    'base-enclosure-other-heated-space.xml' => 0,             # no foundation in contact w/ ground
-                                    'base-enclosure-other-non-freezing-space.xml' => 0,       # no foundation in contact w/ ground
-                                    'base-enclosure-other-multifamily-buffer-space.xml' => 0, # no foundation in contact w/ ground
-                                    'base-enclosure-common-surfaces.xml' => 2,                # additional instance for vented crawlspace
-                                    'base-foundation-walkout-basement.xml' => 4,              # 3 foundation walls plus a no-wall exposed perimeter
-                                    'base-foundation-complex.xml' => 10,
-                                    'base-misc-loads-large-uncommon.xml' => 2,
-                                    'base-misc-loads-large-uncommon2.xml' => 2 }
-
     if hpxml_path.include? 'ASHRAE_Standard_140'
       # nop
-    elsif not num_expected_kiva_instances[File.basename(hpxml_path)].nil?
-      assert_equal(num_expected_kiva_instances[File.basename(hpxml_path)], num_kiva_instances)
+    elsif hpxml_path.include? 'base-bldgtype-multifamily'
+      assert_equal(0, num_kiva_instances)                                                # no foundation, above dwelling unit
     else
-      assert_equal(1, num_kiva_instances)
+      num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,                # no foundation in contact w/ ground
+                                      'base-foundation-multiple.xml' => 2,               # additional instance for 2nd foundation type
+                                      'base-enclosure-2stories-garage.xml' => 2,         # additional instance for garage
+                                      'base-enclosure-garage.xml' => 2,                  # additional instance for garage
+                                      'base-foundation-walkout-basement.xml' => 4,       # 3 foundation walls plus a no-wall exposed perimeter
+                                      'base-foundation-complex.xml' => 10 }              # lots of foundations for testing
+
+      if not num_expected_kiva_instances[File.basename(hpxml_path)].nil?
+        assert_equal(num_expected_kiva_instances[File.basename(hpxml_path)], num_kiva_instances)
+      else
+        assert_equal(1, num_kiva_instances)
+      end
     end
 
     # Enclosure Foundation Slabs
@@ -1004,36 +994,23 @@ class HPXMLTest < MiniTest::Test
       next unless heating_system.fraction_heat_load_served > 0
       next unless hpxml.heating_systems.size == 1
 
-      if (not heating_system.fan_watts.nil?) || (not heating_system.fan_watts_per_cfm.nil?)
-        # Compare fan power from timeseries output
-        next if hpxml.cooling_systems.size + hpxml.heat_pumps.size > 0 # Skip if other system types (which could result in A) multiple supply fans or B) different supply fan power consumption in the cooling season)
+      next unless (not heating_system.fan_watts.nil?) || (not heating_system.fan_watts_per_cfm.nil?)
+      # Compare fan power from timeseries output
+      next if hpxml.cooling_systems.size + hpxml.heat_pumps.size > 0 # Skip if other system types (which could result in A) multiple supply fans or B) different supply fan power consumption in the cooling season)
 
-        if not heating_system.fan_watts.nil?
-          hpxml_value = heating_system.fan_watts
-        else
-          query = "SELECT SUM(Value) FROM ComponentSizes WHERE Description='User-Specified Heating Supply Air Flow Rate'"
-          heating_cfm = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^3/s', 'cfm')
-          hpxml_value = heating_system.fan_watts_per_cfm * heating_cfm
-        end
-        query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Runtime Fraction' AND ReportingFrequency='Run Period')"
-        avg_rtf = sqlFile.execAndReturnFirstDouble(query).get
-        query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Electricity Rate' AND ReportingFrequency='Run Period')"
-        avg_w = sqlFile.execAndReturnFirstDouble(query).get
-        sql_value = avg_w / avg_rtf
-        assert_in_epsilon(sql_value, hpxml_value, 0.01)
+      if not heating_system.fan_watts.nil?
+        hpxml_value = heating_system.fan_watts
+      else
+        query = "SELECT SUM(Value) FROM ComponentSizes WHERE Description='User-Specified Heating Supply Air Flow Rate'"
+        heating_cfm = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^3/s', 'cfm')
+        hpxml_value = heating_system.fan_watts_per_cfm * heating_cfm
       end
-
-      next unless not heating_system.electric_auxiliary_energy.nil?
-      next if hpxml.water_heating_systems.select { |wh| [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? wh.water_heater_type }.size > 0 # Skip combi systems
-
-      # Compare pump power from timeseries output
-      hpxml_value = heating_system.electric_auxiliary_energy / 2.08
-      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Boiler Part Load Ratio' AND ReportingFrequency='Run Period')"
-      avg_plr = sqlFile.execAndReturnFirstDouble(query).get
-      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electricity Rate' AND ReportingFrequency='Run Period')"
+      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Runtime Fraction' AND ReportingFrequency='Run Period')"
+      avg_rtf = sqlFile.execAndReturnFirstDouble(query).get
+      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Electricity Rate' AND ReportingFrequency='Run Period')"
       avg_w = sqlFile.execAndReturnFirstDouble(query).get
-      sql_value = avg_w / avg_plr
-      assert_in_epsilon(sql_value, hpxml_value, 0.05)
+      sql_value = avg_w / avg_rtf
+      assert_in_epsilon(sql_value, hpxml_value, 0.01)
     end
 
     # HVAC Cooling Systems
@@ -1054,23 +1031,6 @@ class HPXMLTest < MiniTest::Test
       avg_w = sqlFile.execAndReturnFirstDouble(query).get
       sql_value = avg_w / avg_rtf
       assert_in_epsilon(sql_value, hpxml_value, 0.01)
-    end
-
-    # HVAC Heat Pumps
-    hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump.fraction_heat_load_served > 0
-      next unless hpxml.heat_pumps.size == 1
-      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
-      next unless not heat_pump.pump_watts_per_ton.nil?
-
-      # Compare pump power from timeseries output
-      hpxml_value = heat_pump.pump_watts_per_ton * UnitConversions.convert(results['Capacity: Cooling (W)'], 'W', 'ton')
-      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Unitary System Part Load Ratio' AND ReportingFrequency='Run Period')"
-      avg_plr = sqlFile.execAndReturnFirstDouble(query).get
-      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electricity Rate' AND ReportingFrequency='Run Period')"
-      avg_w = sqlFile.execAndReturnFirstDouble(query).get
-      sql_value = avg_w / avg_plr
-      assert_in_epsilon(sql_value, hpxml_value, 0.05)
     end
 
     # HVAC Capacities
