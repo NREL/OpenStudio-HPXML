@@ -10,7 +10,7 @@ require_relative '../HPXMLtoOpenStudio/resources/version'
 
 basedir = File.expand_path(File.dirname(__FILE__))
 
-def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseries_outputs)
+def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseries_outputs, skip_validation)
   measures_dir = File.join(basedir, '..')
 
   measures = {}
@@ -21,6 +21,7 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
   args['hpxml_path'] = hpxml
   args['output_dir'] = rundir
   args['debug'] = debug
+  args['skip_validation'] = skip_validation
   update_args_hash(measures, measure_subdir, args)
 
   # Add reporting measure to workflow
@@ -74,6 +75,11 @@ OptionParser.new do |opts|
   options[:timestep_outputs] = []
   opts.on('--timestep TYPE', timeseries_types, "Request timestep output type (#{timeseries_types[0..4].join(', ')},", "#{timeseries_types[5..-1].join(', ')}); can be called multiple times") do |t|
     options[:timestep_outputs] << t
+  end
+
+  options[:skip_validation] = false
+  opts.on('-s', '--skip-validation') do |t|
+    options[:skip_validation] = true
   end
 
   options[:version] = false
@@ -149,12 +155,16 @@ unless Dir.exist?(options[:output_dir])
   FileUtils.mkdir_p(options[:output_dir])
 end
 
+if options[:skip_validation]
+  puts 'WARNING: Skipping HPXML input validation. This should only be used if the HPXML file has already been validated.'
+end
+
 # Create run dir
 rundir = File.join(options[:output_dir], 'run')
 
 # Run design
 puts "HPXML: #{options[:hpxml]}"
-success = run_workflow(basedir, rundir, options[:hpxml], options[:debug], timeseries_output_freq, timeseries_outputs)
+success = run_workflow(basedir, rundir, options[:hpxml], options[:debug], timeseries_output_freq, timeseries_outputs, options[:skip_validation])
 
 if not success
   exit! 1
