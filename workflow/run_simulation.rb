@@ -155,10 +155,6 @@ unless Dir.exist?(options[:output_dir])
   FileUtils.mkdir_p(options[:output_dir])
 end
 
-if options[:skip_validation]
-  puts 'WARNING: Skipping HPXML input validation. This should only be used if the HPXML file has already been validated.'
-end
-
 # Create run dir
 rundir = File.join(options[:output_dir], 'run')
 
