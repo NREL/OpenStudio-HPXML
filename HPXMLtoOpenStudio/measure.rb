@@ -578,10 +578,9 @@ class OSModel
     new_cond_bsmnt_surfaces = @cond_bsmnt_surfaces.dup
     @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
       next if cond_bsmnt_surface.is_a? OpenStudio::Model::InternalMassDefinition
-      if not cond_bsmnt_surface.subSurfaces.empty?
-        cond_bsmnt_surface.subSurfaces.each do |ss|
-          new_cond_bsmnt_surfaces << ss
-        end
+      next unless not cond_bsmnt_surface.subSurfaces.empty?
+      cond_bsmnt_surface.subSurfaces.each do |ss|
+        new_cond_bsmnt_surfaces << ss
       end
     end
     @cond_bsmnt_surfaces = new_cond_bsmnt_surfaces.dup
@@ -593,7 +592,7 @@ class OSModel
   def self.update_solar_absorptances(runner, model)
     # modify conditioned basement surface properties
     # zero out interior solar absorptance in conditioned basement
-    
+
     @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
       adj_surface = nil
       if not cond_bsmnt_surface.is_a? OpenStudio::Model::InternalMassDefinition
@@ -632,13 +631,12 @@ class OSModel
       innermost_material = layered_const.layers[layered_const.numLayers() - 1].to_StandardOpaqueMaterial.get
       innermost_material.setSolarAbsorptance(0.0)
       innermost_material.setVisibleAbsorptance(0.0)
-      if not adj_surface.nil?
-        # Create new construction in case of shared construciton.
-        layered_const_adj = OpenStudio::Model::Construction.new(model)
-        layered_const_adj.setName(cond_bsmnt_surface.construction.get.name.get + ' Reversed Bsmnt')
-        adj_surface.setConstruction(layered_const_adj)
-        layered_const_adj.setLayers(cond_bsmnt_surface.construction.get.to_LayeredConstruction.get.layers.reverse())
-      end
+      next unless not adj_surface.nil?
+      # Create new construction in case of shared construciton.
+      layered_const_adj = OpenStudio::Model::Construction.new(model)
+      layered_const_adj.setName(cond_bsmnt_surface.construction.get.name.get + ' Reversed Bsmnt')
+      adj_surface.setConstruction(layered_const_adj)
+      layered_const_adj.setLayers(cond_bsmnt_surface.construction.get.to_LayeredConstruction.get.layers.reverse())
     end
   end
 
