@@ -10,6 +10,7 @@ require_relative 'resources/airflow'
 require_relative 'resources/constants'
 require_relative 'resources/constructions'
 require_relative 'resources/energyplus'
+require_relative 'resources/generator'
 require_relative 'resources/geometry'
 require_relative 'resources/hotwater_appliances'
 require_relative 'resources/hpxml'
@@ -65,7 +66,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('debug', false)
     arg.setDisplayName('Debug Mode?')
-    arg.setDescription('If enabled: 1) Writes in.osm file, 2) Writes in.xml HPXML file with defaults populated, 3) Generates additional log output, and 4) Creates all EnergyPlus output files. Any files written will be in the output path specified above.')
+    arg.setDescription('If true: 1) Writes in.osm file, 2) Writes in.xml HPXML file with defaults populated, 3) Generates additional log output, and 4) Creates all EnergyPlus output files. Any files written will be in the output path specified above.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('skip_validation', false)
+    arg.setDisplayName('Skip Validation?')
+    arg.setDescription('If true, bypasses HPXML input validation for faster performance. WARNING: This should only be used if the supplied HPXML file has already been validated against the Schema & Schematron documents.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -89,6 +96,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     hpxml_path = runner.getStringArgumentValue('hpxml_path', user_arguments)
     output_dir = runner.getOptionalStringArgumentValue('output_dir', user_arguments)
     debug = runner.getBoolArgumentValue('debug', user_arguments)
+    skip_validation = runner.getBoolArgumentValue('skip_validation', user_arguments)
 
     unless (Pathname.new hpxml_path).absolute?
       hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
@@ -107,11 +115,21 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     begin
-      hpxml = HPXML.new(hpxml_path: hpxml_path)
-
-      if not validate_hpxml(runner, hpxml_path, hpxml)
-        return false
+      if skip_validation
+        stron_paths = []
+        runner.registerWarning('Skipping HPXML input validation. This should only be used if the HPXML file has already been validated.')
+      else
+        stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'HPXMLvalidator.xml'),
+                       File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')]
       end
+      hpxml = HPXML.new(hpxml_path: hpxml_path, schematron_validators: stron_paths)
+      hpxml.errors.each do |error|
+        runner.registerError(error)
+      end
+      hpxml.warnings.each do |warning|
+        runner.registerWarning(warning)
+      end
+      return false unless hpxml.errors.empty?
 
       epw_path, cache_path = process_weather(hpxml, runner, model, output_dir, hpxml_path)
 
@@ -135,33 +153,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     if has_existing_objects
       runner.registerWarning('The model contains existing objects and is being reset.')
     end
-  end
-
-  def validate_hpxml(runner, hpxml_path, hpxml)
-    schemas_dir = File.join(File.dirname(__FILE__), 'resources')
-
-    is_valid = true
-
-    # Validate input HPXML against schematron docs
-    stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'HPXMLvalidator.xml'),
-                   File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')]
-    errors, warnings = Validator.run_validators(hpxml.doc, stron_paths)
-    errors.each do |error|
-      runner.registerError("#{hpxml_path}: #{error}")
-      is_valid = false
-    end
-    warnings.each do |warning|
-      runner.registerWarning("#{warning}")
-    end
-
-    # Check for additional errors
-    errors = hpxml.check_for_errors()
-    errors.each do |error|
-      runner.registerError("#{hpxml_path}: #{error}")
-      is_valid = false
-    end
-
-    return is_valid
   end
 
   def process_weather(hpxml, runner, model, output_dir, hpxml_path)
@@ -272,6 +263,7 @@ class OSModel
     add_airflow(runner, model, weather, spaces)
     add_hvac_sizing(runner, model, weather, spaces)
     add_photovoltaics(runner, model)
+    add_generators(runner, model)
     add_additional_properties(runner, model, hpxml_path)
 
     # Output
@@ -453,7 +445,7 @@ class OSModel
     azimuth_lengths = {}
     model.getSurfaces.sort.each do |surface|
       next unless ['wall', 'roofceiling'].include? surface.surfaceType.downcase
-      next unless ['outdoors', 'foundation'].include? surface.outsideBoundaryCondition.downcase
+      next unless ['outdoors', 'foundation', 'adiabatic'].include? surface.outsideBoundaryCondition.downcase
       next if surface.additionalProperties.getFeatureAsDouble('Tilt').get <= 0 # skip flat roofs
 
       surfaces << surface
@@ -803,10 +795,23 @@ class OSModel
     vertices << OpenStudio::Point3d.new(x / 2, y / 2, z)
     vertices << OpenStudio::Point3d.new(x / 2, 0 - y / 2, z)
 
-    return vertices
+    # Rotate about the z axis
+    # This is not strictly needed, but will make the floor edges
+    # parallel to the walls for a better geometry rendering.
+    azimuth_rad = UnitConversions.convert(@default_azimuths[0], 'deg', 'rad')
+    m = OpenStudio::Matrix.new(4, 4, 0)
+    m[0, 0] = Math::cos(-azimuth_rad)
+    m[1, 1] = Math::cos(-azimuth_rad)
+    m[0, 1] = -Math::sin(-azimuth_rad)
+    m[1, 0] = Math::sin(-azimuth_rad)
+    m[2, 2] = 1
+    m[3, 3] = 1
+    transformation = OpenStudio::Transformation.new(m)
+
+    return transformation * vertices
   end
 
-  def self.add_wall_polygon(x, y, z, azimuth = 0, offsets = [0] * 4, subsurface_area = 0)
+  def self.add_wall_polygon(x, y, z, azimuth, offsets = [0] * 4, subsurface_area = 0)
     x = UnitConversions.convert(x, 'ft', 'm')
     y = UnitConversions.convert(y, 'ft', 'm')
     z = UnitConversions.convert(z, 'ft', 'm')
@@ -844,7 +849,7 @@ class OSModel
     return transformation * vertices
   end
 
-  def self.add_roof_polygon(x, y, z, azimuth = 0, tilt = 0.5)
+  def self.add_roof_polygon(x, y, z, azimuth, tilt)
     x = UnitConversions.convert(x, 'ft', 'm')
     y = UnitConversions.convert(y, 'ft', 'm')
     z = UnitConversions.convert(z, 'ft', 'm')
@@ -954,13 +959,13 @@ class OSModel
 
   def self.add_roofs(runner, model, spaces)
     @hpxml.roofs.each do |roof|
-      next if roof.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+      next if roof.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
       if roof.azimuth.nil?
         if roof.pitch > 0
           azimuths = @default_azimuths # Model as four directions for average exterior incident solar
         else
-          azimuths = [90] # Arbitrary azimuth for flat roof
+          azimuths = [@default_azimuths[0]] # Arbitrary azimuth for flat roof
         end
       else
         azimuths = [roof.azimuth]
@@ -1057,7 +1062,7 @@ class OSModel
 
   def self.add_walls(runner, model, spaces)
     @hpxml.walls.each do |wall|
-      next if wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+      next if wall.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
       if wall.azimuth.nil?
         if wall.is_exterior
@@ -1218,6 +1223,7 @@ class OSModel
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
         surface.additionalProperties.setFeature('SurfaceType', 'Floor')
       end
+      surface.additionalProperties.setFeature('Tilt', 0.0)
       set_surface_interior(model, spaces, surface, frame_floor)
       set_surface_exterior(model, spaces, surface, frame_floor)
       surface.setName(frame_floor.id)
@@ -1302,7 +1308,7 @@ class OSModel
       slabs = []
       @hpxml.foundation_walls.each do |foundation_wall|
         next unless foundation_wall.interior_adjacent_to == foundation_type
-        next if foundation_wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+        next if foundation_wall.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
         fnd_walls << foundation_wall
       end
@@ -1377,7 +1383,7 @@ class OSModel
 
       # For each slab, create a no-wall Kiva slab instance if needed.
       slabs.each do |slab|
-        next unless no_wall_slab_exp_perim[slab] > 0.1
+        next unless no_wall_slab_exp_perim[slab] > 1.0
 
         z_origin = 0
         slab_area = total_slab_area * no_wall_slab_exp_perim[slab] / total_slab_exp_perim
@@ -1394,7 +1400,7 @@ class OSModel
 
         ag_height = foundation_wall.height - foundation_wall.depth_below_grade
         ag_net_area = foundation_wall.net_area * ag_height / foundation_wall.height
-        next if ag_net_area < 0.1
+        next if ag_net_area < 1.0
 
         length = ag_net_area / ag_height
         z_origin = -1 * ag_height
@@ -1604,11 +1610,11 @@ class OSModel
 
     addtl_cfa = @cfa - sum_cfa
 
-    if addtl_cfa < -0.1 # Allow some rounding
+    if addtl_cfa < -1.0 # Allow some rounding
       fail "Sum of floor/slab area adjacent to conditioned space (#{sum_cfa.round(1)}) is greater than conditioned floor area (#{@cfa.round(1)})."
     end
 
-    return unless addtl_cfa > 0.1 # Allow some rounding
+    return unless addtl_cfa > 1.0 # Allow some rounding
 
     floor_width = Math::sqrt(addtl_cfa)
     floor_length = addtl_cfa / floor_width
@@ -1624,6 +1630,7 @@ class OSModel
     floor_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
     floor_surface.setOutsideBoundaryCondition('Adiabatic')
     floor_surface.additionalProperties.setFeature('SurfaceType', 'InferredFloor')
+    floor_surface.additionalProperties.setFeature('Tilt', 0.0)
 
     # Add ceiling surface
     ceiling_surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-floor_width, -floor_length, z_origin), model)
@@ -1635,6 +1642,7 @@ class OSModel
     ceiling_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
     ceiling_surface.setOutsideBoundaryCondition('Adiabatic')
     ceiling_surface.additionalProperties.setFeature('SurfaceType', 'InferredCeiling')
+    ceiling_surface.additionalProperties.setFeature('Tilt', 0.0)
 
     if not @cond_bsmnt_surfaces.empty?
       # assuming added ceiling is in conditioned basement
@@ -2234,8 +2242,9 @@ class OSModel
 
     hvac_control = @hpxml.hvac_controls[0]
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
+    has_ceiling_fan = (@hpxml.ceiling_fans.size > 0)
 
-    HVAC.apply_setpoints(model, runner, weather, hvac_control, living_zone)
+    HVAC.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan)
   end
 
   def self.add_ceiling_fans(runner, model, weather, spaces)
@@ -2498,6 +2507,12 @@ class OSModel
     end
   end
 
+  def self.add_generators(runner, model)
+    @hpxml.generators.each do |generator|
+      Generator.apply(model, @nbeds, generator)
+    end
+  end
+
   def self.add_additional_properties(runner, model, hpxml_path)
     # Store some data for use in reporting measure
     additionalProperties = model.getBuilding.additionalProperties
@@ -2562,6 +2577,8 @@ class OSModel
     output_diagnostics = model.getOutputDiagnostics
     output_diagnostics.addKey('DisplayAdvancedReportVariables')
 
+    area_tolerance = UnitConversions.convert(1.0, 'ft^2', 'm^2')
+
     model.getSurfaces.sort.each_with_index do |s, idx|
       next unless s.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
 
@@ -2604,7 +2621,7 @@ class OSModel
         end
       end
 
-      next if s.netArea < 0.1 # Skip parent surfaces (of subsurfaces) that have near zero net area
+      next if s.netArea < area_tolerance # Skip parent surfaces (of subsurfaces) that have near zero net area
 
       key = { 'FoundationWall' => :foundation_walls,
               'RimJoist' => :rim_joists,
