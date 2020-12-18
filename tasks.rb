@@ -81,10 +81,10 @@ def create_hpxmls
     'invalid_files/invalid-datatype-integer.xml' => 'base.xml',
     'invalid_files/invalid-daylight-saving.xml' => 'base-simcontrol-daylight-saving-custom.xml',
     'invalid_files/invalid-epw-filepath.xml' => 'base.xml',
-    'invalid_files/invalid-erv-properties.xml' => 'base-mechvent-erv.xml',
     'invalid_files/invalid-facility-type-equipment.xml' => 'base-bldgtype-multifamily-shared-laundry-room.xml',
     'invalid_files/invalid-facility-type-surfaces.xml' => 'base.xml',
     'invalid_files/invalid-foundation-wall-properties.xml' => 'base-foundation-unconditioned-basement-wall-insulation.xml',
+    'invalid_files/invalid-id.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/invalid-infiltration-volume.xml' => 'base.xml',
     'invalid_files/invalid-input-parameters.xml' => 'base.xml',
     'invalid_files/invalid-neighbor-shading-azimuth.xml' => 'base-misc-neighbor-shading.xml',
@@ -2568,6 +2568,8 @@ def set_hpxml_skylights(hpxml_file, hpxml)
     hpxml.skylights[0].area = 4000
   elsif ['invalid_files/unattached-skylight.xml'].include? hpxml_file
     hpxml.skylights[0].roof_idref = 'foobar'
+  elsif ['invalid_files/invalid-id.xml'].include? hpxml_file
+    hpxml.skylights[0].id = ''
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.skylights.size
       hpxml.skylights[n - 1].area /= 9.0
@@ -3741,9 +3743,6 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                sensible_recovery_efficiency_adjusted: 0.79,
                                fan_power: 60,
                                used_for_whole_building_ventilation: true)
-  elsif ['invalid_files/invalid-erv-properties.xml'].include? hpxml_file
-    hpxml.ventilation_fans[0].total_recovery_efficiency = 0.65
-    hpxml.ventilation_fans[0].sensible_recovery_efficiency = 0.65
   elsif ['base-mechvent-exhaust.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeExhaust,

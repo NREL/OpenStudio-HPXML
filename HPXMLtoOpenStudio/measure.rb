@@ -66,7 +66,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('debug', false)
     arg.setDisplayName('Debug Mode?')
-    arg.setDescription('If enabled: 1) Writes in.osm file, 2) Writes in.xml HPXML file with defaults populated, 3) Generates additional log output, and 4) Creates all EnergyPlus output files. Any files written will be in the output path specified above.')
+    arg.setDescription('If true: 1) Writes in.osm file, 2) Writes in.xml HPXML file with defaults populated, 3) Generates additional log output, and 4) Creates all EnergyPlus output files. Any files written will be in the output path specified above.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('skip_validation', false)
+    arg.setDisplayName('Skip Validation?')
+    arg.setDescription('If true, bypasses HPXML input validation for faster performance. WARNING: This should only be used if the supplied HPXML file has already been validated against the Schema & Schematron documents.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -90,6 +96,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     hpxml_path = runner.getStringArgumentValue('hpxml_path', user_arguments)
     output_dir = runner.getOptionalStringArgumentValue('output_dir', user_arguments)
     debug = runner.getBoolArgumentValue('debug', user_arguments)
+    skip_validation = runner.getBoolArgumentValue('skip_validation', user_arguments)
 
     unless (Pathname.new hpxml_path).absolute?
       hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
@@ -108,8 +115,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     begin
-      stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'HPXMLvalidator.xml'),
-                     File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')]
+      if skip_validation
+        stron_paths = []
+        runner.registerWarning('Skipping HPXML input validation. This should only be used if the HPXML file has already been validated.')
+      else
+        stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'HPXMLvalidator.xml'),
+                       File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')]
+      end
       hpxml = HPXML.new(hpxml_path: hpxml_path, schematron_validators: stron_paths)
       hpxml.errors.each do |error|
         runner.registerError(error)

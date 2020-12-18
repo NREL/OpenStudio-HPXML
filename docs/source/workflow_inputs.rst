@@ -1239,25 +1239,23 @@ Heat Recovery Ventilator
 
 If a heat recovery ventilator system is specified, additional information is entered in ``VentilationFan``.
 
-  ========================================================================  ======  =====  ===========  ========  =======  ============================
+  ========================================================================  ======  =====  ===========  ========  =======  =======================================
   Element                                                                   Type    Units  Constraints  Required  Default  Notes
-  ========================================================================  ======  =====  ===========  ========  =======  ============================
-  ``SensibleRecoveryEfficiency`` or ``AdjustedSensibleRecoveryEfficiency``  double  frac   0-1          Yes                Sensible recovery efficiency
-  ========================================================================  ======  =====  ===========  ========  =======  ============================
+  ========================================================================  ======  =====  ===========  ========  =======  =======================================
+  ``SensibleRecoveryEfficiency`` or ``AdjustedSensibleRecoveryEfficiency``  double  frac   0-1          Yes                (Adjusted) Sensible recovery efficiency
+  ========================================================================  ======  =====  ===========  ========  =======  =======================================
 
 Energy Recovery Ventilator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If an energy recovery ventilator system is specified, additional information is entered in ``VentilationFan``.
 
-  ========================================================================  ======  =====  ===========  ========  =======  ============================
+  ========================================================================  ======  =====  ===========  ========  =======  =======================================
   Element                                                                   Type    Units  Constraints  Required  Default  Notes
-  ========================================================================  ======  =====  ===========  ========  =======  ============================
-  ``TotalRecoveryEfficiency`` or ``AdjustedTotalRecoveryEfficiency``        double  frac   0-1          Yes                Total recovery efficiency
-  ``SensibleRecoveryEfficiency`` or ``AdjustedSensibleRecoveryEfficiency``  double  frac   0-1 [#]_     Yes                Sensible recovery efficiency
-  ========================================================================  ======  =====  ===========  ========  =======  ============================
-  
-  .. [#] SensibleRecoveryEfficiency (or AdjustedSensibleRecoveryEfficiency) must also be >= TotalRecoveryEfficiency (or AdjustedTotalRecoveryEfficiency).
+  ========================================================================  ======  =====  ===========  ========  =======  =======================================
+  ``TotalRecoveryEfficiency`` or ``AdjustedTotalRecoveryEfficiency``        double  frac   0-1          Yes                (Adjusted) Total recovery efficiency
+  ``SensibleRecoveryEfficiency`` or ``AdjustedSensibleRecoveryEfficiency``  double  frac   0-1          Yes                (Adjusted) Sensible recovery efficiency
+  ========================================================================  ======  =====  ===========  ========  =======  =======================================
 
 Central Fan Integrated Supply
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
