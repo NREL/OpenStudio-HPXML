@@ -574,6 +574,17 @@ class OSModel
 
   def self.update_conditioned_basement(runner, model, spaces)
     return if @cond_bsmnt_surfaces.empty?
+    # Update @cond_bsmnt_surfaces to include subsurfaces
+    new_cond_bsmnt_surfaces = @cond_bsmnt_surfaces.dup
+    @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
+      next if cond_bsmnt_surface.is_a? OpenStudio::Model::InternalMassDefinition
+      if not cond_bsmnt_surface.subSurfaces.empty?
+        cond_bsmnt_surface.subSurfaces.each do |ss|
+          new_cond_bsmnt_surfaces << ss
+        end
+      end
+    end
+    @cond_bsmnt_surfaces = new_cond_bsmnt_surfaces.dup
 
     update_solar_absorptances(runner, model)
     assign_view_factors(runner, model, spaces)
@@ -582,7 +593,16 @@ class OSModel
   def self.update_solar_absorptances(runner, model)
     # modify conditioned basement surface properties
     # zero out interior solar absorptance in conditioned basement
+    
     @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
+      adj_surface = nil
+      if not cond_bsmnt_surface.is_a? OpenStudio::Model::InternalMassDefinition
+        if not cond_bsmnt_surface.is_a? OpenStudio::Model::SubSurface
+          adj_surface = cond_bsmnt_surface.adjacentSurface.get if cond_bsmnt_surface.adjacentSurface.is_initialized
+        else
+          adj_surface = cond_bsmnt_surface.adjacentSubSurface.get if cond_bsmnt_surface.adjacentSubSurface.is_initialized
+        end
+      end
       const = cond_bsmnt_surface.construction.get
       layered_const = const.to_LayeredConstruction.get
       innermost_material = layered_const.layers[layered_const.numLayers() - 1].to_StandardOpaqueMaterial.get
@@ -612,6 +632,13 @@ class OSModel
       innermost_material = layered_const.layers[layered_const.numLayers() - 1].to_StandardOpaqueMaterial.get
       innermost_material.setSolarAbsorptance(0.0)
       innermost_material.setVisibleAbsorptance(0.0)
+      if not adj_surface.nil?
+        # Create new construction in case of shared construciton.
+        layered_const_adj = OpenStudio::Model::Construction.new(model)
+        layered_const_adj.setName(cond_bsmnt_surface.construction.get.name.get + ' Reversed Bsmnt')
+        adj_surface.setConstruction(layered_const_adj)
+        layered_const_adj.setLayers(cond_bsmnt_surface.construction.get.to_LayeredConstruction.get.layers.reverse())
+      end
     end
   end
 
@@ -633,8 +660,7 @@ class OSModel
 
     all_surfaces.each do |surface|
       if @cond_bsmnt_surfaces.include?(surface) ||
-         ((@cond_bsmnt_surfaces.include? surface.internalMassDefinition) if surface.is_a? OpenStudio::Model::InternalMass) ||
-         ((@cond_bsmnt_surfaces.include? surface.surface.get) if surface.is_a? OpenStudio::Model::SubSurface)
+         ((@cond_bsmnt_surfaces.include? surface.internalMassDefinition) if surface.is_a? OpenStudio::Model::InternalMass)
         cond_base_surfaces << surface
       else
         lv_surfaces << surface
@@ -3456,7 +3482,7 @@ class OSModel
       set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     elsif exterior_adjacent_to == HPXML::LocationBasementConditioned
       surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
-      @cond_bsmnt_surfaces << surface
+      @cond_bsmnt_surfaces << surface.adjacentSurface.get
     else
       surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to))
     end
