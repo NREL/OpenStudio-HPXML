@@ -594,6 +594,8 @@ class OSModel
     # zero out interior solar absorptance in conditioned basement
 
     @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
+      # skip windows because windows don't have such property to change.
+      next if cond_bsmnt_surface.is_a?(OpenStudio::Model::SubSurface) && (cond_bsmnt_surface.subSurfaceType.downcase == 'fixedwindow')
       adj_surface = nil
       if not cond_bsmnt_surface.is_a? OpenStudio::Model::InternalMassDefinition
         if not cond_bsmnt_surface.is_a? OpenStudio::Model::SubSurface
