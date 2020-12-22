@@ -284,6 +284,34 @@
             <AttachedToWall idref='Wall'/>
           </Window>
         </Windows>
+        <Skylights>
+          <Skylight>
+            <SystemIdentifier id=''/>
+            <Area>45.0</Area>
+            <Azimuth>0</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='InteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <AttachedToRoof idref='Roof'/>
+          </Skylight>
+          <Skylight>
+            <SystemIdentifier id='SkylightSouth'/>
+            <Area>45.0</Area>
+            <Azimuth>180</Azimuth>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.47</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='SkylightSouthInteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <AttachedToRoof idref='Roof'/>
+          </Skylight>
+        </Skylights>
         <Doors>
           <Door>
             <SystemIdentifier id='DoorNorth'/>
@@ -376,20 +404,6 @@
             <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
-        <MechanicalVentilation>
-          <VentilationFans>
-            <VentilationFan>
-              <SystemIdentifier id='MechanicalVentilation'/>
-              <FanType>energy recovery ventilator</FanType>
-              <TestedFlowRate>110.0</TestedFlowRate>
-              <HoursInOperation>24.0</HoursInOperation>
-              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <TotalRecoveryEfficiency>0.65</TotalRecoveryEfficiency>
-              <SensibleRecoveryEfficiency>0.65</SensibleRecoveryEfficiency>
-              <FanPower>60.0</FanPower>
-            </VentilationFan>
-          </VentilationFans>
-        </MechanicalVentilation>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>

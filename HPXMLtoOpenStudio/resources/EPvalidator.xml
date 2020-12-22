@@ -893,8 +893,6 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForWholeBuildingVentilation="true" and h:FanType="energy recovery ventilator"]'>
       <sch:assert role='ERROR' test='count(h:TotalRecoveryEfficiency) + count(h:AdjustedTotalRecoveryEfficiency) = 1'>Expected 1 element(s) for xpath: TotalRecoveryEfficiency | AdjustedTotalRecoveryEfficiency</sch:assert>
       <sch:assert role='ERROR' test='count(h:SensibleRecoveryEfficiency) + count(h:AdjustedSensibleRecoveryEfficiency) = 1'>Expected 1 element(s) for xpath: SensibleRecoveryEfficiency | AdjustedSensibleRecoveryEfficiency</sch:assert>
-      <sch:assert role='ERROR' test='number(h:SensibleRecoveryEfficiency) &gt; number(h:TotalRecoveryEfficiency) or not(h:SensibleRecoveryEfficiency) or not(h:TotalRecoveryEfficiency)'>Expected SensibleRecoveryEfficiency to be greater than TotalRecoveryEfficiency</sch:assert>
-      <sch:assert role='ERROR' test='number(h:AdjustedSensibleRecoveryEfficiency) &gt; number(h:AdjustedTotalRecoveryEfficiency) or not(h:AdjustedSensibleRecoveryEfficiency) or not(h:AdjustedTotalRecoveryEfficiency)'>Expected AdjustedSensibleRecoveryEfficiency to be greater than AdjustedTotalRecoveryEfficiency</sch:assert>
     </sch:rule>
   </sch:pattern>
 
