@@ -5162,7 +5162,7 @@ class HPXML < Object
     # Check for errors across objects #
     # ------------------------------- #
 
-    # Check for globally unique SystemIdentifier IDs
+    # Check for globally unique SystemIdentifier IDs and empty IDs
     sys_ids = {}
     self.class::HPXML_ATTRS.each do |attribute|
       hpxml_obj = send(attribute)
@@ -5173,6 +5173,8 @@ class HPXML < Object
 
         sys_ids[obj.id] = 0 if sys_ids[obj.id].nil?
         sys_ids[obj.id] += 1
+
+        errors << "Empty SystemIdentifier ID ('#{obj.id}') detected for #{attribute}." if obj.id.size == 0
       end
     end
     sys_ids.each do |sys_id, cnt|
