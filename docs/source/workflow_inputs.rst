@@ -74,10 +74,10 @@ In the ``in.xml`` file, the window would have additional elements like so:
     <SHGC>0.45</SHGC>
     <InteriorShading>
       <SystemIdentifier id='WindowInteriorShading'/>
-      <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-      <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+      <SummerShadingCoefficient dataSource='software'>0.7</SummerShadingCoefficient>
+      <WinterShadingCoefficient dataSource='software'>0.85</WinterShadingCoefficient>
     </InteriorShading>
-    <FractionOperable>0.67</FractionOperable>
+    <FractionOperable dataSource='software'>0.67</FractionOperable>
     <AttachedToWall idref='Wall'/>
   </Window>
 
@@ -1239,25 +1239,23 @@ Heat Recovery Ventilator
 
 If a heat recovery ventilator system is specified, additional information is entered in ``VentilationFan``.
 
-  ========================================================================  ======  =====  ===========  ========  =======  ============================
+  ========================================================================  ======  =====  ===========  ========  =======  =======================================
   Element                                                                   Type    Units  Constraints  Required  Default  Notes
-  ========================================================================  ======  =====  ===========  ========  =======  ============================
-  ``SensibleRecoveryEfficiency`` or ``AdjustedSensibleRecoveryEfficiency``  double  frac   0-1          Yes                Sensible recovery efficiency
-  ========================================================================  ======  =====  ===========  ========  =======  ============================
+  ========================================================================  ======  =====  ===========  ========  =======  =======================================
+  ``SensibleRecoveryEfficiency`` or ``AdjustedSensibleRecoveryEfficiency``  double  frac   0-1          Yes                (Adjusted) Sensible recovery efficiency
+  ========================================================================  ======  =====  ===========  ========  =======  =======================================
 
 Energy Recovery Ventilator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If an energy recovery ventilator system is specified, additional information is entered in ``VentilationFan``.
 
-  ========================================================================  ======  =====  ===========  ========  =======  ============================
+  ========================================================================  ======  =====  ===========  ========  =======  =======================================
   Element                                                                   Type    Units  Constraints  Required  Default  Notes
-  ========================================================================  ======  =====  ===========  ========  =======  ============================
-  ``TotalRecoveryEfficiency`` or ``AdjustedTotalRecoveryEfficiency``        double  frac   0-1          Yes                Total recovery efficiency
-  ``SensibleRecoveryEfficiency`` or ``AdjustedSensibleRecoveryEfficiency``  double  frac   0-1 [#]_     Yes                Sensible recovery efficiency
-  ========================================================================  ======  =====  ===========  ========  =======  ============================
-  
-  .. [#] SensibleRecoveryEfficiency must also be >= TotalRecoveryEfficiency.
+  ========================================================================  ======  =====  ===========  ========  =======  =======================================
+  ``TotalRecoveryEfficiency`` or ``AdjustedTotalRecoveryEfficiency``        double  frac   0-1          Yes                (Adjusted) Total recovery efficiency
+  ``SensibleRecoveryEfficiency`` or ``AdjustedSensibleRecoveryEfficiency``  double  frac   0-1          Yes                (Adjusted) Sensible recovery efficiency
+  ========================================================================  ======  =====  ===========  ========  =======  =======================================
 
 Central Fan Integrated Supply
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1787,7 +1785,9 @@ If IntegratedModifiedEnergyFactor or ModifiedEnergyFactor is provided, a complet
   ``LabelUsage``                    double   cyc/wk   > 0          Yes                    EnergyGuide label number of cycles
   ``Capacity``                      double   ft3      > 0          Yes                    Clothes dryer volume
   ================================  =======  =======  ===========  ============  =======  ====================================
-  
+
+Clothes washer energy use and hot water use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 Addendum A <https://www.resnet.us/wp-content/uploads/ANSI_RESNET_ICC-301-2019-Addendum-A-2019_7.16.20-1.pdf>`_.
+
 HPXML Clothes Dryer
 *******************
 
@@ -1828,6 +1828,8 @@ If the CombinedEnergyFactor or EnergyFactor is provided, a complete set of Energ
   ===============  =======  =======  ===========  ========  =======  ================
 
   .. [#] ControlType choices are "timer" or "moisture".
+
+Clothes dryer energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 Addendum A <https://www.resnet.us/wp-content/uploads/ANSI_RESNET_ICC-301-2019-Addendum-A-2019_7.16.20-1.pdf>`_.
 
 HPXML Dishwasher
 ****************
@@ -1872,6 +1874,8 @@ If the RatedAnnualkWh or EnergyFactor is provided, a complete set of EnergyGuide
   ``LabelUsage``            double   cyc/wk   > 0          Yes                EnergyGuide label number of cycles
   ``PlaceSettingCapacity``  integer  #        > 0          Yes                Number of place settings
   ========================  =======  =======  ===========  ========  =======  ==================================
+
+Dishwasher energy use and hot water use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 Addendum A <https://www.resnet.us/wp-content/uploads/ANSI_RESNET_ICC-301-2019-Addendum-A-2019_7.16.20-1.pdf>`_.
 
 HPXML Refrigerators
 *******************
@@ -1980,6 +1984,8 @@ If a cooking range is specified, a single oven is also entered as a ``/HPXML/Bui
   ``IsConvection``      boolean                       No        false    Convection oven?
   ====================  =======  ======  ===========  ========  =======  ================
 
+Cooking range/oven energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+
 HPXML Lighting & Ceiling Fans
 -----------------------------
 
@@ -2051,6 +2057,8 @@ If exterior holiday lighting is specified, additional information is entered in 
   .. [#] If Value not provided, defaults to 1.1 for single-family detached and 0.55 for others.
   .. [#] If WeekdayScheduleFractions not provided, defaults to "0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019".
 
+Interior, exterior, and garage lighting energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+
 HPXML Ceiling Fans
 ******************
 
@@ -2067,6 +2075,8 @@ If not entered, the simulation will not include a ceiling fan.
 
   .. [#] If Efficiency not provided, defaults to 3000 / 42.6 based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
   .. [#] If Quantity not provided, defaults to NumberofBedrooms + 1 based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+
+Ceiling fan energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 .. note::
 

@@ -265,6 +265,10 @@
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution'>
       <sch:assert role='ERROR' test='number(h:ConditionedFloorAreaServed) &gt; 0 or not(h:ConditionedFloorAreaServed)'>Expected ConditionedFloorAreaServed to be greater than 0</sch:assert>
+      <sch:assert role='ERROR' test='number(h:AnnualHeatingDistributionSystemEfficiency) &gt;= 0 or not(h:AnnualHeatingDistributionSystemEfficiency)'>Expected AnnualHeatingDistributionSystemEfficiency to be greater than or equal to 0</sch:assert>
+      <sch:assert role='ERROR' test='number(h:AnnualHeatingDistributionSystemEfficiency) &lt;= 1 or not(h:AnnualHeatingDistributionSystemEfficiency)'>Expected AnnualHeatingDistributionSystemEfficiency to be less than or equal to 1</sch:assert>
+      <sch:assert role='ERROR' test='number(h:AnnualCoolingDistributionSystemEfficiency) &gt;= 0 or not(h:AnnualCoolingDistributionSystemEfficiency)'>Expected AnnualCoolingDistributionSystemEfficiency to be greater than or equal to 0</sch:assert>
+      <sch:assert role='ERROR' test='number(h:AnnualCoolingDistributionSystemEfficiency) &lt;= 1 or not(h:AnnualCoolingDistributionSystemEfficiency)'>Expected AnnualCoolingDistributionSystemEfficiency to be less than or equal to 1</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan'>
       <sch:assert role='ERROR' test='number(h:Quantity) &gt; 0 or not(h:Quantity)'>Expected Quantity to be greater than 0</sch:assert>
