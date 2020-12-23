@@ -902,7 +902,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @fuels.each do |fuel_type, fuel|
       results_out << ["#{fuel.name} (#{fuel.annual_units})", fuel.annual_output.round(2)]
       if fuel_type == FT::Elec
-        results_out << ['Electricity: Net (MBtu)', (fuel.annual_output + elec_pv_produced.annual_output + elec_generator_produced.annual_output).round(2)]
+        results_out << ['Fuel Use: Electricity: Net (MBtu)', (fuel.annual_output + elec_pv_produced.annual_output + elec_generator_produced.annual_output).round(2)]
       end
     end
     results_out << [line_break]
@@ -937,9 +937,16 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     if output_format == 'csv'
       CSV.open(annual_output_path, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
     elsif output_format == 'json'
+      h = {}
+      results_out.each do |out|
+        next if out == [line_break]
+
+        grp, name = out[0].split(':', 2)
+        h[grp] = {} if h[grp].nil?
+        h[grp][name.strip] = out[1]
+      end
+
       require 'json'
-      h = Hash[results_out]
-      h.delete(line_break)
       File.open(annual_output_path, 'w') { |json| json.write(JSON.pretty_generate(h)) }
     end
     runner.registerInfo("Wrote annual output results to #{annual_output_path}.")
@@ -1154,11 +1161,13 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       CSV.open(timeseries_output_path, 'wb') { |csv| data.to_a.each { |elem| csv << elem } }
     elsif output_format == 'json'
       # Assemble data
-      h = Hash.new
+      h = {}
       h['Time'] = data[2..-1]
       [fuel_data, end_use_data, hot_water_use_data, total_loads_data, comp_loads_data, zone_temps_data, airflows_data, weather_data].each do |d|
         d.each do |o|
-          h["#{o[0]} (#{o[1]})"] = o[2..-1]
+          grp, name = o[0].split(':', 2)
+          h[grp] = {} if h[grp].nil?
+          h[grp]["#{name.strip} (#{o[1]})"] = o[2..-1]
         end
       end
 
@@ -2025,7 +2034,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @fuels[FT::Coal] = Fuel.new(meters: ["#{EPlus::FuelTypeCoal}:Facility"])
 
     @fuels.each do |fuel_type, fuel|
-      fuel.name = "#{fuel_type}: Total"
+      fuel.name = "Fuel Use: #{fuel_type}: Total"
       fuel.annual_units = 'MBtu'
       fuel.timeseries_units = get_timeseries_units_from_fuel_type(fuel_type)
     end
@@ -2138,7 +2147,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     @end_uses.each do |key, end_use|
       fuel_type, end_use_type = key
-      end_use.name = "#{fuel_type}: #{end_use_type}"
+      end_use.name = "End Use: #{fuel_type}: #{end_use_type}"
       end_use.annual_units = 'MBtu'
       end_use.timeseries_units = get_timeseries_units_from_fuel_type(fuel_type)
     end

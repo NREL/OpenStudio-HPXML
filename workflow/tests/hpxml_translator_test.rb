@@ -1170,7 +1170,7 @@ class HPXMLTest < MiniTest::Test
     vent_fan_bath = hpxml.ventilation_fans.select { |vent_mech| vent_mech.used_for_local_ventilation && (vent_mech.fan_location == HPXML::LocationBath) }
 
     if not (fan_cfis + fan_sup + fan_exh + fan_bal + vent_fan_kitchen + vent_fan_bath).empty?
-      mv_energy = UnitConversions.convert(results['Electricity: Mech Vent (MBtu)'], 'MBtu', 'GJ')
+      mv_energy = UnitConversions.convert(results['End Use: Electricity: Mech Vent (MBtu)'], 'MBtu', 'GJ')
 
       if not fan_cfis.empty?
         # CFIS, check for positive mech vent energy that is less than the energy if it had run 24/7
@@ -1270,7 +1270,7 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Lighting
-    ltg_energy = results.select { |k, v| k.include? 'Electricity: Lighting' }.map { |k, v| v }.sum(0.0)
+    ltg_energy = results.select { |k, v| k.include? 'End Use: Electricity: Lighting' }.map { |k, v| v }.sum(0.0)
     assert_equal(hpxml.lighting_groups.size > 0, ltg_energy > 0)
 
     # Get fuels
@@ -1301,10 +1301,10 @@ class HPXMLTest < MiniTest::Test
      HPXML::FuelTypeCoal].each do |fuel|
       fuel_name = fuel.split.map(&:capitalize).join(' ')
       fuel_name += ' Cord' if fuel_name == 'Wood'
-      energy_htg = results.fetch("#{fuel_name}: Heating (MBtu)", 0)
-      energy_dhw = results.fetch("#{fuel_name}: Hot Water (MBtu)", 0)
-      energy_cd = results.fetch("#{fuel_name}: Clothes Dryer (MBtu)", 0)
-      energy_cr = results.fetch("#{fuel_name}: Range/Oven (MBtu)", 0)
+      energy_htg = results.fetch("End Use: #{fuel_name}: Heating (MBtu)", 0)
+      energy_dhw = results.fetch("End Use: #{fuel_name}: Hot Water (MBtu)", 0)
+      energy_cd = results.fetch("End Use: #{fuel_name}: Clothes Dryer (MBtu)", 0)
+      energy_cr = results.fetch("End Use: #{fuel_name}: Range/Oven (MBtu)", 0)
       if htg_fuels.include?(fuel) && (not hpxml_path.include? 'location-miami')
         assert_operator(energy_htg, :>, 0)
       else
