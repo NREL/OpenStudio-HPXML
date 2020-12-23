@@ -4,12 +4,13 @@ Workflow Outputs
 ================
 
 OpenStudio-HPXML generates a variety of annual (and optionally, timeseries) outputs for a residential HPXML-based model.
+You can request the annual/timeseries output files be generated in either CSV or JSON formats.
 
 Annual Outputs
 --------------
 
-OpenStudio-HPXML will always generate an annual CSV output file called results_annual.csv, co-located with the EnergyPlus output.
-The CSV file includes the following sections of output:
+OpenStudio-HPXML will always generate an annual output file called results_annual.csv (or results_annual.json), co-located with the EnergyPlus output.
+The file includes the following sections of output:
 
 Annual Energy Consumption by Fuel Type
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -235,10 +236,10 @@ Current annual hot water uses are:
 Timeseries Outputs
 ------------------
 
-OpenStudio-HPXML can optionally generate a timeseries CSV output file.
-The timeseries output file is called results_timeseries.csv and co-located with the EnergyPlus output.
+OpenStudio-HPXML can optionally generate a timeseries output file.
+The timeseries output file is called results_timeseries.csv (or results_timeseries.json) and co-located with the EnergyPlus output.
 
-Depending on the outputs requested, CSV files may include:
+Depending on the outputs requested, the file may include:
 
    =================================== ==================================================================================================================================
    Type                                Notes
