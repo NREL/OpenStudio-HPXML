@@ -10,7 +10,7 @@ require_relative '../HPXMLtoOpenStudio/resources/version'
 
 basedir = File.expand_path(File.dirname(__FILE__))
 
-def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseries_outputs, skip_validation, output_format)
+def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseries_outputs, skip_validation)
   measures_dir = File.join(basedir, '..')
 
   measures = {}
@@ -27,7 +27,6 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
   # Add reporting measure to workflow
   measure_subdir = 'SimulationOutputReport'
   args = {}
-  args['output_format'] = output_format
   args['timeseries_frequency'] = timeseries_output_freq
   args['include_timeseries_fuel_consumptions'] = timeseries_outputs.include? 'fuels'
   args['include_timeseries_end_use_consumptions'] = timeseries_outputs.include? 'enduses'
@@ -56,10 +55,6 @@ OptionParser.new do |opts|
 
   opts.on('-o', '--output-dir <DIR>', 'Output directory') do |t|
     options[:output_dir] = t
-  end
-
-  opts.on('--output-format TYPE', ['csv', 'json'], 'Output file format type (csv, json)') do |t|
-    options[:output_format] = t
   end
 
   options[:hourly_outputs] = []
@@ -165,7 +160,7 @@ rundir = File.join(options[:output_dir], 'run')
 
 # Run design
 puts "HPXML: #{options[:hpxml]}"
-success = run_workflow(basedir, rundir, options[:hpxml], options[:debug], timeseries_output_freq, timeseries_outputs, options[:skip_validation], options[:output_format])
+success = run_workflow(basedir, rundir, options[:hpxml], options[:debug], timeseries_output_freq, timeseries_outputs, options[:skip_validation])
 
 if not success
   exit! 1
