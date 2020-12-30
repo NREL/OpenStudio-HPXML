@@ -445,14 +445,6 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoHVACActualCFMPerTonCooling
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACActualCFMPerTonHeating
-    return __method__.to_s
-  end
-
   def self.SizingInfoHVACFanWatts
     return __method__.to_s
   end

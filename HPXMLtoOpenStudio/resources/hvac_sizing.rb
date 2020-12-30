@@ -1651,100 +1651,117 @@ class HVACSizing
     end
 
     f_ch = hvac.ChargeDefectRatio.round(3)
+    tol = 0.001
     if not airflow_rated_defect_ratio_cool.empty?
-      cap_clg_ratios = []
-      for speed in 0..(num_speeds_clg - 1)
-        cool_cap_fff_curve = cool_cap_fff_curves[speed]
+      airflow_rated_defect_ratio_cool_temp = airflow_rated_defect_ratio_cool
+      for i in 0..20
+        cap_clg_ratios = []
+        for speed in 0..(num_speeds_clg - 1)
+          cool_cap_fff_curve = cool_cap_fff_curves[speed]
 
-        # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
-        a1_AF_Qgr_c = cool_cap_fff_curve.coefficient1Constant
-        a2_AF_Qgr_c = cool_cap_fff_curve.coefficient2x
-        a3_AF_Qgr_c = cool_cap_fff_curve.coefficient3xPOW2
+          # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
+          a1_AF_Qgr_c = cool_cap_fff_curve.coefficient1Constant
+          a2_AF_Qgr_c = cool_cap_fff_curve.coefficient2x
+          a3_AF_Qgr_c = cool_cap_fff_curve.coefficient3xPOW2
 
-        if f_ch <= 0
-          qgr_values = [-9.46E-01, 4.93E-02, -1.18E-03, -1.15E+00]
-        else
-          qgr_values = [-1.63E-01, 1.14E-02, -2.10E-04, -1.40E-01]
+          if f_ch <= 0
+            qgr_values = [-9.46E-01, 4.93E-02, -1.18E-03, -1.15E+00]
+          else
+            qgr_values = [-1.63E-01, 1.14E-02, -2.10E-04, -1.40E-01]
+          end
+
+          a1_CH_Qgr_c = qgr_values[0]
+          a2_CH_Qgr_c = qgr_values[1]
+          a3_CH_Qgr_c = qgr_values[2]
+          a4_CH_Qgr_c = qgr_values[3]
+          ff_ch_c = (1.0 / (1.0 + (qgr_values[0] + (qgr_values[1] * 26.67) + (qgr_values[2] * 35.0) + (qgr_values[3] * f_ch)) * f_ch)).round(3)
+
+          q0_CH = a1_CH_Qgr_c
+          q1_CH = a2_CH_Qgr_c * tin_cool
+          q2_CH = a3_CH_Qgr_c * tout_cool
+          q3_CH = a4_CH_Qgr_c * f_ch
+          y_CH_Q_c = 1 + ((q0_CH + q1_CH + q2_CH + q3_CH) * f_ch)
+
+          q0_AF_CH = a1_AF_Qgr_c
+          q1_AF_CH = a2_AF_Qgr_c * ff_ch_c
+          q2_AF_CH = a3_AF_Qgr_c * ff_ch_c * ff_ch_c
+          p_CH_Q_c = y_CH_Q_c / (q0_AF_CH + q1_AF_CH + q2_AF_CH)
+
+          ff_AF_c = airflow_rated_defect_ratio_cool_temp[speed].round(3)
+          ff_AF_c_nodefect = airflow_rated_ratio_cool[speed].round(3)
+          ff_AF_comb_c = ff_ch_c * ff_AF_c
+
+          q0_AF_comb = a1_AF_Qgr_c
+          q1_AF_comb = a2_AF_Qgr_c * ff_AF_comb_c
+          q2_AF_comb = a3_AF_Qgr_c * ff_AF_comb_c * ff_AF_comb_c
+          p_AF_Q_c = q0_AF_comb + q1_AF_comb + q2_AF_comb
+
+          cool_cap_fff = (p_CH_Q_c * p_AF_Q_c)
+          cool_cap_fff_nodefect = a1_AF_Qgr_c + a2_AF_Qgr_c * ff_AF_c_nodefect + a3_AF_Qgr_c * ff_AF_c_nodefect * ff_AF_c_nodefect
+          cap_clg_ratio = 1 / (cool_cap_fff / cool_cap_fff_nodefect)
+          cap_clg_ratios << cap_clg_ratio
         end
-
-        a1_CH_Qgr_c = qgr_values[0]
-        a2_CH_Qgr_c = qgr_values[1]
-        a3_CH_Qgr_c = qgr_values[2]
-        a4_CH_Qgr_c = qgr_values[3]
-        ff_ch_c = (1.0 / (1.0 + (qgr_values[0] + (qgr_values[1] * 26.67) + (qgr_values[2] * 35.0) + (qgr_values[3] * f_ch)) * f_ch)).round(3)
-
-        q0_CH = a1_CH_Qgr_c
-        q1_CH = a2_CH_Qgr_c * tin_cool
-        q2_CH = a3_CH_Qgr_c * tout_cool
-        q3_CH = a4_CH_Qgr_c * f_ch
-        y_CH_Q_c = 1 + ((q0_CH + q1_CH + q2_CH + q3_CH) * f_ch)
-
-        q0_AF_CH = a1_AF_Qgr_c
-        q1_AF_CH = a2_AF_Qgr_c * ff_ch_c
-        q2_AF_CH = a3_AF_Qgr_c * ff_ch_c * ff_ch_c
-        p_CH_Q_c = y_CH_Q_c / (q0_AF_CH + q1_AF_CH + q2_AF_CH)
-
-        ff_AF_c = airflow_rated_defect_ratio_cool[speed].round(3)
-        ff_AF_c_pre = airflow_rated_ratio_cool[speed].round(3)
-        ff_AF_comb_c = ff_ch_c * ff_AF_c
-
-        q0_AF_comb = a1_AF_Qgr_c
-        q1_AF_comb = a2_AF_Qgr_c * ff_AF_comb_c
-        q2_AF_comb = a3_AF_Qgr_c * ff_AF_comb_c * ff_AF_comb_c
-        p_AF_Q_c = q0_AF_comb + q1_AF_comb + q2_AF_comb
-
-        cool_cap_fff = (p_CH_Q_c * p_AF_Q_c)
-        cool_cap_fff_pre = a1_AF_Qgr_c + a2_AF_Qgr_c * ff_AF_c_pre + a3_AF_Qgr_c * ff_AF_c_pre * ff_AF_c_pre
-        cap_clg_ratio = 1 / (cool_cap_fff / cool_cap_fff_pre)
-        cap_clg_ratios << cap_clg_ratio
+        # reduce design-to-rated defect ratio because rated airflow will also be bumped up
+        # don't need to adjust airflow_rated_ratio_cool because we want a factor to counterbalance the defect ratio (compare with no bumping up, original curve output).
+        airflow_rated_defect_ratio_cool_pre = airflow_rated_defect_ratio_cool_temp
+        airflow_rated_defect_ratio_cool_temp = airflow_rated_defect_ratio_cool.map { |r| r / cap_clg_ratios.max }
+        break if airflow_rated_defect_ratio_cool_pre.map.with_index { |r_pre, i| (r_pre - airflow_rated_defect_ratio_cool_temp[i]).abs }.any? { |n| n < tol }
       end
       hvac_final_values.Cool_Capacity *= cap_clg_ratios.max
     end
 
     if not airflow_rated_defect_ratio_heat.empty?
-      cap_htg_ratios = []
-      for speed in 0..(num_speeds_htg - 1)
-        heat_cap_fff_curve = heat_cap_fff_curves[speed]
+      airflow_rated_defect_ratio_heat_temp = airflow_rated_defect_ratio_heat
+      for i in 0..20
+        cap_htg_ratios = []
+        for speed in 0..(num_speeds_htg - 1)
+          heat_cap_fff_curve = heat_cap_fff_curves[speed]
 
-        a1_AF_Qgr_h = heat_cap_fff_curve.coefficient1Constant
-        a2_AF_Qgr_h = heat_cap_fff_curve.coefficient2x
-        a3_AF_Qgr_h = heat_cap_fff_curve.coefficient3xPOW2
+          a1_AF_Qgr_h = heat_cap_fff_curve.coefficient1Constant
+          a2_AF_Qgr_h = heat_cap_fff_curve.coefficient2x
+          a3_AF_Qgr_h = heat_cap_fff_curve.coefficient3xPOW2
 
-        if f_ch <= 0
-          qgr_values = [-0.0338595, 0.0202827, -2.6226343]
-        else
-          qgr_values = [-0.0029514, 0.0007379, -0.0064112]
+          if f_ch <= 0
+            qgr_values = [-0.0338595, 0.0202827, -2.6226343]
+          else
+            qgr_values = [-0.0029514, 0.0007379, -0.0064112]
+          end
+
+          a1_CH_Qgr_h = qgr_values[0]
+          a2_CH_Qgr_h = qgr_values[1]
+          a3_CH_Qgr_h = qgr_values[2]
+
+          ff_ch_h = (1 / (1 + (qgr_values[0] + qgr_values[1] * 8.33 + qgr_values[2] * f_ch) * f_ch)).round(3)
+
+          qh1_CH = a1_CH_Qgr_h
+          qh2_CH = a2_CH_Qgr_h * tout_heat
+          qh3_CH = a3_CH_Qgr_h * f_ch
+          y_CH_Q_h = 1 + ((qh1_CH + qh2_CH + qh3_CH) * f_ch)
+
+          qh0_AF_CH = a1_AF_Qgr_h
+          qh1_AF_CH = a2_AF_Qgr_h * ff_ch_h
+          qh2_AF_CH = a3_AF_Qgr_h * ff_ch_h * ff_ch_h
+          p_CH_Q_h = y_CH_Q_h / (qh0_AF_CH + qh1_AF_CH + qh2_AF_CH)
+
+          ff_AF_h = airflow_rated_defect_ratio_heat_temp[speed].round(3)
+          ff_AF_h_nodefect = airflow_rated_ratio_heat[speed].round(3)
+          ff_AF_comb_h = ff_ch_h * ff_AF_h
+
+          qh0_AF_comb = a1_AF_Qgr_h
+          qh1_AF_comb = a2_AF_Qgr_h * ff_AF_comb_h
+          qh2_AF_comb = a3_AF_Qgr_h * ff_AF_comb_h * ff_AF_comb_h
+          p_AF_Q_h = qh0_AF_comb + qh1_AF_comb + qh2_AF_comb
+
+          heat_cap_fff = (p_CH_Q_h * p_AF_Q_h)
+          heat_cap_fff_nodefect = a1_AF_Qgr_h + a2_AF_Qgr_h * ff_AF_h_nodefect + a3_AF_Qgr_h * ff_AF_h_nodefect * ff_AF_h_nodefect
+          cap_htg_ratio = 1 / (heat_cap_fff / heat_cap_fff_nodefect)
+          cap_htg_ratios << cap_htg_ratio
         end
-
-        a1_CH_Qgr_h = qgr_values[0]
-        a2_CH_Qgr_h = qgr_values[1]
-        a3_CH_Qgr_h = qgr_values[2]
-
-        ff_ch_h = (1 / (1 + (qgr_values[0] + qgr_values[1] * 8.33 + qgr_values[2] * f_ch) * f_ch)).round(3)
-
-        qh1_CH = a1_CH_Qgr_h
-        qh2_CH = a2_CH_Qgr_h * tout_heat
-        qh3_CH = a3_CH_Qgr_h * f_ch
-        y_CH_Q_h = 1 + ((qh1_CH + qh2_CH + qh3_CH) * f_ch)
-
-        qh0_AF_CH = a1_AF_Qgr_h
-        qh1_AF_CH = a2_AF_Qgr_h * ff_ch_h
-        qh2_AF_CH = a3_AF_Qgr_h * ff_ch_h * ff_ch_h
-        p_CH_Q_h = y_CH_Q_h / (qh0_AF_CH + qh1_AF_CH + qh2_AF_CH)
-
-        ff_AF_h = airflow_rated_defect_ratio_heat[speed].round(3)
-        ff_AF_h_pre = airflow_rated_ratio_heat[speed].round(3)
-        ff_AF_comb_h = ff_ch_h * ff_AF_h
-
-        qh0_AF_comb = a1_AF_Qgr_h
-        qh1_AF_comb = a2_AF_Qgr_h * ff_AF_comb_h
-        qh2_AF_comb = a3_AF_Qgr_h * ff_AF_comb_h * ff_AF_comb_h
-        p_AF_Q_h = qh0_AF_comb + qh1_AF_comb + qh2_AF_comb
-
-        heat_cap_fff = (p_CH_Q_h * p_AF_Q_h)
-        heat_cap_fff_pre = a1_AF_Qgr_h + a2_AF_Qgr_h * ff_AF_h_pre + a3_AF_Qgr_h * ff_AF_h_pre * ff_AF_h_pre
-        cap_htg_ratio = 1 / (heat_cap_fff / heat_cap_fff_pre)
-        cap_htg_ratios << cap_htg_ratio
+        # reduce design-to-rated defect ratio because rated airflow will also be bumped up
+        # don't need to adjust airflow_rated_ratio_cool because we want a factor to counterbalance the defect ratio (compare with no bumping up, original curve output).
+        airflow_rated_defect_ratio_heat_pre = airflow_rated_defect_ratio_heat_temp
+        airflow_rated_defect_ratio_heat_temp = airflow_rated_defect_ratio_heat.map { |r| r / cap_htg_ratios.max }
+        break if airflow_rated_defect_ratio_heat_pre.map.with_index { |r_pre, i| (r_pre - airflow_rated_defect_ratio_heat_temp[i]).abs }.any? { |n| n < tol }
       end
       hvac_final_values.Heat_Capacity *= cap_htg_ratios.max
     end
