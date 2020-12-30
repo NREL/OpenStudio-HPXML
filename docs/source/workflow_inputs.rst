@@ -672,12 +672,13 @@ If a furnace is specified, additional information is entered in ``HeatingSystem`
   ===============================================  ======  =====  ===========  ========  =========  ================================================
   ``DistributionSystem``                           idref          See [#]_     Yes                  ID of attached distribution system
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``  double  frac   0 - 1        Yes                  Rated efficiency
-  ``extension/FanPowerWattsPerCFM``                double  W/cfm  >= 0         No        See [#]_   Installed fan efficiency
-  ``extension/AirflowDefectRatio``                 double  frac   -0.5 - 0.5   No        0.0        Deviation between design/installed airflows [#]_
+  ``extension/FanPowerWattsPerCFM``                double  W/cfm  >= 0         No        See [#]_   Installed fan efficiency [#]_
+  ``extension/AirflowDefectRatio``                 double  frac   > -1         No        0.0        Deviation between design/installed airflows [#]_
   ===============================================  ======  =====  ===========  ========  =========  ================================================
 
   .. [#] HVACDistribution type must be AirDistribution or DSE.
   .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0.5 W/cfm if AFUE <= 0.9, else 0.375 W/cfm.
+  .. [#] If there is a cooling system attached to the DistributionSystem, the heating and cooling systems cannot have different values for FanPowerWattsPerCFM.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
 
@@ -796,15 +797,16 @@ If a central air conditioner is specified, additional information is entered in 
   ``CoolingCapacity``                              double    Btu/hr  >= 0         No        autosized  Cooling capacity
   ``SensibleHeatFraction``                         double    frac    0 - 1        No                   Sensible heat fraction
   ``CompressorType``                               string            See [#]_     No        See [#]_   Type of compressor
-  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Installed fan efficiency
-  ``extension/AirflowDefectRatio``                 double    frac    -0.5 - 0.5   No        0.0        Deviation between design/installed airflows [#]_
-  ``extension/ChargeDefectRatio``                  double    frac    -0.5 - 0.5   No        0.0        Deviation between design/installed charges [#]_
+  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Installed fan efficiency [#]_
+  ``extension/AirflowDefectRatio``                 double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
+  ``extension/ChargeDefectRatio``                  double    frac    > -1         No        0.0        Deviation between design/installed charges [#]_
   ===============================================  ========  ======  ===========  ========  =========  ================================================
 
   .. [#] HVACDistribution type must be AirDistribution or DSE.
   .. [#] CompressorType choices are "single stage", "two stage", or "variable speed".
   .. [#] If CompressorType not provided, defaults to "single stage" if SEER <= 15, else "two stage" if SEER <= 21, else "variable speed".
   .. [#] If FanPowerWattsPerCFM not provided, defaults to using attached furnace W/cfm if available, else 0.5 W/cfm if SEER <= 13.5, else 0.375 W/cfm.
+  .. [#] If there is a heating system attached to the DistributionSystem, the heating and cooling systems cannot have different values for FanPowerWattsPerCFM.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
@@ -847,7 +849,7 @@ If a mini-split is specified, additional information is entered in ``CoolingSyst
   ``DistributionSystem``             idref             See [#]_     No                   ID of attached distribution system
   ``CoolingCapacity``                double    Btu/hr  >= 0         No        autosized  Cooling capacity
   ``SensibleHeatFraction``           double    frac    0 - 1        No                   Sensible heat fraction
-  ``extension/ChargeDefectRatio``    double    frac    -0.5 - 0.5   No        0.0        Deviation between design/installed charges [#]_
+  ``extension/ChargeDefectRatio``    double    frac    > -1         No        0.0        Deviation between design/installed charges [#]_
   =================================  ========  ======  ===========  ========  =========  ===============================================
 
   .. [#] If provided, HVACDistribution type must be AirDistribution or DSE.
@@ -860,7 +862,7 @@ If a ducted mini-split is specified (i.e., a ``DistributionSystem`` has been ent
   Element                            Type      Units   Constraints  Required  Default    Notes
   =================================  ========  ======  ===========  ========  =========  ===============================================
   ``extension/FanPowerWattsPerCFM``  double    W/cfm   >= 0         No        0.18       Installed fan efficiency
-  ``extension/AirflowDefectRatio``   double    frac    -0.5 - 0.5   No        0.0        Deviation between design/installed airflows [#]_
+  ``extension/AirflowDefectRatio``   double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
   =================================  ========  ======  ===========  ========  =========  ===============================================
 
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
@@ -977,8 +979,8 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   ``AnnualHeatingEfficiency[Units="HSPF"]/Value``  double    Btu/Wh  > 0          Yes                  Rated heating efficiency
   ``HeatingCapacity17F``                           double    Btu/hr  >= 0         No                   Heating capacity at 17F, if available
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Installed fan efficiency
-  ``extension/AirflowDefectRatio``                 double    frac    -0.5 - 0.5   No        0.0        Deviation between design/installed airflows [#]_
-  ``extension/ChargeDefectRatio``                  double    frac    -0.5 - 0.5   No        0.0        Deviation between design/installed charges [#]_
+  ``extension/AirflowDefectRatio``                 double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
+  ``extension/ChargeDefectRatio``                  double    frac    > -1         No        0.0        Deviation between design/installed charges [#]_
   ===============================================  ========  ======  ===========  ========  =========  ================================================
 
   .. [#] HVACDistribution type must be AirDistribution or DSE.
@@ -1002,7 +1004,7 @@ If a mini-split heat pump is specified, additional information is entered in ``H
   ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  > 0          Yes                  Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="HSPF"]/Value``  double    Btu/Wh  > 0          Yes                  Rated heating efficiency
   ``HeatingCapacity17F``                           double    Btu/hr  >= 0         No                   Heating capacity at 17F, if available
-  ``extension/ChargeDefectRatio``                  double    frac    -0.5 - 0.5   No        0.0        Deviation between design/installed charges [#]_
+  ``extension/ChargeDefectRatio``                  double    frac    > -1         No        0.0        Deviation between design/installed charges [#]_
   ===============================================  ========  ======  ===========  ========  =========  ==============================================
 
   .. [#] If provided, HVACDistribution type must be AirDistribution or DSE.
@@ -1015,7 +1017,7 @@ If a ducted mini-split is specified (i.e., a ``DistributionSystem`` has been ent
   Element                            Type      Units   Constraints  Required  Default    Notes
   =================================  ========  ======  ===========  ========  =========  ===============================================
   ``extension/FanPowerWattsPerCFM``  double    W/cfm   >= 0         No        0.18       Installed fan efficiency
-  ``extension/AirflowDefectRatio``   double    frac    -0.5 - 0.5   No        0.0        Deviation between design/installed airflows [#]_
+  ``extension/AirflowDefectRatio``   double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
   =================================  ========  ======  ===========  ========  =========  ===============================================
 
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
@@ -1037,7 +1039,7 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0         No        See [#]_   Installed pump efficiency
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Installed fan efficiency
   ``extension/SharedLoopWatts``                    double    W       >= 0         See [#]_             Shared pump power [#]_
-  ``extension/AirflowDefectRatio``                 double    frac    -0.5 - 0.5   No        0.0        Deviation between design/installed airflows [#]_
+  ``extension/AirflowDefectRatio``                 double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                  double    frac    0.0 [#]_     No        0.0        Deviation between design/installed charges [#]_
   ===============================================  ========  ======  ===========  ========  =========  ==============================================
 
