@@ -2353,11 +2353,15 @@ class OSModel
 
   def self.add_pools_and_hot_tubs(runner, model, spaces)
     @hpxml.pools.each do |pool|
+      next if pool.type == HPXML::TypeNone
+
       MiscLoads.apply_pool_or_hot_tub_heater(model, pool, Constants.ObjectNameMiscPoolHeater, spaces[HPXML::LocationLivingSpace])
       MiscLoads.apply_pool_or_hot_tub_pump(model, pool, Constants.ObjectNameMiscPoolPump, spaces[HPXML::LocationLivingSpace])
     end
 
     @hpxml.hot_tubs.each do |hot_tub|
+      next if hot_tub.type == HPXML::TypeNone
+
       MiscLoads.apply_pool_or_hot_tub_heater(model, hot_tub, Constants.ObjectNameMiscHotTubHeater, spaces[HPXML::LocationLivingSpace])
       MiscLoads.apply_pool_or_hot_tub_pump(model, hot_tub, Constants.ObjectNameMiscHotTubPump, spaces[HPXML::LocationLivingSpace])
     end
