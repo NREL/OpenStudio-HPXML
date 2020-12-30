@@ -1706,6 +1706,9 @@ class HVACSizing
         airflow_rated_defect_ratio_cool_pre = airflow_rated_defect_ratio_cool_temp
         airflow_rated_defect_ratio_cool_temp = airflow_rated_defect_ratio_cool.map { |r| r / cap_clg_ratios.max }
         break if airflow_rated_defect_ratio_cool_pre.map.with_index { |r_pre, i| (r_pre - airflow_rated_defect_ratio_cool_temp[i]).abs }.any? { |n| n < tol }
+        if i == 20
+          fail 'Size adjustment for IQ did not converge in 20 iterations.'
+        end
       end
       hvac_final_values.Cool_Capacity *= cap_clg_ratios.max
     end
