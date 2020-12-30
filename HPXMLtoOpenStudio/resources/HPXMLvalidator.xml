@@ -403,6 +403,12 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Lighting/h:CeilingFan'>
       <sch:assert role='ERROR' test='number(h:Quantity) &gt; 0 or not(h:Quantity)'>Expected Quantity to be greater than 0</sch:assert>
     </sch:rule>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Pools/h:Pool'>
+      <sch:assert role='ERROR' test='h:Type[text()="in ground" or text()="on ground" or text()="above ground" or text()="other" or text()="unknown" or text()="none"] or not(h:Type)'>Expected Type to be 'in ground' or 'on ground' or 'above ground' or 'other' or 'unknown' or 'none'</sch:assert>
+    </sch:rule>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Pools/h:Pool/h:PoolPumps/h:PoolPump'>
+      <sch:assert role='ERROR' test='h:Type[text()="single speed" or text()="multi speed" or text()="variable speed" or text()="variable flow" or text()="other" or text()="unknown" or text()="none"] or not(h:Type)'>Expected Type to be 'single speed' or 'multi speed' or 'variable speed' or 'variable flow' or 'other' or 'unknown' or 'none'</sch:assert>
+    </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Pools/h:Pool/h:PoolPumps/h:PoolPump/h:Load'>
       <sch:assert role='ERROR' test='h:Units[text()="kWh/year" or text()="W"] or not(h:Units)'>Expected Units to be 'kWh/year' or 'W'</sch:assert>
     </sch:rule>
@@ -411,6 +417,12 @@
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Pools/h:Pool/h:Heater/h:Load'>
       <sch:assert role='ERROR' test='h:Units[text()="kWh/year" or text()="therm/year" or text()="W" or text()="Btuh"] or not(h:Units)'>Expected Units to be 'kWh/year' or 'therm/year' or 'W' or 'Btuh'</sch:assert>
+    </sch:rule>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:HotTubs/h:HotTub'>
+      <sch:assert role='ERROR' test='h:Type[text()="in ground" or text()="on ground" or text()="above ground" or text()="other" or text()="unknown" or text()="none"] or not(h:Type)'>Expected Type to be 'in ground' or 'on ground' or 'above ground' or 'other' or 'unknown' or 'none'</sch:assert>
+    </sch:rule>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:HotTubs/h:HotTub/h:HotTubPumps/h:HotTubPump'>
+      <sch:assert role='ERROR' test='h:Type[text()="single speed" or text()="multi speed" or text()="variable speed" or text()="variable flow" or text()="other" or text()="unknown" or text()="none"] or not(h:Type)'>Expected Type to be 'single speed' or 'multi speed' or 'variable speed' or 'variable flow' or 'other' or 'unknown' or 'none'</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:HotTubs/h:HotTub/h:HotTubPumps/h:HotTubPump/h:Load'>
       <sch:assert role='ERROR' test='h:Units[text()="kWh/year" or text()="W"] or not(h:Units)'>Expected Units to be 'kWh/year' or 'W'</sch:assert>
