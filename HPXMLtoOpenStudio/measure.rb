@@ -1906,7 +1906,7 @@ class OSModel
       shading_surface.additionalProperties.setFeature('ParentSurface', parent_surface.name.to_s)
 
       # Create transmittance schedule for heating/cooling seasons
-      trans_values = @cooling_season.map { |c| c == 1 ? 1.0 - sf_summer : 1.0 - sf_winter }
+      trans_values = @cooling_season.map { |c| c == 1 ? sf_summer : sf_winter }
       if shading_schedules[trans_values].nil?
         trans_sch = MonthWeekdayWeekendSchedule.new(model, "trans schedule winter=#{sf_winter} summer=#{sf_summer}", Array.new(24, 1), Array.new(24, 1), trans_values, Constants.ScheduleTypeLimitsFraction, false)
         shading_schedules[trans_values] = trans_sch
@@ -1916,7 +1916,7 @@ class OSModel
       # Adjustment to default view factor is used to reduce ground diffuse solar
       avg_trans_value = trans_values.sum(0.0) / 12.0 # TODO: Create EnergyPlus actuator to adjust this? Throw warning for now if summer/winter values are very different?
       default_vf_to_ground = ((1.0 - Math::cos(parent_surface.tilt)) / 2.0).round(2)
-      parent_surface.setViewFactortoGround(default_vf_to_ground * (1.0 - avg_trans_value))
+      parent_surface.setViewFactortoGround(default_vf_to_ground * avg_trans_value)
 
       if shading_group.nil?
         shading_group = OpenStudio::Model::ShadingSurfaceGroup.new(model)
