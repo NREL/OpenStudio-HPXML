@@ -435,7 +435,6 @@ class OSModel
 
   def self.explode_surfaces(runner, model)
     # Re-position surfaces so as to not shade each other and to make it easier to visualize the building.
-    # FUTURE: Might be able to use the new self-shading options in E+ 8.9 ShadowCalculation object instead?
 
     gap_distance = UnitConversions.convert(10.0, 'ft', 'm') # distance between surfaces of the same azimuth
     rad90 = UnitConversions.convert(90, 'deg', 'rad')
@@ -488,10 +487,10 @@ class OSModel
     end
 
     # Explode neighbors
-    model.getShadingSurfaceGroups.each do |shading_surface_group|
-      next if shading_surface_group.name.to_s != Constants.ObjectNameNeighbors
+    model.getShadingSurfaceGroups.each do |shading_group|
+      next unless shading_group.name.to_s == Constants.ObjectNameNeighbors
 
-      shading_surface_group.shadingSurfaces.each do |shading_surface|
+      shading_group.shadingSurfaces.each do |shading_surface|
         azimuth = shading_surface.additionalProperties.getFeatureAsInteger('Azimuth').get
         azimuth_rad = UnitConversions.convert(azimuth, 'deg', 'rad')
         distance = shading_surface.additionalProperties.getFeatureAsDouble('Distance').get
@@ -521,6 +520,28 @@ class OSModel
       azimuth = surface.additionalProperties.getFeatureAsInteger('Azimuth').get
       azimuth_rad = UnitConversions.convert(azimuth, 'deg', 'rad')
 
+      # Get associated shading surfaces (e.g., overhangs, interior shading surfaces)
+      overhang_surfaces = []
+      shading_surfaces = []
+      surface.subSurfaces.each do |subsurface|
+        next unless subsurface.subSurfaceType.downcase == 'fixedwindow'
+
+        subsurface.shadingSurfaceGroups.each do |overhang_group|
+          overhang_group.shadingSurfaces.each do |overhang|
+            overhang_surfaces << overhang
+          end
+        end
+      end
+      model.getShadingSurfaceGroups.each do |shading_group|
+        next unless [Constants.ObjectNameSkylightShade, Constants.ObjectNameWindowShade].include? shading_group.name.to_s
+
+        shading_group.shadingSurfaces.each do |window_shade|
+          next unless window_shade.additionalProperties.getFeatureAsString('ParentSurface').get == surface.name.to_s
+
+          shading_surfaces << window_shade
+        end
+      end
+
       # Push out horizontally
       distance = explode_distance
 
@@ -531,39 +552,27 @@ class OSModel
         distance -= 0.5 * Math.cos(Math.atan(tilt)) * width
       end
       transformation = get_surface_transformation(distance, Math::sin(azimuth_rad), Math::cos(azimuth_rad), 0)
+      transformation_shade = get_surface_transformation(distance + 0.001, Math::sin(azimuth_rad), Math::cos(azimuth_rad), 0) # Offset slightly from window
 
-      surface.setVertices(transformation * surface.vertices)
+      ([surface] + surface.subSurfaces + overhang_surfaces).each do |s|
+        s.setVertices(transformation * s.vertices)
+      end
+      shading_surfaces.each do |s|
+        s.setVertices(transformation_shade * s.vertices)
+      end
       if surface.adjacentSurface.is_initialized
         surface.adjacentSurface.get.setVertices(transformation * surface.adjacentSurface.get.vertices)
       end
-      surface.subSurfaces.each do |subsurface|
-        subsurface.setVertices(transformation * subsurface.vertices)
-        next unless subsurface.subSurfaceType.downcase == 'fixedwindow'
 
-        subsurface.shadingSurfaceGroups.each do |overhang_group|
-          overhang_group.shadingSurfaces.each do |overhang|
-            overhang.setVertices(transformation * overhang.vertices)
-          end
-        end
-      end
-
-      # Shift at 90-degrees to previous transformation
+      # Shift at 90-degrees to previous transformation, so surfaces don't overlap and shade each other
       azimuth_side_shifts[azimuth] -= surface.additionalProperties.getFeatureAsDouble('Length').get / 2.0
       transformation_shift = get_surface_transformation(azimuth_side_shifts[azimuth], Math::sin(azimuth_rad + rad90), Math::cos(azimuth_rad + rad90), 0)
 
-      surface.setVertices(transformation_shift * surface.vertices)
+      ([surface] + surface.subSurfaces + overhang_surfaces + shading_surfaces).each do |s|
+        s.setVertices(transformation_shift * s.vertices)
+      end
       if surface.adjacentSurface.is_initialized
         surface.adjacentSurface.get.setVertices(transformation_shift * surface.adjacentSurface.get.vertices)
-      end
-      surface.subSurfaces.each do |subsurface|
-        subsurface.setVertices(transformation_shift * subsurface.vertices)
-        next unless subsurface.subSurfaceType.downcase == 'fixedwindow'
-
-        subsurface.shadingSurfaceGroups.each do |overhang_group|
-          overhang_group.shadingSurfaces.each do |overhang|
-            overhang.setVertices(transformation_shift * overhang.vertices)
-          end
-        end
       end
 
       azimuth_side_shifts[azimuth] -= (surface.additionalProperties.getFeatureAsDouble('Length').get / 2.0 + gap_distance)
@@ -1728,16 +1737,13 @@ class OSModel
   end
 
   def self.add_interior_shading_schedule(runner, model, weather)
-    heating_season, cooling_season = HVAC.get_default_heating_and_cooling_seasons(weather)
-    @clg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'cooling season schedule', Array.new(24, 1), Array.new(24, 1), cooling_season, Constants.ScheduleTypeLimitsFraction)
+    heating_season, @cooling_season = HVAC.get_default_heating_and_cooling_seasons(weather)
 
-    # Create heating season as opposite of cooling season (i.e., with overlap months)
-    non_cooling_season = cooling_season.map { |m| (m - 1).abs }
-    @htg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'heating season schedule', Array.new(24, 1), Array.new(24, 1), non_cooling_season, Constants.ScheduleTypeLimitsFraction)
-
+    # Create cooling season schedule
+    clg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'cooling season schedule', Array.new(24, 1), Array.new(24, 1), @cooling_season, Constants.ScheduleTypeLimitsFraction)
     @clg_ssn_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     @clg_ssn_sensor.setName('cool_season')
-    @clg_ssn_sensor.setKeyName(@clg_season_sch.schedule.name.to_s)
+    @clg_ssn_sensor.setKeyName(clg_season_sch.schedule.name.to_s)
   end
 
   def self.add_windows(runner, model, spaces, weather)
@@ -1749,6 +1755,9 @@ class OSModel
       window.fraction_operable = nil
     end
     @hpxml.collapse_enclosure_surfaces()
+
+    shading_group = nil
+    shading_schedules = {}
 
     surfaces = []
     @hpxml.windows.each do |window|
@@ -1794,11 +1803,11 @@ class OSModel
         end
 
         # Apply construction
-        cool_shade_mult = window.interior_shading_factor_summer
-        heat_shade_mult = window.interior_shading_factor_winter
-        Constructions.apply_window(runner, model, sub_surface, 'WindowConstruction',
-                                   weather, @htg_season_sch, @clg_season_sch, window.ufactor, window.shgc,
-                                   heat_shade_mult, cool_shade_mult)
+        Constructions.apply_window(runner, model, sub_surface, 'WindowConstruction', window.ufactor, window.shgc)
+
+        # Apply interior shading (as needed)
+        shading_polygon = add_wall_polygon(window_width, window_height, z_origin, window.azimuth, [0, 0, 0, 0])
+        shading_group = apply_interior_shading(model, window, shading_polygon, surface, shading_group, shading_schedules, Constants.ObjectNameWindowShade)
       else
         # Window is on an interior surface, which E+ does not allow. Model
         # as a door instead so that we can get the appropriate conduction
@@ -1837,6 +1846,10 @@ class OSModel
 
   def self.add_skylights(runner, model, spaces, weather)
     surfaces = []
+
+    shading_group = nil
+    shading_schedules = {}
+
     @hpxml.skylights.each do |skylight|
       tilt = skylight.roof.pitch / 12.0
       width = Math::sqrt(skylight.area)
@@ -1865,16 +1878,53 @@ class OSModel
       sub_surface.setSubSurfaceType('Skylight')
 
       # Apply construction
-      ufactor = skylight.ufactor
-      shgc = skylight.shgc
-      cool_shade_mult = skylight.interior_shading_factor_summer
-      heat_shade_mult = skylight.interior_shading_factor_winter
-      Constructions.apply_skylight(runner, model, sub_surface, 'SkylightConstruction',
-                                   weather, @htg_season_sch, @clg_season_sch, ufactor, shgc,
-                                   heat_shade_mult, cool_shade_mult)
+      Constructions.apply_skylight(runner, model, sub_surface, 'SkylightConstruction', skylight.ufactor, skylight.shgc)
+
+      # Apply interior shading (as needed)
+      shading_polygon = add_roof_polygon(length, width, z_origin, skylight.azimuth, tilt)
+      shading_group = apply_interior_shading(model, skylight, shading_polygon, surface, shading_group, shading_schedules, Constants.ObjectNameSkylightShade)
     end
 
     apply_adiabatic_construction(runner, model, surfaces, 'roof')
+  end
+
+  def self.apply_interior_shading(model, window_or_skylight, shading_polygon, parent_surface, shading_group, shading_schedules, name)
+    # TODO: Move this code elsewhere?
+    sf_summer = window_or_skylight.interior_shading_factor_summer
+    sf_winter = window_or_skylight.interior_shading_factor_winter
+    if (sf_summer < 1.0) || (sf_winter < 1.0)
+      # Apply shading
+      # We use a ShadingSurface instead of a Shade so that we perfectly get the result we want.
+      # The latter object is complex and it is essentially impossible to achieve the target reduction in transmitted
+      # solar (due to, e.g., re-reflectance, absorptance, angle modifiers, effects on convection, etc.).
+
+      # Shading surface is used to reduce beam solar and sky diffuse solar
+      # TODO: Allow a single shading surface to span multiple windows w/ the same interior shading and orientation?
+      shading_surface = OpenStudio::Model::ShadingSurface.new(shading_polygon, model)
+      shading_surface.setName("#{window_or_skylight.id} shading surface")
+      shading_surface.additionalProperties.setFeature('Azimuth', window_or_skylight.azimuth)
+      shading_surface.additionalProperties.setFeature('ParentSurface', parent_surface.name.to_s)
+
+      # Create transmittance schedule for heating/cooling seasons
+      trans_values = @cooling_season.map { |c| c == 1 ? 1.0 - sf_summer : 1.0 - sf_winter }
+      if shading_schedules[trans_values].nil?
+        trans_sch = MonthWeekdayWeekendSchedule.new(model, "trans schedule winter=#{sf_winter} summer=#{sf_summer}", Array.new(24, 1), Array.new(24, 1), trans_values, Constants.ScheduleTypeLimitsFraction, false)
+        shading_schedules[trans_values] = trans_sch
+      end
+      shading_surface.setTransmittanceSchedule(shading_schedules[trans_values].schedule)
+
+      # Adjustment to default view factor is used to reduce ground diffuse solar
+      avg_trans_value = trans_values.sum(0.0) / 12.0 # TODO: Create EnergyPlus actuator to adjust this? Throw warning for now if summer/winter values are very different?
+      default_vf_to_ground = ((1.0 - Math::cos(parent_surface.tilt)) / 2.0).round(2)
+      parent_surface.setViewFactortoGround(default_vf_to_ground * (1.0 - avg_trans_value))
+
+      if shading_group.nil?
+        shading_group = OpenStudio::Model::ShadingSurfaceGroup.new(model)
+        shading_group.setName(name)
+      end
+      shading_surface.setShadingSurfaceGroup(shading_group)
+    end
+    return shading_group
   end
 
   def self.add_doors(runner, model, spaces)

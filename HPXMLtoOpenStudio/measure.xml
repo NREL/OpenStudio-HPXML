@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>769ce570-ace5-43c3-9525-a731c0ba2164</version_id>
-  <version_modified>20201230T174951Z</version_modified>
+  <version_id>84d9862e-96be-4eca-b4e5-693fd2a76d3a</version_id>
+  <version_modified>20201231T021445Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -317,12 +317,6 @@
       <checksum>1DEAF026</checksum>
     </file>
     <file>
-      <filename>constructions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BA0409DC</checksum>
-    </file>
-    <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -363,18 +357,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>35C3F156</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E4CE9FD0</checksum>
-    </file>
-    <file>
-      <filename>simcontrols.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1164C9B8</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -509,17 +491,6 @@
       <checksum>85291D94</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.1.1</identifier>
-        <min_compatible>2.1.1</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>2A8811F6</checksum>
-    </file>
-    <file>
       <filename>HPXMLvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
@@ -536,6 +507,35 @@
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
       <checksum>12D1BD69</checksum>
+    </file>
+    <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>78C8DA95</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E362B7BC</checksum>
+    </file>
+    <file>
+      <filename>simcontrols.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>77520F9B</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.1.1</identifier>
+        <min_compatible>2.1.1</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>E9E278A2</checksum>
     </file>
   </files>
 </measure>
