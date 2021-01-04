@@ -245,7 +245,8 @@ def create_hpxmls
     'base-enclosure-rooftypes.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
     'base-enclosure-split-level.xml' => 'base-foundation-slab.xml',
-    'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml',
+    'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml', # Surfaces should collapse via HPXML.collapse_enclosure_surfaces()
+    'base-enclosure-split-surfaces2.xml' => 'base-enclosure-skylights.xml', # Surfaces should NOT collapse via HPXML.collapse_enclosure_surfaces()
     'base-enclosure-walltypes.xml' => 'base.xml',
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
@@ -981,12 +982,16 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs[0].area += 670
   elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
     hpxml.roofs[0].insulation_assembly_r_value = 25.8
-  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+  elsif ['base-enclosure-split-surfaces.xml',
+         'base-enclosure-split-surfaces2.xml'].include? hpxml_file
     for n in 1..hpxml.roofs.size
       hpxml.roofs[n - 1].area /= 9.0
       for i in 2..9
         hpxml.roofs << hpxml.roofs[n - 1].dup
         hpxml.roofs[-1].id += i.to_s
+        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
+          hpxml.roofs[-1].insulation_assembly_r_value += 0.01 * i
+        end
       end
     end
     hpxml.roofs << hpxml.roofs[-1].dup
@@ -1123,12 +1128,16 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                          solar_absorptance: 0.7,
                          emittance: 0.92,
                          insulation_assembly_r_value: 23.0)
-  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+  elsif ['base-enclosure-split-surfaces.xml',
+         'base-enclosure-split-surfaces2.xml'].include? hpxml_file
     for n in 1..hpxml.rim_joists.size
       hpxml.rim_joists[n - 1].area /= 9.0
       for i in 2..9
         hpxml.rim_joists << hpxml.rim_joists[n - 1].dup
         hpxml.rim_joists[-1].id += i.to_s
+        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
+          hpxml.rim_joists[-1].insulation_assembly_r_value += 0.01 * i
+        end
       end
     end
     hpxml.rim_joists << hpxml.rim_joists[-1].dup
@@ -1499,12 +1508,16 @@ def set_hpxml_walls(hpxml_file, hpxml)
   elsif ['base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml'].include? hpxml_file
     hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
     hpxml.walls[-1].insulation_assembly_r_value = 23
-  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+  elsif ['base-enclosure-split-surfaces.xml',
+         'base-enclosure-split-surfaces2.xml'].include? hpxml_file
     for n in 1..hpxml.walls.size
       hpxml.walls[n - 1].area /= 9.0
       for i in 2..9
         hpxml.walls << hpxml.walls[n - 1].dup
         hpxml.walls[-1].id += i.to_s
+        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
+          hpxml.walls[-1].insulation_assembly_r_value += 0.01 * i
+        end
       end
     end
     hpxml.walls << hpxml.walls[-1].dup
@@ -1839,12 +1852,16 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 4,
                                insulation_exterior_r_value: 8.9)
-  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+  elsif ['base-enclosure-split-surfaces.xml',
+         'base-enclosure-split-surfaces2.xml'].include? hpxml_file
     for n in 1..hpxml.foundation_walls.size
       hpxml.foundation_walls[n - 1].area /= 9.0
       for i in 2..9
         hpxml.foundation_walls << hpxml.foundation_walls[n - 1].dup
         hpxml.foundation_walls[-1].id += i.to_s
+        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
+          hpxml.foundation_walls[-1].insulation_exterior_r_value += 0.01 * i
+        end
       end
     end
     hpxml.foundation_walls << hpxml.foundation_walls[-1].dup
@@ -2023,12 +2040,16 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            area: 150,
                            insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
-  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+  elsif ['base-enclosure-split-surfaces.xml',
+         'base-enclosure-split-surfaces2.xml'].include? hpxml_file
     for n in 1..hpxml.frame_floors.size
       hpxml.frame_floors[n - 1].area /= 9.0
       for i in 2..9
         hpxml.frame_floors << hpxml.frame_floors[n - 1].dup
         hpxml.frame_floors[-1].id += i.to_s
+        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
+          hpxml.frame_floors[-1].insulation_assembly_r_value += 0.01 * i
+        end
       end
     end
     hpxml.frame_floors << hpxml.frame_floors[-1].dup
@@ -2215,13 +2236,18 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                     under_slab_insulation_r_value: 0,
                     carpet_fraction: 0,
                     carpet_r_value: 0)
-  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+  elsif ['base-enclosure-split-surfaces.xml',
+         'base-enclosure-split-surfaces2.xml'].include? hpxml_file
     for n in 1..hpxml.slabs.size
       hpxml.slabs[n - 1].area /= 9.0
       hpxml.slabs[n - 1].exposed_perimeter /= 9.0
       for i in 2..9
         hpxml.slabs << hpxml.slabs[n - 1].dup
         hpxml.slabs[-1].id += i.to_s
+        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
+          hpxml.slabs[-1].perimeter_insulation_depth += 0.01 * i
+          hpxml.slabs[-1].perimeter_insulation_r_value += 0.01 * i
+        end
       end
     end
     hpxml.slabs << hpxml.slabs[-1].dup
@@ -2512,7 +2538,8 @@ def set_hpxml_windows(hpxml_file, hpxml)
     end
   elsif ['invalid_files/unattached-window.xml'].include? hpxml_file
     hpxml.windows[0].wall_idref = 'foobar'
-  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+  elsif ['base-enclosure-split-surfaces.xml',
+         'base-enclosure-split-surfaces2.xml'].include? hpxml_file
     area_adjustments = []
     for n in 1..hpxml.windows.size
       hpxml.windows[n - 1].area /= 9.0
@@ -2524,6 +2551,10 @@ def set_hpxml_windows(hpxml_file, hpxml)
         if i >= 4
           hpxml.windows[-1].fraction_operable = 1.0
         end
+        next unless hpxml_file == 'base-enclosure-split-surfaces2.xml'
+        hpxml.windows[-1].ufactor += 0.01 * i
+        hpxml.windows[-1].interior_shading_factor_summer -= 0.02 * i
+        hpxml.windows[-1].interior_shading_factor_winter -= 0.01 * i
       end
     end
     hpxml.windows << hpxml.windows[-1].dup
@@ -2612,13 +2643,18 @@ def set_hpxml_skylights(hpxml_file, hpxml)
     hpxml.skylights[0].roof_idref = 'foobar'
   elsif ['invalid_files/invalid-id.xml'].include? hpxml_file
     hpxml.skylights[0].id = ''
-  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+  elsif ['base-enclosure-split-surfaces.xml',
+         'base-enclosure-split-surfaces2.xml'].include? hpxml_file
     for n in 1..hpxml.skylights.size
       hpxml.skylights[n - 1].area /= 9.0
       for i in 2..9
         hpxml.skylights << hpxml.skylights[n - 1].dup
         hpxml.skylights[-1].id += i.to_s
         hpxml.skylights[-1].roof_idref += i.to_s if i % 2 == 0
+        next unless hpxml_file == 'base-enclosure-split-surfaces2.xml'
+        hpxml.skylights[-1].ufactor += 0.01 * i
+        hpxml.skylights[-1].interior_shading_factor_summer -= 0.02 * i
+        hpxml.skylights[-1].interior_shading_factor_winter -= 0.01 * i
       end
     end
     hpxml.skylights << hpxml.skylights[-1].dup
@@ -2698,7 +2734,8 @@ def set_hpxml_doors(hpxml_file, hpxml)
                     r_value: 4.4)
   elsif ['invalid_files/unattached-door.xml'].include? hpxml_file
     hpxml.doors[0].wall_idref = 'foobar'
-  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+  elsif ['base-enclosure-split-surfaces.xml',
+         'base-enclosure-split-surfaces2.xml'].include? hpxml_file
     area_adjustments = []
     for n in 1..hpxml.doors.size
       hpxml.doors[n - 1].area /= 9.0
@@ -2706,6 +2743,9 @@ def set_hpxml_doors(hpxml_file, hpxml)
         hpxml.doors << hpxml.doors[n - 1].dup
         hpxml.doors[-1].id += i.to_s
         hpxml.doors[-1].wall_idref += i.to_s
+        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
+          hpxml.doors[-1].r_value += 0.01 * i
+        end
       end
     end
     hpxml.doors << hpxml.doors[-1].dup
@@ -4968,16 +5008,18 @@ def set_hpxml_pools(hpxml_file, hpxml)
   if ['base-misc-loads-large-uncommon.xml',
       'base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.pools.add(id: 'Pool',
+                    type: HPXML::TypeUnknown,
+                    pump_type: HPXML::TypeUnknown,
+                    pump_kwh_per_year: 2700,
+                    pump_weekday_fractions: '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003',
+                    pump_weekend_fractions: '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003',
+                    pump_monthly_multipliers: '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154',
                     heater_type: HPXML::HeaterTypeGas,
                     heater_load_units: HPXML::UnitsThermPerYear,
                     heater_load_value: 500,
-                    pump_kwh_per_year: 2700,
                     heater_weekday_fractions: '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003',
                     heater_weekend_fractions: '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003',
-                    heater_monthly_multipliers: '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154',
-                    pump_weekday_fractions: '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003',
-                    pump_weekend_fractions: '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003',
-                    pump_monthly_multipliers: '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
+                    heater_monthly_multipliers: '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
     if hpxml_file == 'base-misc-usage-multiplier.xml'
       hpxml.pools.each do |pool|
         pool.pump_usage_multiplier = 0.9
@@ -4985,11 +5027,7 @@ def set_hpxml_pools(hpxml_file, hpxml)
       end
     end
   elsif ['base-misc-loads-large-uncommon2.xml'].include? hpxml_file
-    hpxml.pools[0].heater_type = nil
-    hpxml.pools[0].heater_load_value = nil
-    hpxml.pools[0].heater_weekday_fractions = nil
-    hpxml.pools[0].heater_weekend_fractions = nil
-    hpxml.pools[0].heater_monthly_multipliers = nil
+    hpxml.pools[0].heater_type = HPXML::TypeNone
   end
 end
 
@@ -4997,16 +5035,18 @@ def set_hpxml_hot_tubs(hpxml_file, hpxml)
   if ['base-misc-loads-large-uncommon.xml',
       'base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.hot_tubs.add(id: 'HotTub',
+                       type: HPXML::TypeUnknown,
+                       pump_type: HPXML::TypeUnknown,
+                       pump_kwh_per_year: 1000,
+                       pump_weekday_fractions: '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024',
+                       pump_weekend_fractions: '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024',
+                       pump_monthly_multipliers: '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837',
                        heater_type: HPXML::HeaterTypeElectricResistance,
                        heater_load_units: HPXML::UnitsKwhPerYear,
                        heater_load_value: 1300,
-                       pump_kwh_per_year: 1000,
                        heater_weekday_fractions: '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024',
                        heater_weekend_fractions: '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024',
-                       heater_monthly_multipliers: '0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921',
-                       pump_weekday_fractions: '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024',
-                       pump_weekend_fractions: '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024',
-                       pump_monthly_multipliers: '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
+                       heater_monthly_multipliers: '0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921')
     if hpxml_file == 'base-misc-usage-multiplier.xml'
       hpxml.hot_tubs.each do |hot_tub|
         hot_tub.pump_usage_multiplier = 0.9
