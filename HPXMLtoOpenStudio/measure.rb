@@ -1807,7 +1807,7 @@ class OSModel
 
         # Apply interior shading (as needed)
         shading_polygon = add_wall_polygon(window_width, window_height, z_origin, window.azimuth, [0, 0, 0, 0])
-        shading_group = apply_interior_shading(model, window, shading_polygon, surface, shading_group, shading_schedules, Constants.ObjectNameWindowShade)
+        shading_group = apply_interior_shading(model, window, shading_polygon, surface, sub_surface, shading_group, shading_schedules, Constants.ObjectNameWindowShade)
       else
         # Window is on an interior surface, which E+ does not allow. Model
         # as a door instead so that we can get the appropriate conduction
@@ -1882,13 +1882,13 @@ class OSModel
 
       # Apply interior shading (as needed)
       shading_polygon = add_roof_polygon(length, width, z_origin, skylight.azimuth, tilt)
-      shading_group = apply_interior_shading(model, skylight, shading_polygon, surface, shading_group, shading_schedules, Constants.ObjectNameSkylightShade)
+      shading_group = apply_interior_shading(model, skylight, shading_polygon, surface, sub_surface, shading_group, shading_schedules, Constants.ObjectNameSkylightShade)
     end
 
     apply_adiabatic_construction(runner, model, surfaces, 'roof')
   end
 
-  def self.apply_interior_shading(model, window_or_skylight, shading_polygon, parent_surface, shading_group, shading_schedules, name)
+  def self.apply_interior_shading(model, window_or_skylight, shading_polygon, parent_surface, sub_surface, shading_group, shading_schedules, name)
     # TODO: Move this code elsewhere?
     sf_summer = window_or_skylight.interior_shading_factor_summer
     sf_winter = window_or_skylight.interior_shading_factor_winter
@@ -1916,7 +1916,7 @@ class OSModel
       # Adjustment to default view factor is used to reduce ground diffuse solar
       avg_trans_value = trans_values.sum(0.0) / 12.0 # TODO: Create EnergyPlus actuator to adjust this? Throw warning for now if summer/winter values are very different?
       default_vf_to_ground = ((1.0 - Math::cos(parent_surface.tilt)) / 2.0).round(2)
-      parent_surface.setViewFactortoGround(default_vf_to_ground * avg_trans_value)
+      sub_surface.setViewFactortoGround(default_vf_to_ground * avg_trans_value)
 
       if shading_group.nil?
         shading_group = OpenStudio::Model::ShadingSurfaceGroup.new(model)
