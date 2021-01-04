@@ -133,6 +133,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       epw_path, cache_path = process_weather(hpxml, runner, model, output_dir, hpxml_path)
 
+      if debug
+        epw_output_path = File.join(output_dir, 'in.epw')
+        FileUtils.cp(epw_path, epw_output_path)
+      end
+
       OSModel.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, debug)
     rescue Exception => e
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
