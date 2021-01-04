@@ -2537,9 +2537,10 @@ def set_hpxml_windows(hpxml_file, hpxml)
         if i >= 4
           hpxml.windows[-1].fraction_operable = 1.0
         end
-        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
-          hpxml.windows[-1].ufactor += 0.01 * i
-        end
+        next unless hpxml_file == 'base-enclosure-split-surfaces2.xml'
+        hpxml.windows[-1].ufactor += 0.01 * i
+        hpxml.windows[-1].interior_shading_factor_summer -= 0.02 * i
+        hpxml.windows[-1].interior_shading_factor_winter -= 0.01 * i
       end
     end
     hpxml.windows << hpxml.windows[-1].dup
@@ -2636,9 +2637,10 @@ def set_hpxml_skylights(hpxml_file, hpxml)
         hpxml.skylights << hpxml.skylights[n - 1].dup
         hpxml.skylights[-1].id += i.to_s
         hpxml.skylights[-1].roof_idref += i.to_s if i % 2 == 0
-        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
-          hpxml.skylights[-1].ufactor += 0.01 * i
-        end
+        next unless hpxml_file == 'base-enclosure-split-surfaces2.xml'
+        hpxml.skylights[-1].ufactor += 0.01 * i
+        hpxml.skylights[-1].interior_shading_factor_summer -= 0.02 * i
+        hpxml.skylights[-1].interior_shading_factor_winter -= 0.01 * i
       end
     end
     hpxml.skylights << hpxml.skylights[-1].dup

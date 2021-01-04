@@ -1373,8 +1373,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowNorth2InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.6599999999999999</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.83</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall2'/>
@@ -1387,8 +1387,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowNorth3InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.6399999999999999</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.82</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall3'/>
@@ -1401,8 +1401,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowNorth4InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.62</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.8099999999999999</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall4'/>
@@ -1415,8 +1415,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowNorth5InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.7999999999999999</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall5'/>
@@ -1429,8 +1429,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowNorth6InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.58</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.79</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall6'/>
@@ -1443,8 +1443,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowNorth7InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.5599999999999999</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.78</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall7'/>
@@ -1457,8 +1457,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowNorth8InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.5399999999999999</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.77</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall8'/>
@@ -1471,8 +1471,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowNorth9InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.52</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.76</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall9'/>
@@ -1485,8 +1485,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowSouth2InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.6599999999999999</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.83</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall2'/>
@@ -1499,8 +1499,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowSouth3InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.6399999999999999</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.82</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall3'/>
@@ -1513,8 +1513,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowSouth4InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.62</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.8099999999999999</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall4'/>
@@ -1527,8 +1527,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowSouth5InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.7999999999999999</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall5'/>
@@ -1541,8 +1541,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowSouth6InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.58</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.79</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall6'/>
@@ -1555,8 +1555,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowSouth7InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.5599999999999999</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.78</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall7'/>
@@ -1569,8 +1569,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowSouth8InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.5399999999999999</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.77</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall8'/>
@@ -1583,8 +1583,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowSouth9InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.52</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.76</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall9'/>
@@ -1597,8 +1597,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowEast2InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.6599999999999999</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.83</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall2'/>
@@ -1611,8 +1611,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowEast3InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.6399999999999999</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.82</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall3'/>
@@ -1625,8 +1625,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowEast4InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.62</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.8099999999999999</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall4'/>
@@ -1639,8 +1639,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowEast5InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.7999999999999999</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall5'/>
@@ -1653,8 +1653,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowEast6InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.58</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.79</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall6'/>
@@ -1667,8 +1667,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowEast7InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.5599999999999999</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.78</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall7'/>
@@ -1681,8 +1681,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowEast8InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.5399999999999999</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.77</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall8'/>
@@ -1695,8 +1695,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowEast9InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.52</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.76</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall9'/>
@@ -1709,8 +1709,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowWest2InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.6599999999999999</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.83</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall2'/>
@@ -1723,8 +1723,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowWest3InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.6399999999999999</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.82</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall3'/>
@@ -1737,8 +1737,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowWest4InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.62</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.8099999999999999</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall4'/>
@@ -1751,8 +1751,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowWest5InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.7999999999999999</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall5'/>
@@ -1765,8 +1765,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowWest6InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.58</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.79</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall6'/>
@@ -1779,8 +1779,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowWest7InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.5599999999999999</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.78</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall7'/>
@@ -1793,8 +1793,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowWest8InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.5399999999999999</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.77</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall8'/>
@@ -1807,8 +1807,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowWest9InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.52</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.76</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall9'/>
@@ -1821,8 +1821,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='TinyWindowInteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.52</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.76</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>1.0</FractionOperable>
             <AttachedToWall idref='Wall9'/>
@@ -1863,8 +1863,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='SkylightNorth2InteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.96</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.98</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof2'/>
           </Skylight>
@@ -1876,8 +1876,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='SkylightNorth3InteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.94</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.97</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof'/>
           </Skylight>
@@ -1889,8 +1889,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='SkylightNorth4InteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.92</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.96</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof4'/>
           </Skylight>
@@ -1902,8 +1902,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='SkylightNorth5InteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.95</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof'/>
           </Skylight>
@@ -1915,8 +1915,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='SkylightNorth6InteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.88</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.94</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof6'/>
           </Skylight>
@@ -1928,8 +1928,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='SkylightNorth7InteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.86</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.9299999999999999</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof'/>
           </Skylight>
@@ -1941,8 +1941,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='SkylightNorth8InteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.84</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.92</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof8'/>
           </Skylight>
@@ -1954,8 +1954,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='SkylightNorth9InteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.8200000000000001</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.91</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof'/>
           </Skylight>
@@ -1967,8 +1967,8 @@
             <SHGC>0.47</SHGC>
             <InteriorShading>
               <SystemIdentifier id='SkylightSouth2InteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.96</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.98</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof2'/>
           </Skylight>
@@ -1980,8 +1980,8 @@
             <SHGC>0.47</SHGC>
             <InteriorShading>
               <SystemIdentifier id='SkylightSouth3InteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.94</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.97</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof'/>
           </Skylight>
@@ -1993,8 +1993,8 @@
             <SHGC>0.47</SHGC>
             <InteriorShading>
               <SystemIdentifier id='SkylightSouth4InteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.92</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.96</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof4'/>
           </Skylight>
@@ -2006,8 +2006,8 @@
             <SHGC>0.47</SHGC>
             <InteriorShading>
               <SystemIdentifier id='SkylightSouth5InteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.95</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof'/>
           </Skylight>
@@ -2019,8 +2019,8 @@
             <SHGC>0.47</SHGC>
             <InteriorShading>
               <SystemIdentifier id='SkylightSouth6InteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.88</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.94</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof6'/>
           </Skylight>
@@ -2032,8 +2032,8 @@
             <SHGC>0.47</SHGC>
             <InteriorShading>
               <SystemIdentifier id='SkylightSouth7InteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.86</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.9299999999999999</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof'/>
           </Skylight>
@@ -2045,8 +2045,8 @@
             <SHGC>0.47</SHGC>
             <InteriorShading>
               <SystemIdentifier id='SkylightSouth8InteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.84</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.92</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof8'/>
           </Skylight>
@@ -2058,8 +2058,8 @@
             <SHGC>0.47</SHGC>
             <InteriorShading>
               <SystemIdentifier id='SkylightSouth9InteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.8200000000000001</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.91</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof'/>
           </Skylight>
@@ -2071,8 +2071,8 @@
             <SHGC>0.47</SHGC>
             <InteriorShading>
               <SystemIdentifier id='TinySkylightInteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.8200000000000001</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.91</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToRoof idref='Roof'/>
           </Skylight>
