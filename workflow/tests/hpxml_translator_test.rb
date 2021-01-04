@@ -573,6 +573,7 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
       next if err_line.include? 'Air-cooled condenser inlet dry-bulb temperature below 0 C.'
       next if err_line.include? 'Low condenser dry-bulb temperature error continues.'
+      next if err_line.include? 'GetSurfaceData: Very small surface area'
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
@@ -698,7 +699,8 @@ class HPXMLTest < MiniTest::Test
                                       'base-foundation-basement-garage.xml' => 2,        # additional instance for garage
                                       'base-enclosure-garage.xml' => 2,                  # additional instance for garage
                                       'base-foundation-walkout-basement.xml' => 4,       # 3 foundation walls plus a no-wall exposed perimeter
-                                      'base-foundation-complex.xml' => 10 }              # lots of foundations for testing
+                                      'base-foundation-complex.xml' => 10,               # lots of foundations for testing
+                                      'base-enclosure-split-surfaces2.xml' => 81 }       # lots of foundations for testing
 
       if not num_expected_kiva_instances[File.basename(hpxml_path)].nil?
         assert_equal(num_expected_kiva_instances[File.basename(hpxml_path)], num_kiva_instances)
