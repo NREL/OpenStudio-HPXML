@@ -573,7 +573,6 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
       next if err_line.include? 'Air-cooled condenser inlet dry-bulb temperature below 0 C.'
       next if err_line.include? 'Low condenser dry-bulb temperature error continues.'
-      next if err_line.include? 'GetSurfaceData: Very small surface area'
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
@@ -603,6 +602,9 @@ class HPXMLTest < MiniTest::Test
       end
       if hpxml.hvac_distributions.select { |d| d.hydronic_and_air_type.to_s == HPXML::HydronicAndAirTypeFanCoil }.size > 0
         next if err_line.include? 'In calculating the design coil UA for Coil:Cooling:Water' # Warning for unused cooling coil for fan coil
+      end
+      if hpxml_path.include? 'base-enclosure-split-surfaces2.xml'
+        next if err_line.include? 'GetSurfaceData: Very small surface area' # FUTURE: Prevent this warning
       end
 
       flunk "Unexpected warning found: #{err_line}"
