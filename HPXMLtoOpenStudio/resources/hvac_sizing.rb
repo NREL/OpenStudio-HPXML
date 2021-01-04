@@ -316,13 +316,15 @@ class HVACSizing
   def self.process_zone_loads(model, weather, nbeds, infilvolume)
     # Constant loads (no variation throughout day)
     zone_loads = ZoneLoads.new
-    zone_loads = process_load_windows_skylights(zone_loads, weather)
-    zone_loads = process_load_doors(zone_loads, weather)
-    zone_loads = process_load_walls(zone_loads, weather)
-    zone_loads = process_load_roofs(zone_loads, weather)
-    zone_loads = process_load_floors(zone_loads, weather)
-    zone_loads = process_infiltration_ventilation(model, zone_loads, weather, infilvolume)
-    zone_loads = process_internal_gains(zone_loads, nbeds)
+    process_load_windows_skylights(zone_loads, weather)
+    process_load_doors(zone_loads, weather)
+    process_load_walls(zone_loads, weather)
+    process_load_roofs(zone_loads, weather)
+    process_load_ceilings(zone_loads, weather)
+    process_load_floors(zone_loads, weather)
+    process_load_slabs(zone_loads, weather)
+    process_infiltration_ventilation(model, zone_loads, weather, infilvolume)
+    process_internal_gains(zone_loads, nbeds)
     return zone_loads
   end
 
@@ -662,8 +664,6 @@ class HVACSizing
 
     # Skylight Cooling Load
     zone_loads.Cool_Skylights = alp_load + eal
-
-    return zone_loads
   end
 
   def self.process_load_doors(zone_loads, weather)
@@ -688,14 +688,12 @@ class HVACSizing
       if door.wall.is_exterior
         zone_loads.Heat_Doors += (1.0 / door.r_value) * door.area * @htd
         zone_loads.Cool_Doors += (1.0 / door.r_value) * door.area * cltd
-      else
+      else # Partition door
         adjacent_space = door.wall.exterior_adjacent_to
         zone_loads.Cool_Doors += (1.0 / door.r_value) * door.area * (@cool_design_temps[adjacent_space] - @cool_setpoint)
         zone_loads.Heat_Doors += (1.0 / door.r_value) * door.area * (@heat_setpoint - @heat_design_temps[adjacent_space])
       end
     end
-
-    return zone_loads
   end
 
   def self.process_load_walls(zone_loads, weather)
@@ -764,7 +762,7 @@ class HVACSizing
 
           zone_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * cltd
           zone_loads.Heat_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * @htd
-        else
+        else # Partition wall
           adjacent_space = wall.exterior_adjacent_to
           zone_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (@cool_design_temps[adjacent_space] - @cool_setpoint)
           zone_loads.Heat_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (@heat_setpoint - @heat_design_temps[adjacent_space])
@@ -779,16 +777,12 @@ class HVACSizing
       u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(foundation_wall)
       zone_loads.Heat_Walls += u_wall_with_soil * foundation_wall.net_area * @htd
     end
-
-    return zone_loads
   end
 
   def self.process_load_roofs(zone_loads, weather)
     '''
-    Heating and Cooling Loads: Ceilings
+    Heating and Cooling Loads: Roofs
     '''
-
-    cltd = 0.0
 
     zone_loads.Heat_Roofs = 0.0
     zone_loads.Cool_Roofs = 0.0
@@ -837,8 +831,29 @@ class HVACSizing
       zone_loads.Cool_Roofs += (1.0 / roof.insulation_assembly_r_value) * roof.net_area * cltd
       zone_loads.Heat_Roofs += (1.0 / roof.insulation_assembly_r_value) * roof.net_area * @htd
     end
+  end
 
-    return zone_loads
+  def self.process_load_ceilings(zone_loads, weather)
+    '''
+    Heating and Cooling Loads: Ceilings
+    '''
+
+    zone_loads.Heat_Ceilings = 0.0
+    zone_loads.Cool_Ceilings = 0.0
+
+    @hpxml.frame_floors.each do |frame_floor|
+      next unless frame_floor.is_ceiling
+      next unless frame_floor.is_thermal_boundary
+
+      if frame_floor.is_exterior
+        zone_loads.Cool_Ceilings += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@ctd - 5.0 + @daily_range_temp_adjust[@daily_range_num])
+        zone_loads.Heat_Ceilings += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * @htd
+      else
+        adjacent_space = frame_floor.exterior_adjacent_to
+        zone_loads.Cool_Ceilings += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@cool_design_temps[adjacent_space] - @cool_setpoint)
+        zone_loads.Heat_Ceilings += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@heat_setpoint - @heat_design_temps[adjacent_space])
+      end
+    end
   end
 
   def self.process_load_floors(zone_loads, weather)
@@ -850,24 +865,71 @@ class HVACSizing
     zone_loads.Cool_Floors = 0.0
 
     @hpxml.frame_floors.each do |frame_floor|
+      next unless frame_floor.is_floor
       next unless frame_floor.is_thermal_boundary
 
       if frame_floor.is_exterior
         zone_loads.Cool_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@ctd - 5.0 + @daily_range_temp_adjust[@daily_range_num])
         zone_loads.Heat_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * @htd
-      else
+      else # Partition floor
         adjacent_space = frame_floor.exterior_adjacent_to
-        zone_loads.Cool_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@cool_design_temps[adjacent_space] - @cool_setpoint)
-        zone_loads.Heat_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@heat_setpoint - @heat_design_temps[adjacent_space])
+        if frame_floor.is_floor && [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned].include?(adjacent_space)
+          u_floor = 1.0 / frame_floor.insulation_assembly_r_value
+
+          sum_ua_wall = 0.0
+          sum_a_wall = 0.0
+          @hpxml.foundation_walls.each do |foundation_wall|
+            next unless foundation_wall.is_exterior && foundation_wall.interior_adjacent_to == adjacent_space
+
+            u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(foundation_wall)
+
+            sum_a_wall += foundation_wall.net_area
+            sum_ua_wall += (u_wall_without_soil * foundation_wall.net_area)
+          end
+          @hpxml.walls.each do |wall|
+            next unless wall.is_exterior && wall.interior_adjacent_to == adjacent_space
+
+            sum_a_wall += wall.net_area
+            sum_ua_wall += (1.0 / wall.insulation_assembly_r_value * wall.net_area)
+          end
+          fail 'Could not find connected walls.' if sum_a_wall <= 0
+          u_wall = sum_ua_wall / sum_a_wall
+
+          # Calculate partition temperature different cooling (PTDC) per Manual J Figure A12-17
+          # Calculate partition temperature different heating (PTDH) per Manual J Figure A12-6
+          if [HPXML::LocationCrawlspaceVented].include? adjacent_space
+            # Vented or Leaky
+            ptdc_floor = @ctd / (1.0 + (4.0 * u_floor) / (u_wall + 0.11))
+            ptdh_floor = @htd / (1.0 + (4.0 * u_floor) / (u_wall + 0.11))
+          elsif [HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned].include? adjacent_space
+            # Sealed Tight
+            ptdc_floor = u_wall * @ctd / (4.0 * u_floor + u_wall)
+            ptdh_floor = u_wall * @htd / (4.0 * u_floor + u_wall)
+          end
+
+          zone_loads.Cool_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * ptdc_floor
+          zone_loads.Heat_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * ptdh_floor
+        else # E.g., floor over garage
+          zone_loads.Cool_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@cool_design_temps[adjacent_space] - @cool_setpoint)
+          zone_loads.Heat_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@heat_setpoint - @heat_design_temps[adjacent_space])
+        end
       end
     end
+  end
+
+  def self.process_load_slabs(zone_loads, weather)
+    '''
+    Heating and Cooling Loads: Floors
+    '''
+
+    zone_loads.Heat_Slabs = 0.0
 
     @hpxml.slabs.each do |slab|
       next unless slab.is_thermal_boundary
 
       if slab.interior_adjacent_to == HPXML::LocationLivingSpace # Slab-on-grade
         f_value = calc_slab_f_value(slab)
-        zone_loads.Heat_Floors += f_value * slab.exposed_perimeter * @htd
+        zone_loads.Heat_Slabs += f_value * slab.exposed_perimeter * @htd
       elsif slab.interior_adjacent_to == HPXML::LocationBasementConditioned
         # Based on MJ 8th Ed. A12-7 and ASHRAE HoF 2013 pg 18.31 Eq 40
         # FIXME: Assumes slab is uninsulated?
@@ -881,11 +943,9 @@ class HVACSizing
         w_b = [length, width].min
         u_avg_bf = (2.0 * k_soil / (Math::PI * w_b)) * (Math::log(w_b / 2.0 + z_f / 2.0 + (k_soil * r_other) / Math::PI) - Math::log(z_f / 2.0 + (k_soil * r_other) / Math::PI))
         u_value_mj8 = 0.85 * u_avg_bf
-        zone_loads.Heat_Floors += u_value_mj8 * slab.area * @htd
+        zone_loads.Heat_Slabs += u_value_mj8 * slab.area * @htd
       end
     end
-
-    return zone_loads
   end
 
   def self.process_infiltration_ventilation(model, zone_loads, weather, infilvolume)
@@ -913,8 +973,6 @@ class HVACSizing
 
     zone_loads.Cool_Infil_Sens = 1.1 * @acf * cfm_Cool_Load_Sens * @ctd
     zone_loads.Cool_Infil_Lat = 0.68 * @acf * cfm_Cool_Load_Lat * (@cool_design_grains - @cool_indoor_grains)
-
-    return zone_loads
   end
 
   def self.process_internal_gains(zone_loads, nbeds)
@@ -926,8 +984,6 @@ class HVACSizing
     n_occupants = nbeds + 1
     zone_loads.Cool_IntGains_Sens = 1600.0 + 230.0 * n_occupants
     zone_loads.Cool_IntGains_Lat = 200.0 * n_occupants
-
-    return zone_loads
   end
 
   def self.aggregate_zone_loads(zone_loads)
@@ -940,14 +996,16 @@ class HVACSizing
     # Heating
     init_loads.Heat = [zone_loads.Heat_Windows + zone_loads.Heat_Skylights +
       zone_loads.Heat_Doors + zone_loads.Heat_Walls +
-      zone_loads.Heat_Floors + zone_loads.Heat_Roofs, 0.0].max +
+      zone_loads.Heat_Floors + +zone_loads.Heat_Slabs +
+      zone_loads.Heat_Ceilings + zone_loads.Heat_Roofs, 0.0].max +
                       zone_loads.Heat_Infil
 
     # Cooling
     init_loads.Cool_Sens = zone_loads.Cool_Windows + zone_loads.Cool_Skylights +
                            zone_loads.Cool_Doors + zone_loads.Cool_Walls +
-                           zone_loads.Cool_Floors + zone_loads.Cool_Roofs +
-                           zone_loads.Cool_Infil_Sens + zone_loads.Cool_IntGains_Sens
+                           zone_loads.Cool_Floors + zone_loads.Cool_Ceilings +
+                           zone_loads.Cool_Roofs + zone_loads.Cool_Infil_Sens +
+                           zone_loads.Cool_IntGains_Sens
     init_loads.Cool_Lat = zone_loads.Cool_Infil_Lat + zone_loads.Cool_IntGains_Lat
 
     init_loads.Cool_Lat = [init_loads.Cool_Lat, 0.0].max
@@ -2447,42 +2505,85 @@ class HVACSizing
     wall_ufactor = 1.0 / wall.insulation_assembly_r_value
 
     # The following correlations were estimated by analyzing MJ8 construction tables.
-    if [HPXML::WallTypeWoodStud, HPXML::WallTypeSteelStud].include? wall_type
-      if wall.insulation_cavity_r_value < 2
-        wall_group = 1 # A
-      elsif wall.insulation_cavity_r_value <= 11
-        wall_group = 2 # B
-      elsif wall.insulation_cavity_r_value <= 13
-        wall_group = 3 # C
-      elsif wall.insulation_cavity_r_value <= 15
-        wall_group = 4 # D
-      elsif wall.insulation_cavity_r_value <= 19
-        wall_group = 5 # E
-      elsif wall.insulation_cavity_r_value <= 21
-        wall_group = 6 # F
-      else
-        wall_group = 7 # G
-      end
-      # Adjust the wall group for rigid foam insulation
-      if (wall.insulation_continuous_r_value > 1) && (wall.insulation_continuous_r_value <= 7)
-        if wall.insulation_cavity_r_value < 2
-          wall_group += 2
-        else
-          wall_group += 4
-        end
-      elsif wall.insulation_continuous_r_value > 7
-        if wall.insulation_cavity_r_value < 2
-          wall_group += 4
-        else
-          wall_group += 6
-        end
-      end
-      # Adjust the wall group for brick siding
+    if wall_type == HPXML::WallTypeWoodStud
       if wall.siding == HPXML::SidingTypeBrick
-        if wall.insulation_cavity_r_value < 2
-          wall_group += 4
+        if wall_ufactor <= 0.070
+          wall_group = 11 # K
+        elsif wall_ufactor <= 0.083
+          wall_group = 10 # J
+        elsif wall_ufactor <= 0.095
+          wall_group = 9 # I
+        elsif wall_ufactor <= 0.100
+          wall_group = 8 # H
+        elsif wall_ufactor <= 0.130
+          wall_group = 7 # G
+        elsif wall_ufactor <= 0.175
+          wall_group = 6 # F
         else
-          wall_group += 6
+          wall_group = 5 # E
+        end
+      else
+        if wall_ufactor <= 0.048
+          wall_group = 10 # J
+        elsif wall_ufactor <= 0.051
+          wall_group = 9 # I
+        elsif wall_ufactor <= 0.059
+          wall_group = 8 # H
+        elsif wall_ufactor <= 0.063
+          wall_group = 7 # G
+        elsif wall_ufactor <= 0.067
+          wall_group = 6 # F
+        elsif wall_ufactor <= 0.075
+          wall_group = 5 # E
+        elsif wall_ufactor <= 0.086
+          wall_group = 4 # D
+        elsif wall_ufactor <= 0.110
+          wall_group = 3 # C
+        elsif wall_ufactor <= 0.170
+          wall_group = 2 # B
+        else
+          wall_group = 1 # A
+        end
+      end
+
+    elsif wall_type == HPXML::WallTypeSteelStud
+      if wall.siding == HPXML::SidingTypeBrick
+        if wall_ufactor <= 0.090
+          wall_group = 11 # K
+        elsif wall_ufactor <= 0.105
+          wall_group = 10 # J
+        elsif wall_ufactor <= 0.118
+          wall_group = 9 # I
+        elsif wall_ufactor <= 0.125
+          wall_group = 8 # H
+        elsif wall_ufactor <= 0.145
+          wall_group = 7 # G
+        elsif wall_ufactor <= 0.200
+          wall_group = 6 # F
+        else
+          wall_group = 5 # E
+        end
+      else
+        if wall_ufactor <= 0.066
+          wall_group = 10 # J
+        elsif wall_ufactor <= 0.070
+          wall_group = 9 # I
+        elsif wall_ufactor <= 0.075
+          wall_group = 8 # H
+        elsif wall_ufactor <= 0.081
+          wall_group = 7 # G
+        elsif wall_ufactor <= 0.088
+          wall_group = 6 # F
+        elsif wall_ufactor <= 0.100
+          wall_group = 5 # E
+        elsif wall_ufactor <= 0.105
+          wall_group = 4 # D
+        elsif wall_ufactor <= 0.120
+          wall_group = 3 # C
+        elsif wall_ufactor <= 0.200
+          wall_group = 2 # B
+        else
+          wall_group = 1 # A
         end
       end
 
@@ -3356,14 +3457,10 @@ class HVACSizing
   def self.display_zone_loads(zone_loads)
     s = "Zone Loads for #{@cond_zone.name}:"
     properties = [
-      :Heat_Windows, :Heat_Skylights,
-      :Heat_Doors, :Heat_Walls,
-      :Heat_Roofs, :Heat_Floors,
-      :Heat_Infil,
-      :Cool_Windows, :Cool_Skylights,
-      :Cool_Doors, :Cool_Walls,
-      :Cool_Roofs, :Cool_Floors,
-      :Cool_Infil_Sens, :Cool_Infil_Lat,
+      :Heat_Windows, :Heat_Skylights, :Heat_Doors, :Heat_Walls,
+      :Heat_Roofs, :Heat_Floors, :Heat_Slabs, :Heat_Ceilings, :Heat_Infil,
+      :Cool_Windows, :Cool_Skylights, :Cool_Doors, :Cool_Walls,
+      :Cool_Roofs, :Cool_Floors, :Cool_Ceilings, :Cool_Infil_Sens, :Cool_Infil_Lat,
       :Cool_IntGains_Sens, :Cool_IntGains_Lat,
     ]
     properties.each do |property|
@@ -3404,9 +3501,9 @@ class ZoneLoads
   def initialize
   end
   attr_accessor(:Cool_Windows, :Cool_Skylights, :Cool_Doors, :Cool_Walls, :Cool_Roofs, :Cool_Floors,
-                :Cool_Infil_Sens, :Cool_Infil_Lat, :Cool_IntGains_Sens, :Cool_IntGains_Lat,
+                :Cool_Ceilings, :Cool_Infil_Sens, :Cool_Infil_Lat, :Cool_IntGains_Sens, :Cool_IntGains_Lat,
                 :Heat_Windows, :Heat_Skylights, :Heat_Doors, :Heat_Walls, :Heat_Roofs, :Heat_Floors,
-                :Heat_Infil)
+                :Heat_Slabs, :Heat_Ceilings, :Heat_Infil)
 end
 
 class InitialLoads

@@ -2844,7 +2844,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     heater_type_choices = OpenStudio::StringVector.new
-    heater_type_choices << 'none'
+    heater_type_choices << HPXML::TypeNone
     heater_type_choices << HPXML::HeaterTypeElectricResistance
     heater_type_choices << HPXML::HeaterTypeGas
     heater_type_choices << HPXML::HeaterTypeHeatPump
@@ -2871,7 +2871,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pool_heater_type', heater_type_choices, true)
     arg.setDisplayName('Pool: Heater Type')
     arg.setDescription("The type of pool heater. Use 'none' if there is no pool heater.")
-    arg.setDefaultValue('none')
+    arg.setDefaultValue(HPXML::TypeNone)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('pool_heater_annual_kwh', true)
@@ -2916,7 +2916,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hot_tub_heater_type', heater_type_choices, true)
     arg.setDisplayName('Hot Tub: Heater Type')
     arg.setDescription("The type of hot tub heater. Use 'none' if there is no hot tub heater.")
-    arg.setDefaultValue('none')
+    arg.setDefaultValue(HPXML::TypeNone)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('hot_tub_heater_annual_kwh', true)
@@ -5242,10 +5242,6 @@ class HPXMLFile
       pump_usage_multiplier = args[:pool_pump_usage_multiplier]
     end
 
-    if args[:pool_heater_type] != 'none'
-      heater_type = args[:pool_heater_type]
-    end
-
     if args[:pool_heater_annual_kwh] != Constants.Auto
       heater_load_units = 'kWh/year'
       heater_load_value = args[:pool_heater_annual_kwh]
@@ -5261,9 +5257,11 @@ class HPXMLFile
     end
 
     hpxml.pools.add(id: 'Pool',
+                    type: HPXML::TypeUnknown,
+                    pump_type: HPXML::TypeUnknown,
                     pump_kwh_per_year: pump_kwh_per_year,
                     pump_usage_multiplier: pump_usage_multiplier,
-                    heater_type: heater_type,
+                    heater_type: args[:pool_heater_type],
                     heater_load_units: heater_load_units,
                     heater_load_value: heater_load_value,
                     heater_usage_multiplier: heater_usage_multiplier)
@@ -5278,10 +5276,6 @@ class HPXMLFile
 
     if args[:hot_tub_pump_usage_multiplier] != 1.0
       pump_usage_multiplier = args[:hot_tub_pump_usage_multiplier]
-    end
-
-    if args[:hot_tub_heater_type] != 'none'
-      heater_type = args[:hot_tub_heater_type]
     end
 
     if args[:hot_tub_heater_annual_kwh] != Constants.Auto
@@ -5299,9 +5293,11 @@ class HPXMLFile
     end
 
     hpxml.hot_tubs.add(id: 'HotTub',
+                       type: HPXML::TypeUnknown,
+                       pump_type: HPXML::TypeUnknown,
                        pump_kwh_per_year: pump_kwh_per_year,
                        pump_usage_multiplier: pump_usage_multiplier,
-                       heater_type: heater_type,
+                       heater_type: args[:hot_tub_heater_type],
                        heater_load_units: heater_load_units,
                        heater_load_value: heater_load_value,
                        heater_usage_multiplier: heater_usage_multiplier)
