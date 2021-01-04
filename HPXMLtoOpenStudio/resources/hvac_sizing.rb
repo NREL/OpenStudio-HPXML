@@ -1592,7 +1592,6 @@ class HVACSizing
     # in capacity due to HVAC installation quality. This is done to prevent causing
     # unmet loads.
 
-    # Fixme: GSHP?
     return unless hvac.has_type(Constants.ObjectNameCentralAirConditioner) || hvac.has_type(Constants.ObjectNameAirSourceHeatPump) || hvac.has_type(Constants.ObjectNameMiniSplitHeatPump) || hvac.has_type(Constants.ObjectNameGroundSourceHeatPump)
 
     tin_cool = UnitConversions.convert(@cool_setpoint, 'F', 'C')
@@ -1618,9 +1617,10 @@ class HVACSizing
       design_vfr_air_defect = UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioCooling)
       # calculate water flow based on current capacity.
       loop_flow = [1.0, UnitConversions.convert([hvac_final_values.Heat_Capacity, hvac_final_values.Cool_Capacity].max, 'Btu/hr', 'ton')].max.floor * 3.0
+      loop_flow_m_3_S = UnitConversions.convert(loop_flow, 'gal/min', 'm^3/s')
 
-      totalCap_CurveValue, sensibleCap_CurveValue = calc_gshp_clg_curve_value(hvac, design_wb_temp, design_db_temp, design_w_temp, design_vfr_air, loop_flow)
-      totalCap_CurveValue_d, sensibleCap_CurveValue_d = calc_gshp_clg_curve_value(hvac, design_wb_temp, design_db_temp, design_w_temp, design_vfr_air_defect, loop_flow)
+      totalCap_CurveValue, sensibleCap_CurveValue = calc_gshp_clg_curve_value(hvac, design_wb_temp, design_db_temp, design_w_temp, design_vfr_air, loop_flow_m_3_S)
+      totalCap_CurveValue_d, sensibleCap_CurveValue_d = calc_gshp_clg_curve_value(hvac, design_wb_temp, design_db_temp, design_w_temp, design_vfr_air_defect, loop_flow_m_3_S)
 
       cap_clg_ratio = 1 / (totalCap_CurveValue_d / totalCap_CurveValue)
       if cap_clg_ratio > 1
@@ -1628,7 +1628,6 @@ class HVACSizing
         hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
         bypassFactor_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, @cool_setpoint, hvac.COIL_BF_FT_SPEC[hvac.SizingSpeed])
 
-        # Recalculate the air flow rate in case the oversizing limit has been used
         cool_Load_SensCap_Design = (hvac_final_values.Cool_Capacity_Sens * sensibleCap_CurveValue /
                                    (1.0 + (1.0 - hvac.CoilBF * bypassFactor_CurveValue) *
                                    (80.0 - @cool_setpoint) / (@cool_setpoint - hvac.LeavingAirTemp)))
@@ -1650,9 +1649,10 @@ class HVACSizing
       design_vfr_air_defect = UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioHeating)
       # calculate water flow based on current capacity.
       loop_flow = [1.0, UnitConversions.convert([hvac_final_values.Heat_Capacity, hvac_final_values.Cool_Capacity].max, 'Btu/hr', 'ton')].max.floor * 3.0
+      loop_flow_m_3_S = UnitConversions.convert(loop_flow, 'gal/min', 'm^3/s')
 
-      totalCap_CurveValue = calc_gshp_htg_curve_value(hvac, design_db_temp, design_w_temp, design_vfr_air, loop_flow)
-      totalCap_CurveValue_d = calc_gshp_htg_curve_value(hvac, design_db_temp, design_w_temp, design_vfr_air_defect, loop_flow)
+      totalCap_CurveValue = calc_gshp_htg_curve_value(hvac, design_db_temp, design_w_temp, design_vfr_air, loop_flow_m_3_S)
+      totalCap_CurveValue_d = calc_gshp_htg_curve_value(hvac, design_db_temp, design_w_temp, design_vfr_air_defect, loop_flow_m_3_S)
 
       cap_htg_ratio = 1 / (totalCap_CurveValue_d / totalCap_CurveValue)
       if cap_htg_ratio > 1
