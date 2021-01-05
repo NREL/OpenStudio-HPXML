@@ -27,8 +27,14 @@ jobs:
         run: |
           bundle exec rake test_all
 
-      - name: Store artifacts
+      - name: Store results
         uses: actions/upload-artifact@v2
         with:
-          name: results
           path: workflow/tests/results
+          name: results          
+
+      - name: Store reports
+        uses: actions/upload-artifact@v2
+        with:
+          path: test/reports
+          name: reports
