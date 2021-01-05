@@ -228,7 +228,7 @@ class OSModel
     add_rim_joists(runner, model, spaces)
     add_frame_floors(runner, model, spaces)
     add_foundation_walls_slabs(runner, model, spaces)
-    add_interior_shading_schedule(runner, model, weather)
+    add_shading_schedule(runner, model, weather)
     add_windows(runner, model, spaces, weather)
     add_doors(runner, model, spaces)
     add_skylights(runner, model, spaces, weather)
@@ -1741,7 +1741,7 @@ class OSModel
     end
   end
 
-  def self.add_interior_shading_schedule(runner, model, weather)
+  def self.add_shading_schedule(runner, model, weather)
     heating_season, @cooling_season = HVAC.get_default_heating_and_cooling_seasons(weather)
 
     # Create cooling season schedule
@@ -1810,9 +1810,9 @@ class OSModel
         # Apply construction
         Constructions.apply_window(runner, model, sub_surface, 'WindowConstruction', window.ufactor, window.shgc)
 
-        # Apply interior shading (as needed)
+        # Apply interior/exterior shading (as needed)
         shading_polygon = add_wall_polygon(window_width, window_height, z_origin, window.azimuth, [0, 0, 0, 0])
-        shading_group = apply_interior_shading(model, window, shading_polygon, surface, sub_surface, shading_group, shading_schedules, Constants.ObjectNameWindowShade)
+        shading_group = apply_shading(model, window, shading_polygon, surface, sub_surface, shading_group, shading_schedules, Constants.ObjectNameWindowShade)
       else
         # Window is on an interior surface, which E+ does not allow. Model
         # as a door instead so that we can get the appropriate conduction
@@ -1885,18 +1885,18 @@ class OSModel
       # Apply construction
       Constructions.apply_skylight(runner, model, sub_surface, 'SkylightConstruction', skylight.ufactor, skylight.shgc)
 
-      # Apply interior shading (as needed)
+      # Apply interior/exterior shading (as needed)
       shading_polygon = add_roof_polygon(length, width, z_origin, skylight.azimuth, tilt)
-      shading_group = apply_interior_shading(model, skylight, shading_polygon, surface, sub_surface, shading_group, shading_schedules, Constants.ObjectNameSkylightShade)
+      shading_group = apply_shading(model, skylight, shading_polygon, surface, sub_surface, shading_group, shading_schedules, Constants.ObjectNameSkylightShade)
     end
 
     apply_adiabatic_construction(runner, model, surfaces, 'roof')
   end
 
-  def self.apply_interior_shading(model, window_or_skylight, shading_polygon, parent_surface, sub_surface, shading_group, shading_schedules, name)
+  def self.apply_shading(model, window_or_skylight, shading_polygon, parent_surface, sub_surface, shading_group, shading_schedules, name)
     # TODO: Move this code elsewhere?
-    sf_summer = window_or_skylight.interior_shading_factor_summer
-    sf_winter = window_or_skylight.interior_shading_factor_winter
+    sf_summer = window_or_skylight.interior_shading_factor_summer * window_or_skylight.exterior_shading_factor_summer
+    sf_winter = window_or_skylight.interior_shading_factor_winter * window_or_skylight.exterior_shading_factor_winter
     if (sf_summer < 1.0) || (sf_winter < 1.0)
       # Apply shading
       # We use a ShadingSurface instead of a Shade so that we perfectly get the result we want.
@@ -1904,7 +1904,6 @@ class OSModel
       # solar (due to, e.g., re-reflectance, absorptance, angle modifiers, effects on convection, etc.).
 
       # Shading surface is used to reduce beam solar and sky diffuse solar
-      # TODO: Allow a single shading surface to span multiple windows w/ the same interior shading and orientation?
       shading_surface = OpenStudio::Model::ShadingSurface.new(shading_polygon, model)
       shading_surface.setName("#{window_or_skylight.id} shading surface")
       shading_surface.additionalProperties.setFeature('Azimuth', window_or_skylight.azimuth)
