@@ -3280,8 +3280,8 @@ class HVAC
   end
 
   def self.apply_capacity_degradation_EMS(model, cap_fflow_spec, eir_fflow_spec, coil_name, is_cooling, cap_fff_curve, eir_fff_curve)
-    cap_time = 5 # Assumed minutes to take to ramp up to full capacity
-    power_time = 3 # Assumed minutes to take to ramp up to full power
+    cap_time = 2 # Assumed minutes to take to ramp up to full capacity
+    power_time = 1 # Assumed minutes to take to ramp up to full power
     number_of_timestep_logged = [cap_time, power_time].max
 
     # Sensors
@@ -3295,10 +3295,11 @@ class HVAC
 
     if is_cooling
       coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Electricity Energy')
+      coil_energy.setName('clg coil electric energy')
     else
       coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electricity Energy')
+      coil_energy.setName('htg coil electric energy')
     end
-    coil_energy.setName('coil electric energy')
     coil_energy.setKeyName(coil_name)
     # Trend variable
     energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, coil_energy)
@@ -3357,12 +3358,11 @@ class HVAC
         r_s = r_s_a.join(' && ')
         realistic_cycling_program.addLine("ElseIf cc_#{t_i + 1}_ago == 0 && #{r_s}")
       end
-      realistic_cycling_program.addLine("  Set cc_mult = 0.4087*(@Ln(#{t_i + 1}))+0.3466") # Note 1 in @Ln(1) is 1 MINUTE, at larger timesteps we'll have to populate the natural log dynamically
-      if t_i < power_time
-        realistic_cycling_program.addLine("  Set ec_mult = 0.273*(@Ln(#{t_i + 1})) + 0.7")
-      else
-        realistic_cycling_program.addLine('  Set ec_mult = 1.0')
-      end
+      # Curve fit from Winkler's thesis, page 200: https://drum.lib.umd.edu/bitstream/handle/1903/9493/Winkler_umd_0117E_10504.pdf?sequence=1&isAllowed=y
+      realistic_cycling_program.addLine("  Set exp = @Exp((-2.19722) * #{t_i + 1})")
+      realistic_cycling_program.addLine("  Set cc_mult = -1.0125 * exp + 1.0125")
+      # power is ramped up in less than 1 min, only second level simulation can capture power startup behavior
+      realistic_cycling_program.addLine('  Set ec_mult = 1.0')
     end
     realistic_cycling_program.addLine('Else')
     realistic_cycling_program.addLine('  Set cc_mult = 1.0')
