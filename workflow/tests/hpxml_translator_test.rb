@@ -604,6 +604,9 @@ class HPXMLTest < MiniTest::Test
       if hpxml.hvac_distributions.select { |d| d.hydronic_and_air_type.to_s == HPXML::HydronicAndAirTypeFanCoil }.size > 0
         next if err_line.include? 'In calculating the design coil UA for Coil:Cooling:Water' # Warning for unused cooling coil for fan coil
       end
+      if hpxml_path.include? 'base-enclosure-split-surfaces2.xml'
+        next if err_line.include? 'GetSurfaceData: Very small surface area' # FUTURE: Prevent this warning
+      end
 
       flunk "Unexpected warning found: #{err_line}"
     end
@@ -699,7 +702,8 @@ class HPXMLTest < MiniTest::Test
                                       'base-foundation-basement-garage.xml' => 2,        # additional instance for garage
                                       'base-enclosure-garage.xml' => 2,                  # additional instance for garage
                                       'base-foundation-walkout-basement.xml' => 4,       # 3 foundation walls plus a no-wall exposed perimeter
-                                      'base-foundation-complex.xml' => 10 }              # lots of foundations for testing
+                                      'base-foundation-complex.xml' => 10,               # lots of foundations for testing
+                                      'base-enclosure-split-surfaces2.xml' => 81 }       # lots of foundations for testing
 
       if not num_expected_kiva_instances[File.basename(hpxml_path)].nil?
         assert_equal(num_expected_kiva_instances[File.basename(hpxml_path)], num_kiva_instances)
