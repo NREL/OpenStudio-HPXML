@@ -5476,6 +5476,8 @@ if ARGV[0].to_sym == :create_release_zips
     puts "Command failed: '#{command}'. Perhaps git needs to be installed?"
     exit!
   end
+  
+  puts "git_files #{git_files}"
 
   files = ['HPXMLtoOpenStudio/measure.*',
            'HPXMLtoOpenStudio/resources/*.*',
@@ -5544,16 +5546,21 @@ if ARGV[0].to_sym == :create_release_zips
     end
     files.each do |f|
       Dir[f].each do |file|
+        puts "considering #{file}..."
         if file.start_with? 'documentation'
+          puts "include documentation"
           # always include
         elsif include_all_epws
+          puts "include epw"
           if (not git_files.include? file) && (not file.start_with? 'weather')
             next
           end
         else
           if not git_files.include? file
+            puts "exclude file"
             next
           end
+          puts "include file"
         end
 
         zip.addFile(file, File.join('OpenStudio-HPXML', file))
