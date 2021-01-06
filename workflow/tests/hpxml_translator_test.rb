@@ -292,6 +292,7 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_release_zips
+    skip
     # Check release zips successfully created
     top_dir = File.join(@this_dir, '..', '..')
     command = "#{OpenStudio.getOpenStudioCLI} #{File.join(top_dir, 'tasks.rb')} create_release_zips"
