@@ -25,7 +25,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_simulations
-    skip
     sample_files_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files'))
     autosize_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files', 'hvac_autosizing'))
 
@@ -57,7 +56,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_ashrae_140
-    skip
     ashrae140_dir = File.absolute_path(File.join(@this_dir, 'ASHRAE_Standard_140'))
 
     ashrae140_out = File.join(@results_dir, 'results_ashrae_140.csv')
@@ -80,7 +78,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_run_simulation_rb
-    skip
     # Check that simulation works using run_simulation.rb script
     os_cli = OpenStudio.getOpenStudioCLI
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
@@ -104,7 +101,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_run_simulation_json_output
-    skip
     # Check that the simulation produces JSON outputs (instead of CSV outputs) if requested
     os_cli = OpenStudio.getOpenStudioCLI
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
@@ -128,7 +124,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_template_osw
-    skip
     # Check that simulation works using template.osw
     require 'json'
 
@@ -172,7 +167,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_weather_cache
-    skip
     cache_orig = File.join(@this_dir, '..', '..', 'weather', 'USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv')
     cache_bak = cache_orig + '.bak'
     File.rename(cache_orig, cache_bak)
@@ -181,7 +175,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_invalid
-    skip
     sample_files_dir = File.join(@this_dir, '..', 'sample_files')
 
     expected_error_msgs = { 'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
