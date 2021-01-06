@@ -1,4 +1,4 @@
-name: Run Tests and Plot results
+name: ci
 on: [push]
 jobs:
   run-tests:
