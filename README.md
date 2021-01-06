@@ -3,7 +3,7 @@ OpenStudio-HEScore
 
 An OpenStudio/EnergyPlus simulation workflow that operates on a HPXML file produced by DOE's Home Energy Score (HEScore).
 
-**Unit Test Status:** ![Github Actions](https://github.com/NREL/OpenStudio-HEScore/workflows/Run%20Tests%20and%20Plot%20results/badge.svg?branch=github_actions)
+**Unit Test Status:** ![Github Actions](https://github.com/NREL/OpenStudio-HEScore/workflows/Run%20Tests%20and%20Plot%20results/badge.svg)
 
 ## Setup
 
