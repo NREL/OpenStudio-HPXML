@@ -28,6 +28,7 @@ GEM
     oga (3.3)
       ast
       ruby-ll (~> 2.1)
+    parallel (1.20.1)
     rake (13.0.1)
     ruby-ll (2.1.2)
       ansi
@@ -49,6 +50,7 @@ DEPENDENCIES
   minitest-reporters
   nokogiri (~> 1.10)
   oga
+  parallel
   rake
   simplecov
 
