@@ -35,5 +35,5 @@ jobs:
         run: python plots/make_comparison_plots.py plots/doe2_enduse_v8_4_eri_setpoints.csv /tmp/data/test_results/results.csv
       - uses: actions/upload-artifact@v2
         with:
-          name: plots/plots
-          path: plots
+          name: plots
+          path: plots/plots
