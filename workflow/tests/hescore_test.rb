@@ -5,6 +5,7 @@ require 'openstudio/measure/ShowRunnerOutput'
 require 'minitest/autorun'
 require 'fileutils'
 require 'json'
+require 'parallel'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/measure'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/xmlhelper'
 require_relative '../hescore_lib'
@@ -27,11 +28,12 @@ class HEScoreTest < Minitest::Unit::TestCase
     results = {}
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
     xmldir = "#{parent_dir}/sample_files"
-    Dir["#{xmldir}/*.xml"].sort.each do |xml|
-      results[File.basename(xml)] = run_and_check(xml, parent_dir, false, zipfile)
+    Parallel.map(Dir["#{xmldir}/*.xml"].sort, in_threads: Parallel.processor_count) do |xml|
+      out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
+      results[File.basename(xml)] = run_and_check(xml, out_dir, false, zipfile)
     end
 
-    _write_summary_results(results, results_csv_path)
+    _write_summary_results(results.sort_by { |k, v| k.downcase }.to_h, results_csv_path)
   end
 
   def test_skip_simulation
@@ -99,7 +101,7 @@ class HEScoreTest < Minitest::Unit::TestCase
 
     # Run workflow
     cli_path = OpenStudio.getOpenStudioCLI
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml}"
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} -o #{parent_dir}"
     start_time = Time.now
     success = system(command)
     assert_equal(true, success)
