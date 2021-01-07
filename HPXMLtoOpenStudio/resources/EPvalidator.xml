@@ -1321,6 +1321,8 @@
       <sch:assert role='ERROR' test='count(h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: SystemIdentifier</sch:assert>
       <sch:assert role='ERROR' test='count(h:Type) = 1'>Expected 1 element(s) for xpath: Type</sch:assert>
       <sch:assert role='ERROR' test='h:Type[text()="portable" or text()="whole-home"] or not(h:Type)'>Expected Type to be 'portable' or 'whole-home'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Location) = 1'>Expected 1 element(s) for xpath: Location</sch:assert>
+      <sch:assert role='ERROR' test='h:Location[text()="living space"] or not(h:Location)'>Expected Location to be 'living space'</sch:assert>
       <sch:assert role='ERROR' test='count(h:Capacity) = 1'>Expected 1 element(s) for xpath: Capacity</sch:assert> <!-- pints/day -->
       <sch:assert role='ERROR' test='count(h:IntegratedEnergyFactor) + count(h:EnergyFactor) = 1'>Expected 1 element(s) for xpath: IntegratedEnergyFactor | EnergyFactor</sch:assert> <!-- liters/kWh -->
       <sch:assert role='ERROR' test='count(h:DehumidistatSetpoint) = 1'>Expected 1 element(s) for xpath: DehumidistatSetpoint</sch:assert> <!-- RH, fraction -->

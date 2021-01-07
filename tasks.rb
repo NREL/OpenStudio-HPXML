@@ -4827,7 +4827,8 @@ def set_hpxml_dehumidifier(hpxml_file, hpxml)
                             capacity: 40,
                             energy_factor: 1.8,
                             rh_setpoint: 0.5,
-                            fraction_served: 1.0)
+                            fraction_served: 1.0,
+                            location: HPXML::LocationLivingSpace)
   elsif ['base-appliances-dehumidifier-50percent.xml'].include? hpxml_file
     hpxml.dehumidifiers[0].fraction_served = 0.5
   elsif ['base-appliances-dehumidifier-ief-portable.xml'].include? hpxml_file
