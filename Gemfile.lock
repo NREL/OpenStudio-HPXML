@@ -23,7 +23,6 @@ GEM
     oga (3.3)
       ast
       ruby-ll (~> 2.1)
-    parallel (1.20.1)
     rake (13.0.3)
     ruby-ll (2.1.2)
       ansi
@@ -37,7 +36,6 @@ GEM
     simplecov_json_formatter (0.1.2)
 
 PLATFORMS
-  ruby
   x64-mingw32
 
 DEPENDENCIES
@@ -46,9 +44,8 @@ DEPENDENCIES
   minitest (~> 5.9)
   minitest-reporters
   oga
-  parallel
   rake
   simplecov
 
 BUNDLED WITH
-   2.1.4
+   2.1.0
