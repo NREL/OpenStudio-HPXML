@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>18e73971-4395-4f93-a17b-f65c61b6075c</version_id>
-  <version_modified>20210107T201236Z</version_modified>
+  <version_id>df276b76-07cc-4317-be05-54ae93758aaf</version_id>
+  <version_modified>20210107T211710Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -2015,7 +2015,7 @@
     <argument>
       <name>heat_pump_is_ducted</name>
       <display_name>Heat Pump: Is Ducted</display_name>
-      <description>Whether the heat pump is ducted or not. Only used for mini-split and evaporative cooler.</description>
+      <description>Whether the heat pump is ducted or not. Only used for mini-split.</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -7580,6 +7580,12 @@
       <checksum>58D16286</checksum>
     </file>
     <file>
+      <filename>extra-second-heating-system-boiler.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CB19349D</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.0</identifier>
@@ -7588,13 +7594,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>B24D3D33</checksum>
-    </file>
-    <file>
-      <filename>extra-second-heating-system-boiler.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>CB19349D</checksum>
+      <checksum>267B7BE6</checksum>
     </file>
   </files>
 </measure>
