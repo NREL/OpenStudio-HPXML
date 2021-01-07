@@ -21,22 +21,14 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_simulations
-    sample_files_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files'))
-    autosize_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files', 'hvac_autosizing'))
-
     results_out = File.join(@results_dir, 'results.csv')
     File.delete(results_out) if File.exist? results_out
     sizing_out = File.join(@results_dir, 'results_hvac_sizing.csv')
     File.delete(sizing_out) if File.exist? sizing_out
 
-    test_dirs = [sample_files_dir,
-                 autosize_dir]
-
     xmls = []
-    test_dirs.each do |test_dir|
-      Dir["#{test_dir}/*.xml"].sort.each do |xml|
-        xmls << File.absolute_path(xml)
-      end
+    Dir["#{File.absolute_path(File.join(@this_dir, '..', 'sample_files'))}/*.xml"].sort.each do |xml|
+      xmls << File.absolute_path(xml)
     end
 
     # Test simulations
