@@ -7,7 +7,7 @@ __New Features__
 - Allows detailed heating/cooling setpoints to be specified: 24-hour weekday & weekend values.
 - Allows JSON annual/timeseries output files to be generated instead of CSV. **Breaking change**: For CSV outputs, the first two sections in the results_annual.csv file are now prefixed with "Fuel Use:" and "End Use:", respectively.
 - Allows more defaulting (optional inputs) for a variety of HPXML elements.
-- Includes hot water loads to outputs (in addition to heating/cooling loads) when timeseries total loads are requested.
+- Includes hot water loads (in addition to heating/cooling loads) when timeseries total loads are requested.
 - Allows skipping schema/schematron validation (for speed); should only be used if the HPXML was already validated upstream.
 - Overhauls documentation to be more comprehensive and standardized.
 - `run_simulation.rb` now returns exit code 1 if not successful (i.e., either invalid inputs or simulation fails).
