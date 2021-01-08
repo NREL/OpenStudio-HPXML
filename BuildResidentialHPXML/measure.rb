@@ -4723,7 +4723,8 @@ class HPXMLFile
                             energy_factor: energy_factor,
                             integrated_energy_factor: integrated_energy_factor,
                             rh_setpoint: args[:dehumidifier_rh_setpoint],
-                            fraction_served: args[:dehumidifier_fraction_dehumidification_load_served])
+                            fraction_served: args[:dehumidifier_fraction_dehumidification_load_served],
+                            location: HPXML::LocationLivingSpace)
   end
 
   def self.set_clothes_washer(hpxml, runner, args)
