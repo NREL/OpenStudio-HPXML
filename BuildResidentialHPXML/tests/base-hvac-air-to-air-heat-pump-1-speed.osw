@@ -144,7 +144,6 @@
         "heat_pump_cooling_efficiency_eer": 16.6,
         "heat_pump_cooling_efficiency_seer": 13.0,
         "heat_pump_cooling_sensible_heat_fraction": 0.73,
-        "heat_pump_fan_power_watts_per_cfm": 0.45,
         "heat_pump_fraction_cool_load_served": 1,
         "heat_pump_fraction_heat_load_served": 1,
         "heat_pump_heating_capacity": "42000.0",

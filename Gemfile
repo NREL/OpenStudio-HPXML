@@ -9,4 +9,4 @@ gem 'ci_reporter_minitest', '~> 1.0.0'
 gem 'simplecov'
 gem 'codecov', '0.2.12'
 gem 'minitest-reporters'
-gem 'minitest-ci' # For CircleCI Automatic test metadata collection
+gem 'parallel'
