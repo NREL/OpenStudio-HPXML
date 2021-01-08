@@ -1,10 +1,30 @@
 ## OpenStudio-HPXML v1.1.0 (pending)
 
 __New Features__
-- TODO
+- **Breaking change**: `Type` is now a required input for dehumidifiers; can be "portable" or "whole-home".
+- **Breaking change**: `Location` is now a required input for dehumidifiers; must be "living space" as dehumidifiers are currently modeled as located in living space.
+- Allows modeling generators (generic on-site power production).
+- Allows detailed heating/cooling setpoints to be specified: 24-hour weekday & weekend values.
+- Allows JSON annual/timeseries output files to be generated instead of CSV. **Breaking change**: For CSV outputs, the first two sections in the results_annual.csv file are now prefixed with "Fuel Use:" and "End Use:", respectively.
+- Allows more defaulting (optional inputs) for a variety of HPXML elements.
+- Includes hot water loads to outputs (in addition to heating/cooling loads) when timeseries total loads are requested.
+- Allows skipping schema/schematron validation (for speed); should only be used if the HPXML was already validated upstream.
+- Overhauls documentation to be more comprehensive and standardized.
+- `run_simulation.rb` now returns exit code 1 if not successful (i.e., either invalid inputs or simulation fails).
 
 __Bugfixes__
-- TODO
+- Adds error-checking on the HPXML schemaVersion.
+- Adds various error-checking the schematron validator.
+- Adds error-checking for empty IDs in the HPXML file.
+- Fixes heat pump water heater fan energy not included in SimulationOutputReport outputs.
+- Fixes possibility of incorrect "A neighbor building has an azimuth (XXX) not equal to the azimuth of any wall" error.
+- Fixes possibility of errors encountered before schematron validation has occurred.
+- Small bugfixes related to basement interior surface solar absorptances.
+- Allows NumberofConditionedFloors/NumberofConditionedFloorsAboveGrade to be non-integer values per the HPXML schema.
+- HVAC sizing improvements for floors above crawlspaces/basements and walls.
+- Now recognizes Type="none" to prevent modeling of pools and hot tubs (pumps and heaters). **Breaking Change**: `Type` is now a required input for Pool, PoolPump, HotTub, and HotTubPump.
+- Slight adjustment of default water heater recovery efficiency equation to prevent errors from values being too high.
+- Fixes schematron file not being valid per ISO Schematron standard.
 
 ## OpenStudio-HPXML v1.0.0
 
