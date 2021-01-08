@@ -416,6 +416,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('geometry_has_flue_or_chimney', true)
+    arg.setDisplayName('Geometry: Has Flue or Chimney')
+    arg.setDescription('Whether there is a flue or chimney.')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
     level_choices = OpenStudio::StringVector.new
     level_choices << 'Bottom'
     level_choices << 'Middle'
@@ -997,12 +1003,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heating_system_has_flue_or_chimney', true)
-    arg.setDisplayName('Heating System: Has Flue or Chimney')
-    arg.setDescription('Whether the heating system has a flue or chimney.')
-    arg.setDefaultValue(false)
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_type', cooling_system_type_choices, true)
     arg.setDisplayName('Cooling System: Type')
     arg.setDescription("The type of cooling system. Use 'none' if there is no cooling system.")
@@ -1343,12 +1343,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The heat load served fraction of the second heating system.')
     arg.setUnits('Frac')
     arg.setDefaultValue(0.25)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heating_system_has_flue_or_chimney_2', true)
-    arg.setDisplayName('Heating System 2: Has Flue or Chimney')
-    arg.setDescription('Whether the second heating system has a flue or chimney.')
-    arg.setDefaultValue(false)
     args << arg
 
     mech_vent_fan_type_choices = OpenStudio::StringVector.new
@@ -1723,12 +1717,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The setpoint temperature of water heater.')
     arg.setUnits('deg-F')
     arg.setDefaultValue(Constants.Auto)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('water_heater_has_flue_or_chimney', true)
-    arg.setDisplayName('Water Heater: Has Flue or Chimney')
-    arg.setDescription('Whether the water heater has a flue or chimney.')
-    arg.setDefaultValue(false)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('water_heater_num_units_served', true)
@@ -3368,11 +3356,9 @@ class HPXMLFile
     hpxml.building_construction.conditioned_building_volume = conditioned_building_volume
     hpxml.building_construction.average_ceiling_height = args[:geometry_wall_height]
     hpxml.building_construction.residential_facility_type = args[:geometry_unit_type]
-
-    if (args[:heating_system_type] != 'none' && args[:heating_system_has_flue_or_chimney]) ||
-       (args[:heating_system_type_2] != 'none' && args[:heating_system_has_flue_or_chimney_2]) ||
-       (args[:water_heater_type] != 'none' && args[:water_heater_has_flue_or_chimney])
-      hpxml.building_construction.has_flue_or_chimney = true
+    if args[:geometry_has_flue_or_chimney] != Constants.Auto
+      has_flue_or_chimney = args[:geometry_has_flue_or_chimney]
+      hpxml.building_construction.has_flue_or_chimney = has_flue_or_chimney
     end
   end
 
