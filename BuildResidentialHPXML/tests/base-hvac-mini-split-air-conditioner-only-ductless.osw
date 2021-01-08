@@ -46,7 +46,6 @@
         "cooling_system_cooling_efficiency_eer": 8.5,
         "cooling_system_cooling_efficiency_seer": 19.0,
         "cooling_system_cooling_sensible_heat_fraction": 0.73,
-        "cooling_system_fan_power_watts_per_cfm": 0.2,
         "cooling_system_fraction_cool_load_served": 1,
         "cooling_system_is_ducted": false,
         "cooling_system_type": "mini-split",

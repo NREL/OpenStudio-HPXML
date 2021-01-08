@@ -231,7 +231,17 @@ class BuildResidentialHPXMLTest < MiniTest::Test
           door.delete
         end
       end
+      hpxml.heating_systems.each do |heating_system|
+        heating_system.electric_auxiliary_energy = nil # Detailed input not offered
+        heating_system.fan_watts = nil # Detailed input not offered
+        heating_system.fan_watts_per_cfm = nil # Detailed input not offered
+      end
+      hpxml.cooling_systems.each do |cooling_system|
+        cooling_system.fan_watts_per_cfm = nil # Detailed input not offered
+      end
       hpxml.heat_pumps.each do |heat_pump|
+        heat_pump.fan_watts_per_cfm = nil # Detailed input not offered
+        heat_pump.pump_watts_per_ton = nil # Detailed input not offered
         next if heat_pump.backup_heating_efficiency_afue.nil?
 
         # These are treated the same in the model, so allow AFUE/percent comparison
