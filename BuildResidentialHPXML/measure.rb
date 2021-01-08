@@ -2184,7 +2184,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Dehumidifier: Efficiency')
     arg.setUnits('liters/kWh')
     arg.setDescription('The efficiency of the dehumidifier.')
-    arg.setDefaultValue(1.8)
+    arg.setDefaultValue(1.5)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dehumidifier_capacity', true)

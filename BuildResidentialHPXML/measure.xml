@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>3ecc7413-7a01-4ffa-8d64-f1042467ec4a</version_id>
-  <version_modified>20210108T170742Z</version_modified>
+  <version_id>26919801-e3dc-4cec-9dd1-ac75c89c7ffc</version_id>
+  <version_modified>20210108T172703Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -4068,7 +4068,7 @@
       <units>liters/kWh</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>1.8</default_value>
+      <default_value>1.5</default_value>
     </argument>
     <argument>
       <name>dehumidifier_capacity</name>
@@ -7408,17 +7408,6 @@
       <checksum>821CE47F</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>0D24D962</checksum>
-    </file>
-    <file>
       <filename>test_measure.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
@@ -7429,6 +7418,17 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>5A3AA02F</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>D10EDB68</checksum>
     </file>
   </files>
 </measure>
