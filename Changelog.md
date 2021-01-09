@@ -8,14 +8,15 @@ __New Features__
 - Allows detailed heating/cooling setpoints to be specified: 24-hour weekday & weekend values.
 - Allows JSON annual/timeseries output files to be generated instead of CSV. **Breaking change**: For CSV outputs, the first two sections in the results_annual.csv file are now prefixed with "Fuel Use:" and "End Use:", respectively.
 - Allows more defaulting (optional inputs) for a variety of HPXML elements.
-- Includes hot water loads (in addition to heating/cooling loads) when timeseries total loads are requested.
+- Allows requesting timeseries unmet heating/cooling loads.
 - Allows skipping schema/schematron validation (for speed); should only be used if the HPXML was already validated upstream.
+- Includes hot water loads (in addition to heating/cooling loads) when timeseries total loads are requested.
 - Overhauls documentation to be more comprehensive and standardized.
 - `run_simulation.rb` now returns exit code 1 if not successful (i.e., either invalid inputs or simulation fails).
 
 __Bugfixes__
 - Adds error-checking on the HPXML schemaVersion.
-- Adds various error-checking the schematron validator.
+- Adds various error-checking to the schematron validator.
 - Adds error-checking for empty IDs in the HPXML file.
 - Fixes heat pump water heater fan energy not included in SimulationOutputReport outputs.
 - Fixes possibility of incorrect "A neighbor building has an azimuth (XXX) not equal to the azimuth of any wall" error.
