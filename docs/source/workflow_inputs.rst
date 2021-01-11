@@ -1944,6 +1944,7 @@ If not entered, the simulation will not include a dehumidifier.
   ==============================================  ==========  ==========  ===========  ========  =======  ========================================
   ``SystemIdentifier``                            id                                   Yes                Unique identifier
   ``Type``                                        string                  See [#]_     Yes                Type of dehumidifier
+  ``Location``                                    string                  See [#]_     Yes                Location of dehumidifier
   ``Capacity``                                    double      pints/day   > 0          Yes                Dehumidification capacity
   ``IntegratedEnergyFactor`` or ``EnergyFactor``  double      liters/kWh  > 0          Yes                Rated efficiency
   ``DehumidistatSetpoint``                        double      frac        0-1          Yes                Relative humidity setpoint
@@ -1951,6 +1952,12 @@ If not entered, the simulation will not include a dehumidifier.
   ==============================================  ==========  ==========  ===========  ========  =======  ========================================
   
   .. [#] Type choices are "portable" or "whole-home".
+  .. [#] Location only choice is "living space".
+
+.. note::
+
+  Dehumidifiers are currently modeled as located within conditioned space; the model is not suited for a dehumidifier in, e.g., a wet unconditioned basement or crawlspace.
+  Therefore the dehumidifier Location is currently restricted to "living space".
 
 HPXML Cooking Range/Oven
 ************************

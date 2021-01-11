@@ -7,9 +7,6 @@ class HVACSizing
     @spaces = spaces
     @cond_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
-    @conditioned_heat_design_temp = 70.0 # Indoor heating design temperature according to ACCA MANUAL J
-    @conditioned_cool_design_temp = 75.0 # Indoor cooling design temperature according to ACCA MANUAL J
-
     @min_cooling_capacity = 1.0 # Btu/hr
 
     # Based on EnergyPlus's model for calculating SHR at off-rated conditions. This curve fit
@@ -17,13 +14,7 @@ class HVACSizing
     # in the SHRRated. It is a function of ODB (MJ design temp) and CFM/Ton (from MJ)
     @shr_biquadratic = [1.08464364, 0.002096954, 0, -0.005766327, 0, -0.000011147]
 
-    # Inside air density
-    @inside_air_dens = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * (Constants.AssumedInsideTemp + 460.0))
-
     process_site_calcs_and_design_temps(weather)
-
-    # Get shelter class
-    @shelter_class = get_shelter_class(model, min_neighbor_distance)
 
     # Calculate loads for the conditioned thermal zone
     zone_loads = process_zone_loads(model, weather, nbeds, infilvolume)
@@ -72,8 +63,8 @@ class HVACSizing
     @daily_range_temp_adjust = [4, 0, -5]
 
     # Manual J inside conditions
-    @cool_setpoint = 75
-    @heat_setpoint = 70
+    @cool_setpoint = 75.0
+    @heat_setpoint = 70.0
 
     @cool_design_grains = UnitConversions.convert(weather.design.CoolingHumidityRatio, 'lbm/lbm', 'grains')
 
@@ -110,6 +101,9 @@ class HVACSizing
     @enthalpy_indoor_cooling = (1.006 * db_indoor_degC + hr_indoor_cooling * (2501.0 + 1.86 * db_indoor_degC)) * UnitConversions.convert(1.0, 'kJ', 'Btu') * UnitConversions.convert(1.0, 'lbm', 'kg')
     @wetbulb_outdoor_cooling = weather.design.CoolingWetbulb
 
+    # Inside air density
+    @inside_air_dens = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * (Constants.AssumedInsideTemp + 460.0))
+
     # Design Temperatures
 
     @cool_design_temps = {}
@@ -134,7 +128,7 @@ class HVACSizing
 
   def self.process_design_temp_heating(weather, space_type)
     if space_type == HPXML::LocationLivingSpace
-      heat_temp = @conditioned_heat_design_temp
+      heat_temp = @heat_setpoint
 
     elsif space_type == HPXML::LocationGarage
       heat_temp = weather.design.HeatingDrybulb + 13.0
@@ -153,14 +147,14 @@ class HVACSizing
         if space_type == HPXML::LocationAtticVented
           heat_temp = weather.design.HeatingDrybulb
         else
-          heat_temp = calculate_space_design_temps(space_type, weather, @conditioned_heat_design_temp, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
+          heat_temp = calculate_space_design_temps(space_type, weather, @heat_setpoint, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
         end
       else
         heat_temp = weather.design.HeatingDrybulb
       end
 
     elsif [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? space_type
-      heat_temp = calculate_space_design_temps(space_type, weather, @conditioned_heat_design_temp, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
+      heat_temp = calculate_space_design_temps(space_type, weather, @heat_setpoint, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
 
     end
 
@@ -171,7 +165,7 @@ class HVACSizing
 
   def self.process_design_temp_cooling(weather, space_type)
     if space_type == HPXML::LocationLivingSpace
-      cool_temp = @conditioned_cool_design_temp
+      cool_temp = @cool_setpoint
 
     elsif space_type == HPXML::LocationGarage
       # Calculate fraction of garage under conditioned space
@@ -220,7 +214,7 @@ class HVACSizing
         if space_type == HPXML::LocationAtticVented
           cool_temp = weather.design.CoolingDrybulb + 40.0 # This is the number from a California study with dark shingle roof and similar ventilation.
         else
-          cool_temp = calculate_space_design_temps(space_type, weather, @conditioned_cool_design_temp, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max, true)
+          cool_temp = calculate_space_design_temps(space_type, weather, @cool_setpoint, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max, true)
         end
 
       else
@@ -304,7 +298,7 @@ class HVACSizing
       end
 
     elsif [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? space_type
-      cool_temp = calculate_space_design_temps(space_type, weather, @conditioned_cool_design_temp, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max)
+      cool_temp = calculate_space_design_temps(space_type, weather, @cool_setpoint, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max)
 
     end
 
@@ -2464,8 +2458,8 @@ class HVACSizing
       # when the roof is insulated
       min_temp_rise = 5.0
 
-      max_cooling_temp = @conditioned_cool_design_temp + max_temp_rise
-      min_cooling_temp = @conditioned_cool_design_temp + min_temp_rise
+      max_cooling_temp = @cool_setpoint + max_temp_rise
+      min_cooling_temp = @cool_setpoint + min_temp_rise
 
       ua_conditioned = 0.0
       ua_outside = 0.0

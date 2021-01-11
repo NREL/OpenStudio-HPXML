@@ -1894,7 +1894,6 @@ class OSModel
   end
 
   def self.apply_shading(model, window_or_skylight, shading_polygon, parent_surface, sub_surface, shading_group, shading_schedules, name)
-    # TODO: Move this code elsewhere?
     sf_summer = window_or_skylight.interior_shading_factor_summer * window_or_skylight.exterior_shading_factor_summer
     sf_winter = window_or_skylight.interior_shading_factor_winter * window_or_skylight.exterior_shading_factor_winter
     if (sf_summer < 1.0) || (sf_winter < 1.0)
@@ -1918,7 +1917,7 @@ class OSModel
       shading_surface.setTransmittanceSchedule(shading_schedules[trans_values].schedule)
 
       # Adjustment to default view factor is used to reduce ground diffuse solar
-      avg_trans_value = trans_values.sum(0.0) / 12.0 # TODO: Create EnergyPlus actuator to adjust this? Throw warning for now if summer/winter values are very different?
+      avg_trans_value = trans_values.sum(0.0) / 12.0 # FUTURE: Create EnergyPlus actuator to adjust this
       default_vf_to_ground = ((1.0 - Math::cos(parent_surface.tilt)) / 2.0).round(2)
       sub_surface.setViewFactortoGround(default_vf_to_ground * avg_trans_value)
 

@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>ba598001-3ace-4368-8d96-2cb289b6c36f</version_id>
-  <version_modified>20210105T155104Z</version_modified>
+  <version_id>1f11bb36-20d2-4199-aedf-5417d4677639</version_id>
+  <version_modified>20210111T221318Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -317,12 +317,6 @@
       <checksum>1A6416EF</checksum>
     </file>
     <file>
-      <filename>HPXMLDataTypes.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C13E66F3</checksum>
-    </file>
-    <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -389,12 +383,6 @@
       <checksum>1932CF82</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>216063F8</checksum>
-    </file>
-    <file>
       <filename>test_hotwater_appliance.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -449,12 +437,6 @@
       <checksum>7D19E7A5</checksum>
     </file>
     <file>
-      <filename>BaseElements.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>206E1C74</checksum>
-    </file>
-    <file>
       <filename>meta_measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -465,6 +447,24 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>32F08043</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3E533530</checksum>
+    </file>
+    <file>
+      <filename>HPXMLDataTypes.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>CC90A68D</checksum>
+    </file>
+    <file>
+      <filename>BaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FDB6F8B2</checksum>
     </file>
     <file>
       <filename>constructions.rb</filename>
@@ -491,22 +491,40 @@
       <checksum>1F88BB71</checksum>
     </file>
     <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>393C5181</checksum>
+    </file>
+    <file>
+      <filename>hvac_sizing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FCAF5E5C</checksum>
+    </file>
+    <file>
       <filename>HPXMLvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A552E5E7</checksum>
+      <checksum>B6BFAEDD</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2E001659</checksum>
+      <checksum>F9B1C122</checksum>
     </file>
     <file>
-      <filename>test_defaults.rb</filename>
+      <filename>EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>0148075E</checksum>
+    </file>
+    <file>
+      <filename>test_constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>393C5181</checksum>
+      <checksum>727CC3F3</checksum>
     </file>
     <file>
       <version>
@@ -517,25 +535,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>3099D86B</checksum>
-    </file>
-    <file>
-      <filename>test_constructions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>727CC3F3</checksum>
-    </file>
-    <file>
-      <filename>EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7B6212E3</checksum>
-    </file>
-    <file>
-      <filename>hvac_sizing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3972843B</checksum>
+      <checksum>DD60ACFE</checksum>
     </file>
   </files>
 </measure>
