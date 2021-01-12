@@ -88,13 +88,18 @@ class MiscLoads
   end
 
   def self.apply_pool_or_hot_tub_heater(model, pool_or_hot_tub, obj_name, living_space)
+    return if pool_or_hot_tub.heater_type == HPXML::TypeNone
+
     heater_kwh = 0
     heater_therm = 0
-    heater_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_hot_tub.heater_weekday_fractions, pool_or_hot_tub.heater_weekend_fractions, pool_or_hot_tub.heater_monthly_multipliers, Constants.ScheduleTypeLimitsFraction)
     if pool_or_hot_tub.heater_load_units == HPXML::UnitsKwhPerYear
       heater_kwh = pool_or_hot_tub.heater_load_value * pool_or_hot_tub.heater_usage_multiplier
     elsif pool_or_hot_tub.heater_load_units == HPXML::UnitsThermPerYear
       heater_therm = pool_or_hot_tub.heater_load_value * pool_or_hot_tub.heater_usage_multiplier
+    end
+
+    if (heater_kwh > 0) || (heater_therm > 0)
+      heater_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_hot_tub.heater_weekday_fractions, pool_or_hot_tub.heater_weekend_fractions, pool_or_hot_tub.heater_monthly_multipliers, Constants.ScheduleTypeLimitsFraction)
     end
 
     if heater_kwh > 0
@@ -131,13 +136,15 @@ class MiscLoads
   end
 
   def self.apply_pool_or_hot_tub_pump(model, pool_or_hot_tub, obj_name, living_space)
+    return if pool_or_hot_tub.pump_type == HPXML::TypeNone
+
     pump_kwh = 0
-    pump_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_hot_tub.pump_weekday_fractions, pool_or_hot_tub.pump_weekend_fractions, pool_or_hot_tub.pump_monthly_multipliers, Constants.ScheduleTypeLimitsFraction)
     if not pool_or_hot_tub.pump_kwh_per_year.nil?
       pump_kwh = pool_or_hot_tub.pump_kwh_per_year * pool_or_hot_tub.pump_usage_multiplier
     end
 
     if pump_kwh > 0
+      pump_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_hot_tub.pump_weekday_fractions, pool_or_hot_tub.pump_weekend_fractions, pool_or_hot_tub.pump_monthly_multipliers, Constants.ScheduleTypeLimitsFraction)
       space_design_level = pump_sch.calcDesignLevelFromDailykWh(pump_kwh / 365.0)
 
       mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
