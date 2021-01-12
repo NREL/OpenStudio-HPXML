@@ -6,6 +6,7 @@ __New Features__
 - **Breaking Change**: `Type` is now a required input for Pool, PoolPump, HotTub, and HotTubPump.
 - Allows modeling generators (generic on-site power production).
 - Allows detailed heating/cooling setpoints to be specified: 24-hour weekday & weekend values.
+- Allows modeling window/skylight *exterior* shading via summer/winter shading coefficients.
 - Allows JSON annual/timeseries output files to be generated instead of CSV. **Breaking change**: For CSV outputs, the first two sections in the results_annual.csv file are now prefixed with "Fuel Use:" and "End Use:", respectively.
 - Allows more defaulting (optional inputs) for a variety of HPXML elements.
 - Allows requesting timeseries unmet heating/cooling loads.

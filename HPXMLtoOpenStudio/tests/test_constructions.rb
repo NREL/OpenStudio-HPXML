@@ -28,9 +28,9 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
     end
   end
 
-  def test_windows_interior_shading
+  def test_windows_shading
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-enclosure-windows-interior-shading.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-enclosure-windows-shading.xml'))
     model, hpxml = _test_measure(args_hash)
 
     summer_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new('June'), 1, model.yearDescription.get.assumedYear)
@@ -42,6 +42,8 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
       os_window = model.getSubSurfaces.select { |w| w.name.to_s == window.id }[0]
       sf_summer = window.interior_shading_factor_summer
       sf_winter = window.interior_shading_factor_winter
+      sf_summer *= window.exterior_shading_factor_summer unless window.exterior_shading_factor_summer.nil?
+      sf_winter *= window.exterior_shading_factor_winter unless window.exterior_shading_factor_winter.nil?
 
       # Check shading transmittance for sky beam and sky diffuse
       os_shading_surface = model.getShadingSurfaces.select { |ss| ss.name.to_s.start_with? window.id }[0]
@@ -77,9 +79,9 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
     end
   end
 
-  def test_skylights_interior_shading
+  def test_skylights_shading
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-enclosure-skylights-interior-shading.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-enclosure-skylights-shading.xml'))
     model, hpxml = _test_measure(args_hash)
 
     summer_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new('June'), 1, model.yearDescription.get.assumedYear)
@@ -91,6 +93,8 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
       os_window = model.getSubSurfaces.select { |w| w.name.to_s == skylight.id }[0]
       sf_summer = skylight.interior_shading_factor_summer
       sf_winter = skylight.interior_shading_factor_winter
+      sf_summer *= skylight.exterior_shading_factor_summer unless skylight.exterior_shading_factor_summer.nil?
+      sf_winter *= skylight.exterior_shading_factor_winter unless skylight.exterior_shading_factor_winter.nil?
 
       # Check shading transmittance for sky beam and sky diffuse
       os_shading_surface = model.getShadingSurfaces.select { |ss| ss.name.to_s.start_with? skylight.id }[0]
