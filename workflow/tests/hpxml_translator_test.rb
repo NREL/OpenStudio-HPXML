@@ -45,13 +45,11 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_ashrae_140
-    ashrae140_dir = File.absolute_path(File.join(@this_dir, 'ASHRAE_Standard_140'))
-
     ashrae140_out = File.join(@results_dir, 'results_ashrae_140.csv')
     File.delete(ashrae140_out) if File.exist? ashrae140_out
 
     xmls = []
-    Dir["#{ashrae140_dir}/*.xml"].sort.each do |xml|
+    Dir["#{File.absolute_path(File.join(@this_dir, 'ASHRAE_Standard_140'))}/*.xml"].sort.each do |xml|
       xmls << File.absolute_path(xml)
     end
 
@@ -64,7 +62,7 @@ class HPXMLTest < MiniTest::Test
       all_results[xml_name], all_sizing_results[xml_name] = _run_xml(xml, Parallel.worker_number)
     end
 
-    _write_ashrae_140_results(all_results.sort_by { |k, v| k.downcase }.to_h, ashrae140_dir, ashrae140_out)
+    _write_ashrae_140_results(all_results.sort_by { |k, v| k.downcase }.to_h, ashrae140_out)
   end
 
   def test_run_simulation_json_output
@@ -1251,7 +1249,7 @@ class HPXMLTest < MiniTest::Test
     puts "Wrote HVAC sizing results to #{csv_out}."
   end
 
-  def _write_ashrae_140_results(all_results, ashrae140_dir, csv_out)
+  def _write_ashrae_140_results(all_results, csv_out)
     require 'csv'
 
     htg_loads = {}
@@ -1259,7 +1257,6 @@ class HPXMLTest < MiniTest::Test
     CSV.open(csv_out, 'w') do |csv|
       csv << ['Test Case', 'Annual Heating Load [MMBtu]', 'Annual Cooling Load [MMBtu]']
       all_results.sort.each do |xml, xml_results|
-        next unless xml.include? ashrae140_dir
         next unless xml.include? 'C.xml'
 
         htg_load = xml_results['Load: Heating (MBtu)'].round(2)
@@ -1268,7 +1265,6 @@ class HPXMLTest < MiniTest::Test
         htg_loads[test_name] = htg_load
       end
       all_results.sort.each do |xml, xml_results|
-        next unless xml.include? ashrae140_dir
         next unless xml.include? 'L.xml'
 
         clg_load = xml_results['Load: Cooling (MBtu)'].round(2)
