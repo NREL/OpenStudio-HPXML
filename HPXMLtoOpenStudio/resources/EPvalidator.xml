@@ -374,6 +374,8 @@
       <sch:assert role='ERROR' test='count(h:Azimuth) = 1'>Expected 1 element(s) for xpath: Azimuth</sch:assert>
       <sch:assert role='ERROR' test='count(h:UFactor) = 1'>Expected 1 element(s) for xpath: UFactor</sch:assert>
       <sch:assert role='ERROR' test='count(h:SHGC) = 1'>Expected 1 element(s) for xpath: SHGC</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ExteriorShading/h:SummerShadingCoefficient) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ExteriorShading/SummerShadingCoefficient</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ExteriorShading/h:WinterShadingCoefficient) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ExteriorShading/WinterShadingCoefficient</sch:assert>
       <sch:assert role='ERROR' test='count(h:InteriorShading/h:SummerShadingCoefficient) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InteriorShading/SummerShadingCoefficient</sch:assert>
       <sch:assert role='ERROR' test='count(h:InteriorShading/h:WinterShadingCoefficient) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InteriorShading/WinterShadingCoefficient</sch:assert>
       <sch:assert role='ERROR' test='count(h:Overhangs) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Overhangs</sch:assert> <!-- See [WindowOverhangs] -->
@@ -400,6 +402,8 @@
       <sch:assert role='ERROR' test='count(h:Azimuth) = 1'>Expected 1 element(s) for xpath: Azimuth</sch:assert>
       <sch:assert role='ERROR' test='count(h:UFactor) = 1'>Expected 1 element(s) for xpath: UFactor</sch:assert>
       <sch:assert role='ERROR' test='count(h:SHGC) = 1'>Expected 1 element(s) for xpath: SHGC</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ExteriorShading/h:SummerShadingCoefficient) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ExteriorShading/SummerShadingCoefficient</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ExteriorShading/h:WinterShadingCoefficient) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ExteriorShading/WinterShadingCoefficient</sch:assert>
       <sch:assert role='ERROR' test='count(h:InteriorShading/h:SummerShadingCoefficient) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InteriorShading/SummerShadingCoefficient</sch:assert>
       <sch:assert role='ERROR' test='count(h:InteriorShading/h:WinterShadingCoefficient) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InteriorShading/WinterShadingCoefficient</sch:assert>
       <sch:assert role='ERROR' test='count(h:AttachedToRoof) = 1'>Expected 1 element(s) for xpath: AttachedToRoof</sch:assert>
