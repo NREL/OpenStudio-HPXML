@@ -238,6 +238,7 @@ class OSModel
     set_zone_volumes(runner, model, spaces)
     explode_surfaces(runner, model)
     add_num_occupants(model, runner, spaces)
+    set_part_of_total_floor_area(model, runner, spaces)
 
     # HVAC
 
@@ -951,6 +952,14 @@ class OSModel
       weekend_sch = weekday_sch
       monthly_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
       Geometry.process_occupants(model, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds, spaces[HPXML::LocationLivingSpace])
+    end
+  end
+
+  def self.set_part_of_total_floor_area(model, runner, spaces)
+    spaces.keys.each do |space_type|
+      next if [HPXML::LocationBasementConditioned, HPXML::LocationLivingSpace].include? space_type
+
+      spaces[space_type].setPartofTotalFloorArea(false)
     end
   end
 
