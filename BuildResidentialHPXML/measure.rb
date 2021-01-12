@@ -807,6 +807,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Interior shading multiplier for the cooling season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_exterior_shading_winter', false)
+    arg.setDisplayName('Windows: Winter Exterior Shading')
+    arg.setDescription('Exterior shading multiplier for the heating season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_exterior_shading_summer', false)
+    arg.setDisplayName('Windows: Summer Exterior Shading')
+    arg.setDescription('Exterior shading multiplier for the cooling season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_front_depth', true)
     arg.setDisplayName('Overhangs: Front Facade Depth')
     arg.setDescription('Specifies the depth of overhangs for windows on the front facade.')
@@ -3736,6 +3746,14 @@ class HPXMLFile
           interior_shading_factor_summer = args[:window_interior_shading_summer].get
         end
 
+        if args[:window_exterior_shading_winter].is_initialized
+          exterior_shading_factor_winter = args[:window_exterior_shading_winter].get
+        end
+
+        if args[:window_exterior_shading_summer].is_initialized
+          exterior_shading_factor_summer = args[:window_exterior_shading_summer].get
+        end
+
         if args[:window_fraction_operable].is_initialized
           fraction_operable = args[:window_fraction_operable].get
         end
@@ -3750,6 +3768,8 @@ class HPXMLFile
                           overhangs_distance_to_bottom_of_window: overhangs_distance_to_bottom_of_window,
                           interior_shading_factor_winter: interior_shading_factor_winter,
                           interior_shading_factor_summer: interior_shading_factor_summer,
+                          exterior_shading_factor_winter: exterior_shading_factor_winter,
+                          exterior_shading_factor_summer: exterior_shading_factor_summer,
                           fraction_operable: fraction_operable,
                           wall_idref: valid_attr(surface.name))
       end # sub_surfaces

@@ -110,9 +110,10 @@ def create_osws
     'base-enclosure-overhangs.osw' => 'base.osw',
     # 'base-enclosure-rooftypes.osw' => 'base.osw',
     # 'base-enclosure-skylights.osw' => 'base.osw', # There are no front roof surfaces, but 15.0 ft^2 of skylights were specified.
+    # 'base-enclosure-skylights-shading.osw' => 'base-enclosure-skylights.osw", # Not going to support interior/exterior shading by facade
     # 'base-enclosure-split-surfaces.osw' => 'base.osw',
     # 'base-enclosure-walltypes.osw' => 'base.osw',
-    # 'base-enclosure-windows-interior-shading.osw' => 'base.osw', # Not going to support interior shading by facade
+    # 'base-enclosure-windows-shading.osw' => 'base.osw', # Not going to support interior/exterior shading by facade
     'base-enclosure-windows-none.osw' => 'base.osw',
     'base-foundation-ambient.osw' => 'base.osw',
     # 'base-foundation-complex.osw' => 'base.osw', # Not going to support multiple foundation types
@@ -234,6 +235,7 @@ def create_osws
     'extra-enclosure-garage-partially-protruded.osw' => 'base.osw',
     'extra-vacancy-6-months.osw' => 'base-schedules-stochastic.osw',
     'extra-schedules-random-seed.osw' => 'base-schedules-stochastic.osw',
+    'extra-enclosure-windows-shading.osw' => 'base.osw',
 
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
     'invalid_files/heating-system-and-heat-pump.osw' => 'base.osw',
@@ -1100,9 +1102,6 @@ def get_values(osw_file, step)
     step.setArgument('overhangs_left_distance_to_top_of_window', 2.0)
     step.setArgument('overhangs_right_depth', 1.5)
     step.setArgument('overhangs_right_distance_to_top_of_window', 2.0)
-  elsif ['base-enclosure-skylights.osw'].include? osw_file
-    step.setArgument('skylight_area_front', 15)
-    step.setArgument('skylight_area_back', 15)
   elsif ['base-enclosure-windows-none.osw'].include? osw_file
     step.setArgument('window_area_front', 0)
     step.setArgument('window_area_back', 0)
@@ -1791,6 +1790,11 @@ def get_values(osw_file, step)
     step.setArgument('schedules_vacancy_end_day_of_month', 30)
   elsif ['extra-schedules-random-seed.osw'].include? osw_file
     step.setArgument('schedules_random_seed', 123)
+  elsif ['extra-enclosure-windows-shading.osw'].include? osw_file
+    step.setArgument('window_interior_shading_winter', 0.99)
+    step.setArgument('window_interior_shading_summer', 0.01)
+    step.setArgument('window_exterior_shading_winter', 0.9)
+    step.setArgument('window_exterior_shading_summer', 0.1)
   end
 
   # Warnings/Errors
