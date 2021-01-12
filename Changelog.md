@@ -6,6 +6,7 @@ __New Features__
 - **Breaking Change**: `Type` is now a required input for Pool, PoolPump, HotTub, and HotTubPump.
 - Allows modeling generators (generic on-site power production).
 - Allows detailed heating/cooling setpoints to be specified: 24-hour weekday & weekend values.
+- Allows modeling window/skylight *exterior* shading via summer/winter shading coefficients.
 - Allows JSON annual/timeseries output files to be generated instead of CSV. **Breaking change**: For CSV outputs, the first two sections in the results_annual.csv file are now prefixed with "Fuel Use:" and "End Use:", respectively.
 - Allows more defaulting (optional inputs) for a variety of HPXML elements.
 - Allows requesting timeseries unmet heating/cooling loads.
@@ -15,6 +16,7 @@ __New Features__
 - `run_simulation.rb` now returns exit code 1 if not successful (i.e., either invalid inputs or simulation fails).
 
 __Bugfixes__
+- Improved modeling of window/skylight interior shading -- better reflects shading coefficient inputs.
 - Adds error-checking on the HPXML schemaVersion.
 - Adds various error-checking to the schematron validator.
 - Adds error-checking for empty IDs in the HPXML file.

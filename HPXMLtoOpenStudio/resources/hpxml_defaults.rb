@@ -355,6 +355,14 @@ class HPXMLDefaults
         window.interior_shading_factor_winter = default_shade_winter
         window.interior_shading_factor_winter_isdefaulted = true
       end
+      if window.exterior_shading_factor_summer.nil?
+        window.exterior_shading_factor_summer = 1.0
+        window.exterior_shading_factor_summer_isdefaulted = true
+      end
+      if window.exterior_shading_factor_winter.nil?
+        window.exterior_shading_factor_winter = 1.0
+        window.exterior_shading_factor_winter_isdefaulted = true
+      end
       if window.fraction_operable.nil?
         window.fraction_operable = Airflow.get_default_fraction_of_windows_operable()
         window.fraction_operable_isdefaulted = true
@@ -371,6 +379,14 @@ class HPXMLDefaults
       if skylight.interior_shading_factor_winter.nil?
         skylight.interior_shading_factor_winter = 1.0
         skylight.interior_shading_factor_winter_isdefaulted = true
+      end
+      if skylight.exterior_shading_factor_summer.nil?
+        skylight.exterior_shading_factor_summer = 1.0
+        skylight.exterior_shading_factor_summer_isdefaulted = true
+      end
+      if skylight.exterior_shading_factor_winter.nil?
+        skylight.exterior_shading_factor_winter = 1.0
+        skylight.exterior_shading_factor_winter_isdefaulted = true
       end
     end
   end
