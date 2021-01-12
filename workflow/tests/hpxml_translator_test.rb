@@ -528,6 +528,9 @@ class HPXMLTest < MiniTest::Test
       if hpxml.hvac_distributions.select { |d| d.hydronic_and_air_type.to_s == HPXML::HydronicAndAirTypeFanCoil }.size > 0
         next if err_line.include? 'In calculating the design coil UA for Coil:Cooling:Water' # Warning for unused cooling coil for fan coil
       end
+      if hpxml_path.include?('ASHRAE_Standard_140') || (hpxml.windows.size == 0)
+        next if err_line.include? 'GetShadowingInput: DetailedSkyDiffuseModeling is chosen but not needed'
+      end
       if hpxml_path.include? 'base-enclosure-split-surfaces2.xml'
         next if err_line.include? 'GetSurfaceData: Very small surface area' # FUTURE: Prevent this warning
       end

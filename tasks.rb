@@ -244,6 +244,7 @@ def create_hpxmls
     'base-enclosure-overhangs.xml' => 'base.xml',
     'base-enclosure-rooftypes.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
+    'base-enclosure-skylights-interior-shading.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-split-level.xml' => 'base-foundation-slab.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml', # Surfaces should collapse via HPXML.collapse_enclosure_surfaces()
     'base-enclosure-split-surfaces2.xml' => 'base-enclosure-skylights.xml', # Surfaces should NOT collapse via HPXML.collapse_enclosure_surfaces()
@@ -2622,6 +2623,11 @@ def set_hpxml_skylights(hpxml_file, hpxml)
                         interior_shading_factor_summer: 1.0,
                         interior_shading_factor_winter: 1.0,
                         roof_idref: 'Roof')
+  elsif ['base-enclosure-skylights-interior-shading.xml'].include? hpxml_file
+    hpxml.skylights[0].interior_shading_factor_summer = 0.01
+    hpxml.skylights[0].interior_shading_factor_winter = 0.99
+    hpxml.skylights[1].interior_shading_factor_summer = 0.5
+    hpxml.skylights[1].interior_shading_factor_winter = 1.0
   elsif ['invalid_files/net-area-negative-roof.xml'].include? hpxml_file
     hpxml.skylights[0].area = 4000
   elsif ['invalid_files/unattached-skylight.xml'].include? hpxml_file
