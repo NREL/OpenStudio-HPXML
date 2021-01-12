@@ -463,6 +463,7 @@ class HVACSizing
     @hpxml.windows.each do |window|
       next unless window.wall.is_exterior_thermal_boundary
 
+      window_summer_sf = window.interior_shading_factor_summer * window.exterior_shading_factor_summer
       window_true_azimuth = get_true_azimuth(window.azimuth)
       cnt225 = (window_true_azimuth / 22.5).round.to_i
 
@@ -476,7 +477,7 @@ class HVACSizing
         # clf_d: Average Cooling Load Factor for the given window direction
         # clf_n: Average Cooling Load Factor for a window facing North (fully shaded)
         if hr == -1
-          if window.interior_shading_factor_summer < 1
+          if window_summer_sf < 1
             clf_d = clf_avg_is[cnt225]
             clf_n = clf_avg_is[8]
           else
@@ -484,7 +485,7 @@ class HVACSizing
             clf_n = clf_avg_nois[8]
           end
         else
-          if window.interior_shading_factor_summer < 1
+          if window_summer_sf < 1
             clf_d = clf_hr_is[cnt225][hr]
             clf_n = clf_hr_is[8][hr]
           else
@@ -500,10 +501,10 @@ class HVACSizing
         end
 
         # Hourly Heat Transfer Multiplier for the given window Direction
-        htm_d = psf_lat[cnt225] * clf_d * window.shgc * window.interior_shading_factor_summer / 0.87 + window.ufactor * ctd_adj
+        htm_d = psf_lat[cnt225] * clf_d * window.shgc * window_summer_sf / 0.87 + window.ufactor * ctd_adj
 
         # Hourly Heat Transfer Multiplier for a window facing North (fully shaded)
-        htm_n = psf_lat[8] * clf_n * window.shgc * window.interior_shading_factor_summer / 0.87 + window.ufactor * ctd_adj
+        htm_n = psf_lat[8] * clf_n * window.shgc * window_summer_sf / 0.87 + window.ufactor * ctd_adj
 
         if window_true_azimuth < 180
           surf_azimuth = window_true_azimuth
@@ -592,6 +593,7 @@ class HVACSizing
     afl_hr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # Initialize Hourly Aggregate Fenestration Load (AFL)
 
     @hpxml.skylights.each do |skylight|
+      skylight_summer_sf = skylight.interior_shading_factor_summer * skylight.exterior_shading_factor_summer
       skylight_true_azimuth = get_true_azimuth(skylight.azimuth)
       cnt225 = (skylight_true_azimuth / 22.5).round.to_i
       inclination_angle = UnitConversions.convert(Math.atan(skylight.roof.pitch / 12.0), 'rad', 'deg')
@@ -606,7 +608,7 @@ class HVACSizing
         # clf_d: Average Cooling Load Factor for the given skylight direction
         # clf_d: Average Cooling Load Factor for horizontal
         if hr == -1
-          if skylight.interior_shading_factor_summer < 1
+          if skylight_summer_sf < 1
             clf_d = clf_avg_is[cnt225]
             clf_horiz = clf_avg_is_horiz
           else
@@ -614,7 +616,7 @@ class HVACSizing
             clf_horiz = clf_avg_nois_horiz
           end
         else
-          if skylight.interior_shading_factor_summer < 1
+          if skylight_summer_sf < 1
             clf_d = clf_hr_is[cnt225][hr]
             clf_horiz = clf_hr_is_horiz[hr]
           else
@@ -636,7 +638,7 @@ class HVACSizing
         u_curb = 0.51 # default to wood (Table 2B-3)
         ar_curb = 0.35 # default to small (Table 2B-3)
         u_eff_skylight = skylight.ufactor + u_curb * ar_curb
-        htm = (sol_h + sol_v) * (skylight.shgc * skylight.interior_shading_factor_summer / 0.87) + u_eff_skylight * (ctd_adj + 15.0)
+        htm = (sol_h + sol_v) * (skylight.shgc * skylight_summer_sf / 0.87) + u_eff_skylight * (ctd_adj + 15.0)
 
         if hr == -1
           alp_load += htm * skylight.area
