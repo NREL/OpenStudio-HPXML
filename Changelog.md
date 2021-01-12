@@ -4,6 +4,7 @@ __New Features__
 - **Breaking change**: `Type` is now a required input for dehumidifiers; can be "portable" or "whole-home".
 - **Breaking change**: `Location` is now a required input for dehumidifiers; must be "living space" as dehumidifiers are currently modeled as located in living space.
 - **Breaking Change**: `Type` is now a required input for Pool, PoolPump, HotTub, and HotTubPump.
+- Allows modeling airflow/charge defects for air conditioners, heat pumps, and furnaces (RESNET Standard 310).
 - Allows modeling generators (generic on-site power production).
 - Allows detailed heating/cooling setpoints to be specified: 24-hour weekday & weekend values.
 - Allows modeling window/skylight *exterior* shading via summer/winter shading coefficients.

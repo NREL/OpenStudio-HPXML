@@ -1440,14 +1440,6 @@ class HVACSizing
 
         totalCap_CurveValue, sensibleCap_CurveValue = calc_gshp_clg_curve_value(hvac, design_wb_temp, design_db_temp, design_w_temp, design_vfr_air, nil)
 
-        # Used to verify curve, should be close to 1 using ref conditions
-        # ref_temp = 299.817 # K
-        # ref_wb_temp = UnitConversions.convert(67, 'f', 'k')
-        # ref_w_temp = UnitConversions.convert(30, 'f', 'k')
-        # ref_vfr_air = UnitConversions.convert(1200, 'cfm', 'm^3/s')
-        # ref_vfr_water = 0.000284
-        # puts calc_gshp_clg_curve_value(hvac, ref_wb_temp, ref_temp, ref_w_temp, ref_vfr_air, ref_vfr_water)
-
         bypassFactor_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, @cool_setpoint, hvac.COIL_BF_FT_SPEC[hvac.SizingSpeed])
 
         hvac_final_values.Cool_Capacity = hvac_final_values.Cool_Load_Tot / totalCap_CurveValue # Note: cool_Capacity_Design = hvac_final_values.Cool_Load_Tot
@@ -1629,13 +1621,6 @@ class HVACSizing
                                    (80.0 - @cool_setpoint) / (@cool_setpoint - hvac.LeavingAirTemp)))
         hvac_final_values.Cool_Airflow = calc_airflow_rate(cool_Load_SensCap_Design, (@cool_setpoint - hvac.LeavingAirTemp))
       end
-
-      # Used to verify curve, should be close to 1 using ref conditions
-      # ref_temp = UnitConversions.convert(70, 'f', 'k')
-      # ref_w_temp = UnitConversions.convert(30, 'f', 'k')
-      # ref_vfr_air = UnitConversions.convert(1200, 'cfm', 'm^3/s')
-      # ref_vfr_water = 0.000284
-      # puts calc_gshp_htg_curve_value(hvac, ref_temp, ref_w_temp, ref_vfr_air, ref_vfr_water)
 
       # Heating
       # Calculate curve point w/ and w/o defect ratios

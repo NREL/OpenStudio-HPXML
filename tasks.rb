@@ -340,20 +340,20 @@ def create_hpxmls
     'base-hvac-furnace-x3-dse.xml' => 'base.xml',
     'base-hvac-ground-to-air-heat-pump.xml' => 'base.xml',
     'base-hvac-ideal-air.xml' => 'base.xml',
-    'base-hvac-install-qual-none-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
-    'base-hvac-install-qual-airflow-defect-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
-    'base-hvac-install-qual-charge-defect-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
-    'base-hvac-install-qual-blower-efficiency-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
-    'base-hvac-install-qual-all-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
-    'base-hvac-install-qual-all-air-to-air-heat-pump-2-speed.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
-    'base-hvac-install-qual-all-air-to-air-heat-pump-var-speed.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
-    'base-hvac-install-qual-all-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
-    'base-hvac-install-qual-all-furnace-gas-central-ac-2-speed.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
-    'base-hvac-install-qual-all-furnace-gas-central-ac-var-speed.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
-    'base-hvac-install-qual-all-furnace-gas-only.xml' => 'base-hvac-furnace-gas-only.xml',
-    'base-hvac-install-qual-all-ground-to-air-heat-pump.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
-    'base-hvac-install-qual-all-mini-split-heat-pump-ducted.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
-    'base-hvac-install-qual-all-mini-split-air-conditioner-only-ducted.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
+    'base-hvac-install-quality-none-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
+    'base-hvac-install-quality-airflow-defect-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
+    'base-hvac-install-quality-charge-defect-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
+    'base-hvac-install-quality-blower-efficiency-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
+    'base-hvac-install-quality-all-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-install-quality-all-air-to-air-heat-pump-2-speed.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
+    'base-hvac-install-quality-all-air-to-air-heat-pump-var-speed.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
+    'base-hvac-install-quality-all-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
+    'base-hvac-install-quality-all-furnace-gas-central-ac-2-speed.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
+    'base-hvac-install-quality-all-furnace-gas-central-ac-var-speed.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
+    'base-hvac-install-quality-all-furnace-gas-only.xml' => 'base-hvac-furnace-gas-only.xml',
+    'base-hvac-install-quality-all-ground-to-air-heat-pump.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'base-hvac-install-quality-all-mini-split-heat-pump-ducted.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
+    'base-hvac-install-quality-all-mini-split-air-conditioner-only-ducted.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
     'base-hvac-mini-split-air-conditioner-only-ducted.xml' => 'base.xml',
     'base-hvac-mini-split-air-conditioner-only-ductless.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
     'base-hvac-mini-split-heat-pump-ducted.xml' => 'base.xml',
@@ -3027,16 +3027,16 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].fan_coil_watts = nil
     hpxml.heating_systems[0].shared_loop_watts = nil
     hpxml.heating_systems[0].electric_auxiliary_energy = 500.0
-  elsif ['base-hvac-install-qual-none-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
+  elsif ['base-hvac-install-quality-none-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.heating_systems[0].airflow_defect_ratio = 0.0
-  elsif ['base-hvac-install-qual-airflow-defect-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
+  elsif ['base-hvac-install-quality-airflow-defect-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.heating_systems[0].airflow_defect_ratio = -0.25
-  elsif ['base-hvac-install-qual-blower-efficiency-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
+  elsif ['base-hvac-install-quality-blower-efficiency-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.heating_systems[0].fan_watts_per_cfm = 0.365
-  elsif ['base-hvac-install-qual-all-furnace-gas-only.xml',
-         'base-hvac-install-qual-all-furnace-gas-central-ac-1-speed.xml',
-         'base-hvac-install-qual-all-furnace-gas-central-ac-2-speed.xml',
-         'base-hvac-install-qual-all-furnace-gas-central-ac-var-speed.xml'].include? hpxml_file
+  elsif ['base-hvac-install-quality-all-furnace-gas-only.xml',
+         'base-hvac-install-quality-all-furnace-gas-central-ac-1-speed.xml',
+         'base-hvac-install-quality-all-furnace-gas-central-ac-2-speed.xml',
+         'base-hvac-install-quality-all-furnace-gas-central-ac-var-speed.xml'].include? hpxml_file
     hpxml.heating_systems[0].fan_watts_per_cfm = 0.365
     hpxml.heating_systems[0].airflow_defect_ratio = -0.25
   elsif hpxml_file.include?('base-hvac-autosize') && (not hpxml.heating_systems.nil?) && (hpxml.heating_systems.size > 0)
@@ -3165,19 +3165,19 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].fan_watts_per_cfm = 0.55
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_capacity /= 10.0
-  elsif ['base-hvac-install-qual-none-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
+  elsif ['base-hvac-install-quality-none-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].airflow_defect_ratio = 0.0
     hpxml.cooling_systems[0].charge_defect_ratio = 0.0
-  elsif ['base-hvac-install-qual-airflow-defect-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
+  elsif ['base-hvac-install-quality-airflow-defect-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].airflow_defect_ratio = -0.25
-  elsif ['base-hvac-install-qual-charge-defect-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
+  elsif ['base-hvac-install-quality-charge-defect-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].charge_defect_ratio = -0.25
-  elsif ['base-hvac-install-qual-blower-efficiency-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
+  elsif ['base-hvac-install-quality-blower-efficiency-furnace-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fan_watts_per_cfm = 0.365
-  elsif ['base-hvac-install-qual-all-mini-split-air-conditioner-only-ducted.xml',
-         'base-hvac-install-qual-all-furnace-gas-central-ac-1-speed.xml',
-         'base-hvac-install-qual-all-furnace-gas-central-ac-2-speed.xml',
-         'base-hvac-install-qual-all-furnace-gas-central-ac-var-speed.xml'].include? hpxml_file
+  elsif ['base-hvac-install-quality-all-mini-split-air-conditioner-only-ducted.xml',
+         'base-hvac-install-quality-all-furnace-gas-central-ac-1-speed.xml',
+         'base-hvac-install-quality-all-furnace-gas-central-ac-2-speed.xml',
+         'base-hvac-install-quality-all-furnace-gas-central-ac-var-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].charge_defect_ratio = -0.25
     hpxml.cooling_systems[0].fan_watts_per_cfm = 0.365
     hpxml.cooling_systems[0].airflow_defect_ratio = -0.25
@@ -3420,14 +3420,14 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.xml'].include? hpxml_file
     hpxml.heat_pumps[0].backup_heating_fuel = HPXML::FuelTypeElectricity
     hpxml.heat_pumps[0].backup_heating_efficiency_afue = 1.0
-  elsif ['base-hvac-install-qual-all-air-to-air-heat-pump-1-speed.xml',
-         'base-hvac-install-qual-all-air-to-air-heat-pump-2-speed.xml',
-         'base-hvac-install-qual-all-air-to-air-heat-pump-var-speed.xml',
-         'base-hvac-install-qual-all-mini-split-heat-pump-ducted.xml',
-         'base-hvac-install-qual-all-ground-to-air-heat-pump.xml'].include? hpxml_file
+  elsif ['base-hvac-install-quality-all-air-to-air-heat-pump-1-speed.xml',
+         'base-hvac-install-quality-all-air-to-air-heat-pump-2-speed.xml',
+         'base-hvac-install-quality-all-air-to-air-heat-pump-var-speed.xml',
+         'base-hvac-install-quality-all-mini-split-heat-pump-ducted.xml',
+         'base-hvac-install-quality-all-ground-to-air-heat-pump.xml'].include? hpxml_file
     hpxml.heat_pumps[0].airflow_defect_ratio = -0.25
     hpxml.heat_pumps[0].fan_watts_per_cfm = 0.365
-    if hpxml_file != 'base-hvac-install-qual-all-ground-to-air-heat-pump.xml'
+    if hpxml_file != 'base-hvac-install-quality-all-ground-to-air-heat-pump.xml'
       hpxml.heat_pumps[0].charge_defect_ratio = -0.25
     else
       hpxml.heat_pumps[0].charge_defect_ratio = 0.0
