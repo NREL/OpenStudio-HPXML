@@ -1465,7 +1465,6 @@ class HVACSizing
                                    (1.0 + (1.0 - hvac.CoilBF * bypassFactor_CurveValue) *
                                    (80.0 - @cool_setpoint) / (@cool_setpoint - hvac.LeavingAirTemp)))
         hvac_final_values.Cool_Airflow = calc_airflow_rate(cool_Load_SensCap_Design, (@cool_setpoint - hvac.LeavingAirTemp))
-        # FIXME: the airflow was adjusted to about 1.7 * airflow_preadjusted, please verify it.
       else
 
         fail 'Unexpected cooling system.'
