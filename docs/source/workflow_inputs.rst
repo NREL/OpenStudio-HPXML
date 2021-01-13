@@ -579,7 +579,7 @@ If overhangs are specified, additional information is entered in ``Overhangs``.
   ============================  ========  ======  =======================  ========  =======  ========================================================
   Element                       Type      Units   Constraints              Required  Default  Notes
   ============================  ========  ======  =======================  ========  =======  ========================================================
-  ``Depth``                     double    inches  > 0                      Yes                Depth of overhang
+  ``Depth``                     double    inches  >= 0                     Yes                Depth of overhang
   ``DistanceToTopOfWindow``     double    ft      >= 0                     Yes                Vertical distance from overhang to top of window
   ``DistanceToBottomOfWindow``  double    ft      > DistanceToTopOfWindow  Yes                Vertical distance from overhang to bottom of window [#]_
   ============================  ========  ======  =======================  ========  =======  ========================================================
