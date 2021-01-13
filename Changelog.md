@@ -27,6 +27,7 @@ __Bugfixes__
 - Allows NumberofConditionedFloors/NumberofConditionedFloorsAboveGrade to be non-integer values per the HPXML schema.
 - HVAC sizing improvements for floors above crawlspaces/basements and walls.
 - Now recognizes Type="none" to prevent modeling of pools and hot tubs (pumps and heaters).
+- Fixes error for overhangs with zero depth.
 - Slight adjustment of default water heater recovery efficiency equation to prevent errors from values being too high.
 - Fixes schematron file not being valid per ISO Schematron standard.
 
