@@ -512,7 +512,7 @@ class HVACSizing
           surf_azimuth = window_true_azimuth - 360.0
         end
 
-        if not window.overhangs_depth.nil?
+        if (not window.overhangs_depth.nil?) && (window.overhangs_depth > 0)
           if ((hr == -1) && (surf_azimuth.abs < 90.1)) || (hr > -1)
             if hr == -1
               actual_hr = slm_alp_hr[cnt225]

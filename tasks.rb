@@ -2433,6 +2433,9 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[0].overhangs_depth = 2.5
     hpxml.windows[0].overhangs_distance_to_top_of_window = 0
     hpxml.windows[0].overhangs_distance_to_bottom_of_window = 4
+    hpxml.windows[1].overhangs_depth = 0
+    hpxml.windows[1].overhangs_distance_to_top_of_window = 1
+    hpxml.windows[1].overhangs_distance_to_bottom_of_window = 5
     hpxml.windows[2].overhangs_depth = 1.5
     hpxml.windows[2].overhangs_distance_to_top_of_window = 2
     hpxml.windows[2].overhangs_distance_to_bottom_of_window = 6
