@@ -1769,7 +1769,7 @@ class OSModel
       window_height = 4.0 # ft, default
 
       overhang_depth = nil
-      if not window.overhangs_depth.nil?
+      if (not window.overhangs_depth.nil?) && (window.overhangs_depth > 0)
         overhang_depth = window.overhangs_depth
         overhang_distance_to_top = window.overhangs_distance_to_top_of_window
         overhang_distance_to_bottom = window.overhangs_distance_to_bottom_of_window
