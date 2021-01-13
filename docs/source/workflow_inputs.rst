@@ -549,23 +549,25 @@ HPXML Windows
 
 Each window or glass door area is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Windows/Window``.
 
-  ============================================  ========  ============  ===========  ========  =========  ==============================================
+  ============================================  ========  ============  ===========  ========  =========  =============================================================
   Element                                       Type      Units         Constraints  Required  Default    Notes
-  ============================================  ========  ============  ===========  ========  =========  ==============================================
+  ============================================  ========  ============  ===========  ========  =========  =============================================================
   ``SystemIdentifier``                          id                                   Yes                  Unique identifier
   ``Area``                                      double    ft2           > 0          Yes                  Total area
   ``Azimuth``                                   integer   deg           0 - 359      Yes                  Azimuth (clockwise from North)
   ``UFactor``                                   double    Btu/F-ft2-hr  > 0          Yes                  Full-assembly NFRC U-factor
   ``SHGC``                                      double                  0 - 1        Yes                  Full-assembly NFRC solar heat gain coefficient
-  ``InteriorShading/SummerShadingCoefficient``  double    frac          0 - 1        No        0.70 [#]_  Summer interior shading coefficient
-  ``InteriorShading/WinterShadingCoefficient``  double    frac          0 - 1        No        0.85 [#]_  Winter interior shading coefficient
+  ``ExteriorShading/SummerShadingCoefficient``  double    frac          0 - 1        No        1.00       Exterior summer shading coefficient (1=transparent, 0=opaque)
+  ``ExteriorShading/WinterShadingCoefficient``  double    frac          0 - 1        No        1.00       Exterior winter shading coefficient (1=transparent, 0=opaque)
+  ``InteriorShading/SummerShadingCoefficient``  double    frac          0 - 1        No        0.70 [#]_  Interior summer shading coefficient (1=transparent, 0=opaque)
+  ``InteriorShading/WinterShadingCoefficient``  double    frac          0 - 1        No        0.85 [#]_  Interior winter shading coefficient (1=transparent, 0=opaque)
   ``Overhangs``                                 element                 0 - 1        No        <none>     Presence of overhangs (including roof eaves)
   ``FractionOperable``                          double    frac          0 - 1        No        0.67       Operable fraction [#]_
   ``AttachedToWall``                            idref                   See [#]_     Yes                  ID of attached wall
-  ============================================  ========  ============  ===========  ========  =========  ==============================================
+  ============================================  ========  ============  ===========  ========  =========  =============================================================
 
-  .. [#] SummerShadingCoefficient default value indicates 30% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
-  .. [#] WinterShadingCoefficient default value indicates 15% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+  .. [#] InteriorShading/SummerShadingCoefficient default value indicates 30% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+  .. [#] InteriorShading/WinterShadingCoefficient default value indicates 15% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
   .. [#] FractionOperable reflects whether the windows are operable (can be opened), not how they are used by the occupants.
          If a ``Window`` represents a single window, the value should be 0 or 1.
          If a ``Window`` represents multiple windows (e.g., 4), the value should be between 0 and 1 (e.g., 0, 0.25, 0.5, 0.75, or 1).
@@ -577,7 +579,7 @@ If overhangs are specified, additional information is entered in ``Overhangs``.
   ============================  ========  ======  =======================  ========  =======  ========================================================
   Element                       Type      Units   Constraints              Required  Default  Notes
   ============================  ========  ======  =======================  ========  =======  ========================================================
-  ``Depth``                     double    inches  > 0                      Yes                Depth of overhang
+  ``Depth``                     double    inches  >= 0                     Yes                Depth of overhang
   ``DistanceToTopOfWindow``     double    ft      >= 0                     Yes                Vertical distance from overhang to top of window
   ``DistanceToBottomOfWindow``  double    ft      > DistanceToTopOfWindow  Yes                Vertical distance from overhang to bottom of window [#]_
   ============================  ========  ======  =======================  ========  =======  ========================================================
@@ -589,21 +591,21 @@ HPXML Skylights
 
 Each skylight is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight``.
 
-  ============================================  ========  ============  ===========  ========  =========  ==============================================
-  Element                                       Type      Units         Constraints  Required  Default    Notes
-  ============================================  ========  ============  ===========  ========  =========  ==============================================
-  ``SystemIdentifier``                          id                                   Yes                  Unique identifier
-  ``Area``                                      double    ft2           > 0          Yes                  Total area
-  ``Azimuth``                                   integer   deg           0 - 359      Yes                  Azimuth (clockwise from North)
-  ``UFactor``                                   double    Btu/F-ft2-hr  > 0          Yes                  Full-assembly NFRC U-factor
-  ``SHGC``                                      double                  0 - 1        Yes                  Full-assembly NFRC solar heat gain coefficient
-  ``InteriorShading/SummerShadingCoefficient``  double    frac          0 - 1        No        1.0 [#]_   Summer interior shading coefficient
-  ``InteriorShading/WinterShadingCoefficient``  double    frac          0 - 1        No        1.0 [#]_   Winter interior shading coefficient
-  ``AttachedToRoof``                            idref                   See [#]_     Yes                  ID of attached roof
-  ============================================  ========  ============  ===========  ========  =========  ==============================================
+  ============================================  ========  ============  ===========  ========  ==========  =============================================================
+  Element                                       Type      Units         Constraints  Required  Default     Notes
+  ============================================  ========  ============  ===========  ========  ==========  =============================================================
+  ``SystemIdentifier``                          id                                   Yes                   Unique identifier
+  ``Area``                                      double    ft2           > 0          Yes                   Total area
+  ``Azimuth``                                   integer   deg           0 - 359      Yes                   Azimuth (clockwise from North)
+  ``UFactor``                                   double    Btu/F-ft2-hr  > 0          Yes                   Full-assembly NFRC U-factor
+  ``SHGC``                                      double                  0 - 1        Yes                   Full-assembly NFRC solar heat gain coefficient
+  ``ExteriorShading/SummerShadingCoefficient``  double    frac          0 - 1        No        1.00        Exterior summer shading coefficient (1=transparent, 0=opaque)
+  ``ExteriorShading/WinterShadingCoefficient``  double    frac          0 - 1        No        1.00        Exterior winter shading coefficient (1=transparent, 0=opaque)
+  ``InteriorShading/SummerShadingCoefficient``  double    frac          0 - 1        No        1.00        Interior summer shading coefficient (1=transparent, 0=opaque)
+  ``InteriorShading/WinterShadingCoefficient``  double    frac          0 - 1        No        1.00        Interior winter shading coefficient (1=transparent, 0=opaque)
+  ``AttachedToRoof``                            idref                   See [#]_     Yes                   ID of attached roof
+  ============================================  ========  ============  ===========  ========  ==========  =============================================================
 
-  .. [#] SummerShadingCoefficient default value indicates 0% reduction in solar heat gain.
-  .. [#] WinterShadingCoefficient default value indicates 0% reduction in solar heat gain.
   .. [#] AttachedToRoof must reference a ``Roof``.
 
 HPXML Doors

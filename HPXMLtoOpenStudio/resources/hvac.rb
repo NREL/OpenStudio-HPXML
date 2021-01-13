@@ -4053,11 +4053,6 @@ class HVAC
   end
 
   def self.apply_installation_quality_EMS(model, unitary_system, clg_coil, htg_coil, control_zone, charge_defect_ratio, airflow_rated_defect_ratio_cool, airflow_rated_defect_ratio_heat)
-    # TODO: Error checking on inputs
-
-    # TEMP: For testing without
-    # return
-
     return if airflow_rated_defect_ratio_cool.empty? && airflow_rated_defect_ratio_heat.empty?
 
     obj_name = "#{unitary_system.name} install quality"
@@ -4177,7 +4172,6 @@ class HVAC
         heat_cap_fff_curves = htg_coil.stages.map { |stage| stage.heatingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get }
         heat_eir_fff_curves = htg_coil.stages.map { |stage| stage.energyInputRatioFunctionofFlowFractionCurve.to_CurveQuadratic.get }
       else
-        puts htg_coil
         fail 'heating coil not supported'
       end
       for speed in 0..(num_speeds - 1)
