@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>bef97971-dc15-49f5-a9e9-794ced76c815</version_id>
-  <version_modified>20210114T180516Z</version_modified>
+  <version_id>6dbd5423-2ac4-43ff-9e35-cf861c9e0376</version_id>
+  <version_modified>20210114T200132Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -1691,6 +1691,15 @@
       <default_value>1</default_value>
     </argument>
     <argument>
+      <name>heating_system_airflow_defect_ratio</name>
+      <display_name>Heating System: Airflow Defect Ratio</display_name>
+      <description>The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / DesignAirflow, of the heating system. A value of zero means no airflow defect. Applies only to Furnace.</description>
+      <type>Double</type>
+      <units>Frac</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
       <name>cooling_system_type</name>
       <display_name>Cooling System: Type</display_name>
       <description>The type of cooling system. Use 'none' if there is no cooling system.</description>
@@ -1810,6 +1819,24 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+    </argument>
+    <argument>
+      <name>cooling_system_airflow_defect_ratio</name>
+      <display_name>Cooling System: Airflow Defect Ratio</display_name>
+      <description>The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / DesignAirflow, of the cooling system. A value of zero means no airflow defect. Applies only to central air conditioner.</description>
+      <type>Double</type>
+      <units>Frac</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>cooling_system_charge_defect_ratio</name>
+      <display_name>Cooling System: Airflow Defect Ratio</display_name>
+      <description>The refrigerant charge defect ratio, defined as (InstalledCharge - DesignCharge) / DesignCharge, of the cooling system. A value of zero means no refrigerant charge defect. Applies only to central air conditioner and mini-split.</description>
+      <type>Double</type>
+      <units>Frac</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>heat_pump_type</name>
@@ -2035,6 +2062,24 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+    </argument>
+    <argument>
+      <name>heat_pump_airflow_defect_ratio</name>
+      <display_name>Cooling System: Airflow Defect Ratio</display_name>
+      <description>The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / DesignAirflow, of the heat pump. A value of zero means no airflow defect.</description>
+      <type>Double</type>
+      <units>Frac</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>heat_pump_charge_defect_ratio</name>
+      <display_name>Cooling System: Airflow Defect Ratio</display_name>
+      <description>The refrigerant charge defect ratio, defined as (InstalledCharge - DesignCharge) / DesignCharge, of the cooling system. A value of zero means no refrigerant charge defect.</description>
+      <type>Double</type>
+      <units>Frac</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>setpoint_heating_weekday</name>
@@ -7382,6 +7427,12 @@
       <checksum>24C2AA22</checksum>
     </file>
     <file>
+      <filename>base-hvac-install-quality-none-furnace-gas-central-ac-1-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A2E7409F</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.0</identifier>
@@ -7390,19 +7441,91 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>EB74475B</checksum>
+      <checksum>8F63B873</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-install-quality-airflow-defect-furnace-gas-central-ac-1-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1DB8F06D</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-install-quality-charge-defect-furnace-gas-central-ac-1-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>477579EE</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-install-quality-all-air-to-air-heat-pump-1-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0381536B</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-install-quality-all-air-to-air-heat-pump-2-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F550F7C4</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-install-quality-all-air-to-air-heat-pump-var-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F68983F2</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-install-quality-all-furnace-gas-central-ac-1-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>51EABBA9</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-install-quality-all-furnace-gas-central-ac-2-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>618FBB76</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-install-quality-all-furnace-gas-central-ac-var-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E949B948</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-install-quality-all-furnace-gas-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A496FBD2</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-install-quality-all-mini-split-heat-pump-ducted.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>01C8DB44</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-install-quality-all-ground-to-air-heat-pump.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5BD268C2</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-install-quality-all-mini-split-air-conditioner-only-ducted.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3C5EC219</checksum>
     </file>
     <file>
       <filename>test_measure.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
-      <checksum>638226E1</checksum>
+      <checksum>229B2CB0</checksum>
     </file>
     <file>
       <filename>test_rakefile.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
-      <checksum>574F5926</checksum>
+      <checksum>1168C293</checksum>
     </file>
   </files>
 </measure>
