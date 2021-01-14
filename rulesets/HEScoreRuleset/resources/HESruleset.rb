@@ -101,8 +101,6 @@ class HEScoreRuleset
                                      distance: 20.0,
                                      height: 12.0)
 
-    new_hpxml.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(@nbeds)
-
     new_hpxml.building_construction.residential_facility_type = @bldg_type
     new_hpxml.building_construction.number_of_conditioned_floors = @ncfl
     new_hpxml.building_construction.number_of_conditioned_floors_above_grade = @ncfl_ag
@@ -373,8 +371,11 @@ class HEScoreRuleset
       end
 
       interior_shading_factor_summer, interior_shading_factor_winter = Constructions.get_default_interior_shading_factors()
+      exterior_shading_factor_summer = 1.0
+      exterior_shading_factor_winter = 1.0
       if orig_window.exterior_shading == 'solar screens'
-        interior_shading_factor_summer = 0.29
+        # Summer only, total shading factor reduced to 0.29
+        exterior_shading_factor_summer = 0.29 / interior_shading_factor_summer # Overall shading factor is interior multiplied by exterior
       end
 
       # Add one HPXML window per side of the house with only the overhangs from the roof.
@@ -388,7 +389,9 @@ class HEScoreRuleset
                             overhangs_distance_to_bottom_of_window: @ceil_height * @ncfl_ag,
                             wall_idref: orig_window.wall_idref,
                             interior_shading_factor_summer: interior_shading_factor_summer,
-                            interior_shading_factor_winter: interior_shading_factor_winter)
+                            interior_shading_factor_winter: interior_shading_factor_winter,
+                            exterior_shading_factor_summer: exterior_shading_factor_summer,
+                            exterior_shading_factor_winter: exterior_shading_factor_winter)
     end
   end
 
@@ -405,8 +408,14 @@ class HEScoreRuleset
                                                   orig_skylight.gas_fill)
       end
 
+      interior_shading_factor_summer = 1.0
+      interior_shading_factor_winter = 1.0
+      exterior_shading_factor_summer = 1.0
+      exterior_shading_factor_winter = 1.0
       if orig_skylight.exterior_shading == 'solar screens'
-        shgc *= 0.29
+        # Year-round, total shading factor reduced to 0.29
+        exterior_shading_factor_summer = 0.29
+        exterior_shading_factor_winter = 0.29
       end
 
       new_hpxml.roofs.each do |new_roof|
@@ -418,7 +427,11 @@ class HEScoreRuleset
                                 azimuth: new_roof.azimuth,
                                 ufactor: ufactor,
                                 shgc: shgc,
-                                roof_idref: new_roof.id)
+                                roof_idref: new_roof.id,
+                                interior_shading_factor_summer: interior_shading_factor_summer,
+                                interior_shading_factor_winter: interior_shading_factor_winter,
+                                exterior_shading_factor_summer: exterior_shading_factor_summer,
+                                exterior_shading_factor_winter: exterior_shading_factor_winter)
       end
     end
   end
