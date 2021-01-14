@@ -62,25 +62,28 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
     args['include_timeseries_hot_water_uses'] = true
     args['include_timeseries_total_loads'] = false
     args['include_timeseries_component_loads'] = false
+    args['include_timeseries_unmet_loads'] = false
     args['include_timeseries_zone_temperatures'] = false
     args['include_timeseries_airflows'] = false
     args['include_timeseries_weather'] = false
     update_args_hash(measures, measure_subdir, args)
   end
 
-  run_hpxml_workflow(rundir, hpxml, measures, measures_dir,
-                     debug: debug, run_measures_only: skip_simulation)
+  results = run_hpxml_workflow(rundir, hpxml, measures, measures_dir,
+                               debug: debug, run_measures_only: skip_simulation)
 
-  return if skip_simulation
+  return results[:success] if skip_simulation
+  return results[:success] unless results[:success]
 
+  # Gather monthly outputs for results JSON
   timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
-  return unless File.exist? timeseries_csv_path
+  return false unless File.exist? timeseries_csv_path
 
   units_map = get_units_map()
   output_map = get_output_map()
-  results = {}
+  outputs = {}
   output_map.each do |ep_output, hes_output|
-    results[hes_output] = []
+    outputs[hes_output] = []
   end
   row_index = {}
   units = nil
@@ -93,15 +96,15 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
       units = row
     else # Data
       # Init for month
-      results.keys.each do |k|
-        results[k] << 0.0
+      outputs.keys.each do |k|
+        outputs[k] << 0.0
       end
       # Add values
       output_map.each do |ep_output, hes_output|
         col = row_index[ep_output]
         next if col.nil?
 
-        results[hes_output][-1] += UnitConversions.convert(Float(row[col]), units[col], units_map[hes_output[1]].gsub('gallons', 'gal')).abs
+        outputs[hes_output][-1] += UnitConversions.convert(Float(row[col]), units[col], units_map[hes_output[1]].gsub('gallons', 'gal')).abs
       end
       # Make sure there aren't any end uses with positive values that aren't mapped to HES
       row.each_with_index do |val, col|
@@ -116,7 +119,7 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
 
   # Write results to JSON
   data = { 'end_use' => [] }
-  results.each do |hes_key, values|
+  outputs.each do |hes_key, values|
     hes_end_use, hes_resource_type = hes_key
     to_units = units_map[hes_resource_type]
     annual_value = values.inject(0, :+)
@@ -137,6 +140,8 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
   File.open(File.join(resultsdir, 'results.json'), 'w') do |f|
     f.write(JSON.pretty_generate(data))
   end
+
+  return results[:success]
 end
 
 def download_epws
@@ -239,6 +244,10 @@ puts "HPXML: #{options[:hpxml]}"
 design = 'HEScoreDesign'
 rundir = get_rundir(options[:output_dir], design)
 
-rundir = run_design(basedir, rundir, design, resultsdir, options[:hpxml], options[:debug], options[:skip_simulation])
+success = run_design(basedir, rundir, design, resultsdir, options[:hpxml], options[:debug], options[:skip_simulation])
+
+if not success
+  exit! 1
+end
 
 puts "Completed in #{(Time.now - start_time).round(1)} seconds."

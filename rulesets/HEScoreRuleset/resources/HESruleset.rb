@@ -50,6 +50,9 @@ class HEScoreRuleset
     set_misc_plug_loads(orig_hpxml, new_hpxml)
     set_misc_television(orig_hpxml, new_hpxml)
 
+    # Prevent downstream errors in OS-HPXML
+    adjust_floor_areas(new_hpxml)
+
     return new_hpxml
   end
 
@@ -97,8 +100,6 @@ class HEScoreRuleset
     new_hpxml.neighbor_buildings.add(azimuth: sanitize_azimuth(@bldg_azimuth - 90.0),
                                      distance: 20.0,
                                      height: 12.0)
-
-    new_hpxml.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(@nbeds)
 
     new_hpxml.building_construction.residential_facility_type = @bldg_type
     new_hpxml.building_construction.number_of_conditioned_floors = @ncfl
@@ -179,6 +180,10 @@ class HEScoreRuleset
         else
           roof_azimuths = [@bldg_azimuth, @bldg_azimuth + 180]
         end
+        rb_grade = nil
+        if orig_roof.radiant_barrier
+          rb_grade = 1
+        end
         roof_azimuths.each_with_index do |roof_azimuth, idx|
           new_hpxml.roofs.add(id: "#{orig_roof.id}_#{idx}",
                               interior_adjacent_to: attic_location,
@@ -188,7 +193,7 @@ class HEScoreRuleset
                               emittance: 0.9,
                               pitch: Math.tan(@roof_angle_rad) * 12,
                               radiant_barrier: orig_roof.radiant_barrier,
-                              radiant_barrier_grade: 1,
+                              radiant_barrier_grade: rb_grade,
                               insulation_assembly_r_value: roof_r)
         end
       end
@@ -366,8 +371,11 @@ class HEScoreRuleset
       end
 
       interior_shading_factor_summer, interior_shading_factor_winter = Constructions.get_default_interior_shading_factors()
+      exterior_shading_factor_summer = 1.0
+      exterior_shading_factor_winter = 1.0
       if orig_window.exterior_shading == 'solar screens'
-        interior_shading_factor_summer = 0.29
+        # Summer only, total shading factor reduced to 0.29
+        exterior_shading_factor_summer = 0.29 / interior_shading_factor_summer # Overall shading factor is interior multiplied by exterior
       end
 
       # Add one HPXML window per side of the house with only the overhangs from the roof.
@@ -381,7 +389,9 @@ class HEScoreRuleset
                             overhangs_distance_to_bottom_of_window: @ceil_height * @ncfl_ag,
                             wall_idref: orig_window.wall_idref,
                             interior_shading_factor_summer: interior_shading_factor_summer,
-                            interior_shading_factor_winter: interior_shading_factor_winter)
+                            interior_shading_factor_winter: interior_shading_factor_winter,
+                            exterior_shading_factor_summer: exterior_shading_factor_summer,
+                            exterior_shading_factor_winter: exterior_shading_factor_winter)
     end
   end
 
@@ -398,8 +408,14 @@ class HEScoreRuleset
                                                   orig_skylight.gas_fill)
       end
 
+      interior_shading_factor_summer = 1.0
+      interior_shading_factor_winter = 1.0
+      exterior_shading_factor_summer = 1.0
+      exterior_shading_factor_winter = 1.0
       if orig_skylight.exterior_shading == 'solar screens'
-        shgc *= 0.29
+        # Year-round, total shading factor reduced to 0.29
+        exterior_shading_factor_summer = 0.29
+        exterior_shading_factor_winter = 0.29
       end
 
       new_hpxml.roofs.each do |new_roof|
@@ -411,7 +427,11 @@ class HEScoreRuleset
                                 azimuth: new_roof.azimuth,
                                 ufactor: ufactor,
                                 shgc: shgc,
-                                roof_idref: new_roof.id)
+                                roof_idref: new_roof.id,
+                                interior_shading_factor_summer: interior_shading_factor_summer,
+                                interior_shading_factor_winter: interior_shading_factor_winter,
+                                exterior_shading_factor_summer: exterior_shading_factor_summer,
+                                exterior_shading_factor_winter: exterior_shading_factor_winter)
       end
     end
   end
@@ -865,6 +885,33 @@ class HEScoreRuleset
   def self.set_misc_television(orig_hpxml, new_hpxml)
     new_hpxml.plug_loads.add(id: 'PlugLoadTV',
                              plug_load_type: HPXML::PlugLoadTypeTelevision)
+  end
+
+  def self.adjust_floor_areas(new_hpxml)
+    # Gather floors/slabs adjacent to conditioned space
+    conditioned_floors = []
+    new_hpxml.frame_floors.each do |frame_floor|
+      next unless frame_floor.is_floor
+      next unless [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include?(frame_floor.interior_adjacent_to) ||
+                  [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include?(frame_floor.exterior_adjacent_to)
+
+      conditioned_floors << frame_floor
+    end
+    new_hpxml.slabs.each do |slab|
+      next unless [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? slab.interior_adjacent_to
+
+      conditioned_floors << slab
+    end
+
+    # Check if the sum of conditioned floors' area is greater than CFA.
+    # If so, reduce floor areas. Note that the HES API already restricts
+    # these two areas to being close, so any adjustments will be small.
+    sum_cfa = conditioned_floors.map { |f| f.area }.sum
+    if sum_cfa > @cfa
+      conditioned_floors.each do |floor|
+        floor.area *= @cfa / sum_cfa
+      end
+    end
   end
 
   def self.get_foundation_perimeter(orig_hpxml, foundation)

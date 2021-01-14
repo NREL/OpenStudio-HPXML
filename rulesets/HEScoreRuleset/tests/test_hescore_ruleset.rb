@@ -524,13 +524,13 @@ class HEScoreRulesetTest < MiniTest::Test
 
     wall_code_by_id = {}
     XMLHelper.get_elements(in_doc, 'HPXML/Building/BuildingDetails/Enclosure/Walls/Wall') do |wall|
-      wall_code = XMLHelper.get_value(wall, 'extension/hescore_wall_code')
+      wall_code = XMLHelper.get_value(wall, 'extension/hescore_wall_code', :string)
       wallid = XMLHelper.get_attribute_value(XMLHelper.get_element(wall, 'SystemIdentifier'), 'id')
       wall_code_by_id[wallid] = wall_code
     end
 
     XMLHelper.get_elements(out_doc, 'HPXML/Building/BuildingDetails/Enclosure/Walls/Wall') do |wall|
-      eff_rvalue = Float(XMLHelper.get_value(wall, 'Insulation/AssemblyEffectiveRValue'))
+      eff_rvalue = XMLHelper.get_value(wall, 'Insulation/AssemblyEffectiveRValue', :float)
       wallid = XMLHelper.get_attribute_value(XMLHelper.get_element(wall, 'SystemIdentifier'), 'id')
       next if wall_code_by_id[wallid].nil?
 
@@ -540,12 +540,12 @@ class HEScoreRulesetTest < MiniTest::Test
     roof_code_by_id = {}
     XMLHelper.get_elements(in_doc, 'HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof') do |roof|
       roofid = XMLHelper.get_attribute_value(XMLHelper.get_element(roof, 'SystemIdentifier'), 'id')
-      roof_code_by_id[roofid] = XMLHelper.get_value(roof, 'extension/roof_assembly_code')
+      roof_code_by_id[roofid] = XMLHelper.get_value(roof, 'extension/roof_assembly_code', :string)
     end
 
     XMLHelper.get_elements(out_doc, 'HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof') do |roof|
       roofid = XMLHelper.get_attribute_value(XMLHelper.get_element(roof, 'SystemIdentifier'), 'id')
-      eff_rvalue = Float(XMLHelper.get_value(roof, 'Insulation/AssemblyEffectiveRValue'))
+      eff_rvalue = XMLHelper.get_value(roof, 'Insulation/AssemblyEffectiveRValue', :float)
       assert_in_epsilon(eff_rvalue, get_roof_effective_r_from_doe2code(roof_code_by_id[roofid.split('_')[0]]), 0.01)
     end
   end
@@ -554,9 +554,9 @@ class HEScoreRulesetTest < MiniTest::Test
     in_doc = XMLHelper.parse_file(args_hash['hpxml_path'])
     out_doc = XMLHelper.parse_file(args_hash['hpxml_output_path'])
 
-    cfa = Float(XMLHelper.get_value(in_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea'))
-    ceil_height = Float(XMLHelper.get_value(in_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/AverageCeilingHeight'))
-    cbv = Float(XMLHelper.get_value(out_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume'))
+    cfa = XMLHelper.get_value(in_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea', :float)
+    ceil_height = XMLHelper.get_value(in_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/AverageCeilingHeight', :float)
+    cbv = XMLHelper.get_value(out_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume', :float)
 
     has_conditioned_attic = XMLHelper.has_element(in_doc, "HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/AtticType/Attic[Conditioned='true']")
     has_cathedral_ceiling = XMLHelper.has_element(in_doc, 'HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/AtticType/CathedralCeiling')

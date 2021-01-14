@@ -5,6 +5,7 @@ require 'openstudio/measure/ShowRunnerOutput'
 require 'minitest/autorun'
 require 'fileutils'
 require 'json'
+require 'parallel'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/measure'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/xmlhelper'
 require_relative '../hescore_lib'
@@ -27,11 +28,12 @@ class HEScoreTest < Minitest::Unit::TestCase
     results = {}
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
     xmldir = "#{parent_dir}/sample_files"
-    Dir["#{xmldir}/*.xml"].sort.each do |xml|
-      results[File.basename(xml)] = run_and_check(xml, parent_dir, false, zipfile)
+    Parallel.map(Dir["#{xmldir}/*.xml"].sort, in_threads: Parallel.processor_count) do |xml|
+      out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
+      results[File.basename(xml)] = run_and_check(xml, out_dir, false, zipfile)
     end
 
-    _write_summary_results(results, results_csv_path)
+    _write_summary_results(results.sort_by { |k, v| k.downcase }.to_h, results_csv_path)
   end
 
   def test_skip_simulation
@@ -41,7 +43,8 @@ class HEScoreTest < Minitest::Unit::TestCase
     xml = File.absolute_path(File.join(parent_dir, 'sample_files', 'Base_hpxml.xml'))
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" --skip-simulation -x #{xml}"
     start_time = Time.now
-    system(command)
+    success = system(command)
+    assert_equal(true, success)
 
     # Check for output
     hes_hpxml = File.join(parent_dir, 'results', 'HEScoreDesign.xml')
@@ -50,6 +53,43 @@ class HEScoreTest < Minitest::Unit::TestCase
     # Check that IDF wasn't generated
     idf = File.join(parent_dir, 'HEScoreDesign', 'in.idf')
     assert(!File.exist?(idf))
+  end
+
+  def test_invalid_simulation
+    cli_path = OpenStudio.getOpenStudioCLI
+    xml = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..', 'hpxml-measures', 'workflow', 'sample_files', 'base.xml'))
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml}"
+    start_time = Time.now
+    success = system(command)
+    assert_equal(false, success)
+  end
+
+  def test_floor_areas
+    # Run modified HES HPXML w/ sum of conditioned floor areas' > CFA.
+    # This file would normally generate errors in OS-HPXML, but the ruleset
+    # now handles it. Check for successful run.
+    parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
+
+    cli_path = OpenStudio.getOpenStudioCLI
+    xml = File.absolute_path(File.join(parent_dir, 'sample_files', 'Floors_1_hpxml.xml'))
+
+    # Create derivative file
+    hpxml = XMLHelper.parse_file(xml)
+    bldg_const = XMLHelper.get_element(hpxml, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea')
+    bldg_const.inner_text = (Float(bldg_const.inner_text) - 5.0).to_s # ft2
+    xml.gsub!('.xml', '_floor_area_test.xml')
+    XMLHelper.write_file(hpxml, xml)
+
+    # Run derivative file
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml}"
+    success = system(command)
+
+    # Check for success
+    assert_equal(true, success)
+    assert(File.exist?(File.join(parent_dir, 'results', 'HEScoreDesign.xml')))
+
+    # Cleanup
+    File.delete(xml)
   end
 
   private
@@ -61,9 +101,10 @@ class HEScoreTest < Minitest::Unit::TestCase
 
     # Run workflow
     cli_path = OpenStudio.getOpenStudioCLI
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml}"
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} -o #{parent_dir}"
     start_time = Time.now
-    system(command)
+    success = system(command)
+    assert_equal(true, success)
     runtime = Time.now - start_time
 
     results_json = File.join(parent_dir, 'results', 'results.json')
@@ -77,7 +118,7 @@ class HEScoreTest < Minitest::Unit::TestCase
       assert(File.exist?(results_json))
 
       # Check HPXMLs are valid
-      schemas_dir = File.absolute_path(File.join(parent_dir, '..', 'hpxml-measures', 'HPXMLtoOpenStudio', 'resources'))
+      schemas_dir = File.absolute_path(File.join(parent_dir, '..', '..', 'hpxml-measures', 'HPXMLtoOpenStudio', 'resources'))
       _test_schema_validation(parent_dir, xml, schemas_dir)
       _test_schema_validation(parent_dir, hes_hpxml, schemas_dir)
 
