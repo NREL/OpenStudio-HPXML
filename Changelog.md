@@ -4,6 +4,7 @@ __New Features__
 - **Breaking change**: `Type` is now a required input for dehumidifiers; can be "portable" or "whole-home".
 - **Breaking change**: `Location` is now a required input for dehumidifiers; must be "living space" as dehumidifiers are currently modeled as located in living space.
 - **Breaking Change**: `Type` is now a required input for Pool, PoolPump, HotTub, and HotTubPump.
+- Allows modeling airflow/charge defects for air conditioners, heat pumps, and furnaces (RESNET Standard 310).
 - Allows modeling generators (generic on-site power production).
 - Allows detailed heating/cooling setpoints to be specified: 24-hour weekday & weekend values.
 - Allows modeling window/skylight *exterior* shading via summer/winter shading coefficients.
@@ -27,6 +28,7 @@ __Bugfixes__
 - Allows NumberofConditionedFloors/NumberofConditionedFloorsAboveGrade to be non-integer values per the HPXML schema.
 - HVAC sizing improvements for floors above crawlspaces/basements and walls.
 - Now recognizes Type="none" to prevent modeling of pools and hot tubs (pumps and heaters).
+- Fixes error for overhangs with zero depth.
 - Slight adjustment of default water heater recovery efficiency equation to prevent errors from values being too high.
 - Fixes schematron file not being valid per ISO Schematron standard.
 
