@@ -2323,9 +2323,10 @@ class OSModel
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     has_ceiling_fan = (@hpxml.ceiling_fans.size > 0)
     timestep = @hpxml.header.timestep
-    # Question: do we want to allow on-off thermostat control while disable startup degradation EMS in some timesteps (eg. a few minutes)?
-    # Do not apply on off thermostat if timestep is greater than 2
+    # Do not apply on off thermostat if timestep is >= 2
+    # Only availabe with 1 min time step
     hvac_control.onoff_thermostat_deadband = nil if timestep >= 2
+    runner.registerWarning('Time step too large to enable on-off thermostat deadband. Continute without on-off control.')
 
     HVAC.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan)
   end

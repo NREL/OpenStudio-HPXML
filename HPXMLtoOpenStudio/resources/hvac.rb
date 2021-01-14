@@ -3285,6 +3285,7 @@ class HVAC
   end
 
   def self.apply_capacity_degradation_EMS(model, cap_fflow_spec, eir_fflow_spec, coil_name, is_cooling, cap_fff_curve, eir_fff_curve)
+    # Note: Currently only available in 1 min time step
     cap_time = 2 # Assumed minutes to take to ramp up to full capacity
     power_time = 1 # Assumed minutes to take to ramp up to full power
     number_of_timestep_logged = [cap_time, power_time].max
@@ -3352,19 +3353,20 @@ class HVAC
         realistic_cycling_program.addLine("Set cc_#{t_i}_ago = @TrendValue #{energy_trend.name} #{t_i}")
       end
     end
-    (0...cap_time - 1).each do |t_i|
-      if t_i == 0
-        realistic_cycling_program.addLine("If cc_#{t_i + 1}_ago == 0 && cc_now > 0") # Coil just turned on
+    (1...(cap_time + 1)).each do |t_i|
+      if t_i == 1
+        realistic_cycling_program.addLine("If cc_#{t_i}_ago == 0 && cc_now > 0") # Coil just turned on
       else
         r_s_a = ['cc_now > 0']
-        (0...t_i).each do |i|
-          r_s_a << "cc_#{i + 1}_ago > 0"
+        (1...t_i).each do |i|
+          r_s_a << "cc_#{i}_ago > 0"
         end
         r_s = r_s_a.join(' && ')
-        realistic_cycling_program.addLine("ElseIf cc_#{t_i + 1}_ago == 0 && #{r_s}")
+        realistic_cycling_program.addLine("ElseIf cc_#{t_i}_ago == 0 && #{r_s}")
       end
       # Curve fit from Winkler's thesis, page 200: https://drum.lib.umd.edu/bitstream/handle/1903/9493/Winkler_umd_0117E_10504.pdf?sequence=1&isAllowed=y
-      realistic_cycling_program.addLine("  Set exp = @Exp((-2.19722) * #{t_i + 1})")
+      # use average curve value ( ~ at 0.5 min). 
+      realistic_cycling_program.addLine("  Set exp = @Exp((-2.19722) * #{t_i - 0.5})")
       realistic_cycling_program.addLine("  Set cc_mult = -1.0125 * exp + 1.0125")
       # power is ramped up in less than 1 min, only second level simulation can capture power startup behavior
       realistic_cycling_program.addLine('  Set ec_mult = 1.0')
