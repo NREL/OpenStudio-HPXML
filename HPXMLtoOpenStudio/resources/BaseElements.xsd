@@ -449,7 +449,7 @@
 							<xs:documentation>Portable room dehumidifiers are typically used to dehumidify a single room or space and can be easily moved to where they are needed. Whole-home dehumidifiers are typically installed to use your home’s air ducts to dehumidify one or more rooms and are often permanent. Some dehumifiers can operate in both configurations by means of a ducting kit.</xs:documentation>
 						</xs:annotation>
 					</xs:element>
-					<xs:element minOccurs="0" name="Location" type="DehumidifierLocation"/>
+					<xs:element minOccurs="0" name="Location" type="AdjacentTo"/>
 					<xs:element minOccurs="0" name="Efficiency" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>[L/kWh] DEPRECATED. This will be removed in v4.0. Use EnergyFactor or IntegratedEnergyFactor instead.</xs:documentation>
