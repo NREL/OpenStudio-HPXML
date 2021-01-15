@@ -3,7 +3,7 @@
 __New Features__
 - **Breaking change**: `Type` is now a required input for dehumidifiers; can be "portable" or "whole-home".
 - **Breaking change**: `Location` is now a required input for dehumidifiers; must be "living space" as dehumidifiers are currently modeled as located in living space.
-- **Breaking Change**: `Type` is now a required input for Pool, PoolPump, HotTub, and HotTubPump.
+- **Breaking change**: `Type` is now a required input for Pool, PoolPump, HotTub, and HotTubPump.
 - Allows modeling airflow/charge defects for air conditioners, heat pumps, and furnaces (RESNET Standard 310).
 - Allows modeling generators (generic on-site power production).
 - Allows detailed heating/cooling setpoints to be specified: 24-hour weekday & weekend values.
@@ -17,6 +17,8 @@ __New Features__
 - `run_simulation.rb` now returns exit code 1 if not successful (i.e., either invalid inputs or simulation fails).
 
 __Bugfixes__
+- **Breaking change**: Both `DuctLeakageMeasurement[DuctType="supply"]` and `DuctLeakageMeasurement[DuctType="return"] are now required inputs for AirDistribution/HydronicAndAirDistribution systems.
+- **Breaking change**: At least one `Duct[DuctType="supply" or DuctType="return"]` is now required for AirDistribution/HydronicAndAirDistribution systems.
 - Improved modeling of window/skylight interior shading -- better reflects shading coefficient inputs.
 - Adds error-checking on the HPXML schemaVersion.
 - Adds various error-checking to the schematron validator.
