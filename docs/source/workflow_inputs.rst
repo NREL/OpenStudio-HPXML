@@ -1136,7 +1136,7 @@ Each separate HVAC distribution system is entered as a ``/HPXML/Building/Buildin
   ==============================  =======  =======  ===========  ========  =========  =============================
 
   .. [#] DistributionSystemType child element choices are ``AirDistribution``, ``HydronicDistribution``, ``HydronicAndAirDistribution``, or ``Other=DSE``.
-  .. [#] ConditionedFloorAreaServed is required for AirDistribution and HydronicAndAir types.
+  .. [#] ConditionedFloorAreaServed is required for AirDistribution and HydronicAndAirDistribution types.
 
 .. note::
   
@@ -1229,7 +1229,7 @@ To define an air and hydronic distribution system, additional information is ent
 
   .. [#] HydronicAndAirDistributionType choices are "fan coil" or "water loop heat pump".
 
-In addition, if the system is ducted, all of the elements from the :ref:`air_distribution` Section can be entered in this ``HydronicAndAirDistribution`` element too (e.g., ``DuctLeakageMeasurement`` and ``Ducts``).
+In addition, all of the elements from the :ref:`air_distribution` Section are available here too (e.g., ``DuctLeakageMeasurement`` and ``Ducts``) to describe ducted systems.
 
 Distribution System Efficiency (DSE)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
