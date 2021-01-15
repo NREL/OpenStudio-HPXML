@@ -3668,7 +3668,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].ducts[0].duct_surface_area = 30
     hpxml.hvac_distributions[0].ducts[1].duct_surface_area = 10
   elsif ['base-hvac-evap-cooler-only-ducted.xml'].include? hpxml_file
-    hpxml.hvac_distributions[0].duct_leakage_measurements.pop
+    hpxml.hvac_distributions[0].duct_leakage_measurements[-1].duct_leakage_value = 0.0
     hpxml.hvac_distributions[0].ducts.pop
   elsif ['base-hvac-ducts-leakage-percent.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear

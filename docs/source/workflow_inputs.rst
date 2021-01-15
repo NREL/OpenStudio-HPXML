@@ -1151,34 +1151,33 @@ Air Distribution
 
 To define an air distribution system, additional information is entered in ``HVACDistribution/DistributionSystemType/AirDistribution``.
 
-  ===========================  =======  =======  ===========  ========  =========  ===========================================
-  Element                      Type     Units    Constraints  Required  Default    Notes
-  ===========================  =======  =======  ===========  ========  =========  ===========================================
-  ``DuctLeakageMeasurement``   element           >= 0         No        <none>     Presence of supply/return duct leakage [#]_
-  ``Ducts``                    element           >= 0         No        <none>     Presence of supply/return ducts [#]_
-  ``NumberofReturnRegisters``  integer           >= 0         No        See [#]_   Number of return registers
-  ===========================  =======  =======  ===========  ========  =========  ===========================================
+  =============================================  =======  =======  ===========  ========  =========  ==========================
+  Element                                        Type     Units    Constraints  Required  Default    Notes
+  =============================================  =======  =======  ===========  ========  =========  ==========================
+  ``DuctLeakageMeasurement[DuctType="supply"]``  element           1            Yes                  Supply duct leakage value
+  ``DuctLeakageMeasurement[DuctType="return"]``  element           1            Yes                  Return duct leakage value
+  ``Ducts``                                      element           >= 1         Yes                  Supply/return ducts [#]_
+  ``NumberofReturnRegisters``                    integer           >= 0         No        See [#]_   Number of return registers
+  =============================================  =======  =======  ===========  ========  =========  ==========================
   
-  .. [#] Provide one DuctLeakageMeasurement element for any supply ducts and one for any return ducts.
-  .. [#] Provide one or more Ducts elements for any supply ducts and one or more for any return ducts.
+  .. [#] Provide a Ducts element for each supply duct and each return duct.
   .. [#] If NumberofReturnRegisters not provided, defaults to one return register per conditioned floor per `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_, rounded up to the nearest integer if needed.
 
-If there is supply or return duct leakage, additional information is entered in a ``DuctLeakageMeasurement``.
+Additional information is entered in each ``DuctLeakageMeasurement``.
 
   ================================  =======  =======  ===========  ========  =========  =========================================================
   Element                           Type     Units    Constraints  Required  Default    Notes
   ================================  =======  =======  ===========  ========  =========  =========================================================
-  ``DuctType``                      string            See [#]_     Yes                  Supply or return ducts
   ``DuctLeakage/Units``             string            See [#]_     Yes                  Duct leakage units
-  ``DuctLeakage/Value``             double            >= 0         Yes                  Duct leakage value
+  ``DuctLeakage/Value``             double            >= 0         Yes                  Duct leakage value [#]_
   ``DuctLeakage/TotalOrToOutside``  string            See [#]_     Yes                  Type of duct leakage (outside conditioned space vs total)
   ================================  =======  =======  ===========  ========  =========  =========================================================
   
-  .. [#] DuctType choices are "supply" or "return".
   .. [#] Units choices are "CFM25" or "Percent".
+  .. [#] If the HVAC system has no return ducts (e.g., a ducted evaporative cooler), use zero for the Value.
   .. [#] TotalOrToOutside only choice is "to outside".
 
-If there are supply or return ducts, additional information is entered in a ``Ducts``.
+Additional information is entered in each ``Ducts``.
 
   ========================  =======  ============  ===========  ========  =========  ===============================
   Element                   Type     Units         Constraints  Required  Default    Notes
