@@ -2116,7 +2116,7 @@ class OSModel
 
         HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
                                                    @remaining_cool_load_frac, @remaining_heat_load_frac,
-                                                   living_zone, @hvac_map)
+                                                   living_zone, @hvac_map, @hpxml.hvac_controls[0])
 
         if not heating_system.nil?
           @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
@@ -2126,7 +2126,7 @@ class OSModel
 
         HVAC.apply_room_air_conditioner(model, runner, cooling_system,
                                         @remaining_cool_load_frac, living_zone,
-                                        @hvac_map)
+                                        @hvac_map, @hpxml.hvac_controls[0])
 
       elsif cooling_system.cooling_system_type == HPXML::HVACTypeEvaporativeCooler
 
@@ -2219,7 +2219,7 @@ class OSModel
         HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
                                                 @remaining_heat_load_frac,
                                                 @remaining_cool_load_frac,
-                                                living_zone, @hvac_map)
+                                                living_zone, @hvac_map, @hpxml.hvac_controls[0])
 
       elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
 

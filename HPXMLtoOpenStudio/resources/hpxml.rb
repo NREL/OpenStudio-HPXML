@@ -3003,8 +3003,8 @@ class HPXML < Object
     ATTRS = [:id, :control_type, :heating_setpoint_temp, :heating_setback_temp,
              :heating_setback_hours_per_week, :heating_setback_start_hour, :cooling_setpoint_temp,
              :cooling_setup_temp, :cooling_setup_hours_per_week, :cooling_setup_start_hour,
-             :ceiling_fan_cooling_setpoint_temp_offset,:onoff_thermostat_deadband,
-             :weekday_heating_setpoints, :weekend_heating_setpoints,
+             :ceiling_fan_cooling_setpoint_temp_offset,:onoff_thermostat_deadband, 
+             :realistic_staging, :weekday_heating_setpoints, :weekend_heating_setpoints,
              :weekday_cooling_setpoints, :weekend_cooling_setpoints]
     attr_accessor(*ATTRS)
 
@@ -3035,6 +3035,7 @@ class HPXML < Object
       XMLHelper.add_extension(hvac_control, 'SetupStartHourCooling', @cooling_setup_start_hour, :integer, @cooling_setup_start_hour_isdefaulted) unless @cooling_setup_start_hour.nil?
       XMLHelper.add_extension(hvac_control, 'CeilingFanSetpointTempCoolingSeasonOffset', @ceiling_fan_cooling_setpoint_temp_offset, :float) unless @ceiling_fan_cooling_setpoint_temp_offset.nil?
       XMLHelper.add_extension(hvac_control, 'OnOffThermostatDeadband', @onoff_thermostat_deadband, :float) unless @onoff_thermostat_deadband.nil?
+      XMLHelper.add_extension(hvac_control, 'MultispeedRealisticStaging', @realistic_staging, :boolean) unless @realistic_staging.nil?
       XMLHelper.add_extension(hvac_control, 'WeekdaySetpointTempsHeatingSeason', @weekday_heating_setpoints, :string) unless @weekday_heating_setpoints.nil?
       XMLHelper.add_extension(hvac_control, 'WeekendSetpointTempsHeatingSeason', @weekend_heating_setpoints, :string) unless @weekend_heating_setpoints.nil?
       XMLHelper.add_extension(hvac_control, 'WeekdaySetpointTempsCoolingSeason', @weekday_cooling_setpoints, :string) unless @weekday_cooling_setpoints.nil?
@@ -3056,6 +3057,7 @@ class HPXML < Object
       @cooling_setup_start_hour, @cooling_setup_start_hour_isdefaulted = XMLHelper.get_value_and_defaulted(hvac_control, 'extension/SetupStartHourCooling', :integer)
       @ceiling_fan_cooling_setpoint_temp_offset = XMLHelper.get_value(hvac_control, 'extension/CeilingFanSetpointTempCoolingSeasonOffset', :float)
       @onoff_thermostat_deadband = XMLHelper.get_value(hvac_control, 'extension/OnOffThermostatDeadband', :float)
+      @realistic_staging = XMLHelper.get_value(hvac_control, 'extension/MultispeedRealisticStaging', :boolean)
       @weekday_heating_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekdaySetpointTempsHeatingSeason', :string)
       @weekend_heating_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekendSetpointTempsHeatingSeason', :string)
       @weekday_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekdaySetpointTempsCoolingSeason', :string)
