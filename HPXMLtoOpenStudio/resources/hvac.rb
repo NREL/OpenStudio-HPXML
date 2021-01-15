@@ -468,7 +468,7 @@ class HVAC
     else
       heating_capacity_offset = heat_pump.heating_capacity - heat_pump.cooling_capacity
     end
-    if heat_pump.heating_capacity_17F.nil?
+    if heat_pump.heating_capacity_17F.nil? || ((heat_pump.heating_capacity_17F == 0) && (heat_pump.heating_capacity == 0))
       cap_retention_frac = 0.25 # frac
       cap_retention_temp = -5.0 # deg-F
     else
@@ -4248,7 +4248,7 @@ class HVAC
     end
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{obj_name} program manager")
-    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
+    program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
     program_calling_manager.addProgram(fault_program)
   end
 
