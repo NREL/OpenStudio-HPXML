@@ -18,7 +18,7 @@ __New Features__
 
 __Bugfixes__
 - **Breaking change**: Both `DuctLeakageMeasurement[DuctType="supply"]` and `DuctLeakageMeasurement[DuctType="return"]` are now required inputs for AirDistribution systems.
-- **Breaking change**: At least one `Duct[DuctType="supply" or DuctType="return"]` is now required for AirDistribution systems.
+- **Breaking change**: At least one `Ducts` element is now required for AirDistribution systems.
 - Improved modeling of window/skylight interior shading -- better reflects shading coefficient inputs.
 - Adds error-checking on the HPXML schemaVersion.
 - Adds various error-checking to the schematron validator.
