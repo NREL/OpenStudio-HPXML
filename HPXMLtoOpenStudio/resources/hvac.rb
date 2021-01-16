@@ -637,8 +637,8 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heat_pump.airflow_defect_ratio)
     else
       # Ductless system
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 1.0)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, 1.0)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, 0.0)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, 0.0)
     end
   end
 
@@ -4248,7 +4248,7 @@ class HVAC
     end
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{obj_name} program manager")
-    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
+    program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
     program_calling_manager.addProgram(fault_program)
   end
 
