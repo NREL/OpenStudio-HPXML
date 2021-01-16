@@ -1156,7 +1156,7 @@ To define an air distribution system, additional information is entered in ``HVA
   =============================================  =======  =======  ===========  ========  =========  ==========================
   ``DuctLeakageMeasurement[DuctType="supply"]``  element           1            Yes                  Supply duct leakage value
   ``DuctLeakageMeasurement[DuctType="return"]``  element           1            Yes                  Return duct leakage value
-  ``Ducts``                                      element           >= 1         Yes                  Supply/return ducts [#]_
+  ``Ducts``                                      element           >= 0         No                   Supply/return ducts [#]_
   ``NumberofReturnRegisters``                    integer           >= 0         No        See [#]_   Number of return registers
   =============================================  =======  =======  ===========  ========  =========  ==========================
   
