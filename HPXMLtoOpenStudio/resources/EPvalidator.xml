@@ -855,10 +855,9 @@
     <sch:title>[HVACDistributionType=Air]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:AirDistribution'>
       <sch:assert role='ERROR' test='count(../../h:ConditionedFloorAreaServed) = 1'>Expected 1 element(s) for xpath: ../../ConditionedFloorAreaServed</sch:assert>
-      <sch:assert role='ERROR' test='count(h:DuctLeakageMeasurement[h:DuctType="supply"]/h:DuctLeakage[(h:Units="CFM25" or h:Units="Percent") and h:TotalOrToOutside="to outside"]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="supply"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value</sch:assert>
-      <sch:assert role='ERROR' test='count(h:DuctLeakageMeasurement[h:DuctType="return"]/h:DuctLeakage[(h:Units="CFM25" or h:Units="Percent") and h:TotalOrToOutside="to outside"]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Ducts[h:DuctType="supply"]) &gt;= 0'>Expected 0 or more element(s) for xpath: Ducts[DuctType="supply"]</sch:assert> <!-- See [HVACDuct] -->
-      <sch:assert role='ERROR' test='count(h:Ducts[h:DuctType="return"]) &gt;= 0'>Expected 0 or more element(s) for xpath: Ducts[DuctType="return"]</sch:assert> <!-- See [HVACDuct] -->
+      <sch:assert role='ERROR' test='count(h:DuctLeakageMeasurement[h:DuctType="supply"]/h:DuctLeakage[(h:Units="CFM25" or h:Units="Percent") and h:TotalOrToOutside="to outside"]/h:Value) = 1'>Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="supply"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value</sch:assert>
+      <sch:assert role='ERROR' test='count(h:DuctLeakageMeasurement[h:DuctType="return"]/h:DuctLeakage[(h:Units="CFM25" or h:Units="Percent") and h:TotalOrToOutside="to outside"]/h:Value) = 1'>Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Ducts) &gt;= 0'>Expected 0 or more element(s) for xpath: Ducts</sch:assert> <!-- See [HVACDuct] -->
       <sch:assert role='ERROR' test='count(h:NumberofReturnRegisters) &lt;= 1'>Expected 0 or 1 element(s) for xpath: NumberofReturnRegisters</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -879,8 +878,7 @@
       <sch:assert role='ERROR' test='count(../../h:ConditionedFloorAreaServed) = 1'>Expected 1 element(s) for xpath: ../../ConditionedFloorAreaServed</sch:assert>
       <sch:assert role='ERROR' test='count(h:DuctLeakageMeasurement[h:DuctType="supply"]/h:DuctLeakage[(h:Units="CFM25" or h:Units="Percent") and h:TotalOrToOutside="to outside"]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="supply"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value</sch:assert>
       <sch:assert role='ERROR' test='count(h:DuctLeakageMeasurement[h:DuctType="return"]/h:DuctLeakage[(h:Units="CFM25" or h:Units="Percent") and h:TotalOrToOutside="to outside"]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Ducts[h:DuctType="supply"]) &gt;= 0'>Expected 0 or more element(s) for xpath: Ducts[DuctType="supply"]</sch:assert> <!-- See [HVACDuct] -->
-      <sch:assert role='ERROR' test='count(h:Ducts[h:DuctType="return"]) &gt;= 0'>Expected 0 or more element(s) for xpath: Ducts[DuctType="return"]</sch:assert> <!-- See [HVACDuct] -->
+      <sch:assert role='ERROR' test='count(h:Ducts) &gt;= 0'>Expected 0 or more element(s) for xpath: Ducts</sch:assert> <!-- See [HVACDuct] -->
       <sch:assert role='ERROR' test='count(h:NumberofReturnRegisters) &lt;= 1'>Expected 0 or 1 element(s) for xpath: NumberofReturnRegisters</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -895,7 +893,9 @@
 
   <sch:pattern>
     <sch:title>[HVACDuct]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/*/h:Ducts[h:DuctType="supply" or h:DuctType="return"]'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/*/h:Ducts'>
+      <sch:assert role='ERROR' test='count(h:DuctType) = 1'>Expected 1 element(s) for xpath: DuctType</sch:assert>
+      <sch:assert role='ERROR' test='h:DuctType[text()="supply" or text()="return"] or not(h:DuctType)'>Expected DuctType to be 'supply' or 'return'</sch:assert>
       <sch:assert role='ERROR' test='count(h:DuctInsulationRValue) = 1'>Expected 1 element(s) for xpath: DuctInsulationRValue</sch:assert>
       <sch:assert role='ERROR' test='count(h:DuctSurfaceArea) + count(h:DuctLocation) = 0 or count(h:DuctSurfaceArea) + count(h:DuctLocation) = 2'>Expected 0 or 2 element(s) for xpath: DuctSurfaceArea | DuctLocation</sch:assert>
       <sch:assert role='ERROR' test='h:DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="exterior wall" or text()="under slab" or text()="roof deck" or text()="outside" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"] or not(h:DuctLocation)'>Expected DuctLocation to be 'living space' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'attic - vented' or 'attic - unvented' or 'garage' or 'exterior wall' or 'under slab' or 'roof deck' or 'outside' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'</sch:assert>
