@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>0559c0c2-1290-4f2f-b73d-e6fe80252e9d</version_id>
-  <version_modified>20210115T163651Z</version_modified>
+  <version_id>3c8e7dd1-466c-4ddc-a6f8-8b4baab25d96</version_id>
+  <version_modified>20210119T172727Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -6611,12 +6611,6 @@
       <checksum>85171EA8</checksum>
     </file>
     <file>
-      <filename>base-hvac-evap-cooler-only-ducted.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>39DD4134</checksum>
-    </file>
-    <file>
       <filename>base-hvac-furnace-gas-central-ac-var-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -6633,12 +6627,6 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>EAD8F4B2</checksum>
-    </file>
-    <file>
-      <filename>base-mechvent-cfis-evap-cooler-only-ducted.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>62020B6B</checksum>
     </file>
     <file>
       <filename>base-atticroof-flat.osw</filename>
@@ -7505,16 +7493,28 @@
       <checksum>3C5EC219</checksum>
     </file>
     <file>
+      <filename>base-hvac-evap-cooler-only-ducted.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>777B06AA</checksum>
+    </file>
+    <file>
+      <filename>base-mechvent-cfis-evap-cooler-only-ducted.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0349F14E</checksum>
+    </file>
+    <file>
       <filename>test_measure.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
-      <checksum>229B2CB0</checksum>
+      <checksum>B509B427</checksum>
     </file>
     <file>
       <filename>test_rakefile.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
-      <checksum>1168C293</checksum>
+      <checksum>E12837E4</checksum>
     </file>
     <file>
       <version>
@@ -7525,7 +7525,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>E52DBCCD</checksum>
+      <checksum>C42F0428</checksum>
     </file>
   </files>
 </measure>

@@ -4112,13 +4112,10 @@ class HPXMLFile
                                                                duct_leakage_value: args[:ducts_supply_leakage_value],
                                                                duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
 
-    if not ([HPXML::HVACTypeEvaporativeCooler].include?(args[:cooling_system_type]) && args[:cooling_system_is_ducted])
-
-      hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                                 duct_leakage_units: args[:ducts_return_leakage_units],
-                                                                 duct_leakage_value: args[:ducts_return_leakage_value],
-                                                                 duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-    end
+    hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                               duct_leakage_units: args[:ducts_return_leakage_units],
+                                                               duct_leakage_value: args[:ducts_return_leakage_value],
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
 
     # Ducts
     if args[:ducts_supply_location] != Constants.Auto
