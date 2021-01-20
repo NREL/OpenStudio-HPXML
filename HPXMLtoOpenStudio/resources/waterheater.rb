@@ -157,7 +157,7 @@ class Waterheater
     # ProgramCallingManagers
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{obj_name_hpwh} ProgramManager")
-    program_calling_manager.setCallingPoint('EndOfZoneTimestepBeforeZoneReporting')
+    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
     program_calling_manager.addProgram(hpwh_ctrl_program)
     program_calling_manager.addProgram(hpwh_inlet_air_program)
 
