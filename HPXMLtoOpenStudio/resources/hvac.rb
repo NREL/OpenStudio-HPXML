@@ -1266,19 +1266,32 @@ class HVAC
     ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameIdealAirSystem)
   end
 
-  def self.apply_dehumidifier(model, runner, dehumidifier, living_space, hvac_map)
-    hvac_map[dehumidifier.id] = []
+  def self.apply_dehumidifiers(model, runner, dehumidifiers, living_space, hvac_map)
+    dehumidifier_id = dehumidifiers[0].id # Syncs with SimulationOutputReport, which only looks at first dehumidifier ID
+    hvac_map[dehumidifier_id] = []
 
-    water_removal_rate = dehumidifier.capacity
-    energy_factor = dehumidifier.energy_factor
+    if dehumidifiers.map { |d| d.rh_setpoint }.uniq.size > 1
+      fail 'All dehumidifiers must have the same setpoint but multiple setpoints were specified.'
+    end
+
+    dehumidifiers.each do |d|
+      next unless d.energy_factor.nil?
+
+      # shift inputs tested under IEF test conditions to those under EF test conditions with performance curves
+      d.energy_factor, d.capacity = apply_dehumidifier_ief_to_ef_inputs(d.type, w_coeff, ef_coeff, d.integrated_energy_factor, d.capacity)
+    end
+
+    total_capacity = dehumidifiers.map { |d| d.capacity }.sum
+    avg_energy_factor = dehumidifiers.map { |d| d.energy_factor * d.capacity }.sum / total_capacity
+    total_fraction_served = dehumidifiers.map { |d| d.fraction_served }.sum
 
     control_zone = living_space.thermalZone.get
     obj_name = Constants.ObjectNameDehumidifier
 
-    avg_rh_setpoint = dehumidifier.rh_setpoint * 100.0 # (EnergyPlus uses 60 for 60% RH)
+    rh_setpoint = dehumidifiers[0].rh_setpoint * 100.0 # (EnergyPlus uses 60 for 60% RH)
     relative_humidity_setpoint_sch = OpenStudio::Model::ScheduleConstant.new(model)
     relative_humidity_setpoint_sch.setName(Constants.ObjectNameRelativeHumiditySetpoint)
-    relative_humidity_setpoint_sch.setValue(avg_rh_setpoint)
+    relative_humidity_setpoint_sch.setValue(rh_setpoint)
 
     # Dehumidifier coefficients
     # Generic model coefficients from Winkler, Christensen, and Tomerlin (2011)
@@ -1288,13 +1301,9 @@ class HVAC
     water_removal_curve = create_curve_biquadratic(model, w_coeff, 'DXDH-WaterRemove-Cap-fT', -100, 100, -100, 100)
     energy_factor_curve = create_curve_biquadratic(model, ef_coeff, 'DXDH-EnergyFactor-fT', -100, 100, -100, 100)
     part_load_frac_curve = create_curve_quadratic(model, pl_coeff, 'DXDH-PLF-fPLR', 0, 1, 0.7, 1)
-    if energy_factor.nil?
-      # shift inputs tested under IEF test conditions to those under EF test conditions with performance curves
-      energy_factor, water_removal_rate = apply_dehumidifier_ief_to_ef_inputs(dehumidifier.type, w_coeff, ef_coeff, dehumidifier.integrated_energy_factor, water_removal_rate)
-    end
 
     # Calculate air flow rate by assuming 2.75 cfm/pint/day (based on experimental test data)
-    air_flow_rate = 2.75 * water_removal_rate
+    air_flow_rate = 2.75 * total_capacity
 
     humidistat = OpenStudio::Model::ZoneControlHumidistat.new(model)
     humidistat.setName(obj_name + ' humidistat')
@@ -1305,17 +1314,17 @@ class HVAC
     zone_hvac = OpenStudio::Model::ZoneHVACDehumidifierDX.new(model, water_removal_curve, energy_factor_curve, part_load_frac_curve)
     zone_hvac.setName(obj_name)
     zone_hvac.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
-    zone_hvac.setRatedWaterRemoval(UnitConversions.convert(water_removal_rate, 'pint', 'L'))
-    zone_hvac.setRatedEnergyFactor(energy_factor / dehumidifier.fraction_served)
+    zone_hvac.setRatedWaterRemoval(UnitConversions.convert(total_capacity, 'pint', 'L'))
+    zone_hvac.setRatedEnergyFactor(avg_energy_factor / total_fraction_served)
     zone_hvac.setRatedAirFlowRate(UnitConversions.convert(air_flow_rate, 'cfm', 'm^3/s'))
     zone_hvac.setMinimumDryBulbTemperatureforDehumidifierOperation(10)
     zone_hvac.setMaximumDryBulbTemperatureforDehumidifierOperation(40)
 
     zone_hvac.addToThermalZone(control_zone)
 
-    hvac_map[dehumidifier.id] << zone_hvac
-    if dehumidifier.fraction_served < 1.0
-      adjust_dehumidifier_load_EMS(dehumidifier.fraction_served, zone_hvac, model, living_space)
+    hvac_map[dehumidifier_id] << zone_hvac
+    if total_fraction_served < 1.0
+      adjust_dehumidifier_load_EMS(total_fraction_served, zone_hvac, model, living_space)
     end
   end
 
