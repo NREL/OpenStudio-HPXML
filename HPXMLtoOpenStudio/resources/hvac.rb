@@ -1274,6 +1274,12 @@ class HVAC
       fail 'All dehumidifiers must have the same setpoint but multiple setpoints were specified.'
     end
 
+    # Dehumidifier coefficients
+    # Generic model coefficients from Winkler, Christensen, and Tomerlin (2011)
+    w_coeff = [-1.162525707, 0.02271469, -0.000113208, 0.021110538, -0.0000693034, 0.000378843]
+    ef_coeff = [-1.902154518, 0.063466565, -0.000622839, 0.039540407, -0.000125637, -0.000176722]
+    pl_coeff = [0.90, 0.10, 0.0]
+
     dehumidifiers.each do |d|
       next unless d.energy_factor.nil?
 
@@ -1293,11 +1299,6 @@ class HVAC
     relative_humidity_setpoint_sch.setName(Constants.ObjectNameRelativeHumiditySetpoint)
     relative_humidity_setpoint_sch.setValue(rh_setpoint)
 
-    # Dehumidifier coefficients
-    # Generic model coefficients from Winkler, Christensen, and Tomerlin (2011)
-    w_coeff = [-1.162525707, 0.02271469, -0.000113208, 0.021110538, -0.0000693034, 0.000378843]
-    ef_coeff = [-1.902154518, 0.063466565, -0.000622839, 0.039540407, -0.000125637, -0.000176722]
-    pl_coeff = [0.90, 0.10, 0.0]
     water_removal_curve = create_curve_biquadratic(model, w_coeff, 'DXDH-WaterRemove-Cap-fT', -100, 100, -100, 100)
     energy_factor_curve = create_curve_biquadratic(model, ef_coeff, 'DXDH-EnergyFactor-fT', -100, 100, -100, 100)
     part_load_frac_curve = create_curve_quadratic(model, pl_coeff, 'DXDH-PLF-fPLR', 0, 1, 0.7, 1)
