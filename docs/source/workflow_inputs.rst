@@ -2000,7 +2000,7 @@ If not entered, the simulation will not include a dehumidifier.
   
   .. [#] Type choices are "portable" or "whole-home".
   .. [#] Location only choice is "living space".
-  .. [#] If multiple dehumidifiers are entered, they must all have the same setpoint or any error will be generated.
+  .. [#] If multiple dehumidifiers are entered, they must all have the same setpoint or an error will be generated.
   .. [#] The sum of all ``FractionDehumidificationLoadServed`` (across all Dehumidifiers) must be less than or equal to 1.
 
 .. note::
