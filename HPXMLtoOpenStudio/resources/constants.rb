@@ -453,75 +453,11 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoHVACFanWatts
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACFracHeatLoadServed
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACFracCoolLoadServed
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACPumpPower
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACSystemIsDucted # Only needed for optionally ducted systems
-    return __method__.to_s
-  end
-
-  def self.SizingInfoGSHPBoreConfig
-    return __method__.to_s
-  end
-
-  def self.SizingInfoGSHPBoreDepth
-    return __method__.to_s
-  end
-
-  def self.SizingInfoGSHPBoreHoles
-    return __method__.to_s
-  end
-
-  def self.SizingInfoGSHPBoreSpacing
-    return __method__.to_s
-  end
-
-  def self.SizingInfoGSHPCoil_BF_FT_SPEC
-    return __method__.to_s
-  end
-
-  def self.SizingInfoGSHPCoilBF
-    return __method__.to_s
-  end
-
-  def self.SizingInfoGSHPUTubeSpacingType
-    return __method__.to_s
-  end
-
   def self.SizingInfoHVACCapacityRatioCooling
     return __method__.to_s
   end
 
   def self.SizingInfoHVACCapacityRatioHeating
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACAirflowDefectRatioCooling
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACAirflowDefectRatioHeating
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACChargeDefectRatio
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACHeatingCapacityOffset
     return __method__.to_s
   end
 
