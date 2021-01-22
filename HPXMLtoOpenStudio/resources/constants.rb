@@ -465,14 +465,6 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoHVACCoolType
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACHeatType
-    return __method__.to_s
-  end
-
   def self.SizingInfoHVACPumpPower
     return __method__.to_s
   end

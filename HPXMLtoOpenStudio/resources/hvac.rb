@@ -124,13 +124,11 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, cool_capacity_ratios.join(','))
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cool_cfms_ton_rated.join(','))
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, cooling_system.fraction_cool_load_served)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, cooling_system.charge_defect_ratio)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, cooling_system.airflow_defect_ratio)
     end
     if not heating_system.nil?
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heating_system.airflow_defect_ratio)
     end
   end
@@ -199,7 +197,6 @@ class HVAC
     # Store info for HVAC Sizing measure
     ptac.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated.join(','))
     ptac.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, cooling_system.fraction_cool_load_served)
-    ptac.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameRoomAirConditioner)
   end
 
   def self.apply_evaporative_cooler(model, runner, cooling_system,
@@ -224,7 +221,6 @@ class HVAC
 
     air_loop = create_air_loop(model, obj_name, evap_cooler, control_zone, 0, sequential_cool_load_frac)
     air_loop.additionalProperties.setFeature(Constants.SizingInfoHVACSystemIsDucted, !cooling_system.distribution_system_idref.nil?)
-    air_loop.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameEvaporativeCooler)
     hvac_map[cooling_system.id] << air_loop
 
     # Fan
@@ -263,7 +259,6 @@ class HVAC
 
     # Store info for HVAC Sizing measure
     evap_cooler.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, cooling_system.fraction_cool_load_served)
-    evap_cooler.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameEvaporativeCooler)
   end
 
   def self.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
@@ -397,8 +392,6 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cool_cfms_ton_rated.join(','))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heat_pump.fraction_heat_load_served)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, heat_pump.fraction_cool_load_served)
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, heat_pump.charge_defect_ratio)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, heat_pump.airflow_defect_ratio)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heat_pump.airflow_defect_ratio)
@@ -628,8 +621,6 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heat_pump.fraction_heat_load_served)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, heat_pump.fraction_cool_load_served)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACSHR, cool_shrs_rated_gross_4.join(','))
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameMiniSplitHeatPump)
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameMiniSplitHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, heat_pump.charge_defect_ratio)
     if not heat_pump.distribution_system.nil?
       # Ducted system
@@ -902,8 +893,6 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoGSHPBoreDepth, bore_depth.to_s)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoGSHPBoreConfig, bore_config.to_s)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoGSHPUTubeSpacingType, u_tube_spacing_type)
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameGroundSourceHeatPump)
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameGroundSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACPumpPower, heat_pump.pump_watts_per_ton)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioCooling, heat_pump.airflow_defect_ratio)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatioHeating, heat_pump.airflow_defect_ratio)
@@ -962,8 +951,6 @@ class HVAC
     # Store info for HVAC Sizing measure
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heat_pump.fraction_heat_load_served)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, heat_pump.fraction_cool_load_served)
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameWaterLoopHeatPump)
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameWaterLoopHeatPump)
   end
 
   def self.apply_boiler(model, runner, heating_system,
@@ -1150,7 +1137,6 @@ class HVAC
 
     # Store info for HVAC Sizing measure
     zone_hvac.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
-    zone_hvac.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameBoiler)
   end
 
   def self.apply_electric_baseboard(model, runner, heating_system,
@@ -1177,7 +1163,6 @@ class HVAC
 
     # Store info for HVAC Sizing measure
     zone_hvac.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
-    zone_hvac.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameElectricBaseboard)
   end
 
   def self.apply_unit_heater(model, runner, heating_system,
@@ -1227,7 +1212,6 @@ class HVAC
     # Store info for HVAC Sizing measure
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, [airflow_cfm_per_ton].join(','))
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
-    unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameUnitHeater)
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACFanWatts, heating_system.fan_watts)
   end
 
@@ -1260,10 +1244,6 @@ class HVAC
 
     control_zone.setSequentialCoolingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_cool_load_frac))
     control_zone.setSequentialHeatingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_heat_load_frac))
-
-    # Store info for HVAC Sizing measure
-    ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameIdealAirSystem)
-    ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameIdealAirSystem)
   end
 
   def self.apply_dehumidifier(model, runner, dehumidifier, living_space, hvac_map)
@@ -3303,72 +3283,6 @@ class HVAC
     return pump_eff * pump_w / pump_head_pa # m3/s
   end
 
-  def self.existing_equipment(model, thermal_zone, runner)
-    # Returns a list of equipment objects
-
-    equipment = []
-    hvac_types = []
-
-    unitary_system_air_loops = get_unitary_system_air_loops(model, thermal_zone)
-    unitary_system_air_loops.each do |unitary_system_air_loop|
-      system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
-      equipment << system
-
-      hvac_type_cool = system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType)
-      hvac_types << hvac_type_cool.get if hvac_type_cool.is_initialized
-
-      hvac_type_heat = system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACHeatType)
-      hvac_types << hvac_type_heat.get if hvac_type_heat.is_initialized
-    end
-
-    ptacs = get_ptacs(model, thermal_zone)
-    ptacs.each do |ptac|
-      equipment << ptac
-      hvac_types << ptac.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType).get
-    end
-
-    evap_coolers = get_evap_coolers(model, thermal_zone)
-    evap_coolers.each do |evap_cooler|
-      equipment << evap_cooler
-      hvac_types << evap_cooler.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType).get
-    end
-
-    baseboards = get_baseboard_waters(model, thermal_zone)
-    baseboards.each do |baseboard|
-      equipment << baseboard
-      hvac_types << baseboard.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACHeatType).get
-    end
-
-    fancoils = get_fan_coils(model, thermal_zone)
-    fancoils.each do |fancoil|
-      equipment << fancoil
-      hvac_types << fancoil.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACHeatType).get
-    end
-
-    baseboards = get_baseboard_electrics(model, thermal_zone)
-    baseboards.each do |baseboard|
-      equipment << baseboard
-      hvac_types << baseboard.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACHeatType).get
-    end
-
-    unitary_system_hvac_map = get_unitary_system_hvac_map(model, thermal_zone)
-    unitary_system_hvac_map.each do |unitary_system_zone_hvac|
-      system, clg_coil, htg_coil = unitary_system_zone_hvac
-      next if htg_coil.nil?
-
-      equipment << system
-      hvac_types << system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACHeatType).get
-    end
-
-    ideal_air = get_ideal_air(model, thermal_zone)
-    if not ideal_air.nil?
-      equipment << ideal_air
-      hvac_types << ideal_air.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType).get
-      hvac_types << ideal_air.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACHeatType).get
-    end
-    return equipment
-  end
-
   def self.get_coils_from_hvac_equip(model, hvac_equip)
     # Returns the clg coil, htg coil, and supp htg coil as applicable
     clg_coil = nil
@@ -3438,161 +3352,6 @@ class HVAC
       return comp.to_AirLoopHVACUnitarySystem.get
     end
     return
-  end
-
-  def self.get_evap_cooler_from_air_loop_hvac(air_loop)
-    # Returns the evap cooler or nil
-    air_loop.supplyComponents.each do |comp|
-      next unless comp.to_EvaporativeCoolerDirectResearchSpecial.is_initialized
-
-      return comp.to_EvaporativeCoolerDirectResearchSpecial.get
-    end
-    return
-  end
-
-  def self.get_unitary_system_air_loops(model, thermal_zone)
-    # Returns the unitary system(s), cooling coil(s), heating coil(s), and air loops(s) if available
-    unitary_system_air_loops = []
-    thermal_zone.airLoopHVACs.each do |air_loop|
-      system = get_unitary_system_from_air_loop_hvac(air_loop)
-      next if system.nil?
-
-      clg_coil = nil
-      htg_coil = nil
-      if system.coolingCoil.is_initialized
-        clg_coil = system.coolingCoil.get
-      end
-      if system.heatingCoil.is_initialized
-        htg_coil = system.heatingCoil.get
-      end
-      unitary_system_air_loops << [system, clg_coil, htg_coil, air_loop]
-    end
-    return unitary_system_air_loops
-  end
-
-  def self.get_unitary_system_hvac_map(model, thermal_zone)
-    # Returns the unitary system, cooling coil, and heating coil if available
-    unitary_system_hvac_map = []
-    thermal_zone.equipment.each do |equipment|
-      next unless equipment.to_AirLoopHVACUnitarySystem.is_initialized
-
-      system = equipment.to_AirLoopHVACUnitarySystem.get
-      clg_coil = nil
-      htg_coil = nil
-      if system.coolingCoil.is_initialized
-        clg_coil = system.coolingCoil.get
-      end
-      if system.heatingCoil.is_initialized
-        htg_coil = system.heatingCoil.get
-      end
-      unitary_system_hvac_map << [system, clg_coil, htg_coil]
-    end
-    return unitary_system_hvac_map
-  end
-
-  def self.get_ptacs(model, thermal_zone)
-    # Returns the PTAC(s) if available
-    ptacs = []
-    model.getZoneHVACPackagedTerminalAirConditioners.each do |ptac|
-      next unless thermal_zone.handle.to_s == ptac.thermalZone.get.handle.to_s
-
-      ptacs << ptac
-    end
-    return ptacs
-  end
-
-  def self.get_evap_coolers(model, thermal_zone)
-    # Returns the evaporative cooler if available
-    evap_coolers = []
-    thermal_zone.airLoopHVACs.each do |air_loop|
-      evap_cooler = get_evap_cooler_from_air_loop_hvac(air_loop)
-      next if evap_cooler.nil?
-
-      evap_coolers << evap_cooler
-    end
-    return evap_coolers
-  end
-
-  def self.get_baseboard_waters(model, thermal_zone)
-    # Returns the water baseboard if available
-    baseboards = []
-    model.getZoneHVACBaseboardConvectiveWaters.each do |baseboard|
-      next unless thermal_zone.handle.to_s == baseboard.thermalZone.get.handle.to_s
-
-      baseboards << baseboard
-    end
-    return baseboards
-  end
-
-  def self.get_fan_coils(model, thermal_zone)
-    # Returns the fan coil if available
-    fancoils = []
-    model.getZoneHVACFourPipeFanCoils.each do |fancoil|
-      next unless thermal_zone.handle.to_s == fancoil.thermalZone.get.handle.to_s
-
-      fancoils << fancoil
-    end
-    return fancoils
-  end
-
-  def self.get_baseboard_electrics(model, thermal_zone)
-    # Returns the electric baseboard if available
-    baseboards = []
-    model.getZoneHVACBaseboardConvectiveElectrics.each do |baseboard|
-      next unless thermal_zone.handle.to_s == baseboard.thermalZone.get.handle.to_s
-
-      baseboards << baseboard
-    end
-    return baseboards
-  end
-
-  def self.get_dehumidifiers(model, runner, thermal_zone)
-    # Returns the dehumidifier if available
-    dehums = []
-    model.getZoneHVACDehumidifierDXs.each do |dehum|
-      next unless thermal_zone.handle.to_s == dehum.thermalZone.get.handle.to_s
-
-      dehums << dehum
-    end
-    return dehums
-  end
-
-  def self.get_ideal_air(model, thermal_zone)
-    # Returns the heating ideal air loads system if available
-    model.getZoneHVACIdealLoadsAirSystems.each do |ideal_air|
-      next unless thermal_zone.handle.to_s == ideal_air.thermalZone.get.handle.to_s
-
-      return ideal_air
-    end
-    return
-  end
-
-  def self.has_ducted_equipment(model, air_loop)
-    if air_loop.name.to_s.include? Constants.ObjectNameEvaporativeCooler
-      system = air_loop
-    else
-      system = get_unitary_system_from_air_loop_hvac(air_loop)
-    end
-
-    hvac_type_cool = system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType)
-    hvac_type_cool = hvac_type_cool.get if hvac_type_cool.is_initialized
-    hvac_type_heat = system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACHeatType)
-    hvac_type_heat = hvac_type_heat.get if hvac_type_heat.is_initialized
-
-    if [Constants.ObjectNameCentralAirConditioner,
-        Constants.ObjectNameAirSourceHeatPump,
-        Constants.ObjectNameGroundSourceHeatPump].include? hvac_type_cool
-      return true
-    elsif Constants.ObjectNameFurnace == hvac_type_heat
-      return true
-    elsif [Constants.ObjectNameMiniSplitHeatPump, Constants.ObjectNameEvaporativeCooler].include? hvac_type_cool
-      is_ducted = system.additionalProperties.getFeatureAsBoolean(Constants.SizingInfoHVACSystemIsDucted).get
-      if is_ducted
-        return true
-      end
-    end
-
-    return false
   end
 
   def self.calc_mshp_cfms_ton_cooling(cap_min_per, cap_max_per, cfm_ton_min, cfm_ton_max, num_speeds, dB_rated, wB_rated, shr)

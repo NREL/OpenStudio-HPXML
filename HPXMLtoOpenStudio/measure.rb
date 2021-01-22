@@ -2500,7 +2500,8 @@ class OSModel
   end
 
   def self.add_hvac_sizing(runner, model, weather, spaces)
-    HVACSizing.apply(model, runner, weather, spaces, @hpxml, @infil_volume, @nbeds, @min_neighbor_distance, @debug)
+    HVACSizing.apply(model, runner, weather, spaces, @hpxml, @hvac_map,
+                     @infil_volume, @nbeds, @min_neighbor_distance, @debug)
   end
 
   def self.add_photovoltaics(runner, model)
