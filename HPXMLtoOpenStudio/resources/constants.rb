@@ -453,26 +453,6 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoHVACCapacityRatioCooling
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACCapacityRatioHeating
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACRatedCFMperTonHeating
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACRatedCFMperTonCooling
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACSHR
-    return __method__.to_s
-  end
-
   def self.SizingInfoMechVentExist
     return __method__.to_s
   end
@@ -502,10 +482,6 @@ class Constants
   end
 
   def self.SizingInfoMechVentWholeHouseRateRecirculated
-    return __method__.to_s
-  end
-
-  def self.SizingInfoSIPWallInsThickness
     return __method__.to_s
   end
 

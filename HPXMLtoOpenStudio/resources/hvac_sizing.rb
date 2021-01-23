@@ -26,7 +26,7 @@ class HVACSizing
     init_loads = aggregate_zone_loads(zone_loads)
 
     # Get HVAC system info
-    hvacs = get_hvacs(hpxml, hvac_map, model)
+    hvacs = get_hvacs(hpxml, hvac_map)
 
     hvacs.each do |hvac|
       # Init
@@ -1305,7 +1305,7 @@ class HVACSizing
       if hvac.CoolType != HPXML::HVACTypeHeatPumpGroundToAir
         enteringTemp = weather.design.CoolingDrybulb
       else
-        enteringTemp = hvac.GSHP_HXCHWDesign
+        enteringTemp = UnitConversions.convert(hvac.GSHP_HXVertical.plantLoop.get.sizingPlant.designLoopExitTemperature, 'C', 'F')
       end
 
       if [HPXML::HVACTypeCentralAirConditioner,
@@ -1607,7 +1607,7 @@ class HVACSizing
       # Calculate curve point w/ and w/o defect ratios
       design_wb_temp = UnitConversions.convert(@wetbulb_indoor_cooling, 'f', 'k')
       design_db_temp = UnitConversions.convert(@cool_setpoint, 'f', 'k')
-      design_w_temp = UnitConversions.convert(hvac.GSHP_HXCHWDesign, 'f', 'k')
+      design_w_temp = UnitConversions.convert(hvac.GSHP_HXVertical.plantLoop.get.sizingPlant.designLoopExitTemperature, 'c', 'k')
       design_vfr_air = UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s')
       design_vfr_air_defect = UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioCooling)
       # calculate water flow based on current capacity.
@@ -1632,7 +1632,7 @@ class HVACSizing
       # Heating
       # Calculate curve point w/ and w/o defect ratios
       design_db_temp = UnitConversions.convert(@heat_setpoint, 'f', 'k')
-      design_w_temp = UnitConversions.convert(hvac.GSHP_HXCHWDesign, 'f', 'k')
+      design_w_temp = UnitConversions.convert(hvac.GSHP_HXVertical.plantLoop.get.sizingPlant.designLoopExitTemperature, 'c', 'k')
       design_vfr_air = UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s')
       design_vfr_air_defect = UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioHeating)
       # calculate water flow based on current capacity.
@@ -1867,7 +1867,10 @@ class HVACSizing
 
       # Autosize ground loop heat exchanger length
       bore_spacing = 20 # ft, distance between bores
-      nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(weather, bore_spacing, ground_conductivity, hvac.GSHP_SpacingType, grout_conductivity, bore_diameter, pipe_od, pipe_r_value, hvac.HeatingEIR, hvac.CoolingEIR, hvac.GSHP_HXCHWDesign, hvac.GSHP_HXHWDesign, hvac.GSHP_HXDTDesign)
+      hxdt_design = UnitConversions.convert(hvac.GSHP_HXVertical.plantLoop.get.sizingPlant.loopDesignTemperatureDifference, 'K', 'R')
+      hxhw_design = UnitConversions.convert(hvac.GSHP_HXVertical.plantLoop.get.minimumLoopTemperature, 'C', 'F')
+      hxchw_design = UnitConversions.convert(hvac.GSHP_HXVertical.plantLoop.get.sizingPlant.designLoopExitTemperature, 'C', 'F')
+      nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(weather, bore_spacing, ground_conductivity, hvac.GSHP_SpacingType, grout_conductivity, bore_diameter, pipe_od, pipe_r_value, hvac.HeatingEIR, hvac.CoolingEIR, hxchw_design, hxhw_design, hxdt_design)
 
       bore_length_heat = nom_length_heat * hvac_final_values.Heat_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
       bore_length_cool = nom_length_cool * hvac_final_values.Cool_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
@@ -2336,7 +2339,7 @@ class HVACSizing
     return
   end
 
-  def self.get_hvacs(hpxml, hvac_map, model)
+  def self.get_hvacs(hpxml, hvac_map)
     hvacs = []
 
     # Create map of HVAC equipment -> HPXML object IDs
@@ -2354,8 +2357,6 @@ class HVACSizing
       hvac = HVACInfo.new
       hvac.Object = equip
       hvacs << hvac
-
-      clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, equip)
 
       # Get heating/cooling system info from HPXML objects
       hvac_ids.each do |hvac_id|
@@ -2377,6 +2378,49 @@ class HVACSizing
         end
         if hpxml_hvac.respond_to? :fraction_cool_load_served
           hvac.CoolingLoadFraction = hpxml_hvac.fraction_cool_load_served
+        end
+
+        # Capacities
+        if hpxml_hvac.respond_to? :heating_capacity
+          hvac.FixedHeatingCapacity = hpxml_hvac.heating_capacity
+          if not hvac.FixedHeatingCapacity.nil?
+            hvac.FixedHeatingCapacity = [hvac.FixedHeatingCapacity, Constants.small].max
+          end
+        end
+        if hpxml_hvac.respond_to? :cooling_capacity
+          hvac.FixedCoolingCapacity = hpxml_hvac.cooling_capacity
+          if not hvac.FixedCoolingCapacity.nil?
+            hvac.FixedCoolingCapacity = [hvac.FixedCoolingCapacity, Constants.small].max
+          end
+        end
+        if hpxml_hvac.respond_to? :backup_heating_capacity
+          hvac.FixedSuppHeatingCapacity = hpxml_hvac.backup_heating_capacity
+          if not hvac.FixedSuppHeatingCapacity.nil?
+            hvac.FixedSuppHeatingCapacity = [hvac.FixedSuppHeatingCapacity, Constants.small].max
+          end
+        end
+
+        # Number of speeds
+        if hpxml_hvac.is_a?(HPXML::CoolingSystem) || hpxml_hvac.is_a?(HPXML::HeatPump)
+          # Cooling
+          if hpxml_hvac.respond_to? :compressor_type
+            num_speeds = HVAC.get_num_speeds_from_compressor_type(hpxml_hvac.compressor_type)
+          end
+          num_speeds = 1 if num_speeds.nil?
+          hvac.NumSpeedsCooling = num_speeds
+          if hvac.NumSpeedsCooling == 2
+            hvac.OverSizeLimit = 1.2
+          elsif hvac.NumSpeedsCooling > 2
+            hvac.OverSizeLimit = 1.3
+          end
+        end
+        if hpxml_hvac.is_a?(HPXML::HeatingSystem) || hpxml_hvac.is_a?(HPXML::HeatPump)
+          # Heating
+          if hpxml_hvac.respond_to? :compressor_type
+            num_speeds = HVAC.get_num_speeds_from_compressor_type(hpxml_hvac.compressor_type)
+          end
+          num_speeds = 1 if num_speeds.nil?
+          hvac.NumSpeedsHeating = num_speeds
         end
 
         # HVAC installation quality
@@ -2419,9 +2463,63 @@ class HVACSizing
           hvac.GSHP_PumpWattsPerTon = hpxml_hvac.pump_watts_per_ton
         end
 
+        # Rated airflow rates
+        if hpxml_hvac.additional_properties.respond_to? :rated_cfm_per_ton_cooling
+          hvac.RatedCFMperTonCooling = hpxml_hvac.additional_properties.rated_cfm_per_ton_cooling
+        end
+        if hpxml_hvac.additional_properties.respond_to? :rated_cfm_per_ton_heating
+          hvac.RatedCFMperTonHeating = hpxml_hvac.additional_properties.rated_cfm_per_ton_heating
+        end
+
+        # Capacity ratios
+        if hpxml_hvac.additional_properties.respond_to? :capacity_ratios_cooling
+          hvac.CapacityRatioCooling = hpxml_hvac.additional_properties.capacity_ratios_cooling
+        end
+        if hpxml_hvac.additional_properties.respond_to? :capacity_ratios_heating
+          hvac.CapacityRatioHeating = hpxml_hvac.additional_properties.capacity_ratios_heating
+        end
+
+        # Fan speed ratios
+        if hpxml_hvac.additional_properties.respond_to? :fan_speed_ratios_cooling
+          hvac.FanspeedRatioCooling = hpxml_hvac.additional_properties.fan_speed_ratios_cooling
+        end
+        if hpxml_hvac.additional_properties.respond_to? :fan_speed_ratios_heating
+          hvac.FanspeedRatioHeating = hpxml_hvac.additional_properties.fan_speed_ratios_heating
+        end
+
+        # Rated SHRs
+        if hpxml_hvac.additional_properties.respond_to? :rated_shrs
+          hvac.SHRRated = hpxml_hvac.additional_properties.rated_shrs
+        end
+
+        # Performance curves
+        if hpxml_hvac.additional_properties.respond_to? :cap_ft_spec_cooling
+          hvac.COOL_CAP_FT_SPEC = hpxml_hvac.additional_properties.cap_ft_spec_cooling
+        end
+        if hpxml_hvac.additional_properties.respond_to? :sh_ft_spec_cooling
+          hvac.COOL_SH_FT_SPEC = hpxml_hvac.additional_properties.sh_ft_spec_cooling
+        end
+        if hpxml_hvac.additional_properties.respond_to? :cap_ft_spec_heating
+          hvac.HEAT_CAP_FT_SPEC = hpxml_hvac.additional_properties.cap_ft_spec_heating
+        end
+
         # GSHP
         if hpxml_hvac.additional_properties.respond_to? :u_tube_spacing_type
           hvac.GSHP_SpacingType = hpxml_hvac.additional_properties.u_tube_spacing_type
+        end
+        if hpxml_hvac.additional_properties.respond_to? :eir_cooling
+          hvac.CoolingEIR = hpxml_hvac.additional_properties.eir_cooling
+        end
+        if hpxml_hvac.additional_properties.respond_to? :eir_heating
+          hvac.HeatingEIR = hpxml_hvac.additional_properties.eir_heating
+        end
+        if hvac.HeatType == HPXML::HVACTypeHeatPumpGroundToAir
+          hvac.GSHP_HXVertical = equip.heatingCoil.get.plantLoop.get.supplyComponents.select { |c| c.to_GroundHeatExchangerVertical.is_initialized }[0].to_GroundHeatExchangerVertical.get
+        end
+
+        # Evaporative cooler
+        if hpxml_hvac.additional_properties.respond_to? :effectiveness
+          hvac.EvapCoolerEffectiveness = hpxml_hvac.additional_properties.effectiveness
         end
 
         # FUTURE: Refactor code so we don't need to do this
@@ -2439,248 +2537,10 @@ class HVACSizing
         hvac.Ducts = get_ducts_for_object(equip)
       elsif equip.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
         hvac.Ducts = get_ducts_for_object(equip.airLoopHVAC.get)
-
-        hvac.EvapCoolerEffectiveness = equip.coolerEffectiveness
-      end
-
-      if not clg_coil.nil?
-        ratedCFMperTonCooling = get_feature(equip, Constants.SizingInfoHVACRatedCFMperTonCooling, 'string', false)
-        if not ratedCFMperTonCooling.nil?
-          hvac.RatedCFMperTonCooling = ratedCFMperTonCooling.split(',').map(&:to_f)
-        end
-      end
-
-      if clg_coil.is_a? OpenStudio::Model::CoilCoolingDXSingleSpeed
-        hvac.NumSpeedsCooling = 1
-
-        curves = [clg_coil.totalCoolingCapacityFunctionOfTemperatureCurve]
-        hvac.COOL_CAP_FT_SPEC = get_2d_vector_from_CAP_FT_SPEC_curves(curves, hvac.NumSpeedsCooling)
-        if not clg_coil.ratedSensibleHeatRatio.is_initialized
-          fail "SHR not set for #{clg_coil.name}."
-        end
-
-        hvac.SHRRated = [clg_coil.ratedSensibleHeatRatio.get]
-        if clg_coil.ratedTotalCoolingCapacity.is_initialized
-          hvac.FixedCoolingCapacity = UnitConversions.convert(clg_coil.ratedTotalCoolingCapacity.get, 'W', 'Btu/hr')
-        end
-
-      elsif clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
-        hvac.NumSpeedsCooling = clg_coil.stages.size
-        if hvac.NumSpeedsCooling == 2
-          hvac.OverSizeLimit = 1.2
-        else
-          hvac.OverSizeLimit = 1.3
-        end
-
-        capacityRatioCooling = get_feature(equip, Constants.SizingInfoHVACCapacityRatioCooling, 'string')
-
-        hvac.CapacityRatioCooling = capacityRatioCooling.split(',').map(&:to_f)
-
-        if not equip.designSpecificationMultispeedObject.is_initialized
-          fail "DesignSpecificationMultispeedObject not set for #{equip.name}."
-        end
-
-        perf = equip.designSpecificationMultispeedObject.get
-        hvac.FanspeedRatioCooling = []
-        perf.supplyAirflowRatioFields.each do |airflowRatioField|
-          if not airflowRatioField.coolingRatio.is_initialized
-            fail "Cooling airflow ratio not set for #{perf.name}"
-          end
-
-          hvac.FanspeedRatioCooling << airflowRatioField.coolingRatio.get
-        end
-
-        curves = []
-        hvac.SHRRated = []
-        clg_coil.stages.each_with_index do |stage, speed|
-          curves << stage.totalCoolingCapacityFunctionofTemperatureCurve
-          if not stage.grossRatedSensibleHeatRatio.is_initialized
-            fail "SHR not set for #{clg_coil.name}."
-          end
-
-          hvac.SHRRated << stage.grossRatedSensibleHeatRatio.get
-          next if !stage.grossRatedTotalCoolingCapacity.is_initialized
-
-          hvac.FixedCoolingCapacity = UnitConversions.convert(stage.grossRatedTotalCoolingCapacity.get, 'W', 'Btu/hr')
-        end
-        hvac.COOL_CAP_FT_SPEC = get_2d_vector_from_CAP_FT_SPEC_curves(curves, hvac.NumSpeedsCooling)
-
-      elsif clg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit
-        hvac.NumSpeedsCooling = 1
-
-        cOOL_CAP_FT_SPEC = [clg_coil.totalCoolingCapacityCoefficient1,
-                            clg_coil.totalCoolingCapacityCoefficient2,
-                            clg_coil.totalCoolingCapacityCoefficient3,
-                            clg_coil.totalCoolingCapacityCoefficient4,
-                            clg_coil.totalCoolingCapacityCoefficient5]
-        hvac.COOL_CAP_FT_SPEC = [cOOL_CAP_FT_SPEC]
-
-        cOOL_SH_FT_SPEC = [clg_coil.sensibleCoolingCapacityCoefficient1,
-                           clg_coil.sensibleCoolingCapacityCoefficient2,
-                           clg_coil.sensibleCoolingCapacityCoefficient3,
-                           clg_coil.sensibleCoolingCapacityCoefficient4,
-                           clg_coil.sensibleCoolingCapacityCoefficient5,
-                           clg_coil.sensibleCoolingCapacityCoefficient6]
-        hvac.COOL_SH_FT_SPEC = [cOOL_SH_FT_SPEC]
-
-        shr_rated = get_feature(equip, Constants.SizingInfoHVACSHR, 'string')
-        hvac.SHRRated = shr_rated.split(',').map(&:to_f)
-
-        if clg_coil.ratedTotalCoolingCapacity.is_initialized
-          hvac.FixedCoolingCapacity = UnitConversions.convert(clg_coil.ratedTotalCoolingCapacity.get, 'W', 'Btu/hr')
-        end
-
-        hvac.CoolingEIR = 1.0 / clg_coil.ratedCoolingCoefficientofPerformance
-
-      elsif not clg_coil.nil?
-        fail "Unexpected cooling coil: #{clg_coil.name}."
-      end
-
-      if not htg_coil.nil?
-        ratedCFMperTonHeating = get_feature(equip, Constants.SizingInfoHVACRatedCFMperTonHeating, 'string', false)
-        if not ratedCFMperTonHeating.nil?
-          hvac.RatedCFMperTonHeating = ratedCFMperTonHeating.split(',').map(&:to_f)
-        end
-      end
-
-      if equip.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric
-        if equip.nominalCapacity.is_initialized
-          hvac.FixedHeatingCapacity = UnitConversions.convert(equip.nominalCapacity.get, 'W', 'Btu/hr')
-        end
-
-      elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingElectric
-        hvac.NumSpeedsHeating = 1
-        if htg_coil.nominalCapacity.is_initialized
-          hvac.FixedHeatingCapacity = UnitConversions.convert(htg_coil.nominalCapacity.get, 'W', 'Btu/hr')
-        end
-
-      elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingGas
-        hvac.NumSpeedsHeating = 1
-        if htg_coil.nominalCapacity.is_initialized
-          hvac.FixedHeatingCapacity = UnitConversions.convert(htg_coil.nominalCapacity.get, 'W', 'Btu/hr')
-        end
-
-      elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterBaseboard
-        hvac.NumSpeedsHeating = 1
-        if htg_coil.heatingDesignCapacity.is_initialized
-          hvac.FixedHeatingCapacity = UnitConversions.convert(htg_coil.heatingDesignCapacity.get, 'W', 'Btu/hr')
-        end
-
-        hvac.BoilerDesignTemp = UnitConversions.convert(htg_coil.plantLoop.get.sizingPlant.designLoopExitTemperature, 'C', 'F')
-
-      elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingWater
-        hvac.NumSpeedsHeating = 1
-        if htg_coil.ratedCapacity.is_initialized
-          hvac.FixedHeatingCapacity = UnitConversions.convert(htg_coil.ratedCapacity.get, 'W', 'Btu/hr')
-        end
-
-        hvac.BoilerDesignTemp = UnitConversions.convert(htg_coil.plantLoop.get.sizingPlant.designLoopExitTemperature, 'C', 'F')
-
-      elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingDXSingleSpeed
-        hvac.NumSpeedsHeating = 1
-
-        curves = [htg_coil.totalHeatingCapacityFunctionofTemperatureCurve]
-        hvac.HEAT_CAP_FT_SPEC = get_2d_vector_from_CAP_FT_SPEC_curves(curves, hvac.NumSpeedsHeating)
-
-        if htg_coil.ratedTotalHeatingCapacity.is_initialized
-          hvac.FixedHeatingCapacity = UnitConversions.convert(htg_coil.ratedTotalHeatingCapacity.get, 'W', 'Btu/hr')
-        end
-
-      elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
-        hvac.NumSpeedsHeating = htg_coil.stages.size
-
-        capacityRatioHeating = get_feature(equip, Constants.SizingInfoHVACCapacityRatioHeating, 'string')
-        hvac.CapacityRatioHeating = capacityRatioHeating.split(',').map(&:to_f)
-
-        if not equip.designSpecificationMultispeedObject.is_initialized
-          fail "DesignSpecificationMultispeedObject not set for #{equip.name}."
-        end
-
-        perf = equip.designSpecificationMultispeedObject.get
-        hvac.FanspeedRatioHeating = []
-        perf.supplyAirflowRatioFields.each do |airflowRatioField|
-          if not airflowRatioField.heatingRatio.is_initialized
-            fail "Heating airflow ratio not set for #{perf.name}"
-          end
-
-          hvac.FanspeedRatioHeating << airflowRatioField.heatingRatio.get
-        end
-
-        curves = []
-        htg_coil.stages.each_with_index do |stage, speed|
-          curves << stage.heatingCapacityFunctionofTemperatureCurve
-          next if !stage.grossRatedHeatingCapacity.is_initialized
-
-          hvac.FixedHeatingCapacity = UnitConversions.convert(stage.grossRatedHeatingCapacity.get, 'W', 'Btu/hr')
-        end
-        hvac.HEAT_CAP_FT_SPEC = get_2d_vector_from_CAP_FT_SPEC_curves(curves, hvac.NumSpeedsHeating)
-
-      elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit
-        hvac.NumSpeedsHeating = 1
-
-        # Grab cap ft spec to later calculate IQ size adjustment
-        hEAT_CAP_FT_SPEC = [htg_coil.heatingCapacityCoefficient1,
-                            htg_coil.heatingCapacityCoefficient2,
-                            htg_coil.heatingCapacityCoefficient3,
-                            htg_coil.heatingCapacityCoefficient4,
-                            htg_coil.heatingCapacityCoefficient5]
-        hvac.HEAT_CAP_FT_SPEC = [hEAT_CAP_FT_SPEC]
-
-        if htg_coil.ratedHeatingCapacity.is_initialized
-          hvac.FixedHeatingCapacity = UnitConversions.convert(htg_coil.ratedHeatingCapacity.get, 'W', 'Btu/hr')
-        end
-
-        hvac.HeatingEIR = 1.0 / htg_coil.ratedHeatingCoefficientofPerformance
-
-        plant_loop = htg_coil.plantLoop.get
-        plant_loop.supplyComponents.each do |plc|
-          next if !plc.to_GroundHeatExchangerVertical.is_initialized
-
-          hvac.GSHP_HXVertical = plc.to_GroundHeatExchangerVertical.get
-        end
-        if hvac.GSHP_HXVertical.nil?
-          fail 'Could not find GroundHeatExchangerVertical object on GSHP plant loop.'
-        end
-
-        hvac.GSHP_HXDTDesign = UnitConversions.convert(plant_loop.sizingPlant.loopDesignTemperatureDifference, 'K', 'R')
-        hvac.GSHP_HXCHWDesign = UnitConversions.convert(plant_loop.sizingPlant.designLoopExitTemperature, 'C', 'F')
-        hvac.GSHP_HXHWDesign = UnitConversions.convert(plant_loop.minimumLoopTemperature, 'C', 'F')
-        if hvac.GSHP_HXDTDesign.nil? || hvac.GSHP_HXCHWDesign.nil? || hvac.GSHP_HXHWDesign.nil?
-          fail 'Could not find GSHP plant loop.'
-        end
-
-      elsif not htg_coil.nil?
-        fail "Unexpected heating coil: #{htg_coil.name}."
-      end
-
-      # Supplemental heating
-      if supp_htg_coil.is_a?(OpenStudio::Model::CoilHeatingElectric) || supp_htg_coil.is_a?(OpenStudio::Model::CoilHeatingGas)
-        if supp_htg_coil.nominalCapacity.is_initialized
-          hvac.FixedSuppHeatingCapacity = UnitConversions.convert(supp_htg_coil.nominalCapacity.get, 'W', 'Btu/hr')
-        end
-
-      elsif not supp_htg_coil.nil?
-        fail "Unexpected supplemental heating coil: #{supp_htg_coil.name}."
       end
     end
 
     return hvacs
-  end
-
-  def self.get_2d_vector_from_CAP_FT_SPEC_curves(curves, num_speeds)
-    vector = []
-    curves.each do |curve|
-      bi = curve.to_CurveBiquadratic.get
-      c_si = [bi.coefficient1Constant, bi.coefficient2x, bi.coefficient3xPOW2, bi.coefficient4y, bi.coefficient5yPOW2, bi.coefficient6xTIMESY]
-      vector << HVAC.convert_curve_biquadratic(c_si, curves_in_ip = false)
-    end
-    if (num_speeds > 1) && (vector.size == 1)
-      # Repeat coefficients for each speed
-      for i in 1..num_speeds
-        vector << vector[0]
-      end
-    end
-    return vector
   end
 
   def self.process_curve_fit(airFlowRate, capacity, temp)
@@ -3658,9 +3518,10 @@ class HVACSizing
       ## Hot Water Boiler ##
 
       plant_loop = object.heatingCoil.plantLoop.get
+      boiler_design_temp = UnitConversions.convert(plant_loop.sizingPlant.designLoopExitTemperature, 'C', 'F')
 
       max_water_flow = UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'W') / UnitConversions.convert(20.0, 'R', 'K') / 4.186 / 998.2 / 1000.0 * 2.0
-      bb_UA = UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'W') / UnitConversions.convert(hvac.BoilerDesignTemp - 10.0 - 95.0, 'R', 'K') * 3.0
+      bb_UA = UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'W') / UnitConversions.convert(boiler_design_temp - 10.0 - 95.0, 'R', 'K') * 3.0
       if object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
         # Baseboard Coil
         coil = object.heatingCoil.to_CoilHeatingWaterBaseboard.get
@@ -3930,18 +3791,17 @@ class HVACInfo
     self.AirflowDefectRatioHeating = 0.0
   end
 
-  attr_accessor(:HeatType, :CoolType, :Handle, :Object, :Ducts, :NumSpeedsCooling, :NumSpeedsHeating,
+  attr_accessor(:HeatType, :CoolType, :Object, :Ducts, :NumSpeedsCooling, :NumSpeedsHeating,
                 :FixedCoolingCapacity, :FixedHeatingCapacity, :FixedSuppHeatingCapacity,
                 :AirflowDefectRatioCooling, :AirflowDefectRatioHeating,
                 :RatedCFMperTonCooling, :RatedCFMperTonHeating, :ChargeDefectRatio,
                 :COOL_CAP_FT_SPEC, :HEAT_CAP_FT_SPEC, :COOL_SH_FT_SPEC,
                 :SHRRated, :CapacityRatioCooling, :CapacityRatioHeating, :FanWatts,
                 :OverSizeLimit, :OverSizeDelta, :FanspeedRatioCooling,
-                :FanspeedRatioHeating, :BoilerDesignTemp, :HeatingEIR, :CoolingEIR, :SizingSpeed,
-                :GSHP_PumpWattsPerTon, :GSHP_HXVertical, :GSHP_HXDTDesign, :GSHP_HXCHWDesign, :GSHP_HXHWDesign,
-                :GSHP_SpacingType,
-                :HeatingLoadFraction, :CoolingLoadFraction, :SupplyAirTemp, :LeavingAirTemp,
-                :EvapCoolerEffectiveness)
+                :FanspeedRatioHeating, :HeatingEIR, :CoolingEIR, :SizingSpeed,
+                :GSHP_PumpWattsPerTon, :GSHP_HXVertical,
+                :GSHP_SpacingType, :EvapCoolerEffectiveness,
+                :HeatingLoadFraction, :CoolingLoadFraction, :SupplyAirTemp, :LeavingAirTemp)
 end
 
 class DuctInfo
