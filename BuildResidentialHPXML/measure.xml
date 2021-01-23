@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>c7b13be4-366d-4245-bfae-1f4eab83b1c4</version_id>
-  <version_modified>20210123T200528Z</version_modified>
+  <version_id>e8750658-24bf-4401-8ca6-5640909e6433</version_id>
+  <version_modified>20210123T214828Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -260,10 +260,6 @@
       <default_value>single-family detached</default_value>
       <choices>
         <choice>
-          <value>manufactured home</value>
-          <display_name>manufactured home</display_name>
-        </choice>
-        <choice>
           <value>single-family detached</value>
           <display_name>single-family detached</display_name>
         </choice>
@@ -290,7 +286,7 @@
     <argument>
       <name>geometry_num_floors_above_grade</name>
       <display_name>Geometry: Number of Floors</display_name>
-      <description>The number of floors above grade (in the unit if single-family attached, and in the building if apartment unit).</description>
+      <description>The number of floors above grade (in the unit if single-family detached or single-family attached, and in the building if apartment unit).</description>
       <type>Integer</type>
       <units>#</units>
       <required>true</required>
@@ -330,7 +326,7 @@
     <argument>
       <name>geometry_corridor_position</name>
       <display_name>Geometry: Corridor Position</display_name>
-      <description>The position of the corridor.</description>
+      <description>The position of the corridor. Only applies to single-family attached and apartment unit units.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -357,7 +353,7 @@
     <argument>
       <name>geometry_corridor_width</name>
       <display_name>Geometry: Corridor Width</display_name>
-      <description>The width of the corridor.</description>
+      <description>The width of the corridor. Only applies to apartment unit units.</description>
       <type>Double</type>
       <units>ft</units>
       <required>true</required>
@@ -367,7 +363,7 @@
     <argument>
       <name>geometry_inset_width</name>
       <display_name>Geometry: Inset Width</display_name>
-      <description>The width of the inset.</description>
+      <description>The width of the inset. Only applies to apartment unit units.</description>
       <type>Double</type>
       <units>ft</units>
       <required>true</required>
@@ -377,7 +373,7 @@
     <argument>
       <name>geometry_inset_depth</name>
       <display_name>Geometry: Inset Depth</display_name>
-      <description>The depth of the inset.</description>
+      <description>The depth of the inset. Only applies to apartment unit units.</description>
       <type>Double</type>
       <units>ft</units>
       <required>true</required>
@@ -387,7 +383,7 @@
     <argument>
       <name>geometry_inset_position</name>
       <display_name>Geometry: Inset Position</display_name>
-      <description>The position of the inset.</description>
+      <description>The position of the inset. Only applies to apartment unit units.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -406,7 +402,7 @@
     <argument>
       <name>geometry_balcony_depth</name>
       <display_name>Geometry: Balcony Depth</display_name>
-      <description>The depth of the balcony.</description>
+      <description>The depth of the balcony. Only applies to apartment unit units.</description>
       <type>Double</type>
       <units>ft</units>
       <required>true</required>
@@ -416,7 +412,7 @@
     <argument>
       <name>geometry_garage_width</name>
       <display_name>Geometry: Garage Width</display_name>
-      <description>The width of the garage. Enter zero for no garage.</description>
+      <description>The width of the garage. Enter zero for no garage. Only applies to single-family detached units.</description>
       <type>Double</type>
       <units>ft</units>
       <required>true</required>
@@ -426,7 +422,7 @@
     <argument>
       <name>geometry_garage_depth</name>
       <display_name>Geometry: Garage Depth</display_name>
-      <description>The depth of the garage.</description>
+      <description>The depth of the garage. Only applies to single-family detached units.</description>
       <type>Double</type>
       <units>ft</units>
       <required>true</required>
@@ -436,7 +432,7 @@
     <argument>
       <name>geometry_garage_protrusion</name>
       <display_name>Geometry: Garage Protrusion</display_name>
-      <description>The fraction of the garage that is protruding from the living space.</description>
+      <description>The fraction of the garage that is protruding from the living space. Only applies to single-family detached units.</description>
       <type>Double</type>
       <units>frac</units>
       <required>true</required>
@@ -446,7 +442,7 @@
     <argument>
       <name>geometry_garage_position</name>
       <display_name>Geometry: Garage Position</display_name>
-      <description>The position of the garage.</description>
+      <description>The position of the garage. Only applies to single-family detached units.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -520,7 +516,7 @@
     <argument>
       <name>geometry_roof_type</name>
       <display_name>Geometry: Roof Type</display_name>
-      <description>The roof type of the building.</description>
+      <description>The roof type of the building. Assumed flat for apartment unit units.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -718,7 +714,7 @@
     <argument>
       <name>geometry_building_num_units</name>
       <display_name>Geometry: Building Number of Units</display_name>
-      <description>The number of units in the building. This is required for single-family attached and apartment unit buildings.</description>
+      <description>The number of units in the building. This is required for single-family attached and apartment unit units.</description>
       <type>Integer</type>
       <units>#</units>
       <required>false</required>
@@ -727,7 +723,7 @@
     <argument>
       <name>geometry_building_num_bedrooms</name>
       <display_name>Geometry: Building Number of Bedrooms</display_name>
-      <description>The number of bedrooms in the building. This is required for single-family attached and apartment unit buildings with shared PV systems.</description>
+      <description>The number of bedrooms in the building. This is required for single-family attached and apartment unit units with shared PV systems.</description>
       <type>Integer</type>
       <units>#</units>
       <required>false</required>
@@ -7519,19 +7515,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C42F0428</checksum>
+      <checksum>F7BF9AC7</checksum>
     </file>
     <file>
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>F8E38E71</checksum>
+      <checksum>3AD8F4D5</checksum>
     </file>
     <file>
       <filename>extra-bldgtype-multifamily-double-loaded-interior-corridor.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>12E8FA18</checksum>
+      <checksum>71268C79</checksum>
     </file>
   </files>
 </measure>
