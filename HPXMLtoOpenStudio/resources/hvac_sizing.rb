@@ -984,13 +984,15 @@ class HVACSizing
           achXX = measurement.air_leakage * 60.0 / infil_volume # Convert CFM to ACH
           ach50 = Airflow.calc_air_leakage_at_diff_pressure(0.65, achXX, measurement.house_pressure, 50.0)
         end
-        sla = Airflow.get_infiltration_SLA_from_ACH50(ach50, 0.67, cfa, infil_volume)
+        sla = Airflow.get_infiltration_SLA_from_ACH50(ach50, 0.65, cfa, infil_volume)
         ach_nat = Airflow.get_infiltration_ACH_from_SLA(sla, infil_height, weather)
       elsif measurement.unit_of_measure == HPXML::UnitsACHNatural
         sla = Airflow.get_infiltration_SLA_from_ACH(measurement.air_leakage, infil_height, weather)
         ach_nat = Airflow.get_infiltration_ACH_from_SLA(sla, infil_height, weather)
       end
     end
+    puts "ach_nat #{ach_nat}"
+    puts "infil_volume #{infil_volume}"
 
     # Per ANSI/RESNET/ICC 301
     ach_Cooling = 1.2 * ach_nat
