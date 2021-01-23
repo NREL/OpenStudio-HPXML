@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>3c8e7dd1-466c-4ddc-a6f8-8b4baab25d96</version_id>
-  <version_modified>20210119T172727Z</version_modified>
+  <version_id>c7b13be4-366d-4245-bfae-1f4eab83b1c4</version_id>
+  <version_modified>20210123T200528Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -6323,12 +6323,6 @@
       <checksum>24396BA2</checksum>
     </file>
     <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3AD8F4D5</checksum>
-    </file>
-    <file>
       <filename>base.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -7526,6 +7520,18 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>C42F0428</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F8E38E71</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-double-loaded-interior-corridor.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>12E8FA18</checksum>
     </file>
   </files>
 </measure>
