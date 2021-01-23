@@ -991,8 +991,6 @@ class HVACSizing
         ach_nat = Airflow.get_infiltration_ACH_from_SLA(sla, infil_height, weather)
       end
     end
-    puts "ach_nat #{ach_nat}"
-    puts "infil_volume #{infil_volume}"
 
     # Per ANSI/RESNET/ICC 301
     ach_Cooling = 1.2 * ach_nat
