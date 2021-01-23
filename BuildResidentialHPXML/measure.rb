@@ -3136,6 +3136,7 @@ class HPXMLFile
     elsif args[:geometry_unit_type] == HPXML::ResidentialTypeSFA
       success = Geometry.create_single_family_attached(runner: runner, model: model, **args)
     elsif args[:geometry_unit_type] == HPXML::ResidentialTypeApartment
+      args[:geometry_roof_type] = 'flat'
       success = Geometry.create_multifamily(runner: runner, model: model, **args)
     end
     return false if not success
