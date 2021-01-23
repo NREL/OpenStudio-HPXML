@@ -2104,8 +2104,8 @@ class HVACSizing
       weighted_vent_mech_apparent_sens_eff += vent_mech.average_oa_unit_flow_rate / tot_bal_cfm * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
     end
 
-    tot_bal_cfm_sens = tot_bal_cfm * (1.0 - weighted_vent_mech_lat_eff)
-    tot_bal_cfm_lat = tot_bal_cfm * (1.0 - weighted_vent_mech_apparent_sens_eff)
+    tot_bal_cfm_sens = tot_bal_cfm * (1.0 - weighted_vent_mech_apparent_sens_eff)
+    tot_bal_cfm_lat = tot_bal_cfm * (1.0 - weighted_vent_mech_lat_eff)
 
     return [tot_unbal_cfm, oa_cfm_preheat, oa_cfm_precool, recirc_cfm_shared, tot_bal_cfm_sens, tot_bal_cfm_lat]
   end
