@@ -1953,7 +1953,7 @@ class HVACSizing
 
       hvac_final_values.GSHP_Loop_flow = loop_flow
       hvac_final_values.GSHP_Bore_Depth = bore_depth
-      hvac_final_values.GSHP_num_bore_holes = num_bore_holes
+      hvac_final_values.GSHP_Bore_Holes = num_bore_holes
       hvac_final_values.GSHP_G_Functions = [lntts, gfnc_coeff]
     end
   end
@@ -3435,7 +3435,7 @@ class HVACSizing
 
         # Ground Heat Exchanger Vertical
         hvac.GSHP_HXVertical.setDesignFlowRate(UnitConversions.convert(hvac_final_values.GSHP_Loop_flow, 'gal/min', 'm^3/s'))
-        hvac.GSHP_HXVertical.setNumberofBoreHoles(hvac_final_values.GSHP_num_bore_holes.to_i)
+        hvac.GSHP_HXVertical.setNumberofBoreHoles(hvac_final_values.GSHP_Bore_Holes.to_i)
         hvac.GSHP_HXVertical.setBoreHoleLength(UnitConversions.convert(hvac_final_values.GSHP_Bore_Depth, 'ft', 'm'))
         hvac.GSHP_HXVertical.removeAllGFunctions
         for i in 0..(hvac_final_values.GSHP_G_Functions[0].size - 1)
@@ -3770,7 +3770,7 @@ class FinalValues
                 :Cool_Capacity, :Cool_Capacity_Sens, :Cool_Airflow,
                 :Heat_Load, :Heat_Load_Ducts,
                 :Heat_Capacity, :Heat_Capacity_Supp, :Heat_Airflow,
-                :GSHP_Loop_flow, :GSHP_num_bore_holes, :GSHP_Bore_Depth, :GSHP_G_Functions)
+                :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions)
 end
 
 class HVACInfo
