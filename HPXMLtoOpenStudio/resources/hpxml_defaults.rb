@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class HPXMLDefaults
-  def self.apply(hpxml, cfa, nbeds, ncfl, ncfl_ag, has_uncond_bsmnt, eri_version, epw_file, runner)
+  def self.apply(hpxml, weather, cfa, nbeds, ncfl, ncfl_ag, has_uncond_bsmnt, eri_version, epw_file, runner, debug)
     apply_header(hpxml, epw_file, runner)
     apply_site(hpxml)
     apply_building_occupancy(hpxml, nbeds)
@@ -32,6 +32,8 @@ class HPXMLDefaults
     apply_fuel_loads(hpxml, cfa, nbeds)
     apply_pv_systems(hpxml)
     apply_generators(hpxml)
+    init_loads = apply_hvac_sizing(hpxml, runner, weather, cfa, nbeds, debug)
+    return init_loads
   end
 
   private
@@ -205,6 +207,8 @@ class HPXMLDefaults
         measurement.infiltration_volume_isdefaulted = true
       end
     end
+
+    return infil_volume
   end
 
   def self.apply_attics(hpxml)
@@ -1520,5 +1524,10 @@ class HPXMLDefaults
         fuel_load.usage_multiplier_isdefaulted = true
       end
     end
+  end
+
+  def self.apply_hvac_sizing(hpxml, runner, weather, cfa, nbeds, debug)
+    init_loads = HVACSizing.calculate_building_design_loads(runner, weather, hpxml, cfa, nbeds, debug)
+    return init_loads
   end
 end

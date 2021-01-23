@@ -3,7 +3,7 @@
 class Constants
   # Numbers --------------------
 
-  def self.AssumedInsideTemp
+  def self.AssumedInsideTemp # FIXME: Remove
     return 73.5 # deg-F
   end
 
@@ -39,34 +39,6 @@ class Constants
 
   def self.CalcTypeERIIndexAdjustmentReferenceHome
     return 'ERI Index Adjustment Reference Home'
-  end
-
-  def self.BoreConfigSingle
-    return 'single'
-  end
-
-  def self.BoreConfigLine
-    return 'line'
-  end
-
-  def self.BoreConfigOpenRectangle
-    return 'open-rectangle'
-  end
-
-  def self.BoreConfigRectangle
-    return 'rectangle'
-  end
-
-  def self.BoreConfigLconfig
-    return 'l-config'
-  end
-
-  def self.BoreConfigL2config
-    return 'l2-config'
-  end
-
-  def self.BoreConfigUconfig
-    return 'u-config'
   end
 
   def self.BuildingAmericaClimateZone
@@ -425,71 +397,31 @@ class Constants
     return 'Temperature'
   end
 
-  def self.SizingInfoDuctExist
+  def self.SizingInfoDuctExist # FIXME: Remove
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctSides
+  def self.SizingInfoDuctSides # FIXME: Remove
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctLocations
+  def self.SizingInfoDuctLocations # FIXME: Remove
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctLeakageFracs
+  def self.SizingInfoDuctLeakageFracs # FIXME: Remove
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctLeakageCFM25s
+  def self.SizingInfoDuctLeakageCFM25s # FIXME: Remove
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctAreas
+  def self.SizingInfoDuctAreas # FIXME: Remove
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctRvalues
-    return __method__.to_s
-  end
-
-  def self.SizingInfoMechVentExist
-    return __method__.to_s
-  end
-
-  def self.SizingInfoMechVentApparentSensibleEffectiveness
-    return __method__.to_s
-  end
-
-  def self.SizingInfoMechVentLatentEffectiveness
-    return __method__.to_s
-  end
-
-  def self.SizingInfoMechVentWholeHouseRateBalanced
-    return __method__.to_s
-  end
-
-  def self.SizingInfoMechVentWholeHouseRateUnbalanced
-    return __method__.to_s
-  end
-
-  def self.SizingInfoMechVentWholeHouseRatePreHeated
-    return __method__.to_s
-  end
-
-  def self.SizingInfoMechVentWholeHouseRatePreCooled
-    return __method__.to_s
-  end
-
-  def self.SizingInfoMechVentWholeHouseRateRecirculated
-    return __method__.to_s
-  end
-
-  def self.SizingInfoZoneInfiltrationACH
-    return __method__.to_s
-  end
-
-  def self.SizingInfoZoneInfiltrationCFM
+  def self.SizingInfoDuctRvalues # FIXME: Remove
     return __method__.to_s
   end
 end

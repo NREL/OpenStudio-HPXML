@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
 class HVACSizing
-  def self.apply(model, runner, weather, spaces, hpxml, hvac_map, infilvolume, nbeds, min_neighbor_distance, debug)
+  def self.calculate_building_design_loads(runner, weather, hpxml, cfa, nbeds, debug)
+    @runner = runner
+    @hpxml = hpxml
+    process_site_calcs_and_design_temps(weather)
+
+    # Calculate loads for the conditioned thermal zone
+    zone_loads = process_zone_loads(weather, cfa, nbeds)
+
+    # Display debug info
+    display_zone_loads(zone_loads) if debug
+
+    # Aggregate zone loads into initial loads
+    init_loads = aggregate_zone_loads(zone_loads)
+
+    return init_loads
+  end
+
+  def self.apply(model, runner, weather, spaces, hpxml, hvac_map, debug, init_loads)
     @runner = runner
     @hpxml = hpxml
     @spaces = spaces
@@ -13,17 +30,6 @@ class HVACSizing
     # avoids the iterations in the actual model. It does not account for altitude or variations
     # in the SHRRated. It is a function of ODB (MJ design temp) and CFM/Ton (from MJ)
     @shr_biquadratic = [1.08464364, 0.002096954, 0, -0.005766327, 0, -0.000011147]
-
-    process_site_calcs_and_design_temps(weather)
-
-    # Calculate loads for the conditioned thermal zone
-    zone_loads = process_zone_loads(model, weather, nbeds, infilvolume)
-
-    # Display debug info
-    display_zone_loads(zone_loads) if debug
-
-    # Aggregate zone loads into initial loads
-    init_loads = aggregate_zone_loads(zone_loads)
 
     # Get HVAC system info
     hvacs = get_hvacs(hpxml, hvac_map)
@@ -43,7 +49,7 @@ class HVACSizing
       process_sizing_for_installation_quality(hvac_final_values, weather, hvac, model)
       process_fixed_equipment(hvac_final_values, hvac)
       process_ground_loop(hvac_final_values, weather, hvac)
-      process_finalize(hvac_final_values, zone_loads, weather, hvac)
+      process_finalize(hvac_final_values, weather, hvac)
 
       # Set OpenStudio object values
       set_object_values(model, hvac, hvac_final_values)
@@ -104,27 +110,42 @@ class HVACSizing
     @wetbulb_outdoor_cooling = weather.design.CoolingWetbulb
 
     # Inside air density
-    @inside_air_dens = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * (Constants.AssumedInsideTemp + 460.0))
+    avg_setpoint = (@cool_setpoint + @heat_setpoint) / 2.0
+    @inside_air_dens = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * (avg_setpoint + 460.0))
 
     # Design Temperatures
 
     @cool_design_temps = {}
     @heat_design_temps = {}
 
-    @cool_design_temps[HPXML::LocationOutside] = weather.design.CoolingDrybulb
-    @heat_design_temps[HPXML::LocationOutside] = weather.design.HeatingDrybulb
-
-    [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
-     HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab].each do |space_type|
-      @heat_design_temps[space_type] = calculate_scheduled_space_design_temps(space_type, @heat_setpoint, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
-      @cool_design_temps[space_type] = calculate_scheduled_space_design_temps(space_type, @cool_setpoint, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max)
+    space_types = []
+    (@hpxml.roofs + @hpxml.rim_joists + @hpxml.walls + @hpxml.foundation_walls + @hpxml.frame_floors + @hpxml.slabs).each do |surface|
+      space_types << surface.interior_adjacent_to
+      space_types << surface.exterior_adjacent_to
+    end
+    @hpxml.hvac_distributions.each do |hvac_dist|
+      hvac_dist.ducts.each do |duct|
+        space_types << duct.duct_location
+      end
     end
 
-    @spaces.each do |space_type, space|
-      next unless space.is_a? OpenStudio::Model::Space
+    space_types.uniq.each do |space_type|
+      next if [HPXML::LocationGround, HPXML::LocationRoofDeck].include? space_type
 
-      @cool_design_temps[space_type] = process_design_temp_cooling(weather, space_type)
-      @heat_design_temps[space_type] = process_design_temp_heating(weather, space_type)
+      if [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
+          HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab].include? space_type
+        @cool_design_temps[space_type] = calculate_scheduled_space_design_temps(space_type, @cool_setpoint, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max)
+        @heat_design_temps[space_type] = calculate_scheduled_space_design_temps(space_type, @heat_setpoint, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
+      elsif space_type == HPXML::LocationOutside
+        @cool_design_temps[space_type] = weather.design.CoolingDrybulb
+        @heat_design_temps[space_type] = weather.design.HeatingDrybulb
+      elsif space_type == HPXML::LocationBasementConditioned
+        @cool_design_temps[space_type] = process_design_temp_cooling(weather, HPXML::LocationLivingSpace)
+        @heat_design_temps[space_type] = process_design_temp_heating(weather, HPXML::LocationLivingSpace)
+      else
+        @cool_design_temps[space_type] = process_design_temp_cooling(weather, space_type)
+        @heat_design_temps[space_type] = process_design_temp_heating(weather, space_type)
+      end
     end
   end
 
@@ -309,7 +330,7 @@ class HVACSizing
     return cool_temp
   end
 
-  def self.process_zone_loads(model, weather, nbeds, infilvolume)
+  def self.process_zone_loads(weather, cfa, nbeds)
     # Constant loads (no variation throughout day)
     zone_loads = ZoneLoads.new
     process_load_windows_skylights(zone_loads, weather)
@@ -319,7 +340,7 @@ class HVACSizing
     process_load_ceilings(zone_loads, weather)
     process_load_floors(zone_loads, weather)
     process_load_slabs(zone_loads, weather)
-    process_infiltration_ventilation(model, zone_loads, weather, infilvolume)
+    process_infiltration_ventilation(zone_loads, weather, cfa)
     process_internal_gains(zone_loads, nbeds)
     return zone_loads
   end
@@ -946,21 +967,39 @@ class HVACSizing
     end
   end
 
-  def self.process_infiltration_ventilation(model, zone_loads, weather, infilvolume)
+  def self.process_infiltration_ventilation(zone_loads, weather, cfa)
     '''
     Heating and Cooling Loads: Infiltration & Ventilation
     '''
 
-    # Per ANSI/RESNET/ICC 301
-    ach_nat = get_feature(@cond_zone, Constants.SizingInfoZoneInfiltrationACH, 'double')
+    # TODO: Consolidate code w/ airflow.rb
+    infil_volume = @hpxml.air_infiltration_measurements.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
+    infil_height = @hpxml.inferred_infiltration_height(infil_volume)
+    ach_nat = nil
+    @hpxml.air_infiltration_measurements.each do |measurement|
+      if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure) && !measurement.house_pressure.nil?
+        if measurement.unit_of_measure == HPXML::UnitsACH
+          ach50 = Airflow.calc_air_leakage_at_diff_pressure(0.65, measurement.air_leakage, measurement.house_pressure, 50.0)
+        elsif measurement.unit_of_measure == HPXML::UnitsCFM
+          achXX = measurement.air_leakage * 60.0 / infil_volume # Convert CFM to ACH
+          ach50 = Airflow.calc_air_leakage_at_diff_pressure(0.65, achXX, measurement.house_pressure, 50.0)
+        end
+        sla = Airflow.get_infiltration_SLA_from_ACH50(ach50, 0.67, cfa, infil_volume)
+        ach_nat = Airflow.get_infiltration_ACH_from_SLA(sla, infil_height, weather)
+      elsif measurement.unit_of_measure == HPXML::UnitsACHNatural
+        sla = Airflow.get_infiltration_SLA_from_ACH(measurement.air_leakage, infil_height, weather)
+        ach_nat = Airflow.get_infiltration_ACH_from_SLA(sla, infil_height, weather)
+      end
+    end
 
+    # Per ANSI/RESNET/ICC 301
     ach_Cooling = 1.2 * ach_nat
     ach_Heating = 1.6 * ach_nat
 
-    icfm_Cooling = ach_Cooling / UnitConversions.convert(1.0, 'hr', 'min') * infilvolume
-    icfm_Heating = ach_Heating / UnitConversions.convert(1.0, 'hr', 'min') * infilvolume
+    icfm_Cooling = ach_Cooling / UnitConversions.convert(1.0, 'hr', 'min') * infil_volume
+    icfm_Heating = ach_Heating / UnitConversions.convert(1.0, 'hr', 'min') * infil_volume
 
-    q_unb_cfm, q_preheat, q_precool, q_recirc, q_bal_Sens, q_bal_Lat = get_ventilation_rates(model)
+    q_unb_cfm, q_preheat, q_precool, q_recirc, q_bal_Sens, q_bal_Lat = get_ventilation_rates()
 
     cfm_Heating = q_bal_Sens + (icfm_Heating**2.0 + q_unb_cfm**2.0)**0.5 - q_preheat - q_recirc
 
@@ -1856,109 +1895,109 @@ class HVACSizing
     '''
     GSHP Ground Loop Sizing Calculations
     '''
-    if hvac.CoolType == HPXML::HVACTypeHeatPumpGroundToAir
-      ground_conductivity = UnitConversions.convert(hvac.GSHP_HXVertical.groundThermalConductivity.get, 'W/(m*K)', 'Btu/(hr*ft*R)')
-      grout_conductivity = UnitConversions.convert(hvac.GSHP_HXVertical.groutThermalConductivity.get, 'W/(m*K)', 'Btu/(hr*ft*R)')
-      bore_diameter = UnitConversions.convert(hvac.GSHP_HXVertical.boreHoleRadius.get * 2.0, 'm', 'in')
-      pipe_od = UnitConversions.convert(hvac.GSHP_HXVertical.pipeOutDiameter.get, 'm', 'in')
-      pipe_id = pipe_od - UnitConversions.convert(hvac.GSHP_HXVertical.pipeThickness.get * 2.0, 'm', 'in')
-      pipe_cond = UnitConversions.convert(hvac.GSHP_HXVertical.pipeThermalConductivity.get, 'W/(m*K)', 'Btu/(hr*ft*R)')
-      pipe_r_value = gshp_hx_pipe_rvalue(pipe_od, pipe_id, pipe_cond)
+    return unless hvac.CoolType == HPXML::HVACTypeHeatPumpGroundToAir
 
-      # Autosize ground loop heat exchanger length
-      bore_spacing = 20 # ft, distance between bores
-      hxdt_design = UnitConversions.convert(hvac.GSHP_HXVertical.plantLoop.get.sizingPlant.loopDesignTemperatureDifference, 'K', 'R')
-      hxhw_design = UnitConversions.convert(hvac.GSHP_HXVertical.plantLoop.get.minimumLoopTemperature, 'C', 'F')
-      hxchw_design = UnitConversions.convert(hvac.GSHP_HXVertical.plantLoop.get.sizingPlant.designLoopExitTemperature, 'C', 'F')
-      nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(weather, bore_spacing, ground_conductivity, hvac.GSHP_SpacingType, grout_conductivity, bore_diameter, pipe_od, pipe_r_value, hvac.HeatingEIR, hvac.CoolingEIR, hxchw_design, hxhw_design, hxdt_design)
+    ground_conductivity = UnitConversions.convert(hvac.GSHP_HXVertical.groundThermalConductivity.get, 'W/(m*K)', 'Btu/(hr*ft*R)')
+    grout_conductivity = UnitConversions.convert(hvac.GSHP_HXVertical.groutThermalConductivity.get, 'W/(m*K)', 'Btu/(hr*ft*R)')
+    bore_diameter = UnitConversions.convert(hvac.GSHP_HXVertical.boreHoleRadius.get * 2.0, 'm', 'in')
+    pipe_od = UnitConversions.convert(hvac.GSHP_HXVertical.pipeOutDiameter.get, 'm', 'in')
+    pipe_id = pipe_od - UnitConversions.convert(hvac.GSHP_HXVertical.pipeThickness.get * 2.0, 'm', 'in')
+    pipe_cond = UnitConversions.convert(hvac.GSHP_HXVertical.pipeThermalConductivity.get, 'W/(m*K)', 'Btu/(hr*ft*R)')
+    pipe_r_value = gshp_hx_pipe_rvalue(pipe_od, pipe_id, pipe_cond)
 
-      bore_length_heat = nom_length_heat * hvac_final_values.Heat_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
-      bore_length_cool = nom_length_cool * hvac_final_values.Cool_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
-      bore_length = [bore_length_heat, bore_length_cool].max
+    # Autosize ground loop heat exchanger length
+    bore_spacing = 20 # ft, distance between bores
+    hxdt_design = UnitConversions.convert(hvac.GSHP_HXVertical.plantLoop.get.sizingPlant.loopDesignTemperatureDifference, 'K', 'R')
+    hxhw_design = UnitConversions.convert(hvac.GSHP_HXVertical.plantLoop.get.minimumLoopTemperature, 'C', 'F')
+    hxchw_design = UnitConversions.convert(hvac.GSHP_HXVertical.plantLoop.get.sizingPlant.designLoopExitTemperature, 'C', 'F')
+    nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(weather, bore_spacing, ground_conductivity, hvac.GSHP_SpacingType, grout_conductivity, bore_diameter, pipe_od, pipe_r_value, hvac.HeatingEIR, hvac.CoolingEIR, hxchw_design, hxhw_design, hxdt_design)
 
-      loop_flow = [1.0, UnitConversions.convert([hvac_final_values.Heat_Capacity, hvac_final_values.Cool_Capacity].max, 'Btu/hr', 'ton')].max.floor * 3.0
+    bore_length_heat = nom_length_heat * hvac_final_values.Heat_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
+    bore_length_cool = nom_length_cool * hvac_final_values.Cool_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
+    bore_length = [bore_length_heat, bore_length_cool].max
 
-      num_bore_holes = [1, (UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'ton') + 0.5).floor].max
-      bore_depth = (bore_length / num_bore_holes).floor # ft
-      min_bore_depth = 0.15 * bore_spacing # 0.15 is the maximum Spacing2DepthRatio defined for the G-function
+    loop_flow = [1.0, UnitConversions.convert([hvac_final_values.Heat_Capacity, hvac_final_values.Cool_Capacity].max, 'Btu/hr', 'ton')].max.floor * 3.0
 
-      (0..4).to_a.each do |tmp|
-        if (bore_depth < min_bore_depth) && (num_bore_holes > 1)
-          num_bore_holes -= 1
-          bore_depth = (bore_length / num_bore_holes).floor
-        elsif bore_depth > 345
-          num_bore_holes += 1
-          bore_depth = (bore_length / num_bore_holes).floor
-        end
+    num_bore_holes = [1, (UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'ton') + 0.5).floor].max
+    bore_depth = (bore_length / num_bore_holes).floor # ft
+    min_bore_depth = 0.15 * bore_spacing # 0.15 is the maximum Spacing2DepthRatio defined for the G-function
+
+    (0..4).to_a.each do |tmp|
+      if (bore_depth < min_bore_depth) && (num_bore_holes > 1)
+        num_bore_holes -= 1
+        bore_depth = (bore_length / num_bore_holes).floor
+      elsif bore_depth > 345
+        num_bore_holes += 1
+        bore_depth = (bore_length / num_bore_holes).floor
       end
-
-      bore_depth = (bore_length / num_bore_holes).floor + 5
-
-      bore_length = bore_depth * num_bore_holes
-
-      if num_bore_holes == 1
-        bore_config = Constants.BoreConfigSingle
-      elsif num_bore_holes == 2
-        bore_config = Constants.BoreConfigLine
-      elsif num_bore_holes == 3
-        bore_config = Constants.BoreConfigLine
-      elsif num_bore_holes == 4
-        bore_config = Constants.BoreConfigRectangle
-      elsif num_bore_holes == 5
-        bore_config = Constants.BoreConfigUconfig
-      elsif num_bore_holes > 5
-        bore_config = Constants.BoreConfigLine
-      end
-
-      # Test for valid GSHP bore field configurations
-      valid_configs = { Constants.BoreConfigSingle => [1],
-                        Constants.BoreConfigLine => [2, 3, 4, 5, 6, 7, 8, 9, 10],
-                        Constants.BoreConfigLconfig => [3, 4, 5, 6],
-                        Constants.BoreConfigRectangle => [2, 4, 6, 8],
-                        Constants.BoreConfigUconfig => [5, 7, 9],
-                        Constants.BoreConfigL2config => [8],
-                        Constants.BoreConfigOpenRectangle => [8] }
-      valid_num_bores = valid_configs[bore_config]
-      max_valid_configs = { Constants.BoreConfigLine => 10, Constants.BoreConfigLconfig => 6 }
-      unless valid_num_bores.include? num_bore_holes
-        # Any configuration with a max_valid_configs value can accept any number of bores up to the maximum
-        if max_valid_configs.keys.include? bore_config
-          max_num_bore_holes = max_valid_configs[bore_config]
-          @runner.registerWarning("Maximum number of bore holes for '#{bore_config}' bore configuration is #{max_num_bore_holes}. Overriding value of #{num_bore_holes} bore holes to #{max_num_bore_holes}.")
-          num_bore_holes = max_num_bore_holes
-        else
-          # Search for first valid bore field
-          new_bore_config = nil
-          valid_field_found = false
-          valid_configs.keys.each do |bore_config|
-            next unless valid_configs[bore_config].include? num_bore_holes
-
-            valid_field_found = true
-            new_bore_config = bore_config
-            break
-          end
-          if valid_field_found
-            @runner.registerWarning("Bore field '#{bore_config}' with #{num_bore_holes.to_i} bore holes is an invalid configuration. Changing layout to '#{new_bore_config}' configuration.")
-            bore_config = new_bore_config
-          else
-            fail 'Could not construct a valid GSHP bore field configuration.'
-          end
-        end
-      end
-
-      spacing_to_depth_ratio = bore_spacing / bore_depth
-
-      lntts = [-8.5, -7.8, -7.2, -6.5, -5.9, -5.2, -4.5, -3.963, -3.27, -2.864, -2.577, -2.171, -1.884, -1.191, -0.497, -0.274, -0.051, 0.196, 0.419, 0.642, 0.873, 1.112, 1.335, 1.679, 2.028, 2.275, 3.003]
-      gfnc_coeff = gshp_gfnc_coeff(bore_config, num_bore_holes, spacing_to_depth_ratio)
-
-      hvac_final_values.GSHP_Loop_flow = loop_flow
-      hvac_final_values.GSHP_Bore_Depth = bore_depth
-      hvac_final_values.GSHP_Bore_Holes = num_bore_holes
-      hvac_final_values.GSHP_G_Functions = [lntts, gfnc_coeff]
     end
+
+    bore_depth = (bore_length / num_bore_holes).floor + 5
+
+    bore_length = bore_depth * num_bore_holes
+
+    if num_bore_holes == 1
+      bore_config = 'single'
+    elsif num_bore_holes == 2
+      bore_config = 'line'
+    elsif num_bore_holes == 3
+      bore_config = 'line'
+    elsif num_bore_holes == 4
+      bore_config = 'rectangle'
+    elsif num_bore_holes == 5
+      bore_config = 'u-config'
+    elsif num_bore_holes > 5
+      bore_config = 'line'
+    end
+
+    # Test for valid GSHP bore field configurations
+    valid_configs = { 'single' => [1],
+                      'line' => [2, 3, 4, 5, 6, 7, 8, 9, 10],
+                      'l-config' => [3, 4, 5, 6],
+                      'rectangle' => [2, 4, 6, 8],
+                      'u-config' => [5, 7, 9],
+                      'l2-config' => [8],
+                      'open-rectangle' => [8] }
+    valid_num_bores = valid_configs[bore_config]
+    max_valid_configs = { 'line' => 10, 'l-config' => 6 }
+    unless valid_num_bores.include? num_bore_holes
+      # Any configuration with a max_valid_configs value can accept any number of bores up to the maximum
+      if max_valid_configs.keys.include? bore_config
+        max_num_bore_holes = max_valid_configs[bore_config]
+        @runner.registerWarning("Maximum number of bore holes for '#{bore_config}' bore configuration is #{max_num_bore_holes}. Overriding value of #{num_bore_holes} bore holes to #{max_num_bore_holes}.")
+        num_bore_holes = max_num_bore_holes
+      else
+        # Search for first valid bore field
+        new_bore_config = nil
+        valid_field_found = false
+        valid_configs.keys.each do |bore_config|
+          next unless valid_configs[bore_config].include? num_bore_holes
+
+          valid_field_found = true
+          new_bore_config = bore_config
+          break
+        end
+        if valid_field_found
+          @runner.registerWarning("Bore field '#{bore_config}' with #{num_bore_holes.to_i} bore holes is an invalid configuration. Changing layout to '#{new_bore_config}' configuration.")
+          bore_config = new_bore_config
+        else
+          fail 'Could not construct a valid GSHP bore field configuration.'
+        end
+      end
+    end
+
+    spacing_to_depth_ratio = bore_spacing / bore_depth
+
+    lntts = [-8.5, -7.8, -7.2, -6.5, -5.9, -5.2, -4.5, -3.963, -3.27, -2.864, -2.577, -2.171, -1.884, -1.191, -0.497, -0.274, -0.051, 0.196, 0.419, 0.642, 0.873, 1.112, 1.335, 1.679, 2.028, 2.275, 3.003]
+    gfnc_coeff = gshp_gfnc_coeff(bore_config, num_bore_holes, spacing_to_depth_ratio)
+
+    hvac_final_values.GSHP_Loop_flow = loop_flow
+    hvac_final_values.GSHP_Bore_Depth = bore_depth
+    hvac_final_values.GSHP_Bore_Holes = num_bore_holes
+    hvac_final_values.GSHP_G_Functions = [lntts, gfnc_coeff]
   end
 
-  def self.process_finalize(hvac_final_values, zone_loads, weather, hvac)
+  def self.process_finalize(hvac_final_values, weather, hvac)
     '''
     Finalize Sizing Calculations
     '''
@@ -2018,52 +2057,57 @@ class HVACSizing
     return hvac_final_values
   end
 
-  def self.get_shelter_class(model, min_neighbor_distance)
-    height_ft = Geometry.get_height_of_spaces([@spaces[HPXML::LocationLivingSpace]])
-    tot_cb_area, ext_cb_area = @hpxml.compartmentalization_boundary_areas()
-    exposed_wall_ratio = ext_cb_area / tot_cb_area
-
-    if exposed_wall_ratio > 0.5 # 3 or 4 exposures; Table 5D
-      if min_neighbor_distance.nil?
-        shelter_class = 2 # Typical shelter for isolated rural house
-      elsif min_neighbor_distance > height_ft
-        shelter_class = 3 # Typical shelter caused by other buildings across the street
-      else
-        shelter_class = 4 # Typical shelter for urban buildings where sheltering obstacles are less than one building height away
-      end
-    else # 0, 1, or 2 exposures; Table 5E
-      if min_neighbor_distance.nil?
-        if exposed_wall_ratio > 0.25 # 2 exposures; Table 5E
-          shelter_class = 2 # Typical shelter for isolated rural house
-        else # 1 exposure; Table 5E
-          shelter_class = 3 # Typical shelter caused by other buildings across the street
-        end
-      elsif min_neighbor_distance > height_ft
-        shelter_class = 4 # Typical shelter for urban buildings where sheltering obstacles are less than one building height away
-      else
-        shelter_class = 5 # Typical shelter for urban buildings where sheltering obstacles are less than one building height away
-      end
+  def self.get_ventilation_rates()
+    vent_fans_mech = @hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }
+    if vent_fans_mech.empty?
+      return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     end
 
-    return shelter_class
-  end
+    # Categorize fans into different types
+    vent_mech_preheat = vent_fans_mech.select { |vent_mech| (not vent_mech.preheating_efficiency_cop.nil?) }
+    vent_mech_precool = vent_fans_mech.select { |vent_mech| (not vent_mech.precooling_efficiency_cop.nil?) }
+    vent_mech_shared = vent_fans_mech.select { |vent_mech| vent_mech.is_shared_system }
 
-  def self.get_ventilation_rates(model)
-    mechVentExist = get_feature(model.getBuilding, Constants.SizingInfoMechVentExist, 'boolean')
-    return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0] unless mechVentExist
+    vent_mech_sup_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
+    vent_mech_exh_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
+    vent_mech_cfis_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS }
+    vent_mech_bal_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
+    vent_mech_erv_hrv_tot = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
 
-    q_unb_cfm = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateUnbalanced, 'double')
-    q_b = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateBalanced, 'double')
-    q_preheat = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRatePreHeated, 'double')
-    q_precool = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRatePreCooled, 'double')
-    q_recirc = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateRecirculated, 'double')
-    apparentSensibleEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentApparentSensibleEffectiveness, 'double')
-    latentEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentLatentEffectiveness, 'double')
+    # Average in-unit cfms (include recirculation from in unit cfms for shared systems)
+    sup_cfm_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
+    exh_cfm_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
+    bal_cfm_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
+    erv_hrv_cfm_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
+    cfis_cfm_tot = vent_mech_cfis_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
 
-    q_bal_sens = q_b * (1.0 - apparentSensibleEffectiveness)
-    q_bal_lat = q_b * (1.0 - latentEffectiveness)
+    # Average preconditioned oa air cfms (only oa, recirculation will be addressed below for all shared systems)
+    oa_cfm_preheat = vent_mech_preheat.map { |vent_mech| vent_mech.average_oa_unit_flow_rate * vent_mech.preheating_fraction_load_served }.sum(0.0)
+    oa_cfm_precool = vent_mech_precool.map { |vent_mech| vent_mech.average_oa_unit_flow_rate * vent_mech.precooling_fraction_load_served }.sum(0.0)
+    recirc_cfm_shared = vent_mech_shared.map { |vent_mech| vent_mech.average_total_unit_flow_rate - vent_mech.average_oa_unit_flow_rate }.sum(0.0)
 
-    return [q_unb_cfm, q_preheat, q_precool, q_recirc, q_bal_sens, q_bal_lat]
+    # Total CFMS
+    tot_sup_cfm = sup_cfm_tot + bal_cfm_tot + erv_hrv_cfm_tot + cfis_cfm_tot
+    tot_exh_cfm = exh_cfm_tot + bal_cfm_tot + erv_hrv_cfm_tot
+    tot_unbal_cfm = (tot_sup_cfm - tot_exh_cfm).abs
+    tot_bal_cfm = [tot_exh_cfm, tot_sup_cfm].min
+
+    # Calculate effectivenesses for all ERV/HRV and store results in a hash
+    hrv_erv_effectiveness_map = Airflow.calc_hrv_erv_effectiveness(vent_mech_erv_hrv_tot)
+
+    # Calculate cfm weighted average effectivenesses for the combined balanced airflow
+    weighted_vent_mech_lat_eff = 0.0
+    weighted_vent_mech_apparent_sens_eff = 0.0
+    vent_mech_erv_hrv_unprecond = vent_mech_erv_hrv_tot.select { |vent_mech| vent_mech.preheating_efficiency_cop.nil? && vent_mech.precooling_efficiency_cop.nil? }
+    vent_mech_erv_hrv_unprecond.each do |vent_mech|
+      weighted_vent_mech_lat_eff += vent_mech.average_oa_unit_flow_rate / tot_bal_cfm * hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff]
+      weighted_vent_mech_apparent_sens_eff += vent_mech.average_oa_unit_flow_rate / tot_bal_cfm * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
+    end
+
+    tot_bal_cfm_sens = tot_bal_cfm * (1.0 - weighted_vent_mech_lat_eff)
+    tot_bal_cfm_lat = tot_bal_cfm * (1.0 - weighted_vent_mech_apparent_sens_eff)
+
+    return [tot_unbal_cfm, oa_cfm_preheat, oa_cfm_precool, recirc_cfm_shared, tot_bal_cfm_sens, tot_bal_cfm_lat]
   end
 
   def self.calc_airflow_rate(load_or_capacity, deltaT)
@@ -2605,8 +2649,39 @@ class HVACSizing
     end
 
     # Infiltration UA
-    infiltration_cfm = get_feature(@spaces[space_type].thermalZone.get, Constants.SizingInfoZoneInfiltrationCFM, 'double', false)
-    infiltration_cfm = 0.0 if infiltration_cfm.nil?
+    infiltration_cfm = nil
+    if [HPXML::LocationCrawlspaceVented, HPXML::LocationAtticVented].include? space_type
+      # Vented space
+      if space_type == HPXML::LocationCrawlspaceVented
+        vented_crawl = @hpxml.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceVented }[0]
+        sla = vented_crawl.vented_crawlspace_sla
+      else
+        vented_attic = @hpxml.attics.select { |f| f.attic_type == HPXML::AtticTypeVented }[0]
+        sla = vented_attic.vented_attic_sla
+      end
+      ach = Airflow.get_infiltration_ACH_from_SLA(sla, 8.202, weather)
+    else # Unvented space
+      ach = 0.1 # Assumption
+    end
+    # TODO: Reuse code from measure.rb set_zone_volumes()
+    if [HPXML::LocationAtticVented, HPXML::LocationAtticUnvented].include? space_type
+      floor_area = @hpxml.frame_floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? space_type }.map { |s| s.area }.sum(0.0)
+      roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }
+      avg_pitch = roofs.map { |r| r.pitch }.sum(0.0) / roofs.size
+      # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
+      length = floor_area**0.5
+      height = 0.5 * Math.sin(Math.atan(avg_pitch / 12.0)) * length
+      volume = [floor_area * height / 3.0, 0.01].max
+    else # foundation/garage space
+      floor_area = @hpxml.slabs.select { |s| s.interior_adjacent_to == space_type }.map { |s| s.area }.sum(0.0)
+      if space_type == HPXML::LocationGarage
+        height = 8.0
+      else
+        height = @hpxml.foundation_walls.select { |w| w.interior_adjacent_to == space_type }.map { |w| w.height }.max
+      end
+      volume = floor_area * height
+    end
+    infiltration_cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
     outside_air_density = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * (weather.data.AnnualAvgDrybulb + 460.0))
     space_UAs['infil'] = infiltration_cfm * outside_air_density * Gas.Air.cp * UnitConversions.convert(1.0, 'hr', 'min')
 
@@ -2806,24 +2881,20 @@ class HVACSizing
       end
 
     elsif wall_type == HPXML::WallTypeCMU
-      # Manual J uses the same wall group for filled or hollow block
-      if wall.insulation_cavity_r_value < 2
-        wall_group = 5  # E
-      elsif wall.insulation_cavity_r_value <= 11
-        wall_group = 8  # H
-      elsif wall.insulation_cavity_r_value <= 13
-        wall_group = 9  # I
-      elsif wall.insulation_cavity_r_value <= 15
-        wall_group = 9  # I
-      elsif wall.insulation_cavity_r_value <= 19
+      # Table 4A - Construction Number 13
+      if wall_ufactor <= 0.0575
         wall_group = 10 # J
-      elsif wall.insulation_cavity_r_value <= 21
-        wall_group = 11 # K
+      elsif wall_ufactor <= 0.067
+        wall_group = 9 # I
+      elsif wall_ufactor <= 0.080
+        wall_group = 8 # H
+      elsif wall_ufactor <= 0.108
+        wall_group = 7 # G
+      elsif wall_ufactor <= 0.148
+        wall_group = 6 # F
       else
-        wall_group = 11 # K
+        wall_group = 5 # E
       end
-      # This is an estimate based on Table 4A - Construction Number 13
-      wall_group += (wall.insulation_continuous_r_value / 3.0).floor # Group is increased by approximately 1 letter for each R3
 
     elsif [HPXML::WallTypeBrick, HPXML::WallTypeAdobe].include? wall_type
       # Two Courses Brick
@@ -2905,9 +2976,9 @@ class HVACSizing
   def self.gshp_gfnc_coeff(bore_config, num_bore_holes, spacing_to_depth_ratio)
     # Set GFNC coefficients
     gfnc_coeff = nil
-    if bore_config == Constants.BoreConfigSingle
+    if bore_config == 'single'
       gfnc_coeff = 2.681, 3.024, 3.320, 3.666, 3.963, 4.306, 4.645, 4.899, 5.222, 5.405, 5.531, 5.704, 5.821, 6.082, 6.304, 6.366, 6.422, 6.477, 6.520, 6.558, 6.591, 6.619, 6.640, 6.665, 6.893, 6.694, 6.715
-    elsif bore_config == Constants.BoreConfigLine
+    elsif bore_config == 'line'
       if num_bore_holes == 2
         if spacing_to_depth_ratio <= 0.02
           gfnc_coeff = 2.681, 3.043, 3.397, 3.9, 4.387, 5.005, 5.644, 6.137, 6.77, 7.131, 7.381, 7.722, 7.953, 8.462, 8.9, 9.022, 9.13, 9.238, 9.323, 9.396, 9.46, 9.515, 9.556, 9.604, 9.636, 9.652, 9.678
@@ -3017,7 +3088,7 @@ class HVACSizing
           gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.275, 5.587, 5.837, 6.238, 6.552, 7.399, 8.347, 8.654, 8.956, 9.283, 9.549, 9.79, 10.014, 10.209, 10.36, 10.541, 10.669, 10.732, 10.837
         end
       end
-    elsif bore_config == Constants.BoreConfigLconfig
+    elsif bore_config == 'l-config'
       if num_bore_holes == 3
         if spacing_to_depth_ratio <= 0.02
           gfnc_coeff = 2.682, 3.052, 3.435, 4.036, 4.668, 5.519, 6.435, 7.155, 8.091, 8.626, 8.997, 9.504, 9.847, 10.605, 11.256, 11.434, 11.596, 11.755, 11.88, 11.988, 12.083, 12.163, 12.224, 12.294, 12.342, 12.365, 12.405
@@ -3067,7 +3138,7 @@ class HVACSizing
           gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.27, 5.579, 5.828, 6.225, 6.535, 7.384, 8.244, 8.515, 8.768, 9.026, 9.244, 9.428, 9.595, 9.737, 9.845, 9.97, 10.057, 10.099, 10.168
         end
       end
-    elsif bore_config == Constants.BoreConfigL2config
+    elsif bore_config == 'l2-config'
       if num_bore_holes == 8
         if spacing_to_depth_ratio <= 0.02
           gfnc_coeff = 2.685, 3.078, 3.547, 4.438, 5.521, 7.194, 9.237, 10.973, 13.311, 14.677, 15.634, 16.942, 17.831, 19.791, 21.462, 21.917, 22.329, 22.734, 23.052, 23.328, 23.568, 23.772, 23.925, 24.102, 24.224, 24.283, 24.384
@@ -3093,7 +3164,7 @@ class HVACSizing
           gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.307, 4.653, 4.842, 5.331, 5.731, 6.083, 6.683, 7.178, 8.6, 10.054, 10.508, 10.929, 11.356, 11.711, 12.009, 12.275, 12.5, 12.671, 12.866, 13, 13.064, 13.17
         end
       end
-    elsif bore_config == Constants.BoreConfigUconfig
+    elsif bore_config == 'u-config'
       if num_bore_holes == 5
         if spacing_to_depth_ratio <= 0.02
           gfnc_coeff = 2.683, 3.057, 3.46, 4.134, 4.902, 6.038, 7.383, 8.503, 9.995, 10.861, 11.467, 12.294, 12.857, 14.098, 15.16, 15.449, 15.712, 15.97, 16.173, 16.349, 16.503, 16.633, 16.731, 16.844, 16.922, 16.96, 17.024
@@ -3131,7 +3202,7 @@ class HVACSizing
           gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.277, 5.6, 5.87, 6.322, 6.698, 7.823, 9.044, 9.438, 9.809, 10.188, 10.506, 10.774, 11.015, 11.219, 11.374, 11.552, 11.674, 11.733, 11.83
         end
       end
-    elsif bore_config == Constants.BoreConfigOpenRectangle
+    elsif bore_config == 'open-rectangle'
       if num_bore_holes == 8
         if spacing_to_depth_ratio <= 0.02
           gfnc_coeff = 2.684, 3.066, 3.497, 4.275, 5.229, 6.767, 8.724, 10.417, 12.723, 14.079, 15.03, 16.332, 17.217, 19.17, 20.835, 21.288, 21.698, 22.101, 22.417, 22.692, 22.931, 23.133, 23.286, 23.462, 23.583, 23.642, 23.742
@@ -3157,7 +3228,7 @@ class HVACSizing
           gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.651, 4.839, 5.292, 5.636, 5.928, 6.425, 6.841, 8.089, 9.44, 9.875, 10.284, 10.7, 11.05, 11.344, 11.608, 11.831, 12.001, 12.196, 12.329, 12.393, 12.499
         end
       end
-    elsif bore_config == Constants.BoreConfigRectangle
+    elsif bore_config == 'rectangle'
       if num_bore_holes == 4
         if spacing_to_depth_ratio <= 0.02
           gfnc_coeff = 2.684, 3.066, 3.493, 4.223, 5.025, 6.131, 7.338, 8.291, 9.533, 10.244, 10.737, 11.409, 11.865, 12.869, 13.73, 13.965, 14.178, 14.388, 14.553, 14.696, 14.821, 14.927, 15.007, 15.099, 15.162, 15.193, 15.245
@@ -3703,7 +3774,7 @@ class HVACSizing
   end
 
   def self.display_zone_loads(zone_loads)
-    s = "Zone Loads for #{@cond_zone.name}:"
+    s = 'Building Loads:'
     properties = [
       :Heat_Windows, :Heat_Skylights, :Heat_Doors, :Heat_Walls,
       :Heat_Roofs, :Heat_Floors, :Heat_Slabs, :Heat_Ceilings, :Heat_Infil,

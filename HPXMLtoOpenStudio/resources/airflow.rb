@@ -1134,9 +1134,6 @@ class Airflow
     ach = 0.1 # Assumption
     cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
     apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
-
-    # Store info for HVAC Sizing measure
-    space.thermalZone.get.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, cfm.to_f)
   end
 
   def self.apply_infiltration_to_vented_crawlspace(model, weather, vented_crawl)
@@ -1148,9 +1145,6 @@ class Airflow
     ach = get_infiltration_ACH_from_SLA(sla, 8.202, weather)
     cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
     apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
-
-    # Store info for HVAC Sizing measure
-    space.thermalZone.get.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, cfm.to_f)
   end
 
   def self.apply_infiltration_to_unvented_crawlspace(model, weather)
@@ -1162,9 +1156,6 @@ class Airflow
     ach = get_infiltration_ACH_from_SLA(sla, 8.202, weather)
     cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
     apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
-
-    # Store info for HVAC Sizing measure
-    space.thermalZone.get.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, cfm.to_f)
   end
 
   def self.apply_infiltration_to_vented_attic(model, weather, vented_attic)
@@ -1197,9 +1188,6 @@ class Airflow
       cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
       apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
     end
-
-    # Store info for HVAC Sizing measure
-    space.thermalZone.get.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, cfm.to_f)
   end
 
   def self.apply_infiltration_to_unvented_attic(model, weather)
@@ -1216,9 +1204,6 @@ class Airflow
     cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
     c_w_SG, c_s_SG = calc_wind_stack_coeffs(hor_lk_frac, neutral_level, space)
     apply_infiltration_to_unconditioned_space(model, space, nil, ela, c_w_SG, c_s_SG)
-
-    # Store info for HVAC Sizing measure
-    space.thermalZone.get.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, cfm.to_f)
   end
 
   def self.apply_local_ventilation(model, vent_object_array, obj_type_name)
@@ -1632,39 +1617,9 @@ class Airflow
     exh_cfm_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
     bal_cfm_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
     erv_hrv_cfm_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    cfis_cfm_tot = vent_mech_cfis_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-
-    # Average preconditioned oa air cfms (only oa, recirculation will be addressed below for all shared systems)
-    oa_cfm_preheat = vent_mech_preheat.map { |vent_mech| vent_mech.average_oa_unit_flow_rate * vent_mech.preheating_fraction_load_served }.sum(0.0)
-    oa_cfm_precool = vent_mech_precool.map { |vent_mech| vent_mech.average_oa_unit_flow_rate * vent_mech.precooling_fraction_load_served }.sum(0.0)
-    recirc_cfm_shared = vent_mech_shared.map { |vent_mech| vent_mech.average_total_unit_flow_rate - vent_mech.average_oa_unit_flow_rate }.sum(0.0)
-
-    # HVAC Sizing data
-    tot_sup_cfm = sup_cfm_tot + bal_cfm_tot + erv_hrv_cfm_tot + cfis_cfm_tot
-    tot_exh_cfm = exh_cfm_tot + bal_cfm_tot + erv_hrv_cfm_tot
-    tot_unbal_cfm = (tot_sup_cfm - tot_exh_cfm).abs
-    tot_bal_cfm = [tot_exh_cfm, tot_sup_cfm].min
 
     # Calculate effectivenesses for all ERV/HRV and store results in a hash
     hrv_erv_effectiveness_map = calc_hrv_erv_effectiveness(vent_mech_erv_hrv_tot)
-
-    # Calculate cfm weighted average effectivenesses for the combined balanced airflow
-    weighted_vent_mech_lat_eff = 0.0
-    weighted_vent_mech_apparent_sens_eff = 0.0
-    vent_mech_erv_hrv_unprecond = vent_mech_erv_hrv_tot.select { |vent_mech| vent_mech.preheating_efficiency_cop.nil? && vent_mech.precooling_efficiency_cop.nil? }
-    vent_mech_erv_hrv_unprecond.each do |vent_mech|
-      weighted_vent_mech_lat_eff += vent_mech.average_oa_unit_flow_rate / tot_bal_cfm * hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff]
-      weighted_vent_mech_apparent_sens_eff += vent_mech.average_oa_unit_flow_rate / tot_bal_cfm * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
-    end
-    # Store info for HVAC Sizing measure
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentLatentEffectiveness, weighted_vent_mech_lat_eff)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentApparentSensibleEffectiveness, weighted_vent_mech_apparent_sens_eff)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateBalanced, tot_bal_cfm)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateUnbalanced, tot_unbal_cfm)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRatePreHeated, oa_cfm_preheat)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRatePreCooled, oa_cfm_precool)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateRecirculated, recirc_cfm_shared)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentExist, (not vent_fans_mech.empty?))
 
     infil_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
     infil_flow.setName(Constants.ObjectNameInfiltration + ' flow')
@@ -1717,11 +1672,11 @@ class Airflow
     living_const_ach = nil
     air_infils.each do |air_infil|
       if (air_infil.unit_of_measure == HPXML::UnitsACH) && !air_infil.house_pressure.nil?
-        living_ach = air_infil.air_leakage
-        living_ach50 = calc_air_leakage_at_diff_pressure(0.65, living_ach, air_infil.house_pressure, 50.0)
+        living_achXX = air_infil.air_leakage
+        living_ach50 = calc_air_leakage_at_diff_pressure(0.65, living_achXX, air_infil.house_pressure, 50.0)
       elsif (air_infil.unit_of_measure == HPXML::UnitsCFM) && !air_infil.house_pressure.nil?
-        living_ach = air_infil.air_leakage * 60.0 / @infil_volume # Convert CFM to ACH
-        living_ach50 = calc_air_leakage_at_diff_pressure(0.65, living_ach, air_infil.house_pressure, 50.0)
+        living_achXX = air_infil.air_leakage * 60.0 / @infil_volume # Convert CFM to ACH
+        living_ach50 = calc_air_leakage_at_diff_pressure(0.65, living_achXX, air_infil.house_pressure, 50.0)
       elsif air_infil.unit_of_measure == HPXML::UnitsACHNatural
         if @apply_ashrae140_assumptions
           living_const_ach = air_infil.air_leakage
@@ -1861,10 +1816,6 @@ class Airflow
     else
       infil_program.addLine('Set Qinf = 0')
     end
-
-    # Store info for HVAC Sizing measure
-    @living_zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, living_cfm.to_f)
-    @living_zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationACH, living_ach.to_f)
   end
 
   def self.calc_wind_stack_coeffs(hor_lk_frac, neutral_level, space, space_height = nil)

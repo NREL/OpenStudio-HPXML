@@ -211,7 +211,7 @@ class OSModel
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
     check_for_errors()
-    set_defaults_and_globals(runner, output_dir, epw_file)
+    set_defaults_and_globals(runner, output_dir, epw_file, weather)
     Location.apply(model, runner, weather, epw_file, @hpxml)
     add_simulation_params(model)
 
@@ -296,7 +296,7 @@ class OSModel
     end
   end
 
-  def self.set_defaults_and_globals(runner, output_dir, epw_file)
+  def self.set_defaults_and_globals(runner, output_dir, epw_file, weather)
     # Initialize
     @remaining_heat_load_frac = 1.0
     @remaining_cool_load_frac = 1.0
@@ -318,7 +318,7 @@ class OSModel
     end
 
     # Apply defaults to HPXML object
-    HPXMLDefaults.apply(@hpxml, @cfa, @nbeds, @ncfl, @ncfl_ag, @has_uncond_bsmnt, @eri_version, epw_file, runner)
+    @sizing_init_loads = HPXMLDefaults.apply(@hpxml, weather, @cfa, @nbeds, @ncfl, @ncfl_ag, @has_uncond_bsmnt, @eri_version, epw_file, runner, @debug)
 
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
@@ -2404,11 +2404,11 @@ class OSModel
       end
     end
 
-    air_infils = @hpxml.air_infiltration_measurements
     window_area = @hpxml.windows.map { |w| w.area }.sum(0.0)
     open_window_area = window_area * @frac_windows_operable * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
     site_type = @hpxml.site.site_type
     shelter_coef = @hpxml.site.shelter_coefficient
+    air_infils = @hpxml.air_infiltration_measurements
     @infil_volume = air_infils.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
     infil_height = @hpxml.inferred_infiltration_height(@infil_volume)
     Airflow.apply(model, runner, weather, spaces, air_infils, @hpxml.ventilation_fans, @hpxml.clothes_dryers, @nbeds,
@@ -2500,8 +2500,7 @@ class OSModel
   end
 
   def self.add_hvac_sizing(runner, model, weather, spaces)
-    HVACSizing.apply(model, runner, weather, spaces, @hpxml, @hvac_map,
-                     @infil_volume, @nbeds, @min_neighbor_distance, @debug)
+    HVACSizing.apply(model, runner, weather, spaces, @hpxml, @hvac_map, @debug, @sizing_init_loads)
   end
 
   def self.add_photovoltaics(runner, model)
