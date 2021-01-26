@@ -211,6 +211,7 @@ class OSModel
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
     check_for_errors()
+    update_shared_hvac_systems()
     set_defaults_and_globals(runner, output_dir, epw_file, weather)
     Location.apply(model, runner, weather, epw_file, @hpxml)
     add_simulation_params(model)
@@ -241,7 +242,6 @@ class OSModel
 
     # HVAC
 
-    update_shared_hvac_systems()
     add_ideal_system(runner, model, spaces, epw_path)
     add_cooling_system(runner, model, spaces)
     add_heating_system(runner, model, spaces)

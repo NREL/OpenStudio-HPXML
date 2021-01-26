@@ -3671,9 +3671,6 @@ class HVAC
     applied_htg = apply_shared_heating_systems(hpxml)
     return unless (applied_clg || applied_htg)
 
-    weather = nil # FIXME
-    HPXMLDefaults.apply_hvac(hpxml) # FIXME: Why do we do need to do this?
-
     # Remove any orphaned HVAC distributions
     hpxml.hvac_distributions.each do |hvac_distribution|
       hvac_systems = []
