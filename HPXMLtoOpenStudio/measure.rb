@@ -1853,9 +1853,24 @@ class OSModel
       shading_surface.setTransmittanceSchedule(shading_schedules[trans_values].schedule)
 
       # Adjustment to default view factor is used to reduce ground diffuse solar
-      avg_trans_value = trans_values.sum(0.0) / 12.0 # FUTURE: Create EnergyPlus actuator to adjust this
-      default_vf_to_ground = ((1.0 - Math::cos(parent_surface.tilt)) / 2.0).round(2)
-      sub_surface.setViewFactortoGround(default_vf_to_ground * avg_trans_value)
+      actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(sub_surface, *EPlus::EMSActuatorSurfaceViewFactorToGround)
+      actuator.setName("#{sub_surface.name.to_s.gsub(' ', '_').gsub('-', '_')}_actuator")
+
+      # EMS to actuate schedule
+      program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+      program.setName("#{sub_surface.name.to_s.gsub('-', '_')} View Factor To Ground Program")
+      program.addLine("IF (DayOfYear >= 1) && (DayOfYear <= 120)") # FIXME: Is there a way to parameterize DayOfYear so that I can avoid hard-coding it?
+      program.addLine("Set #{actuator.name} = #{((1.0 - Math::cos(sub_surface.tilt)) / 2.0).round(2)}*#{sf_winter}") 
+      program.addLine("ELSEIF (DayOfYear > 120) && (DayOfYear <= 320)") # FIXME: use 320 days (11/17) instead of 304 days (11/1) in order to synchronize with the default "period" frequency of 20 days
+      program.addLine("Set #{actuator.name} = #{((1.0 - Math::cos(sub_surface.tilt)) / 2.0).round(2)}*#{sf_summer}") 
+      program.addLine("ELSEIF (DayOfYear > 320) && (DayOfYear <= 365)") 
+      program.addLine("Set #{actuator.name} = #{((1.0 - Math::cos(sub_surface.tilt)) / 2.0).round(2)}*#{sf_winter}") 
+      program.addLine('EndIf')
+
+      program_cm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+      program_cm.setName("#{program.name} calling manager")
+      program_cm.setCallingPoint('BeginTimestepBeforePredictor')
+      program_cm.addProgram(program)
 
       if shading_group.nil?
         shading_group = OpenStudio::Model::ShadingSurfaceGroup.new(model)
