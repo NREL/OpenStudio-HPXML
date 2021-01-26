@@ -67,13 +67,13 @@ class HVACSizing
       htg_id, clg_id, hvac = key
 
       # Assign OSM object
-      equip = nil
-      hvac_map.each do |hvac_id, objects|
+      osm_object = nil
+      hvac_map.each do |hvac_id, osm_objects|
         next unless [htg_id, clg_id].include? hvac_id
 
-        equip = filter_object_of_interest(objects)
+        osm_object = filter_osm_object_of_interest(osm_objects)
       end
-      hvac.OSMObject = equip
+      hvac.OSMObject = osm_object
 
       # Set OpenStudio object values
       set_object_values(model, hvac, hvac_sizing_values)
@@ -1662,10 +1662,6 @@ class HVACSizing
     tout_cool = UnitConversions.convert(weather.design.CoolingDrybulb, 'F', 'C')
     tout_heat = UnitConversions.convert(weather.design.HeatingDrybulb, 'F', 'C')
 
-    # Get cooling coil, heating coil
-    if hvac.OSMObject.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
-      clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, hvac.OSMObject)
-    end
     if hvac.CoolType == HPXML::HVACTypeHeatPumpGroundToAir
       # Cooling
       coil_bf = gshp_coil_bf
@@ -1713,6 +1709,10 @@ class HVACSizing
         hvac_sizing_values.Heat_Airflow = calc_airflow_rate(hvac_sizing_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
       end
     else
+      # Get cooling coil, heating coil
+      if hvac.OSMObject.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
+        clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, hvac.OSMObject)
+      end
       airflow_rated_defect_ratio_cool = []
       airflow_rated_defect_ratio_heat = []
       airflow_rated_ratio_cool = []
@@ -1925,9 +1925,8 @@ class HVACSizing
 
     # Autosize ground loop heat exchanger length
     bore_spacing = 20.0 # ft, distance between bores
-    pipe_r_value = gshp_hx_pipe_rvalue(hvac.GSHP_pipe_od, hvac.GSHP_pipe_id, hvac.GSHP_pipe_cond)
-    # FIXME: Pass hvac object, remove unnecessary arguments
-    nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(weather, bore_spacing, hvac.GSHP_ground_k, hvac.GSHP_SpacingType, hvac.GSHP_grout_k, hvac.GSHP_bore_d, hvac.GSHP_pipe_od, pipe_r_value, hvac.HeatingEIR, hvac.CoolingEIR, hvac.GSHP_design_chw, hvac.GSHP_design_hw, hvac.GSHP_design_delta_t)
+    pipe_r_value = gshp_hx_pipe_rvalue(hvac)
+    nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(weather, hvac, bore_spacing, pipe_r_value)
 
     bore_length_heat = nom_length_heat * hvac_sizing_values.Heat_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
     bore_length_cool = nom_length_cool * hvac_sizing_values.Cool_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
@@ -2261,56 +2260,6 @@ class HVACSizing
     return cool_Load_Lat, cool_Load_Sens
   end
 
-  def self.get_ducts_for_object(object)
-    ducts = []
-
-    # Has ducts?
-    has_ducts = get_feature(object, Constants.SizingInfoDuctExist, 'boolean', false)
-    return ducts if ducts.nil?
-
-    # Leakage values
-    leakage_fracs = get_feature(object, Constants.SizingInfoDuctLeakageFracs, 'string', false)
-    leakage_cfm25s = get_feature(object, Constants.SizingInfoDuctLeakageCFM25s, 'string', false)
-    return ducts if leakage_fracs.nil? || leakage_cfm25s.nil?
-
-    leakage_fracs = leakage_fracs.split(',').map(&:to_f)
-    leakage_cfm25s = leakage_cfm25s.split(',').map(&:to_f)
-    if leakage_fracs.sum(0.0) == 0.0
-      leakage_fracs = [nil] * leakage_fracs.size
-    else
-      leakage_cfm25s = [nil] * leakage_cfm25s.size
-    end
-
-    # Areas
-    areas = get_feature(object, Constants.SizingInfoDuctAreas, 'string')
-    areas = areas.split(',').map(&:to_f)
-
-    # R-values
-    rvalues = get_feature(object, Constants.SizingInfoDuctRvalues, 'string')
-    rvalues = rvalues.split(',').map(&:to_f)
-
-    # Locations
-    locations = get_feature(object, Constants.SizingInfoDuctLocations, 'string')
-    locations = locations.split(',')
-
-    # Sides
-    sides = get_feature(object, Constants.SizingInfoDuctSides, 'string')
-    sides = sides.split(',')
-
-    locations.each_with_index do |location, index|
-      d = DuctInfo.new
-      d.Location = location
-      d.LeakageFrac = leakage_fracs[index]
-      d.LeakageCFM25 = leakage_cfm25s[index]
-      d.Area = areas[index]
-      d.Rvalue = rvalues[index]
-      d.Side = sides[index]
-      ducts << d
-    end
-
-    return ducts
-  end
-
   def self.calc_ducts_area_weighted_average(ducts, values)
     '''
     Calculate area-weighted average values for unconditioned duct(s)
@@ -2360,9 +2309,9 @@ class HVACSizing
     ducts.each do |duct|
       next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.Location
 
-      if not duct.LeakageFrac.nil?
+      if not duct.LeakageFrac.to_f > 0
         cfms[duct.Side] += duct.LeakageFrac * system_cfm
-      elsif not duct.LeakageCFM25.nil?
+      elsif not duct.LeakageCFM25.to_f > 0
         cfms[duct.Side] += duct.LeakageCFM25
       end
     end
@@ -2387,7 +2336,7 @@ class HVACSizing
     return 1.0 / supply_u, 1.0 / return_u
   end
 
-  def self.filter_object_of_interest(objects)
+  def self.filter_osm_object_of_interest(objects)
     objects.each do |o|
       next unless (o.is_a?(OpenStudio::Model::AirLoopHVACUnitarySystem) ||
                    o.is_a?(OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial) ||
@@ -2455,8 +2404,8 @@ class HVACSizing
       # Number of speeds
       if hpxml_hvac.is_a?(HPXML::CoolingSystem) || hpxml_hvac.is_a?(HPXML::HeatPump)
         # Cooling
-        if hpxml_hvac.respond_to? :compressor_type
-          num_speeds = HVAC.get_num_speeds_from_compressor_type(hpxml_hvac.compressor_type)
+        if hpxml_hvac.additional_properties.respond_to? :num_speeds
+          num_speeds = hpxml_hvac.additional_properties.num_speeds
         end
         num_speeds = 1 if num_speeds.nil?
         hvac.NumSpeedsCooling = num_speeds
@@ -2468,8 +2417,8 @@ class HVACSizing
       end
       if hpxml_hvac.is_a?(HPXML::HeatingSystem) || hpxml_hvac.is_a?(HPXML::HeatPump)
         # Heating
-        if hpxml_hvac.respond_to? :compressor_type
-          num_speeds = HVAC.get_num_speeds_from_compressor_type(hpxml_hvac.compressor_type)
+        if hpxml_hvac.additional_properties.respond_to? :num_speeds
+          num_speeds = hpxml_hvac.additional_properties.num_speeds
         end
         num_speeds = 1 if num_speeds.nil?
         hvac.NumSpeedsHeating = num_speeds
@@ -2581,18 +2530,68 @@ class HVACSizing
       if hpxml_hvac.additional_properties.respond_to? :effectiveness
         hvac.EvapCoolerEffectiveness = hpxml_hvac.additional_properties.effectiveness
       end
-    end
 
-    # FIXME: Update this to reference HPXML HVACDistribution object
-    # if equip.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
-    #  if equip.airLoopHVAC.is_initialized
-    #    hvac.Ducts = get_ducts_for_object(equip.airLoopHVAC.get)
-    #  end
-    # elsif equip.is_a? OpenStudio::Model::ZoneHVACFourPipeFanCoil
-    #  hvac.Ducts = get_ducts_for_object(equip)
-    # elsif equip.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
-    #  hvac.Ducts = get_ducts_for_object(equip.airLoopHVAC.get)
-    # end
+      # Ducts
+      # FIXME: Consolidate w/ ducts code in measure.rb
+      hvac.Ducts = []
+      lto = { supply_percent: nil, supply_cfm25: nil, return_percent: nil, return_cfm25: nil }
+      hpxml_hvac.distribution_system.duct_leakage_measurements.each do |m|
+        next unless m.duct_leakage_total_or_to_outside == 'to outside'
+
+        if m.duct_leakage_units == HPXML::UnitsPercent && m.duct_type == HPXML::DuctTypeSupply
+          lto[:supply_percent] = m.duct_leakage_value
+        elsif m.duct_leakage_units == HPXML::UnitsCFM25 && m.duct_type == HPXML::DuctTypeSupply
+          lto[:supply_cfm25] = m.duct_leakage_value
+        elsif m.duct_leakage_units == HPXML::UnitsPercent && m.duct_type == HPXML::DuctTypeReturn
+          lto[:return_percent] = m.duct_leakage_value
+        elsif m.duct_leakage_units == HPXML::UnitsCFM25 && m.duct_type == HPXML::DuctTypeReturn
+          lto[:return_cfm25] = m.duct_leakage_value
+        end
+      end
+      total_uncond_supply_area = hpxml_hvac.distribution_system.total_unconditioned_duct_areas[HPXML::DuctTypeSupply]
+      total_uncond_return_area = hpxml_hvac.distribution_system.total_unconditioned_duct_areas[HPXML::DuctTypeReturn]
+      hpxml_hvac.distribution_system.ducts.each do |duct|
+        next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.duct_location
+
+        d = DuctInfo.new
+        d.Side = duct.duct_type
+        d.Location = duct.duct_location # FIXME: Test w/ MF space and outside/roofdeck
+        d.Area = duct.duct_surface_area
+
+        # Calculate R-value w/ air film
+        d.Rvalue = Airflow.get_duct_insulation_rvalue(duct.duct_insulation_r_value, d.Side)
+
+        # Leakage to Outside apportioned to this duct
+        if d.Side == HPXML::DuctTypeSupply
+          d.LeakageFrac = lto[:supply_percent].to_f * d.Area / total_uncond_supply_area
+          d.LeakageCFM25 = lto[:supply_cfm25].to_f * d.Area / total_uncond_supply_area
+        elsif d.Side == HPXML::DuctTypeReturn
+          d.LeakageFrac = lto[:return_percent].to_f * d.Area / total_uncond_return_area
+          d.LeakageCFM25 = lto[:return_cfm25].to_f * d.Area / total_uncond_return_area
+        end
+        hvac.Ducts << d
+      end
+      # If all ducts are in conditioned space, treat leakage as going to outside
+      if (lto[:supply_percent].to_f + lto[:supply_cfm25].to_f) > 0 && total_uncond_supply_area == 0
+        d = DuctInfo.new
+        d.Side = HPXML::DuctTypeSupply
+        d.Location = HPXML::LocationOutside
+        d.Area = 0.0
+        d.Rvalue = 0.0
+        d.LeakageFrac = lto[:supply_percent]
+        d.LeakageCFM25 = lto[:supply_cfm25]
+        hvac.Ducts << d
+      end
+      next unless (lto[:return_percent].to_f + lto[:return_cfm25].to_f) > 0 && total_uncond_return_area == 0
+      d = DuctInfo.new
+      d.Side = HPXML::DuctTypeReturn
+      d.Location = HPXML::LocationOutside
+      d.Area = 0.0
+      d.Rvalue = 0.0
+      d.LeakageFrac = lto[:return_percent]
+      d.LeakageCFM25 = lto[:return_cfm25]
+      hvac.Ducts << d
+    end
 
     return hvac
   end
@@ -2953,32 +2952,32 @@ class HVACSizing
     return [1.21005458, -0.00664200, 0.00000000, 0.00348246, 0.00000000, 0.00000000]
   end
 
-  def self.gshp_hx_pipe_rvalue(pipe_od, pipe_id, pipe_cond)
+  def self.gshp_hx_pipe_rvalue(hvac)
     # Thermal Resistance of Pipe
-    return Math.log(pipe_od / pipe_id) / 2.0 / Math::PI / pipe_cond
+    return Math.log(hvac.GSHP_pipe_od / hvac.GSHP_pipe_id) / 2.0 / Math::PI / hvac.GSHP_pipe_cond
   end
 
-  def self.gshp_hxbore_ft_per_ton(weather, bore_spacing, ground_conductivity, spacing_type, grout_conductivity, bore_diameter, pipe_od, pipe_r_value, heating_eir, cooling_eir, design_chw, hw_design, design_delta_t)
-    if spacing_type == 'b'
+  def self.gshp_hxbore_ft_per_ton(weather, hvac, bore_spacing, pipe_r_value)
+    if hvac.GSHP_SpacingType == 'b'
       beta_0 = 17.4427
       beta_1 = -0.6052
-    elsif spacing_type == 'c'
+    elsif hvac.GSHP_SpacingType == 'c'
       beta_0 = 21.9059
       beta_1 = -0.3796
-    elsif spacing_type == 'as'
+    elsif hvac.GSHP_SpacingType == 'as'
       beta_0 = 20.1004
       beta_1 = -0.94467
     end
 
-    r_value_ground = Math.log(bore_spacing / bore_diameter * 12.0) / 2.0 / Math::PI / ground_conductivity
-    r_value_grout = 1.0 / grout_conductivity / beta_0 / ((bore_diameter / pipe_od)**beta_1)
+    r_value_ground = Math.log(bore_spacing / hvac.GSHP_bore_d * 12.0) / 2.0 / Math::PI / hvac.GSHP_ground_k
+    r_value_grout = 1.0 / hvac.GSHP_grout_k / beta_0 / ((hvac.GSHP_bore_d / hvac.GSHP_pipe_od)**beta_1)
     r_value_bore = r_value_grout + pipe_r_value / 2.0 # Note: Convection resistance is negligible when calculated against Glhepro (Jeffrey D. Spitler, 2000)
 
     rtf_DesignMon_Heat = [0.25, (71.0 - weather.data.MonthlyAvgDrybulbs[0]) / @htd].max
     rtf_DesignMon_Cool = [0.25, (weather.data.MonthlyAvgDrybulbs[6] - 76.0) / @ctd].max
 
-    nom_length_heat = (1.0 - heating_eir) * (r_value_bore + r_value_ground * rtf_DesignMon_Heat) / (weather.data.AnnualAvgDrybulb - (2.0 * hw_design - design_delta_t) / 2.0) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
-    nom_length_cool = (1.0 + cooling_eir) * (r_value_bore + r_value_ground * rtf_DesignMon_Cool) / ((2.0 * design_chw + design_delta_t) / 2.0 - weather.data.AnnualAvgDrybulb) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
+    nom_length_heat = (1.0 - hvac.HeatingEIR) * (r_value_bore + r_value_ground * rtf_DesignMon_Heat) / (weather.data.AnnualAvgDrybulb - (2.0 * hvac.GSHP_design_hw - hvac.GSHP_design_delta_t) / 2.0) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
+    nom_length_cool = (1.0 + hvac.CoolingEIR) * (r_value_bore + r_value_ground * rtf_DesignMon_Cool) / ((2.0 * hvac.GSHP_design_chw + hvac.GSHP_design_delta_t) / 2.0 - weather.data.AnnualAvgDrybulb) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
 
     return nom_length_heat, nom_length_cool
   end
@@ -3889,6 +3888,7 @@ end
 
 class DuctInfo
   # Model info for a duct
+  # FUTURE: Remove class; use either airflow.rb Duct class or HPXML Ducts class directly
   def initial
   end
   attr_accessor(:LeakageFrac, :LeakageCFM25, :Area, :Rvalue, :Location, :Side)

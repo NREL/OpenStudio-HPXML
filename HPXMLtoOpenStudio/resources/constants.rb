@@ -400,32 +400,4 @@ class Constants
   def self.ScheduleTypeLimitsTemperature
     return 'Temperature'
   end
-
-  def self.SizingInfoDuctExist # FIXME: Remove
-    return __method__.to_s
-  end
-
-  def self.SizingInfoDuctSides # FIXME: Remove
-    return __method__.to_s
-  end
-
-  def self.SizingInfoDuctLocations # FIXME: Remove
-    return __method__.to_s
-  end
-
-  def self.SizingInfoDuctLeakageFracs # FIXME: Remove
-    return __method__.to_s
-  end
-
-  def self.SizingInfoDuctLeakageCFM25s # FIXME: Remove
-    return __method__.to_s
-  end
-
-  def self.SizingInfoDuctAreas # FIXME: Remove
-    return __method__.to_s
-  end
-
-  def self.SizingInfoDuctRvalues # FIXME: Remove
-    return __method__.to_s
-  end
 end

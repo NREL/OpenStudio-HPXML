@@ -581,8 +581,7 @@ class HVAC
 
     # Unitary System
 
-    supp_max_temp = heat_pump.additional_properties.supp_max_temp
-    air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, supp_max_temp)
+    air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil)
     hvac_map[heat_pump.id] << air_loop_unitary
 
     # Air Loop
@@ -1100,8 +1099,9 @@ class HVAC
     return clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr
   end
 
-  def self.get_hp_clg_curves(num_speeds, heat_pump, fan_power_rated, cool_c_d)
-    if num_speeds == 1
+  def self.get_hp_clg_curves(heat_pump)
+    hp_ap = heat_pump.additional_properties
+    if hp_ap.num_speeds == 1
       cool_rated_airflow_rate = 394.2 # cfm/ton
       cool_capacity_ratios = [1.0]
       cool_fan_speed_ratios = [1.0]
@@ -1111,8 +1111,8 @@ class HVAC
       # Single stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
       cool_cap_fflow_spec = [[0.718664047, 0.41797409, -0.136638137]]
       cool_eir_fflow_spec = [[1.143487507, -0.13943972, -0.004047787]]
-      cool_eers = [calc_eer_cooling_1speed(heat_pump.cooling_efficiency_seer, fan_power_rated, cool_eir_ft_spec)]
-    elsif num_speeds == 2
+      cool_eers = [calc_eer_cooling_1speed(heat_pump.cooling_efficiency_seer, hp_ap.cool_c_d, hp_ap.fan_power_rated, cool_eir_ft_spec)]
+    elsif hp_ap.num_speeds == 2
       cool_rated_airflow_rate = 344.1 # cfm/ton
       cool_capacity_ratios = [0.72, 1.0]
       cool_fan_speed_ratios = [0.86, 1.0]
@@ -1126,8 +1126,8 @@ class HVAC
                              [0.618281092, 0.569060264, -0.187341356]]
       cool_eir_fflow_spec = [[1.639108268, -0.998953996, 0.359845728],
                              [1.570774717, -0.914152018, 0.343377302]]
-      cool_eers = calc_eers_cooling_2speed(heat_pump.cooling_efficiency_seer, cool_c_d, cool_capacity_ratios, cool_fan_speed_ratios, fan_power_rated, cool_eir_ft_spec, cool_cap_ft_spec, true)
-    elsif num_speeds == 4
+      cool_eers = calc_eers_cooling_2speed(heat_pump.cooling_efficiency_seer, hp_ap.cool_c_d, cool_capacity_ratios, cool_fan_speed_ratios, hp_ap.fan_power_rated, cool_eir_ft_spec, cool_cap_ft_spec, true)
+    elsif hp_ap.num_speeds == 4
       cool_rated_airflow_rate = 411.0 # cfm/ton
       cool_capacity_ratios = [0.36, 0.51, 0.67, 1.0]
       cool_fan_speed_ratios = [0.42, 0.54, 0.68, 1.0]
@@ -1153,13 +1153,14 @@ class HVAC
       cool_cap_fflow_spec = [[1, 0, 0]] * 4
       cap_ratio_seer_3 = cool_capacity_ratios.select { |i| [0, 1, 3].include? cool_capacity_ratios.index(i) }
       fan_speed_seer_3 = cool_fan_speed_ratios.select { |i| [0, 1, 3].include? cool_fan_speed_ratios.index(i) }
-      cool_eers = calc_eers_cooling_4speed(heat_pump.cooling_efficiency_seer, cool_c_d, cap_ratio_seer_3, fan_speed_seer_3, fan_power_rated, cool_eir_ft_spec_3, cool_cap_ft_spec_3)
+      cool_eers = calc_eers_cooling_4speed(heat_pump.cooling_efficiency_seer, hp_ap.cool_c_d, cap_ratio_seer_3, fan_speed_seer_3, hp_ap.fan_power_rated, cool_eir_ft_spec_3, cool_cap_ft_spec_3)
     end
     return cool_rated_airflow_rate, cool_fan_speed_ratios, cool_capacity_ratios, cool_shrs, cool_eers, cool_cap_ft_spec, cool_eir_ft_spec, cool_cap_fflow_spec, cool_eir_fflow_spec
   end
 
-  def self.get_hp_htg_curves(num_speeds, heat_pump, fan_power_rated, heat_c_d)
-    if num_speeds == 1
+  def self.get_hp_htg_curves(heat_pump)
+    hp_ap = heat_pump.additional_properties
+    if hp_ap.num_speeds == 1
       heat_rated_airflow_rate = 384.1 # cfm/ton
       heat_capacity_ratios = [1.0]
       heat_fan_speed_ratios = [1.0]
@@ -1169,10 +1170,10 @@ class HVAC
       if heat_pump.heating_capacity_17F.nil?
         heat_cap_ft_spec = [[0.566333415, -0.000744164, -0.0000103, 0.009414634, 0.0000506, -0.00000675]]
       else
-        heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(num_speeds, heat_pump)
+        heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(hp_ap.num_speeds, heat_pump)
       end
-      heat_cops = [calc_cop_heating_1speed(heat_pump.heating_efficiency_hspf, heat_c_d, fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)]
-    elsif num_speeds == 2
+      heat_cops = [calc_cop_heating_1speed(heat_pump.heating_efficiency_hspf, hp_ap.heat_c_d, hp_ap.fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)]
+    elsif hp_ap.num_speeds == 2
       heat_rated_airflow_rate = 352.2 # cfm/ton
       heat_capacity_ratios = [0.72, 1.0]
       heat_fan_speed_ratios = [0.8, 1.0]
@@ -1186,10 +1187,10 @@ class HVAC
         heat_cap_ft_spec = [[0.335690634, 0.002405123, -0.0000464, 0.013498735, 0.0000499, -0.00000725],
                             [0.306358843, 0.005376987, -0.0000579, 0.011645092, 0.0000591, -0.0000203]]
       else
-        heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(num_speeds, heat_pump)
+        heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(hp_ap.num_speeds, heat_pump)
       end
-      heat_cops = calc_cops_heating_2speed(heat_pump.heating_efficiency_hspf, heat_c_d, heat_capacity_ratios, heat_fan_speed_ratios, fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)
-    elsif num_speeds == 4
+      heat_cops = calc_cops_heating_2speed(heat_pump.heating_efficiency_hspf, hp_ap.heat_c_d, heat_capacity_ratios, heat_fan_speed_ratios, hp_ap.fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)
+    elsif hp_ap.num_speeds == 4
       heat_rated_airflow_rate = 296.9 # cfm/ton
       heat_capacity_ratios = [0.33, 0.56, 1.0, 1.17]
       heat_fan_speed_ratios = [0.63, 0.76, 1.0, 1.19]
@@ -1205,9 +1206,9 @@ class HVAC
                             [0.697171186, -0.006189599, 0.0000337077, 0.014291981, 0.0000105633, -0.0000387956],
                             [0.555513805, -0.001337363, -0.00000265117, 0.014328826, 0.0000163849, -0.0000480711]]
       else
-        heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(num_speeds, heat_pump)
+        heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(hp_ap.num_speeds, heat_pump)
       end
-      heat_cops = calc_cops_heating_4speed(heat_pump.heating_efficiency_hspf, heat_c_d, heat_capacity_ratios, heat_fan_speed_ratios, fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)
+      heat_cops = calc_cops_heating_4speed(heat_pump.heating_efficiency_hspf, hp_ap.heat_c_d, heat_capacity_ratios, heat_fan_speed_ratios, hp_ap.fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)
     end
     return heat_rated_airflow_rate, heat_fan_speed_ratios, heat_capacity_ratios, heat_cops, heat_cap_ft_spec, heat_eir_ft_spec, heat_cap_fflow_spec, heat_eir_fflow_spec
   end
@@ -1856,10 +1857,8 @@ class HVAC
     return result
   end
 
-  def self.calc_eer_cooling_1speed(seer, fan_power_rated, coeff_eir)
+  def self.calc_eer_cooling_1speed(seer, c_d, fan_power_rated, coeff_eir)
     # Directly calculate cooling coil net eer at condition A (95/80/67) using Seer
-
-    c_d = get_cool_c_d(1, seer)
 
     # 1. Calculate eer_b using Seer and c_d
     eer_b = seer / (1.0 - 0.5 * c_d)

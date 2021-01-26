@@ -641,14 +641,12 @@ class HPXMLDefaults
       if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
         # Note: We use HP cooling curve so that a central AC behaves the same, per
         # discussion within RESNET Software Consistency Committee.
-        # FIXME: Set values on HPXML object instead of returning values?
-        # FIXME: Reduce arguments passed to methods
         clg_ap.num_speeds = HVAC.get_num_speeds_from_compressor_type(cooling_system.compressor_type)
         clg_ap.fan_power_rated = HVAC.get_fan_power_rated(cooling_system.cooling_efficiency_seer)
         clg_ap.crankcase_kw, clg_ap.crankcase_temp = HVAC.get_crankcase_assumptions(cooling_system.fraction_cool_load_served)
 
         clg_ap.cool_c_d = HVAC.get_cool_c_d(clg_ap.num_speeds, cooling_system.cooling_efficiency_seer)
-        clg_ap.cool_rated_airflow_rate, clg_ap.cool_fan_speed_ratios, clg_ap.cool_capacity_ratios, clg_ap.shrs, clg_ap.eers, clg_ap.cool_cap_ft_spec, clg_ap.cool_eir_ft_spec, clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = HVAC.get_hp_clg_curves(clg_ap.num_speeds, cooling_system, clg_ap.fan_power_rated, clg_ap.cool_c_d)
+        clg_ap.cool_rated_airflow_rate, clg_ap.cool_fan_speed_ratios, clg_ap.cool_capacity_ratios, clg_ap.shrs, clg_ap.eers, clg_ap.cool_cap_ft_spec, clg_ap.cool_eir_ft_spec, clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = HVAC.get_hp_clg_curves(cooling_system)
         clg_ap.cool_rated_cfm_per_ton = HVAC.calc_cfms_ton_rated(clg_ap.cool_rated_airflow_rate, clg_ap.cool_fan_speed_ratios, clg_ap.cool_capacity_ratios)
         clg_ap.cool_shrs_rated_gross = HVAC.calc_shrs_rated_gross(clg_ap.num_speeds, clg_ap.shrs, clg_ap.fan_power_rated, clg_ap.cool_rated_cfm_per_ton)
         clg_ap.cool_rated_eirs = HVAC.calc_cool_rated_eirs(clg_ap.num_speeds, clg_ap.eers, clg_ap.fan_power_rated)
@@ -733,14 +731,14 @@ class HPXMLDefaults
         hp_ap.hp_min_temp, hp_ap.supp_max_temp = HVAC.get_heat_pump_temp_assumptions(heat_pump)
 
         hp_ap.cool_c_d = HVAC.get_cool_c_d(hp_ap.num_speeds, heat_pump.cooling_efficiency_seer)
-        hp_ap.cool_rated_airflow_rate, hp_ap.cool_fan_speed_ratios, hp_ap.cool_capacity_ratios, hp_ap.cool_shrs, hp_ap.cool_eers, hp_ap.cool_cap_ft_spec, hp_ap.cool_eir_ft_spec, hp_ap.cool_cap_fflow_spec, hp_ap.cool_eir_fflow_spec = HVAC.get_hp_clg_curves(hp_ap.num_speeds, heat_pump, hp_ap.fan_power_rated, hp_ap.cool_c_d)
+        hp_ap.cool_rated_airflow_rate, hp_ap.cool_fan_speed_ratios, hp_ap.cool_capacity_ratios, hp_ap.cool_shrs, hp_ap.cool_eers, hp_ap.cool_cap_ft_spec, hp_ap.cool_eir_ft_spec, hp_ap.cool_cap_fflow_spec, hp_ap.cool_eir_fflow_spec = HVAC.get_hp_clg_curves(heat_pump)
         hp_ap.cool_rated_cfm_per_ton = HVAC.calc_cfms_ton_rated(hp_ap.cool_rated_airflow_rate, hp_ap.cool_fan_speed_ratios, hp_ap.cool_capacity_ratios)
         hp_ap.cool_shrs_rated_gross = HVAC.calc_shrs_rated_gross(hp_ap.num_speeds, hp_ap.cool_shrs, hp_ap.fan_power_rated, hp_ap.cool_rated_cfm_per_ton)
         hp_ap.cool_rated_eirs = HVAC.calc_cool_rated_eirs(hp_ap.num_speeds, hp_ap.cool_eers, hp_ap.fan_power_rated)
         hp_ap.cool_closs_fplr_spec = [HVAC.calc_plr_coefficients(hp_ap.cool_c_d)] * hp_ap.num_speeds
 
         hp_ap.heat_c_d = HVAC.get_heat_c_d(hp_ap.num_speeds, heat_pump.heating_efficiency_hspf)
-        hp_ap.heat_rated_airflow_rate, hp_ap.heat_fan_speed_ratios, hp_ap.heat_capacity_ratios, hp_ap.heat_cops, hp_ap.heat_cap_ft_spec, hp_ap.heat_eir_ft_spec, hp_ap.heat_cap_fflow_spec, hp_ap.heat_eir_fflow_spec = HVAC.get_hp_htg_curves(hp_ap.num_speeds, heat_pump, hp_ap.fan_power_rated, hp_ap.heat_c_d)
+        hp_ap.heat_rated_airflow_rate, hp_ap.heat_fan_speed_ratios, hp_ap.heat_capacity_ratios, hp_ap.heat_cops, hp_ap.heat_cap_ft_spec, hp_ap.heat_eir_ft_spec, hp_ap.heat_cap_fflow_spec, hp_ap.heat_eir_fflow_spec = HVAC.get_hp_htg_curves(heat_pump)
         hp_ap.heat_rated_cfm_per_ton = HVAC.calc_cfms_ton_rated(hp_ap.heat_rated_airflow_rate, hp_ap.heat_fan_speed_ratios, hp_ap.heat_capacity_ratios)
         hp_ap.heat_rated_eirs = HVAC.calc_heat_rated_eirs(hp_ap.num_speeds, hp_ap.heat_cops, hp_ap.fan_power_rated)
         hp_ap.heat_closs_fplr_spec = [HVAC.calc_plr_coefficients(hp_ap.heat_c_d)] * hp_ap.num_speeds

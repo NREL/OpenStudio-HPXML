@@ -27,7 +27,7 @@ class HPXMLTest < MiniTest::Test
     File.delete(sizing_out) if File.exist? sizing_out
 
     xmls = []
-    Dir["#{File.absolute_path(File.join(@this_dir, '..', 'sample_files'))}/*.xml"].sort.each do |xml|
+    Dir["#{File.absolute_path(File.join(@this_dir, '..', 'sample_files'))}/base-hvac-autosize-ground-to-air-heat-pump-manual-s-oversize-allowances.xml"].sort.each do |xml|
       xmls << File.absolute_path(xml)
     end
 
@@ -413,9 +413,9 @@ class HPXMLTest < MiniTest::Test
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
     hpxml_defaults_path = File.join(rundir, 'in.xml')
     hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
-    HVAC.apply_shared_systems(hpxml)
 
     # Collapse windows further using same logic as measure.rb
+    # FIXME: is this still needed?
     hpxml.windows.each do |window|
       window.fraction_operable = nil
     end

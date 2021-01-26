@@ -573,12 +573,6 @@ class Airflow
       if (not duct.leakage_cfm25.nil?) && (duct.leakage_cfm25 < 0)
         fail 'Ducts: Leakage CFM25 must be greater than or equal to 0.'
       end
-      if duct.rvalue < 0
-        fail 'Ducts: Insulation Nominal R-Value must be greater than or equal to 0.'
-      end
-      if duct.area < 0
-        fail 'Ducts: Surface Area must be greater than or equal to 0.'
-      end
     end
 
     ducts.each do |duct|
@@ -593,17 +587,6 @@ class Airflow
         duct.location = HPXML::LocationOutside
         duct.zone = nil
       end
-    end
-
-    if ducts.size > 0
-      # Store info for HVAC Sizing measure
-      object.additionalProperties.setFeature(Constants.SizingInfoDuctExist, true)
-      object.additionalProperties.setFeature(Constants.SizingInfoDuctSides, ducts.map { |duct| duct.side }.join(','))
-      object.additionalProperties.setFeature(Constants.SizingInfoDuctLocations, ducts.map { |duct| duct.location.to_s }.join(','))
-      object.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageFracs, ducts.map { |duct| duct.leakage_frac.to_f }.join(','))
-      object.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageCFM25s, ducts.map { |duct| duct.leakage_cfm25.to_f }.join(','))
-      object.additionalProperties.setFeature(Constants.SizingInfoDuctAreas, ducts.map { |duct| duct.area.to_f }.join(','))
-      object.additionalProperties.setFeature(Constants.SizingInfoDuctRvalues, ducts.map { |duct| duct.rvalue.to_f }.join(','))
     end
 
     return if ducts.size == 0 # No ducts
