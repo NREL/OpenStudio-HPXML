@@ -27,7 +27,7 @@ class HPXMLTest < MiniTest::Test
     File.delete(sizing_out) if File.exist? sizing_out
 
     xmls = []
-    Dir["#{File.absolute_path(File.join(@this_dir, '..', 'sample_files'))}/base-hvac-autosize-ground-to-air-heat-pump-manual-s-oversize-allowances.xml"].sort.each do |xml|
+    Dir["#{File.absolute_path(File.join(@this_dir, '..', 'sample_files'))}/*.xml"].sort.each do |xml|
       xmls << File.absolute_path(xml)
     end
 

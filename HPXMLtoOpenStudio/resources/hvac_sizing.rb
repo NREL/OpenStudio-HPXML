@@ -154,13 +154,13 @@ class HVACSizing
     end
 
     space_types.uniq.each do |space_type|
-      next if [HPXML::LocationGround, HPXML::LocationRoofDeck].include? space_type
+      next if [HPXML::LocationGround].include? space_type
 
       if [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
           HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab].include? space_type
         @cool_design_temps[space_type] = calculate_scheduled_space_design_temps(space_type, @cool_setpoint, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max)
         @heat_design_temps[space_type] = calculate_scheduled_space_design_temps(space_type, @heat_setpoint, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
-      elsif space_type == HPXML::LocationOutside
+      elsif [HPXML::LocationOutside, HPXML::LocationRoofDeck].include? space_type
         @cool_design_temps[space_type] = weather.design.CoolingDrybulb
         @heat_design_temps[space_type] = weather.design.HeatingDrybulb
       elsif space_type == HPXML::LocationBasementConditioned
