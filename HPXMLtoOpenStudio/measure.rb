@@ -257,7 +257,7 @@ class OSModel
     add_cooling_system(runner, model, spaces)
     add_heating_system(runner, model, spaces)
     add_heat_pump(runner, model, weather, spaces)
-    add_dehumidifier(runner, model, spaces)
+    add_dehumidifiers(runner, model, spaces)
     add_residual_ideal_system(runner, model, spaces)
     add_ceiling_fans(runner, model, weather, spaces)
 
@@ -2266,11 +2266,10 @@ class OSModel
     HVAC.apply_ceiling_fans(model, runner, weather, ceiling_fan, spaces[HPXML::LocationLivingSpace], @schedules_file)
   end
 
-  def self.add_dehumidifier(runner, model, spaces)
+  def self.add_dehumidifiers(runner, model, spaces)
     return if @hpxml.dehumidifiers.size == 0
 
-    dehumidifier = @hpxml.dehumidifiers[0]
-    HVAC.apply_dehumidifier(model, runner, dehumidifier, spaces[HPXML::LocationLivingSpace], @hvac_map)
+    HVAC.apply_dehumidifiers(model, runner, @hpxml.dehumidifiers, spaces[HPXML::LocationLivingSpace], @hvac_map)
   end
 
   def self.check_distribution_system(hvac_distribution, system_type)
