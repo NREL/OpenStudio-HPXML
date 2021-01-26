@@ -673,8 +673,8 @@ class HPXMLDefaults
         else
           # Ductless, installed and rated value should be equal
           clg_ap.fan_power_rated = 0.07 # W/cfm
+          cooling_system.fan_watts_per_cfm = clg_ap.fan_power_rated # W/cfm
         end
-        cooling_system.fan_watts_per_cfm = clg_ap.fan_power_rated # W/cfm
 
         min_cooling_capacity = 0.4 # frac
         max_cooling_capacity = 1.2 # frac
@@ -754,8 +754,8 @@ class HPXMLDefaults
         else
           # Ductless, installed and rated value should be equal
           hp_ap.fan_power_rated = 0.07 # W/cfm
+          heat_pump.fan_watts_per_cfm = hp_ap.fan_power_rated # W/cfm
         end
-        heat_pump.fan_watts_per_cfm = hp_ap.fan_power_rated # W/cfm
         hp_ap.hp_min_temp, hp_ap.supp_max_temp = HVAC.get_heat_pump_temp_assumptions(heat_pump)
 
         min_cooling_capacity = 0.4 # frac
@@ -806,6 +806,7 @@ class HPXMLDefaults
           cap_retention_frac = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
           cap_retention_temp = 17.0 # deg-F
         end
+        # FUTURE: Write HeatingCapacity17F to in.xml
 
         # Biquadratic: capacity multiplier = a + b*IAT + c*IAT^2 + d*OAT + e*OAT^2 + f*IAT*OAT
         x_A = UnitConversions.convert(cap_retention_temp, 'F', 'C')
@@ -1809,11 +1810,34 @@ class HPXMLDefaults
 
     hvac_sizing_values = {}
     HVAC.get_hpxml_hvac_systems(hpxml).each do |hvac_system|
+      htg_sys = hvac_system[:heating]
+      clg_sys = hvac_system[:cooling]
+
       # Calculate design loads and capacities/airflows for this HVAC system
-      htg_id = hvac_system[:heating].id unless hvac_system[:heating].nil?
-      clg_id = hvac_system[:cooling].id unless hvac_system[:cooling].nil?
+      htg_id = htg_sys.id unless hvac_system[:heating].nil?
+      clg_id = clg_sys.id unless hvac_system[:cooling].nil?
       hvac, sizing_values = HVACSizing.calculate_hvac_sizing_values(runner, weather, hpxml, cfa, bldg_loads, hvac_system, debug)
       hvac_sizing_values[[htg_id, clg_id, hvac]] = sizing_values
+
+      # Assign back to HPXML objects
+      tol = 0.1 # Btuh
+      if not htg_sys.nil?
+        if htg_sys.heating_capacity.nil? || ((htg_sys.heating_capacity - sizing_values.Heat_Capacity).abs > tol)
+          htg_sys.heating_capacity = sizing_values.Heat_Capacity.round(0)
+          htg_sys.heating_capacity_isdefaulted = true
+        end
+        if htg_sys.respond_to? :backup_heating_capacity
+          if htg_sys.backup_heating_capacity.nil? || ((htg_sys.backup_heating_capacity - sizing_values.Heat_Capacity_Supp).abs > tol)
+            htg_sys.backup_heating_capacity = sizing_values.Heat_Capacity_Supp.round(0)
+            htg_sys.backup_heating_capacity_isdefaulted = true
+          end
+        end
+      end
+      next unless not clg_sys.nil?
+      if clg_sys.cooling_capacity.nil? || ((clg_sys.cooling_capacity - sizing_values.Cool_Capacity).abs > tol)
+        clg_sys.cooling_capacity = sizing_values.Cool_Capacity.round(0)
+        clg_sys.cooling_capacity_isdefaulted = true
+      end
     end
     return hvac_sizing_values
   end

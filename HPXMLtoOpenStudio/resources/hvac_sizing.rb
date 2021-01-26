@@ -1560,7 +1560,7 @@ class HVACSizing
 
     # Heating
     if hvac.HeatType == HPXML::HVACTypeHeatPumpAirToAir
-      hvac_sizing_values = process_heat_pump_adjustment(hvac_sizing_values, weather, hvac, totalCap_CurveValue)
+      process_heat_pump_adjustment(hvac_sizing_values, weather, hvac, totalCap_CurveValue)
 
       hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Cool_Capacity
       hvac_sizing_values.Heat_Capacity_Supp = hvac_sizing_values.Heat_Load
@@ -1572,7 +1572,7 @@ class HVACSizing
       end
 
     elsif hvac.HeatType == HPXML::HVACTypeHeatPumpMiniSplit
-      hvac_sizing_values = process_heat_pump_adjustment(hvac_sizing_values, weather, hvac, totalCap_CurveValue)
+      process_heat_pump_adjustment(hvac_sizing_values, weather, hvac, totalCap_CurveValue)
 
       hvac_sizing_values.Heat_Capacity = [hvac_sizing_values.Cool_Capacity, Constants.small].max
       hvac_sizing_values.Heat_Capacity_Supp = hvac_sizing_values.Heat_Load
@@ -1720,9 +1720,10 @@ class HVACSizing
             HPXML::HVACTypeCentralAirConditioner].include? hvac.CoolType
           cool_airflow_rated_ratio << cool_cfm_m3s / calc_rated_airflow_clg(hvac_sizing_values, speed, hvac, true)
           cool_airflow_rated_defect_ratio << cool_cfm_m3s * (1 + hvac.AirflowDefectRatioCooling) / calc_rated_airflow_clg(hvac_sizing_values, speed, hvac, true)
-        else
-          cool_airflow_rated_ratio << cool_cfm_m3s / calc_rated_airflow_clg(hvac_sizing_values, speed, hvac)
-          cool_airflow_rated_defect_ratio << cool_cfm_m3s * (1 + hvac.AirflowDefectRatioCooling) / calc_rated_airflow_clg(hvac_sizing_values, speed, hvac)
+        else [HPXML::HVACTypeHeatPumpMiniSplit,
+              HPXML::HVACTypeMiniSplitAirConditioner].include? hvac.CoolType
+             cool_airflow_rated_ratio << cool_cfm_m3s / calc_rated_airflow_clg(hvac_sizing_values, speed, hvac)
+             cool_airflow_rated_defect_ratio << cool_cfm_m3s * (1 + hvac.AirflowDefectRatioCooling) / calc_rated_airflow_clg(hvac_sizing_values, speed, hvac)
         end
       end
       if not cool_airflow_rated_defect_ratio.empty?
@@ -1785,10 +1786,10 @@ class HVACSizing
       heat_airflow_rated_ratio = []
       heat_cfm_m3s = UnitConversions.convert(hvac_sizing_values.Heat_Airflow, 'cfm', 'm^3/s')
       for speed in 0..(hvac.NumSpeedsHeating - 1)
-        if hvac.CoolType == HPXML::HVACTypeHeatPumpAirToAir
+        if [HPXML::HVACTypeHeatPumpAirToAir].include? hvac.HeatType
           heat_airflow_rated_ratio << heat_cfm_m3s / calc_rated_airflow_htg(hvac_sizing_values, speed, hvac, true)
           heat_airflow_rated_defect_ratio << heat_cfm_m3s * (1 + hvac.AirflowDefectRatioHeating) / calc_rated_airflow_htg(hvac_sizing_values, speed, hvac, true)
-        else
+        elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? hvac.HeatType
           heat_airflow_rated_ratio << heat_cfm_m3s / calc_rated_airflow_htg(hvac_sizing_values, speed, hvac)
           heat_airflow_rated_defect_ratio << heat_cfm_m3s * (1 + hvac.AirflowDefectRatioHeating) / calc_rated_airflow_htg(hvac_sizing_values, speed, hvac)
         end
@@ -2039,8 +2040,6 @@ class HVACSizing
         hvac_sizing_values.Heat_Capacity = [hvac_sizing_values.Cool_Capacity, Constants.small].max
       end
     end
-
-    return hvac_sizing_values
   end
 
   def self.get_ventilation_rates()
@@ -2279,9 +2278,9 @@ class HVACSizing
     ducts.each do |duct|
       next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.Location
 
-      if not duct.LeakageFrac.to_f > 0
+      if duct.LeakageFrac.to_f > 0
         cfms[duct.Side] += duct.LeakageFrac * system_cfm
-      elsif not duct.LeakageCFM25.to_f > 0
+      elsif duct.LeakageCFM25.to_f > 0
         cfms[duct.Side] += duct.LeakageCFM25
       end
     end
@@ -2554,7 +2553,7 @@ class HVACSizing
         d.Side = HPXML::DuctTypeSupply
         d.Location = HPXML::LocationOutside
         d.Area = 0.0
-        d.Rvalue = 0.0
+        d.Rvalue = Airflow.get_duct_insulation_rvalue(0.0, d.Side)
         d.LeakageFrac = lto[:supply_percent]
         d.LeakageCFM25 = lto[:supply_cfm25]
         hvac.Ducts << d
@@ -2564,7 +2563,7 @@ class HVACSizing
       d.Side = HPXML::DuctTypeReturn
       d.Location = HPXML::LocationOutside
       d.Area = 0.0
-      d.Rvalue = 0.0
+      d.Rvalue = Airflow.get_duct_insulation_rvalue(0.0, d.Side)
       d.LeakageFrac = lto[:return_percent]
       d.LeakageCFM25 = lto[:return_cfm25]
       hvac.Ducts << d
