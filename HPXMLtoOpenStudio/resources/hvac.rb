@@ -57,14 +57,15 @@ class HVAC
         # Zero out impact of part load ratio
         cool_closs_fplr_spec = [1.0, 0.0, 0.0] * num_speeds
         # single speed system cooling coil or first speed cooling coil for two speed systems
-        clg_coil = create_dx_cooling_coil(model, obj_name, [0], [cool_eirs[0]], [cool_cap_ft_spec[0]], [cool_eir_ft_spec[0]], [cool_cap_fflow_spec[0]], [cool_eir_fflow_spec[0]], [cool_shrs_rated_gross[0]], cooling_system.cooling_capacity * cool_capacity_ratios[0], crankcase_kw, crankcase_temp, fan_power_rated)
+        clg_coil = create_dx_cooling_coil(model, obj_name, [0], [cool_eirs[0]], [cool_cap_ft_spec[0]], [cool_eir_ft_spec[0]], cool_closs_fplr_spec, [cool_cap_fflow_spec[0]], [cool_eir_fflow_spec[0]], [cool_shrs_rated_gross[0]], cooling_system.cooling_capacity * cool_capacity_ratios[0], crankcase_kw, crankcase_temp, fan_power_rated)
 
         # Only apply startup capacity degradation on first coil for two speed systems
-        apply_capacity_degradation_EMS(model, cool_cap_fflow_spec[0], cool_eir_fflow_spec[0], clg_coil.name, true, clg_coil.totalCoolingCapacityFunctionOfFlowFractionCurve, clg_coil.energyInputRatioFunctionOfFlowFractionCurve)
+        apply_capacity_degradation_EMS(model, cool_cap_fflow_spec[0], cool_eir_fflow_spec[0], clg_coil.name, true, clg_coil.totalCoolingCapacityFunctionOfFlowFractionCurve.to_CurveQuadratic.get, clg_coil.energyInputRatioFunctionOfFlowFractionCurve.to_CurveQuadratic.get)
         clg_coils << clg_coil
+        hvac_map[cooling_system.id] << clg_coil
         if is_realistic_staging
           # Second speed cooling coil
-          clg_coil_speed2 = create_dx_cooling_coil(model, obj_name, [0], [cool_eirs[1]], [cool_cap_ft_spec[1]], [cool_eir_ft_spec[1]], [cool_cap_fflow_spec[1]], [cool_eir_fflow_spec[1]], [cool_shrs_rated_gross[1]], cooling_system.cooling_capacity * cool_capacity_ratios[1], crankcase_kw, crankcase_temp, fan_power_rated)
+          clg_coil_speed2 = create_dx_cooling_coil(model, obj_name, [0], [cool_eirs[1]], [cool_cap_ft_spec[1]], [cool_eir_ft_spec[1]], cool_closs_fplr_spec, [cool_cap_fflow_spec[1]], [cool_eir_fflow_spec[1]], [cool_shrs_rated_gross[1]], cooling_system.cooling_capacity * cool_capacity_ratios[1], crankcase_kw, crankcase_temp, fan_power_rated)
           hvac_map[cooling_system.id] << clg_coil_speed2
           clg_coils << clg_coil_speed2
         end
@@ -72,8 +73,8 @@ class HVAC
         cool_closs_fplr_spec = [calc_plr_coefficients(cool_c_d)] * num_speeds
         clg_coil = create_dx_cooling_coil(model, obj_name, (0...num_speeds).to_a, cool_eirs, cool_cap_ft_spec, cool_eir_ft_spec, cool_closs_fplr_spec, cool_cap_fflow_spec, cool_eir_fflow_spec, cool_shrs_rated_gross, cooling_system.cooling_capacity, crankcase_kw, crankcase_temp, fan_power_rated)
         clg_coils << clg_coil
+        hvac_map[cooling_system.id] << clg_coil
       end
-      hvac_map[cooling_system.id] << clg_coil
     end
 
     if is_realistic_staging
@@ -81,6 +82,7 @@ class HVAC
     else
       num_system = 1
     end
+
     if not heating_system.nil?
 
       # Heating Coil
@@ -105,9 +107,10 @@ class HVAC
       end
     end
 
-    # Fan
-
+    air_loop_unitary_systems = []
     (0...num_system).each do |i|
+      # Fan
+
       if (not cooling_system.nil?) && (not heating_system.nil?) && (cooling_system.fan_watts_per_cfm.to_f != heating_system.fan_watts_per_cfm.to_f)
         fail "Fan powers for heating system '#{heating_system.id}' and cooling system '#{cooling_system.id}' are attached to a single distribution system and therefore must be the same."
       end
@@ -116,16 +119,13 @@ class HVAC
       else
         fan_watts_per_cfm = heating_system.fan_watts_per_cfm
       end
-      fan = create_supply_fan(model, obj_name + " #{i}", num_speeds, fan_watts_per_cfm)
+      fan = create_supply_fan(model, obj_name, num_speeds, fan_watts_per_cfm)
       if not cooling_system.nil?
         hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, clg_coils[i], nil)
       end
       if not heating_system.nil?
         hvac_map[heating_system.id] += disaggregate_fan_or_pump(model, fan, htg_coils[i], nil, nil)
       end
-    end
-    air_loop_unitary_systems = []
-    (0...num_system).each do |i|
     
       # Unitary System
 
@@ -358,15 +358,33 @@ class HVAC
     cool_cfms_ton_rated = calc_cfms_ton_rated(cool_rated_airflow_rate, cool_fan_speed_ratios, cool_capacity_ratios)
     cool_shrs_rated_gross = calc_shrs_rated_gross(num_speeds, cool_shrs, fan_power_rated, cool_cfms_ton_rated)
     cool_eirs = calc_cool_eirs(num_speeds, cool_eers, fan_power_rated)
-    cool_closs_fplr_spec = [calc_plr_coefficients(cool_c_d)] * num_speeds
-    if realistic_staging
+    clg_coils = []
+    if is_ddb_control
+        # Zero out impact of part load ratio
+        cool_closs_fplr_spec = [1.0, 0.0, 0.0] * num_speeds
+        # single speed system cooling coil or first speed cooling coil for two speed systems
+        clg_coil = create_dx_cooling_coil(model, obj_name, [0], [cool_eirs[0]], [cool_cap_ft_spec[0]], [cool_eir_ft_spec[0]], cool_closs_fplr_spec, [cool_cap_fflow_spec[0]], [cool_eir_fflow_spec[0]], [cool_shrs_rated_gross[0]], heat_pump.cooling_capacity * cool_capacity_ratios[0], 0, nil, fan_power_rated)
+
+        # Only apply startup capacity degradation on first coil for two speed systems
+        apply_capacity_degradation_EMS(model, cool_cap_fflow_spec[0], cool_eir_fflow_spec[0], clg_coil.name, true, clg_coil.totalCoolingCapacityFunctionOfFlowFractionCurve.to_CurveQuadratic.get, clg_coil.energyInputRatioFunctionOfFlowFractionCurve.to_CurveQuadratic.get)
+        clg_coils << clg_coil
+       hvac_map[heat_pump.id] << clg_coil
+        if is_realistic_staging
+          # Second speed cooling coil
+          clg_coil_speed2 = create_dx_cooling_coil(model, obj_name, [0], [cool_eirs[1]], [cool_cap_ft_spec[1]], [cool_eir_ft_spec[1]], cool_closs_fplr_spec, [cool_cap_fflow_spec[1]], [cool_eir_fflow_spec[1]], [cool_shrs_rated_gross[1]], heat_pump.cooling_capacity * cool_capacity_ratios[1], 0, nil, fan_power_rated)
+          hvac_map[heat_pump.id] << clg_coil_speed2
+          clg_coils << clg_coil_speed2
+        end
     else
-    clg_coil = create_dx_cooling_coil(model, obj_name, (0...num_speeds).to_a, cool_eirs, cool_cap_ft_spec, cool_eir_ft_spec, cool_closs_fplr_spec, cool_cap_fflow_spec, cool_eir_fflow_spec, cool_shrs_rated_gross, heat_pump.cooling_capacity, 0, nil, fan_power_rated)
+      cool_closs_fplr_spec = [calc_plr_coefficients(cool_c_d)] * num_speeds
+      clg_coil = create_dx_cooling_coil(model, obj_name, (0...num_speeds).to_a, cool_eirs, cool_cap_ft_spec, cool_eir_ft_spec, cool_closs_fplr_spec, cool_cap_fflow_spec, cool_eir_fflow_spec, cool_shrs_rated_gross, heat_pump.cooling_capacity, 0, nil, fan_power_rated)
+      clg_coils << clg_coil
+      hvac_map[heat_pump.id] << clg_coil
     end
-    hvac_map[heat_pump.id] << clg_coil
 
     # Heating Coil
 
+    htg_coils = []
     heat_c_d = get_heat_c_d(num_speeds, heat_pump.heating_efficiency_hspf)
     if num_speeds == 1
       heat_rated_airflow_rate = 384.1 # cfm/ton
@@ -420,18 +438,45 @@ class HVAC
     end
     heat_cfms_ton_rated = calc_cfms_ton_rated(heat_rated_airflow_rate, heat_fan_speed_ratios, heat_capacity_ratios)
     heat_eirs = calc_heat_eirs(num_speeds, heat_cops, fan_power_rated)
-    heat_closs_fplr_spec = [calc_plr_coefficients(heat_c_d)] * num_speeds
-    htg_coil = create_dx_heating_coil(model, obj_name, (0...num_speeds).to_a, heat_eirs, heat_cap_ft_spec, heat_eir_ft_spec, heat_closs_fplr_spec, heat_cap_fflow_spec, heat_eir_fflow_spec, heat_pump.heating_capacity, crankcase_kw, crankcase_temp, fan_power_rated, hp_min_temp, heat_pump.fraction_heat_load_served)
-    hvac_map[heat_pump.id] << htg_coil
+    if is_ddb_control
+        # Zero out impact of part load ratio
+        heat_closs_fplr_spec = [1.0, 0.0, 0.0] * num_speeds
+        # single speed system cooling coil or first speed cooling coil for two speed systems
+        htg_coil = create_dx_heating_coil(model, obj_name, [0], [heat_eirs[0]], [heat_cap_ft_spec[0]], [heat_eir_ft_spec[0]], heat_closs_fplr_spec, [heat_cap_fflow_spec[0]], [heat_eir_fflow_spec[0]], heat_pump.heating_capacity * heat_capacity_ratios[0], crankcase_kw, crankcase_temp, fan_power_rated, hp_min_temp, heat_pump.fraction_heat_load_served)
 
-    # Supplemental Heating Coil
+        # Only apply startup capacity degradation on first coil for two speed systems
+        apply_capacity_degradation_EMS(model, heat_cap_fflow_spec[0], heat_eir_fflow_spec[0], htg_coil.name, false, htg_coil.totalHeatingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get, htg_coil.energyInputRatioFunctionofFlowFractionCurve.to_CurveQuadratic.get)
+        htg_coils << htg_coil
+        hvac_map[heat_pump.id] << htg_coil
+        if is_realistic_staging
+          # Second speed cooling coil
+          htg_coil_speed2 = create_dx_heating_coil(model, obj_name, [0], [heat_eirs[1]], [heat_cap_ft_spec[1]], [heat_eir_ft_spec[1]], heat_closs_fplr_spec, [heat_cap_fflow_spec[1]], [heat_eir_fflow_spec[1]], heat_pump.heating_capacity * heat_capacity_ratios[1], crankcase_kw, crankcase_temp, fan_power_rated, hp_min_temp, heat_pump.fraction_heat_load_served)
+          hvac_map[heat_pump.id] << htg_coil_speed2
+          htg_coils << htg_coil_speed2
+        end
+    else
+        heat_closs_fplr_spec = [calc_plr_coefficients(heat_c_d)] * num_speeds
+        htg_coil = create_dx_heating_coil(model, obj_name, (0...num_speeds).to_a, heat_eirs, heat_cap_ft_spec, heat_eir_ft_spec, heat_closs_fplr_spec, heat_cap_fflow_spec, heat_eir_fflow_spec, heat_pump.heating_capacity, crankcase_kw, crankcase_temp, fan_power_rated, hp_min_temp, heat_pump.fraction_heat_load_served)
+        htg_coils << htg_coil
+        hvac_map[heat_pump.id] << htg_coil
+    end
 
-    htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
-    hvac_map[heat_pump.id] << htg_supp_coil
+    if is_realistic_staging
+      num_system = 2
+    else
+      num_system = 1
+    end
+ 
+    htg_supp_coils = []
+    (0...num_system).each do |i|
+      # Supplemental Heating Coil
+      htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
+      hvac_map[heat_pump.id] << htg_supp_coil
+      htg_supp_coils << htg_supp_coil
 
-    # Fan
-    fan = create_supply_fan(model, obj_name, num_speeds, heat_pump.fan_watts_per_cfm)
-    hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
+      # Fan
+      fan = create_supply_fan(model, obj_name, num_speeds, heat_pump.fan_watts_per_cfm)
+      hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
     # Unitary System
     if realistic_staging
@@ -2058,7 +2103,7 @@ class HVAC
 
     return air_loop
   end
-
+  
   def self.apply_dehumidifier_ief_to_ef_inputs(dh_type, w_coeff, ef_coeff, ief, water_removal_rate)
     # Shift inputs under IEF test conditions to E+ supported EF test conditions
     # test conditions
@@ -3241,12 +3286,7 @@ class HVAC
       eir_fff_curve = create_curve_quadratic(model, eir_fflow_spec[speed_idx], "HP_Heat-eir-fFF#{speed}", 0, 2, 0, 2)
 
       if num_speeds == 1
-        if is_ddb_control
-          # Zero out previous c_d PLR curve
-          plf_fplr_curve = create_curve_quadratic(model, [1.0, 0.0, 0.0], "HP_Heat-PLF-fPLR#{speed}", 0, 1, 0.7, 1)
-        else
-          plf_fplr_curve = create_curve_quadratic(model, closs_fplr_spec[speed_idx], "HP_Heat-PLF-fPLR#{speed}", 0, 1, 0.7, 1)
-        end
+        plf_fplr_curve = create_curve_quadratic(model, closs_fplr_spec[speed_idx], "HP_Heat-PLF-fPLR#{speed}", 0, 1, 0.7, 1)
         htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
         htg_coil.setRatedSupplyFanPowerPerVolumeFlowRate(fan_power_rated / UnitConversions.convert(1.0, 'cfm', 'm^3/s'))
         htg_coil.setRatedCOP(1.0 / eirs[speed_idx])
@@ -3255,9 +3295,6 @@ class HVAC
         end
         if not crankcase_temp.nil?
           htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, 'F', 'C'))
-        end
-        if is_ddb_control
-          apply_capacity_degradation_EMS(model, cap_fflow_spec[speed_idx], eir_fflow_spec[speed_idx], htg_coil_name, false, cap_fff_curve, eir_fff_curve)
         end
       else
         plf_fplr_curve = create_curve_quadratic(model, closs_fplr_spec[speed_idx], "HP_Heat-PLF-fPLR#{speed}", 0, 1, 0.7, 1)
