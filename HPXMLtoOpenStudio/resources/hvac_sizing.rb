@@ -229,7 +229,11 @@ class HVACSizing
         area_total += frame_floor.area
         area_conditioned += frame_floor.area if frame_floor.is_thermal_boundary
       end
-      garage_frac_under_conditioned = area_conditioned / area_total
+      if area_total == 0
+        garage_frac_under_conditioned = 0.5
+      else
+        garage_frac_under_conditioned = area_conditioned / area_total
+      end
 
       # Calculate the garage cooling design temperature based on Table 4C
       # Linearly interpolate between having living space over the garage and not having living space above the garage

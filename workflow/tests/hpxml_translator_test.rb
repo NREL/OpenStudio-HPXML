@@ -356,7 +356,7 @@ class HPXMLTest < MiniTest::Test
       htg_cap_w += sqlFile.execAndReturnFirstDouble(query).get
       break if htg_cap_w > 0
     end
-    query = "SELECT SUM(Value) FROM ComponentSizes WHERE ((CompType LIKE 'Coil:Heating:%' OR CompType LIKE 'Boiler:%' OR CompType LIKE 'ZONEHVAC:BASEBOARD:%') AND CompType!='Coil:Heating:DX:MultiSpeed') AND Description LIKE '%User-Specified%Capacity' AND Units='W'"
+    query = "SELECT SUM(Value) FROM ComponentSizes WHERE ((CompType LIKE 'Coil:Heating:%' OR CompType LIKE 'Boiler:%' OR CompType LIKE 'ZONEHVAC:BASEBOARD:%') AND CompType!='Coil:Heating:DX:MultiSpeed') AND Description LIKE '%User-Specified%Capacity' AND Description NOT LIKE '%Defrost%' AND Units='W'"
     htg_cap_w += sqlFile.execAndReturnFirstDouble(query).get
     results['Capacity: Heating (W)'] = htg_cap_w
 
