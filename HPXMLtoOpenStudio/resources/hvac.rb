@@ -27,26 +27,13 @@ class HVAC
     end
 
     if not cooling_system.nil?
-      num_speeds = get_num_speeds_from_compressor_type(cooling_system.compressor_type)
-      fan_power_rated = get_fan_power_rated(cooling_system.cooling_efficiency_seer)
-      crankcase_kw, crankcase_temp = get_crankcase_assumptions(cooling_system.fraction_cool_load_served)
-
       # Cooling Coil
-
-      cool_c_d = get_cool_c_d(num_speeds, cooling_system.cooling_efficiency_seer)
-      cool_rated_airflow_rate, cool_fan_speed_ratios, cool_capacity_ratios, cool_shrs, cool_eers, cool_cap_ft_spec, cool_eir_ft_spec, cool_cap_fflow_spec, cool_eir_fflow_spec = get_hp_clg_curves(num_speeds, cooling_system, fan_power_rated, cool_c_d, runner)
-      cool_cfms_ton_rated = calc_cfms_ton_rated(cool_rated_airflow_rate, cool_fan_speed_ratios, cool_capacity_ratios)
-      cool_shrs_rated_gross = calc_shrs_rated_gross(num_speeds, cool_shrs, fan_power_rated, cool_cfms_ton_rated)
-      cool_eirs = calc_cool_eirs(num_speeds, cool_eers, fan_power_rated)
-      cool_closs_fplr_spec = [calc_plr_coefficients(cool_c_d)] * num_speeds
-      clg_coil = create_dx_cooling_coil(model, obj_name, (0...num_speeds).to_a, cool_eirs, cool_cap_ft_spec, cool_eir_ft_spec, cool_closs_fplr_spec, cool_cap_fflow_spec, cool_eir_fflow_spec, cool_shrs_rated_gross, crankcase_kw, crankcase_temp, fan_power_rated)
+      clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system)
       hvac_map[cooling_system.id] << clg_coil
     end
 
     if not heating_system.nil?
-
       # Heating Coil
-
       if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
         htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
         htg_coil.setEfficiency(heating_system.heating_efficiency_afue)
@@ -71,6 +58,11 @@ class HVAC
     else
       fan_watts_per_cfm = heating_system.fan_watts_per_cfm
     end
+    if not cooling_system.nil?
+      num_speeds = cooling_system.additional_properties.num_speeds
+    else
+      num_speeds = 1
+    end
     fan = create_supply_fan(model, obj_name, num_speeds, fan_watts_per_cfm)
     if not cooling_system.nil?
       hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil)
@@ -91,10 +83,11 @@ class HVAC
 
     if (not cooling_system.nil?) && (num_speeds > 1)
       # Unitary System Performance
+      clg_ap = cooling_system.additional_properties
       perf = OpenStudio::Model::UnitarySystemPerformanceMultispeed.new(model)
       perf.setSingleModeOperation(false)
       for speed in 1..num_speeds
-        f = OpenStudio::Model::SupplyAirflowRatioField.fromCoolingRatio(cool_fan_speed_ratios[speed - 1])
+        f = OpenStudio::Model::SupplyAirflowRatioField.fromCoolingRatio(clg_ap.cool_fan_speed_ratios[speed - 1])
         perf.addSupplyAirflowRatioField(f)
       end
       air_loop_unitary.setDesignSpecificationMultispeedObject(perf)
@@ -109,15 +102,6 @@ class HVAC
     if not heating_system.nil?
       hvac_map[heating_system.id] << air_loop
     end
-
-    # Store info for HVAC Sizing measure
-    if not cooling_system.nil?
-      cooling_system.additional_properties.rated_shrs = cool_shrs_rated_gross
-      cooling_system.additional_properties.capacity_ratios_cooling = cool_capacity_ratios
-      cooling_system.additional_properties.rated_cfm_per_ton_cooling = cool_cfms_ton_rated
-      cooling_system.additional_properties.fan_speed_ratios_cooling = cool_fan_speed_ratios
-      cooling_system.additional_properties.cap_ft_spec_cooling = cool_cap_ft_spec
-    end
   end
 
   def self.apply_room_air_conditioner(model, runner, cooling_system,
@@ -129,22 +113,16 @@ class HVAC
     sequential_cool_load_frac = calc_sequential_load_fraction(cooling_system.fraction_cool_load_served, remaining_cool_load_frac)
 
     # Performance curves
-    # From Frigidaire 10.7 eer unit in Winkler et. al. Lab Testing of Window ACs (2013)
 
-    cool_cap_ft_spec = [0.43945980246913574, -0.0008922469135802481, 0.00013984567901234569, 0.0038489259259259253, -5.6327160493827156e-05, 2.041358024691358e-05]
-    cool_cap_ft_spec_si = convert_curve_biquadratic(cool_cap_ft_spec)
-    cool_eir_ft_spec = [6.310506172839506, -0.17705185185185185, 0.0014645061728395061, 0.012571604938271608, 0.0001493827160493827, -0.00040308641975308644]
-    cool_eir_ft_spec_si = convert_curve_biquadratic(cool_eir_ft_spec)
-    cool_cap_fflow_spec = [0.887, 0.1128, 0]
-    cool_eir_fflow_spec = [1.763, -0.6081, 0]
-    cool_plf_fplr = [0.78, 0.22, 0]
-    cfms_ton_rated = [312] # cfm/ton, medium speed
+    clg_ap = cooling_system.additional_properties
+    cool_cap_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_cap_ft_spec[0])
+    cool_eir_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_eir_ft_spec[0])
 
     roomac_cap_ft_curve = create_curve_biquadratic(model, cool_cap_ft_spec_si, 'RoomAC-Cap-fT', 0, 100, 0, 100)
-    roomac_cap_fff_curve = create_curve_quadratic(model, cool_cap_fflow_spec, 'RoomAC-Cap-fFF', 0, 2, 0, 2)
+    roomac_cap_fff_curve = create_curve_quadratic(model, clg_ap.cool_cap_fflow_spec[0], 'RoomAC-Cap-fFF', 0, 2, 0, 2)
     roomac_eir_ft_curve = create_curve_biquadratic(model, cool_eir_ft_spec_si, 'RoomAC-eir-fT', 0, 100, 0, 100)
-    roomcac_eir_fff_curve = create_curve_quadratic(model, cool_eir_fflow_spec, 'RoomAC-eir-fFF', 0, 2, 0, 2)
-    roomac_plf_fplr_curve = create_curve_quadratic(model, cool_plf_fplr, 'RoomAC-PLF-fPLR', 0, 1, 0, 1)
+    roomcac_eir_fff_curve = create_curve_quadratic(model, clg_ap.cool_eir_fflow_spec[0], 'RoomAC-eir-fFF', 0, 2, 0, 2)
+    roomac_plf_fplr_curve = create_curve_quadratic(model, clg_ap.cool_plf_fplr[0], 'RoomAC-PLF-fPLR', 0, 1, 0, 1)
 
     # Cooling Coil
 
@@ -177,17 +155,14 @@ class HVAC
 
     control_zone.setSequentialCoolingFractionSchedule(ptac, get_sequential_load_schedule(model, sequential_cool_load_frac))
     control_zone.setSequentialHeatingFractionSchedule(ptac, get_sequential_load_schedule(model, 0))
-
-    # Store info for HVAC Sizing measure
-    cooling_system.additional_properties.rated_shrs = [cooling_system.cooling_shr]
-    cooling_system.additional_properties.rated_cfm_per_ton_cooling = cfms_ton_rated
-    cooling_system.additional_properties.cap_ft_spec_cooling = [cool_cap_ft_spec]
   end
 
   def self.apply_evaporative_cooler(model, runner, cooling_system,
                                     remaining_cool_load_frac, control_zone,
                                     hvac_map)
-    cooling_system.additional_properties.effectiveness = 0.72 # Assumption from HEScore
+
+    clg_ap = cooling_system.additional_properties
+    effectiveness = clg_ap.effectiveness
 
     hvac_map[cooling_system.id] = []
     obj_name = Constants.ObjectNameEvaporativeCooler
@@ -252,83 +227,13 @@ class HVAC
     obj_name = Constants.ObjectNameAirSourceHeatPump
     sequential_heat_load_frac = calc_sequential_load_fraction(heat_pump.fraction_heat_load_served, remaining_heat_load_frac)
     sequential_cool_load_frac = calc_sequential_load_fraction(heat_pump.fraction_cool_load_served, remaining_cool_load_frac)
-    num_speeds = get_num_speeds_from_compressor_type(heat_pump.compressor_type)
-    fan_power_rated = get_fan_power_rated(heat_pump.cooling_efficiency_seer)
-    if heat_pump.fraction_heat_load_served <= 0
-      crankcase_kw, crankcase_temp = 0, nil
-    else
-      crankcase_kw, crankcase_temp = get_crankcase_assumptions(heat_pump.fraction_cool_load_served)
-    end
-    hp_min_temp, supp_max_temp = get_heat_pump_temp_assumptions(heat_pump)
 
     # Cooling Coil
-
-    cool_c_d = get_cool_c_d(num_speeds, heat_pump.cooling_efficiency_seer)
-    cool_rated_airflow_rate, cool_fan_speed_ratios, cool_capacity_ratios, cool_shrs, cool_eers, cool_cap_ft_spec, cool_eir_ft_spec, cool_cap_fflow_spec, cool_eir_fflow_spec = get_hp_clg_curves(num_speeds, heat_pump, fan_power_rated, cool_c_d, runner)
-    cool_cfms_ton_rated = calc_cfms_ton_rated(cool_rated_airflow_rate, cool_fan_speed_ratios, cool_capacity_ratios)
-    cool_shrs_rated_gross = calc_shrs_rated_gross(num_speeds, cool_shrs, fan_power_rated, cool_cfms_ton_rated)
-    cool_eirs = calc_cool_eirs(num_speeds, cool_eers, fan_power_rated)
-    cool_closs_fplr_spec = [calc_plr_coefficients(cool_c_d)] * num_speeds
-    clg_coil = create_dx_cooling_coil(model, obj_name, (0...num_speeds).to_a, cool_eirs, cool_cap_ft_spec, cool_eir_ft_spec, cool_closs_fplr_spec, cool_cap_fflow_spec, cool_eir_fflow_spec, cool_shrs_rated_gross, 0, nil, fan_power_rated)
+    clg_coil = create_dx_cooling_coil(model, obj_name, heat_pump)
     hvac_map[heat_pump.id] << clg_coil
 
     # Heating Coil
-
-    heat_c_d = get_heat_c_d(num_speeds, heat_pump.heating_efficiency_hspf)
-    if num_speeds == 1
-      heat_rated_airflow_rate = 384.1 # cfm/ton
-      heat_capacity_ratios = [1.0]
-      heat_fan_speed_ratios = [1.0]
-      heat_eir_ft_spec = [[0.718398423, 0.003498178, 0.000142202, -0.005724331, 0.00014085, -0.000215321]]
-      heat_cap_fflow_spec = [[0.694045465, 0.474207981, -0.168253446]]
-      heat_eir_fflow_spec = [[2.185418751, -1.942827919, 0.757409168]]
-      if heat_pump.heating_capacity_17F.nil?
-        heat_cap_ft_spec = [[0.566333415, -0.000744164, -0.0000103, 0.009414634, 0.0000506, -0.00000675]]
-      else
-        heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(num_speeds, heat_pump)
-      end
-      heat_cops = [calc_cop_heating_1speed(heat_pump.heating_efficiency_hspf, heat_c_d, fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)]
-    elsif num_speeds == 2
-      heat_rated_airflow_rate = 352.2 # cfm/ton
-      heat_capacity_ratios = [0.72, 1.0]
-      heat_fan_speed_ratios = [0.8, 1.0]
-      heat_eir_ft_spec = [[0.36338171, 0.013523725, 0.000258872, -0.009450269, 0.000439519, -0.000653723],
-                          [0.981100941, -0.005158493, 0.000243416, -0.005274352, 0.000230742, -0.000336954]]
-      heat_cap_fflow_spec = [[0.741466907, 0.378645444, -0.119754733],
-                             [0.76634609, 0.32840943, -0.094701495]]
-      heat_eir_fflow_spec = [[2.153618211, -1.737190609, 0.584269478],
-                             [2.001041353, -1.58869128, 0.587593517]]
-      if heat_pump.heating_capacity_17F.nil?
-        heat_cap_ft_spec = [[0.335690634, 0.002405123, -0.0000464, 0.013498735, 0.0000499, -0.00000725],
-                            [0.306358843, 0.005376987, -0.0000579, 0.011645092, 0.0000591, -0.0000203]]
-      else
-        heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(num_speeds, heat_pump)
-      end
-      heat_cops = calc_cops_heating_2speed(heat_pump.heating_efficiency_hspf, heat_c_d, heat_capacity_ratios, heat_fan_speed_ratios, fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)
-    elsif num_speeds == 4
-      heat_rated_airflow_rate = 296.9 # cfm/ton
-      heat_capacity_ratios = [0.33, 0.56, 1.0, 1.17]
-      heat_fan_speed_ratios = [0.63, 0.76, 1.0, 1.19]
-      heat_eir_ft_spec = [[0.708311527, 0.020732093, 0.000391479, -0.037640031, 0.000979937, -0.001079042],
-                          [0.025480155, 0.020169585, 0.000121341, -0.004429789, 0.000166472, -0.00036447],
-                          [0.379003189, 0.014195012, 0.0000821046, -0.008894061, 0.000151519, -0.000210299],
-                          [0.690404655, 0.00616619, 0.000137643, -0.009350199, 0.000153427, -0.000213258]]
-      heat_cap_fflow_spec = [[1, 0, 0]] * 4
-      heat_eir_fflow_spec = [[1, 0, 0]] * 4
-      if heat_pump.heating_capacity_17F.nil?
-        heat_cap_ft_spec = [[0.304192655, -0.003972566, 0.0000196432, 0.024471251, -0.000000774126, -0.0000841323],
-                            [0.496381324, -0.00144792, 0.0, 0.016020855, 0.0000203447, -0.0000584118],
-                            [0.697171186, -0.006189599, 0.0000337077, 0.014291981, 0.0000105633, -0.0000387956],
-                            [0.555513805, -0.001337363, -0.00000265117, 0.014328826, 0.0000163849, -0.0000480711]]
-      else
-        heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(num_speeds, heat_pump)
-      end
-      heat_cops = calc_cops_heating_4speed(runner, heat_pump.heating_efficiency_hspf, heat_c_d, heat_capacity_ratios, heat_fan_speed_ratios, fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)
-    end
-    heat_cfms_ton_rated = calc_cfms_ton_rated(heat_rated_airflow_rate, heat_fan_speed_ratios, heat_capacity_ratios)
-    heat_eirs = calc_heat_eirs(num_speeds, heat_cops, fan_power_rated)
-    heat_closs_fplr_spec = [calc_plr_coefficients(heat_c_d)] * num_speeds
-    htg_coil = create_dx_heating_coil(model, obj_name, (0...num_speeds).to_a, heat_eirs, heat_cap_ft_spec, heat_eir_ft_spec, heat_closs_fplr_spec, heat_cap_fflow_spec, heat_eir_fflow_spec, crankcase_kw, crankcase_temp, fan_power_rated, hp_min_temp, heat_pump.fraction_heat_load_served)
+    htg_coil = create_dx_heating_coil(model, obj_name, heat_pump)
     hvac_map[heat_pump.id] << htg_coil
 
     # Supplemental Heating Coil
@@ -337,20 +242,23 @@ class HVAC
     hvac_map[heat_pump.id] << htg_supp_coil unless htg_supp_coil.nil?
 
     # Fan
+    num_speeds = heat_pump.additional_properties.num_speeds
     fan = create_supply_fan(model, obj_name, num_speeds, heat_pump.fan_watts_per_cfm)
     hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
     # Unitary System
 
+    supp_max_temp = heat_pump.additional_properties.supp_max_temp
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, supp_max_temp)
     hvac_map[heat_pump.id] << air_loop_unitary
 
     if num_speeds > 1
       # Unitary System Performance
+      hp_ap = heat_pump.additional_properties
       perf = OpenStudio::Model::UnitarySystemPerformanceMultispeed.new(model)
       perf.setSingleModeOperation(false)
       for speed in 1..num_speeds
-        f = OpenStudio::Model::SupplyAirflowRatioField.new(heat_fan_speed_ratios[speed - 1], cool_fan_speed_ratios[speed - 1])
+        f = OpenStudio::Model::SupplyAirflowRatioField.new(hp_ap.heat_fan_speed_ratios[speed - 1], hp_ap.cool_fan_speed_ratios[speed - 1])
         perf.addSupplyAirflowRatioField(f)
       end
       air_loop_unitary.setDesignSpecificationMultispeedObject(perf)
@@ -360,56 +268,45 @@ class HVAC
 
     air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac)
     hvac_map[heat_pump.id] << air_loop
-
-    # Store info for HVAC Sizing measure
-    heat_pump.additional_properties.rated_shrs = cool_shrs_rated_gross
-    heat_pump.additional_properties.capacity_ratios_heating = heat_capacity_ratios
-    heat_pump.additional_properties.capacity_ratios_cooling = cool_capacity_ratios
-    heat_pump.additional_properties.rated_cfm_per_ton_heating = heat_cfms_ton_rated
-    heat_pump.additional_properties.rated_cfm_per_ton_cooling = cool_cfms_ton_rated
-    heat_pump.additional_properties.fan_speed_ratios_heating = heat_fan_speed_ratios
-    heat_pump.additional_properties.fan_speed_ratios_cooling = cool_fan_speed_ratios
-    heat_pump.additional_properties.cap_ft_spec_heating = heat_cap_ft_spec
-    heat_pump.additional_properties.cap_ft_spec_cooling = cool_cap_ft_spec
   end
 
   def self.apply_mini_split_air_conditioner(model, runner, cooling_system,
                                             remaining_cool_load_frac,
                                             control_zone, hvac_map)
 
-    # Shoehorn cooling_system object into a corresponding heat_pump object
-    heat_pump = HPXML::HeatPump.new(cooling_system.hpxml_object)
-    heat_pump.id = cooling_system.id
-    heat_pump.heat_pump_type = HPXML::HVACTypeHeatPumpMiniSplit
-    heat_pump.heat_pump_fuel = cooling_system.cooling_system_fuel
-    heat_pump.cooling_capacity = cooling_system.cooling_capacity
-    if !heat_pump.cooling_capacity.nil?
-      heat_pump.heating_capacity = 0
+    hvac_map[cooling_system.id] = []
+    obj_name = Constants.ObjectNameMiniSplitAirConditioner
+    sequential_cool_load_frac = calc_sequential_load_fraction(cooling_system.fraction_cool_load_served, remaining_cool_load_frac)
+
+    # Cooling Coil
+    clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system)
+    hvac_map[cooling_system.id] << clg_coil
+
+    # Fan
+
+    num_speeds = cooling_system.additional_properties.num_speeds
+    fan = create_supply_fan(model, obj_name, num_speeds, cooling_system.fan_watts_per_cfm)
+    hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil)
+
+    # Unitary System
+
+    air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, nil, clg_coil, nil)
+    hvac_map[cooling_system.id] << air_loop_unitary
+
+    # Unitary System Performance
+    clg_ap = cooling_system.additional_properties
+    perf = OpenStudio::Model::UnitarySystemPerformanceMultispeed.new(model)
+    perf.setSingleModeOperation(false)
+    for i in 0..(num_speeds - 1)
+      f = OpenStudio::Model::SupplyAirflowRatioField.new(1.0, clg_ap.cool_fan_speed_ratios[i])
+      perf.addSupplyAirflowRatioField(f)
     end
-    heat_pump.cooling_shr = cooling_system.cooling_shr
-    heat_pump.fraction_heat_load_served = 0
-    heat_pump.fraction_cool_load_served = cooling_system.fraction_cool_load_served
-    heat_pump.cooling_efficiency_seer = cooling_system.cooling_efficiency_seer
-    heat_pump.heating_efficiency_hspf = 7.7 # Arbitrary; shouldn't affect energy use  TODO: Allow nil
-    heat_pump.distribution_system_idref = cooling_system.distribution_system_idref
-    heat_pump.fan_watts_per_cfm = cooling_system.fan_watts_per_cfm
-    heat_pump.airflow_defect_ratio = cooling_system.airflow_defect_ratio
-    heat_pump.charge_defect_ratio = cooling_system.charge_defect_ratio
+    air_loop_unitary.setDesignSpecificationMultispeedObject(perf)
 
-    apply_mini_split_heat_pump(model, runner, heat_pump, 0,
-                               remaining_cool_load_frac,
-                               control_zone, hvac_map)
+    # Air Loop
 
-    # Re-assign additional_properties back to original cooling_system object
-    cooling_system.additional_properties.capacity_ratios_heating = heat_pump.additional_properties.capacity_ratios_heating
-    cooling_system.additional_properties.capacity_ratios_cooling = heat_pump.additional_properties.capacity_ratios_cooling
-    cooling_system.additional_properties.rated_cfm_per_ton_heating = heat_pump.additional_properties.rated_cfm_per_ton_heating
-    cooling_system.additional_properties.rated_cfm_per_ton_cooling = heat_pump.additional_properties.rated_cfm_per_ton_cooling
-    cooling_system.additional_properties.rated_shrs = heat_pump.additional_properties.rated_shrs
-    cooling_system.additional_properties.fan_speed_ratios_heating = heat_pump.additional_properties.fan_speed_ratios_heating
-    cooling_system.additional_properties.fan_speed_ratios_cooling = heat_pump.additional_properties.fan_speed_ratios_cooling
-    cooling_system.additional_properties.cap_ft_spec_heating = heat_pump.additional_properties.cap_ft_spec_heating
-    cooling_system.additional_properties.cap_ft_spec_cooling = heat_pump.additional_properties.cap_ft_spec_cooling
+    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, 0, sequential_cool_load_frac)
+    hvac_map[cooling_system.id] << air_loop
   end
 
   def self.apply_mini_split_heat_pump(model, runner, heat_pump,
@@ -421,83 +318,13 @@ class HVAC
     obj_name = Constants.ObjectNameMiniSplitHeatPump
     sequential_heat_load_frac = calc_sequential_load_fraction(heat_pump.fraction_heat_load_served, remaining_heat_load_frac)
     sequential_cool_load_frac = calc_sequential_load_fraction(heat_pump.fraction_cool_load_served, remaining_cool_load_frac)
-    num_speeds = 10
-    mshp_indices = [1, 3, 5, 9]
-    hp_min_temp, supp_max_temp = get_heat_pump_temp_assumptions(heat_pump)
-    if not heat_pump.distribution_system.nil?
-      # Ducted, installed fan power may differ from rated fan power
-      fan_power_rated = 0.18 # W/cfm, ducted
-    else
-      # Ductless, installed and rated value should be equal
-      fan_power_rated = 0.07 # W/cfm
-      heat_pump.fan_watts_per_cfm = fan_power_rated # W/cfm
-    end
-
-    # Calculate generic inputs
-    min_cooling_capacity = 0.4 # frac
-    max_cooling_capacity = 1.2 # frac
-    min_cooling_airflow_rate = 200.0
-    max_cooling_airflow_rate = 425.0
-    min_heating_capacity = 0.3 # frac
-    max_heating_capacity = 1.2 # frac
-    min_heating_airflow_rate = 200.0
-    max_heating_airflow_rate = 400.0
-    if heat_pump.heating_capacity_17F.nil? || ((heat_pump.heating_capacity_17F == 0) && (heat_pump.heating_capacity == 0))
-      cap_retention_frac = 0.25 # frac
-      cap_retention_temp = -5.0 # deg-F
-    else
-      cap_retention_frac = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
-      cap_retention_temp = 17.0 # deg-F
-    end
 
     # Cooling Coil
-
-    cool_cap_ft_spec = [[0.7531983499655835, 0.003618193903031667, 0.0, 0.006574385031351544, -6.87181191015432e-05, 0.0]] * num_speeds
-    cool_eir_ft_spec = [[-0.06376924779982301, -0.0013360593470367282, 1.413060577993827e-05, 0.019433076486584752, -4.91395947154321e-05, -4.909341249475308e-05]] * num_speeds
-    cool_cap_fflow_spec = [[1, 0, 0]] * num_speeds
-    cool_eir_fflow_spec = [[1, 0, 0]] * num_speeds
-    cool_c_d = get_cool_c_d(num_speeds, heat_pump.cooling_efficiency_seer)
-    cool_closs_fplr_spec = [calc_plr_coefficients(cool_c_d)] * num_speeds
-    dB_rated = 80.0 # deg-F
-    wB_rated = 67.0 # deg-F
-    cool_cfms_ton_rated, cool_capacity_ratios, cool_shrs_rated_gross = calc_mshp_cfms_ton_cooling(min_cooling_capacity, max_cooling_capacity, min_cooling_airflow_rate, max_cooling_airflow_rate, num_speeds, dB_rated, wB_rated, heat_pump.cooling_shr)
-    cool_eirs = calc_mshp_cool_eirs(runner, heat_pump.cooling_efficiency_seer, fan_power_rated, cool_c_d, num_speeds, cool_capacity_ratios, cool_cfms_ton_rated, cool_eir_ft_spec, cool_cap_ft_spec)
-    clg_coil = create_dx_cooling_coil(model, obj_name, mshp_indices, cool_eirs, cool_cap_ft_spec, cool_eir_ft_spec, cool_closs_fplr_spec, cool_cap_fflow_spec, cool_eir_fflow_spec, cool_shrs_rated_gross, 0.0, nil, nil)
+    clg_coil = create_dx_cooling_coil(model, obj_name, heat_pump)
     hvac_map[heat_pump.id] << clg_coil
 
     # Heating Coil
-
-    # cop/eir as a function of temperature
-    # Generic curves (=Daikin from lab data)
-    heat_eir_ft_spec = [[0.9999941697687026, 0.004684593830254383, 5.901286675833333e-05, -0.0028624467783091973, 1.3041120194135802e-05, -0.00016172918478765433]] * num_speeds
-    heat_cap_fflow_spec = [[1, 0, 0]] * num_speeds
-    heat_eir_fflow_spec = [[1, 0, 0]] * num_speeds
-
-    # Derive coefficients from user input for capacity retention at outdoor drybulb temperature X [C].
-    # Biquadratic: capacity multiplier = a + b*IAT + c*IAT^2 + d*OAT + e*OAT^2 + f*IAT*OAT
-    x_A = UnitConversions.convert(cap_retention_temp, 'F', 'C')
-    y_A = cap_retention_frac
-    x_B = UnitConversions.convert(47.0, 'F', 'C') # 47F is the rating point
-    y_B = 1.0 # Maximum capacity factor is 1 at the rating point, by definition (this is maximum capacity, not nominal capacity)
-    oat_slope = (y_B - y_A) / (x_B - x_A)
-    oat_intercept = y_A - (x_A * oat_slope)
-
-    # Coefficients for the indoor temperature relationship are retained from the generic curve (Daikin lab data).
-    iat_slope = -0.010386676170938
-    iat_intercept = 0.219274275
-    a = oat_intercept + iat_intercept
-    b = iat_slope
-    c = 0
-    d = oat_slope
-    e = 0
-    f = 0
-    heat_cap_ft_spec = [convert_curve_biquadratic([a, b, c, d, e, f], false)] * num_speeds
-
-    heat_c_d = get_heat_c_d(num_speeds, heat_pump.heating_efficiency_hspf)
-    heat_closs_fplr_spec = [calc_plr_coefficients(heat_c_d)] * num_speeds
-    heat_cfms_ton_rated, heat_capacity_ratios = calc_mshp_cfms_ton_heating(min_heating_capacity, max_heating_capacity, min_heating_airflow_rate, max_heating_airflow_rate, num_speeds)
-    heat_eirs = calc_mshp_heat_eirs(runner, heat_pump.heating_efficiency_hspf, fan_power_rated, hp_min_temp, heat_c_d, cool_cfms_ton_rated, num_speeds, heat_capacity_ratios, heat_cfms_ton_rated, heat_eir_ft_spec, heat_cap_ft_spec)
-    htg_coil = create_dx_heating_coil(model, obj_name, mshp_indices, heat_eirs, heat_cap_ft_spec, heat_eir_ft_spec, heat_closs_fplr_spec, heat_cap_fflow_spec, heat_eir_fflow_spec, 0.0, nil, nil, hp_min_temp, heat_pump.fraction_heat_load_served)
+    htg_coil = create_dx_heating_coil(model, obj_name, heat_pump)
     hvac_map[heat_pump.id] << htg_coil
 
     # Supplemental Heating Coil
@@ -507,22 +334,22 @@ class HVAC
 
     # Fan
 
-    fan = create_supply_fan(model, obj_name, 4, heat_pump.fan_watts_per_cfm)
+    num_speeds = heat_pump.additional_properties.num_speeds
+    fan = create_supply_fan(model, obj_name, num_speeds, heat_pump.fan_watts_per_cfm)
     hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
     # Unitary System
 
+    supp_max_temp = heat_pump.additional_properties.supp_max_temp
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, supp_max_temp)
     hvac_map[heat_pump.id] << air_loop_unitary
 
+    # Unitary System Performance
+    hp_ap = heat_pump.additional_properties
     perf = OpenStudio::Model::UnitarySystemPerformanceMultispeed.new(model)
     perf.setSingleModeOperation(false)
-    cool_fan_speed_ratios = []
-    heat_fan_speed_ratios = []
-    mshp_indices.each do |mshp_index|
-      heat_fan_speed_ratios << heat_cfms_ton_rated[mshp_index] / heat_cfms_ton_rated[mshp_indices[-1]]
-      cool_fan_speed_ratios << cool_cfms_ton_rated[mshp_index] / cool_cfms_ton_rated[mshp_indices[-1]]
-      f = OpenStudio::Model::SupplyAirflowRatioField.new(heat_fan_speed_ratios[-1], cool_fan_speed_ratios[-1])
+    for i in 0..(num_speeds - 1)
+      f = OpenStudio::Model::SupplyAirflowRatioField.new(hp_ap.heat_fan_speed_ratios[i], hp_ap.cool_fan_speed_ratios[i])
       perf.addSupplyAirflowRatioField(f)
     end
     air_loop_unitary.setDesignSpecificationMultispeedObject(perf)
@@ -531,29 +358,6 @@ class HVAC
 
     air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac)
     hvac_map[heat_pump.id] << air_loop
-
-    # Store info for HVAC Sizing measure
-    heat_capacity_ratios_4 = []
-    cool_capacity_ratios_4 = []
-    heat_cfms_ton_rated_4 = []
-    cool_cfms_ton_rated_4 = []
-    cool_shrs_rated_gross_4 = []
-    mshp_indices.each do |mshp_index|
-      heat_capacity_ratios_4 << heat_capacity_ratios[mshp_index]
-      cool_capacity_ratios_4 << cool_capacity_ratios[mshp_index]
-      heat_cfms_ton_rated_4 << heat_cfms_ton_rated[mshp_index]
-      cool_cfms_ton_rated_4 << cool_cfms_ton_rated[mshp_index]
-      cool_shrs_rated_gross_4 << cool_shrs_rated_gross[mshp_index]
-    end
-    heat_pump.additional_properties.capacity_ratios_heating = heat_capacity_ratios_4
-    heat_pump.additional_properties.capacity_ratios_cooling = cool_capacity_ratios_4
-    heat_pump.additional_properties.rated_cfm_per_ton_heating = heat_cfms_ton_rated_4
-    heat_pump.additional_properties.rated_cfm_per_ton_cooling = cool_cfms_ton_rated_4
-    heat_pump.additional_properties.rated_shrs = cool_shrs_rated_gross_4
-    heat_pump.additional_properties.fan_speed_ratios_heating = heat_fan_speed_ratios
-    heat_pump.additional_properties.fan_speed_ratios_cooling = cool_fan_speed_ratios
-    heat_pump.additional_properties.cap_ft_spec_heating = heat_cap_ft_spec
-    heat_pump.additional_properties.cap_ft_spec_cooling = cool_cap_ft_spec
   end
 
   def self.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
@@ -564,112 +368,54 @@ class HVAC
     obj_name = Constants.ObjectNameGroundSourceHeatPump
     sequential_heat_load_frac = calc_sequential_load_fraction(heat_pump.fraction_heat_load_served, remaining_heat_load_frac)
     sequential_cool_load_frac = calc_sequential_load_fraction(heat_pump.fraction_cool_load_served, remaining_cool_load_frac)
-    pipe_cond = 0.23 # Pipe thermal conductivity, default to high density polyethylene
-    ground_conductivity = 0.6
-    grout_conductivity = 0.4
-    bore_diameter = 5.0
-    pipe_size = 0.75
-    ground_diffusivity = 0.0208
-    fluid_type = Constants.FluidPropyleneGlycol
-    frac_glycol = 0.3
-    design_delta_t = 10.0
-    chw_design = [85.0, weather.design.CoolingDrybulb - 15.0, weather.data.AnnualAvgDrybulb + 10.0].max # Temperature of water entering indoor coil,use 85F as lower bound
-    if fluid_type == Constants.FluidWater
-      hw_design = [45.0, weather.design.HeatingDrybulb + 35.0, weather.data.AnnualAvgDrybulb - 10.0].max # Temperature of fluid entering indoor coil, use 45F as lower bound for water
-    else
-      hw_design = [35.0, weather.design.HeatingDrybulb + 35.0, weather.data.AnnualAvgDrybulb - 10.0].min # Temperature of fluid entering indoor coil, use 35F as upper bound
-    end
-    # Pipe nominal size conversion to pipe outside diameter and inside diameter,
-    # only pipe sizes <= 2" are used here with DR11 (dimension ratio),
-    if pipe_size == 0.75 # 3/4" pipe
-      pipe_od = 1.050
-      pipe_id = 0.859
-    elsif pipe_size == 1.0 # 1" pipe
-      pipe_od = 1.315
-      pipe_id = 1.076
-    elsif pipe_size == 1.25 # 1-1/4" pipe
-      pipe_od = 1.660
-      pipe_id = 1.358
-    end
-    heat_pump.additional_properties.u_tube_spacing_type = 'b'
-    # Calculate distance between pipes
-    if heat_pump.additional_properties.u_tube_spacing_type == 'as'
-      # Two tubes, spaced 1/8” apart at the center of the borehole
-      u_tube_spacing = 0.125
-    elsif heat_pump.additional_properties.u_tube_spacing_type == 'b'
-      # Two tubes equally spaced between the borehole edges
-      u_tube_spacing = 0.9661
-    elsif heat_pump.additional_properties.u_tube_spacing_type == 'c'
-      # Both tubes placed against outer edge of borehole
-      u_tube_spacing = bore_diameter - 2 * pipe_od
-    end
-    shank_spacing = u_tube_spacing + pipe_od # Distance from center of pipe to center of pipe
 
-    if frac_glycol == 0
-      fluid_type = Constants.FluidWater
-      runner.registerWarning("Specified #{fluid_type} fluid type and 0 fraction of glycol, so assuming #{Constants.FluidWater} fluid type.")
+    hp_ap = heat_pump.additional_properties
+
+    if hp_ap.frac_glycol == 0
+      hp_ap.fluid_type = Constants.FluidWater
+      runner.registerWarning("Specified #{hp_ap.fluid_type} fluid type and 0 fraction of glycol, so assuming #{Constants.FluidWater} fluid type.")
     end
 
     # Cooling Coil
 
-    # E+ equation fit coil coefficients from Tang's thesis:
-    # See Appendix B of  https://hvac.okstate.edu/sites/default/files/pubs/theses/MS/27-Tang_Thesis_05.pdf
-    # Coefficients generated by catalog data
-    gshp_cool_cap_fT_coeff = [-1.27373428, 3.73053580, -1.75023168, 0.04789060, 0.015777882]
-    gshp_cool_power_fT_coeff = [-7.66308745, 1.13961086, 7.57407956, 0.30151440, -0.091186547]
-    gshp_cool_SH_fT_coeff = [4.27615968, 13.90195633, -17.28090511, -0.70050924, 0.51366014, 0.017194205]
-
-    # FUTURE: Reconcile these adjustments with ANSI/RESNET/ICC 301-2019 Section 4.4.5
-    fan_adjust_kw = UnitConversions.convert(400.0, 'Btu/hr', 'ton') * UnitConversions.convert(1.0, 'cfm', 'm^3/s') * 1000.0 * 0.35 * 249.0 / 300.0 # Adjustment per ISO 13256-1 Internal pressure drop across heat pump assumed to be 0.5 in. w.g.
-    pump_adjust_kw = UnitConversions.convert(3.0, 'Btu/hr', 'ton') * UnitConversions.convert(1.0, 'gal/min', 'm^3/s') * 1000.0 * 6.0 * 2990.0 / 3000.0 # Adjustment per ISO 13256-1 Internal Pressure drop across heat pump coil assumed to be 11ft w.g.
-    cooling_eir = UnitConversions.convert((1.0 - heat_pump.cooling_efficiency_eer * (fan_adjust_kw + pump_adjust_kw)) / (heat_pump.cooling_efficiency_eer * (1.0 + UnitConversions.convert(fan_adjust_kw, 'Wh', 'Btu'))), 'Wh', 'Btu')
-
     clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit.new(model)
     clg_coil.setName(obj_name + ' clg coil')
-    clg_coil.setRatedCoolingCoefficientofPerformance(1.0 / cooling_eir)
-    clg_coil.setTotalCoolingCapacityCoefficient1(gshp_cool_cap_fT_coeff[0])
-    clg_coil.setTotalCoolingCapacityCoefficient2(gshp_cool_cap_fT_coeff[1])
-    clg_coil.setTotalCoolingCapacityCoefficient3(gshp_cool_cap_fT_coeff[2])
-    clg_coil.setTotalCoolingCapacityCoefficient4(gshp_cool_cap_fT_coeff[3])
-    clg_coil.setTotalCoolingCapacityCoefficient5(gshp_cool_cap_fT_coeff[4])
-    clg_coil.setSensibleCoolingCapacityCoefficient1(gshp_cool_SH_fT_coeff[0])
-    clg_coil.setSensibleCoolingCapacityCoefficient2(gshp_cool_SH_fT_coeff[1])
-    clg_coil.setSensibleCoolingCapacityCoefficient3(gshp_cool_SH_fT_coeff[2])
-    clg_coil.setSensibleCoolingCapacityCoefficient4(gshp_cool_SH_fT_coeff[3])
-    clg_coil.setSensibleCoolingCapacityCoefficient5(gshp_cool_SH_fT_coeff[4])
-    clg_coil.setSensibleCoolingCapacityCoefficient6(gshp_cool_SH_fT_coeff[5])
-    clg_coil.setCoolingPowerConsumptionCoefficient1(gshp_cool_power_fT_coeff[0])
-    clg_coil.setCoolingPowerConsumptionCoefficient2(gshp_cool_power_fT_coeff[1])
-    clg_coil.setCoolingPowerConsumptionCoefficient3(gshp_cool_power_fT_coeff[2])
-    clg_coil.setCoolingPowerConsumptionCoefficient4(gshp_cool_power_fT_coeff[3])
-    clg_coil.setCoolingPowerConsumptionCoefficient5(gshp_cool_power_fT_coeff[4])
+    clg_coil.setRatedCoolingCoefficientofPerformance(1.0 / hp_ap.cool_rated_eirs[0])
+    clg_coil.setTotalCoolingCapacityCoefficient1(hp_ap.cool_cap_ft_spec[0][0])
+    clg_coil.setTotalCoolingCapacityCoefficient2(hp_ap.cool_cap_ft_spec[0][1])
+    clg_coil.setTotalCoolingCapacityCoefficient3(hp_ap.cool_cap_ft_spec[0][2])
+    clg_coil.setTotalCoolingCapacityCoefficient4(hp_ap.cool_cap_ft_spec[0][3])
+    clg_coil.setTotalCoolingCapacityCoefficient5(hp_ap.cool_cap_ft_spec[0][4])
+    clg_coil.setSensibleCoolingCapacityCoefficient1(hp_ap.cool_sh_ft_spec[0][0])
+    clg_coil.setSensibleCoolingCapacityCoefficient2(hp_ap.cool_sh_ft_spec[0][1])
+    clg_coil.setSensibleCoolingCapacityCoefficient3(hp_ap.cool_sh_ft_spec[0][2])
+    clg_coil.setSensibleCoolingCapacityCoefficient4(hp_ap.cool_sh_ft_spec[0][3])
+    clg_coil.setSensibleCoolingCapacityCoefficient5(hp_ap.cool_sh_ft_spec[0][4])
+    clg_coil.setSensibleCoolingCapacityCoefficient6(hp_ap.cool_sh_ft_spec[0][5])
+    clg_coil.setCoolingPowerConsumptionCoefficient1(hp_ap.cool_power_ft_spec[0][0])
+    clg_coil.setCoolingPowerConsumptionCoefficient2(hp_ap.cool_power_ft_spec[0][1])
+    clg_coil.setCoolingPowerConsumptionCoefficient3(hp_ap.cool_power_ft_spec[0][2])
+    clg_coil.setCoolingPowerConsumptionCoefficient4(hp_ap.cool_power_ft_spec[0][3])
+    clg_coil.setCoolingPowerConsumptionCoefficient5(hp_ap.cool_power_ft_spec[0][4])
     clg_coil.setNominalTimeforCondensateRemovaltoBegin(1000)
     clg_coil.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
     hvac_map[heat_pump.id] << clg_coil
 
     # Heating Coil
 
-    # E+ equation fit coil coefficients from Tang's thesis:
-    # See Appendix B Figure B.3 of  https://hvac.okstate.edu/sites/default/files/pubs/theses/MS/27-Tang_Thesis_05.pdf
-    # Coefficients generated by catalog data
-    gshp_heat_cap_fT_coeff = [-5.12650150, -0.93997630, 7.21443206, 0.121065721, 0.051809805]
-    gshp_heat_power_fT_coeff = [-7.73235249, 6.43390775, 2.29152262, -0.175598629, 0.005888871]
-
-    heating_eir = (1.0 - heat_pump.heating_efficiency_cop * (fan_adjust_kw + pump_adjust_kw)) / (heat_pump.heating_efficiency_cop * (1.0 - fan_adjust_kw))
-
     htg_coil = OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit.new(model)
     htg_coil.setName(obj_name + ' htg coil')
-    htg_coil.setRatedHeatingCoefficientofPerformance(1.0 / heating_eir)
-    htg_coil.setHeatingCapacityCoefficient1(gshp_heat_cap_fT_coeff[0])
-    htg_coil.setHeatingCapacityCoefficient2(gshp_heat_cap_fT_coeff[1])
-    htg_coil.setHeatingCapacityCoefficient3(gshp_heat_cap_fT_coeff[2])
-    htg_coil.setHeatingCapacityCoefficient4(gshp_heat_cap_fT_coeff[3])
-    htg_coil.setHeatingCapacityCoefficient5(gshp_heat_cap_fT_coeff[4])
-    htg_coil.setHeatingPowerConsumptionCoefficient1(gshp_heat_power_fT_coeff[0])
-    htg_coil.setHeatingPowerConsumptionCoefficient2(gshp_heat_power_fT_coeff[1])
-    htg_coil.setHeatingPowerConsumptionCoefficient3(gshp_heat_power_fT_coeff[2])
-    htg_coil.setHeatingPowerConsumptionCoefficient4(gshp_heat_power_fT_coeff[3])
-    htg_coil.setHeatingPowerConsumptionCoefficient5(gshp_heat_power_fT_coeff[4])
+    htg_coil.setRatedHeatingCoefficientofPerformance(1.0 / hp_ap.heat_rated_eirs[0])
+    htg_coil.setHeatingCapacityCoefficient1(hp_ap.heat_cap_ft_spec[0][0])
+    htg_coil.setHeatingCapacityCoefficient2(hp_ap.heat_cap_ft_spec[0][1])
+    htg_coil.setHeatingCapacityCoefficient3(hp_ap.heat_cap_ft_spec[0][2])
+    htg_coil.setHeatingCapacityCoefficient4(hp_ap.heat_cap_ft_spec[0][3])
+    htg_coil.setHeatingCapacityCoefficient5(hp_ap.heat_cap_ft_spec[0][4])
+    htg_coil.setHeatingPowerConsumptionCoefficient1(hp_ap.heat_power_ft_spec[0][0])
+    htg_coil.setHeatingPowerConsumptionCoefficient2(hp_ap.heat_power_ft_spec[0][1])
+    htg_coil.setHeatingPowerConsumptionCoefficient3(hp_ap.heat_power_ft_spec[0][2])
+    htg_coil.setHeatingPowerConsumptionCoefficient4(hp_ap.heat_power_ft_spec[0][3])
+    htg_coil.setHeatingPowerConsumptionCoefficient5(hp_ap.heat_power_ft_spec[0][4])
     hvac_map[heat_pump.id] << htg_coil
 
     # Supplemental Heating Coil
@@ -681,15 +427,15 @@ class HVAC
 
     ground_heat_exch_vert = OpenStudio::Model::GroundHeatExchangerVertical.new(model)
     ground_heat_exch_vert.setName(obj_name + ' exchanger')
-    ground_heat_exch_vert.setBoreHoleRadius(UnitConversions.convert(bore_diameter / 2.0, 'in', 'm'))
-    ground_heat_exch_vert.setGroundThermalConductivity(UnitConversions.convert(ground_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
-    ground_heat_exch_vert.setGroundThermalHeatCapacity(UnitConversions.convert(ground_conductivity / ground_diffusivity, 'Btu/(ft^3*F)', 'J/(m^3*K)'))
+    ground_heat_exch_vert.setBoreHoleRadius(UnitConversions.convert(hp_ap.bore_diameter / 2.0, 'in', 'm'))
+    ground_heat_exch_vert.setGroundThermalConductivity(UnitConversions.convert(hp_ap.ground_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
+    ground_heat_exch_vert.setGroundThermalHeatCapacity(UnitConversions.convert(hp_ap.ground_conductivity / hp_ap.ground_diffusivity, 'Btu/(ft^3*F)', 'J/(m^3*K)'))
     ground_heat_exch_vert.setGroundTemperature(UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'C'))
-    ground_heat_exch_vert.setGroutThermalConductivity(UnitConversions.convert(grout_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
-    ground_heat_exch_vert.setPipeThermalConductivity(UnitConversions.convert(pipe_cond, 'Btu/(hr*ft*R)', 'W/(m*K)'))
-    ground_heat_exch_vert.setPipeOutDiameter(UnitConversions.convert(pipe_od, 'in', 'm'))
-    ground_heat_exch_vert.setUTubeDistance(UnitConversions.convert(shank_spacing, 'in', 'm'))
-    ground_heat_exch_vert.setPipeThickness(UnitConversions.convert((pipe_od - pipe_id) / 2.0, 'in', 'm'))
+    ground_heat_exch_vert.setGroutThermalConductivity(UnitConversions.convert(hp_ap.grout_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
+    ground_heat_exch_vert.setPipeThermalConductivity(UnitConversions.convert(hp_ap.pipe_cond, 'Btu/(hr*ft*R)', 'W/(m*K)'))
+    ground_heat_exch_vert.setPipeOutDiameter(UnitConversions.convert(hp_ap.pipe_od, 'in', 'm'))
+    ground_heat_exch_vert.setUTubeDistance(UnitConversions.convert(hp_ap.shank_spacing, 'in', 'm'))
+    ground_heat_exch_vert.setPipeThickness(UnitConversions.convert((hp_ap.pipe_od - hp_ap.pipe_id) / 2.0, 'in', 'm'))
     ground_heat_exch_vert.setMaximumLengthofSimulation(1)
     ground_heat_exch_vert.setGFunctionReferenceRatio(0.0005)
 
@@ -697,14 +443,14 @@ class HVAC
 
     plant_loop = OpenStudio::Model::PlantLoop.new(model)
     plant_loop.setName(obj_name + ' condenser loop')
-    if fluid_type == Constants.FluidWater
+    if hp_ap.fluid_type == Constants.FluidWater
       plant_loop.setFluidType('Water')
     else
-      plant_loop.setFluidType({ Constants.FluidPropyleneGlycol => 'PropyleneGlycol', Constants.FluidEthyleneGlycol => 'EthyleneGlycol' }[fluid_type])
-      plant_loop.setGlycolConcentration((frac_glycol * 100).to_i)
+      plant_loop.setFluidType({ Constants.FluidPropyleneGlycol => 'PropyleneGlycol', Constants.FluidEthyleneGlycol => 'EthyleneGlycol' }[hp_ap.fluid_type])
+      plant_loop.setGlycolConcentration((hp_ap.frac_glycol * 100).to_i)
     end
     plant_loop.setMaximumLoopTemperature(48.88889)
-    plant_loop.setMinimumLoopTemperature(UnitConversions.convert(hw_design, 'F', 'C'))
+    plant_loop.setMinimumLoopTemperature(UnitConversions.convert(hp_ap.design_hw, 'F', 'C'))
     plant_loop.setMinimumLoopFlowRate(0)
     plant_loop.setLoadDistributionScheme('SequentialLoad')
     plant_loop.addSupplyBranchForComponent(ground_heat_exch_vert)
@@ -714,14 +460,14 @@ class HVAC
 
     sizing_plant = plant_loop.sizingPlant
     sizing_plant.setLoopType('Condenser')
-    sizing_plant.setDesignLoopExitTemperature(UnitConversions.convert(chw_design, 'F', 'C'))
-    sizing_plant.setLoopDesignTemperatureDifference(UnitConversions.convert(design_delta_t, 'R', 'K'))
+    sizing_plant.setDesignLoopExitTemperature(UnitConversions.convert(hp_ap.design_chw, 'F', 'C'))
+    sizing_plant.setLoopDesignTemperatureDifference(UnitConversions.convert(hp_ap.design_delta_t, 'R', 'K'))
 
     setpoint_mgr_follow_ground_temp = OpenStudio::Model::SetpointManagerFollowGroundTemperature.new(model)
     setpoint_mgr_follow_ground_temp.setName(obj_name + ' condenser loop temp')
     setpoint_mgr_follow_ground_temp.setControlVariable('Temperature')
     setpoint_mgr_follow_ground_temp.setMaximumSetpointTemperature(48.88889)
-    setpoint_mgr_follow_ground_temp.setMinimumSetpointTemperature(UnitConversions.convert(hw_design, 'F', 'C'))
+    setpoint_mgr_follow_ground_temp.setMinimumSetpointTemperature(UnitConversions.convert(hp_ap.design_hw, 'F', 'C'))
     setpoint_mgr_follow_ground_temp.setReferenceGroundTemperatureObjectType('Site:GroundTemperature:Deep')
     setpoint_mgr_follow_ground_temp.addToNode(plant_loop.supplyOutletNode)
 
@@ -791,14 +537,6 @@ class HVAC
 
     air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac)
     hvac_map[heat_pump.id] << air_loop
-
-    # Store info for HVAC Sizing measure
-    heat_pump.additional_properties.rated_shrs = [heat_pump.cooling_shr]
-    heat_pump.additional_properties.cap_ft_spec_heating = [gshp_heat_cap_fT_coeff] # FIXME: Need to convert to IP?
-    heat_pump.additional_properties.cap_ft_spec_cooling = [gshp_cool_cap_fT_coeff] # FIXME: Need to convert to IP?
-    heat_pump.additional_properties.sh_ft_spec_cooling = [gshp_cool_SH_fT_coeff]
-    heat_pump.additional_properties.eir_cooling = cooling_eir
-    heat_pump.additional_properties.eir_heating = heating_eir
   end
 
   def self.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
@@ -843,6 +581,7 @@ class HVAC
 
     # Unitary System
 
+    supp_max_temp = heat_pump.additional_properties.supp_max_temp
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, supp_max_temp)
     hvac_map[heat_pump.id] << air_loop_unitary
 
@@ -1053,7 +792,6 @@ class HVAC
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameUnitHeater
     sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
-    airflow_cfm_per_ton = 350.0
 
     # Heating Coil
 
@@ -1086,9 +824,6 @@ class HVAC
 
     control_zone.setSequentialHeatingFractionSchedule(unitary_system, get_sequential_load_schedule(model, sequential_heat_load_frac))
     control_zone.setSequentialCoolingFractionSchedule(unitary_system, get_sequential_load_schedule(model, 0))
-
-    # Store info for HVAC Sizing measure
-    heating_system.additional_properties.rated_cfm_per_ton_heating = [airflow_cfm_per_ton]
   end
 
   def self.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac,
@@ -1365,7 +1100,7 @@ class HVAC
     return clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr
   end
 
-  def self.get_hp_clg_curves(num_speeds, heat_pump, fan_power_rated, cool_c_d, runner)
+  def self.get_hp_clg_curves(num_speeds, heat_pump, fan_power_rated, cool_c_d)
     if num_speeds == 1
       cool_rated_airflow_rate = 394.2 # cfm/ton
       cool_capacity_ratios = [1.0]
@@ -1391,7 +1126,7 @@ class HVAC
                              [0.618281092, 0.569060264, -0.187341356]]
       cool_eir_fflow_spec = [[1.639108268, -0.998953996, 0.359845728],
                              [1.570774717, -0.914152018, 0.343377302]]
-      cool_eers = calc_eers_cooling_2speed(runner, heat_pump.cooling_efficiency_seer, cool_c_d, cool_capacity_ratios, cool_fan_speed_ratios, fan_power_rated, cool_eir_ft_spec, cool_cap_ft_spec, true)
+      cool_eers = calc_eers_cooling_2speed(heat_pump.cooling_efficiency_seer, cool_c_d, cool_capacity_ratios, cool_fan_speed_ratios, fan_power_rated, cool_eir_ft_spec, cool_cap_ft_spec, true)
     elsif num_speeds == 4
       cool_rated_airflow_rate = 411.0 # cfm/ton
       cool_capacity_ratios = [0.36, 0.51, 0.67, 1.0]
@@ -1418,9 +1153,63 @@ class HVAC
       cool_cap_fflow_spec = [[1, 0, 0]] * 4
       cap_ratio_seer_3 = cool_capacity_ratios.select { |i| [0, 1, 3].include? cool_capacity_ratios.index(i) }
       fan_speed_seer_3 = cool_fan_speed_ratios.select { |i| [0, 1, 3].include? cool_fan_speed_ratios.index(i) }
-      cool_eers = calc_eers_cooling_4speed(runner, heat_pump.cooling_efficiency_seer, cool_c_d, cap_ratio_seer_3, fan_speed_seer_3, fan_power_rated, cool_eir_ft_spec_3, cool_cap_ft_spec_3)
+      cool_eers = calc_eers_cooling_4speed(heat_pump.cooling_efficiency_seer, cool_c_d, cap_ratio_seer_3, fan_speed_seer_3, fan_power_rated, cool_eir_ft_spec_3, cool_cap_ft_spec_3)
     end
     return cool_rated_airflow_rate, cool_fan_speed_ratios, cool_capacity_ratios, cool_shrs, cool_eers, cool_cap_ft_spec, cool_eir_ft_spec, cool_cap_fflow_spec, cool_eir_fflow_spec
+  end
+
+  def self.get_hp_htg_curves(num_speeds, heat_pump, fan_power_rated, heat_c_d)
+    if num_speeds == 1
+      heat_rated_airflow_rate = 384.1 # cfm/ton
+      heat_capacity_ratios = [1.0]
+      heat_fan_speed_ratios = [1.0]
+      heat_eir_ft_spec = [[0.718398423, 0.003498178, 0.000142202, -0.005724331, 0.00014085, -0.000215321]]
+      heat_cap_fflow_spec = [[0.694045465, 0.474207981, -0.168253446]]
+      heat_eir_fflow_spec = [[2.185418751, -1.942827919, 0.757409168]]
+      if heat_pump.heating_capacity_17F.nil?
+        heat_cap_ft_spec = [[0.566333415, -0.000744164, -0.0000103, 0.009414634, 0.0000506, -0.00000675]]
+      else
+        heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(num_speeds, heat_pump)
+      end
+      heat_cops = [calc_cop_heating_1speed(heat_pump.heating_efficiency_hspf, heat_c_d, fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)]
+    elsif num_speeds == 2
+      heat_rated_airflow_rate = 352.2 # cfm/ton
+      heat_capacity_ratios = [0.72, 1.0]
+      heat_fan_speed_ratios = [0.8, 1.0]
+      heat_eir_ft_spec = [[0.36338171, 0.013523725, 0.000258872, -0.009450269, 0.000439519, -0.000653723],
+                          [0.981100941, -0.005158493, 0.000243416, -0.005274352, 0.000230742, -0.000336954]]
+      heat_cap_fflow_spec = [[0.741466907, 0.378645444, -0.119754733],
+                             [0.76634609, 0.32840943, -0.094701495]]
+      heat_eir_fflow_spec = [[2.153618211, -1.737190609, 0.584269478],
+                             [2.001041353, -1.58869128, 0.587593517]]
+      if heat_pump.heating_capacity_17F.nil?
+        heat_cap_ft_spec = [[0.335690634, 0.002405123, -0.0000464, 0.013498735, 0.0000499, -0.00000725],
+                            [0.306358843, 0.005376987, -0.0000579, 0.011645092, 0.0000591, -0.0000203]]
+      else
+        heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(num_speeds, heat_pump)
+      end
+      heat_cops = calc_cops_heating_2speed(heat_pump.heating_efficiency_hspf, heat_c_d, heat_capacity_ratios, heat_fan_speed_ratios, fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)
+    elsif num_speeds == 4
+      heat_rated_airflow_rate = 296.9 # cfm/ton
+      heat_capacity_ratios = [0.33, 0.56, 1.0, 1.17]
+      heat_fan_speed_ratios = [0.63, 0.76, 1.0, 1.19]
+      heat_eir_ft_spec = [[0.708311527, 0.020732093, 0.000391479, -0.037640031, 0.000979937, -0.001079042],
+                          [0.025480155, 0.020169585, 0.000121341, -0.004429789, 0.000166472, -0.00036447],
+                          [0.379003189, 0.014195012, 0.0000821046, -0.008894061, 0.000151519, -0.000210299],
+                          [0.690404655, 0.00616619, 0.000137643, -0.009350199, 0.000153427, -0.000213258]]
+      heat_cap_fflow_spec = [[1, 0, 0]] * 4
+      heat_eir_fflow_spec = [[1, 0, 0]] * 4
+      if heat_pump.heating_capacity_17F.nil?
+        heat_cap_ft_spec = [[0.304192655, -0.003972566, 0.0000196432, 0.024471251, -0.000000774126, -0.0000841323],
+                            [0.496381324, -0.00144792, 0.0, 0.016020855, 0.0000203447, -0.0000584118],
+                            [0.697171186, -0.006189599, 0.0000337077, 0.014291981, 0.0000105633, -0.0000387956],
+                            [0.555513805, -0.001337363, -0.00000265117, 0.014328826, 0.0000163849, -0.0000480711]]
+      else
+        heat_cap_ft_spec = calc_heat_cap_ft_spec_using_capacity_17F(num_speeds, heat_pump)
+      end
+      heat_cops = calc_cops_heating_4speed(heat_pump.heating_efficiency_hspf, heat_c_d, heat_capacity_ratios, heat_fan_speed_ratios, fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)
+    end
+    return heat_rated_airflow_rate, heat_fan_speed_ratios, heat_capacity_ratios, heat_cops, heat_cap_ft_spec, heat_eir_ft_spec, heat_cap_fflow_spec, heat_eir_fflow_spec
   end
 
   def self.get_default_compressor_type(hvac_type, seer)
@@ -2085,7 +1874,7 @@ class HVAC
     return eer_a
   end
 
-  def self.calc_eers_cooling_2speed(runner, seer, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, is_heat_pump = false)
+  def self.calc_eers_cooling_2speed(seer, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, is_heat_pump = false)
     # Iterate to find rated net eers given Seer using simple bisection method for two stage air conditioners
 
     # Initial large bracket of eer (A condition) to span possible seer range
@@ -2128,7 +1917,7 @@ class HVAC
     return calc_eers_from_eir_2speed(eer_c, fan_power_rated, is_heat_pump)
   end
 
-  def self.calc_eers_cooling_4speed(runner, seer, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
+  def self.calc_eers_cooling_4speed(seer, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
     # Iterate to find rated net eers given Seer using simple bisection method for two stage and variable speed air conditioners
 
     # Initial large bracket of eer (A condition) to span possible seer range
@@ -2420,7 +2209,7 @@ class HVAC
     return calc_cops_from_eir_2speed(cop_c, fan_power_rated)
   end
 
-  def self.calc_cops_heating_4speed(runner, hspf, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
+  def self.calc_cops_heating_4speed(hspf, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
     # Iterate to find rated net cops given HSPF using simple bisection method for variable speed heat pumps
 
     # Initial large bracket of cop to span possible hspf range
@@ -2921,34 +2710,33 @@ class HVAC
     return curve
   end
 
-  def self.create_dx_cooling_coil(model, obj_name, speed_indices, eirs, cap_ft_spec, eir_ft_spec, closs_fplr_spec, cap_fflow_spec, eir_fflow_spec, shrs_rated_gross,
-                                  crankcase_kw, crankcase_temp, fan_power_rated)
-    num_speeds = speed_indices.size
+  def self.create_dx_cooling_coil(model, obj_name, cooling_system)
+    clg_ap = cooling_system.additional_properties
 
-    if num_speeds > 1
+    if clg_ap.num_speeds > 1
       constant_biquadratic = create_curve_biquadratic_constant(model)
     end
 
     clg_coil = nil
 
-    for speed_idx in speed_indices
-      speed = speed_idx + 1
-      cap_ft_spec_si = convert_curve_biquadratic(cap_ft_spec[speed_idx])
-      eir_ft_spec_si = convert_curve_biquadratic(eir_ft_spec[speed_idx])
+    for i in 0..(clg_ap.num_speeds - 1)
+      speed = i + 1
+      cap_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_cap_ft_spec[i])
+      eir_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_eir_ft_spec[i])
       cap_ft_curve = create_curve_biquadratic(model, cap_ft_spec_si, "Cool-Cap-fT#{speed}", 13.88, 23.88, 18.33, 51.66)
       eir_ft_curve = create_curve_biquadratic(model, eir_ft_spec_si, "Cool-eir-fT#{speed}", 13.88, 23.88, 18.33, 51.66)
-      plf_fplr_curve = create_curve_quadratic(model, closs_fplr_spec[speed_idx], "Cool-PLF-fPLR#{speed}", 0, 1, 0.7, 1)
-      cap_fff_curve = create_curve_quadratic(model, cap_fflow_spec[speed_idx], "Cool-Cap-fFF#{speed}", 0, 2, 0, 2)
-      eir_fff_curve = create_curve_quadratic(model, eir_fflow_spec[speed_idx], "Cool-eir-fFF#{speed}", 0, 2, 0, 2)
+      plf_fplr_curve = create_curve_quadratic(model, clg_ap.cool_closs_fplr_spec[i], "Cool-PLF-fPLR#{speed}", 0, 1, 0.7, 1)
+      cap_fff_curve = create_curve_quadratic(model, clg_ap.cool_cap_fflow_spec[i], "Cool-Cap-fFF#{speed}", 0, 2, 0, 2)
+      eir_fff_curve = create_curve_quadratic(model, clg_ap.cool_eir_fflow_spec[i], "Cool-eir-fFF#{speed}", 0, 2, 0, 2)
 
-      if num_speeds == 1
+      if clg_ap.num_speeds == 1
         clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
-        clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(fan_power_rated / UnitConversions.convert(1.0, 'cfm', 'm^3/s'))
-        if not crankcase_temp.nil?
-          clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, 'F', 'C'))
+        clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(clg_ap.fan_power_rated / UnitConversions.convert(1.0, 'cfm', 'm^3/s'))
+        if not clg_ap.crankcase_temp.nil?
+          clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C'))
         end
-        clg_coil.setRatedCOP(1.0 / eirs[speed_idx])
-        clg_coil.setRatedSensibleHeatRatio(shrs_rated_gross[speed_idx])
+        clg_coil.setRatedCOP(1.0 / clg_ap.cool_rated_eirs[i])
+        clg_coil.setRatedSensibleHeatRatio(clg_ap.cool_shrs_rated_gross[i])
         clg_coil.setNominalTimeForCondensateRemovalToBegin(1000.0)
         clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(1.5)
         clg_coil.setMaximumCyclingRate(3.0)
@@ -2960,13 +2748,13 @@ class HVAC
           clg_coil.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
           clg_coil.setFuelType(EPlus::FuelTypeElectricity)
           clg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
-          if not crankcase_temp.nil?
-            clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, 'F', 'C'))
+          if not clg_ap.crankcase_temp.nil?
+            clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C'))
           end
         end
         stage = OpenStudio::Model::CoilCoolingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_biquadratic)
-        stage.setGrossRatedCoolingCOP(1.0 / eirs[speed_idx])
-        stage.setGrossRatedSensibleHeatRatio(shrs_rated_gross[speed_idx])
+        stage.setGrossRatedCoolingCOP(1.0 / clg_ap.cool_rated_eirs[i])
+        stage.setGrossRatedSensibleHeatRatio(clg_ap.cool_shrs_rated_gross[i])
         stage.setNominalTimeforCondensateRemovaltoBegin(1000)
         stage.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
         stage.setRatedWasteHeatFractionofPowerInput(0.2)
@@ -2978,37 +2766,36 @@ class HVAC
 
     clg_coil.setName(obj_name + ' clg coil')
     clg_coil.setCondenserType('AirCooled')
-    clg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_kw, 'kW', 'W'))
+    clg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(clg_ap.crankcase_kw, 'kW', 'W'))
 
     return clg_coil
   end
 
-  def self.create_dx_heating_coil(model, obj_name, speed_indices, eirs, cap_ft_spec, eir_ft_spec, closs_fplr_spec, cap_fflow_spec, eir_fflow_spec,
-                                  crankcase_kw, crankcase_temp, fan_power_rated, hp_min_temp, fraction_heat_load_served)
-    num_speeds = speed_indices.size
+  def self.create_dx_heating_coil(model, obj_name, heating_system)
+    htg_ap = heating_system.additional_properties
 
-    if num_speeds > 1
+    if htg_ap.num_speeds > 1
       constant_biquadratic = create_curve_biquadratic_constant(model)
     end
 
     htg_coil = nil
 
-    for speed_idx in speed_indices
-      speed = speed_idx + 1
-      cap_ft_spec_si = convert_curve_biquadratic(cap_ft_spec[speed_idx])
-      eir_ft_spec_si = convert_curve_biquadratic(eir_ft_spec[speed_idx])
+    for i in 0..(htg_ap.num_speeds - 1)
+      speed = i + 1
+      cap_ft_spec_si = convert_curve_biquadratic(htg_ap.heat_cap_ft_spec[i])
+      eir_ft_spec_si = convert_curve_biquadratic(htg_ap.heat_eir_ft_spec[i])
       cap_ft_curve = create_curve_biquadratic(model, cap_ft_spec_si, "HP_Heat-Cap-fT#{speed}", -100, 100, -100, 100)
       eir_ft_curve = create_curve_biquadratic(model, eir_ft_spec_si, "HP_Heat-eir-fT#{speed}", -100, 100, -100, 100)
-      plf_fplr_curve = create_curve_quadratic(model, closs_fplr_spec[speed_idx], "HP_Heat-PLF-fPLR#{speed}", 0, 1, 0.7, 1)
-      cap_fff_curve = create_curve_quadratic(model, cap_fflow_spec[speed_idx], "HP_Heat-CAP-fFF#{speed}", 0, 2, 0, 2)
-      eir_fff_curve = create_curve_quadratic(model, eir_fflow_spec[speed_idx], "HP_Heat-eir-fFF#{speed}", 0, 2, 0, 2)
+      plf_fplr_curve = create_curve_quadratic(model, htg_ap.heat_closs_fplr_spec[i], "HP_Heat-PLF-fPLR#{speed}", 0, 1, 0.7, 1)
+      cap_fff_curve = create_curve_quadratic(model, htg_ap.heat_cap_fflow_spec[i], "HP_Heat-CAP-fFF#{speed}", 0, 2, 0, 2)
+      eir_fff_curve = create_curve_quadratic(model, htg_ap.heat_eir_fflow_spec[i], "HP_Heat-eir-fFF#{speed}", 0, 2, 0, 2)
 
-      if num_speeds == 1
+      if htg_ap.num_speeds == 1
         htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
-        htg_coil.setRatedSupplyFanPowerPerVolumeFlowRate(fan_power_rated / UnitConversions.convert(1.0, 'cfm', 'm^3/s'))
-        htg_coil.setRatedCOP(1.0 / eirs[speed_idx])
-        if not crankcase_temp.nil?
-          htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, 'F', 'C'))
+        htg_coil.setRatedSupplyFanPowerPerVolumeFlowRate(htg_ap.fan_power_rated / UnitConversions.convert(1.0, 'cfm', 'm^3/s'))
+        htg_coil.setRatedCOP(1.0 / htg_ap.heat_rated_eirs[i])
+        if not htg_ap.crankcase_temp.nil?
+          htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(htg_ap.crankcase_temp, 'F', 'C'))
         end
       else
         if htg_coil.nil?
@@ -3016,21 +2803,21 @@ class HVAC
           htg_coil.setFuelType(EPlus::FuelTypeElectricity)
           htg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
           htg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
-          if not crankcase_temp.nil?
-            htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, 'F', 'C'))
+          if not htg_ap.crankcase_temp.nil?
+            htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(htg_ap.crankcase_temp, 'F', 'C'))
           end
         end
         stage = OpenStudio::Model::CoilHeatingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_biquadratic)
-        stage.setGrossRatedHeatingCOP(1.0 / eirs[speed_idx])
+        stage.setGrossRatedHeatingCOP(1.0 / htg_ap.heat_rated_eirs[i])
         stage.setRatedWasteHeatFractionofPowerInput(0.2)
         htg_coil.addStage(stage)
       end
     end
 
     htg_coil.setName(obj_name + ' htg coil')
-    htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(hp_min_temp, 'F', 'C'))
+    htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(htg_ap.hp_min_temp, 'F', 'C'))
     htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(UnitConversions.convert(40.0, 'F', 'C'))
-    if fraction_heat_load_served > 0
+    if heating_system.fraction_heat_load_served > 0
       defrost_eir_curve = create_curve_biquadratic(model, [0.1528, 0, 0, 0, 0, 0], 'Defrosteir', -100, 100, -100, 100) # Heating defrost curve for reverse cycle
       htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
       htg_coil.setDefrostStrategy('ReverseCycle')
@@ -3038,27 +2825,27 @@ class HVAC
     else
       htg_coil.setDefrostTimePeriodFraction(0)
     end
-    htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_kw, 'kW', 'W'))
+    htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(htg_ap.crankcase_kw, 'kW', 'W'))
 
     return htg_coil
   end
 
-  def self.calc_cool_eirs(num_speeds, eers, fan_power_rated)
-    cool_eirs = []
+  def self.calc_cool_rated_eirs(num_speeds, eers, fan_power_rated)
+    cool_rated_eirs = []
     (0...num_speeds).to_a.each do |speed|
       eir = calc_eir_from_eer(eers[speed], fan_power_rated)
-      cool_eirs << eir
+      cool_rated_eirs << eir
     end
-    return cool_eirs
+    return cool_rated_eirs
   end
 
-  def self.calc_heat_eirs(num_speeds, cops, fan_power_rated)
-    heat_eirs = []
+  def self.calc_heat_rated_eirs(num_speeds, cops, fan_power_rated)
+    heat_rated_eirs = []
     (0...num_speeds).to_a.each do |speed|
       eir = calc_eir_from_cop(cops[speed], fan_power_rated)
-      heat_eirs << eir
+      heat_rated_eirs << eir
     end
-    return heat_eirs
+    return heat_rated_eirs
   end
 
   def self.calc_shrs_rated_gross(num_speeds, shr_Rated_Net, fan_power_rated, cfms_ton_rated)
@@ -3216,9 +3003,12 @@ class HVAC
     return
   end
 
-  def self.calc_mshp_cfms_ton_cooling(cap_min_per, cap_max_per, cfm_ton_min, cfm_ton_max, num_speeds, dB_rated, wB_rated, shr)
+  def self.calc_mshp_cfms_ton_cooling(cap_min_per, cap_max_per, cfm_ton_min, cfm_ton_max, num_speeds, dB_rated = nil, wB_rated = nil, shr)
+    dB_rated = 80.0 if dB_rated.nil? # deg-F
+    wB_rated = 67.0 if wB_rated.nil? # deg-F
+
     cool_capacity_ratios = [0.0] * num_speeds
-    cool_cfms_ton_rated = [0.0] * num_speeds
+    cool_rated_cfm_per_ton = [0.0] * num_speeds
     cool_shrs_rated = [0.0] * num_speeds
 
     cap_nom_per = 1.0
@@ -3230,19 +3020,19 @@ class HVAC
 
     (0...num_speeds).each do |i|
       cool_capacity_ratios[i] = cap_min_per + i * (cap_max_per - cap_min_per) / (num_speeds - 1)
-      cool_cfms_ton_rated[i] = cfm_ton_min + i * (cfm_ton_max - cfm_ton_min) / (num_speeds - 1)
+      cool_rated_cfm_per_ton[i] = cfm_ton_min + i * (cfm_ton_max - cfm_ton_min) / (num_speeds - 1)
       # Calculate the SHR for each speed. Use minimum value of 0.98 to prevent E+ bypass factor calculation errors
-      cool_shrs_rated[i] = [Psychrometrics.CalculateSHR(dB_rated, wB_rated, p_atm, UnitConversions.convert(cool_capacity_ratios[i], 'ton', 'kBtu/hr'), cool_cfms_ton_rated[i], ao), 0.98].min
+      cool_shrs_rated[i] = [Psychrometrics.CalculateSHR(dB_rated, wB_rated, p_atm, UnitConversions.convert(cool_capacity_ratios[i], 'ton', 'kBtu/hr'), cool_rated_cfm_per_ton[i], ao), 0.98].min
     end
 
-    return cool_cfms_ton_rated, cool_capacity_ratios, cool_shrs_rated
+    return cool_rated_cfm_per_ton, cool_capacity_ratios, cool_shrs_rated
   end
 
-  def self.calc_mshp_cool_eirs(runner, seer, fan_power, c_d, num_speeds, cool_capacity_ratios, cool_cfms_ton_rated, cool_eir_ft_spec, cool_cap_ft_spec)
+  def self.calc_mshp_cool_rated_eirs(seer, fan_power, c_d, num_speeds, cool_capacity_ratios, cool_rated_cfm_per_ton, cool_eir_ft_spec, cool_cap_ft_spec)
     cops_norm = [1.901, 1.859, 1.746, 1.609, 1.474, 1.353, 1.247, 1.156, 1.079, 1.0]
     fan_powers_norm = [0.604, 0.634, 0.670, 0.711, 0.754, 0.800, 0.848, 0.898, 0.948, 1.0]
 
-    cool_eirs = [0.0] * num_speeds
+    cool_rated_eirs = [0.0] * num_speeds
     fan_powers_rated = [0.0] * num_speeds
     eers_Rated = [0.0] * num_speeds
 
@@ -3255,7 +3045,7 @@ class HVAC
 
     cop_maxSpeed_1 = cop_maxSpeed
     cop_maxSpeed_2 = cop_maxSpeed
-    error = seer - calc_mshp_seer_4speed(eers_Rated, c_d, cool_capacity_ratios, cool_cfms_ton_rated, fan_powers_rated, true, cool_eir_ft_spec, cool_cap_ft_spec)
+    error = seer - calc_mshp_seer_4speed(eers_Rated, c_d, cool_capacity_ratios, cool_rated_cfm_per_ton, fan_powers_rated, true, cool_eir_ft_spec, cool_cap_ft_spec)
     error1 = error
     error2 = error
 
@@ -3269,7 +3059,7 @@ class HVAC
         eers_Rated[i] = UnitConversions.convert(cop_maxSpeed, 'W', 'Btu/hr') * cops_norm[i]
       end
 
-      error = seer - calc_mshp_seer_4speed(eers_Rated, c_d, cool_capacity_ratios, cool_cfms_ton_rated, fan_powers_rated, true, cool_eir_ft_spec, cool_cap_ft_spec)
+      error = seer - calc_mshp_seer_4speed(eers_Rated, c_d, cool_capacity_ratios, cool_rated_cfm_per_ton, fan_powers_rated, true, cool_eir_ft_spec, cool_cap_ft_spec)
 
       cop_maxSpeed, cvg, cop_maxSpeed_1, error1, cop_maxSpeed_2, error2 = MathTools.Iterate(cop_maxSpeed, error, cop_maxSpeed_1, error1, cop_maxSpeed_2, error2, n, cvg)
 
@@ -3280,14 +3070,13 @@ class HVAC
 
     if (not cvg) || (final_n > itmax)
       cop_maxSpeed = UnitConversions.convert(0.547 * seer - 0.104, 'Btu/hr', 'W') # Correlation developed from JonW's MatLab scripts. Only used if an eer cannot be found.
-      runner.registerWarning('Mini-split heat pump cop iteration failed to converge. Setting to default value.')
     end
 
     (0...num_speeds).each do |i|
-      cool_eirs[i] = calc_eir_from_eer(UnitConversions.convert(cop_maxSpeed, 'W', 'Btu/hr') * cops_norm[i], fan_powers_rated[i])
+      cool_rated_eirs[i] = calc_eir_from_eer(UnitConversions.convert(cop_maxSpeed, 'W', 'Btu/hr') * cops_norm[i], fan_powers_rated[i])
     end
 
-    return cool_eirs
+    return cool_rated_eirs
   end
 
   def self.calc_mshp_seer_4speed(eer_a, c_d, capacity_ratio, cfm_tons, fan_power_rated, is_heat_pump, cool_eir_ft_spec, cool_cap_ft_spec)
@@ -3408,11 +3197,12 @@ class HVAC
     return heat_cfms_ton_rated, heat_capacity_ratios
   end
 
-  def self.calc_mshp_heat_eirs(runner, hspf, fan_power, hp_min_temp, c_d, cool_cfms_ton_rated, num_speeds, heat_capacity_ratios, heat_cfms_ton_rated, heat_eir_ft_spec, heat_cap_ft_spec)
+  # FIXME: Check w/ Jon that rated_cfm_per_ton should be heating and not cooling
+  def self.calc_mshp_heat_rated_eirs(hspf, fan_power, hp_min_temp, c_d, heat_rated_cfm_per_ton, num_speeds, heat_capacity_ratios, heat_cfms_ton_rated, heat_eir_ft_spec, heat_cap_ft_spec)
     cops_norm = [1.792, 1.502, 1.308, 1.207, 1.145, 1.105, 1.077, 1.056, 1.041, 1]
     fan_powers_norm = [0.577, 0.625, 0.673, 0.720, 0.768, 0.814, 0.861, 0.907, 0.954, 1]
 
-    heat_eirs = [0.0] * num_speeds
+    heat_rated_eirs = [0.0] * num_speeds
     fan_powers_rated = [0.0] * num_speeds
     cops_rated = [0.0] * num_speeds
 
@@ -3440,7 +3230,7 @@ class HVAC
         cops_rated[i] = cop_maxSpeed * cops_norm[i]
       end
 
-      error = hspf - calc_mshp_hspf_4speed(cops_rated, c_d, heat_capacity_ratios, cool_cfms_ton_rated, fan_powers_rated, hp_min_temp, heat_eir_ft_spec, heat_cap_ft_spec)
+      error = hspf - calc_mshp_hspf_4speed(cops_rated, c_d, heat_capacity_ratios, heat_rated_cfm_per_ton, fan_powers_rated, hp_min_temp, heat_eir_ft_spec, heat_cap_ft_spec)
 
       cop_maxSpeed, cvg, cop_maxSpeed_1, error1, cop_maxSpeed_2, error2 = MathTools.Iterate(cop_maxSpeed, error, cop_maxSpeed_1, error1, cop_maxSpeed_2, error2, n, cvg)
 
@@ -3451,14 +3241,13 @@ class HVAC
 
     if (not cvg) || (final_n > itmax)
       cop_maxSpeed = UnitConversions.convert(0.4174 * hspf - 1.1134, 'Btu/hr', 'W') # Correlation developed from JonW's MatLab scripts. Only used if a cop cannot be found.
-      runner.registerWarning('Mini-split heat pump cop iteration failed to converge. Setting to default value.')
     end
 
     (0...num_speeds).each do |i|
-      heat_eirs[i] = calc_eir_from_cop(cop_maxSpeed * cops_norm[i], fan_powers_rated[i])
+      heat_rated_eirs[i] = calc_eir_from_cop(cop_maxSpeed * cops_norm[i], fan_powers_rated[i])
     end
 
-    return heat_eirs
+    return heat_rated_eirs
   end
 
   def self.calc_mshp_hspf_4speed(cop_47, c_d, capacity_ratio, cfm_tons, fan_power_rated, hp_min_temp, heat_eir_ft_spec, heat_cap_ft_spec)
@@ -3878,9 +3667,12 @@ class HVAC
   end
 
   def self.apply_shared_systems(hpxml)
-    apply_shared_cooling_systems(hpxml)
-    apply_shared_heating_systems(hpxml)
-    HPXMLDefaults.apply_hvac(hpxml)
+    applied_clg = apply_shared_cooling_systems(hpxml)
+    applied_htg = apply_shared_heating_systems(hpxml)
+    return unless (applied_clg || applied_htg)
+
+    weather = nil # FIXME
+    HPXMLDefaults.apply_hvac(hpxml) # FIXME: Why do we do need to do this?
 
     # Remove any orphaned HVAC distributions
     hpxml.hvac_distributions.each do |hvac_distribution|
@@ -3898,9 +3690,11 @@ class HVAC
   end
 
   def self.apply_shared_cooling_systems(hpxml)
+    applied = false
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.is_shared_system
 
+      applied = true
       distribution_system = cooling_system.distribution_system
       distribution_type = distribution_system.distribution_system_type
       hydronic_and_air_type = distribution_system.hydronic_and_air_type
@@ -3970,12 +3764,16 @@ class HVAC
         cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
       end
     end
+
+    return applied
   end
 
   def self.apply_shared_heating_systems(hpxml)
+    applied = false
     hpxml.heating_systems.each do |heating_system|
       next unless heating_system.is_shared_system
 
+      applied = true
       distribution_system = heating_system.distribution_system
       distribution_type = distribution_system.distribution_system_type
       hydronic_and_air_type = distribution_system.hydronic_and_air_type
@@ -4008,6 +3806,8 @@ class HVAC
 
       heating_system.heating_capacity = nil # Autosize the equipment
     end
+
+    return applied
   end
 
   def self.get_num_speeds_from_compressor_type(compressor_type)
@@ -4018,5 +3818,51 @@ class HVAC
     elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
       return 4
     end
+  end
+
+  def self.is_central_air_conditioner_and_furnace(hpxml, heating_system, cooling_system)
+    if not (hpxml.heating_systems.include?(heating_system) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace))
+      return false
+    end
+    if not (hpxml.cooling_systems.include?(cooling_system) && (cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner))
+      return false
+    end
+
+    return true
+  end
+
+  def self.get_hpxml_hvac_systems(hpxml)
+    hvac_systems = []
+
+    hpxml.cooling_systems.each do |cooling_system|
+      heating_system = nil
+      if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+        heating_system = cooling_system.attached_heating_system
+        if not is_central_air_conditioner_and_furnace(hpxml, heating_system, cooling_system)
+          heating_system = nil
+        end
+      end
+      hvac_systems << { cooling: cooling_system,
+                        heating: heating_system }
+    end
+
+    hpxml.heating_systems.each do |heating_system|
+      cooling_system = nil
+      if heating_system.heating_system_type == HPXML::HVACTypeFurnace
+        cooling_system = heating_system.attached_cooling_system
+        if is_central_air_conditioner_and_furnace(hpxml, heating_system, cooling_system)
+          next # Already processed combined AC+furnace
+        end
+      end
+      hvac_systems << { cooling: cooling_system,
+                        heating: heating_system }
+    end
+
+    hpxml.heat_pumps.each do |heat_pump|
+      hvac_systems << { cooling: heat_pump,
+                        heating: heat_pump }
+    end
+
+    return hvac_systems
   end
 end

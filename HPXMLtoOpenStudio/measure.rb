@@ -266,7 +266,7 @@ class OSModel
     # Other
 
     add_airflow(runner, model, weather, spaces)
-    add_hvac_sizing(runner, model, weather, spaces)
+    add_hvac_sizing(runner, model, weather)
     add_photovoltaics(runner, model)
     add_generators(runner, model)
     add_additional_properties(runner, model, hpxml_path)
@@ -318,7 +318,7 @@ class OSModel
     end
 
     # Apply defaults to HPXML object
-    @sizing_init_loads = HPXMLDefaults.apply(@hpxml, weather, @cfa, @nbeds, @ncfl, @ncfl_ag, @has_uncond_bsmnt, @eri_version, epw_file, runner, @debug)
+    @hvac_sizing_values = HPXMLDefaults.apply(@hpxml, weather, @cfa, @nbeds, @ncfl, @ncfl_ag, @has_uncond_bsmnt, @eri_version, epw_file, runner, @debug)
 
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
@@ -2022,17 +2022,6 @@ class OSModel
     Waterheater.apply_combi_system_EMS(model, @dhw_map, @hpxml.water_heating_systems)
   end
 
-  def self.is_central_air_conditioner_and_furnace(heating_system, cooling_system)
-    if not (@hpxml.heating_systems.include?(heating_system) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace))
-      return false
-    end
-    if not (@hpxml.cooling_systems.include?(cooling_system) && (cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner))
-      return false
-    end
-
-    return true
-  end
-
   def self.update_shared_hvac_systems()
     HVAC.apply_shared_systems(@hpxml)
   end
@@ -2040,13 +2029,14 @@ class OSModel
   def self.add_cooling_system(runner, model, spaces)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
+    # FIXME: Use HVAC.get_hpxml_hvac_systems
     @hpxml.cooling_systems.each do |cooling_system|
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
 
-      if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+      if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
 
         heating_system = cooling_system.attached_heating_system
-        if not is_central_air_conditioner_and_furnace(heating_system, cooling_system)
+        if not HVAC.is_central_air_conditioner_and_furnace(@hpxml, heating_system, cooling_system)
           heating_system = nil
         end
 
@@ -2058,19 +2048,19 @@ class OSModel
           @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
         end
 
-      elsif cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
+      elsif [HPXML::HVACTypeRoomAirConditioner].include? cooling_system.cooling_system_type
 
         HVAC.apply_room_air_conditioner(model, runner, cooling_system,
                                         @remaining_cool_load_frac, living_zone,
                                         @hvac_map)
 
-      elsif cooling_system.cooling_system_type == HPXML::HVACTypeEvaporativeCooler
+      elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
 
         HVAC.apply_evaporative_cooler(model, runner, cooling_system,
                                       @remaining_cool_load_frac, living_zone,
                                       @hvac_map)
 
-      elsif cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner
+      elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
 
         HVAC.apply_mini_split_air_conditioner(model, runner, cooling_system,
                                               @remaining_cool_load_frac,
@@ -2084,13 +2074,14 @@ class OSModel
   def self.add_heating_system(runner, model, spaces)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
+    # FIXME: Use HVAC.get_hpxml_hvac_systems
     @hpxml.heating_systems.each do |heating_system|
       check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
 
-      if heating_system.heating_system_type == HPXML::HVACTypeFurnace
+      if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
 
         cooling_system = heating_system.attached_cooling_system
-        if is_central_air_conditioner_and_furnace(heating_system, cooling_system)
+        if HVAC.is_central_air_conditioner_and_furnace(@hpxml, heating_system, cooling_system)
           next # Already processed combined AC+furnace
         end
 
@@ -2098,22 +2089,22 @@ class OSModel
                                                    nil, @remaining_heat_load_frac,
                                                    living_zone, @hvac_map)
 
-      elsif heating_system.heating_system_type == HPXML::HVACTypeBoiler
+      elsif [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
         HVAC.apply_boiler(model, runner, heating_system,
                           @remaining_heat_load_frac, living_zone, @hvac_map)
 
-      elsif heating_system.heating_system_type == HPXML::HVACTypeElectricResistance
+      elsif [HPXML::HVACTypeElectricResistance].include? heating_system.heating_system_type
 
         HVAC.apply_electric_baseboard(model, runner, heating_system,
                                       @remaining_heat_load_frac, living_zone, @hvac_map)
 
-      elsif (heating_system.heating_system_type == HPXML::HVACTypeStove ||
-             heating_system.heating_system_type == HPXML::HVACTypePortableHeater ||
-             heating_system.heating_system_type == HPXML::HVACTypeFixedHeater ||
-             heating_system.heating_system_type == HPXML::HVACTypeWallFurnace ||
-             heating_system.heating_system_type == HPXML::HVACTypeFloorFurnace ||
-             heating_system.heating_system_type == HPXML::HVACTypeFireplace)
+      elsif [HPXML::HVACTypeStove,
+             HPXML::HVACTypePortableHeater,
+             HPXML::HVACTypeFixedHeater,
+             HPXML::HVACTypeWallFurnace,
+             HPXML::HVACTypeFloorFurnace,
+             HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
 
         HVAC.apply_unit_heater(model, runner, heating_system,
                                @remaining_heat_load_frac, living_zone, @hvac_map)
@@ -2126,31 +2117,32 @@ class OSModel
   def self.add_heat_pump(runner, model, weather, spaces)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
+    # FIXME: Use HVAC.get_hpxml_hvac_systems
     @hpxml.heat_pumps.each do |heat_pump|
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
-      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir
+      if [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
 
         HVAC.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
                                                @remaining_heat_load_frac,
                                                @remaining_cool_load_frac,
                                                living_zone, @hvac_map)
 
-      elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
+      elsif [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
 
         HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
                                                 @remaining_heat_load_frac,
                                                 @remaining_cool_load_frac,
                                                 living_zone, @hvac_map)
 
-      elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
+      elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
 
         HVAC.apply_mini_split_heat_pump(model, runner, heat_pump,
                                         @remaining_heat_load_frac,
                                         @remaining_cool_load_frac,
                                         living_zone, @hvac_map)
 
-      elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
 
         HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                            @remaining_heat_load_frac,
@@ -2499,8 +2491,8 @@ class OSModel
     return air_ducts
   end
 
-  def self.add_hvac_sizing(runner, model, weather, spaces)
-    HVACSizing.apply(model, runner, weather, spaces, @hpxml, @hvac_map, @debug, @sizing_init_loads)
+  def self.add_hvac_sizing(runner, model, weather)
+    HVACSizing.apply(model, runner, weather, @hvac_map, @debug, @hvac_sizing_values)
   end
 
   def self.add_photovoltaics(runner, model)
