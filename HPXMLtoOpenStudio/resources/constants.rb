@@ -3,7 +3,7 @@
 class Constants
   # Numbers --------------------
 
-  def self.AssumedInsideTemp # FIXME: Remove
+  def self.AssumedInsideTemp
     return 73.5 # deg-F
   end
 

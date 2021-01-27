@@ -695,6 +695,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_ground_to_air_heat_pump_values(hpxml_default, 30.0, 0.375, 0, nil, nil, nil)
   end
 
+  # FIXME: Add test for increased autosizing of hardsized systems
+
   def test_hvac_controls
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-hvac-programmable-thermostat.xml')

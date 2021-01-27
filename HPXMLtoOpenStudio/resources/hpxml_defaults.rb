@@ -6,7 +6,7 @@ class HPXMLDefaults
   # to the HPXML file. This is useful to associate additional values with the
   # HPXML objects that will ultimately get passed around.
 
-  def self.apply(hpxml, weather, cfa, nbeds, ncfl, ncfl_ag, has_uncond_bsmnt, eri_version, epw_file, runner, debug)
+  def self.apply(hpxml, runner, epw_file, weather, cfa, nbeds, ncfl, ncfl_ag, has_uncond_bsmnt, eri_version)
     apply_header(hpxml, epw_file, runner)
     apply_site(hpxml)
     apply_building_occupancy(hpxml, nbeds)
@@ -37,8 +37,7 @@ class HPXMLDefaults
     apply_fuel_loads(hpxml, cfa, nbeds)
     apply_pv_systems(hpxml)
     apply_generators(hpxml)
-    hvac_sizing_values = apply_hvac_sizing(hpxml, runner, weather, cfa, nbeds, debug)
-    return hvac_sizing_values
+    apply_hvac_sizing(hpxml, runner, weather, cfa, nbeds)
   end
 
   private
@@ -1804,11 +1803,12 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac_sizing(hpxml, runner, weather, cfa, nbeds, debug)
-    # Building design load
-    bldg_loads = HVACSizing.calculate_building_design_loads(runner, weather, hpxml, cfa, nbeds, debug)
+  def self.apply_hvac_sizing(hpxml, runner, weather, cfa, nbeds)
+    tol = 0.1 # Btuh
 
-    hvac_sizing_values = {}
+    # Calculate building design load (excluding HVAC distribution losses)
+    bldg_loads = HVACSizing.calculate_building_design_loads(runner, weather, hpxml, cfa, nbeds)
+
     HVAC.get_hpxml_hvac_systems(hpxml).each do |hvac_system|
       htg_sys = hvac_system[:heating]
       clg_sys = hvac_system[:cooling]
@@ -1816,29 +1816,38 @@ class HPXMLDefaults
       # Calculate design loads and capacities/airflows for this HVAC system
       htg_id = htg_sys.id unless hvac_system[:heating].nil?
       clg_id = clg_sys.id unless hvac_system[:cooling].nil?
-      hvac, sizing_values = HVACSizing.calculate_hvac_sizing_values(runner, weather, hpxml, cfa, bldg_loads, hvac_system, debug)
-      hvac_sizing_values[[htg_id, clg_id, hvac]] = sizing_values
+      sizing_values = HVACSizing.calculate_hvac_sizing_values(runner, weather, hpxml, cfa, bldg_loads, hvac_system)
 
-      # Assign back to HPXML objects
-      tol = 0.1 # Btuh
+      # Assign back to HPXML objects -- HeatingSystem/HeatPump
       if not htg_sys.nil?
         if htg_sys.heating_capacity.nil? || ((htg_sys.heating_capacity - sizing_values.Heat_Capacity).abs > tol)
           htg_sys.heating_capacity = sizing_values.Heat_Capacity.round(0)
           htg_sys.heating_capacity_isdefaulted = true
         end
         if htg_sys.respond_to? :backup_heating_capacity
+          # FIXME: Need to address zero => non-zero (e.g., base-hvac-mini-split-heat-pump-ductless.xml)
           if htg_sys.backup_heating_capacity.nil? || ((htg_sys.backup_heating_capacity - sizing_values.Heat_Capacity_Supp).abs > tol)
             htg_sys.backup_heating_capacity = sizing_values.Heat_Capacity_Supp.round(0)
             htg_sys.backup_heating_capacity_isdefaulted = true
           end
         end
+        htg_sys.additional_properties.heating_airflow_rate = sizing_values.Heat_Airflow
+        if htg_sys.is_a? HPXML::HeatPump
+          htg_sys.additional_properties.GSHP_Loop_flow = sizing_values.GSHP_Loop_flow
+          htg_sys.additional_properties.GSHP_Bore_Depth = sizing_values.GSHP_Bore_Depth
+          htg_sys.additional_properties.GSHP_Bore_Holes = sizing_values.GSHP_Bore_Holes
+          htg_sys.additional_properties.GSHP_G_Functions = sizing_values.GSHP_G_Functions
+        end
       end
+
+      # Assign back to HPXML objects -- CoolingSystem/HeatPump
       next unless not clg_sys.nil?
       if clg_sys.cooling_capacity.nil? || ((clg_sys.cooling_capacity - sizing_values.Cool_Capacity).abs > tol)
         clg_sys.cooling_capacity = sizing_values.Cool_Capacity.round(0)
         clg_sys.cooling_capacity_isdefaulted = true
       end
+      clg_sys.additional_properties.cooling_capacity_sensible = sizing_values.Cool_Capacity_Sens
+      clg_sys.additional_properties.cooling_airflow_rate = sizing_values.Cool_Airflow
     end
-    return hvac_sizing_values
   end
 end

@@ -266,7 +266,6 @@ class OSModel
     # Other
 
     add_airflow(runner, model, weather, spaces)
-    add_hvac_sizing(runner, model, weather)
     add_photovoltaics(runner, model)
     add_generators(runner, model)
     add_additional_properties(runner, model, hpxml_path)
@@ -318,7 +317,7 @@ class OSModel
     end
 
     # Apply defaults to HPXML object
-    @hvac_sizing_values = HPXMLDefaults.apply(@hpxml, weather, @cfa, @nbeds, @ncfl, @ncfl_ag, @has_uncond_bsmnt, @eri_version, epw_file, runner, @debug)
+    HPXMLDefaults.apply(@hpxml, runner, epw_file, weather, @cfa, @nbeds, @ncfl, @ncfl_ag, @has_uncond_bsmnt, @eri_version)
 
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
@@ -2029,16 +2028,16 @@ class OSModel
   def self.add_cooling_system(runner, model, spaces)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
-    # FIXME: Use HVAC.get_hpxml_hvac_systems
-    @hpxml.cooling_systems.each do |cooling_system|
+    HVAC.get_hpxml_hvac_systems(@hpxml).each do |hvac_system|
+      next if hvac_system[:cooling].nil?
+      next unless hvac_system[:cooling].is_a? HPXML::CoolingSystem
+
+      cooling_system = hvac_system[:cooling]
+      heating_system = hvac_system[:heating]
+
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
 
       if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
-
-        heating_system = cooling_system.attached_heating_system
-        if not HVAC.is_central_air_conditioner_and_furnace(@hpxml, heating_system, cooling_system)
-          heating_system = nil
-        end
 
         HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
                                                    @remaining_cool_load_frac, @remaining_heat_load_frac,
@@ -2074,14 +2073,18 @@ class OSModel
   def self.add_heating_system(runner, model, spaces)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
-    # FIXME: Use HVAC.get_hpxml_hvac_systems
-    @hpxml.heating_systems.each do |heating_system|
+    HVAC.get_hpxml_hvac_systems(@hpxml).each do |hvac_system|
+      next if hvac_system[:heating].nil?
+      next unless hvac_system[:heating].is_a? HPXML::HeatingSystem
+
+      cooling_system = hvac_system[:cooling]
+      heating_system = hvac_system[:heating]
+
       check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
 
       if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
 
-        cooling_system = heating_system.attached_cooling_system
-        if HVAC.is_central_air_conditioner_and_furnace(@hpxml, heating_system, cooling_system)
+        if not cooling_system.nil?
           next # Already processed combined AC+furnace
         end
 
@@ -2117,8 +2120,12 @@ class OSModel
   def self.add_heat_pump(runner, model, weather, spaces)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
-    # FIXME: Use HVAC.get_hpxml_hvac_systems
-    @hpxml.heat_pumps.each do |heat_pump|
+    HVAC.get_hpxml_hvac_systems(@hpxml).each do |hvac_system|
+      next if hvac_system[:cooling].nil?
+      next unless hvac_system[:cooling].is_a? HPXML::HeatPump
+
+      heat_pump = hvac_system[:cooling]
+
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
       if [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
@@ -2489,10 +2496,6 @@ class OSModel
     end
 
     return air_ducts
-  end
-
-  def self.add_hvac_sizing(runner, model, weather)
-    HVACSizing.apply(model, runner, weather, @hvac_map, @debug, @hvac_sizing_values)
   end
 
   def self.add_photovoltaics(runner, model)
