@@ -1804,8 +1804,6 @@ class HPXMLDefaults
   end
 
   def self.apply_hvac_sizing(hpxml, runner, weather, cfa, nbeds)
-    tol = 0.1 # Btuh
-
     # Calculate building design load (excluding HVAC distribution losses)
     bldg_loads = HVACSizing.calculate_building_design_loads(runner, weather, hpxml, cfa, nbeds)
 
@@ -1820,14 +1818,14 @@ class HPXMLDefaults
 
       # Assign back to HPXML objects -- HeatingSystem/HeatPump
       if not htg_sys.nil?
-        if htg_sys.heating_capacity.nil? || ((htg_sys.heating_capacity - sizing_values.Heat_Capacity).abs > tol)
-          htg_sys.heating_capacity = sizing_values.Heat_Capacity.round(0)
+        if htg_sys.heating_capacity.nil? || ((htg_sys.heating_capacity - sizing_values.Heat_Capacity).abs >= Constants.small)
+          htg_sys.heating_capacity = sizing_values.Heat_Capacity
           htg_sys.heating_capacity_isdefaulted = true
         end
         if htg_sys.respond_to? :backup_heating_capacity
           # FIXME: Need to address zero => non-zero (e.g., base-hvac-mini-split-heat-pump-ductless.xml)
-          if htg_sys.backup_heating_capacity.nil? || ((htg_sys.backup_heating_capacity - sizing_values.Heat_Capacity_Supp).abs > tol)
-            htg_sys.backup_heating_capacity = sizing_values.Heat_Capacity_Supp.round(0)
+          if htg_sys.backup_heating_capacity.nil? || ((htg_sys.backup_heating_capacity - sizing_values.Heat_Capacity_Supp).abs >= Constants.small)
+            htg_sys.backup_heating_capacity = sizing_values.Heat_Capacity_Supp
             htg_sys.backup_heating_capacity_isdefaulted = true
           end
         end
@@ -1842,8 +1840,8 @@ class HPXMLDefaults
 
       # Assign back to HPXML objects -- CoolingSystem/HeatPump
       next unless not clg_sys.nil?
-      if clg_sys.cooling_capacity.nil? || ((clg_sys.cooling_capacity - sizing_values.Cool_Capacity).abs > tol)
-        clg_sys.cooling_capacity = sizing_values.Cool_Capacity.round(0)
+      if clg_sys.cooling_capacity.nil? || ((clg_sys.cooling_capacity - sizing_values.Cool_Capacity).abs >= Constants.small)
+        clg_sys.cooling_capacity = sizing_values.Cool_Capacity
         clg_sys.cooling_capacity_isdefaulted = true
       end
       clg_sys.additional_properties.cooling_capacity_sensible = sizing_values.Cool_Capacity_Sens
