@@ -67,7 +67,8 @@ def run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: false, outp
 
   # Run simulation
   print "#{print_prefix}Running simulation...\n"
-  ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus')) # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
+  # ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus')) # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
+  ep_path = File.absolute_path('C:\GitHub\EnergyPlus-shading\build\Products\Debug\energyplus')
   simulation_start = Time.now
   command = "\"#{ep_path}\" -w \"#{model.getWeatherFile.path.get}\" in.idf"
   if debug
