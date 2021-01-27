@@ -387,7 +387,6 @@ class HPXMLTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
 
     # Collapse windows further using same logic as measure.rb
-    # FIXME: is this still needed?
     hpxml.windows.each do |window|
       window.fraction_operable = nil
     end
