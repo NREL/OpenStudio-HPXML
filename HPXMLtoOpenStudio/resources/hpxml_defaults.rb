@@ -1857,15 +1857,15 @@ class HPXMLDefaults
         htg_sys.hdl_doors = hvac_design_loads.Heat_Doors.round
         htg_sys.hdl_infilvent = hvac_design_loads.Heat_InfilVent.round
         htg_sys.hdl_ducts = hvac_sizing_values.Heat_Load_Ducts.round
-      end
 
-      # Check that components sum to totals
-      hdl_sum = (htg_sys.hdl_walls + htg_sys.hdl_ceilings + htg_sys.hdl_roofs +
-                 htg_sys.hdl_floors + htg_sys.hdl_slabs + htg_sys.hdl_windows +
-                 htg_sys.hdl_skylights + htg_sys.hdl_doors + htg_sys.hdl_infilvent +
-                 htg_sys.hdl_ducts)
-      if (hdl_sum - htg_sys.hdl_total).abs > 100
-        runner.registerWarning('Heating design loads do not sum to total.')
+        # Check that components sum to totals
+        hdl_sum = (htg_sys.hdl_walls + htg_sys.hdl_ceilings + htg_sys.hdl_roofs +
+                   htg_sys.hdl_floors + htg_sys.hdl_slabs + htg_sys.hdl_windows +
+                   htg_sys.hdl_skylights + htg_sys.hdl_doors + htg_sys.hdl_infilvent +
+                   htg_sys.hdl_ducts)
+        if (hdl_sum - htg_sys.hdl_total).abs > 100
+          runner.registerWarning('Heating design loads do not sum to total.')
+        end
       end
 
       # Cooling -- Assign back to HPXML objects (CoolingSystem/HeatPump)
