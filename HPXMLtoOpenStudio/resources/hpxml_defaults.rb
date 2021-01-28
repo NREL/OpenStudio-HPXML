@@ -1830,6 +1830,8 @@ class HPXMLDefaults
               htg_sys.backup_heating_capacity = hvac_sizing_values.Heat_Capacity_Supp.round
               htg_sys.backup_heating_capacity_isdefaulted = true
             end
+          else
+            htg_sys.backup_heating_capacity = 0.0
           end
         end
 

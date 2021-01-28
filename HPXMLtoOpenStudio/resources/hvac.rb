@@ -1589,7 +1589,7 @@ class HVAC
 
   def self.create_supp_heating_coil(model, obj_name, heat_pump)
     fuel = heat_pump.backup_heating_fuel
-    return if fuel.nil? # No backup heating
+    return if fuel.nil? or heat_pump.backup_heating_capacity == 0 # No backup heating
 
     efficiency = heat_pump.backup_heating_efficiency_percent
     efficiency = heat_pump.backup_heating_efficiency_afue if efficiency.nil?

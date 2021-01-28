@@ -2953,20 +2953,18 @@ class HPXML < Object
       XMLHelper.add_element(heat_pump, 'CoolingCapacity', @cooling_capacity, :float, @cooling_capacity_isdefaulted) unless @cooling_capacity.nil?
       XMLHelper.add_element(heat_pump, 'CompressorType', @compressor_type, :string, @compressor_type_isdefaulted) unless @compressor_type.nil?
       XMLHelper.add_element(heat_pump, 'CoolingSensibleHeatFraction', @cooling_shr, :float, @cooling_shr_isdefaulted) unless @cooling_shr.nil?
-      if not @backup_heating_fuel.nil?
-        XMLHelper.add_element(heat_pump, 'BackupSystemFuel', @backup_heating_fuel, :string)
-        efficiencies = { 'Percent' => @backup_heating_efficiency_percent,
-                         UnitsAFUE => @backup_heating_efficiency_afue }
-        efficiencies.each do |units, value|
-          next if value.nil?
+      XMLHelper.add_element(heat_pump, 'BackupSystemFuel', @backup_heating_fuel, :string) unless @backup_heating_fuel.nil?
+      efficiencies = { 'Percent' => @backup_heating_efficiency_percent,
+                       UnitsAFUE => @backup_heating_efficiency_afue }
+      efficiencies.each do |units, value|
+        next if value.nil?
 
-          backup_eff = XMLHelper.add_element(heat_pump, 'BackupAnnualHeatingEfficiency')
-          XMLHelper.add_element(backup_eff, 'Units', units, :string)
-          XMLHelper.add_element(backup_eff, 'Value', value, :float)
-        end
-        XMLHelper.add_element(heat_pump, 'BackupHeatingCapacity', @backup_heating_capacity, :float) unless @backup_heating_capacity.nil?
-        XMLHelper.add_element(heat_pump, 'BackupHeatingSwitchoverTemperature', @backup_heating_switchover_temp, :float) unless @backup_heating_switchover_temp.nil?
+        backup_eff = XMLHelper.add_element(heat_pump, 'BackupAnnualHeatingEfficiency')
+        XMLHelper.add_element(backup_eff, 'Units', units, :string)
+        XMLHelper.add_element(backup_eff, 'Value', value, :float)
       end
+      XMLHelper.add_element(heat_pump, 'BackupHeatingCapacity', @backup_heating_capacity, :float) unless @backup_heating_capacity.nil?
+      XMLHelper.add_element(heat_pump, 'BackupHeatingSwitchoverTemperature', @backup_heating_switchover_temp, :float) unless @backup_heating_switchover_temp.nil?
       XMLHelper.add_element(heat_pump, 'FractionHeatLoadServed', @fraction_heat_load_served, :float) unless @fraction_heat_load_served.nil?
       XMLHelper.add_element(heat_pump, 'FractionCoolLoadServed', @fraction_cool_load_served, :float) unless @fraction_cool_load_served.nil?
 
