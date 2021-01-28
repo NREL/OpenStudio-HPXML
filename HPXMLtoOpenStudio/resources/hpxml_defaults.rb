@@ -1859,6 +1859,15 @@ class HPXMLDefaults
         htg_sys.hdl_ducts = hvac_sizing_values.Heat_Load_Ducts.round
       end
 
+      # Check that components sum to totals
+      hdl_sum = (htg_sys.hdl_walls + htg_sys.hdl_ceilings + htg_sys.hdl_roofs +
+                 htg_sys.hdl_floors + htg_sys.hdl_slabs + htg_sys.hdl_windows +
+                 htg_sys.hdl_skylights + htg_sys.hdl_doors + htg_sys.hdl_infilvent +
+                 htg_sys.hdl_ducts)
+      if (hdl_sum - htg_sys.hdl_total).abs > 100
+        runner.registerWarning('Heating design loads do not sum to total.')
+      end
+
       # Cooling -- Assign back to HPXML objects (CoolingSystem/HeatPump)
       next unless not clg_sys.nil?
 
@@ -1901,10 +1910,6 @@ class HPXMLDefaults
       end
 
       # Check that components sum to totals
-      hdl_sum = (htg_sys.hdl_walls + htg_sys.hdl_ceilings + htg_sys.hdl_roofs +
-                 htg_sys.hdl_floors + htg_sys.hdl_slabs + htg_sys.hdl_windows +
-                 htg_sys.hdl_skylights + htg_sys.hdl_doors + htg_sys.hdl_infilvent +
-                 htg_sys.hdl_ducts)
       cdl_sens_sum = (clg_sys.cdl_sens_walls + clg_sys.cdl_sens_ceilings +
                       clg_sys.cdl_sens_roofs + clg_sys.cdl_sens_floors +
                       clg_sys.cdl_sens_slabs + clg_sys.cdl_sens_windows +
@@ -1913,9 +1918,6 @@ class HPXMLDefaults
                       clg_sys.cdl_sens_intgains)
       cdl_lat_sum = (clg_sys.cdl_lat_ducts + clg_sys.cdl_lat_infilvent +
                      clg_sys.cdl_lat_intgains)
-      if (hdl_sum - htg_sys.hdl_total).abs > 100
-        runner.registerWarning('Heating design loads do not sum to total.')
-      end
       if (cdl_sens_sum - clg_sys.cdl_sens_total).abs > 100
         runner.registerWarning('Cooling sensible design loads do not sum to total.')
       end
