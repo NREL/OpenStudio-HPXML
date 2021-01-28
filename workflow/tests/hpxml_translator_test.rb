@@ -331,7 +331,7 @@ class HPXMLTest < MiniTest::Test
     # Check outputs
     hpxml_defaults_path = File.join(rundir, 'in.xml')
     hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
-    sizing_results = _get_sizing_results(hpxml)
+    sizing_results = _get_sizing_results(hpxml, xml)
     _verify_outputs(rundir, xml, results, hpxml)
 
     return results, sizing_results
@@ -361,8 +361,9 @@ class HPXMLTest < MiniTest::Test
     return results
   end
 
-  def _get_sizing_results(hpxml)
+  def _get_sizing_results(hpxml, xml)
     results = {}
+    return if xml.include? 'ASHRAE_Standard_140'
 
     hdl_prefix = 'hdl_'
     cdl_prefix = 'cdl_'
