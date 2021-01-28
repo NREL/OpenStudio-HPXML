@@ -3016,14 +3016,14 @@ class HPXML < Object
       if not @cdl_sens_total.nil?
         cdl_sens_extension = XMLHelper.create_elements_as_needed(heat_pump, ['extension', 'CoolingDesignLoadsSensible'])
         XMLHelper.add_attribute(cdl_sens_extension, 'dataSource', 'software')
-        COOL_DESIGN_LOAD_ATTRS.each do |attr, element_name|
+        CDL_SENS_ATTRS.each do |attr, element_name|
           XMLHelper.add_element(cdl_sens_extension, element_name, send(attr), :float)
         end
       end
       if not @cdl_lat_total.nil?
         cdl_lat_extension = XMLHelper.create_elements_as_needed(heat_pump, ['extension', 'CoolingDesignLoadsLatent'])
         XMLHelper.add_attribute(cdl_lat_extension, 'dataSource', 'software')
-        COOL_DESIGN_LOAD_ATTRS.each do |attr, element_name|
+        CDL_LAT_ATTRS.each do |attr, element_name|
           XMLHelper.add_element(cdl_lat_extension, element_name, send(attr), :float)
         end
       end

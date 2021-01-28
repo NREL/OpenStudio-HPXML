@@ -1026,7 +1026,7 @@ class HVACSizing
     # Heating
     bldg_design_loads.Heat_Tot = [bldg_design_loads.Heat_Windows + bldg_design_loads.Heat_Skylights +
       bldg_design_loads.Heat_Doors + bldg_design_loads.Heat_Walls +
-      bldg_design_loads.Heat_Floors + +bldg_design_loads.Heat_Slabs +
+      bldg_design_loads.Heat_Floors + bldg_design_loads.Heat_Slabs +
       bldg_design_loads.Heat_Ceilings + bldg_design_loads.Heat_Roofs, 0.0].max +
                                  bldg_design_loads.Heat_InfilVent
 
@@ -1079,12 +1079,34 @@ class HVACSizing
     '''
     Intermediate Loads (HVAC-specific)
     '''
+    hvac_design_loads.Heat_Windows *= hvac.HeatingLoadFraction
+    hvac_design_loads.Heat_Skylights *= hvac.HeatingLoadFraction
+    hvac_design_loads.Heat_Doors *= hvac.HeatingLoadFraction
+    hvac_design_loads.Heat_Walls *= hvac.HeatingLoadFraction
+    hvac_design_loads.Heat_Roofs *= hvac.HeatingLoadFraction
+    hvac_design_loads.Heat_Floors *= hvac.HeatingLoadFraction
+    hvac_design_loads.Heat_Slabs *= hvac.HeatingLoadFraction
+    hvac_design_loads.Heat_Ceilings *= hvac.HeatingLoadFraction
+    hvac_design_loads.Heat_InfilVent *= hvac.HeatingLoadFraction
     hvac_design_loads.Heat_Tot *= hvac.HeatingLoadFraction
+
+    hvac_design_loads.Cool_Windows *= hvac.CoolingLoadFraction
+    hvac_design_loads.Cool_Skylights *= hvac.CoolingLoadFraction
+    hvac_design_loads.Cool_Doors *= hvac.CoolingLoadFraction
+    hvac_design_loads.Cool_Walls *= hvac.CoolingLoadFraction
+    hvac_design_loads.Cool_Roofs *= hvac.CoolingLoadFraction
+    hvac_design_loads.Cool_Floors *= hvac.CoolingLoadFraction
+    hvac_design_loads.Cool_Ceilings *= hvac.CoolingLoadFraction
+    hvac_design_loads.Cool_Infil_Sens *= hvac.CoolingLoadFraction
+    hvac_design_loads.Cool_Infil_Lat *= hvac.CoolingLoadFraction
+    hvac_design_loads.Cool_IntGains_Sens *= hvac.CoolingLoadFraction
+    hvac_design_loads.Cool_IntGains_Lat *= hvac.CoolingLoadFraction
     hvac_design_loads.Cool_Sens *= hvac.CoolingLoadFraction
     hvac_design_loads.Cool_Lat *= hvac.CoolingLoadFraction
     hvac_design_loads.Cool_Tot *= hvac.CoolingLoadFraction
 
     # Prevent error for, e.g., an ASHP with CoolingLoadFraction == 0.
+    # FUTURE: Is there a better way to handle this?
     hvac_design_loads.Heat_Tot = [hvac_design_loads.Heat_Tot, 0.001].max
     hvac_design_loads.Cool_Sens = [hvac_design_loads.Cool_Sens, 0.001].max
     hvac_design_loads.Cool_Lat = [hvac_design_loads.Cool_Lat, 0.001].max
@@ -1098,7 +1120,7 @@ class HVACSizing
         HPXML::HVACTypeHeatPumpMiniSplit,
         HPXML::HVACTypeHeatPumpGroundToAir,
         HPXML::HVACTypeHeatPumpWaterLoopToAir].include? hvac.CoolType
-      if @hpxml.header.use_max_load_for_heat_pumps
+      if @hpxml.header.use_max_load_for_heat_pumps && (hvac.CoolingLoadFraction > 0) && (hvac.HeatingLoadFraction > 0)
         max_load = [hvac_design_loads.Heat_Tot, hvac_design_loads.Cool_Tot].max
         hvac_design_loads.Heat_Tot = max_load
         hvac_design_loads.Cool_Sens *= max_load / hvac_design_loads.Cool_Tot
