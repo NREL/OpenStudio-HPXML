@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>fcda5c9f-a0bc-44a2-b38c-5ed78126b307</version_id>
-  <version_modified>20210128T052902Z</version_modified>
+  <version_id>8f9341cc-41b7-47e4-8fb6-287e5d93415a</version_id>
+  <version_modified>20210128T173327Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -479,12 +479,6 @@
       <checksum>10B29762</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A3F1E9E9</checksum>
-    </file>
-    <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -503,22 +497,28 @@
       <checksum>9A5F147D</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
+      <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2C397385</checksum>
+      <checksum>7D19E7A5</checksum>
     </file>
     <file>
       <filename>EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FE82048C</checksum>
+      <checksum>4C2B3B04</checksum>
     </file>
     <file>
-      <filename>waterheater.rb</filename>
+      <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7D19E7A5</checksum>
+      <checksum>A584C324</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4CA404A4</checksum>
     </file>
     <file>
       <version>
@@ -529,7 +529,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>A447DF34</checksum>
+      <checksum>94E58FE6</checksum>
     </file>
   </files>
 </measure>

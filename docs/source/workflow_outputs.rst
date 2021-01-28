@@ -268,3 +268,8 @@ Depending on the outputs requested, the file may include:
    Airflows                            Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.
    Weather                             Weather file data including outdoor temperatures, relative humidity, wind speed, and solar.
    =================================== ==================================================================================================================================
+
+Timeseries outputs can be one of the following frequencies: hourly, daily, monthly, or timestep (i.e., equal to the simulation timestep, which defaults to an hour but can be sub-hourly).
+
+Timestamps in the output use the end-of-hour (or end-of-day for daily frequency, etc.) convention.
+Most outputs will be summed over the hour (e.g., energy) but some will be averaged over the hour (e.g., temperatures, airflows).
