@@ -1423,7 +1423,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(24)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_total_recovery_efficiency_type', mech_vent_recovery_efficiency_type_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_recovery_efficiency_type', mech_vent_recovery_efficiency_type_choices, true)
     arg.setDisplayName('Mechanical Ventilation: Total Recovery Efficiency Type')
     arg.setDescription('The total recovery efficiency type of the mechanical ventilation.')
     arg.setDefaultValue('Unadjusted')
@@ -1434,12 +1434,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The Unadjusted or Adjusted total recovery efficiency of the mechanical ventilation.')
     arg.setUnits('Frac')
     arg.setDefaultValue(0.48)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_sensible_recovery_efficiency_type', mech_vent_recovery_efficiency_type_choices, true)
-    arg.setDisplayName('Mechanical Ventilation: Sensible Recovery Efficiency Type')
-    arg.setDescription('The sensible recovery efficiency type of the mechanical ventilation.')
-    arg.setDefaultValue('Unadjusted')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_sensible_recovery_efficiency', true)
@@ -1526,7 +1520,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(24)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_total_recovery_efficiency_type_2', mech_vent_recovery_efficiency_type_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_recovery_efficiency_type_2', mech_vent_recovery_efficiency_type_choices, true)
     arg.setDisplayName('Mechanical Ventilation 2: Total Recovery Efficiency Type')
     arg.setDescription('The total recovery efficiency type of the second mechanical ventilation.')
     arg.setDefaultValue('Unadjusted')
@@ -1537,12 +1531,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The Unadjusted or Adjusted total recovery efficiency of the second mechanical ventilation.')
     arg.setUnits('Frac')
     arg.setDefaultValue(0.48)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_sensible_recovery_efficiency_type_2', mech_vent_recovery_efficiency_type_choices, true)
-    arg.setDisplayName('Mechanical Ventilation 2: Sensible Recovery Efficiency Type')
-    arg.setDescription('The sensible recovery efficiency type of the second mechanical ventilation.')
-    arg.setDefaultValue('Unadjusted')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_sensible_recovery_efficiency_2', true)
@@ -4186,17 +4174,19 @@ class HPXMLFile
 
         if args[:mech_vent_fan_type].include? 'energy'
 
-          if args[:mech_vent_total_recovery_efficiency_type] == 'Unadjusted'
+          if args[:mech_vent_recovery_efficiency_type] == 'Unadjusted'
             total_recovery_efficiency = args[:mech_vent_total_recovery_efficiency]
-          elsif args[:mech_vent_total_recovery_efficiency_type] == 'Adjusted'
+            sensible_recovery_efficiency = args[:mech_vent_sensible_recovery_efficiency]
+          elsif args[:mech_vent_recovery_efficiency_type] == 'Adjusted'
             total_recovery_efficiency_adjusted = args[:mech_vent_total_recovery_efficiency]
+            sensible_recovery_efficiency_adjusted = args[:mech_vent_sensible_recovery_efficiency]
           end
 
         end
 
-        if args[:mech_vent_sensible_recovery_efficiency_type] == 'Unadjusted'
+        if args[:mech_vent_recovery_efficiency_type] == 'Unadjusted'
           sensible_recovery_efficiency = args[:mech_vent_sensible_recovery_efficiency]
-        elsif args[:mech_vent_sensible_recovery_efficiency_type] == 'Adjusted'
+        elsif args[:mech_vent_recovery_efficiency_type] == 'Adjusted'
           sensible_recovery_efficiency_adjusted = args[:mech_vent_sensible_recovery_efficiency]
         end
 
@@ -4255,17 +4245,19 @@ class HPXMLFile
 
         if args[:mech_vent_fan_type_2].include? 'energy'
 
-          if args[:mech_vent_total_recovery_efficiency_type_2] == 'Unadjusted'
+          if args[:mech_vent_recovery_efficiency_type_2] == 'Unadjusted'
             total_recovery_efficiency = args[:mech_vent_total_recovery_efficiency_2]
-          elsif args[:mech_vent_total_recovery_efficiency_type_2] == 'Adjusted'
+            sensible_recovery_efficiency = args[:mech_vent_sensible_recovery_efficiency_2]
+          elsif args[:mech_vent_recovery_efficiency_type_2] == 'Adjusted'
             total_recovery_efficiency_adjusted = args[:mech_vent_total_recovery_efficiency_2]
+            sensible_recovery_efficiency_adjusted = args[:mech_vent_sensible_recovery_efficiency_2]
           end
 
         end
 
-        if args[:mech_vent_sensible_recovery_efficiency_type_2] == 'Unadjusted'
+        if args[:mech_vent_recovery_efficiency_type_2] == 'Unadjusted'
           sensible_recovery_efficiency = args[:mech_vent_sensible_recovery_efficiency_2]
-        elsif args[:mech_vent_sensible_recovery_efficiency_type_2] == 'Adjusted'
+        elsif args[:mech_vent_recovery_efficiency_type_2] == 'Adjusted'
           sensible_recovery_efficiency_adjusted = args[:mech_vent_sensible_recovery_efficiency_2]
         end
 
