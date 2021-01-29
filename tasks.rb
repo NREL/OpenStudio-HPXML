@@ -3319,9 +3319,13 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
     hpxml.heat_pumps[0].heating_capacity_17F = 0
     hpxml.heat_pumps[0].fraction_heat_load_served = 0
     hpxml.heat_pumps[0].backup_heating_fuel = nil
+    hpxml.heat_pumps[0].backup_heating_capacity = nil
+    hpxml.heat_pumps[0].backup_heating_efficiency_percent = nil
   elsif ['base-hvac-mini-split-heat-pump-ductless.xml'].include? hpxml_file
     hpxml.heat_pumps[0].distribution_system_idref = nil
     hpxml.heat_pumps[0].backup_heating_fuel = nil
+    hpxml.heat_pumps[0].backup_heating_capacity = nil
+    hpxml.heat_pumps[0].backup_heating_efficiency_percent = nil
   elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml'].include? hpxml_file
     hpxml.heat_pumps[0].cooling_capacity = nil
     hpxml.heat_pumps[0].heating_capacity = nil

@@ -1299,16 +1299,16 @@ class HVACSizing
 
       initial_Cool_Airflow = calc_airflow_rate(init_cool_load_sens, (@cool_setpoint - hvac.LeavingAirTemp))
 
-      supply_leakage_cfm, return_leakage_cfm = calc_ducts_leakages(hvac.Ducts, initial_Cool_Airflow)
+      dse_Qs, dse_Qr = calc_ducts_leakages(hvac.Ducts, initial_Cool_Airflow)
 
-      hvac_sizing_values.Cool_Load_Lat, hvac_sizing_values.Cool_Load_Sens = calculate_sensible_latent_split(return_leakage_cfm, coolingLoad_Tot_Next, init_cool_load_lat)
+      hvac_sizing_values.Cool_Load_Lat, hvac_sizing_values.Cool_Load_Sens = calculate_sensible_latent_split(dse_Qr, coolingLoad_Tot_Next, init_cool_load_lat)
 
       for _iter in 1..50
         break if delta.abs <= 0.001
 
         coolingLoad_Tot_Prev = coolingLoad_Tot_Next
 
-        hvac_sizing_values.Cool_Load_Lat, hvac_sizing_values.Cool_Load_Sens = calculate_sensible_latent_split(return_leakage_cfm, coolingLoad_Tot_Next, init_cool_load_lat)
+        hvac_sizing_values.Cool_Load_Lat, hvac_sizing_values.Cool_Load_Sens = calculate_sensible_latent_split(dse_Qr, coolingLoad_Tot_Next, init_cool_load_lat)
         hvac_sizing_values.Cool_Load_Tot = hvac_sizing_values.Cool_Load_Lat + hvac_sizing_values.Cool_Load_Sens
 
         # Calculate the new cooling air flow rate
@@ -1331,8 +1331,8 @@ class HVACSizing
     # Calculate the air flow rate required for design conditions
     hvac_sizing_values.Cool_Airflow = calc_airflow_rate(hvac_sizing_values.Cool_Load_Sens, (@cool_setpoint - hvac.LeavingAirTemp))
 
-    # FIXME: Something isn't right here. Run w/ base-location-miami-fl.xml
-    hvac_sizing_values.Cool_Load_Ducts_Lat = hvac_sizing_values.Cool_Load_Ducts_Tot - hvac_sizing_values.Cool_Load_Ducts_Sens
+    hvac_sizing_values.Cool_Load_Ducts_Sens = hvac_sizing_values.Cool_Load_Sens - init_cool_load_sens
+    hvac_sizing_values.Cool_Load_Ducts_Lat = hvac_sizing_values.Cool_Load_Lat - init_cool_load_lat
   end
 
   def self.process_equipment_adjustments(hvac_sizing_values, weather, hvac, cfa)
