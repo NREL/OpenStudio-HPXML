@@ -524,11 +524,13 @@ class OSModel
 
   def self.update_conditioned_basement(runner, model, spaces)
     return if @cond_bsmnt_surfaces.empty?
+
     # Update @cond_bsmnt_surfaces to include subsurfaces
     new_cond_bsmnt_surfaces = @cond_bsmnt_surfaces.dup
     @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
       next if cond_bsmnt_surface.is_a? OpenStudio::Model::InternalMassDefinition
       next if cond_bsmnt_surface.subSurfaces.empty?
+
       cond_bsmnt_surface.subSurfaces.each do |ss|
         new_cond_bsmnt_surfaces << ss
       end
@@ -546,6 +548,7 @@ class OSModel
     @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
       # skip windows because windows don't have such property to change.
       next if cond_bsmnt_surface.is_a?(OpenStudio::Model::SubSurface) && (cond_bsmnt_surface.subSurfaceType.downcase == 'fixedwindow')
+
       adj_surface = nil
       if not cond_bsmnt_surface.is_a? OpenStudio::Model::InternalMassDefinition
         if not cond_bsmnt_surface.is_a? OpenStudio::Model::SubSurface
@@ -584,6 +587,7 @@ class OSModel
       innermost_material.setSolarAbsorptance(0.0)
       innermost_material.setVisibleAbsorptance(0.0)
       next if adj_surface.nil?
+
       # Create new construction in case of shared construciton.
       layered_const_adj = OpenStudio::Model::Construction.new(model)
       layered_const_adj.setName(cond_bsmnt_surface.construction.get.name.get + ' Reversed Bsmnt')
@@ -1699,6 +1703,7 @@ class OSModel
 
     shading_group = nil
     shading_schedules = {}
+    shading_ems = { sensors: {}, program: nil }
 
     surfaces = []
     @hpxml.windows.each do |window|
@@ -1748,7 +1753,7 @@ class OSModel
 
         # Apply interior/exterior shading (as needed)
         shading_polygon = add_wall_polygon(window_width, window_height, z_origin, window.azimuth, [0, 0, 0, 0])
-        shading_group = apply_shading(model, window, shading_polygon, surface, sub_surface, shading_group, shading_schedules, Constants.ObjectNameWindowShade)
+        shading_group = apply_shading(model, window, shading_polygon, surface, sub_surface, shading_group, shading_schedules, shading_ems, Constants.ObjectNameWindowShade)
       else
         # Window is on an interior surface, which E+ does not allow. Model
         # as a door instead so that we can get the appropriate conduction
@@ -1790,6 +1795,7 @@ class OSModel
 
     shading_group = nil
     shading_schedules = {}
+    shading_ems = { sensors: {}, program: nil }
 
     @hpxml.skylights.each do |skylight|
       tilt = skylight.roof.pitch / 12.0
@@ -1823,13 +1829,13 @@ class OSModel
 
       # Apply interior/exterior shading (as needed)
       shading_polygon = add_roof_polygon(length, width, z_origin, skylight.azimuth, tilt)
-      shading_group = apply_shading(model, skylight, shading_polygon, surface, sub_surface, shading_group, shading_schedules, Constants.ObjectNameSkylightShade)
+      shading_group = apply_shading(model, skylight, shading_polygon, surface, sub_surface, shading_group, shading_schedules, shading_ems, Constants.ObjectNameSkylightShade)
     end
 
     apply_adiabatic_construction(runner, model, surfaces, 'roof')
   end
 
-  def self.apply_shading(model, window_or_skylight, shading_polygon, parent_surface, sub_surface, shading_group, shading_schedules, name)
+  def self.apply_shading(model, window_or_skylight, shading_polygon, parent_surface, sub_surface, shading_group, shading_schedules, shading_ems, name)
     sf_summer = window_or_skylight.interior_shading_factor_summer * window_or_skylight.exterior_shading_factor_summer
     sf_winter = window_or_skylight.interior_shading_factor_winter * window_or_skylight.exterior_shading_factor_winter
     if (sf_summer < 1.0) || (sf_winter < 1.0)
@@ -1852,25 +1858,35 @@ class OSModel
       end
       shading_surface.setTransmittanceSchedule(shading_schedules[trans_values].schedule)
 
-      # Adjustment to default view factor is used to reduce ground diffuse solar
-      shading_coeff_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      shading_coeff_sensor.setName("#{sub_surface.name.to_s}_shading_coefficients")
-      shading_coeff_sensor.setKeyName(shading_schedules[trans_values].schedule.name.to_s)
-      
+      # EMS to actuate view factor to ground
       actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(sub_surface, *EPlus::EMSActuatorSurfaceViewFactorToGround)
       actuator.setName("#{sub_surface.name.to_s.gsub(' ', '_').gsub('-', '_')}_actuator")
 
-      # EMS to actuate schedule
-      default_vf_to_ground = ((1.0 - Math::cos(sub_surface.tilt)) / 2.0).round(2)
-      shading_coeff = shading_coeff_sensor.name
-      program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-      program.setName("#{sub_surface.name.to_s.gsub('-', '_')} View Factor To Ground Program")
-      program.addLine("Set #{actuator.name} = #{default_vf_to_ground}*#{shading_coeff}")
+      if shading_ems[:sensors][trans_values].nil?
+        sub_surface_type = sub_surface.subSurfaceType.downcase.to_s
+        shading_schedule_name = shading_schedules[trans_values].schedule.name.to_s
+        shading_coeff_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+        shading_coeff_sensor.setName("#{sub_surface_type}_shading_coefficient")
+        shading_coeff_sensor.setKeyName(shading_schedule_name)
+        shading_ems[:sensors][trans_values] = shading_coeff_sensor
+      end
 
-      program_cm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-      program_cm.setName("#{program.name} calling manager")
-      program_cm.setCallingPoint('BeginTimestepBeforePredictor')
-      program_cm.addProgram(program)
+      default_vf_to_ground = ((1.0 - Math::cos(sub_surface.tilt)) / 2.0).round(2)
+      shading_coeff = shading_ems[:sensors][trans_values].name
+      if shading_ems[:program].nil?
+        sub_surface_type = sub_surface.subSurfaceType.downcase.to_s
+        program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+        program.setName("#{sub_surface_type}_view_factor_to_ground_program")
+        program.addLine("Set #{actuator.name} = #{default_vf_to_ground}*#{shading_coeff}")
+        shading_ems[:program] = program
+
+        program_cm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+        program_cm.setName("#{program.name} calling manager")
+        program_cm.setCallingPoint('BeginTimestepBeforePredictor')
+        program_cm.addProgram(program)
+      else
+        shading_ems[:program].addLine("Set #{actuator.name} = #{default_vf_to_ground}*#{shading_coeff}")
+      end
 
       if shading_group.nil?
         shading_group = OpenStudio::Model::ShadingSurfaceGroup.new(model)

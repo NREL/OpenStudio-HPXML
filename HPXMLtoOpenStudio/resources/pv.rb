@@ -11,6 +11,7 @@ class PV
       if pv_system.number_of_bedrooms_served.to_f <= nbeds.to_f
         fail "Shared PV system number of bedrooms served (#{pv_system.number_of_bedrooms_served}) must be greater than the number of bedrooms in the dwelling unit (#{nbeds})."
       end
+
       max_power = pv_system.max_power_output * nbeds.to_f / pv_system.number_of_bedrooms_served.to_f
     end
 

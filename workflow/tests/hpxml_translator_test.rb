@@ -303,6 +303,7 @@ class HPXMLTest < MiniTest::Test
           found_error_msg = false
           run_log.each do |run_line|
             next unless run_line.start_with? 'Error: '
+
             n_errors += 1 if i == 0
 
             next unless run_line.include? error_msg

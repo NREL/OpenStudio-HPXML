@@ -12,6 +12,7 @@ class Generator
       if generator.number_of_bedrooms_served.to_f <= nbeds.to_f
         fail "Shared Generator number of bedrooms served (#{generator.number_of_bedrooms_served}) must be greater than the number of bedrooms in the dwelling unit (#{nbeds})."
       end
+
       annual_consumption_kbtu = generator.annual_consumption_kbtu * nbeds.to_f / generator.number_of_bedrooms_served.to_f
       annual_output_kwh = generator.annual_output_kwh * nbeds.to_f / generator.number_of_bedrooms_served.to_f
     end
