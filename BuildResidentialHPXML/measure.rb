@@ -2264,17 +2264,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('IntegratedModifiedEnergyFactor')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('clothes_washer_efficiency_mef', true)
-    arg.setDisplayName('Clothes Washer: Modified Energy Factor')
-    arg.setUnits('ft^3/kWh-cycle')
-    arg.setDescription('The Modified Energy Factor (MEF) is the capacity of the clothes container divided by the total clothes washer energy consumption per cycle, where the energy consumption is the sum of the machine electrical energy consumption, the hot water energy consumption, the energy required for removal of the remaining moisture in the wash load, standby energy, and off-mode energy consumption.')
-    arg.setDefaultValue(Constants.Auto)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('clothes_washer_efficiency_imef', true)
-    arg.setDisplayName('Clothes Washer: Integrated Modified Energy Factor')
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('clothes_washer_efficiency', true)
+    arg.setDisplayName('Clothes Washer: Efficiency')
     arg.setUnits('ft^3/kWh-cyc')
-    arg.setDescription('The energy performance metric for ENERGY STAR certified residential clothes washers as of March 7, 2015.')
+    arg.setDescription('The efficiency of the clothes washer.')
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
@@ -4750,13 +4743,11 @@ class HPXMLFile
       location = args[:clothes_washer_location]
     end
 
-    if args[:clothes_washer_efficiency_type] == 'ModifiedEnergyFactor'
-      if args[:clothes_washer_efficiency_mef] != Constants.Auto
-        modified_energy_factor = args[:clothes_washer_efficiency_mef]
-      end
-    elsif args[:clothes_washer_efficiency_type] == 'IntegratedModifiedEnergyFactor'
-      if args[:clothes_washer_efficiency_imef] != Constants.Auto
-        integrated_modified_energy_factor = args[:clothes_washer_efficiency_imef]
+    if args[:clothes_washer_efficiency] != Constants.Auto
+      if args[:clothes_washer_efficiency_type] == 'ModifiedEnergyFactor'
+        modified_energy_factor = args[:clothes_washer_efficiency].to_f
+      elsif args[:clothes_washer_efficiency_type] == 'IntegratedModifiedEnergyFactor'
+        integrated_modified_energy_factor = args[:clothes_washer_efficiency].to_f
       end
     end
 
