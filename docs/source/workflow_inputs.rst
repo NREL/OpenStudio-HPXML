@@ -43,11 +43,10 @@ HPXML files submitted to OpenStudio-HPXML should undergo a two step validation p
 Input Defaults
 **************
 
-An increasing number of elements in the HPXML file are being made optional with "smart" defaults.
+A large number of elements in the HPXML file are optional and can be defaulted.
 Default values, equations, and logic are described throughout this documentation.
 
-Most defaults can also be seen by using the ``debug`` argument/flag when running the workflow on an actual HPXML file.
-This will create a new HPXML file (``in.xml`` in the run directory) where additional fields are populated for inspection.
+Defaults can also be seen in the ``in.xml`` file generated in the run directory, where additional fields are populated for inspection.
 
 For example, suppose a HPXML file has a window defined as follows:
 
@@ -83,9 +82,9 @@ In the ``in.xml`` file, the window would have additional elements like so:
 
 .. note::
 
-  The OpenStudio-HPXML workflow generally treats missing HPXML objects differently than missing properties.
-  For example, if there is a ``Window`` with no ``Overhangs`` object defined, the window will be interpreted as having no overhangs and modeled this way.
-  On the other hand, if there is a ``Window`` element with no ``FractionOperable`` property defined, it is assumed that the operable property of the window is unknown and will be defaulted in the model according to :ref:`windowinputs`.
+  The OpenStudio-HPXML workflow generally treats missing elements differently than missing values.
+  For example, if there is a ``Window`` with no ``Overhangs`` element defined, the window will be interpreted as having no overhangs and modeled this way.
+  On the other hand, if there is a ``Window`` with no ``FractionOperable`` value defined, it is assumed that the operable property of the window is unknown and will be defaulted in the model according to :ref:`windowinputs`.
 
 HPXML Software Info
 -------------------
@@ -1983,7 +1982,7 @@ If not entered, the simulation will not include a standalone freezer.
 HPXML Dehumidifier
 ******************
 
-A single dehumidifier can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/Dehumidifier``.
+Each dehumidifier can be entered as a ``/HPXML/Building/BuildingDetails/Appliances/Dehumidifier``.
 If not entered, the simulation will not include a dehumidifier.
 
   ==============================================  ==========  ==========  ===========  ========  =======  ========================================
@@ -1994,12 +1993,14 @@ If not entered, the simulation will not include a dehumidifier.
   ``Location``                                    string                  See [#]_     Yes                Location of dehumidifier
   ``Capacity``                                    double      pints/day   > 0          Yes                Dehumidification capacity
   ``IntegratedEnergyFactor`` or ``EnergyFactor``  double      liters/kWh  > 0          Yes                Rated efficiency
-  ``DehumidistatSetpoint``                        double      frac        0 - 1        Yes                Relative humidity setpoint
-  ``FractionDehumidificationLoadServed``          double      frac        0 - 1        Yes                Fraction of dehumidification load served
+  ``DehumidistatSetpoint``                        double      frac        0 - 1 [#]_   Yes                Relative humidity setpoint
+  ``FractionDehumidificationLoadServed``          double      frac        0 - 1 [#]_   Yes                Fraction of dehumidification load served
   ==============================================  ==========  ==========  ===========  ========  =======  ========================================
   
   .. [#] Type choices are "portable" or "whole-home".
   .. [#] Location only choice is "living space".
+  .. [#] If multiple dehumidifiers are entered, they must all have the same setpoint or an error will be generated.
+  .. [#] The sum of all ``FractionDehumidificationLoadServed`` (across all Dehumidifiers) must be less than or equal to 1.
 
 .. note::
 
