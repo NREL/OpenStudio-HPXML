@@ -975,6 +975,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     cooling_system_type_choices << HPXML::HVACTypeEvaporativeCooler
     cooling_system_type_choices << HPXML::HVACTypeMiniSplitAirConditioner
 
+    cooling_efficiency_type_choices = OpenStudio::StringVector.new
+    cooling_efficiency_type_choices << HPXML::UnitsSEER
+    cooling_efficiency_type_choices << HPXML::UnitsEER
+
     compressor_type_choices = OpenStudio::StringVector.new
     compressor_type_choices << HPXML::HVACCompressorTypeSingleStage
     compressor_type_choices << HPXML::HVACCompressorTypeTwoStage
@@ -1025,18 +1029,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::HVACTypeCentralAirConditioner)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_efficiency_seer', true)
-    arg.setDisplayName('Cooling System: Rated SEER')
-    arg.setUnits('SEER')
-    arg.setDescription("The rated efficiency value of the #{HPXML::HVACTypeCentralAirConditioner} cooling system.")
-    arg.setDefaultValue(13.0)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_cooling_efficiency_type', cooling_efficiency_type_choices, true)
+    arg.setDisplayName('Cooling System: Efficiency Type')
+    arg.setDescription('The efficiency type of the cooling system.')
+    arg.setDefaultValue(HPXML::UnitsSEER)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_efficiency_eer', true)
-    arg.setDisplayName('Cooling System: Rated EER')
-    arg.setUnits('EER')
-    arg.setDescription("The rated efficiency value of the #{HPXML::HVACTypeRoomAirConditioner} cooling system.")
-    arg.setDefaultValue(8.5)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_efficiency', true)
+    arg.setDisplayName('Cooling System: Efficiency')
+    arg.setUnits("#{HPXML::UnitsSEER} or #{HPXML::UnitsEER}")
+    arg.setDescription('The rated efficiency value of the cooling system.')
+    arg.setDefaultValue(13.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_cooling_compressor_type', compressor_type_choices, false)
@@ -1088,6 +1091,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpMiniSplit
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpGroundToAir
 
+    heat_pump_heating_efficiency_type_choices = OpenStudio::StringVector.new
+    heat_pump_heating_efficiency_type_choices << HPXML::UnitsHSPF
+    heat_pump_heating_efficiency_type_choices << HPXML::UnitsCOP
+
     heat_pump_fuel_choices = OpenStudio::StringVector.new
     heat_pump_fuel_choices << HPXML::FuelTypeElectricity
 
@@ -1104,32 +1111,30 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('none')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_efficiency_hspf', true)
-    arg.setDisplayName('Heat Pump: Rated Heating HSPF')
-    arg.setUnits('HSPF')
-    arg.setDescription("The rated heating efficiency value of the #{HPXML::HVACTypeHeatPumpAirToAir}/#{HPXML::HVACTypeHeatPumpMiniSplit} heat pump.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_heating_efficiency_type', heat_pump_heating_efficiency_type_choices, true)
+    arg.setDisplayName('Heat Pump: Heating Efficiency Type')
+    arg.setDescription('The heating efficiency type of heat pump.')
+    arg.setDefaultValue(HPXML::UnitsHSPF)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_efficiency', true)
+    arg.setDisplayName('Heat Pump: Heating Efficiency')
+    arg.setUnits("#{HPXML::UnitsHSPF} or #{HPXML::UnitsCOP}")
+    arg.setDescription('The rated heating efficiency value of the heat pump.')
     arg.setDefaultValue(7.7)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_efficiency_cop', true)
-    arg.setDisplayName('Heat Pump: Rated Heating COP')
-    arg.setUnits('COP')
-    arg.setDescription("The rated heating efficiency value of the #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump.")
-    arg.setDefaultValue(3.6)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_cooling_efficiency_type', cooling_efficiency_type_choices, true)
+    arg.setDisplayName('Heat Pump: Cooling Efficiency Type')
+    arg.setDescription('The cooling efficiency type of heat pump.')
+    arg.setDefaultValue(HPXML::UnitsSEER)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_efficiency_seer', true)
-    arg.setDisplayName('Heat Pump: Rated Cooling SEER')
-    arg.setUnits('SEER')
-    arg.setDescription("The rated cooling efficiency value of the #{HPXML::HVACTypeHeatPumpAirToAir}/#{HPXML::HVACTypeHeatPumpMiniSplit} heat pump.")
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_efficiency', true)
+    arg.setDisplayName('Heat Pump: Cooling Efficiency')
+    arg.setUnits("#{HPXML::UnitsSEER} or #{HPXML::UnitsEER}")
+    arg.setDescription('The rated cooling efficiency value of the heat pump.')
     arg.setDefaultValue(13.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_efficiency_eer', true)
-    arg.setDisplayName('Heat Pump: Rated Cooling EER')
-    arg.setUnits('EER')
-    arg.setDescription("The rated cooling efficiency value of the #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump.")
-    arg.setDefaultValue(16.6)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_cooling_compressor_type', compressor_type_choices, false)
@@ -2260,7 +2265,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('clothes_washer_efficiency_type', clothes_washer_efficiency_type_choices, true)
     arg.setDisplayName('Clothes Washer: Efficiency Type')
-    arg.setDescription('The efficiency type of clothes washer.')
+    arg.setDescription('The efficiency type of the clothes washer.')
     arg.setDefaultValue('IntegratedModifiedEnergyFactor')
     args << arg
 
@@ -2350,7 +2355,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('clothes_dryer_efficiency_type', clothes_dryer_efficiency_type_choices, true)
     arg.setDisplayName('Clothes Dryer: Efficiency Type')
-    arg.setDescription('The efficiency type of clothes dryer.')
+    arg.setDescription('The efficiency type of the clothes dryer.')
     arg.setDefaultValue('CombinedEnergyFactor')
     args << arg
 
@@ -2396,17 +2401,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('RatedAnnualkWh')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('dishwasher_efficiency_kwh', true)
-    arg.setDisplayName('Dishwasher: Rated Annual kWh')
-    arg.setUnits('kWh/yr')
-    arg.setDescription('The rated annual kWh of the dishwasher.')
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('dishwasher_efficiency', true)
+    arg.setDisplayName('Dishwasher: Efficiency')
+    arg.setUnits('RatedAnnualkWh or EnergyFactor')
+    arg.setDescription('The efficiency of the dishwasher.')
     arg.setDefaultValue(Constants.Auto)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dishwasher_efficiency_ef', true)
-    arg.setDisplayName('Dishwasher: Energy Factor')
-    arg.setDescription('The energy factor of the dishwasher.')
-    arg.setDefaultValue(0.46)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('dishwasher_label_electric_rate', true)
@@ -3928,10 +3927,10 @@ class HPXMLFile
       end
     end
 
-    if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system_type
-      cooling_efficiency_seer = args[:cooling_system_cooling_efficiency_seer]
-    elsif [HPXML::HVACTypeRoomAirConditioner].include? cooling_system_type
-      cooling_efficiency_eer = args[:cooling_system_cooling_efficiency_eer]
+    if args[:cooling_system_cooling_efficiency_type] == HPXML::UnitsSEER
+      cooling_efficiency_seer = args[:cooling_system_cooling_efficiency]
+    elsif args[:cooling_system_cooling_efficiency_type] == HPXML::UnitsEER
+      cooling_efficiency_eer = args[:cooling_system_cooling_efficiency]
     end
 
     if args[:cooling_system_airflow_defect_ratio].is_initialized
@@ -4007,12 +4006,16 @@ class HPXMLFile
       cooling_shr = args[:heat_pump_cooling_sensible_heat_fraction].get
     end
 
-    if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
-      heating_efficiency_hspf = args[:heat_pump_heating_efficiency_hspf]
-      cooling_efficiency_seer = args[:heat_pump_cooling_efficiency_seer]
-    elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump_type
-      heating_efficiency_cop = args[:heat_pump_heating_efficiency_cop]
-      cooling_efficiency_eer = args[:heat_pump_cooling_efficiency_eer]
+    if args[:heat_pump_heating_efficiency_type] == HPXML::UnitsHSPF
+      heating_efficiency_hspf = args[:heat_pump_heating_efficiency]
+    elsif args[:heat_pump_heating_efficiency_type] == HPXML::UnitsCOP
+      heating_efficiency_cop = args[:heat_pump_heating_efficiency]
+    end
+
+    if args[:heat_pump_cooling_efficiency_type] == HPXML::UnitsSEER
+      cooling_efficiency_seer = args[:heat_pump_cooling_efficiency]
+    elsif args[:heat_pump_cooling_efficiency_type] == HPXML::UnitsEER
+      cooling_efficiency_eer = args[:heat_pump_cooling_efficiency]
     end
 
     if args[:heat_pump_airflow_defect_ratio].is_initialized
@@ -4839,11 +4842,11 @@ class HPXMLFile
     end
 
     if args[:dishwasher_efficiency_type] == 'RatedAnnualkWh'
-      if args[:dishwasher_efficiency_kwh] != Constants.Auto
-        rated_annual_kwh = args[:dishwasher_efficiency_kwh]
+      if args[:dishwasher_efficiency] != Constants.Auto
+        rated_annual_kwh = args[:dishwasher_efficiency]
       end
     elsif args[:dishwasher_efficiency_type] == 'EnergyFactor'
-      energy_factor = args[:dishwasher_efficiency_ef]
+      energy_factor = args[:dishwasher_efficiency]
     end
 
     if args[:dishwasher_label_electric_rate] != Constants.Auto
