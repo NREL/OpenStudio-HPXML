@@ -367,11 +367,23 @@ class HPXMLTest < MiniTest::Test
     results = {}
     return if xml.include? 'ASHRAE_Standard_140'
 
-    hdl_prefix = 'hdl_'
-    cdl_prefix = 'cdl_'
+    # Heating design loads
+    hpxml.hvac_plant.class::HDL_ATTRS.each do |attr, element_name|
+      results["heating_load_#{attr.to_s.gsub('hdl_', '')} [Btuh]"] = hpxml.hvac_plant.send(attr.to_s)
+    end
 
+    # Cooling sensible design loads
+    hpxml.hvac_plant.class::CDL_SENS_ATTRS.each do |attr, element_name|
+      results["cooling_load_#{attr.to_s.gsub('cdl_', '')} [Btuh]"] = hpxml.hvac_plant.send(attr.to_s)
+    end
+
+    # Cooling latent design loads
+    hpxml.hvac_plant.class::CDL_LAT_ATTRS.each do |attr, element_name|
+      results["cooling_load_#{attr.to_s.gsub('cdl_', '')} [Btuh]"] = hpxml.hvac_plant.send(attr.to_s)
+    end
+
+    # Heating capacities/airflows
     (hpxml.heating_systems + hpxml.heat_pumps).each do |htg_sys|
-      # Heating capacities/airflows
       results['heating_capacity [Btuh]'] = htg_sys.heating_capacity
       if htg_sys.respond_to? :backup_heating_capacity
         results['heating_backup_capacity [Btuh]'] = htg_sys.backup_heating_capacity
@@ -379,27 +391,12 @@ class HPXMLTest < MiniTest::Test
         results['heating_backup_capacity [Btuh]'] = 0.0
       end
       results['heating_airflow [cfm]'] = htg_sys.heating_airflow_cfm
-
-      # Heating design loads
-      htg_sys.class::ATTRS.each do |attr|
-        next unless attr.to_s.start_with? hdl_prefix
-        next if attr.to_s.end_with? '_isdefaulted'
-
-        results["heating_load_#{attr.to_s.gsub(hdl_prefix, '')} [Btuh]"] = htg_sys.send(attr.to_s)
-      end
     end
+
+    # Cooling capacity/airflows
     (hpxml.cooling_systems + hpxml.heat_pumps).each do |clg_sys|
-      # Cooling capacity/airflows
       results['cooling_capacity [Btuh]'] = clg_sys.cooling_capacity
       results['cooling_airflow [cfm]'] = clg_sys.cooling_airflow_cfm
-
-      # Cooling design loads
-      clg_sys.class::ATTRS.each do |attr|
-        next unless attr.to_s.start_with? cdl_prefix
-        next if attr.to_s.end_with? '_isdefaulted'
-
-        results["cooling_load_#{attr.to_s.gsub(cdl_prefix, '')} [Btuh]"] = clg_sys.send(attr.to_s)
-      end
     end
     assert(!results.empty?)
 
