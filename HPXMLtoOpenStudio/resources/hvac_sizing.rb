@@ -1125,6 +1125,7 @@ class HVACSizing
     hvac_sizing_values.Cool_Load_Lat = hvac_design_loads.Cool_Lat
     hvac_sizing_values.Cool_Load_Ducts_Tot = 0.0
     hvac_sizing_values.Cool_Load_Ducts_Sens = 0.0
+    hvac_sizing_values.Cool_Load_Ducts_Lat = 0.0
   end
 
   def self.apply_hp_sizing_logic(hvac_sizing_values, hvac)
@@ -1337,9 +1338,6 @@ class HVACSizing
       delta = (coolingLoad_Tot_Next - coolingLoad_Tot_Prev) / coolingLoad_Tot_Prev
     end
 
-    # Calculate the air flow rate required for design conditions
-    hvac_sizing_values.Cool_Airflow = calc_airflow_rate(hvac_sizing_values.Cool_Load_Sens, (@cool_setpoint - hvac.LeavingAirTemp))
-
     hvac_sizing_values.Cool_Load_Ducts_Sens = hvac_sizing_values.Cool_Load_Sens - init_cool_load_sens
     hvac_sizing_values.Cool_Load_Ducts_Lat = hvac_sizing_values.Cool_Load_Lat - init_cool_load_lat
   end
@@ -1352,6 +1350,10 @@ class HVACSizing
     underSizeLimit = 0.9
 
     # Cooling
+
+    # Calculate the air flow rate required for design conditions
+    hvac_sizing_values.Cool_Airflow = calc_airflow_rate(hvac_sizing_values.Cool_Load_Sens, (@cool_setpoint - hvac.LeavingAirTemp))
+
     if [HPXML::HVACTypeCentralAirConditioner,
         HPXML::HVACTypeHeatPumpAirToAir,
         HPXML::HVACTypeHeatPumpMiniSplit,
