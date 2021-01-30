@@ -1811,6 +1811,7 @@ class HPXMLDefaults
     bldg_design_loads, all_hvac_sizing_values = HVACSizing.calculate(runner, weather, hpxml, cfa, nbeds, hvac_systems)
 
     hvacpl = hpxml.hvac_plant
+    tol = 10 # Btuh
 
     # Assign heating design loads back to HPXML object
     hvacpl.hdl_total = bldg_design_loads.Heat_Tot.round
@@ -1828,7 +1829,7 @@ class HPXMLDefaults
                hvacpl.hdl_floors + hvacpl.hdl_slabs + hvacpl.hdl_windows +
                hvacpl.hdl_skylights + hvacpl.hdl_doors + hvacpl.hdl_infilvent +
                hvacpl.hdl_ducts)
-    if (hdl_sum - hvacpl.hdl_total).abs > 100
+    if (hdl_sum - hvacpl.hdl_total).abs > tol
       runner.registerWarning('Heating design loads do not sum to total.')
     end
 
@@ -1851,7 +1852,7 @@ class HPXMLDefaults
                     hvacpl.cdl_sens_skylights + hvacpl.cdl_sens_doors +
                     hvacpl.cdl_sens_infilvent + hvacpl.cdl_sens_ducts +
                     hvacpl.cdl_sens_intgains)
-    if (cdl_sens_sum - hvacpl.cdl_sens_total).abs > 100
+    if (cdl_sens_sum - hvacpl.cdl_sens_total).abs > tol
       runner.registerWarning('Cooling sensible design loads do not sum to total.')
     end
 
@@ -1869,7 +1870,7 @@ class HPXMLDefaults
     end
     cdl_lat_sum = (hvacpl.cdl_lat_ducts + hvacpl.cdl_lat_infilvent +
                    hvacpl.cdl_lat_intgains)
-    if (cdl_lat_sum - hvacpl.cdl_lat_total).abs > 100
+    if (cdl_lat_sum - hvacpl.cdl_lat_total).abs > tol
       runner.registerWarning('Cooling latent design loads do not sum to total.')
     end
 

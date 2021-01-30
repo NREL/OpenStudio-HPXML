@@ -27,11 +27,11 @@ class HVACSizing
     process_load_ceilings(bldg_design_loads, weather)
     process_load_floors(bldg_design_loads, weather)
     process_load_slabs(bldg_design_loads, weather)
-    process_infiltration_ventilation(bldg_design_loads, weather, cfa)
-    process_internal_gains(bldg_design_loads, nbeds)
+    process_load_infiltration_ventilation(bldg_design_loads, weather, cfa)
+    process_load_internal_gains(bldg_design_loads, nbeds)
 
     # Aggregate zone loads into initial loads
-    aggregate_bldg_design_loads(bldg_design_loads)
+    aggregate_loads(bldg_design_loads)
 
     # Loop through each HVAC system
     all_hvac_sizing_values = {}
@@ -39,20 +39,19 @@ class HVACSizing
       hvac = get_hvac_information(hvac_system)
 
       # Add duct losses
-      calculate_hvac_temperatures(hvac, bldg_design_loads)
-      apply_duct_loads_heating(bldg_design_loads, weather, hvac)
-      apply_duct_loads_cooling(bldg_design_loads, weather, hvac)
+      apply_hvac_temperatures(hvac, bldg_design_loads)
+      apply_load_ducts_heating(bldg_design_loads, weather, hvac)
+      apply_load_ducts_cooling(bldg_design_loads, weather, hvac)
 
       # Calculate equipment values
       hvac_sizing_values = HVACSizingValues.new
-      calculate_hvac_temperatures(hvac, bldg_design_loads)
-      apply_init_sizing_loads(hvac, hvac_sizing_values, bldg_design_loads)
-      apply_hp_sizing_logic(hvac_sizing_values, hvac)
-      apply_equipment_adjustments(hvac_sizing_values, weather, hvac, cfa)
-      apply_sizing_for_installation_quality(hvac_sizing_values, weather, hvac)
-      apply_fixed_equipment(hvac_sizing_values, hvac)
-      apply_ground_loop(hvac_sizing_values, weather, hvac)
-      apply_finalize(hvac_sizing_values, weather, hvac)
+      apply_hvac_loads(hvac, hvac_sizing_values, bldg_design_loads)
+      apply_hvac_heat_pump_logic(hvac_sizing_values, hvac)
+      apply_hvac_equipment_adjustments(hvac_sizing_values, weather, hvac, cfa)
+      apply_hvac_installation_quality(hvac_sizing_values, weather, hvac)
+      apply_hvac_fixed_capacities(hvac_sizing_values, hvac)
+      apply_hvac_ground_loop(hvac_sizing_values, weather, hvac)
+      apply_hvac_finalize(hvac_sizing_values, weather, hvac)
 
       all_hvac_sizing_values[hvac_system] = hvac_sizing_values
     end
@@ -956,7 +955,7 @@ class HVACSizing
     end
   end
 
-  def self.process_infiltration_ventilation(bldg_design_loads, weather, cfa)
+  def self.process_load_infiltration_ventilation(bldg_design_loads, weather, cfa)
     '''
     Heating and Cooling Loads: Infiltration & Ventilation
     '''
@@ -1001,7 +1000,7 @@ class HVACSizing
     bldg_design_loads.Cool_Infil_Lat = 0.68 * @acf * cfm_Cool_Load_Lat * (@cool_design_grains - @cool_indoor_grains)
   end
 
-  def self.process_internal_gains(bldg_design_loads, nbeds)
+  def self.process_load_internal_gains(bldg_design_loads, nbeds)
     '''
     Cooling Load: Internal Gains
     '''
@@ -1012,10 +1011,9 @@ class HVACSizing
     bldg_design_loads.Cool_IntGains_Lat = 200.0 * n_occupants
   end
 
-  def self.aggregate_bldg_design_loads(bldg_design_loads)
+  def self.aggregate_loads(bldg_design_loads)
     '''
-    Intermediate Loads
-    (total loads excluding ducts)
+    Building Loads (excluding ducts)
     '''
 
     # Heating
@@ -1035,9 +1033,14 @@ class HVACSizing
 
     bldg_design_loads.Cool_Lat = [bldg_design_loads.Cool_Lat, 0.0].max
     bldg_design_loads.Cool_Tot = bldg_design_loads.Cool_Sens + bldg_design_loads.Cool_Lat
+
+    # Initialize ducts
+    bldg_design_loads.Heat_Ducts = 0.0
+    bldg_design_loads.Cool_Ducts_Sens = 0.0
+    bldg_design_loads.Cool_Ducts_Lat = 0.0
   end
 
-  def self.calculate_hvac_temperatures(hvac, bldg_design_loads)
+  def self.apply_hvac_temperatures(hvac, bldg_design_loads)
     '''
     HVAC Temperatures
     '''
@@ -1076,7 +1079,9 @@ class HVACSizing
     '''
   end
 
-  def self.apply_init_sizing_loads(hvac, hvac_sizing_values, bldg_design_loads)
+  def self.apply_hvac_loads(hvac, hvac_sizing_values, bldg_design_loads)
+    # Calculate design loads that this HVAC system serves
+
     # Heating
     hvac_sizing_values.Heat_Load = bldg_design_loads.Heat_Tot * hvac.HeatingLoadFraction
 
@@ -1093,7 +1098,7 @@ class HVACSizing
     hvac_sizing_values.Cool_Load_Tot = [hvac_sizing_values.Cool_Load_Tot, 0.001].max
   end
 
-  def self.apply_hp_sizing_logic(hvac_sizing_values, hvac)
+  def self.apply_hvac_heat_pump_logic(hvac_sizing_values, hvac)
     # If true, uses the larger of heating and cooling loads for heat pump capacity sizing (required for ERI).
     # Otherwise, uses standard Manual S oversize allowances.
     if [HPXML::HVACTypeHeatPumpAirToAir,
@@ -1184,14 +1189,12 @@ class HVACSizing
     return dse_Fregain
   end
 
-  def self.apply_duct_loads_heating(bldg_design_loads, weather, hvac)
+  def self.apply_load_ducts_heating(bldg_design_loads, weather, hvac)
     '''
     Heating Duct Loads
     '''
 
-    bldg_design_loads.Heat_Ducts = 0.0
-
-    return if (bldg_design_loads.Heat_Tot == 0) || hvac.Ducts.empty?
+    return if (bldg_design_loads.Heat_Tot == 0) || hvac.Ducts.empty? || hvac.HeatType.nil?
 
     init_heat_load = bldg_design_loads.Heat_Tot
 
@@ -1214,41 +1217,39 @@ class HVACSizing
 
     # Initialize for the iteration
     delta = 1
-    heatingLoad_Prev = init_heat_load
+    heat_load_next = init_heat_load
+
     heat_cfm = calc_airflow_rate(init_heat_load, (hvac.SupplyAirTemp - @heat_setpoint))
 
     for _iter in 0..19
       break if delta.abs <= 0.001
 
+      heat_load_prev = heat_load_next
+
+      # Calculate the new heating air flow rate
+      heat_cfm = calc_airflow_rate(heat_load_next, (hvac.SupplyAirTemp - @heat_setpoint))
+
       dse_Qs, dse_Qr = calc_ducts_leakages(hvac.Ducts, heat_cfm)
 
-      dse_DE = calc_delivery_effectiveness_heating(dse_Qs, dse_Qr, heat_cfm, heatingLoad_Prev, dse_Tamb_heating_s, dse_Tamb_heating_r, dse_As, dse_Ar, @heat_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r)
+      dse_DE = calc_delivery_effectiveness_heating(dse_Qs, dse_Qr, heat_cfm, heat_load_next, dse_Tamb_heating_s, dse_Tamb_heating_r, dse_As, dse_Ar, @heat_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r)
 
       # Calculate the increase in heating load due to ducts (Approach: DE = Qload/Qequip -> Qducts = Qequip-Qload)
-      heatingLoad_Next = init_heat_load / dse_DE
+      heat_load_next = init_heat_load / dse_DE
 
       # Calculate the change since the last iteration
-      delta = (heatingLoad_Next - heatingLoad_Prev) / heatingLoad_Prev
-
-      # Update the flow rate for the next iteration
-      heatingLoad_Prev = heatingLoad_Next
-      heat_cfm = calc_airflow_rate(heatingLoad_Next, (hvac.SupplyAirTemp - @heat_setpoint))
-
+      delta = (heat_load_next - heat_load_prev) / heat_load_prev
     end
 
-    bldg_design_loads.Heat_Ducts = heatingLoad_Next - init_heat_load
-    bldg_design_loads.Heat_Tot = init_heat_load + bldg_design_loads.Heat_Ducts
+    bldg_design_loads.Heat_Ducts += heat_load_next - init_heat_load
+    bldg_design_loads.Heat_Tot = heat_load_next
   end
 
-  def self.apply_duct_loads_cooling(bldg_design_loads, weather, hvac)
+  def self.apply_load_ducts_cooling(bldg_design_loads, weather, hvac)
     '''
     Cooling Duct Loads
     '''
 
-    bldg_design_loads.Cool_Ducts_Sens = 0.0
-    bldg_design_loads.Cool_Ducts_Lat = 0.0
-
-    return if (bldg_design_loads.Cool_Sens == 0) || hvac.Ducts.empty?
+    return if (bldg_design_loads.Cool_Sens == 0) || hvac.Ducts.empty? || hvac.CoolType.nil?
 
     init_cool_load_sens = bldg_design_loads.Cool_Sens
     init_cool_load_lat = bldg_design_loads.Cool_Lat
@@ -1275,44 +1276,42 @@ class HVACSizing
 
     # Initialize for the iteration
     delta = 1
-    coolingLoad_Tot_Prev = init_cool_load_sens + init_cool_load_lat
-    coolingLoad_Tot_Next = init_cool_load_sens + init_cool_load_lat
-    bldg_design_loads.Cool_Tot  = init_cool_load_sens + init_cool_load_lat
-    bldg_design_loads.Cool_Sens = init_cool_load_sens
+    cool_load_tot_next = init_cool_load_sens + init_cool_load_lat
 
-    initial_Cool_Airflow = calc_airflow_rate(init_cool_load_sens, (@cool_setpoint - hvac.LeavingAirTemp))
+    cool_cfm = calc_airflow_rate(init_cool_load_sens, (@cool_setpoint - hvac.LeavingAirTemp))
 
-    dse_Qs, dse_Qr = calc_ducts_leakages(hvac.Ducts, initial_Cool_Airflow)
+    dse_Qs, dse_Qr = calc_ducts_leakages(hvac.Ducts, cool_cfm)
 
-    bldg_design_loads.Cool_Lat, bldg_design_loads.Cool_Sens = calculate_sensible_latent_split(dse_Qr, coolingLoad_Tot_Next, init_cool_load_lat)
+    cool_load_lat, cool_load_sens = calculate_sensible_latent_split(dse_Qr, cool_load_tot_next, init_cool_load_lat)
 
     for _iter in 1..50
       break if delta.abs <= 0.001
 
-      coolingLoad_Tot_Prev = coolingLoad_Tot_Next
+      cool_load_tot_prev = cool_load_tot_next
 
-      bldg_design_loads.Cool_Lat, bldg_design_loads.Cool_Sens = calculate_sensible_latent_split(dse_Qr, coolingLoad_Tot_Next, init_cool_load_lat)
-      bldg_design_loads.Cool_Tot = bldg_design_loads.Cool_Lat + bldg_design_loads.Cool_Sens
-      bldg_design_loads.Cool_Ducts_Sens = bldg_design_loads.Cool_Sens - init_cool_load_sens
+      cool_load_lat, cool_load_sens = calculate_sensible_latent_split(dse_Qr, cool_load_tot_next, init_cool_load_lat)
+      cool_load_tot = cool_load_lat + cool_load_sens
 
       # Calculate the new cooling air flow rate
-      cool_Airflow = calc_airflow_rate(bldg_design_loads.Cool_Sens, (@cool_setpoint - hvac.LeavingAirTemp))
+      cool_cfm = calc_airflow_rate(cool_load_sens, (@cool_setpoint - hvac.LeavingAirTemp))
 
-      dse_Qs, dse_Qr = calc_ducts_leakages(hvac.Ducts, cool_Airflow)
+      dse_Qs, dse_Qr = calc_ducts_leakages(hvac.Ducts, cool_cfm)
 
-      dse_DE, dse_dTe_cooling, bldg_design_loads.Cool_Ducts_Sens = calc_delivery_effectiveness_cooling(dse_Qs, dse_Qr, hvac.LeavingAirTemp, cool_Airflow, bldg_design_loads.Cool_Sens, dse_Tamb_cooling_s, dse_Tamb_cooling_r, dse_As, dse_Ar, @cool_setpoint, dse_Fregain_s, dse_Fregain_r, bldg_design_loads.Cool_Tot, dse_h_r, supply_r, return_r)
+      dse_DE, dse_dTe_cooling, cool_duct_sens = calc_delivery_effectiveness_cooling(dse_Qs, dse_Qr, hvac.LeavingAirTemp, cool_cfm, cool_load_sens, dse_Tamb_cooling_s, dse_Tamb_cooling_r, dse_As, dse_Ar, @cool_setpoint, dse_Fregain_s, dse_Fregain_r, cool_load_tot, dse_h_r, supply_r, return_r)
 
-      coolingLoad_Tot_Next = (init_cool_load_sens + init_cool_load_lat) / dse_DE
+      cool_load_tot_next = (init_cool_load_sens + init_cool_load_lat) / dse_DE
 
       # Calculate the change since the last iteration
-      delta = (coolingLoad_Tot_Next - coolingLoad_Tot_Prev) / coolingLoad_Tot_Prev
+      delta = (cool_load_tot_next - cool_load_tot_prev) / cool_load_tot_prev
     end
 
-    bldg_design_loads.Cool_Ducts_Sens = bldg_design_loads.Cool_Sens - init_cool_load_sens
-    bldg_design_loads.Cool_Ducts_Lat = bldg_design_loads.Cool_Lat - init_cool_load_lat
+    bldg_design_loads.Cool_Ducts_Sens += cool_load_sens - init_cool_load_sens
+    bldg_design_loads.Cool_Sens += cool_load_sens - init_cool_load_sens
+    bldg_design_loads.Cool_Ducts_Lat += cool_load_lat - init_cool_load_lat
+    bldg_design_loads.Cool_Lat += cool_load_lat - init_cool_load_lat
   end
 
-  def self.apply_equipment_adjustments(hvac_sizing_values, weather, hvac, cfa)
+  def self.apply_hvac_equipment_adjustments(hvac_sizing_values, weather, hvac, cfa)
     '''
     Equipment Adjustments
     '''
@@ -1617,7 +1616,7 @@ class HVACSizing
     end
   end
 
-  def self.apply_sizing_for_installation_quality(hvac_sizing_values, weather, hvac)
+  def self.apply_hvac_installation_quality(hvac_sizing_values, weather, hvac)
     # Increases the autosized heating/cooling capacities to account for any reduction
     # in capacity due to HVAC installation quality. This is done to prevent causing
     # unmet loads.
@@ -1825,7 +1824,7 @@ class HVACSizing
     end
   end
 
-  def self.apply_fixed_equipment(hvac_sizing_values, hvac)
+  def self.apply_hvac_fixed_capacities(hvac_sizing_values, hvac)
     '''
     Fixed Sizing Equipment
     '''
@@ -1865,7 +1864,7 @@ class HVACSizing
     end
   end
 
-  def self.apply_ground_loop(hvac_sizing_values, weather, hvac)
+  def self.apply_hvac_ground_loop(hvac_sizing_values, weather, hvac)
     '''
     GSHP Ground Loop Sizing Calculations
     '''
@@ -1961,7 +1960,7 @@ class HVACSizing
     hvac_sizing_values.GSHP_G_Functions = [lntts, gfnc_coeff]
   end
 
-  def self.apply_finalize(hvac_sizing_values, weather, hvac)
+  def self.apply_hvac_finalize(hvac_sizing_values, weather, hvac)
     '''
     Finalize Sizing Calculations
     '''
