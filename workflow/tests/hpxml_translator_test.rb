@@ -385,20 +385,23 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Heating capacities/airflows
+    results['heating_capacity [Btuh]'] = 0.0
+    results['heating_backup_capacity [Btuh]'] = 0.0
+    results['heating_airflow [cfm]'] = 0.0
     (hpxml.heating_systems + hpxml.heat_pumps).each do |htg_sys|
-      results['heating_capacity [Btuh]'] = htg_sys.heating_capacity
+      results['heating_capacity [Btuh]'] += htg_sys.heating_capacity
       if htg_sys.respond_to? :backup_heating_capacity
-        results['heating_backup_capacity [Btuh]'] = htg_sys.backup_heating_capacity
-      else
-        results['heating_backup_capacity [Btuh]'] = 0.0
+        results['heating_backup_capacity [Btuh]'] += htg_sys.backup_heating_capacity
       end
-      results['heating_airflow [cfm]'] = htg_sys.heating_airflow_cfm
+      results['heating_airflow [cfm]'] += htg_sys.heating_airflow_cfm
     end
 
     # Cooling capacity/airflows
+    results['cooling_capacity [Btuh]'] = 0.0
+    results['cooling_airflow [cfm]'] = 0.0
     (hpxml.cooling_systems + hpxml.heat_pumps).each do |clg_sys|
-      results['cooling_capacity [Btuh]'] = clg_sys.cooling_capacity
-      results['cooling_airflow [cfm]'] = clg_sys.cooling_airflow_cfm
+      results['cooling_capacity [Btuh]'] += clg_sys.cooling_capacity
+      results['cooling_airflow [cfm]'] += clg_sys.cooling_airflow_cfm
     end
 
     assert(!results.empty?)
