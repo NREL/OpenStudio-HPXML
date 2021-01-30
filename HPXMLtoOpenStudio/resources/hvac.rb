@@ -267,7 +267,7 @@ class HVAC
 
     # Supplemental Heating Coil
     htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
-    hvac_map[heat_pump.id] << htg_supp_coil unless htg_supp_coil.nil?
+    hvac_map[heat_pump.id] << htg_supp_coil
 
     # Fan
     num_speeds = hp_ap.num_speeds
@@ -363,7 +363,7 @@ class HVAC
 
     # Supplemental Heating Coil
     htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
-    hvac_map[heat_pump.id] << htg_supp_coil unless htg_supp_coil.nil?
+    hvac_map[heat_pump.id] << htg_supp_coil
 
     # Fan
     num_speeds = hp_ap.num_speeds
@@ -461,7 +461,7 @@ class HVAC
 
     # Supplemental Heating Coil
     htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
-    hvac_map[heat_pump.id] << htg_supp_coil unless htg_supp_coil.nil?
+    hvac_map[heat_pump.id] << htg_supp_coil
 
     # Ground Heat Exchanger
     ground_heat_exch_vert = OpenStudio::Model::GroundHeatExchangerVertical.new(model)
@@ -626,7 +626,7 @@ class HVAC
 
     # Supplemental Heating Coil
     htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
-    hvac_map[heat_pump.id] << htg_supp_coil unless htg_supp_coil.nil?
+    hvac_map[heat_pump.id] << htg_supp_coil
 
     # Fan
     fan_power_installed = 0.5 # FIXME
@@ -1603,10 +1603,15 @@ class HVAC
 
   def self.create_supp_heating_coil(model, obj_name, heat_pump)
     fuel = heat_pump.backup_heating_fuel
-    return if fuel.nil? || (heat_pump.backup_heating_capacity == 0) # No backup heating
-
+    capacity = heat_pump.backup_heating_capacity
     efficiency = heat_pump.backup_heating_efficiency_percent
     efficiency = heat_pump.backup_heating_efficiency_afue if efficiency.nil?
+
+    if fuel.nil?
+      fuel = HPXML::FuelTypeElectricity
+      capacity = 0.0
+      efficiency = 1.0
+    end
 
     if fuel == HPXML::FuelTypeElectricity
       htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
@@ -1618,7 +1623,7 @@ class HVAC
       htg_supp_coil.setParasiticGasLoad(0)
       htg_supp_coil.setFuelType(EPlus.fuel_type(fuel))
     end
-    htg_supp_coil.setNominalCapacity(UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W'))
+    htg_supp_coil.setNominalCapacity(UnitConversions.convert(capacity, 'Btu/hr', 'W'))
     htg_supp_coil.setName(obj_name + ' ' + Constants.ObjectNameBackupHeatingCoil)
     return htg_supp_coil
   end
