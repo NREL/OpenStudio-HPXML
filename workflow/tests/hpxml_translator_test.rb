@@ -50,7 +50,8 @@ class HPXMLTest < MiniTest::Test
     File.delete(ashrae140_out) if File.exist? ashrae140_out
 
     xmls = []
-    Dir["#{File.absolute_path(File.join(@this_dir, 'ASHRAE_Standard_140'))}/*.xml"].sort.each do |xml|
+    ashrae_140_dir = File.absolute_path(File.join(@this_dir, 'ASHRAE_Standard_140'))
+    Dir["#{ashrae_140_dir}/*.xml"].sort.each do |xml|
       xmls << File.absolute_path(xml)
     end
 
@@ -532,7 +533,7 @@ class HPXMLTest < MiniTest::Test
       if hpxml_path.include? 'base-enclosure-split-surfaces2.xml'
         next if err_line.include? 'GetSurfaceData: Very small surface area' # FUTURE: Prevent this warning
       end
-      if hpxml_path.include?('base-hvac-autosize-ground-to-air-heat-pump-cooling-only.xml') || hpxml_path.include?('base-hvac-autosize-ground-to-air-heat-pump-heating-only.xml')
+      if hpxml_path.include?('ground-to-air-heat-pump-cooling-only.xml') || hpxml_path.include?('ground-to-air-heat-pump-heating-only.xml')
         next if err_line.include? 'COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT' # heating capacity is > 20% different than cooling capacity; safe to ignore
       end
 
