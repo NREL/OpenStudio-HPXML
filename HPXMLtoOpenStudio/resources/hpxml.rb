@@ -3034,24 +3034,19 @@ class HPXML < Object
 
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
       if not @hdl_total.nil?
-        hdl_extension = XMLHelper.create_elements_as_needed(hvac_plant, ['extension', 'HeatingDesignLoads'])
-        XMLHelper.add_attribute(hdl_extension, 'dataSource', 'software')
+        dl_extension = XMLHelper.create_elements_as_needed(hvac_plant, ['extension', 'DesignLoads'])
+        XMLHelper.add_attribute(dl_extension, 'dataSource', 'software')
+        hdl = XMLHelper.add_element(dl_extension, 'Heating')
         HDL_ATTRS.each do |attr, element_name|
-          XMLHelper.add_element(hdl_extension, element_name, send(attr), :float)
+          XMLHelper.add_element(hdl, element_name, send(attr), :float)
         end
-      end
-      if not @cdl_sens_total.nil?
-        cdl_sens_extension = XMLHelper.create_elements_as_needed(hvac_plant, ['extension', 'CoolingDesignLoadsSensible'])
-        XMLHelper.add_attribute(cdl_sens_extension, 'dataSource', 'software')
+        cdl_sens = XMLHelper.add_element(dl_extension, 'CoolingSensible')
         CDL_SENS_ATTRS.each do |attr, element_name|
-          XMLHelper.add_element(cdl_sens_extension, element_name, send(attr), :float)
+          XMLHelper.add_element(cdl_sens, element_name, send(attr), :float)
         end
-      end
-      if not @cdl_lat_total.nil?
-        cdl_lat_extension = XMLHelper.create_elements_as_needed(hvac_plant, ['extension', 'CoolingDesignLoadsLatent'])
-        XMLHelper.add_attribute(cdl_lat_extension, 'dataSource', 'software')
+        cdl_lat = XMLHelper.add_element(dl_extension, 'CoolingLatent')
         CDL_LAT_ATTRS.each do |attr, element_name|
-          XMLHelper.add_element(cdl_lat_extension, element_name, send(attr), :float)
+          XMLHelper.add_element(cdl_lat, element_name, send(attr), :float)
         end
       end
     end
@@ -3060,13 +3055,13 @@ class HPXML < Object
       return if hvac_plant.nil?
 
       HDL_ATTRS.each do |attr, element_name|
-        send("#{attr.to_s}=", XMLHelper.get_value(hvac_plant, "extension/HeatingDesignLoads/#{element_name}", :float))
+        send("#{attr.to_s}=", XMLHelper.get_value(hvac_plant, "extensionDesignLoads//Heating/#{element_name}", :float))
       end
       CDL_SENS_ATTRS.each do |attr, element_name|
-        send("#{attr.to_s}=", XMLHelper.get_value(hvac_plant, "extension/CoolingDesignLoadsSensible/#{element_name}", :float))
+        send("#{attr.to_s}=", XMLHelper.get_value(hvac_plant, "extension/DesignLoads/CoolingSensible/#{element_name}", :float))
       end
       CDL_LAT_ATTRS.each do |attr, element_name|
-        send("#{attr.to_s}=", XMLHelper.get_value(hvac_plant, "extension/CoolingDesignLoadsLatent/#{element_name}", :float))
+        send("#{attr.to_s}=", XMLHelper.get_value(hvac_plant, "extension/DesignLoads/CoolingLatent/#{element_name}", :float))
       end
     end
   end
