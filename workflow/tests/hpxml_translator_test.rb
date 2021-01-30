@@ -27,7 +27,8 @@ class HPXMLTest < MiniTest::Test
     File.delete(sizing_out) if File.exist? sizing_out
 
     xmls = []
-    Dir["#{File.absolute_path(File.join(@this_dir, '..', 'sample_files'))}/*.xml"].sort.each do |xml|
+    sample_files_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files'))
+    Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
       xmls << File.absolute_path(xml)
     end
 
@@ -398,7 +399,10 @@ class HPXMLTest < MiniTest::Test
       results['cooling_capacity [Btuh]'] = clg_sys.cooling_capacity
       results['cooling_airflow [cfm]'] = clg_sys.cooling_airflow_cfm
     end
+
     assert(!results.empty?)
+    # FIXME: Add tests to make sure capacities/airflows are zero as appropriate (FractionLoadServed == 0)
+    # FIXME: Add tests to make sure duct design loads are zero as appropriate (no ducts, FractionLoadServed == 0)
 
     return results
   end
@@ -527,6 +531,9 @@ class HPXMLTest < MiniTest::Test
       end
       if hpxml_path.include? 'base-enclosure-split-surfaces2.xml'
         next if err_line.include? 'GetSurfaceData: Very small surface area' # FUTURE: Prevent this warning
+      end
+      if hpxml_path.include?('base-hvac-autosize-ground-to-air-heat-pump-cooling-only.xml') || hpxml_path.include?('base-hvac-autosize-ground-to-air-heat-pump-heating-only.xml')
+        next if err_line.include? 'COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT' # heating capacity is > 20% different than cooling capacity; safe to ignore
       end
 
       flunk "Unexpected warning found: #{err_line}"

@@ -1857,17 +1857,10 @@ class HPXMLDefaults
     end
 
     # Cooling latent design loads back to HPXML object
-    if bldg_design_loads.Cool_Lat <= 0.001 # FIXME: This should be handled inside hvac_sizing.rb
-      hvacpl.cdl_lat_total = 0.0
-      hvacpl.cdl_lat_ducts = 0.0
-      hvacpl.cdl_lat_infilvent = 0.0
-      hvacpl.cdl_lat_intgains = 0.0
-    else
-      hvacpl.cdl_lat_total = bldg_design_loads.Cool_Lat.round
-      hvacpl.cdl_lat_ducts = bldg_design_loads.Cool_Ducts_Lat.round
-      hvacpl.cdl_lat_infilvent = bldg_design_loads.Cool_Infil_Lat.round
-      hvacpl.cdl_lat_intgains = bldg_design_loads.Cool_IntGains_Lat.round
-    end
+    hvacpl.cdl_lat_total = bldg_design_loads.Cool_Lat.round
+    hvacpl.cdl_lat_ducts = bldg_design_loads.Cool_Ducts_Lat.round
+    hvacpl.cdl_lat_infilvent = bldg_design_loads.Cool_Infil_Lat.round
+    hvacpl.cdl_lat_intgains = bldg_design_loads.Cool_IntGains_Lat.round
     cdl_lat_sum = (hvacpl.cdl_lat_ducts + hvacpl.cdl_lat_infilvent +
                    hvacpl.cdl_lat_intgains)
     if (cdl_lat_sum - hvacpl.cdl_lat_total).abs > tol
@@ -1883,13 +1876,13 @@ class HPXMLDefaults
       if not htg_sys.nil?
 
         # Heating capacities
-        if htg_sys.heating_capacity.nil? || ((htg_sys.heating_capacity - hvac_sizing_values.Heat_Capacity).abs >= Constants.small)
+        if htg_sys.heating_capacity.nil? || ((htg_sys.heating_capacity - hvac_sizing_values.Heat_Capacity).abs >= 1.0)
           htg_sys.heating_capacity = hvac_sizing_values.Heat_Capacity.round
           htg_sys.heating_capacity_isdefaulted = true
         end
         if htg_sys.respond_to? :backup_heating_capacity
           if not htg_sys.backup_heating_fuel.nil? # If there is a backup heating source
-            if htg_sys.backup_heating_capacity.nil? || ((htg_sys.backup_heating_capacity - hvac_sizing_values.Heat_Capacity_Supp).abs >= Constants.small)
+            if htg_sys.backup_heating_capacity.nil? || ((htg_sys.backup_heating_capacity - hvac_sizing_values.Heat_Capacity_Supp).abs >= 1.0)
               htg_sys.backup_heating_capacity = hvac_sizing_values.Heat_Capacity_Supp.round
               htg_sys.backup_heating_capacity_isdefaulted = true
             end
@@ -1915,7 +1908,7 @@ class HPXMLDefaults
       next unless not clg_sys.nil?
 
       # Cooling capacities
-      if clg_sys.cooling_capacity.nil? || ((clg_sys.cooling_capacity - hvac_sizing_values.Cool_Capacity).abs >= Constants.small)
+      if clg_sys.cooling_capacity.nil? || ((clg_sys.cooling_capacity - hvac_sizing_values.Cool_Capacity).abs >= 1.0)
         clg_sys.cooling_capacity = hvac_sizing_values.Cool_Capacity.round
         clg_sys.cooling_capacity_isdefaulted = true
       end

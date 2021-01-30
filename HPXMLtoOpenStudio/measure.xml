@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>77f8fb46-80d6-45e8-b647-bc467e368d10</version_id>
-  <version_modified>20210130T003236Z</version_modified>
+  <version_id>22adf8cc-222d-499b-a364-1b4596ae36f0</version_id>
+  <version_modified>20210130T045151Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -491,10 +491,16 @@
       <checksum>7C01D029</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
+      <filename>test_hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>137CD481</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F5F7B5AC</checksum>
+      <checksum>0E0F5599</checksum>
     </file>
     <file>
       <version>
@@ -505,31 +511,25 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>F700E337</checksum>
-    </file>
-    <file>
-      <filename>test_hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>137CD481</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>911E6ED1</checksum>
+      <checksum>756B6C64</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>65738272</checksum>
+      <checksum>0878C427</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F67BEAF1</checksum>
+      <checksum>181529D6</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>288889DA</checksum>
     </file>
   </files>
 </measure>
