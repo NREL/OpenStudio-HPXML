@@ -51,6 +51,7 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
     args['hpxml_path'] = output_hpxml_path
     args['output_dir'] = rundir
     args['debug'] = debug
+    args['skip_validation'] = !debug
     update_args_hash(measures, measure_subdir, args)
 
     # Add reporting measure to workflow

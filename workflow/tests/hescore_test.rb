@@ -101,7 +101,7 @@ class HEScoreTest < Minitest::Unit::TestCase
 
     # Run workflow
     cli_path = OpenStudio.getOpenStudioCLI
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} -o #{parent_dir}"
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} -o #{parent_dir} --debug"
     start_time = Time.now
     success = system(command)
     assert_equal(true, success)
