@@ -3016,9 +3016,29 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = ((args[:water_heater_type] == HPXML::WaterHeaterTypeCombiStorage) || (args[:water_heater_type] == HPXML::WaterHeaterTypeCombiTankless)) && (args[:heating_system_type] != HPXML::HVACTypeBoiler)
     errors << "water_heater_type=#{args[:water_heater_type]} and heating_system_type=#{args[:heating_system_type]}" if error
 
-    # no plug loads but specifying usage multipliers
-    warning = (args[:plug_loads_television_annual_kwh] == 0.0 && args[:plug_loads_television_usage_multiplier] != 0.0) || (args[:plug_loads_other_annual_kwh] == 0.0 && args[:plug_loads_other_usage_multiplier] != 0.0) || (!args[:plug_loads_well_pump_present] && args[:plug_loads_well_pump_usage_multiplier] != 0.0) || (!args[:plug_loads_vehicle_present] && args[:plug_loads_vehicle_usage_multiplier] != 0.0)
-    warnings << "plug_loads_television_annual_kwh=#{args[:plug_loads_television_annual_kwh]} and plug_loads_television_usage_multiplier=#{args[:plug_loads_television_usage_multiplier]} and plug_loads_other_annual_kwh=#{args[:plug_loads_other_annual_kwh]} and plug_loads_other_usage_multiplier=#{args[:plug_loads_other_usage_multiplier]} and plug_loads_well_pump_present=#{args[:plug_loads_well_pump_present]} and plug_loads_well_pump_usage_multiplier=#{args[:plug_loads_well_pump_usage_multiplier]} and plug_loads_vehicle_present=#{args[:plug_loads_vehicle_present]} and plug_loads_vehicle_usage_multiplier=#{args[:plug_loads_vehicle_usage_multiplier]}" if warning
+    # no tv plug loads but specifying usage multipliers
+    if args[:plug_loads_television_annual_kwh] != Constants.Auto
+      warning = (args[:plug_loads_television_annual_kwh].to_f == 0.0 && args[:plug_loads_television_usage_multiplier] != 0.0)
+      warnings << "plug_loads_television_annual_kwh=#{args[:plug_loads_television_annual_kwh]} and plug_loads_television_usage_multiplier=#{args[:plug_loads_television_usage_multiplier]}" if warning
+    end
+
+    # no other plug loads but specifying usage multipliers
+    if args[:plug_loads_other_annual_kwh] != Constants.Auto
+      warning = (args[:plug_loads_other_annual_kwh].to_f == 0.0 && args[:plug_loads_other_usage_multiplier] != 0.0)
+      warnings << "plug_loads_other_annual_kwh=#{args[:plug_loads_other_annual_kwh]} and plug_loads_other_usage_multiplier=#{args[:plug_loads_other_usage_multiplier]}" if warning
+    end
+
+    # no well pump plug loads but specifying usage multipliers
+    if args[:plug_loads_well_pump_annual_kwh] != Constants.Auto
+      warning = (args[:plug_loads_well_pump_annual_kwh].to_f == 0.0 && args[:plug_loads_well_pump_usage_multiplier] != 0.0)
+      warnings << "plug_loads_well_pump_annual_kwh=#{args[:plug_loads_well_pump_annual_kwh]} and plug_loads_well_pump_usage_multiplier=#{args[:plug_loads_well_pump_usage_multiplier]}" if warning
+    end
+
+    # no vehicle plug loads but specifying usage multipliers
+    if args[:plug_loads_vehicle_annual_kwh] != Constants.Auto
+      warning = (args[:plug_loads_vehicle_annual_kwh].to_f && args[:plug_loads_vehicle_usage_multiplier] != 0.0)
+      warnings << "plug_loads_vehicle_annual_kwh=#{args[:plug_loads_vehicle_annual_kwh]} and plug_loads_vehicle_usage_multiplier=#{args[:plug_loads_vehicle_usage_multiplier]}" if warning
+    end
 
     # no fuel loads but specifying usage multipliers
     warning = (!args[:fuel_loads_grill_present] && args[:fuel_loads_grill_usage_multiplier] != 0.0) || (!args[:fuel_loads_lighting_present] && args[:fuel_loads_lighting_usage_multiplier] != 0.0) || (!args[:fuel_loads_fireplace_present] && args[:fuel_loads_fireplace_usage_multiplier] != 0.0)
@@ -3056,9 +3076,7 @@ end
 
 class HPXMLFile
   def self.create(runner, model, args, epw_file)
-    model_geometry = OpenStudio::Model::Model.new
-
-    success = create_geometry_envelope(runner, model_geometry, args)
+    success = create_geometry_envelope(runner, model, args)
     return false if not success
 
     success = create_schedules(runner, model, epw_file, args)
@@ -3073,17 +3091,19 @@ class HPXMLFile
     set_building_construction(hpxml, runner, args)
     set_climate_and_risk_zones(hpxml, runner, args, epw_file)
     set_air_infiltration_measurements(hpxml, runner, args)
-    set_attics(hpxml, runner, model_geometry, args)
-    set_foundations(hpxml, runner, model_geometry, args)
-    set_roofs(hpxml, runner, model_geometry, args)
-    set_rim_joists(hpxml, runner, model_geometry, args)
-    set_walls(hpxml, runner, model_geometry, args)
-    set_foundation_walls(hpxml, runner, model_geometry, args)
-    set_frame_floors(hpxml, runner, model_geometry, args)
-    set_slabs(hpxml, runner, model_geometry, args)
-    set_windows(hpxml, runner, model_geometry, args)
-    set_skylights(hpxml, runner, model_geometry, args)
-    set_doors(hpxml, runner, model_geometry, args)
+
+    set_attics(hpxml, runner, model, args)
+    set_foundations(hpxml, runner, model, args)
+    set_roofs(hpxml, runner, model, args)
+    set_rim_joists(hpxml, runner, model, args)
+    set_walls(hpxml, runner, model, args)
+    set_foundation_walls(hpxml, runner, model, args)
+    set_frame_floors(hpxml, runner, model, args)
+    set_slabs(hpxml, runner, model, args)
+    set_windows(hpxml, runner, model, args)
+    set_skylights(hpxml, runner, model, args)
+    set_doors(hpxml, runner, model, args)
+
     set_heating_systems(hpxml, runner, args)
     set_cooling_systems(hpxml, runner, args)
     set_heat_pumps(hpxml, runner, args)
