@@ -3051,11 +3051,14 @@ class HPXML < Object
       end
     end
 
-    def from_oga(hvac_plant)
+    def from_oga(hpxml)
+      return if hpxml.nil?
+
+      hvac_plant = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/Systems/HVAC/HVACPlant')
       return if hvac_plant.nil?
 
       HDL_ATTRS.each do |attr, element_name|
-        send("#{attr.to_s}=", XMLHelper.get_value(hvac_plant, "extensionDesignLoads//Heating/#{element_name}", :float))
+        send("#{attr.to_s}=", XMLHelper.get_value(hvac_plant, "extension/DesignLoads/Heating/#{element_name}", :float))
       end
       CDL_SENS_ATTRS.each do |attr, element_name|
         send("#{attr.to_s}=", XMLHelper.get_value(hvac_plant, "extension/DesignLoads/CoolingSensible/#{element_name}", :float))
