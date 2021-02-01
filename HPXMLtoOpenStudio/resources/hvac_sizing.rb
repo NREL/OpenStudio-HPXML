@@ -953,7 +953,7 @@ class HVACSizing
     Heating and Cooling Loads: Infiltration & Ventilation
     '''
 
-    # FIXME: Consolidate code w/ airflow.rb
+    # FUTURE: Consolidate code w/ airflow.rb
     infil_volume = @hpxml.air_infiltration_measurements.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
     infil_height = @hpxml.inferred_infiltration_height(infil_volume)
     ach_nat = nil
@@ -1061,11 +1061,13 @@ class HVACSizing
     end
 
     # Calculate Supply Air Temperature
-    # FIXME: Reverse the logic and specify 105F for HPs, 120F for everything else?
-    if hvac.HeatType == HPXML::HVACTypeFurnace
-      hvac.SupplyAirTemp = 120.0 # F
-    else
+    if [HPXML::HVACTypeHeatPumpAirToAir,
+        HPXML::HVACTypeHeatPumpMiniSplit,
+        HPXML::HVACTypeHeatPumpGroundToAir,
+        HPXML::HVACTypeHeatPumpWaterLoopToAir].include? hvac.HeatType
       hvac.SupplyAirTemp = 105.0 # F
+    else
+      hvac.SupplyAirTemp = 120.0 # F
     end
   end
 
@@ -1710,20 +1712,14 @@ class HVACSizing
           a2_AF_Qgr_c = hvac.COOL_CAP_FFLOW_SPEC[speed][1]
           a3_AF_Qgr_c = hvac.COOL_CAP_FFLOW_SPEC[speed][2]
 
-          # FIXME: Get coefficients from HVAC.rb to ensure consistency
-          if f_ch <= 0
-            qgr_values = [-9.46E-01, 4.93E-02, -1.18E-03, -1.15E+00]
-          else
-            qgr_values = [-1.63E-01, 1.14E-02, -2.10E-04, -1.40E-01]
-          end
+          p_values, qgr_values, ff_chg_values = HVAC.get_installation_quality_cooling_coeff(f_ch)
 
           a1_CH_Qgr_c = qgr_values[0]
           a2_CH_Qgr_c = qgr_values[1]
           a3_CH_Qgr_c = qgr_values[2]
           a4_CH_Qgr_c = qgr_values[3]
 
-          # FIXME: Get coefficients from HVAC.rb to ensure consistency
-          ff_ch_c = (1.0 / (1.0 + (qgr_values[0] + (qgr_values[1] * 26.67) + (qgr_values[2] * 35.0) + (qgr_values[3] * f_ch)) * f_ch)).round(3)
+          ff_ch_c = (1.0 / (1.0 + (qgr_values[0] + (qgr_values[1] * ff_chg_values[0]) + (qgr_values[2] * ff_chg_values[1]) + (qgr_values[3] * f_ch)) * f_ch)).round(3)
 
           q0_CH = a1_CH_Qgr_c
           q1_CH = a2_CH_Qgr_c * tin_cool
@@ -1780,19 +1776,13 @@ class HVACSizing
           a2_AF_Qgr_h = hvac.HEAT_CAP_FFLOW_SPEC[speed][1]
           a3_AF_Qgr_h = hvac.HEAT_CAP_FFLOW_SPEC[speed][2]
 
-          # FIXME: Get coefficients from HVAC.rb to ensure consistency
-          if f_ch <= 0
-            qgr_values = [-0.0338595, 0.0202827, -2.6226343]
-          else
-            qgr_values = [-0.0029514, 0.0007379, -0.0064112]
-          end
+          p_values, qgr_values, ff_chg_values = HVAC.get_installation_quality_heating_coeff(f_ch)
 
           a1_CH_Qgr_h = qgr_values[0]
           a2_CH_Qgr_h = qgr_values[1]
           a3_CH_Qgr_h = qgr_values[2]
 
-          # FIXME: Get coefficients from HVAC.rb to ensure consistency
-          ff_ch_h = (1 / (1 + (qgr_values[0] + qgr_values[1] * 8.33 + qgr_values[2] * f_ch) * f_ch)).round(3)
+          ff_ch_h = (1 / (1 + (qgr_values[0] + qgr_values[1] * ff_chg_values[0] + qgr_values[2] * f_ch) * f_ch)).round(3)
 
           qh1_CH = a1_CH_Qgr_h
           qh2_CH = a2_CH_Qgr_h * tout_heat
@@ -2272,7 +2262,7 @@ class HVACSizing
   end
 
   def self.get_hvac_information(hvac_system)
-    # FIXME: Remove this method and use hvac_system objects directly.
+    # FUTURE: Remove this method and use hvac_system objects directly.
     hvac = HVACInfo.new
 
     hpxml_hvacs = []
@@ -2435,7 +2425,7 @@ class HVACSizing
       end
 
       # Ducts
-      # FIXME: Consolidate w/ ducts code in measure.rb
+      # FUTURE: Consolidate w/ ducts code in measure.rb
       hvac.Ducts = []
       next unless not hpxml_hvac.distribution_system.nil?
       lto = { supply_percent: nil, supply_cfm25: nil, return_percent: nil, return_cfm25: nil }
@@ -2583,7 +2573,7 @@ class HVACSizing
     else # Unvented space
       ach = 0.1 # Assumption
     end
-    # FIXME: Reuse code from measure.rb set_zone_volumes()
+    # FUTURE: Reuse code from measure.rb set_zone_volumes()
     if [HPXML::LocationAtticVented, HPXML::LocationAtticUnvented].include? space_type
       floor_area = @hpxml.frame_floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? space_type }.map { |s| s.area }.sum(0.0)
       roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }

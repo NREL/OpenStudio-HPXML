@@ -3516,6 +3516,30 @@ class HVAC
     return primary_duct_location, secondary_duct_location
   end
 
+  def self.get_installation_quality_cooling_coeff(f_chg)
+    if f_chg <= 0
+      qgr_values = [-9.46E-01, 4.93E-02, -1.18E-03, -1.15E+00]
+      p_values = [-3.13E-01, 1.15E-02, 2.66E-03, -1.16E-01]
+    else
+      qgr_values = [-1.63E-01, 1.14E-02, -2.10E-04, -1.40E-01]
+      p_values = [2.19E-01, -5.01E-03, 9.89E-04, 2.84E-01]
+    end
+    ff_chg_values = [26.67, 35.0]
+    return qgr_values, p_values, ff_chg_values
+  end
+
+  def self.get_installation_quality_heating_coeff(f_chg)
+    if f_chg <= 0
+      qgr_values = [-0.0338595, 0.0202827, -2.6226343]
+      p_values = [0.0615649, 0.0044554, -0.2598507]
+    else
+      qgr_values = [-0.0029514, 0.0007379, -0.0064112]
+      p_values = [-0.0594134, 0.0159205, 1.8872153]
+    end
+    ff_chg_values = [8.33]
+    return qgr_values, p_values, ff_chg_values
+  end
+
   def self.apply_installation_quality(model, heating_system, cooling_system, unitary_system, htg_coil, clg_coil, control_zone)
     if not cooling_system.nil?
       charge_defect_ratio = cooling_system.charge_defect_ratio
@@ -3596,13 +3620,7 @@ class HVAC
         fault_program.addLine("Set a2_AF_EIR_c = #{cool_eir_fff_curve.coefficient2x}")
         fault_program.addLine("Set a3_AF_EIR_c = #{cool_eir_fff_curve.coefficient3xPOW2}")
 
-        if f_chg <= 0
-          qgr_values = [-9.46E-01, 4.93E-02, -1.18E-03, -1.15E+00]
-          p_values = [-3.13E-01, 1.15E-02, 2.66E-03, -1.16E-01]
-        else
-          qgr_values = [-1.63E-01, 1.14E-02, -2.10E-04, -1.40E-01]
-          p_values = [2.19E-01, -5.01E-03, 9.89E-04, 2.84E-01]
-        end
+        qgr_values, p_values, ff_chg_values = get_installation_quality_cooling_coeff(f_chg)
 
         fault_program.addLine("Set a1_CH_Qgr_c = #{qgr_values[0]}")
         fault_program.addLine("Set a2_CH_Qgr_c = #{qgr_values[1]}")
@@ -3614,7 +3632,7 @@ class HVAC
         fault_program.addLine("Set a3_CH_P_c = #{p_values[2]}")
         fault_program.addLine("Set a4_CH_P_c = #{p_values[3]}")
 
-        ff_ch_c = 1.0 / (1.0 + (qgr_values[0] + (qgr_values[1] * 26.67) + (qgr_values[2] * 35.0) + (qgr_values[3] * f_chg)) * f_chg)
+        ff_ch_c = 1.0 / (1.0 + (qgr_values[0] + (qgr_values[1] * ff_chg_values[0]) + (qgr_values[2] * ff_chg_values[1]) + (qgr_values[3] * f_chg)) * f_chg)
         fault_program.addLine("Set FF_CH_c = #{ff_ch_c.round(3)}")
 
         fault_program.addLine('Set q0_CH = a1_CH_Qgr_c')
@@ -3686,13 +3704,7 @@ class HVAC
         fault_program.addLine("Set a2_AF_EIR_h = #{heat_eir_fff_curve.coefficient2x}")
         fault_program.addLine("Set a3_AF_EIR_h = #{heat_eir_fff_curve.coefficient3xPOW2}")
 
-        if f_chg <= 0
-          qgr_values = [-0.0338595, 0.0202827, -2.6226343]
-          p_values = [0.0615649, 0.0044554, -0.2598507]
-        else
-          qgr_values = [-0.0029514, 0.0007379, -0.0064112]
-          p_values = [-0.0594134, 0.0159205, 1.8872153]
-        end
+        qgr_values, p_values, ff_chg_values = get_installation_quality_cooling_coeff(f_chg)
 
         fault_program.addLine("Set a1_CH_Qgr_h = #{qgr_values[0]}")
         fault_program.addLine("Set a2_CH_Qgr_h = #{qgr_values[1]}")
@@ -3702,7 +3714,7 @@ class HVAC
         fault_program.addLine("Set a2_CH_P_h = #{p_values[1]}")
         fault_program.addLine("Set a3_CH_P_h = #{p_values[2]}")
 
-        ff_ch_h = 1 / (1 + (qgr_values[0] + qgr_values[1] * 8.33 + qgr_values[2] * f_chg) * f_chg)
+        ff_ch_h = 1 / (1 + (qgr_values[0] + qgr_values[1] * ff_chg_values[0] + qgr_values[2] * f_chg) * f_chg)
         fault_program.addLine("Set FF_CH_h = #{ff_ch_h.round(3)}")
 
         fault_program.addLine('Set qh1_CH = a1_CH_Qgr_h')
