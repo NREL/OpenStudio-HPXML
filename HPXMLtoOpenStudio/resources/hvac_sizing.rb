@@ -1179,7 +1179,7 @@ class HVACSizing
 
     return if (bldg_design_loads.Heat_Tot == 0) || (hvac.HeatingLoadFraction == 0) || hvac.Ducts.empty?
 
-    init_heat_load = bldg_design_loads.Heat_Tot
+    init_heat_load = bldg_design_loads.Heat_Tot * hvac.HeatingLoadFraction
 
     # Distribution system efficiency (DSE) calculations based on ASHRAE Standard 152
     dse_As, dse_Ar = calc_ducts_areas(hvac.Ducts)
@@ -1202,8 +1202,6 @@ class HVACSizing
     delta = 1
     heat_load_next = init_heat_load
 
-    heat_cfm = calc_airflow_rate(init_heat_load, (hvac.SupplyAirTemp - @heat_setpoint))
-
     for _iter in 0..19
       break if delta.abs <= 0.001
 
@@ -1223,19 +1221,20 @@ class HVACSizing
       delta = (heat_load_next - heat_load_prev) / heat_load_prev
     end
 
-    bldg_design_loads.Heat_Ducts += heat_load_next - init_heat_load
-    bldg_design_loads.Heat_Tot = heat_load_next
+    ducts_heat_load = heat_load_next - init_heat_load
+
+    bldg_design_loads.Heat_Ducts += ducts_heat_load
+    bldg_design_loads.Heat_Tot += ducts_heat_load
   end
 
   def self.apply_load_ducts_cooling(bldg_design_loads, weather, hvac)
     '''
     Cooling Duct Loads
     '''
-
     return if (bldg_design_loads.Cool_Sens == 0) || (hvac.CoolingLoadFraction == 0) || hvac.Ducts.empty?
 
-    init_cool_load_sens = bldg_design_loads.Cool_Sens
-    init_cool_load_lat = bldg_design_loads.Cool_Lat
+    init_cool_load_sens = bldg_design_loads.Cool_Sens * hvac.CoolingLoadFraction
+    init_cool_load_lat = bldg_design_loads.Cool_Lat * hvac.CoolingLoadFraction
 
     # Distribution system efficiency (DSE) calculations based on ASHRAE Standard 152
     dse_As, dse_Ar = calc_ducts_areas(hvac.Ducts)
@@ -1262,10 +1261,7 @@ class HVACSizing
     cool_load_tot_next = init_cool_load_sens + init_cool_load_lat
 
     cool_cfm = calc_airflow_rate(init_cool_load_sens, (@cool_setpoint - hvac.LeavingAirTemp))
-
     dse_Qs, dse_Qr = calc_ducts_leakages(hvac.Ducts, cool_cfm)
-
-    cool_load_lat, cool_load_sens = calculate_sensible_latent_split(dse_Qr, cool_load_tot_next, init_cool_load_lat)
 
     for _iter in 1..50
       break if delta.abs <= 0.001
@@ -1288,10 +1284,14 @@ class HVACSizing
       delta = (cool_load_tot_next - cool_load_tot_prev) / cool_load_tot_prev
     end
 
-    bldg_design_loads.Cool_Ducts_Sens += cool_load_sens - init_cool_load_sens
-    bldg_design_loads.Cool_Sens += cool_load_sens - init_cool_load_sens
-    bldg_design_loads.Cool_Ducts_Lat += cool_load_lat - init_cool_load_lat
-    bldg_design_loads.Cool_Lat += cool_load_lat - init_cool_load_lat
+    ducts_cool_load_sens = cool_load_sens - init_cool_load_sens
+    ducts_cool_load_lat = cool_load_lat - init_cool_load_lat
+
+    bldg_design_loads.Cool_Ducts_Sens += ducts_cool_load_sens
+    bldg_design_loads.Cool_Sens += ducts_cool_load_sens
+    bldg_design_loads.Cool_Ducts_Lat += ducts_cool_load_lat
+    bldg_design_loads.Cool_Lat += ducts_cool_load_lat
+    bldg_design_loads.Cool_Tot += ducts_cool_load_sens + ducts_cool_load_lat
   end
 
   def self.apply_hvac_equipment_adjustments(hvac_sizing_values, weather, hvac, cfa)
