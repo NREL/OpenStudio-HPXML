@@ -175,7 +175,7 @@
         "hot_tub_present": false,
         "hot_tub_pump_annual_kwh": "auto",
         "hot_tub_pump_usage_multiplier": 1.0,
-        "hpxml_path": "../BuildResidentialHPXML/tests/built_residential_hpxml/extra-second-heating-system-portable-heater.xml",
+        "hpxml_path": "../BuildResidentialHPXML/tests/built_residential_hpxml/extra-second-heating-system-portable-heater-to-heating-system.xml",
         "kitchen_fans_quantity": "0",
         "lighting_fraction_cfl_exterior": 0.4,
         "lighting_fraction_cfl_garage": 0.4,
