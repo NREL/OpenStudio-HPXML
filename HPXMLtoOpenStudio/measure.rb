@@ -333,6 +333,10 @@ class OSModel
     # Write updated HPXML object (w/ defaults) to file for inspection
     hpxml_defaults_path = File.join(output_dir, 'in.xml')
     XMLHelper.write_file(@hpxml.to_oga, hpxml_defaults_path)
+
+    # Now that we've written in.xml, ensure that no capacities/airflows
+    # are zero in order to prevent potential E+ errors.
+    HVAC.ensure_nonzero_sizing_values(@hpxml)
   end
 
   def self.add_simulation_params(model)
