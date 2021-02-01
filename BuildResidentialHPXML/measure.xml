@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>8504a4df-ab8a-4c18-ba8f-0421de3d1412</version_id>
-  <version_modified>20210201T170221Z</version_modified>
+  <version_id>990dfda5-961a-490b-9cba-cf0e70573565</version_id>
+  <version_modified>20210201T225439Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -7517,6 +7517,12 @@
       <checksum>9B11E688</checksum>
     </file>
     <file>
+      <filename>extra-second-heating-system-portable-heater-to-heat-pump.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>05E61FB8</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.0</identifier>
@@ -7525,13 +7531,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C06751BB</checksum>
-    </file>
-    <file>
-      <filename>extra-second-heating-system-portable-heater-to-heat-pump.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>05E61FB8</checksum>
+      <checksum>FC89E4EB</checksum>
     </file>
   </files>
 </measure>

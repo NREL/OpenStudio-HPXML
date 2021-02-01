@@ -2864,6 +2864,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       return false
     end
 
+    Geometry.tear_down_model(model, runner)
+
     Version.check_openstudio_version()
 
     # assign the user inputs to variables
