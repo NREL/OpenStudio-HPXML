@@ -260,9 +260,12 @@ def create_osws
     'extra-pv-roofpitch.osw' => 'base.osw',
     'extra-dhw-solar-latitude.osw' => 'base.osw',
     'extra-second-refrigerator.osw' => 'base.osw',
-    'extra-second-heating-system-portable-heater.osw' => 'base.osw',
-    'extra-second-heating-system-fireplace.osw' => 'base.osw',
-    'extra-second-heating-system-boiler.osw' => 'base.osw',
+    'extra-second-heating-system-portable-heater-to-heating-system.osw' => 'base.osw',
+    'extra-second-heating-system-fireplace-to-heating-system.osw' => 'base-hvac-elec-resistance-only.osw',
+    'extra-second-heating-system-boiler-to-heating-system.osw' => 'base-hvac-boiler-gas-central-ac-1-speed.osw',
+    'extra-second-heating-system-portable-heater-to-heat-pump.osw' => 'base-hvac-air-to-air-heat-pump-1-speed.osw',
+    'extra-second-heating-system-fireplace-to-heat-pump.osw' => 'base-hvac-mini-split-heat-pump-ducted.osw',
+    'extra-second-heating-system-boiler-to-heat-pump.osw' => 'base-hvac-ground-to-air-heat-pump.osw',
     'extra-enclosure-garage-partially-protruded.osw' => 'base.osw',
     'extra-vacancy-6-months.osw' => 'base-schedules-stochastic.osw',
     'extra-schedules-random-seed.osw' => 'base-schedules-stochastic.osw',
@@ -339,7 +342,10 @@ def create_osws
     'invalid_files/conditioned-basement-with-ceiling-insulation.osw' => 'base.osw',
     'invalid_files/conditioned-attic-with-floor-insulation.osw' => 'base.osw',
     'invalid_files/dhw-indirect-without-boiler.osw' => 'base.osw',
-    'invalid_files/multipliers-without-plug-loads.osw' => 'base.osw',
+    'invalid_files/multipliers-without-tv-plug-loads.osw' => 'base.osw',
+    'invalid_files/multipliers-without-other-plug-loads.osw' => 'base.osw',
+    'invalid_files/multipliers-without-well-pump-plug-loads.osw' => 'base.osw',
+    'invalid_files/multipliers-without-vehicle-plug-loads.osw' => 'base.osw',
     'invalid_files/multipliers-without-fuel-loads.osw' => 'base.osw'
   }
 
@@ -1879,7 +1885,7 @@ def get_values(osw_file, step)
     step.setArgument('solar_thermal_collector_tilt', 'latitude-15')
   elsif ['extra-second-refrigerator.osw'].include? osw_file
     step.setArgument('extra_refrigerator_location', HPXML::LocationLivingSpace)
-  elsif ['extra-second-heating-system-portable-heater.osw'].include? osw_file
+  elsif ['extra-second-heating-system-portable-heater-to-heating-system.osw'].include? osw_file
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('heating_system_heating_capacity', '48000.0')
     step.setArgument('heating_system_fraction_heat_load_served', 0.75)
@@ -1889,16 +1895,30 @@ def get_values(osw_file, step)
     step.setArgument('ducts_return_location', HPXML::LocationLivingSpace)
     step.setArgument('heating_system_type_2', HPXML::HVACTypePortableHeater)
     step.setArgument('heating_system_heating_capacity_2', '16000.0')
-  elsif ['extra-second-heating-system-fireplace.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeElectricResistance)
-    step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
+  elsif ['extra-second-heating-system-fireplace-to-heating-system.osw'].include? osw_file
     step.setArgument('heating_system_heating_capacity', '48000.0')
     step.setArgument('heating_system_fraction_heat_load_served', 0.75)
     step.setArgument('heating_system_type_2', HPXML::HVACTypeFireplace)
     step.setArgument('heating_system_heating_capacity_2', '16000.0')
-  elsif ['extra-second-heating-system-boiler.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
+  elsif ['extra-second-heating-system-boiler-to-heating-system.osw'].include? osw_file
     step.setArgument('heating_system_fraction_heat_load_served', 0.75)
+    step.setArgument('heating_system_type_2', HPXML::HVACTypeBoiler)
+  elsif ['extra-second-heating-system-portable-heater-to-heat-pump.osw'].include? osw_file
+    step.setArgument('heat_pump_heating_capacity', '48000.0')
+    step.setArgument('heat_pump_fraction_heat_load_served', 0.75)
+    step.setArgument('ducts_supply_leakage_value', 0.0)
+    step.setArgument('ducts_return_leakage_value', 0.0)
+    step.setArgument('ducts_supply_location', HPXML::LocationLivingSpace)
+    step.setArgument('ducts_return_location', HPXML::LocationLivingSpace)
+    step.setArgument('heating_system_type_2', HPXML::HVACTypePortableHeater)
+    step.setArgument('heating_system_heating_capacity_2', '16000.0')
+  elsif ['extra-second-heating-system-fireplace-to-heat-pump.osw'].include? osw_file
+    step.setArgument('heat_pump_heating_capacity', '48000.0')
+    step.setArgument('heat_pump_fraction_heat_load_served', 0.75)
+    step.setArgument('heating_system_type_2', HPXML::HVACTypeFireplace)
+    step.setArgument('heating_system_heating_capacity_2', '16000.0')
+  elsif ['extra-second-heating-system-boiler-to-heat-pump.osw'].include? osw_file
+    step.setArgument('heat_pump_fraction_heat_load_served', 0.75)
     step.setArgument('heating_system_type_2', HPXML::HVACTypeBoiler)
   elsif ['extra-enclosure-garage-partially-protruded.osw'].include? osw_file
     step.setArgument('geometry_garage_width', 12)
@@ -2133,10 +2153,15 @@ def get_values(osw_file, step)
     step.setArgument('geometry_attic_type', HPXML::AtticTypeConditioned)
   elsif ['invalid_files/dhw-indirect-without-boiler.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeCombiStorage)
-  elsif ['invalid_files/multipliers-without-plug-loads.osw'].include? osw_file
+  elsif ['invalid_files/multipliers-without-tv-plug-loads.osw'].include? osw_file
     step.setArgument('plug_loads_television_annual_kwh', '0.0')
+  elsif ['invalid_files/multipliers-without-other-plug-loads.osw'].include? osw_file
     step.setArgument('plug_loads_other_annual_kwh', '0.0')
+  elsif ['invalid_files/multipliers-without-well-pump-plug-loads.osw'].include? osw_file
+    step.setArgument('plug_loads_well_pump_annual_kwh', '0.0')
     step.setArgument('plug_loads_well_pump_usage_multiplier', 1.0)
+  elsif ['invalid_files/multipliers-without-vehicle-plug-loads.osw'].include? osw_file
+    step.setArgument('plug_loads_vehicle_annual_kwh', '0.0')
     step.setArgument('plug_loads_vehicle_usage_multiplier', 1.0)
   elsif ['invalid_files/multipliers-without-fuel-loads.osw'].include? osw_file
     step.setArgument('fuel_loads_grill_usage_multiplier', 1.0)
