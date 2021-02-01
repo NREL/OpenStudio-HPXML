@@ -204,7 +204,7 @@ class Geometry
     return heat_gain, hrs_per_day, sens_frac, lat_frac
   end
 
-  def tear_down_model(model, runner)
+  def self.tear_down_model(model, runner)
     # Tear down the existing model if it exists
     has_existing_objects = (model.getThermalZones.size > 0)
     handles = OpenStudio::UUIDVector.new
