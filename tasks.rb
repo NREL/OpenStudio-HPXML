@@ -291,7 +291,10 @@ def create_osws
     'invalid_files/conditioned-basement-with-ceiling-insulation.osw' => 'base.osw',
     'invalid_files/conditioned-attic-with-floor-insulation.osw' => 'base.osw',
     'invalid_files/dhw-indirect-without-boiler.osw' => 'base.osw',
-    'invalid_files/multipliers-without-plug-loads.osw' => 'base.osw',
+    'invalid_files/multipliers-without-tv-plug-loads.osw' => 'base.osw',
+    'invalid_files/multipliers-without-other-plug-loads.osw' => 'base.osw',
+    'invalid_files/multipliers-without-well-pump-plug-loads.osw' => 'base.osw',
+    'invalid_files/multipliers-without-vehicle-plug-loads.osw' => 'base.osw',
     'invalid_files/multipliers-without-fuel-loads.osw' => 'base.osw'
   }
 
@@ -1945,10 +1948,15 @@ def get_values(osw_file, step)
     step.setArgument('geometry_attic_type', HPXML::AtticTypeConditioned)
   elsif ['invalid_files/dhw-indirect-without-boiler.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeCombiStorage)
-  elsif ['invalid_files/multipliers-without-plug-loads.osw'].include? osw_file
+  elsif ['invalid_files/multipliers-without-tv-plug-loads.osw'].include? osw_file
     step.setArgument('plug_loads_television_annual_kwh', '0.0')
+  elsif ['invalid_files/multipliers-without-other-plug-loads.osw'].include? osw_file
     step.setArgument('plug_loads_other_annual_kwh', '0.0')
+  elsif ['invalid_files/multipliers-without-well-pump-plug-loads.osw'].include? osw_file
+    step.setArgument('plug_loads_well_pump_annual_kwh', '0.0')
     step.setArgument('plug_loads_well_pump_usage_multiplier', 1.0)
+  elsif ['invalid_files/multipliers-without-vehicle-plug-loads.osw'].include? osw_file
+    step.setArgument('plug_loads_vehicle_annual_kwh', '0.0')
     step.setArgument('plug_loads_vehicle_usage_multiplier', 1.0)
   elsif ['invalid_files/multipliers-without-fuel-loads.osw'].include? osw_file
     step.setArgument('fuel_loads_grill_usage_multiplier', 1.0)

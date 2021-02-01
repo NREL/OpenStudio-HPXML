@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>e163917b-e78d-4197-976e-7132907012d5</version_id>
-  <version_modified>20210129T222748Z</version_modified>
+  <version_id>87f20540-b6f3-4857-b7e9-4f5faf1e2ed2</version_id>
+  <version_modified>20210201T162410Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -1752,7 +1752,7 @@
     <argument>
       <name>cooling_system_cooling_efficiency</name>
       <display_name>Cooling System: Efficiency</display_name>
-      <description>The rated efficiency value of the cooling system.</description>
+      <description>The rated efficiency value of the cooling system. System types central air conditioner and mini-split use SEER. System type room air conditioner uses EER.</description>
       <type>Double</type>
       <units>SEER or EER</units>
       <required>true</required>
@@ -1896,7 +1896,7 @@
     <argument>
       <name>heat_pump_heating_efficiency</name>
       <display_name>Heat Pump: Heating Efficiency</display_name>
-      <description>The rated heating efficiency value of the heat pump.</description>
+      <description>The rated heating efficiency value of the heat pump. System types air-to-air and mini-split use HSPF. System type ground-to-air uses COP.</description>
       <type>Double</type>
       <units>HSPF or COP</units>
       <required>true</required>
@@ -1925,7 +1925,7 @@
     <argument>
       <name>heat_pump_cooling_efficiency</name>
       <display_name>Heat Pump: Cooling Efficiency</display_name>
-      <description>The rated cooling efficiency value of the heat pump.</description>
+      <description>The rated cooling efficiency value of the heat pump. System types air-to-air and mini-split use SEER. System type ground-to-air uses EER.</description>
       <type>Double</type>
       <units>SEER or EER</units>
       <required>true</required>
@@ -2605,7 +2605,7 @@
     <argument>
       <name>mech_vent_total_recovery_efficiency</name>
       <display_name>Mechanical Ventilation: Total Recovery Efficiency</display_name>
-      <description>The Unadjusted or Adjusted total recovery efficiency of the mechanical ventilation.</description>
+      <description>The Unadjusted or Adjusted total recovery efficiency of the mechanical ventilation. Applies to energy recovery ventilator.</description>
       <type>Double</type>
       <units>Frac</units>
       <required>true</required>
@@ -2615,7 +2615,7 @@
     <argument>
       <name>mech_vent_sensible_recovery_efficiency</name>
       <display_name>Mechanical Ventilation: Sensible Recovery Efficiency</display_name>
-      <description>The Unadjusted or Adjusted sensible recovery efficiency of the mechanical ventilation.</description>
+      <description>The Unadjusted or Adjusted sensible recovery efficiency of the mechanical ventilation. Applies to energy recovery ventilator and heat recovery ventilator.</description>
       <type>Double</type>
       <units>Frac</units>
       <required>true</required>
@@ -2820,7 +2820,7 @@
     <argument>
       <name>mech_vent_total_recovery_efficiency_2</name>
       <display_name>Mechanical Ventilation 2: Total Recovery Efficiency</display_name>
-      <description>The Unadjusted or Adjusted total recovery efficiency of the second mechanical ventilation.</description>
+      <description>The Unadjusted or Adjusted total recovery efficiency of the second mechanical ventilation. Applies to energy recovery ventilator.</description>
       <type>Double</type>
       <units>Frac</units>
       <required>true</required>
@@ -2830,7 +2830,7 @@
     <argument>
       <name>mech_vent_sensible_recovery_efficiency_2</name>
       <display_name>Mechanical Ventilation 2: Sensible Recovery Efficiency</display_name>
-      <description>The Unadjusted or Adjusted sensible recovery efficiency of the second mechanical ventilation.</description>
+      <description>The Unadjusted or Adjusted sensible recovery efficiency of the second mechanical ventilation. Applies to energy recovery ventilator and heat recovery ventilator.</description>
       <type>Double</type>
       <units>Frac</units>
       <required>true</required>
@@ -6281,12 +6281,6 @@
       <checksum>9ED612C8</checksum>
     </file>
     <file>
-      <filename>geometry.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D8BA3AF2</checksum>
-    </file>
-    <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -6296,7 +6290,13 @@
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>08E5FDB4</checksum>
+      <checksum>9B11E688</checksum>
+    </file>
+    <file>
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>7576BFF1</checksum>
     </file>
     <file>
       <filename>base.osw</filename>
@@ -6587,6 +6587,18 @@
       <checksum>0FB74385</checksum>
     </file>
     <file>
+      <filename>base-hvac-furnace-gas-room-ac.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FDFF0FB5</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-room-ac-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8614A1F1</checksum>
+    </file>
+    <file>
       <filename>base-atticroof-flat.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -6747,6 +6759,12 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>E3B9B572</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-room-ac-only-33percent.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D1980717</checksum>
     </file>
     <file>
       <filename>base-hvac-furnace-elec-central-ac-1-speed.osw</filename>
@@ -7457,24 +7475,6 @@
       <checksum>58E22917</checksum>
     </file>
     <file>
-      <filename>base-hvac-furnace-gas-room-ac.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>FDFF0FB5</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-room-ac-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8614A1F1</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-room-ac-only-33percent.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>D1980717</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.0</identifier>
@@ -7483,7 +7483,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>AE32979B</checksum>
+      <checksum>1ADAFAFA</checksum>
     </file>
   </files>
 </measure>
