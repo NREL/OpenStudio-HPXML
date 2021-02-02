@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>87f20540-b6f3-4857-b7e9-4f5faf1e2ed2</version_id>
-  <version_modified>20210201T162410Z</version_modified>
+  <version_id>6acec5be-8f5d-4c0f-a6e5-88161aebbb0a</version_id>
+  <version_modified>20210202T013619Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -736,7 +736,7 @@
     <argument>
       <name>floor_assembly_r</name>
       <display_name>Floor: Assembly R-value</display_name>
-      <description>Assembly R-value for the floor (foundation ceiling). Ignored if a slab foundation.</description>
+      <description>Assembly R-value for the floor (foundation ceiling). Ignored if the building has a slab foundation.</description>
       <type>Double</type>
       <units>h-ft^2-R/Btu</units>
       <required>true</required>
@@ -1733,7 +1733,7 @@
     <argument>
       <name>cooling_system_cooling_efficiency_type</name>
       <display_name>Cooling System: Efficiency Type</display_name>
-      <description>The efficiency type of the cooling system.</description>
+      <description>The efficiency type of the cooling system. System types central air conditioner and mini-split use SEER. System type room air conditioner uses EER. Ignored for system type evaporative cooler.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -1752,7 +1752,7 @@
     <argument>
       <name>cooling_system_cooling_efficiency</name>
       <display_name>Cooling System: Efficiency</display_name>
-      <description>The rated efficiency value of the cooling system. System types central air conditioner and mini-split use SEER. System type room air conditioner uses EER.</description>
+      <description>The rated efficiency value of the cooling system. Ignored for evaporative cooler.</description>
       <type>Double</type>
       <units>SEER or EER</units>
       <required>true</required>
@@ -1877,7 +1877,7 @@
     <argument>
       <name>heat_pump_heating_efficiency_type</name>
       <display_name>Heat Pump: Heating Efficiency Type</display_name>
-      <description>The heating efficiency type of heat pump.</description>
+      <description>The heating efficiency type of heat pump. System types air-to-air and mini-split use HSPF. System type ground-to-air uses COP.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -1896,7 +1896,7 @@
     <argument>
       <name>heat_pump_heating_efficiency</name>
       <display_name>Heat Pump: Heating Efficiency</display_name>
-      <description>The rated heating efficiency value of the heat pump. System types air-to-air and mini-split use HSPF. System type ground-to-air uses COP.</description>
+      <description>The rated heating efficiency value of the heat pump.</description>
       <type>Double</type>
       <units>HSPF or COP</units>
       <required>true</required>
@@ -1906,7 +1906,7 @@
     <argument>
       <name>heat_pump_cooling_efficiency_type</name>
       <display_name>Heat Pump: Cooling Efficiency Type</display_name>
-      <description>The cooling efficiency type of heat pump.</description>
+      <description>The cooling efficiency type of heat pump. System types air-to-air and mini-split use SEER. System type ground-to-air uses EER.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -1925,7 +1925,7 @@
     <argument>
       <name>heat_pump_cooling_efficiency</name>
       <display_name>Heat Pump: Cooling Efficiency</display_name>
-      <description>The rated cooling efficiency value of the heat pump. System types air-to-air and mini-split use SEER. System type ground-to-air uses EER.</description>
+      <description>The rated cooling efficiency value of the heat pump.</description>
       <type>Double</type>
       <units>SEER or EER</units>
       <required>true</required>
@@ -2107,6 +2107,118 @@
       <units>Frac</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>heating_system_type_2</name>
+      <display_name>Heating System 2: Type</display_name>
+      <description>The type of the second heating system.</description>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>none</default_value>
+      <choices>
+        <choice>
+          <value>none</value>
+          <display_name>none</display_name>
+        </choice>
+        <choice>
+          <value>WallFurnace</value>
+          <display_name>WallFurnace</display_name>
+        </choice>
+        <choice>
+          <value>FloorFurnace</value>
+          <display_name>FloorFurnace</display_name>
+        </choice>
+        <choice>
+          <value>Boiler</value>
+          <display_name>Boiler</display_name>
+        </choice>
+        <choice>
+          <value>ElectricResistance</value>
+          <display_name>ElectricResistance</display_name>
+        </choice>
+        <choice>
+          <value>Stove</value>
+          <display_name>Stove</display_name>
+        </choice>
+        <choice>
+          <value>PortableHeater</value>
+          <display_name>PortableHeater</display_name>
+        </choice>
+        <choice>
+          <value>Fireplace</value>
+          <display_name>Fireplace</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>heating_system_fuel_2</name>
+      <display_name>Heating System 2: Fuel Type</display_name>
+      <description>The fuel type of the second heating system. Ignored for ElectricResistance.</description>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>electricity</default_value>
+      <choices>
+        <choice>
+          <value>electricity</value>
+          <display_name>electricity</display_name>
+        </choice>
+        <choice>
+          <value>natural gas</value>
+          <display_name>natural gas</display_name>
+        </choice>
+        <choice>
+          <value>fuel oil</value>
+          <display_name>fuel oil</display_name>
+        </choice>
+        <choice>
+          <value>propane</value>
+          <display_name>propane</display_name>
+        </choice>
+        <choice>
+          <value>wood</value>
+          <display_name>wood</display_name>
+        </choice>
+        <choice>
+          <value>wood pellets</value>
+          <display_name>wood pellets</display_name>
+        </choice>
+        <choice>
+          <value>coal</value>
+          <display_name>coal</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>heating_system_heating_efficiency_2</name>
+      <display_name>Heating System 2: Rated AFUE or Percent</display_name>
+      <description>For Furnace/WallFurnace/FloorFurnace/Boiler second heating system, the rated AFUE value. For ElectricResistance/Stove/PortableHeater/Fireplace, the rated Percent value.</description>
+      <type>Double</type>
+      <units>Frac</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
+    </argument>
+    <argument>
+      <name>heating_system_heating_capacity_2</name>
+      <display_name>Heating System 2: Heating Capacity</display_name>
+      <description>The output heating capacity of the second heating system. If using 'auto', the autosizing algorithm will use ACCA Manual J/S to set the capacity to meet its load served.</description>
+      <type>String</type>
+      <units>Btu/hr</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>auto</default_value>
+    </argument>
+    <argument>
+      <name>heating_system_fraction_heat_load_served_2</name>
+      <display_name>Heating System 2: Fraction Heat Load Served</display_name>
+      <description>The heat load served fraction of the second heating system.</description>
+      <type>Double</type>
+      <units>Frac</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.25</default_value>
     </argument>
     <argument>
       <name>setpoint_heating_weekday</name>
@@ -2411,118 +2523,6 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
-    </argument>
-    <argument>
-      <name>heating_system_type_2</name>
-      <display_name>Heating System 2: Type</display_name>
-      <description>The type of the second heating system.</description>
-      <type>Choice</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>none</default_value>
-      <choices>
-        <choice>
-          <value>none</value>
-          <display_name>none</display_name>
-        </choice>
-        <choice>
-          <value>WallFurnace</value>
-          <display_name>WallFurnace</display_name>
-        </choice>
-        <choice>
-          <value>FloorFurnace</value>
-          <display_name>FloorFurnace</display_name>
-        </choice>
-        <choice>
-          <value>Boiler</value>
-          <display_name>Boiler</display_name>
-        </choice>
-        <choice>
-          <value>ElectricResistance</value>
-          <display_name>ElectricResistance</display_name>
-        </choice>
-        <choice>
-          <value>Stove</value>
-          <display_name>Stove</display_name>
-        </choice>
-        <choice>
-          <value>PortableHeater</value>
-          <display_name>PortableHeater</display_name>
-        </choice>
-        <choice>
-          <value>Fireplace</value>
-          <display_name>Fireplace</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>heating_system_fuel_2</name>
-      <display_name>Heating System 2: Fuel Type</display_name>
-      <description>The fuel type of the second heating system. Ignored for ElectricResistance.</description>
-      <type>Choice</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>electricity</default_value>
-      <choices>
-        <choice>
-          <value>electricity</value>
-          <display_name>electricity</display_name>
-        </choice>
-        <choice>
-          <value>natural gas</value>
-          <display_name>natural gas</display_name>
-        </choice>
-        <choice>
-          <value>fuel oil</value>
-          <display_name>fuel oil</display_name>
-        </choice>
-        <choice>
-          <value>propane</value>
-          <display_name>propane</display_name>
-        </choice>
-        <choice>
-          <value>wood</value>
-          <display_name>wood</display_name>
-        </choice>
-        <choice>
-          <value>wood pellets</value>
-          <display_name>wood pellets</display_name>
-        </choice>
-        <choice>
-          <value>coal</value>
-          <display_name>coal</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>heating_system_heating_efficiency_2</name>
-      <display_name>Heating System 2: Rated AFUE or Percent</display_name>
-      <description>For Furnace/WallFurnace/FloorFurnace/Boiler second heating system, the rated AFUE value. For ElectricResistance/Stove/PortableHeater/Fireplace, the rated Percent value.</description>
-      <type>Double</type>
-      <units>Frac</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>1</default_value>
-    </argument>
-    <argument>
-      <name>heating_system_heating_capacity_2</name>
-      <display_name>Heating System 2: Heating Capacity</display_name>
-      <description>The output heating capacity of the second heating system. If using 'auto', the autosizing algorithm will use ACCA Manual J/S to set the capacity to meet its load served.</description>
-      <type>String</type>
-      <units>Btu/hr</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>auto</default_value>
-    </argument>
-    <argument>
-      <name>heating_system_fraction_heat_load_served_2</name>
-      <display_name>Heating System 2: Fraction Heat Load Served</display_name>
-      <description>The heat load served fraction of the second heating system.</description>
-      <type>Double</type>
-      <units>Frac</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0.25</default_value>
     </argument>
     <argument>
       <name>mech_vent_fan_type</name>
@@ -3126,7 +3126,7 @@
     <argument>
       <name>water_heater_tank_volume</name>
       <display_name>Water Heater: Tank Volume</display_name>
-      <description>Nominal volume of water heater tank. Set to auto to have volume autosized. Only applies to storage water heater, heat pump water heater, and space-heating boiler with storage tank.</description>
+      <description>Nominal volume of water heater tank. Set to 'auto' to have volume autosized. Only applies to storage water heater, heat pump water heater, and space-heating boiler with storage tank.</description>
       <type>String</type>
       <units>gal</units>
       <required>true</required>
@@ -6287,16 +6287,16 @@
       <checksum>24396BA2</checksum>
     </file>
     <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>9B11E688</checksum>
-    </file>
-    <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>7576BFF1</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9B11E688</checksum>
     </file>
     <file>
       <filename>base.osw</filename>
@@ -6851,18 +6851,6 @@
       <checksum>4F932A29</checksum>
     </file>
     <file>
-      <filename>extra-second-heating-system-fireplace.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>9C572C9F</checksum>
-    </file>
-    <file>
-      <filename>extra-second-heating-system-portable-heater.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2E8EB1D8</checksum>
-    </file>
-    <file>
       <filename>base-lighting-detailed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -7361,12 +7349,6 @@
       <checksum>D12D7C80</checksum>
     </file>
     <file>
-      <filename>extra-second-heating-system-boiler.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2EB6711C</checksum>
-    </file>
-    <file>
       <filename>base-enclosure-infil-flue.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -7475,6 +7457,42 @@
       <checksum>58E22917</checksum>
     </file>
     <file>
+      <filename>extra-second-heating-system-portable-heater-to-heating-system.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8EDF7F81</checksum>
+    </file>
+    <file>
+      <filename>extra-second-heating-system-boiler-to-heating-system.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B5A72A55</checksum>
+    </file>
+    <file>
+      <filename>extra-second-heating-system-fireplace-to-heating-system.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F9010280</checksum>
+    </file>
+    <file>
+      <filename>extra-second-heating-system-boiler-to-heat-pump.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>58CDFDAC</checksum>
+    </file>
+    <file>
+      <filename>extra-second-heating-system-fireplace-to-heat-pump.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C56998D5</checksum>
+    </file>
+    <file>
+      <filename>extra-second-heating-system-portable-heater-to-heat-pump.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>75E35345</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.0</identifier>
@@ -7483,7 +7501,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>1ADAFAFA</checksum>
+      <checksum>D5C73421</checksum>
     </file>
   </files>
 </measure>
