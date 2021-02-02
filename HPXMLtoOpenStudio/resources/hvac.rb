@@ -3944,25 +3944,18 @@ class HVAC
 
     hpxml.cooling_systems.each do |cooling_system|
       heating_system = nil
-      if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+      if is_central_air_conditioner_and_furnace(hpxml, cooling_system.attached_heating_system, cooling_system)
         heating_system = cooling_system.attached_heating_system
-        if not is_central_air_conditioner_and_furnace(hpxml, heating_system, cooling_system)
-          heating_system = nil
-        end
       end
       hvac_systems << { cooling: cooling_system,
                         heating: heating_system }
     end
 
     hpxml.heating_systems.each do |heating_system|
-      cooling_system = nil
-      if heating_system.heating_system_type == HPXML::HVACTypeFurnace
-        cooling_system = heating_system.attached_cooling_system
-        if is_central_air_conditioner_and_furnace(hpxml, heating_system, cooling_system)
-          next # Already processed combined AC+furnace
-        end
+      if is_central_air_conditioner_and_furnace(hpxml, heating_system, heating_system.attached_cooling_system)
+        next # Already processed combined AC+furnace
       end
-      hvac_systems << { cooling: cooling_system,
+      hvac_systems << { cooling: nil,
                         heating: heating_system }
     end
 
