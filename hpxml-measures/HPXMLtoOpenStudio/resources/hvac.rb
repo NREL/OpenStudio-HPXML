@@ -3706,7 +3706,7 @@ class HVAC
         fault_program.addLine("Set a2_AF_EIR_h = #{heat_eir_fff_curve.coefficient2x}")
         fault_program.addLine("Set a3_AF_EIR_h = #{heat_eir_fff_curve.coefficient3xPOW2}")
 
-        qgr_values, p_values, ff_chg_values = get_installation_quality_cooling_coeff(f_chg)
+        qgr_values, p_values, ff_chg_values = get_installation_quality_heating_coeff(f_chg)
 
         fault_program.addLine("Set a1_CH_Qgr_h = #{qgr_values[0]}")
         fault_program.addLine("Set a2_CH_Qgr_h = #{qgr_values[1]}")
