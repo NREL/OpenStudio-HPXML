@@ -718,10 +718,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     clg_cap = hpxml.heat_pumps[0].cooling_capacity
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    assert(hpxml_default.heating_systems[0].heating_capacity > htg_cap)
-    assert(hpxml_default.heating_systems[0].heating_capacity_17F > htg_17f_cap)
-    assert(hpxml_default.heating_systems[0].backup_heating_capacity > htg_bak_cap)
-    assert(hpxml_default.cooling_systems[0].cooling_capacity > clg_cap)
+    assert(hpxml_default.heat_pumps[0].heating_capacity > htg_cap)
+    assert(hpxml_default.heat_pumps[0].heating_capacity_17F > htg_17f_cap)
+    assert(hpxml_default.heat_pumps[0].backup_heating_capacity > htg_bak_cap)
+    assert(hpxml_default.heat_pumps[0].cooling_capacity > clg_cap)
   end
 
   def test_hvac_controls
