@@ -1877,6 +1877,22 @@ class HPXMLDefaults
 
         # Heating capacities
         if htg_sys.heating_capacity.nil? || ((htg_sys.heating_capacity - hvac_sizing_values.Heat_Capacity).abs >= 1.0)
+          # Heating capacity @ 17F
+          if htg_sys.respond_to? :heating_capacity_17F
+            if not htg_sys.heating_capacity.nil?
+              # Fixed value entered; scale w/ heating_capacity in case allow_increased_fixed_capacities=true
+              htg_cap_17f = htg_sys.heating_capacity_17F * hvac_sizing_values.Heat_Capacity.round / htg_sys.heating_capacity
+              if htg_sys.heating_capacity_17F.nil? || ((htg_sys.heating_capacity_17F - htg_cap_17f).abs >= 1.0)
+                htg_sys.heating_capacity_17F = htg_cap_17f
+                htg_sys.heating_capacity_17F_isdefaulted = true
+              end
+            else
+              # Autosized
+              # FUTURE: Calculate HeatingCapacity17F from heat_cap_ft_spec? Might be confusing
+              # since user would not be able to replicate the results using this value, as the
+              # default curves are non-linear.
+            end
+          end
           htg_sys.heating_capacity = hvac_sizing_values.Heat_Capacity.round
           htg_sys.heating_capacity_isdefaulted = true
         end
