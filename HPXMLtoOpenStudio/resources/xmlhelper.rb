@@ -58,6 +58,11 @@ class XMLHelper
 
   # Returns the value of 'element_name' in the parent element or nil.
   def self.get_value(parent, element_name, datatype)
+    value, isdefaulted = get_value_and_defaulted(parent, element_name, datatype)
+    return value
+  end
+
+  def self.get_value_and_defaulted(parent, element_name, datatype)
     element = parent.at_xpath(element_name)
     if element.nil?
       return
@@ -74,7 +79,9 @@ class XMLHelper
       fail 'Unexpected datatype.'
     end
 
-    return value
+    isdefaulted = get_attribute_value(element, 'dataSource') == 'software'
+
+    return value, isdefaulted
   end
 
   # Returns the value(s) of 'element_name' in the parent element or [].
