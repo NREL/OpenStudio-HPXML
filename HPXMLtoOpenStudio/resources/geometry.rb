@@ -60,6 +60,15 @@ class Geometry
     return maxzs.max - minzs.min
   end
 
+  def self.get_max_z_of_spaces(spaces)
+    maxzs = []
+    spaces.each do |space|
+      zvalues = getSurfaceZValues(space.surfaces)
+      maxzs << zvalues.max + UnitConversions.convert(space.zOrigin, 'm', 'ft')
+    end
+    return maxzs.max
+  end
+
   # Return an array of z values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
   def self.getSurfaceZValues(surfaceArray)
     zValueArray = []
@@ -193,18 +202,5 @@ class Geometry
     sens_frac = sens_gains / tot_gains
     lat_frac = lat_gains / tot_gains
     return heat_gain, hrs_per_day, sens_frac, lat_frac
-  end
-
-  def self.tear_down_model(model, runner)
-    # Tear down the existing model if it exists
-    has_existing_objects = (model.getThermalZones.size > 0)
-    handles = OpenStudio::UUIDVector.new
-    model.objects.each do |obj|
-      handles << obj.handle
-    end
-    model.removeObjects(handles)
-    if has_existing_objects
-      runner.registerWarning('The model contains existing objects and is being reset.')
-    end
   end
 end
