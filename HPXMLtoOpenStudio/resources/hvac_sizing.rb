@@ -1692,15 +1692,8 @@ class HVACSizing
         cool_airflow_rated_ratio = []
         cool_cfm_m3s = UnitConversions.convert(hvac_sizing_values.Cool_Airflow, 'cfm', 'm^3/s')
         for speed in 0..(hvac.NumSpeedsCooling - 1)
-          if [HPXML::HVACTypeHeatPumpAirToAir,
-              HPXML::HVACTypeCentralAirConditioner].include? hvac.CoolType
-            cool_airflow_rated_ratio << cool_cfm_m3s / HVAC.calc_rated_airflow_clg(hvac_sizing_values.Cool_Capacity, hvac.RatedCFMperTonCooling[speed], hvac.CapacityRatioCooling[speed])
-            cool_airflow_rated_defect_ratio << cool_cfm_m3s * (1 + hvac.AirflowDefectRatioCooling) / HVAC.calc_rated_airflow_clg(hvac_sizing_values.Cool_Capacity, hvac.RatedCFMperTonCooling[speed], hvac.CapacityRatioCooling[speed])
-          else [HPXML::HVACTypeHeatPumpMiniSplit,
-                HPXML::HVACTypeMiniSplitAirConditioner].include? hvac.CoolType
-               cool_airflow_rated_ratio << cool_cfm_m3s / HVAC.calc_rated_airflow_clg(hvac_sizing_values.Cool_Capacity, hvac.RatedCFMperTonCooling[speed])
-               cool_airflow_rated_defect_ratio << cool_cfm_m3s * (1 + hvac.AirflowDefectRatioCooling) / HVAC.calc_rated_airflow_clg(hvac_sizing_values.Cool_Capacity, hvac.RatedCFMperTonCooling[speed])
-          end
+          cool_airflow_rated_ratio << cool_cfm_m3s / HVAC.calc_rated_airflow_clg(hvac_sizing_values.Cool_Capacity, hvac.RatedCFMperTonCooling[speed], hvac.CapacityRatioCooling[speed])
+          cool_airflow_rated_defect_ratio << cool_cfm_m3s * (1 + hvac.AirflowDefectRatioCooling) / HVAC.calc_rated_airflow_clg(hvac_sizing_values.Cool_Capacity, hvac.RatedCFMperTonCooling[speed], hvac.CapacityRatioCooling[speed])
         end
         if not cool_airflow_rated_defect_ratio.empty?
           cap_clg_ratios = []
@@ -1761,13 +1754,8 @@ class HVACSizing
         heat_airflow_rated_ratio = []
         heat_cfm_m3s = UnitConversions.convert(hvac_sizing_values.Heat_Airflow, 'cfm', 'm^3/s')
         for speed in 0..(hvac.NumSpeedsHeating - 1)
-          if [HPXML::HVACTypeHeatPumpAirToAir].include? hvac.HeatType
-            heat_airflow_rated_ratio << heat_cfm_m3s / HVAC.calc_rated_airflow_htg(hvac_sizing_values.Heat_Capacity, hvac.RatedCFMperTonHeating[speed], hvac.CapacityRatioHeating[speed])
-            heat_airflow_rated_defect_ratio << heat_cfm_m3s * (1 + hvac.AirflowDefectRatioHeating) / HVAC.calc_rated_airflow_htg(hvac_sizing_values.Heat_Capacity, hvac.RatedCFMperTonHeating[speed], hvac.CapacityRatioHeating[speed])
-          elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? hvac.HeatType
-            heat_airflow_rated_ratio << heat_cfm_m3s / HVAC.calc_rated_airflow_htg(hvac_sizing_values.Heat_Capacity, hvac.RatedCFMperTonHeating[speed])
-            heat_airflow_rated_defect_ratio << heat_cfm_m3s * (1 + hvac.AirflowDefectRatioHeating) / HVAC.calc_rated_airflow_htg(hvac_sizing_values.Heat_Capacity, hvac.RatedCFMperTonHeating[speed])
-          end
+          heat_airflow_rated_ratio << heat_cfm_m3s / HVAC.calc_rated_airflow_htg(hvac_sizing_values.Heat_Capacity, hvac.RatedCFMperTonHeating[speed], hvac.CapacityRatioHeating[speed])
+          heat_airflow_rated_defect_ratio << heat_cfm_m3s * (1 + hvac.AirflowDefectRatioHeating) / HVAC.calc_rated_airflow_htg(hvac_sizing_values.Heat_Capacity, hvac.RatedCFMperTonHeating[speed], hvac.CapacityRatioHeating[speed])
         end
         if not heat_airflow_rated_defect_ratio.empty?
           cap_htg_ratios = []
