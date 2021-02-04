@@ -80,6 +80,12 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
   timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
   return false unless File.exist? timeseries_csv_path
 
+  # Update HEScoreDesign.xml to include HPXML defaults
+  in_xml = File.join(rundir, 'in.xml')
+  if File.exist? in_xml
+    FileUtils.cp(in_xml, output_hpxml_path)
+  end
+
   units_map = get_units_map()
   output_map = get_output_map()
   outputs = {}
