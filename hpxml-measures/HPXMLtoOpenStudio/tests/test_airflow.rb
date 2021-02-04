@@ -92,7 +92,7 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     # Check infiltration/ventilation program
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameInfiltration} program")
     assert_in_epsilon(0.0436, program_values['c'].sum, 0.01)
-    assert_in_epsilon(0.0818, program_values['Cs'].sum, 0.01)
+    assert_in_epsilon(0.0661, program_values['Cs'].sum, 0.01)
     assert_in_epsilon(0.1323, program_values['Cw'].sum, 0.01)
   end
 
@@ -599,6 +599,7 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     model = OpenStudio::Model::Model.new
 
     # get arguments
+    args_hash['output_dir'] = 'tests'
     arguments = measure.arguments(model)
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
 
@@ -622,6 +623,8 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     assert_equal('Success', result.value.valueName)
 
     hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
+
+    File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
 
     return model, hpxml
   end

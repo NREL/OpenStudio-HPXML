@@ -59,14 +59,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative path of the HPXML file.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('output_dir', false)
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('output_dir', true)
     arg.setDisplayName('Directory for Output Files')
     arg.setDescription('Absolute/relative path for the output files directory.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('debug', false)
     arg.setDisplayName('Debug Mode?')
-    arg.setDescription('If true: 1) Writes in.osm file, 2) Writes in.xml HPXML file with defaults populated, 3) Generates additional log output, and 4) Creates all EnergyPlus output files. Any files written will be in the output path specified above.')
+    arg.setDescription('If true: 1) Writes in.osm file, 2) Generates additional log output, and 3) Creates all EnergyPlus output files.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -88,13 +88,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    tear_down_model(model, runner)
+    Geometry.tear_down_model(model, runner)
 
     Version.check_openstudio_version()
 
     # assign the user inputs to variables
     hpxml_path = runner.getStringArgumentValue('hpxml_path', user_arguments)
-    output_dir = runner.getOptionalStringArgumentValue('output_dir', user_arguments)
+    output_dir = runner.getStringArgumentValue('output_dir', user_arguments)
     debug = runner.getBoolArgumentValue('debug', user_arguments)
     skip_validation = runner.getBoolArgumentValue('skip_validation', user_arguments)
 
@@ -105,13 +105,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       fail "'#{hpxml_path}' does not exist or is not an .xml file."
     end
 
-    if output_dir.is_initialized
-      output_dir = output_dir.get
-      unless (Pathname.new output_dir).absolute?
-        output_dir = File.expand_path(File.join(File.dirname(__FILE__), output_dir))
-      end
-    else
-      output_dir = nil
+    unless (Pathname.new output_dir).absolute?
+      output_dir = File.expand_path(File.join(File.dirname(__FILE__), output_dir))
     end
 
     begin
@@ -131,7 +126,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
       return false unless hpxml.errors.empty?
 
-      epw_path, cache_path = process_weather(hpxml, runner, model, output_dir, hpxml_path)
+      epw_path, cache_path = process_weather(hpxml, runner, model, hpxml_path)
 
       if debug
         epw_output_path = File.join(output_dir, 'in.epw')
@@ -147,20 +142,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return true
   end
 
-  def tear_down_model(model, runner)
-    # Tear down the existing model if it exists
-    has_existing_objects = (model.getThermalZones.size > 0)
-    handles = OpenStudio::UUIDVector.new
-    model.objects.each do |obj|
-      handles << obj.handle
-    end
-    model.removeObjects(handles)
-    if has_existing_objects
-      runner.registerWarning('The model contains existing objects and is being reset.')
-    end
-  end
-
-  def process_weather(hpxml, runner, model, output_dir, hpxml_path)
+  def process_weather(hpxml, runner, model, hpxml_path)
     epw_path = hpxml.climate_and_risk_zones.weather_station_epw_filepath
 
     if not File.exist? epw_path
@@ -246,7 +228,7 @@ class OSModel
     add_cooling_system(runner, model, spaces)
     add_heating_system(runner, model, spaces)
     add_heat_pump(runner, model, weather, spaces)
-    add_dehumidifier(runner, model, spaces)
+    add_dehumidifiers(runner, model, spaces)
     add_residual_ideal_system(runner, model, spaces)
     add_ceiling_fans(runner, model, weather, spaces)
 
@@ -278,7 +260,7 @@ class OSModel
     # Uncomment to debug EMS
     # add_ems_debug_output(runner, model)
 
-    if debug && (not output_dir.nil?)
+    if debug
       osm_output_path = File.join(output_dir, 'in.osm')
       File.write(osm_output_path, model.to_s)
       runner.registerInfo("Wrote file: #{osm_output_path}")
@@ -288,70 +270,6 @@ class OSModel
   private
 
   def self.check_for_errors()
-    # Conditioned space
-    location = HPXML::LocationLivingSpace
-    if (@hpxml.roofs.select { |s| s.interior_adjacent_to == location }.size +
-        @hpxml.frame_floors.select { |s| s.is_ceiling && (s.interior_adjacent_to == location) }.size) == 0
-      fail 'There must be at least one ceiling/roof adjacent to conditioned space.'
-    end
-    if @hpxml.walls.select { |s| (s.interior_adjacent_to == location) && s.is_exterior }.size == 0
-      fail 'There must be at least one exterior wall adjacent to conditioned space.'
-    end
-    if (@hpxml.slabs.select { |s| [location, HPXML::LocationBasementConditioned].include? s.interior_adjacent_to }.size +
-        @hpxml.frame_floors.select { |s| s.is_floor && (s.interior_adjacent_to == location) }.size) == 0
-      fail 'There must be at least one floor/slab adjacent to conditioned space.'
-    end
-
-    # Basement/Crawlspace
-    [HPXML::LocationBasementConditioned,
-     HPXML::LocationBasementUnconditioned,
-     HPXML::LocationCrawlspaceVented,
-     HPXML::LocationCrawlspaceUnvented].each do |location|
-      next unless @hpxml.has_space_type(location)
-
-      if location != HPXML::LocationBasementConditioned # HPXML file doesn't need to have FrameFloor between living and conditioned basement
-        if @hpxml.frame_floors.select { |s| s.is_floor && (s.interior_adjacent_to == HPXML::LocationLivingSpace) && (s.exterior_adjacent_to == location) }.size == 0
-          fail "There must be at least one ceiling adjacent to #{location}."
-        end
-      end
-      if @hpxml.foundation_walls.select { |s| (s.interior_adjacent_to == location) && s.is_exterior }.size == 0
-        fail "There must be at least one exterior foundation wall adjacent to #{location}."
-      end
-      if @hpxml.slabs.select { |s| s.interior_adjacent_to == location }.size == 0
-        fail "There must be at least one slab adjacent to #{location}."
-      end
-    end
-
-    # Garage
-    location = HPXML::LocationGarage
-    if @hpxml.has_space_type(location)
-      if (@hpxml.roofs.select { |s| s.interior_adjacent_to == location }.size +
-          @hpxml.frame_floors.select { |s| [s.interior_adjacent_to, s.exterior_adjacent_to].include? location }.size) == 0
-        fail "There must be at least one roof/ceiling adjacent to #{location}."
-      end
-      if (@hpxml.walls.select { |s| (s.interior_adjacent_to == location) && s.is_exterior }.size +
-         @hpxml.foundation_walls.select { |s| [s.interior_adjacent_to, s.exterior_adjacent_to].include?(location) && s.is_exterior }.size) == 0
-        fail "There must be at least one exterior wall/foundation wall adjacent to #{location}."
-      end
-      if @hpxml.slabs.select { |s| s.interior_adjacent_to == location }.size == 0
-        fail "There must be at least one slab adjacent to #{location}."
-      end
-    end
-
-    # Attic
-    [HPXML::LocationAtticVented,
-     HPXML::LocationAtticUnvented].each do |location|
-      next unless @hpxml.has_space_type(location)
-
-      if @hpxml.roofs.select { |s| s.interior_adjacent_to == location }.size == 0
-        fail "There must be at least one roof adjacent to #{location}."
-      end
-
-      if @hpxml.frame_floors.select { |s| s.is_ceiling && [s.interior_adjacent_to, s.exterior_adjacent_to].include?(location) }.size == 0
-        fail "There must be at least one floor adjacent to #{location}."
-      end
-    end
-
     # Error-checking from RESNET Pub 002: Number of bedrooms
     nbeds = @hpxml.building_construction.number_of_bedrooms
     nbeds_limit = (@hpxml.building_construction.conditioned_floor_area - 120.0) / 70.0
@@ -386,12 +304,9 @@ class OSModel
 
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
-    if @debug && (not output_dir.nil?)
-      # Write updated HPXML object to file
-      hpxml_defaults_path = File.join(output_dir, 'in.xml')
-      XMLHelper.write_file(@hpxml.to_oga, hpxml_defaults_path)
-      runner.registerInfo("Wrote file: #{hpxml_defaults_path}")
-    end
+    # Write updated HPXML object (w/ defaults) to file for inspection
+    hpxml_defaults_path = File.join(output_dir, 'in.xml')
+    XMLHelper.write_file(@hpxml.to_oga, hpxml_defaults_path)
   end
 
   def self.add_simulation_params(model)
@@ -1769,7 +1684,7 @@ class OSModel
       window_height = 4.0 # ft, default
 
       overhang_depth = nil
-      if not window.overhangs_depth.nil?
+      if (not window.overhangs_depth.nil?) && (window.overhangs_depth > 0)
         overhang_depth = window.overhangs_depth
         overhang_distance_to_top = window.overhangs_distance_to_top_of_window
         overhang_distance_to_bottom = window.overhangs_distance_to_bottom_of_window
@@ -2191,20 +2106,6 @@ class OSModel
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     @hpxml.heat_pumps.each do |heat_pump|
-      # FUTURE: Move these checks into hvac.rb
-      if not heat_pump.heating_capacity_17F.nil?
-        if heat_pump.heating_capacity.nil?
-          fail "HeatPump '#{heat_pump.id}' must have both HeatingCapacity and HeatingCapacity17F provided or not provided."
-        elsif heat_pump.heating_capacity == 0.0
-          heat_pump.heating_capacity_17F = nil
-        end
-      end
-      if not heat_pump.backup_heating_fuel.nil?
-        if heat_pump.backup_heating_capacity.nil? ^ heat_pump.heating_capacity.nil?
-          fail "HeatPump '#{heat_pump.id}' must have both HeatingCapacity and BackupHeatingCapacity provided or not provided."
-        end
-      end
-
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
       if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir
@@ -2248,7 +2149,7 @@ class OSModel
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     obj_name = Constants.ObjectNameIdealAirSystem
 
-    if @hpxml.building_construction.use_only_ideal_air_system
+    if @hpxml.building_construction.use_only_ideal_air_system || (@apply_ashrae140_assumptions && (@hpxml.total_fraction_heat_load_served + @hpxml.total_fraction_heat_load_served == 0.0))
       cooling_load_frac = 1.0
       heating_load_frac = 1.0
       if @apply_ashrae140_assumptions
@@ -2330,11 +2231,10 @@ class OSModel
     HVAC.apply_ceiling_fans(model, runner, weather, ceiling_fan, spaces[HPXML::LocationLivingSpace])
   end
 
-  def self.add_dehumidifier(runner, model, spaces)
+  def self.add_dehumidifiers(runner, model, spaces)
     return if @hpxml.dehumidifiers.size == 0
 
-    dehumidifier = @hpxml.dehumidifiers[0]
-    HVAC.apply_dehumidifier(model, runner, dehumidifier, spaces[HPXML::LocationLivingSpace], @hvac_map)
+    HVAC.apply_dehumidifiers(model, runner, @hpxml.dehumidifiers, spaces[HPXML::LocationLivingSpace], @hvac_map)
   end
 
   def self.check_distribution_system(hvac_distribution, system_type)
@@ -2490,7 +2390,7 @@ class OSModel
     @infil_volume = air_infils.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
     infil_height = @hpxml.inferred_infiltration_height(@infil_volume)
     Airflow.apply(model, runner, weather, spaces, air_infils, @hpxml.ventilation_fans, @hpxml.clothes_dryers, @nbeds,
-                  duct_systems, @infil_volume, infil_height, open_window_area,
+                  @ncfl_ag, duct_systems, @infil_volume, infil_height, open_window_area,
                   @clg_ssn_sensor, @min_neighbor_distance, vented_attic, vented_crawl,
                   site_type, shelter_coef, @hpxml.building_construction.has_flue_or_chimney, @hvac_map, @eri_version,
                   @apply_ashrae140_assumptions)
