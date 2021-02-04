@@ -88,7 +88,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    tear_down_model(model, runner)
+    Geometry.tear_down_model(model, runner)
 
     Version.check_openstudio_version()
 
@@ -140,19 +140,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     return true
-  end
-
-  def tear_down_model(model, runner)
-    # Tear down the existing model if it exists
-    has_existing_objects = (model.getThermalZones.size > 0)
-    handles = OpenStudio::UUIDVector.new
-    model.objects.each do |obj|
-      handles << obj.handle
-    end
-    model.removeObjects(handles)
-    if has_existing_objects
-      runner.registerWarning('The model contains existing objects and is being reset.')
-    end
   end
 
   def process_weather(hpxml, runner, model, hpxml_path)
@@ -2406,7 +2393,7 @@ class OSModel
     @infil_volume = air_infils.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
     infil_height = @hpxml.inferred_infiltration_height(@infil_volume)
     Airflow.apply(model, runner, weather, spaces, air_infils, @hpxml.ventilation_fans, @hpxml.clothes_dryers, @nbeds,
-                  duct_systems, @infil_volume, infil_height, open_window_area,
+                  @ncfl_ag, duct_systems, @infil_volume, infil_height, open_window_area,
                   @clg_ssn_sensor, @min_neighbor_distance, vented_attic, vented_crawl,
                   site_type, shelter_coef, @hpxml.building_construction.has_flue_or_chimney, @hvac_map, @eri_version,
                   @apply_ashrae140_assumptions)
