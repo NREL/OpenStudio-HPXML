@@ -1425,7 +1425,7 @@ class HVACSizing
 
       hvac_sizing_values.Cool_Capacity = (hvac_sizing_values.Cool_Load_Tot / totalCap_CurveValue)
       hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
-      hvac_sizing_values.Cool_Airflow = hvac.RatedCFMperTonCooling[-1] * UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton')
+      hvac_sizing_values.Cool_Airflow = hvac.RatedCFMperTonCooling[-1] * hvac.CapacityRatioCooling[-1] * UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton')
 
     elsif hvac.CoolType == HPXML::HVACTypeRoomAirConditioner
 
@@ -1532,7 +1532,7 @@ class HVACSizing
         hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
         hvac_sizing_values.Heat_Capacity_Supp = hvac_sizing_values.Heat_Load
       end
-      hvac_sizing_values.Heat_Airflow = hvac.RatedCFMperTonHeating[-1] * UnitConversions.convert(hvac_sizing_values.Heat_Capacity, 'Btu/hr', 'ton') # Maximum air flow under heating operation
+      hvac_sizing_values.Heat_Airflow = hvac.RatedCFMperTonHeating[-1] * hvac.CapacityRatioHeating[-1] * UnitConversions.convert(hvac_sizing_values.Heat_Capacity, 'Btu/hr', 'ton') # Maximum air flow under heating operation
 
     elsif hvac.HeatType == HPXML::HVACTypeHeatPumpGroundToAir
 
@@ -1687,7 +1687,10 @@ class HVACSizing
       f_ch = hvac.ChargeDefectRatio.round(3)
 
       # Cooling
-      if hvac.CoolingLoadFraction > 0
+      if [HPXML::HVACTypeHeatPumpAirToAir,
+          HPXML::HVACTypeCentralAirConditioner,
+          HPXML::HVACTypeHeatPumpMiniSplit,
+          HPXML::HVACTypeMiniSplitAirConditioner].include?(hvac.CoolType) && hvac.CoolingLoadFraction > 0
         cool_airflow_rated_defect_ratio = []
         cool_airflow_rated_ratio = []
         cool_cfm_m3s = UnitConversions.convert(hvac_sizing_values.Cool_Airflow, 'cfm', 'm^3/s')
@@ -1749,7 +1752,8 @@ class HVACSizing
       end
 
       # Heating
-      if hvac.HeatingLoadFraction > 0
+      if [HPXML::HVACTypeHeatPumpAirToAir,
+          HPXML::HVACTypeHeatPumpMiniSplit].include?(hvac.HeatType) && hvac.HeatingLoadFraction > 0
         heat_airflow_rated_defect_ratio = []
         heat_airflow_rated_ratio = []
         heat_cfm_m3s = UnitConversions.convert(hvac_sizing_values.Heat_Airflow, 'cfm', 'm^3/s')
@@ -1977,7 +1981,7 @@ class HVACSizing
       if hvac.HeatType == HPXML::HVACTypeHeatPumpAirToAir
         hvac_sizing_values.Cool_Airflow = cfm_per_btuh * hvac_sizing_values.Cool_Capacity
       elsif hvac.HeatType == HPXML::HVACTypeHeatPumpMiniSplit
-        hvac_sizing_values.Cool_Airflow = hvac.RatedCFMperTonCooling[-1] * UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton')
+        hvac_sizing_values.Cool_Airflow = hvac.RatedCFMperTonCooling[-1] * hvac.CapacityRatioCooling[-1] * UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton')
       end
     end
   end
