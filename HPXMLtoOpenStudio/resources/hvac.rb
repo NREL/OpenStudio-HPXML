@@ -3685,19 +3685,14 @@ class HVAC
     hp_ap = heat_pump.additional_properties
 
     # Sets:
-    # 1. Minimum temperature for HP compressor operation
-    # 2. Maximum temperature for HP supplemental heating operation
+    # 1. Minimum temperature (deg-F) for HP compressor operation
+    # 2. Maximum temperature (deg-F) for HP supplemental heating operation
     if not heat_pump.backup_heating_switchover_temp.nil?
       hp_ap.hp_min_temp = heat_pump.backup_heating_switchover_temp
       hp_ap.supp_max_temp = heat_pump.backup_heating_switchover_temp
     else
       hp_ap.supp_max_temp = 40.0
-      # Minimum temperature for Heat Pump operation:
-      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
-        hp_ap.hp_min_temp = -30.0 # deg-F
-      else
-        hp_ap.hp_min_temp = 0.0 # deg-F
-      end
+      hp_ap.hp_min_temp = -40.0
     end
   end
 
