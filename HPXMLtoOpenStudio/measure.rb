@@ -290,7 +290,6 @@ class OSModel
     @ncfl = @hpxml.building_construction.number_of_conditioned_floors
     @ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade
     @nbeds = @hpxml.building_construction.number_of_bedrooms
-    @min_neighbor_distance = get_min_neighbor_distance()
     @default_azimuths = get_default_azimuths()
     @has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
 
@@ -2324,22 +2323,6 @@ class OSModel
   end
 
   def self.add_airflow(runner, model, weather, spaces)
-    # Vented Attic
-    vented_attic = nil
-    @hpxml.attics.each do |attic|
-      next unless attic.attic_type == HPXML::AtticTypeVented
-
-      vented_attic = attic
-    end
-
-    # Vented Crawlspace
-    vented_crawl = nil
-    @hpxml.foundations.each do |foundation|
-      next unless foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented
-
-      vented_crawl = foundation
-    end
-
     # Ducts
     duct_systems = {}
     @hpxml.hvac_distributions.each do |hvac_distribution|
@@ -2385,18 +2368,9 @@ class OSModel
       end
     end
 
-    window_area = @hpxml.windows.map { |w| w.area }.sum(0.0)
-    open_window_area = window_area * @frac_windows_operable * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
-    site_type = @hpxml.site.site_type
-    shelter_coef = @hpxml.site.shelter_coefficient
-    air_infils = @hpxml.air_infiltration_measurements
-    @infil_volume = air_infils.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
-    infil_height = @hpxml.inferred_infiltration_height(@infil_volume)
-    Airflow.apply(model, runner, weather, spaces, air_infils, @hpxml.ventilation_fans, @hpxml.clothes_dryers, @nbeds,
-                  @ncfl_ag, duct_systems, @infil_volume, infil_height, open_window_area,
-                  @clg_ssn_sensor, @min_neighbor_distance, vented_attic, vented_crawl,
-                  site_type, shelter_coef, @hpxml.building_construction.has_flue_or_chimney, @hvac_map, @eri_version,
-                  @apply_ashrae140_assumptions)
+    Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds,
+                  @ncfl_ag, duct_systems, @clg_ssn_sensor, @hvac_map, @eri_version,
+                  @frac_windows_operable, @apply_ashrae140_assumptions)
   end
 
   def self.create_ducts(runner, model, hvac_distribution, spaces)
@@ -3597,19 +3571,6 @@ class OSModel
     else
       set_surface_exterior(model, spaces, surface, hpxml_surface)
     end
-  end
-
-  def self.get_min_neighbor_distance()
-    min_neighbor_distance = nil
-    @hpxml.neighbor_buildings.each do |neighbor_building|
-      if min_neighbor_distance.nil?
-        min_neighbor_distance = 9e99
-      end
-      if neighbor_building.distance < min_neighbor_distance
-        min_neighbor_distance = neighbor_building.distance
-      end
-    end
-    return min_neighbor_distance
   end
 
   def self.get_kiva_instances(fnd_walls, slabs)

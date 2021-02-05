@@ -956,7 +956,7 @@ class HVACSizing
     # FUTURE: Consolidate code w/ airflow.rb
     infil_volume = @hpxml.air_infiltration_measurements.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
     infil_height = @hpxml.inferred_infiltration_height(infil_volume)
-    ach_nat = nil
+    sla = nil
     @hpxml.air_infiltration_measurements.each do |measurement|
       if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure) && !measurement.house_pressure.nil?
         if measurement.unit_of_measure == HPXML::UnitsACH
@@ -966,19 +966,66 @@ class HVACSizing
           ach50 = Airflow.calc_air_leakage_at_diff_pressure(0.65, achXX, measurement.house_pressure, 50.0)
         end
         sla = Airflow.get_infiltration_SLA_from_ACH50(ach50, 0.65, cfa, infil_volume)
-        ach_nat = Airflow.get_infiltration_ACH_from_SLA(sla, infil_height, weather)
       elsif measurement.unit_of_measure == HPXML::UnitsACHNatural
         sla = Airflow.get_infiltration_SLA_from_ACH(measurement.air_leakage, infil_height, weather)
-        ach_nat = Airflow.get_infiltration_ACH_from_SLA(sla, infil_height, weather)
+      end
+    end
+    ela = sla * cfa
+
+    ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade
+
+    # Calculate fraction of walls that are exposed
+    sum_wall_area_total = 0.0
+    sum_wall_area_exposed = 0.0
+    @hpxml.walls.each do |wall|
+      sum_wall_area_total += wall.area if wall.is_thermal_boundary
+      sum_wall_area_exposed += wall.area if wall.is_exterior_thermal_boundary
+    end
+    exposed_wall_ratio = sum_wall_area_exposed / sum_wall_area_total
+
+    # Determine shielding class
+    if exposed_wall_ratio > 0.5 # 3 or 4 exposures; Table 5D
+      if @hpxml.site.shelter_coefficient > 0.8
+        shelter_class = 2 # Typical shelter for isolated rural house
+      elsif @hpxml.site.shelter_coefficient > 0.6
+        shelter_class = 3 # Typical shelter caused by other buildings across the street
+      else
+        shelter_class = 4 # Typical shelter for urban buildings where sheltering obstacles are less than one building height away
+      end
+    else # 0, 1, or 2 exposures; Table 5E
+      if min_neighbor_distance.nil?
+        if exposed_wall_ratio > 0.25 # 2 exposures; Table 5E
+          shelter_class = 2 # Typical shelter for isolated rural house
+        else # 1 exposure; Table 5E
+          shelter_class = 3 # Typical shelter caused by other buildings across the street
+        end
+      elsif @hpxml.site.shelter_coefficient > 0.6
+        shelter_class = 4 # Typical shelter for urban buildings where sheltering obstacles are less than one building height away
+      else
+        shelter_class = 5 # Typical shelter for urban buildings where sheltering obstacles are less than one building height away
       end
     end
 
-    # Per ANSI/RESNET/ICC 301
-    ach_Cooling = 1.2 * ach_nat
-    ach_Heating = 1.6 * ach_nat
+    # Set stack/wind coefficients from Tables 5D/5E
+    c_s = 0.015 * ncfl_ag
+    if shelter_class == 1
+      c_w = 0.0119 * ncfl_ag**0.4
+    elsif shelter_class == 2
+      c_w = 0.0092 * ncfl_ag**0.4
+    elsif shelter_class == 3
+      c_w = 0.0065 * ncfl_ag**0.4
+    elsif shelter_class == 4
+      c_w = 0.0039 * ncfl_ag**0.4
+    elsif shelter_class == 5
+      c_w = 0.0012 * ncfl_ag**0.4
+    end
 
-    icfm_Cooling = ach_Cooling / UnitConversions.convert(1.0, 'hr', 'min') * infil_volume
-    icfm_Heating = ach_Heating / UnitConversions.convert(1.0, 'hr', 'min') * infil_volume
+    ela_in2 = UnitConversions.convert(ela, 'ft^2', 'in^2')
+    windspeed_cooling_mph = 7.5 # Table 5D/5E Wind Velocity Value footnote
+    windspeed_heating_mph = 15.0 # Table 5D/5E Wind Velocity Value footnote
+
+    icfm_Cooling = ela_in2 * (c_s * @ctd + c_w * windspeed_cooling_mph**2)**0.5
+    icfm_Heating = ela_in2 * (c_s * @htd + c_w * windspeed_heating_mph**2)**0.5
 
     q_unb_cfm, q_preheat, q_precool, q_recirc, q_bal_Sens, q_bal_Lat = get_ventilation_rates()
 
@@ -1425,6 +1472,7 @@ class HVACSizing
 
       hvac_sizing_values.Cool_Capacity = (hvac_sizing_values.Cool_Load_Tot / totalCap_CurveValue)
       hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
+      # FIXME: Why not use calc_airflow_rate?
       hvac_sizing_values.Cool_Airflow = hvac.RatedCFMperTonCooling[-1] * hvac.CapacityRatioCooling[-1] * UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton')
 
     elsif hvac.CoolType == HPXML::HVACTypeRoomAirConditioner
@@ -1434,6 +1482,7 @@ class HVACSizing
 
       hvac_sizing_values.Cool_Capacity = hvac_sizing_values.Cool_Load_Tot / totalCap_CurveValue
       hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
+      # FIXME: Why not use calc_airflow_rate?
       hvac_sizing_values.Cool_Airflow = hvac.RatedCFMperTonCooling[hvac.SizingSpeed] * UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton')
 
     elsif hvac.CoolType == HPXML::HVACTypeHeatPumpGroundToAir
@@ -1532,6 +1581,7 @@ class HVACSizing
         hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
         hvac_sizing_values.Heat_Capacity_Supp = hvac_sizing_values.Heat_Load
       end
+      # FIXME: Why not use calc_airflow_rate?
       hvac_sizing_values.Heat_Airflow = hvac.RatedCFMperTonHeating[-1] * hvac.CapacityRatioHeating[-1] * UnitConversions.convert(hvac_sizing_values.Heat_Capacity, 'Btu/hr', 'ton') # Maximum air flow under heating operation
 
     elsif hvac.HeatType == HPXML::HVACTypeHeatPumpGroundToAir
@@ -1589,6 +1639,7 @@ class HVACSizing
 
       if hvac.RatedCFMperTonHeating[0] > 0
         # Fixed airflow rate
+        # FIXME: Is this still needed?
         hvac_sizing_values.Heat_Airflow = UnitConversions.convert(hvac_sizing_values.Heat_Capacity, 'Btu/hr', 'ton') * hvac.RatedCFMperTonHeating[0]
       else
         # Autosized airflow rate
