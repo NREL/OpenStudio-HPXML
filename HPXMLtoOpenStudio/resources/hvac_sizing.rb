@@ -974,51 +974,10 @@ class HVACSizing
 
     ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade
 
-    # Calculate fraction of walls that are exposed
-    sum_wall_area_total = 0.0
-    sum_wall_area_exposed = 0.0
-    @hpxml.walls.each do |wall|
-      sum_wall_area_total += wall.area if wall.is_thermal_boundary
-      sum_wall_area_exposed += wall.area if wall.is_exterior_thermal_boundary
-    end
-    exposed_wall_ratio = sum_wall_area_exposed / sum_wall_area_total
-
-    # Determine shielding class
-    if exposed_wall_ratio > 0.5 # 3 or 4 exposures; Table 5D
-      if @hpxml.site.shelter_coefficient > 0.8
-        shelter_class = 2 # Typical shelter for isolated rural house
-      elsif @hpxml.site.shelter_coefficient > 0.6
-        shelter_class = 3 # Typical shelter caused by other buildings across the street
-      else
-        shelter_class = 4 # Typical shelter for urban buildings where sheltering obstacles are less than one building height away
-      end
-    else # 0, 1, or 2 exposures; Table 5E
-      if min_neighbor_distance.nil?
-        if exposed_wall_ratio > 0.25 # 2 exposures; Table 5E
-          shelter_class = 2 # Typical shelter for isolated rural house
-        else # 1 exposure; Table 5E
-          shelter_class = 3 # Typical shelter caused by other buildings across the street
-        end
-      elsif @hpxml.site.shelter_coefficient > 0.6
-        shelter_class = 4 # Typical shelter for urban buildings where sheltering obstacles are less than one building height away
-      else
-        shelter_class = 5 # Typical shelter for urban buildings where sheltering obstacles are less than one building height away
-      end
-    end
-
     # Set stack/wind coefficients from Tables 5D/5E
     c_s = 0.015 * ncfl_ag
-    if shelter_class == 1
-      c_w = 0.0119 * ncfl_ag**0.4
-    elsif shelter_class == 2
-      c_w = 0.0092 * ncfl_ag**0.4
-    elsif shelter_class == 3
-      c_w = 0.0065 * ncfl_ag**0.4
-    elsif shelter_class == 4
-      c_w = 0.0039 * ncfl_ag**0.4
-    elsif shelter_class == 5
-      c_w = 0.0012 * ncfl_ag**0.4
-    end
+    c_w_base = [0.0133 * @hpxml.site.shelter_coefficient - 0.0027, 0.0].max # Linear relationship between shelter coefficient and c_w coefficients by shielding class
+    c_w = c_w_base * ncfl_ag**0.4
 
     ela_in2 = UnitConversions.convert(ela, 'ft^2', 'in^2')
     windspeed_cooling_mph = 7.5 # Table 5D/5E Wind Velocity Value footnote
