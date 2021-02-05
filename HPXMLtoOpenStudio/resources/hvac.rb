@@ -3768,7 +3768,7 @@ class HVAC
     return if (charge_defect_ratio.to_f.abs < 0.001) && (cool_airflow_defect_ratio.to_f.abs < 0.001) && (heat_airflow_defect_ratio.to_f.abs < 0.001)
 
     cool_airflow_rated_defect_ratio = []
-    if not clg_coil.nil?
+    if (not clg_coil.nil?) && (cooling_system.fraction_cool_load_served > 0)
       clg_ap = cooling_system.additional_properties
       clg_cfm = cooling_system.cooling_airflow_cfm
       if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized
@@ -3779,7 +3779,7 @@ class HVAC
     end
 
     heat_airflow_rated_defect_ratio = []
-    if not htg_coil.nil?
+    if (not htg_coil.nil?) && (heating_system.fraction_heat_load_served > 0)
       htg_ap = heating_system.additional_properties
       htg_cfm = heating_system.heating_airflow_cfm
       if htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized
