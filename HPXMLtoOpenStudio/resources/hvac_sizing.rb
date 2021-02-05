@@ -1692,8 +1692,8 @@ class HVACSizing
         cool_airflow_rated_ratio = []
         cool_cfm_m3s = UnitConversions.convert(hvac_sizing_values.Cool_Airflow, 'cfm', 'm^3/s')
         for speed in 0..(hvac.NumSpeedsCooling - 1)
-          cool_airflow_rated_ratio << cool_cfm_m3s / HVAC.calc_rated_airflow_clg(hvac_sizing_values.Cool_Capacity, hvac.RatedCFMperTonCooling[speed], hvac.CapacityRatioCooling[speed])
-          cool_airflow_rated_defect_ratio << cool_cfm_m3s * (1 + hvac.AirflowDefectRatioCooling) / HVAC.calc_rated_airflow_clg(hvac_sizing_values.Cool_Capacity, hvac.RatedCFMperTonCooling[speed], hvac.CapacityRatioCooling[speed])
+          cool_airflow_rated_ratio << cool_cfm_m3s / HVAC.calc_rated_airflow(hvac_sizing_values.Cool_Capacity, hvac.RatedCFMperTonCooling[speed], hvac.CapacityRatioCooling[speed])
+          cool_airflow_rated_defect_ratio << cool_cfm_m3s * (1 + hvac.AirflowDefectRatioCooling) / HVAC.calc_rated_airflow(hvac_sizing_values.Cool_Capacity, hvac.RatedCFMperTonCooling[speed], hvac.CapacityRatioCooling[speed])
         end
         if not cool_airflow_rated_defect_ratio.empty?
           cap_clg_ratios = []
@@ -1754,8 +1754,8 @@ class HVACSizing
         heat_airflow_rated_ratio = []
         heat_cfm_m3s = UnitConversions.convert(hvac_sizing_values.Heat_Airflow, 'cfm', 'm^3/s')
         for speed in 0..(hvac.NumSpeedsHeating - 1)
-          heat_airflow_rated_ratio << heat_cfm_m3s / HVAC.calc_rated_airflow_htg(hvac_sizing_values.Heat_Capacity, hvac.RatedCFMperTonHeating[speed], hvac.CapacityRatioHeating[speed])
-          heat_airflow_rated_defect_ratio << heat_cfm_m3s * (1 + hvac.AirflowDefectRatioHeating) / HVAC.calc_rated_airflow_htg(hvac_sizing_values.Heat_Capacity, hvac.RatedCFMperTonHeating[speed], hvac.CapacityRatioHeating[speed])
+          heat_airflow_rated_ratio << heat_cfm_m3s / HVAC.calc_rated_airflow(hvac_sizing_values.Heat_Capacity, hvac.RatedCFMperTonHeating[speed], hvac.CapacityRatioHeating[speed])
+          heat_airflow_rated_defect_ratio << heat_cfm_m3s * (1 + hvac.AirflowDefectRatioHeating) / HVAC.calc_rated_airflow(hvac_sizing_values.Heat_Capacity, hvac.RatedCFMperTonHeating[speed], hvac.CapacityRatioHeating[speed])
         end
         if not heat_airflow_rated_defect_ratio.empty?
           cap_htg_ratios = []
@@ -2259,6 +2259,8 @@ class HVACSizing
 
     # Get heating/cooling system info from HPXML objects
     hpxml_hvacs.uniq.each do |hpxml_hvac|
+      hpxml_hvac_ap = hpxml_hvac.additional_properties
+
       # System type
       if hpxml_hvac.respond_to? :heating_system_type
         hvac.HeatType = hpxml_hvac.heating_system_type
@@ -2291,8 +2293,8 @@ class HVACSizing
       # Number of speeds
       if hpxml_hvac.is_a?(HPXML::CoolingSystem) || hpxml_hvac.is_a?(HPXML::HeatPump)
         # Cooling
-        if hpxml_hvac.additional_properties.respond_to? :num_speeds
-          num_speeds = hpxml_hvac.additional_properties.num_speeds
+        if hpxml_hvac_ap.respond_to? :num_speeds
+          num_speeds = hpxml_hvac_ap.num_speeds
         end
         num_speeds = 1 if num_speeds.nil?
         hvac.NumSpeedsCooling = num_speeds
@@ -2304,8 +2306,8 @@ class HVACSizing
       end
       if hpxml_hvac.is_a?(HPXML::HeatingSystem) || hpxml_hvac.is_a?(HPXML::HeatPump)
         # Heating
-        if hpxml_hvac.additional_properties.respond_to? :num_speeds
-          num_speeds = hpxml_hvac.additional_properties.num_speeds
+        if hpxml_hvac_ap.respond_to? :num_speeds
+          num_speeds = hpxml_hvac_ap.num_speeds
         end
         num_speeds = 1 if num_speeds.nil?
         hvac.NumSpeedsHeating = num_speeds
@@ -2344,71 +2346,71 @@ class HVACSizing
       end
 
       # Rated airflow rates
-      if hpxml_hvac.additional_properties.respond_to? :cool_rated_cfm_per_ton
-        hvac.RatedCFMperTonCooling = hpxml_hvac.additional_properties.cool_rated_cfm_per_ton
+      if hpxml_hvac_ap.respond_to? :cool_rated_cfm_per_ton
+        hvac.RatedCFMperTonCooling = hpxml_hvac_ap.cool_rated_cfm_per_ton
       end
-      if hpxml_hvac.additional_properties.respond_to? :heat_rated_cfm_per_ton
-        hvac.RatedCFMperTonHeating = hpxml_hvac.additional_properties.heat_rated_cfm_per_ton
+      if hpxml_hvac_ap.respond_to? :heat_rated_cfm_per_ton
+        hvac.RatedCFMperTonHeating = hpxml_hvac_ap.heat_rated_cfm_per_ton
       end
 
       # Capacity ratios
-      if hpxml_hvac.additional_properties.respond_to? :cool_capacity_ratios
-        hvac.CapacityRatioCooling = hpxml_hvac.additional_properties.cool_capacity_ratios
+      if hpxml_hvac_ap.respond_to? :cool_capacity_ratios
+        hvac.CapacityRatioCooling = hpxml_hvac_ap.cool_capacity_ratios
       end
-      if hpxml_hvac.additional_properties.respond_to? :heat_capacity_ratios
-        hvac.CapacityRatioHeating = hpxml_hvac.additional_properties.heat_capacity_ratios
+      if hpxml_hvac_ap.respond_to? :heat_capacity_ratios
+        hvac.CapacityRatioHeating = hpxml_hvac_ap.heat_capacity_ratios
       end
 
       # Sizing speed
       hvac.SizingSpeed = get_sizing_speed(hvac.NumSpeedsCooling, hvac.CapacityRatioCooling)
 
       # Rated SHRs
-      if hpxml_hvac.additional_properties.respond_to? :cool_shrs_rated_gross
-        hvac.SHRRated = hpxml_hvac.additional_properties.cool_shrs_rated_gross
+      if hpxml_hvac_ap.respond_to? :cool_rated_shrs_gross
+        hvac.SHRRated = hpxml_hvac_ap.cool_rated_shrs_gross
       end
 
       # Performance curves
-      if hpxml_hvac.additional_properties.respond_to? :cool_cap_ft_spec
-        hvac.COOL_CAP_FT_SPEC = hpxml_hvac.additional_properties.cool_cap_ft_spec
+      if hpxml_hvac_ap.respond_to? :cool_cap_ft_spec
+        hvac.COOL_CAP_FT_SPEC = hpxml_hvac_ap.cool_cap_ft_spec
       end
-      if hpxml_hvac.additional_properties.respond_to? :cool_sh_ft_spec
-        hvac.COOL_SH_FT_SPEC = hpxml_hvac.additional_properties.cool_sh_ft_spec
+      if hpxml_hvac_ap.respond_to? :cool_sh_ft_spec
+        hvac.COOL_SH_FT_SPEC = hpxml_hvac_ap.cool_sh_ft_spec
       end
-      if hpxml_hvac.additional_properties.respond_to? :heat_cap_ft_spec
-        hvac.HEAT_CAP_FT_SPEC = hpxml_hvac.additional_properties.heat_cap_ft_spec
+      if hpxml_hvac_ap.respond_to? :heat_cap_ft_spec
+        hvac.HEAT_CAP_FT_SPEC = hpxml_hvac_ap.heat_cap_ft_spec
       end
-      if hpxml_hvac.additional_properties.respond_to? :cool_cap_fflow_spec
-        hvac.COOL_CAP_FFLOW_SPEC = hpxml_hvac.additional_properties.cool_cap_fflow_spec
+      if hpxml_hvac_ap.respond_to? :cool_cap_fflow_spec
+        hvac.COOL_CAP_FFLOW_SPEC = hpxml_hvac_ap.cool_cap_fflow_spec
       end
-      if hpxml_hvac.additional_properties.respond_to? :heat_cap_fflow_spec
-        hvac.HEAT_CAP_FFLOW_SPEC = hpxml_hvac.additional_properties.heat_cap_fflow_spec
+      if hpxml_hvac_ap.respond_to? :heat_cap_fflow_spec
+        hvac.HEAT_CAP_FFLOW_SPEC = hpxml_hvac_ap.heat_cap_fflow_spec
       end
 
       # GSHP
-      if hpxml_hvac.additional_properties.respond_to? :u_tube_spacing_type
-        hvac.GSHP_SpacingType = hpxml_hvac.additional_properties.u_tube_spacing_type
+      if hpxml_hvac_ap.respond_to? :u_tube_spacing_type
+        hvac.GSHP_SpacingType = hpxml_hvac_ap.u_tube_spacing_type
       end
-      if hpxml_hvac.additional_properties.respond_to? :cool_rated_eirs
-        hvac.CoolingEIR = hpxml_hvac.additional_properties.cool_rated_eirs[0]
+      if hpxml_hvac_ap.respond_to? :cool_rated_eirs
+        hvac.CoolingEIR = hpxml_hvac_ap.cool_rated_eirs[0]
       end
-      if hpxml_hvac.additional_properties.respond_to? :heat_rated_eirs
-        hvac.HeatingEIR = hpxml_hvac.additional_properties.heat_rated_eirs[0]
+      if hpxml_hvac_ap.respond_to? :heat_rated_eirs
+        hvac.HeatingEIR = hpxml_hvac_ap.heat_rated_eirs[0]
       end
       if hvac.HeatType == HPXML::HVACTypeHeatPumpGroundToAir
-        hvac.GSHP_design_chw = hpxml_hvac.additional_properties.design_chw
-        hvac.GSHP_design_delta_t = hpxml_hvac.additional_properties.design_delta_t
-        hvac.GSHP_design_hw = hpxml_hvac.additional_properties.design_hw
-        hvac.GSHP_bore_d = hpxml_hvac.additional_properties.bore_diameter
-        hvac.GSHP_pipe_od = hpxml_hvac.additional_properties.pipe_od
-        hvac.GSHP_pipe_id = hpxml_hvac.additional_properties.pipe_id
-        hvac.GSHP_pipe_cond = hpxml_hvac.additional_properties.pipe_cond
-        hvac.GSHP_ground_k = hpxml_hvac.additional_properties.ground_conductivity
-        hvac.GSHP_grout_k = hpxml_hvac.additional_properties.grout_conductivity
+        hvac.GSHP_design_chw = hpxml_hvac_ap.design_chw
+        hvac.GSHP_design_delta_t = hpxml_hvac_ap.design_delta_t
+        hvac.GSHP_design_hw = hpxml_hvac_ap.design_hw
+        hvac.GSHP_bore_d = hpxml_hvac_ap.bore_diameter
+        hvac.GSHP_pipe_od = hpxml_hvac_ap.pipe_od
+        hvac.GSHP_pipe_id = hpxml_hvac_ap.pipe_id
+        hvac.GSHP_pipe_cond = hpxml_hvac_ap.pipe_cond
+        hvac.GSHP_ground_k = hpxml_hvac_ap.ground_conductivity
+        hvac.GSHP_grout_k = hpxml_hvac_ap.grout_conductivity
       end
 
       # Evaporative cooler
-      if hpxml_hvac.additional_properties.respond_to? :effectiveness
-        hvac.EvapCoolerEffectiveness = hpxml_hvac.additional_properties.effectiveness
+      if hpxml_hvac_ap.respond_to? :effectiveness
+        hvac.EvapCoolerEffectiveness = hpxml_hvac_ap.effectiveness
       end
 
       # Ducts
