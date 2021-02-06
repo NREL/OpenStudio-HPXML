@@ -3331,7 +3331,9 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
          'base-hvac-ground-to-air-heat-pump-cooling-only.xml',
          'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml'].include? hpxml_file
     hpxml.heat_pumps[0].heating_capacity = 0
-    hpxml.heat_pumps[0].heating_capacity_17F = 0
+    if not ['base-hvac-ground-to-air-heat-pump-cooling-only.xml'].include? hpxml_file
+      hpxml.heat_pumps[0].heating_capacity_17F = 0
+    end
     hpxml.heat_pumps[0].fraction_heat_load_served = 0
     hpxml.heat_pumps[0].backup_heating_fuel = nil
     hpxml.heat_pumps[0].backup_heating_capacity = nil
