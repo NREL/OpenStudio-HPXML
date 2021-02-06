@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>f50d5369-abb0-461c-910d-1a7fd45d3342</version_id>
-  <version_modified>20210206T154915Z</version_modified>
+  <version_id>b28c0f76-8ebe-4235-ae94-a8d08b8a16d6</version_id>
+  <version_modified>20210206T170919Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -7502,6 +7502,48 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>D5C73421</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-air-to-air-heat-pump-1-speed-cooling-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>66EEC64D</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-air-to-air-heat-pump-1-speed-heating-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2D537E38</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-furnace-coal-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>90F93BC7</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-ground-to-air-heat-pump-heating-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B7458EAD</checksum>
+    </file>
+    <file>
+      <filename>base-mechvent-exhaust-rated-flow-rate.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AF35DDD2</checksum>
+    </file>
+    <file>
+      <filename>test_rakefile.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AB67F3DC</checksum>
+    </file>
+    <file>
+      <filename>test_measure.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5F266DE4</checksum>
     </file>
   </files>
 </measure>
