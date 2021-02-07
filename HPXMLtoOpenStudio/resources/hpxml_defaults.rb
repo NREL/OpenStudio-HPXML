@@ -1,4 +1,3 @@
-
 # frozen_string_literal: true
 
 class HPXMLDefaults
@@ -8,6 +7,7 @@ class HPXMLDefaults
   # HPXML objects that will ultimately get passed around.
 
   def self.apply(hpxml, runner, epw_file, weather, cfa, nbeds, ncfl, ncfl_ag, has_uncond_bsmnt, eri_version)
+    HVAC.apply_shared_systems(hpxml)
     apply_header(hpxml, epw_file, runner)
     apply_site(hpxml)
     apply_building_occupancy(hpxml, nbeds)
@@ -419,10 +419,11 @@ class HPXMLDefaults
 
     # Default boiler EAE
     hpxml.heating_systems.each do |heating_system|
-      if heating_system.electric_auxiliary_energy.nil?
-        heating_system.electric_auxiliary_energy_isdefaulted = true
-        heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system)
-      end
+      next unless heating_system.electric_auxiliary_energy.nil?
+      heating_system.electric_auxiliary_energy_isdefaulted = true
+      heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system)
+      heating_system.shared_loop_watts = nil
+      heating_system.fan_coil_watts = nil
     end
 
     # Default AC/HP sensible heat ratio
@@ -479,8 +480,7 @@ class HPXMLDefaults
     # Charge defect ratio
     hpxml.cooling_systems.each do |cooling_system|
       next unless [HPXML::HVACTypeCentralAirConditioner,
-                   HPXML::HVACTypeMiniSplitAirConditioner,
-                   HPXML::HVACTypeRoomAirConditioner].include? cooling_system.cooling_system_type
+                   HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
       next unless cooling_system.charge_defect_ratio.nil?
 
       cooling_system.charge_defect_ratio = 0.0
@@ -488,7 +488,8 @@ class HPXMLDefaults
     end
     hpxml.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
-                   HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
+                   HPXML::HVACTypeHeatPumpMiniSplit,
+                   HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
       next unless heat_pump.charge_defect_ratio.nil?
 
       heat_pump.charge_defect_ratio = 0.0
@@ -505,8 +506,7 @@ class HPXMLDefaults
     end
     hpxml.cooling_systems.each do |cooling_system|
       next unless [HPXML::HVACTypeCentralAirConditioner,
-                   HPXML::HVACTypeMiniSplitAirConditioner,
-                   HPXML::HVACTypeRoomAirConditioner].include? cooling_system.cooling_system_type
+                   HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
       if cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner && cooling_system.distribution_system_idref.nil?
         next # Ducted mini-splits only
       end
@@ -766,7 +766,7 @@ class HPXMLDefaults
     end
 
     hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? hvac_distribution.distribution_system_type
+      next unless [HPXML::HVACDistributionTypeAir].include? hvac_distribution.distribution_system_type
 
       # Default return registers
       if hvac_distribution.number_of_return_registers.nil?
@@ -1232,6 +1232,8 @@ class HPXMLDefaults
   end
 
   def self.apply_lighting(hpxml)
+    return if hpxml.lighting_groups.empty?
+
     if hpxml.lighting.interior_usage_multiplier.nil?
       hpxml.lighting.interior_usage_multiplier = 1.0
       hpxml.lighting.interior_usage_multiplier_isdefaulted = true
