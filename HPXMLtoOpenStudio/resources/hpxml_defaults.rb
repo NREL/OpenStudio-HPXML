@@ -616,38 +616,6 @@ class HPXMLDefaults
       end
     end
 
-    # HVAC capacities
-    # Transition capacity elements from -1 (old approach) to nil (new approach)
-    hpxml.heating_systems.each do |heating_system|
-      if (not heating_system.heating_capacity.nil?) && (heating_system.heating_capacity < 0)
-        heating_system.heating_capacity = nil
-      end
-    end
-    hpxml.cooling_systems.each do |cooling_system|
-      if (not cooling_system.cooling_capacity.nil?) && (cooling_system.cooling_capacity < 0)
-        cooling_system.cooling_capacity = nil
-      end
-    end
-    hpxml.heat_pumps.each do |heat_pump|
-      if (not heat_pump.cooling_capacity.nil?) && (heat_pump.cooling_capacity < 0)
-        heat_pump.cooling_capacity = nil
-      end
-      if (not heat_pump.heating_capacity.nil?) && (heat_pump.heating_capacity < 0)
-        heat_pump.heating_capacity = nil
-      end
-      if (not heat_pump.heating_capacity_17F.nil?) && (heat_pump.heating_capacity_17F < 0)
-        heat_pump.heating_capacity_17F = nil
-      end
-      if (not heat_pump.backup_heating_capacity.nil?) && (heat_pump.backup_heating_capacity < 0)
-        heat_pump.backup_heating_capacity = nil
-      end
-      if heat_pump.cooling_capacity.nil? && (not heat_pump.heating_capacity.nil?)
-        heat_pump.cooling_capacity = heat_pump.heating_capacity
-      elsif heat_pump.heating_capacity.nil? && (not heat_pump.cooling_capacity.nil?)
-        heat_pump.heating_capacity = heat_pump.cooling_capacity
-      end
-    end
-
     # Detailed HVAC performance
     hpxml.cooling_systems.each do |cooling_system|
       clg_ap = cooling_system.additional_properties

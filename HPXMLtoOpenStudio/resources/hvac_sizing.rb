@@ -1078,7 +1078,13 @@ class HVACSizing
     # Calculate design loads that this HVAC system serves
 
     # Heating
-    hvac_sizing_values.Heat_Load = bldg_design_loads.Heat_Tot * hvac.HeatingLoadFraction
+    if hvac.HeatType == HPXML::HVACTypeHeatPumpWaterLoopToAir
+      # Size to meet original fraction load served (not adjusted value from HVAC.apply_shared_heating_systems()
+      # This ensures, e.g., that an appropriate heating airflow is used for duct losses.
+      hvac_sizing_values.Heat_Load = bldg_design_loads.Heat_Tot / (1.0 / hvac.HeatingCOP)
+    else
+      hvac_sizing_values.Heat_Load = bldg_design_loads.Heat_Tot * hvac.HeatingLoadFraction
+    end
 
     # Cooling
     hvac_sizing_values.Cool_Load_Tot = bldg_design_loads.Cool_Tot * hvac.CoolingLoadFraction
@@ -2395,6 +2401,11 @@ class HVACSizing
         hvac.HEAT_CAP_FFLOW_SPEC = hpxml_hvac_ap.heat_cap_fflow_spec
       end
 
+      # WLHP
+      if hpxml_hvac.respond_to? :heating_efficiency_cop
+        hvac.HeatingCOP = hpxml_hvac.heating_efficiency_cop
+      end
+
       # GSHP
       if hpxml_hvac_ap.respond_to? :u_tube_spacing_type
         hvac.GSHP_SpacingType = hpxml_hvac_ap.u_tube_spacing_type
@@ -3370,7 +3381,7 @@ class HVACInfo
                 :COOL_CAP_FFLOW_SPEC, :HEAT_CAP_FFLOW_SPEC,
                 :SHRRated, :CapacityRatioCooling, :CapacityRatioHeating,
                 :OverSizeLimit, :OverSizeDelta,
-                :HeatingEIR, :CoolingEIR, :SizingSpeed,
+                :HeatingEIR, :CoolingEIR, :SizingSpeed, :HeatingCOP,
                 :GSHP_SpacingType, :EvapCoolerEffectiveness,
                 :HeatingLoadFraction, :CoolingLoadFraction, :SupplyAirTemp, :LeavingAirTemp,
                 :GSHP_design_chw, :GSHP_design_delta_t, :GSHP_design_hw, :GSHP_bore_d,
