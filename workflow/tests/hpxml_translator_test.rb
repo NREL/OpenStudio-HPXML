@@ -230,6 +230,8 @@ class HPXMLTest < MiniTest::Test
                             'multifamily-reference-duct.xml' => ["The building is of type 'single-family detached' but"],
                             'multifamily-reference-surface.xml' => ["The building is of type 'single-family detached' but"],
                             'multifamily-reference-water-heater.xml' => ["The building is of type 'single-family detached' but"],
+                            'multiple-buildings-without-building-id.xml' => ['Multiple Building elements defined in HPXML file; building_id argument must be provided.'],
+                            'multiple-buildings-wrong-building-id.xml' => ["Could not find Building element with ID 'MyFoo'."],
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for surface 'Wall'."],
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for surface 'Roof'."],
                             'num-bedrooms-exceeds-limit.xml' => ['Number of bedrooms (40) exceeds limit of (CFA-120)/70=36.9.'],
@@ -287,7 +289,13 @@ class HPXMLTest < MiniTest::Test
     # Uses 'monthly' to verify timeseries results match annual results via error-checking
     # inside the SimulationOutputReport measure.
     cli_path = OpenStudio.getOpenStudioCLI
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} -o #{rundir} --debug --monthly ALL"
+    building_id = ''
+    if xml.include? 'base-multiple-buildings.xml'
+      building_id = '--building-id MyBuilding'
+    elsif xml.include? 'multiple-buildings-wrong-building-id.xml'
+      building_id = '--building-id MyFoo'
+    end
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} -o #{rundir} --debug --monthly ALL #{building_id}"
     workflow_start = Time.now
     success = system(command)
     workflow_time = Time.now - workflow_start

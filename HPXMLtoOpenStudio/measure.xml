@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>6a3d8e49-f000-490f-b702-959800984196</version_id>
-  <version_modified>20210206T142723Z</version_modified>
+  <version_id>ccf66238-5e08-4aa6-b8b7-65da8c5ff21e</version_id>
+  <version_modified>20210208T224930Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -64,6 +64,14 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+    </argument>
+    <argument>
+      <name>building_id</name>
+      <display_name>BuildingID</display_name>
+      <description>The ID of the HPXML Building. Only required if there are multiple Building elements in the HPXML file.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
     </argument>
   </arguments>
   <outputs />
@@ -383,12 +391,6 @@
       <checksum>7D19E7A5</checksum>
     </file>
     <file>
-      <filename>EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4C2B3B04</checksum>
-    </file>
-    <file>
       <filename>test_miscloads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -503,16 +505,22 @@
       <checksum>4A64CE8E</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>DF58FE4A</checksum>
-    </file>
-    <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>B5B2EE3D</checksum>
+    </file>
+    <file>
+      <filename>hvac_sizing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>37305368</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>537EE191</checksum>
     </file>
     <file>
       <version>
@@ -523,13 +531,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>414FEDD8</checksum>
+      <checksum>E688624A</checksum>
     </file>
     <file>
-      <filename>hvac_sizing.rb</filename>
+      <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>37305368</checksum>
+      <checksum>3BA25E0F</checksum>
     </file>
   </files>
 </measure>

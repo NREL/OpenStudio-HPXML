@@ -14,6 +14,7 @@ __New Features__
 - Allows more defaulting (optional inputs) for a variety of HPXML elements.
 - Allows requesting timeseries unmet heating/cooling loads.
 - Allows skipping schema/schematron validation (for speed); should only be used if the HPXML was already validated upstream.
+- Allows HPXML files w/ multiple `Building` elements; requires providing the ID of the single building to be simulated.
 - Includes hot water loads (in addition to heating/cooling loads) when timeseries total loads are requested.
 - The `in.xml` HPXML file is now always produced for inspection of default values (e.g., autosized HVAC capacities). **Breaking change**: The `output_dir` HPXMLtoOpenStudio measure argument is now required.
 - Overhauls documentation to be more comprehensive and standardized.

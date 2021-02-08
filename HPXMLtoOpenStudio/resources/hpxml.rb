@@ -279,7 +279,7 @@ class HPXML < Object
   WindowLayersSinglePane = 'single-pane'
   WindowLayersTriplePane = 'triple-pane'
 
-  def initialize(hpxml_path: nil, schematron_validators: [], collapse_enclosure: true)
+  def initialize(hpxml_path: nil, schematron_validators: [], collapse_enclosure: true, building_id: nil)
     @doc = nil
     @hpxml_path = hpxml_path
     @errors = []
@@ -292,6 +292,24 @@ class HPXML < Object
       # Check HPXML version
       hpxml = XMLHelper.get_element(@doc, '/HPXML')
       Version.check_hpxml_version(XMLHelper.get_attribute_value(hpxml, 'schemaVersion'))
+
+      if XMLHelper.get_elements(hpxml, 'Building').size > 1
+        if building_id.nil?
+          @errors << 'Multiple Building elements defined in HPXML file; building_id argument must be provided.'
+          return unless @errors.empty?
+        end
+
+        # Discard all Building elements except the one of interest
+        XMLHelper.get_elements(hpxml, 'Building').reverse_each do |building|
+          next if XMLHelper.get_attribute_value(XMLHelper.get_element(building, 'BuildingID'), 'id') == building_id
+
+          building.remove
+        end
+        if XMLHelper.get_elements(hpxml, 'Building').size == 0
+          @errors << "Could not find Building element with ID '#{building_id}'."
+          return unless @errors.empty?
+        end
+      end
 
       # Validate against Schematron docs
       @errors, @warnings = validate_against_schematron(schematron_validators: schematron_validators)
