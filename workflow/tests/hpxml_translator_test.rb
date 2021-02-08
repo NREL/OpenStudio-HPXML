@@ -230,6 +230,8 @@ class HPXMLTest < MiniTest::Test
                             'multifamily-reference-duct.xml' => ["The building is of type 'single-family detached' but"],
                             'multifamily-reference-surface.xml' => ["The building is of type 'single-family detached' but"],
                             'multifamily-reference-water-heater.xml' => ["The building is of type 'single-family detached' but"],
+                            'multiple-shared-cooling-systems.xml' => ['More than one shared cooling system found.'],
+                            'multiple-shared-heating-systems.xml' => ['More than one shared heating system found.'],
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for surface 'Wall'."],
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for surface 'Roof'."],
                             'num-bedrooms-exceeds-limit.xml' => ['Number of bedrooms (40) exceeds limit of (CFA-120)/70=36.9.'],
