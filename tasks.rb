@@ -3426,6 +3426,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heat_pump_type: HPXML::HVACTypeHeatPumpWaterLoopToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity)
     if hpxml_file.include? 'boiler'
+      hpxml.heat_pumps[-1].heating_capacity = 24000
       hpxml.heat_pumps[-1].heating_efficiency_cop = 4.4
     end
     if hpxml_file.include? 'chiller'

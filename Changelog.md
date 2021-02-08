@@ -5,6 +5,7 @@ __New Features__
 - **Breaking change**: `Location` is now a required input for dehumidifiers; must be "living space" as dehumidifiers are currently modeled as located in living space.
 - **Breaking change**: `Type` is now a required input for Pool, PoolPump, HotTub, and HotTubPump.
 - **Breaking change**: Both supply and return duct leakage to outside are now required inputs for AirDistribution systems.
+- **Breaking change**: Simplifies inputs for fan coils and water loop heat pumps by A) removing HydronicAndAirDistribution element and B) moving WLHP inputs from extension elements to HeatPump element.
 - Allows modeling airflow/charge defects for air conditioners, heat pumps, and furnaces (RESNET Standard 310).
 - Allows modeling *multiple* dehumidifiers (previously only one allowed).
 - Allows modeling generators (generic on-site power production).

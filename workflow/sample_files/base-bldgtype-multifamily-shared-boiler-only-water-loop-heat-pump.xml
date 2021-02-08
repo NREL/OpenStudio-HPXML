@@ -212,6 +212,7 @@
               <DistributionSystem idref='HVACDistributionWLHP'/>
               <HeatPumpType>water-loop-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity>24000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>COP</Units>
                 <Value>4.4</Value>
