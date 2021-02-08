@@ -1,14 +1,19 @@
-
 # frozen_string_literal: true
 
 class HPXMLDefaults
-  # Note: Each HPXML object has an additional_properties child object where
-  # custom information can be attached to the object without being written
-  # to the HPXML file. This is useful to associate additional values with the
-  # HPXML objects that will ultimately get passed around.
+  # Note: Each HPXML object (e.g., HPXML::Wall) has an additional_properties
+  # child object where # custom information can be attached to the object without
+  # being written to the HPXML file. This is useful to associate additional values
+  # with the HPXML objects that will ultimately get passed around.
 
-  def self.apply(hpxml, runner, epw_file, weather, cfa, nbeds, ncfl, ncfl_ag, has_uncond_bsmnt, eri_version)
-    apply_header(hpxml, epw_file, runner)
+  def self.apply(hpxml, eri_version, weather, epw_file = nil)
+    cfa = hpxml.building_construction.conditioned_floor_area
+    nbeds = hpxml.building_construction.number_of_bedrooms
+    ncfl = hpxml.building_construction.number_of_conditioned_floors
+    ncfl_ag = hpxml.building_construction.number_of_conditioned_floors_above_grade
+    has_uncond_bsmnt = hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
+
+    apply_header(hpxml, epw_file)
     apply_site(hpxml)
     apply_building_occupancy(hpxml, nbeds)
     apply_building_construction(hpxml, cfa, nbeds)
@@ -40,12 +45,12 @@ class HPXMLDefaults
     apply_generators(hpxml)
 
     # Do HVAC sizing after all other defaults have been applied
-    apply_hvac_sizing(hpxml, runner, weather, cfa, nbeds)
+    apply_hvac_sizing(hpxml, weather, cfa, nbeds)
   end
 
   private
 
-  def self.apply_header(hpxml, epw_file, runner)
+  def self.apply_header(hpxml, epw_file)
     if hpxml.header.timestep.nil?
       hpxml.header.timestep = 60
       hpxml.header.timestep_isdefaulted = true
@@ -68,10 +73,9 @@ class HPXMLDefaults
       hpxml.header.sim_end_day_isdefaulted = true
     end
 
-    if epw_file.startDateActualYear.is_initialized # AMY
+    if (not epw_file.nil?) && epw_file.startDateActualYear.is_initialized # AMY
       if not hpxml.header.sim_calendar_year.nil?
         if hpxml.header.sim_calendar_year != epw_file.startDateActualYear.get
-          runner.registerWarning("Overriding Calendar Year (#{hpxml.header.sim_calendar_year}) with AMY year (#{epw_file.startDateActualYear.get}).")
           hpxml.header.sim_calendar_year = epw_file.startDateActualYear.get
           hpxml.header.sim_calendar_year_isdefaulted = true
         end
@@ -91,7 +95,7 @@ class HPXMLDefaults
       hpxml.header.dst_enabled_isdefaulted = true
     end
 
-    if hpxml.header.dst_enabled
+    if hpxml.header.dst_enabled && (not epw_file.nil?)
       if hpxml.header.dst_begin_month.nil? || hpxml.header.dst_begin_day.nil? || hpxml.header.dst_end_month.nil? || hpxml.header.dst_end_day.nil?
         if epw_file.daylightSavingStartDate.is_initialized && epw_file.daylightSavingEndDate.is_initialized
           # Use weather file DST dates if available
@@ -190,6 +194,11 @@ class HPXMLDefaults
 
         hpxml.building_construction.has_flue_or_chimney = true
       end
+    end
+
+    if hpxml.building_construction.use_only_ideal_air_system.nil?
+      hpxml.building_construction.use_only_ideal_air_system = false
+      hpxml.building_construction.use_only_ideal_air_system_isdefaulted = true
     end
   end
 
@@ -403,6 +412,8 @@ class HPXMLDefaults
   end
 
   def self.apply_hvac(hpxml, weather)
+    HVAC.apply_shared_systems(hpxml)
+
     # Default AC/HP compressor type
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.compressor_type.nil?
@@ -419,10 +430,11 @@ class HPXMLDefaults
 
     # Default boiler EAE
     hpxml.heating_systems.each do |heating_system|
-      if heating_system.electric_auxiliary_energy.nil?
-        heating_system.electric_auxiliary_energy_isdefaulted = true
-        heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system)
-      end
+      next unless heating_system.electric_auxiliary_energy.nil?
+      heating_system.electric_auxiliary_energy_isdefaulted = true
+      heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system)
+      heating_system.shared_loop_watts = nil
+      heating_system.fan_coil_watts = nil
     end
 
     # Default AC/HP sensible heat ratio
@@ -479,8 +491,7 @@ class HPXMLDefaults
     # Charge defect ratio
     hpxml.cooling_systems.each do |cooling_system|
       next unless [HPXML::HVACTypeCentralAirConditioner,
-                   HPXML::HVACTypeMiniSplitAirConditioner,
-                   HPXML::HVACTypeRoomAirConditioner].include? cooling_system.cooling_system_type
+                   HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
       next unless cooling_system.charge_defect_ratio.nil?
 
       cooling_system.charge_defect_ratio = 0.0
@@ -488,7 +499,8 @@ class HPXMLDefaults
     end
     hpxml.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
-                   HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
+                   HPXML::HVACTypeHeatPumpMiniSplit,
+                   HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
       next unless heat_pump.charge_defect_ratio.nil?
 
       heat_pump.charge_defect_ratio = 0.0
@@ -505,8 +517,7 @@ class HPXMLDefaults
     end
     hpxml.cooling_systems.each do |cooling_system|
       next unless [HPXML::HVACTypeCentralAirConditioner,
-                   HPXML::HVACTypeMiniSplitAirConditioner,
-                   HPXML::HVACTypeRoomAirConditioner].include? cooling_system.cooling_system_type
+                   HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
       if cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner && cooling_system.distribution_system_idref.nil?
         next # Ducted mini-splits only
       end
@@ -766,7 +777,7 @@ class HPXMLDefaults
     end
 
     hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? hvac_distribution.distribution_system_type
+      next unless [HPXML::HVACDistributionTypeAir].include? hvac_distribution.distribution_system_type
 
       # Default return registers
       if hvac_distribution.number_of_return_registers.nil?
@@ -1232,6 +1243,8 @@ class HPXMLDefaults
   end
 
   def self.apply_lighting(hpxml)
+    return if hpxml.lighting_groups.empty?
+
     if hpxml.lighting.interior_usage_multiplier.nil?
       hpxml.lighting.interior_usage_multiplier = 1.0
       hpxml.lighting.interior_usage_multiplier_isdefaulted = true
@@ -1629,11 +1642,11 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac_sizing(hpxml, runner, weather, cfa, nbeds)
+  def self.apply_hvac_sizing(hpxml, weather, cfa, nbeds)
     hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml)
 
     # Calculate building design loads and equipment capacities/airflows
-    bldg_design_loads, all_hvac_sizing_values = HVACSizing.calculate(runner, weather, hpxml, cfa, nbeds, hvac_systems)
+    bldg_design_loads, all_hvac_sizing_values = HVACSizing.calculate(weather, hpxml, cfa, nbeds, hvac_systems)
 
     hvacpl = hpxml.hvac_plant
     tol = 10 # Btuh
@@ -1655,7 +1668,7 @@ class HPXMLDefaults
                hvacpl.hdl_skylights + hvacpl.hdl_doors + hvacpl.hdl_infilvent +
                hvacpl.hdl_ducts)
     if (hdl_sum - hvacpl.hdl_total).abs > tol
-      runner.registerWarning('Heating design loads do not sum to total.')
+      fail 'Heating design loads do not sum to total.'
     end
 
     # Cooling sensible design loads back to HPXML object
@@ -1678,7 +1691,7 @@ class HPXMLDefaults
                     hvacpl.cdl_sens_infilvent + hvacpl.cdl_sens_ducts +
                     hvacpl.cdl_sens_intgains)
     if (cdl_sens_sum - hvacpl.cdl_sens_total).abs > tol
-      runner.registerWarning('Cooling sensible design loads do not sum to total.')
+      fail 'Cooling sensible design loads do not sum to total.'
     end
 
     # Cooling latent design loads back to HPXML object
@@ -1689,7 +1702,7 @@ class HPXMLDefaults
     cdl_lat_sum = (hvacpl.cdl_lat_ducts + hvacpl.cdl_lat_infilvent +
                    hvacpl.cdl_lat_intgains)
     if (cdl_lat_sum - hvacpl.cdl_lat_total).abs > tol
-      runner.registerWarning('Cooling latent design loads do not sum to total.')
+      fail 'Cooling latent design loads do not sum to total.'
     end
 
     # Assign sizing values back to HPXML objects
