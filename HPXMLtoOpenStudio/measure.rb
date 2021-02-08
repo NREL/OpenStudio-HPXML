@@ -2312,7 +2312,7 @@ class OSModel
     # Ducts
     duct_systems = {}
     @hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless [HPXML::HVACDistributionTypeAir].include? hvac_distribution.distribution_system_type
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
 
       air_ducts = create_ducts(runner, model, hvac_distribution, spaces)
       next if air_ducts.empty?
@@ -2321,7 +2321,7 @@ class OSModel
       added_ducts = false
       hvac_distribution.hvac_systems.each do |hvac_system|
         @hvac_map[hvac_system.id].each do |object|
-          next unless object.is_a? OpenStudio::Model::AirLoopHVAC
+          next unless object.is_a?(OpenStudio::Model::AirLoopHVAC) || object.is_a?(OpenStudio::Model::ZoneHVACFourPipeFanCoil)
 
           if duct_systems[air_ducts].nil?
             duct_systems[air_ducts] = object
@@ -2332,20 +2332,6 @@ class OSModel
             air_ducts2 = create_ducts(runner, model, hvac_distribution, spaces)
             duct_systems[air_ducts2] = object
             added_ducts = true
-          end
-        end
-      end
-      if not added_ducts
-        # Check if ducted fan coil, which doesn't have an AirLoopHVAC;
-        # assign to FanCoil instead.
-        if hvac_distribution.distribution_system_type && hvac_distribution.air_type == HPXML::AirTypeFanCoil
-          hvac_distribution.hvac_systems.each do |hvac_system|
-            @hvac_map[hvac_system.id].each do |object|
-              next unless object.is_a? OpenStudio::Model::ZoneHVACFourPipeFanCoil
-
-              duct_systems[air_ducts] = object
-              added_ducts = true
-            end
           end
         end
       end
