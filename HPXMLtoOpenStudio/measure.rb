@@ -305,14 +305,9 @@ class OSModel
     @ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade
     @nbeds = @hpxml.building_construction.number_of_bedrooms
     @default_azimuths = get_default_azimuths()
-    @has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
-
-    if @hpxml.building_construction.use_only_ideal_air_system.nil?
-      @hpxml.building_construction.use_only_ideal_air_system = false
-    end
 
     # Apply defaults to HPXML object
-    HPXMLDefaults.apply(@hpxml, runner, epw_file, weather, @cfa, @nbeds, @ncfl, @ncfl_ag, @has_uncond_bsmnt, @eri_version)
+    HPXMLDefaults.apply(@hpxml, @eri_version, weather, epw_file)
 
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
@@ -1966,10 +1961,11 @@ class OSModel
     end
 
     # Water Heater
+    has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
     @hpxml.water_heating_systems.each do |water_heating_system|
       loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
 
-      ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl, water_heating_system, hot_water_distribution)
+      ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, @cfa, @ncfl, water_heating_system, hot_water_distribution)
 
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
 
@@ -2001,11 +1997,7 @@ class OSModel
     end
 
     # Hot water fixtures and appliances
-    HotWaterAndAppliances.apply(model, runner, weather, spaces[HPXML::LocationLivingSpace],
-                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, @hpxml.clothes_washers,
-                                @hpxml.clothes_dryers, @hpxml.dishwashers, @hpxml.refrigerators,
-                                @hpxml.freezers, @hpxml.cooking_ranges, @hpxml.ovens, @hpxml.water_heating,
-                                @hpxml.water_heating_systems, hot_water_distribution, @hpxml.water_fixtures,
+    HotWaterAndAppliances.apply(model, runner, @hpxml, weather, spaces, hot_water_distribution,
                                 solar_thermal_system, @eri_version, @dhw_map, @schedules_file)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
