@@ -89,7 +89,7 @@ OptionParser.new do |opts|
     options[:skip_validation] = true
   end
 
-  opts.on('-b', '--building-id <ID>', 'ID of HPXML Building to simulate') do |t|
+  opts.on('-b', '--building-id <ID>', 'ID of Building to simulate (required when multiple HPXML Building elements)') do |t|
     options[:building_id] = t
   end
 

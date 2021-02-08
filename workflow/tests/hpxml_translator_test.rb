@@ -230,7 +230,7 @@ class HPXMLTest < MiniTest::Test
                             'multifamily-reference-duct.xml' => ["The building is of type 'single-family detached' but"],
                             'multifamily-reference-surface.xml' => ["The building is of type 'single-family detached' but"],
                             'multifamily-reference-water-heater.xml' => ["The building is of type 'single-family detached' but"],
-                            'multiple-buildings-without-building-id.xml' => ['Multiple Building elements defined in HPXML file; building_id argument must be provided.'],
+                            'multiple-buildings-without-building-id.xml' => ['Multiple Building elements defined in HPXML file; Building ID argument must be provided.'],
                             'multiple-buildings-wrong-building-id.xml' => ["Could not find Building element with ID 'MyFoo'."],
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for surface 'Wall'."],
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for surface 'Roof'."],

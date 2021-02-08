@@ -293,9 +293,14 @@ class HPXML < Object
       hpxml = XMLHelper.get_element(@doc, '/HPXML')
       Version.check_hpxml_version(XMLHelper.get_attribute_value(hpxml, 'schemaVersion'))
 
+      # Validate against Schematron docs
+      @errors, @warnings = validate_against_schematron(schematron_validators: schematron_validators)
+      return unless @errors.empty?
+
+      # Handle multiple buildings
       if XMLHelper.get_elements(hpxml, 'Building').size > 1
         if building_id.nil?
-          @errors << 'Multiple Building elements defined in HPXML file; building_id argument must be provided.'
+          @errors << 'Multiple Building elements defined in HPXML file; Building ID argument must be provided.'
           return unless @errors.empty?
         end
 
@@ -310,10 +315,6 @@ class HPXML < Object
           return unless @errors.empty?
         end
       end
-
-      # Validate against Schematron docs
-      @errors, @warnings = validate_against_schematron(schematron_validators: schematron_validators)
-      return unless @errors.empty?
     end
 
     # Create/populate child objects
