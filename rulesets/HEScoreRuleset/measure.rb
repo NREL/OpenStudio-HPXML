@@ -4,13 +4,23 @@ require 'pathname'
 require 'csv'
 require 'oga'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/airflow'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/constants'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/constructions'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/geometry'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/hpxml'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/hpxml_defaults'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/hotwater_appliances'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/hvac'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/hvac_sizing'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/lighting'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/materials'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/misc_loads'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/psychrometrics'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/pv'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/unit_conversions'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/util'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/waterheater'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/weather'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/xmlhelper'
 require_relative 'resources/HESruleset'
 
@@ -72,8 +82,36 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
 
     hpxml = HPXML.new(hpxml_path: hpxml_path, collapse_enclosure: false)
 
+    # Look up EPW path from WMO
+    epw_path = nil
+    weather_wmo = hpxml.climate_and_risk_zones.weather_station_wmo
+    weather_dir = File.join(File.dirname(__FILE__), '..', '..', 'weather')
+    CSV.foreach(File.join(weather_dir, 'data.csv'), headers: true) do |row|
+      next if row['wmo'] != weather_wmo
+
+      epw_path = File.join(weather_dir, row['filename'])
+      if not File.exist?(epw_path)
+        fail "'#{epw_path}' could not be found."
+      end
+
+      break
+    end
+    if epw_path.nil?
+      fail "Weather station WMO '#{weather_wmo}' could not be found in #{File.join(weather_dir, 'data.csv')}."
+    end
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = epw_path
+
+    cache_path = epw_path.gsub('.epw', '-cache.csv')
+    if not File.exist?(cache_path)
+      runner.registerError("'#{cache_path}' could not be found.")
+      return false
+    end
+
+    # Obtain weather object
+    weather = WeatherProcess.new(nil, nil, cache_path)
+
     begin
-      new_hpxml = HEScoreRuleset.apply_ruleset(hpxml)
+      new_hpxml = HEScoreRuleset.apply_ruleset(hpxml, weather)
     rescue Exception => e
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
       return false
