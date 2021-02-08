@@ -527,6 +527,7 @@
   <sch:pattern>
     <sch:title>[HeatingSystemType=SharedBoilerWithWLHP]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:Boiler and h:IsSharedSystem="true" and //h:HydronicDistributionType[text()="water loop"]]'>
+      <sch:assert role='ERROR' test='count(../h:HeatPump[h:HeatPumpType="water-loop-to-air"]/h:HeatingCapacity) = 1'>Expected 1 element(s) for xpath: ../HeatPump[HeatPumpType="water-loop-to-air"]/HeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(../h:HeatPump[h:HeatPumpType="water-loop-to-air"]/h:AnnualHeatingEfficiency[h:Units="COP"]/h:Value) = 1'>Expected 1 element(s) for xpath: ../HeatPump[HeatPumpType="water-loop-to-air"]/AnnualHeatingEfficiency[Units="COP"]/Value</sch:assert>
     </sch:rule>
   </sch:pattern>
