@@ -891,10 +891,10 @@ If a chiller is specified, additional information is entered in ``CoolingSystem`
 
   Chillers are modeled as central air conditioners with a SEER equivalent using the equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
-Cooling Tower w/ WLHP
-~~~~~~~~~~~~~~~~~~~~~
+Cooling Tower
+~~~~~~~~~~~~~
 
-If a cooling tower w/ water loop heat pump (WLHP) is specified, additional information is entered in ``CoolingSystem``.
+If a cooling tower is specified, additional information is entered in ``CoolingSystem``.
 
   ==========================================================================  ========  ======  ===========  ========  =========  =========================================
   Element                                                                     Type      Units   Constraints  Required  Default    Notes
@@ -909,7 +909,7 @@ If a cooling tower w/ water loop heat pump (WLHP) is specified, additional infor
   
 .. note::
 
-  Cooling towers w/ WLHPs are modeled as central air conditioners with a SEER equivalent using the equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+  Cooling towers w/ water loop heat pumps are modeled as central air conditioners with a SEER equivalent using the equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 .. _hvac_heatpump:
 
@@ -1066,7 +1066,7 @@ If a water-loop-to-air heat pump is specified, additional information is entered
   Element                                          Type      Units   Constraints  Required  Default    Notes
   ===============================================  ========  ======  ===========  ========  =========  ==============================================
   ``DistributionSystem``                           idref             See [#]_     Yes                  ID of attached distribution system
-  ``HeatingCapacity``                              double    Btu/hr  > 0          No                   Heating capacity
+  ``HeatingCapacity``                              double    Btu/hr  > 0          No        autosized  Heating capacity
   ``CoolingCapacity``                              double    Btu/hr  > 0          See [#]_             Cooling capacity
   ``AnnualCoolingEfficiency[Units="EER"]/Value``   double    Btu/Wh  > 0          See [#]_             Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="COP"]/Value``   double    W/W     > 0          See [#]_             Rated heating efficiency

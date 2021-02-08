@@ -4104,6 +4104,7 @@ class HVAC
         fraction_heat_load_served = heating_system.fraction_heat_load_served
 
         # Heat pump
+        # If this approach is ever removed, also remove code in HVACSizing.apply_hvac_loads()
         wlhp = hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir }[0]
         wlhp.fraction_heat_load_served = fraction_heat_load_served * (1.0 / wlhp.heating_efficiency_cop)
         wlhp.fraction_cool_load_served = 0.0
