@@ -5424,6 +5424,26 @@ class HPXML < Object
       end
     end
 
+    # Check for at most 1 shared heating system and 1 shared cooling system
+    num_htg_shared = 0
+    num_clg_shared = 0
+    (@heating_systems + @heat_pumps).each do |hvac_system|
+      next unless hvac_system.is_shared_system
+
+      num_htg_shared += 1
+    end
+    (@cooling_systems + @heat_pumps).each do |hvac_system|
+      next unless hvac_system.is_shared_system
+
+      num_clg_shared += 1
+    end
+    if num_htg_shared > 1
+      errors << 'More than one shared heating system found.'
+    end
+    if num_clg_shared > 1
+      errors << 'More than one shared cooling system found.'
+    end
+
     errors.map! { |e| "#{@hpxml_path}: #{e}" }
 
     return errors
