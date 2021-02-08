@@ -193,6 +193,10 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
     # Find a HPXML file that contains the specified elements.
     @hpxml_docs.each do |xml, hpxml_doc|
+      if context_xpath.include? 'HeatPump[HeatPumpType="water-loop-to-air"]'
+        next unless xml.include? 'boiler-only'
+      end
+
       parent_elements = XMLHelper.get_elements(hpxml_doc, context_xpath)
       next if parent_elements.nil?
 

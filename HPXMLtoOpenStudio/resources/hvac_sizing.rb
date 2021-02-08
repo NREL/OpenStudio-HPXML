@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
 class HVACSizing
-  def self.calculate(runner, weather, hpxml, cfa, nbeds, hvac_systems)
+  def self.calculate(weather, hpxml, cfa, nbeds, hvac_systems)
     # Calculates heating/cooling design loads, and selects equipment
     # values (e.g., capacities, airflows) specific to each HVAC system.
     # Calculations generally follow ACCA Manual J/S.
 
-    @runner = runner
     @hpxml = hpxml
 
     process_site_calcs_and_design_temps(weather)
@@ -436,13 +435,11 @@ class HVACSizing
       if latitude < 20.0
         psf_lat << psf[cnt][0]
         if cnt == 0
-          @runner.registerWarning('Latitude of 20 was assumed for Manual J solar load calculations.')
           psf_lat_horiz = psf_horiz[0]
         end
       elsif latitude >= 64.0
         psf_lat << psf[cnt][11]
         if cnt == 0
-          @runner.registerWarning('Latitude of 64 was assumed for Manual J solar load calculations.') if latitude > 64.0
           psf_lat_horiz = psf_horiz[11]
         end
       else
@@ -1834,7 +1831,7 @@ class HVACSizing
       if @hpxml.header.allow_increased_fixed_capacities
         hvac_sizing_values.Cool_Capacity = [hvac_sizing_values.Cool_Capacity, prev_capacity].max
       end
-      hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
+      hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity_Sens * hvac_sizing_values.Cool_Capacity / prev_capacity
       hvac_sizing_values.Cool_Airflow = hvac_sizing_values.Cool_Airflow * hvac_sizing_values.Cool_Capacity / prev_capacity
     end
     if (not hvac.FixedHeatingCapacity.nil?) && (hvac_sizing_values.Heat_Capacity > 0)
@@ -1917,7 +1914,6 @@ class HVACSizing
       # Any configuration with a max_valid_configs value can accept any number of bores up to the maximum
       if max_valid_configs.keys.include? bore_config
         max_num_bore_holes = max_valid_configs[bore_config]
-        @runner.registerWarning("Maximum number of bore holes for '#{bore_config}' bore configuration is #{max_num_bore_holes}. Overriding value of #{num_bore_holes} bore holes to #{max_num_bore_holes}.")
         num_bore_holes = max_num_bore_holes
       else
         # Search for first valid bore field
@@ -1931,7 +1927,6 @@ class HVACSizing
           break
         end
         if valid_field_found
-          @runner.registerWarning("Bore field '#{bore_config}' with #{num_bore_holes.to_i} bore holes is an invalid configuration. Changing layout to '#{new_bore_config}' configuration.")
           bore_config = new_bore_config
         else
           fail 'Could not construct a valid GSHP bore field configuration.'
