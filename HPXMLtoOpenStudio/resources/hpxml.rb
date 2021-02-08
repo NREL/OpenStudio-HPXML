@@ -2600,7 +2600,7 @@ class HPXML < Object
         XMLHelper.add_element(annual_efficiency, 'Units', efficiency_units, :string)
         XMLHelper.add_element(annual_efficiency, 'Value', efficiency_value, :float)
       end
-      XMLHelper.add_element(heating_system, 'FractionHeatLoadServed', @fraction_heat_load_served, :float) unless @fraction_heat_load_served.nil?
+      XMLHelper.add_element(heating_system, 'FractionHeatLoadServed', @fraction_heat_load_served, :float, @fraction_heat_load_served_isdefaulted) unless @fraction_heat_load_served.nil?
       XMLHelper.add_element(heating_system, 'ElectricAuxiliaryEnergy', @electric_auxiliary_energy, :float, @electric_auxiliary_energy_isdefaulted) unless @electric_auxiliary_energy.nil?
       XMLHelper.add_extension(heating_system, 'SharedLoopWatts', @shared_loop_watts, :float) unless @shared_loop_watts.nil?
       XMLHelper.add_extension(heating_system, 'FanCoilWatts', @fan_coil_watts, :float) unless @fan_coil_watts.nil?
@@ -2726,7 +2726,7 @@ class HPXML < Object
       XMLHelper.add_element(cooling_system, 'CoolingSystemFuel', @cooling_system_fuel, :string) unless @cooling_system_fuel.nil?
       XMLHelper.add_element(cooling_system, 'CoolingCapacity', @cooling_capacity, :float, @cooling_capacity_isdefaulted) unless @cooling_capacity.nil?
       XMLHelper.add_element(cooling_system, 'CompressorType', @compressor_type, :string, @compressor_type_isdefaulted) unless @compressor_type.nil?
-      XMLHelper.add_element(cooling_system, 'FractionCoolLoadServed', @fraction_cool_load_served, :float) unless @fraction_cool_load_served.nil?
+      XMLHelper.add_element(cooling_system, 'FractionCoolLoadServed', @fraction_cool_load_served, :float, @fraction_cool_load_served_isdefaulted) unless @fraction_cool_load_served.nil?
 
       efficiency_units = nil
       efficiency_value = nil
@@ -2884,10 +2884,10 @@ class HPXML < Object
         XMLHelper.add_element(backup_eff, 'Units', units, :string)
         XMLHelper.add_element(backup_eff, 'Value', value, :float)
       end
-      XMLHelper.add_element(heat_pump, 'BackupHeatingCapacity', @backup_heating_capacity, :float) unless @backup_heating_capacity.nil?
+      XMLHelper.add_element(heat_pump, 'BackupHeatingCapacity', @backup_heating_capacity, :float, @backup_heating_capacity_isdefaulted) unless @backup_heating_capacity.nil?
       XMLHelper.add_element(heat_pump, 'BackupHeatingSwitchoverTemperature', @backup_heating_switchover_temp, :float) unless @backup_heating_switchover_temp.nil?
-      XMLHelper.add_element(heat_pump, 'FractionHeatLoadServed', @fraction_heat_load_served, :float) unless @fraction_heat_load_served.nil?
-      XMLHelper.add_element(heat_pump, 'FractionCoolLoadServed', @fraction_cool_load_served, :float) unless @fraction_cool_load_served.nil?
+      XMLHelper.add_element(heat_pump, 'FractionHeatLoadServed', @fraction_heat_load_served, :float, @fraction_heat_load_served_isdefaulted) unless @fraction_heat_load_served.nil?
+      XMLHelper.add_element(heat_pump, 'FractionCoolLoadServed', @fraction_cool_load_served, :float, @fraction_cool_load_served_isdefaulted) unless @fraction_cool_load_served.nil?
 
       clg_efficiency_units = nil
       clg_efficiency_value = nil

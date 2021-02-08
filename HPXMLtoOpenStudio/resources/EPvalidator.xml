@@ -714,9 +714,6 @@
       <sch:assert role='ERROR' test='h:HeatPumpType[text()="air-to-air" or text()="mini-split" or text()="ground-to-air" or text()="water-loop-to-air"] or not(h:HeatPumpType)'>Expected HeatPumpType to be 'air-to-air' or 'mini-split' or 'ground-to-air' or 'water-loop-to-air'</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatPumpFuel) = 1'>Expected 1 element(s) for xpath: HeatPumpFuel</sch:assert>
       <sch:assert role='ERROR' test='h:HeatPumpFuel[text()="electricity"] or not(h:HeatPumpFuel)'>Expected HeatPumpFuel to be 'electricity'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
-      <sch:assert role='ERROR' test='count(h:CoolingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingCapacity</sch:assert>
-      <sch:assert role='ERROR' test='count(h:CoolingSensibleHeatFraction) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingSensibleHeatFraction</sch:assert>
       <sch:assert role='ERROR' test='count(h:BackupSystemFuel) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BackupSystemFuel</sch:assert> <!-- See [HeatPumpBackup] -->
       <sch:assert role='ERROR' test='h:BackupSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"] or not(h:BackupSystemFuel)'>Expected BackupSystemFuel to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
     </sch:rule>
@@ -729,7 +726,10 @@
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 1'>Expected 1 element(s) for xpath: DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='count(h:CompressorType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CompressorType</sch:assert>
       <sch:assert role='ERROR' test='h:CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"] or not(h:CompressorType)'>Expected CompressorType to be 'single stage' or 'two stage' or 'variable speed'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity17F) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity17F</sch:assert>
+      <sch:assert role='ERROR' test='count(h:CoolingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingCapacity</sch:assert>
+      <sch:assert role='ERROR' test='count(h:CoolingSensibleHeatFraction) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingSensibleHeatFraction</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionHeatLoadServed) = 1'>Expected 1 element(s) for xpath: FractionHeatLoadServed</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionCoolLoadServed) = 1'>Expected 1 element(s) for xpath: FractionCoolLoadServed</sch:assert>
       <sch:assert role='ERROR' test='count(h:AnnualCoolingEfficiency[h:Units="SEER"]/h:Value) = 1'>Expected 1 element(s) for xpath: AnnualCoolingEfficiency[Units="SEER"]/Value</sch:assert>
@@ -748,7 +748,10 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:HeatPumpType="mini-split"]'>
       <sch:assert role='ERROR' test='count(../../h:HVACDistribution/h:DistributionSystemType/h:AirDistribution) + count(../../h:HVACDistribution/h:DistributionSystemType/h:Other[text()="DSE"]) &gt;= 0'>Expected 0 or more element(s) for xpath: ../../HVACDistribution/DistributionSystemType/AirDistribution | ../../HVACDistribution/DistributionSystemType/Other[text()="DSE"]</sch:assert> <!-- See [HVACDistribution] -->
       <sch:assert role='ERROR' test='count(h:DistributionSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: DistributionSystem</sch:assert> <!-- See [HeatPumpType=DuctedMiniSplit] -->
+      <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity17F) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity17F</sch:assert>
+      <sch:assert role='ERROR' test='count(h:CoolingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingCapacity</sch:assert>
+      <sch:assert role='ERROR' test='count(h:CoolingSensibleHeatFraction) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingSensibleHeatFraction</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionHeatLoadServed) = 1'>Expected 1 element(s) for xpath: FractionHeatLoadServed</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionCoolLoadServed) = 1'>Expected 1 element(s) for xpath: FractionCoolLoadServed</sch:assert>
       <sch:assert role='ERROR' test='count(h:AnnualCoolingEfficiency[h:Units="SEER"]/h:Value) = 1'>Expected 1 element(s) for xpath: AnnualCoolingEfficiency[Units="SEER"]/Value</sch:assert>
@@ -775,6 +778,9 @@
       <sch:assert role='ERROR' test='count(h:IsSharedSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: IsSharedSystem</sch:assert> <!-- See [HeatPumpType=GroundSourceWithSharedLoop] -->
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 1'>Expected 1 element(s) for xpath: DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='count(h:BackupHeatingSwitchoverTemperature) = 0'>Expected 0 element(s) for xpath: BackupHeatingSwitchoverTemperature</sch:assert>
+      <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
+      <sch:assert role='ERROR' test='count(h:CoolingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingCapacity</sch:assert>
+      <sch:assert role='ERROR' test='count(h:CoolingSensibleHeatFraction) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingSensibleHeatFraction</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionHeatLoadServed) = 1'>Expected 1 element(s) for xpath: FractionHeatLoadServed</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionCoolLoadServed) = 1'>Expected 1 element(s) for xpath: FractionCoolLoadServed</sch:assert>
       <sch:assert role='ERROR' test='count(h:AnnualCoolingEfficiency[h:Units="EER"]/h:Value) = 1'>Expected 1 element(s) for xpath: AnnualCoolingEfficiency[Units="EER"]/Value</sch:assert>
