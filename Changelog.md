@@ -1,4 +1,4 @@
-## OpenStudio-HPXML v1.1.0 (pending)
+## OpenStudio-HPXML v1.1.0
 
 __New Features__
 - **Breaking change**: `Type` is now a required input for dehumidifiers; can be "portable" or "whole-home".
