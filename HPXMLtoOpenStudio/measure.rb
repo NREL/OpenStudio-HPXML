@@ -76,6 +76,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('building_id', false)
+    arg.setDisplayName('BuildingID')
+    arg.setDescription('The ID of the HPXML Building. Only required if there are multiple Building elements in the HPXML file.')
+    args << arg
+
     return args
   end
 
@@ -97,6 +102,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     output_dir = runner.getStringArgumentValue('output_dir', user_arguments)
     debug = runner.getBoolArgumentValue('debug', user_arguments)
     skip_validation = runner.getBoolArgumentValue('skip_validation', user_arguments)
+    building_id = runner.getOptionalStringArgumentValue('building_id', user_arguments)
 
     unless (Pathname.new hpxml_path).absolute?
       hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
@@ -109,6 +115,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       output_dir = File.expand_path(File.join(File.dirname(__FILE__), output_dir))
     end
 
+    if building_id.is_initialized
+      building_id = building_id.get
+    else
+      building_id = nil
+    end
+
     begin
       if skip_validation
         stron_paths = []
@@ -117,7 +129,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'HPXMLvalidator.xml'),
                        File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')]
       end
-      hpxml = HPXML.new(hpxml_path: hpxml_path, schematron_validators: stron_paths)
+      hpxml = HPXML.new(hpxml_path: hpxml_path, schematron_validators: stron_paths, building_id: building_id)
       hpxml.errors.each do |error|
         runner.registerError(error)
       end
@@ -133,7 +145,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         FileUtils.cp(epw_path, epw_output_path)
       end
 
-      OSModel.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, debug)
+      OSModel.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, building_id, debug)
     rescue Exception => e
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
       return false
@@ -178,7 +190,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 end
 
 class OSModel
-  def self.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, debug)
+  def self.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, building_id, debug)
     @hpxml = hpxml
     @debug = debug
 
@@ -249,7 +261,7 @@ class OSModel
     add_airflow(runner, model, weather, spaces)
     add_photovoltaics(runner, model)
     add_generators(runner, model)
-    add_additional_properties(runner, model, hpxml_path)
+    add_additional_properties(runner, model, hpxml_path, building_id)
 
     # Output
 
@@ -2438,10 +2450,11 @@ class OSModel
     end
   end
 
-  def self.add_additional_properties(runner, model, hpxml_path)
+  def self.add_additional_properties(runner, model, hpxml_path, building_id)
     # Store some data for use in reporting measure
     additionalProperties = model.getBuilding.additionalProperties
     additionalProperties.setFeature('hpxml_path', hpxml_path)
+    additionalProperties.setFeature('building_id', building_id.to_s)
     additionalProperties.setFeature('hvac_map', map_to_string(@hvac_map))
     additionalProperties.setFeature('dhw_map', map_to_string(@dhw_map))
   end
