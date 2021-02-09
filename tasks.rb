@@ -3506,6 +3506,7 @@ def set_hpxml_hvac_control(hpxml_file, hpxml)
     hpxml.hvac_controls[0].onoff_thermostat_deadband = 2.0
   elsif ['base-hvac-realistic-control-2-speed.xml'].include? hpxml_file
     hpxml.hvac_controls[0].onoff_thermostat_deadband = 2.0
+    hpxml.hvac_controls[0].realistic_staging = true
   end
 end
 
