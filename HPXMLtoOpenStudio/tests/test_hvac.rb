@@ -582,7 +582,8 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     afue = heating_system.heating_efficiency_afue
     capacity = UnitConversions.convert(heating_system.heating_capacity.to_f, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
-    wlhp_cop = heating_system.wlhp_heating_efficiency_cop
+    heat_pump = hpxml.heat_pumps[0]
+    wlhp_cop = heat_pump.heating_efficiency_cop
 
     # Check boiler
     assert_equal(1, model.getBoilerHotWaters.size)
@@ -779,7 +780,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
   end
 
   def test_install_quality_ground_to_air_heat_pump_ratio
-    # FIXME: TODO
+    # TODO
   end
 
   def test_install_quality_mini_split_air_conditioner_ratio
@@ -810,6 +811,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     model = OpenStudio::Model::Model.new
 
     # get arguments
+    args_hash['output_dir'] = 'tests'
     arguments = measure.arguments(model)
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
 
@@ -833,6 +835,8 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert_equal('Success', result.value.valueName)
 
     hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
+
+    File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
 
     return model, hpxml
   end
