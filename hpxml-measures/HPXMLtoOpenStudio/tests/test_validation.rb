@@ -22,7 +22,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     @hpxml_docs = {}
     hpxml_file_dirs.each do |hpxml_file_dir|
       Dir["#{hpxml_file_dir}/*.xml"].sort.each do |xml|
-        @hpxml_docs[File.basename(xml)] = HPXML.new(hpxml_path: File.join(hpxml_file_dir, File.basename(xml))).to_oga()
+        @hpxml_docs[File.basename(xml)] = HPXML.new(hpxml_path: File.join(hpxml_file_dir, File.basename(xml)), building_id: 'MyBuilding').to_oga()
       end
     end
 
