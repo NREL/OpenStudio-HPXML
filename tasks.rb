@@ -105,6 +105,8 @@ def create_hpxmls
     'invalid_files/multifamily-reference-duct.xml' => 'base.xml',
     'invalid_files/multifamily-reference-surface.xml' => 'base.xml',
     'invalid_files/multifamily-reference-water-heater.xml' => 'base.xml',
+    'invalid_files/multiple-buildings-without-building-id.xml' => 'base.xml',
+    'invalid_files/multiple-buildings-wrong-building-id.xml' => 'base.xml',
     'invalid_files/multiple-shared-cooling-systems.xml' => 'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
     'invalid_files/multiple-shared-heating-systems.xml' => 'base-bldgtype-multifamily-shared-boiler-only-baseboard.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
@@ -416,6 +418,7 @@ def create_hpxmls
     'base-misc-neighbor-shading.xml' => 'base.xml',
     'base-misc-shelter-coefficient.xml' => 'base.xml',
     'base-misc-usage-multiplier.xml' => 'base.xml',
+    'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
     'base-simcontrol-calendar-year-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
@@ -516,6 +519,20 @@ def create_hpxmls
       end
 
       XMLHelper.write_file(hpxml_doc, hpxml_path)
+
+      if ['base-multiple-buildings.xml',
+          'invalid_files/multiple-buildings-without-building-id.xml',
+          'invalid_files/multiple-buildings-wrong-building-id.xml'].include? derivative
+        # HPXML class doesn't support multiple buildings, so we'll stitch together manually.
+        hpxml_element = XMLHelper.get_element(hpxml_doc, '/HPXML')
+        building_element = XMLHelper.get_element(hpxml_element, 'Building')
+        for i in 2..3
+          new_building_element = Marshal.load(Marshal.dump(building_element))
+          XMLHelper.add_attribute(XMLHelper.get_element(new_building_element, 'BuildingID'), 'id', "MyBuilding#{i}")
+          hpxml_element.children << new_building_element
+        end
+        XMLHelper.write_file(hpxml_doc, hpxml_path)
+      end
 
       if not hpxml_path.include? 'invalid_files'
         # Validate file against HPXML schema
