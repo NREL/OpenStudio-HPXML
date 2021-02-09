@@ -3892,10 +3892,8 @@ class HPXMLFile
 
     return if cooling_system_type == 'none'
 
-    if cooling_system_type != HPXML::HVACTypeEvaporativeCooler
-      if args[:cooling_system_cooling_capacity] != Constants.Auto
-        cooling_capacity = args[:cooling_system_cooling_capacity]
-      end
+    if args[:cooling_system_cooling_capacity] != Constants.Auto
+      cooling_capacity = args[:cooling_system_cooling_capacity]
     end
 
     if args[:cooling_system_cooling_compressor_type].is_initialized
