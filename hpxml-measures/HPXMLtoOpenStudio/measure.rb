@@ -76,6 +76,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('building_id', false)
+    arg.setDisplayName('BuildingID')
+    arg.setDescription('The ID of the HPXML Building. Only required if there are multiple Building elements in the HPXML file.')
+    args << arg
+
     return args
   end
 
@@ -97,6 +102,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     output_dir = runner.getStringArgumentValue('output_dir', user_arguments)
     debug = runner.getBoolArgumentValue('debug', user_arguments)
     skip_validation = runner.getBoolArgumentValue('skip_validation', user_arguments)
+    building_id = runner.getOptionalStringArgumentValue('building_id', user_arguments)
 
     unless (Pathname.new hpxml_path).absolute?
       hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
@@ -109,6 +115,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       output_dir = File.expand_path(File.join(File.dirname(__FILE__), output_dir))
     end
 
+    if building_id.is_initialized
+      building_id = building_id.get
+    else
+      building_id = nil
+    end
+
     begin
       if skip_validation
         stron_paths = []
@@ -117,7 +129,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'HPXMLvalidator.xml'),
                        File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')]
       end
-      hpxml = HPXML.new(hpxml_path: hpxml_path, schematron_validators: stron_paths)
+      hpxml = HPXML.new(hpxml_path: hpxml_path, schematron_validators: stron_paths, building_id: building_id)
       hpxml.errors.each do |error|
         runner.registerError(error)
       end
@@ -133,7 +145,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         FileUtils.cp(epw_path, epw_output_path)
       end
 
-      OSModel.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, debug)
+      OSModel.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, building_id, debug)
     rescue Exception => e
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
       return false
@@ -178,7 +190,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 end
 
 class OSModel
-  def self.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, debug)
+  def self.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, building_id, debug)
     @hpxml = hpxml
     @debug = debug
 
@@ -193,7 +205,6 @@ class OSModel
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
     check_for_errors()
-    update_shared_hvac_systems()
     set_defaults_and_globals(runner, output_dir, epw_file, weather)
     Location.apply(model, runner, weather, epw_file, @hpxml)
     add_simulation_params(model)
@@ -250,7 +261,7 @@ class OSModel
     add_airflow(runner, model, weather, spaces)
     add_photovoltaics(runner, model)
     add_generators(runner, model)
-    add_additional_properties(runner, model, hpxml_path)
+    add_additional_properties(runner, model, hpxml_path, building_id)
 
     # Output
 
@@ -291,14 +302,9 @@ class OSModel
     @ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade
     @nbeds = @hpxml.building_construction.number_of_bedrooms
     @default_azimuths = get_default_azimuths()
-    @has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
-
-    if @hpxml.building_construction.use_only_ideal_air_system.nil?
-      @hpxml.building_construction.use_only_ideal_air_system = false
-    end
 
     # Apply defaults to HPXML object
-    HPXMLDefaults.apply(@hpxml, runner, epw_file, weather, @cfa, @nbeds, @ncfl, @ncfl_ag, @has_uncond_bsmnt, @eri_version)
+    HPXMLDefaults.apply(@hpxml, @eri_version, weather, epw_file)
 
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
@@ -1951,10 +1957,11 @@ class OSModel
     end
 
     # Water Heater
+    has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
     @hpxml.water_heating_systems.each do |water_heating_system|
       loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
 
-      ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl, water_heating_system, hot_water_distribution)
+      ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, @cfa, @ncfl, water_heating_system, hot_water_distribution)
 
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
 
@@ -1986,12 +1993,7 @@ class OSModel
     end
 
     # Hot water fixtures and appliances
-    fixtures_usage_multiplier = @hpxml.water_heating.water_fixtures_usage_multiplier
-    HotWaterAndAppliances.apply(model, runner, weather, spaces[HPXML::LocationLivingSpace],
-                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, @hpxml.clothes_washers,
-                                @hpxml.clothes_dryers, @hpxml.dishwashers, @hpxml.refrigerators,
-                                @hpxml.freezers, @hpxml.cooking_ranges, @hpxml.ovens, fixtures_usage_multiplier,
-                                @hpxml.water_heating_systems, hot_water_distribution, @hpxml.water_fixtures,
+    HotWaterAndAppliances.apply(model, runner, @hpxml, weather, spaces, hot_water_distribution,
                                 solar_thermal_system, @eri_version, @dhw_map)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
@@ -2001,10 +2003,6 @@ class OSModel
 
     # Add combi-system EMS program with water use equipment information
     Waterheater.apply_combi_system_EMS(model, @dhw_map, @hpxml.water_heating_systems)
-  end
-
-  def self.update_shared_hvac_systems()
-    HVAC.apply_shared_systems(@hpxml)
   end
 
   def self.add_cooling_system(runner, model, spaces)
@@ -2243,14 +2241,14 @@ class OSModel
     return if hvac_distribution.nil?
 
     hvac_distribution_type_map = { HPXML::HVACTypeFurnace => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeBoiler => [HPXML::HVACDistributionTypeHydronic, HPXML::HVACDistributionTypeHydronicAndAir, HPXML::HVACDistributionTypeDSE],
+                                   HPXML::HVACTypeBoiler => [HPXML::HVACDistributionTypeHydronic, HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeCentralAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeEvaporativeCooler => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeMiniSplitAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeHeatPumpAirToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeHeatPumpMiniSplit => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeHeatPumpGroundToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeHeatPumpWaterLoopToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir, HPXML::HVACDistributionTypeDSE] }
+                                   HPXML::HVACTypeHeatPumpWaterLoopToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE] }
 
     if not hvac_distribution_type_map[system_type].include? hvac_distribution.distribution_system_type
       # validator.rb only checks that a HVAC distribution system of the correct type (for the given HVAC system) exists
@@ -2326,7 +2324,7 @@ class OSModel
     # Ducts
     duct_systems = {}
     @hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? hvac_distribution.distribution_system_type
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
 
       air_ducts = create_ducts(runner, model, hvac_distribution, spaces)
       next if air_ducts.empty?
@@ -2335,7 +2333,7 @@ class OSModel
       added_ducts = false
       hvac_distribution.hvac_systems.each do |hvac_system|
         @hvac_map[hvac_system.id].each do |object|
-          next unless object.is_a? OpenStudio::Model::AirLoopHVAC
+          next unless object.is_a?(OpenStudio::Model::AirLoopHVAC) || object.is_a?(OpenStudio::Model::ZoneHVACFourPipeFanCoil)
 
           if duct_systems[air_ducts].nil?
             duct_systems[air_ducts] = object
@@ -2346,20 +2344,6 @@ class OSModel
             air_ducts2 = create_ducts(runner, model, hvac_distribution, spaces)
             duct_systems[air_ducts2] = object
             added_ducts = true
-          end
-        end
-      end
-      if not added_ducts
-        # Check if ducted fan coil, which doesn't have an AirLoopHVAC;
-        # assign to FanCoil instead.
-        if hvac_distribution.distribution_system_type && hvac_distribution.hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
-          hvac_distribution.hvac_systems.each do |hvac_system|
-            @hvac_map[hvac_system.id].each do |object|
-              next unless object.is_a? OpenStudio::Model::ZoneHVACFourPipeFanCoil
-
-              duct_systems[air_ducts] = object
-              added_ducts = true
-            end
           end
         end
       end
@@ -2466,10 +2450,11 @@ class OSModel
     end
   end
 
-  def self.add_additional_properties(runner, model, hpxml_path)
+  def self.add_additional_properties(runner, model, hpxml_path, building_id)
     # Store some data for use in reporting measure
     additionalProperties = model.getBuilding.additionalProperties
     additionalProperties.setFeature('hpxml_path', hpxml_path)
+    additionalProperties.setFeature('building_id', building_id.to_s)
     additionalProperties.setFeature('hvac_map', map_to_string(@hvac_map))
     additionalProperties.setFeature('dhw_map', map_to_string(@dhw_map))
   end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class HEScoreRuleset
-  def self.apply_ruleset(orig_hpxml)
+  def self.apply_ruleset(orig_hpxml, weather)
     # Create new HPXML object
     new_hpxml = HPXML.new
     new_hpxml.header.xml_type = orig_hpxml.header.xml_type
@@ -52,6 +52,8 @@ class HEScoreRuleset
 
     # Prevent downstream errors in OS-HPXML
     adjust_floor_areas(new_hpxml)
+
+    HPXMLDefaults.apply(new_hpxml, Constants.ERIVersions[-1], weather)
 
     return new_hpxml
   end
@@ -114,25 +116,7 @@ class HEScoreRuleset
     new_hpxml.climate_and_risk_zones.weather_station_id = orig_hpxml.climate_and_risk_zones.weather_station_id
     new_hpxml.climate_and_risk_zones.weather_station_name = orig_hpxml.climate_and_risk_zones.weather_station_name
     new_hpxml.climate_and_risk_zones.weather_station_wmo = orig_hpxml.climate_and_risk_zones.weather_station_wmo
-
-    # Look up EPW path from WMO
-    epw_path = nil
-    weather_wmo = orig_hpxml.climate_and_risk_zones.weather_station_wmo
-    weather_dir = File.join(File.dirname(__FILE__), '..', '..', '..', 'weather')
-    CSV.foreach(File.join(weather_dir, 'data.csv'), headers: true) do |row|
-      next if row['wmo'] != weather_wmo
-
-      epw_path = File.join(weather_dir, row['filename'])
-      if not File.exist?(epw_path)
-        fail "'#{epw_path}' could not be found."
-      end
-
-      break
-    end
-    if epw_path.nil?
-      fail "Weather station WMO '#{weather_wmo}' could not be found in #{File.join(weather_dir, 'data.csv')}."
-    end
-    new_hpxml.climate_and_risk_zones.weather_station_epw_filepath = epw_path
+    new_hpxml.climate_and_risk_zones.weather_station_epw_filepath = orig_hpxml.climate_and_risk_zones.weather_station_epw_filepath
 
     @iecc_zone = orig_hpxml.climate_and_risk_zones.iecc_zone
   end
