@@ -48,6 +48,8 @@ def create_hpxmls
     'invalid_files/clothes-washer-location.xml' => 'base.xml',
     'invalid_files/clothes-dryer-location.xml' => 'base.xml',
     'invalid_files/cooking-range-location.xml' => 'base.xml',
+    'invalid_files/dehumidifier-fraction-served.xml' => 'base-appliances-dehumidifier-multiple.xml',
+    'invalid_files/dehumidifier-setpoints.xml' => 'base-appliances-dehumidifier-multiple.xml',
     'invalid_files/dhw-frac-load-served.xml' => 'base-dhw-multiple.xml',
     'invalid_files/dhw-invalid-ef-tank.xml' => 'base.xml',
     'invalid_files/dhw-invalid-uef-tank-heat-pump.xml' => 'base-dhw-tank-heat-pump-uef.xml',
@@ -64,9 +66,8 @@ def create_hpxmls
     'invalid_files/enclosure-garage-missing-slab.xml' => 'base-enclosure-garage.xml',
     'invalid_files/enclosure-living-missing-ceiling-roof.xml' => 'base.xml',
     'invalid_files/enclosure-living-missing-exterior-wall.xml' => 'base.xml',
-    'invalid_files/enclosure-living-missing-floor-slab.xml' => 'base.xml',
+    'invalid_files/enclosure-living-missing-floor-slab.xml' => 'base-foundation-slab.xml',
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
-    'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities2.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/hvac-invalid-distribution-system-type.xml' => 'base.xml',
     'invalid_files/hvac-distribution-multiple-attached-cooling.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-distribution-multiple-attached-heating.xml' => 'base-hvac-multiple.xml',
@@ -134,6 +135,7 @@ def create_hpxmls
     'base-appliances-dehumidifier-50percent.xml' => 'base-appliances-dehumidifier.xml',
     'base-appliances-dehumidifier-ief-portable.xml' => 'base-appliances-dehumidifier.xml',
     'base-appliances-dehumidifier-ief-whole-home.xml' => 'base-appliances-dehumidifier-ief-portable.xml',
+    'base-appliances-dehumidifier-multiple.xml' => 'base-appliances-dehumidifier-50percent.xml',
     'base-appliances-gas.xml' => 'base.xml',
     'base-appliances-modified.xml' => 'base.xml',
     'base-appliances-none.xml' => 'base.xml',
@@ -266,10 +268,14 @@ def create_hpxmls
     'base-foundation-complex.xml' => 'base.xml',
     'base-foundation-basement-garage.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-1-speed.xml' => 'base.xml',
+    'base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-air-to-air-heat-pump-2-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-var-speed.xml' => 'base.xml',
     'base-hvac-autosize.xml' => 'base.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-1-speed-heating-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-2-speed.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-2-speed-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-air-to-air-heat-pump-2-speed.xml',
@@ -293,11 +299,13 @@ def create_hpxmls
     'base-hvac-autosize-furnace-gas-only.xml' => 'base-hvac-furnace-gas-only.xml',
     'base-hvac-autosize-furnace-gas-room-ac.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'base-hvac-autosize-ground-to-air-heat-pump.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'base-hvac-autosize-ground-to-air-heat-pump-cooling-only.xml' => 'base-hvac-ground-to-air-heat-pump-cooling-only.xml',
+    'base-hvac-autosize-ground-to-air-heat-pump-heating-only.xml' => 'base-hvac-ground-to-air-heat-pump-heating-only.xml',
     'base-hvac-autosize-ground-to-air-heat-pump-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-ground-to-air-heat-pump.xml',
     'base-hvac-autosize-mini-split-heat-pump-ducted.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
-    'base-hvac-autosize-mini-split-heat-pump-ducted-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-mini-split-heat-pump-ducted.xml',
-    'base-hvac-autosize-mini-split-heat-pump-ducted-heating-only.xml' => 'base-hvac-mini-split-heat-pump-ducted-heating-only.xml',
     'base-hvac-autosize-mini-split-heat-pump-ducted-cooling-only.xml' => 'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml',
+    'base-hvac-autosize-mini-split-heat-pump-ducted-heating-only.xml' => 'base-hvac-mini-split-heat-pump-ducted-heating-only.xml',
+    'base-hvac-autosize-mini-split-heat-pump-ducted-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-mini-split-heat-pump-ducted.xml',
     'base-hvac-autosize-mini-split-air-conditioner-only-ducted.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
     'base-hvac-autosize-room-ac-only.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-autosize-stove-oil-only.xml' => 'base-hvac-stove-oil-only.xml',
@@ -339,6 +347,8 @@ def create_hpxmls
     'base-hvac-furnace-wood-only.xml' => 'base.xml',
     'base-hvac-furnace-x3-dse.xml' => 'base.xml',
     'base-hvac-ground-to-air-heat-pump.xml' => 'base.xml',
+    'base-hvac-ground-to-air-heat-pump-cooling-only.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'base-hvac-ground-to-air-heat-pump-heating-only.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-hvac-ideal-air.xml' => 'base.xml',
     'base-hvac-install-quality-none-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-install-quality-airflow-defect-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
@@ -357,8 +367,8 @@ def create_hpxmls
     'base-hvac-mini-split-air-conditioner-only-ducted.xml' => 'base.xml',
     'base-hvac-mini-split-air-conditioner-only-ductless.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
     'base-hvac-mini-split-heat-pump-ducted.xml' => 'base.xml',
-    'base-hvac-mini-split-heat-pump-ducted-heating-only.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
+    'base-hvac-mini-split-heat-pump-ducted-heating-only.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ductless.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-multiple.xml' => 'base.xml',
     'base-hvac-multiple2.xml' => 'base.xml',
@@ -638,7 +648,6 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.conditioned_floor_area = 1539
     hpxml.building_construction.conditioned_building_volume = 12312
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFD
-    hpxml.building_construction.use_only_ideal_air_system = true
   elsif ['ASHRAE_Standard_140/L322XC.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors = 2
     hpxml.building_construction.conditioned_floor_area = 3078
@@ -2073,8 +2082,10 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
          'invalid_files/enclosure-garage-missing-roof-ceiling.xml'].include? hpxml_file
     hpxml.frame_floors[1].delete
   elsif ['invalid_files/multifamily-reference-surface.xml'].include? hpxml_file
-    hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
-    hpxml.frame_floors[0].other_space_above_or_below = HPXML::FrameFloorOtherSpaceAbove
+    hpxml.frame_floors << hpxml.frame_floors[0].dup
+    hpxml.frame_floors[1].id += '2'
+    hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
+    hpxml.frame_floors[1].other_space_above_or_below = HPXML::FrameFloorOtherSpaceAbove
   elsif ['invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
     hpxml.frame_floors.add(id: 'FloorOther',
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
@@ -3317,23 +3328,31 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          cooling_efficiency_seer: 19,
                          heating_capacity_17F: 52000 * f,
                          cooling_shr: 0.73)
-  elsif ['base-hvac-mini-split-heat-pump-ducted-heating-only.xml'].include? hpxml_file
+  elsif ['base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml',
+         'base-hvac-ground-to-air-heat-pump-heating-only.xml',
+         'base-hvac-mini-split-heat-pump-ducted-heating-only.xml'].include? hpxml_file
     hpxml.heat_pumps[0].cooling_capacity = 0
     hpxml.heat_pumps[0].fraction_cool_load_served = 0
-  elsif ['base-hvac-mini-split-heat-pump-ducted-cooling-only.xml'].include? hpxml_file
+  elsif ['base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml',
+         'base-hvac-ground-to-air-heat-pump-cooling-only.xml',
+         'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml'].include? hpxml_file
     hpxml.heat_pumps[0].heating_capacity = 0
-    hpxml.heat_pumps[0].heating_capacity_17F = 0
+    if not ['base-hvac-ground-to-air-heat-pump-cooling-only.xml'].include? hpxml_file
+      hpxml.heat_pumps[0].heating_capacity_17F = 0
+    end
     hpxml.heat_pumps[0].fraction_heat_load_served = 0
     hpxml.heat_pumps[0].backup_heating_fuel = nil
+    hpxml.heat_pumps[0].backup_heating_capacity = nil
+    hpxml.heat_pumps[0].backup_heating_efficiency_percent = nil
   elsif ['base-hvac-mini-split-heat-pump-ductless.xml'].include? hpxml_file
     hpxml.heat_pumps[0].distribution_system_idref = nil
     hpxml.heat_pumps[0].backup_heating_fuel = nil
+    hpxml.heat_pumps[0].backup_heating_capacity = nil
+    hpxml.heat_pumps[0].backup_heating_efficiency_percent = nil
   elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml'].include? hpxml_file
     hpxml.heat_pumps[0].cooling_capacity = nil
     hpxml.heat_pumps[0].heating_capacity = nil
     hpxml.heat_pumps[0].heating_capacity_17F = 25000
-  elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities2.xml'].include? hpxml_file
-    hpxml.heat_pumps[0].backup_heating_capacity = nil
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.heat_pumps.add(id: 'HeatPump',
                          distribution_system_idref: 'HVACDistribution5',
@@ -3679,8 +3698,10 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].ducts[0].duct_surface_area = 30
     hpxml.hvac_distributions[0].ducts[1].duct_surface_area = 10
   elsif ['base-hvac-evap-cooler-only-ducted.xml'].include? hpxml_file
-    hpxml.hvac_distributions[0].duct_leakage_measurements.pop
+    hpxml.hvac_distributions[0].duct_leakage_measurements[-1].duct_leakage_value = 0.0
     hpxml.hvac_distributions[0].ducts.pop
+  elsif ['invalid_files/hvac-distribution-return-duct-leakage-missing.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].duct_leakage_measurements.pop
   elsif ['base-hvac-ducts-leakage-percent.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear
     hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
@@ -4906,6 +4927,18 @@ def set_hpxml_dehumidifier(hpxml_file, hpxml)
     hpxml.dehumidifiers[0].integrated_energy_factor = 1.5
   elsif ['base-appliances-dehumidifier-ief-whole-home.xml'].include? hpxml_file
     hpxml.dehumidifiers[0].type = HPXML::DehumidifierTypeWholeHome
+  elsif ['base-appliances-dehumidifier-multiple.xml'].include? hpxml_file
+    hpxml.dehumidifiers.add(id: 'Dehumidifier2',
+                            type: HPXML::DehumidifierTypePortable,
+                            capacity: 30,
+                            energy_factor: 1.6,
+                            rh_setpoint: 0.5,
+                            fraction_served: 0.25,
+                            location: HPXML::LocationLivingSpace)
+  elsif ['invalid_files/dehumidifier-setpoints.xml'].include? hpxml_file
+    hpxml.dehumidifiers[1].rh_setpoint = 0.55
+  elsif ['invalid_files/dehumidifier-fraction-served.xml'].include? hpxml_file
+    hpxml.dehumidifiers[1].fraction_served = 0.6
   end
 end
 
