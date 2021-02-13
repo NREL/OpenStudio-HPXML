@@ -2687,12 +2687,12 @@ class HPXML < Object
       heating_system = XMLHelper.add_element(hvac_plant, 'HeatingSystem')
       sys_id = XMLHelper.add_element(heating_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(heating_system, 'YearInstalled', @year_installed, :integer) unless @year_installed.nil?
       XMLHelper.add_element(heating_system, 'ThirdPartyCertification', @third_party_certification, :string) unless @third_party_certification.nil?
       if not @distribution_system_idref.nil?
         distribution_system = XMLHelper.add_element(heating_system, 'DistributionSystem')
         XMLHelper.add_attribute(distribution_system, 'idref', @distribution_system_idref)
       end
-      XMLHelper.add_element(heating_system, 'YearInstalled', @year_installed, :integer) unless @year_installed.nil?
       XMLHelper.add_element(heating_system, 'IsSharedSystem', @is_shared_system, :boolean) unless @is_shared_system.nil?
       XMLHelper.add_element(heating_system, 'NumberofUnitsServed', @number_of_units_served, :integer) unless @number_of_units_served.nil?
       if not @heating_system_type.nil?
@@ -2733,9 +2733,9 @@ class HPXML < Object
       return if heating_system.nil?
 
       @id = HPXML::get_id(heating_system)
+      @year_installed = XMLHelper.get_value(heating_system, 'YearInstalled', :integer)
       @third_party_certification = XMLHelper.get_value(heating_system, 'ThirdPartyCertification', :string)
       @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(heating_system, 'DistributionSystem'))
-      @year_installed = XMLHelper.get_value(heating_system, 'YearInstalled', :integer)
       @is_shared_system = XMLHelper.get_value(heating_system, 'IsSharedSystem', :boolean)
       @number_of_units_served = XMLHelper.get_value(heating_system, 'NumberofUnitsServed', :integer)
       @heating_system_type = XMLHelper.get_child_name(heating_system, 'HeatingSystemType')
@@ -2832,12 +2832,12 @@ class HPXML < Object
       cooling_system = XMLHelper.add_element(hvac_plant, 'CoolingSystem')
       sys_id = XMLHelper.add_element(cooling_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(cooling_system, 'YearInstalled', @year_installed, :integer) unless @year_installed.nil?
       XMLHelper.add_element(cooling_system, 'ThirdPartyCertification', @third_party_certification, :string) unless @third_party_certification.nil?
       if not @distribution_system_idref.nil?
         distribution_system = XMLHelper.add_element(cooling_system, 'DistributionSystem')
         XMLHelper.add_attribute(distribution_system, 'idref', @distribution_system_idref)
       end
-      XMLHelper.add_element(cooling_system, 'YearInstalled', @year_installed, :integer) unless @year_installed.nil?
       XMLHelper.add_element(cooling_system, 'IsSharedSystem', @is_shared_system, :boolean) unless @is_shared_system.nil?
       XMLHelper.add_element(cooling_system, 'NumberofUnitsServed', @number_of_units_served, :integer) unless @number_of_units_served.nil?
       XMLHelper.add_element(cooling_system, 'CoolingSystemType', @cooling_system_type, :string) unless @cooling_system_type.nil?
@@ -2880,9 +2880,9 @@ class HPXML < Object
       return if cooling_system.nil?
 
       @id = HPXML::get_id(cooling_system)
+      @year_installed = XMLHelper.get_value(cooling_system, 'YearInstalled', :integer)
       @third_party_certification = XMLHelper.get_value(cooling_system, 'ThirdPartyCertification', :string)
       @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(cooling_system, 'DistributionSystem'))
-      @year_installed = XMLHelper.get_value(cooling_system, 'YearInstalled', :integer)
       @is_shared_system = XMLHelper.get_value(cooling_system, 'IsSharedSystem', :boolean)
       @number_of_units_served = XMLHelper.get_value(cooling_system, 'NumberofUnitsServed', :integer)
       @cooling_system_type = XMLHelper.get_value(cooling_system, 'CoolingSystemType', :string)
@@ -2979,12 +2979,12 @@ class HPXML < Object
       heat_pump = XMLHelper.add_element(hvac_plant, 'HeatPump')
       sys_id = XMLHelper.add_element(heat_pump, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(heat_pump, 'YearInstalled', @year_installed, :integer) unless @year_installed.nil?
       XMLHelper.add_element(heat_pump, 'ThirdPartyCertification', @third_party_certification, :string) unless @third_party_certification.nil?
       if not @distribution_system_idref.nil?
         distribution_system = XMLHelper.add_element(heat_pump, 'DistributionSystem')
         XMLHelper.add_attribute(distribution_system, 'idref', @distribution_system_idref)
       end
-      XMLHelper.add_element(heat_pump, 'YearInstalled', @year_installed, :integer) unless @year_installed.nil?
       XMLHelper.add_element(heat_pump, 'IsSharedSystem', @is_shared_system, :boolean) unless @is_shared_system.nil?
       XMLHelper.add_element(heat_pump, 'NumberofUnitsServed', @number_of_units_served, :integer) unless @number_of_units_served.nil?
       XMLHelper.add_element(heat_pump, 'HeatPumpType', @heat_pump_type, :string) unless @heat_pump_type.nil?
@@ -3051,9 +3051,9 @@ class HPXML < Object
       return if heat_pump.nil?
 
       @id = HPXML::get_id(heat_pump)
+      @year_installed = XMLHelper.get_value(heat_pump, 'YearInstalled', :integer)
       @third_party_certification = XMLHelper.get_value(heat_pump, 'ThirdPartyCertification', :string)
       @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(heat_pump, 'DistributionSystem'))
-      @year_installed = XMLHelper.get_value(heat_pump, 'YearInstalled', :integer)
       @is_shared_system = XMLHelper.get_value(heat_pump, 'IsSharedSystem', :boolean)
       @number_of_units_served = XMLHelper.get_value(heat_pump, 'NumberofUnitsServed', :integer)
       @heat_pump_type = XMLHelper.get_value(heat_pump, 'HeatPumpType', :string)
