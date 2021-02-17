@@ -105,6 +105,7 @@ class HVAC
     if not cooling_system.nil?
       fan_cfm *= clg_ap.cool_fan_speed_ratios.max
     end
+
     (0...num_system).each do |i|
       # Fan
       fan = create_supply_fan(model, obj_name, num_speeds, fan_watts_per_cfm, fan_cfm)
@@ -153,6 +154,11 @@ class HVAC
     end
     if not heating_system.nil?
       hvac_map[heating_system.id] << air_loop
+    end
+    if is_realistic_staging
+      cooling_coil = cooling_system.nil? ? nil : clg_coils[0]
+      heating_coil = heating_system.nil? ? nil : htg_coils[0]
+      apply_two_speed_realistic_staging_EMS(model, air_loop_unitary_systems, cooling_coil, heating_coil)
     end
   end
 
@@ -372,6 +378,9 @@ class HVAC
 
     air_loop = create_air_loop(model, obj_name, air_loop_unitary_systems, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, fan_cfm)
     hvac_map[heat_pump.id] << air_loop
+    if is_realistic_staging
+      apply_two_speed_realistic_staging_EMS(model, air_loop_unitary_systems, clg_coils[0], htg_coils[0])
+    end
   end
 
   def self.apply_mini_split_air_conditioner(model, runner, cooling_system,
@@ -385,8 +394,10 @@ class HVAC
     clg_ap = cooling_system.additional_properties
 
     # Cooling Coil
-    clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system)
-    hvac_map[cooling_system.id] << clg_coil
+    clg_coils = create_dx_cooling_coils(model, obj_name, cooling_system)
+    clg_coils.each do |clg_coil|
+      hvac_map[cooling_system.id] << clg_coil
+    end
 
     # Fan
     num_speeds = clg_ap.num_speeds
@@ -428,12 +439,16 @@ class HVAC
     hp_ap = heat_pump.additional_properties
 
     # Cooling Coil
-    clg_coil = create_dx_cooling_coil(model, obj_name, heat_pump)
-    hvac_map[heat_pump.id] << clg_coil
+    clg_coils = create_dx_cooling_coils(model, obj_name, heat_pump)
+    clg_coils.each do |clg_coil|
+      hvac_map[heat_pump.id] << clg_coil
+    end
 
     # Heating Coil
-    htg_coil = create_dx_heating_coil(model, obj_name, heat_pump)
-    hvac_map[heat_pump.id] << htg_coil
+    htg_coils = create_dx_heating_coils(model, obj_name, heat_pump)
+    htg_coils.each do |htg_coil|
+      hvac_map[heat_pump.id] << htg_coil
+    end
 
     # Supplemental Heating Coil
     htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
@@ -3278,64 +3293,178 @@ class HVAC
     ec_actuator.setName(eir_fff_curve.name.get.gsub('-', '_') + ' value')
 
     # Program
-    realistic_cycling_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    cycling_degrad_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     # Check values within min/max limits
-    realistic_cycling_program.setName("#{coil_name} realistic cycling")
-    realistic_cycling_program.addLine("If #{cap_curve_var_in.name} < #{cap_fff_curve.minimumValueofx}")
-    realistic_cycling_program.addLine("  Set #{cap_curve_var_in.name} = #{cap_fff_curve.minimumValueofx}")
-    realistic_cycling_program.addLine("ElseIf #{cap_curve_var_in.name} > #{cap_fff_curve.maximumValueofx}")
-    realistic_cycling_program.addLine("  Set #{cap_curve_var_in.name} = #{cap_fff_curve.maximumValueofx}")
-    realistic_cycling_program.addLine('EndIf')
-    realistic_cycling_program.addLine("If #{eir_curve_var_in.name} < #{eir_fff_curve.minimumValueofx}")
-    realistic_cycling_program.addLine("  Set #{eir_curve_var_in.name} = #{eir_fff_curve.minimumValueofx}")
-    realistic_cycling_program.addLine("ElseIf #{eir_curve_var_in.name} > #{eir_fff_curve.maximumValueofx}")
-    realistic_cycling_program.addLine("  Set #{eir_curve_var_in.name} = #{eir_fff_curve.maximumValueofx}")
-    realistic_cycling_program.addLine('EndIf')
+    cycling_degrad_program.setName("#{coil_name} cycling degradation program")
+    cycling_degrad_program.addLine("If #{cap_curve_var_in.name} < #{cap_fff_curve.minimumValueofx}")
+    cycling_degrad_program.addLine("  Set #{cap_curve_var_in.name} = #{cap_fff_curve.minimumValueofx}")
+    cycling_degrad_program.addLine("ElseIf #{cap_curve_var_in.name} > #{cap_fff_curve.maximumValueofx}")
+    cycling_degrad_program.addLine("  Set #{cap_curve_var_in.name} = #{cap_fff_curve.maximumValueofx}")
+    cycling_degrad_program.addLine('EndIf')
+    cycling_degrad_program.addLine("If #{eir_curve_var_in.name} < #{eir_fff_curve.minimumValueofx}")
+    cycling_degrad_program.addLine("  Set #{eir_curve_var_in.name} = #{eir_fff_curve.minimumValueofx}")
+    cycling_degrad_program.addLine("ElseIf #{eir_curve_var_in.name} > #{eir_fff_curve.maximumValueofx}")
+    cycling_degrad_program.addLine("  Set #{eir_curve_var_in.name} = #{eir_fff_curve.maximumValueofx}")
+    cycling_degrad_program.addLine('EndIf')
     cc_out_calc = []
     ec_out_calc = []
     cap_fflow_spec.each_with_index do |coeff, i|
       c_name = "c_#{i + 1}_cap"
-      realistic_cycling_program.addLine("Set #{c_name} = #{coeff}")
+      cycling_degrad_program.addLine("Set #{c_name} = #{coeff}")
       cc_out_calc << c_name + " * (#{cap_curve_var_in.name}^#{i})"
     end
     eir_fflow_spec.each_with_index do |coeff, i|
       c_name = "c_#{i + 1}_eir"
-      realistic_cycling_program.addLine("Set #{c_name} = #{coeff}")
+      cycling_degrad_program.addLine("Set #{c_name} = #{coeff}")
       ec_out_calc << c_name + " * (#{eir_curve_var_in.name}^#{i})"
     end
-    realistic_cycling_program.addLine("Set cc_out = #{cc_out_calc.join(' + ')}")
-    realistic_cycling_program.addLine("Set ec_out = #{ec_out_calc.join(' + ')}")
-    (0...number_of_timestep_logged).each do |t_i|
+    cycling_degrad_program.addLine("Set cc_out = #{cc_out_calc.join(' + ')}")
+    cycling_degrad_program.addLine("Set ec_out = #{ec_out_calc.join(' + ')}")
+    (0...number_of_timestep_logged + 1).each do |t_i|
       if t_i == 0
-        realistic_cycling_program.addLine("Set cc_now = #{energy_trend.name}")
+        cycling_degrad_program.addLine("Set cc_now = #{energy_trend.name}")
       else
-        realistic_cycling_program.addLine("Set cc_#{t_i}_ago = @TrendValue #{energy_trend.name} #{t_i}")
+        cycling_degrad_program.addLine("Set cc_#{t_i}_ago = @TrendValue #{energy_trend.name} #{t_i}")
       end
     end
     (1...(cap_time + 1)).each do |t_i|
       if t_i == 1
-        realistic_cycling_program.addLine("If cc_#{t_i}_ago == 0 && cc_now > 0") # Coil just turned on
+        cycling_degrad_program.addLine("If cc_#{t_i}_ago == 0 && cc_now > 0") # Coil just turned on
       else
         r_s_a = ['cc_now > 0']
         (1...t_i).each do |i|
           r_s_a << "cc_#{i}_ago > 0"
         end
         r_s = r_s_a.join(' && ')
-        realistic_cycling_program.addLine("ElseIf cc_#{t_i}_ago == 0 && #{r_s}")
+        cycling_degrad_program.addLine("ElseIf cc_#{t_i}_ago == 0 && #{r_s}")
       end
       # Curve fit from Winkler's thesis, page 200: https://drum.lib.umd.edu/bitstream/handle/1903/9493/Winkler_umd_0117E_10504.pdf?sequence=1&isAllowed=y
       # use average curve value ( ~ at 0.5 min).
-      realistic_cycling_program.addLine("  Set exp = @Exp((-2.19722) * #{t_i - 0.5})")
-      realistic_cycling_program.addLine('  Set cc_mult = -1.0125 * exp + 1.0125')
+      cycling_degrad_program.addLine("  Set exp = @Exp((-2.19722) * #{t_i - 0.5})")
+      cycling_degrad_program.addLine('  Set cc_mult = -1.0125 * exp + 1.0125')
       # power is ramped up in less than 1 min, only second level simulation can capture power startup behavior
-      realistic_cycling_program.addLine('  Set ec_mult = 1.0')
+      cycling_degrad_program.addLine('  Set ec_mult = 1.0')
     end
-    realistic_cycling_program.addLine('Else')
-    realistic_cycling_program.addLine('  Set cc_mult = 1.0')
-    realistic_cycling_program.addLine('  Set ec_mult = 1.0')
-    realistic_cycling_program.addLine('EndIf')
-    realistic_cycling_program.addLine("Set #{cc_actuator.name} = cc_mult * cc_out")
-    realistic_cycling_program.addLine("Set #{ec_actuator.name} = ec_mult * ec_out / cc_mult")
+    cycling_degrad_program.addLine('Else')
+    cycling_degrad_program.addLine('  Set cc_mult = 1.0')
+    cycling_degrad_program.addLine('  Set ec_mult = 1.0')
+    cycling_degrad_program.addLine('EndIf')
+    cycling_degrad_program.addLine("Set #{cc_actuator.name} = cc_mult * cc_out")
+    cycling_degrad_program.addLine("Set #{ec_actuator.name} = ec_mult * ec_out / cc_mult")
+
+    # ProgramCallingManagers
+    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    program_calling_manager.setName("#{cycling_degrad_program.name} ProgramManager")
+    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
+    program_calling_manager.addProgram(cycling_degrad_program)
+
+    # oems = model.getOutputEnergyManagementSystem
+    # oems.setActuatorAvailabilityDictionaryReporting('Verbose')
+    # oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
+    # oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
+  end
+
+  def self.apply_two_speed_realistic_staging_EMS(model, unitary_systems, clg_coil_1, htg_coil_1)
+    # Note: Currently only available in 1 min time step
+    number_of_timestep_logged = 5 # wait 5 mins to check demand
+
+    # Sensors
+    living_temp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
+    living_temp_ss.setName('living temp')
+    living_temp_ss.setKeyName(HPXML::LocationLivingSpace)
+
+    htg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    htg_sp_ss.setName('htg_setpoint')
+    htg_sp_ss.setKeyName(Constants.ObjectNameHeatingSetpoint)
+    
+    clg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    clg_sp_ss.setName('clg_setpoint')
+    clg_sp_ss.setKeyName(Constants.ObjectNameCoolingSetpoint)
+    
+    ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
+    
+    coil_energy_clg = nil
+    coil_energy_htg = nil
+    if not clg_coil_1.nil?
+      coil_energy_clg = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Electricity Energy')
+      coil_energy_clg.setName('low speed clg coil ee')
+      coil_energy_clg.setKeyName(clg_coil_1.name.get)
+      # Trend variable
+      clg_energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, coil_energy_clg)
+      clg_energy_trend.setName("#{coil_energy_clg.name} Trend")
+      clg_energy_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
+    end
+    if not htg_coil_1.nil?
+      coil_energy_htg = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electricity Energy')
+      coil_energy_htg.setName('low speed htg coil ee')
+      coil_energy_htg.setKeyName(htg_coil_1.name.get)
+      # Trend variable
+      htg_energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, coil_energy_htg)
+      htg_energy_trend.setName("#{coil_energy_htg.name} Trend")
+      htg_energy_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
+    end
+    unitary_hi_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    unitary_hi_ss.setName('high speed unitary sys avail')
+    unitary_hi_ss.setKeyName(unitary_systems[1].availabilitySchedule.get.name.get)
+    # Trend variable
+    unitary_hi_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, unitary_hi_ss)
+    unitary_hi_trend.setName("#{unitary_hi_ss.name} Trend")
+    unitary_hi_trend.setNumberOfTimestepsToBeLogged(2) # only need 1 min ago
+
+    # Actuators
+    unitary_acts = []
+    unitary_systems.each_with_index do |unitary_system, i|
+      unitary_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(unitary_system.availabilitySchedule.get.to_ScheduleConstant.get, 'Schedule:Constant', 'Schedule Value')
+      unitary_actuator.setName(unitary_system.name.get + "#{i+1} avail")
+      unitary_acts << unitary_actuator
+    end
+
+    # Program
+    realistic_cycling_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    # Check values within min/max limits
+    realistic_cycling_program.setName("two speed coil realistic cycling")
+    realistic_cycling_program.addLine("Set living_t = #{living_temp_ss.name}")
+    realistic_cycling_program.addLine("Set htg_sp_l = #{htg_sp_ss.name}")
+    realistic_cycling_program.addLine("Set htg_sp_h = #{htg_sp_ss.name} + #{ddb}")
+    realistic_cycling_program.addLine("Set clg_sp_l = #{clg_sp_ss.name} - #{ddb}")
+    realistic_cycling_program.addLine("Set clg_sp_h = #{clg_sp_ss.name}")
+    s_unmet_demand = []
+    s_unmet_ddb = []
+    s_trend = []
+    if not coil_energy_clg.nil?
+      s_trend_clg = []
+      (1...number_of_timestep_logged).each do |t_i|
+          realistic_cycling_program.addLine("Set cc_ee_#{t_i}_ago = @TrendValue #{clg_energy_trend.name} #{t_i}")
+          s_trend_clg << "(cc_ee_#{t_i}_ago > 0)"
+      end
+      s_unmet_demand << '(living_t - clg_sp_h > 0.0)'
+      s_unmet_ddb << '(living_t - clg_sp_l > 0.0)'
+      s_trend << "(#{s_trend_clg.join(' && ')})"
+    end
+    if not coil_energy_htg.nil?
+      s_trend_htg = []
+      (1...number_of_timestep_logged).each do |t_i|
+          realistic_cycling_program.addLine("Set hc_ee_#{t_i}_ago = @TrendValue #{htg_energy_trend.name} #{t_i}")
+          s_trend_htg << "(hc_ee_#{t_i}_ago > 0)"
+      end
+      s_unmet_demand << '(htg_sp_l - living_t > 0.0)'
+      s_unmet_ddb << '(htg_sp_h - living_t > 0.0)'
+      s_trend << "(#{s_trend_htg.join(' && ')})"
+    end
+    realistic_cycling_program.addLine("Set unitary_highspeed_1_ago = #{unitary_hi_trend.name} 1")
+    # Setpoint not met and low speed is on for 5 time steps
+    realistic_cycling_program.addLine("If (#{s_unmet_demand.join(' || ')}) && (#{s_trend.join(' || ')})")
+    # Enable high speed unitary system
+    realistic_cycling_program.addLine("  Set #{unitary_acts[1].name} = 1")
+    realistic_cycling_program.addLine("  Set #{unitary_acts[0].name} = 0")
+    # Keep high speed unitary on until setpoint +- deadband is met
+    realistic_cycling_program.addLine("ElseIf (unitary_highspeed_1_ago == 1) && (#{s_unmet_ddb.join(' || ')})")
+    realistic_cycling_program.addLine("  Set #{unitary_acts[1].name} = 1")
+    realistic_cycling_program.addLine("  Set #{unitary_acts[0].name} = 0")
+    realistic_cycling_program.addLine("Else")
+    realistic_cycling_program.addLine("  Set #{unitary_acts[1].name} = 0")
+    realistic_cycling_program.addLine("  Set #{unitary_acts[0].name} = 1")
+    realistic_cycling_program.addLine("EndIf")
 
     # ProgramCallingManagers
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
