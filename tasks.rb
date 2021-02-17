@@ -1101,9 +1101,13 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.rim_joists.clear
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
     siding_types = [[HPXML::SidingTypeAluminum, HPXML::ColorDark],
+                    [HPXML::SidingTypeAsbestos, HPXML::ColorMedium],
                     [HPXML::SidingTypeBrick, HPXML::ColorReflective],
+                    [HPXML::SidingTypeCompositeShingle, HPXML::ColorDark],
                     [HPXML::SidingTypeFiberCement, HPXML::ColorMediumDark],
+                    [HPXML::SidingTypeMasonite, HPXML::ColorLight],
                     [HPXML::SidingTypeStucco, HPXML::ColorMedium],
+                    [HPXML::SidingTypeSyntheticStucco, HPXML::ColorMediumDark],
                     [HPXML::SidingTypeVinyl, HPXML::ColorLight]]
     hpxml.rim_joists.clear
     siding_types.each_with_index do |siding_type, i|
@@ -1428,9 +1432,13 @@ def set_hpxml_walls(hpxml_file, hpxml)
                   HPXML::WallTypeBrick => 7.9,
                   HPXML::WallTypeAdobe => 5.0 }
     siding_types = [[HPXML::SidingTypeAluminum, HPXML::ColorReflective],
+                    [HPXML::SidingTypeAsbestos, HPXML::ColorLight],
                     [HPXML::SidingTypeBrick, HPXML::ColorMediumDark],
+                    [HPXML::SidingTypeCompositeShingle, HPXML::ColorReflective],
                     [HPXML::SidingTypeFiberCement, HPXML::ColorMedium],
+                    [HPXML::SidingTypeMasonite, HPXML::ColorDark],
                     [HPXML::SidingTypeStucco, HPXML::ColorLight],
+                    [HPXML::SidingTypeSyntheticStucco, HPXML::ColorMedium],
                     [HPXML::SidingTypeVinyl, HPXML::ColorDark]]
     last_wall = hpxml.walls[-1]
     hpxml.walls.clear
