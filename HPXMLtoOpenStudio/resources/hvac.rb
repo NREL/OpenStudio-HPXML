@@ -1904,7 +1904,7 @@ class HVAC
       air_terminal.setFixedMinimumAirFlowRate(0)
     end
     air_terminal.setMaximumAirFlowRate(UnitConversions.convert(airflow_cfm, 'cfm', 'm^3/s'))
-    air_terminal.setName(obj_name + " terminal")
+    air_terminal.setName(obj_name + ' terminal')
     air_loop.multiAddBranchForZone(control_zone, air_terminal)
 
     control_zone.setSequentialHeatingFractionSchedule(air_terminal, get_sequential_load_schedule(model, sequential_heat_load_frac))
@@ -3376,13 +3376,13 @@ class HVAC
     htg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     htg_sp_ss.setName('htg_setpoint')
     htg_sp_ss.setKeyName(Constants.ObjectNameHeatingSetpoint)
-    
+
     clg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     clg_sp_ss.setName('clg_setpoint')
     clg_sp_ss.setKeyName(Constants.ObjectNameCoolingSetpoint)
-    
+
     ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
-    
+
     coil_energy_clg = nil
     coil_energy_htg = nil
     if not clg_coil_1.nil?
@@ -3415,14 +3415,14 @@ class HVAC
     unitary_acts = []
     unitary_systems.each_with_index do |unitary_system, i|
       unitary_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(unitary_system.availabilitySchedule.get.to_ScheduleConstant.get, 'Schedule:Constant', 'Schedule Value')
-      unitary_actuator.setName(unitary_system.name.get + "#{i+1} avail")
+      unitary_actuator.setName(unitary_system.name.get + "#{i + 1} avail")
       unitary_acts << unitary_actuator
     end
 
     # Program
     realistic_cycling_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     # Check values within min/max limits
-    realistic_cycling_program.setName("two speed coil realistic cycling")
+    realistic_cycling_program.setName('two speed coil realistic cycling')
     realistic_cycling_program.addLine("Set living_t = #{living_temp_ss.name}")
     realistic_cycling_program.addLine("Set htg_sp_l = #{htg_sp_ss.name}")
     realistic_cycling_program.addLine("Set htg_sp_h = #{htg_sp_ss.name} + #{ddb}")
@@ -3434,8 +3434,8 @@ class HVAC
     if not coil_energy_clg.nil?
       s_trend_clg = []
       (1...number_of_timestep_logged).each do |t_i|
-          realistic_cycling_program.addLine("Set cc_ee_#{t_i}_ago = @TrendValue #{clg_energy_trend.name} #{t_i}")
-          s_trend_clg << "(cc_ee_#{t_i}_ago > 0)"
+        realistic_cycling_program.addLine("Set cc_ee_#{t_i}_ago = @TrendValue #{clg_energy_trend.name} #{t_i}")
+        s_trend_clg << "(cc_ee_#{t_i}_ago > 0)"
       end
       s_unmet_demand << '(living_t - clg_sp_h > 0.0)'
       s_unmet_ddb << '(living_t - clg_sp_l > 0.0)'
@@ -3444,8 +3444,8 @@ class HVAC
     if not coil_energy_htg.nil?
       s_trend_htg = []
       (1...number_of_timestep_logged).each do |t_i|
-          realistic_cycling_program.addLine("Set hc_ee_#{t_i}_ago = @TrendValue #{htg_energy_trend.name} #{t_i}")
-          s_trend_htg << "(hc_ee_#{t_i}_ago > 0)"
+        realistic_cycling_program.addLine("Set hc_ee_#{t_i}_ago = @TrendValue #{htg_energy_trend.name} #{t_i}")
+        s_trend_htg << "(hc_ee_#{t_i}_ago > 0)"
       end
       s_unmet_demand << '(htg_sp_l - living_t > 0.0)'
       s_unmet_ddb << '(htg_sp_h - living_t > 0.0)'
@@ -3461,10 +3461,10 @@ class HVAC
     realistic_cycling_program.addLine("ElseIf (unitary_highspeed_1_ago == 1) && (#{s_unmet_ddb.join(' || ')})")
     realistic_cycling_program.addLine("  Set #{unitary_acts[1].name} = 1")
     realistic_cycling_program.addLine("  Set #{unitary_acts[0].name} = 0")
-    realistic_cycling_program.addLine("Else")
+    realistic_cycling_program.addLine('Else')
     realistic_cycling_program.addLine("  Set #{unitary_acts[1].name} = 0")
     realistic_cycling_program.addLine("  Set #{unitary_acts[0].name} = 1")
-    realistic_cycling_program.addLine("EndIf")
+    realistic_cycling_program.addLine('EndIf')
 
     # ProgramCallingManagers
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
