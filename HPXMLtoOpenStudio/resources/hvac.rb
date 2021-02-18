@@ -403,10 +403,10 @@ class HVAC
     num_speeds = clg_ap.num_speeds
     clg_cfm = cooling_system.cooling_airflow_cfm
     fan = create_supply_fan(model, obj_name, num_speeds, cooling_system.fan_watts_per_cfm, clg_cfm)
-    hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil)
+    hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, clg_coils[0], nil)
 
     # Unitary System
-    air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, nil, clg_coil, nil, nil, clg_cfm)
+    air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, nil, clg_coils[0], nil, nil, clg_cfm)
     hvac_map[cooling_system.id] << air_loop_unitary
 
     # Unitary System Performance
@@ -419,11 +419,11 @@ class HVAC
     air_loop_unitary.setDesignSpecificationMultispeedObject(perf)
 
     # Air Loop
-    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, 0, sequential_cool_load_frac, clg_cfm)
+    air_loop = create_air_loop(model, obj_name, [air_loop_unitary], control_zone, 0, sequential_cool_load_frac, clg_cfm)
     hvac_map[cooling_system.id] << air_loop
 
     # HVAC Installation Quality
-    apply_installation_quality(model, nil, cooling_system, air_loop_unitary, nil, clg_coil, control_zone)
+    apply_installation_quality(model, nil, cooling_system, air_loop_unitary, nil, clg_coils[0], control_zone)
   end
 
   def self.apply_mini_split_heat_pump(model, runner, heat_pump,
@@ -460,10 +460,10 @@ class HVAC
     clg_cfm = heat_pump.cooling_airflow_cfm
     fan_cfm = hp_ap.cool_fan_speed_ratios.max * [htg_cfm, clg_cfm].max
     fan = create_supply_fan(model, obj_name, num_speeds, heat_pump.fan_watts_per_cfm, fan_cfm)
-    hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
+    hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coils[0], clg_coils[0], htg_supp_coil)
 
     # Unitary System
-    air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, hp_ap.supp_max_temp)
+    air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coils[0], clg_coils[0], htg_supp_coil, htg_cfm, clg_cfm, hp_ap.supp_max_temp)
     hvac_map[heat_pump.id] << air_loop_unitary
 
     # Unitary System Performance
@@ -481,7 +481,7 @@ class HVAC
     hvac_map[heat_pump.id] << air_loop
 
     # HVAC Installation Quality
-    apply_installation_quality(model, heat_pump, heat_pump, air_loop_unitary, htg_coil, clg_coil, control_zone)
+    apply_installation_quality(model, heat_pump, heat_pump, air_loop_unitary, htg_coils[0], clg_coils[0], control_zone)
   end
 
   def self.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
@@ -1888,12 +1888,12 @@ class HVAC
     air_loop.setName(obj_name + ' airloop')
     air_loop.zoneSplitter.setName(obj_name + ' zone splitter')
     air_loop.zoneMixer.setName(obj_name + ' zone mixer')
+    air_loop.setDesignSupplyAirFlowRate(UnitConversions.convert(airflow_cfm, 'cfm', 'm^3/s'))
     is_airloophvac_unitary = false
     systems.each_with_index do |system, i|
+      system.addToNode(air_loop.supplyInletNode)
       break unless system.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
       is_airloophvac_unitary = true
-      air_loop.setDesignSupplyAirFlowRate(UnitConversions.convert(airflow_cfm, 'cfm', 'm^3/s'))
-      system.addToNode(air_loop.supplyInletNode)
       system.setControllingZoneorThermostatLocation(control_zone)
     end
     if is_airloophvac_unitary
@@ -3097,7 +3097,7 @@ class HVAC
     return clg_coils
   end
 
-  def self.create_dx_heating_coils(model, obj_name, heating_system, is_ddb_control, is_realistic_staging)
+  def self.create_dx_heating_coils(model, obj_name, heating_system, is_ddb_control = false, is_realistic_staging = false)
     htg_ap = heating_system.additional_properties
 
     if htg_ap.num_speeds > 1

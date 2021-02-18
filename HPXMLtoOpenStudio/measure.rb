@@ -2063,7 +2063,7 @@ class OSModel
 
         HVAC.apply_central_air_conditioner_furnace(model, runner, nil, heating_system,
                                                    nil, @remaining_heat_load_frac,
-                                                   living_zone, @hvac_map)
+                                                   living_zone, @hvac_map, @hpxml.hvac_controls[0])
 
       elsif [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
