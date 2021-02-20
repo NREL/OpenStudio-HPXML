@@ -3582,14 +3582,15 @@ class HVAC
     return pump_eff * pump_w / pump_head_pa # m3/s
   end
 
-  def self.get_unitary_system_from_air_loop_hvac(air_loop)
+  def self.get_unitary_systems_from_air_loop_hvac(air_loop)
     # Returns the unitary system or nil
+    unitary_systems = []
     air_loop.supplyComponents.each do |comp|
       next unless comp.to_AirLoopHVACUnitarySystem.is_initialized
 
-      return comp.to_AirLoopHVACUnitarySystem.get
+      unitary_systems << comp.to_AirLoopHVACUnitarySystem.get
     end
-    return
+    return unitary_systems
   end
 
   def self.set_cool_rated_cfm_per_ton_mshp(heat_pump, num_speeds)
