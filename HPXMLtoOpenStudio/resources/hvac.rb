@@ -188,7 +188,7 @@ class HVAC
       roomac_plf_fplr_curve = [1.0, 0.0, 0.0] * num_speeds
       clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, roomac_cap_ft_curve, roomac_cap_fff_curve, roomac_eir_ft_curve, roomcac_eir_fff_curve, roomac_plf_fplr_curve)
       # Apply startup degradation
-      apply_capacity_degradation_EMS(model, cool_cap_fflow_spec, cool_eir_fflow_spec, clg_coil.name.get, true, roomac_cap_fff_curve, roomcac_eir_fff_curve)
+      apply_capacity_degradation_EMS(model, clg_ap, clg_coil.name.get, true, roomac_cap_fff_curve, roomcac_eir_fff_curve)
     else
       clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, roomac_cap_ft_curve, roomac_cap_fff_curve, roomac_eir_ft_curve, roomcac_eir_fff_curve, roomac_plf_fplr_curve)
     end
@@ -3048,20 +3048,20 @@ class HVAC
       eir_fff_curve = create_curve_quadratic(model, clg_ap.cool_eir_fflow_spec[i], "Cool-EIR-fFF#{i + 1}", 0, 2, 0, 2)
 
       if clg_ap.num_speeds == 1
-        clg_coil = create_single_speed_dx_cooling_coil(model, clg_coil_name, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, clg_ap, cooling_system.cooling_capacity, i)
+        clg_coil = create_single_speed_dx_cooling_coil(model, clg_coil_name, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, cooling_system)
         if is_ddb_control
           # Apply startup capacity degradation
-          apply_capacity_degradation_EMS(model, clg_ap.cool_cap_fflow_spec[0], clg_ap.cool_eir_fflow_spec[0], clg_coil.name.get, true, cap_fff_curve, eir_fff_curve)
+          apply_capacity_degradation_EMS(model, clg_ap, clg_coil.name.get, true, cap_fff_curve, eir_fff_curve)
         end
         clg_coils << clg_coil
       else
         if is_realistic_staging
           clg_coil_name = obj_name + ' clg coil' + " #{i}"
-          clg_coil = create_single_speed_dx_cooling_coil(model, clg_coil_name, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, clg_ap, cooling_system.cooling_capacity * clg_ap.cool_capacity_ratios[i], i)
+          clg_coil = create_single_speed_dx_cooling_coil(model, clg_coil_name, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, cooling_system, i, true)
           clg_coils << clg_coil
           if (i == 0)
             # Apply startup capacity degradation
-            apply_capacity_degradation_EMS(model, clg_ap.cool_cap_fflow_spec[0], clg_ap.cool_eir_fflow_spec[0], clg_coil.name.get, true, cap_fff_curve, eir_fff_curve)
+            apply_capacity_degradation_EMS(model, clg_ap, clg_coil.name.get, true, cap_fff_curve, eir_fff_curve)
           end
         else
           if clg_coil.nil?
@@ -3122,20 +3122,20 @@ class HVAC
       eir_fff_curve = create_curve_quadratic(model, htg_ap.heat_eir_fflow_spec[i], "Heat-EIR-fFF#{i + 1}", 0, 2, 0, 2)
 
       if htg_ap.num_speeds == 1
-        htg_coil = create_single_speed_dx_heating_coil(model, htg_coil_name, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, htg_ap, heating_system.heating_capacity, heating_system.fraction_heat_load_served, i)
+        htg_coil = create_single_speed_dx_heating_coil(model, htg_coil_name, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, heating_system)
         htg_coils << htg_coil
         if is_ddb_control
           # Apply startup capacity degradation
-          apply_capacity_degradation_EMS(model, htg_ap.heat_cap_fflow_spec[0], htg_ap.heat_eir_fflow_spec[0], htg_coil.name.get, false, cap_fff_curve, eir_fff_curve)
+          apply_capacity_degradation_EMS(model, htg_ap, htg_coil.name.get, false, cap_fff_curve, eir_fff_curve)
         end
       else
         if is_realistic_staging
           htg_coil_name = obj_name + ' htg coil' + " #{i}"
-          htg_coil = create_single_speed_dx_heating_coil(model, htg_coil_name, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, htg_ap, heating_system.heating_capacity * htg_ap.heat_capacity_ratios[i], heating_system.fraction_heat_load_served, i)
+          htg_coil = create_single_speed_dx_heating_coil(model, htg_coil_name, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, heating_system, i, true)
           htg_coils << htg_coil
           if (i == 0)
             # Apply startup capacity degradation
-            apply_capacity_degradation_EMS(model, htg_ap.heat_cap_fflow_spec[0], htg_ap.heat_eir_fflow_spec[0], htg_coil.name.get, false, cap_fff_curve, eir_fff_curve)
+            apply_capacity_degradation_EMS(model, htg_ap, htg_coil.name.get, false, cap_fff_curve, eir_fff_curve)
           end
         else
           if htg_coil.nil?
@@ -3172,12 +3172,18 @@ class HVAC
     return htg_coils
   end
 
-  def self.create_single_speed_dx_cooling_coil(model, clg_coil_name, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, clg_ap, cooling_capacity, i)
+  def self.create_single_speed_dx_cooling_coil(model, clg_coil_name, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, cooling_system, i = 0, is_realistic_staging = false)
+    clg_ap = cooling_system.additional_properties
     clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
     clg_coil.setName(clg_coil_name)
     clg_coil.setCondenserType('AirCooled')
     clg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(clg_ap.crankcase_kw, 'kW', 'W'))
-    clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(clg_ap.fan_power_rated / UnitConversions.convert(1.0, 'cfm', 'm^3/s'))
+    if not is_realistic_staging
+      clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(clg_ap.fan_power_rated / UnitConversions.convert(1.0, 'cfm', 'm^3/s'))
+      cooling_capacity = cooling_system.cooling_capacity
+    else
+      cooling_capacity = cooling_system.cooling_capacity * clg_ap.cool_capacity_ratios[i]
+    end
     if not clg_ap.crankcase_temp.nil?
       clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C'))
     end
@@ -3185,30 +3191,40 @@ class HVAC
     clg_coil.setRatedSensibleHeatRatio(clg_ap.cool_rated_shrs_gross[i])
     clg_coil.setNominalTimeForCondensateRemovalToBegin(1000.0)
     clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(1.5)
+    clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(cooling_capacity, 'Btu/hr', 'W'))
     clg_coil.setMaximumCyclingRate(3.0)
     clg_coil.setLatentCapacityTimeConstant(45.0)
-    clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(cooling_capacity, 'Btu/hr', 'W'))
-    clg_coil.setRatedAirFlowRate(calc_rated_airflow(cooling_capacity, clg_ap.cool_rated_cfm_per_ton[0], 1.0))
+    clg_coil.setRatedAirFlowRate(calc_rated_airflow(cooling_capacity, clg_ap.cool_rated_cfm_per_ton[i], 1.0))
     return clg_coil
   end
 
-  def self.create_single_speed_dx_heating_coil(model, htg_coil_name, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, htg_ap, heating_capacity, fraction_heat_load_served, i)
+  def self.create_single_speed_dx_heating_coil(model, htg_coil_name, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, heating_system, i = 0, is_realistic_staging = false)
+    htg_ap = heating_system.additional_properties
     htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
     htg_coil.setName(htg_coil_name)
-    htg_coil.setRatedSupplyFanPowerPerVolumeFlowRate(htg_ap.fan_power_rated / UnitConversions.convert(1.0, 'cfm', 'm^3/s'))
+    if not is_realistic_staging
+      heating_capacity = heating_system.heating_capacity
+      htg_coil.setRatedSupplyFanPowerPerVolumeFlowRate(htg_ap.fan_power_rated / UnitConversions.convert(1.0, 'cfm', 'm^3/s'))
+    else
+      heating_capacity = heating_system.heating_capacity * htg_ap.heat_capacity_ratios[i]
+      # To make it consistent with two speed default values
+      # Question: why OS is using 0.166667 as default defrost time period fraction for single speed coil, while E+ is using 0.058333? https://bigladdersoftware.com/epx/docs/9-4/input-output-reference/group-heating-and-cooling-coils.html#field-defrost-time-period-fraction
+      htg_coil.autosizeResistiveDefrostHeaterCapacity()
+      htg_coil.resetDefrostTimePeriodFraction()
+    end
     htg_coil.setRatedCOP(1.0 / htg_ap.heat_rated_eirs[i])
     if not htg_ap.crankcase_temp.nil?
       htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(htg_ap.crankcase_temp, 'F', 'C'))
     end
-    htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(heating_capacity, 'Btu/hr', 'W'))
-    htg_coil.setRatedAirFlowRate(calc_rated_airflow(heating_capacity, htg_ap.heat_rated_cfm_per_ton[0], 1.0))
+    htg_coil.setRatedAirFlowRate(calc_rated_airflow(heating_capacity, htg_ap.heat_rated_cfm_per_ton[i], 1.0))
     htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(htg_ap.hp_min_temp, 'F', 'C'))
     htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(UnitConversions.convert(40.0, 'F', 'C'))
+    htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(heating_capacity, 'Btu/hr', 'W'))
     defrost_eir_curve = create_curve_biquadratic(model, [0.1528, 0, 0, 0, 0, 0], 'Defrosteir', -100, 100, -100, 100) # Heating defrost curve for reverse cycle
     htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
     htg_coil.setDefrostStrategy('ReverseCycle')
     htg_coil.setDefrostControl('Timed')
-    if fraction_heat_load_served == 0
+    if heating_system.fraction_heat_load_served == 0
       htg_coil.setResistiveDefrostHeaterCapacity(0)
     end
     htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(htg_ap.crankcase_kw, 'kW', 'W'))
@@ -3258,7 +3274,7 @@ class HVAC
     end
   end
 
-  def self.apply_capacity_degradation_EMS(model, cap_fflow_spec, eir_fflow_spec, coil_name, is_cooling, cap_fff_curve, eir_fff_curve)
+  def self.apply_capacity_degradation_EMS(model, system_ap, coil_name, is_cooling, cap_fff_curve, eir_fff_curve)
     # Note: Currently only available in 1 min time step
     cap_time = 2 # Assumed minutes to take to ramp up to full capacity
     power_time = 1 # Assumed minutes to take to ramp up to full power
@@ -3276,9 +3292,13 @@ class HVAC
     if is_cooling
       coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Electricity Energy')
       coil_energy.setName('clg coil electric energy')
+      cap_fflow_spec = system_ap.cool_cap_fflow_spec[0]
+      eir_fflow_spec = system_ap.cool_eir_fflow_spec[0]
     else
       coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electricity Energy')
       coil_energy.setName('htg coil electric energy')
+      cap_fflow_spec = system_ap.heat_cap_fflow_spec[0]
+      eir_fflow_spec = system_ap.heat_eir_fflow_spec[0]
     end
     coil_energy.setKeyName(coil_name)
     # Trend variable
