@@ -1056,8 +1056,10 @@ class Airflow
         duct_program.addLine("  Set cfis_m3s = (#{@fan_mfr_max_var[object].name} / 1.16097654)") # Density of 1.16097654 was back calculated using E+ results
         # Pick first fan to run extra time to meet cfis requirement, not necessary to be specific because runtime fraction is just used in calculations (not actuating real fans).
         duct_program.addLine("  Set #{@fan_rtf_vars[object][0].name} = #{@cfis_f_damper_extra_open_var[cfis_id].name}") # Need to use global vars to sync duct_program and infiltration program of different calling points
-        # Need to clean the second fan rtf before calling subroutine for the second time.
-        duct_program.addLine("  Set #{@fan_rtf_vars[object][1].name} = 0")
+        if @fan_rtf_vars.size > 1
+          # Need to clean the second fan rtf before calling subroutine for the second time.
+          duct_program.addLine("  Set #{@fan_rtf_vars[object][1].name} = 0")
+        end
         duct_program.addLine("  Set #{ah_vfr_var.name} = #{@fan_rtf_vars[object][0].name}*cfis_m3s")
         duct_program.addLine("  Set rho_in = (@RhoAirFnPbTdbW #{@pbar_sensor.name} #{@tin_sensor.name} #{@win_sensor.name})")
         duct_program.addLine("  Set #{ah_mfr_var.name} = #{ah_vfr_var.name} * rho_in")
