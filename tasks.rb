@@ -114,7 +114,7 @@ def create_osws
     'base-dhw-tank-oil.osw' => 'base.osw',
     'base-dhw-tank-wood.osw' => 'base.osw',
     'base-enclosure-2stories.osw' => 'base.osw',
-    'base-enclosure-2stories-garage.osw' => 'base.osw',
+    'base-enclosure-2stories-garage.osw' => 'base-enclosure-2stories.osw',
     'base-enclosure-beds-1.osw' => 'base.osw',
     'base-enclosure-beds-2.osw' => 'base.osw',
     'base-enclosure-beds-4.osw' => 'base.osw',
@@ -622,7 +622,7 @@ def get_values(osw_file, step)
     step.setArgument('ducts_return_location', HPXML::LocationAtticUnvented)
     step.setArgument('ducts_supply_surface_area', '150.0')
     step.setArgument('ducts_return_surface_area', '50.0')
-    step.setArgument('ducts_number_of_return_registers', Constants.Auto)
+    step.setArgument('ducts_number_of_return_registers', '2')
     step.setArgument('heating_system_type_2', 'none')
     step.setArgument('heating_system_fuel_2', HPXML::FuelTypeElectricity)
     step.setArgument('heating_system_heating_efficiency_2', 1.0)
@@ -920,6 +920,7 @@ def get_values(osw_file, step)
     step.setArgument('ducts_return_location', HPXML::LocationLivingSpace)
     step.setArgument('ducts_supply_insulation_r', 0.0)
     step.setArgument('ducts_return_insulation_r', 0.0)
+    step.setArgument('ducts_number_of_return_registers', '1')
     step.setArgument('door_area', 20.0)
     step.setArgument('plug_loads_other_annual_kwh', '819.0')
   elsif ['base-bldgtype-multifamily-shared-mechvent.osw'].include? osw_file
@@ -1145,15 +1146,11 @@ def get_values(osw_file, step)
     step.setArgument('window_area_back', 216.0)
     step.setArgument('window_area_left', 144.0)
     step.setArgument('window_area_right', 144.0)
+    step.setArgument('ducts_number_of_return_registers', '3')
     step.setArgument('plug_loads_other_annual_kwh', '3685.5')
   elsif ['base-enclosure-2stories-garage.osw'].include? osw_file
     step.setArgument('geometry_cfa', 3250.0)
-    step.setArgument('geometry_num_floors_above_grade', 2)
     step.setArgument('geometry_garage_width', 20.0)
-    step.setArgument('window_area_front', 216.0)
-    step.setArgument('window_area_back', 216.0)
-    step.setArgument('window_area_left', 144.0)
-    step.setArgument('window_area_right', 144.0)
     step.setArgument('ducts_supply_surface_area', '112.5')
     step.setArgument('ducts_return_surface_area', '37.5')
     step.setArgument('plug_loads_other_annual_kwh', '2957.5')
@@ -1258,6 +1255,7 @@ def get_values(osw_file, step)
     step.setArgument('geometry_cfa', 1350.0)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeAmbient)
     step.setArgument('floor_assembly_r', 18.7)
+    step.setArgument('ducts_number_of_return_registers', '1')
     step.setArgument('plug_loads_other_annual_kwh', '1228.5')
   elsif ['base-foundation-conditioned-basement-slab-insulation.osw'].include? osw_file
     step.setArgument('slab_under_insulation_r', 10)
@@ -1276,6 +1274,7 @@ def get_values(osw_file, step)
     step.setArgument('slab_carpet_r', '2.5')
     step.setArgument('ducts_supply_location', HPXML::LocationUnderSlab)
     step.setArgument('ducts_return_location', HPXML::LocationUnderSlab)
+    step.setArgument('ducts_number_of_return_registers', '1')
     step.setArgument('plug_loads_other_annual_kwh', '1228.5')
   elsif ['base-foundation-unconditioned-basement.osw'].include? osw_file
     step.setArgument('geometry_cfa', 1350.0)
@@ -1285,6 +1284,7 @@ def get_values(osw_file, step)
     step.setArgument('foundation_wall_insulation_distance_to_bottom', 0)
     step.setArgument('ducts_supply_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('ducts_return_location', HPXML::LocationBasementUnconditioned)
+    step.setArgument('ducts_number_of_return_registers', '1')
     step.setArgument('water_heater_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('clothes_washer_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('clothes_dryer_location', HPXML::LocationBasementUnconditioned)
@@ -1322,6 +1322,7 @@ def get_values(osw_file, step)
     step.setArgument('slab_carpet_r', '2.5')
     step.setArgument('ducts_supply_location', HPXML::LocationCrawlspaceUnvented)
     step.setArgument('ducts_return_location', HPXML::LocationCrawlspaceUnvented)
+    step.setArgument('ducts_number_of_return_registers', '1')
     step.setArgument('water_heater_location', HPXML::LocationCrawlspaceUnvented)
     step.setArgument('plug_loads_other_annual_kwh', '1228.5')
   elsif ['base-foundation-vented-crawlspace.osw'].include? osw_file
@@ -1333,6 +1334,7 @@ def get_values(osw_file, step)
     step.setArgument('slab_carpet_r', '2.5')
     step.setArgument('ducts_supply_location', HPXML::LocationCrawlspaceVented)
     step.setArgument('ducts_return_location', HPXML::LocationCrawlspaceVented)
+    step.setArgument('ducts_number_of_return_registers', '1')
     step.setArgument('water_heater_location', HPXML::LocationCrawlspaceVented)
     step.setArgument('plug_loads_other_annual_kwh', '1228.5')
   elsif ['base-foundation-walkout-basement.osw'].include? osw_file
@@ -1385,7 +1387,6 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
-    step.setArgument('ducts_number_of_return_registers', '3')
   elsif ['base-hvac-boiler-gas-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('cooling_system_type', 'none')
@@ -2326,6 +2327,7 @@ def get_values(osw_file, step)
     step.setArgument('foundation_wall_insulation_distance_to_bottom', 6.0)
   elsif ['invalid_files/conditioned-attic-with-one-floor-above-grade.osw'].include? osw_file
     step.setArgument('geometry_attic_type', HPXML::AtticTypeConditioned)
+    step.setArgument('ceiling_assembly_r', 0.0)
   end
   return step
 end
@@ -5933,8 +5935,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear
     hpxml.hvac_distributions[0].ducts.clear
     hpxml.hvac_distributions.add(id: 'HVACDistribution2',
-                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
-                                 number_of_return_registers: 3)
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
                                                                duct_leakage_value: 75,
@@ -6176,7 +6177,6 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
       hpxml.hvac_distributions[0].hydronic_type = HPXML::HydronicTypeWaterLoop
       hpxml.hvac_distributions.add(id: 'HVACDistributionWLHP',
                                    distribution_system_type: HPXML::HVACDistributionTypeAir)
-      hpxml.hvac_distributions[-1].number_of_return_registers = 3
       hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                  duct_leakage_units: HPXML::UnitsCFM25,
                                                                  duct_leakage_value: 15,
@@ -6244,6 +6244,16 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   end
   if ['invalid_files/invalid-distribution-cfa-served.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area + 0.1
+  end
+
+  # Set number of return registers
+  if not ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+      next unless hvac_distribution.ducts.select { |d| d.duct_type == HPXML::DuctTypeReturn }.size > 0
+
+      hvac_distribution.number_of_return_registers = hpxml.building_construction.number_of_conditioned_floors.ceil
+    end
   end
 end
 
