@@ -394,10 +394,14 @@ def create_hpxmls
     'base-lighting-detailed.xml' => 'base.xml',
     'base-lighting-none.xml' => 'base.xml',
     'base-location-AMY-2012.xml' => 'base.xml',
-    'base-location-baltimore-md.xml' => 'base.xml',
+    'base-location-baltimore-md.xml' => 'base-foundation-unvented-crawlspace.xml',
     'base-location-dallas-tx.xml' => 'base-foundation-slab.xml',
-    'base-location-duluth-mn.xml' => 'base.xml',
+    'base-location-duluth-mn.xml' => 'base-foundation-unconditioned-basement.xml',
+    'base-location-honolulu-hi.xml' => 'base-foundation-slab.xml',
     'base-location-miami-fl.xml' => 'base-foundation-slab.xml',
+    'base-location-phoenix-az.xml' => 'base-foundation-slab.xml',
+    'base-location-portland-or.xml' => 'base-foundation-vented-crawlspace.xml',
+    'base-location-salt-lake-city-ut.xml' => 'base.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-bath-kitchen-fans.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
@@ -786,11 +790,31 @@ def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
     hpxml.climate_and_risk_zones.weather_station_name = 'Duluth, MN'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_MN_Duluth.Intl.AP.727450_TMY3.epw'
     hpxml.header.state_code = 'MN'
+  elsif ['base-location-honolulu-hi.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.iecc_zone = '1A'
+    hpxml.climate_and_risk_zones.weather_station_name = 'Honolulu, HI'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw'
+    hpxml.header.state_code = 'HI'
   elsif ['base-location-miami-fl.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.iecc_zone = '1A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Miami, FL'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_FL_Miami.Intl.AP.722020_TMY3.epw'
     hpxml.header.state_code = 'FL'
+  elsif ['base-location-phoenix-az.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.iecc_zone = '2B'
+    hpxml.climate_and_risk_zones.weather_station_name = 'Phoenix, AZ'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw'
+    hpxml.header.state_code = 'AZ'
+  elsif ['base-location-portland-or.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.iecc_zone = '4C'
+    hpxml.climate_and_risk_zones.weather_station_name = 'Portland, OR'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_OR_Portland.Intl.AP.726980_TMY3.epw'
+    hpxml.header.state_code = 'OR'
+  elsif ['base-location-salt-lake-city-ut.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.iecc_zone = '6B'
+    hpxml.climate_and_risk_zones.weather_station_name = 'Salt Lake City, UT'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_UT_Salt.Lake.City.Intl.AP.725720_TMY3.epw'
+    hpxml.header.state_code = 'UT'
   elsif ['base-location-AMY-2012.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_name = 'Boulder, CO'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'US_CO_Boulder_AMY_2012.epw'
