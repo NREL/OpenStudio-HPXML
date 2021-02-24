@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>d92b94a9-e309-460e-ab23-dce2c8c7fec0</version_id>
-  <version_modified>20210222T204016Z</version_modified>
+  <version_id>bd0ba447-bd27-4f7d-a373-911363594dbd</version_id>
+  <version_modified>20210224T221108Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -6448,18 +6448,6 @@
       <checksum>695BA275</checksum>
     </file>
     <file>
-      <filename>base-location-baltimore-md.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>09C97C5A</checksum>
-    </file>
-    <file>
-      <filename>base-location-duluth-mn.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>35EB2408</checksum>
-    </file>
-    <file>
       <filename>base-mechvent-balanced.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -7540,16 +7528,52 @@
       <checksum>28B76745</checksum>
     </file>
     <file>
+      <filename>base-location-baltimore-md.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>30A56106</checksum>
+    </file>
+    <file>
+      <filename>base-location-duluth-mn.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7D941C23</checksum>
+    </file>
+    <file>
       <filename>test_measure.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
-      <checksum>61FEF2EF</checksum>
+      <checksum>8D080945</checksum>
     </file>
     <file>
       <filename>test_rakefile.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
-      <checksum>A6596F1A</checksum>
+      <checksum>29EEB5A1</checksum>
+    </file>
+    <file>
+      <filename>base-location-honolulu-hi.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>612A8DDE</checksum>
+    </file>
+    <file>
+      <filename>base-location-phoenix-az.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FB18286A</checksum>
+    </file>
+    <file>
+      <filename>base-location-portland-or.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7FD5AF58</checksum>
+    </file>
+    <file>
+      <filename>base-location-salt-lake-city-ut.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AEC18793</checksum>
     </file>
   </files>
 </measure>

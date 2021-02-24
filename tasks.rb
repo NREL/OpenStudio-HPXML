@@ -231,10 +231,14 @@ def create_osws
     'base-lighting-detailed.osw' => 'base.osw',
     # 'base-lighting-none.osw' => 'base.osw',
     'base-location-AMY-2012.osw' => 'base.osw',
-    'base-location-baltimore-md.osw' => 'base.osw',
+    'base-location-baltimore-md.osw' => 'base-foundation-unvented-crawlspace.osw',
     'base-location-dallas-tx.osw' => 'base-foundation-slab.osw',
-    'base-location-duluth-mn.osw' => 'base.osw',
+    'base-location-duluth-mn.osw' => 'base-foundation-unconditioned-basement.osw',
+    'base-location-honolulu-hi.osw' => 'base-foundation-slab.osw',
     'base-location-miami-fl.osw' => 'base-foundation-slab.osw',
+    'base-location-phoenix-az.osw' => 'base-foundation-slab.osw',
+    'base-location-portland-or.osw' => 'base-foundation-vented-crawlspace.osw',
+    'base-location-salt-lake-city-ut.osw' => 'base.osw',
     'base-mechvent-balanced.osw' => 'base.osw',
     'base-mechvent-bath-kitchen-fans.osw' => 'base.osw',
     'base-mechvent-cfis.osw' => 'base.osw',
@@ -1593,8 +1597,16 @@ def get_values(osw_file, step)
     step.setArgument('ducts_number_of_return_registers', '1')
   elsif ['base-location-duluth-mn.osw'].include? osw_file
     step.setArgument('weather_station_epw_filepath', 'USA_MN_Duluth.Intl.AP.727450_TMY3.epw')
+  elsif ['base-location-honolulu-hi.osw'].include? osw_file
+    step.setArgument('weather_station_epw_filepath', 'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw')
   elsif ['base-location-miami-fl.osw'].include? osw_file
     step.setArgument('weather_station_epw_filepath', 'USA_FL_Miami.Intl.AP.722020_TMY3.epw')
+  elsif ['base-location-phoenix-az.osw'].include? osw_file
+    step.setArgument('weather_station_epw_filepath', 'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw')
+  elsif ['base-location-portland-or.osw'].include? osw_file
+    step.setArgument('weather_station_epw_filepath', 'USA_OR_Portland.Intl.AP.726980_TMY3.epw')
+  elsif ['base-location-salt-lake-city-ut.osw'].include? osw_file
+    step.setArgument('weather_station_epw_filepath', 'USA_UT_Salt.Lake.City.Intl.AP.725720_TMY3.epw')
   elsif ['base-mechvent-balanced.osw'].include? osw_file
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeBalanced)
     step.setArgument('mech_vent_fan_power', 60)
