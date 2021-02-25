@@ -234,11 +234,11 @@ def create_osws
     'base-location-baltimore-md.osw' => 'base-foundation-unvented-crawlspace.osw',
     'base-location-dallas-tx.osw' => 'base-foundation-slab.osw',
     'base-location-duluth-mn.osw' => 'base-foundation-unconditioned-basement.osw',
+    'base-location-helena-mt.osw' => 'base.osw',
     'base-location-honolulu-hi.osw' => 'base-foundation-slab.osw',
     'base-location-miami-fl.osw' => 'base-foundation-slab.osw',
     'base-location-phoenix-az.osw' => 'base-foundation-slab.osw',
     'base-location-portland-or.osw' => 'base-foundation-vented-crawlspace.osw',
-    'base-location-salt-lake-city-ut.osw' => 'base.osw',
     'base-mechvent-balanced.osw' => 'base.osw',
     'base-mechvent-bath-kitchen-fans.osw' => 'base.osw',
     'base-mechvent-cfis.osw' => 'base.osw',
@@ -1597,6 +1597,8 @@ def get_values(osw_file, step)
     step.setArgument('ducts_number_of_return_registers', '1')
   elsif ['base-location-duluth-mn.osw'].include? osw_file
     step.setArgument('weather_station_epw_filepath', 'USA_MN_Duluth.Intl.AP.727450_TMY3.epw')
+  elsif ['base-location-helena-mt.osw'].include? osw_file
+    step.setArgument('weather_station_epw_filepath', 'USA_MT_Helena.Rgnl.AP.727720_TMY3.epw')
   elsif ['base-location-honolulu-hi.osw'].include? osw_file
     step.setArgument('weather_station_epw_filepath', 'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw')
   elsif ['base-location-miami-fl.osw'].include? osw_file
@@ -1605,8 +1607,6 @@ def get_values(osw_file, step)
     step.setArgument('weather_station_epw_filepath', 'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw')
   elsif ['base-location-portland-or.osw'].include? osw_file
     step.setArgument('weather_station_epw_filepath', 'USA_OR_Portland.Intl.AP.726980_TMY3.epw')
-  elsif ['base-location-salt-lake-city-ut.osw'].include? osw_file
-    step.setArgument('weather_station_epw_filepath', 'USA_UT_Salt.Lake.City.Intl.AP.725720_TMY3.epw')
   elsif ['base-mechvent-balanced.osw'].include? osw_file
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeBalanced)
     step.setArgument('mech_vent_fan_power', 60)
@@ -2037,6 +2037,7 @@ def create_hpxmls
   require_relative 'HPXMLtoOpenStudio/resources/constants'
   require_relative 'HPXMLtoOpenStudio/resources/hotwater_appliances'
   require_relative 'HPXMLtoOpenStudio/resources/hpxml'
+  require_relative 'HPXMLtoOpenStudio/resources/location'
   require_relative 'HPXMLtoOpenStudio/resources/misc_loads'
   require_relative 'HPXMLtoOpenStudio/resources/waterheater'
   require_relative 'HPXMLtoOpenStudio/resources/xmlhelper'
@@ -2427,11 +2428,11 @@ def create_hpxmls
     'base-location-baltimore-md.xml' => 'base-foundation-unvented-crawlspace.xml',
     'base-location-dallas-tx.xml' => 'base-foundation-slab.xml',
     'base-location-duluth-mn.xml' => 'base-foundation-unconditioned-basement.xml',
+    'base-location-helena-mt.xml' => 'base.xml',
     'base-location-honolulu-hi.xml' => 'base-foundation-slab.xml',
     'base-location-miami-fl.xml' => 'base-foundation-slab.xml',
     'base-location-phoenix-az.xml' => 'base-foundation-slab.xml',
     'base-location-portland-or.xml' => 'base-foundation-vented-crawlspace.xml',
-    'base-location-salt-lake-city-ut.xml' => 'base.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-bath-kitchen-fans.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
@@ -2803,50 +2804,50 @@ def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
     hpxml.climate_and_risk_zones.weather_station_name = 'Las Vegas, NV'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_NV_Las.Vegas-McCarran.Intl.AP.723860_TMY3.epw'
   elsif ['base.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_zone = '5B'
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(725650)
     hpxml.climate_and_risk_zones.weather_station_name = 'Denver, CO'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
     hpxml.header.state_code = 'CO'
   elsif ['base-location-baltimore-md.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_zone = '4A'
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(724060)
     hpxml.climate_and_risk_zones.weather_station_name = 'Baltimore, MD'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw'
     hpxml.header.state_code = 'MD'
   elsif ['base-location-dallas-tx.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_zone = '3A'
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(722590)
     hpxml.climate_and_risk_zones.weather_station_name = 'Dallas, TX'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw'
     hpxml.header.state_code = 'TX'
   elsif ['base-location-duluth-mn.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_zone = '7'
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(727450)
     hpxml.climate_and_risk_zones.weather_station_name = 'Duluth, MN'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_MN_Duluth.Intl.AP.727450_TMY3.epw'
     hpxml.header.state_code = 'MN'
+  elsif ['base-location-helena-mt.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(727720)
+    hpxml.climate_and_risk_zones.weather_station_name = 'Helena, MT'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_MT_Helena.Rgnl.AP.727720_TMY3.epw'
+    hpxml.header.state_code = 'MT'
   elsif ['base-location-honolulu-hi.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_zone = '1A'
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(911820)
     hpxml.climate_and_risk_zones.weather_station_name = 'Honolulu, HI'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw'
     hpxml.header.state_code = 'HI'
   elsif ['base-location-miami-fl.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_zone = '1A'
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(722020)
     hpxml.climate_and_risk_zones.weather_station_name = 'Miami, FL'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_FL_Miami.Intl.AP.722020_TMY3.epw'
     hpxml.header.state_code = 'FL'
   elsif ['base-location-phoenix-az.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_zone = '2B'
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(722780)
     hpxml.climate_and_risk_zones.weather_station_name = 'Phoenix, AZ'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw'
     hpxml.header.state_code = 'AZ'
   elsif ['base-location-portland-or.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_zone = '4C'
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(726980)
     hpxml.climate_and_risk_zones.weather_station_name = 'Portland, OR'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_OR_Portland.Intl.AP.726980_TMY3.epw'
     hpxml.header.state_code = 'OR'
-  elsif ['base-location-salt-lake-city-ut.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_zone = '6B'
-    hpxml.climate_and_risk_zones.weather_station_name = 'Salt Lake City, UT'
-    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_UT_Salt.Lake.City.Intl.AP.725720_TMY3.epw'
-    hpxml.header.state_code = 'UT'
   elsif ['base-location-AMY-2012.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_name = 'Boulder, CO'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'US_CO_Boulder_AMY_2012.epw'

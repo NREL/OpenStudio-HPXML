@@ -58,8 +58,8 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Electricity: Heating Fans/Pumps (MBtu)
    End Use: Electricity: Cooling (MBtu)                                Excludes fans/pumps
    End Use: Electricity: Cooling Fans/Pumps (MBtu)
-   End Use: Electricity: Hot Water (MBtu)
-   End Use: Electricity: Hot Water Recirc Pump (MBtu)                  Excludes recirc and solar thermal pumps
+   End Use: Electricity: Hot Water (MBtu)                              Excludes recirc pump and solar thermal pump
+   End Use: Electricity: Hot Water Recirc Pump (MBtu)
    End Use: Electricity: Hot Water Solar Thermal Pump (MBtu)
    End Use: Electricity: Lighting Interior (MBtu)
    End Use: Electricity: Lighting Garage (MBtu)
@@ -77,7 +77,7 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Electricity: Range/Oven (MBtu)
    End Use: Electricity: Ceiling Fan (MBtu)
    End Use: Electricity: Television (MBtu)
-   End Use: Electricity: Plug Loads (MBtu)                             Excludes independently reported plug loads (e.g., wall pump)
+   End Use: Electricity: Plug Loads (MBtu)                             Excludes independently reported plug loads (e.g., well pump)
    End Use: Electricity: Electric Vehicle Charging (MBtu)
    End Use: Electricity: Well Pump (MBtu)
    End Use: Electricity: Pool Heater (MBtu)
@@ -85,7 +85,7 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Electricity: Hot Tub Heater (MBtu)
    End Use: Electricity: Hot Tub Pump (MBtu)
    End Use: Electricity: PV (MBtu)                                     Negative value for any power produced
-   End Use: Electricity: Generator (MBtu)                              Negative value for power produced
+   End Use: Electricity: Generator (MBtu)                              Negative value for any power produced
    End Use: Natural Gas: Heating (MBtu)
    End Use: Natural Gas: Hot Water (MBtu)
    End Use: Natural Gas: Clothes Dryer (MBtu)
