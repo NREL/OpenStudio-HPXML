@@ -395,11 +395,11 @@ def create_hpxmls
     'base-location-baltimore-md.xml' => 'base-foundation-unvented-crawlspace.xml',
     'base-location-dallas-tx.xml' => 'base-foundation-slab.xml',
     'base-location-duluth-mn.xml' => 'base-foundation-unconditioned-basement.xml',
+    'base-location-helena-mt.xml' => 'base.xml',
     'base-location-honolulu-hi.xml' => 'base-foundation-slab.xml',
     'base-location-miami-fl.xml' => 'base-foundation-slab.xml',
     'base-location-phoenix-az.xml' => 'base-foundation-slab.xml',
     'base-location-portland-or.xml' => 'base-foundation-vented-crawlspace.xml',
-    'base-location-salt-lake-city-ut.xml' => 'base.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-bath-kitchen-fans.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
@@ -784,6 +784,11 @@ def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
     hpxml.climate_and_risk_zones.weather_station_name = 'Duluth, MN'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_MN_Duluth.Intl.AP.727450_TMY3.epw'
     hpxml.header.state_code = 'MN'
+  elsif ['base-location-helena-mt.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.iecc_zone = '6B'
+    hpxml.climate_and_risk_zones.weather_station_name = 'Helena, MT'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_MT_Helena.Rgnl.AP.727720_TMY3.epw'
+    hpxml.header.state_code = 'MT'
   elsif ['base-location-honolulu-hi.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.iecc_zone = '1A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Honolulu, HI'
@@ -804,11 +809,6 @@ def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
     hpxml.climate_and_risk_zones.weather_station_name = 'Portland, OR'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_OR_Portland.Intl.AP.726980_TMY3.epw'
     hpxml.header.state_code = 'OR'
-  elsif ['base-location-salt-lake-city-ut.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_zone = '6B'
-    hpxml.climate_and_risk_zones.weather_station_name = 'Salt Lake City, UT'
-    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_UT_Salt.Lake.City.Intl.AP.725720_TMY3.epw'
-    hpxml.header.state_code = 'UT'
   elsif ['base-location-AMY-2012.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_name = 'Boulder, CO'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'US_CO_Boulder_AMY_2012.epw'
