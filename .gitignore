@@ -1180,8 +1180,6 @@
 /weather/USA_MT_Great.Falls.Intl.AP.727750_TMY3.epw
 /weather/USA_MT_Havre.City-County.AP.727770_TMY3-cache.csv
 /weather/USA_MT_Havre.City-County.AP.727770_TMY3.epw
-/weather/USA_MT_Helena.Rgnl.AP.727720_TMY3-cache.csv
-/weather/USA_MT_Helena.Rgnl.AP.727720_TMY3.epw
 /weather/USA_MT_Kalispell-Glacier.Park.Intl.AP.727790_TMY3-cache.csv
 /weather/USA_MT_Kalispell-Glacier.Park.Intl.AP.727790_TMY3.epw
 /weather/USA_MT_Lewistown.Muni.AP.726776_TMY3-cache.csv
@@ -1784,6 +1782,8 @@
 /weather/USA_UT_Provo.Muni.AWOS.725724_TMY3.epw
 /weather/USA_UT_Saint.George.AWOS.724754_TMY3-cache.csv
 /weather/USA_UT_Saint.George.AWOS.724754_TMY3.epw
+/weather/USA_UT_Salt.Lake.City.Intl.AP.725720_TMY3-cache.csv
+/weather/USA_UT_Salt.Lake.City.Intl.AP.725720_TMY3.epw
 /weather/USA_UT_Vernal.AP.725705_TMY3-cache.csv
 /weather/USA_UT_Vernal.AP.725705_TMY3.epw
 /weather/USA_UT_Wendover.USAF.Auxiliary.Field.725810_TMY3-cache.csv
