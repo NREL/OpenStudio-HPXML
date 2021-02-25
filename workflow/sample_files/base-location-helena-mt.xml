@@ -18,7 +18,7 @@
     <Site>
       <SiteID id='SiteID'/>
       <Address>
-        <StateCode>UT</StateCode>
+        <StateCode>MT</StateCode>
       </Address>
     </Site>
     <ProjectStatus>
@@ -53,9 +53,9 @@
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>Salt Lake City, UT</Name>
+          <Name>Helena, MT</Name>
           <extension>
-            <EPWFilePath>USA_UT_Salt.Lake.City.Intl.AP.725720_TMY3.epw</EPWFilePath>
+            <EPWFilePath>USA_MT_Helena.Rgnl.AP.727720_TMY3.epw</EPWFilePath>
           </extension>
         </WeatherStation>
       </ClimateandRiskZones>
