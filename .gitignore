@@ -1985,14 +1985,7 @@
 /weather/USA_WY_Sheridan.County.AP.726660_TMY3.epw
 /weather/USA_WY_Worland.Muni.AP.726665_TMY3-cache.csv
 /weather/USA_WY_Worland.Muni.AP.726665_TMY3.epw
-/workflow/run0
-/workflow/run1
-/workflow/run2
-/workflow/run3
-/workflow/run4
-/workflow/run5
-/workflow/run6
-/workflow/run7
+/workflow/run*
 /workflow/sample_files_orig
 .DS_Store
 plots/plots

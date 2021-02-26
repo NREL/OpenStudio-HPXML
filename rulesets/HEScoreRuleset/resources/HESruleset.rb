@@ -249,7 +249,7 @@ class HEScoreRuleset
                                        insulation_interior_r_value: 0,
                                        insulation_interior_distance_to_top: 0,
                                        insulation_interior_distance_to_bottom: 0,
-                                       insulation_exterior_r_value: orig_foundation_wall.insulation_r_value,
+                                       insulation_exterior_r_value: orig_foundation_wall.insulation_continuous_r_value,
                                        insulation_exterior_distance_to_top: 0,
                                        insulation_exterior_distance_to_bottom: fndwall_height)
       end
@@ -357,7 +357,7 @@ class HEScoreRuleset
       interior_shading_factor_summer, interior_shading_factor_winter = Constructions.get_default_interior_shading_factors()
       exterior_shading_factor_summer = 1.0
       exterior_shading_factor_winter = 1.0
-      if orig_window.exterior_shading == 'solar screens'
+      if orig_window.exterior_shading_type == 'solar screens'
         # Summer only, total shading factor reduced to 0.29
         exterior_shading_factor_summer = 0.29 / interior_shading_factor_summer # Overall shading factor is interior multiplied by exterior
       end
@@ -396,7 +396,7 @@ class HEScoreRuleset
       interior_shading_factor_winter = 1.0
       exterior_shading_factor_summer = 1.0
       exterior_shading_factor_winter = 1.0
-      if orig_skylight.exterior_shading == 'solar screens'
+      if orig_skylight.exterior_shading_type == 'solar screens'
         # Year-round, total shading factor reduced to 0.29
         exterior_shading_factor_summer = 0.29
         exterior_shading_factor_winter = 0.29
@@ -447,7 +447,7 @@ class HEScoreRuleset
       heating_efficiency_afue = orig_heating.heating_efficiency_afue
       heating_efficiency_percent = orig_heating.heating_efficiency_percent
       year_installed = orig_heating.year_installed
-      energy_star = orig_heating.energy_star
+      energy_star = (orig_heating.third_party_certification == HPXML::CertificationEnergyStar)
       fraction_heat_load_served = orig_heating.fraction_heat_load_served
 
       # Need to create hydronic distribution system?
@@ -525,7 +525,7 @@ class HEScoreRuleset
       cooling_efficiency_seer = orig_cooling.cooling_efficiency_seer
       cooling_efficiency_eer = orig_cooling.cooling_efficiency_eer
       year_installed = orig_cooling.year_installed
-      energy_star = orig_cooling.energy_star
+      energy_star = (orig_cooling.third_party_certification == HPXML::CertificationEnergyStar)
       fraction_cool_load_served = orig_cooling.fraction_cool_load_served
 
       if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
@@ -582,7 +582,7 @@ class HEScoreRuleset
       heating_efficiency_cop = orig_hp.heating_efficiency_cop
       distribution_system_idref = orig_hp.distribution_system_idref
       year_installed = orig_hp.year_installed
-      energy_star = orig_hp.energy_star
+      energy_star = (orig_hp.third_party_certification == HPXML::CertificationEnergyStar)
       fraction_cool_load_served = orig_hp.fraction_cool_load_served
       fraction_heat_load_served = orig_hp.fraction_heat_load_served
 
@@ -735,7 +735,7 @@ class HEScoreRuleset
       fuel_type = orig_water_heater.fuel_type
       water_heater_type = orig_water_heater.water_heater_type
       year_installed = orig_water_heater.year_installed
-      energy_star = orig_water_heater.energy_star
+      energy_star = (orig_water_heater.third_party_certification == HPXML::CertificationEnergyStar)
 
       if not energy_factor.nil?
         # Do nothing, we already have the energy factor
