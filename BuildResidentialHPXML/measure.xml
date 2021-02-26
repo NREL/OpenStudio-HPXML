@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>1400f0af-9960-4584-8d59-7a2e158df421</version_id>
-  <version_modified>20210225T213145Z</version_modified>
+  <version_id>3de08c93-7d4d-415f-b9e0-cfafd23afe07</version_id>
+  <version_modified>20210225T213853Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -260,10 +260,6 @@
       <default_value>single-family detached</default_value>
       <choices>
         <choice>
-          <value>manufactured home</value>
-          <display_name>manufactured home</display_name>
-        </choice>
-        <choice>
           <value>single-family detached</value>
           <display_name>single-family detached</display_name>
         </choice>
@@ -290,7 +286,7 @@
     <argument>
       <name>geometry_num_floors_above_grade</name>
       <display_name>Geometry: Number of Floors</display_name>
-      <description>The number of floors above grade (in the unit if single-family attached, and in the building if apartment unit).</description>
+      <description>The number of floors above grade (in the unit if single-family detached or single-family attached, and in the building if apartment unit). Conditioned attics are included.</description>
       <type>Integer</type>
       <units>#</units>
       <required>true</required>
@@ -330,7 +326,7 @@
     <argument>
       <name>geometry_corridor_position</name>
       <display_name>Geometry: Corridor Position</display_name>
-      <description>The position of the corridor.</description>
+      <description>The position of the corridor. Only applies to single-family attached and apartment unit units.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -357,7 +353,7 @@
     <argument>
       <name>geometry_corridor_width</name>
       <display_name>Geometry: Corridor Width</display_name>
-      <description>The width of the corridor.</description>
+      <description>The width of the corridor. Only applies to apartment unit units.</description>
       <type>Double</type>
       <units>ft</units>
       <required>true</required>
@@ -367,7 +363,7 @@
     <argument>
       <name>geometry_inset_width</name>
       <display_name>Geometry: Inset Width</display_name>
-      <description>The width of the inset.</description>
+      <description>The width of the inset. Only applies to apartment unit units.</description>
       <type>Double</type>
       <units>ft</units>
       <required>true</required>
@@ -377,7 +373,7 @@
     <argument>
       <name>geometry_inset_depth</name>
       <display_name>Geometry: Inset Depth</display_name>
-      <description>The depth of the inset.</description>
+      <description>The depth of the inset. Only applies to apartment unit units.</description>
       <type>Double</type>
       <units>ft</units>
       <required>true</required>
@@ -387,7 +383,7 @@
     <argument>
       <name>geometry_inset_position</name>
       <display_name>Geometry: Inset Position</display_name>
-      <description>The position of the inset.</description>
+      <description>The position of the inset. Only applies to apartment unit units.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -406,7 +402,7 @@
     <argument>
       <name>geometry_balcony_depth</name>
       <display_name>Geometry: Balcony Depth</display_name>
-      <description>The depth of the balcony.</description>
+      <description>The depth of the balcony. Only applies to apartment unit units.</description>
       <type>Double</type>
       <units>ft</units>
       <required>true</required>
@@ -416,7 +412,7 @@
     <argument>
       <name>geometry_garage_width</name>
       <display_name>Geometry: Garage Width</display_name>
-      <description>The width of the garage. Enter zero for no garage.</description>
+      <description>The width of the garage. Enter zero for no garage. Only applies to single-family detached units.</description>
       <type>Double</type>
       <units>ft</units>
       <required>true</required>
@@ -426,7 +422,7 @@
     <argument>
       <name>geometry_garage_depth</name>
       <display_name>Geometry: Garage Depth</display_name>
-      <description>The depth of the garage.</description>
+      <description>The depth of the garage. Only applies to single-family detached units.</description>
       <type>Double</type>
       <units>ft</units>
       <required>true</required>
@@ -436,7 +432,7 @@
     <argument>
       <name>geometry_garage_protrusion</name>
       <display_name>Geometry: Garage Protrusion</display_name>
-      <description>The fraction of the garage that is protruding from the living space.</description>
+      <description>The fraction of the garage that is protruding from the living space. Only applies to single-family detached units.</description>
       <type>Double</type>
       <units>frac</units>
       <required>true</required>
@@ -446,7 +442,7 @@
     <argument>
       <name>geometry_garage_position</name>
       <display_name>Geometry: Garage Position</display_name>
-      <description>The position of the garage.</description>
+      <description>The position of the garage. Only applies to single-family detached units.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -520,7 +516,7 @@
     <argument>
       <name>geometry_roof_type</name>
       <display_name>Geometry: Roof Type</display_name>
-      <description>The roof type of the building.</description>
+      <description>The roof type of the building. Assumed flat for apartment unit units.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -718,7 +714,7 @@
     <argument>
       <name>geometry_building_num_units</name>
       <display_name>Geometry: Building Number of Units</display_name>
-      <description>The number of units in the building. This is required for single-family attached and apartment unit buildings.</description>
+      <description>The number of units in the building. This is required for single-family attached and apartment unit units.</description>
       <type>Integer</type>
       <units>#</units>
       <required>false</required>
@@ -727,7 +723,7 @@
     <argument>
       <name>geometry_building_num_bedrooms</name>
       <display_name>Geometry: Building Number of Bedrooms</display_name>
-      <description>The number of bedrooms in the building. This is required for single-family attached and apartment unit buildings with shared PV systems.</description>
+      <description>The number of bedrooms in the building. This is required for single-family attached and apartment unit units with shared PV systems.</description>
       <type>Integer</type>
       <units>#</units>
       <required>false</required>
@@ -6281,18 +6277,6 @@
       <checksum>24396BA2</checksum>
     </file>
     <file>
-      <filename>geometry.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7576BFF1</checksum>
-    </file>
-    <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C7035B18</checksum>
-    </file>
-    <file>
       <filename>base.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -7541,6 +7525,24 @@
       <checksum>7FD5AF58</checksum>
     </file>
     <file>
+      <filename>base-location-helena-mt.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C973625F</checksum>
+    </file>
+    <file>
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>26780CD9</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6EC2BD04</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.0</identifier>
@@ -7549,13 +7551,511 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>0595E764</checksum>
+      <checksum>AFAF7BCC</checksum>
     </file>
     <file>
-      <filename>base-location-helena-mt.osw</filename>
+      <filename>extra-bldgtype-multifamily-double-exterior.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>C973625F</checksum>
+      <checksum>63164267</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0E578077</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-eaves.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>84674F54</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-single-exterior-front.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6244815F</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>BBBFA880</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-left-bottom-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7B17989B</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-left-bottom.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>92C6B667</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-left-middle-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>89BFE1A3</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-left-middle.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D6C32C58</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-left-top-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8E0E7E80</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-left-top.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>58395E1F</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-middle-bottom-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0885E6CA</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-middle-bottom.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C772A37C</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-middle-middle-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>69BBB75E</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-middle-middle.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>94184B8C</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-middle-top-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>58488F9D</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-middle-top.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>75996620</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-right-bottom-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>21A9D205</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-right-bottom.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A35BE591</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-right-middle-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>92DBDC1B</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-right-middle.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1A190D2A</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-right-top-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4B1B5E10</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab-right-top.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6E65852A</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-slab.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>452C1612</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>92BD2E17</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-left-bottom-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>39142EE9</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-left-bottom.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0708B9EA</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-left-middle-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>240B9129</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-left-middle.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>82CEADD3</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-left-top-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4ACE1DFD</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-left-top.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5558A09C</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-middle-bottom-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9C7AB74B</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-middle-bottom.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3D578E92</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-middle-middle-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>53260558</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-middle-middle.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3267AE00</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-middle-top-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>69D4BE41</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-middle-top.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A7ABDD33</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-right-bottom-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>13B6583C</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-right-bottom.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6F8DF75D</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-right-middle-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>134D9BCA</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-right-middle.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3F6D795D</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-right-top-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9A12C13E</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace-right-top.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0BB47B17</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-unvented-crawlspace.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0AC9096B</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>14E57164</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-left-bottom-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B2A79994</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-left-bottom.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>59CD2F0E</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-left-middle-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>231554B6</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-left-middle.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>28B3BDBA</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-left-top-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>02DBA95B</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-left-top.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C9F72B53</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-middle-bottom-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A004771C</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-middle-bottom.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6A03CDB8</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-middle-middle-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>BD1BC8DC</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-middle-middle.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>EFC5D981</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-middle-top-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5C555E28</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-middle-top.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>BDC40F8D</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-right-bottom-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>53CFF279</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-right-bottom.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>97138ACF</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-right-middle-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1DBC1FA9</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-right-middle.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>540E43D4</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-right-top-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>70FF3E32</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace-right-top.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C85F44BA</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-multifamily-vented-crawlspace.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6E3C1239</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-gable.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D3B40614</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-hip.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C11E002C</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-double-exterior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C76E3E97</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-double-loaded-interior.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2D6D7582</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-single-exterior-front.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>416475E7</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-slab-middle.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>20EF15A6</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-slab-right.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>75BD2197</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-slab.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DC3D4439</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-unconditioned-basement-middle.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7D90DDA9</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-unconditioned-basement-right.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C562843B</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-unconditioned-basement.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0591856B</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-unvented-crawlspace-middle.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F25A45B0</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-unvented-crawlspace-right.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C132AC43</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-unvented-crawlspace.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>ECA4D110</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-vented-crawlspace-middle.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6F5804D7</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-vented-crawlspace-right.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E17438E2</checksum>
+    </file>
+    <file>
+      <filename>extra-bldgtype-single-family-attached-vented-crawlspace.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0ADC4DF5</checksum>
+    </file>
+    <file>
+      <filename>extra-enclosure-atticroof-conditioned-eaves-gable.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C0F28E87</checksum>
+    </file>
+    <file>
+      <filename>extra-enclosure-atticroof-conditioned-eaves-hip.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>105FE361</checksum>
+    </file>
+    <file>
+      <filename>extra-enclosure-garage-atticroof-conditioned.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0C9837FB</checksum>
     </file>
   </files>
 </measure>
