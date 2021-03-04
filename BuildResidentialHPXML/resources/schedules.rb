@@ -8,11 +8,13 @@ class ScheduleGenerator
   def initialize(runner:,
                  model:,
                  epw_file:,
+                 state: 'CO',
                  building_id: nil,
                  random_seed: nil)
     @runner = runner
     @model = model
     @epw_file = epw_file
+    @state = state
     @building_id = building_id
     @random_seed = random_seed
   end
@@ -360,6 +362,8 @@ class ScheduleGenerator
     event_duration_prob_map = read_event_duration_probs(resources_path: args[:resources_path])
     activity_duration_prob_map = read_activity_duration_prob(resources_path: args[:resources_path])
     appliance_power_dist_map = read_appliance_power_dist(resources_path: args[:resources_path])
+    @weekday_monthly_shift_dict = read_monthly_shift_minutes(resources_path: args[:resources_path], daytype: 'weekday')
+    @weekend_monthly_shift_dict = read_monthly_shift_minutes(resources_path: args[:resources_path], daytype: 'weekend')
 
     all_simulated_values = [] # holds the markov-chain state for each of the seven simulated states for each occupant.
     # States are: 'sleeping', 'shower', 'laundry', 'cooking', 'dishwashing', 'absent', 'nothingAtHome'
@@ -878,6 +882,39 @@ class ScheduleGenerator
       new_array[j] = array[(j * group_size)...(j + 1) * group_size].reduce(0, :+)
     end
     return new_array
+  end
+
+  def apply_monthly_offsets(array)
+    @total_days_in_year.times do |day|
+      today = @sim_start_day + day
+      day_of_week = today.wday
+      month_strs = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      month = month_strs[today.month - 1]
+      if [0, 6].include?(day_of_week)
+        # Weekend
+        lead = @weekend_monthly_shift_dict[month]
+      else
+        # weekday
+        lead = @weekday_monthly_shift_dict[month]
+      end
+      if lead.nil?
+        raise "Could not find the entry for month #{month}, day #{day_of_week} and state #{@state}"
+      end
+
+      array[day * 1440, 1440] = array[day * 1440, 1440].rotate(lead)
+    end
+    return array
+  end
+
+  def read_monthly_shift_minutes(resources_path:, daytype:)
+    shift_file = resources_path + "/schedules_#{daytype}_state_and_monthly_schedule_shift.csv"
+    shifts = CSV.read(shift_file)
+    state_index = shifts[0].find_index('State')
+    lead_index = shifts[0].find_index('Lead')
+    month_index = shifts[0].find_index('Month')
+    state_shifts = shifts.select { |row| row[state_index] == @state }
+    monthly_shifts_dict = Hash[state_shifts.map { |row| [row[month_index], row[lead_index].to_i] }]
+    return monthly_shifts_dict
   end
 
   def read_appliance_power_dist(resources_path:)
