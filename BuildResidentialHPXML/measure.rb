@@ -3083,7 +3083,7 @@ class HPXMLFile
 
     hpxml = HPXML.new
 
-    set_header(hpxml, runner, args)
+    set_header(hpxml, runner, args, epw_file)
     set_site(hpxml, runner, args)
     set_neighbor_buildings(hpxml, runner, args)
     set_building_occupancy(hpxml, runner, args)
@@ -3232,7 +3232,7 @@ class HPXMLFile
     return true
   end
 
-  def self.set_header(hpxml, runner, args)
+  def self.set_header(hpxml, runner, args, epw_file)
     hpxml.header.xml_type = 'HPXML'
     hpxml.header.xml_generated_by = 'BuildResidentialHPXML'
     hpxml.header.transaction = 'create'
@@ -3282,6 +3282,7 @@ class HPXMLFile
     end
 
     hpxml.header.building_id = 'MyBuilding'
+    hpxml.header.state_code = epw_file.stateProvinceRegion
     hpxml.header.event_type = 'proposed workscope'
     hpxml.header.schedules_path = args[:schedules_path]
   end
