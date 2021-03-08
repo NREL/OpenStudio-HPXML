@@ -967,6 +967,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_fuel_choices << HPXML::FuelTypeWoodPellets
     heating_system_fuel_choices << HPXML::FuelTypeCoal
 
+    heating_system_shared_distribution_type_choices = OpenStudio::StringVector.new
+    heating_system_shared_distribution_type_choices << HPXML::HydronicTypeBaseboard
+    heating_system_shared_distribution_type_choices << HPXML::AirTypeFanCoil
+
     cooling_system_type_choices = OpenStudio::StringVector.new
     cooling_system_type_choices << 'none'
     cooling_system_type_choices << HPXML::HVACTypeCentralAirConditioner
@@ -987,6 +991,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heating System: Type')
     arg.setDescription("The type of heating system. Use 'none' if there is no heating system.")
     arg.setDefaultValue(HPXML::HVACTypeFurnace)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heating_system_is_shared_system', true)
+    arg.setDisplayName('Heating System: Is Shared System')
+    arg.setDescription("Whether the heating system is shared or not. Only used for #{HPXML::HVACTypeBoiler}.")
+    arg.setDefaultValue(false)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system_fuel', heating_system_fuel_choices, true)
@@ -1020,6 +1030,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heating System: Airflow Defect Ratio')
     arg.setDescription("The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / DesignAirflow, of the heating system per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies only to #{HPXML::HVACTypeFurnace}.")
     arg.setUnits('Frac')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system_shared_distribution_type', heating_system_shared_distribution_type_choices, true)
+    arg.setDisplayName('Heating System: Shared System Distribution Type')
+    arg.setDescription("The distribution type of the shared heating system. Only used for #{HPXML::HVACTypeBoiler}.")
+    arg.setDefaultValue(HPXML::HydronicTypeBaseboard)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_shared_loop_pump_power', true)
+    arg.setDisplayName('Heating System: Shared System Loop Pump Power')
+    arg.setDescription("The loop pumping power of the shared heating system. Only used for #{HPXML::HVACTypeBoiler}.")
+    arg.setUnits('W')
+    arg.setDefaultValue(600)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_in_unit_fan_coil_power', true)
+    arg.setDisplayName('Heating System: Shared System In-Unit Fan Coil Power')
+    arg.setDescription("The in-unit fan coil power of the shared heating system. Only used for #{HPXML::HVACTypeBoiler} with #{HPXML::AirTypeFanCoil}.")
+    arg.setUnits('W')
+    arg.setDefaultValue(150)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_type', cooling_system_type_choices, true)
@@ -3043,6 +3073,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       errors << "foundation_wall_insulation_distance_to_bottom=#{args[:foundation_wall_insulation_distance_to_bottom]} and geometry_foundation_height=#{args[:geometry_foundation_height]}" if error
     end
 
+    # shared system but not boiler
+    error = ![HPXML::HVACTypeBoiler].include?(args[:heating_system_type]) && args[:heating_system_is_shared_system]
+    errors << "heating_system_type=#{args[:heating_system_type]} and heating_system_is_shared_system=#{args[:heating_system_is_shared_system]}" if error
+
+    # single-family detached with shared system
+    error = [HPXML::ResidentialTypeSFD].include?(args[:geometry_unit_type]) && args[:heating_system_is_shared_system]
+    errors << "geometry_unit_type=#{args[:geometry_unit_type]} and heating_system_is_shared_system=#{args[:heating_system_is_shared_system]}" if error
+
     return warnings, errors
   end
 
@@ -3916,6 +3954,13 @@ class HPXMLFile
       fraction_heat_load_served = 1.0 - args[:heating_system_fraction_heat_load_served_2]
     end
 
+    if [HPXML::HVACTypeBoiler].include?(heating_system_type) && args[:heating_system_is_shared_system]
+      is_shared_system = true
+      number_of_units_served = args[:geometry_building_num_units].get
+      shared_loop_watts = args[:heating_system_shared_loop_pump_power]
+      fan_coil_watts = args[:heating_system_in_unit_fan_coil_power]
+    end
+
     hpxml.heating_systems.add(id: 'HeatingSystem',
                               heating_system_type: heating_system_type,
                               heating_system_fuel: heating_system_fuel,
@@ -3923,7 +3968,11 @@ class HPXMLFile
                               fraction_heat_load_served: fraction_heat_load_served,
                               heating_efficiency_afue: heating_efficiency_afue,
                               heating_efficiency_percent: heating_efficiency_percent,
-                              airflow_defect_ratio: airflow_defect_ratio)
+                              airflow_defect_ratio: airflow_defect_ratio,
+                              is_shared_system: is_shared_system,
+                              number_of_units_served: number_of_units_served,
+                              shared_loop_watts: shared_loop_watts,
+                              fan_coil_watts: fan_coil_watts)
   end
 
   def self.set_cooling_systems(hpxml, runner, args)
@@ -4111,6 +4160,7 @@ class HPXMLFile
     hydr_idx = 0
     hpxml.heating_systems.each do |heating_system|
       next unless [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
+      next if (args[:heating_system_is_shared_system] && [HPXML::AirTypeFanCoil].include?(args[:heating_system_shared_distribution_type]))
 
       hydr_idx += 1
       hpxml.hvac_distributions.add(id: "HydronicDistribution#{hydr_idx}",
@@ -4123,6 +4173,8 @@ class HPXMLFile
     air_distribution_systems = []
     hpxml.heating_systems.each do |heating_system|
       if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
+        air_distribution_systems << heating_system
+      elsif [HPXML::HVACTypeBoiler].include?(heating_system.heating_system_type) && args[:heating_system_is_shared_system] && [HPXML::AirTypeFanCoil].include?(args[:heating_system_shared_distribution_type])
         air_distribution_systems << heating_system
       end
     end
@@ -4152,6 +4204,10 @@ class HPXMLFile
                                  distribution_system_type: HPXML::HVACDistributionTypeAir,
                                  conditioned_floor_area_served: args[:geometry_cfa],
                                  number_of_return_registers: number_of_return_registers)
+
+    if [HPXML::HVACTypeBoiler].include?(args[:heating_system_type]) && args[:heating_system_is_shared_system] && [HPXML::AirTypeFanCoil].include?(args[:heating_system_shared_distribution_type])
+      hpxml.hvac_distributions[-1].air_type = HPXML::AirTypeFanCoil
+    end
 
     air_distribution_systems.each do |hvac_system|
       hvac_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
