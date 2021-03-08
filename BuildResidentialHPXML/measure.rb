@@ -726,49 +726,49 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_front_wwr', true)
     arg.setDisplayName('Windows: Front Window-to-Wall Ratio')
-    arg.setDescription("The ratio of window area to wall area for the unit's front facade when viewed from the front. Enter 0 if specifying Front Window Area instead.")
+    arg.setDescription("The ratio of window area to wall area for the unit's front facade. Enter 0 if specifying Front Window Area instead.")
     arg.setDefaultValue(0.18)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_back_wwr', true)
     arg.setDisplayName('Windows: Back Window-to-Wall Ratio')
-    arg.setDescription("The ratio of window area to wall area for the unit's back facade when viewed from the front. Enter 0 if specifying Back Window Area instead.")
+    arg.setDescription("The ratio of window area to wall area for the unit's back facade. Enter 0 if specifying Back Window Area instead.")
     arg.setDefaultValue(0.18)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_left_wwr', true)
     arg.setDisplayName('Windows: Left Window-to-Wall Ratio')
-    arg.setDescription("The ratio of window area to wall area for the unit's left facade when viewed from the front. Enter 0 if specifying Left Window Area instead.")
+    arg.setDescription("The ratio of window area to wall area for the unit's left facade (when viewed from the front). Enter 0 if specifying Left Window Area instead.")
     arg.setDefaultValue(0.18)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_right_wwr', true)
     arg.setDisplayName('Windows: Right Window-to-Wall Ratio')
-    arg.setDescription("The ratio of window area to wall area for the unit's right facade when viewed from the front. Enter 0 if specifying Right Window Area instead.")
+    arg.setDescription("The ratio of window area to wall area for the unit's right facade (when viewed from the front). Enter 0 if specifying Right Window Area instead.")
     arg.setDefaultValue(0.18)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_front', true)
     arg.setDisplayName('Windows: Front Window Area')
-    arg.setDescription("The amount of window area on the unit's front facade when viewed from the front. Enter 0 if specifying Front Window-to-Wall Ratio instead.")
+    arg.setDescription("The amount of window area on the unit's front facade. Enter 0 if specifying Front Window-to-Wall Ratio instead.")
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_back', true)
     arg.setDisplayName('Windows: Back Window Area')
-    arg.setDescription("The amount of window area on the unit's back facade when viewed from the front. Enter 0 if specifying Back Window-to-Wall Ratio instead.")
+    arg.setDescription("The amount of window area on the unit's back facade. Enter 0 if specifying Back Window-to-Wall Ratio instead.")
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_left', true)
     arg.setDisplayName('Windows: Left Window Area')
-    arg.setDescription("The amount of window area on the unit's left facade when viewed from the front. Enter 0 if specifying Left Window-to-Wall Ratio instead.")
+    arg.setDescription("The amount of window area on the unit's left facade (when viewed from the front). Enter 0 if specifying Left Window-to-Wall Ratio instead.")
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_right', true)
     arg.setDisplayName('Windows: Right Window Area')
-    arg.setDescription("The amount of window area on the unit's right facade when viewed from the front. Enter 0 if specifying Right Window-to-Wall Ratio instead.")
+    arg.setDescription("The amount of window area on the unit's right facade (when viewed from the front). Enter 0 if specifying Right Window-to-Wall Ratio instead.")
     arg.setDefaultValue(0)
     args << arg
 
@@ -866,25 +866,25 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_area_front', true)
     arg.setDisplayName('Skylights: Front Roof Area')
-    arg.setDescription("The amount of skylight area on the unit's front conditioned roof facade when viewed from the front.")
+    arg.setDescription("The amount of skylight area on the unit's front conditioned roof facade.")
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_area_back', true)
     arg.setDisplayName('Skylights: Back Roof Area')
-    arg.setDescription("The amount of skylight area on the unit's back conditioned roof facade when viewed from the front.")
+    arg.setDescription("The amount of skylight area on the unit's back conditioned roof facade.")
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_area_left', true)
     arg.setDisplayName('Skylights: Left Roof Area')
-    arg.setDescription("The amount of skylight area on the unit's left conditioned roof facade when viewed from the front.")
+    arg.setDescription("The amount of skylight area on the unit's left conditioned roof facade (when viewed from the front).")
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_area_right', true)
     arg.setDisplayName('Skylights: Right Roof Area')
-    arg.setDescription("The amount of skylight area on the unit's right conditioned roof facade when viewed from the front.")
+    arg.setDescription("The amount of skylight area on the unit's right conditioned roof facade (when viewed from the front).")
     arg.setDefaultValue(0)
     args << arg
 

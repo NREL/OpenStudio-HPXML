@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>ff0f3793-91db-4207-bd2f-9d567fb8f60b</version_id>
-  <version_modified>20210308T174344Z</version_modified>
+  <version_id>e945c7a2-e592-4751-b7d8-fc2256f35197</version_id>
+  <version_modified>20210308T195547Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -1230,7 +1230,7 @@
     <argument>
       <name>window_front_wwr</name>
       <display_name>Windows: Front Window-to-Wall Ratio</display_name>
-      <description>The ratio of window area to wall area for the unit's front facade when viewed from the front. Enter 0 if specifying Front Window Area instead.</description>
+      <description>The ratio of window area to wall area for the unit's front facade. Enter 0 if specifying Front Window Area instead.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -1239,7 +1239,7 @@
     <argument>
       <name>window_back_wwr</name>
       <display_name>Windows: Back Window-to-Wall Ratio</display_name>
-      <description>The ratio of window area to wall area for the unit's back facade when viewed from the front. Enter 0 if specifying Back Window Area instead.</description>
+      <description>The ratio of window area to wall area for the unit's back facade. Enter 0 if specifying Back Window Area instead.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -1248,7 +1248,7 @@
     <argument>
       <name>window_left_wwr</name>
       <display_name>Windows: Left Window-to-Wall Ratio</display_name>
-      <description>The ratio of window area to wall area for the unit's left facade when viewed from the front. Enter 0 if specifying Left Window Area instead.</description>
+      <description>The ratio of window area to wall area for the unit's left facade (when viewed from the front). Enter 0 if specifying Left Window Area instead.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -1257,7 +1257,7 @@
     <argument>
       <name>window_right_wwr</name>
       <display_name>Windows: Right Window-to-Wall Ratio</display_name>
-      <description>The ratio of window area to wall area for the unit's right facade when viewed from the front. Enter 0 if specifying Right Window Area instead.</description>
+      <description>The ratio of window area to wall area for the unit's right facade (when viewed from the front). Enter 0 if specifying Right Window Area instead.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -1266,7 +1266,7 @@
     <argument>
       <name>window_area_front</name>
       <display_name>Windows: Front Window Area</display_name>
-      <description>The amount of window area on the unit's front facade when viewed from the front. Enter 0 if specifying Front Window-to-Wall Ratio instead.</description>
+      <description>The amount of window area on the unit's front facade. Enter 0 if specifying Front Window-to-Wall Ratio instead.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -1275,7 +1275,7 @@
     <argument>
       <name>window_area_back</name>
       <display_name>Windows: Back Window Area</display_name>
-      <description>The amount of window area on the unit's back facade when viewed from the front. Enter 0 if specifying Back Window-to-Wall Ratio instead.</description>
+      <description>The amount of window area on the unit's back facade. Enter 0 if specifying Back Window-to-Wall Ratio instead.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -1284,7 +1284,7 @@
     <argument>
       <name>window_area_left</name>
       <display_name>Windows: Left Window Area</display_name>
-      <description>The amount of window area on the unit's left facade when viewed from the front. Enter 0 if specifying Left Window-to-Wall Ratio instead.</description>
+      <description>The amount of window area on the unit's left facade (when viewed from the front). Enter 0 if specifying Left Window-to-Wall Ratio instead.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -1293,7 +1293,7 @@
     <argument>
       <name>window_area_right</name>
       <display_name>Windows: Right Window Area</display_name>
-      <description>The amount of window area on the unit's right facade when viewed from the front. Enter 0 if specifying Right Window-to-Wall Ratio instead.</description>
+      <description>The amount of window area on the unit's right facade (when viewed from the front). Enter 0 if specifying Right Window-to-Wall Ratio instead.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -1442,7 +1442,7 @@
     <argument>
       <name>skylight_area_front</name>
       <display_name>Skylights: Front Roof Area</display_name>
-      <description>The amount of skylight area on the unit's front conditioned roof facade when viewed from the front.</description>
+      <description>The amount of skylight area on the unit's front conditioned roof facade.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -1451,7 +1451,7 @@
     <argument>
       <name>skylight_area_back</name>
       <display_name>Skylights: Back Roof Area</display_name>
-      <description>The amount of skylight area on the unit's back conditioned roof facade when viewed from the front.</description>
+      <description>The amount of skylight area on the unit's back conditioned roof facade.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -1460,7 +1460,7 @@
     <argument>
       <name>skylight_area_left</name>
       <display_name>Skylights: Left Roof Area</display_name>
-      <description>The amount of skylight area on the unit's left conditioned roof facade when viewed from the front.</description>
+      <description>The amount of skylight area on the unit's left conditioned roof facade (when viewed from the front).</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -1469,7 +1469,7 @@
     <argument>
       <name>skylight_area_right</name>
       <display_name>Skylights: Right Roof Area</display_name>
-      <description>The amount of skylight area on the unit's right conditioned roof facade when viewed from the front.</description>
+      <description>The amount of skylight area on the unit's right conditioned roof facade (when viewed from the front).</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -8053,17 +8053,6 @@
       <checksum>30D725F1</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>C34BC54B</checksum>
-    </file>
-    <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -8080,6 +8069,17 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>F3778D1E</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>A7998697</checksum>
     </file>
   </files>
 </measure>
