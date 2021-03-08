@@ -373,10 +373,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     if not @eri_design.nil?
       # ERI run, store files in a particular location
       output_dir = File.dirname(hpxml_path)
-      design_name = @eri_design.gsub(' ', '')
-      annual_output_path = File.join(output_dir, "#{design_name}.#{output_format}")
-      eri_output_path = File.join(output_dir, "#{design_name}_ERI.csv")
-      timeseries_output_path = File.join(output_dir, "#{design_name}_#{timeseries_frequency.capitalize}.#{output_format}")
+      hpxml_name = File.basename(hpxml_path).gsub('.xml', '')
+      annual_output_path = File.join(output_dir, "#{hpxml_name}.#{output_format}")
+      eri_output_path = File.join(output_dir, "#{hpxml_name}_ERI.csv")
+      timeseries_output_path = File.join(output_dir, "#{hpxml_name}_#{timeseries_frequency.capitalize}.#{output_format}")
     else
       output_dir = File.dirname(@sqlFile.path.to_s)
       annual_output_path = File.join(output_dir, "results_annual.#{output_format}")
