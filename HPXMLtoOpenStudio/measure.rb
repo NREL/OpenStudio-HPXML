@@ -124,7 +124,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     begin
       if skip_validation
         stron_paths = []
-        runner.registerWarning('Skipping HPXML input validation. This should only be used if the HPXML file has already been validated.')
       else
         stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'HPXMLvalidator.xml'),
                        File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')]
