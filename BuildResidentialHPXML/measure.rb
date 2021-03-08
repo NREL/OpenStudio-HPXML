@@ -614,28 +614,28 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_front_distance', true)
     arg.setDisplayName('Neighbor: Front Distance')
     arg.setUnits('ft')
-    arg.setDescription('The minimum distance between the simulated unit and the neighboring unit to the front (not including eaves). A value of zero indicates no neighbors.')
+    arg.setDescription('The minimum distance between the simulated unit and the neighboring building to the front (not including eaves). A value of zero indicates no neighbors.')
     arg.setDefaultValue(0.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_back_distance', true)
     arg.setDisplayName('Neighbor: Back Distance')
     arg.setUnits('ft')
-    arg.setDescription('The minimum distance between the simulated unit and the neighboring unit to the back (not including eaves). A value of zero indicates no neighbors.')
+    arg.setDescription('The minimum distance between the simulated unit and the neighboring building to the back (not including eaves). A value of zero indicates no neighbors.')
     arg.setDefaultValue(0.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_left_distance', true)
     arg.setDisplayName('Neighbor: Left Distance')
     arg.setUnits('ft')
-    arg.setDescription('The minimum distance between the simulated unit and the neighboring unit to the left (not including eaves). A value of zero indicates no neighbors.')
+    arg.setDescription('The minimum distance between the simulated unit and the neighboring building to the left (not including eaves). A value of zero indicates no neighbors.')
     arg.setDefaultValue(10.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_right_distance', true)
     arg.setDisplayName('Neighbor: Right Distance')
     arg.setUnits('ft')
-    arg.setDescription('The minimum distance between the simulated unit and the neighboring unit to the right (not including eaves). A value of zero indicates no neighbors.')
+    arg.setDescription('The minimum distance between the simulated unit and the neighboring building to the right (not including eaves). A value of zero indicates no neighbors.')
     arg.setDefaultValue(10.0)
     args << arg
 
