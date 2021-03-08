@@ -378,6 +378,9 @@ def create_osws
     'extra-bldgtype-multifamily-unvented-crawlspace-right-middle-double-loaded-interior.osw' => 'extra-bldgtype-multifamily-unvented-crawlspace-right-middle.osw',
     'extra-bldgtype-multifamily-unvented-crawlspace-right-top-double-loaded-interior.osw' => 'extra-bldgtype-multifamily-unvented-crawlspace-right-top.osw',
 
+    'extra-bldgtype-multifamily-shared-boiler-only-baseboard.osw' => 'base-bldgtype-multifamily.osw',
+    'extra-bldgtype-multifamily-shared-boiler-only-fan-coil-ducted.osw' => 'base-bldgtype-multifamily.osw',
+
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
     'invalid_files/heating-system-and-heat-pump.osw' => 'base.osw',
     'invalid_files/cooling-system-and-heat-pump.osw' => 'base.osw',
@@ -409,7 +412,9 @@ def create_osws
     'invalid_files/multipliers-without-vehicle-plug-loads.osw' => 'base.osw',
     'invalid_files/multipliers-without-fuel-loads.osw' => 'base.osw',
     'invalid_files/foundation-wall-insulation-greater-than-height.osw' => 'base-foundation-vented-crawlspace.osw',
-    'invalid_files/conditioned-attic-with-one-floor-above-grade.osw' => 'base.osw'
+    'invalid_files/conditioned-attic-with-one-floor-above-grade.osw' => 'base.osw',
+    'invalid_files/shared-heating-system-but-not-boiler.osw' => 'extra-bldgtype-multifamily-shared-boiler-only-baseboard.osw',
+    'invalid_files/single-family-detached-with-shared-system.osw' => 'base-hvac-boiler-gas-only.osw'
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -585,10 +590,14 @@ def get_values(osw_file, step)
     step.setArgument('air_leakage_value', 3)
     step.setArgument('air_leakage_shelter_coefficient', Constants.Auto)
     step.setArgument('heating_system_type', HPXML::HVACTypeFurnace)
+    step.setArgument('heating_system_is_shared_system', false)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeNaturalGas)
     step.setArgument('heating_system_heating_efficiency', 0.92)
     step.setArgument('heating_system_heating_capacity', '64000.0')
     step.setArgument('heating_system_fraction_heat_load_served', 1)
+    step.setArgument('heating_system_shared_distribution_type', HPXML::HydronicTypeBaseboard)
+    step.setArgument('heating_system_shared_loop_pump_power', 600)
+    step.setArgument('heating_system_in_unit_fan_coil_power', 150)
     step.setArgument('cooling_system_type', HPXML::HVACTypeCentralAirConditioner)
     step.setArgument('cooling_system_cooling_efficiency_type', HPXML::UnitsSEER)
     step.setArgument('cooling_system_cooling_efficiency', 13.0)
@@ -2239,6 +2248,15 @@ def get_values(osw_file, step)
     step.setArgument('geometry_corridor_position', 'Double-Loaded Interior')
   elsif ['extra-bldgtype-multifamily-unvented-crawlspace-right-top-double-loaded-interior.osw'].include? osw_file
     step.setArgument('geometry_corridor_position', 'Double-Loaded Interior')
+  elsif ['extra-bldgtype-multifamily-shared-boiler-only-baseboard.osw'].include? osw_file
+    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
+    step.setArgument('heating_system_is_shared_system', true)
+    step.setArgument('cooling_system_type', 'none')
+  elsif ['extra-bldgtype-multifamily-shared-boiler-only-fan-coil-ducted.osw'].include? osw_file
+    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
+    step.setArgument('heating_system_is_shared_system', true)
+    step.setArgument('heating_system_shared_distribution_type', HPXML::AirTypeFanCoil)
+    step.setArgument('cooling_system_type', 'none')
   end
 
   # Warnings/Errors
@@ -2340,6 +2358,10 @@ def get_values(osw_file, step)
   elsif ['invalid_files/conditioned-attic-with-one-floor-above-grade.osw'].include? osw_file
     step.setArgument('geometry_attic_type', HPXML::AtticTypeConditioned)
     step.setArgument('ceiling_assembly_r', 0.0)
+  elsif ['invalid_files/shared-heating-system-but-not-boiler.osw'].include? osw_file
+    step.setArgument('heating_system_type', HPXML::HVACTypeFurnace)
+  elsif ['invalid_files/single-family-detached-with-shared-system.osw'].include? osw_file
+    step.setArgument('heating_system_is_shared_system', true)
   end
   return step
 end
