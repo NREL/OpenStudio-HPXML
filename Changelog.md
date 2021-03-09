@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.2.0 (Pending)
 
 __New Features__
+- Moves additional error-checking from the ruby measure to the schematron validator.
 
 __Bugfixes__
 - Fixes possible "Electricity category end uses do not sum to total" error due to boiler pump energy.
