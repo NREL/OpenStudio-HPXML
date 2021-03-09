@@ -201,7 +201,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   ``ResidentialFacilityType``                                string               See [#]_                           Yes                 Type of dwelling unit
   ``NumberofConditionedFloors``                              double               > 0                                Yes                 Number of conditioned floors (including a basement)
   ``NumberofConditionedFloorsAboveGrade``                    double               > 0, <= NumberofConditionedFloors  Yes                 Number of conditioned floors above grade (including a walkout basement)
-  ``NumberofBedrooms``                                       integer              > 0                                Yes                 Number of bedrooms [#]_
+  ``NumberofBedrooms``                                       integer              > 0 [#]_                           Yes                 Number of bedrooms [#]_
   ``NumberofBathrooms``                                      integer              > 0                                No        See [#]_  Number of bathrooms
   ``ConditionedFloorArea``                                   double    ft2        > 0                                Yes                 Floor area within conditioned space boundary
   ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``  double    ft3 or ft  > 0                                No        See [#]_  Volume/ceiling height within conditioned space boundary
@@ -209,6 +209,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   =========================================================  ========  =========  =================================  ========  ========  =======================================================================
 
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
+  .. [#] NumberofBedrooms must also be <= (ConditionedFloorArea-120)/70.
   .. [#] NumberofBedrooms is currently used to determine usage of plug loads, appliances, hot water, etc.
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to 8.0.
@@ -2336,7 +2337,7 @@ If not entered, the simulation will not include that type of plug load.
          - **well pump**: 0.0
          - **electric vehicle charging**: 0.0
 
-  .. [#] The remaining fraction (i.e., 1.0 - FracSensible - FracLatent) is assumed to be heat gain outside conditioned space and thus lost.
+  .. [#] The remaining fraction (i.e., 1.0 - FracSensible - FracLatent) must be > 0 and is assumed to be heat gain outside conditioned space and thus lost.
   .. [#] If FracLatent not provided, defaults as:
 
          - **other**: 0.045
@@ -2397,7 +2398,7 @@ If not entered, the simulation will not include that type of fuel load.
 
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "wood", or "wood pellets".
   .. [#] If FracSensible not provided, defaults to 0.5 for fireplace and 0.0 for all other types.
-  .. [#] The remaining fraction (i.e., 1.0 - FracSensible - FracLatent) is assumed to be heat gain outside conditioned space and thus lost.
+  .. [#] The remaining fraction (i.e., 1.0 - FracSensible - FracLatent) must be > 0 and is assumed to be heat gain outside conditioned space and thus lost.
   .. [#] If FracLatent not provided, defaults to 0.1 for fireplace and 0.0 for all other types.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided, default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used:
 

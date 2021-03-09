@@ -71,6 +71,10 @@ def create_hpxmls
     'invalid_files/enclosure-living-missing-ceiling-roof.xml' => 'base.xml',
     'invalid_files/enclosure-living-missing-exterior-wall.xml' => 'base.xml',
     'invalid_files/enclosure-living-missing-floor-slab.xml' => 'base-foundation-slab.xml',
+    'invalid_files/frac-sensible-fuel-load.xml' => 'base-misc-loads-large-uncommon.xml',
+    'invalid_files/frac-sensible-plug-load.xml' => 'base-misc-loads-large-uncommon.xml',
+    'invalid_files/frac-total-fuel-load.xml' => 'base-misc-loads-large-uncommon.xml',
+    'invalid_files/frac-total-plug-load.xml' => 'base-misc-loads-large-uncommon.xml',
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/hvac-invalid-distribution-system-type.xml' => 'base.xml',
     'invalid_files/hvac-distribution-multiple-attached-cooling.xml' => 'base-hvac-multiple.xml',
@@ -5279,6 +5283,10 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
                            weekday_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',
                            weekend_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',
                            monthly_multipliers: '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
+    elsif ['invalid_files/frac-sensible-plug-load.xml'].include? hpxml_file
+      hpxml.plug_loads[0].frac_sensible = -0.1
+    elsif ['invalid_files/frac-total-plug-load.xml'].include? hpxml_file
+      hpxml.plug_loads[0].frac_latent = 1.0 - hpxml.plug_loads[0].frac_sensible + 0.1
     else
       cfa = hpxml.building_construction.conditioned_floor_area
       nbeds = hpxml.building_construction.number_of_bedrooms
@@ -5337,6 +5345,11 @@ def set_hpxml_fuel_loads(hpxml_file, hpxml)
   elsif ['base-misc-loads-large-uncommon2.xml'].include? hpxml_file
     hpxml.fuel_loads[0].fuel_type = HPXML::FuelTypeOil
     hpxml.fuel_loads[2].fuel_type = HPXML::FuelTypeWoodPellets
+  elsif ['invalid_files/frac-sensible-fuel-load.xml'].include? hpxml_file
+    hpxml.fuel_loads[0].frac_sensible = -0.1
+  elsif ['invalid_files/frac-total-fuel-load.xml'].include? hpxml_file
+    hpxml.fuel_loads[0].frac_sensible = 0.8
+    hpxml.fuel_loads[0].frac_latent = 1.0 - hpxml.fuel_loads[0].frac_sensible + 0.1
   end
 end
 
