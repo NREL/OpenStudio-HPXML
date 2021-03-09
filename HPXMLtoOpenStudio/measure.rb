@@ -203,7 +203,6 @@ class OSModel
     # Init
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
-    check_for_errors()
     set_defaults_and_globals(runner, output_dir, epw_file, weather)
     Location.apply(model, runner, weather, epw_file, @hpxml)
     add_simulation_params(model)
@@ -277,15 +276,6 @@ class OSModel
   end
 
   private
-
-  def self.check_for_errors()
-    # Error-checking from RESNET Pub 002: Number of bedrooms
-    nbeds = @hpxml.building_construction.number_of_bedrooms
-    nbeds_limit = (@hpxml.building_construction.conditioned_floor_area - 120.0) / 70.0
-    if nbeds > nbeds_limit
-      fail "Number of bedrooms (#{nbeds}) exceeds limit of (CFA-120)/70=#{nbeds_limit.round(1)}."
-    end
-  end
 
   def self.set_defaults_and_globals(runner, output_dir, epw_file, weather)
     # Initialize
@@ -1573,9 +1563,7 @@ class OSModel
 
     addtl_cfa = @cfa - sum_cfa
 
-    if addtl_cfa < -1.0 # Allow some rounding
-      fail "Sum of floor/slab area adjacent to conditioned space (#{sum_cfa.round(1)}) is greater than conditioned floor area (#{@cfa.round(1)})."
-    end
+    fail if addtl_cfa < -1.0 # Allow some rounding; EPvalidator.xml should prevent this
 
     return unless addtl_cfa > 1.0 # Allow some rounding
 
