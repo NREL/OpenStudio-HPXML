@@ -488,10 +488,10 @@ class HPXMLTest < MiniTest::Test
         next if log_line.include? 'No water heater specified, the model will not include water heating energy use.'
       end
       if (hpxml.heating_systems + hpxml.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.empty?
-        next if log_line.include? 'No heating system specified, the model will not include space heating energy use.'
+        next if log_line.include? 'No space heating specified, the model will not include space heating energy use.'
       end
       if (hpxml.cooling_systems + hpxml.heat_pumps).select { |c| c.fraction_cool_load_served.to_f > 0 }.empty?
-        next if log_line.include? 'No cooling system specified, the model will not include space cooling energy use.'
+        next if log_line.include? 'No space cooling specified, the model will not include space cooling energy use.'
       end
       if hpxml.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeOther }.empty?
         next if log_line.include? "No '#{HPXML::PlugLoadTypeOther}' plug loads specified, the model will not include misc plug load energy use."
