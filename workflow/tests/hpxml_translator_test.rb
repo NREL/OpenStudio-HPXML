@@ -485,7 +485,7 @@ class HPXMLTest < MiniTest::Test
         next if log_line.include? 'No cooking range specified, the model will not include cooking range/oven energy use.'
       end
       if hpxml.water_heating_systems.empty?
-        next if log_line.include? 'No water heater specified, the model will not include water heating energy use.'
+        next if log_line.include? 'No water heating specified, the model will not include water heating energy use.'
       end
       if (hpxml.heating_systems + hpxml.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.empty?
         next if log_line.include? 'No space heating specified, the model will not include space heating energy use.'

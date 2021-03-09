@@ -195,11 +195,6 @@ class HPXMLDefaults
         hpxml.building_construction.has_flue_or_chimney = true
       end
     end
-
-    if hpxml.building_construction.use_only_ideal_air_system.nil?
-      hpxml.building_construction.use_only_ideal_air_system = false
-      hpxml.building_construction.use_only_ideal_air_system_isdefaulted = true
-    end
   end
 
   def self.apply_infiltration(hpxml)
