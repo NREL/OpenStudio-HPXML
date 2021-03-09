@@ -79,6 +79,8 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-inconsistent-fan-powers.xml' => 'base.xml',
+    'invalid_files/generator-number-of-bedrooms-served.xml' => 'base-bldgtype-multifamily-shared-generator.xml',
+    'invalid_files/generator-output-greater-than-consumption.xml' => 'base-misc-generators.xml',
     'invalid_files/invalid-assembly-effective-rvalue.xml' => 'base.xml',
     'invalid_files/invalid-datatype-boolean.xml' => 'base.xml',
     'invalid_files/invalid-datatype-float.xml' => 'base.xml',
@@ -4706,6 +4708,10 @@ def set_hpxml_generators(hpxml_file, hpxml)
                          annual_consumption_kbtu: 85000,
                          annual_output_kwh: 5000,
                          number_of_bedrooms_served: 18)
+  elsif ['invalid_files/generator-output-greater-than-consumption.xml'].include? hpxml_file
+    hpxml.generators[0].annual_consumption_kbtu = 1500
+  elsif ['invalid_files/generator-number-of-bedrooms-served.xml'].include? hpxml_file
+    hpxml.generators[0].number_of_bedrooms_served = hpxml.building_construction.number_of_bedrooms
   end
 end
 

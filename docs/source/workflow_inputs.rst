@@ -1192,11 +1192,12 @@ Additional information is entered in each ``DuctLeakageMeasurement``.
   Element                           Type     Units    Constraints  Required  Default    Notes
   ================================  =======  =======  ===========  ========  =========  =========================================================
   ``DuctLeakage/Units``             string            See [#]_     Yes                  Duct leakage units
-  ``DuctLeakage/Value``             double            >= 0         Yes                  Duct leakage value [#]_
+  ``DuctLeakage/Value``             double            >= 0 [#]_    Yes                  Duct leakage value [#]_
   ``DuctLeakage/TotalOrToOutside``  string            See [#]_     Yes                  Type of duct leakage (outside conditioned space vs total)
   ================================  =======  =======  ===========  ========  =========  =========================================================
   
   .. [#] Units choices are "CFM25" or "Percent".
+  .. [#] Value also must be < 1 if Units is Percent.
   .. [#] If the HVAC system has no return ducts (e.g., a ducted evaporative cooler), use zero for the Value.
   .. [#] TotalOrToOutside only choice is "to outside".
 
@@ -1343,7 +1344,7 @@ If the specified system is a shared system (i.e., serving multiple dwelling unit
 
   .. [#] 1-FractionRecirculation is assumed to be the fraction of supply air that is provided from outside.
          The value must be 0 for exhaust only systems.
-  .. [#] InUnitFlowRate must also be > TestedFlowRate (or RatedFlowRate).
+  .. [#] InUnitFlowRate must also be < TestedFlowRate (or RatedFlowRate).
   .. [#] PreHeating not allowed for exhaust only systems.
   .. [#] PreCooling not allowed for exhaust only systems.
 
@@ -1780,11 +1781,12 @@ If not entered, the simulation will not include generators.
   ``IsSharedSystem``          boolean                        No        false    Whether it serves multiple dwelling units
   ``FuelType``                string            See [#]_     Yes                Fuel type
   ``AnnualConsumptionkBtu``   double   kBtu/yr  > 0          Yes                Annual fuel consumed
-  ``AnnualOutputkWh``         double   kWh/yr   > 0          Yes                Annual electricity produced
+  ``AnnualOutputkWh``         double   kWh/yr   > 0 [#]_     Yes                Annual electricity produced
   ``NumberofBedroomsServed``  integer           > 1          See [#]_           Number of bedrooms served
   ==========================  =======  =======  ===========  ========  =======  ============================================
 
   .. [#] FuelType choices are "natural gas" or "propane".
+  .. [#] AnnualOutputkWh must also be < AnnualConsumptionkBtu*3.412 (i.e., the generator must consume more energy than it produces).
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true, in which case it must be > NumberofBedrooms.
          Annual consumption and annual production will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the generator.
 
