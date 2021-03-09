@@ -2196,19 +2196,17 @@ class OSModel
     obj_name = Constants.ObjectNameIdealAirSystemResidual
 
     if @remaining_cool_load_frac < 1.0
-      sequential_cool_load_frac = 1
+      sequential_cool_load_frac = 1.0
     else
-      sequential_cool_load_frac = 0 # no cooling system, don't add ideal air for cooling either
-      runner.registerWarning('No cooling system specified, the model will not include space cooling energy use.')
+      sequential_cool_load_frac = 0.0 # no cooling system, don't add ideal air for cooling either
     end
 
     if @remaining_heat_load_frac < 1.0
-      sequential_heat_load_frac = 1
+      sequential_heat_load_frac = 1.0
     else
-      sequential_heat_load_frac = 0 # no heating system, don't add ideal air for heating either
-      runner.registerWarning('No heating system specified, the model will not include space heating energy use.')
+      sequential_heat_load_frac = 0.0 # no heating system, don't add ideal air for heating either
     end
-    if (sequential_heat_load_frac > 0) || (sequential_cool_load_frac > 0)
+    if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
       HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
                                  living_zone)
     end
@@ -2259,7 +2257,6 @@ class OSModel
 
   def self.add_mels(runner, model, spaces)
     # Misc
-    modeled_mels = []
     @hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
         obj_name = Constants.ObjectNameMiscPlugLoads
@@ -2274,7 +2271,6 @@ class OSModel
         runner.registerWarning("Unexpected plug load type '#{plug_load.plug_load_type}'. The plug load will not be modeled.")
         next
       end
-      modeled_mels << plug_load.plug_load_type
 
       MiscLoads.apply_plug(model, plug_load, obj_name, spaces[HPXML::LocationLivingSpace], @apply_ashrae140_assumptions)
     end
@@ -3539,9 +3535,7 @@ class OSModel
       space = create_or_get_space(model, spaces, location)
     end
 
-    if spaces.size != num_orig_spaces
-      fail "#{object_name} location is '#{location}' but building does not have this location specified."
-    end
+    fail if spaces.size != num_orig_spaces # EPvalidator.xml should prevent this
 
     return space
   end

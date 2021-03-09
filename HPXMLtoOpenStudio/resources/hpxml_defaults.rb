@@ -740,9 +740,7 @@ class HPXMLDefaults
       n_ducts += hvac_distribution.ducts.size
       n_ducts_to_be_defaulted += hvac_distribution.ducts.select { |duct| duct.duct_surface_area.nil? && duct.duct_location.nil? }.size
     end
-    if n_ducts_to_be_defaulted > 0 && (n_ducts != n_ducts_to_be_defaulted)
-      fail 'The location and surface area of all ducts must be provided or blank.'
-    end
+    fail if n_ducts_to_be_defaulted > 0 && (n_ducts != n_ducts_to_be_defaulted) # EPvalidator.xml should prevent this
 
     hpxml.hvac_distributions.each do |hvac_distribution|
       next unless [HPXML::HVACDistributionTypeAir].include? hvac_distribution.distribution_system_type
