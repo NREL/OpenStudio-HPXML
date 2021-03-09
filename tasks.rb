@@ -55,6 +55,8 @@ def create_hpxmls
     'invalid_files/dhw-invalid-ef-tank.xml' => 'base.xml',
     'invalid_files/dhw-invalid-uef-tank-heat-pump.xml' => 'base-dhw-tank-heat-pump-uef.xml',
     'invalid_files/dishwasher-location.xml' => 'base.xml',
+    'invalid_files/duct-leakage-cfm25.xml' => 'base.xml',
+    'invalid_files/duct-leakage-percent.xml' => 'base.xml',
     'invalid_files/duct-location.xml' => 'base.xml',
     'invalid_files/duct-location-unconditioned-space.xml' => 'base.xml',
     'invalid_files/duplicate-id.xml' => 'base.xml',
@@ -3912,6 +3914,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'invalid_files/multiple-shared-heating-systems.xml'].include? hpxml_file
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id += '2'
+  elsif ['invalid_files/duct-leakage-cfm25.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = -2.0
+    hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = -2.0
+  elsif ['invalid_files/duct-leakage-percent.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_units = HPXML::UnitsPercent
+    hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_units = HPXML::UnitsPercent
   end
 
   # Set ConditionedFloorAreaServed
