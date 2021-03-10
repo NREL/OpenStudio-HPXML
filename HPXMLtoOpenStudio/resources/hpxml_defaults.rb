@@ -243,7 +243,7 @@ class HPXMLDefaults
       hpxml.attics[-1].vented_attic_sla_isdefaulted = true
     end
     vented_attics.each do |vented_attic|
-      next unless vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_ach.nil?
+      next unless (vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_ach.nil?)
       if not default_ach.nil? # ACH specified
         vented_attic.vented_attic_ach = default_ach
       else # Use SLA
@@ -272,10 +272,9 @@ class HPXMLDefaults
       hpxml.foundations[-1].vented_crawlspace_sla_isdefaulted = true
     end
     vented_crawls.each do |vented_crawl|
-      if vented_crawl.vented_crawlspace_sla.nil?
-        vented_crawl.vented_crawlspace_sla = default_sla
-        vented_crawl.vented_crawlspace_sla_isdefaulted = true
-      end
+      next unless vented_crawl.vented_crawlspace_sla.nil?
+      vented_crawl.vented_crawlspace_sla = default_sla
+      vented_crawl.vented_crawlspace_sla_isdefaulted = true
     end
   end
 
