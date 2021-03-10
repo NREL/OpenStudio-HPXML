@@ -2996,12 +2996,23 @@ class HVAC
         else
           if clg_coil.nil?
             clg_coil = OpenStudio::Model::CoilCoolingDXVariableSpeed.new(model, plf_fplr_curve)
-            clg_coil.setGrossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel(UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W') * clg_ap.cool_capacity_ratios[0])
-            clg_coil.setRatedAirFlowRateAtSelectedNominalSpeedLevel(calc_rated_airflow(cooling_system.cooling_capacity, clg_ap.cool_rated_cfm_per_ton[0], clg_ap.cool_capacity_ratios[0]))
+            clg_coil.setNominalSpeedLevel(4) # FIXME
+            clg_coil.setGrossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel(UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W')) # FIXME
+            clg_coil.setRatedAirFlowRateAtSelectedNominalSpeedLevel(calc_rated_airflow(cooling_system.cooling_capacity, clg_ap.cool_rated_cfm_per_ton[i], 1.0)) # FIXME
             clg_coil.setNominalTimeforCondensatetoBeginLeavingtheCoil(1000)
             clg_coil.setInitialMoistureEvaporationRateDividedbySteadyStateACLatentCapacity(1.5)
             if not clg_ap.crankcase_temp.nil?
               clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C'))
+            end
+            if cooling_system.modulating
+              grid_signal_schedule = OpenStudio::Model::ScheduleRuleset.new(model)
+              grid_signal_schedule.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 15, 0, 0), 5.5)
+              grid_signal_schedule.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 20, 0, 0), 12.0)
+              grid_signal_schedule.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 5.5)
+              clg_coil.setGridSignalSchedule(grid_signal_schedule)
+              clg_coil.setLowerBoundToApplyGridResponsiveControl(10.0)
+              clg_coil.setUpperBoundToApplyGridResponsiveControl(1000.0)
+              clg_coil.setMaxSpeedLevelDuringGridResponsiveControl(2)
             end
           end
           speed = OpenStudio::Model::CoilCoolingDXVariableSpeedSpeedData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve)
@@ -3074,10 +3085,21 @@ class HVAC
         else
           if htg_coil.nil?
             htg_coil = OpenStudio::Model::CoilHeatingDXVariableSpeed.new(model, plf_fplr_curve)
-            htg_coil.setRatedHeatingCapacityAtSelectedNominalSpeedLevel(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') * htg_ap.heat_capacity_ratios[0])
-            htg_coil.setRatedAirFlowRateAtSelectedNominalSpeedLevel(calc_rated_airflow(heating_system.heating_capacity, htg_ap.heat_rated_cfm_per_ton[0], htg_ap.heat_capacity_ratios[0]))
+            htg_coil.setNominalSpeedLevel(4) # FIXME
+            htg_coil.setRatedHeatingCapacityAtSelectedNominalSpeedLevel(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W')) # FIXME
+            htg_coil.setRatedAirFlowRateAtSelectedNominalSpeedLevel(calc_rated_airflow(heating_system.heating_capacity, htg_ap.heat_rated_cfm_per_ton[0], 1.0)) # FIXME
             if not htg_ap.crankcase_temp.nil?
               htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(htg_ap.crankcase_temp, 'F', 'C'))
+            end
+            if heating_system.dual_source
+              grid_signal_schedule = OpenStudio::Model::ScheduleRuleset.new(model)
+              grid_signal_schedule.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 15, 0, 0), 5.5)
+              grid_signal_schedule.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 20, 0, 0), 12.0)
+              grid_signal_schedule.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), 5.5)
+              htg_coil.setGridSignalSchedule(grid_signal_schedule)
+              htg_coil.setLowerBoundToApplyGridResponsiveControl(10.0)
+              htg_coil.setUpperBoundToApplyGridResponsiveControl(1000.0)
+              htg_coil.setMaxSpeedLevelDuringGridResponsiveControl(2)
             end
           end
           speed = OpenStudio::Model::CoilHeatingDXVariableSpeedSpeedData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve)
