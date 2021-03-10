@@ -3101,6 +3101,8 @@ class HPXML < Object
       @pump_watts_per_ton = XMLHelper.get_value(heat_pump, 'extension/PumpPowerWattsPerTon', :float)
       @shared_loop_watts = XMLHelper.get_value(heat_pump, 'extension/SharedLoopWatts', :float)
       @seed_id = XMLHelper.get_value(heat_pump, 'extension/SeedId', :string)
+      @modulating = XMLHelper.get_value(heat_pump, 'extension/DemandFlexibility/Modulating', :boolean)
+      @dual_source = XMLHelper.get_value(heat_pump, 'extension/DemandFlexibility/DualSource', :boolean)
     end
   end
 

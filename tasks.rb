@@ -153,6 +153,8 @@ def create_osws
     'base-hvac-air-to-air-heat-pump-1-speed-heating-only.osw' => 'base-hvac-air-to-air-heat-pump-1-speed.osw',
     'base-hvac-air-to-air-heat-pump-2-speed.osw' => 'base.osw',
     'base-hvac-air-to-air-heat-pump-var-speed.osw' => 'base.osw',
+    'base-hvac-air-to-air-heat-pump-var-speed-modulating.osw' => 'base-hvac-air-to-air-heat-pump-var-speed.osw',
+    'base-hvac-air-to-air-heat-pump-var-speed-dual-source.osw' => 'base-hvac-air-to-air-heat-pump-var-speed.osw',
     'base-hvac-boiler-coal-only.osw' => 'base.osw',
     'base-hvac-boiler-elec-only.osw' => 'base.osw',
     'base-hvac-boiler-gas-central-ac-1-speed.osw' => 'base.osw',
@@ -1380,6 +1382,10 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_heating_capacity_17_f', '26880.0')
     step.setArgument('heat_pump_cooling_efficiency', 22.0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
+  elsif ['base-hvac-air-to-air-heat-pump-var-speed-modulating.osw'].include? osw_file
+    step.setArgument('heat_pump_demand_flexibility_modulating', true)
+  elsif ['base-hvac-air-to-air-heat-pump-var-speed-dual-source.osw'].include? osw_file
+    step.setArgument('heat_pump_demand_flexibility_dual_source', true)
   elsif ['base-hvac-boiler-coal-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeCoal)

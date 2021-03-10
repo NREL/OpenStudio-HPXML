@@ -1224,6 +1224,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_demand_flexibility_modulating', false)
+    arg.setDisplayName('Heat Pump: Demand Flexibility Modulating')
+    arg.setDescription("")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_demand_flexibility_dual_source', false)
+    arg.setDisplayName('Heat Pump: Demand Flexibility Dual-Source')
+    arg.setDescription("")
+    args << arg
+
     heating_system_type_2_choices = OpenStudio::StringVector.new
     heating_system_type_2_choices << 'none'
     heating_system_type_2_choices << HPXML::HVACTypeWallFurnace
@@ -4053,6 +4063,14 @@ class HPXMLFile
       fraction_heat_load_served = 1.0 - args[:heating_system_fraction_heat_load_served_2]
     end
 
+    if args[:heat_pump_demand_flexibility_modulating].is_initialized
+      modulating = true
+    end
+
+    if args[:heat_pump_demand_flexibility_dual_source].is_initialized
+      dual_source = true
+    end
+
     hpxml.heat_pumps.add(id: 'HeatPump',
                          heat_pump_type: heat_pump_type,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
@@ -4073,7 +4091,9 @@ class HPXMLFile
                          heating_efficiency_cop: heating_efficiency_cop,
                          cooling_efficiency_eer: cooling_efficiency_eer,
                          airflow_defect_ratio: airflow_defect_ratio,
-                         charge_defect_ratio: charge_defect_ratio)
+                         charge_defect_ratio: charge_defect_ratio,
+                         modulating: modulating,
+                         dual_source: dual_source)
   end
 
   def self.set_secondary_heating_systems(hpxml, runner, args)
