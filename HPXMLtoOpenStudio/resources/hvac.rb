@@ -2948,27 +2948,44 @@ class HVAC
         clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W'))
         clg_coil.setRatedAirFlowRate(calc_rated_airflow(cooling_system.cooling_capacity, clg_ap.cool_rated_cfm_per_ton[0], 1.0))
       else
-        if clg_coil.nil?
-          clg_coil = OpenStudio::Model::CoilCoolingDXMultiSpeed.new(model)
-          clg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
-          clg_coil.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
-          clg_coil.setFuelType(EPlus::FuelTypeElectricity)
-          clg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
-          if not clg_ap.crankcase_temp.nil?
-            clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C'))
+        if not clg_ap.demand_flexibility
+          if clg_coil.nil?
+            clg_coil = OpenStudio::Model::CoilCoolingDXMultiSpeed.new(model)
+            clg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
+            clg_coil.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
+            clg_coil.setFuelType(EPlus::FuelTypeElectricity)
+            clg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+            if not clg_ap.crankcase_temp.nil?
+              clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C'))
+            end
           end
+          stage = OpenStudio::Model::CoilCoolingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_biquadratic)
+          stage.setGrossRatedCoolingCOP(1.0 / clg_ap.cool_rated_eirs[i])
+          stage.setGrossRatedSensibleHeatRatio(clg_ap.cool_rated_shrs_gross[i])
+          stage.setNominalTimeforCondensateRemovaltoBegin(1000)
+          stage.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
+          stage.setRatedWasteHeatFractionofPowerInput(0.2)
+          stage.setMaximumCyclingRate(3.0)
+          stage.setLatentCapacityTimeConstant(45.0)
+          stage.setGrossRatedTotalCoolingCapacity(UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W') * clg_ap.cool_capacity_ratios[i])
+          stage.setRatedAirFlowRate(calc_rated_airflow(cooling_system.cooling_capacity, clg_ap.cool_rated_cfm_per_ton[i], clg_ap.cool_capacity_ratios[i]))
+          clg_coil.addStage(stage)
+        else
+          if clg_coil.nil?
+            clg_coil = OpenStudio::Model::CoilCoolingDXVariableSpeed.new(model, plf_fplr_curve)
+            clg_coil.setNominalTimeforCondensatetoBeginLeavingtheCoil(1000)
+            clg_coil.setInitialMoistureEvaporationRateDividedbySteadyStateACLatentCapacity(1.5)
+            if not clg_ap.crankcase_temp.nil?
+              clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C'))
+            end
+          end
+          speed = OpenStudio::Model::CoilCoolingDXVariableSpeedSpeedData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve)
+          speed.setReferenceUnitGrossRatedCoolingCOP(1.0 / clg_ap.cool_rated_eirs[i])
+          speed.setReferenceUnitGrossRatedSensibleHeatRatio(clg_ap.cool_rated_shrs_gross[i])  
+          speed.setReferenceUnitGrossRatedTotalCoolingCapacity(UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W') * clg_ap.cool_capacity_ratios[i])
+          speed.setReferenceUnitRatedAirFlowRate(calc_rated_airflow(cooling_system.cooling_capacity, clg_ap.cool_rated_cfm_per_ton[i], clg_ap.cool_capacity_ratios[i]))
+          clg_coil.addSpeed(speed)
         end
-        stage = OpenStudio::Model::CoilCoolingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_biquadratic)
-        stage.setGrossRatedCoolingCOP(1.0 / clg_ap.cool_rated_eirs[i])
-        stage.setGrossRatedSensibleHeatRatio(clg_ap.cool_rated_shrs_gross[i])
-        stage.setNominalTimeforCondensateRemovaltoBegin(1000)
-        stage.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
-        stage.setRatedWasteHeatFractionofPowerInput(0.2)
-        stage.setMaximumCyclingRate(3.0)
-        stage.setLatentCapacityTimeConstant(45.0)
-        stage.setGrossRatedTotalCoolingCapacity(UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W') * clg_ap.cool_capacity_ratios[i])
-        stage.setRatedAirFlowRate(calc_rated_airflow(cooling_system.cooling_capacity, clg_ap.cool_rated_cfm_per_ton[i], clg_ap.cool_capacity_ratios[i]))
-        clg_coil.addStage(stage)
       end
     end
 
@@ -4228,5 +4245,14 @@ class HVAC
     end
 
     return { rh_setpoint: rh_setpoint, ief: ief }
+  end
+
+  def self.set_demand_flexibility(hvac_system)
+    hvac_ap = hvac_system.additional_properties
+
+    hvac_ap.demand_flexibility = false
+    if hvac_system.modulating || hvac_system.dual_source
+      hvac_ap.demand_flexibility = true
+    end
   end
 end

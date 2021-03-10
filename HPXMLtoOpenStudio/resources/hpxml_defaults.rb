@@ -680,6 +680,8 @@ class HPXMLDefaults
         HVAC.set_heat_rated_cfm_per_ton(heat_pump)
         HVAC.set_heat_rated_eirs(heat_pump)
 
+        HVAC.set_demand_flexibility(heat_pump)
+
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
         num_speeds = 10
         HVAC.set_num_speeds(heat_pump)
