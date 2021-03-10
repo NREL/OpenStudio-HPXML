@@ -201,7 +201,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   ``ResidentialFacilityType``                                string               See [#]_                           Yes                 Type of dwelling unit
   ``NumberofConditionedFloors``                              double               > 0                                Yes                 Number of conditioned floors (including a basement)
   ``NumberofConditionedFloorsAboveGrade``                    double               > 0, <= NumberofConditionedFloors  Yes                 Number of conditioned floors above grade (including a walkout basement)
-  ``NumberofBedrooms``                                       integer              > 0                                Yes                 Number of bedrooms [#]_
+  ``NumberofBedrooms``                                       integer              > 0 [#]_                           Yes                 Number of bedrooms [#]_
   ``NumberofBathrooms``                                      integer              > 0                                No        See [#]_  Number of bathrooms
   ``ConditionedFloorArea``                                   double    ft2        > 0                                Yes                 Floor area within conditioned space boundary
   ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``  double    ft3 or ft  > 0                                No        See [#]_  Volume/ceiling height within conditioned space boundary
@@ -209,6 +209,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   =========================================================  ========  =========  =================================  ========  ========  =======================================================================
 
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
+  .. [#] NumberofBedrooms must also be <= (ConditionedFloorArea-120)/70.
   .. [#] NumberofBedrooms is currently used to determine usage of plug loads, appliances, hot water, etc.
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to 8.0.
@@ -1192,11 +1193,12 @@ Additional information is entered in each ``DuctLeakageMeasurement``.
   Element                           Type     Units    Constraints  Required  Default    Notes
   ================================  =======  =======  ===========  ========  =========  =========================================================
   ``DuctLeakage/Units``             string            See [#]_     Yes                  Duct leakage units
-  ``DuctLeakage/Value``             double            >= 0         Yes                  Duct leakage value [#]_
+  ``DuctLeakage/Value``             double            >= 0 [#]_    Yes                  Duct leakage value [#]_
   ``DuctLeakage/TotalOrToOutside``  string            See [#]_     Yes                  Type of duct leakage (outside conditioned space vs total)
   ================================  =======  =======  ===========  ========  =========  =========================================================
   
   .. [#] Units choices are "CFM25" or "Percent".
+  .. [#] Value also must be < 1 if Units is Percent.
   .. [#] If the HVAC system has no return ducts (e.g., a ducted evaporative cooler), use zero for the Value.
   .. [#] TotalOrToOutside only choice is "to outside".
 
@@ -1343,7 +1345,7 @@ If the specified system is a shared system (i.e., serving multiple dwelling unit
 
   .. [#] 1-FractionRecirculation is assumed to be the fraction of supply air that is provided from outside.
          The value must be 0 for exhaust only systems.
-  .. [#] InUnitFlowRate must also be > TestedFlowRate (or RatedFlowRate).
+  .. [#] InUnitFlowRate must also be < TestedFlowRate (or RatedFlowRate).
   .. [#] PreHeating not allowed for exhaust only systems.
   .. [#] PreCooling not allowed for exhaust only systems.
 
@@ -1780,11 +1782,12 @@ If not entered, the simulation will not include generators.
   ``IsSharedSystem``          boolean                        No        false    Whether it serves multiple dwelling units
   ``FuelType``                string            See [#]_     Yes                Fuel type
   ``AnnualConsumptionkBtu``   double   kBtu/yr  > 0          Yes                Annual fuel consumed
-  ``AnnualOutputkWh``         double   kWh/yr   > 0          Yes                Annual electricity produced
+  ``AnnualOutputkWh``         double   kWh/yr   > 0 [#]_     Yes                Annual electricity produced
   ``NumberofBedroomsServed``  integer           > 1          See [#]_           Number of bedrooms served
   ==========================  =======  =======  ===========  ========  =======  ============================================
 
   .. [#] FuelType choices are "natural gas" or "propane".
+  .. [#] AnnualOutputkWh must also be < AnnualConsumptionkBtu*3.412 (i.e., the generator must consume more energy than it produces).
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true, in which case it must be > NumberofBedrooms.
          Annual consumption and annual production will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the generator.
 
@@ -2334,7 +2337,7 @@ If not entered, the simulation will not include that type of plug load.
          - **well pump**: 0.0
          - **electric vehicle charging**: 0.0
 
-  .. [#] The remaining fraction (i.e., 1.0 - FracSensible - FracLatent) is assumed to be heat gain outside conditioned space and thus lost.
+  .. [#] The remaining fraction (i.e., 1.0 - FracSensible - FracLatent) must be > 0 and is assumed to be heat gain outside conditioned space and thus lost.
   .. [#] If FracLatent not provided, defaults as:
 
          - **other**: 0.045
@@ -2395,7 +2398,7 @@ If not entered, the simulation will not include that type of fuel load.
 
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "wood", or "wood pellets".
   .. [#] If FracSensible not provided, defaults to 0.5 for fireplace and 0.0 for all other types.
-  .. [#] The remaining fraction (i.e., 1.0 - FracSensible - FracLatent) is assumed to be heat gain outside conditioned space and thus lost.
+  .. [#] The remaining fraction (i.e., 1.0 - FracSensible - FracLatent) must be > 0 and is assumed to be heat gain outside conditioned space and thus lost.
   .. [#] If FracLatent not provided, defaults to 0.1 for fireplace and 0.0 for all other types.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided, default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used:
 
