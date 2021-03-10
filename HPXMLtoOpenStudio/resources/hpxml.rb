@@ -2946,7 +2946,8 @@ class HPXML < Object
              :heating_efficiency_cop, :third_party_certification, :seed_id, :pump_watts_per_ton,
              :fan_watts_per_cfm, :fan_power_not_tested, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :airflow_defect_ratio, :airflow_not_tested, :charge_defect_ratio,
-             :charge_not_tested, :heating_airflow_cfm, :cooling_airflow_cfm]
+             :charge_not_tested, :heating_airflow_cfm, :cooling_airflow_cfm,
+             :modulating, :dual_source]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -3048,6 +3049,12 @@ class HPXML < Object
       XMLHelper.add_extension(heat_pump, 'PumpPowerWattsPerTon', @pump_watts_per_ton, :float, @pump_watts_per_ton_isdefaulted) unless @pump_watts_per_ton.nil?
       XMLHelper.add_extension(heat_pump, 'SharedLoopWatts', @shared_loop_watts, :float) unless @shared_loop_watts.nil?
       XMLHelper.add_extension(heat_pump, 'SeedId', @seed_id, :string) unless @seed_id.nil?
+      if (not @modulating.nil?) || (not @dual_source.nil?)
+        extension = XMLHelper.create_elements_as_needed(heat_pump, ['extension'])
+        demand_flexibility = XMLHelper.add_element(extension, 'DemandFlexibility')
+        XMLHelper.add_element(demand_flexibility, 'Modulating', @modulating, :boolean) unless @modulating.nil?
+        XMLHelper.add_element(demand_flexibility, 'DualSource', @dual_source, :boolean) unless @dual_source.nil?
+      end
     end
 
     def from_oga(heat_pump)

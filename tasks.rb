@@ -2636,6 +2636,8 @@ def create_hpxmls
     'base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-air-to-air-heat-pump-2-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-var-speed.xml' => 'base.xml',
+    'base-hvac-air-to-air-heat-pump-var-speed-modulating.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
+    'base-hvac-air-to-air-heat-pump-var-speed-dual-source.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-autosize.xml' => 'base.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml',
@@ -5882,6 +5884,10 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
     hpxml.heat_pumps[0].heating_capacity = nil
     hpxml.heat_pumps[0].heating_capacity_17F = nil
     hpxml.heat_pumps[0].backup_heating_capacity = nil
+  elsif ['base-hvac-air-to-air-heat-pump-var-speed-modulating.xml'].include? hpxml_file
+    hpxml.heat_pumps[0].modulating = true
+  elsif ['base-hvac-air-to-air-heat-pump-var-speed-dual-source.xml'].include? hpxml_file
+    hpxml.heat_pumps[0].dual_source = true
   end
 end
 
@@ -7982,7 +7988,7 @@ if ARGV[0].to_sym == :update_measures
               '"Rake.application[:rubocop].invoke"']
   command = "#{OpenStudio.getOpenStudioCLI} -e #{commands.join(' -e ')}"
   puts 'Applying rubocop auto-correct to measures...'
-  system(command)
+  # system(command)
 
   # Update measures XMLs
   command = "#{OpenStudio.getOpenStudioCLI} measure -t '#{File.dirname(__FILE__)}'"
