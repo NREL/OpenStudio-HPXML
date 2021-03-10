@@ -567,12 +567,6 @@ class Airflow
       if duct.leakage_frac.nil? == duct.leakage_cfm25.nil?
         fail 'Ducts: Must provide either leakage fraction or cfm25, but not both.'
       end
-      if (not duct.leakage_frac.nil?) && ((duct.leakage_frac < 0) || (duct.leakage_frac > 1))
-        fail 'Ducts: Leakage Fraction must be greater than or equal to 0 and less than or equal to 1.'
-      end
-      if (not duct.leakage_cfm25.nil?) && (duct.leakage_cfm25 < 0)
-        fail 'Ducts: Leakage CFM25 must be greater than or equal to 0.'
-      end
     end
 
     ducts.each do |duct|

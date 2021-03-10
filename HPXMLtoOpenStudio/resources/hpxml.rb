@@ -1015,8 +1015,8 @@ class HPXML < Object
   class BuildingConstruction < BaseElement
     ATTRS = [:year_built, :number_of_conditioned_floors, :number_of_conditioned_floors_above_grade,
              :average_ceiling_height, :number_of_bedrooms, :number_of_bathrooms,
-             :conditioned_floor_area, :conditioned_building_volume, :use_only_ideal_air_system,
-             :residential_facility_type, :has_flue_or_chimney]
+             :conditioned_floor_area, :conditioned_building_volume, :residential_facility_type,
+             :has_flue_or_chimney]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -1037,7 +1037,6 @@ class HPXML < Object
       XMLHelper.add_element(building_construction, 'NumberofBathrooms', @number_of_bathrooms, :integer, @number_of_bathrooms_isdefaulted) unless @number_of_bathrooms.nil?
       XMLHelper.add_element(building_construction, 'ConditionedFloorArea', @conditioned_floor_area, :float) unless @conditioned_floor_area.nil?
       XMLHelper.add_element(building_construction, 'ConditionedBuildingVolume', @conditioned_building_volume, :float, @conditioned_building_volume_isdefaulted) unless @conditioned_building_volume.nil?
-      XMLHelper.add_extension(building_construction, 'UseOnlyIdealAirSystem', @use_only_ideal_air_system, :boolean, @use_only_ideal_air_system_isdefaulted) unless @use_only_ideal_air_system.nil?
       XMLHelper.add_extension(building_construction, 'HasFlueOrChimney', @has_flue_or_chimney, :boolean, @has_flue_or_chimney_isdefaulted) unless @has_flue_or_chimney.nil?
     end
 
@@ -1056,7 +1055,6 @@ class HPXML < Object
       @number_of_bathrooms = XMLHelper.get_value(building_construction, 'NumberofBathrooms', :integer)
       @conditioned_floor_area = XMLHelper.get_value(building_construction, 'ConditionedFloorArea', :float)
       @conditioned_building_volume = XMLHelper.get_value(building_construction, 'ConditionedBuildingVolume', :float)
-      @use_only_ideal_air_system = XMLHelper.get_value(building_construction, 'extension/UseOnlyIdealAirSystem', :boolean)
       @has_flue_or_chimney = XMLHelper.get_value(building_construction, 'extension/HasFlueOrChimney', :boolean)
     end
   end
