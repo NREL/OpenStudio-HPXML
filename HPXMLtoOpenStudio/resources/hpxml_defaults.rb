@@ -135,10 +135,11 @@ class HPXMLDefaults
       hpxml.site.site_type_isdefaulted = true
     end
 
-    if hpxml.site.shelter_coefficient.nil?
-      hpxml.site.shelter_coefficient = Airflow.get_default_shelter_coefficient()
-      hpxml.site.shelter_coefficient_isdefaulted = true
+    if hpxml.site.shielding_of_home.nil?
+      hpxml.site.shielding_of_home = HPXML::ShieldingNormal
+      hpxml.site.shielding_of_home_isdefaulted = true
     end
+    hpxml.site.additional_properties.aim2_shelter_coeff = Airflow.get_aim2_shelter_coefficient(hpxml.site.shielding_of_home)
   end
 
   def self.apply_building_occupancy(hpxml, nbeds)
