@@ -969,10 +969,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_fuel_choices << HPXML::FuelTypeWoodPellets
     heating_system_fuel_choices << HPXML::FuelTypeCoal
 
-    heating_system_shared_distribution_type_choices = OpenStudio::StringVector.new
-    heating_system_shared_distribution_type_choices << HPXML::HydronicTypeBaseboard
-    heating_system_shared_distribution_type_choices << HPXML::AirTypeFanCoil
-
     cooling_system_type_choices = OpenStudio::StringVector.new
     cooling_system_type_choices << 'none'
     cooling_system_type_choices << HPXML::HVACTypeCentralAirConditioner
