@@ -3223,7 +3223,7 @@ class HPXMLFile
     return false if not success
 
     # export the schedule
-    args[:schedules_path] = "../#{File.basename(args[:hpxml_path], '.xml')}.csv"
+    args[:schedules_path] = "../#{File.basename(args[:hpxml_path], '.xml')}_schedules.csv"
     success = schedule_generator.export(schedules_path: File.expand_path(args[:schedules_path]))
     return false if not success
 
