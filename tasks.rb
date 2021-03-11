@@ -1983,7 +1983,7 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_heating_capacity_2', '16000.0')
   elsif ['extra-second-heating-system-boiler-to-heating-system.osw'].include? osw_file
     step.setArgument('heating_system_fraction_heat_load_served', 0.75)
-    step.setArgument('heating_system_type_2', HPXML::HVACTypeBoiler)
+    step.setArgument('heating_system_type_2', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
   elsif ['extra-second-heating-system-portable-heater-to-heat-pump.osw'].include? osw_file
     step.setArgument('heat_pump_heating_capacity', '48000.0')
     step.setArgument('heat_pump_fraction_heat_load_served', 0.75)

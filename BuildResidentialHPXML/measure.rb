@@ -3907,7 +3907,7 @@ class HPXMLFile
 
     if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace].include?(heating_system_type) || heating_system_type.include?(HPXML::HVACTypeBoiler)
       heating_efficiency_afue = args[:heating_system_heating_efficiency]
-    elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypeStove, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFireplace, HPXML::HVACTypeFixedHeater].include? heating_system_type
+    elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypeStove, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFireplace, HPXML::HVACTypeFixedHeater].include?(heating_system_type)
       heating_efficiency_percent = args[:heating_system_heating_efficiency]
     end
 
@@ -4095,33 +4095,37 @@ class HPXMLFile
   end
 
   def self.set_secondary_heating_systems(hpxml, runner, args)
-    heating_system_type_2 = args[:heating_system_type_2]
+    heating_system_type = args[:heating_system_type_2]
 
-    return if heating_system_type_2 == 'none'
+    return if heating_system_type == 'none'
 
     if args[:heating_system_heating_capacity_2] != Constants.Auto
-      heating_capacity_2 = args[:heating_system_heating_capacity_2]
+      heating_capacity = args[:heating_system_heating_capacity_2]
     end
 
     if args[:heating_system_fuel_2] == HPXML::HVACTypeElectricResistance
-      heating_system_fuel_2 = HPXML::FuelTypeElectricity
+      heating_system_fuel = HPXML::FuelTypeElectricity
     else
-      heating_system_fuel_2 = args[:heating_system_fuel_2]
+      heating_system_fuel = args[:heating_system_fuel_2]
     end
 
-    if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeBoiler].include? heating_system_type_2
-      heating_efficiency_afue_2 = args[:heating_system_heating_efficiency_2]
-    elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypeStove, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFireplace].include? heating_system_type_2
-      heating_efficiency_percent_2 = args[:heating_system_heating_efficiency_2]
+    if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace].include?(heating_system_type) || heating_system_type.include?(HPXML::HVACTypeBoiler)
+      heating_efficiency_afue = args[:heating_system_heating_efficiency_2]
+    elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypeStove, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFireplace].include?(heating_system_type)
+      heating_efficiency_percent = args[:heating_system_heating_efficiency_2]
+    end
+
+    if heating_system_type.include?(HPXML::HVACTypeBoiler)
+      heating_system_type = HPXML::HVACTypeBoiler
     end
 
     hpxml.heating_systems.add(id: 'SecondHeatingSystem',
-                              heating_system_type: heating_system_type_2,
-                              heating_system_fuel: heating_system_fuel_2,
-                              heating_capacity: heating_capacity_2,
+                              heating_system_type: heating_system_type,
+                              heating_system_fuel: heating_system_fuel,
+                              heating_capacity: heating_capacity,
                               fraction_heat_load_served: args[:heating_system_fraction_heat_load_served_2],
-                              heating_efficiency_afue: heating_efficiency_afue_2,
-                              heating_efficiency_percent: heating_efficiency_percent_2)
+                              heating_efficiency_afue: heating_efficiency_afue,
+                              heating_efficiency_percent: heating_efficiency_percent)
   end
 
   def self.set_hvac_distribution(hpxml, runner, args)
