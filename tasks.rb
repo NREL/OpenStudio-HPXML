@@ -42,8 +42,8 @@ def create_osws
     # 'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil-ducted.osw' => 'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.osw',
     # 'base-bldgtype-multifamily-shared-boiler-chiller-water-loop-heat-pump.osw' => 'base-bldgtype-multifamily-shared-boiler-chiller-baseboard.osw',
     # 'base-bldgtype-multifamily-shared-boiler-cooling-tower-water-loop-heat-pump.osw' => 'base-bldgtype-multifamily-shared-boiler-chiller-water-loop-heat-pump.osw',
-    # 'base-bldgtype-multifamily-shared-boiler-only-baseboard.osw' => 'base-bldgtype-multifamily.osw',
-    # 'base-bldgtype-multifamily-shared-boiler-only-fan-coil.osw' => 'base-bldgtype-multifamily-shared-boiler-only-baseboard.osw',
+    'base-bldgtype-multifamily-shared-boiler-only-baseboard.osw' => 'base-bldgtype-multifamily.osw',
+    'base-bldgtype-multifamily-shared-boiler-only-fan-coil.osw' => 'base-bldgtype-multifamily-shared-boiler-only-baseboard.osw',
     # 'base-bldgtype-multifamily-shared-boiler-only-fan-coil-ducted.osw' => 'base-bldgtype-multifamily-shared-boiler-only-fan-coil.osw',
     # 'base-bldgtype-multifamily-shared-boiler-only-fan-coil-eae.osw' => 'base-bldgtype-multifamily-shared-boiler-only-fan-coil.osw',
     # 'base-bldgtype-multifamily-shared-boiler-only-water-loop-heat-pump.osw' => 'base-bldgtype-multifamily-shared-boiler-only-baseboard.osw',
@@ -378,9 +378,6 @@ def create_osws
     'extra-bldgtype-multifamily-unvented-crawlspace-right-middle-double-loaded-interior.osw' => 'extra-bldgtype-multifamily-unvented-crawlspace-right-middle.osw',
     'extra-bldgtype-multifamily-unvented-crawlspace-right-top-double-loaded-interior.osw' => 'extra-bldgtype-multifamily-unvented-crawlspace-right-top.osw',
 
-    'extra-bldgtype-multifamily-shared-boiler-only-baseboard.osw' => 'base-bldgtype-multifamily.osw',
-    'extra-bldgtype-multifamily-shared-boiler-only-fan-coil-ducted.osw' => 'base-bldgtype-multifamily.osw',
-
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
     'invalid_files/heating-system-and-heat-pump.osw' => 'base.osw',
     'invalid_files/cooling-system-and-heat-pump.osw' => 'base.osw',
@@ -413,8 +410,7 @@ def create_osws
     'invalid_files/multipliers-without-fuel-loads.osw' => 'base.osw',
     'invalid_files/foundation-wall-insulation-greater-than-height.osw' => 'base-foundation-vented-crawlspace.osw',
     'invalid_files/conditioned-attic-with-one-floor-above-grade.osw' => 'base.osw',
-    'invalid_files/shared-heating-system-but-not-boiler.osw' => 'extra-bldgtype-multifamily-shared-boiler-only-baseboard.osw',
-    'invalid_files/single-family-detached-with-shared-system.osw' => 'base-hvac-boiler-gas-only.osw'
+    'invalid_files/single-family-detached-with-shared-system.osw' => 'base.osw'
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -590,14 +586,10 @@ def get_values(osw_file, step)
     step.setArgument('air_leakage_value', 3)
     step.setArgument('air_leakage_shelter_coefficient', Constants.Auto)
     step.setArgument('heating_system_type', HPXML::HVACTypeFurnace)
-    step.setArgument('heating_system_is_shared_system', false)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeNaturalGas)
     step.setArgument('heating_system_heating_efficiency', 0.92)
     step.setArgument('heating_system_heating_capacity', '64000.0')
     step.setArgument('heating_system_fraction_heat_load_served', 1)
-    step.setArgument('heating_system_shared_distribution_type', HPXML::HydronicTypeBaseboard)
-    step.setArgument('heating_system_shared_loop_pump_power', 600)
-    step.setArgument('heating_system_in_unit_fan_coil_power', 150)
     step.setArgument('cooling_system_type', HPXML::HVACTypeCentralAirConditioner)
     step.setArgument('cooling_system_cooling_efficiency_type', HPXML::UnitsSEER)
     step.setArgument('cooling_system_cooling_efficiency', 13.0)
@@ -916,9 +908,9 @@ def get_values(osw_file, step)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeBasementUnconditioned)
     step.setArgument('geometry_level', 'Middle')
     step.setArgument('geometry_horizontal_location', 'Left')
-    step.setArgument('geometry_building_num_units', 50)
-    step.setArgument('geometry_building_num_bedrooms', 50 * 3)
-    step.setArgument('geometry_num_floors_above_grade', 5)
+    step.setArgument('geometry_building_num_units', 6)
+    step.setArgument('geometry_building_num_bedrooms', 6 * 3)
+    step.setArgument('geometry_num_floors_above_grade', 3)
     step.setArgument('window_front_wwr', 0.18)
     step.setArgument('window_back_wwr', 0.18)
     step.setArgument('window_left_wwr', 0.18)
@@ -936,6 +928,12 @@ def get_values(osw_file, step)
     step.setArgument('ducts_number_of_return_registers', '1')
     step.setArgument('door_area', 20.0)
     step.setArgument('plug_loads_other_annual_kwh', '819.0')
+  elsif ['base-bldgtype-multifamily-shared-boiler-only-baseboard.osw'].include? osw_file
+    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, Shared, w/ Baseboard")
+    step.setArgument('cooling_system_type', 'none')
+  elsif ['base-bldgtype-multifamily-shared-boiler-only-fan-coil.osw'].include? osw_file
+    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, Shared, w/ Ductless Fan Coil")
+    step.setArgument('cooling_system_type', 'none')
   elsif ['base-bldgtype-multifamily-shared-mechvent.osw'].include? osw_file
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeSupply)
     step.setArgument('mech_vent_flow_rate', 800)
@@ -1390,29 +1388,29 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_cooling_efficiency', 22.0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
   elsif ['base-hvac-boiler-coal-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
+    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
     step.setArgument('heating_system_fuel', HPXML::FuelTypeCoal)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-boiler-elec-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
+    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('heating_system_heating_efficiency', 1.0)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
+    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
   elsif ['base-hvac-boiler-gas-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
+    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-boiler-oil-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
+    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
     step.setArgument('heating_system_fuel', HPXML::FuelTypeOil)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-boiler-propane-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
+    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
     step.setArgument('heating_system_fuel', HPXML::FuelTypePropane)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-boiler-wood-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
+    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
     step.setArgument('heating_system_fuel', HPXML::FuelTypeWoodCord)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-central-ac-only-1-speed.osw'].include? osw_file
@@ -2002,7 +2000,7 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_heating_capacity_2', '16000.0')
   elsif ['extra-second-heating-system-boiler-to-heat-pump.osw'].include? osw_file
     step.setArgument('heat_pump_fraction_heat_load_served', 0.75)
-    step.setArgument('heating_system_type_2', HPXML::HVACTypeBoiler)
+    step.setArgument('heating_system_type_2', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
   elsif ['extra-enclosure-windows-shading.osw'].include? osw_file
     step.setArgument('window_interior_shading_winter', 0.99)
     step.setArgument('window_interior_shading_summer', 0.01)
@@ -2085,15 +2083,18 @@ def get_values(osw_file, step)
     step.setArgument('geometry_horizontal_location', 'Right')
 
   elsif ['extra-bldgtype-multifamily-slab.osw'].include? osw_file
+    step.setArgument('geometry_building_num_units', 9)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeSlab)
     step.setArgument('geometry_foundation_height', 0.0)
     step.setArgument('geometry_foundation_height_above_grade', 0.0)
   elsif ['extra-bldgtype-multifamily-vented-crawlspace.osw'].include? osw_file
+    step.setArgument('geometry_building_num_units', 9)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceVented)
     step.setArgument('geometry_foundation_height', 4.0)
     step.setArgument('floor_assembly_r', 18.7)
     step.setArgument('foundation_wall_insulation_distance_to_bottom', 4.0)
   elsif ['extra-bldgtype-multifamily-unvented-crawlspace.osw'].include? osw_file
+    step.setArgument('geometry_building_num_units', 9)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceUnvented)
     step.setArgument('geometry_foundation_height', 4.0)
     step.setArgument('floor_assembly_r', 18.7)
@@ -2248,15 +2249,6 @@ def get_values(osw_file, step)
     step.setArgument('geometry_corridor_position', 'Double-Loaded Interior')
   elsif ['extra-bldgtype-multifamily-unvented-crawlspace-right-top-double-loaded-interior.osw'].include? osw_file
     step.setArgument('geometry_corridor_position', 'Double-Loaded Interior')
-  elsif ['extra-bldgtype-multifamily-shared-boiler-only-baseboard.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
-    step.setArgument('heating_system_is_shared_system', true)
-    step.setArgument('cooling_system_type', 'none')
-  elsif ['extra-bldgtype-multifamily-shared-boiler-only-fan-coil-ducted.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
-    step.setArgument('heating_system_is_shared_system', true)
-    step.setArgument('heating_system_shared_distribution_type', HPXML::AirTypeFanCoil)
-    step.setArgument('cooling_system_type', 'none')
   end
 
   # Warnings/Errors
@@ -2358,10 +2350,8 @@ def get_values(osw_file, step)
   elsif ['invalid_files/conditioned-attic-with-one-floor-above-grade.osw'].include? osw_file
     step.setArgument('geometry_attic_type', HPXML::AtticTypeConditioned)
     step.setArgument('ceiling_assembly_r', 0.0)
-  elsif ['invalid_files/shared-heating-system-but-not-boiler.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeFurnace)
   elsif ['invalid_files/single-family-detached-with-shared-system.osw'].include? osw_file
-    step.setArgument('heating_system_is_shared_system', true)
+    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, Shared, w/ Baseboard")
   end
   return step
 end
