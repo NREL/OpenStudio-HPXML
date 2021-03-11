@@ -151,18 +151,12 @@ Building site information is entered in ``/HPXML/Building/BuildingDetails/Buildi
   Element                           Type      Units  Constraints  Required  Default   Notes
   ================================  ========  =====  ===========  ========  ========  ============================================================
   ``SiteType``                      string           See [#]_     No        suburban  Terrain type for infiltration model
-  ``extension/ShelterCoefficient``  double           0 - 1        No        0.5 [#]_  Nearby buildings, trees, obstructions for infiltration model
+  ``ShieldingofHome``               string           See [#]_     No        normal    Presence of nearby buildings, trees, obstructions for infiltration model
   ``extension/Neighbors``           element          >= 0         No        <none>    Presence of neighboring buildings for solar shading
   ================================  ========  =====  ===========  ========  ========  ============================================================
 
   .. [#] SiteType choices are "rural", "suburban", or "urban".
-  .. [#] ShelterCoefficient values are described as follows: 
-
-         - **1.0**: No obstructions or local shielding;
-         - **0.9**: Light local shielding with few obstructions within two building heights;
-         - **0.7**: Local shielding with many large obstructions within two building heights;
-         - **0.5**: Heavily shielded, many large obstructions within one building height;
-         - **0.3**: Complete shielding with large buildings immediately adjacent.
+  .. [#] ShieldingofHome choices are "normal", "exposed", or "well-shielded".
 
 For each neighboring building defined, additional information is entered in a ``extension/Neighbors/NeighborBuilding``.
 

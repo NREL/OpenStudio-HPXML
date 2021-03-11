@@ -973,7 +973,7 @@ class HVACSizing
 
     # Set stack/wind coefficients from Tables 5D/5E
     c_s = 0.015 * ncfl_ag
-    c_w_base = [0.0133 * @hpxml.site.shelter_coefficient - 0.0027, 0.0].max # Linear relationship between shelter coefficient and c_w coefficients by shielding class
+    c_w_base = [0.0133 * @hpxml.site.additional_properties.aim2_shelter_coeff - 0.0027, 0.0].max # Linear relationship between shelter coefficient and c_w coefficients by shielding class
     c_w = c_w_base * ncfl_ag**0.4
 
     ela_in2 = UnitConversions.convert(ela, 'ft^2', 'in^2')

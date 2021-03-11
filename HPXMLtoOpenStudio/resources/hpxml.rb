@@ -218,6 +218,9 @@ class HPXML < Object
   RoofTypeMetal = 'metal surfacing'
   RoofTypePlasticRubber = 'plastic/rubber/synthetic sheeting'
   RoofTypeWoodShingles = 'wood shingles or shakes'
+  ShieldingExposed = 'exposed'
+  ShieldingNormal = 'normal'
+  ShieldingWellShielded = 'well-shielded'
   SidingTypeAluminum = 'aluminum siding'
   SidingTypeBrick = 'brick veneer'
   SidingTypeFiberCement = 'fiber cement siding'
@@ -901,7 +904,7 @@ class HPXML < Object
   end
 
   class Site < BaseElement
-    ATTRS = [:site_type, :surroundings, :orientation_of_front_of_home, :fuels, :shelter_coefficient]
+    ATTRS = [:site_type, :surroundings, :shielding_of_home, :orientation_of_front_of_home, :fuels]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -915,6 +918,7 @@ class HPXML < Object
       site = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'BuildingSummary', 'Site'])
       XMLHelper.add_element(site, 'SiteType', @site_type, :string, @site_type_isdefaulted) unless @site_type.nil?
       XMLHelper.add_element(site, 'Surroundings', @surroundings, :string) unless @surroundings.nil?
+      XMLHelper.add_element(site, 'ShieldingofHome', @shielding_of_home, :string, @shielding_of_home_isdefaulted) unless @shielding_of_home.nil?
       XMLHelper.add_element(site, 'OrientationOfFrontOfHome', @orientation_of_front_of_home, :string) unless @orientation_of_front_of_home.nil?
       if (not @fuels.nil?) && (not @fuels.empty?)
         fuel_types_available = XMLHelper.add_element(site, 'FuelTypesAvailable')
@@ -922,7 +926,6 @@ class HPXML < Object
           XMLHelper.add_element(fuel_types_available, 'Fuel', fuel, :string)
         end
       end
-      XMLHelper.add_extension(site, 'ShelterCoefficient', @shelter_coefficient, :float, shelter_coefficient_isdefaulted) unless @shelter_coefficient.nil?
     end
 
     def from_oga(hpxml)
@@ -933,9 +936,9 @@ class HPXML < Object
 
       @site_type = XMLHelper.get_value(site, 'SiteType', :string)
       @surroundings = XMLHelper.get_value(site, 'Surroundings', :string)
+      @shielding_of_home = XMLHelper.get_value(site, 'ShieldingofHome', :string)
       @orientation_of_front_of_home = XMLHelper.get_value(site, 'OrientationOfFrontOfHome', :string)
       @fuels = XMLHelper.get_values(site, 'FuelTypesAvailable/Fuel', :string)
-      @shelter_coefficient = XMLHelper.get_value(site, 'extension/ShelterCoefficient', :float)
     end
   end
 
