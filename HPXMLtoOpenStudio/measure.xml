@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>b6374920-d68f-457b-b299-bc8afea22219</version_id>
-  <version_modified>20210310T180056Z</version_modified>
+  <version_id>692a7f3c-c808-430b-ac57-d4e311d94cd9</version_id>
+  <version_modified>20210312T203919Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -385,22 +385,10 @@
       <checksum>5894425E</checksum>
     </file>
     <file>
-      <filename>HPXMLvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8F8EE993</checksum>
-    </file>
-    <file>
       <filename>test_hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>558ED24D</checksum>
-    </file>
-    <file>
-      <filename>hvac_sizing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>594B97B1</checksum>
     </file>
     <file>
       <filename>version.rb</filename>
@@ -413,12 +401,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>CB27A3C5</checksum>
-    </file>
-    <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3475CF3F</checksum>
     </file>
     <file>
       <filename>generator.rb</filename>
@@ -439,12 +421,6 @@
       <checksum>9911B5A5</checksum>
     </file>
     <file>
-      <filename>EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A0D65AC0</checksum>
-    </file>
-    <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -461,6 +437,30 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>4FD58D3F</checksum>
+    </file>
+    <file>
+      <filename>HPXMLvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>CE534456</checksum>
+    </file>
+    <file>
+      <filename>hvac_sizing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8B2A73DD</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>05C704E0</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>650D9056</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -493,24 +493,6 @@
       <checksum>D533ACAB</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1030688B</checksum>
-    </file>
-    <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>51F0A091</checksum>
-    </file>
-    <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B6A1B9B2</checksum>
-    </file>
-    <file>
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -538,6 +520,24 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>E5B56D54</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>2C38A286</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>7CB7E7CD</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4A23F2F5</checksum>
     </file>
   </files>
 </measure>

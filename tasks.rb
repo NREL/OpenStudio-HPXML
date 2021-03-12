@@ -259,6 +259,7 @@ def create_osws
     'base-misc-loads-large-uncommon2.osw' => 'base-misc-loads-large-uncommon.osw',
     # 'base-misc-loads-none.osw' => 'base.osw',
     'base-misc-neighbor-shading.osw' => 'base.osw',
+    'base-misc-shielding-of-home.osw' => 'base.osw',
     'base-misc-usage-multiplier.osw' => 'base.osw',
     # 'base-multiple-buildings.osw' => 'base.osw',
     'base-pv.osw' => 'base.osw',
@@ -588,7 +589,7 @@ def get_values(osw_file, step)
     step.setArgument('air_leakage_units', HPXML::UnitsACH)
     step.setArgument('air_leakage_house_pressure', 50)
     step.setArgument('air_leakage_value', 3)
-    step.setArgument('air_leakage_shelter_coefficient', Constants.Auto)
+    step.setArgument('air_leakage_shielding_of_home', Constants.Auto)
     step.setArgument('heating_system_type', HPXML::HVACTypeFurnace)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeNaturalGas)
     step.setArgument('heating_system_heating_efficiency', 0.92)
@@ -1864,6 +1865,12 @@ def get_values(osw_file, step)
     step.setArgument('hot_tub_heater_annual_kwh', '260.0')
     step.setArgument('fuel_loads_grill_fuel_type', HPXML::FuelTypeOil)
     step.setArgument('fuel_loads_fireplace_fuel_type', HPXML::FuelTypeWoodPellets)
+  elsif ['base-misc-neighbor-shading.osw'].include? osw_file
+    step.setArgument('neighbor_back_distance', 10)
+    step.setArgument('neighbor_front_distance', 15)
+    step.setArgument('neighbor_front_height', '12')
+  elsif ['base-misc-shielding-of-home.osw'].include? osw_file
+    step.setArgument('air_leakage_shielding_of_home', HPXML::ShieldingWellShielded)
   elsif ['base-misc-usage-multiplier.osw'].include? osw_file
     step.setArgument('water_fixtures_usage_multiplier', 0.9)
     step.setArgument('lighting_usage_multiplier_interior', 0.9)
@@ -1904,10 +1911,6 @@ def get_values(osw_file, step)
     step.setArgument('fuel_loads_fireplace_frac_sensible', '0.5')
     step.setArgument('fuel_loads_fireplace_frac_latent', '0.1')
     step.setArgument('fuel_loads_fireplace_usage_multiplier', 0.9)
-  elsif ['base-misc-neighbor-shading.osw'].include? osw_file
-    step.setArgument('neighbor_back_distance', 10)
-    step.setArgument('neighbor_front_distance', 15)
-    step.setArgument('neighbor_front_height', '12')
   elsif ['base-pv.osw'].include? osw_file
     step.setArgument('pv_system_module_type_1', HPXML::PVModuleTypeStandard)
     step.setArgument('pv_system_location_1', HPXML::LocationRoof)
@@ -2795,7 +2798,7 @@ def create_hpxmls
     'base-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-misc-loads-none.xml' => 'base.xml',
     'base-misc-neighbor-shading.xml' => 'base.xml',
-    'base-misc-shelter-coefficient.xml' => 'base.xml',
+    'base-misc-shielding-of-home.xml' => 'base.xml',
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
@@ -3016,8 +3019,8 @@ def set_hpxml_site(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.site.fuels = [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas]
     hpxml.site.site_type = HPXML::SiteTypeSuburban
-  elsif ['base-misc-shelter-coefficient.xml'].include? hpxml_file
-    hpxml.site.shelter_coefficient = 0.8
+  elsif ['base-misc-shielding-of-home.xml'].include? hpxml_file
+    hpxml.site.shielding_of_home = HPXML::ShieldingWellShielded
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.site.site_type = nil
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
