@@ -144,6 +144,7 @@ def create_hpxmls
     'invalid_files/invalid-distribution-cfa-served.xml' => 'base.xml',
     'invalid_files/refrigerators-multiple-primary.xml' => 'base.xml',
     'invalid_files/refrigerators-no-primary.xml' => 'base.xml',
+    'invalid_files/ptac-unattached-cooling-system.xml' => 'base-hvac-ptac-electric-resistance.xml',
     'base-appliances-coal.xml' => 'base.xml',
     'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
     'base-appliances-dehumidifier-50percent.xml' => 'base-appliances-dehumidifier.xml',
@@ -397,6 +398,8 @@ def create_hpxmls
     'base-hvac-undersized.xml' => 'base.xml',
     'base-hvac-undersized-allow-increased-fixed-capacities.xml' => 'base-hvac-undersized.xml',
     'base-hvac-wall-furnace-elec-only.xml' => 'base.xml',
+    'base-hvac-ptac-electric-resistance.xml' => 'base.xml',
+    'base-hvac-pthp.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-lighting-ceiling-fans.xml' => 'base.xml',
     'base-lighting-detailed.xml' => 'base.xml',
     'base-lighting-none.xml' => 'base.xml',
@@ -2899,6 +2902,13 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].heating_efficiency_percent = 1
+  elsif ['base-hvac-ptac-electric-resistance.xml'].include? hpxml_file
+    hpxml.heating_systems[0].id = 'HeatingPTAC'
+    hpxml.heating_systems[0].distribution_system_idref = nil
+    hpxml.heating_systems[0].cooling_system_idref = 'CoolingPTAC'
+    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypePTACHeating
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
+    hpxml.heating_systems[0].heating_efficiency_afue = nil
   elsif ['base-hvac-furnace-elec-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
     hpxml.heating_systems[0].heating_efficiency_afue = 1
@@ -3176,6 +3186,15 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].cooling_efficiency_eer = 8.5
     hpxml.cooling_systems[0].cooling_shr = 0.65
     hpxml.cooling_systems[0].compressor_type = nil
+  elsif ['base-hvac-ptac-electric-resistance.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].id = 'CoolingPTAC'
+    hpxml.cooling_systems[0].distribution_system_idref = nil
+    hpxml.cooling_systems[0].cooling_system_type = HPXML::HVACTypePTAC
+    hpxml.cooling_systems[0].cooling_efficiency_seer = nil
+    hpxml.cooling_systems[0].cooling_efficiency_eer = 10.7
+    hpxml.cooling_systems[0].cooling_shr = 0.65
+  elsif ['invalid_files/ptac-unattached-cooling-system.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].id = 'MismatchedCoolingPTAC'
   elsif ['base-hvac-room-ac-only-33percent.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fraction_cool_load_served = 0.33
   elsif ['base-hvac-evap-cooler-only-ducted.xml',
@@ -3357,6 +3376,12 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
       hpxml.heat_pumps[-1].number_of_units_served = 6
       hpxml.heat_pumps[-1].shared_loop_watts = 600
     end
+  elsif ['base-hvac-pthp.xml'].include? hpxml_file
+    hpxml.heat_pumps[-1].distribution_system_idref = nil
+    hpxml.heat_pumps[-1].heat_pump_type = HPXML::HVACTypeHeatPumpPTHP
+    hpxml.heat_pumps[-1].cooling_efficiency_eer = 11.4
+    hpxml.heat_pumps[-1].pump_watts_per_ton = nil
+    hpxml.heat_pumps[-1].compressor_type = HPXML::HVACCompressorTypeSingleStage
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     hpxml.heat_pumps.add(id: 'HeatPump',
@@ -3655,7 +3680,9 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'base-hvac-room-ac-only.xml',
          'base-hvac-stove-oil-only.xml',
          'base-hvac-stove-wood-pellets-only.xml',
-         'base-hvac-wall-furnace-elec-only.xml'].include? hpxml_file
+         'base-hvac-wall-furnace-elec-only.xml',
+         'base-hvac-ptac-electric-resistance.xml',
+         'base-hvac-pthp.xml'].include? hpxml_file
     hpxml.hvac_distributions.clear
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.hvac_distributions.clear

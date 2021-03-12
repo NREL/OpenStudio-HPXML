@@ -265,7 +265,8 @@ class HPXMLTest < MiniTest::Test
                             'water-heater-location.xml' => ['A location is specified as "crawlspace - vented" but no surfaces were found adjacent to this space type.'],
                             'water-heater-location-other.xml' => ["Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem]"],
                             'refrigerators-multiple-primary.xml' => ['More than one refrigerator designated as the primary.'],
-                            'refrigerators-no-primary.xml' => ['Could not find a primary refrigerator.'] }
+                            'refrigerators-no-primary.xml' => ['Could not find a primary refrigerator.'],
+                            'ptac-unattached-cooling-system.xml' => ["Attached cooling system 'CoolingPTAC' not found for HVAC system 'HeatingPTAC'."] }
 
     # Test simulations
     xmls = Dir["#{sample_files_dir}/invalid_files/*.xml"].sort
