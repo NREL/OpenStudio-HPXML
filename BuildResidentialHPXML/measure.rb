@@ -4788,6 +4788,7 @@ class HPXMLFile
 
     if args[:clothes_washer_rated_annual_kwh] != Constants.Auto
       rated_annual_kwh = args[:clothes_washer_rated_annual_kwh]
+      return if Float(rated_annual_kwh) == 0
     end
 
     if args[:clothes_washer_location] != Constants.Auto
@@ -4892,6 +4893,7 @@ class HPXMLFile
     if args[:dishwasher_efficiency_type] == 'RatedAnnualkWh'
       if args[:dishwasher_efficiency] != Constants.Auto
         rated_annual_kwh = args[:dishwasher_efficiency]
+        return if Float(rated_annual_kwh) == 0
       end
     elsif args[:dishwasher_efficiency_type] == 'EnergyFactor'
       energy_factor = args[:dishwasher_efficiency]
@@ -4937,7 +4939,8 @@ class HPXMLFile
     return if args[:refrigerator_location] == 'none'
 
     if args[:refrigerator_rated_annual_kwh] != Constants.Auto
-      refrigerator_rated_annual_kwh = args[:refrigerator_rated_annual_kwh]
+      rated_annual_kwh = args[:refrigerator_rated_annual_kwh]
+      return if Float(rated_annual_kwh) == 0
     end
 
     if args[:refrigerator_location] != Constants.Auto
@@ -4954,7 +4957,7 @@ class HPXMLFile
 
     hpxml.refrigerators.add(id: 'Refrigerator',
                             location: location,
-                            rated_annual_kwh: refrigerator_rated_annual_kwh,
+                            rated_annual_kwh: rated_annual_kwh,
                             primary_indicator: primary_indicator,
                             usage_multiplier: usage_multiplier)
   end
@@ -4964,6 +4967,7 @@ class HPXMLFile
 
     if args[:extra_refrigerator_rated_annual_kwh] != Constants.Auto
       rated_annual_kwh = args[:extra_refrigerator_rated_annual_kwh]
+      return if Float(rated_annual_kwh) == 0
     end
 
     if args[:extra_refrigerator_location] != Constants.Auto
@@ -4986,6 +4990,7 @@ class HPXMLFile
 
     if args[:freezer_rated_annual_kwh] != Constants.Auto
       rated_annual_kwh = args[:freezer_rated_annual_kwh]
+      return if Float(rated_annual_kwh) == 0
     end
 
     if args[:freezer_location] != Constants.Auto

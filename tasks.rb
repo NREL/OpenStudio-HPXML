@@ -288,6 +288,11 @@ def create_osws
     'extra-enclosure-atticroof-conditioned-eaves-hip.osw' => 'extra-enclosure-atticroof-conditioned-eaves-gable.osw',
     'extra-vacancy-6-months.osw' => 'base-schedules-stochastic.osw',
     'extra-schedules-random-seed.osw' => 'base-schedules-stochastic.osw',
+    'extra-zero-refrigerator-kwh.osw' => 'base.osw',
+    'extra-zero-extra-refrigerator-kwh.osw' => 'base.osw',
+    'extra-zero-freezer-kwh.osw' => 'base.osw',
+    'extra-zero-clothes-washer-kwh.osw' => 'base.osw',
+    'extra-zero-dishwasher-kwh.osw' => 'base.osw',
 
     'extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-gable.osw' => 'extra-bldgtype-single-family-attached-slab.osw',
     'extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-hip.osw' => 'extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-gable.osw',
@@ -2019,6 +2024,17 @@ def get_values(osw_file, step)
     step.setArgument('schedules_vacancy_end_day_of_month', 30)
   elsif ['extra-schedules-random-seed.osw'].include? osw_file
     step.setArgument('schedules_random_seed', 123)
+  elsif ['extra-zero-refrigerator-kwh.osw'].include? osw_file
+    step.setArgument('refrigerator_rated_annual_kwh', '0')
+  elsif ['extra-zero-extra-refrigerator-kwh.osw'].include? osw_file
+    step.setArgument('extra_refrigerator_rated_annual_kwh', '0')
+  elsif ['extra-zero-freezer-kwh.osw'].include? osw_file
+    step.setArgument('freezer_rated_annual_kwh', '0')
+  elsif ['extra-zero-clothes-washer-kwh.osw'].include? osw_file
+    step.setArgument('clothes_washer_rated_annual_kwh', '0')
+    step.setArgument('clothes_dryer_location', 'none')
+  elsif ['extra-zero-dishwasher-kwh.osw'].include? osw_file
+    step.setArgument('dishwasher_efficiency', '0')
 
   elsif ['extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-gable.osw'].include? osw_file
     step.setArgument('geometry_num_floors_above_grade', 2)
