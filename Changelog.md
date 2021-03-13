@@ -3,6 +3,7 @@
 __New Features__
 - **Breaking change**: Replaces `Site/extension/ShelterCoefficient` with `Site/ShieldingofHome`.
 - Moves additional error-checking from the ruby measure to the schematron validator.
+- Adds more detail to error messages regarding the wrong data type in the HPXML file.
 
 __Bugfixes__
 - Fixes ruby error if `SystemIdentifier` element exists without an 'id' attribute.
