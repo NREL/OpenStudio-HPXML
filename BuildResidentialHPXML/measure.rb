@@ -594,10 +594,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('roof_radiant_barrier', true)
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('roof_radiant_barrier', true)
     arg.setDisplayName('Roof: Has Radiant Barrier')
     arg.setDescription('Specifies whether the attic has a radiant barrier.')
-    arg.setDefaultValue(Constants.Auto)
+    arg.setDefaultValue(false)
     args << arg
 
     roof_radiant_barrier_grade_choices = OpenStudio::StringVector.new
@@ -3450,11 +3450,9 @@ class HPXMLFile
         emittance = args[:roof_emittance]
       end
 
-      if args[:roof_radiant_barrier] != Constants.Auto
-        radiant_barrier = args[:roof_radiant_barrier]
-        if to_boolean(radiant_barrier)
-          radiant_barrier_grade = args[:roof_radiant_barrier_grade]
-        end
+      radiant_barrier = args[:roof_radiant_barrier]
+      if args[:roof_radiant_barrier]
+        radiant_barrier_grade = args[:roof_radiant_barrier_grade]
       end
 
       if args[:geometry_roof_type] == 'flat'

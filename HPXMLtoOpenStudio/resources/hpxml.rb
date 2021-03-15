@@ -5442,7 +5442,7 @@ class HPXML < Object
         sys_ids[obj.id] = 0 if sys_ids[obj.id].nil?
         sys_ids[obj.id] += 1
 
-        errors << "Empty SystemIdentifier ID ('#{obj.id}') detected for #{attribute}." if obj.id.size == 0
+        errors << "Empty SystemIdentifier ID ('#{obj.id}') detected for #{attribute}." if !obj.id || obj.id.size == 0
       end
     end
     sys_ids.each do |sys_id, cnt|

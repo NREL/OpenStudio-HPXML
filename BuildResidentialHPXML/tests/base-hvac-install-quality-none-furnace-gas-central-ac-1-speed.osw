@@ -265,7 +265,7 @@
         "roof_color": "auto",
         "roof_emittance": "0.92",
         "roof_material_type": "asphalt or fiberglass shingles",
-        "roof_radiant_barrier": "false",
+        "roof_radiant_barrier": false,
         "roof_radiant_barrier_grade": "1",
         "roof_solar_absorptance": "auto",
         "schedules_type": "default",

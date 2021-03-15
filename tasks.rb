@@ -540,7 +540,7 @@ def get_values(osw_file, step)
     step.setArgument('roof_assembly_r', 2.3)
     step.setArgument('roof_solar_absorptance', Constants.Auto)
     step.setArgument('roof_emittance', '0.92')
-    step.setArgument('roof_radiant_barrier', 'false')
+    step.setArgument('roof_radiant_barrier', false)
     step.setArgument('roof_radiant_barrier_grade', '1')
     step.setArgument('neighbor_front_distance', 0)
     step.setArgument('neighbor_back_distance', 0)
@@ -881,7 +881,7 @@ def get_values(osw_file, step)
     step.setArgument('ducts_supply_location', HPXML::LocationBasementConditioned)
     step.setArgument('ducts_return_location', HPXML::LocationBasementConditioned)
   elsif ['base-atticroof-radiant-barrier.osw'].include? osw_file
-    step.setArgument('roof_radiant_barrier', 'true')
+    step.setArgument('roof_radiant_barrier', true)
     step.setArgument('roof_radiant_barrier_grade', '2')
   elsif ['base-atticroof-unvented-insulated-roof.osw'].include? osw_file
     step.setArgument('ceiling_assembly_r', 2.1)
@@ -1772,7 +1772,7 @@ def get_values(osw_file, step)
     step.setArgument('roof_color', HPXML::ColorLight)
     step.removeArgument('roof_material_type')
     step.setArgument('roof_emittance', Constants.Auto)
-    step.setArgument('roof_radiant_barrier', Constants.Auto)
+    step.setArgument('roof_radiant_barrier', false)
     step.removeArgument('wall_siding_type')
     step.setArgument('wall_color', HPXML::ColorMedium)
     step.setArgument('wall_emittance', Constants.Auto)
@@ -4697,9 +4697,6 @@ def set_hpxml_slabs(hpxml_file, hpxml)
       slab.carpet_fraction = nil
       slab.carpet_fraction = nil
     end
-  elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
-    hpxml.slabs[0].interior_adjacent_to = HPXML::LocationBasementUnconditioned
-    hpxml.slabs[0].depth_below_grade = 7.0
   elsif ['invalid_files/slab-zero-exposed-perimeter.xml'].include? hpxml_file
     hpxml.slabs[0].exposed_perimeter = 0
   elsif ['invalid_files/enclosure-living-missing-floor-slab.xml',
@@ -6278,13 +6275,6 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
         duct.duct_surface_area = nil
         duct.duct_location = nil
       end
-    end
-  elsif ['invalid_files/missing-duct-location-and-surface-area.xml'].include? hpxml_file
-    hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
-
-      hvac_distribution.ducts[1].duct_surface_area = nil
-      hvac_distribution.ducts[1].duct_location = nil
     end
   elsif ['invalid_files/missing-duct-location.xml'].include? hpxml_file
     hpxml.hvac_distributions.each do |hvac_distribution|

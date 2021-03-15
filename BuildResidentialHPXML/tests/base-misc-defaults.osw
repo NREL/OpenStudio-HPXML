@@ -255,7 +255,7 @@
         "roof_assembly_r": 2.3,
         "roof_color": "light",
         "roof_emittance": "auto",
-        "roof_radiant_barrier": "auto",
+        "roof_radiant_barrier": false,
         "roof_radiant_barrier_grade": "1",
         "roof_solar_absorptance": "auto",
         "schedules_type": "default",
