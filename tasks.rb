@@ -819,7 +819,10 @@ def get_values(osw_file, step)
     step.setArgument('hot_tub_heater_annual_kwh', Constants.Auto)
     step.setArgument('hot_tub_heater_annual_therm', Constants.Auto)
     step.setArgument('hot_tub_heater_usage_multiplier', 1.0)
-  elsif ['base-appliances-coal.osw'].include? osw_file
+  end
+
+  # Appliances
+  if ['base-appliances-coal.osw'].include? osw_file
     step.setArgument('clothes_dryer_fuel_type', HPXML::FuelTypeCoal)
     step.setArgument('clothes_dryer_efficiency', '3.3')
     step.setArgument('clothes_dryer_control_type', HPXML::ClothesDryerControlTypeMoisture)
@@ -935,10 +938,10 @@ def get_values(osw_file, step)
     step.setArgument('door_area', 20.0)
     step.setArgument('plug_loads_other_annual_kwh', '819.0')
   elsif ['base-bldgtype-multifamily-shared-boiler-only-baseboard.osw'].include? osw_file
-    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, Shared, w/ Baseboard")
+    step.setArgument('heating_system_type', "Shared #{HPXML::HVACTypeBoiler} w/ Baseboard")
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-bldgtype-multifamily-shared-boiler-only-fan-coil.osw'].include? osw_file
-    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, Shared, w/ Ductless Fan Coil")
+    step.setArgument('heating_system_type', "Shared #{HPXML::HVACTypeBoiler} w/ Ductless Fan Coil")
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-bldgtype-multifamily-shared-mechvent.osw'].include? osw_file
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeSupply)
@@ -972,7 +975,10 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_tank_volume', '120')
     step.setArgument('water_heater_efficiency', 0.59)
     step.setArgument('water_heater_recovery_efficiency', '0.76')
-  elsif ['base-dhw-combi-tankless.osw'].include? osw_file
+  end
+
+  # DHW
+  if ['base-dhw-combi-tankless.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeCombiTankless)
     step.setArgument('water_heater_tank_volume', Constants.Auto)
   elsif ['base-dhw-combi-tankless-outside.osw'].include? osw_file
@@ -1156,7 +1162,10 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeWoodCord)
     step.setArgument('water_heater_tank_volume', '50')
     step.setArgument('water_heater_efficiency', 0.59)
-  elsif ['base-enclosure-2stories.osw'].include? osw_file
+  end
+
+  # Enclosure
+  if ['base-enclosure-2stories.osw'].include? osw_file
     step.setArgument('geometry_cfa', 4050.0)
     step.setArgument('geometry_num_floors_above_grade', 2)
     step.setArgument('window_area_front', 216.0)
@@ -1268,7 +1277,10 @@ def get_values(osw_file, step)
     step.setArgument('window_area_back', 0)
     step.setArgument('window_area_left', 0)
     step.setArgument('window_area_right', 0)
-  elsif ['base-foundation-ambient.osw'].include? osw_file
+  end
+
+  # Foundation
+  if ['base-foundation-ambient.osw'].include? osw_file
     step.setArgument('geometry_cfa', 1350.0)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeAmbient)
     step.setArgument('floor_assembly_r', 18.7)
@@ -1357,7 +1369,10 @@ def get_values(osw_file, step)
   elsif ['base-foundation-walkout-basement.osw'].include? osw_file
     step.setArgument('geometry_foundation_height_above_grade', 5.0)
     step.setArgument('foundation_wall_insulation_distance_to_bottom', 4.0)
-  elsif ['base-hvac-air-to-air-heat-pump-1-speed.osw'].include? osw_file
+  end
+
+  # HVAC
+  if ['base-hvac-air-to-air-heat-pump-1-speed.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', 'none')
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpAirToAir)
@@ -1394,29 +1409,29 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_cooling_efficiency', 22.0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
   elsif ['base-hvac-boiler-coal-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
+    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeCoal)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-boiler-elec-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
+    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('heating_system_heating_efficiency', 1.0)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.osw'].include? osw_file
-    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
+    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
   elsif ['base-hvac-boiler-gas-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
+    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-boiler-oil-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
+    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeOil)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-boiler-propane-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
+    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_fuel', HPXML::FuelTypePropane)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-boiler-wood-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
+    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeWoodCord)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-central-ac-only-1-speed.osw'].include? osw_file
@@ -1688,7 +1703,10 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('heating_system_heating_efficiency', 1.0)
     step.setArgument('cooling_system_type', 'none')
-  elsif ['base-lighting-ceiling-fans.osw'].include? osw_file
+  end
+
+  # Lighting
+  if ['base-lighting-ceiling-fans.osw'].include? osw_file
     step.setArgument('ceiling_fan_present', true)
     step.setArgument('ceiling_fan_efficiency', '100.0')
     step.setArgument('ceiling_fan_quantity', '4')
@@ -1700,7 +1718,10 @@ def get_values(osw_file, step)
     step.setArgument('holiday_lighting_period_begin_day_of_month', '24')
     step.setArgument('holiday_lighting_period_end_month', '1')
     step.setArgument('holiday_lighting_period_end_day_of_month', '6')
-  elsif ['base-location-AMY-2012.osw'].include? osw_file
+  end
+
+  # Location
+  if ['base-location-AMY-2012.osw'].include? osw_file
     step.setArgument('weather_station_epw_filepath', 'US_CO_Boulder_AMY_2012.epw')
   elsif ['base-location-baltimore-md.osw'].include? osw_file
     step.setArgument('weather_station_epw_filepath', 'USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw')
@@ -1718,7 +1739,10 @@ def get_values(osw_file, step)
     step.setArgument('weather_station_epw_filepath', 'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw')
   elsif ['base-location-portland-or.osw'].include? osw_file
     step.setArgument('weather_station_epw_filepath', 'USA_OR_Portland.Intl.AP.726980_TMY3.epw')
-  elsif ['base-mechvent-balanced.osw'].include? osw_file
+  end
+
+  # Mechanical Ventilation
+  if ['base-mechvent-balanced.osw'].include? osw_file
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeBalanced)
     step.setArgument('mech_vent_fan_power', 60)
   elsif ['base-mechvent-bath-kitchen-fans.osw'].include? osw_file
@@ -1767,7 +1791,10 @@ def get_values(osw_file, step)
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeSupply)
   elsif ['base-mechvent-whole-house-fan.osw'].include? osw_file
     step.setArgument('whole_house_fan_present', true)
-  elsif ['base-misc-defaults.osw'].include? osw_file
+  end
+
+  # Misc
+  if ['base-misc-defaults.osw'].include? osw_file
     step.removeArgument('simulation_control_timestep')
     step.removeArgument('site_type')
     step.setArgument('geometry_num_bathrooms', Constants.Auto)
@@ -1918,7 +1945,10 @@ def get_values(osw_file, step)
     step.setArgument('fuel_loads_fireplace_frac_sensible', '0.5')
     step.setArgument('fuel_loads_fireplace_frac_latent', '0.1')
     step.setArgument('fuel_loads_fireplace_usage_multiplier', 0.9)
-  elsif ['base-pv.osw'].include? osw_file
+  end
+
+  # PV
+  if ['base-pv.osw'].include? osw_file
     step.setArgument('pv_system_module_type_1', HPXML::PVModuleTypeStandard)
     step.setArgument('pv_system_location_1', HPXML::LocationRoof)
     step.setArgument('pv_system_tracking_1', HPXML::PVTrackingTypeFixed)
@@ -1927,7 +1957,10 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_tracking_2', HPXML::PVTrackingTypeFixed)
     step.setArgument('pv_system_array_azimuth_2', 90)
     step.setArgument('pv_system_max_power_output_2', 1500)
-  elsif ['base-simcontrol-calendar-year-custom.osw'].include? osw_file
+  end
+
+  # Simulation Control
+  if ['base-simcontrol-calendar-year-custom.osw'].include? osw_file
     step.setArgument('simulation_control_run_period_calendar_year', 2008)
   elsif ['base-simcontrol-daylight-saving-custom.osw'].include? osw_file
     step.setArgument('simulation_control_daylight_saving_enabled', true)
@@ -1937,11 +1970,6 @@ def get_values(osw_file, step)
     step.setArgument('simulation_control_daylight_saving_end_day_of_month', 6)
   elsif ['base-simcontrol-daylight-saving-disabled.osw'].include? osw_file
     step.setArgument('simulation_control_daylight_saving_enabled', false)
-  elsif ['base-schedules-stochastic.osw'].include? osw_file
-    step.setArgument('schedules_type', 'stochastic')
-  elsif ['base-schedules-user-specified.osw'].include? osw_file
-    step.setArgument('schedules_type', 'user-specified')
-    step.setArgument('schedules_path', 'BuildResidentialHPXML/tests/schedules/user-specified.csv')
   elsif ['base-simcontrol-runperiod-1-month.osw'].include? osw_file
     step.setArgument('simulation_control_run_period_begin_month', 1)
     step.setArgument('simulation_control_run_period_begin_day_of_month', 1)
@@ -1949,6 +1977,14 @@ def get_values(osw_file, step)
     step.setArgument('simulation_control_run_period_end_day_of_month', 31)
   elsif ['base-simcontrol-timestep-10-mins.osw'].include? osw_file
     step.setArgument('simulation_control_timestep', '10')
+  end
+
+  # Schedules
+  if ['base-schedules-stochastic.osw'].include? osw_file
+    step.setArgument('schedules_type', 'stochastic')
+  elsif ['base-schedules-user-specified.osw'].include? osw_file
+    step.setArgument('schedules_type', 'user-specified')
+    step.setArgument('schedules_path', 'BuildResidentialHPXML/tests/schedules/user-specified.csv')
   end
 
   # Extras
@@ -1991,7 +2027,7 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_heating_capacity_2', '16000.0')
   elsif ['extra-second-heating-system-boiler-to-heating-system.osw'].include? osw_file
     step.setArgument('heating_system_fraction_heat_load_served', 0.75)
-    step.setArgument('heating_system_type_2', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
+    step.setArgument('heating_system_type_2', HPXML::HVACTypeBoiler)
   elsif ['extra-second-heating-system-portable-heater-to-heat-pump.osw'].include? osw_file
     step.setArgument('heat_pump_heating_capacity', '48000.0')
     step.setArgument('heat_pump_fraction_heat_load_served', 0.75)
@@ -2008,7 +2044,7 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_heating_capacity_2', '16000.0')
   elsif ['extra-second-heating-system-boiler-to-heat-pump.osw'].include? osw_file
     step.setArgument('heat_pump_fraction_heat_load_served', 0.75)
-    step.setArgument('heating_system_type_2', "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
+    step.setArgument('heating_system_type_2', HPXML::HVACTypeBoiler)
   elsif ['extra-enclosure-windows-shading.osw'].include? osw_file
     step.setArgument('window_interior_shading_winter', 0.99)
     step.setArgument('window_interior_shading_summer', 0.01)
@@ -2376,7 +2412,7 @@ def get_values(osw_file, step)
     step.setArgument('geometry_attic_type', HPXML::AtticTypeConditioned)
     step.setArgument('ceiling_assembly_r', 0.0)
   elsif ['invalid_files/single-family-detached-with-shared-system.osw'].include? osw_file
-    step.setArgument('heating_system_type', "#{HPXML::HVACTypeBoiler}, Shared, w/ Baseboard")
+    step.setArgument('heating_system_type', "Shared #{HPXML::HVACTypeBoiler} w/ Baseboard")
   end
   return step
 end

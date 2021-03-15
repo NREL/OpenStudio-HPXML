@@ -158,7 +158,7 @@
         "heating_system_heating_efficiency": 0.92,
         "heating_system_heating_efficiency_2": 1.0,
         "heating_system_type": "none",
-        "heating_system_type_2": "Boiler, In-Unit, w/ Baseboard",
+        "heating_system_type_2": "Boiler",
         "holiday_lighting_daily_kwh": "auto",
         "holiday_lighting_period_begin_day_of_month": "auto",
         "holiday_lighting_period_begin_month": "auto",

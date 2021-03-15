@@ -130,7 +130,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'dhw-indirect-without-boiler.osw' => 'water_heater_type=space-heating boiler with storage tank and heating_system_type=Furnace',
       'foundation-wall-insulation-greater-than-height.osw' => 'foundation_wall_insulation_distance_to_bottom=6.0 and geometry_foundation_height=4.0',
       'conditioned-attic-with-one-floor-above-grade.osw' => 'geometry_num_floors_above_grade=1 and geometry_attic_type=ConditionedAttic',
-      'single-family-detached-with-shared-system.osw' => 'geometry_unit_type=single-family detached and heating_system_type=Boiler, Shared, w/ Baseboard'
+      'single-family-detached-with-shared-system.osw' => 'geometry_unit_type=single-family detached and heating_system_type=Shared Boiler w/ Baseboard'
     }
 
     measures = {}

@@ -6,7 +6,7 @@
     {
       "arguments": {
         "air_leakage_house_pressure": 50,
-        "air_leakage_shelter_coefficient": "auto",
+        "air_leakage_shielding_of_home": "auto",
         "air_leakage_units": "ACH",
         "air_leakage_value": 3,
         "bathroom_fans_quantity": "0",
@@ -162,7 +162,7 @@
         "heating_system_heating_capacity_2": "auto",
         "heating_system_heating_efficiency": 0.92,
         "heating_system_heating_efficiency_2": 1.0,
-        "heating_system_type": "Boiler, Shared, w/ Baseboard",
+        "heating_system_type": "Shared Boiler w/ Baseboard",
         "heating_system_type_2": "none",
         "holiday_lighting_daily_kwh": "auto",
         "holiday_lighting_period_begin_day_of_month": "auto",
@@ -266,7 +266,7 @@
         "roof_color": "auto",
         "roof_emittance": "0.92",
         "roof_material_type": "asphalt or fiberglass shingles",
-        "roof_radiant_barrier": "false",
+        "roof_radiant_barrier": false,
         "roof_radiant_barrier_grade": "1",
         "roof_solar_absorptance": "auto",
         "schedules_type": "default",
