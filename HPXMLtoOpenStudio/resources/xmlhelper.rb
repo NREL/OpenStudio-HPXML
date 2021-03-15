@@ -141,6 +141,12 @@ class XMLHelper
     return element.get(attr_name)
   end
 
+  def self.delete_attribute(element, attr_name)
+    return if element.nil?
+
+    element.unset(attr_name)
+  end
+
   def self.validate(doc, xsd_path, runner = nil)
     if Gem::Specification::find_all_by_name('nokogiri').any?
       require 'nokogiri'
