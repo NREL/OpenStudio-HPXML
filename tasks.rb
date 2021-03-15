@@ -2465,6 +2465,7 @@ def create_hpxmls
     'invalid_files/invalid-facility-type-surfaces.xml' => 'base.xml',
     'invalid_files/invalid-foundation-wall-properties.xml' => 'base-foundation-unconditioned-basement-wall-insulation.xml',
     'invalid_files/invalid-id.xml' => 'base-enclosure-skylights.xml',
+    'invalid_files/invalid-id2.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/invalid-infiltration-volume.xml' => 'base.xml',
     'invalid_files/invalid-input-parameters.xml' => 'base.xml',
     'invalid_files/invalid-neighbor-shading-azimuth.xml' => 'base-misc-neighbor-shading.xml',
@@ -2894,6 +2895,9 @@ def create_hpxmls
       elsif ['invalid_files/invalid-schema-version.xml'].include? derivative
         root = XMLHelper.get_element(hpxml_doc, '/HPXML')
         XMLHelper.add_attribute(root, 'schemaVersion', '2.3')
+      elsif ['invalid_files/invalid-id2.xml'].include? derivative
+        element = XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/SystemIdentifier')
+        XMLHelper.delete_attribute(element, 'id')
       end
 
       if derivative.include? 'ASHRAE_Standard_140'
@@ -7910,12 +7914,53 @@ def create_schematron_hpxml_validator(hpxml_docs)
     end
   end
 
+  # Add ID/IDref checks
+  # TODO: Dynamically obtain these lists
+  id_names = ['SystemIdentifier',
+              'BuildingID']
+  idref_names = ['AttachedToRoof',
+                 'AttachedToFrameFloor',
+                 'AttachedToSlab',
+                 'AttachedToFoundationWall',
+                 'AttachedToWall',
+                 'DistributionSystem',
+                 'AttachedToHVACDistributionSystem',
+                 'RelatedHVACSystem',
+                 'ConnectedTo']
+  elements_in_sample_files.each do |element_xpath|
+    element_name = element_xpath.split('/')[-1].gsub('h:', '')
+    context_xpath = "/#{element_xpath.split('/')[0..-2].join('/')}"
+    if id_names.include? element_name
+      rule = rules[context_xpath]
+      if rule.nil?
+        # Need new rule
+        rule = XMLHelper.add_element(pattern, 'sch:rule')
+        XMLHelper.add_attribute(rule, 'context', context_xpath)
+        rules[context_xpath] = rule
+      end
+      assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected id attribute for #{element_name}", :string)
+      XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+      XMLHelper.add_attribute(assertion, 'test', "count(h:#{element_name}[@id]) = 1 or not (h:#{element_name})")
+    elsif idref_names.include? element_name
+      rule = rules[context_xpath]
+      if rule.nil?
+        # Need new rule
+        rule = XMLHelper.add_element(pattern, 'sch:rule')
+        XMLHelper.add_attribute(rule, 'context', context_xpath)
+        rules[context_xpath] = rule
+      end
+      assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected idref attribute for #{element_name}", :string)
+      XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+      XMLHelper.add_attribute(assertion, 'test', "count(h:#{element_name}[@idref]) = 1 or not(h:#{element_name})")
+    end
+  end
+
   XMLHelper.write_file(hpxml_validator, File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'HPXMLvalidator.xml'))
 end
 
 def get_element_full_xpaths(element_xpaths, complex_type_or_group_dict, element_xpath, element_type)
   if not complex_type_or_group_dict.keys.include? element_type
-    return element_xpaths[element_xpath] = element_type
+    element_xpaths[element_xpath] = element_type
   else
     complex_type_or_group = deep_copy_object(complex_type_or_group_dict[element_type])
     complex_type_or_group.each do |k, v|
