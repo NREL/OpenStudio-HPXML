@@ -1323,14 +1323,6 @@
   </sch:pattern>
 
   <sch:pattern>
-    <sch:title>[ClothesDryerType=Detailed]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer[h:CombinedEnergyFactor | h:EnergyFactor]'>
-      <sch:assert role='ERROR' test='count(h:ControlType) = 1'>Expected 1 element(s) for xpath: ControlType</sch:assert>
-      <sch:assert role='ERROR' test='h:ControlType[text()="timer" or text()="moisture"] or not(h:ControlType)'>Expected ControlType to be 'timer' or 'moisture'</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern>
     <sch:title>[ClothesDryerType=Shared]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer[h:IsSharedAppliance="true"]'>
       <sch:assert role='ERROR' test='count(../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]</sch:assert>

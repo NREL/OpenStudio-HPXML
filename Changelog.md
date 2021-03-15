@@ -2,6 +2,7 @@
 
 __New Features__
 - **Breaking change**: Replaces `Site/extension/ShelterCoefficient` with `Site/ShieldingofHome`.
+- Removes `ClothesDryer/ControlType` from being a required input, it is not used.
 - Moves additional error-checking from the ruby measure to the schematron validator.
 - Adds more detail to error messages regarding the wrong data type in the HPXML file.
 

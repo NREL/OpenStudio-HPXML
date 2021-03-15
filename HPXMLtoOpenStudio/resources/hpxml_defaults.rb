@@ -1052,10 +1052,8 @@ class HPXMLDefaults
         clothes_dryer.location = HPXML::LocationLivingSpace
         clothes_dryer.location_isdefaulted = true
       end
-      if clothes_dryer.control_type.nil?
+      if clothes_dryer.combined_energy_factor.nil?
         default_values = HotWaterAndAppliances.get_clothes_dryer_default_values(eri_version, clothes_dryer.fuel_type)
-        clothes_dryer.control_type = default_values[:control_type]
-        clothes_dryer.control_type_isdefaulted = true
         clothes_dryer.combined_energy_factor = default_values[:combined_energy_factor]
         clothes_dryer.combined_energy_factor_isdefaulted = true
       end

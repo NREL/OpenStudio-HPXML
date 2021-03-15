@@ -1876,16 +1876,6 @@ If not entered, the simulation will not include a clothes dryer.
   .. [#] VentedFlowRate only required if IsVented is true.
   .. [#] VentedFlowRate default based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
-If the CombinedEnergyFactor or EnergyFactor is provided, a complete set of EnergyGuide label information is entered in ``ClothesDryer``.
-
-  ===============  =======  =======  ===========  ========  =======  ================
-  Element          Type     Units    Constraints  Required  Default  Notes
-  ===============  =======  =======  ===========  ========  =======  ================
-  ``ControlType``  string            See [#]_     Yes                Type of controls
-  ===============  =======  =======  ===========  ========  =======  ================
-
-  .. [#] ControlType choices are "timer" or "moisture".
-
 Clothes dryer energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 Addendum A <https://www.resnet.us/wp-content/uploads/ANSI_RESNET_ICC-301-2019-Addendum-A-2019_7.16.20-1.pdf>`_.
 
 HPXML Dishwasher
