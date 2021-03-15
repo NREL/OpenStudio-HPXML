@@ -8,7 +8,6 @@ class Lighting
     end
 
     if fractions[[HPXML::LocationInterior, HPXML::LightingTypeCFL]].nil? # Not the lighting group(s) we're interested in
-      runner.registerWarning('No lighting specified, the model will not include lighting energy use.')
       return
     end
 
