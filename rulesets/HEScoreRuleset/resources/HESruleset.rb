@@ -156,7 +156,7 @@ class HEScoreRuleset
                                      orig_roof.roof_type)
         if roof_area.nil?
           orig_attic.attached_frame_floors.each do |orig_frame_floor|
-            roof_area = orig_frame_floor.area / (2. * Math.cos(@roof_angle_rad))
+            roof_area = orig_frame_floor.area / Math.cos(@roof_angle_rad)
           end
         end
         if @is_townhouse
