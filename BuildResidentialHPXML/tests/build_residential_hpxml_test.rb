@@ -220,6 +220,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       end
       hpxml.roofs.each do |roof|
         roof.azimuth = nil
+        roof.radiant_barrier = nil
       end
       hpxml.walls.each do |wall|
         wall.azimuth = nil

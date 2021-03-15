@@ -259,6 +259,7 @@ def create_osws
     'base-misc-loads-large-uncommon2.osw' => 'base-misc-loads-large-uncommon.osw',
     # 'base-misc-loads-none.osw' => 'base.osw',
     'base-misc-neighbor-shading.osw' => 'base.osw',
+    'base-misc-shielding-of-home.osw' => 'base.osw',
     'base-misc-usage-multiplier.osw' => 'base.osw',
     # 'base-multiple-buildings.osw' => 'base.osw',
     'base-pv.osw' => 'base.osw',
@@ -288,6 +289,11 @@ def create_osws
     'extra-enclosure-atticroof-conditioned-eaves-hip.osw' => 'extra-enclosure-atticroof-conditioned-eaves-gable.osw',
     'extra-vacancy-6-months.osw' => 'base-schedules-stochastic.osw',
     'extra-schedules-random-seed.osw' => 'base-schedules-stochastic.osw',
+    'extra-zero-refrigerator-kwh.osw' => 'base.osw',
+    'extra-zero-extra-refrigerator-kwh.osw' => 'base.osw',
+    'extra-zero-freezer-kwh.osw' => 'base.osw',
+    'extra-zero-clothes-washer-kwh.osw' => 'base.osw',
+    'extra-zero-dishwasher-kwh.osw' => 'base.osw',
 
     'extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-gable.osw' => 'extra-bldgtype-single-family-attached-slab.osw',
     'extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-hip.osw' => 'extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-gable.osw',
@@ -535,7 +541,7 @@ def get_values(osw_file, step)
     step.setArgument('roof_assembly_r', 2.3)
     step.setArgument('roof_solar_absorptance', Constants.Auto)
     step.setArgument('roof_emittance', '0.92')
-    step.setArgument('roof_radiant_barrier', 'false')
+    step.setArgument('roof_radiant_barrier', false)
     step.setArgument('roof_radiant_barrier_grade', '1')
     step.setArgument('neighbor_front_distance', 0)
     step.setArgument('neighbor_back_distance', 0)
@@ -584,7 +590,7 @@ def get_values(osw_file, step)
     step.setArgument('air_leakage_units', HPXML::UnitsACH)
     step.setArgument('air_leakage_house_pressure', 50)
     step.setArgument('air_leakage_value', 3)
-    step.setArgument('air_leakage_shelter_coefficient', Constants.Auto)
+    step.setArgument('air_leakage_shielding_of_home', Constants.Auto)
     step.setArgument('heating_system_type', HPXML::HVACTypeFurnace)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeNaturalGas)
     step.setArgument('heating_system_heating_efficiency', 0.92)
@@ -876,7 +882,7 @@ def get_values(osw_file, step)
     step.setArgument('ducts_supply_location', HPXML::LocationBasementConditioned)
     step.setArgument('ducts_return_location', HPXML::LocationBasementConditioned)
   elsif ['base-atticroof-radiant-barrier.osw'].include? osw_file
-    step.setArgument('roof_radiant_barrier', 'true')
+    step.setArgument('roof_radiant_barrier', true)
     step.setArgument('roof_radiant_barrier_grade', '2')
   elsif ['base-atticroof-unvented-insulated-roof.osw'].include? osw_file
     step.setArgument('ceiling_assembly_r', 2.1)
@@ -1773,7 +1779,7 @@ def get_values(osw_file, step)
     step.setArgument('roof_color', HPXML::ColorLight)
     step.removeArgument('roof_material_type')
     step.setArgument('roof_emittance', Constants.Auto)
-    step.setArgument('roof_radiant_barrier', Constants.Auto)
+    step.setArgument('roof_radiant_barrier', false)
     step.removeArgument('wall_siding_type')
     step.setArgument('wall_color', HPXML::ColorMedium)
     step.setArgument('wall_emittance', Constants.Auto)
@@ -1866,6 +1872,12 @@ def get_values(osw_file, step)
     step.setArgument('hot_tub_heater_annual_kwh', '260.0')
     step.setArgument('fuel_loads_grill_fuel_type', HPXML::FuelTypeOil)
     step.setArgument('fuel_loads_fireplace_fuel_type', HPXML::FuelTypeWoodPellets)
+  elsif ['base-misc-neighbor-shading.osw'].include? osw_file
+    step.setArgument('neighbor_back_distance', 10)
+    step.setArgument('neighbor_front_distance', 15)
+    step.setArgument('neighbor_front_height', '12')
+  elsif ['base-misc-shielding-of-home.osw'].include? osw_file
+    step.setArgument('air_leakage_shielding_of_home', HPXML::ShieldingWellShielded)
   elsif ['base-misc-usage-multiplier.osw'].include? osw_file
     step.setArgument('water_fixtures_usage_multiplier', 0.9)
     step.setArgument('lighting_usage_multiplier_interior', 0.9)
@@ -1906,10 +1918,6 @@ def get_values(osw_file, step)
     step.setArgument('fuel_loads_fireplace_frac_sensible', '0.5')
     step.setArgument('fuel_loads_fireplace_frac_latent', '0.1')
     step.setArgument('fuel_loads_fireplace_usage_multiplier', 0.9)
-  elsif ['base-misc-neighbor-shading.osw'].include? osw_file
-    step.setArgument('neighbor_back_distance', 10)
-    step.setArgument('neighbor_front_distance', 15)
-    step.setArgument('neighbor_front_height', '12')
   elsif ['base-pv.osw'].include? osw_file
     step.setArgument('pv_system_module_type_1', HPXML::PVModuleTypeStandard)
     step.setArgument('pv_system_location_1', HPXML::LocationRoof)
@@ -2026,11 +2034,24 @@ def get_values(osw_file, step)
     step.setArgument('schedules_vacancy_end_day_of_month', 30)
   elsif ['extra-schedules-random-seed.osw'].include? osw_file
     step.setArgument('schedules_random_seed', 123)
+  elsif ['extra-zero-refrigerator-kwh.osw'].include? osw_file
+    step.setArgument('refrigerator_rated_annual_kwh', '0')
+  elsif ['extra-zero-extra-refrigerator-kwh.osw'].include? osw_file
+    step.setArgument('extra_refrigerator_rated_annual_kwh', '0')
+  elsif ['extra-zero-freezer-kwh.osw'].include? osw_file
+    step.setArgument('freezer_rated_annual_kwh', '0')
+  elsif ['extra-zero-clothes-washer-kwh.osw'].include? osw_file
+    step.setArgument('clothes_washer_rated_annual_kwh', '0')
+    step.setArgument('clothes_dryer_location', 'none')
+  elsif ['extra-zero-dishwasher-kwh.osw'].include? osw_file
+    step.setArgument('dishwasher_efficiency', '0')
 
   elsif ['extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-gable.osw'].include? osw_file
     step.setArgument('geometry_num_floors_above_grade', 2)
     step.setArgument('geometry_attic_type', HPXML::AtticTypeConditioned)
     step.setArgument('geometry_eaves_depth', 2)
+    step.setArgument('ducts_supply_location', HPXML::LocationLivingSpace)
+    step.setArgument('ducts_return_location', HPXML::LocationLivingSpace)
   elsif ['extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-hip.osw'].include? osw_file
     step.setArgument('geometry_roof_type', 'hip')
   elsif ['extra-bldgtype-multifamily-eaves.osw'].include? osw_file
@@ -2319,6 +2340,8 @@ def get_values(osw_file, step)
   elsif ['invalid_files/vented-attic-with-floor-and-roof-insulation.osw'].include? osw_file
     step.setArgument('geometry_attic_type', HPXML::AtticTypeVented)
     step.setArgument('roof_assembly_r', 10)
+    step.setArgument('ducts_supply_location', HPXML::LocationAtticVented)
+    step.setArgument('ducts_return_location', HPXML::LocationAtticVented)
   elsif ['invalid_files/unvented-attic-with-floor-and-roof-insulation.osw'].include? osw_file
     step.setArgument('geometry_attic_type', HPXML::AtticTypeUnvented)
     step.setArgument('roof_assembly_r', 10)
@@ -2328,6 +2351,8 @@ def get_values(osw_file, step)
   elsif ['invalid_files/conditioned-attic-with-floor-insulation.osw'].include? osw_file
     step.setArgument('geometry_num_floors_above_grade', 2)
     step.setArgument('geometry_attic_type', HPXML::AtticTypeConditioned)
+    step.setArgument('ducts_supply_location', HPXML::LocationLivingSpace)
+    step.setArgument('ducts_return_location', HPXML::LocationLivingSpace)
   elsif ['invalid_files/dhw-indirect-without-boiler.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeCombiStorage)
   elsif ['invalid_files/multipliers-without-tv-plug-loads.osw'].include? osw_file
@@ -2411,6 +2436,8 @@ def create_hpxmls
     'invalid_files/dhw-invalid-ef-tank.xml' => 'base.xml',
     'invalid_files/dhw-invalid-uef-tank-heat-pump.xml' => 'base-dhw-tank-heat-pump-uef.xml',
     'invalid_files/dishwasher-location.xml' => 'base.xml',
+    'invalid_files/duct-leakage-cfm25.xml' => 'base.xml',
+    'invalid_files/duct-leakage-percent.xml' => 'base.xml',
     'invalid_files/duct-location.xml' => 'base.xml',
     'invalid_files/duct-location-unconditioned-space.xml' => 'base.xml',
     'invalid_files/duplicate-id.xml' => 'base.xml',
@@ -2418,12 +2445,17 @@ def create_hpxmls
     'invalid_files/enclosure-basement-missing-exterior-foundation-wall.xml' => 'base-foundation-unconditioned-basement.xml',
     'invalid_files/enclosure-basement-missing-slab.xml' => 'base-foundation-unconditioned-basement.xml',
     'invalid_files/enclosure-floor-area-exceeds-cfa.xml' => 'base.xml',
+    'invalid_files/enclosure-floor-area-exceeds-cfa2.xml' => 'base-bldgtype-multifamily.xml',
     'invalid_files/enclosure-garage-missing-exterior-wall.xml' => 'base-enclosure-garage.xml',
     'invalid_files/enclosure-garage-missing-roof-ceiling.xml' => 'base-enclosure-garage.xml',
     'invalid_files/enclosure-garage-missing-slab.xml' => 'base-enclosure-garage.xml',
     'invalid_files/enclosure-living-missing-ceiling-roof.xml' => 'base.xml',
     'invalid_files/enclosure-living-missing-exterior-wall.xml' => 'base.xml',
     'invalid_files/enclosure-living-missing-floor-slab.xml' => 'base-foundation-slab.xml',
+    'invalid_files/frac-sensible-fuel-load.xml' => 'base-misc-loads-large-uncommon.xml',
+    'invalid_files/frac-sensible-plug-load.xml' => 'base-misc-loads-large-uncommon.xml',
+    'invalid_files/frac-total-fuel-load.xml' => 'base-misc-loads-large-uncommon.xml',
+    'invalid_files/frac-total-plug-load.xml' => 'base-misc-loads-large-uncommon.xml',
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/hvac-invalid-distribution-system-type.xml' => 'base.xml',
     'invalid_files/hvac-distribution-multiple-attached-cooling.xml' => 'base-hvac-multiple.xml',
@@ -2433,6 +2465,8 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-inconsistent-fan-powers.xml' => 'base.xml',
+    'invalid_files/generator-number-of-bedrooms-served.xml' => 'base-bldgtype-multifamily-shared-generator.xml',
+    'invalid_files/generator-output-greater-than-consumption.xml' => 'base-misc-generators.xml',
     'invalid_files/invalid-assembly-effective-rvalue.xml' => 'base.xml',
     'invalid_files/invalid-datatype-boolean.xml' => 'base.xml',
     'invalid_files/invalid-datatype-float.xml' => 'base.xml',
@@ -2710,7 +2744,6 @@ def create_hpxmls
     'base-hvac-ground-to-air-heat-pump.xml' => 'base.xml',
     'base-hvac-ground-to-air-heat-pump-cooling-only.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-hvac-ground-to-air-heat-pump-heating-only.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
-    'base-hvac-ideal-air.xml' => 'base.xml',
     'base-hvac-install-quality-none-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-install-quality-airflow-defect-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-install-quality-charge-defect-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
@@ -2777,7 +2810,7 @@ def create_hpxmls
     'base-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-misc-loads-none.xml' => 'base.xml',
     'base-misc-neighbor-shading.xml' => 'base.xml',
-    'base-misc-shelter-coefficient.xml' => 'base.xml',
+    'base-misc-shielding-of-home.xml' => 'base.xml',
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
@@ -2998,8 +3031,8 @@ def set_hpxml_site(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.site.fuels = [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas]
     hpxml.site.site_type = HPXML::SiteTypeSuburban
-  elsif ['base-misc-shelter-coefficient.xml'].include? hpxml_file
-    hpxml.site.shelter_coefficient = 0.8
+  elsif ['base-misc-shielding-of-home.xml'].include? hpxml_file
+    hpxml.site.shielding_of_home = HPXML::ShieldingWellShielded
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.site.site_type = nil
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
@@ -3069,8 +3102,6 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_conditioned_floors -= 1
     hpxml.building_construction.conditioned_floor_area -= 1350
     hpxml.building_construction.conditioned_building_volume -= 1350 * 8
-  elsif ['base-hvac-ideal-air.xml'].include? hpxml_file
-    hpxml.building_construction.use_only_ideal_air_system = true
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors += 1
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
@@ -3097,7 +3128,9 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_conditioned_floors = 1.5
     hpxml.building_construction.number_of_conditioned_floors_above_grade = 1.5
   elsif ['invalid_files/enclosure-floor-area-exceeds-cfa.xml'].include? hpxml_file
-    hpxml.building_construction.conditioned_floor_area /= 5.0
+    hpxml.building_construction.conditioned_floor_area = 1348.8
+  elsif ['invalid_files/enclosure-floor-area-exceeds-cfa2.xml'].include? hpxml_file
+    hpxml.building_construction.conditioned_floor_area = 898.8
   elsif ['invalid_files/num-bedrooms-exceeds-limit.xml'].include? hpxml_file
     hpxml.building_construction.number_of_bedrooms = 40
   elsif ['invalid_files/invalid-facility-type-equipment.xml',
@@ -4676,9 +4709,6 @@ def set_hpxml_slabs(hpxml_file, hpxml)
       slab.carpet_fraction = nil
       slab.carpet_fraction = nil
     end
-  elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
-    hpxml.slabs[0].interior_adjacent_to = HPXML::LocationBasementUnconditioned
-    hpxml.slabs[0].depth_below_grade = 7.0
   elsif ['invalid_files/slab-zero-exposed-perimeter.xml'].include? hpxml_file
     hpxml.slabs[0].exposed_perimeter = 0
   elsif ['invalid_files/enclosure-living-missing-floor-slab.xml',
@@ -5221,7 +5251,6 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-ground-to-air-heat-pump.xml',
          'base-hvac-mini-split-heat-pump-ducted.xml',
          'base-hvac-mini-split-air-conditioner-only-ducted.xml',
-         'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
          'base-hvac-room-ac-only.xml',
          'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
@@ -5497,7 +5526,6 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-furnace-wood-only.xml',
          'base-hvac-ground-to-air-heat-pump.xml',
          'base-hvac-mini-split-heat-pump-ducted.xml',
-         'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
          'base-hvac-stove-oil-only.xml',
          'base-hvac-stove-wood-pellets-only.xml',
@@ -6006,7 +6034,6 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'base-hvac-evap-cooler-only.xml',
          'base-hvac-fireplace-wood-only.xml',
          'base-hvac-floor-furnace-propane-only.xml',
-         'base-hvac-ideal-air.xml',
          'base-hvac-mini-split-heat-pump-ductless.xml',
          'base-hvac-mini-split-air-conditioner-only-ductless.xml',
          'base-hvac-room-ac-only.xml',
@@ -6261,13 +6288,6 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
         duct.duct_location = nil
       end
     end
-  elsif ['invalid_files/missing-duct-location-and-surface-area.xml'].include? hpxml_file
-    hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
-
-      hvac_distribution.ducts[1].duct_surface_area = nil
-      hvac_distribution.ducts[1].duct_location = nil
-    end
   elsif ['invalid_files/missing-duct-location.xml'].include? hpxml_file
     hpxml.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
@@ -6280,6 +6300,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'invalid_files/multiple-shared-heating-systems.xml'].include? hpxml_file
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id += '2'
+  elsif ['invalid_files/duct-leakage-cfm25.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = -2.0
+    hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = -2.0
+  elsif ['invalid_files/duct-leakage-percent.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_units = HPXML::UnitsPercent
+    hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_units = HPXML::UnitsPercent
   end
 
   # Set ConditionedFloorAreaServed
@@ -7066,6 +7092,10 @@ def set_hpxml_generators(hpxml_file, hpxml)
                          annual_consumption_kbtu: 85000,
                          annual_output_kwh: 5000,
                          number_of_bedrooms_served: 18)
+  elsif ['invalid_files/generator-output-greater-than-consumption.xml'].include? hpxml_file
+    hpxml.generators[0].annual_consumption_kbtu = 1500
+  elsif ['invalid_files/generator-number-of-bedrooms-served.xml'].include? hpxml_file
+    hpxml.generators[0].number_of_bedrooms_served = hpxml.building_construction.number_of_bedrooms
   end
 end
 
@@ -7630,6 +7660,10 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
                            weekday_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',
                            weekend_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',
                            monthly_multipliers: '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
+    elsif ['invalid_files/frac-sensible-plug-load.xml'].include? hpxml_file
+      hpxml.plug_loads[0].frac_sensible = -0.1
+    elsif ['invalid_files/frac-total-plug-load.xml'].include? hpxml_file
+      hpxml.plug_loads[0].frac_latent = 1.0 - hpxml.plug_loads[0].frac_sensible + 0.1
     else
       cfa = hpxml.building_construction.conditioned_floor_area
       nbeds = hpxml.building_construction.number_of_bedrooms
@@ -7688,6 +7722,11 @@ def set_hpxml_fuel_loads(hpxml_file, hpxml)
   elsif ['base-misc-loads-large-uncommon2.xml'].include? hpxml_file
     hpxml.fuel_loads[0].fuel_type = HPXML::FuelTypeOil
     hpxml.fuel_loads[2].fuel_type = HPXML::FuelTypeWoodPellets
+  elsif ['invalid_files/frac-sensible-fuel-load.xml'].include? hpxml_file
+    hpxml.fuel_loads[0].frac_sensible = -0.1
+  elsif ['invalid_files/frac-total-fuel-load.xml'].include? hpxml_file
+    hpxml.fuel_loads[0].frac_sensible = 0.8
+    hpxml.fuel_loads[0].frac_latent = 1.0 - hpxml.fuel_loads[0].frac_sensible + 0.1
   end
 end
 

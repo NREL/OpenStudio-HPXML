@@ -6,7 +6,7 @@
     {
       "arguments": {
         "air_leakage_house_pressure": 50,
-        "air_leakage_shelter_coefficient": "auto",
+        "air_leakage_shielding_of_home": "auto",
         "air_leakage_units": "CFM",
         "air_leakage_value": 1080,
         "bathroom_fans_quantity": "0",
@@ -262,7 +262,7 @@
         "roof_color": "auto",
         "roof_emittance": "0.92",
         "roof_material_type": "asphalt or fiberglass shingles",
-        "roof_radiant_barrier": "false",
+        "roof_radiant_barrier": false,
         "roof_radiant_barrier_grade": "1",
         "roof_solar_absorptance": "auto",
         "schedules_type": "default",
