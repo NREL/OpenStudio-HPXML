@@ -5475,7 +5475,7 @@ class HPXML < Object
       ltg_fracs[lighting_group.location] += lighting_group.fraction_of_units_in_location
     end
     ltg_fracs.each do |location, sum|
-      next if sum <= 1
+      next if sum <= 1.01 # Use 1.01 in case of rounding
 
       errors << "Sum of fractions of #{location} lighting (#{sum}) is greater than 1."
     end
@@ -5511,10 +5511,10 @@ class HPXML < Object
       end
       heating_total_dist_cfa_served = heating_dist.map { |htg_dist| htg_dist.conditioned_floor_area_served.to_f }.sum(0.0)
       cooling_total_dist_cfa_served = cooling_dist.map { |clg_dist| clg_dist.conditioned_floor_area_served.to_f }.sum(0.0)
-      if (heating_total_dist_cfa_served > @building_construction.conditioned_floor_area)
+      if (heating_total_dist_cfa_served > @building_construction.conditioned_floor_area + 1.0) # Allow 1 ft2 of tolerance
         errors << 'The total conditioned floor area served by the HVAC distribution system(s) for heating is larger than the conditioned floor area of the building.'
       end
-      if (cooling_total_dist_cfa_served > @building_construction.conditioned_floor_area)
+      if (cooling_total_dist_cfa_served > @building_construction.conditioned_floor_area + 1.0) # Allow 1 ft2 of tolerance
         errors << 'The total conditioned floor area served by the HVAC distribution system(s) for cooling is larger than the conditioned floor area of the building.'
       end
     end
