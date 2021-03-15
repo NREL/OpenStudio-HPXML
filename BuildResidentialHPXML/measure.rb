@@ -956,14 +956,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_type_choices << HPXML::HVACTypeFurnace
     heating_system_type_choices << HPXML::HVACTypeWallFurnace
     heating_system_type_choices << HPXML::HVACTypeFloorFurnace
-    heating_system_type_choices << "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard"
+    heating_system_type_choices << HPXML::HVACTypeBoiler
     heating_system_type_choices << HPXML::HVACTypeElectricResistance
     heating_system_type_choices << HPXML::HVACTypeStove
     heating_system_type_choices << HPXML::HVACTypePortableHeater
     heating_system_type_choices << HPXML::HVACTypeFireplace
     heating_system_type_choices << HPXML::HVACTypeFixedHeater
-    heating_system_type_choices << "#{HPXML::HVACTypeBoiler}, Shared, w/ Baseboard"
-    heating_system_type_choices << "#{HPXML::HVACTypeBoiler}, Shared, w/ Ductless Fan Coil"
+    heating_system_type_choices << "Shared #{HPXML::HVACTypeBoiler} w/ Baseboard"
+    heating_system_type_choices << "Shared #{HPXML::HVACTypeBoiler} w/ Ductless Fan Coil"
 
     heating_system_fuel_choices = OpenStudio::StringVector.new
     heating_system_fuel_choices << HPXML::FuelTypeElectricity
@@ -1235,7 +1235,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_type_2_choices << 'none'
     heating_system_type_2_choices << HPXML::HVACTypeWallFurnace
     heating_system_type_2_choices << HPXML::HVACTypeFloorFurnace
-    heating_system_type_2_choices << "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard"
+    heating_system_type_2_choices << HPXML::HVACTypeBoiler
     heating_system_type_2_choices << HPXML::HVACTypeElectricResistance
     heating_system_type_2_choices << HPXML::HVACTypeStove
     heating_system_type_2_choices << HPXML::HVACTypePortableHeater
@@ -1506,7 +1506,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_fan_type_2', mech_vent_fan_type_choices, true)
+    mech_vent_fan_type_2_choices = OpenStudio::StringVector.new
+    mech_vent_fan_type_2_choices << 'none'
+    mech_vent_fan_type_2_choices << HPXML::MechVentTypeExhaust
+    mech_vent_fan_type_2_choices << HPXML::MechVentTypeSupply
+    mech_vent_fan_type_2_choices << HPXML::MechVentTypeERV
+    mech_vent_fan_type_2_choices << HPXML::MechVentTypeHRV
+    mech_vent_fan_type_2_choices << HPXML::MechVentTypeBalanced
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_fan_type_2', mech_vent_fan_type_2_choices, true)
     arg.setDisplayName('Mechanical Ventilation 2: Fan Type')
     arg.setDescription("The type of the second mechanical ventilation. Use 'none' if there is no second mechanical ventilation system.")
     arg.setDefaultValue('none')
@@ -3013,7 +3021,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     errors << "geometry_num_floors_above_grade=#{args[:geometry_num_floors_above_grade]} and geometry_attic_type=#{args[:geometry_attic_type]}" if error
 
     # dhw indirect but no boiler
-    error = ((args[:water_heater_type] == HPXML::WaterHeaterTypeCombiStorage) || (args[:water_heater_type] == HPXML::WaterHeaterTypeCombiTankless)) && (args[:heating_system_type] != "#{HPXML::HVACTypeBoiler}, In-Unit, w/ Baseboard")
+    error = ((args[:water_heater_type] == HPXML::WaterHeaterTypeCombiStorage) || (args[:water_heater_type] == HPXML::WaterHeaterTypeCombiTankless)) && (args[:heating_system_type] != HPXML::HVACTypeBoiler)
     errors << "water_heater_type=#{args[:water_heater_type]} and heating_system_type=#{args[:heating_system_type]}" if error
 
     # no tv plug loads but specifying usage multipliers
@@ -4199,12 +4207,10 @@ class HPXMLFile
       hpxml.hvac_distributions.add(id: 'FanCoilDistribution',
                                    distribution_system_type: HPXML::HVACDistributionTypeAir,
                                    conditioned_floor_area_served: args[:geometry_cfa],
-                                   number_of_return_registers: number_of_return_registers,
                                    air_type: HPXML::AirTypeFanCoil)
       fan_coil_distribution_systems.each do |hvac_system|
         hvac_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
       end
-      set_duct_leakages(args, hpxml.hvac_distributions[-1])
     end
   end
 
@@ -4372,16 +4378,6 @@ class HPXMLFile
         end
       end
 
-      distribution_system_idref = nil
-      if args[:mech_vent_fan_type_2] == HPXML::MechVentTypeCFIS
-        hpxml.hvac_distributions.each do |hvac_distribution|
-          next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
-          next unless hvac_distribution.air_type.nil?
-
-          distribution_system_idref = hvac_distribution.id
-        end
-      end
-
       hpxml.ventilation_fans.add(id: 'SecondMechanicalVentilation',
                                  fan_type: args[:mech_vent_fan_type_2],
                                  rated_flow_rate: args[:mech_vent_flow_rate_2],
@@ -4391,8 +4387,7 @@ class HPXMLFile
                                  total_recovery_efficiency_adjusted: total_recovery_efficiency_adjusted,
                                  sensible_recovery_efficiency: sensible_recovery_efficiency,
                                  sensible_recovery_efficiency_adjusted: sensible_recovery_efficiency_adjusted,
-                                 fan_power: args[:mech_vent_fan_power_2],
-                                 distribution_system_idref: distribution_system_idref)
+                                 fan_power: args[:mech_vent_fan_power_2])
     end
 
     if (args[:kitchen_fans_quantity] == Constants.Auto) || (args[:kitchen_fans_quantity].to_i > 0)
