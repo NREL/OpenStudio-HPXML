@@ -19,7 +19,6 @@
         "ceiling_fan_efficiency": "auto",
         "ceiling_fan_present": false,
         "ceiling_fan_quantity": "auto",
-        "clothes_dryer_control_type": "timer",
         "clothes_dryer_efficiency": "3.73",
         "clothes_dryer_efficiency_type": "CombinedEnergyFactor",
         "clothes_dryer_fuel_type": "electricity",

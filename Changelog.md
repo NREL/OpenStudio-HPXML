@@ -2,11 +2,12 @@
 
 __New Features__
 - **Breaking change**: Replaces `Site/extension/ShelterCoefficient` with `Site/ShieldingofHome`.
+- Removes `ClothesDryer/ControlType` from being a required input, it is not used.
 - Moves additional error-checking from the ruby measure to the schematron validator.
 - Adds more detail to error messages regarding the wrong data type in the HPXML file.
 
 __Bugfixes__
-- Fixes ruby error if `SystemIdentifier` element exists without an 'id' attribute.
+- Fixes ruby error if elements (e.g., `SystemIdentifier`) exist without the proper 'id'/'idref' attribute.
 - Fixes possible "Electricity category end uses do not sum to total" error due to boiler pump energy.
 - Fixes possible "Construction R-value ... does not match Assembly R-value" error for highly insulated enclosure elements.
 

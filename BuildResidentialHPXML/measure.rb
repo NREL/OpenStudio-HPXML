@@ -2340,11 +2340,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     clothes_dryer_fuel_choices << HPXML::FuelTypeWoodCord
     clothes_dryer_fuel_choices << HPXML::FuelTypeCoal
 
-    clothes_dryer_control_type_choices = OpenStudio::StringVector.new
-    clothes_dryer_control_type_choices << Constants.Auto
-    clothes_dryer_control_type_choices << HPXML::ClothesDryerControlTypeTimer
-    clothes_dryer_control_type_choices << HPXML::ClothesDryerControlTypeMoisture
-
     clothes_dryer_efficiency_type_choices = OpenStudio::StringVector.new
     clothes_dryer_efficiency_type_choices << 'EnergyFactor'
     clothes_dryer_efficiency_type_choices << 'CombinedEnergyFactor'
@@ -2365,12 +2360,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Clothes Dryer: Efficiency')
     arg.setUnits('lb/kWh')
     arg.setDescription('The efficiency of the clothes dryer.')
-    arg.setDefaultValue(Constants.Auto)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('clothes_dryer_control_type', clothes_dryer_control_type_choices, true)
-    arg.setDisplayName('Clothes Dryer: Control Type')
-    arg.setDescription('Type of control used by the clothes dryer.')
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
@@ -4905,10 +4894,6 @@ class HPXMLFile
       location = args[:clothes_dryer_location]
     end
 
-    if args[:clothes_dryer_control_type] != Constants.Auto
-      control_type = args[:clothes_dryer_control_type]
-    end
-
     if args[:clothes_dryer_vented_flow_rate] != Constants.Auto
       is_vented = false
       if Float(args[:clothes_dryer_vented_flow_rate]) > 0
@@ -4926,7 +4911,6 @@ class HPXMLFile
                              fuel_type: args[:clothes_dryer_fuel_type],
                              energy_factor: energy_factor,
                              combined_energy_factor: combined_energy_factor,
-                             control_type: control_type,
                              is_vented: is_vented,
                              vented_flow_rate: vented_flow_rate,
                              usage_multiplier: usage_multiplier)
