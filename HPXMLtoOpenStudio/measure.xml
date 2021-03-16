@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>b0b186d8-2167-4eff-9426-914b5d03ac47</version_id>
-  <version_modified>20210315T182439Z</version_modified>
+  <version_id>7de806bb-6f2d-4520-8986-fda6fc8345f3</version_id>
+  <version_modified>20210316T192046Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -442,19 +442,19 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>05C704E0</checksum>
+      <checksum>21C7F17E</checksum>
     </file>
     <file>
       <filename>HPXMLvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0E299003</checksum>
+      <checksum>BCC4746A</checksum>
     </file>
     <file>
       <filename>EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>650D9056</checksum>
+      <checksum>949D6AF5</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -467,12 +467,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>C714CC53</checksum>
-    </file>
-    <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>287294BB</checksum>
     </file>
     <file>
       <filename>hvac.rb</filename>
@@ -516,28 +510,34 @@
       <checksum>E5B56D54</checksum>
     </file>
     <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7CB7E7CD</checksum>
-    </file>
-    <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>4A23F2F5</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7E3C75BE</checksum>
-    </file>
-    <file>
       <filename>xmlhelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>EEAB4FC6</checksum>
+    </file>
+    <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>EF9BC498</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F38F9875</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>DDC467FA</checksum>
     </file>
   </files>
 </measure>
