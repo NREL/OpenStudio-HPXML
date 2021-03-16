@@ -151,18 +151,12 @@ Building site information is entered in ``/HPXML/Building/BuildingDetails/Buildi
   Element                           Type      Units  Constraints  Required  Default   Notes
   ================================  ========  =====  ===========  ========  ========  ============================================================
   ``SiteType``                      string           See [#]_     No        suburban  Terrain type for infiltration model
-  ``extension/ShelterCoefficient``  double           0 - 1        No        0.5 [#]_  Nearby buildings, trees, obstructions for infiltration model
+  ``ShieldingofHome``               string           See [#]_     No        normal    Presence of nearby buildings, trees, obstructions for infiltration model
   ``extension/Neighbors``           element          >= 0         No        <none>    Presence of neighboring buildings for solar shading
   ================================  ========  =====  ===========  ========  ========  ============================================================
 
   .. [#] SiteType choices are "rural", "suburban", or "urban".
-  .. [#] ShelterCoefficient values are described as follows: 
-
-         - **1.0**: No obstructions or local shielding;
-         - **0.9**: Light local shielding with few obstructions within two building heights;
-         - **0.7**: Local shielding with many large obstructions within two building heights;
-         - **0.5**: Heavily shielded, many large obstructions within one building height;
-         - **0.3**: Complete shielding with large buildings immediately adjacent.
+  .. [#] ShieldingofHome choices are "normal", "exposed", or "well-shielded".
 
 For each neighboring building defined, additional information is entered in a ``extension/Neighbors/NeighborBuilding``.
 
@@ -326,7 +320,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   ``Emittance``                           double                          0 - 1              No         0.90                            Emittance
   ``Pitch``                               integer           ?:12          >= 0               Yes                                        Pitch
   ``RadiantBarrier``                      boolean                                            No         false                           Presence of radiant barrier
-  ``RadiantBarrier/RadiantBarrierGrade``  integer                         1 - 3              See [#]_                                   Radiant barrier installation grade
+  ``RadiantBarrierGrade``                 integer                         1 - 3              See [#]_                                   Radiant barrier installation grade
   ``Insulation/SystemIdentifier``         id                                                 Yes                                        Unique identifier
   ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0                Yes                                        Assembly R-value [#]_
   ======================================  ================  ============  =================  =========  ==============================  ==================================
@@ -1178,12 +1172,15 @@ To define an air distribution system, additional information is entered in ``HVA
   =============================================  =======  =======  ===========  ========  =========  ==========================
   Element                                        Type     Units    Constraints  Required  Default    Notes
   =============================================  =======  =======  ===========  ========  =========  ==========================
+  ``AirDistributionType``                        string            See [#]_     See [#]_             Type of air distribution
   ``DuctLeakageMeasurement[DuctType="supply"]``  element           1            Yes                  Supply duct leakage value
   ``DuctLeakageMeasurement[DuctType="return"]``  element           1            Yes                  Return duct leakage value
   ``Ducts``                                      element           >= 0         No                   Supply/return ducts [#]_
   ``NumberofReturnRegisters``                    integer           >= 0         No        See [#]_   Number of return registers
   =============================================  =======  =======  ===========  ========  =========  ==========================
   
+  .. [#] AirDistributionType choices are "gravity", "high velocity", "regular velocity", or "fan coil".
+  .. [#] AirDistributionType only required if the distribution system is for shared boilers/chillers with fan coils, in which case value must be "fan coil".
   .. [#] Provide a Ducts element for each supply duct and each return duct.
   .. [#] If NumberofReturnRegisters not provided, defaults to one return register per conditioned floor per `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_, rounded up to the nearest integer if needed.
 
@@ -1872,22 +1869,11 @@ If not entered, the simulation will not include a clothes dryer.
          See :ref:`hpxmllocations` for descriptions.
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
   .. [#] If neither CombinedEnergyFactor nor EnergyFactor provided, the following default values representing a standard clothes dryer from 2006 will be used:
-         CombinedEnergyFactor = 3.01,
-         ControlType = timer.
+         CombinedEnergyFactor = 3.01.
   .. [#] If EnergyFactor (EF) provided instead of CombinedEnergyFactor (CEF), it will be converted using the following equation based on the `Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-10-Section-4.2.2.5.2.8-Clothes-Dryer-CEF-Rating.pdf>`_:
          CEF = EF / 1.15.
   .. [#] VentedFlowRate only required if IsVented is true.
   .. [#] VentedFlowRate default based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
-
-If the CombinedEnergyFactor or EnergyFactor is provided, a complete set of EnergyGuide label information is entered in ``ClothesDryer``.
-
-  ===============  =======  =======  ===========  ========  =======  ================
-  Element          Type     Units    Constraints  Required  Default  Notes
-  ===============  =======  =======  ===========  ========  =======  ================
-  ``ControlType``  string            See [#]_     Yes                Type of controls
-  ===============  =======  =======  ===========  ========  =======  ================
-
-  .. [#] ControlType choices are "timer" or "moisture".
 
 Clothes dryer energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 Addendum A <https://www.resnet.us/wp-content/uploads/ANSI_RESNET_ICC-301-2019-Addendum-A-2019_7.16.20-1.pdf>`_.
 
