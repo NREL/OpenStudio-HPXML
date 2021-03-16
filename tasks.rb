@@ -384,6 +384,8 @@ def create_osws
     'extra-bldgtype-multifamily-unvented-crawlspace-right-middle-double-loaded-interior.osw' => 'extra-bldgtype-multifamily-unvented-crawlspace-right-middle.osw',
     'extra-bldgtype-multifamily-unvented-crawlspace-right-top-double-loaded-interior.osw' => 'extra-bldgtype-multifamily-unvented-crawlspace-right-top.osw',
 
+    'extra-enclosure-3d-coordinates.osw' => 'base.osw',
+
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
     'invalid_files/heating-system-and-heat-pump.osw' => 'base.osw',
     'invalid_files/cooling-system-and-heat-pump.osw' => 'base.osw',
@@ -522,6 +524,7 @@ def get_values(osw_file, step)
     step.setArgument('geometry_num_bathrooms', '2')
     step.setArgument('geometry_num_occupants', '3')
     step.setArgument('geometry_has_flue_or_chimney', Constants.Auto)
+    step.setArgument('geometry_export_3d_coordinates', false)
     step.setArgument('floor_assembly_r', 0)
     step.setArgument('foundation_wall_insulation_r', 8.9)
     step.setArgument('foundation_wall_insulation_distance_to_top', 0.0)
@@ -2252,6 +2255,8 @@ def get_values(osw_file, step)
     step.setArgument('geometry_corridor_position', 'Double-Loaded Interior')
   elsif ['extra-bldgtype-multifamily-unvented-crawlspace-right-top-double-loaded-interior.osw'].include? osw_file
     step.setArgument('geometry_corridor_position', 'Double-Loaded Interior')
+  elsif ['extra-enclosure-3d-coordinates.osw'].include? osw_file
+    step.setArgument('geometry_export_3d_coordinates', true)
   end
 
   # Warnings/Errors
