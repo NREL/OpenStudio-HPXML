@@ -91,11 +91,7 @@ class HEScoreRuleset
     @roof_angle_rad = UnitConversions.convert(@roof_angle, 'deg', 'rad') # radians
     @cvolume = calc_conditioned_volume(orig_hpxml)
 
-    new_hpxml.site.fuels = [HPXML::FuelTypeElectricity] # TODO Check if changing this would ever influence results; if it does, talk to Leo
-    new_hpxml.site.shelter_coefficient = Airflow.get_default_shelter_coefficient()
-
     # Neighboring buildings to left/right, 12ft offset, same height as building.
-    # FIXME: Verify. What about townhouses?
     new_hpxml.neighbor_buildings.add(azimuth: sanitize_azimuth(@bldg_azimuth + 90.0),
                                      distance: 20.0,
                                      height: 12.0)
@@ -193,9 +189,9 @@ class HEScoreRuleset
     orig_hpxml.walls.each do |orig_wall|
       wall_area = nil
       if (@bldg_orient == orig_wall.orientation) || (@bldg_orient == reverse_orientation(orig_wall.orientation))
-        wall_area = @ceil_height * @bldg_length_front * @ncfl_ag # FIXME: Verify
+        wall_area = @ceil_height * @bldg_length_front * @ncfl_ag
       else
-        wall_area = @ceil_height * @bldg_length_side * @ncfl_ag # FIXME: Verify
+        wall_area = @ceil_height * @bldg_length_side * @ncfl_ag
       end
 
       if orig_wall.wall_type == HPXML::WallTypeWoodStud
@@ -1184,7 +1180,6 @@ end
 
 def get_skylight_ufactor_shgc(frame_type, thermal_break, glass_layers, glass_type, gas_fill)
   # Skylight U-factor/SHGC
-  # FIXME: Verify
   key = [frame_type, thermal_break, glass_layers, glass_type, gas_fill]
   vals = { [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, nil, nil] => [1.98, 0.75], # scna
            [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, nil, nil] => [1.47, 0.64], # scnw
@@ -1210,7 +1205,6 @@ def get_skylight_ufactor_shgc(frame_type, thermal_break, glass_layers, glass_typ
 end
 
 def get_roof_solar_absorptance(roof_color)
-  # FIXME: Verify
   val = { HPXML::ColorReflective => 0.35,
           HPXML::ColorLight => 0.55,
           HPXML::ColorMedium => 0.7,
