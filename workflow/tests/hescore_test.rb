@@ -131,17 +131,17 @@ class HEScoreTest < Minitest::Unit::TestCase
 
         next if log_line.include? 'Warning: Could not load nokogiri, no HPXML validation performed.'
 
-        # FIXME: Remove this warning when window/skylight U-factors are reasonable
-        next if log_line.include?('Warning: Glazing U-factor') && log_line.include?('above maximum expected value. U-factor decreased')
+        # FIXME: Remove this warning when https://github.com/NREL/OpenStudio-HPXML/issues/638 is resolved
+        next if log_line.include?('Glazing U-factor') && log_line.include?('above maximum expected value. U-factor decreased')
 
         # Files w/o cooling systems
         if hpxml.total_fraction_cool_load_served <= 0
-          next if log_line.include?('Warning: No cooling system specified, the model will not include space cooling energy use.')
+          next if log_line.include?('No space cooling specified, the model will not include space cooling energy use.')
         end
 
         # Files w/o heating systems
         if hpxml.total_fraction_heat_load_served <= 0
-          next if log_line.include?('Warning: No heating system specified, the model will not include space heating energy use.')
+          next if log_line.include?('No space heating specified, the model will not include space heating energy use.')
         end
 
         flunk "Unexpected warning found in run.log: #{log_line}"
