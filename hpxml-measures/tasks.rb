@@ -3935,7 +3935,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     end
   end
   if ['invalid_files/invalid-distribution-cfa-served.xml'].include? hpxml_file
-    hpxml.hvac_distributions[0].conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area + 0.1
+    hpxml.hvac_distributions[0].conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area + 1.1
   end
 
   # Set number of return registers
