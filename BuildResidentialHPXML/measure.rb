@@ -3172,7 +3172,8 @@ class HPXMLFile
       success = Geometry.create_multifamily(runner: runner, model: model, **args)
     end
     return false if not success
-
+    output_file_path = OpenStudio::Path.new(File.dirname(__FILE__) + '/output/test1.osm')
+    model.save(output_file_path, true)
     success = Geometry.create_windows_and_skylights(runner: runner, model: model, **args)
     return false if not success
 
@@ -3401,7 +3402,6 @@ class HPXMLFile
 
   def self.set_attics(hpxml, runner, model, args)
     return if args[:geometry_unit_type] == HPXML::ResidentialTypeApartment
-    return if args[:geometry_unit_type] == HPXML::ResidentialTypeSFA # TODO: remove when we can model single-family attached units
 
     if args[:geometry_roof_type] == 'flat'
       hpxml.attics.add(id: HPXML::AtticTypeFlatRoof,
@@ -3481,27 +3481,12 @@ class HPXMLFile
   def self.set_rim_joists(hpxml, runner, model, args)
     model.getSurfaces.sort.each do |surface|
       next if surface.surfaceType != 'Wall'
-      next unless ['Outdoors', 'Adiabatic'].include? surface.outsideBoundaryCondition
-
-      interior_adjacent_to = get_adjacent_to(surface)
-      next unless [HPXML::LocationBasementConditioned, HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? interior_adjacent_to
+      next unless ['Outdoors'].include? surface.outsideBoundaryCondition
 
       exterior_adjacent_to = HPXML::LocationOutside
-      if surface.outsideBoundaryCondition == 'Adiabatic' # can be adjacent to foundation space
-        next if [HPXML::ResidentialTypeSFD].include? args[:geometry_unit_type] # these are surfaces for kiva
+      interior_adjacent_to = get_adjacent_to(surface)
 
-        adjacent_surface = get_adiabatic_adjacent_surface(model, surface)
-        if adjacent_surface.nil? # adjacent to a space that is not explicitly in the model
-          exterior_adjacent_to = interior_adjacent_to
-          if exterior_adjacent_to == HPXML::LocationLivingSpace # living adjacent to living
-            exterior_adjacent_to = HPXML::LocationOtherHousingUnit
-          end
-        else # adjacent to a space that is explicitly in the model, e.g., corridor
-          exterior_adjacent_to = get_adjacent_to(adjacent_surface)
-        end
-      end
-
-      next if Geometry.getSurfaceZValues([surface]).min + UnitConversions.convert(surface.space.get.zOrigin, 'm', 'ft') < 0
+      next unless (args[:geometry_rim_joist_height] - Geometry.get_surface_height(surface)).abs < 0.00001
 
       if args[:rim_joist_assembly_r].is_initialized && (args[:rim_joist_assembly_r].get > 0)
         insulation_assembly_r_value = args[:rim_joist_assembly_r]
@@ -3585,6 +3570,7 @@ class HPXMLFile
       end
 
       next if exterior_adjacent_to == HPXML::LocationLivingSpace # already captured these surfaces
+      next if (args[:geometry_rim_joist_height] - Geometry.get_surface_height(surface)).abs < 0.00001
 
       wall_type = args[:wall_type]
       if [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? interior_adjacent_to
@@ -3663,8 +3649,6 @@ class HPXMLFile
           exterior_adjacent_to = get_adjacent_to(adjacent_surface)
         end
       end
-
-      next unless Geometry.getSurfaceZValues([surface]).min + UnitConversions.convert(surface.space.get.zOrigin, 'm', 'ft') < 0
 
       if args[:foundation_wall_assembly_r].is_initialized && (args[:foundation_wall_assembly_r].get > 0)
         insulation_assembly_r_value = args[:foundation_wall_assembly_r]
@@ -3840,7 +3824,7 @@ class HPXMLFile
           overhangs_distance_to_bottom_of_window = (overhangs_distance_to_top_of_window + sub_surface_height).round
         elsif args[:geometry_eaves_depth] > 0
           # Get max z coordinate of eaves
-          eaves_z = args[:geometry_wall_height] * args[:geometry_num_floors_above_grade]
+          eaves_z = args[:geometry_wall_height] * args[:geometry_num_floors_above_grade] + args[:geometry_rim_joist_height]
           if args[:geometry_attic_type] == HPXML::AtticTypeConditioned
             eaves_z += Geometry.get_conditioned_attic_height(model.getSpaces)
           end
@@ -3849,16 +3833,7 @@ class HPXMLFile
           end
 
           # Get max z coordinate of this window
-          sub_surface_z = -9e99
-          space = sub_surface.space.get
-          z_origin = space.zOrigin
-          sub_surface.vertices.each do |vertex|
-            z = vertex.z + z_origin
-            next if z < sub_surface_z
-
-            sub_surface_z = z
-          end
-          sub_surface_z = UnitConversions.convert(sub_surface_z, 'm', 'ft')
+          sub_surface_z = Geometry.getSurfaceZValues([surface]).max + UnitConversions.convert(sub_surface.space.get.zOrigin, 'm', 'ft')
 
           overhangs_depth = args[:geometry_eaves_depth]
           overhangs_distance_to_top_of_window = eaves_z - sub_surface_z # difference between max z coordinates of eaves and this window

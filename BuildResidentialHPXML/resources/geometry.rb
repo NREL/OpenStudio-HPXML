@@ -21,6 +21,39 @@ class Geometry
     return azimuth
   end
 
+  def self.add_rim_joist(model, polygon, space, rim_joist_height, z)
+    if rim_joist_height > 0
+      # make polygons
+      p = OpenStudio::Point3dVector.new
+      polygon.each do |point|
+        p << OpenStudio::Point3d.new(point.x, point.y, z)
+      end
+      rim_joist_polygon = p
+
+      # make space
+      rim_joist_space = OpenStudio::Model::Space::fromFloorPrint(rim_joist_polygon, rim_joist_height, model)
+      rim_joist_space = rim_joist_space.get
+
+      space.surfaces.each do |surface|
+        next if surface.surfaceType.downcase != 'roofceiling'
+
+        surface.remove
+      end
+
+      rim_joist_space.surfaces.each do |surface|
+        next if surface.surfaceType.downcase != 'floor'
+
+        surface.remove
+      end
+
+      rim_joist_space.surfaces.each do |surface|
+        surface.setSpace(space)
+      end
+
+      rim_joist_space.remove
+    end
+  end
+
   def self.create_single_family_detached(runner:,
                                          model:,
                                          geometry_cfa:,
@@ -211,14 +244,13 @@ class Geometry
           end
         end
         foundation_polygon_with_wrong_zs = living_polygon
-
       else # first floor without garage or above first floor
 
         if has_garage
-          garage_se_point = OpenStudio::Point3d.new(garage_se_point.x, garage_se_point.y, wall_height * floor + foundation_offset + rim_joist_height)
-          garage_sw_point = OpenStudio::Point3d.new(garage_sw_point.x, garage_sw_point.y, wall_height * floor + foundation_offset + rim_joist_height)
-          garage_nw_point = OpenStudio::Point3d.new(garage_nw_point.x, garage_nw_point.y, wall_height * floor + foundation_offset + rim_joist_height)
-          garage_ne_point = OpenStudio::Point3d.new(garage_ne_point.x, garage_ne_point.y, wall_height * floor + foundation_offset + rim_joist_height)
+          garage_se_point = OpenStudio::Point3d.new(garage_se_point.x, garage_se_point.y, wall_height * floor + foundation_offset)
+          garage_sw_point = OpenStudio::Point3d.new(garage_sw_point.x, garage_sw_point.y, wall_height * floor + foundation_offset)
+          garage_nw_point = OpenStudio::Point3d.new(garage_nw_point.x, garage_nw_point.y, wall_height * floor + foundation_offset)
+          garage_ne_point = OpenStudio::Point3d.new(garage_ne_point.x, garage_ne_point.y, wall_height * floor + foundation_offset)
           if garage_position == 'Right'
             sw_point = OpenStudio::Point3d.new(0, 0, z)
             nw_point = OpenStudio::Point3d.new(0, width, z)
@@ -279,7 +311,6 @@ class Geometry
       m[1, 3] = 0
       m[2, 3] = z
       living_space.changeTransformation(OpenStudio::Transformation.new(m))
-
     end
 
     # Attic
@@ -450,45 +481,8 @@ class Geometry
       foundation_space.changeTransformation(OpenStudio::Transformation.new(m))
 
       # Rim Joist
-      if rim_joist_height > 0
-        z += foundation_height
-
-        # make polygons
-        p = OpenStudio::Point3dVector.new
-        foundation_polygon_with_wrong_zs.each do |point|
-          p << OpenStudio::Point3d.new(point.x, point.y, z)
-        end
-        rim_joist_polygon = p
-
-        # make space
-        rim_joist_space = OpenStudio::Model::Space::fromFloorPrint(rim_joist_polygon, rim_joist_height, model)
-        rim_joist_space = rim_joist_space.get
-
-        m = initialize_transformation_matrix(OpenStudio::Matrix.new(4, 4, 0))
-        m[0, 3] = 0
-        m[1, 3] = 0
-        m[2, 3] = -foundation_height
-        rim_joist_space.changeTransformation(OpenStudio::Transformation.new(m))
-
-        foundation_space.surfaces.each do |surface|
-          next if surface.surfaceType.downcase != 'roofceiling'
-
-          surface.remove
-        end
-
-        rim_joist_space.surfaces.each do |surface|
-          next if surface.surfaceType.downcase != 'floor'
-
-          surface.remove
-        end
-
-        rim_joist_space.surfaces.each do |surface|
-          surface.setSpace(foundation_space)
-        end
-
-        rim_joist_space.remove
-      end
-    end    
+      add_rim_joist(model, foundation_polygon_with_wrong_zs, foundation_space, rim_joist_height, foundation_height)
+    end
 
     # put all of the spaces in the model into a vector
     spaces = OpenStudio::Model::SpaceVector.new
@@ -670,11 +664,25 @@ class Geometry
       end
     end
 
+    garage_spaces = get_garage_spaces(model.getSpaces)
+
     # set foundation outside boundary condition to Kiva "foundation"
     model.getSurfaces.each do |surface|
-      next if surface.outsideBoundaryCondition.downcase != 'ground'
+      if surface.outsideBoundaryCondition.downcase == 'ground'
+        surface.setOutsideBoundaryCondition('Foundation')
+      elsif (UnitConversions.convert(rim_joist_height, 'm', 'ft') - get_surface_height(surface)).abs < 0.001
+        next if surface.surfaceType.downcase != 'wall'
 
-      surface.setOutsideBoundaryCondition('Foundation')
+        garage_spaces.each do |garage_space|
+          garage_space.surfaces.each do |garage_surface|
+            next if garage_surface.surfaceType.downcase != 'floor'
+
+            if get_walls_connected_to_floor([surface], garage_surface, false).include? surface
+              surface.setOutsideBoundaryCondition('Foundation')
+            end
+          end
+        end
+      end
     end
 
     # set foundation walls adjacent to garage to adiabatic
@@ -685,7 +693,7 @@ class Geometry
 
       foundation_walls << surface
     end
-    garage_spaces = get_garage_spaces(model.getSpaces)
+
     garage_spaces.each do |garage_space|
       garage_space.surfaces.each do |surface|
         next if surface.surfaceType.downcase != 'floor'
@@ -1663,7 +1671,7 @@ class Geometry
       new_living_space.setSpaceType(living_space_type)
 
       m = initialize_transformation_matrix(OpenStudio::Matrix.new(4, 4, 0))
-      m[2, 3] = wall_height * (story - 1) + rim_joist_height
+      m[2, 3] = wall_height * (story - 1)
       new_living_space.setTransformation(OpenStudio::Transformation.new(m))
       new_living_space.setThermalZone(living_zone)
 
@@ -1693,7 +1701,7 @@ class Geometry
       foundation_space = OpenStudio::Model::Space::fromFloorPrint(foundation_front_polygon, foundation_height, model)
       foundation_space = foundation_space.get
       m = initialize_transformation_matrix(OpenStudio::Matrix.new(4, 4, 0))
-      m[2, 3] = foundation_height + rim_joist_height
+      m[2, 3] = foundation_height
       foundation_space.changeTransformation(OpenStudio::Transformation.new(m))
       foundation_space.setXOrigin(0)
       foundation_space.setYOrigin(0)
@@ -1713,34 +1721,7 @@ class Geometry
       foundation_spaces << foundation_space
 
       # Rim Joist
-      if rim_joist_height > 0
-        rim_joist_space = OpenStudio::Model::Space::fromFloorPrint(foundation_front_polygon, rim_joist_height, model)
-        rim_joist_space = rim_joist_space.get
-        m = initialize_transformation_matrix(OpenStudio::Matrix.new(4, 4, 0))
-        m[2, 3] = rim_joist_height
-        rim_joist_space.changeTransformation(OpenStudio::Transformation.new(m))
-        rim_joist_space.setXOrigin(0)
-        rim_joist_space.setYOrigin(0)
-        rim_joist_space.setZOrigin(0)
-
-        foundation_space.surfaces.each do |surface|
-          next if surface.surfaceType.downcase != 'roofceiling'
-
-          surface.remove
-        end
-
-        rim_joist_space.surfaces.each do |surface|
-          next if surface.surfaceType.downcase != 'floor'
-
-          surface.remove
-        end
-
-        rim_joist_space.surfaces.each do |surface|
-          surface.setSpace(foundation_space)
-        end
-
-        rim_joist_space.remove
-      end
+      add_rim_joist(model, foundation_front_polygon, foundation_space, rim_joist_height, 0)
 
       # put all of the spaces in the model into a vector
       spaces = OpenStudio::Model::SpaceVector.new
@@ -1782,7 +1763,6 @@ class Geometry
         surfaces.each do |surface|
           next if surface.surfaceType.downcase != 'wall'
 
-          
           os_facade = get_facade_for_surface(surface)
           if adb_facade.include? os_facade
             surface.setOutsideBoundaryCondition('Adiabatic')
@@ -2458,7 +2438,8 @@ class Geometry
         floor_vertices.each_with_index do |fv1, fidx|
           fv2 = floor_vertices[fidx - 1]
           # Wall within floor edge?
-          next unless is_point_between([wv1.x, wv1.y, wv1.z], [fv1.x, fv1.y, fv1.z], [fv2.x, fv2.y, fv2.z]) && is_point_between([wv2.x, wv2.y, wv2.z], [fv1.x, fv1.y, fv1.z], [fv2.x, fv2.y, fv2.z])
+          next unless (is_point_between([wv1.x, wv1.y, wv1.z], [fv1.x, fv1.y, fv1.z], [fv2.x, fv2.y, fv2.z]) && is_point_between([wv2.x, wv2.y, wv2.z], [fv1.x, fv1.y, fv1.z], [fv2.x, fv2.y, fv2.z])) ||
+                      (is_point_between([wv1.x, wv1.y, wv1.z + wall_surface.space.get.zOrigin], [fv1.x, fv1.y, fv1.z + floor_surface.space.get.zOrigin], [fv2.x, fv2.y, fv2.z + floor_surface.space.get.zOrigin]) && is_point_between([wv2.x, wv2.y, wv2.z + wall_surface.space.get.zOrigin], [fv1.x, fv1.y, fv1.z + floor_surface.space.get.zOrigin], [fv2.x, fv2.y, fv2.z + floor_surface.space.get.zOrigin]))
 
           if not adjacent_wall_surfaces.include? wall_surface
             adjacent_wall_surfaces << wall_surface

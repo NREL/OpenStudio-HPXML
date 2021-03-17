@@ -3503,6 +3503,8 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                          solar_absorptance: 0.7,
                          emittance: 0.92,
                          insulation_assembly_r_value: 23.0)
+  elsif ['base-bldgtype-single-family-attached.xml'].include? hpxml_file
+    hpxml.rim_joists[-1].area = 67
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.rim_joists.clear
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
@@ -3562,6 +3564,8 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                          solar_absorptance: 0.7,
                          emittance: 0.92,
                          insulation_assembly_r_value: 23.0)
+  elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
+    hpxml.rim_joists[-2].area = 85
   elsif ['base-enclosure-split-surfaces.xml',
          'base-enclosure-split-surfaces2.xml'].include? hpxml_file
     for n in 1..hpxml.rim_joists.size
@@ -4104,7 +4108,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                exterior_adjacent_to: HPXML::LocationBasementConditioned,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 8,
-                               area: 294,
+                               area: 323,
                                thickness: 8,
                                depth_below_grade: 7,
                                insulation_interior_r_value: 0,
