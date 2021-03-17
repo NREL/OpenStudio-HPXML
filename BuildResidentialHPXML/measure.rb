@@ -345,6 +345,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(0.0)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_rim_joist_height', true)
+    arg.setDisplayName('Geometry: Rim Joist Height')
+    arg.setUnits('ft')
+    arg.setDescription("The height of the rim joists. Only applies to basements/crawlspaces. Only applies to #{HPXML::ResidentialTypeSFD} and #{HPXML::ResidentialTypeSFA} units.")
+    arg.setDefaultValue(0.0)
+    args << arg
+
     roof_type_choices = OpenStudio::StringVector.new
     roof_type_choices << 'gable'
     roof_type_choices << 'hip'
@@ -491,6 +498,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Foundation: Wall Thickness')
     arg.setDescription('The thickness of the foundation wall.')
     arg.setDefaultValue(Constants.Auto)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('rim_joist_assembly_r', false)
+    arg.setDisplayName('Rim Joist: Assembly R-value')
+    arg.setUnits('h-ft^2-R/Btu')
+    arg.setDescription('Assembly R-value for the rim joists. Only applies to basements/crawlspaces.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_perimeter_insulation_r', true)
@@ -3467,7 +3480,62 @@ class HPXMLFile
 
   def self.set_rim_joists(hpxml, runner, model, args)
     model.getSurfaces.sort.each do |surface|
-      # TODO
+      next if surface.surfaceType != 'Wall'
+      next unless ['Outdoors', 'Adiabatic'].include? surface.outsideBoundaryCondition
+
+      interior_adjacent_to = get_adjacent_to(surface)
+      next unless [HPXML::LocationBasementConditioned, HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? interior_adjacent_to
+
+      exterior_adjacent_to = HPXML::LocationOutside
+      if surface.outsideBoundaryCondition == 'Adiabatic' # can be adjacent to foundation space
+        next if [HPXML::ResidentialTypeSFD].include? args[:geometry_unit_type] # these are surfaces for kiva
+
+        adjacent_surface = get_adiabatic_adjacent_surface(model, surface)
+        if adjacent_surface.nil? # adjacent to a space that is not explicitly in the model
+          exterior_adjacent_to = interior_adjacent_to
+          if exterior_adjacent_to == HPXML::LocationLivingSpace # living adjacent to living
+            exterior_adjacent_to = HPXML::LocationOtherHousingUnit
+          end
+        else # adjacent to a space that is explicitly in the model, e.g., corridor
+          exterior_adjacent_to = get_adjacent_to(adjacent_surface)
+        end
+      end
+
+      next if Geometry.getSurfaceZValues([surface]).min + UnitConversions.convert(surface.space.get.zOrigin, 'm', 'ft') < 0
+
+      if args[:rim_joist_assembly_r].is_initialized && (args[:rim_joist_assembly_r].get > 0)
+        insulation_assembly_r_value = args[:rim_joist_assembly_r]
+      end
+
+      if exterior_adjacent_to == HPXML::LocationOutside && args[:wall_siding_type].is_initialized
+        siding = args[:wall_siding_type].get
+      end
+
+      if args[:wall_color] == Constants.Auto && args[:wall_solar_absorptance] == Constants.Auto
+        solar_absorptance = 0.7
+      end
+
+      if args[:wall_color] != Constants.Auto
+        color = args[:wall_color]
+      end
+
+      if args[:wall_solar_absorptance] != Constants.Auto
+        solar_absorptance = args[:wall_solar_absorptance]
+      end
+
+      if args[:wall_emittance] != Constants.Auto
+        emittance = args[:wall_emittance]
+      end
+
+      hpxml.rim_joists.add(id: valid_attr(surface.name),
+                           exterior_adjacent_to: exterior_adjacent_to,
+                           interior_adjacent_to: interior_adjacent_to,
+                           area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round,
+                           siding: siding,
+                           color: color,
+                           solar_absorptance: solar_absorptance,
+                           emittance: emittance,
+                           insulation_assembly_r_value: insulation_assembly_r_value)
     end
   end
 
@@ -3595,6 +3663,8 @@ class HPXMLFile
           exterior_adjacent_to = get_adjacent_to(adjacent_surface)
         end
       end
+
+      next unless Geometry.getSurfaceZValues([surface]).min + UnitConversions.convert(surface.space.get.zOrigin, 'm', 'ft') < 0
 
       if args[:foundation_wall_assembly_r].is_initialized && (args[:foundation_wall_assembly_r].get > 0)
         insulation_assembly_r_value = args[:foundation_wall_assembly_r]
