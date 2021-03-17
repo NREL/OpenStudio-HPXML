@@ -121,7 +121,7 @@
       <sch:report role='WARN' test='count(h:Appliances/h:Dishwasher) = 0'>No dishwasher specified, the model will not include dishwasher energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:Refrigerator) = 0'>No refrigerator specified, the model will not include refrigerator energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:CookingRange) = 0'>No cooking range specified, the model will not include cooking range/oven energy use.</sch:report>
-      <sch:report role='WARN' test='count(h:Lighting) = 0'>No lighting specified, the model will not include lighting energy use.</sch:assert> <!-- See [Lighting] -->
+      <sch:report role='WARN' test='count(h:Lighting) = 0'>No lighting specified, the model will not include lighting energy use.</sch:report>
     </sch:rule>
   </sch:pattern>  
   
