@@ -514,6 +514,7 @@ def get_values(osw_file, step)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeBasementConditioned)
     step.setArgument('geometry_foundation_height', 8.0)
     step.setArgument('geometry_foundation_height_above_grade', 1.0)
+    step.setArgument('geometry_rim_joist_height', 0.78)
     step.setArgument('geometry_roof_type', 'gable')
     step.setArgument('geometry_roof_pitch', '6:12')
     step.setArgument('geometry_attic_type', HPXML::AtticTypeUnvented)
@@ -527,6 +528,7 @@ def get_values(osw_file, step)
     step.setArgument('foundation_wall_insulation_distance_to_top', 0.0)
     step.setArgument('foundation_wall_insulation_distance_to_bottom', Constants.Auto)
     step.setArgument('foundation_wall_thickness', '8.0')
+    step.setArgument('rim_joist_assembly_r', 23.0)
     step.setArgument('slab_perimeter_insulation_r', 0)
     step.setArgument('slab_perimeter_depth', 0)
     step.setArgument('slab_under_insulation_r', 0)
@@ -8024,7 +8026,7 @@ if ARGV[0].to_sym == :update_measures
               '"Rake.application[:rubocop].invoke"']
   command = "#{OpenStudio.getOpenStudioCLI} -e #{commands.join(' -e ')}"
   puts 'Applying rubocop auto-correct to measures...'
-  system(command)
+  # system(command)
 
   # Update measures XMLs
   command = "#{OpenStudio.getOpenStudioCLI} measure -t '#{File.dirname(__FILE__)}'"
