@@ -121,7 +121,7 @@
       <sch:report role='WARN' test='count(h:Appliances/h:Dishwasher) = 0'>No dishwasher specified, the model will not include dishwasher energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:Refrigerator) = 0'>No refrigerator specified, the model will not include refrigerator energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:CookingRange) = 0'>No cooking range specified, the model will not include cooking range/oven energy use.</sch:report>
-      <sch:report role='WARN' test='count(h:Lighting) = 0'>No lighting specified, the model will not include lighting energy use.</sch:assert> <!-- See [Lighting] -->
+      <sch:report role='WARN' test='count(h:Lighting) = 0'>No lighting specified, the model will not include lighting energy use.</sch:report>
     </sch:rule>
   </sch:pattern>  
   
@@ -361,7 +361,6 @@
       <sch:assert role='ERROR' test='count(h:Area) = 1'>Expected 1 element(s) for xpath: Area</sch:assert>
       <sch:assert role='ERROR' test='count(h:Thickness) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Thickness</sch:assert> <!-- Use zero for dirt floor -->
       <sch:assert role='ERROR' test='count(h:ExposedPerimeter) = 1'>Expected 1 element(s) for xpath: ExposedPerimeter</sch:assert>
-      <sch:assert role='ERROR' test='number(h:ExposedPerimeter) &gt; 0 or not(h:ExposedPerimeter)'>Expected ExposedPerimeter to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:PerimeterInsulationDepth) = 1'>Expected 1 element(s) for xpath: PerimeterInsulationDepth</sch:assert>
       <sch:assert role='ERROR' test='count(h:UnderSlabInsulationWidth) + count(h:UnderSlabInsulationSpansEntireSlab[text()="true"]) = 1'>Expected 1 element(s) for xpath: UnderSlabInsulationWidth | UnderSlabInsulationSpansEntireSlab[text()="true"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:DepthBelowGrade) + count(h:InteriorAdjacentTo[text()!="living space" and text()!="garage"]) &gt;= 1'>Expected 1 or more element(s) for xpath: DepthBelowGrade | InteriorAdjacentTo[text()!="living space" and text()!="garage"]</sch:assert> <!-- DepthBelowGrade only required when InteriorAdjacentTo is "living space" or "garage" -->
@@ -371,6 +370,8 @@
       <sch:assert role='ERROR' test='count(h:UnderSlabInsulation/h:Layer/h:NominalRValue) = 1'>Expected 1 element(s) for xpath: UnderSlabInsulation/Layer/NominalRValue</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:CarpetFraction) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/CarpetFraction</sch:assert> <!-- 0 - 1 -->
       <sch:assert role='ERROR' test='count(h:extension/h:CarpetRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/CarpetRValue</sch:assert>
+      <!-- Warnings -->
+      <sch:report role='WARN' test='number(h:ExposedPerimeter) = 0'>Slab has zero exposed perimeter, this may indicate an input error.</sch:report>
     </sch:rule>
   </sch:pattern>
 

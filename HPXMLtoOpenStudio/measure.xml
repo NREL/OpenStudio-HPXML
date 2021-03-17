@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>8fe11119-5c71-472e-8624-d050c445ece4</version_id>
-  <version_modified>20210317T193742Z</version_modified>
+  <version_id>71cac9ea-2f1d-4590-a785-0bb3a39eef73</version_id>
+  <version_modified>20210317T175659Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -397,6 +397,12 @@
       <checksum>558ED24D</checksum>
     </file>
     <file>
+      <filename>version.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4F621F55</checksum>
+    </file>
+    <file>
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -457,17 +463,6 @@
       <checksum>AA3D2A3A</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.1.1</identifier>
-        <min_compatible>2.1.1</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>52615406</checksum>
-    </file>
-    <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -478,12 +473,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>4FD58D3F</checksum>
-    </file>
-    <file>
-      <filename>hvac_sizing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8B2A73DD</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -516,12 +505,6 @@
       <checksum>BCC4746A</checksum>
     </file>
     <file>
-      <filename>EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>949D6AF5</checksum>
-    </file>
-    <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -534,10 +517,27 @@
       <checksum>C838C4D7</checksum>
     </file>
     <file>
-      <filename>version.rb</filename>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.1.1</identifier>
+        <min_compatible>2.1.1</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>5F291E06</checksum>
+    </file>
+    <file>
+      <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C72E0676</checksum>
+      <checksum>53FE554B</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3FA1DC3F</checksum>
     </file>
   </files>
 </measure>

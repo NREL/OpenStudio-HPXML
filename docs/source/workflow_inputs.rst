@@ -510,7 +510,7 @@ Each space type that borders the ground (i.e., basements, crawlspaces, garages, 
   ``InteriorAdjacentTo``                       string                  See [#]_     Yes                  Interior adjacent space type
   ``Area``                                     double    ft2           > 0          Yes                  Gross area
   ``Thickness``                                double    inches        >= 0         No         See [#]_  Thickness [#]_
-  ``ExposedPerimeter``                         double    ft            > 0          Yes                  Perimeter exposed to ambient conditions [#]_
+  ``ExposedPerimeter``                         double    ft            >= 0         Yes                  Perimeter exposed to ambient conditions [#]_
   ``PerimeterInsulationDepth``                 double    ft            >= 0         Yes                  Depth from grade to bottom of vertical insulation
   ``UnderSlabInsulationWidth``                 double    ft            >= 0         See [#]_             Width from slab edge inward of horizontal insulation
   ``UnderSlabInsulationSpansEntireSlab``       boolean                              See [#]_             Whether horizontal insulation spans entire slab
