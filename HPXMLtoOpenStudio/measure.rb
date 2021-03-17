@@ -1260,6 +1260,7 @@ class OSModel
         next unless slab.interior_adjacent_to == foundation_type
 
         slabs << slab
+        slab.exposed_perimeter = [slab.exposed_perimeter, 1.0].max # minimum value to prevent error if no exposed slab
       end
 
       # Calculate combinations of slabs/walls for each Kiva instance

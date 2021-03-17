@@ -127,7 +127,6 @@ def create_hpxmls
     'invalid_files/refrigerator-location.xml' => 'base.xml',
     'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/repeated-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
-    'invalid_files/slab-zero-exposed-perimeter.xml' => 'base.xml',
     'invalid_files/solar-thermal-system-with-combi-tankless.xml' => 'base-dhw-combi-tankless.xml',
     'invalid_files/solar-thermal-system-with-desuperheater.xml' => 'base-dhw-desuperheater.xml',
     'invalid_files/solar-thermal-system-with-dhw-indirect.xml' => 'base-dhw-combi-tankless.xml',
@@ -2326,8 +2325,6 @@ def set_hpxml_slabs(hpxml_file, hpxml)
       slab.carpet_fraction = nil
       slab.carpet_fraction = nil
     end
-  elsif ['invalid_files/slab-zero-exposed-perimeter.xml'].include? hpxml_file
-    hpxml.slabs[0].exposed_perimeter = 0
   elsif ['invalid_files/enclosure-living-missing-floor-slab.xml',
          'invalid_files/enclosure-basement-missing-slab.xml'].include? hpxml_file
     hpxml.slabs[0].delete
