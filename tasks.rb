@@ -155,6 +155,9 @@ def create_osws
     'base-hvac-air-to-air-heat-pump-var-speed.osw' => 'base.osw',
     'base-hvac-air-to-air-heat-pump-var-speed-modulating.osw' => 'base-hvac-air-to-air-heat-pump-var-speed.osw',
     'base-hvac-air-to-air-heat-pump-var-speed-dual-source.osw' => 'base-hvac-air-to-air-heat-pump-var-speed.osw',
+    'base-hvac-air-to-air-heat-pump-var-speed-ihp-grid-ac.osw' => 'base-hvac-air-to-air-heat-pump-var-speed.osw',
+    'base-hvac-air-to-air-heat-pump-var-speed-ihp-ice-storage.osw' => 'base-hvac-air-to-air-heat-pump-var-speed.osw',
+    'base-hvac-air-to-air-heat-pump-var-speed-ihp-pcm-storage.osw' => 'base-hvac-air-to-air-heat-pump-var-speed.osw',
     'base-hvac-boiler-coal-only.osw' => 'base.osw',
     'base-hvac-boiler-elec-only.osw' => 'base.osw',
     'base-hvac-boiler-gas-central-ac-1-speed.osw' => 'base.osw',
@@ -1385,6 +1388,12 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_demand_flexibility_modulating', true)
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-dual-source.osw'].include? osw_file
     step.setArgument('heat_pump_demand_flexibility_dual_source', true)
+  elsif ['base-hvac-air-to-air-heat-pump-var-speed-ihp-grid-ac.osw'].include? osw_file
+    step.setArgument('heat_pump_demand_flexibility_integrated_heat_pump_grid_ac', true)
+  elsif ['base-hvac-air-to-air-heat-pump-var-speed-ihp-ice-storage.osw'].include? osw_file
+    step.setArgument('heat_pump_demand_flexibility_integrated_heat_pump_ice_storage', true)
+  elsif ['base-hvac-air-to-air-heat-pump-var-speed-ihp-pcm-storage.osw'].include? osw_file
+    step.setArgument('heat_pump_demand_flexibility_integrated_heat_pump_pcm_storage', true)
   elsif ['base-hvac-boiler-coal-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeCoal)
@@ -2656,6 +2665,9 @@ def create_hpxmls
     'base-hvac-air-to-air-heat-pump-var-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-var-speed-modulating.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-air-to-air-heat-pump-var-speed-dual-source.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
+    'base-hvac-air-to-air-heat-pump-var-speed-ihp-grid-ac.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
+    'base-hvac-air-to-air-heat-pump-var-speed-ihp-ice-storage.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
+    'base-hvac-air-to-air-heat-pump-var-speed-ihp-pcm-storage.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-autosize.xml' => 'base.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml',
@@ -5906,6 +5918,12 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
     hpxml.heat_pumps[0].modulating = true
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-dual-source.xml'].include? hpxml_file
     hpxml.heat_pumps[0].dual_source = true
+  elsif ['base-hvac-air-to-air-heat-pump-var-speed-ihp-grid-ac.xml'].include? hpxml_file
+    hpxml.heat_pumps[0].ihp_grid_ac = true
+  elsif ['base-hvac-air-to-air-heat-pump-var-speed-ihp-ice-storage.xml'].include? hpxml_file
+    hpxml.heat_pumps[0].ihp_ice_storage = true
+  elsif ['base-hvac-air-to-air-heat-pump-var-speed-ihp-pcm-storage.xml'].include? hpxml_file
+    hpxml.heat_pumps[0].ihp_pcm_storage = true
   end
 end
 
@@ -8036,7 +8054,7 @@ if ARGV[0].to_sym == :update_measures
               '"Rake.application[:rubocop].invoke"']
   command = "#{OpenStudio.getOpenStudioCLI} -e #{commands.join(' -e ')}"
   puts 'Applying rubocop auto-correct to measures...'
-  # system(command)
+  system(command)
 
   # Update measures XMLs
   command = "#{OpenStudio.getOpenStudioCLI} measure -t '#{File.dirname(__FILE__)}'"
