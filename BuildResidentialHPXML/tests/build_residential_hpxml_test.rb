@@ -19,13 +19,16 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       this_dir,
     ]
 
+    test_base = true
+    test_extra = true
+
     osws = []
     test_dirs.each do |test_dir|
       Dir["#{test_dir}/base*.osw"].sort.each do |osw|
-        osws << File.absolute_path(osw)
+        osws << File.absolute_path(osw) if test_base
       end
       Dir["#{test_dir}/extra*.osw"].sort.each do |osw|
-        osws << File.absolute_path(osw)
+        osws << File.absolute_path(osw) if test_extra
       end
     end
 
@@ -129,7 +132,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'multifamily-no-building-orientation.osw' => 'geometry_unit_type=apartment unit and geometry_building_num_units=false and geometry_level=false and geometry_horizontal_location=false',
       'dhw-indirect-without-boiler.osw' => 'water_heater_type=space-heating boiler with storage tank and heating_system_type=Furnace',
       'foundation-wall-insulation-greater-than-height.osw' => 'foundation_wall_insulation_distance_to_bottom=6.0 and geometry_foundation_height=4.0',
-      'conditioned-attic-with-one-floor-above-grade.osw' => 'geometry_num_floors_above_grade=1 and geometry_attic_type=ConditionedAttic'
+      'conditioned-attic-with-one-floor-above-grade.osw' => 'geometry_num_floors_above_grade=1 and geometry_attic_type=ConditionedAttic',
+      'ambient-with-rim-joists.osw' => 'geometry_foundation_type=Ambient and geometry_rim_joist_height=0.78'
     }
 
     measures = {}
@@ -208,11 +212,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.building_construction.conditioned_building_volume = nil
       hpxml.building_construction.average_ceiling_height = nil # Comparing conditioned volume instead
       hpxml.air_infiltration_measurements[0].infiltration_volume = nil
-      hpxml.foundations.clear()
-      hpxml.attics.each do |attic|
-        attic.vented_attic_sla = nil
-        attic.within_infiltration_volume = nil
-      end
+      hpxml.foundations.clear
+      hpxml.attics.clear
       hpxml.foundation_walls.each do |foundation_wall|
         next if foundation_wall.insulation_assembly_r_value.nil?
         foundation_wall.insulation_assembly_r_value = foundation_wall.insulation_assembly_r_value.round(2)

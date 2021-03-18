@@ -259,7 +259,7 @@
         "refrigerator_location": "basement - unconditioned",
         "refrigerator_rated_annual_kwh": "650.0",
         "refrigerator_usage_multiplier": 1.0,
-        "rim_joist_assembly_r": 23.0,
+        "rim_joist_assembly_r": 2.3,
         "roof_assembly_r": 2.3,
         "roof_color": "auto",
         "roof_emittance": "0.92",

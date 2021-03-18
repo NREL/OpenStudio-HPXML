@@ -3050,6 +3050,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       errors << "foundation_wall_insulation_distance_to_bottom=#{args[:foundation_wall_insulation_distance_to_bottom]} and geometry_foundation_height=#{args[:geometry_foundation_height]}" if error
     end
 
+    # ambient with rim joists
+    error = (args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient) && (args[:geometry_rim_joist_height] > 0)
+    errors << "geometry_foundation_type=#{args[:geometry_foundation_type]} and geometry_rim_joist_height=#{args[:geometry_rim_joist_height]}" if error
+
     return warnings, errors
   end
 
@@ -3172,8 +3176,7 @@ class HPXMLFile
       success = Geometry.create_multifamily(runner: runner, model: model, **args)
     end
     return false if not success
-    output_file_path = OpenStudio::Path.new(File.dirname(__FILE__) + '/output/test1.osm')
-    model.save(output_file_path, true)
+
     success = Geometry.create_windows_and_skylights(runner: runner, model: model, **args)
     return false if not success
 
@@ -3486,7 +3489,7 @@ class HPXMLFile
       exterior_adjacent_to = HPXML::LocationOutside
       interior_adjacent_to = get_adjacent_to(surface)
 
-      next unless (args[:geometry_rim_joist_height] - Geometry.get_surface_height(surface)).abs < 0.00001
+      next unless (args[:geometry_rim_joist_height] - Geometry.get_surface_height(surface)).abs < 0.00001 # this is not a "wall"
 
       if args[:rim_joist_assembly_r].is_initialized && (args[:rim_joist_assembly_r].get > 0)
         insulation_assembly_r_value = args[:rim_joist_assembly_r]
@@ -3522,6 +3525,20 @@ class HPXMLFile
                            emittance: emittance,
                            insulation_assembly_r_value: insulation_assembly_r_value)
     end
+
+    extra_rim_joist_area = get_extra_rim_joist_area(hpxml, args)
+    if hpxml.rim_joists.size > 0
+      hpxml.rim_joists[-1].area -= extra_rim_joist_area
+    end
+  end
+
+  def self.get_extra_rim_joist_area(hpxml, args)
+    # this is "rim joist" area underneath a protruding garage that should actually be foundation wall area
+    # we need this because it's difficult to set this surface to Adiabatic using our geometry methods
+    if (args[:geometry_garage_protrusion] != 0) && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
+      return (args[:geometry_rim_joist_height] * args[:geometry_garage_width]).round
+    end
+    return 0
   end
 
   def self.get_adiabatic_adjacent_surface(model, surface)
@@ -3637,13 +3654,13 @@ class HPXMLFile
 
       exterior_adjacent_to = HPXML::LocationGround
       if surface.outsideBoundaryCondition == 'Adiabatic' # can be adjacent to foundation space
-        next if [HPXML::ResidentialTypeSFD].include? args[:geometry_unit_type] # these are surfaces for kiva
-
         adjacent_surface = get_adiabatic_adjacent_surface(model, surface)
         if adjacent_surface.nil? # adjacent to a space that is not explicitly in the model
-          exterior_adjacent_to = interior_adjacent_to
-          if exterior_adjacent_to == HPXML::LocationLivingSpace # living adjacent to living
-            exterior_adjacent_to = HPXML::LocationOtherHousingUnit
+          unless [HPXML::ResidentialTypeSFD].include?(args[:geometry_unit_type])
+            exterior_adjacent_to = interior_adjacent_to
+            if exterior_adjacent_to == HPXML::LocationLivingSpace # living adjacent to living
+              exterior_adjacent_to = HPXML::LocationOtherHousingUnit
+            end
           end
         else # adjacent to a space that is explicitly in the model, e.g., corridor
           exterior_adjacent_to = get_adjacent_to(adjacent_surface)
@@ -3688,6 +3705,11 @@ class HPXMLFile
                                  insulation_exterior_r_value: insulation_exterior_r_value,
                                  insulation_exterior_distance_to_top: insulation_exterior_distance_to_top,
                                  insulation_exterior_distance_to_bottom: insulation_exterior_distance_to_bottom)
+    end
+
+    extra_rim_joist_area = get_extra_rim_joist_area(hpxml, args)
+    if hpxml.foundation_walls.size > 0
+      hpxml.foundation_walls[-1].area += extra_rim_joist_area
     end
   end
 
@@ -3755,6 +3777,11 @@ class HPXMLFile
       end
       exposed_perimeter = Geometry.calculate_exposed_perimeter(model, [surface], has_foundation_walls).round
       next if exposed_perimeter == 0 # this could be, e.g., the foundation floor of an interior corridor
+
+      if [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned].include? interior_adjacent_to
+        extra_rim_joist_area = get_extra_rim_joist_area(hpxml, args)
+        exposed_perimeter -= extra_rim_joist_area
+      end
 
       if [HPXML::LocationLivingSpace, HPXML::LocationGarage].include? interior_adjacent_to
         depth_below_grade = 0
