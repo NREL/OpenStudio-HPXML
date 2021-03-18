@@ -2950,7 +2950,7 @@ class HPXML < Object
              :fan_watts_per_cfm, :fan_power_not_tested, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :airflow_defect_ratio, :airflow_not_tested, :charge_defect_ratio,
              :charge_not_tested, :heating_airflow_cfm, :cooling_airflow_cfm,
-             :modulating, :dual_source]
+             :modulating, :dual_source, :ihp_grid_ac, :ihp_ice_storage, :ihp_pcm_storage]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -3052,11 +3052,14 @@ class HPXML < Object
       XMLHelper.add_extension(heat_pump, 'PumpPowerWattsPerTon', @pump_watts_per_ton, :float, @pump_watts_per_ton_isdefaulted) unless @pump_watts_per_ton.nil?
       XMLHelper.add_extension(heat_pump, 'SharedLoopWatts', @shared_loop_watts, :float) unless @shared_loop_watts.nil?
       XMLHelper.add_extension(heat_pump, 'SeedId', @seed_id, :string) unless @seed_id.nil?
-      if (not @modulating.nil?) || (not @dual_source.nil?)
+      if (not @modulating.nil?) || (not @dual_source.nil?) || (not @ihp_grid_ac.nil?) || (not @ihp_ice_storage.nil?) || (not @ihp_pcm_storage.nil?)
         extension = XMLHelper.create_elements_as_needed(heat_pump, ['extension'])
         demand_flexibility = XMLHelper.add_element(extension, 'DemandFlexibility')
         XMLHelper.add_element(demand_flexibility, 'Modulating', @modulating, :boolean) unless @modulating.nil?
         XMLHelper.add_element(demand_flexibility, 'DualSource', @dual_source, :boolean) unless @dual_source.nil?
+        XMLHelper.add_element(demand_flexibility, 'IHPGridAC', @ihp_grid_ac, :boolean) unless @ihp_grid_ac.nil?
+        XMLHelper.add_element(demand_flexibility, 'IHPIceStorage', @ihp_ice_storage, :boolean) unless @ihp_ice_storage.nil?
+        XMLHelper.add_element(demand_flexibility, 'IHPPcmStorage', @ihp_pcm_storage, :boolean) unless @ihp_pcm_storage.nil?
       end
     end
 
@@ -3106,6 +3109,9 @@ class HPXML < Object
       @seed_id = XMLHelper.get_value(heat_pump, 'extension/SeedId', :string)
       @modulating = XMLHelper.get_value(heat_pump, 'extension/DemandFlexibility/Modulating', :boolean)
       @dual_source = XMLHelper.get_value(heat_pump, 'extension/DemandFlexibility/DualSource', :boolean)
+      @ihp_grid_ac = XMLHelper.get_value(heat_pump, 'extension/DemandFlexibility/IHPGridAC', :boolean)
+      @ihp_ice_storage = XMLHelper.get_value(heat_pump, 'extension/DemandFlexibility/IHPIceStorage', :boolean)
+      @ihp_pcm_storage = XMLHelper.get_value(heat_pump, 'extension/DemandFlexibility/IHPPcmStorage', :boolean)
     end
   end
 
