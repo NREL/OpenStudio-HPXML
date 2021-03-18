@@ -626,7 +626,132 @@ class HPXMLDefaults
       end
     end
 
+    # HVAC efficiencies (HEScore Assumption)
+    hpxml.heating_systems.each do |heating_system|
+      next unless (heating_system.heating_efficiency_afue.nil? && heating_system.heating_efficiency_percent.nil?)
+
+      year_installed = heating_system.year_installed
+      heating_system_type = heating_system.heating_system_type
+      heating_system_fuel = heating_system.heating_system_fuel
+
+      # FIXME: need to include all heating system types?
+      if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace].include? heating_system_type
+        if heating_system_fuel == HPXML::FuelTypeElectricity
+          heating_system.heating_efficiency_afue = 0.98
+        elsif not year_installed.nil?
+          heating_system.heating_efficiency_afue = lookup_hvac_efficiency(year_installed, heating_system_type, heating_system_fuel, 'AFUE')
+        end
+      elsif heating_system_type == HPXML::HVACTypeBoiler
+        if heating_system_fuel == HPXML::FuelTypeElectricity
+          heating_system.heating_efficiency_afue = 0.98
+        elsif not year_installed.nil?
+          heating_system.heating_efficiency_afue = lookup_hvac_efficiency(year_installed, heating_system_type, heating_system_fuel, 'AFUE')
+        end
+      elsif heating_system_type == HPXML::HVACTypeElectricResistance
+        heating_system.heating_efficiency_percent = 0.98
+      elsif heating_system_type == HPXML::HVACTypeStove
+        if heating_system_fuel == HPXML::FuelTypeWoodCord
+          heating_system.heating_efficiency_percent = 0.60
+        elsif heating_system_fuel == HPXML::FuelTypeWoodPellets
+          heating_system.heating_efficiency_percent = 0.78
+        end
+      end
+    end
+
+    hpxml.cooling_systems.each do |cooling_system|
+      next unless (cooling_system.cooling_efficiency_seer.nil? && cooling_system.cooling_efficiency_eer.nil?)
+
+      year_installed = cooling_system.year_installed
+      cooling_system_type = cooling_system.cooling_system_type
+      cooling_system_fuel = HPXML::FuelTypeElectricity
+
+      # need to include all cooling system types?
+      if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+        if not year_installed.nil?
+          cooling_system.cooling_efficiency_seer = lookup_hvac_efficiency(year_installed, cooling_system_type, cooling_system_fuel, 'SEER')
+        end
+      elsif cooling_system_type == HPXML::HVACTypeRoomAirConditioner
+        if not year_installed.nil?
+          cooling_system.cooling_efficiency_eer = lookup_hvac_efficiency(year_installed, cooling_system_type, cooling_system_fuel, 'EER')
+        end
+      end
+    end
+
+    hpxml.heat_pumps.each do |heat_pump|
+      # FIXME: double-check the line below
+      next unless (heat_pump.cooling_efficiency_seer.nil? && heat_pump.cooling_efficiency_eer.nil? && heat_pump.heating_efficiency_hspf.nil? && heat_pump.heating_efficiency_cop.nil?)
+
+      year_installed = heat_pump.year_installed
+      heat_pump_type = heat_pump.heat_pump_type
+      heat_pump_fuel = HPXML::FuelTypeElectricity
+      
+      # FIXME: need to include all heat pump system types?
+      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
+        if not year_installed.nil?
+          heat_pump.cooling_efficiency_seer = lookup_hvac_efficiency(year_installed, heat_pump_type, heat_pump_fuel, 'SEER')
+        end
+        if not year_installed.nil?
+          heat_pump.heating_efficiency_hspf = lookup_hvac_efficiency(year_installed, heat_pump_type, heat_pump_fuel, 'HSPF')
+        end
+      end
+
+      # If heat pump has no cooling/heating load served, assign arbitrary value for cooling/heating efficiency value
+      if (fraction_cool_load_served == 0) && heat_pump.cooling_efficiency_seer.nil? && heat_pump.cooling_efficiency_eer.nil?
+        if heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+          heat_pump.cooling_efficiency_eer = 16.6
+        else
+          heat_pump.cooling_efficiency_seer = 13.0
+        end
+      end
+      if (fraction_heat_load_served == 0) && heat_pump.heating_efficiency_hspf.nil? && heat_pump.heating_efficiency_cop.nil?
+        if heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+          heat_pump.heating_efficiency_cop = 3.6
+        else
+          heat_pump.heating_efficiency_hspf = 7.7
+        end
+      end
+    end
+
     # TODO: Default HeatingCapacity17F?
+  end
+
+  def self.lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id = 'shipment_weighted', state_code = nil)
+    year = 0 if year.nil?
+
+    type_id = { HPXML::HVACTypeCentralAirConditioner => 'split_dx',
+                HPXML::HVACTypeRoomAirConditioner => 'packaged_dx',
+                HPXML::HVACTypeHeatPumpAirToAir => 'heat_pump',
+                HPXML::HVACTypeHeatPumpMiniSplit => 'mini_split',
+                HPXML::HVACTypeFurnace => 'central_furnace',
+                HPXML::HVACTypeWallFurnace => 'wall_furnace',
+                HPXML::HVACTypeBoiler => 'boiler' }[hvac_type]
+    fail "Unexpected hvac_type #{hvac_type}." if type_id.nil?
+
+    fuel_primary_id = hpxml_to_hescore_fuel(fuel_type)
+    fail "Unexpected fuel_type #{fuel_type}." if fuel_primary_id.nil?
+
+    metric_id = units.downcase
+
+    fail "Invalid performance_id for HVAC lookup #{performance_id}." if not ['shipment_weighted', 'energy_star'].include?(performance_id)
+
+    value = nil
+    lookup_year = 0
+    CSV.foreach(File.join(File.dirname(__FILE__), 'lu_hvac_equipment_efficiency.csv'), headers: true) do |row|
+      next unless row['performance_id'] == performance_id
+      next unless row['type_id'] == type_id
+      next unless row['fuel_primary_id'] == fuel_primary_id
+      next unless row['metric_id'] == metric_id
+      next unless row['region_id'] == region_id # FIXME: I guess region_id isn't used unless performance_id is energy star.
+
+      row_year = Integer(row['year'])
+      if (row_year - year).abs <= (lookup_year - year).abs
+        lookup_year = row_year
+        value = Float(row['value'])
+      end
+    end
+    fail 'Could not lookup default HVAC efficiency.' if value.nil?
+
+    return value
   end
 
   def self.apply_hvac_control(hpxml)
@@ -810,7 +935,46 @@ class HPXMLDefaults
         water_heating_system.location = Waterheater.get_default_location(hpxml, hpxml.climate_and_risk_zones.iecc_zone)
         water_heating_system.location_isdefaulted = true
       end
+      fuel_type = water_heating_system.fuel_type
+      year_installed = water_heating_system.year_installed
+      if water_heating_system.energy_factor.nil? && water_heating_system.uniform_energy_factor.nil?
+        if not year_installed.nil?
+          water_heating_system.energy_factor = lookup_water_heater_efficiency(year_installed, fuel_type)
+        end
+      end
     end
+  end
+
+  def self.lookup_water_heater_efficiency(year, fuel_type, performance_id = 'shipment_weighted')
+    year = 0 if year.nil?
+
+    fuel_primary_id = hpxml_to_hescore_fuel(fuel_type)
+    fail "Unexpected fuel_type #{fuel_type}." if fuel_primary_id.nil?
+
+    fail "Invalid performance_id for water heater lookup #{performance_id}." unless performance_id == 'shipment_weighted'
+
+    value = nil
+    lookup_year = 0
+    CSV.foreach(File.join(File.dirname(__FILE__), 'lu_water_heater_efficiency.csv'), headers: true) do |row|
+      next unless row['performance_id'] == performance_id
+      next unless row['fuel_primary_id'] == fuel_primary_id
+
+      row_year = Integer(row['year'])
+      if (row_year - year).abs <= (lookup_year - year).abs
+        lookup_year = row_year
+        value = Float(row['value'])
+      end
+    end
+    fail 'Could not lookup default water heating efficiency.' if value.nil?
+
+    return value
+  end
+  
+  def self.hpxml_to_hescore_fuel(fuel_type)
+    return { HPXML::FuelTypeElectricity => 'electric',
+             HPXML::FuelTypeNaturalGas => 'natural_gas',
+             HPXML::FuelTypeOil => 'fuel_oil',
+             HPXML::FuelTypePropane => 'lpg' }[fuel_type]
   end
 
   def self.apply_hot_water_distribution(hpxml, cfa, ncfl, has_uncond_bsmnt)
