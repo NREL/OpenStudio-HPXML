@@ -18,7 +18,7 @@
     <Site>
       <SiteID id='SiteID'/>
       <Address>
-        <StateCode>UT</StateCode>
+        <StateCode>CO</StateCode>
       </Address>
     </Site>
     <ProjectStatus>
@@ -49,13 +49,13 @@
       <ClimateandRiskZones>
         <ClimateZoneIECC>
           <Year>2006</Year>
-          <ClimateZone>6B</ClimateZone>
+          <ClimateZone>5B</ClimateZone>
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>Salt Lake City, UT</Name>
+          <Name>Denver, CO</Name>
           <extension>
-            <EPWFilePath>USA_UT_Salt.Lake.City.Intl.AP.725720_TMY3.epw</EPWFilePath>
+            <EPWFilePath>USA_CO_Denver.Intl.AP.725650_TMY3.epw</EPWFilePath>
           </extension>
         </WeatherStation>
       </ClimateandRiskZones>
@@ -284,6 +284,34 @@
             <AttachedToWall idref='Wall'/>
           </Window>
         </Windows>
+        <Skylights>
+          <Skylight>
+            <SystemIdentifier/>
+            <Area>45.0</Area>
+            <Azimuth>0</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='SkylightNorthInteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <AttachedToRoof idref='Roof'/>
+          </Skylight>
+          <Skylight>
+            <SystemIdentifier id='SkylightSouth'/>
+            <Area>45.0</Area>
+            <Azimuth>180</Azimuth>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.47</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='SkylightSouthInteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <AttachedToRoof idref='Roof'/>
+          </Skylight>
+        </Skylights>
         <Doors>
           <Door>
             <SystemIdentifier id='DoorNorth'/>
@@ -429,7 +457,6 @@
           <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
-          <ControlType>timer</ControlType>
           <extension>
             <IsVented>true</IsVented>
             <VentedFlowRate>150.0</VentedFlowRate>
