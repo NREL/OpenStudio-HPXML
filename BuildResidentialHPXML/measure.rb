@@ -1231,12 +1231,27 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_demand_flexibility_modulating', false)
     arg.setDisplayName('Heat Pump: Demand Flexibility Modulating')
-    arg.setDescription("")
+    arg.setDescription('')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_demand_flexibility_dual_source', false)
     arg.setDisplayName('Heat Pump: Demand Flexibility Dual-Source')
-    arg.setDescription("")
+    arg.setDescription('')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_demand_flexibility_integrated_heat_pump_modulating', false)
+    arg.setDisplayName('Heat Pump: Demand Flexibility Integrated Heat Pump Modulating')
+    arg.setDescription('')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_demand_flexibility_integrated_heat_pump_modulating_ice_storage', false)
+    arg.setDisplayName('Heat Pump: Demand Flexibility Integrated Heat Pump Modulating w/ Ice Storage')
+    arg.setDescription('')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_demand_flexibility_integrated_heat_pump_modulating_pcm_storage', false)
+    arg.setDisplayName('Heat Pump: Demand Flexibility Integrated Heat Pump Modulating w/ Pcm Storage')
+    arg.setDescription('')
     args << arg
 
     heating_system_type_2_choices = OpenStudio::StringVector.new
@@ -4063,6 +4078,18 @@ class HPXMLFile
       dual_source = true
     end
 
+    if args[:heat_pump_demand_flexibility_integrated_heat_pump_grid_ac].is_initialized
+      ihp_grid_ac = true
+    end
+
+    if args[:heat_pump_demand_flexibility_integrated_heat_pump_ice_storage].is_initialized
+      ihp_ice_storage = true
+    end
+
+    if args[:heat_pump_demand_flexibility_integrated_heat_pump_pcm_storage].is_initialized
+      ihp_pcm_storage = true
+    end
+
     hpxml.heat_pumps.add(id: 'HeatPump',
                          heat_pump_type: heat_pump_type,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
@@ -4085,7 +4112,10 @@ class HPXMLFile
                          airflow_defect_ratio: airflow_defect_ratio,
                          charge_defect_ratio: charge_defect_ratio,
                          modulating: modulating,
-                         dual_source: dual_source)
+                         dual_source: dual_source,
+                         ihp_grid_ac: ihp_grid_ac,
+                         ihp_ice_storage: ihp_ice_storage,
+                         ihp_pcm_storage: ihp_pcm_storage)
   end
 
   def self.set_secondary_heating_systems(hpxml, runner, args)
