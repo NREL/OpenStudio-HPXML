@@ -3,16 +3,15 @@ require 'csv'
 folder = 'comparisons'
 files = ['results.csv', 'results_ashrae_140.csv', 'results_hvac_sizing.csv']
 
-dir = File.join(File.dirname(__FILE__), folder)
+dir = File.join(File.dirname(__FILE__), 'tests', folder)
 unless Dir.exist?(dir)
   Dir.mkdir(dir)
 end
 
 files.each do |file|
-
   # load file
-  master_rows = CSV.read(File.join(File.dirname(__FILE__), "master/#{file}"))
-  feature_rows = CSV.read(File.join(File.dirname(__FILE__), "results/#{file}"))
+  master_rows = CSV.read(File.join(File.dirname(__FILE__), "tests/master/#{file}"))
+  feature_rows = CSV.read(File.join(File.dirname(__FILE__), "tests/results/#{file}"))
 
   # get columns
   master_cols = master_rows[0]
@@ -25,7 +24,7 @@ files.each do |file|
     master[hpxml] = {}
     row[1..-1].each_with_index do |field, i|
       begin
-        master[hpxml][master_cols[i+1]] = Float(field)
+        master[hpxml][master_cols[i + 1]] = Float(field)
       rescue
       end
     end
@@ -37,7 +36,7 @@ files.each do |file|
     feature[hpxml] = {}
     row[1..-1].each_with_index do |field, i|
       begin
-        feature[hpxml][feature_cols[i+1]] = Float(field)
+        feature[hpxml][feature_cols[i + 1]] = Float(field)
       rescue
       end
     end
@@ -79,10 +78,9 @@ files.each do |file|
   end
 
   # export comparison table
-  CSV.open(File.join(File.dirname(__FILE__), "#{folder}/#{file}"), 'wb') do |csv|
+  CSV.open(File.join(dir, file), 'wb') do |csv|
     rows.each do |row|
       csv << row
     end
   end
-
 end
