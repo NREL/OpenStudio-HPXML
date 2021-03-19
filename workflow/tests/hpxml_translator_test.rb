@@ -507,6 +507,9 @@ class HPXMLTest < MiniTest::Test
       if hpxml.lighting_groups.empty?
         next if log_line.include? 'No lighting specified, the model will not include lighting energy use.'
       end
+      if hpxml.windows.empty?
+        next if log_line.include? 'No windows specified, the model will not include window heat transfer.'
+      end
 
       flunk "Unexpected warning found in run.log: #{log_line}"
     end
