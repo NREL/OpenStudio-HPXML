@@ -347,9 +347,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_rim_joist_height', true)
     arg.setDisplayName('Geometry: Rim Joist Height')
-    arg.setUnits('ft')
-    arg.setDescription("The height of the rim joists. Only applies to basements/crawlspaces. Only applies to #{HPXML::ResidentialTypeSFD} and #{HPXML::ResidentialTypeSFA} units.")
-    arg.setDefaultValue(0.0)
+    arg.setUnits('in')
+    arg.setDescription('The height of the rim joists. Only applies to basements/crawlspaces.')
+    arg.setDefaultValue(5.5)
     args << arg
 
     roof_type_choices = OpenStudio::StringVector.new
@@ -500,10 +500,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('rim_joist_assembly_r', false)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('rim_joist_assembly_r', true)
     arg.setDisplayName('Rim Joist: Assembly R-value')
     arg.setUnits('h-ft^2-R/Btu')
     arg.setDescription('Assembly R-value for the rim joists. Only applies to basements/crawlspaces.')
+    arg.setDefaultValue(23)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_perimeter_insulation_r', true)
@@ -3050,10 +3051,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       errors << "foundation_wall_insulation_distance_to_bottom=#{args[:foundation_wall_insulation_distance_to_bottom]} and geometry_foundation_height=#{args[:geometry_foundation_height]}" if error
     end
 
-    # ambient with rim joists
-    error = (args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient) && (args[:geometry_rim_joist_height] > 0)
-    errors << "geometry_foundation_type=#{args[:geometry_foundation_type]} and geometry_rim_joist_height=#{args[:geometry_rim_joist_height]}" if error
-
     return warnings, errors
   end
 
@@ -3161,6 +3158,9 @@ class HPXMLFile
     if args[:geometry_foundation_type] == HPXML::FoundationTypeSlab
       args[:geometry_foundation_height] = 0.0
       args[:geometry_foundation_height_above_grade] = 0.0
+      args[:geometry_rim_joist_height] = 0.0
+    elsif args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient
+      args[:geometry_rim_joist_height] = 0.0
     end
 
     if args[:geometry_attic_type] == HPXML::AtticTypeConditioned
@@ -3491,10 +3491,6 @@ class HPXMLFile
 
       next unless (args[:geometry_rim_joist_height] - Geometry.get_surface_height(surface)).abs < 0.00001 # this is not a "wall"
 
-      if args[:rim_joist_assembly_r].is_initialized && (args[:rim_joist_assembly_r].get > 0)
-        insulation_assembly_r_value = args[:rim_joist_assembly_r]
-      end
-
       if exterior_adjacent_to == HPXML::LocationOutside && args[:wall_siding_type].is_initialized
         siding = args[:wall_siding_type].get
       end
@@ -3523,7 +3519,7 @@ class HPXMLFile
                            color: color,
                            solar_absorptance: solar_absorptance,
                            emittance: emittance,
-                           insulation_assembly_r_value: insulation_assembly_r_value)
+                           insulation_assembly_r_value: args[:rim_joist_assembly_r])
     end
 
     extra_rim_joist_area = get_extra_rim_joist_area(hpxml, args)
