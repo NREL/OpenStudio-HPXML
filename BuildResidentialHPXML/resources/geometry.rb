@@ -1954,6 +1954,7 @@ class Geometry
                               geometry_balcony_depth:,
                               geometry_foundation_type:,
                               geometry_foundation_height:,
+                              geometry_rim_joist_height:,
                               **remainder)
 
     cfa = geometry_cfa
@@ -1971,10 +1972,12 @@ class Geometry
     balcony_depth = geometry_balcony_depth
     foundation_type = geometry_foundation_type
     foundation_height = geometry_foundation_height
+    rim_joist_height = geometry_rim_joist_height
 
     if level != 'Bottom'
       foundation_type = HPXML::LocationOtherHousingUnit
       foundation_height = 0.0
+      rim_joist_height = 0.0
     end
 
     num_units_per_floor = num_units / num_floors
@@ -2056,6 +2059,7 @@ class Geometry
     inset_width = UnitConversions.convert(inset_width, 'ft', 'm')
     inset_depth = UnitConversions.convert(inset_depth, 'ft', 'm')
     balcony_depth = UnitConversions.convert(balcony_depth, 'ft', 'm')
+    rim_joist_height = UnitConversions.convert(rim_joist_height, 'ft', 'm')
 
     # calculate the dimensions of the unit
     footprint = cfa + inset_width * inset_depth
@@ -2070,10 +2074,10 @@ class Geometry
     foundation_back_polygon = nil
 
     # create the front prototype unit footprint
-    nw_point = OpenStudio::Point3d.new(0, 0, 0)
-    ne_point = OpenStudio::Point3d.new(x, 0, 0)
-    sw_point = OpenStudio::Point3d.new(0, -y, 0)
-    se_point = OpenStudio::Point3d.new(x, -y, 0)
+    nw_point = OpenStudio::Point3d.new(0, 0, rim_joist_height)
+    ne_point = OpenStudio::Point3d.new(x, 0, rim_joist_height)
+    sw_point = OpenStudio::Point3d.new(0, -y, rim_joist_height)
+    se_point = OpenStudio::Point3d.new(x, -y, rim_joist_height)
 
     if inset_width * inset_depth > 0
       if inset_position == 'Right'
@@ -2269,6 +2273,9 @@ class Geometry
         foundation_space.setThermalZone(foundation_zone)
       end
 
+      # Rim Joist
+      add_rim_joist(model, foundation_front_polygon, foundation_space, rim_joist_height, 0)
+
       # put all of the spaces in the model into a vector
       spaces = OpenStudio::Model::SpaceVector.new
       model.getSpaces.each do |space|
@@ -2291,8 +2298,10 @@ class Geometry
           os_facade = get_facade_for_surface(surface)
           if adb_facade.include?(os_facade) && (os_facade != 'RoofCeiling') && (os_facade != 'Floor')
             surface.setOutsideBoundaryCondition('Adiabatic')
-          elsif os_facade != 'RoofCeiling'
+          elsif getSurfaceZValues([surface]).min < 0
             surface.setOutsideBoundaryCondition('Foundation')
+          else
+            surface.setOutsideBoundaryCondition('Outdoors')
           end
         end
       end
