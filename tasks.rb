@@ -415,8 +415,7 @@ def create_osws
     'invalid_files/multipliers-without-vehicle-plug-loads.osw' => 'base.osw',
     'invalid_files/multipliers-without-fuel-loads.osw' => 'base.osw',
     'invalid_files/foundation-wall-insulation-greater-than-height.osw' => 'base-foundation-vented-crawlspace.osw',
-    'invalid_files/conditioned-attic-with-one-floor-above-grade.osw' => 'base.osw',
-    'invalid_files/ambient-with-rim-joists.osw' => 'base-foundation-ambient.osw'
+    'invalid_files/conditioned-attic-with-one-floor-above-grade.osw' => 'base.osw'
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -2365,8 +2364,6 @@ def get_values(osw_file, step)
   elsif ['invalid_files/conditioned-attic-with-one-floor-above-grade.osw'].include? osw_file
     step.setArgument('geometry_attic_type', HPXML::AtticTypeConditioned)
     step.setArgument('ceiling_assembly_r', 0.0)
-  elsif ['invalid_files/ambient-with-rim-joists.osw'].include? osw_file
-    step.setArgument('geometry_rim_joist_height', 0.78)
   end
   return step
 end
