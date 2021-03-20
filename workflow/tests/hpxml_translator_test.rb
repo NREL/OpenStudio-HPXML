@@ -144,7 +144,8 @@ class HPXMLTest < MiniTest::Test
   def test_invalid
     sample_files_dir = File.join(@this_dir, '..', 'sample_files')
 
-    expected_error_msgs = { 'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
+    expected_error_msgs = { 'boiler-invalid-afue.xml' => ['Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1'],
+                            'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
                             'clothes-dryer-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'clothes-washer-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'cooking-range-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
@@ -175,6 +176,7 @@ class HPXMLTest < MiniTest::Test
                             'frac-total-plug-load.xml' => ['Expected sum of extension/FracSensible and extension/FracLatent to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"]]'],
                             'frac-sensible-fuel-load.xml' => ['Expected extension/FracSensible to be greater than or equal to 0 [context: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill" or FuelLoadType="lighting" or FuelLoadType="fireplace"]]'],
                             'frac-total-fuel-load.xml' => ['Expected sum of extension/FracSensible and extension/FracLatent to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill" or FuelLoadType="lighting" or FuelLoadType="fireplace"]]'],
+                            'furnace-invalid-afue.xml' => ['Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1'],
                             'generator-output-greater-than-consumption.xml' => ['Expected AnnualConsumptionkBtu to be greater than AnnualOutputkWh*3412 [context: /HPXML/Building/BuildingDetails/Systems/extension/Generators/Generator]'],
                             'generator-number-of-bedrooms-served.xml' => ['Expected NumberofBedroomsServed to be greater than ../../../../BuildingSummary/BuildingConstruction/NumberofBedrooms [context: /HPXML/Building/BuildingDetails/Systems/extension/Generators/Generator[IsSharedSystem="true"]]'],
                             'heat-pump-mixed-fixed-and-autosize-capacities.xml' => ['Expected 0 or 2 element(s) for xpath: HeatingCapacity | BackupHeatingCapacity [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel]]'],
