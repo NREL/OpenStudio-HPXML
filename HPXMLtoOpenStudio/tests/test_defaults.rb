@@ -401,7 +401,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].cooling_capacity = 12345
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_central_air_conditioner_values(hpxml_default, [0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345])
+    _test_default_central_air_conditioner_values(hpxml_default, 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345)
 
     # Test defaults
     hpxml.cooling_systems[0].cooling_shr = nil
@@ -412,7 +412,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].cooling_capacity = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_central_air_conditioner_values(hpxml_default, [0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, 0, 0, nil])
+    _test_default_central_air_conditioner_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, 0, 0, nil)
   end
 
   def test_room_air_conditioners
@@ -478,7 +478,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].heating_capacity = 12345
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_furnace_values(hpxml_default, [0.66, -0.22, 12345])
+    _test_default_furnace_values(hpxml_default, 0.66, -0.22, 12345)
 
     # Test defaults
     hpxml.heating_systems[0].fan_watts_per_cfm = nil
@@ -486,7 +486,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].heating_capacity = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_furnace_values(hpxml_default, [0.375, 0, nil])
+    _test_default_furnace_values(hpxml_default, 0.375, 0, nil)
   end
 
   def test_wall_furnaces
@@ -1868,8 +1868,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].cooling_efficiency_seer = 12.5
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_furnace_values(hpxml_default, [0.5, 0, 64000, 0.85])
-    _test_default_central_air_conditioner_values(hpxml_default, [0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, 0, 0, 48000, 12.5])
+    _test_default_furnace_values(hpxml_default, 0.5, 0, 64000, 0.85)
+    _test_default_central_air_conditioner_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, 0, 0, 48000, 12.5)
 
     # Test defaults
     hpxml.heating_systems[0].heating_efficiency_afue = nil
@@ -1878,8 +1878,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].year_installed = 2003
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_furnace_values(hpxml_default, [0.5, 0, 64000, 0.835])
-    _test_default_central_air_conditioner_values(hpxml_default, [0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, 0, 0, 48000, 11.19])
+    _test_default_furnace_values(hpxml_default, 0.5, 0, 64000, 0.835)
+    _test_default_central_air_conditioner_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, 0, 0, 48000, 11.19)
   end
 
   def test_water_heater_efficiencies
@@ -2049,27 +2049,22 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_central_air_conditioner_values(hpxml, *expected_values)
-    cooling_systems = hpxml.cooling_systems.select { |h| h.cooling_system_type == HPXML::HVACTypeCentralAirConditioner }
-    assert_equal(expected_values.size, cooling_systems.size)
-    cooling_systems.each_with_index do |cooling_system, idx|
-      shr, compressor_type, fan_watts_per_cfm, charge_defect_ratio, airflow_defect_ratio, cooling_capacity, cooling_efficiency_seer = expected_values[idx]
+  def _test_default_central_air_conditioner_values(hpxml, shr, compressor_type, fan_watts_per_cfm, charge_defect_ratio,
+                                                   airflow_defect_ratio, cooling_capacity, cooling_efficiency_seer=nil)
+    cooling_system = hpxml.cooling_systems[0]
 
-      assert_equal(shr, cooling_system.cooling_shr)
-      assert_equal(compressor_type, cooling_system.compressor_type)
-      assert_equal(fan_watts_per_cfm, cooling_system.fan_watts_per_cfm)
-      assert_equal(charge_defect_ratio, cooling_system.charge_defect_ratio)
-      assert_equal(airflow_defect_ratio, cooling_system.airflow_defect_ratio)
-      if cooling_capacity.nil?
-        assert(cooling_system.cooling_capacity > 0)
-      else
-        assert_equal(cooling_system.cooling_capacity, cooling_capacity)
-      end
-      if cooling_efficiency_seer.nil?
-        assert(cooling_system.cooling_efficiency_seer > 0)
-      else
-        assert_equal(cooling_system.cooling_efficiency_seer, cooling_efficiency_seer)
-      end
+    assert_equal(shr, cooling_system.cooling_shr)
+    assert_equal(compressor_type, cooling_system.compressor_type)
+    assert_equal(fan_watts_per_cfm, cooling_system.fan_watts_per_cfm)
+    assert_equal(charge_defect_ratio, cooling_system.charge_defect_ratio)
+    assert_equal(airflow_defect_ratio, cooling_system.airflow_defect_ratio)
+    if cooling_capacity.nil?
+      assert(cooling_system.cooling_capacity > 0)
+    else
+      assert_equal(cooling_system.cooling_capacity, cooling_capacity)
+    end
+    if not cooling_efficiency_seer.nil?
+      assert_equal(cooling_system.cooling_efficiency_seer, cooling_efficiency_seer)
     end
   end
 
@@ -2109,24 +2104,19 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_furnace_values(hpxml, *expected_values)
-    heating_systems = hpxml.heating_systems.select { |h| h.heating_system_type == HPXML::HVACTypeFurnace }
-    assert_equal(expected_values.size, heating_systems.size)
-    heating_systems.each_with_index do |heating_system, idx|
-      fan_watts_per_cfm, airflow_defect_ratio, heating_capacity, heating_efficiency_afue = expected_values[idx]
+  def _test_default_furnace_values(hpxml, fan_watts_per_cfm, airflow_defect_ratio,
+                                   heating_capacity, heating_efficiency_afue=nil)
+    heating_system = hpxml.heating_systems[0]
 
-      assert_equal(fan_watts_per_cfm, heating_system.fan_watts_per_cfm)
-      assert_equal(airflow_defect_ratio, heating_system.airflow_defect_ratio)
-      if heating_capacity.nil?
-        assert(heating_system.heating_capacity > 0)
-      else
-        assert_equal(heating_system.heating_capacity, heating_capacity)
-      end
-      if heating_efficiency_afue.nil?
-        assert(heating_system.heating_efficiency_afue > 0)
-      else
-        assert_equal(heating_system.heating_efficiency_afue, heating_efficiency_afue)
-      end
+    assert_equal(fan_watts_per_cfm, heating_system.fan_watts_per_cfm)
+    assert_equal(airflow_defect_ratio, heating_system.airflow_defect_ratio)
+    if heating_capacity.nil?
+      assert(heating_system.heating_capacity > 0)
+    else
+      assert_equal(heating_system.heating_capacity, heating_capacity)
+    end
+    if not heating_efficiency_afue.nil?
+      assert_equal(heating_system.heating_efficiency_afue, heating_efficiency_afue)
     end
   end
 
