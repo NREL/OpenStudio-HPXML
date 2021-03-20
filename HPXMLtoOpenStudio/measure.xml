@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>338f0869-c3e5-4669-b3ea-e7ab148a5349</version_id>
-  <version_modified>20210320T051409Z</version_modified>
+  <version_id>e2c436a0-2c0b-4d00-bd25-08d5876e16b1</version_id>
+  <version_modified>20210320T154729Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -525,31 +525,31 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>7CB9CAE9</checksum>
+      <checksum>3449EE84</checksum>
     </file>
     <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>8A3A2A71</checksum>
+      <checksum>3331EC5C</checksum>
     </file>
     <file>
       <filename>EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6EEF0BBE</checksum>
+      <checksum>BA987751</checksum>
     </file>
     <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>48BA87E2</checksum>
+      <checksum>1D300586</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F27A5CEB</checksum>
+      <checksum>1A33EC54</checksum>
     </file>
   </files>
 </measure>

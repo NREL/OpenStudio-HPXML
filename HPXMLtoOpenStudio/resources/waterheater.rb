@@ -1732,7 +1732,7 @@ class Waterheater
   def self.lookup_water_heater_efficiency(year, fuel_type, performance_id = 'shipment_weighted')
     year = 0 if year.nil?
 
-    fuel_primary_id = { HPXML::FuelTypeElectricity => 'electric',
+    fuel_primary_id = { HPXML::FuelTypeElectricity => 'electric', # FIXME: no defaults for tankless water heaters and heatpump water heaters?
                         HPXML::FuelTypeNaturalGas => 'natural_gas',
                         HPXML::FuelTypeOil => 'fuel_oil',
                         HPXML::FuelTypePropane => 'lpg' }[fuel_type]

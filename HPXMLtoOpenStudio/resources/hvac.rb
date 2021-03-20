@@ -4227,11 +4227,11 @@ class HVAC
   def self.lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id = 'shipment_weighted', state_code = nil)
     year = 0 if year.nil?
 
-    type_id = { HPXML::HVACTypeCentralAirConditioner => 'split_dx',
+    type_id = { HPXML::HVACTypeCentralAirConditioner => 'split_dx', # FIXME: map mini-split AC to 'split_dx'?
                 HPXML::HVACTypeRoomAirConditioner => 'packaged_dx',
                 HPXML::HVACTypeHeatPumpAirToAir => 'heat_pump',
-                HPXML::HVACTypeHeatPumpMiniSplit => 'mini_split',
-                HPXML::HVACTypeFurnace => 'central_furnace',
+                HPXML::HVACTypeHeatPumpMiniSplit => 'mini_split', # FIXME: no defaults for GSHP, WLHP, chiller?
+                HPXML::HVACTypeFurnace => 'central_furnace', # FIXME: no defaults for fireplace, fixed heater, portable heater, floor furnace?
                 HPXML::HVACTypeWallFurnace => 'wall_furnace',
                 HPXML::HVACTypeBoiler => 'boiler' }[hvac_type]
     fail "Unexpected hvac_type #{hvac_type}." if type_id.nil?

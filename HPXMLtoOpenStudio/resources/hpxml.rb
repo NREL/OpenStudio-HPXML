@@ -3024,23 +3024,27 @@ class HPXML < Object
       if [HVACTypeHeatPumpAirToAir, HVACTypeHeatPumpMiniSplit].include? @heat_pump_type
         clg_efficiency_units = UnitsSEER
         clg_efficiency_value = @cooling_efficiency_seer
+        clg_efficiency_value_isdefaulted = @cooling_efficiency_seer_isdefaulted
         htg_efficiency_units = UnitsHSPF
         htg_efficiency_value = @heating_efficiency_hspf
+        htg_efficiency_value_isdefaulted = @heating_efficiency_hspf_isdefaulted
       elsif [HVACTypeHeatPumpGroundToAir, HVACTypeHeatPumpWaterLoopToAir].include? @heat_pump_type
         clg_efficiency_units = UnitsEER
         clg_efficiency_value = @cooling_efficiency_eer
+        clg_efficiency_value_isdefaulted = @cooling_efficiency_eer_isdefaulted
         htg_efficiency_units = UnitsCOP
         htg_efficiency_value = @heating_efficiency_cop
+        htg_efficiency_value_isdefaulted = @heating_efficiency_cop_isdefaulted
       end
       if not clg_efficiency_value.nil?
         annual_efficiency = XMLHelper.add_element(heat_pump, 'AnnualCoolingEfficiency')
         XMLHelper.add_element(annual_efficiency, 'Units', clg_efficiency_units, :string)
-        XMLHelper.add_element(annual_efficiency, 'Value', clg_efficiency_value, :float)
+        XMLHelper.add_element(annual_efficiency, 'Value', clg_efficiency_value, :float, clg_efficiency_value_isdefaulted)
       end
       if not htg_efficiency_value.nil?
         annual_efficiency = XMLHelper.add_element(heat_pump, 'AnnualHeatingEfficiency')
         XMLHelper.add_element(annual_efficiency, 'Units', htg_efficiency_units, :string)
-        XMLHelper.add_element(annual_efficiency, 'Value', htg_efficiency_value, :float)
+        XMLHelper.add_element(annual_efficiency, 'Value', htg_efficiency_value, :float, htg_efficiency_value_isdefaulted)
       end
       XMLHelper.add_extension(heat_pump, 'AirflowDefectRatio', @airflow_defect_ratio, :float, @airflow_defect_ratio_isdefaulted) unless @airflow_defect_ratio.nil?
       XMLHelper.add_extension(heat_pump, 'ChargeDefectRatio', @charge_defect_ratio, :float, @charge_defect_ratio_isdefaulted) unless @charge_defect_ratio.nil?

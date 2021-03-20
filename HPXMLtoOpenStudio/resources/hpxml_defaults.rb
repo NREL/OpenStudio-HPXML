@@ -483,25 +483,25 @@ class HPXMLDefaults
 
     hpxml.heat_pumps.each do |heat_pump|
       # FIXME: double-check the line below
-      next unless (heat_pump.cooling_efficiency_seer.nil? && heat_pump.cooling_efficiency_eer.nil? && heat_pump.heating_efficiency_hspf.nil? && heat_pump.heating_efficiency_cop.nil?)
+      next unless ((heat_pump.cooling_efficiency_seer.nil? && heat_pump.cooling_efficiency_eer.nil?) || (heat_pump.heating_efficiency_hspf.nil? && heat_pump.heating_efficiency_cop.nil?))
 
       year_installed = heat_pump.year_installed
       heat_pump_type = heat_pump.heat_pump_type
       heat_pump_fuel = HPXML::FuelTypeElectricity
 
       if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
-        if not year_installed.nil?
+        if (not year_installed.nil?) && (not heat_pump.fraction_cool_load_served == 0) && heat_pump.cooling_efficiency_seer.nil?
           heat_pump.cooling_efficiency_seer = HVAC.lookup_hvac_efficiency(year_installed, heat_pump_type, heat_pump_fuel, 'SEER')
           heat_pump.cooling_efficiency_seer_isdefaulted = true
         end
-        if not year_installed.nil?
+        if (not year_installed.nil?) && (not heat_pump.fraction_heat_load_served == 0) && heat_pump.heating_efficiency_hspf.nil?
           heat_pump.heating_efficiency_hspf = HVAC.lookup_hvac_efficiency(year_installed, heat_pump_type, heat_pump_fuel, 'HSPF')
           heat_pump.heating_efficiency_hspf_isdefaulted = true
         end
       end
 
       # If heat pump has no cooling/heating load served, assign arbitrary value for cooling/heating efficiency value
-      if (fraction_cool_load_served == 0) && heat_pump.cooling_efficiency_seer.nil? && heat_pump.cooling_efficiency_eer.nil?
+      if (heat_pump.fraction_cool_load_served == 0) && heat_pump.cooling_efficiency_seer.nil? && heat_pump.cooling_efficiency_eer.nil?
         if heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
           heat_pump.cooling_efficiency_eer = 16.6
           heat_pump.cooling_efficiency_eer_isdefaulted = true
@@ -510,7 +510,7 @@ class HPXMLDefaults
           heat_pump.cooling_efficiency_seer_isdefaulted = true
         end
       end
-      if (fraction_heat_load_served == 0) && heat_pump.heating_efficiency_hspf.nil? && heat_pump.heating_efficiency_cop.nil?
+      if (heat_pump.fraction_heat_load_served == 0) && heat_pump.heating_efficiency_hspf.nil? && heat_pump.heating_efficiency_cop.nil?
         if heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
           heat_pump.heating_efficiency_cop = 3.6
           heat_pump.heating_efficiency_cop_isdefaulted = true

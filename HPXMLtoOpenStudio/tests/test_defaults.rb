@@ -2050,7 +2050,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_central_air_conditioner_values(hpxml, shr, compressor_type, fan_watts_per_cfm, charge_defect_ratio,
-                                                   airflow_defect_ratio, cooling_capacity, cooling_efficiency_seer=nil)
+                                                   airflow_defect_ratio, cooling_capacity, cooling_efficiency_seer = nil)
     cooling_system = hpxml.cooling_systems[0]
 
     assert_equal(shr, cooling_system.cooling_shr)
@@ -2105,7 +2105,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_furnace_values(hpxml, fan_watts_per_cfm, airflow_defect_ratio,
-                                   heating_capacity, heating_efficiency_afue=nil)
+                                   heating_capacity, heating_efficiency_afue = nil)
     heating_system = hpxml.heating_systems[0]
 
     assert_equal(fan_watts_per_cfm, heating_system.fan_watts_per_cfm)
