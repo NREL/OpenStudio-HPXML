@@ -689,6 +689,8 @@ If a wall furnace or floor furnace is specified, additional information is enter
   ``extension/FanPowerWatts``                      double  W      >= 0         No        0        Fan power
   ===============================================  ======  =====  ===========  ========  =======  ===================
 
+.. _hvac_heating_boiler:
+
 Boiler
 ~~~~~~
 
@@ -705,6 +707,7 @@ If a boiler is specified, additional information is entered in ``HeatingSystem``
 
   .. [#] For in-unit boilers, HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or DSE.
          For shared boilers, HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or AirDistribution (type: "fan coil").
+         If the shared boiler has "water loop" distribution, a :ref:`hvac_heatpump_wlhp` must also be specified.
   .. [#] | For shared boilers, ElectricAuxiliaryEnergy can alternatively be calculated as follows per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
          | EAE = (SP / N_dweq + aux_in) * HLH
          | where
@@ -862,6 +865,8 @@ If a ducted mini-split is specified (i.e., a ``DistributionSystem`` has been ent
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
 
+.. _hvac_cooling_chiller:
+
 Chiller
 ~~~~~~~
 
@@ -880,11 +885,14 @@ If a chiller is specified, additional information is entered in ``CoolingSystem`
   ==========================================================================  ========  ======  ===========  ========  =========  =========================================
 
   .. [#] HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or AirDistribution (type: "fan coil").
+         If the chiller has "water loop" distribution, a :ref:`hvac_heatpump_wlhp` must also be specified.
   .. [#] FanCoilWatts only required if chiller connected to a fan coil.
   
 .. note::
 
   Chillers are modeled as central air conditioners with a SEER equivalent using the equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+
+.. _hvac_cooling_tower:
 
 Cooling Tower
 ~~~~~~~~~~~~~
@@ -901,6 +909,7 @@ If a cooling tower is specified, additional information is entered in ``CoolingS
   ==========================================================================  ========  ======  ===========  ========  =========  =========================================
 
   .. [#] HVACDistribution type must be HydronicDistribution (type: "water loop").
+         A :ref:`hvac_heatpump_wlhp` must also be specified.
   
 .. note::
 
@@ -1052,6 +1061,8 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
 
+.. _hvac_heatpump_wlhp:
+
 Water-Loop-to-Air Heat Pump
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1074,7 +1085,7 @@ If a water-loop-to-air heat pump is specified, additional information is entered
 
 .. note::
 
-  If a water loop heat pump is specified, there must be at least one shared heating system (i.e., boiler) and/or one shared cooling system (i.e., chiller or cooling tower) specified with water loop distribution.
+  If a water loop heat pump is specified, there must be at least one shared heating system (i.e., :ref:`hvac_heating_boiler`) and/or one shared cooling system (i.e., :ref:`hvac_cooling_chiller` or :ref:`hvac_cooling_tower`) specified with water loop distribution.
 
 .. _hvac_control:
 
