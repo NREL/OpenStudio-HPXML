@@ -1004,11 +1004,10 @@ class HPXMLDefaults
       end
       fuel_type = water_heating_system.fuel_type
       year_installed = water_heating_system.year_installed
-      if water_heating_system.energy_factor.nil? && water_heating_system.uniform_energy_factor.nil?
-        if not year_installed.nil?
-          water_heating_system.energy_factor = Waterheater.lookup_water_heater_efficiency(year_installed, fuel_type)
-          water_heating_system.energy_factor_isdefaulted = true
-        end
+      next unless water_heating_system.energy_factor.nil? && water_heating_system.uniform_energy_factor.nil?
+      if not year_installed.nil?
+        water_heating_system.energy_factor = Waterheater.lookup_water_heater_efficiency(year_installed, fuel_type)
+        water_heating_system.energy_factor_isdefaulted = true
       end
     end
   end

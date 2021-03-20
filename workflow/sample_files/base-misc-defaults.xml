@@ -236,7 +236,7 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
-              <YearInstalled>2021</YearInstalled>
+              <YearInstalled>2009</YearInstalled>
               <DistributionSystem idref='HVACDistribution'/>
               <HeatingSystemType>
                 <Furnace/>
@@ -247,7 +247,7 @@
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
-              <YearInstalled>2021</YearInstalled>
+              <YearInstalled>2009</YearInstalled>
               <DistributionSystem idref='HVACDistribution'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
@@ -314,7 +314,7 @@
             <SystemIdentifier id='WaterHeater'/>
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
-            <YearInstalled>2021</YearInstalled>
+            <YearInstalled>2009</YearInstalled>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <FirstHourRating>46.0</FirstHourRating>
           </WaterHeatingSystem>
