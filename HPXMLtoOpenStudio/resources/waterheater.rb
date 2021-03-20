@@ -1399,8 +1399,6 @@ class Waterheater
       location_hierarchy = [HPXML::LocationBasementConditioned,
                             HPXML::LocationBasementUnconditioned,
                             HPXML::LocationLivingSpace]
-    else
-      fail "Unexpected IECC climate zone: '#{iecc_zone}'."
     end
     location_hierarchy.each do |space_type|
       if hpxml.has_space_type(space_type)
@@ -1729,5 +1727,33 @@ class Waterheater
       solar_fraction = solar_thermal_system.solar_fraction
     end
     return solar_fraction.to_f
+  end
+
+  def self.lookup_water_heater_efficiency(year, fuel_type, performance_id = 'shipment_weighted')
+    year = 0 if year.nil?
+
+    fuel_primary_id = { HPXML::FuelTypeElectricity => 'electric',
+                        HPXML::FuelTypeNaturalGas => 'natural_gas',
+                        HPXML::FuelTypeOil => 'fuel_oil',
+                        HPXML::FuelTypePropane => 'lpg' }[fuel_type]
+    fail "Unexpected fuel_type #{fuel_type}." if fuel_primary_id.nil?
+
+    fail "Invalid performance_id for water heater lookup #{performance_id}." unless performance_id == 'shipment_weighted'
+
+    value = nil
+    lookup_year = 0
+    CSV.foreach(File.join(File.dirname(__FILE__), 'lu_water_heater_efficiency.csv'), headers: true) do |row|
+      next unless row['performance_id'] == performance_id
+      next unless row['fuel_primary_id'] == fuel_primary_id
+
+      row_year = Integer(row['year'])
+      if (row_year - year).abs <= (lookup_year - year).abs
+        lookup_year = row_year
+        value = Float(row['value'])
+      end
+    end
+    fail 'Could not lookup default water heating efficiency.' if value.nil?
+
+    return value
   end
 end

@@ -5,6 +5,7 @@ def create_hpxmls
   require_relative 'HPXMLtoOpenStudio/resources/constants'
   require_relative 'HPXMLtoOpenStudio/resources/hotwater_appliances'
   require_relative 'HPXMLtoOpenStudio/resources/hpxml'
+  require_relative 'HPXMLtoOpenStudio/resources/location'
   require_relative 'HPXMLtoOpenStudio/resources/misc_loads'
   require_relative 'HPXMLtoOpenStudio/resources/waterheater'
   require_relative 'HPXMLtoOpenStudio/resources/xmlhelper'
@@ -54,6 +55,8 @@ def create_hpxmls
     'invalid_files/dhw-invalid-ef-tank.xml' => 'base.xml',
     'invalid_files/dhw-invalid-uef-tank-heat-pump.xml' => 'base-dhw-tank-heat-pump-uef.xml',
     'invalid_files/dishwasher-location.xml' => 'base.xml',
+    'invalid_files/duct-leakage-cfm25.xml' => 'base.xml',
+    'invalid_files/duct-leakage-percent.xml' => 'base.xml',
     'invalid_files/duct-location.xml' => 'base.xml',
     'invalid_files/duct-location-unconditioned-space.xml' => 'base.xml',
     'invalid_files/duplicate-id.xml' => 'base.xml',
@@ -61,12 +64,17 @@ def create_hpxmls
     'invalid_files/enclosure-basement-missing-exterior-foundation-wall.xml' => 'base-foundation-unconditioned-basement.xml',
     'invalid_files/enclosure-basement-missing-slab.xml' => 'base-foundation-unconditioned-basement.xml',
     'invalid_files/enclosure-floor-area-exceeds-cfa.xml' => 'base.xml',
+    'invalid_files/enclosure-floor-area-exceeds-cfa2.xml' => 'base-bldgtype-multifamily.xml',
     'invalid_files/enclosure-garage-missing-exterior-wall.xml' => 'base-enclosure-garage.xml',
     'invalid_files/enclosure-garage-missing-roof-ceiling.xml' => 'base-enclosure-garage.xml',
     'invalid_files/enclosure-garage-missing-slab.xml' => 'base-enclosure-garage.xml',
     'invalid_files/enclosure-living-missing-ceiling-roof.xml' => 'base.xml',
     'invalid_files/enclosure-living-missing-exterior-wall.xml' => 'base.xml',
     'invalid_files/enclosure-living-missing-floor-slab.xml' => 'base-foundation-slab.xml',
+    'invalid_files/frac-sensible-fuel-load.xml' => 'base-misc-loads-large-uncommon.xml',
+    'invalid_files/frac-sensible-plug-load.xml' => 'base-misc-loads-large-uncommon.xml',
+    'invalid_files/frac-total-fuel-load.xml' => 'base-misc-loads-large-uncommon.xml',
+    'invalid_files/frac-total-plug-load.xml' => 'base-misc-loads-large-uncommon.xml',
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/hvac-invalid-distribution-system-type.xml' => 'base.xml',
     'invalid_files/hvac-distribution-multiple-attached-cooling.xml' => 'base-hvac-multiple.xml',
@@ -76,6 +84,8 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-inconsistent-fan-powers.xml' => 'base.xml',
+    'invalid_files/generator-number-of-bedrooms-served.xml' => 'base-bldgtype-multifamily-shared-generator.xml',
+    'invalid_files/generator-output-greater-than-consumption.xml' => 'base-misc-generators.xml',
     'invalid_files/invalid-assembly-effective-rvalue.xml' => 'base.xml',
     'invalid_files/invalid-datatype-boolean.xml' => 'base.xml',
     'invalid_files/invalid-datatype-float.xml' => 'base.xml',
@@ -86,6 +96,7 @@ def create_hpxmls
     'invalid_files/invalid-facility-type-surfaces.xml' => 'base.xml',
     'invalid_files/invalid-foundation-wall-properties.xml' => 'base-foundation-unconditioned-basement-wall-insulation.xml',
     'invalid_files/invalid-id.xml' => 'base-enclosure-skylights.xml',
+    'invalid_files/invalid-id2.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/invalid-infiltration-volume.xml' => 'base.xml',
     'invalid_files/invalid-input-parameters.xml' => 'base.xml',
     'invalid_files/invalid-neighbor-shading-azimuth.xml' => 'base-misc-neighbor-shading.xml',
@@ -105,6 +116,10 @@ def create_hpxmls
     'invalid_files/multifamily-reference-duct.xml' => 'base.xml',
     'invalid_files/multifamily-reference-surface.xml' => 'base.xml',
     'invalid_files/multifamily-reference-water-heater.xml' => 'base.xml',
+    'invalid_files/multiple-buildings-without-building-id.xml' => 'base.xml',
+    'invalid_files/multiple-buildings-wrong-building-id.xml' => 'base.xml',
+    'invalid_files/multiple-shared-cooling-systems.xml' => 'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
+    'invalid_files/multiple-shared-heating-systems.xml' => 'base-bldgtype-multifamily-shared-boiler-only-baseboard.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
     'invalid_files/num-bedrooms-exceeds-limit.xml' => 'base.xml',
@@ -112,7 +127,6 @@ def create_hpxmls
     'invalid_files/refrigerator-location.xml' => 'base.xml',
     'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/repeated-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
-    'invalid_files/slab-zero-exposed-perimeter.xml' => 'base.xml',
     'invalid_files/solar-thermal-system-with-combi-tankless.xml' => 'base-dhw-combi-tankless.xml',
     'invalid_files/solar-thermal-system-with-desuperheater.xml' => 'base-dhw-desuperheater.xml',
     'invalid_files/solar-thermal-system-with-dhw-indirect.xml' => 'base-dhw-combi-tankless.xml',
@@ -268,10 +282,14 @@ def create_hpxmls
     'base-foundation-complex.xml' => 'base.xml',
     'base-foundation-basement-garage.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-1-speed.xml' => 'base.xml',
+    'base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-air-to-air-heat-pump-2-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-var-speed.xml' => 'base.xml',
     'base-hvac-autosize.xml' => 'base.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-1-speed-heating-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-2-speed.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-2-speed-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-air-to-air-heat-pump-2-speed.xml',
@@ -295,11 +313,13 @@ def create_hpxmls
     'base-hvac-autosize-furnace-gas-only.xml' => 'base-hvac-furnace-gas-only.xml',
     'base-hvac-autosize-furnace-gas-room-ac.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'base-hvac-autosize-ground-to-air-heat-pump.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'base-hvac-autosize-ground-to-air-heat-pump-cooling-only.xml' => 'base-hvac-ground-to-air-heat-pump-cooling-only.xml',
+    'base-hvac-autosize-ground-to-air-heat-pump-heating-only.xml' => 'base-hvac-ground-to-air-heat-pump-heating-only.xml',
     'base-hvac-autosize-ground-to-air-heat-pump-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-ground-to-air-heat-pump.xml',
     'base-hvac-autosize-mini-split-heat-pump-ducted.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
-    'base-hvac-autosize-mini-split-heat-pump-ducted-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-mini-split-heat-pump-ducted.xml',
-    'base-hvac-autosize-mini-split-heat-pump-ducted-heating-only.xml' => 'base-hvac-mini-split-heat-pump-ducted-heating-only.xml',
     'base-hvac-autosize-mini-split-heat-pump-ducted-cooling-only.xml' => 'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml',
+    'base-hvac-autosize-mini-split-heat-pump-ducted-heating-only.xml' => 'base-hvac-mini-split-heat-pump-ducted-heating-only.xml',
+    'base-hvac-autosize-mini-split-heat-pump-ducted-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-mini-split-heat-pump-ducted.xml',
     'base-hvac-autosize-mini-split-air-conditioner-only-ducted.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
     'base-hvac-autosize-room-ac-only.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-autosize-stove-oil-only.xml' => 'base-hvac-stove-oil-only.xml',
@@ -341,7 +361,8 @@ def create_hpxmls
     'base-hvac-furnace-wood-only.xml' => 'base.xml',
     'base-hvac-furnace-x3-dse.xml' => 'base.xml',
     'base-hvac-ground-to-air-heat-pump.xml' => 'base.xml',
-    'base-hvac-ideal-air.xml' => 'base.xml',
+    'base-hvac-ground-to-air-heat-pump-cooling-only.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'base-hvac-ground-to-air-heat-pump-heating-only.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-hvac-install-quality-none-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-install-quality-airflow-defect-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-install-quality-charge-defect-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
@@ -359,8 +380,8 @@ def create_hpxmls
     'base-hvac-mini-split-air-conditioner-only-ducted.xml' => 'base.xml',
     'base-hvac-mini-split-air-conditioner-only-ductless.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
     'base-hvac-mini-split-heat-pump-ducted.xml' => 'base.xml',
-    'base-hvac-mini-split-heat-pump-ducted-heating-only.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
+    'base-hvac-mini-split-heat-pump-ducted-heating-only.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ductless.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-multiple.xml' => 'base.xml',
     'base-hvac-multiple2.xml' => 'base.xml',
@@ -380,10 +401,14 @@ def create_hpxmls
     'base-lighting-detailed.xml' => 'base.xml',
     'base-lighting-none.xml' => 'base.xml',
     'base-location-AMY-2012.xml' => 'base.xml',
-    'base-location-baltimore-md.xml' => 'base.xml',
+    'base-location-baltimore-md.xml' => 'base-foundation-unvented-crawlspace.xml',
     'base-location-dallas-tx.xml' => 'base-foundation-slab.xml',
-    'base-location-duluth-mn.xml' => 'base.xml',
+    'base-location-duluth-mn.xml' => 'base-foundation-unconditioned-basement.xml',
+    'base-location-helena-mt.xml' => 'base.xml',
+    'base-location-honolulu-hi.xml' => 'base-foundation-slab.xml',
     'base-location-miami-fl.xml' => 'base-foundation-slab.xml',
+    'base-location-phoenix-az.xml' => 'base-foundation-slab.xml',
+    'base-location-portland-or.xml' => 'base-foundation-vented-crawlspace.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-bath-kitchen-fans.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
@@ -404,8 +429,9 @@ def create_hpxmls
     'base-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-misc-loads-none.xml' => 'base.xml',
     'base-misc-neighbor-shading.xml' => 'base.xml',
-    'base-misc-shelter-coefficient.xml' => 'base.xml',
+    'base-misc-shielding-of-home.xml' => 'base.xml',
     'base-misc-usage-multiplier.xml' => 'base.xml',
+    'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
     'base-simcontrol-calendar-year-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
@@ -497,6 +523,9 @@ def create_hpxmls
       elsif ['invalid_files/invalid-schema-version.xml'].include? derivative
         root = XMLHelper.get_element(hpxml_doc, '/HPXML')
         XMLHelper.add_attribute(root, 'schemaVersion', '2.3')
+      elsif ['invalid_files/invalid-id2.xml'].include? derivative
+        element = XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/SystemIdentifier')
+        XMLHelper.delete_attribute(element, 'id')
       end
 
       if derivative.include? 'ASHRAE_Standard_140'
@@ -506,6 +535,20 @@ def create_hpxmls
       end
 
       XMLHelper.write_file(hpxml_doc, hpxml_path)
+
+      if ['base-multiple-buildings.xml',
+          'invalid_files/multiple-buildings-without-building-id.xml',
+          'invalid_files/multiple-buildings-wrong-building-id.xml'].include? derivative
+        # HPXML class doesn't support multiple buildings, so we'll stitch together manually.
+        hpxml_element = XMLHelper.get_element(hpxml_doc, '/HPXML')
+        building_element = XMLHelper.get_element(hpxml_element, 'Building')
+        for i in 2..3
+          new_building_element = Marshal.load(Marshal.dump(building_element))
+          XMLHelper.add_attribute(XMLHelper.get_element(new_building_element, 'BuildingID'), 'id', "MyBuilding#{i}")
+          hpxml_element.children << new_building_element
+        end
+        XMLHelper.write_file(hpxml_doc, hpxml_path)
+      end
 
       if not hpxml_path.include? 'invalid_files'
         # Validate file against HPXML schema
@@ -604,8 +647,8 @@ def set_hpxml_site(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.site.fuels = [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas]
     hpxml.site.site_type = HPXML::SiteTypeSuburban
-  elsif ['base-misc-shelter-coefficient.xml'].include? hpxml_file
-    hpxml.site.shelter_coefficient = 0.8
+  elsif ['base-misc-shielding-of-home.xml'].include? hpxml_file
+    hpxml.site.shielding_of_home = HPXML::ShieldingWellShielded
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.site.site_type = nil
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
@@ -675,8 +718,6 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_conditioned_floors -= 1
     hpxml.building_construction.conditioned_floor_area -= 1350
     hpxml.building_construction.conditioned_building_volume -= 1350 * 8
-  elsif ['base-hvac-ideal-air.xml'].include? hpxml_file
-    hpxml.building_construction.use_only_ideal_air_system = true
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors += 1
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
@@ -703,7 +744,9 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_conditioned_floors = 1.5
     hpxml.building_construction.number_of_conditioned_floors_above_grade = 1.5
   elsif ['invalid_files/enclosure-floor-area-exceeds-cfa.xml'].include? hpxml_file
-    hpxml.building_construction.conditioned_floor_area /= 5.0
+    hpxml.building_construction.conditioned_floor_area = 1348.8
+  elsif ['invalid_files/enclosure-floor-area-exceeds-cfa2.xml'].include? hpxml_file
+    hpxml.building_construction.conditioned_floor_area = 898.8
   elsif ['invalid_files/num-bedrooms-exceeds-limit.xml'].include? hpxml_file
     hpxml.building_construction.number_of_bedrooms = 40
   elsif ['invalid_files/invalid-facility-type-equipment.xml',
@@ -734,30 +777,50 @@ def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
     hpxml.climate_and_risk_zones.weather_station_name = 'Las Vegas, NV'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_NV_Las.Vegas-McCarran.Intl.AP.723860_TMY3.epw'
   elsif ['base.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_zone = '5B'
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(725650)
     hpxml.climate_and_risk_zones.weather_station_name = 'Denver, CO'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
     hpxml.header.state_code = 'CO'
   elsif ['base-location-baltimore-md.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_zone = '4A'
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(724060)
     hpxml.climate_and_risk_zones.weather_station_name = 'Baltimore, MD'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw'
     hpxml.header.state_code = 'MD'
   elsif ['base-location-dallas-tx.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_zone = '3A'
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(722590)
     hpxml.climate_and_risk_zones.weather_station_name = 'Dallas, TX'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw'
     hpxml.header.state_code = 'TX'
   elsif ['base-location-duluth-mn.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_zone = '7'
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(727450)
     hpxml.climate_and_risk_zones.weather_station_name = 'Duluth, MN'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_MN_Duluth.Intl.AP.727450_TMY3.epw'
     hpxml.header.state_code = 'MN'
+  elsif ['base-location-helena-mt.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(727720)
+    hpxml.climate_and_risk_zones.weather_station_name = 'Helena, MT'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_MT_Helena.Rgnl.AP.727720_TMY3.epw'
+    hpxml.header.state_code = 'MT'
+  elsif ['base-location-honolulu-hi.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(911820)
+    hpxml.climate_and_risk_zones.weather_station_name = 'Honolulu, HI'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw'
+    hpxml.header.state_code = 'HI'
   elsif ['base-location-miami-fl.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_zone = '1A'
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(722020)
     hpxml.climate_and_risk_zones.weather_station_name = 'Miami, FL'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_FL_Miami.Intl.AP.722020_TMY3.epw'
     hpxml.header.state_code = 'FL'
+  elsif ['base-location-phoenix-az.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(722780)
+    hpxml.climate_and_risk_zones.weather_station_name = 'Phoenix, AZ'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw'
+    hpxml.header.state_code = 'AZ'
+  elsif ['base-location-portland-or.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(726980)
+    hpxml.climate_and_risk_zones.weather_station_name = 'Portland, OR'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_OR_Portland.Intl.AP.726980_TMY3.epw'
+    hpxml.header.state_code = 'OR'
   elsif ['base-location-AMY-2012.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_name = 'Boulder, CO'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'US_CO_Boulder_AMY_2012.epw'
@@ -2262,11 +2325,6 @@ def set_hpxml_slabs(hpxml_file, hpxml)
       slab.carpet_fraction = nil
       slab.carpet_fraction = nil
     end
-  elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
-    hpxml.slabs[0].interior_adjacent_to = HPXML::LocationBasementUnconditioned
-    hpxml.slabs[0].depth_below_grade = 7.0
-  elsif ['invalid_files/slab-zero-exposed-perimeter.xml'].include? hpxml_file
-    hpxml.slabs[0].exposed_perimeter = 0
   elsif ['invalid_files/enclosure-living-missing-floor-slab.xml',
          'invalid_files/enclosure-basement-missing-slab.xml'].include? hpxml_file
     hpxml.slabs[0].delete
@@ -2807,7 +2865,6 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-ground-to-air-heat-pump.xml',
          'base-hvac-mini-split-heat-pump-ducted.xml',
          'base-hvac-mini-split-air-conditioner-only-ducted.xml',
-         'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
          'base-hvac-room-ac-only.xml',
          'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
@@ -2817,7 +2874,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
   elsif ['base-hvac-boiler-elec-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
-    hpxml.heating_systems[0].heating_efficiency_afue = 1
+    hpxml.heating_systems[0].heating_efficiency_afue = 1.0
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml',
          'base-hvac-boiler-gas-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
@@ -3026,9 +3083,6 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
   elsif ['base-bldgtype-multifamily-shared-boiler-only-fan-coil.xml',
          'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
     hpxml.heating_systems[0].fan_coil_watts = 150
-  elsif ['base-bldgtype-multifamily-shared-boiler-only-water-loop-heat-pump.xml',
-         'base-bldgtype-multifamily-shared-boiler-chiller-water-loop-heat-pump.xml'].include? hpxml_file
-    hpxml.heating_systems[0].wlhp_heating_efficiency_cop = 4.4
   elsif ['base-bldgtype-multifamily-shared-boiler-only-fan-coil-eae.xml'].include? hpxml_file
     hpxml.heating_systems[0].fan_coil_watts = nil
     hpxml.heating_systems[0].shared_loop_watts = nil
@@ -3045,8 +3099,16 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-install-quality-all-furnace-gas-central-ac-var-speed.xml'].include? hpxml_file
     hpxml.heating_systems[0].fan_watts_per_cfm = 0.365
     hpxml.heating_systems[0].airflow_defect_ratio = -0.25
+  elsif ['invalid_files/multiple-shared-heating-systems.xml'].include? hpxml_file
+    hpxml.heating_systems[0].fraction_heat_load_served = 0.5
+    hpxml.heating_systems << hpxml.heating_systems[0].dup
+    hpxml.heating_systems[1].id += '2'
+    hpxml.heating_systems[1].distribution_system_idref += '2'
   elsif hpxml_file.include?('base-hvac-autosize') && (not hpxml.heating_systems.nil?) && (hpxml.heating_systems.size > 0)
     hpxml.heating_systems[0].heating_capacity = nil
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.heating_systems[0].heating_efficiency_afue = nil
+    hpxml.heating_systems[0].year_installed = 2009
   end
 end
 
@@ -3081,7 +3143,6 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-furnace-wood-only.xml',
          'base-hvac-ground-to-air-heat-pump.xml',
          'base-hvac-mini-split-heat-pump-ducted.xml',
-         'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
          'base-hvac-stove-oil-only.xml',
          'base-hvac-stove-wood-pellets-only.xml',
@@ -3124,7 +3185,6 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].cooling_system_type = HPXML::HVACTypeEvaporativeCooler
     hpxml.cooling_systems[0].cooling_efficiency_seer = nil
     hpxml.cooling_systems[0].cooling_efficiency_eer = nil
-    hpxml.cooling_systems[0].cooling_capacity = nil
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].compressor_type = nil
     if ['base-hvac-evap-cooler-furnace-gas.xml',
@@ -3190,6 +3250,8 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].compressor_type = nil
+    hpxml.cooling_systems[0].cooling_efficiency_seer = nil
+    hpxml.cooling_systems[0].year_installed = 2009
   elsif ['base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
          'base-bldgtype-multifamily-shared-boiler-chiller-baseboard.xml',
          'base-bldgtype-multifamily-shared-chiller-only-water-loop-heat-pump.xml',
@@ -3202,10 +3264,6 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].cooling_efficiency_kw_per_ton = 0.9
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].shared_loop_watts = 600
-    if hpxml_file.include? 'water-loop-heat-pump'
-      hpxml.cooling_systems[0].wlhp_cooling_capacity = 24000
-      hpxml.cooling_systems[0].wlhp_cooling_efficiency_eer = 12.8
-    end
   elsif ['base-bldgtype-multifamily-shared-cooling-tower-only-water-loop-heat-pump.xml',
          'base-bldgtype-multifamily-shared-boiler-cooling-tower-water-loop-heat-pump.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_system_type = HPXML::HVACTypeCoolingTower
@@ -3214,6 +3272,11 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
   elsif ['base-bldgtype-multifamily-shared-chiller-only-fan-coil.xml',
          'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fan_coil_watts = 150
+  elsif ['invalid_files/multiple-shared-cooling-systems.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].fraction_cool_load_served = 0.5
+    hpxml.cooling_systems << hpxml.cooling_systems[0].dup
+    hpxml.cooling_systems[1].id += '2'
+    hpxml.cooling_systems[1].distribution_system_idref += '2'
   elsif hpxml_file.include?('base-hvac-autosize') && (not hpxml.cooling_systems.nil?) && (hpxml.cooling_systems.size > 0)
     hpxml.cooling_systems[0].cooling_capacity = nil
   end
@@ -3314,17 +3377,27 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          cooling_efficiency_seer: 19,
                          heating_capacity_17F: 52000 * f,
                          cooling_shr: 0.73)
-  elsif ['base-hvac-mini-split-heat-pump-ducted-heating-only.xml'].include? hpxml_file
+  elsif ['base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml',
+         'base-hvac-ground-to-air-heat-pump-heating-only.xml',
+         'base-hvac-mini-split-heat-pump-ducted-heating-only.xml'].include? hpxml_file
     hpxml.heat_pumps[0].cooling_capacity = 0
     hpxml.heat_pumps[0].fraction_cool_load_served = 0
-  elsif ['base-hvac-mini-split-heat-pump-ducted-cooling-only.xml'].include? hpxml_file
+  elsif ['base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml',
+         'base-hvac-ground-to-air-heat-pump-cooling-only.xml',
+         'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml'].include? hpxml_file
     hpxml.heat_pumps[0].heating_capacity = 0
-    hpxml.heat_pumps[0].heating_capacity_17F = 0
+    if not ['base-hvac-ground-to-air-heat-pump-cooling-only.xml'].include? hpxml_file
+      hpxml.heat_pumps[0].heating_capacity_17F = 0
+    end
     hpxml.heat_pumps[0].fraction_heat_load_served = 0
     hpxml.heat_pumps[0].backup_heating_fuel = nil
+    hpxml.heat_pumps[0].backup_heating_capacity = nil
+    hpxml.heat_pumps[0].backup_heating_efficiency_percent = nil
   elsif ['base-hvac-mini-split-heat-pump-ductless.xml'].include? hpxml_file
     hpxml.heat_pumps[0].distribution_system_idref = nil
     hpxml.heat_pumps[0].backup_heating_fuel = nil
+    hpxml.heat_pumps[0].backup_heating_capacity = nil
+    hpxml.heat_pumps[0].backup_heating_efficiency_percent = nil
   elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml'].include? hpxml_file
     hpxml.heat_pumps[0].cooling_capacity = nil
     hpxml.heat_pumps[0].heating_capacity = nil
@@ -3408,6 +3481,21 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          cooling_efficiency_eer: 16.6,
                          cooling_shr: 0.73,
                          pump_watts_per_ton: 30.0)
+  elsif ['base-bldgtype-multifamily-shared-boiler-only-water-loop-heat-pump.xml',
+         'base-bldgtype-multifamily-shared-chiller-only-water-loop-heat-pump.xml',
+         'base-bldgtype-multifamily-shared-boiler-chiller-water-loop-heat-pump.xml'].include? hpxml_file
+    hpxml.heat_pumps.add(id: 'WLHP',
+                         distribution_system_idref: 'HVACDistributionWLHP',
+                         heat_pump_type: HPXML::HVACTypeHeatPumpWaterLoopToAir,
+                         heat_pump_fuel: HPXML::FuelTypeElectricity)
+    if hpxml_file.include? 'boiler'
+      hpxml.heat_pumps[-1].heating_capacity = 24000
+      hpxml.heat_pumps[-1].heating_efficiency_cop = 4.4
+    end
+    if hpxml_file.include? 'chiller'
+      hpxml.heat_pumps[-1].cooling_capacity = 24000
+      hpxml.heat_pumps[-1].cooling_efficiency_eer = 12.8
+    end
   elsif ['invalid_files/hvac-distribution-multiple-attached-heating.xml'].include? hpxml_file
     hpxml.heat_pumps[0].distribution_system_idref = 'HVACDistribution'
   elsif ['invalid_files/hvac-distribution-multiple-attached-cooling.xml'].include? hpxml_file
@@ -3527,16 +3615,23 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   elsif ['base-bldgtype-multifamily-shared-boiler-only-fan-coil.xml',
          'base-bldgtype-multifamily-shared-chiller-only-fan-coil.xml',
          'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
-    hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronicAndAir
-    hpxml.hvac_distributions[0].hydronic_and_air_type = HPXML::HydronicAndAirTypeFanCoil
+    hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeAir
+    hpxml.hvac_distributions[0].air_type = HPXML::AirTypeFanCoil
+    hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                              duct_leakage_units: HPXML::UnitsCFM25,
+                                                              duct_leakage_value: 0,
+                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+    hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                              duct_leakage_units: HPXML::UnitsCFM25,
+                                                              duct_leakage_value: 0,
+                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronic
     hpxml.hvac_distributions[0].hydronic_type = HPXML::HydronicTypeBaseboard
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear
     hpxml.hvac_distributions[0].ducts.clear
     hpxml.hvac_distributions.add(id: 'HVACDistribution2',
-                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
-                                 number_of_return_registers: 3)
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
                                                                duct_leakage_value: 75,
@@ -3558,7 +3653,6 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'base-hvac-evap-cooler-only.xml',
          'base-hvac-fireplace-wood-only.xml',
          'base-hvac-floor-furnace-propane-only.xml',
-         'base-hvac-ideal-air.xml',
          'base-hvac-mini-split-heat-pump-ductless.xml',
          'base-hvac-mini-split-air-conditioner-only-ductless.xml',
          'base-hvac-room-ac-only.xml',
@@ -3768,29 +3862,33 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil-ducted.xml',
          'base-bldgtype-multifamily-shared-boiler-only-fan-coil-ducted.xml',
          'base-bldgtype-multifamily-shared-chiller-only-fan-coil-ducted.xml'].include? hpxml_file
-    hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronicAndAir
     if hpxml_file.include? 'fan-coil'
-      hpxml.hvac_distributions[0].hydronic_and_air_type = HPXML::HydronicAndAirTypeFanCoil
+      hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeAir
+      hpxml.hvac_distributions[0].air_type = HPXML::AirTypeFanCoil
+      hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 15
+      hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 10
     elsif hpxml_file.include? 'water-loop-heat-pump'
-      hpxml.hvac_distributions[0].hydronic_and_air_type = HPXML::HydronicAndAirTypeWaterLoopHeatPump
-      hpxml.hvac_distributions[0].number_of_return_registers = 3
+      hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronic
+      hpxml.hvac_distributions[0].hydronic_type = HPXML::HydronicTypeWaterLoop
+      hpxml.hvac_distributions.add(id: 'HVACDistributionWLHP',
+                                   distribution_system_type: HPXML::HVACDistributionTypeAir)
+      hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                                 duct_leakage_units: HPXML::UnitsCFM25,
+                                                                 duct_leakage_value: 15,
+                                                                 duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+      hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                                 duct_leakage_units: HPXML::UnitsCFM25,
+                                                                 duct_leakage_value: 10,
+                                                                 duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     end
-    hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                              duct_leakage_units: HPXML::UnitsCFM25,
-                                                              duct_leakage_value: 15,
-                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-    hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                              duct_leakage_units: HPXML::UnitsCFM25,
-                                                              duct_leakage_value: 10,
-                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-    hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeSupply,
-                                          duct_insulation_r_value: 0,
-                                          duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
-                                          duct_surface_area: 50)
-    hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeReturn,
-                                          duct_insulation_r_value: 0,
-                                          duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
-                                          duct_surface_area: 20)
+    hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
+                                           duct_insulation_r_value: 0,
+                                           duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
+                                           duct_surface_area: 50)
+    hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeReturn,
+                                           duct_insulation_r_value: 0,
+                                           duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
+                                           duct_surface_area: 20)
   elsif ['invalid_files/hvac-invalid-distribution-system-type.xml'].include? hpxml_file
     hpxml.hvac_distributions.add(id: 'HVACDistribution2',
                                  distribution_system_type: HPXML::HVACDistributionTypeHydronic,
@@ -3809,13 +3907,6 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
         duct.duct_location = nil
       end
     end
-  elsif ['invalid_files/missing-duct-location-and-surface-area.xml'].include? hpxml_file
-    hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
-
-      hvac_distribution.ducts[1].duct_surface_area = nil
-      hvac_distribution.ducts[1].duct_location = nil
-    end
   elsif ['invalid_files/missing-duct-location.xml'].include? hpxml_file
     hpxml.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
@@ -3824,20 +3915,39 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     end
   elsif ['invalid_files/multifamily-reference-duct.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherMultifamilyBufferSpace
+  elsif ['invalid_files/multiple-shared-cooling-systems.xml',
+         'invalid_files/multiple-shared-heating-systems.xml'].include? hpxml_file
+    hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
+    hpxml.hvac_distributions[-1].id += '2'
+  elsif ['invalid_files/duct-leakage-cfm25.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = -2.0
+    hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = -2.0
+  elsif ['invalid_files/duct-leakage-percent.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_units = HPXML::UnitsPercent
+    hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_units = HPXML::UnitsPercent
   end
 
   # Set ConditionedFloorAreaServed
-  n_air_dists = hpxml.hvac_distributions.select { |d| [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? d.distribution_system_type }.size
+  n_air_dists = hpxml.hvac_distributions.select { |d| [HPXML::HVACDistributionTypeAir].include? d.distribution_system_type }.size
   hpxml.hvac_distributions.each do |hvac_distribution|
-    if [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? hvac_distribution.distribution_system_type
-
+    if [HPXML::HVACDistributionTypeAir].include? hvac_distribution.distribution_system_type
       hvac_distribution.conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area / n_air_dists
     else
       hvac_distribution.conditioned_floor_area_served = nil
     end
   end
   if ['invalid_files/invalid-distribution-cfa-served.xml'].include? hpxml_file
-    hpxml.hvac_distributions[0].conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area + 0.1
+    hpxml.hvac_distributions[0].conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area + 1.1
+  end
+
+  # Set number of return registers
+  if not ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+      next unless hvac_distribution.ducts.select { |d| d.duct_type == HPXML::DuctTypeReturn }.size > 0
+
+      hvac_distribution.number_of_return_registers = hpxml.building_construction.number_of_conditioned_floors.ceil
+    end
   end
 end
 
@@ -4358,6 +4468,9 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].heating_capacity = nil
     hpxml.water_heating_systems[0].tank_volume = nil
     hpxml.water_heating_systems[0].recovery_efficiency = nil
+    hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].first_hour_rating = 46.0
+    hpxml.water_heating_systems[0].year_installed = 2009
   elsif ['base-bldgtype-multifamily-shared-water-heater.xml'].include? hpxml_file
     hpxml.water_heating_systems.clear
     hpxml.water_heating_systems.add(id: 'SharedWaterHeater',
@@ -4601,6 +4714,10 @@ def set_hpxml_generators(hpxml_file, hpxml)
                          annual_consumption_kbtu: 85000,
                          annual_output_kwh: 5000,
                          number_of_bedrooms_served: 18)
+  elsif ['invalid_files/generator-output-greater-than-consumption.xml'].include? hpxml_file
+    hpxml.generators[0].annual_consumption_kbtu = 1500
+  elsif ['invalid_files/generator-number-of-bedrooms-served.xml'].include? hpxml_file
+    hpxml.generators[0].number_of_bedrooms_served = hpxml.building_construction.number_of_bedrooms
   end
 end
 
@@ -4669,7 +4786,6 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
                              combined_energy_factor: 3.73,
-                             control_type: HPXML::ClothesDryerControlTypeTimer,
                              is_vented: true,
                              vented_flow_rate: 150)
   elsif ['base-appliances-none.xml',
@@ -4692,7 +4808,6 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
                              energy_factor: HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(cef).round(2),
-                             control_type: HPXML::ClothesDryerControlTypeMoisture,
                              is_vented: false)
   elsif ['base-appliances-coal.xml',
          'base-appliances-gas.xml',
@@ -4702,8 +4817,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers.clear
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
-                             combined_energy_factor: 3.30,
-                             control_type: HPXML::ClothesDryerControlTypeMoisture)
+                             combined_energy_factor: 3.30)
     if hpxml_file == 'base-appliances-coal.xml'
       hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeCoal
     elsif hpxml_file == 'base-appliances-gas.xml'
@@ -4726,7 +4840,6 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers[0].location = nil
     hpxml.clothes_dryers[0].energy_factor = nil
     hpxml.clothes_dryers[0].combined_energy_factor = nil
-    hpxml.clothes_dryers[0].control_type = nil
     hpxml.clothes_dryers[0].is_vented = nil
     hpxml.clothes_dryers[0].vented_flow_rate = nil
   elsif ['base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
@@ -5165,6 +5278,10 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
                            weekday_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',
                            weekend_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',
                            monthly_multipliers: '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
+    elsif ['invalid_files/frac-sensible-plug-load.xml'].include? hpxml_file
+      hpxml.plug_loads[0].frac_sensible = -0.1
+    elsif ['invalid_files/frac-total-plug-load.xml'].include? hpxml_file
+      hpxml.plug_loads[0].frac_latent = 1.0 - hpxml.plug_loads[0].frac_sensible + 0.1
     else
       cfa = hpxml.building_construction.conditioned_floor_area
       nbeds = hpxml.building_construction.number_of_bedrooms
@@ -5223,6 +5340,11 @@ def set_hpxml_fuel_loads(hpxml_file, hpxml)
   elsif ['base-misc-loads-large-uncommon2.xml'].include? hpxml_file
     hpxml.fuel_loads[0].fuel_type = HPXML::FuelTypeOil
     hpxml.fuel_loads[2].fuel_type = HPXML::FuelTypeWoodPellets
+  elsif ['invalid_files/frac-sensible-fuel-load.xml'].include? hpxml_file
+    hpxml.fuel_loads[0].frac_sensible = -0.1
+  elsif ['invalid_files/frac-total-fuel-load.xml'].include? hpxml_file
+    hpxml.fuel_loads[0].frac_sensible = 0.8
+    hpxml.fuel_loads[0].frac_latent = 1.0 - hpxml.fuel_loads[0].frac_sensible + 0.1
   end
 end
 
@@ -5418,12 +5540,53 @@ def create_schematron_hpxml_validator(hpxml_docs)
     end
   end
 
+  # Add ID/IDref checks
+  # TODO: Dynamically obtain these lists
+  id_names = ['SystemIdentifier',
+              'BuildingID']
+  idref_names = ['AttachedToRoof',
+                 'AttachedToFrameFloor',
+                 'AttachedToSlab',
+                 'AttachedToFoundationWall',
+                 'AttachedToWall',
+                 'DistributionSystem',
+                 'AttachedToHVACDistributionSystem',
+                 'RelatedHVACSystem',
+                 'ConnectedTo']
+  elements_in_sample_files.each do |element_xpath|
+    element_name = element_xpath.split('/')[-1].gsub('h:', '')
+    context_xpath = "/#{element_xpath.split('/')[0..-2].join('/')}"
+    if id_names.include? element_name
+      rule = rules[context_xpath]
+      if rule.nil?
+        # Need new rule
+        rule = XMLHelper.add_element(pattern, 'sch:rule')
+        XMLHelper.add_attribute(rule, 'context', context_xpath)
+        rules[context_xpath] = rule
+      end
+      assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected id attribute for #{element_name}", :string)
+      XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+      XMLHelper.add_attribute(assertion, 'test', "count(h:#{element_name}[@id]) = 1 or not (h:#{element_name})")
+    elsif idref_names.include? element_name
+      rule = rules[context_xpath]
+      if rule.nil?
+        # Need new rule
+        rule = XMLHelper.add_element(pattern, 'sch:rule')
+        XMLHelper.add_attribute(rule, 'context', context_xpath)
+        rules[context_xpath] = rule
+      end
+      assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected idref attribute for #{element_name}", :string)
+      XMLHelper.add_attribute(assertion, 'role', 'ERROR')
+      XMLHelper.add_attribute(assertion, 'test', "count(h:#{element_name}[@idref]) = 1 or not(h:#{element_name})")
+    end
+  end
+
   XMLHelper.write_file(hpxml_validator, File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'HPXMLvalidator.xml'))
 end
 
 def get_element_full_xpaths(element_xpaths, complex_type_or_group_dict, element_xpath, element_type)
   if not complex_type_or_group_dict.keys.include? element_type
-    return element_xpaths[element_xpath] = element_type
+    element_xpaths[element_xpath] = element_type
   else
     complex_type_or_group = deep_copy_object(complex_type_or_group_dict[element_type])
     complex_type_or_group.each do |k, v|

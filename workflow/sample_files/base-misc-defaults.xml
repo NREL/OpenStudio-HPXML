@@ -236,6 +236,7 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
+              <YearInstalled>2021</YearInstalled>
               <DistributionSystem idref='HVACDistribution'/>
               <HeatingSystemType>
                 <Furnace/>
@@ -246,6 +247,7 @@
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
+              <YearInstalled>2021</YearInstalled>
               <DistributionSystem idref='HVACDistribution'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
@@ -287,6 +289,7 @@
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                 </Ducts>
+                <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
             <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
@@ -311,8 +314,9 @@
             <SystemIdentifier id='WaterHeater'/>
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
+            <YearInstalled>2021</YearInstalled>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <EnergyFactor>0.95</EnergyFactor>
+            <FirstHourRating>46.0</FirstHourRating>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution'/>

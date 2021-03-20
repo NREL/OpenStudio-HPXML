@@ -27,7 +27,8 @@ class HPXMLTest < MiniTest::Test
     File.delete(sizing_out) if File.exist? sizing_out
 
     xmls = []
-    Dir["#{File.absolute_path(File.join(@this_dir, '..', 'sample_files'))}/*.xml"].sort.each do |xml|
+    sample_files_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files'))
+    Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
       xmls << File.absolute_path(xml)
     end
 
@@ -49,7 +50,8 @@ class HPXMLTest < MiniTest::Test
     File.delete(ashrae140_out) if File.exist? ashrae140_out
 
     xmls = []
-    Dir["#{File.absolute_path(File.join(@this_dir, 'ASHRAE_Standard_140'))}/*.xml"].sort.each do |xml|
+    ashrae_140_dir = File.absolute_path(File.join(@this_dir, 'ASHRAE_Standard_140'))
+    Dir["#{ashrae_140_dir}/*.xml"].sort.each do |xml|
       xmls << File.absolute_path(xml)
     end
 
@@ -143,29 +145,38 @@ class HPXMLTest < MiniTest::Test
     sample_files_dir = File.join(@this_dir, '..', 'sample_files')
 
     expected_error_msgs = { 'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
-                            'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
-                            'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
-                            'cooking-range-location.xml' => ["CookingRange location is 'garage' but building does not have this location specified."],
+                            'clothes-dryer-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
+                            'clothes-washer-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
+                            'cooking-range-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'dehumidifier-fraction-served.xml' => ['Expected FractionDehumidificationLoadServed to sum to <= 1, but calculated sum is 1.1.'],
                             'dehumidifier-setpoints.xml' => ['All dehumidifiers must have the same setpoint but multiple setpoints were specified.'],
-                            'dishwasher-location.xml' => ["Dishwasher location is 'garage' but building does not have this location specified."],
+                            'dishwasher-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'dhw-frac-load-served.xml' => ['Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15.'],
                             'dhw-invalid-ef-tank.xml' => ['Expected EnergyFactor to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="storage water heater"]]'],
                             'dhw-invalid-uef-tank-heat-pump.xml' => ['Expected UniformEnergyFactor to be greater than 1 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="heat pump water heater"]]'],
-                            'duct-location.xml' => ["Duct location is 'garage' but building does not have this location specified."],
+                            'duct-leakage-cfm25.xml' => ['Expected Value to be greater than or equal to 0 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement/DuctLeakage[Units="CFM25"]]'],
+                            'duct-leakage-percent.xml' => ['Expected Value to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement/DuctLeakage[Units="Percent"]]'],
+                            'duct-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'duct-location-unconditioned-space.xml' => ["Expected DuctLocation to be 'living space' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'attic - vented' or 'attic - unvented' or 'garage' or 'exterior wall' or 'under slab' or 'roof deck' or 'outside' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/*/Ducts]"],
                             'duplicate-id.xml' => ["Duplicate SystemIdentifier IDs detected for 'WindowNorth'."],
-                            'enclosure-attic-missing-roof.xml' => ['There must be at least one roof adjacent to attic - unvented. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="attic - unvented" or ExteriorAdjacentTo="attic - unvented"]]]'],
-                            'enclosure-basement-missing-exterior-foundation-wall.xml' => ['There must be at least one exterior foundation wall adjacent to basement - unconditioned. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="basement - unconditioned" or ExteriorAdjacentTo="basement - unconditioned"]]]'],
-                            'enclosure-basement-missing-slab.xml' => ['There must be at least one slab adjacent to basement - unconditioned. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="basement - unconditioned" or ExteriorAdjacentTo="basement - unconditioned"]]]'],
-                            'enclosure-floor-area-exceeds-cfa.xml' => ['Sum of floor/slab area adjacent to conditioned space (1350.0) is greater than conditioned floor area (540.0).'],
-                            'enclosure-garage-missing-exterior-wall.xml' => ['There must be at least one exterior wall/foundation wall adjacent to garage. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="garage" or ExteriorAdjacentTo="garage"]]]'],
-                            'enclosure-garage-missing-roof-ceiling.xml' => ['There must be at least one roof/ceiling adjacent to garage. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="garage" or ExteriorAdjacentTo="garage"]]]'],
-                            'enclosure-garage-missing-slab.xml' => ['There must be at least one slab adjacent to garage. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="garage" or ExteriorAdjacentTo="garage"]]]'],
+                            'enclosure-attic-missing-roof.xml' => ['There must be at least one roof adjacent to "attic - unvented". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="attic - unvented" or ExteriorAdjacentTo="attic - unvented"]]]'],
+                            'enclosure-basement-missing-exterior-foundation-wall.xml' => ['There must be at least one exterior foundation wall adjacent to "basement - unconditioned". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="basement - unconditioned" or ExteriorAdjacentTo="basement - unconditioned"]]]'],
+                            'enclosure-basement-missing-slab.xml' => ['There must be at least one slab adjacent to "basement - unconditioned". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="basement - unconditioned" or ExteriorAdjacentTo="basement - unconditioned"]]]'],
+                            'enclosure-floor-area-exceeds-cfa.xml' => ['Expected ConditionedFloorArea to be greater than or equal to the sum of conditioned slab/floor areas. [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]'],
+                            'enclosure-floor-area-exceeds-cfa2.xml' => ['Expected ConditionedFloorArea to be greater than or equal to the sum of conditioned slab/floor areas. [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]'],
+                            'enclosure-garage-missing-exterior-wall.xml' => ['There must be at least one exterior wall/foundation wall adjacent to "garage". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="garage" or ExteriorAdjacentTo="garage"]]]'],
+                            'enclosure-garage-missing-roof-ceiling.xml' => ['There must be at least one roof/ceiling adjacent to "garage". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="garage" or ExteriorAdjacentTo="garage"]]]'],
+                            'enclosure-garage-missing-slab.xml' => ['There must be at least one slab adjacent to "garage". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="garage" or ExteriorAdjacentTo="garage"]]]'],
                             'enclosure-living-missing-ceiling-roof.xml' => ['There must be at least one ceiling/roof adjacent to conditioned space. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="living space"]]]',
-                                                                            'There must be at least one floor adjacent to attic - unvented. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="attic - unvented" or ExteriorAdjacentTo="attic - unvented"]]]'],
+                                                                            'There must be at least one floor adjacent to "attic - unvented". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="attic - unvented" or ExteriorAdjacentTo="attic - unvented"]]]'],
                             'enclosure-living-missing-exterior-wall.xml' => ['There must be at least one exterior wall adjacent to conditioned space. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="living space"]]]'],
                             'enclosure-living-missing-floor-slab.xml' => ['There must be at least one floor/slab adjacent to conditioned space. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="living space"]]]'],
+                            'frac-sensible-plug-load.xml' => ['Expected extension/FracSensible to be greater than or equal to 0 [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"]]'],
+                            'frac-total-plug-load.xml' => ['Expected sum of extension/FracSensible and extension/FracLatent to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"]]'],
+                            'frac-sensible-fuel-load.xml' => ['Expected extension/FracSensible to be greater than or equal to 0 [context: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill" or FuelLoadType="lighting" or FuelLoadType="fireplace"]]'],
+                            'frac-total-fuel-load.xml' => ['Expected sum of extension/FracSensible and extension/FracLatent to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill" or FuelLoadType="lighting" or FuelLoadType="fireplace"]]'],
+                            'generator-output-greater-than-consumption.xml' => ['Expected AnnualConsumptionkBtu to be greater than AnnualOutputkWh*3412 [context: /HPXML/Building/BuildingDetails/Systems/extension/Generators/Generator]'],
+                            'generator-number-of-bedrooms-served.xml' => ['Expected NumberofBedroomsServed to be greater than ../../../../BuildingSummary/BuildingConstruction/NumberofBedrooms [context: /HPXML/Building/BuildingDetails/Systems/extension/Generators/Generator[IsSharedSystem="true"]]'],
                             'heat-pump-mixed-fixed-and-autosize-capacities.xml' => ['Expected 0 or 2 element(s) for xpath: HeatingCapacity | BackupHeatingCapacity [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel]]'],
                             'hvac-invalid-distribution-system-type.xml' => ["Incorrect HVAC distribution system type for HVAC type: 'Furnace'. Should be one of: ["],
                             'hvac-distribution-multiple-attached-cooling.xml' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution2'."],
@@ -174,15 +185,12 @@ class HPXMLTest < MiniTest::Test
                             'hvac-dse-multiple-attached-heating.xml' => ["Multiple heating systems found attached to distribution system 'HVACDistribution'."],
                             'hvac-frac-load-served.xml' => ['Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is 1.2.',
                                                             'Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1.'],
-                            'hvac-distribution-return-duct-leakage-missing.xml' => ['Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution]'],
+                            'hvac-distribution-return-duct-leakage-missing.xml' => ['Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"] [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution]'],
                             'hvac-inconsistent-fan-powers.xml' => ["Fan powers for heating system 'HeatingSystem' and cooling system 'CoolingSystem' are attached to a single distribution system and therefore must be the same."],
                             'invalid-assembly-effective-rvalue.xml' => ['Expected Insulation/AssemblyEffectiveRValue to be greater than 0 [context: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall]'],
-                            'invalid-datatype-boolean.xml' => ["Cannot convert 'FOOBAR' to boolean."],
-                            'invalid-datatype-boolean2.xml' => ["Cannot convert '' to boolean."],
-                            'invalid-datatype-integer.xml' => ["Cannot convert '2.5' to integer."],
-                            'invalid-datatype-integer2.xml' => ["Cannot convert '' to integer."],
-                            'invalid-datatype-float.xml' => ["Cannot convert 'FOOBAR' to float."],
-                            'invalid-datatype-float2.xml' => ["Cannot convert '' to float."],
+                            'invalid-datatype-boolean.xml' => ["Cannot convert 'FOOBAR' to boolean for Roof/RadiantBarrier."],
+                            'invalid-datatype-integer.xml' => ["Cannot convert '2.5' to integer for BuildingConstruction/NumberofBedrooms."],
+                            'invalid-datatype-float.xml' => ["Cannot convert 'FOOBAR' to float for Slab/extension/CarpetFraction."],
                             'invalid-daylight-saving.xml' => ['Daylight Saving End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-distribution-cfa-served.xml' => ['The total conditioned floor area served by the HVAC distribution system(s) for heating is larger than the conditioned floor area of the building.',
                                                                       'The total conditioned floor area served by the HVAC distribution system(s) for cooling is larger than the conditioned floor area of the building.'],
@@ -200,6 +208,7 @@ class HPXMLTest < MiniTest::Test
                                                                          'Expected extension/DistanceToBottomOfInsulation to be greater than or equal to extension/DistanceToTopOfInsulation [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer[InstallationType="continuous - exterior" or InstallationType="continuous - interior"]]',
                                                                          'Expected extension/DistanceToBottomOfInsulation to be less than or equal to ../../Height [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer[InstallationType="continuous - exterior" or InstallationType="continuous - interior"]]'],
                             'invalid-id.xml' => ["Empty SystemIdentifier ID ('') detected for skylights."],
+                            'invalid-id2.xml' => ['Expected id attribute for SystemIdentifier [context: /HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight]'],
                             'invalid-infiltration-volume.xml' => ['Expected InfiltrationVolume to be greater than or equal to ../../../BuildingSummary/BuildingConstruction/ConditionedBuildingVolume [context: /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure[text()="ACH" or text()="CFM"]]]'],
                             'invalid-input-parameters.xml' => ["Expected Transaction to be 'create' or 'update' [context: /HPXML/XMLTransactionHeaderInformation]",
                                                                "Expected SiteType to be 'rural' or 'suburban' or 'urban' [context: /HPXML/Building/BuildingDetails/BuildingSummary/Site]",
@@ -219,20 +228,24 @@ class HPXMLTest < MiniTest::Test
                             'invalid-runperiod.xml' => ['Run Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-window-height.xml' => ['Expected DistanceToBottomOfWindow to be greater than DistanceToTopOfWindow [context: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs]'],
                             'lighting-fractions.xml' => ['Sum of fractions of interior lighting (1.15) is greater than 1.'],
-                            'mismatched-slab-and-foundation-wall.xml' => ["Foundation wall 'FoundationWall' is adjacent to 'basement - conditioned' but no corresponding slab was found adjacent to"],
                             'missing-elements.xml' => ['Expected 1 element(s) for xpath: NumberofConditionedFloors [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]',
                                                        'Expected 1 element(s) for xpath: ConditionedFloorArea [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]'],
                             'missing-duct-location.xml' => ['Expected 0 or 2 element(s) for xpath: DuctSurfaceArea | DuctLocation [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/*/Ducts]'],
-                            'missing-duct-location-and-surface-area.xml' => ['Error: The location and surface area of all ducts must be provided or blank.'],
                             'multifamily-reference-appliance.xml' => ["The building is of type 'single-family detached' but"],
                             'multifamily-reference-duct.xml' => ["The building is of type 'single-family detached' but"],
                             'multifamily-reference-surface.xml' => ["The building is of type 'single-family detached' but"],
                             'multifamily-reference-water-heater.xml' => ["The building is of type 'single-family detached' but"],
+                            'multiple-buildings-without-building-id.xml' => ['Multiple Building elements defined in HPXML file; Building ID argument must be provided.'],
+                            'multiple-buildings-wrong-building-id.xml' => ["Could not find Building element with ID 'MyFoo'."],
+                            'multiple-shared-cooling-systems.xml' => ['More than one shared cooling system found.'],
+                            'multiple-shared-heating-systems.xml' => ['More than one shared heating system found.'],
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for surface 'Wall'."],
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for surface 'Roof'."],
-                            'num-bedrooms-exceeds-limit.xml' => ['Number of bedrooms (40) exceeds limit of (CFA-120)/70=36.9.'],
+                            'num-bedrooms-exceeds-limit.xml' => ['Expected NumberofBedrooms to be less than or equal to (ConditionedFloorArea-120)/70 [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]'],
                             'orphaned-hvac-distribution.xml' => ["Distribution system 'HVACDistribution' found but no HVAC system attached to it."],
-                            'refrigerator-location.xml' => ["Refrigerator location is 'garage' but building does not have this location specified."],
+                            'refrigerator-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
+                            'refrigerators-multiple-primary.xml' => ['More than one refrigerator designated as the primary.'],
+                            'refrigerators-no-primary.xml' => ['Could not find a primary refrigerator.'],
                             'repeated-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem' is attached to multiple water heating systems."],
                             'repeated-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem' is attached to multiple water heating systems."],
                             'slab-zero-exposed-perimeter.xml' => ['Expected ExposedPerimeter to be greater than 0 [context: /HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab]'],
@@ -247,10 +260,8 @@ class HPXMLTest < MiniTest::Test
                             'unattached-shared-clothes-washer-water-heater.xml' => ["Attached water heating system 'foobar' not found for clothes washer"],
                             'unattached-shared-dishwasher-water-heater.xml' => ["Attached water heating system 'foobar' not found for dishwasher"],
                             'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
-                            'water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
-                            'water-heater-location-other.xml' => ["Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem]"],
-                            'refrigerators-multiple-primary.xml' => ['More than one refrigerator designated as the primary.'],
-                            'refrigerators-no-primary.xml' => ['Could not find a primary refrigerator.'] }
+                            'water-heater-location.xml' => ['A location is specified as "crawlspace - vented" but no surfaces were found adjacent to this space type.'],
+                            'water-heater-location-other.xml' => ["Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem]"] }
 
     # Test simulations
     xmls = Dir["#{sample_files_dir}/invalid_files/*.xml"].sort
@@ -285,7 +296,13 @@ class HPXMLTest < MiniTest::Test
     # Uses 'monthly' to verify timeseries results match annual results via error-checking
     # inside the SimulationOutputReport measure.
     cli_path = OpenStudio.getOpenStudioCLI
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} -o #{rundir} --debug --monthly ALL"
+    building_id = ''
+    if xml.include? 'base-multiple-buildings.xml'
+      building_id = '--building-id MyBuilding'
+    elsif xml.include? 'multiple-buildings-wrong-building-id.xml'
+      building_id = '--building-id MyFoo'
+    end
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} -o #{rundir} --debug --monthly ALL #{building_id}"
     workflow_start = Time.now
     success = system(command)
     workflow_time = Time.now - workflow_start
@@ -329,10 +346,20 @@ class HPXMLTest < MiniTest::Test
 
     # Get results
     results = _get_results(rundir, workflow_time, annual_csv_path, xml)
-    sizing_results = _get_sizing_results(rundir)
 
     # Check outputs
-    _verify_outputs(rundir, xml, results)
+    hpxml_defaults_path = File.join(rundir, 'in.xml')
+    stron_paths = [File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'EPvalidator.xml')]
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schematron_validators: stron_paths) # Validate in.xml to ensure it can be run back through OS-HPXML
+    if not hpxml.errors.empty?
+      puts 'ERRORS:'
+      hpxml.errors.each do |error|
+        puts error
+      end
+      flunk "EPvalidator.xml error in #{hpxml_defaults_path}."
+    end
+    sizing_results = _get_sizing_results(hpxml, xml)
+    _verify_outputs(rundir, xml, results, hpxml)
 
     return results, sizing_results
   end
@@ -345,35 +372,6 @@ class HPXMLTest < MiniTest::Test
 
       results[row[0]] = Float(row[1])
     end
-
-    sql_path = File.join(rundir, 'eplusout.sql')
-    sqlFile = OpenStudio::SqlFile.new(sql_path, false)
-
-    # Obtain HVAC capacities
-    # TODO: Add to reporting measure?
-    htg_cap_w = 0
-    for spd in [4, 2]
-      # Get capacity of highest speed for multi-speed coil
-      query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType='Coil:Heating:DX:MultiSpeed' AND Description LIKE '%User-Specified Speed #{spd}%Capacity' AND Units='W'"
-      htg_cap_w += sqlFile.execAndReturnFirstDouble(query).get
-      break if htg_cap_w > 0
-    end
-    query = "SELECT SUM(Value) FROM ComponentSizes WHERE ((CompType LIKE 'Coil:Heating:%' OR CompType LIKE 'Boiler:%' OR CompType LIKE 'ZONEHVAC:BASEBOARD:%') AND CompType!='Coil:Heating:DX:MultiSpeed') AND Description LIKE '%User-Specified%Capacity' AND Units='W'"
-    htg_cap_w += sqlFile.execAndReturnFirstDouble(query).get
-    results['Capacity: Heating (W)'] = htg_cap_w
-
-    clg_cap_w = 0
-    for spd in [4, 2]
-      # Get capacity of highest speed for multi-speed coil
-      query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType='Coil:Cooling:DX:MultiSpeed' AND Description LIKE 'User-Specified Speed #{spd}%Total%Capacity' AND Units='W'"
-      clg_cap_w += sqlFile.execAndReturnFirstDouble(query).get
-      break if clg_cap_w > 0
-    end
-    query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType LIKE 'Coil:Cooling:%' AND CompType!='Coil:Cooling:DX:MultiSpeed' AND Description LIKE '%User-Specified%Total%Capacity' AND Units='W'"
-    clg_cap_w += sqlFile.execAndReturnFirstDouble(query).get
-    results['Capacity: Cooling (W)'] = clg_cap_w
-
-    sqlFile.close
 
     # Check discrepancy between total load and sum of component loads
     if not xml.include? 'ASHRAE_Standard_140'
@@ -390,32 +388,76 @@ class HPXMLTest < MiniTest::Test
     return results
   end
 
-  def _get_sizing_results(rundir)
+  def _get_sizing_results(hpxml, xml)
     results = {}
-    File.readlines(File.join(rundir, 'run.log')).each do |s|
-      next unless s.start_with?('Heat ') || s.start_with?('Cool ')
-      next unless s.include? '='
+    return if xml.include? 'ASHRAE_Standard_140'
 
-      vals = s.split('=')
-      prop = vals[0].strip
-      vals = vals[1].split(' ')
-      value = Float(vals[0].strip)
-      prop += " [#{vals[1].strip}]" # add units
-      results[prop] = 0.0 if results[prop].nil?
-      results[prop] += value
+    # Heating design loads
+    hpxml.hvac_plant.class::HDL_ATTRS.each do |attr, element_name|
+      results["heating_load_#{attr.to_s.gsub('hdl_', '')} [Btuh]"] = hpxml.hvac_plant.send(attr.to_s)
     end
+
+    # Cooling sensible design loads
+    hpxml.hvac_plant.class::CDL_SENS_ATTRS.each do |attr, element_name|
+      results["cooling_load_#{attr.to_s.gsub('cdl_', '')} [Btuh]"] = hpxml.hvac_plant.send(attr.to_s)
+    end
+
+    # Cooling latent design loads
+    hpxml.hvac_plant.class::CDL_LAT_ATTRS.each do |attr, element_name|
+      results["cooling_load_#{attr.to_s.gsub('cdl_', '')} [Btuh]"] = hpxml.hvac_plant.send(attr.to_s)
+    end
+
+    # Heating capacities/airflows
+    results['heating_capacity [Btuh]'] = 0.0
+    results['heating_backup_capacity [Btuh]'] = 0.0
+    results['heating_airflow [cfm]'] = 0.0
+    (hpxml.heating_systems + hpxml.heat_pumps).each do |htg_sys|
+      results['heating_capacity [Btuh]'] += htg_sys.heating_capacity
+      if htg_sys.respond_to? :backup_heating_capacity
+        results['heating_backup_capacity [Btuh]'] += htg_sys.backup_heating_capacity
+      end
+      results['heating_airflow [cfm]'] += htg_sys.heating_airflow_cfm
+    end
+
+    # Cooling capacity/airflows
+    results['cooling_capacity [Btuh]'] = 0.0
+    results['cooling_airflow [cfm]'] = 0.0
+    (hpxml.cooling_systems + hpxml.heat_pumps).each do |clg_sys|
+      results['cooling_capacity [Btuh]'] += clg_sys.cooling_capacity
+      results['cooling_airflow [cfm]'] += clg_sys.cooling_airflow_cfm
+    end
+
     assert(!results.empty?)
+
+    if (hpxml.heating_systems + hpxml.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.empty?
+      # No heating equipment; check for zero heating capacities/airflows/duct loads
+      assert_equal(0.0, results['heating_capacity [Btuh]'])
+      assert_equal(0.0, results['heating_backup_capacity [Btuh]'])
+      assert_equal(0.0, results['heating_airflow [cfm]'])
+      assert_equal(0.0, results['heating_load_ducts [Btuh]'])
+    end
+    if (hpxml.cooling_systems + hpxml.heat_pumps).select { |c| c.fraction_cool_load_served.to_f > 0 }.empty?
+      # No cooling equipment; check for zero cooling capacities/airflows/duct loads
+      assert_equal(0.0, results['cooling_capacity [Btuh]'])
+      assert_equal(0.0, results['cooling_airflow [cfm]'])
+      assert_equal(0.0, results['cooling_load_sens_ducts [Btuh]'])
+      assert_equal(0.0, results['cooling_load_lat_ducts [Btuh]'])
+    end
+    if hpxml.hvac_distributions.map { |dist| dist.ducts.size }.empty?
+      # No ducts; check for zero duct loads
+      assert_equal(0.0, results['heating_load_ducts [Btuh]'])
+      assert_equal(0.0, results['cooling_load_sens_ducts [Btuh]'])
+      assert_equal(0.0, results['cooling_load_lat_ducts [Btuh]'])
+    end
+
     return results
   end
 
-  def _verify_outputs(rundir, hpxml_path, results)
+  def _verify_outputs(rundir, hpxml_path, results, hpxml)
     sql_path = File.join(rundir, 'eplusout.sql')
     assert(File.exist? sql_path)
 
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
-    hpxml_defaults_path = File.join(rundir, 'in.xml')
-    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
-    HVAC.apply_shared_systems(hpxml)
 
     # Collapse windows further using same logic as measure.rb
     hpxml.windows.each do |window|
@@ -429,7 +471,6 @@ class HPXMLTest < MiniTest::Test
       next if log_line.include? 'Warning: Could not load nokogiri, no HPXML validation performed.'
       next if log_line.start_with? 'Info: '
       next if log_line.start_with? 'Executing command'
-      next if (log_line.start_with?('Heat ') || log_line.start_with?('Cool ')) && log_line.include?('=')
       next if log_line.include? "-cache.csv' could not be found; regenerating it."
       next if log_line.include?('Warning: HVACDistribution') && log_line.include?('has ducts entirely within conditioned space but there is non-zero leakage to the outside.')
 
@@ -449,13 +490,13 @@ class HPXMLTest < MiniTest::Test
         next if log_line.include? 'No cooking range specified, the model will not include cooking range/oven energy use.'
       end
       if hpxml.water_heating_systems.empty?
-        next if log_line.include? 'No water heater specified, the model will not include water heating energy use.'
+        next if log_line.include? 'No water heating specified, the model will not include water heating energy use.'
       end
       if (hpxml.heating_systems + hpxml.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.empty?
-        next if log_line.include? 'No heating system specified, the model will not include space heating energy use.'
+        next if log_line.include? 'No space heating specified, the model will not include space heating energy use.'
       end
       if (hpxml.cooling_systems + hpxml.heat_pumps).select { |c| c.fraction_cool_load_served.to_f > 0 }.empty?
-        next if log_line.include? 'No cooling system specified, the model will not include space cooling energy use.'
+        next if log_line.include? 'No space cooling specified, the model will not include space cooling energy use.'
       end
       if hpxml.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeOther }.empty?
         next if log_line.include? "No '#{HPXML::PlugLoadTypeOther}' plug loads specified, the model will not include misc plug load energy use."
@@ -527,7 +568,7 @@ class HPXMLTest < MiniTest::Test
       if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeRoomAirConditioner }.size > 0
         next if err_line.include? 'GetDXCoils: Coil:Cooling:DX:SingleSpeed="ROOM AC CLG COIL" curve values' # TODO: Double-check Room AC curves
       end
-      if hpxml.hvac_distributions.select { |d| d.hydronic_and_air_type.to_s == HPXML::HydronicAndAirTypeFanCoil }.size > 0
+      if hpxml.hvac_distributions.select { |d| d.air_type.to_s == HPXML::AirTypeFanCoil }.size > 0
         next if err_line.include? 'In calculating the design coil UA for Coil:Cooling:Water' # Warning for unused cooling coil for fan coil
       end
       if hpxml_path.include?('ASHRAE_Standard_140') || (hpxml.windows.size == 0)
@@ -535,6 +576,9 @@ class HPXMLTest < MiniTest::Test
       end
       if hpxml_path.include? 'base-enclosure-split-surfaces2.xml'
         next if err_line.include? 'GetSurfaceData: Very small surface area' # FUTURE: Prevent this warning
+      end
+      if hpxml_path.include?('ground-to-air-heat-pump-cooling-only.xml') || hpxml_path.include?('ground-to-air-heat-pump-heating-only.xml')
+        next if err_line.include? 'COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT' # heating capacity is > 20% different than cooling capacity; safe to ignore
       end
 
       flunk "Unexpected warning found: #{err_line}"
@@ -947,86 +991,8 @@ class HPXMLTest < MiniTest::Test
       assert_in_epsilon(hpxml_value, sql_value, 0.02)
     end
 
-    # HVAC Capacities
-    htg_cap = nil
-    clg_cap = nil
-    hpxml.heating_systems.each do |heating_system|
-      htg_sys_cap = heating_system.heating_capacity.to_f
-      if htg_sys_cap > 0
-        htg_cap = 0 if htg_cap.nil?
-        htg_cap += htg_sys_cap
-      end
-    end
-    hpxml.cooling_systems.each do |cooling_system|
-      clg_sys_cap = cooling_system.cooling_capacity.to_f
-      clg_cap_mult = 1.0
-      if cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner
-        # TODO: Generalize this
-        clg_cap_mult = 1.20
-      end
-      if clg_sys_cap > 0
-        clg_cap = 0 if clg_cap.nil?
-        clg_cap += (clg_sys_cap * clg_cap_mult)
-      end
-    end
-    hpxml.heat_pumps.each do |heat_pump|
-      hp_cap_clg = heat_pump.cooling_capacity.to_f
-      hp_cap_htg = heat_pump.heating_capacity.to_f
-      clg_cap_mult = 1.0
-      htg_cap_mult = 1.0
-      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
-        # TODO: Generalize this
-        clg_cap_mult = 1.20
-        htg_cap_mult = 1.20
-      elsif (heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir) && (heat_pump.cooling_efficiency_seer > 21)
-        # TODO: Generalize this
-        htg_cap_mult = 1.17
-      end
-      supp_hp_cap = heat_pump.backup_heating_capacity.to_f
-      if hp_cap_clg > 0
-        clg_cap = 0 if clg_cap.nil?
-        clg_cap += (hp_cap_clg * clg_cap_mult)
-      end
-      if hp_cap_htg > 0
-        htg_cap = 0 if htg_cap.nil?
-        htg_cap += (hp_cap_htg * htg_cap_mult)
-      end
-      if supp_hp_cap > 0
-        htg_cap = 0 if htg_cap.nil?
-        htg_cap += supp_hp_cap
-      end
-    end
-    if not clg_cap.nil?
-      sql_value = UnitConversions.convert(results['Capacity: Cooling (W)'], 'W', 'Btu/hr')
-      if clg_cap == 0
-        assert_operator(sql_value, :<, 1)
-      elsif clg_cap > 0
-        if hpxml.header.allow_increased_fixed_capacities
-          assert_operator(sql_value, :>=, clg_cap)
-        else
-          assert_in_epsilon(clg_cap, sql_value, 0.01)
-        end
-      else # autosized
-        assert_operator(sql_value, :>, 1)
-      end
-    end
-    if not htg_cap.nil?
-      sql_value = UnitConversions.convert(results['Capacity: Heating (W)'], 'W', 'Btu/hr')
-      if htg_cap == 0
-        assert_operator(sql_value, :<, 1)
-      elsif htg_cap > 0
-        if hpxml.header.allow_increased_fixed_capacities
-          assert_operator(sql_value, :>=, htg_cap)
-        else
-          assert_in_epsilon(htg_cap, sql_value, 0.01)
-        end
-      else # autosized
-        assert_operator(sql_value, :>, 1)
-      end
-    end
-
     # HVAC Load Fractions
-    if not hpxml_path.include? 'location-miami'
+    if (not hpxml_path.include? 'location-miami') && (not hpxml_path.include? 'location-honolulu') && (not hpxml_path.include? 'location-phoenix')
       htg_energy = results.select { |k, v| (k.include?(': Heating (MBtu)') || k.include?(': Heating Fans/Pumps (MBtu)')) && !k.include?('Load') }.map { |k, v| v }.sum(0.0)
       assert_equal(hpxml.total_fraction_heat_load_served > 0, htg_energy > 0)
     end
@@ -1170,7 +1136,7 @@ class HPXMLTest < MiniTest::Test
       energy_dhw = results.fetch("End Use: #{fuel_name}: Hot Water (MBtu)", 0)
       energy_cd = results.fetch("End Use: #{fuel_name}: Clothes Dryer (MBtu)", 0)
       energy_cr = results.fetch("End Use: #{fuel_name}: Range/Oven (MBtu)", 0)
-      if htg_fuels.include?(fuel) && (not hpxml_path.include? 'location-miami')
+      if htg_fuels.include?(fuel) && (not hpxml_path.include? 'location-miami') && (not hpxml_path.include? 'location-honolulu') && (not hpxml_path.include? 'location-phoenix')
         assert_operator(energy_htg, :>, 0)
       else
         assert_equal(0, energy_htg)
