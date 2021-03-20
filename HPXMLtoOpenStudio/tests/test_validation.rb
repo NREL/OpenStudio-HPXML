@@ -169,7 +169,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
     begin
       require 'schematron-nokogiri'
-      
+
       [@stron_path, hpxml_stron_path].each do |s_path|
         xml_doc = Nokogiri::XML(File.open(s_path)) do |config|
           config.options = Nokogiri::XML::ParseOptions::STRICT
