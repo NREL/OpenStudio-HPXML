@@ -2710,7 +2710,7 @@ class HPXML < Object
       if [HVACTypeFurnace, HVACTypeWallFurnace, HVACTypeFloorFurnace, HVACTypeBoiler].include? @heating_system_type
         efficiency_units = UnitsAFUE
         efficiency_value = @heating_efficiency_afue
-        efficiency_value_isdefaulted = @heating_efficiency_afue_isdefaulted # FIXME: do the same thing for similar elements
+        efficiency_value_isdefaulted = @heating_efficiency_afue_isdefaulted
       elsif [HVACTypeElectricResistance, HVACTypeStove, HVACTypePortableHeater, HVACTypeFixedHeater, HVACTypeFireplace].include? @heating_system_type
         efficiency_units = UnitsPercent
         efficiency_value = @heating_efficiency_percent
@@ -2719,7 +2719,7 @@ class HPXML < Object
       if not efficiency_value.nil?
         annual_efficiency = XMLHelper.add_element(heating_system, 'AnnualHeatingEfficiency')
         XMLHelper.add_element(annual_efficiency, 'Units', efficiency_units, :string)
-        XMLHelper.add_element(annual_efficiency, 'Value', efficiency_value, :float, efficiency_value_isdefaulted) # FIXME: do the same thing for similar elements
+        XMLHelper.add_element(annual_efficiency, 'Value', efficiency_value, :float, efficiency_value_isdefaulted)
       end
       XMLHelper.add_element(heating_system, 'FractionHeatLoadServed', @fraction_heat_load_served, :float, @fraction_heat_load_served_isdefaulted) unless @fraction_heat_load_served.nil?
       XMLHelper.add_element(heating_system, 'ElectricAuxiliaryEnergy', @electric_auxiliary_energy, :float, @electric_auxiliary_energy_isdefaulted) unless @electric_auxiliary_energy.nil?
