@@ -45,6 +45,7 @@ def create_hpxmls
     'ASHRAE_Standard_140/L304XC.xml' => 'ASHRAE_Standard_140/L302XC.xml',
     'ASHRAE_Standard_140/L324XC.xml' => 'ASHRAE_Standard_140/L322XC.xml',
 
+    'invalid_files/boiler-invalid-afue.xml' => 'base-hvac-boiler-oil-only.xml',
     'invalid_files/cfis-with-hydronic-distribution.xml' => 'base-hvac-boiler-gas-only.xml',
     'invalid_files/clothes-washer-location.xml' => 'base.xml',
     'invalid_files/clothes-dryer-location.xml' => 'base.xml',
@@ -75,6 +76,7 @@ def create_hpxmls
     'invalid_files/frac-sensible-plug-load.xml' => 'base-misc-loads-large-uncommon.xml',
     'invalid_files/frac-total-fuel-load.xml' => 'base-misc-loads-large-uncommon.xml',
     'invalid_files/frac-total-plug-load.xml' => 'base-misc-loads-large-uncommon.xml',
+    'invalid_files/furnace-invalid-afue.xml' => 'base.xml',
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/hvac-invalid-distribution-system-type.xml' => 'base.xml',
     'invalid_files/hvac-distribution-multiple-attached-cooling.xml' => 'base-hvac-multiple.xml',
@@ -3104,6 +3106,9 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems << hpxml.heating_systems[0].dup
     hpxml.heating_systems[1].id += '2'
     hpxml.heating_systems[1].distribution_system_idref += '2'
+  elsif ['invalid_files/boiler-invalid-afue.xml',
+         'invalid_files/furnace-invalid-afue.xml'].include? hpxml_file
+    hpxml.heating_systems[0].heating_efficiency_afue *= 100.0
   elsif hpxml_file.include?('base-hvac-autosize') && (not hpxml.heating_systems.nil?) && (hpxml.heating_systems.size > 0)
     hpxml.heating_systems[0].heating_capacity = nil
   elsif ['base-misc-defaults.xml'].include? hpxml_file
