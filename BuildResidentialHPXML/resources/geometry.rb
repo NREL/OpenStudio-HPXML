@@ -2665,4 +2665,10 @@ class Geometry
 
     return false
   end
+
+  def self.surface_is_rim_joist(surface, height)
+    return false unless (height - Geometry.get_surface_height(surface)).abs < 0.00001
+    return false unless Geometry.getSurfaceZValues([surface]).max > 0
+    return true
+  end
 end

@@ -225,6 +225,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         end
       end
       hpxml.rim_joists.each do |rim_joist|
+        rim_joist.area = rim_joist.area.round
         rim_joist.insulation_assembly_r_value = rim_joist.insulation_assembly_r_value.round(2)
       end
       hpxml.roofs.each do |roof|

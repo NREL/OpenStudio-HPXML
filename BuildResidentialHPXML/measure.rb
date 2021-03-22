@@ -2858,6 +2858,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # assign the user inputs to variables
     args = get_argument_values(runner, arguments(model), user_arguments)
     args = Hash[args.collect { |k, v| [k.to_sym, v] }]
+    args[:geometry_rim_joist_height] /= 12.0
     args[:geometry_roof_pitch] = { '1:12' => 1.0 / 12.0, '2:12' => 2.0 / 12.0, '3:12' => 3.0 / 12.0, '4:12' => 4.0 / 12.0, '5:12' => 5.0 / 12.0, '6:12' => 6.0 / 12.0, '7:12' => 7.0 / 12.0, '8:12' => 8.0 / 12.0, '9:12' => 9.0 / 12.0, '10:12' => 10.0 / 12.0, '11:12' => 11.0 / 12.0, '12:12' => 12.0 / 12.0 }[args[:geometry_roof_pitch]]
 
     # Argument error checks
@@ -3484,12 +3485,26 @@ class HPXMLFile
   def self.set_rim_joists(hpxml, runner, model, args)
     model.getSurfaces.sort.each do |surface|
       next if surface.surfaceType != 'Wall'
-      next unless ['Outdoors'].include? surface.outsideBoundaryCondition
+      next unless ['Outdoors', 'Adiabatic'].include? surface.outsideBoundaryCondition
+      next unless Geometry.surface_is_rim_joist(surface, args[:geometry_rim_joist_height])
+
+      interior_adjacent_to = get_adjacent_to(surface)
+      next unless [HPXML::LocationBasementConditioned, HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? interior_adjacent_to
 
       exterior_adjacent_to = HPXML::LocationOutside
-      interior_adjacent_to = get_adjacent_to(surface)
-
-      next unless (args[:geometry_rim_joist_height] - Geometry.get_surface_height(surface)).abs < 0.00001 # this is not a "wall"
+      if surface.outsideBoundaryCondition == 'Adiabatic' # can be adjacent to foundation space
+        adjacent_surface = get_adiabatic_adjacent_surface(model, surface)
+        if adjacent_surface.nil? # adjacent to a space that is not explicitly in the model
+          unless [HPXML::ResidentialTypeSFD].include?(args[:geometry_unit_type])
+            exterior_adjacent_to = interior_adjacent_to
+            if exterior_adjacent_to == HPXML::LocationLivingSpace # living adjacent to living
+              exterior_adjacent_to = HPXML::LocationOtherHousingUnit
+            end
+          end
+        else # adjacent to a space that is explicitly in the model, e.g., corridor
+          exterior_adjacent_to = get_adjacent_to(adjacent_surface)
+        end
+      end
 
       if exterior_adjacent_to == HPXML::LocationOutside && args[:wall_siding_type].is_initialized
         siding = args[:wall_siding_type].get
@@ -3514,25 +3529,20 @@ class HPXMLFile
       hpxml.rim_joists.add(id: valid_attr(surface.name),
                            exterior_adjacent_to: exterior_adjacent_to,
                            interior_adjacent_to: interior_adjacent_to,
-                           area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round,
+                           area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round(1),
                            siding: siding,
                            color: color,
                            solar_absorptance: solar_absorptance,
                            emittance: emittance,
                            insulation_assembly_r_value: args[:rim_joist_assembly_r])
     end
-
-    extra_rim_joist_area = get_extra_rim_joist_area(hpxml, args)
-    if hpxml.rim_joists.size > 0
-      hpxml.rim_joists[-1].area -= extra_rim_joist_area
-    end
   end
 
-  def self.get_extra_rim_joist_area(hpxml, args)
-    # this is "rim joist" area underneath a protruding garage that should actually be foundation wall area
+  def self.get_unexposed_garage_perimeter(hpxml, args)
+    # this is perimeter adjacent to a 100% protruding garage that is not exposed
     # we need this because it's difficult to set this surface to Adiabatic using our geometry methods
-    if (args[:geometry_garage_protrusion] != 0) && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
-      return (args[:geometry_rim_joist_height] * args[:geometry_garage_width]).round
+    if (args[:geometry_garage_protrusion] == 1.0) && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
+      return args[:geometry_garage_width]
     end
     return 0
   end
@@ -3563,6 +3573,7 @@ class HPXMLFile
   def self.set_walls(hpxml, runner, model, args)
     model.getSurfaces.sort.each do |surface|
       next if surface.surfaceType != 'Wall'
+      next if Geometry.surface_is_rim_joist(surface, args[:geometry_rim_joist_height])
 
       interior_adjacent_to = get_adjacent_to(surface)
       next unless [HPXML::LocationLivingSpace, HPXML::LocationAtticUnvented, HPXML::LocationAtticVented, HPXML::LocationGarage].include? interior_adjacent_to
@@ -3583,7 +3594,6 @@ class HPXMLFile
       end
 
       next if exterior_adjacent_to == HPXML::LocationLivingSpace # already captured these surfaces
-      next if (args[:geometry_rim_joist_height] - Geometry.get_surface_height(surface)).abs < 0.00001
 
       wall_type = args[:wall_type]
       if [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? interior_adjacent_to
@@ -3644,6 +3654,7 @@ class HPXMLFile
     model.getSurfaces.sort.each do |surface|
       next if surface.surfaceType != 'Wall'
       next unless ['Foundation', 'Adiabatic'].include? surface.outsideBoundaryCondition
+      next if Geometry.surface_is_rim_joist(surface, args[:geometry_rim_joist_height])
 
       interior_adjacent_to = get_adjacent_to(surface)
       next unless [HPXML::LocationBasementConditioned, HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? interior_adjacent_to
@@ -3701,11 +3712,6 @@ class HPXMLFile
                                  insulation_exterior_r_value: insulation_exterior_r_value,
                                  insulation_exterior_distance_to_top: insulation_exterior_distance_to_top,
                                  insulation_exterior_distance_to_bottom: insulation_exterior_distance_to_bottom)
-    end
-
-    extra_rim_joist_area = get_extra_rim_joist_area(hpxml, args)
-    if hpxml.foundation_walls.size > 0
-      hpxml.foundation_walls[-1].area += extra_rim_joist_area
     end
   end
 
@@ -3775,8 +3781,7 @@ class HPXMLFile
       next if exposed_perimeter == 0 # this could be, e.g., the foundation floor of an interior corridor
 
       if [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned].include? interior_adjacent_to
-        extra_rim_joist_area = get_extra_rim_joist_area(hpxml, args)
-        exposed_perimeter -= extra_rim_joist_area
+        exposed_perimeter -= get_unexposed_garage_perimeter(hpxml, args)
       end
 
       if [HPXML::LocationLivingSpace, HPXML::LocationGarage].include? interior_adjacent_to
