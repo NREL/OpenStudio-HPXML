@@ -1516,7 +1516,7 @@ If a conventional storage water heater is specified, additional information is e
   .. [#] If TankVolume not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
   .. [#] If HeatingCapacity not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
   .. [#] YearInstalled only required if both UniformEnergyFactor and EnergyFactor are not provided.
-  .. [#] EnergyFactor only required if YearInstalled is not provided. UniformEnergyFactor is only required if both YearInstalled and EnergyFactor are not provided.
+  .. [#] EnergyFactor only required if both UniformEnergyFactor and YearInstalled are not provided. UniformEnergyFactor is only required if both EnergyFactor and YearInstalled are not provided.
   .. [#] Defaulted to EnergyFactor from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_water_heater_efficiency.csv`` based on YearInstalled.
   .. [#] FirstHourRating only required if UniformEnergyFactor provided.
   .. [#] If RecoveryEfficiency not provided, defaults as follows based on a regression analysis of `AHRI certified water heaters <https://www.ahridirectory.org/NewSearch?programId=24&searchTypeId=3>`_:
