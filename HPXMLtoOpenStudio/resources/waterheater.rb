@@ -1192,10 +1192,11 @@ class Waterheater
         ef = calc_ef_from_uef(water_heating_system)
       end
       if ef >= 0.75
-        return 0.778114 * ef + 0.276679
+        re = 0.561 * ef + 0.439
       else
-        return 0.252117 * ef + 0.607997
+        re = 0.252 * ef + 0.608
       end
+      return re
     end
   end
 
@@ -1398,8 +1399,6 @@ class Waterheater
       location_hierarchy = [HPXML::LocationBasementConditioned,
                             HPXML::LocationBasementUnconditioned,
                             HPXML::LocationLivingSpace]
-    else
-      fail "Unexpected IECC climate zone: '#{iecc_zone}'."
     end
     location_hierarchy.each do |space_type|
       if hpxml.has_space_type(space_type)

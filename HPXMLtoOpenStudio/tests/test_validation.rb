@@ -22,7 +22,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     @hpxml_docs = {}
     hpxml_file_dirs.each do |hpxml_file_dir|
       Dir["#{hpxml_file_dir}/*.xml"].sort.each do |xml|
-        @hpxml_docs[File.basename(xml)] = HPXML.new(hpxml_path: File.join(hpxml_file_dir, File.basename(xml))).to_oga()
+        @hpxml_docs[File.basename(xml)] = HPXML.new(hpxml_path: File.join(hpxml_file_dir, File.basename(xml)), building_id: 'MyBuilding').to_oga()
       end
     end
 
@@ -48,6 +48,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
           @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion_message, 'addition')
         elsif assertion_message.include?("Expected #{element_name} to be")
           @expected_assertions_by_alteration[key] = _get_expected_error_msg(context_xpath, assertion_message, 'alteration')
+        elsif assertion_message.include?('There must be at least one') || assertion_message.include?('A location is specified as') || assertion_message.include?('sum of')
+          # Skip these complex rules
         else
           fail "Unexpected assertion: '#{assertion_message}'."
         end
@@ -160,6 +162,24 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     puts
   end
 
+  def test_schematron_validation
+    # Check that the schematron file is valid
+
+    hpxml_stron_path = File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'HPXMLvalidator.xml')
+
+    begin
+      require 'schematron-nokogiri'
+
+      [@stron_path, hpxml_stron_path].each do |s_path|
+        xml_doc = Nokogiri::XML(File.open(s_path)) do |config|
+          config.options = Nokogiri::XML::ParseOptions::STRICT
+        end
+        stron_doc = SchematronNokogiri::Schema.new(xml_doc)
+      end
+    rescue LoadError
+    end
+  end
+
   private
 
   def _test_schematron_validation(hpxml_doc, expected_error_msg = nil)
@@ -191,6 +211,10 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
     # Find a HPXML file that contains the specified elements.
     @hpxml_docs.each do |xml, hpxml_doc|
+      if context_xpath.include? 'HeatPump[HeatPumpType="water-loop-to-air"]'
+        next unless xml.include? 'boiler-only'
+      end
+
       parent_elements = XMLHelper.get_elements(hpxml_doc, context_xpath)
       next if parent_elements.nil?
 

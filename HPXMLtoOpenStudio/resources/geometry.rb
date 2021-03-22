@@ -60,15 +60,6 @@ class Geometry
     return maxzs.max - minzs.min
   end
 
-  def self.get_max_z_of_spaces(spaces)
-    maxzs = []
-    spaces.each do |space|
-      zvalues = getSurfaceZValues(space.surfaces)
-      maxzs << zvalues.max + UnitConversions.convert(space.zOrigin, 'm', 'ft')
-    end
-    return maxzs.max
-  end
-
   # Return an array of z values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
   def self.getSurfaceZValues(surfaceArray)
     zValueArray = []
@@ -137,8 +128,16 @@ class Geometry
     end
   end
 
-  def self.process_occupants(model, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch,
-                             cfa, nbeds, space)
+  def self.process_occupants(model, num_occ, cfa, space)
+    occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
+    weekday_sch = '1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000'
+    weekday_sch_sum = weekday_sch.split(',').map(&:to_f).sum(0.0)
+    if (weekday_sch_sum - hrs_per_day).abs > 0.1
+      fail 'Occupancy schedule inconsistent with hrs_per_day.'
+    end
+
+    weekend_sch = weekday_sch
+    monthly_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
 
     # Error checking
     if (sens_frac < 0) || (sens_frac > 1)
@@ -202,5 +201,18 @@ class Geometry
     sens_frac = sens_gains / tot_gains
     lat_frac = lat_gains / tot_gains
     return heat_gain, hrs_per_day, sens_frac, lat_frac
+  end
+
+  def self.tear_down_model(model, runner)
+    # Tear down the existing model if it exists
+    has_existing_objects = (model.getThermalZones.size > 0)
+    handles = OpenStudio::UUIDVector.new
+    model.objects.each do |obj|
+      handles << obj.handle
+    end
+    model.removeObjects(handles)
+    if has_existing_objects
+      runner.registerWarning('The model contains existing objects and is being reset.')
+    end
   end
 end

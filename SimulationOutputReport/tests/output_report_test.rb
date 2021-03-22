@@ -10,102 +10,102 @@ require_relative '../measure.rb'
 
 class SimulationOutputReportTest < MiniTest::Test
   AnnualRows = [
-    'Electricity: Total (MBtu)',
-    'Electricity: Net (MBtu)',
-    'Natural Gas: Total (MBtu)',
-    'Fuel Oil: Total (MBtu)',
-    'Propane: Total (MBtu)',
-    'Wood Cord: Total (MBtu)',
-    'Wood Pellets: Total (MBtu)',
-    'Coal: Total (MBtu)',
-    'Electricity: Heating (MBtu)',
-    'Electricity: Heating Fans/Pumps (MBtu)',
-    'Electricity: Cooling (MBtu)',
-    'Electricity: Cooling Fans/Pumps (MBtu)',
-    'Electricity: Hot Water (MBtu)',
-    'Electricity: Hot Water Recirc Pump (MBtu)',
-    'Electricity: Hot Water Solar Thermal Pump (MBtu)',
-    'Electricity: Lighting Interior (MBtu)',
-    'Electricity: Lighting Garage (MBtu)',
-    'Electricity: Lighting Exterior (MBtu)',
-    'Electricity: Mech Vent (MBtu)',
-    'Electricity: Mech Vent Preheating (MBtu)',
-    'Electricity: Mech Vent Precooling (MBtu)',
-    'Electricity: Whole House Fan (MBtu)',
-    'Electricity: Refrigerator (MBtu)',
-    'Electricity: Freezer (MBtu)',
-    'Electricity: Dehumidifier (MBtu)',
-    'Electricity: Dishwasher (MBtu)',
-    'Electricity: Clothes Washer (MBtu)',
-    'Electricity: Clothes Dryer (MBtu)',
-    'Electricity: Range/Oven (MBtu)',
-    'Electricity: Ceiling Fan (MBtu)',
-    'Electricity: Television (MBtu)',
-    'Electricity: Plug Loads (MBtu)',
-    'Electricity: Electric Vehicle Charging (MBtu)',
-    'Electricity: Well Pump (MBtu)',
-    'Electricity: Pool Heater (MBtu)',
-    'Electricity: Pool Pump (MBtu)',
-    'Electricity: Hot Tub Heater (MBtu)',
-    'Electricity: Hot Tub Pump (MBtu)',
-    'Electricity: PV (MBtu)',
-    'Electricity: Generator (MBtu)',
-    'Natural Gas: Heating (MBtu)',
-    'Natural Gas: Hot Water (MBtu)',
-    'Natural Gas: Clothes Dryer (MBtu)',
-    'Natural Gas: Range/Oven (MBtu)',
-    'Natural Gas: Pool Heater (MBtu)',
-    'Natural Gas: Hot Tub Heater (MBtu)',
-    'Natural Gas: Grill (MBtu)',
-    'Natural Gas: Lighting (MBtu)',
-    'Natural Gas: Fireplace (MBtu)',
-    'Natural Gas: Mech Vent Preheating (MBtu)',
-    'Natural Gas: Generator (MBtu)',
-    'Fuel Oil: Heating (MBtu)',
-    'Fuel Oil: Hot Water (MBtu)',
-    'Fuel Oil: Clothes Dryer (MBtu)',
-    'Fuel Oil: Range/Oven (MBtu)',
-    'Fuel Oil: Grill (MBtu)',
-    'Fuel Oil: Lighting (MBtu)',
-    'Fuel Oil: Fireplace (MBtu)',
-    'Fuel Oil: Mech Vent Preheating (MBtu)',
-    'Fuel Oil: Generator (MBtu)',
-    'Propane: Heating (MBtu)',
-    'Propane: Hot Water (MBtu)',
-    'Propane: Clothes Dryer (MBtu)',
-    'Propane: Range/Oven (MBtu)',
-    'Propane: Grill (MBtu)',
-    'Propane: Lighting (MBtu)',
-    'Propane: Fireplace (MBtu)',
-    'Propane: Mech Vent Preheating (MBtu)',
-    'Propane: Generator (MBtu)',
-    'Wood Cord: Heating (MBtu)',
-    'Wood Cord: Hot Water (MBtu)',
-    'Wood Cord: Clothes Dryer (MBtu)',
-    'Wood Cord: Range/Oven (MBtu)',
-    'Wood Cord: Grill (MBtu)',
-    'Wood Cord: Lighting (MBtu)',
-    'Wood Cord: Fireplace (MBtu)',
-    'Wood Cord: Mech Vent Preheating (MBtu)',
-    'Wood Cord: Generator (MBtu)',
-    'Wood Pellets: Heating (MBtu)',
-    'Wood Pellets: Hot Water (MBtu)',
-    'Wood Pellets: Clothes Dryer (MBtu)',
-    'Wood Pellets: Range/Oven (MBtu)',
-    'Wood Pellets: Grill (MBtu)',
-    'Wood Pellets: Lighting (MBtu)',
-    'Wood Pellets: Fireplace (MBtu)',
-    'Wood Pellets: Mech Vent Preheating (MBtu)',
-    'Wood Pellets: Generator (MBtu)',
-    'Coal: Heating (MBtu)',
-    'Coal: Hot Water (MBtu)',
-    'Coal: Clothes Dryer (MBtu)',
-    'Coal: Range/Oven (MBtu)',
-    'Coal: Grill (MBtu)',
-    'Coal: Lighting (MBtu)',
-    'Coal: Fireplace (MBtu)',
-    'Coal: Mech Vent Preheating (MBtu)',
-    'Coal: Generator (MBtu)',
+    'Fuel Use: Electricity: Total (MBtu)',
+    'Fuel Use: Electricity: Net (MBtu)',
+    'Fuel Use: Natural Gas: Total (MBtu)',
+    'Fuel Use: Fuel Oil: Total (MBtu)',
+    'Fuel Use: Propane: Total (MBtu)',
+    'Fuel Use: Wood Cord: Total (MBtu)',
+    'Fuel Use: Wood Pellets: Total (MBtu)',
+    'Fuel Use: Coal: Total (MBtu)',
+    'End Use: Electricity: Heating (MBtu)',
+    'End Use: Electricity: Heating Fans/Pumps (MBtu)',
+    'End Use: Electricity: Cooling (MBtu)',
+    'End Use: Electricity: Cooling Fans/Pumps (MBtu)',
+    'End Use: Electricity: Hot Water (MBtu)',
+    'End Use: Electricity: Hot Water Recirc Pump (MBtu)',
+    'End Use: Electricity: Hot Water Solar Thermal Pump (MBtu)',
+    'End Use: Electricity: Lighting Interior (MBtu)',
+    'End Use: Electricity: Lighting Garage (MBtu)',
+    'End Use: Electricity: Lighting Exterior (MBtu)',
+    'End Use: Electricity: Mech Vent (MBtu)',
+    'End Use: Electricity: Mech Vent Preheating (MBtu)',
+    'End Use: Electricity: Mech Vent Precooling (MBtu)',
+    'End Use: Electricity: Whole House Fan (MBtu)',
+    'End Use: Electricity: Refrigerator (MBtu)',
+    'End Use: Electricity: Freezer (MBtu)',
+    'End Use: Electricity: Dehumidifier (MBtu)',
+    'End Use: Electricity: Dishwasher (MBtu)',
+    'End Use: Electricity: Clothes Washer (MBtu)',
+    'End Use: Electricity: Clothes Dryer (MBtu)',
+    'End Use: Electricity: Range/Oven (MBtu)',
+    'End Use: Electricity: Ceiling Fan (MBtu)',
+    'End Use: Electricity: Television (MBtu)',
+    'End Use: Electricity: Plug Loads (MBtu)',
+    'End Use: Electricity: Electric Vehicle Charging (MBtu)',
+    'End Use: Electricity: Well Pump (MBtu)',
+    'End Use: Electricity: Pool Heater (MBtu)',
+    'End Use: Electricity: Pool Pump (MBtu)',
+    'End Use: Electricity: Hot Tub Heater (MBtu)',
+    'End Use: Electricity: Hot Tub Pump (MBtu)',
+    'End Use: Electricity: PV (MBtu)',
+    'End Use: Electricity: Generator (MBtu)',
+    'End Use: Natural Gas: Heating (MBtu)',
+    'End Use: Natural Gas: Hot Water (MBtu)',
+    'End Use: Natural Gas: Clothes Dryer (MBtu)',
+    'End Use: Natural Gas: Range/Oven (MBtu)',
+    'End Use: Natural Gas: Pool Heater (MBtu)',
+    'End Use: Natural Gas: Hot Tub Heater (MBtu)',
+    'End Use: Natural Gas: Grill (MBtu)',
+    'End Use: Natural Gas: Lighting (MBtu)',
+    'End Use: Natural Gas: Fireplace (MBtu)',
+    'End Use: Natural Gas: Mech Vent Preheating (MBtu)',
+    'End Use: Natural Gas: Generator (MBtu)',
+    'End Use: Fuel Oil: Heating (MBtu)',
+    'End Use: Fuel Oil: Hot Water (MBtu)',
+    'End Use: Fuel Oil: Clothes Dryer (MBtu)',
+    'End Use: Fuel Oil: Range/Oven (MBtu)',
+    'End Use: Fuel Oil: Grill (MBtu)',
+    'End Use: Fuel Oil: Lighting (MBtu)',
+    'End Use: Fuel Oil: Fireplace (MBtu)',
+    'End Use: Fuel Oil: Mech Vent Preheating (MBtu)',
+    'End Use: Fuel Oil: Generator (MBtu)',
+    'End Use: Propane: Heating (MBtu)',
+    'End Use: Propane: Hot Water (MBtu)',
+    'End Use: Propane: Clothes Dryer (MBtu)',
+    'End Use: Propane: Range/Oven (MBtu)',
+    'End Use: Propane: Grill (MBtu)',
+    'End Use: Propane: Lighting (MBtu)',
+    'End Use: Propane: Fireplace (MBtu)',
+    'End Use: Propane: Mech Vent Preheating (MBtu)',
+    'End Use: Propane: Generator (MBtu)',
+    'End Use: Wood Cord: Heating (MBtu)',
+    'End Use: Wood Cord: Hot Water (MBtu)',
+    'End Use: Wood Cord: Clothes Dryer (MBtu)',
+    'End Use: Wood Cord: Range/Oven (MBtu)',
+    'End Use: Wood Cord: Grill (MBtu)',
+    'End Use: Wood Cord: Lighting (MBtu)',
+    'End Use: Wood Cord: Fireplace (MBtu)',
+    'End Use: Wood Cord: Mech Vent Preheating (MBtu)',
+    'End Use: Wood Cord: Generator (MBtu)',
+    'End Use: Wood Pellets: Heating (MBtu)',
+    'End Use: Wood Pellets: Hot Water (MBtu)',
+    'End Use: Wood Pellets: Clothes Dryer (MBtu)',
+    'End Use: Wood Pellets: Range/Oven (MBtu)',
+    'End Use: Wood Pellets: Grill (MBtu)',
+    'End Use: Wood Pellets: Lighting (MBtu)',
+    'End Use: Wood Pellets: Fireplace (MBtu)',
+    'End Use: Wood Pellets: Mech Vent Preheating (MBtu)',
+    'End Use: Wood Pellets: Generator (MBtu)',
+    'End Use: Coal: Heating (MBtu)',
+    'End Use: Coal: Hot Water (MBtu)',
+    'End Use: Coal: Clothes Dryer (MBtu)',
+    'End Use: Coal: Range/Oven (MBtu)',
+    'End Use: Coal: Grill (MBtu)',
+    'End Use: Coal: Lighting (MBtu)',
+    'End Use: Coal: Fireplace (MBtu)',
+    'End Use: Coal: Mech Vent Preheating (MBtu)',
+    'End Use: Coal: Generator (MBtu)',
     'Load: Heating (MBtu)',
     'Load: Cooling (MBtu)',
     'Load: Hot Water: Delivered (MBtu)',
@@ -159,96 +159,96 @@ class SimulationOutputReportTest < MiniTest::Test
   ]
 
   TimeseriesColsFuels = [
-    'Electricity: Total',
-    'Natural Gas: Total',
-    'Fuel Oil: Total',
-    'Propane: Total',
-    'Wood Cord: Total',
-    'Wood Pellets: Total',
-    'Coal: Total',
+    'Fuel Use: Electricity: Total',
+    'Fuel Use: Natural Gas: Total',
+    'Fuel Use: Fuel Oil: Total',
+    'Fuel Use: Propane: Total',
+    'Fuel Use: Wood Cord: Total',
+    'Fuel Use: Wood Pellets: Total',
+    'Fuel Use: Coal: Total',
   ]
 
   TimeseriesColsEndUses = [
-    'Electricity: Heating',
-    'Electricity: Heating Fans/Pumps',
-    'Electricity: Cooling',
-    'Electricity: Cooling Fans/Pumps',
-    'Electricity: Hot Water',
-    'Electricity: Hot Water Recirc Pump',
-    'Electricity: Hot Water Solar Thermal Pump',
-    'Electricity: Lighting Interior',
-    'Electricity: Lighting Garage',
-    'Electricity: Lighting Exterior',
-    'Electricity: Mech Vent',
-    'Electricity: Whole House Fan',
-    'Electricity: Refrigerator',
-    'Electricity: Freezer',
-    'Electricity: Dehumidifier',
-    'Electricity: Dishwasher',
-    'Electricity: Clothes Washer',
-    'Electricity: Clothes Dryer',
-    'Electricity: Range/Oven',
-    'Electricity: Ceiling Fan',
-    'Electricity: Television',
-    'Electricity: Plug Loads',
-    'Electricity: Electric Vehicle Charging',
-    'Electricity: Well Pump',
-    'Electricity: Pool Heater',
-    'Electricity: Pool Pump',
-    'Electricity: Hot Tub Heater',
-    'Electricity: Hot Tub Pump',
-    'Electricity: PV',
-    'Electricity: Generator',
-    'Natural Gas: Heating',
-    'Natural Gas: Hot Water',
-    'Natural Gas: Clothes Dryer',
-    'Natural Gas: Range/Oven',
-    'Natural Gas: Pool Heater',
-    'Natural Gas: Hot Tub Heater',
-    'Natural Gas: Grill',
-    'Natural Gas: Lighting',
-    'Natural Gas: Fireplace',
-    'Natural Gas: Generator',
-    'Fuel Oil: Heating',
-    'Fuel Oil: Hot Water',
-    'Fuel Oil: Clothes Dryer',
-    'Fuel Oil: Range/Oven',
-    'Fuel Oil: Grill',
-    'Fuel Oil: Lighting',
-    'Fuel Oil: Fireplace',
-    'Fuel Oil: Generator',
-    'Propane: Heating',
-    'Propane: Hot Water',
-    'Propane: Clothes Dryer',
-    'Propane: Range/Oven',
-    'Propane: Grill',
-    'Propane: Lighting',
-    'Propane: Fireplace',
-    'Propane: Generator',
-    'Wood Cord: Heating',
-    'Wood Cord: Hot Water',
-    'Wood Cord: Clothes Dryer',
-    'Wood Cord: Range/Oven',
-    'Wood Cord: Grill',
-    'Wood Cord: Lighting',
-    'Wood Cord: Fireplace',
-    'Wood Cord: Generator',
-    'Wood Pellets: Heating',
-    'Wood Pellets: Hot Water',
-    'Wood Pellets: Clothes Dryer',
-    'Wood Pellets: Range/Oven',
-    'Wood Pellets: Grill',
-    'Wood Pellets: Lighting',
-    'Wood Pellets: Fireplace',
-    'Wood Pellets: Generator',
-    'Coal: Heating',
-    'Coal: Hot Water',
-    'Coal: Clothes Dryer',
-    'Coal: Range/Oven',
-    'Coal: Grill',
-    'Coal: Lighting',
-    'Coal: Fireplace',
-    'Coal: Generator',
+    'End Use: Electricity: Heating',
+    'End Use: Electricity: Heating Fans/Pumps',
+    'End Use: Electricity: Cooling',
+    'End Use: Electricity: Cooling Fans/Pumps',
+    'End Use: Electricity: Hot Water',
+    'End Use: Electricity: Hot Water Recirc Pump',
+    'End Use: Electricity: Hot Water Solar Thermal Pump',
+    'End Use: Electricity: Lighting Interior',
+    'End Use: Electricity: Lighting Garage',
+    'End Use: Electricity: Lighting Exterior',
+    'End Use: Electricity: Mech Vent',
+    'End Use: Electricity: Whole House Fan',
+    'End Use: Electricity: Refrigerator',
+    'End Use: Electricity: Freezer',
+    'End Use: Electricity: Dehumidifier',
+    'End Use: Electricity: Dishwasher',
+    'End Use: Electricity: Clothes Washer',
+    'End Use: Electricity: Clothes Dryer',
+    'End Use: Electricity: Range/Oven',
+    'End Use: Electricity: Ceiling Fan',
+    'End Use: Electricity: Television',
+    'End Use: Electricity: Plug Loads',
+    'End Use: Electricity: Electric Vehicle Charging',
+    'End Use: Electricity: Well Pump',
+    'End Use: Electricity: Pool Heater',
+    'End Use: Electricity: Pool Pump',
+    'End Use: Electricity: Hot Tub Heater',
+    'End Use: Electricity: Hot Tub Pump',
+    'End Use: Electricity: PV',
+    'End Use: Electricity: Generator',
+    'End Use: Natural Gas: Heating',
+    'End Use: Natural Gas: Hot Water',
+    'End Use: Natural Gas: Clothes Dryer',
+    'End Use: Natural Gas: Range/Oven',
+    'End Use: Natural Gas: Pool Heater',
+    'End Use: Natural Gas: Hot Tub Heater',
+    'End Use: Natural Gas: Grill',
+    'End Use: Natural Gas: Lighting',
+    'End Use: Natural Gas: Fireplace',
+    'End Use: Natural Gas: Generator',
+    'End Use: Fuel Oil: Heating',
+    'End Use: Fuel Oil: Hot Water',
+    'End Use: Fuel Oil: Clothes Dryer',
+    'End Use: Fuel Oil: Range/Oven',
+    'End Use: Fuel Oil: Grill',
+    'End Use: Fuel Oil: Lighting',
+    'End Use: Fuel Oil: Fireplace',
+    'End Use: Fuel Oil: Generator',
+    'End Use: Propane: Heating',
+    'End Use: Propane: Hot Water',
+    'End Use: Propane: Clothes Dryer',
+    'End Use: Propane: Range/Oven',
+    'End Use: Propane: Grill',
+    'End Use: Propane: Lighting',
+    'End Use: Propane: Fireplace',
+    'End Use: Propane: Generator',
+    'End Use: Wood Cord: Heating',
+    'End Use: Wood Cord: Hot Water',
+    'End Use: Wood Cord: Clothes Dryer',
+    'End Use: Wood Cord: Range/Oven',
+    'End Use: Wood Cord: Grill',
+    'End Use: Wood Cord: Lighting',
+    'End Use: Wood Cord: Fireplace',
+    'End Use: Wood Cord: Generator',
+    'End Use: Wood Pellets: Heating',
+    'End Use: Wood Pellets: Hot Water',
+    'End Use: Wood Pellets: Clothes Dryer',
+    'End Use: Wood Pellets: Range/Oven',
+    'End Use: Wood Pellets: Grill',
+    'End Use: Wood Pellets: Lighting',
+    'End Use: Wood Pellets: Fireplace',
+    'End Use: Wood Pellets: Generator',
+    'End Use: Coal: Heating',
+    'End Use: Coal: Hot Water',
+    'End Use: Coal: Clothes Dryer',
+    'End Use: Coal: Range/Oven',
+    'End Use: Coal: Grill',
+    'End Use: Coal: Lighting',
+    'End Use: Coal: Fireplace',
+    'End Use: Coal: Generator',
   ]
 
   TimeseriesColsWaterUses = [
@@ -299,6 +299,11 @@ class SimulationOutputReportTest < MiniTest::Test
     'Component Load: Cooling: Whole House Fan',
     'Component Load: Cooling: Ducts',
     'Component Load: Cooling: Internal Gains',
+  ]
+
+  TimeseriesColsUnmetLoads = [
+    'Unmet Load: Heating',
+    'Unmet Load: Cooling',
   ]
 
   TimeseriesColsZoneTemps = [
@@ -425,6 +430,7 @@ class SimulationOutputReportTest < MiniTest::Test
             TimeseriesColsWaterUses +
             TimeseriesColsTotalLoads +
             TimeseriesColsComponentLoads +
+            TimeseriesColsUnmetLoads +
             TimeseriesColsZoneTemps +
             TimeseriesColsAirflows +
             TimeseriesColsWeather)
@@ -438,6 +444,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -457,6 +464,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => true,
                   'include_timeseries_total_loads' => true,
                   'include_timeseries_component_loads' => true,
+                  'include_timeseries_unmet_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true }
@@ -476,6 +484,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -486,7 +495,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_nonzero_timeseries_value(timeseries_csv, ['Electricity: Total'])
+    _check_for_nonzero_timeseries_value(timeseries_csv, ['Fuel Use: Electricity: Total'])
   end
 
   def test_timeseries_hourly_enduses
@@ -497,6 +506,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -507,7 +517,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_nonzero_timeseries_value(timeseries_csv, ['Electricity: Plug Loads'])
+    _check_for_nonzero_timeseries_value(timeseries_csv, ['End Use: Electricity: Plug Loads'])
   end
 
   def test_timeseries_hourly_hotwateruses
@@ -518,6 +528,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => true,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -531,7 +542,7 @@ class SimulationOutputReportTest < MiniTest::Test
     _check_for_nonzero_timeseries_value(timeseries_csv, TimeseriesColsWaterUses)
   end
 
-  def test_timeseries_hourly_loads
+  def test_timeseries_hourly_total_loads
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
@@ -539,6 +550,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => true,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -552,7 +564,7 @@ class SimulationOutputReportTest < MiniTest::Test
     _check_for_nonzero_timeseries_value(timeseries_csv, TimeseriesColsTotalLoads)
   end
 
-  def test_timeseries_hourly_componentloads
+  def test_timeseries_hourly_component_loads
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
@@ -560,6 +572,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => true,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -573,6 +586,28 @@ class SimulationOutputReportTest < MiniTest::Test
     _check_for_nonzero_timeseries_value(timeseries_csv, ['Component Load: Heating: Internal Gains', 'Component Load: Cooling: Internal Gains'])
   end
 
+  def test_timeseries_hourly_unmet_loads
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-hvac-undersized.xml',
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_fuel_consumptions' => false,
+                  'include_timeseries_end_use_consumptions' => false,
+                  'include_timeseries_hot_water_uses' => false,
+                  'include_timeseries_total_loads' => false,
+                  'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => true,
+                  'include_timeseries_zone_temperatures' => false,
+                  'include_timeseries_airflows' => false,
+                  'include_timeseries_weather' => false }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + TimeseriesColsUnmetLoads
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    _check_for_nonzero_timeseries_value(timeseries_csv, TimeseriesColsUnmetLoads)
+  end
+
   def test_timeseries_hourly_zone_temperatures
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
@@ -581,6 +616,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -602,6 +638,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -624,6 +661,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => false }
@@ -645,6 +683,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => false }
@@ -666,6 +705,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => false }
@@ -687,6 +727,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => false }
@@ -708,6 +749,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => false }
@@ -729,6 +771,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => true }
@@ -750,6 +793,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => true,
                   'include_timeseries_total_loads' => true,
                   'include_timeseries_component_loads' => true,
+                  'include_timeseries_unmet_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true }
@@ -760,7 +804,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['End Use: Electricity: Refrigerator'])
   end
 
   def test_timeseries_daily_ALL
@@ -771,6 +815,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => true,
                   'include_timeseries_total_loads' => true,
                   'include_timeseries_component_loads' => true,
+                  'include_timeseries_unmet_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true }
@@ -781,7 +826,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(365, File.readlines(timeseries_csv).size - 2)
-    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['End Use: Electricity: Refrigerator'])
   end
 
   def test_timeseries_monthly_ALL
@@ -792,6 +837,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => true,
                   'include_timeseries_total_loads' => true,
                   'include_timeseries_component_loads' => true,
+                  'include_timeseries_unmet_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true }
@@ -802,7 +848,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(12, File.readlines(timeseries_csv).size - 2)
-    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['End Use: Electricity: Refrigerator'])
   end
 
   def test_timeseries_timestep
@@ -813,6 +859,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -830,6 +877,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -847,6 +895,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -864,6 +913,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -881,6 +931,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -898,6 +949,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -915,6 +967,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
+                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -946,6 +999,7 @@ class SimulationOutputReportTest < MiniTest::Test
                     'include_timeseries_hot_water_uses' => true,
                     'include_timeseries_total_loads' => true,
                     'include_timeseries_component_loads' => true,
+                    'include_timeseries_unmet_loads' => true,
                     'include_timeseries_zone_temperatures' => true,
                     'include_timeseries_airflows' => true,
                     'include_timeseries_weather' => true }
@@ -990,7 +1044,7 @@ class SimulationOutputReportTest < MiniTest::Test
     workflow.setWorkflowSteps(steps)
     osw_path = File.join(File.dirname(template_osw), 'test.osw')
     workflow.saveAs(osw_path)
-    assert_equal(10, found_args.size)
+    assert_equal(11, found_args.size)
 
     # Run OSW
     success = system("#{OpenStudio.getOpenStudioCLI} run -w #{osw_path}")

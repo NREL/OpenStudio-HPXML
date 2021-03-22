@@ -449,7 +449,7 @@
 							<xs:documentation>Portable room dehumidifiers are typically used to dehumidify a single room or space and can be easily moved to where they are needed. Whole-home dehumidifiers are typically installed to use your home’s air ducts to dehumidify one or more rooms and are often permanent. Some dehumifiers can operate in both configurations by means of a ducting kit.</xs:documentation>
 						</xs:annotation>
 					</xs:element>
-					<xs:element minOccurs="0" name="Location" type="DehumidifierLocation"/>
+					<xs:element minOccurs="0" name="Location" type="AdjacentTo"/>
 					<xs:element minOccurs="0" name="Efficiency" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>[L/kWh] DEPRECATED. This will be removed in v4.0. Use EnergyFactor or IntegratedEnergyFactor instead.</xs:documentation>
@@ -1273,7 +1273,6 @@
 											<xs:choice>
 												<xs:element name="AirDistribution" type="AirDistributionInfo"/>
 												<xs:element name="HydronicDistribution" type="HydronicDistributionInfo"/>
-												<xs:element name="HydronicAndAirDistribution" type="HydronicAndAirDistributionInfo"/>
 												<xs:element name="Other" type="HPXMLString">
 													<xs:annotation>
 														<xs:documentation>describe</xs:documentation>
@@ -1288,18 +1287,14 @@
 											<xs:documentation>[sq.ft.] Conditioned floor area that this distribution system serves.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="AnnualHeatingDistributionSystemEfficiency" type="HPXMLDouble">
+									<xs:element minOccurs="0" name="AnnualHeatingDistributionSystemEfficiency" type="Fraction">
 										<xs:annotation>
-											<xs:documentation>For software that does not calculate an annual distribution system efficiency (DSE) for heating, the DSE may be approximated by equation
-												3.4.i in ANSI/BPI-2400-S-2012: Standard Practice for Standardized Qualification of Whole-House Energy Savings, Predictions by Calibration to Energy Use
-												History.</xs:documentation>
+											<xs:documentation>For software that does not calculate an annual distribution system efficiency (DSE) for heating, the DSE may be approximated by equation 3.4.i in ANSI/BPI-2400-S-2012: Standard Practice for Standardized Qualification of Whole-House Energy Savings, Predictions by Calibration to Energy Use History. Enter values as a fractional number between 0 and 1, i.e. 80% = 0.8</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="AnnualCoolingDistributionSystemEfficiency" type="HPXMLDouble">
+									<xs:element minOccurs="0" name="AnnualCoolingDistributionSystemEfficiency" type="Fraction">
 										<xs:annotation>
-											<xs:documentation>For software that does not calculate an annual distribution system efficiency (DSE) for cooling, the DSE may be approximated by equation
-												3.4.i in ANSI/BPI-2400-S-2012: Standard Practice for Standardized Qualification of Whole-House Energy Savings, Predictions by Calibration to Energy Use
-												History.</xs:documentation>
+											<xs:documentation>For software that does not calculate an annual distribution system efficiency (DSE) for cooling, the DSE may be approximated by equation 3.4.i in ANSI/BPI-2400-S-2012: Standard Practice for Standardized Qualification of Whole-House Energy Savings, Predictions by Calibration to Energy Use History. Enter values as a fractional number between 0 and 1, i.e. 80% = 0.8</xs:documentation>
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="HVACDistributionImprovement" type="HVACDistributionImprovementInfo"/>
@@ -3820,93 +3815,6 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" name="Supply" type="TotalExternalStaticPressureMeasurement"/>
 						<xs:element minOccurs="0" name="Return" type="TotalExternalStaticPressureMeasurement"/>
-					</xs:sequence>
-					<xs:attribute name="dataSource" type="DataSource"/>
-				</xs:complexType>
-			</xs:element>
-			<xs:element minOccurs="0" ref="extension"/>
-		</xs:sequence>
-		<xs:attribute name="dataSource" type="DataSource"/>
-	</xs:complexType>
-	<xs:complexType name="HydronicAndAirDistributionInfo">
-		<xs:sequence>
-			<xs:element name="HydronicAndAirDistributionType" type="HydronicAndAirDistributionType" minOccurs="0"/>
-			<xs:element name="AirHandlerMotorType" type="AirHandlerMotorType" minOccurs="0"/>
-			<xs:element minOccurs="0" name="DuctLeakageMeasurement" type="DuctLeakageMeasurementType" maxOccurs="unbounded"/>
-			<xs:element minOccurs="0" name="DuctSystemSizingAppropriate" type="HPXMLBoolean"/>
-			<xs:element maxOccurs="unbounded" minOccurs="0" name="Ducts">
-				<xs:complexType>
-					<xs:sequence>
-						<xs:element name="DuctType" type="DuctType" minOccurs="0"/>
-						<xs:element name="DuctMaterial" type="DuctMaterial" minOccurs="0"/>
-						<xs:element minOccurs="0" name="DuctInsulationMaterial" type="InsulationMaterial"/>
-						<xs:element name="DuctInsulationRValue" type="RValue" minOccurs="0"/>
-						<xs:element minOccurs="0" name="DuctInsulationThickness" type="LengthMeasurement">
-							<xs:annotation>
-								<xs:documentation>[in]</xs:documentation>
-							</xs:annotation>
-						</xs:element>
-						<xs:element minOccurs="0" name="DuctInsulationCondition" type="InsulationCondition"/>
-						<xs:element name="DuctLocation" type="DuctLocation" minOccurs="0"/>
-						<xs:element minOccurs="0" name="FractionDuctArea" type="Fraction">
-							<xs:annotation>
-								<xs:documentation>If a DuctType of supply or return is specified above, this is the fraction of the supply or return duct area. If DuctType is omitted above, this is
-									the fraction of the total duct area. </xs:documentation>
-							</xs:annotation>
-						</xs:element>
-						<xs:element minOccurs="0" name="DuctSurfaceArea" type="SurfaceArea">
-							<xs:annotation>
-								<xs:documentation>[sq.ft.]</xs:documentation>
-							</xs:annotation>
-						</xs:element>
-						<xs:element minOccurs="0" ref="extension"/>
-					</xs:sequence>
-					<xs:attribute name="dataSource" type="DataSource"/>
-				</xs:complexType>
-			</xs:element>
-			<xs:element minOccurs="0" name="NumberofReturnRegisters" type="IntegerGreaterThanOrEqualToZero"/>
-			<xs:element minOccurs="0" name="TotalExternalStaticPressureMeasurement">
-				<xs:complexType>
-					<xs:sequence>
-						<xs:element minOccurs="0" name="Supply" type="TotalExternalStaticPressureMeasurement"/>
-						<xs:element minOccurs="0" name="Return" type="TotalExternalStaticPressureMeasurement"/>
-					</xs:sequence>
-					<xs:attribute name="dataSource" type="DataSource"/>
-				</xs:complexType>
-			</xs:element>
-			<xs:element name="FractionHydronicPipeInsulated" type="Fraction" minOccurs="0"/>
-			<xs:element minOccurs="0" name="PipeRValue" type="RValue"/>
-			<xs:element minOccurs="0" name="PipeInsulationThickness" type="LengthMeasurement">
-				<xs:annotation>
-					<xs:documentation>[in]</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element minOccurs="0" name="PipeLength" type="LengthMeasurement">
-				<xs:annotation>
-					<xs:documentation>[ft]</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element minOccurs="0" name="PipeDiameter" type="PipeDiameterType"/>
-			<xs:element minOccurs="0" name="SupplyTemperature" type="Temperature">
-				<xs:annotation>
-					<xs:documentation>[degF]</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element minOccurs="0" name="ReturnTemperature" type="Temperature">
-				<xs:annotation>
-					<xs:documentation>[degF]</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element minOccurs="0" name="PumpandZoneValve">
-				<xs:complexType>
-					<xs:sequence>
-						<xs:element minOccurs="0" name="ValveCorrections" type="HPXMLBoolean">
-							<xs:annotation>
-								<xs:documentation>System Pump and Zone Valve Corrections made</xs:documentation>
-							</xs:annotation>
-						</xs:element>
-						<xs:element minOccurs="0" name="ThermostaticRadiatorValves" type="HPXMLBoolean"/>
-						<xs:element minOccurs="0" name="VariableSpeedPump" type="HPXMLBoolean"/>
 					</xs:sequence>
 					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>

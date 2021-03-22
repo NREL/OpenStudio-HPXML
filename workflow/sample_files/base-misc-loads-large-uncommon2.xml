@@ -38,8 +38,8 @@
         </BuildingOccupancy>
         <BuildingConstruction>
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
-          <NumberofConditionedFloors>2</NumberofConditionedFloors>
-          <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
+          <NumberofConditionedFloors>2.0</NumberofConditionedFloors>
+          <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>3</NumberofBedrooms>
           <NumberofBathrooms>2</NumberofBathrooms>
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
@@ -371,6 +371,7 @@
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
+                <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
             <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
@@ -428,7 +429,6 @@
           <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
-          <ControlType>timer</ControlType>
           <extension>
             <IsVented>true</IsVented>
             <VentedFlowRate>150.0</VentedFlowRate>
@@ -588,9 +588,11 @@
       <Pools>
         <Pool>
           <SystemIdentifier id='Pool'/>
+          <Type>unknown</Type>
           <PoolPumps>
             <PoolPump>
               <SystemIdentifier id='PoolPump'/>
+              <Type>unknown</Type>
               <Load>
                 <Units>kWh/year</Units>
                 <Value>2700.0</Value>
@@ -602,14 +604,20 @@
               </extension>
             </PoolPump>
           </PoolPumps>
+          <Heater>
+            <SystemIdentifier id='PoolHeater'/>
+            <Type>none</Type>
+          </Heater>
         </Pool>
       </Pools>
       <HotTubs>
         <HotTub>
           <SystemIdentifier id='HotTub'/>
+          <Type>unknown</Type>
           <HotTubPumps>
             <HotTubPump>
               <SystemIdentifier id='HotTubPump'/>
+              <Type>unknown</Type>
               <Load>
                 <Units>kWh/year</Units>
                 <Value>1000.0</Value>
