@@ -3359,6 +3359,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
       hpxml.heat_pumps[-1].is_shared_system = true
       hpxml.heat_pumps[-1].number_of_units_served = 6
       hpxml.heat_pumps[-1].shared_loop_watts = 600
+      hpxml.heat_pumps[-1].pump_watts_per_ton = 0.0
     end
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
