@@ -9,6 +9,7 @@ __New Features__
 
 __Bugfixes__
 - Fixes ruby error if elements (e.g., `SystemIdentifier`) exist without the proper 'id'/'idref' attribute.
+- Fixes error if boiler/GSHP pump power is zero
 - Fixes possible "Electricity category end uses do not sum to total" error due to boiler pump energy.
 - Fixes possible "Construction R-value ... does not match Assembly R-value" error for highly insulated enclosure elements.
 
