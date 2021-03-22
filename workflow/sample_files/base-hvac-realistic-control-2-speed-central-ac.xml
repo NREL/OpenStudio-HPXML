@@ -304,33 +304,20 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <HeatPump>
-              <SystemIdentifier id='HeatPump'/>
+            <CoolingSystem>
+              <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <HeatPumpType>air-to-air</HeatPumpType>
-              <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>42000.0</HeatingCapacity>
-              <HeatingCapacity17F>24780.0</HeatingCapacity17F>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
+              <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>48000.0</CoolingCapacity>
               <CompressorType>two stage</CompressorType>
-              <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
-              <BackupSystemFuel>electricity</BackupSystemFuel>
-              <BackupAnnualHeatingEfficiency>
-                <Units>Percent</Units>
-                <Value>1.0</Value>
-              </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>34121.0</BackupHeatingCapacity>
-              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>18.0</Value>
               </AnnualCoolingEfficiency>
-              <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>9.3</Value>
-              </AnnualHeatingEfficiency>
-            </HeatPump>
+              <SensibleHeatFraction>0.73</SensibleHeatFraction>
+            </CoolingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>
@@ -432,7 +419,6 @@
           <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
-          <ControlType>timer</ControlType>
           <extension>
             <IsVented>true</IsVented>
             <VentedFlowRate>150.0</VentedFlowRate>

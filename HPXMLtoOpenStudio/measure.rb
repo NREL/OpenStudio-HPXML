@@ -1996,12 +1996,22 @@ class OSModel
       heating_system = hvac_system[:heating]
 
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
+      hvac_control = @hpxml.hvac_controls[0]
+      is_realistic_staging = false
+      is_ddb_control = (not hvac_control.onoff_thermostat_deadband.nil?) && (hvac_control.onoff_thermostat_deadband > 0) && (cooling_system.additional_properties.num_speeds == 1)
 
       if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
-
-        HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
-                                                   @remaining_cool_load_frac, @remaining_heat_load_frac,
-                                                   living_zone, @hvac_map, @hpxml.hvac_controls[0])
+        if (cooling_system.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
+          is_realistic_staging = true
+          is_ddb_control = true
+          HVAC.apply_central_air_conditioner_furnace_two_speed_realistic(model, runner, cooling_system, heating_system,
+                                                                         @remaining_cool_load_frac, @remaining_heat_load_frac,
+                                                                         living_zone, @hvac_map)
+        else
+          HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
+                                                     @remaining_cool_load_frac, @remaining_heat_load_frac,
+                                                     living_zone, @hvac_map, is_ddb_control)
+        end
 
         if not heating_system.nil?
           @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
@@ -2011,7 +2021,7 @@ class OSModel
 
         HVAC.apply_room_air_conditioner(model, runner, cooling_system,
                                         @remaining_cool_load_frac, living_zone,
-                                        @hvac_map, @hpxml.hvac_controls[0])
+                                        @hvac_map, is_ddb_control)
 
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
 
@@ -2088,6 +2098,9 @@ class OSModel
 
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
+      hvac_control = @hpxml.hvac_controls[0]
+      is_realistic_staging = false
+      is_ddb_control = (not hvac_control.onoff_thermostat_deadband.nil?) && (hvac_control.onoff_thermostat_deadband > 0) && (heat_pump.additional_properties.num_speeds == 1)
       if [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
 
         HVAC.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
@@ -2097,11 +2110,18 @@ class OSModel
 
       elsif [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
 
-        HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
-                                                @remaining_heat_load_frac,
-                                                @remaining_cool_load_frac,
-                                                living_zone, @hvac_map, @hpxml.hvac_controls[0])
-
+        if (cooling_system.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
+          is_realistic_staging = true
+          is_ddb_control = true
+          HVAC.apply_central_air_to_air_heat_pump_two_speed_realistic(model, runner, cooling_system, heating_system,
+                                                                      @remaining_cool_load_frac, @remaining_heat_load_frac,
+                                                                      living_zone, @hvac_map)
+        else
+          HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
+                                                  @remaining_heat_load_frac,
+                                                  @remaining_cool_load_frac,
+                                                  living_zone, @hvac_map, @hpxml.hvac_controls[0])
+        end
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
 
         HVAC.apply_mini_split_heat_pump(model, runner, heat_pump,

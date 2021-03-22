@@ -310,9 +310,9 @@
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>42000.0</HeatingCapacity>
-              <HeatingCapacity17F>26460.0</HeatingCapacity17F>
+              <HeatingCapacity17F>24780.0</HeatingCapacity17F>
               <CoolingCapacity>48000.0</CoolingCapacity>
-              <CompressorType>single stage</CompressorType>
+              <CompressorType>two stage</CompressorType>
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
@@ -324,11 +324,11 @@
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>13.0</Value>
+                <Value>18.0</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>HSPF</Units>
-                <Value>7.7</Value>
+                <Value>9.3</Value>
               </AnnualHeatingEfficiency>
             </HeatPump>
           </HVACPlant>
@@ -339,6 +339,7 @@
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
             <extension>
               <OnOffThermostatDeadband>2.0</OnOffThermostatDeadband>
+              <TwospeedRealisticStaging>true</TwospeedRealisticStaging>
             </extension>
           </HVACControl>
           <HVACDistribution>

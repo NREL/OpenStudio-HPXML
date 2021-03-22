@@ -3,7 +3,7 @@
 class HVAC
   def self.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
                                                  remaining_cool_load_frac, remaining_heat_load_frac,
-                                                 control_zone, hvac_map, is_ddb_control = false)
+                                                 control_zone, hvac_map, is_ddb_control = false, is_realistic_staging = false)
 
     hvac_map[cooling_system.id] = [] unless cooling_system.nil?
     hvac_map[heating_system.id] = [] unless heating_system.nil?
@@ -119,6 +119,70 @@ class HVAC
 
     # HVAC Installation Quality
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
+  end
+
+  def self.apply_central_air_conditioner_furnace_two_speed_realistic(model, runner, cooling_system, heating_system,
+                                                                     remaining_cool_load_frac, remaining_heat_load_frac,
+                                                                     control_zone, hvac_map, is_ddb_control = false)
+    if not cooling_system.nil?
+      clg_ap = cooling_system.additional_properties
+      clg_ap.num_speeds = 1
+      cooling_system2 = cooling_system.dup
+
+      cool_fan_speed_ratios = clg_ap.cool_fan_speed_ratios
+      cool_rated_eirs = clg_ap.cool_rated_eirs
+      cool_rated_shrs_gross = clg_ap.cool_rated_shrs_gross
+      cool_rated_cfm_per_ton = clg_ap.cool_rated_cfm_per_ton
+      cool_capacity_ratios = clg_ap.cool_capacity_ratios
+      cool_cap_ft_spec = clg_ap.cool_cap_ft_spec
+      cool_cap_fflow_spec = clg_ap.cool_cap_fflow_spec
+      cool_eir_ft_spec = clg_ap.cool_eir_ft_spec
+      cool_eir_fflow_spec = clg_ap.cool_eir_fflow_spec
+      cool_plf_fplr_spec = clg_ap.cool_plf_fplr_spec
+
+      clg_ap.cool_fan_speed_ratios = [1.0]
+      clg_ap.cool_capacity_ratios = [1.0]
+      clg_ap.cool_rated_eirs = [cool_rated_eirs[0]]
+      clg_ap.cool_rated_shrs_gross = [cool_rated_shrs_gross[0]]
+      clg_ap.cool_rated_cfm_per_ton = [cool_rated_cfm_per_ton[0]]
+      clg_ap.cool_cap_ft_spec = [cool_cap_ft_spec[0]]
+      clg_ap.cool_cap_fflow_spec = [cool_cap_fflow_spec[0]]
+      clg_ap.cool_eir_ft_spec = [cool_eir_ft_spec[0]]
+      clg_ap.cool_eir_fflow_spec = [cool_eir_fflow_spec[0]]
+      clg_ap.cool_plf_fplr_spec = [cool_plf_fplr_spec[0]]
+
+      cooling_system.cooling_capacity *= cool_capacity_ratios[0]
+      cooling_system.cooling_airflow_cfm *= cool_fan_speed_ratios[0]
+      puts cool_capacity_ratios
+      puts cooling_system.cooling_capacity
+
+      apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
+                                            remaining_cool_load_frac, remaining_heat_load_frac,
+                                            control_zone, hvac_map, true)
+      clg_ap2 = cooling_system2.additional_properties
+      clg_ap2.cool_fan_speed_ratios = [1.0]
+      clg_ap2.cool_capacity_ratios = [1.0]
+      clg_ap2.cool_rated_eirs = [cool_rated_eirs[1]]
+      clg_ap2.cool_rated_shrs_gross = [cool_rated_shrs_gross[1]]
+      clg_ap2.cool_rated_cfm_per_ton = [cool_rated_cfm_per_ton[1]]
+      clg_ap2.cool_cap_ft_spec = [cool_cap_ft_spec[1]]
+      clg_ap2.cool_cap_fflow_spec = [cool_cap_fflow_spec[1]]
+      clg_ap2.cool_eir_ft_spec = [cool_eir_ft_spec[1]]
+      clg_ap2.cool_eir_fflow_spec = [cool_eir_fflow_spec[1]]
+      clg_ap2.cool_plf_fplr_spec = [cool_plf_fplr_spec[1]]
+
+      cooling_system2.cooling_capacity *= cool_capacity_ratios[1]
+      cooling_system2.cooling_airflow_cfm *= cool_fan_speed_ratios[1]
+      puts cooling_system2.cooling_capacity
+
+      apply_central_air_conditioner_furnace(model, runner, cooling_system2, heating_system,
+                                            remaining_cool_load_frac, remaining_heat_load_frac,
+                                            control_zone, hvac_map, false)
+    else
+      apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
+                                            remaining_cool_load_frac, remaining_heat_load_frac,
+                                            control_zone, hvac_map)
+    end
   end
 
   def self.apply_room_air_conditioner(model, runner, cooling_system,
@@ -2967,10 +3031,6 @@ class HVAC
         clg_coil.setLatentCapacityTimeConstant(45.0)
         clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W'))
         clg_coil.setRatedAirFlowRate(calc_rated_airflow(cooling_system.cooling_capacity, clg_ap.cool_rated_cfm_per_ton[0], 1.0))
-        if is_ddb_control
-          # Apply startup capacity degradation
-          apply_capacity_degradation_EMS(model, clg_ap, clg_coil.name.get, true, cap_fff_curve, eir_fff_curve)
-        end
       else
         if clg_coil.nil?
           clg_coil = OpenStudio::Model::CoilCoolingDXMultiSpeed.new(model)
@@ -2999,6 +3059,10 @@ class HVAC
     clg_coil.setName(obj_name + ' clg coil')
     clg_coil.setCondenserType('AirCooled')
     clg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(clg_ap.crankcase_kw, 'kW', 'W'))
+    if is_ddb_control
+      # Apply startup capacity degradation
+      apply_capacity_degradation_EMS(model, clg_ap, clg_coil.name.get, true, cap_fff_curve, eir_fff_curve)
+    end
 
     return clg_coil
   end
@@ -4392,9 +4456,9 @@ class HVAC
     elsif hvac_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
       hvac_ap.num_speeds = 1
     elsif hvac_system.compressor_type == HPXML::HVACCompressorTypeTwoStage
-      hvac_ap.num_speeds =  2
+      hvac_ap.num_speeds = 2
     elsif hvac_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      hvac_ap.num_speeds =  4
+      hvac_ap.num_speeds = 4
     end
   end
 
