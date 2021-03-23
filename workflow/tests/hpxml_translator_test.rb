@@ -474,8 +474,10 @@ class HPXMLTest < MiniTest::Test
       next if log_line.start_with? 'Info: '
       next if log_line.start_with? 'Executing command'
       next if log_line.include? "-cache.csv' could not be found; regenerating it."
-      next if log_line.include?('Warning: HVACDistribution') && log_line.include?('has ducts entirely within conditioned space but there is non-zero leakage to the outside.')
 
+      if hpxml_path.include? 'base-atticroof-conditioned.xml'
+        next if log_line.include?('Ducts are entirely within conditioned space but there is moderate leakage to the outside. Leakage to the outside is typically zero or near-zero in these situations, consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.')
+      end
       if hpxml.clothes_washers.empty?
         next if log_line.include? 'No clothes washer specified, the model will not include clothes washer energy use.'
       end
