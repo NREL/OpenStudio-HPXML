@@ -3944,6 +3944,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   # Set number of return registers
   if not ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.hvac_distributions.each do |hvac_distribution|
+      hvac_distribution.number_of_return_registers = nil
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
       next unless hvac_distribution.ducts.select { |d| d.duct_type == HPXML::DuctTypeReturn }.size > 0
 
