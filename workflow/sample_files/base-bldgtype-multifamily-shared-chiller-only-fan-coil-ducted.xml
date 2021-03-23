@@ -217,8 +217,8 @@
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution'/>
             <DistributionSystemType>
-              <HydronicAndAirDistribution>
-                <HydronicAndAirDistributionType>fan coil</HydronicAndAirDistributionType>
+              <AirDistribution>
+                <AirDistributionType>fan coil</AirDistributionType>
                 <DuctLeakageMeasurement>
                   <DuctType>supply</DuctType>
                   <DuctLeakage>
@@ -247,7 +247,8 @@
                   <DuctLocation>other multifamily buffer space</DuctLocation>
                   <DuctSurfaceArea>20.0</DuctSurfaceArea>
                 </Ducts>
-              </HydronicAndAirDistribution>
+                <NumberofReturnRegisters>1</NumberofReturnRegisters>
+              </AirDistribution>
             </DistributionSystemType>
             <ConditionedFloorAreaServed>900.0</ConditionedFloorAreaServed>
           </HVACDistribution>
@@ -304,7 +305,6 @@
           <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
-          <ControlType>timer</ControlType>
           <extension>
             <IsVented>true</IsVented>
             <VentedFlowRate>150.0</VentedFlowRate>

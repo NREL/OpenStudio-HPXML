@@ -1,10 +1,26 @@
-## OpenStudio-HPXML v1.1.0 (pending)
+## OpenStudio-HPXML v1.2.0 (Pending)
+
+__New Features__
+- Updates to OpenStudio 3.2.0/EnergyPlus 9.5.0.
+- Allow `Slab/ExposedPerimeter` to be zero.
+- **Breaking change**: Replaces `Site/extension/ShelterCoefficient` with `Site/ShieldingofHome`.
+- Removes `ClothesDryer/ControlType` from being a required input, it is not used.
+- Moves additional error-checking from the ruby measure to the schematron validator.
+- Adds more detail to error messages regarding the wrong data type in the HPXML file.
+
+__Bugfixes__
+- Fixes ruby error if elements (e.g., `SystemIdentifier`) exist without the proper 'id'/'idref' attribute.
+- Fixes possible "Electricity category end uses do not sum to total" error due to boiler pump energy.
+- Fixes possible "Construction R-value ... does not match Assembly R-value" error for highly insulated enclosure elements.
+
+## OpenStudio-HPXML v1.1.0
 
 __New Features__
 - **Breaking change**: `Type` is now a required input for dehumidifiers; can be "portable" or "whole-home".
 - **Breaking change**: `Location` is now a required input for dehumidifiers; must be "living space" as dehumidifiers are currently modeled as located in living space.
 - **Breaking change**: `Type` is now a required input for Pool, PoolPump, HotTub, and HotTubPump.
 - **Breaking change**: Both supply and return duct leakage to outside are now required inputs for AirDistribution systems.
+- **Breaking change**: Simplifies inputs for fan coils and water loop heat pumps by A) removing HydronicAndAirDistribution element and B) moving WLHP inputs from extension elements to HeatPump element.
 - Allows modeling airflow/charge defects for air conditioners, heat pumps, and furnaces (RESNET Standard 310).
 - Allows modeling *multiple* dehumidifiers (previously only one allowed).
 - Allows modeling generators (generic on-site power production).
@@ -14,8 +30,9 @@ __New Features__
 - Allows more defaulting (optional inputs) for a variety of HPXML elements.
 - Allows requesting timeseries unmet heating/cooling loads.
 - Allows skipping schema/schematron validation (for speed); should only be used if the HPXML was already validated upstream.
+- Allows HPXML files w/ multiple `Building` elements; requires providing the ID of the single building to be simulated.
 - Includes hot water loads (in addition to heating/cooling loads) when timeseries total loads are requested.
-- The `in.xml` HPXML file is now always produced for inspection of default values. **Breaking change**: The `output_dir` HPXMLtoOpenStudio measure argument is now required.
+- The `in.xml` HPXML file is now always produced for inspection of default values (e.g., autosized HVAC capacities). **Breaking change**: The `output_dir` HPXMLtoOpenStudio measure argument is now required.
 - Overhauls documentation to be more comprehensive and standardized.
 - `run_simulation.rb` now returns exit code 1 if not successful (i.e., either invalid inputs or simulation fails).
 
@@ -29,9 +46,10 @@ __Bugfixes__
 - Fixes possibility of errors encountered before schematron validation has occurred.
 - Small bugfixes related to basement interior surface solar absorptances.
 - Allows NumberofConditionedFloors/NumberofConditionedFloorsAboveGrade to be non-integer values per the HPXML schema.
-- HVAC sizing improvements for floors above crawlspaces/basements and walls.
+- HVAC sizing design load improvements for floors above crawlspaces/basements, walls, ducts, and heat pumps.
 - Now recognizes Type="none" to prevent modeling of pools and hot tubs (pumps and heaters).
 - Fixes error for overhangs with zero depth.
+- Fixes possible error where the normalized flue height for the AIM-2 infiltration model is negative.
 - Slight adjustment of default water heater recovery efficiency equation to prevent errors from values being too high.
 - Fixes schematron file not being valid per ISO Schematron standard.
 

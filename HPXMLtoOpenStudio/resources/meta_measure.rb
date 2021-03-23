@@ -2,7 +2,7 @@
 
 require 'fileutils'
 
-def run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: false, output_vars: [],
+def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars: [],
                        output_meters: [], run_measures_only: false, print_prefix: '')
   rm_path(rundir)
   FileUtils.mkdir_p(rundir)
@@ -345,7 +345,7 @@ end
 def register_error(msg, runner = nil)
   if not runner.nil?
     runner.registerError(msg)
-    fail msg # OS 2.0 will handle this more gracefully
+    fail msg
   else
     raise "ERROR: #{msg}"
   end

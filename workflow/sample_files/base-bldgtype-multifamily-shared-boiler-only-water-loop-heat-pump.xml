@@ -205,14 +205,19 @@
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <extension>
                 <SharedLoopWatts>600.0</SharedLoopWatts>
-                <WaterLoopHeatPump>
-                  <AnnualHeatingEfficiency>
-                    <Units>COP</Units>
-                    <Value>4.4</Value>
-                  </AnnualHeatingEfficiency>
-                </WaterLoopHeatPump>
               </extension>
             </HeatingSystem>
+            <HeatPump>
+              <SystemIdentifier id='WLHP'/>
+              <DistributionSystem idref='HVACDistributionWLHP'/>
+              <HeatPumpType>water-loop-to-air</HeatPumpType>
+              <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity>24000.0</HeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>COP</Units>
+                <Value>4.4</Value>
+              </AnnualHeatingEfficiency>
+            </HeatPump>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>
@@ -223,8 +228,15 @@
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution'/>
             <DistributionSystemType>
-              <HydronicAndAirDistribution>
-                <HydronicAndAirDistributionType>water loop heat pump</HydronicAndAirDistributionType>
+              <HydronicDistribution>
+                <HydronicDistributionType>water loop</HydronicDistributionType>
+              </HydronicDistribution>
+            </DistributionSystemType>
+          </HVACDistribution>
+          <HVACDistribution>
+            <SystemIdentifier id='HVACDistributionWLHP'/>
+            <DistributionSystemType>
+              <AirDistribution>
                 <DuctLeakageMeasurement>
                   <DuctType>supply</DuctType>
                   <DuctLeakage>
@@ -253,8 +265,8 @@
                   <DuctLocation>other multifamily buffer space</DuctLocation>
                   <DuctSurfaceArea>20.0</DuctSurfaceArea>
                 </Ducts>
-                <NumberofReturnRegisters>3</NumberofReturnRegisters>
-              </HydronicAndAirDistribution>
+                <NumberofReturnRegisters>1</NumberofReturnRegisters>
+              </AirDistribution>
             </DistributionSystemType>
             <ConditionedFloorAreaServed>900.0</ConditionedFloorAreaServed>
           </HVACDistribution>
@@ -311,7 +323,6 @@
           <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
-          <ControlType>timer</ControlType>
           <extension>
             <IsVented>true</IsVented>
             <VentedFlowRate>150.0</VentedFlowRate>
