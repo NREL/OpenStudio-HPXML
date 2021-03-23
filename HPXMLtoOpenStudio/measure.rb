@@ -2383,14 +2383,9 @@ class OSModel
     end
 
     # If all ducts are in conditioned space, model leakage as going to outside
-    registered_warning = false
     [HPXML::DuctTypeSupply, HPXML::DuctTypeReturn].each do |duct_side|
       next unless (leakage_to_outside[duct_side][0] > 0) && (total_unconditioned_duct_area[duct_side] == 0)
 
-      if not registered_warning
-        runner.registerWarning("HVACDistribution '#{hvac_distribution.id}' has ducts entirely within conditioned space but there is non-zero leakage to the outside. Leakage to the outside is typically zero in these situations; consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.")
-        registered_warning = true
-      end
       duct_area = 0.0
       duct_rvalue = 0.0
       duct_loc_space = nil # outside
