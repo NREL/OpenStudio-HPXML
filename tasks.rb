@@ -514,6 +514,7 @@ def get_values(osw_file, step)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeBasementConditioned)
     step.setArgument('geometry_foundation_height', 8.0)
     step.setArgument('geometry_foundation_height_above_grade', 1.0)
+    step.setArgument('geometry_rim_joist_height', 9.25)
     step.setArgument('geometry_roof_type', 'gable')
     step.setArgument('geometry_roof_pitch', '6:12')
     step.setArgument('geometry_attic_type', HPXML::AtticTypeUnvented)
@@ -527,6 +528,7 @@ def get_values(osw_file, step)
     step.setArgument('foundation_wall_insulation_distance_to_top', 0.0)
     step.setArgument('foundation_wall_insulation_distance_to_bottom', Constants.Auto)
     step.setArgument('foundation_wall_thickness', '8.0')
+    step.setArgument('rim_joist_assembly_r', 23.0)
     step.setArgument('slab_perimeter_insulation_r', 0)
     step.setArgument('slab_perimeter_depth', 0)
     step.setArgument('slab_under_insulation_r', 0)
@@ -536,10 +538,8 @@ def get_values(osw_file, step)
     step.setArgument('slab_carpet_r', '0.0')
     step.setArgument('ceiling_assembly_r', 39.3)
     step.setArgument('roof_material_type', HPXML::RoofTypeAsphaltShingles)
-    step.setArgument('roof_color', Constants.Auto)
+    step.setArgument('roof_color', HPXML::ColorMedium)
     step.setArgument('roof_assembly_r', 2.3)
-    step.setArgument('roof_solar_absorptance', Constants.Auto)
-    step.setArgument('roof_emittance', '0.92')
     step.setArgument('roof_radiant_barrier', false)
     step.setArgument('roof_radiant_barrier_grade', '1')
     step.setArgument('neighbor_front_distance', 0)
@@ -552,10 +552,8 @@ def get_values(osw_file, step)
     step.setArgument('neighbor_right_height', Constants.Auto)
     step.setArgument('wall_type', HPXML::WallTypeWoodStud)
     step.setArgument('wall_siding_type', HPXML::SidingTypeWood)
-    step.setArgument('wall_color', Constants.Auto)
+    step.setArgument('wall_color', HPXML::ColorMedium)
     step.setArgument('wall_assembly_r', 23)
-    step.setArgument('wall_solar_absorptance', Constants.Auto)
-    step.setArgument('wall_emittance', '0.92')
     step.setArgument('window_front_wwr', 0)
     step.setArgument('window_back_wwr', 0)
     step.setArgument('window_left_wwr', 0)
@@ -1257,6 +1255,7 @@ def get_values(osw_file, step)
   elsif ['base-foundation-ambient.osw'].include? osw_file
     step.setArgument('geometry_cfa', 1350.0)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeAmbient)
+    step.setArgument('geometry_rim_joist_height', 0)
     step.setArgument('floor_assembly_r', 18.7)
     step.setArgument('ducts_number_of_return_registers', '1')
     step.setArgument('plug_loads_other_annual_kwh', '1228.5')
@@ -1285,6 +1284,7 @@ def get_values(osw_file, step)
     step.setArgument('floor_assembly_r', 18.7)
     step.setArgument('foundation_wall_insulation_r', 0)
     step.setArgument('foundation_wall_insulation_distance_to_bottom', 0)
+    step.setArgument('rim_joist_assembly_r', 4.0)
     step.setArgument('ducts_supply_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('ducts_return_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('ducts_number_of_return_registers', '1')
@@ -1316,6 +1316,7 @@ def get_values(osw_file, step)
     step.setArgument('floor_assembly_r', 2.1)
     step.setArgument('foundation_wall_insulation_r', 8.9)
     step.setArgument('foundation_wall_insulation_distance_to_bottom', 4)
+    step.setArgument('rim_joist_assembly_r', 23.0)
   elsif ['base-foundation-unvented-crawlspace.osw'].include? osw_file
     step.setArgument('geometry_cfa', 1350.0)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceUnvented)
@@ -1764,11 +1765,9 @@ def get_values(osw_file, step)
     step.removeArgument('roof_material_type')
     step.setArgument('roof_color', HPXML::ColorLight)
     step.removeArgument('roof_material_type')
-    step.setArgument('roof_emittance', Constants.Auto)
     step.setArgument('roof_radiant_barrier', false)
     step.removeArgument('wall_siding_type')
     step.setArgument('wall_color', HPXML::ColorMedium)
-    step.setArgument('wall_emittance', Constants.Auto)
     step.removeArgument('window_fraction_operable')
     step.removeArgument('window_interior_shading_winter')
     step.removeArgument('window_interior_shading_summer')
@@ -2276,6 +2275,7 @@ def get_values(osw_file, step)
     step.setArgument('geometry_foundation_height', 0.0)
   elsif ['invalid_files/single-family-attached-ambient.osw'].include? osw_file
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeAmbient)
+    step.setArgument('geometry_rim_joist_height', 0)
   elsif ['invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw'].include? osw_file
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeSlab)
     step.setArgument('geometry_foundation_height_above_grade', 0.0)
@@ -3501,6 +3501,15 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                          solar_absorptance: 0.7,
                          emittance: 0.92,
                          insulation_assembly_r_value: 23.0)
+  elsif ['base-bldgtype-single-family-attached.xml'].include? hpxml_file
+    hpxml.rim_joists[-1].area = 66
+    hpxml.rim_joists.add(id: 'RimJoistOther',
+                         exterior_adjacent_to: HPXML::LocationBasementConditioned,
+                         interior_adjacent_to: HPXML::LocationBasementConditioned,
+                         area: 28,
+                         solar_absorptance: 0.7,
+                         emittance: 0.92,
+                         insulation_assembly_r_value: 4.0)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.rim_joists.clear
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
@@ -3526,7 +3535,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     for i in 0..hpxml.rim_joists.size - 1
       hpxml.rim_joists[i].interior_adjacent_to = HPXML::LocationBasementUnconditioned
-      hpxml.rim_joists[i].insulation_assembly_r_value = 2.3
+      hpxml.rim_joists[i].insulation_assembly_r_value = 4.0
     end
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
     for i in 0..hpxml.rim_joists.size - 1
@@ -3550,7 +3559,9 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                          area: 81,
                          solar_absorptance: 0.7,
                          emittance: 0.92,
-                         insulation_assembly_r_value: 2.3)
+                         insulation_assembly_r_value: 4.0)
+  elsif ['base-enclosure-garage.xml'].include? hpxml_file
+    hpxml.rim_joists[-1].area = 116
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     hpxml.rim_joists.add(id: 'RimJoist2ndStory',
                          exterior_adjacent_to: HPXML::LocationOutside,
@@ -4299,8 +4310,6 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls << hpxml.foundation_walls[-1].dup
     hpxml.foundation_walls[-1].id = 'TinyFoundationWall'
     hpxml.foundation_walls[-1].area = 0.05
-  elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
-    hpxml.foundation_walls[-1].area = 880
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.foundation_walls.each do |fwall|
       fwall.thickness = nil
