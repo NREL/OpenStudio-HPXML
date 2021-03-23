@@ -1,12 +1,14 @@
 ## OpenStudio-HPXML v1.2.0 (Pending)
 
 __New Features__
-- Allow `Slab/ExposedPerimeter` to be zero.
 - **Breaking change**: Replaces `Site/extension/ShelterCoefficient` with `Site/ShieldingofHome`.
+- **Breaking change**: `AirDistributionType` is now required for all air distributions.
+- Allows `DuctLeakageMeasurement` to not be specified for ductless fan coil systems.
+- Allows `Slab/ExposedPerimeter` to be zero.
 - Removes `ClothesDryer/ControlType` from being a required input, it is not used.
+- Relaxes tolerance for duct leakage to outside warning when ducts solely in conditioned space.
 - Moves additional error-checking from the ruby measure to the schematron validator.
 - Adds more detail to error messages regarding the wrong data type in the HPXML file.
-- Relaxes tolerance for duct leakage to outside warning when ducts solely in conditioned space.
 
 __Bugfixes__
 - Fixes ruby error if elements (e.g., `SystemIdentifier`) exist without the proper 'id'/'idref' attribute.

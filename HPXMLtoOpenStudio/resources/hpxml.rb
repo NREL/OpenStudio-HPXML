@@ -63,6 +63,9 @@ class HPXML < Object
   # Constants
   # FUTURE: Move some of these to within child classes (e.g., HPXML::Attic class)
   AirTypeFanCoil = 'fan coil'
+  AirTypeGravity = 'gravity'
+  AirTypeHighVelocity = 'high velocity'
+  AirTypeRegularVelocity = 'regular velocity'
   AtticTypeCathedral = 'CathedralCeiling'
   AtticTypeConditioned = 'ConditionedAttic'
   AtticTypeFlatRoof = 'FlatRoof'
