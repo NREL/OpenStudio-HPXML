@@ -3619,14 +3619,6 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeAir
     hpxml.hvac_distributions[0].air_type = HPXML::AirTypeFanCoil
-    hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                              duct_leakage_units: HPXML::UnitsCFM25,
-                                                              duct_leakage_value: 0,
-                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-    hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                              duct_leakage_units: HPXML::UnitsCFM25,
-                                                              duct_leakage_value: 0,
-                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronic
     hpxml.hvac_distributions[0].hydronic_type = HPXML::HydronicTypeBaseboard
@@ -3870,23 +3862,21 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     if hpxml_file.include? 'fan-coil'
       hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeAir
       hpxml.hvac_distributions[0].air_type = HPXML::AirTypeFanCoil
-      hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 15
-      hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 10
     elsif hpxml_file.include? 'water-loop-heat-pump'
       hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronic
       hpxml.hvac_distributions[0].hydronic_type = HPXML::HydronicTypeWaterLoop
       hpxml.hvac_distributions.add(id: 'HVACDistributionWLHP',
                                    distribution_system_type: HPXML::HVACDistributionTypeAir,
                                    air_type: HPXML::AirTypeRegularVelocity)
-      hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                                 duct_leakage_units: HPXML::UnitsCFM25,
-                                                                 duct_leakage_value: 15,
-                                                                 duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-      hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                                 duct_leakage_units: HPXML::UnitsCFM25,
-                                                                 duct_leakage_value: 10,
-                                                                 duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     end
+    hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                               duct_leakage_units: HPXML::UnitsCFM25,
+                                                               duct_leakage_value: 15,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+    hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                               duct_leakage_units: HPXML::UnitsCFM25,
+                                                               duct_leakage_value: 10,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                            duct_insulation_r_value: 0,
                                            duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
