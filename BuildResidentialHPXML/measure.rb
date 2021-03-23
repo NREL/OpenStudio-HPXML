@@ -349,7 +349,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Geometry: Rim Joist Height')
     arg.setUnits('in')
     arg.setDescription('The height of the rim joists. Only applies to basements/crawlspaces.')
-    arg.setDefaultValue(5.5)
+    arg.setDefaultValue(9.25)
     args << arg
 
     roof_type_choices = OpenStudio::StringVector.new
@@ -576,7 +576,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     color_choices = OpenStudio::StringVector.new
-    color_choices << Constants.Auto
     color_choices << HPXML::ColorDark
     color_choices << HPXML::ColorLight
     color_choices << HPXML::ColorMedium
@@ -586,7 +585,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('roof_color', color_choices, true)
     arg.setDisplayName('Roof: Color')
     arg.setDescription('The color of the roof.')
-    arg.setDefaultValue(Constants.Auto)
+    arg.setDefaultValue(HPXML::ColorMedium)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('roof_assembly_r', true)
@@ -594,18 +593,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('h-ft^2-R/Btu')
     arg.setDescription('Assembly R-value of the roof.')
     arg.setDefaultValue(2.3)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('roof_solar_absorptance', true)
-    arg.setDisplayName('Roof: Solar Absorptance')
-    arg.setDescription('The solar absorptance of the roof.')
-    arg.setDefaultValue(Constants.Auto)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('roof_emittance', true)
-    arg.setDisplayName('Roof: Emittance')
-    arg.setDescription('The emittance of the roof.')
-    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('roof_radiant_barrier', true)
@@ -710,13 +697,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('wall_siding_type', wall_siding_type_choices, false)
     arg.setDisplayName('Wall: Siding Type')
-    arg.setDescription('The siding type of the exterior walls.')
+    arg.setDescription('The siding type of the exterior walls. Also applies to rim joists.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('wall_color', color_choices, true)
     arg.setDisplayName('Wall: Color')
-    arg.setDescription('The color of the exterior walls.')
-    arg.setDefaultValue(Constants.Auto)
+    arg.setDescription('The color of the exterior walls. Also applies to rim joists.')
+    arg.setDefaultValue(HPXML::ColorMedium)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('wall_assembly_r', true)
@@ -724,18 +711,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('h-ft^2-R/Btu')
     arg.setDescription('Assembly R-value of the exterior walls.')
     arg.setDefaultValue(13)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('wall_solar_absorptance', true)
-    arg.setDisplayName('Wall: Solar Absorptance')
-    arg.setDescription('The solar absorptance of the exterior walls.')
-    arg.setDefaultValue(Constants.Auto)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('wall_emittance', true)
-    arg.setDisplayName('Wall: Emittance')
-    arg.setDescription('The emittance of the exterior walls.')
-    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_front_wwr', true)
@@ -3440,20 +3415,8 @@ class HPXMLFile
         roof_type = args[:roof_material_type].get
       end
 
-      if args[:roof_color] == Constants.Auto && args[:roof_solar_absorptance] == Constants.Auto
-        solar_absorptance = 0.7
-      end
-
       if args[:roof_color] != Constants.Auto
         roof_color = args[:roof_color]
-      end
-
-      if args[:roof_solar_absorptance] != Constants.Auto
-        solar_absorptance = args[:roof_solar_absorptance]
-      end
-
-      if args[:roof_emittance] != Constants.Auto
-        emittance = args[:roof_emittance]
       end
 
       radiant_barrier = args[:roof_radiant_barrier]
@@ -3473,8 +3436,6 @@ class HPXMLFile
                       area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round,
                       roof_type: roof_type,
                       roof_color: roof_color,
-                      solar_absorptance: solar_absorptance,
-                      emittance: emittance,
                       pitch: args[:geometry_roof_pitch],
                       radiant_barrier: radiant_barrier,
                       radiant_barrier_grade: radiant_barrier_grade,
@@ -3510,20 +3471,14 @@ class HPXMLFile
         siding = args[:wall_siding_type].get
       end
 
-      if args[:wall_color] == Constants.Auto && args[:wall_solar_absorptance] == Constants.Auto
-        solar_absorptance = 0.7
-      end
-
       if args[:wall_color] != Constants.Auto
         color = args[:wall_color]
       end
 
-      if args[:wall_solar_absorptance] != Constants.Auto
-        solar_absorptance = args[:wall_solar_absorptance]
-      end
-
-      if args[:wall_emittance] != Constants.Auto
-        emittance = args[:wall_emittance]
+      if interior_adjacent_to == exterior_adjacent_to
+        insulation_assembly_r_value = 4.0 # Uninsulated
+      else
+        insulation_assembly_r_value = args[:rim_joist_assembly_r]
       end
 
       hpxml.rim_joists.add(id: valid_attr(surface.name),
@@ -3532,9 +3487,7 @@ class HPXMLFile
                            area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round(1),
                            siding: siding,
                            color: color,
-                           solar_absorptance: solar_absorptance,
-                           emittance: emittance,
-                           insulation_assembly_r_value: args[:rim_joist_assembly_r])
+                           insulation_assembly_r_value: insulation_assembly_r_value)
     end
   end
 
