@@ -151,7 +151,11 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         success = apply_measures(measures_dir, measures, runner, model)
 
         # Report warnings/errors
-        assert(runner.result.stepWarnings.length > 1 || runner.result.stepErrors.length > 0)
+        if Gem::Specification::find_all_by_name('nokogiri').any?
+          assert(runner.result.stepWarnings.length > 0 || runner.result.stepErrors.length > 0)
+        else
+          assert(runner.result.stepWarnings.length > 1 || runner.result.stepErrors.length > 0)
+        end
         runner.result.stepWarnings.each do |s|
           next if s.include? 'nokogiri'
 
