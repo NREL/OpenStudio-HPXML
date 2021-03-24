@@ -4096,6 +4096,7 @@ class HVAC
                                                                      duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
         end
         if hpxml.hvac_distributions[-1].duct_leakage_measurements.select { |lm| (lm.duct_type == HPXML::DuctTypeReturn) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) }.size == 0
+          # Assign zero return leakage
           hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                                      duct_leakage_units: HPXML::UnitsCFM25,
                                                                      duct_leakage_value: 0,
