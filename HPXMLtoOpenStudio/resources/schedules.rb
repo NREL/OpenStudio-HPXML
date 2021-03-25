@@ -1203,12 +1203,16 @@ class SchedulesFile
     return external_file
   end
 
-  def set_vacancy(col_names:)
+  def set_vacancy(exclusions:)
     return unless @schedules.keys.include? 'vacancy'
     return if @schedules['vacancy'].all? { |i| i == 0 }
 
+    col_names = ScheduleGenerator.col_names
+
     @schedules[col_names[0]].each_with_index do |ts, i|
       col_names.each do |col_name|
+        next if exclusions.include? col_name
+
         @schedules[col_name][i] *= (1.0 - @schedules['vacancy'][i])
       end
     end
@@ -1248,9 +1252,14 @@ class SchedulesFile
     return false if @schedules_path.nil?
 
     # need to update schedules csv in generated_files folder (alongside run folder) since this is what the simulation points to
-    schedules_path = File.expand_path(File.join(File.dirname(@schedules_path), '../generated_files', File.basename(@schedules_path)))
+    begin
+      schedules_path = File.expand_path(File.join(File.dirname(@schedules_path), '../generated_files', File.basename(@schedules_path))) # called from cli
+      columns = CSV.read(schedules_path).transpose
+    rescue
+      schedules_path = File.expand_path(File.join(File.dirname(@schedules_path), '../../../files', File.basename(@schedules_path))) # testing
+      columns = CSV.read(schedules_path).transpose
+    end
 
-    columns = CSV.read(schedules_path).transpose
     col_names.each do |col_name|
       col_num = get_col_index(col_name: col_name)
       columns.each_with_index do |col, i|
