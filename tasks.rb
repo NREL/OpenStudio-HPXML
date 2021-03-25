@@ -269,6 +269,7 @@ def create_osws
     'base-simcontrol-runperiod-1-month.osw' => 'base.osw',
     'base-simcontrol-timestep-10-mins.osw' => 'base.osw',
     'base-schedules-stochastic.osw' => 'base.osw',
+    'base-schedules-stochastic-vacant.osw' => 'base-schedules-stochastic.osw',
     'base-schedules-user-specified.osw' => 'base.osw',
 
     # Extra test files that don't correspond with sample files
@@ -287,7 +288,6 @@ def create_osws
     'extra-enclosure-garage-atticroof-conditioned.osw' => 'base-enclosure-garage.osw',
     'extra-enclosure-atticroof-conditioned-eaves-gable.osw' => 'base-foundation-slab.osw',
     'extra-enclosure-atticroof-conditioned-eaves-hip.osw' => 'extra-enclosure-atticroof-conditioned-eaves-gable.osw',
-    'extra-vacancy-6-months.osw' => 'base-schedules-stochastic.osw',
     'extra-schedules-random-seed.osw' => 'base-schedules-stochastic.osw',
     'extra-zero-refrigerator-kwh.osw' => 'base.osw',
     'extra-zero-extra-refrigerator-kwh.osw' => 'base.osw',
@@ -1923,6 +1923,11 @@ def get_values(osw_file, step)
     step.setArgument('simulation_control_daylight_saving_enabled', false)
   elsif ['base-schedules-stochastic.osw'].include? osw_file
     step.setArgument('schedules_type', 'stochastic')
+  elsif ['base-schedules-stochastic-vacant.osw'].include? osw_file
+    step.setArgument('schedules_vacancy_begin_month', 1)
+    step.setArgument('schedules_vacancy_begin_day_of_month', 1)
+    step.setArgument('schedules_vacancy_end_month', 12)
+    step.setArgument('schedules_vacancy_end_day_of_month', 31)
   elsif ['base-schedules-user-specified.osw'].include? osw_file
     step.setArgument('schedules_type', 'user-specified')
     step.setArgument('schedules_path', 'BuildResidentialHPXML/tests/schedules/user-specified.csv')
@@ -2011,11 +2016,6 @@ def get_values(osw_file, step)
     step.setArgument('geometry_eaves_depth', 2)
   elsif ['extra-enclosure-atticroof-conditioned-eaves-hip.osw'].include? osw_file
     step.setArgument('geometry_roof_type', 'hip')
-  elsif ['extra-vacancy-6-months.osw'].include? osw_file
-    step.setArgument('schedules_vacancy_begin_month', 1)
-    step.setArgument('schedules_vacancy_begin_day_of_month', 1)
-    step.setArgument('schedules_vacancy_end_month', 6)
-    step.setArgument('schedules_vacancy_end_day_of_month', 30)
   elsif ['extra-schedules-random-seed.osw'].include? osw_file
     step.setArgument('schedules_random_seed', 123)
   elsif ['extra-zero-refrigerator-kwh.osw'].include? osw_file
@@ -2802,6 +2802,7 @@ def create_hpxmls
     'base-simcontrol-runperiod-1-month.xml' => 'base.xml',
     'base-simcontrol-timestep-10-mins.xml' => 'base.xml',
     'base-schedules-stochastic.xml' => 'base.xml',
+    'base-schedules-stochastic-vacant.xml' => 'base-schedules-stochastic.xml',
     'base-schedules-user-specified.xml' => 'base.xml',
   }
 
@@ -3005,6 +3006,8 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.timestep = nil
   elsif ['base-schedules-stochastic.xml'].include? hpxml_file
     hpxml.header.schedules_path = 'BuildResidentialHPXML/tests/schedules/stochastic.csv'
+  elsif ['base-schedules-stochastic-vacant.xml'].include? hpxml_file
+    hpxml.header.schedules_path = 'BuildResidentialHPXML/tests/schedules/vacant.csv'
   elsif ['base-schedules-user-specified.xml'].include? hpxml_file
     hpxml.header.schedules_path = 'BuildResidentialHPXML/tests/schedules/user-specified.csv'
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
