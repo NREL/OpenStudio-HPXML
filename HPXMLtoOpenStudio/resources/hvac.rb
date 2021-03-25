@@ -131,27 +131,8 @@ class HVAC
 
     clg_ap = cooling_system.additional_properties
 
-    # Performance curves
-    cool_cap_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_cap_ft_spec[0])
-    cool_eir_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_eir_ft_spec[0])
-
-    roomac_cap_ft_curve = create_curve_biquadratic(model, cool_cap_ft_spec_si, 'Cool-CAP-fT', 0, 100, 0, 100)
-    roomac_cap_fff_curve = create_curve_quadratic(model, clg_ap.cool_cap_fflow_spec[0], 'Cool-CAP-fFF', 0, 2, 0, 2)
-    roomac_eir_ft_curve = create_curve_biquadratic(model, cool_eir_ft_spec_si, 'Cool-EIR-fT', 0, 100, 0, 100)
-    roomcac_eir_fff_curve = create_curve_quadratic(model, clg_ap.cool_eir_fflow_spec[0], 'Cool-EIR-fFF', 0, 2, 0, 2)
-    roomac_plf_fplr_curve = create_curve_quadratic(model, clg_ap.cool_plf_fplr_spec[0], 'Cool-PLF-fPLR', 0, 1, 0, 1)
-
     # Cooling Coil
-    clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, roomac_cap_ft_curve, roomac_cap_fff_curve, roomac_eir_ft_curve, roomcac_eir_fff_curve, roomac_plf_fplr_curve)
-    clg_coil.setName(obj_name + ' clg coil')
-    clg_coil.setRatedSensibleHeatRatio(cooling_system.cooling_shr)
-    clg_coil.setRatedCOP(UnitConversions.convert(cooling_system.cooling_efficiency_eer, 'Btu/hr', 'W'))
-    clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(773.3)
-    clg_coil.setEvaporativeCondenserEffectiveness(0.9)
-    clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(10)
-    clg_coil.setBasinHeaterSetpointTemperature(2)
-    clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W'))
-    clg_coil.setRatedAirFlowRate(calc_rated_airflow(cooling_system.cooling_capacity, clg_ap.cool_rated_cfm_per_ton[0], 1.0))
+    clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system)
     hvac_map[cooling_system.id] << clg_coil
 
     # Fan
@@ -164,21 +145,13 @@ class HVAC
     htg_coil.setNominalCapacity(0.0)
     htg_coil.setName(obj_name + ' htg coil')
 
-    # PTAC
-    ptac = OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner.new(model, model.alwaysOnDiscreteSchedule, fan, htg_coil, clg_coil)
-    ptac.setName(obj_name)
-    ptac.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
-    ptac.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(clg_cfm, 'cfm', 'm^3/s'))
-    ptac.setSupplyAirFlowRateDuringHeatingOperation(0.00001)
-    ptac.setSupplyAirFlowRateWhenNoCoolingorHeatingisNeeded(0.0)
-    ptac.setOutdoorAirFlowRateDuringCoolingOperation(0.0)
-    ptac.setOutdoorAirFlowRateDuringHeatingOperation(0.0)
-    ptac.setOutdoorAirFlowRateWhenNoCoolingorHeatingisNeeded(0.0)
-    ptac.addToThermalZone(control_zone)
-    hvac_map[cooling_system.id] << ptac
+    # Unitary System
+    air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, nil, 0.00001, clg_cfm)
+    hvac_map[cooling_system.id] << air_loop_unitary
 
-    control_zone.setSequentialCoolingFractionSchedule(ptac, get_sequential_load_schedule(model, sequential_cool_load_frac))
-    control_zone.setSequentialHeatingFractionSchedule(ptac, get_sequential_load_schedule(model, 0))
+    # Air Loop
+    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, 0, sequential_cool_load_frac, clg_cfm)
+    hvac_map[cooling_system.id] << air_loop
   end
 
   def self.apply_evaporative_cooler(model, runner, cooling_system,
@@ -2923,19 +2896,29 @@ class HVAC
     for i in 0..(clg_ap.num_speeds - 1)
       cap_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_cap_ft_spec[i])
       eir_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_eir_ft_spec[i])
-      cap_ft_curve = create_curve_biquadratic(model, cap_ft_spec_si, "Cool-CAP-fT#{i + 1}", 13.88, 23.88, 18.33, 51.66)
-      eir_ft_curve = create_curve_biquadratic(model, eir_ft_spec_si, "Cool-EIR-fT#{i + 1}", 13.88, 23.88, 18.33, 51.66)
+      # cap_ft_curve = create_curve_biquadratic(model, cap_ft_spec_si, "Cool-CAP-fT#{i + 1}", 13.88, 23.88, 18.33, 51.66)
+      # eir_ft_curve = create_curve_biquadratic(model, eir_ft_spec_si, "Cool-EIR-fT#{i + 1}", 13.88, 23.88, 18.33, 51.66)
+      cap_ft_curve = create_curve_biquadratic(model, cap_ft_spec_si, "Cool-CAP-fT#{i + 1}", 0, 100, 0, 100)
+      eir_ft_curve = create_curve_biquadratic(model, eir_ft_spec_si, "Cool-EIR-fT#{i + 1}", 0, 100, 0, 100)
       plf_fplr_curve = create_curve_quadratic(model, clg_ap.cool_plf_fplr_spec[i], "Cool-PLF-fPLR#{i + 1}", 0, 1, 0.7, 1)
       cap_fff_curve = create_curve_quadratic(model, clg_ap.cool_cap_fflow_spec[i], "Cool-CAP-fFF#{i + 1}", 0, 2, 0, 2)
       eir_fff_curve = create_curve_quadratic(model, clg_ap.cool_eir_fflow_spec[i], "Cool-EIR-fFF#{i + 1}", 0, 2, 0, 2)
 
       if clg_ap.num_speeds == 1
         clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
-        clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(clg_ap.fan_power_rated / UnitConversions.convert(1.0, 'cfm', 'm^3/s'))
-        if not clg_ap.crankcase_temp.nil?
-          clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C'))
+        if not clg_type == HPXML::HVACTypeRoomAirConditioner
+          clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(clg_ap.fan_power_rated / UnitConversions.convert(1.0, 'cfm', 'm^3/s'))
         end
-        clg_coil.setRatedCOP(1.0 / clg_ap.cool_rated_eirs[i])
+        if not clg_type == HPXML::HVACTypeRoomAirConditioner
+          clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C'))
+        else
+          clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(10)
+        end
+        if clg_type == HPXML::HVACTypeRoomAirConditioner
+          clg_coil.setRatedCOP(UnitConversions.convert(cooling_system.cooling_efficiency_eer, 'Btu/hr', 'W'))
+        else
+          clg_coil.setRatedCOP(1.0 / clg_ap.cool_rated_eirs[i])
+        end
         clg_coil.setRatedSensibleHeatRatio(clg_ap.cool_rated_shrs_gross[i])
         clg_coil.setNominalTimeForCondensateRemovalToBegin(1000.0)
         clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(1.5)
@@ -2970,7 +2953,9 @@ class HVAC
 
     clg_coil.setName(obj_name + ' clg coil')
     clg_coil.setCondenserType('AirCooled')
+    if not clg_type == HPXML::HVACTypeRoomAirConditioner
     clg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(clg_ap.crankcase_kw, 'kW', 'W'))
+    end
 
     return clg_coil
   end
