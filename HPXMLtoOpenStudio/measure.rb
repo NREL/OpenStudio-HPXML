@@ -1673,7 +1673,7 @@ class OSModel
     shading_ems = { sensors: {}, program: nil }
 
     surfaces = []
-    @hpxml.windows.each do |window|
+    @hpxml.windows.each_with_index do |window, i|
       window_height = 4.0 # ft, default
 
       overhang_depth = nil
@@ -1720,7 +1720,7 @@ class OSModel
 
         # Apply interior/exterior shading (as needed)
         shading_polygon = add_wall_polygon(window_width, window_height, z_origin, window.azimuth, [0, 0, 0, 0])
-        shading_group = apply_shading(model, window, shading_polygon, surface, sub_surface, shading_group, shading_schedules, shading_ems, Constants.ObjectNameWindowShade)
+        shading_group = apply_shading(model, window, i, shading_polygon, surface, sub_surface, shading_group, shading_schedules, shading_ems, Constants.ObjectNameWindowShade)
       else
         # Window is on an interior surface, which E+ does not allow. Model
         # as a door instead so that we can get the appropriate conduction
@@ -1764,7 +1764,7 @@ class OSModel
     shading_schedules = {}
     shading_ems = { sensors: {}, program: nil }
 
-    @hpxml.skylights.each do |skylight|
+    @hpxml.skylights.each_with_index do |skylight, i|
       tilt = skylight.roof.pitch / 12.0
       width = Math::sqrt(skylight.area)
       length = skylight.area / width
@@ -1796,13 +1796,13 @@ class OSModel
 
       # Apply interior/exterior shading (as needed)
       shading_polygon = add_roof_polygon(length, width, z_origin, skylight.azimuth, tilt)
-      shading_group = apply_shading(model, skylight, shading_polygon, surface, sub_surface, shading_group, shading_schedules, shading_ems, Constants.ObjectNameSkylightShade)
+      shading_group = apply_shading(model, skylight, i, shading_polygon, surface, sub_surface, shading_group, shading_schedules, shading_ems, Constants.ObjectNameSkylightShade)
     end
 
     apply_adiabatic_construction(runner, model, surfaces, 'roof')
   end
 
-  def self.apply_shading(model, window_or_skylight, shading_polygon, parent_surface, sub_surface, shading_group, shading_schedules, shading_ems, name)
+  def self.apply_shading(model, window_or_skylight, index, shading_polygon, parent_surface, sub_surface, shading_group, shading_schedules, shading_ems, name)
     sf_summer = window_or_skylight.interior_shading_factor_summer * window_or_skylight.exterior_shading_factor_summer
     sf_winter = window_or_skylight.interior_shading_factor_winter * window_or_skylight.exterior_shading_factor_winter
     if (sf_summer < 1.0) || (sf_winter < 1.0)
@@ -1826,11 +1826,11 @@ class OSModel
       shading_surface.setTransmittanceSchedule(shading_schedules[trans_values].schedule)
 
       # EMS to actuate view factor to ground
+      sub_surface_type = sub_surface.subSurfaceType.downcase.to_s
       actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(sub_surface, *EPlus::EMSActuatorSurfaceViewFactorToGround)
-      actuator.setName("#{sub_surface.name.to_s.gsub(' ', '_').gsub('-', '_')}_actuator")
+      actuator.setName("#{sub_surface_type}#{index}_actuator")
 
       if shading_ems[:sensors][trans_values].nil?
-        sub_surface_type = sub_surface.subSurfaceType.downcase.to_s
         shading_schedule_name = shading_schedules[trans_values].schedule.name.to_s
         shading_coeff_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
         shading_coeff_sensor.setName("#{sub_surface_type}_shading_coefficient")
@@ -1841,7 +1841,6 @@ class OSModel
       default_vf_to_ground = ((1.0 - Math::cos(sub_surface.tilt)) / 2.0).round(2)
       shading_coeff = shading_ems[:sensors][trans_values].name
       if shading_ems[:program].nil?
-        sub_surface_type = sub_surface.subSurfaceType.downcase.to_s
         program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
         program.setName("#{sub_surface_type}_view_factor_to_ground_program")
         program.addLine("Set #{actuator.name} = #{default_vf_to_ground}*#{shading_coeff}")

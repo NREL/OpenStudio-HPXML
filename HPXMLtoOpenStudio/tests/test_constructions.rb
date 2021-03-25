@@ -13,35 +13,6 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
     return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
 
-  def _get_ems_values(ems_objects, name)
-    values = {}
-    ems_objects.each do |ems_object|
-      next unless ems_object.name.to_s.include? name.gsub(' ', '_')
-
-      ems_object.lines.each do |line|
-        next unless line.downcase.start_with? 'set'
-
-        lhs, rhs = line.split('=')
-        lhs = lhs.gsub('Set', '').gsub('set', '').strip
-        rhs = rhs.gsub(',', '').gsub(';', '').strip
-        values[lhs] = [] if values[lhs].nil?
-        # eg. "Q = Q + 1.5"
-        if rhs.include? '+'
-          rhs_els = rhs.split('+')
-          rhs = rhs_els.map { |s| s.to_f }.sum(0.0)
-        elsif rhs.include? '*'
-          rhs_els = rhs.split('*')
-          rhs = rhs_els.map { |s| s.to_f }.reject(&:zero?).inject(:*)
-        else
-          rhs = rhs.to_f
-        end
-        values[lhs] << rhs
-      end
-    end
-    assert_operator(values.size, :>, 0)
-    return values
-  end
-
   def test_windows
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
@@ -85,9 +56,9 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
 
       # Check subsurface view factor to ground
       subsurface_view_factor = 0.5
-      os_window = model.getSubSurfaces.select { |w| w.name.to_s == window.id }[0]
-      program_values = _get_ems_values(model.getEnergyManagementSystemPrograms, 'fixedwindow view factor to ground program')
-      assert_equal(subsurface_view_factor, program_values["#{os_window.name.to_s}_actuator"][0])
+      os_window = model.getEnergyManagementSystemActuators.select { |w| w.actuatedComponent.get.name.to_s == window.id }[0]
+      program_values = UnitTestTools.get_ems_values(model.getEnergyManagementSystemPrograms, 'fixedwindow view factor to ground program')
+      assert_equal(subsurface_view_factor, program_values["#{os_window.name.to_s}"][0])
     end
   end
 
@@ -134,9 +105,9 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
 
       # Check subsurface view factor to ground
       subsurface_view_factor = 0.05 # 6:12 pitch
-      os_skylight = model.getSubSurfaces.select { |w| w.name.to_s == skylight.id }[0]
-      program_values = _get_ems_values(model.getEnergyManagementSystemPrograms, 'skylight view factor to ground program')
-      assert_equal(subsurface_view_factor, program_values["#{os_skylight.name.to_s}_actuator"][0])
+      os_skylight = model.getEnergyManagementSystemActuators.select { |w| w.actuatedComponent.get.name.to_s == skylight.id }[0]
+      program_values = UnitTestTools.get_ems_values(model.getEnergyManagementSystemPrograms, 'skylight view factor to ground program')
+      assert_equal(subsurface_view_factor, program_values["#{os_skylight.name.to_s}"][0])
     end
   end
 
