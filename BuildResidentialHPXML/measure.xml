@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>5ad55352-590e-48b9-b9b5-01823d96bda8</version_id>
-  <version_modified>20210324T205220Z</version_modified>
+  <version_id>b32ec94e-43b6-4acd-b14a-2be4bee1f9a9</version_id>
+  <version_modified>20210324T232425Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -6263,12 +6263,6 @@
       <checksum>5FC694CF</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3B954F0A</checksum>
-    </file>
-    <file>
       <filename>base-misc-defaults.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -6926,12 +6920,6 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>8FE1C915</checksum>
-    </file>
-    <file>
-      <filename>extra-vacancy-6-months.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7068C55D</checksum>
     </file>
     <file>
       <filename>base-lighting-ceiling-fans.osw</filename>
@@ -8086,16 +8074,28 @@
       <checksum>F8893C28</checksum>
     </file>
     <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E2B367AD</checksum>
-    </file>
-    <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>516E9B57</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0CA26641</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C6E3FE11</checksum>
+    </file>
+    <file>
+      <filename>base-schedules-stochastic-vacant.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>BB9BD473</checksum>
     </file>
   </files>
 </measure>
