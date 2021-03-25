@@ -2,14 +2,15 @@
 
 __New Features__
 - Updates to OpenStudio 3.2.0/EnergyPlus 9.5.0.
-- Allow `Slab/ExposedPerimeter` to be zero.
+- Allows `Slab/ExposedPerimeter` to be zero.
 - **Breaking change**: Replaces `Site/extension/ShelterCoefficient` with `Site/ShieldingofHome`.
 - Removes `ClothesDryer/ControlType` from being a required input, it is not used.
 - Moves additional error-checking from the ruby measure to the schematron validator.
-- Adds more detail to error messages regarding the wrong data type in the HPXML file.
 - Relaxes tolerance for duct leakage to outside warning when ducts solely in conditioned space.
 
 __Bugfixes__
+- Improves ground reflectance when there is shading of windows/skylights.
+- Adds more detail to error messages regarding the wrong data type in the HPXML file.
 - Fixes ruby error if elements (e.g., `SystemIdentifier`) exist without the proper 'id'/'idref' attribute.
 - Fixes error if boiler/GSHP pump power is zero
 - Fixes possible "Electricity category end uses do not sum to total" error due to boiler pump energy.
