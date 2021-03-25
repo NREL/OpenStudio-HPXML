@@ -50,59 +50,48 @@ class ScheduleGenerator
   end
 
   def self.col_names
-    return [
-      'occupants',
-      'lighting_interior',
-      'lighting_exterior',
-      'lighting_garage',
-      'lighting_exterior_holiday',
-      'cooking_range',
-      'refrigerator',
-      'extra_refrigerator',
-      'freezer',
-      'dishwasher',
-      'dishwasher_power',
-      'clothes_washer',
-      'clothes_washer_power',
-      'clothes_dryer',
-      'clothes_dryer_exhaust',
-      'baths',
-      'showers',
-      'sinks',
-      'fixtures',
-      'ceiling_fan',
-      'plug_loads_other',
-      'plug_loads_tv',
-      'plug_loads_vehicle',
-      'plug_loads_well_pump',
-      'fuel_loads_grill',
-      'fuel_loads_lighting',
-      'fuel_loads_fireplace',
-      'pool_pump',
-      'pool_heater',
-      'hot_tub_pump',
-      'hot_tub_heater',
-      'sleep',
-      'vacancy'
-    ]
-  end
-
-  def self.unaffected_by_vacancy
-    return [
-      'refrigerator',
-      'extra_refrigerator',
-      'freezer',
-      'pool_pump',
-      'pool_heater',
-      'hot_tub_pump',
-      'hot_tub_heater'
-    ]
+    # col_name => affected_by_vacancy
+    return {
+      'occupants' => true,
+      'lighting_interior' => true,
+      'lighting_exterior' => true,
+      'lighting_garage' => true,
+      'lighting_exterior_holiday' => true,
+      'cooking_range' => true,
+      'refrigerator' => false,
+      'extra_refrigerator' => false,
+      'freezer' => false,
+      'dishwasher' => true,
+      'dishwasher_power' => true,
+      'clothes_washer' => true,
+      'clothes_washer_power' => true,
+      'clothes_dryer' => true,
+      'clothes_dryer_exhaust' => true,
+      'baths' => true,
+      'showers' => true,
+      'sinks' => true,
+      'fixtures' => true,
+      'ceiling_fan' => true,
+      'plug_loads_other' => true,
+      'plug_loads_tv' => true,
+      'plug_loads_vehicle' => true,
+      'plug_loads_well_pump' => true,
+      'fuel_loads_grill' => true,
+      'fuel_loads_lighting' => true,
+      'fuel_loads_fireplace' => true,
+      'pool_pump' => false,
+      'pool_heater' => false,
+      'hot_tub_pump' => false,
+      'hot_tub_heater' => false,
+      'sleep' => nil,
+      'vacancy' => nil
+    }
   end
 
   def initialize_schedules(args:)
     @schedules = {}
 
-    ScheduleGenerator.col_names.each do |col_name|
+    ScheduleGenerator.col_names.keys.each do |col_name|
       @schedules[col_name] = Array.new(@total_days_in_year * @steps_in_day, 0.0)
     end
 

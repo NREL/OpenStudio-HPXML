@@ -1203,21 +1203,21 @@ class SchedulesFile
     return external_file
   end
 
-  def set_vacancy(exclusions:)
+  def set_vacancy
     return unless @schedules.keys.include? 'vacancy'
     return if @schedules['vacancy'].all? { |i| i == 0 }
 
     col_names = ScheduleGenerator.col_names
 
-    @schedules[col_names[0]].each_with_index do |ts, i|
-      col_names.each do |col_name|
-        next if exclusions.include? col_name
+    @schedules[col_names.keys[0]].each_with_index do |ts, i|
+      col_names.keys.each do |col_name|
+        next unless col_names[col_name] # skip those unaffected by vacancy
 
         @schedules[col_name][i] *= (1.0 - @schedules['vacancy'][i])
       end
     end
 
-    update(col_names: col_names)
+    update(col_names: col_names.keys)
   end
 
   def import(col_names:)

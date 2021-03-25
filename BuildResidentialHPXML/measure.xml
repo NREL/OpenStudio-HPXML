@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>b32ec94e-43b6-4acd-b14a-2be4bee1f9a9</version_id>
-  <version_modified>20210324T232425Z</version_modified>
+  <version_id>9f7bc539-9613-4ddc-a79c-ab1c30014526</version_id>
+  <version_modified>20210325T174425Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -8086,16 +8086,16 @@
       <checksum>0CA26641</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C6E3FE11</checksum>
-    </file>
-    <file>
       <filename>base-schedules-stochastic-vacant.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>BB9BD473</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>763ECD4B</checksum>
     </file>
   </files>
 </measure>

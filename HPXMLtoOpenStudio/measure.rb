@@ -215,7 +215,7 @@ class OSModel
 
     @schedules_file = nil
     unless @hpxml.header.schedules_path.nil?
-      @schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_path, col_names: ScheduleGenerator.col_names)
+      @schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_path, col_names: ScheduleGenerator.col_names.keys)
     end
 
     # Conditioned space/zone
@@ -281,7 +281,7 @@ class OSModel
 
     # Vacancy
     unless @schedules_file.nil?
-      @schedules_file.set_vacancy(exclusions: ScheduleGenerator.unaffected_by_vacancy)
+      @schedules_file.set_vacancy
     end
 
     if debug
