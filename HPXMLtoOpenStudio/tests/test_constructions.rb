@@ -13,6 +13,35 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
     return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
 
+  def _get_ems_values(ems_objects, name)
+    values = {}
+    ems_objects.each do |ems_object|
+      next unless ems_object.name.to_s.include? name.gsub(' ', '_')
+
+      ems_object.lines.each do |line|
+        next unless line.downcase.start_with? 'set'
+
+        lhs, rhs = line.split('=')
+        lhs = lhs.gsub('Set', '').gsub('set', '').strip
+        rhs = rhs.gsub(',', '').gsub(';', '').strip
+        values[lhs] = [] if values[lhs].nil?
+        # eg. "Q = Q + 1.5"
+        if rhs.include? '+'
+          rhs_els = rhs.split('+')
+          rhs = rhs_els.map { |s| s.to_f }.sum(0.0)
+        elsif rhs.include? '*'
+          rhs_els = rhs.split('*')
+          rhs = rhs_els.map { |s| s.to_f }.reject(&:zero?).inject(:*)
+        else
+          rhs = rhs.to_f
+        end
+        values[lhs] << rhs
+      end
+    end
+    assert_operator(values.size, :>, 0)
+    return values
+  end
+
   def test_windows
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
@@ -34,12 +63,9 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     summer_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new('June'), 1, model.yearDescription.get.assumedYear)
-    summer_length = 6 # 6 months for Denver
     winter_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new('January'), 1, model.yearDescription.get.assumedYear)
-    winter_length = 12 - summer_length # months
 
     hpxml.windows.each do |window|
-      os_window = model.getSubSurfaces.select { |w| w.name.to_s == window.id }[0]
       sf_summer = window.interior_shading_factor_summer
       sf_winter = window.interior_shading_factor_winter
       sf_summer *= window.exterior_shading_factor_summer unless window.exterior_shading_factor_summer.nil?
@@ -57,10 +83,11 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
         assert_equal(sf_winter, winter_transmittance)
       end
 
-      # Check view factor for ground diffuse
-      default_view_factor = 0.5 # Default for vertical wall
-      view_factor = default_view_factor * (sf_summer * summer_length + sf_winter * winter_length) / 12.0
-      assert_in_delta(view_factor, os_window.viewFactortoGround.get, 0.001)
+      # Check subsurface view factor to ground
+      subsurface_view_factor = 0.5
+      os_window = model.getSubSurfaces.select { |w| w.name.to_s == window.id }[0]
+      program_values = _get_ems_values(model.getEnergyManagementSystemPrograms, "fixedwindow view factor to ground program")
+      assert_equal(subsurface_view_factor, program_values["#{os_window.name.to_s}_actuator"][0])
     end
   end
 
@@ -85,12 +112,9 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     summer_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new('June'), 1, model.yearDescription.get.assumedYear)
-    summer_length = 6 # 6 months for Denver
     winter_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new('January'), 1, model.yearDescription.get.assumedYear)
-    winter_length = 12 - summer_length # months
-
+    
     hpxml.skylights.each do |skylight|
-      os_window = model.getSubSurfaces.select { |w| w.name.to_s == skylight.id }[0]
       sf_summer = skylight.interior_shading_factor_summer
       sf_winter = skylight.interior_shading_factor_winter
       sf_summer *= skylight.exterior_shading_factor_summer unless skylight.exterior_shading_factor_summer.nil?
@@ -108,10 +132,11 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
         assert_equal(sf_winter, winter_transmittance)
       end
 
-      # Check view factor for ground diffuse
-      default_view_factor = 0.05 # Based on 6:12 pitch in HPXML
-      view_factor = default_view_factor * (sf_summer * summer_length + sf_winter * winter_length) / 12.0
-      assert_in_delta(view_factor, os_window.viewFactortoGround.get, 0.001)
+      # Check subsurface view factor to ground
+      subsurface_view_factor = 0.05 # 6:12 pitch
+      os_skylight = model.getSubSurfaces.select { |w| w.name.to_s == skylight.id }[0]
+      program_values = _get_ems_values(model.getEnergyManagementSystemPrograms, "skylight view factor to ground program")
+      assert_equal(subsurface_view_factor, program_values["#{os_skylight.name.to_s}_actuator"][0])
     end
   end
 
