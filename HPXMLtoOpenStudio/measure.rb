@@ -214,7 +214,7 @@ class OSModel
     add_simulation_params(model)
 
     @schedules_file = nil
-    if not @hpxml.header.schedules_path.nil?
+    unless @hpxml.header.schedules_path.nil?
       @schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_path, col_names: ScheduleGenerator.col_names)
     end
 
@@ -280,7 +280,9 @@ class OSModel
     # add_ems_debug_output(runner, model)
 
     # Vacancy
-    set_vacancy(runner, model)
+    unless @schedules_file.nil?
+      @schedules_file.set_vacancy(exclusions: ScheduleGenerator.unaffected_by_vacancy)
+    end
 
     if debug
       osm_output_path = File.join(output_dir, 'in.osm')
@@ -2941,12 +2943,6 @@ class OSModel
     program_calling_manager.setName("#{program.name} calling manager")
     program_calling_manager.setCallingPoint('EndOfZoneTimestepAfterZoneReporting')
     program_calling_manager.addProgram(program)
-  end
-
-  def self.set_vacancy(runner, model)
-    return if @schedules_file.nil?
-
-    @schedules_file.set_vacancy(col_names: ScheduleGenerator.col_names)
   end
 
   def self.add_output_control_files(runner, model)

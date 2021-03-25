@@ -87,6 +87,18 @@ class ScheduleGenerator
     ]
   end
 
+  def self.unaffected_by_vacancy
+    return [
+      'refrigerator',
+      'extra_refrigerator',
+      'freezer',
+      'pool_pump',
+      'pool_heater',
+      'hot_tub_pump',
+      'hot_tub_heater'
+    ]
+  end
+
   def initialize_schedules(args:)
     @schedules = {}
 
