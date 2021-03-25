@@ -86,7 +86,7 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
       # Check subsurface view factor to ground
       subsurface_view_factor = 0.5
       os_window = model.getSubSurfaces.select { |w| w.name.to_s == window.id }[0]
-      program_values = _get_ems_values(model.getEnergyManagementSystemPrograms, "fixedwindow view factor to ground program")
+      program_values = _get_ems_values(model.getEnergyManagementSystemPrograms, 'fixedwindow view factor to ground program')
       assert_equal(subsurface_view_factor, program_values["#{os_window.name.to_s}_actuator"][0])
     end
   end
@@ -113,7 +113,7 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
 
     summer_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new('June'), 1, model.yearDescription.get.assumedYear)
     winter_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new('January'), 1, model.yearDescription.get.assumedYear)
-    
+
     hpxml.skylights.each do |skylight|
       sf_summer = skylight.interior_shading_factor_summer
       sf_winter = skylight.interior_shading_factor_winter
@@ -135,7 +135,7 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
       # Check subsurface view factor to ground
       subsurface_view_factor = 0.05 # 6:12 pitch
       os_skylight = model.getSubSurfaces.select { |w| w.name.to_s == skylight.id }[0]
-      program_values = _get_ems_values(model.getEnergyManagementSystemPrograms, "skylight view factor to ground program")
+      program_values = _get_ems_values(model.getEnergyManagementSystemPrograms, 'skylight view factor to ground program')
       assert_equal(subsurface_view_factor, program_values["#{os_skylight.name.to_s}_actuator"][0])
     end
   end
