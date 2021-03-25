@@ -7,6 +7,7 @@ require 'minitest/autorun'
 require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
+require_relative 'util.rb'
 
 class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
   def sample_files_dir
@@ -56,9 +57,9 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
 
       # Check subsurface view factor to ground
       subsurface_view_factor = 0.5
-      os_window = model.getEnergyManagementSystemActuators.select { |w| w.actuatedComponent.get.name.to_s == window.id }[0]
-      program_values = UnitTestTools.get_ems_values(model.getEnergyManagementSystemPrograms, 'fixedwindow view factor to ground program')
-      assert_equal(subsurface_view_factor, program_values["#{os_window.name.to_s}"][0])
+      window_actuator = model.getEnergyManagementSystemActuators.select { |w| w.actuatedComponent.get.name.to_s == window.id }[0]
+      program_values = get_ems_values(model.getEnergyManagementSystemPrograms, 'fixedwindow view factor to ground program')
+      assert_equal(subsurface_view_factor, program_values["#{window_actuator.name.to_s}"][0])
     end
   end
 
@@ -105,9 +106,9 @@ class HPXMLtoOpenStudioConstructionsTest < MiniTest::Test
 
       # Check subsurface view factor to ground
       subsurface_view_factor = 0.05 # 6:12 pitch
-      os_skylight = model.getEnergyManagementSystemActuators.select { |w| w.actuatedComponent.get.name.to_s == skylight.id }[0]
-      program_values = UnitTestTools.get_ems_values(model.getEnergyManagementSystemPrograms, 'skylight view factor to ground program')
-      assert_equal(subsurface_view_factor, program_values["#{os_skylight.name.to_s}"][0])
+      skylight_actuator = model.getEnergyManagementSystemActuators.select { |w| w.actuatedComponent.get.name.to_s == skylight.id }[0]
+      program_values = get_ems_values(model.getEnergyManagementSystemPrograms, 'skylight view factor to ground program')
+      assert_equal(subsurface_view_factor, program_values["#{skylight_actuator.name.to_s}"][0])
     end
   end
 
