@@ -475,6 +475,7 @@ class HPXMLTest < MiniTest::Test
       next if log_line.start_with? 'Info: '
       next if log_line.start_with? 'Executing command'
       next if log_line.include? "-cache.csv' could not be found; regenerating it."
+      next if log_line.include? 'OS Message'
 
       if hpxml_path.include? 'base-atticroof-conditioned.xml'
         next if log_line.include?('Ducts are entirely within conditioned space but there is moderate leakage to the outside. Leakage to the outside is typically zero or near-zero in these situations, consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.')
@@ -524,9 +525,13 @@ class HPXMLTest < MiniTest::Test
       next unless err_line.include? '** Warning **'
 
       # General
-      next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
-      next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
-      next if err_line.include? 'Output:Meter: invalid Key Name'
+      next if err_line.include? 'Plant Loop: SOLAR HOT WATER LOOP Supply Side is storing excess heat the majority of the time.'
+      next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input' # IDF
+      next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank schedule_type_limits_name input' # epJSON
+      next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input' # IDF
+      next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank schedule_type_limits_name input' # epJSON
+      next if err_line.include? 'Output:Meter: invalid Key Name' # IDF
+      next if err_line.include? 'Output:Meter: invalid key_name' # epJSON
       next if err_line.include? 'Entered Zone Volumes differ from calculated zone volume'
       next if err_line.include?('CalculateZoneVolume') && err_line.include?('not fully enclosed')
       next if err_line.include?('GetInputViewFactors') && err_line.include?('not enough values')
@@ -571,7 +576,8 @@ class HPXMLTest < MiniTest::Test
         # "The only valid controller type for an AirLoopHVAC is Controller:WaterCoil.", evap cooler doesn't need one.
         next if err_line.include?('GetAirPathData: AirLoopHVAC') && err_line.include?('has no Controllers')
         # input "Autosize" for Fixed Minimum Air Flow Rate is added by OS translation, now set it to 0 to skip potential sizing process, though no way to prevent this warning.
-        next if err_line.include? 'Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored'
+        next if err_line.include? 'Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored' # IDF
+        next if err_line.include? 'Since zone_minimum_air_flow_input_method = CONSTANT, input for fixed_minimum_air_flow_rate will be ignored' # epJSON
       end
       if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeRoomAirConditioner }.size > 0
         next if err_line.include? 'GetDXCoils: Coil:Cooling:DX:SingleSpeed="ROOM AC CLG COIL" curve values' # TODO: Double-check Room AC curves

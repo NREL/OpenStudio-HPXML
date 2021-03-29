@@ -70,6 +70,9 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
   elsif ep_type == 'epjson'
     ep_input_filename = 'in.epJSON'
     json = OpenStudio::EPJSON::toJSONString(workspace.toIdfFile)
+    # FIXME: Temporary fix for https://github.com/NREL/OpenStudio/issues/4264
+    json.gsub!('g_function_lnt_ts_value', 'g_function_ln_t_ts_value')
+    json.gsub!('"autosize"', '"Autosize"')
     File.open(File.join(rundir, ep_input_filename), 'w') { |f| f << json.to_s }
   else
     fail "Unexpected ep_type: #{ep_type}."
@@ -77,7 +80,8 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
 
   # Run simulation
   print "#{print_prefix}Running simulation...\n"
-  ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus')) # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
+  ep_path = "C:/git/energyplus/build/Products/Release/energyplus.exe"
+  #ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus')) # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
   simulation_start = Time.now
   command = "\"#{ep_path}\" -w \"#{model.getWeatherFile.path.get}\" #{ep_input_filename}"
   if debug
