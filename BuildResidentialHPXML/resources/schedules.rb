@@ -88,7 +88,7 @@ class ScheduleGenerator
     }
   end
 
-  def initialize_schedules(args:)
+  def initialize_schedules
     @schedules = {}
 
     ScheduleGenerator.col_names.keys.each do |col_name|
@@ -104,7 +104,7 @@ class ScheduleGenerator
 
   def create(args:)
     get_simulation_parameters
-    initialize_schedules(args: args)
+    initialize_schedules
 
     success = create_average_schedules(args: args)
     return false if not success
@@ -112,7 +112,7 @@ class ScheduleGenerator
     success = create_stochastic_schedules(args: args)
     return false if not success
 
-    success = set_vacancy(args: args, sim_year: @sim_year)
+    success = set_vacancy(args: args)
     return false if not success
 
     return true
@@ -856,15 +856,14 @@ class ScheduleGenerator
     return true
   end
 
-  def set_vacancy(args:,
-                  sim_year:)
+  def set_vacancy(args:)
     if args[:schedules_vacancy_begin_month].is_initialized && args[:schedules_vacancy_begin_day_of_month].is_initialized && args[:schedules_vacancy_end_month].is_initialized && args[:schedules_vacancy_end_day_of_month].is_initialized
       begin
-        vacancy_start_date = Time.new(sim_year, args[:schedules_vacancy_begin_month].get, args[:schedules_vacancy_begin_day_of_month].get)
-        vacancy_end_date = Time.new(sim_year, args[:schedules_vacancy_end_month].get, args[:schedules_vacancy_end_day_of_month].get, 24)
+        vacancy_start_date = Time.new(@sim_year, args[:schedules_vacancy_begin_month].get, args[:schedules_vacancy_begin_day_of_month].get)
+        vacancy_end_date = Time.new(@sim_year, args[:schedules_vacancy_end_month].get, args[:schedules_vacancy_end_day_of_month].get, 24)
 
         sec_per_step = @minutes_per_step * 60.0
-        ts = Time.new(sim_year, 'Jan', 1)
+        ts = Time.new(@sim_year, 'Jan', 1)
         @schedules['vacancy'].each_with_index do |step, i|
           if vacancy_start_date <= ts && ts <= vacancy_end_date # in the vacancy period
             @schedules['vacancy'][i] = 1.0
