@@ -2478,7 +2478,6 @@ class OSModel
     model.getZoneHVACDehumidifierDXs.each do |e|
       next unless e.thermalZone.get.name.to_s == living_zone.name.to_s
 
-      intgains_sensors << []
       { 'Zone Dehumidifier Sensible Heating Energy' => 'ig_dehumidifier' }.each do |var, name|
         intgain_dehumidifier = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
         intgain_dehumidifier.setName(name)
