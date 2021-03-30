@@ -90,6 +90,31 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? hpxml_defaults_path)
   end
 
+  def test_run_simulation_faster_performance
+    # Run w/ --skip-validation and --skip-component-loads arguments
+    os_cli = OpenStudio.getOpenStudioCLI
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    command = "#{os_cli} #{rb_path} -x #{xml} --skip-validation --skip-component-loads"
+    system(command, err: File::NULL)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+
+    # Check component loads exist but are all zero
+    component_loads = {}
+    CSV.read(csv_output_path, headers: false).each do |data|
+      next unless data[0].to_s.start_with? 'Component Load'
+
+      component_loads[data[0]] = Float(data[1])
+    end
+    assert(component_loads.size > 0)
+    assert_equal(0.0, component_loads.values.sum)
+  end
+
   def test_template_osw
     # Check that simulation works using template.osw
     require 'json'

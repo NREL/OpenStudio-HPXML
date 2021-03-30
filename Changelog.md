@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.2.0 (Pending)
 
 __New Features__
+- Adds a `--skip-component-loads` argument for faster performance.
 - Allow `Slab/ExposedPerimeter` to be zero.
 - **Breaking change**: Replaces `Site/extension/ShelterCoefficient` with `Site/ShieldingofHome`.
 - Removes `ClothesDryer/ControlType` from being a required input, it is not used.
