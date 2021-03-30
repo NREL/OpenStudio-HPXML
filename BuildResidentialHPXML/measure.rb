@@ -3027,6 +3027,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       errors << "foundation_wall_insulation_distance_to_bottom=#{args[:foundation_wall_insulation_distance_to_bottom]} and geometry_foundation_height=#{args[:geometry_foundation_height]}" if error
     end
 
+    # number of bedrooms not greater than zero
+    error = (args[:geometry_num_bedrooms] <= 0)
+    errors << "geometry_num_bedrooms=#{args[:geometry_num_bedrooms]}" if error
+
     return warnings, errors
   end
 
@@ -3149,6 +3153,7 @@ class HPXMLFile
       success = Geometry.create_single_family_attached(runner: runner, model: model, **args)
     elsif args[:geometry_unit_type] == HPXML::ResidentialTypeApartment
       args[:geometry_roof_type] = 'flat'
+      args[:geometry_attic_type] = HPXML::AtticTypeVented
       success = Geometry.create_multifamily(runner: runner, model: model, **args)
     end
     return false if not success
