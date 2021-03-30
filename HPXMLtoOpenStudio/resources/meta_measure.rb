@@ -70,9 +70,6 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
   elsif ep_type == 'epjson'
     ep_input_filename = 'in.epJSON'
     json = OpenStudio::EPJSON::toJSONString(workspace.toIdfFile)
-    # FIXME: Temporary fix for https://github.com/NREL/OpenStudio/issues/4264
-    json.gsub!('g_function_lnt_ts_value', 'g_function_ln_t_ts_value')
-    json.gsub!('"autosize"', '"Autosize"')
     File.open(File.join(rundir, ep_input_filename), 'w') { |f| f << json.to_s }
   else
     fail "Unexpected ep_type: #{ep_type}."
