@@ -428,94 +428,94 @@ class HPXMLDefaults
 
     # HVAC efficiencies (HEScore Assumption)
     hpxml.heating_systems.each do |heating_system|
-      next unless (heating_system.heating_efficiency_afue.nil? && heating_system.heating_efficiency_percent.nil?)
-
       year_installed = heating_system.year_installed
       heating_system_type = heating_system.heating_system_type
       heating_system_fuel = heating_system.heating_system_fuel
 
-      if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace].include? heating_system_type
+      if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace].include? heating_system_type
+        next unless heating_system.heating_efficiency_afue.nil?
+
         if heating_system_fuel == HPXML::FuelTypeElectricity
           heating_system.heating_efficiency_afue = 0.98
-        elsif not year_installed.nil?
+        elsif [HPXML::FuelTypeNaturalGas, HPXML::FuelTypeOil, HPXML::FuelTypePropane].include? heating_system_fuel
           heating_system.heating_efficiency_afue = HVAC.lookup_hvac_efficiency(year_installed, heating_system_type, heating_system_fuel, 'AFUE')
+        else
+          fail "Unexpected fuel type: Cannot find #{heating_system_fuel} #{heating_system_type} default efficiency."
         end
         heating_system.heating_efficiency_afue_isdefaulted = true
       elsif heating_system_type == HPXML::HVACTypeBoiler
+        next unless heating_system.heating_efficiency_afue.nil?
+
         if heating_system_fuel == HPXML::FuelTypeElectricity
           heating_system.heating_efficiency_afue = 0.98
-        elsif not year_installed.nil?
+        elsif [HPXML::FuelTypeNaturalGas, HPXML::FuelTypeOil, HPXML::FuelTypePropane].include? heating_system_fuel
           heating_system.heating_efficiency_afue = HVAC.lookup_hvac_efficiency(year_installed, heating_system_type, heating_system_fuel, 'AFUE')
+        else
+          fail "Unexpected fuel type: Cannot find #{heating_system_fuel} #{heating_system_type} default efficiency."
         end
         heating_system.heating_efficiency_afue_isdefaulted = true
-      elsif heating_system_type == HPXML::HVACTypeElectricResistance
+      elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFixedHeater].include? heating_system_type
+        next unless heating_system.heating_efficiency_percent.nil?
+
         heating_system.heating_efficiency_percent = 0.98
         heating_system.heating_efficiency_percent_isdefaulted = true
       elsif heating_system_type == HPXML::HVACTypeStove
+        next unless heating_system.heating_efficiency_percent.nil?
+
         if heating_system_fuel == HPXML::FuelTypeWoodCord
           heating_system.heating_efficiency_percent = 0.60
         elsif heating_system_fuel == HPXML::FuelTypeWoodPellets
           heating_system.heating_efficiency_percent = 0.78
+        else
+          fail "Unexpected fuel type: Cannot find #{heating_system_fuel} #{heating_system_type} default efficiency."
         end
+        heating_system.heating_efficiency_percent_isdefaulted = true
+      elsif heating_system_type == HPXML::HVACTypeFireplace
+        next unless heating_system.heating_efficiency_percent.nil?
+
+        # FIXME: Need to use heating_efficiency_percent for fireplace
+        heating_system.heating_efficiency_percent = 0.98
         heating_system.heating_efficiency_percent_isdefaulted = true
       end
     end
 
     hpxml.cooling_systems.each do |cooling_system|
-      next unless (cooling_system.cooling_efficiency_seer.nil? && cooling_system.cooling_efficiency_eer.nil?)
-
       year_installed = cooling_system.year_installed
       cooling_system_type = cooling_system.cooling_system_type
       cooling_system_fuel = HPXML::FuelTypeElectricity
 
       if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
-        if not year_installed.nil?
-          cooling_system.cooling_efficiency_seer = HVAC.lookup_hvac_efficiency(year_installed, cooling_system_type, cooling_system_fuel, 'SEER')
-          cooling_system.cooling_efficiency_seer_isdefaulted = true
-        end
+        next unless cooling_system.cooling_efficiency_seer.nil?
+        
+        cooling_system.cooling_efficiency_seer = HVAC.lookup_hvac_efficiency(year_installed, cooling_system_type, cooling_system_fuel, 'SEER')
+        cooling_system.cooling_efficiency_seer_isdefaulted = true
       elsif cooling_system_type == HPXML::HVACTypeRoomAirConditioner
-        if not year_installed.nil?
-          cooling_system.cooling_efficiency_eer = HVAC.lookup_hvac_efficiency(year_installed, cooling_system_type, cooling_system_fuel, 'EER')
-          cooling_system.cooling_efficiency_eer_isdefaulted = true
-        end
+        next unless cooling_system.cooling_efficiency_eer.nil?
+
+        cooling_system.cooling_efficiency_eer = HVAC.lookup_hvac_efficiency(year_installed, cooling_system_type, cooling_system_fuel, 'EER')
+        cooling_system.cooling_efficiency_eer_isdefaulted = true
+      elsif cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner
+        next unless cooling_system.cooling_efficiency_seer.nil?
+
+        cooling_system.cooling_efficiency_seer = HVAC.lookup_hvac_efficiency(year_installed, cooling_system_type, cooling_system_fuel, 'SEER')
+        cooling_system.cooling_efficiency_seer_isdefaulted = true
       end
     end
 
     hpxml.heat_pumps.each do |heat_pump|
-      # FIXME: double-check the line below
-      next unless ((heat_pump.cooling_efficiency_seer.nil? && heat_pump.cooling_efficiency_eer.nil?) || (heat_pump.heating_efficiency_hspf.nil? && heat_pump.heating_efficiency_cop.nil?))
-
       year_installed = heat_pump.year_installed
       heat_pump_type = heat_pump.heat_pump_type
       heat_pump_fuel = HPXML::FuelTypeElectricity
 
       if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
-        if (not year_installed.nil?) && (not heat_pump.fraction_cool_load_served == 0) && heat_pump.cooling_efficiency_seer.nil?
+        next unless (heat_pump.cooling_efficiency_seer.nil? || heat_pump.heating_efficiency_hspf.nil?)
+
+        if heat_pump.cooling_efficiency_seer.nil?
           heat_pump.cooling_efficiency_seer = HVAC.lookup_hvac_efficiency(year_installed, heat_pump_type, heat_pump_fuel, 'SEER')
           heat_pump.cooling_efficiency_seer_isdefaulted = true
         end
-        if (not year_installed.nil?) && (not heat_pump.fraction_heat_load_served == 0) && heat_pump.heating_efficiency_hspf.nil?
+        if heat_pump.heating_efficiency_hspf.nil?
           heat_pump.heating_efficiency_hspf = HVAC.lookup_hvac_efficiency(year_installed, heat_pump_type, heat_pump_fuel, 'HSPF')
-          heat_pump.heating_efficiency_hspf_isdefaulted = true
-        end
-      end
-
-      # If heat pump has no cooling/heating load served, assign arbitrary value for cooling/heating efficiency value
-      if (heat_pump.fraction_cool_load_served == 0) && heat_pump.cooling_efficiency_seer.nil? && heat_pump.cooling_efficiency_eer.nil?
-        if heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
-          heat_pump.cooling_efficiency_eer = 16.6
-          heat_pump.cooling_efficiency_eer_isdefaulted = true
-        else
-          heat_pump.cooling_efficiency_seer = 13.0
-          heat_pump.cooling_efficiency_seer_isdefaulted = true
-        end
-      end
-      if (heat_pump.fraction_heat_load_served == 0) && heat_pump.heating_efficiency_hspf.nil? && heat_pump.heating_efficiency_cop.nil?
-        if heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
-          heat_pump.heating_efficiency_cop = 3.6
-          heat_pump.heating_efficiency_cop_isdefaulted = true
-        else
-          heat_pump.heating_efficiency_hspf = 7.7
           heat_pump.heating_efficiency_hspf_isdefaulted = true
         end
       end
@@ -820,7 +820,6 @@ class HPXMLDefaults
 
       end
     end
-    # TODO: Default HeatingCapacity17F?
   end
 
   def self.apply_hvac_control(hpxml)
@@ -997,17 +996,14 @@ class HPXMLDefaults
           water_heating_system.recovery_efficiency = Waterheater.get_default_recovery_efficiency(water_heating_system)
           water_heating_system.recovery_efficiency_isdefaulted = true
         end
+        if water_heating_system.energy_factor.nil? && water_heating_system.uniform_energy_factor.nil?
+          water_heating_system.energy_factor = Waterheater.lookup_water_heater_efficiency(water_heating_system.year_installed, water_heating_system.fuel_type)
+          water_heating_system.energy_factor_isdefaulted = true
+        end
       end
       if water_heating_system.location.nil?
         water_heating_system.location = Waterheater.get_default_location(hpxml, hpxml.climate_and_risk_zones.iecc_zone)
         water_heating_system.location_isdefaulted = true
-      end
-      fuel_type = water_heating_system.fuel_type
-      year_installed = water_heating_system.year_installed
-      next unless water_heating_system.energy_factor.nil? && water_heating_system.uniform_energy_factor.nil?
-      if not year_installed.nil?
-        water_heating_system.energy_factor = Waterheater.lookup_water_heater_efficiency(year_installed, fuel_type)
-        water_heating_system.energy_factor_isdefaulted = true
       end
     end
   end
