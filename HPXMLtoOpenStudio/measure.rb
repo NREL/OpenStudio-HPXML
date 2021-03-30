@@ -2089,8 +2089,8 @@ class OSModel
              HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
 
         HVAC.apply_central_air_source_hvac_systems(model, runner, heat_pump, heat_pump,
-                                                   @remaining_heat_load_frac,
                                                    @remaining_cool_load_frac,
+                                                   @remaining_heat_load_frac,
                                                    living_zone, @hvac_map)
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
