@@ -144,6 +144,11 @@ class HEScoreTest < Minitest::Unit::TestCase
           next if log_line.include?('No space heating specified, the model will not include space heating energy use.')
         end
 
+        # Files w/o windows
+        if hpxml.windows.map { |w| w.area }.sum(0.0) <= 1.0
+          next if log_line.include?('No windows specified, the model will not include window heat transfer.')
+        end
+
         flunk "Unexpected warning found in run.log: #{log_line}"
       end
 
