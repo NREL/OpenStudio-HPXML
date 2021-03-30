@@ -423,20 +423,18 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     write_annual_output_results(runner, outputs, output_format, annual_output_path)
     report_sim_outputs(outputs, runner)
     write_eri_output_results(outputs, eri_output_path)
-    if not @timestamps.nil?
-      write_timeseries_output_results(runner, output_format,
-                                      timeseries_output_path,
-                                      timeseries_frequency,
-                                      include_timeseries_fuel_consumptions,
-                                      include_timeseries_end_use_consumptions,
-                                      include_timeseries_hot_water_uses,
-                                      include_timeseries_total_loads,
-                                      include_timeseries_component_loads,
-                                      include_timeseries_unmet_loads,
-                                      include_timeseries_zone_temperatures,
-                                      include_timeseries_airflows,
-                                      include_timeseries_weather)
-    end
+    write_timeseries_output_results(runner, output_format,
+                                    timeseries_output_path,
+                                    timeseries_frequency,
+                                    include_timeseries_fuel_consumptions,
+                                    include_timeseries_end_use_consumptions,
+                                    include_timeseries_hot_water_uses,
+                                    include_timeseries_total_loads,
+                                    include_timeseries_component_loads,
+                                    include_timeseries_unmet_loads,
+                                    include_timeseries_zone_temperatures,
+                                    include_timeseries_airflows,
+                                    include_timeseries_weather)
 
     return true
   end
