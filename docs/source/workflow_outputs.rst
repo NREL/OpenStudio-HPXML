@@ -210,6 +210,9 @@ Annual Component Building Loads
 
 Component loads represent the estimated contribution of different building components to the annual heating/cooling building loads.
 The sum of component loads for heating (or cooling) will roughly equal the annual heating (or cooling) building load reported above.
+
+**Note**: These values will be zero if the ``--skip-component-loads`` argument is used.
+
 Current component loads disaggregated by Heating/Cooling are listed below.
    
    ================================================= =========================================================================================================
