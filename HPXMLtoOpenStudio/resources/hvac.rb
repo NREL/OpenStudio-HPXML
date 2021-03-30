@@ -535,6 +535,7 @@ class HVAC
     else
       pump_w = heat_pump.pump_watts_per_ton * UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton')
     end
+    pump_w = [pump_w, 1.0].max # prevent error if zero
     pump.setRatedPowerConsumption(pump_w)
     pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead))
     hvac_map[heat_pump.id] << pump
@@ -680,6 +681,7 @@ class HVAC
 
     # Pump
     pump_w = heating_system.electric_auxiliary_energy / 2.08
+    pump_w = [pump_w, 1.0].max # prevent error if zero
     pump = OpenStudio::Model::PumpVariableSpeed.new(model)
     pump.setName(obj_name + ' hydronic pump')
     pump.setRatedPowerConsumption(pump_w)
@@ -4053,6 +4055,10 @@ class HVAC
 
       else
         fail "Unexpected cooling system type '#{cooling_system.cooling_system_type}'."
+      end
+
+      if seer_eq <= 0
+        fail "Negative SEER equivalent calculated for cooling system '#{cooling_system.id}', double check inputs."
       end
 
       cooling_system.cooling_system_type = HPXML::HVACTypeCentralAirConditioner

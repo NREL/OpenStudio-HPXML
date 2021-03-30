@@ -86,6 +86,7 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-inconsistent-fan-powers.xml' => 'base.xml',
+    'invalid_files/hvac-shared-negative-seer-eq.xml' => 'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
     'invalid_files/generator-number-of-bedrooms-served.xml' => 'base-bldgtype-multifamily-shared-generator.xml',
     'invalid_files/generator-output-greater-than-consumption.xml' => 'base-misc-generators.xml',
     'invalid_files/invalid-assembly-effective-rvalue.xml' => 'base.xml',
@@ -3282,6 +3283,8 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems << hpxml.cooling_systems[0].dup
     hpxml.cooling_systems[1].id += '2'
     hpxml.cooling_systems[1].distribution_system_idref += '2'
+  elsif ['invalid_files/hvac-shared-negative-seer-eq.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].shared_loop_watts *= 100.0
   elsif hpxml_file.include?('base-hvac-autosize') && (not hpxml.cooling_systems.nil?) && (hpxml.cooling_systems.size > 0)
     hpxml.cooling_systems[0].cooling_capacity = nil
   end
@@ -3364,6 +3367,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
       hpxml.heat_pumps[-1].is_shared_system = true
       hpxml.heat_pumps[-1].number_of_units_served = 6
       hpxml.heat_pumps[-1].shared_loop_watts = 600
+      hpxml.heat_pumps[-1].pump_watts_per_ton = 0.0
     end
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
@@ -3846,8 +3850,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     if hpxml_file == 'base-atticroof-conditioned.xml'
       # Test leakage to outside when all ducts in conditioned space
       # (e.g., ducts may be in floor cavities which have leaky rims)
-      hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 1.5
-      hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 1.5
+      hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 50.0
+      hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 100.0
     end
   elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherHousingUnit

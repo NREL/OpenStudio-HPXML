@@ -808,7 +808,7 @@ If a central air conditioner is specified, additional information is entered in 
   ``CoolingCapacity``                              double    Btu/hr  >= 0         No        autosized  Cooling capacity
   ``SensibleHeatFraction``                         double    frac    0 - 1        No                   Sensible heat fraction
   ``CompressorType``                               string            See [#]_     No        See [#]_   Type of compressor
-  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan efficiency [#]_
+  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan power [#]_
   ``extension/AirflowDefectRatio``                 double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                  double    frac    > -1         No        0.0        Deviation between design/installed charges [#]_
   ===============================================  ========  ======  ===========  ========  =========  ================================================
@@ -882,7 +882,7 @@ If a ducted mini-split is specified (i.e., a ``DistributionSystem`` has been ent
   =================================  ========  ======  ===========  ========  =========  ===============================================
   Element                            Type      Units   Constraints  Required  Default    Notes
   =================================  ========  ======  ===========  ========  =========  ===============================================
-  ``extension/FanPowerWattsPerCFM``  double    W/cfm   >= 0         No        0.18       Fan efficiency
+  ``extension/FanPowerWattsPerCFM``  double    W/cfm   >= 0         No        0.18       Fan power
   ``extension/AirflowDefectRatio``   double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
   =================================  ========  ======  ===========  ========  =========  ===============================================
 
@@ -991,7 +991,7 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   ``YearInstalled``                                integer                        See [#]_             Year installed
   ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  > 0          See [#]_  See [#]_   Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="HSPF"]/Value``  double    Btu/Wh  > 0          See [#]_  See [#]_   Rated heating efficiency
-  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan efficiency
+  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan power
   ``extension/AirflowDefectRatio``                 double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                  double    frac    > -1         No        0.0        Deviation between design/installed charges [#]_
   ===============================================  ========  ======  ===========  ========  =========  ================================================
@@ -1049,7 +1049,7 @@ If a ducted mini-split is specified (i.e., a ``DistributionSystem`` has been ent
   =================================  ========  ======  ===========  ========  =========  ===============================================
   Element                            Type      Units   Constraints  Required  Default    Notes
   =================================  ========  ======  ===========  ========  =========  ===============================================
-  ``extension/FanPowerWattsPerCFM``  double    W/cfm   >= 0         No        0.18       Fan efficiency
+  ``extension/FanPowerWattsPerCFM``  double    W/cfm   >= 0         No        0.18       Fan power
   ``extension/AirflowDefectRatio``   double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
   =================================  ========  ======  ===========  ========  =========  ===============================================
 
@@ -1074,9 +1074,9 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   ``AnnualCoolingEfficiency[Units="EER"]/Value``   double    Btu/Wh  > 0          Yes                  Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="COP"]/Value``   double    W/W     > 0          Yes                  Rated heating efficiency
   ``NumberofUnitsServed``                          integer           > 0          See [#]_             Number of dwelling units served
-  ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0         No        See [#]_   Pump efficiency [#]_
-  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan efficiency
+  ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0         No        See [#]_   Pump power [#]_
   ``extension/SharedLoopWatts``                    double    W       >= 0         See [#]_             Shared pump power [#]_
+  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan power
   ``extension/AirflowDefectRatio``                 double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                  double    frac    0.0 [#]_     No        0.0        Deviation between design/installed charges [#]_
   ===============================================  ========  ======  ===========  ========  =========  ==============================================
@@ -1088,9 +1088,10 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] If PumpPowerWattsPerTon not provided, defaults to 30 W/ton per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ for a closed loop system.
   .. [#] Pump power is calculated using PumpPowerWattsPerTon and the cooling capacity in tons, unless the system only provides heating, in which case the heating capacity in tons is used instead.
-  .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0.5 W/cfm if COP <= 8.75/3.2, else 0.375 W/cfm.
+         Any pump power that is shared by multiple dwelling units should be included in SharedLoopWatts, *not* PumpPowerWattsPerTon, so that shared loop pump power attributed to the dwelling unit is calculated.
   .. [#] SharedLoopWatts only required if IsSharedSystem is true.
   .. [#] Shared loop pump power attributed to the dwelling unit is calculated as SharedLoopWatts / NumberofUnitsServed.
+  .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0.5 W/cfm if COP <= 8.75/3.2, else 0.375 W/cfm.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
   .. [#] ChargeDefectRatio currently constrained to zero for ground-to-air heat pumps due to an EnergyPlus limitation; this constraint will be relaxed in the future.
