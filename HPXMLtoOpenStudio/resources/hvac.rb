@@ -4063,6 +4063,10 @@ class HVAC
         fail "Unexpected cooling system type '#{cooling_system.cooling_system_type}'."
       end
 
+      if seer_eq <= 0
+        fail "Negative SEER equivalent calculated for cooling system '#{cooling_system.id}', double check inputs."
+      end
+
       cooling_system.cooling_system_type = HPXML::HVACTypeCentralAirConditioner
       cooling_system.cooling_efficiency_seer = seer_eq
       cooling_system.cooling_efficiency_kw_per_ton = nil
