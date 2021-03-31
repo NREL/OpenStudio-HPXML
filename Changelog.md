@@ -1,9 +1,9 @@
 ## OpenStudio-HPXML v1.2.0 (Pending)
 
 __New Features__
-- Adds a `--skip-component-loads` argument for faster performance.
-- Allow `Slab/ExposedPerimeter` to be zero.
+- **Breaking change**: Heating/cooling component loads no longer calculated by default for faster performance; use `--add-component-loads` argument if desired.
 - **Breaking change**: Replaces `Site/extension/ShelterCoefficient` with `Site/ShieldingofHome`.
+- Allows `Slab/ExposedPerimeter` to be zero.
 - Removes `ClothesDryer/ControlType` from being a required input, it is not used.
 - Moves additional error-checking from the ruby measure to the schematron validator.
 - Adds more detail to error messages regarding the wrong data type in the HPXML file.
