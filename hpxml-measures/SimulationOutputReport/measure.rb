@@ -423,20 +423,18 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     write_annual_output_results(runner, outputs, output_format, annual_output_path)
     report_sim_outputs(outputs, runner)
     write_eri_output_results(outputs, eri_output_path)
-    if not @timestamps.nil?
-      write_timeseries_output_results(runner, output_format,
-                                      timeseries_output_path,
-                                      timeseries_frequency,
-                                      include_timeseries_fuel_consumptions,
-                                      include_timeseries_end_use_consumptions,
-                                      include_timeseries_hot_water_uses,
-                                      include_timeseries_total_loads,
-                                      include_timeseries_component_loads,
-                                      include_timeseries_unmet_loads,
-                                      include_timeseries_zone_temperatures,
-                                      include_timeseries_airflows,
-                                      include_timeseries_weather)
-    end
+    write_timeseries_output_results(runner, output_format,
+                                    timeseries_output_path,
+                                    timeseries_frequency,
+                                    include_timeseries_fuel_consumptions,
+                                    include_timeseries_end_use_consumptions,
+                                    include_timeseries_hot_water_uses,
+                                    include_timeseries_total_loads,
+                                    include_timeseries_component_loads,
+                                    include_timeseries_unmet_loads,
+                                    include_timeseries_zone_temperatures,
+                                    include_timeseries_airflows,
+                                    include_timeseries_weather)
 
     return true
   end
@@ -960,9 +958,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @peak_loads.each do |load_type, peak_load|
       results_out << ["#{peak_load.name} (#{peak_load.annual_units})", peak_load.annual_output.round(2)]
     end
-    results_out << [line_break]
-    @component_loads.each do |load_type, load|
-      results_out << ["#{load.name} (#{load.annual_units})", load.annual_output.round(2)]
+    if @component_loads.values.map { |load| load.annual_output }.sum > 0 # Skip if component loads not calculated
+      results_out << [line_break]
+      @component_loads.each do |load_type, load|
+        results_out << ["#{load.name} (#{load.annual_units})", load.annual_output.round(2)]
+      end
     end
     results_out << [line_break]
     @hot_water_uses.each do |hot_water_type, hot_water|
