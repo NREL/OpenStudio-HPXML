@@ -64,7 +64,7 @@ class HEScoreRulesetTest < MiniTest::Test
     lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
     assert_in_epsilon(0.0325, lto_s, 0.00001)
     assert_in_epsilon(0.0500, lto_r, 0.00001)
-    assert_in_epsilon(222351, uncond_area_s, 0.00001)
+    assert_in_epsilon(351, uncond_area_s, 0.00001)
     assert_in_epsilon(200, uncond_area_r, 0.00001)
 
     # Base w/ ducts completely in conditioned space
