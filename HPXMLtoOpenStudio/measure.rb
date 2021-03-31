@@ -70,9 +70,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('skip_component_loads', false)
-    arg.setDisplayName('Skip component loads?')
-    arg.setDescription('If true, skips the calculation of heating/cooling component loads for faster performance.')
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('add_component_loads', false)
+    arg.setDisplayName('Add component loads?')
+    arg.setDescription('If true, adds the calculation of heating/cooling component loads (not enabled by default for faster performance).')
     arg.setDefaultValue(false)
     args << arg
 
@@ -106,7 +106,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # assign the user inputs to variables
     hpxml_path = runner.getStringArgumentValue('hpxml_path', user_arguments)
     output_dir = runner.getStringArgumentValue('output_dir', user_arguments)
-    skip_component_loads = runner.getBoolArgumentValue('skip_component_loads', user_arguments)
+    add_component_loads = runner.getBoolArgumentValue('add_component_loads', user_arguments)
     debug = runner.getBoolArgumentValue('debug', user_arguments)
     skip_validation = runner.getBoolArgumentValue('skip_validation', user_arguments)
     building_id = runner.getOptionalStringArgumentValue('building_id', user_arguments)
@@ -152,7 +152,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
 
       OSModel.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir,
-                     skip_component_loads, building_id, debug)
+                     add_component_loads, building_id, debug)
     rescue Exception => e
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
       return false
@@ -198,7 +198,7 @@ end
 
 class OSModel
   def self.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir,
-                  skip_component_loads, building_id, debug)
+                  add_component_loads, building_id, debug)
     @hpxml = hpxml
     @debug = debug
 
@@ -272,7 +272,7 @@ class OSModel
 
     # Output
 
-    add_loads_output(runner, model, spaces, skip_component_loads)
+    add_loads_output(runner, model, spaces, add_component_loads)
     add_output_control_files(runner, model)
     # Uncomment to debug EMS
     # add_ems_debug_output(runner, model)
@@ -2451,11 +2451,11 @@ class OSModel
     return map_str.to_s
   end
 
-  def self.add_loads_output(runner, model, spaces, skip_component_loads)
+  def self.add_loads_output(runner, model, spaces, add_component_loads)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     liv_load_sensors, intgain_dehumidifier = add_total_loads_output(runner, model, living_zone)
-    return if skip_component_loads
+    return unless add_component_loads
 
     add_component_loads_output(runner, model, living_zone, liv_load_sensors, intgain_dehumidifier)
   end
@@ -2478,7 +2478,6 @@ class OSModel
     model.getZoneHVACDehumidifierDXs.each do |e|
       next unless e.thermalZone.get.name.to_s == living_zone.name.to_s
 
-      intgains_sensors << []
       { 'Zone Dehumidifier Sensible Heating Energy' => 'ig_dehumidifier' }.each do |var, name|
         intgain_dehumidifier = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
         intgain_dehumidifier.setName(name)
