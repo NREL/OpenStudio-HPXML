@@ -43,6 +43,7 @@ XMLHelper.write_file(hpxml.to_oga, "out.xml")
 '''
 
 require_relative 'version'
+require 'ostruct'
 
 # FUTURE: Remove all idref attributes, make object attributes instead
 #         E.g., in class Window, :wall_idref => :wall
@@ -60,6 +61,7 @@ class HPXML < Object
   attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings)
 
   # Constants
+  # FUTURE: Move some of these to within child classes (e.g., HPXML::Attic class)
   AirTypeFanCoil = 'fan coil'
   AtticTypeCathedral = 'CathedralCeiling'
   AtticTypeConditioned = 'ConditionedAttic'

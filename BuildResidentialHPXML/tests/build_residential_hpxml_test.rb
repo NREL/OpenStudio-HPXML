@@ -19,13 +19,16 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       this_dir,
     ]
 
+    test_base = true
+    test_extra = true
+
     osws = []
     test_dirs.each do |test_dir|
       Dir["#{test_dir}/base*.osw"].sort.each do |osw|
-        osws << File.absolute_path(osw)
+        osws << File.absolute_path(osw) if test_base
       end
       Dir["#{test_dir}/extra*.osw"].sort.each do |osw|
-        osws << File.absolute_path(osw)
+        osws << File.absolute_path(osw) if test_extra
       end
     end
 
@@ -129,7 +132,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'multifamily-no-building-orientation.osw' => 'geometry_unit_type=apartment unit and geometry_building_num_units=false and geometry_level=false and geometry_horizontal_location=false',
       'dhw-indirect-without-boiler.osw' => 'water_heater_type=space-heating boiler with storage tank and heating_system_type=Furnace',
       'foundation-wall-insulation-greater-than-height.osw' => 'foundation_wall_insulation_distance_to_bottom=6.0 and geometry_foundation_height=4.0',
-      'conditioned-attic-with-one-floor-above-grade.osw' => 'geometry_num_floors_above_grade=1 and geometry_attic_type=ConditionedAttic'
+      'conditioned-attic-with-one-floor-above-grade.osw' => 'geometry_num_floors_above_grade=1 and geometry_attic_type=ConditionedAttic',
+      'zero-number-of-bedrooms.osw' => 'geometry_num_bedrooms=0'
     }
 
     measures = {}
@@ -148,7 +152,11 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         success = apply_measures(measures_dir, measures, runner, model)
 
         # Report warnings/errors
-        assert(runner.result.stepWarnings.length > 1 || runner.result.stepErrors.length > 0)
+        if Gem::Specification::find_all_by_name('nokogiri').any?
+          assert(runner.result.stepWarnings.length > 0 || runner.result.stepErrors.length > 0)
+        else
+          assert(runner.result.stepWarnings.length > 1 || runner.result.stepErrors.length > 0)
+        end
         runner.result.stepWarnings.each do |s|
           next if s.include? 'nokogiri'
 
@@ -192,6 +200,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.roofs.sort_by! { |roof| roof.area }
       hpxml.walls.sort_by! { |wall| [wall.exterior_adjacent_to, wall.insulation_assembly_r_value, wall.area] }
       hpxml.foundation_walls.sort_by! { |foundation_wall| foundation_wall.area }
+      hpxml.rim_joists.sort_by! { |rim_joist| [rim_joist.exterior_adjacent_to, rim_joist.insulation_assembly_r_value, rim_joist.area] }
       hpxml.frame_floors.sort_by! { |frame_floor| [frame_floor.insulation_assembly_r_value, frame_floor.area] }
       hpxml.slabs.sort_by! { |slab| slab.area }
       hpxml.windows.sort_by! { |window| [window.azimuth, window.area] }
@@ -207,23 +216,39 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.building_construction.conditioned_building_volume = nil
       hpxml.building_construction.average_ceiling_height = nil # Comparing conditioned volume instead
       hpxml.air_infiltration_measurements[0].infiltration_volume = nil
-      hpxml.attics.clear()
-      hpxml.foundations.clear()
-      hpxml.rim_joists.clear() # TODO
-      hpxml.refrigerators.each do |refrigerator|
-        refrigerator.adjusted_annual_kwh = nil
-      end
+      hpxml.foundations.clear
+      hpxml.attics.clear
       hpxml.foundation_walls.each do |foundation_wall|
         next if foundation_wall.insulation_assembly_r_value.nil?
         foundation_wall.insulation_assembly_r_value = foundation_wall.insulation_assembly_r_value.round(2)
       end
+      if hpxml.rim_joists.length > 0
+        (0...hpxml.rim_joists.length).to_a.reverse.each do |i|
+          next unless [HPXML::LocationLivingSpace].include? hpxml.rim_joists[i].interior_adjacent_to
+
+          hpxml.rim_joists.delete_at(i)
+        end
+      end
+      hpxml.rim_joists.each do |rim_joist|
+        rim_joist.area = rim_joist.area.round
+        rim_joist.insulation_assembly_r_value = rim_joist.insulation_assembly_r_value.round(2)
+        rim_joist.solar_absorptance = nil
+        rim_joist.emittance = nil
+        rim_joist.color = nil
+      end
       hpxml.roofs.each do |roof|
         roof.azimuth = nil
         roof.radiant_barrier = nil
+        roof.solar_absorptance = nil
+        roof.emittance = nil
+        roof.roof_color = nil
       end
       hpxml.walls.each do |wall|
         wall.azimuth = nil
-        next unless wall.exterior_adjacent_to == HPXML::LocationOutside
+        wall.solar_absorptance = nil
+        wall.emittance = nil
+        wall.color = nil
+        next if wall.exterior_adjacent_to != HPXML::LocationOutside
         next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? wall.interior_adjacent_to
 
         wall.area = nil # TODO: Attic gable wall areas
@@ -282,6 +307,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       end
       hpxml.refrigerators.each do |refrigerator|
         refrigerator.primary_indicator = nil
+        refrigerator.adjusted_annual_kwh = nil
         refrigerator.weekday_fractions = nil
         refrigerator.weekend_fractions = nil
         refrigerator.monthly_multipliers = nil
