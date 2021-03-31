@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5b62efa4-2cdf-4611-9983-52c6ba88cfba</version_id>
-  <version_modified>20210330T065245Z</version_modified>
+  <version_id>59939bcd-5de3-4091-9b7f-80b12ffda704</version_id>
+  <version_modified>20210331T140029Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -47,9 +47,9 @@
       </choices>
     </argument>
     <argument>
-      <name>skip_component_loads</name>
-      <display_name>Skip component loads?</display_name>
-      <description>If true, skips the calculation of heating/cooling component loads for faster performance.</description>
+      <name>add_component_loads</name>
+      <display_name>Add component loads?</display_name>
+      <description>If true, adds the calculation of heating/cooling component loads (not enabled by default for faster performance).</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -556,7 +556,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>CBF390E0</checksum>
+      <checksum>A0728E31</checksum>
     </file>
   </files>
 </measure>
