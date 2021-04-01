@@ -1228,17 +1228,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_demand_flexibility_integrated_heat_pump_modulating', false)
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_demand_flexibility_ihp_grid_ac', false)
     arg.setDisplayName('Heat Pump: Demand Flexibility Integrated Heat Pump Modulating')
     arg.setDescription('')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_demand_flexibility_integrated_heat_pump_modulating_ice_storage', false)
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_demand_flexibility_ihp_ice_storage', false)
     arg.setDisplayName('Heat Pump: Demand Flexibility Integrated Heat Pump Modulating w/ Ice Storage')
     arg.setDescription('')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_demand_flexibility_integrated_heat_pump_modulating_pcm_storage', false)
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_demand_flexibility_ihp_pcm_storage', false)
     arg.setDisplayName('Heat Pump: Demand Flexibility Integrated Heat Pump Modulating w/ Pcm Storage')
     arg.setDescription('')
     args << arg
@@ -4109,15 +4109,15 @@ class HPXMLFile
       dual_source = true
     end
 
-    if args[:heat_pump_demand_flexibility_integrated_heat_pump_grid_ac].is_initialized
+    if args[:heat_pump_demand_flexibility_ihp_grid_ac].is_initialized
       ihp_grid_ac = true
     end
 
-    if args[:heat_pump_demand_flexibility_integrated_heat_pump_ice_storage].is_initialized
+    if args[:heat_pump_demand_flexibility_ihp_ice_storage].is_initialized
       ihp_ice_storage = true
     end
 
-    if args[:heat_pump_demand_flexibility_integrated_heat_pump_pcm_storage].is_initialized
+    if args[:heat_pump_demand_flexibility_ihp_pcm_storage].is_initialized
       ihp_pcm_storage = true
     end
 
