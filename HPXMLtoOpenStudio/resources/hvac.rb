@@ -300,14 +300,14 @@ class HVAC
 
         # Grid AC
         if heat_pump.ihp_grid_ac
-          grid_clg_coil = grid_clg_coil(model)
+          grid_clg_coil = create_dx_cooling_coil(model, obj_name, heat_pump)
         end
 
         # Storage
         if heat_pump.ihp_ice_storage || heat_pump.ihp_pcm_storage
-          chiller_coil = chiller_coil(model)
-          supp_chiller_coil = supp_chiller_coil(model)
-          storage = thermal_storage(model, heat_pump.ihp_ice_storage, heat_pump.ihp_pcm_storage)
+          chiller_coil = chiller_coil(model, obj_name)
+          supp_chiller_coil = supp_chiller_coil(model, obj_name)
+          storage = thermal_storage(model, heat_pump.ihp_ice_storage, heat_pump.ihp_pcm_storage, obj_name)
 
           chw_loop = OpenStudio::Model::PlantLoop.new(model)
           pri_chw_pump = OpenStudio::Model::HeaderedPumpsConstantSpeed.new(model)
@@ -327,6 +327,12 @@ class HVAC
           chw_loop.setLoopTemperatureSetpointNode(storage.outletModelObject.get.to_Node.get)
 
           pair = OpenStudio::Model::ThermalStorageCoolingPair.new(model, clg_coil, storage)
+
+          sat_f = 55
+          sat_c = OpenStudio.convert(sat_f, 'F', 'C').get
+          sat_sch = OpenStudio::Model::ScheduleRuleset.new(model)
+          sat_sch.defaultDaySchedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), sat_c)
+          stpt_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, sat_sch)
         end
       end
 
@@ -336,7 +342,7 @@ class HVAC
     end
 
     # Air Loop
-    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, fan_cfm, supp_chiller_coil)
+    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, fan_cfm, stpt_manager, supp_chiller_coil)
     hvac_map[heat_pump.id] << air_loop
 
     # HVAC Installation Quality
@@ -351,19 +357,9 @@ class HVAC
     return schedule
   end
 
-  def self.grid_clg_coil(model)
-    clg_coil = OpenStudio::Model::CoilCoolingDXVariableSpeed.new(model)
-    clg_coil.setGridSignalSchedule(grid_signal_schedule(model))
-    clg_coil.setLowerBoundToApplyGridResponsiveControl(10.0)
-    clg_coil.setUpperBoundToApplyGridResponsiveControl(1000.0)
-    clg_coil.setMaxSpeedLevelDuringGridResponsiveControl(2)
-    speed = OpenStudio::Model::CoilCoolingDXVariableSpeedSpeedData.new(model)
-    clg_coil.addSpeed(speed)
-    return clg_coil
-  end
-
-  def self.chiller_coil(model)
+  def self.chiller_coil(model, obj_name)
     chiller_coil = OpenStudio::Model::CoilChillerAirSourceVariableSpeed.new(model)
+    chiller_coil.setName(obj_name + ' chiller coil')
     chiller_coil_speed_1 = OpenStudio::Model::CoilChillerAirSourceVariableSpeedSpeedData.new(model)
     chiller_coil.addSpeed(chiller_coil_speed_1)
     plf_curve = OpenStudio::Model::CurveQuadratic.new(model)
@@ -371,17 +367,26 @@ class HVAC
     return chiller_coil
   end
 
-  def self.supp_chiller_coil(model)
+  def self.supp_chiller_coil(model, obj_name)
     supp_chiller_coil = OpenStudio::Model::CoilCoolingWater.new(model)
+    supp_chiller_coil.setName(obj_name + ' supp chiller coil')
+    supp_chiller_coil.setDesignWaterFlowRate(0.0022)
+    supp_chiller_coil.setDesignAirFlowRate(1.45)
+    supp_chiller_coil.setDesignInletWaterTemperature(7.0)
+    supp_chiller_coil.setDesignInletAirTemperature(26.0)
+    supp_chiller_coil.setDesignOutletAirTemperature(16.0)
+    supp_chiller_coil.setDesignInletAirHumidityRatio(0.0113)
+    supp_chiller_coil.setDesignOutletAirHumidityRatio(0.009)
     return supp_chiller_coil
   end
 
-  def self.thermal_storage(model, ice, pcm)
+  def self.thermal_storage(model, ice, pcm, obj_name)
     if ice
       thermal_storage = OpenStudio::Model::ThermalStorageIceDetailed.new(model)
     elsif pcm
       thermal_storage = OpenStudio::Model::ThermalStoragePcmSimple.new(model)
     end
+    thermal_storage.setName(obj_name + ' thermal storage')
     return thermal_storage
   end
 
@@ -1906,7 +1911,7 @@ class HVAC
     return coil_system
   end
 
-  def self.create_air_loop(model, obj_name, system, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, airflow_cfm, supp_chiller_coil = nil)
+  def self.create_air_loop(model, obj_name, system, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, airflow_cfm, stpt_manager = nil, supp_chiller_coil = nil)
     air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
     air_loop.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     air_loop.setName(obj_name + ' airloop')
@@ -1914,6 +1919,9 @@ class HVAC
     air_loop.zoneMixer.setName(obj_name + ' zone mixer')
     air_loop.setDesignSupplyAirFlowRate(UnitConversions.convert(airflow_cfm, 'cfm', 'm^3/s'))
     system.addToNode(air_loop.supplyInletNode)
+    unless stpt_manager.nil?
+      stpt_manager.addToNode(air_loop.supplyOutletNode)
+    end
     unless supp_chiller_coil.nil?
       supp_chiller_coil.addToNode(air_loop.supplyOutletNode)
     end
