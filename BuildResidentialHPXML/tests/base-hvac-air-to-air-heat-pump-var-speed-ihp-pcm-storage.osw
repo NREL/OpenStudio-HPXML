@@ -143,7 +143,7 @@
         "heat_pump_cooling_efficiency": 22.0,
         "heat_pump_cooling_efficiency_type": "SEER",
         "heat_pump_cooling_sensible_heat_fraction": 0.78,
-        "heat_pump_demand_flexibility_integrated_heat_pump_pcm_storage": true,
+        "heat_pump_demand_flexibility_ihp_pcm_storage": true,
         "heat_pump_fraction_cool_load_served": 1,
         "heat_pump_fraction_heat_load_served": 1,
         "heat_pump_heating_capacity": "42000.0",

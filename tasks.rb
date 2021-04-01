@@ -1406,11 +1406,11 @@ def get_values(osw_file, step)
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-dual-source.osw'].include? osw_file
     step.setArgument('heat_pump_demand_flexibility_dual_source', true)
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-ihp-grid-ac.osw'].include? osw_file
-    step.setArgument('heat_pump_demand_flexibility_integrated_heat_pump_grid_ac', true)
+    step.setArgument('heat_pump_demand_flexibility_ihp_grid_ac', true)
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-ihp-ice-storage.osw'].include? osw_file
-    step.setArgument('heat_pump_demand_flexibility_integrated_heat_pump_ice_storage', true)
+    step.setArgument('heat_pump_demand_flexibility_ihp_ice_storage', true)
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-ihp-pcm-storage.osw'].include? osw_file
-    step.setArgument('heat_pump_demand_flexibility_integrated_heat_pump_pcm_storage', true)
+    step.setArgument('heat_pump_demand_flexibility_ihp_pcm_storage', true)
   elsif ['base-hvac-boiler-coal-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeCoal)
