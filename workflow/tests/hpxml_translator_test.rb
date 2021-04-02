@@ -28,7 +28,7 @@ class HPXMLTest < MiniTest::Test
 
     xmls = []
     sample_files_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files'))
-    Dir["#{sample_files_dir}/base.xml"].sort.each do |xml|
+    Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
       xmls << File.absolute_path(xml)
     end
 
@@ -51,7 +51,7 @@ class HPXMLTest < MiniTest::Test
 
     xmls = []
     ashrae_140_dir = File.absolute_path(File.join(@this_dir, 'ASHRAE_Standard_140'))
-    Dir["#{ashrae_140_dir}/L100AC.xml"].sort.each do |xml|
+    Dir["#{ashrae_140_dir}/*.xml"].sort.each do |xml|
       xmls << File.absolute_path(xml)
     end
 
@@ -68,7 +68,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_run_simulation_json_output
-    skip
     # Check that the simulation produces JSON outputs (instead of CSV outputs) if requested
     os_cli = OpenStudio.getOpenStudioCLI
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
@@ -92,7 +91,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_run_simulation_faster_performance
-    skip
     # Run w/ --skip-validation and w/o --add-component-loads arguments
     os_cli = OpenStudio.getOpenStudioCLI
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
@@ -117,7 +115,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_template_osw
-    skip
     # Check that simulation works using template.osw
     require 'json'
 
@@ -161,7 +158,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_weather_cache
-    skip
     cache_orig = File.join(@this_dir, '..', '..', 'weather', 'USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv')
     cache_bak = cache_orig + '.bak'
     File.rename(cache_orig, cache_bak)
@@ -170,7 +166,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_invalid
-    skip
     sample_files_dir = File.join(@this_dir, '..', 'sample_files')
 
     expected_error_msgs = { 'boiler-invalid-afue.xml' => ['Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1'],
@@ -303,7 +298,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_release_zips
-    skip
     # Check release zips successfully created
     top_dir = File.join(@this_dir, '..', '..')
     command = "#{OpenStudio.getOpenStudioCLI} #{File.join(top_dir, 'tasks.rb')} create_release_zips"
