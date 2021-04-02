@@ -556,6 +556,14 @@ class HPXMLDefaults
     ecm_watts_per_cfm = 0.375 # W/cfm, ECM fan
     mini_split_ducted_watts_per_cfm = 0.18 # W/cfm, ducted mini split
     hpxml.heating_systems.each do |heating_system|
+      if heating_system.modulating.nil?
+        heating_system.modulating = false
+        heating_system.modulating_isdefaulted = true
+      end
+      if heating_system.dual_source.nil?
+        heating_system.dual_source = false
+        heating_system.dual_source_isdefaulted = true
+      end
       if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
         if heating_system.fan_watts_per_cfm.nil?
           if heating_system.heating_efficiency_afue > 0.9 # HEScore assumption
@@ -582,6 +590,14 @@ class HPXMLDefaults
       end
     end
     hpxml.cooling_systems.each do |cooling_system|
+      if cooling_system.modulating.nil?
+        cooling_system.modulating = false
+        cooling_system.modulating_isdefaulted = true
+      end
+      if cooling_system.dual_source.nil?
+        cooling_system.dual_source = false
+        cooling_system.dual_source_isdefaulted = true
+      end
       next unless cooling_system.fan_watts_per_cfm.nil?
 
       if (not cooling_system.attached_heating_system.nil?) && (not cooling_system.attached_heating_system.fan_watts_per_cfm.nil?)
@@ -604,6 +620,26 @@ class HPXMLDefaults
       end
     end
     hpxml.heat_pumps.each do |heat_pump|
+      if heat_pump.modulating.nil?
+        heat_pump.modulating = false
+        heat_pump.modulating_isdefaulted = true
+      end
+      if heat_pump.dual_source.nil?
+        heat_pump.dual_source = false
+        heat_pump.dual_source_isdefaulted = true
+      end
+      if heat_pump.ihp_grid_ac.nil?
+        heat_pump.ihp_grid_ac = false
+        heat_pump.ihp_grid_ac_isdefaulted = true
+      end
+      if heat_pump.ihp_ice_storage.nil?
+        heat_pump.ihp_ice_storage = false
+        heat_pump.ihp_ice_storage_isdefaulted = true
+      end
+      if heat_pump.ihp_pcm_storage.nil?
+        heat_pump.ihp_pcm_storage = false
+        heat_pump.ihp_pcm_storage_isdefaulted = true
+      end
       next unless heat_pump.fan_watts_per_cfm.nil?
 
       if [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
@@ -631,6 +667,7 @@ class HPXMLDefaults
     # Detailed HVAC performance
     hpxml.cooling_systems.each do |cooling_system|
       clg_ap = cooling_system.additional_properties
+      HVAC.set_demand_flexibility(cooling_system)
       if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
         # Note: We use HP cooling curve so that a central AC behaves the same.
         HVAC.set_num_speeds(cooling_system)
@@ -670,6 +707,7 @@ class HPXMLDefaults
     end
     hpxml.heating_systems.each do |heating_system|
       htg_ap = heating_system.additional_properties
+      HVAC.set_demand_flexibility(heating_system)
       next unless [HPXML::HVACTypeStove,
                    HPXML::HVACTypePortableHeater,
                    HPXML::HVACTypeFixedHeater,
@@ -680,6 +718,7 @@ class HPXMLDefaults
     end
     hpxml.heat_pumps.each do |heat_pump|
       hp_ap = heat_pump.additional_properties
+      HVAC.set_demand_flexibility(heat_pump)
       if [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
         HVAC.set_num_speeds(heat_pump)
         HVAC.set_fan_power_rated(heat_pump)
@@ -696,8 +735,6 @@ class HPXMLDefaults
         HVAC.set_ashp_htg_curves(heat_pump)
         HVAC.set_heat_rated_cfm_per_ton(heat_pump)
         HVAC.set_heat_rated_eirs(heat_pump)
-
-        HVAC.set_demand_flexibility(heat_pump)
 
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
         num_speeds = 10
