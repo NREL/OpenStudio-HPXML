@@ -4,7 +4,7 @@ on:
   push:
     branches: [ master ]
   pull_request:
-    types: [ synchronize ]
+    types: [ synchronize, closed ]
   workflow_dispatch:
 
 jobs:
@@ -40,7 +40,7 @@ jobs:
           name: comparisons
 
   update-results:
-    if: github.event.pull_request.merged == true
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -79,5 +79,5 @@ jobs:
             git commit -m "Latest results."
             branch_name="${{ github.base_ref }}"
             echo "Pushing to branch: $branch_name"
-            git push -u origin $branch_name
+            #git push -u origin $branch_name
           fi
