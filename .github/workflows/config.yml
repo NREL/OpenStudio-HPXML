@@ -77,7 +77,7 @@ jobs:
             git config --global user.name "GitHub Action"
             git commit -m "Latest results."
             branch_name="${{ github.base_ref }}"
-            #git pull -u origin $branch_name
+            git pull origin $branch_name
             echo "Pushing to branch: $branch_name"
             git push -u origin $branch_name
           fi
