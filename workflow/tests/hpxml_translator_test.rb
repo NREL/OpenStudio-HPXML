@@ -28,7 +28,7 @@ class HPXMLTest < MiniTest::Test
 
     xmls = []
     sample_files_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files'))
-    Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
+    Dir["#{sample_files_dir}/base.xml"].sort.each do |xml|
       xmls << File.absolute_path(xml)
     end
 
@@ -44,7 +44,7 @@ class HPXMLTest < MiniTest::Test
     _write_summary_results(all_results.sort_by { |k, v| k.downcase }.to_h, results_out)
     _write_hvac_sizing_results(all_sizing_results.sort_by { |k, v| k.downcase }.to_h, sizing_out)
   end
-
+=begin
   def test_ashrae_140
     ashrae140_out = File.join(@results_dir, 'results_ashrae_140.csv')
     File.delete(ashrae140_out) if File.exist? ashrae140_out
@@ -315,7 +315,7 @@ class HPXMLTest < MiniTest::Test
       rm_path('OpenStudio-HPXML')
     end
   end
-
+=end
   private
 
   def _run_xml(xml, worker_num = nil, expect_error = false, expect_error_msgs = nil)
