@@ -52,7 +52,8 @@ jobs:
         shell: bash
         run: |
           branch_name="${{ github.base_ref }}"
-          echo "Checking out branch: $branch_name"
+          branch_sha=#{{ github.event.pull_request.base.sha }}"
+          echo "Checking out: $branch_name, $branch_sha"
           git checkout -b $branch_name || git checkout $branch_name
 
       - name: Download results
@@ -69,15 +70,14 @@ jobs:
           cp results/results.csv workflow/tests/master/results.csv
           cp results/results_ashrae_140.csv workflow/tests/master/results_ashrae_140.csv
           cp results/results_hvac_sizing.csv workflow/tests/master/results_hvac_sizing.csv
-          git add workflow/tests/master/results.csv
-          git add workflow/tests/master/results_ashrae_140.csv
-          git add workflow/tests/master/results_hvac_sizing.csv
+          git add workflow/tests/master
           git status
           if [[ $(git diff --cached --exit-code) ]]; then
             git config --global user.email "github-action@users.noreply.github.com"
             git config --global user.name "GitHub Action"
             git commit -m "Latest results."
             branch_name="${{ github.base_ref }}"
+            #git pull -u origin $branch_name
             echo "Pushing to branch: $branch_name"
             git push -u origin $branch_name
           fi
