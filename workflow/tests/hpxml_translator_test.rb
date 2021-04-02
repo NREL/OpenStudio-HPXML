@@ -44,14 +44,14 @@ class HPXMLTest < MiniTest::Test
     _write_summary_results(all_results.sort_by { |k, v| k.downcase }.to_h, results_out)
     _write_hvac_sizing_results(all_sizing_results.sort_by { |k, v| k.downcase }.to_h, sizing_out)
   end
-=begin
+
   def test_ashrae_140
     ashrae140_out = File.join(@results_dir, 'results_ashrae_140.csv')
     File.delete(ashrae140_out) if File.exist? ashrae140_out
 
     xmls = []
     ashrae_140_dir = File.absolute_path(File.join(@this_dir, 'ASHRAE_Standard_140'))
-    Dir["#{ashrae_140_dir}/*.xml"].sort.each do |xml|
+    Dir["#{ashrae_140_dir}/L100AC.xml"].sort.each do |xml|
       xmls << File.absolute_path(xml)
     end
 
@@ -66,7 +66,7 @@ class HPXMLTest < MiniTest::Test
 
     _write_ashrae_140_results(all_results.sort_by { |k, v| k.downcase }.to_h, ashrae140_out)
   end
-
+=begin
   def test_run_simulation_json_output
     # Check that the simulation produces JSON outputs (instead of CSV outputs) if requested
     os_cli = OpenStudio.getOpenStudioCLI
