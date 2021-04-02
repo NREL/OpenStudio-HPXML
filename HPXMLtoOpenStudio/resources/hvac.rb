@@ -293,7 +293,7 @@ class HVAC
         end
         air_loop_unitary.setDesignSpecificationMultispeedObject(perf)
       end
-    else
+    elsif hp_ap.demand_flexibility
       coil_system = false
       if heat_pump.ihp_grid_ac || heat_pump.ihp_ice_storage || heat_pump.ihp_pcm_storage
         coil_system = true
@@ -3109,7 +3109,7 @@ class HVAC
           stage.setGrossRatedTotalCoolingCapacity(UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W') * clg_ap.cool_capacity_ratios[i])
           stage.setRatedAirFlowRate(calc_rated_airflow(cooling_system.cooling_capacity, clg_ap.cool_rated_cfm_per_ton[i], clg_ap.cool_capacity_ratios[i]))
           clg_coil.addStage(stage)
-        else
+        elsif clg_ap.demand_flexibility
           if clg_coil.nil?
             clg_coil = OpenStudio::Model::CoilCoolingDXVariableSpeed.new(model, plf_fplr_curve)
             clg_coil.setNominalSpeedLevel(4) # FIXME
@@ -3194,7 +3194,7 @@ class HVAC
           stage.setGrossRatedHeatingCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') * htg_ap.heat_capacity_ratios[i])
           stage.setRatedAirFlowRate(calc_rated_airflow(heating_system.heating_capacity, htg_ap.heat_rated_cfm_per_ton[i], htg_ap.heat_capacity_ratios[i]))
           htg_coil.addStage(stage)
-        else
+        elsif htg_ap.demand_flexibility
           if htg_coil.nil?
             htg_coil = OpenStudio::Model::CoilHeatingDXVariableSpeed.new(model, plf_fplr_curve)
             htg_coil.setNominalSpeedLevel(4) # FIXME
@@ -4434,8 +4434,14 @@ class HVAC
     hvac_ap = hvac_system.additional_properties
 
     hvac_ap.demand_flexibility = false
-    if hvac_system.modulating || hvac_system.dual_source || hvac_system.ihp_grid_ac || hvac_system.ihp_ice_storage || hvac_system.ihp_pcm_storage
-      hvac_ap.demand_flexibility = true
+    if hvac_system.is_a?(HPXML::HeatingSystem) || hvac_system.is_a?(HPXML::CoolingSystem)
+      if hvac_system.modulating || hvac_system.dual_source
+        hvac_ap.demand_flexibility = true
+      end
+    elsif hvac_system.is_a?(HPXML::HeatPump)
+      if hvac_system.modulating || hvac_system.dual_source || hvac_system.ihp_grid_ac || hvac_system.ihp_ice_storage || hvac_system.ihp_pcm_storage
+        hvac_ap.demand_flexibility = true
+      end
     end
   end
 end
