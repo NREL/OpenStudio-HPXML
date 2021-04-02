@@ -4,7 +4,7 @@ on:
   push:
     branches: [ master ]
   pull_request:
-    types: [ synchronize, closed ]
+    types: [ opened, synchronize, closed ]
   workflow_dispatch:
 
 jobs:
@@ -46,7 +46,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: github.event.pull_request.base.sha # Checkout the target branch
+          ref: ${{ github.event.pull_request.base.sha }} # Checkout the target branch
 
       - name: Setup git branch
         shell: bash
