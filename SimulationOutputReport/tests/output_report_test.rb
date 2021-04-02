@@ -425,7 +425,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_annual_only
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'add_component_loads' => true,
                   'timeseries_frequency' => 'hourly',
@@ -447,7 +446,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_annual_only2
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'add_component_loads' => true,
                   'timeseries_frequency' => 'none',
@@ -469,7 +467,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_fuels
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => true,
@@ -492,7 +489,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_enduses
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
@@ -515,7 +511,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_hotwateruses
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
@@ -538,7 +533,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_total_loads
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
@@ -561,7 +555,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_component_loads
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'add_component_loads' => true,
                   'timeseries_frequency' => 'hourly',
@@ -585,7 +578,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_unmet_loads
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base-hvac-undersized.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
@@ -608,7 +600,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_zone_temperatures
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
@@ -631,7 +622,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_zone_temperatures_mf_space
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base-bldgtype-multifamily-adjacent-to-multiple.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
@@ -655,7 +645,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_airflows_with_exhaust_mechvent
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base-mechvent-exhaust.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
@@ -678,7 +667,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_airflows_with_whf
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base-mechvent-whole-house-fan.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
@@ -701,7 +689,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_airflows_with_clothes_dryer_exhaust
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base-appliances-gas.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
@@ -724,7 +711,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_airflows_with_balanced_mechvent
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base-mechvent-balanced.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
@@ -747,7 +733,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_airflows_with_cfis
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base-mechvent-cfis.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
@@ -770,7 +755,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_weather
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
@@ -793,7 +777,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_ALL
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => true,
@@ -816,7 +799,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_daily_ALL
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'daily',
                   'include_timeseries_fuel_consumptions' => true,
@@ -839,7 +821,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_monthly_ALL
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'monthly',
                   'include_timeseries_fuel_consumptions' => true,
@@ -862,7 +843,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_timestep
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'timestep',
                   'include_timeseries_fuel_consumptions' => true,
@@ -881,7 +861,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_timestep_10min
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base-simcontrol-timestep-10-mins.xml',
                   'timeseries_frequency' => 'timestep',
                   'include_timeseries_fuel_consumptions' => true,
@@ -900,7 +879,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_runperiod_Jan
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => true,
@@ -919,7 +897,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_daily_runperiod_Jan
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml',
                   'timeseries_frequency' => 'daily',
                   'include_timeseries_fuel_consumptions' => true,
@@ -938,7 +915,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_monthly_runperiod_Jan
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml',
                   'timeseries_frequency' => 'monthly',
                   'include_timeseries_fuel_consumptions' => true,
@@ -957,7 +933,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_timestep_runperiod_Jan
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml',
                   'timeseries_frequency' => 'timestep',
                   'include_timeseries_fuel_consumptions' => true,
@@ -976,7 +951,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_AMY_2012
-    skip
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base-location-AMY-2012.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => true,
@@ -995,7 +969,6 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_eri_designs
-    skip
     # Create derivative HPXML file w/ ERI design type set
     require 'fileutils'
     require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper.rb'
