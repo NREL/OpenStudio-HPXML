@@ -12,4 +12,3 @@ Not all may apply:
 - [ ] Changelog has been updated
 - [ ] `openstudio tasks.rb update_measures` has been run
 - [ ] No unexpected regression test changes on CI (checked comparison artifacts)
-- [ ] Replaced `workflow/tests/master` with `workflow/tests/results`
