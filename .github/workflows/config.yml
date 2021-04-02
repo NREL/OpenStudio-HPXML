@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           branch_name="${{ github.base_ref }}"
-          branch_sha=${{ github.event.pull_request.base.sha }}"
+          branch_sha="${{ github.event.pull_request.base.sha }}"
           echo "Checking out: $branch_name, $branch_sha"
           git checkout -b $branch_name || git checkout $branch_name
 
