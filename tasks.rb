@@ -294,6 +294,7 @@ def create_osws
     'extra-zero-freezer-kwh.osw' => 'base.osw',
     'extra-zero-clothes-washer-kwh.osw' => 'base.osw',
     'extra-zero-dishwasher-kwh.osw' => 'base.osw',
+    'extra-bldgtype-single-family-attached-atticroof-flat.osw' => 'base-bldgtype-single-family-attached.osw',
 
     'extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-gable.osw' => 'extra-bldgtype-single-family-attached-slab.osw',
     'extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-hip.osw' => 'extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-gable.osw',
@@ -2030,6 +2031,12 @@ def get_values(osw_file, step)
     step.setArgument('clothes_dryer_location', 'none')
   elsif ['extra-zero-dishwasher-kwh.osw'].include? osw_file
     step.setArgument('dishwasher_efficiency', '0')
+  elsif ['extra-bldgtype-single-family-attached-atticroof-flat.osw'].include? osw_file
+    step.setArgument('geometry_roof_type', 'flat')
+    step.setArgument('ducts_supply_leakage_value', 0.0)
+    step.setArgument('ducts_return_leakage_value', 0.0)
+    step.setArgument('ducts_supply_location', HPXML::LocationBasementConditioned)
+    step.setArgument('ducts_return_location', HPXML::LocationBasementConditioned)
 
   elsif ['extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-gable.osw'].include? osw_file
     step.setArgument('geometry_num_floors_above_grade', 2)
