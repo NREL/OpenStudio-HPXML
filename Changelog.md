@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.2.0 (Pending)
 
 __New Features__
+- **Breaking change**: Heating/cooling component loads no longer calculated by default for faster performance; use `--add-component-loads` argument if desired.
 - **Breaking change**: Replaces `Site/extension/ShelterCoefficient` with `Site/ShieldingofHome`.
 - **Breaking change**: `AirDistributionType` is now required for all air distributions.
 - Allows `DuctLeakageMeasurement` to not be specified for ductless fan coil systems.
@@ -9,6 +10,7 @@ __New Features__
 - Relaxes tolerance for duct leakage to outside warning when ducts solely in conditioned space.
 - Moves additional error-checking from the ruby measure to the schematron validator.
 - Adds more detail to error messages regarding the wrong data type in the HPXML file.
+- Adds error-checking for negative SEEReq results for shared cooling systems.
 
 __Bugfixes__
 - Fixes ruby error if elements (e.g., `SystemIdentifier`) exist without the proper 'id'/'idref' attribute.
