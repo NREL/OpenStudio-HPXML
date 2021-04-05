@@ -4211,10 +4211,15 @@ class HPXMLFile
       number_of_return_registers = args[:ducts_number_of_return_registers]
     end
 
+    if [HPXML::HVACTypeEvaporativeCooler].include?(args[:cooling_system_type]) && hpxml.heating_systems.size == 0 && hpxml.heat_pumps.size == 0
+      number_of_return_registers = nil
+    end
+
     if air_distribution_systems.size > 0
       hpxml.hvac_distributions.add(id: 'AirDistribution',
                                    distribution_system_type: HPXML::HVACDistributionTypeAir,
                                    conditioned_floor_area_served: args[:geometry_cfa],
+                                   air_type: HPXML::AirTypeRegularVelocity,
                                    number_of_return_registers: number_of_return_registers)
       air_distribution_systems.each do |hvac_system|
         hvac_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
@@ -4335,7 +4340,7 @@ class HPXMLFile
       if args[:mech_vent_fan_type] == HPXML::MechVentTypeCFIS
         hpxml.hvac_distributions.each do |hvac_distribution|
           next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
-          next unless hvac_distribution.air_type.nil?
+          next if hvac_distribution.air_type != HPXML::AirTypeRegularVelocity
 
           distribution_system_idref = hvac_distribution.id
         end
