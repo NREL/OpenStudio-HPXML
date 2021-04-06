@@ -68,9 +68,7 @@ jobs:
         shell: bash        
         run: |
           git status
-          cp results/results.csv workflow/tests/master/results.csv
-          cp results/results_ashrae_140.csv workflow/tests/master/results_ashrae_140.csv
-          cp results/results_hvac_sizing.csv workflow/tests/master/results_hvac_sizing.csv
+          cp -r results/results* workflow/tests/master
           git add workflow/tests/master
           git status
           if [[ $(git diff --cached --exit-code) ]]; then
