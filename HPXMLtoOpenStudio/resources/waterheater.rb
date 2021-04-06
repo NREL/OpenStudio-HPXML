@@ -1747,7 +1747,7 @@ class Waterheater
                         HPXML::FuelTypeCoke => 'fuel_oil', # assumption
                         HPXML::FuelTypeWoodCord => 'fuel_oil', # assumption
                         HPXML::FuelTypeWoodPellets => 'fuel_oil', # assumption
-                        HPXML::FuelTypePropane => 'lpg'}[fuel_type]
+                        HPXML::FuelTypePropane => 'lpg' }[fuel_type]
 
     value = nil
     lookup_year = 0
