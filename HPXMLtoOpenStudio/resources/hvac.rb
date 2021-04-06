@@ -4230,33 +4230,38 @@ class HVAC
     return { rh_setpoint: rh_setpoint, ief: ief }
   end
 
-  def self.lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id = 'shipment_weighted', state_code = nil)
+  def self.lookup_hvac_efficiency(year, hvac_type, fuel_type, units)
     year = 0 if year.nil?
 
     type_id = { HPXML::HVACTypeCentralAirConditioner => 'split_dx',
                 HPXML::HVACTypeRoomAirConditioner => 'packaged_dx',
                 HPXML::HVACTypeHeatPumpAirToAir => 'heat_pump',
-                HPXML::HVACTypeHeatPumpMiniSplit => 'mini_split', # FIXME: no defaults for GSHP, WLHP, chiller?
-                HPXML::HVACTypeMiniSplitAirConditioner => 'mini_split',
-                HPXML::HVACTypeFurnace => 'central_furnace', # FIXME: no defaults for fireplace, fixed heater, portable heater, floor furnace?
+                HPXML::HVACTypeFurnace => 'central_furnace',
                 HPXML::HVACTypeWallFurnace => 'wall_furnace',
-                HPXML::HVACTypeBoiler => 'boiler' }[hvac_type]
-    fail "Unexpected hvac_type #{hvac_type}." if type_id.nil?
+                HPXML::HVACTypeFloorFurnace => 'wall_furnace', # floor furnaces mapped to wall furnaces
+                HPXML::HVACTypeBoiler => 'boiler'}[hvac_type]
 
     fuel_primary_id = { HPXML::FuelTypeElectricity => 'electric',
                         HPXML::FuelTypeNaturalGas => 'natural_gas',
                         HPXML::FuelTypeOil => 'fuel_oil',
-                        HPXML::FuelTypePropane => 'lpg' }[fuel_type]
-    fail "Unexpected fuel_type #{fuel_type}." if fuel_primary_id.nil?
+                        HPXML::FuelTypeOil1 => 'fuel_oil', # assumption
+                        HPXML::FuelTypeOil2 => 'fuel_oil', # assumption
+                        HPXML::FuelTypeOil4 => 'fuel_oil', # assumption
+                        HPXML::FuelTypeOil5or6 => 'fuel_oil', # assumption
+                        HPXML::FuelTypeKerosene => 'fuel_oil', # assumption
+                        HPXML::FuelTypeDiesel => 'fuel_oil', # assumption
+                        HPXML::FuelTypeCoal => 'fuel_oil', # assumption
+                        HPXML::FuelTypeCoalAnthracite => 'fuel_oil', # assumption
+                        HPXML::FuelTypeCoalBituminous => 'fuel_oil', # assumption
+                        HPXML::FuelTypeCoke => 'fuel_oil', # assumption
+                        HPXML::FuelTypeWoodCord => 'fuel_oil', # assumption
+                        HPXML::FuelTypeWoodPellets => 'fuel_oil', # assumption
+                        HPXML::FuelTypePropane => 'lpg'}[fuel_type]
 
     metric_id = units.downcase
-
-    fail "Invalid performance_id for HVAC lookup #{performance_id}." unless performance_id == 'shipment_weighted'
-
     value = nil
     lookup_year = 0
     CSV.foreach(File.join(File.dirname(__FILE__), 'lu_hvac_equipment_efficiency.csv'), headers: true) do |row|
-      next unless row['performance_id'] == performance_id
       next unless row['type_id'] == type_id
       next unless row['fuel_primary_id'] == fuel_primary_id
       next unless row['metric_id'] == metric_id
@@ -4267,7 +4272,6 @@ class HVAC
         value = Float(row['value'])
       end
     end
-    fail 'Could not lookup default HVAC efficiency.' if value.nil?
 
     return value
   end

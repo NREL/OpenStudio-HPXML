@@ -155,6 +155,3 @@ year,performance_id,type_id,fuel_primary_id,metric_id,units_id,value
 2008,shipment_weighted,storage,fuel_oil,EF,none,0.59
 2009,shipment_weighted,storage,fuel_oil,EF,none,0.59
 2010,shipment_weighted,storage,fuel_oil,EF,none,0.59
-0,energy_star,storage,natural_gas,EF,none,0.67
-0,energy_star,storage,lpg,EF,none,0.67
-0,energy_star,heat_pump,electric,EF,none,2.76

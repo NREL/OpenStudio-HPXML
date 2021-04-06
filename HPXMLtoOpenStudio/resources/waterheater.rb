@@ -1729,21 +1729,29 @@ class Waterheater
     return solar_fraction.to_f
   end
 
-  def self.lookup_water_heater_efficiency(year, fuel_type, performance_id = 'shipment_weighted')
+  def self.lookup_water_heater_efficiency(year, fuel_type)
     year = 0 if year.nil?
 
-    fuel_primary_id = { HPXML::FuelTypeElectricity => 'electric', # FIXME: no defaults for tankless water heaters and heatpump water heaters?
+    fuel_primary_id = { HPXML::FuelTypeElectricity => 'electric',
                         HPXML::FuelTypeNaturalGas => 'natural_gas',
                         HPXML::FuelTypeOil => 'fuel_oil',
-                        HPXML::FuelTypePropane => 'lpg' }[fuel_type]
-    fail "Unexpected fuel_type #{fuel_type}." if fuel_primary_id.nil?
-
-    fail "Invalid performance_id for water heater lookup #{performance_id}." unless performance_id == 'shipment_weighted'
+                        HPXML::FuelTypeOil1 => 'fuel_oil', # assumption
+                        HPXML::FuelTypeOil2 => 'fuel_oil', # assumption
+                        HPXML::FuelTypeOil4 => 'fuel_oil', # assumption
+                        HPXML::FuelTypeOil5or6 => 'fuel_oil', # assumption
+                        HPXML::FuelTypeKerosene => 'fuel_oil', # assumption
+                        HPXML::FuelTypeDiesel => 'fuel_oil', # assumption
+                        HPXML::FuelTypeCoal => 'fuel_oil', # assumption
+                        HPXML::FuelTypeCoalAnthracite => 'fuel_oil', # assumption
+                        HPXML::FuelTypeCoalBituminous => 'fuel_oil', # assumption
+                        HPXML::FuelTypeCoke => 'fuel_oil', # assumption
+                        HPXML::FuelTypeWoodCord => 'fuel_oil', # assumption
+                        HPXML::FuelTypeWoodPellets => 'fuel_oil', # assumption
+                        HPXML::FuelTypePropane => 'lpg'}[fuel_type]
 
     value = nil
     lookup_year = 0
     CSV.foreach(File.join(File.dirname(__FILE__), 'lu_water_heater_efficiency.csv'), headers: true) do |row|
-      next unless row['performance_id'] == performance_id
       next unless row['fuel_primary_id'] == fuel_primary_id
 
       row_year = Integer(row['year'])
@@ -1752,7 +1760,6 @@ class Waterheater
         value = Float(row['value'])
       end
     end
-    fail 'Could not lookup default water heating efficiency.' if value.nil?
 
     return value
   end

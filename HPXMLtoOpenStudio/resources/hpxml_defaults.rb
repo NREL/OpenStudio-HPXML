@@ -432,49 +432,58 @@ class HPXMLDefaults
       heating_system_type = heating_system.heating_system_type
       heating_system_fuel = heating_system.heating_system_fuel
 
-      if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace].include? heating_system_type
+      if [HPXML::HVACTypeBoiler, HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace].include? heating_system_type
         next unless heating_system.heating_efficiency_afue.nil?
 
         if heating_system_fuel == HPXML::FuelTypeElectricity
           heating_system.heating_efficiency_afue = 0.98
-        elsif [HPXML::FuelTypeNaturalGas, HPXML::FuelTypeOil, HPXML::FuelTypePropane].include? heating_system_fuel
-          heating_system.heating_efficiency_afue = HVAC.lookup_hvac_efficiency(year_installed, heating_system_type, heating_system_fuel, 'AFUE')
         else
-          fail "Unexpected fuel type: Cannot find #{heating_system_fuel} #{heating_system_type} default efficiency."
+          if [HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace].include? heating_system_type
+            heating_system_fuel = HPXML::FuelTypeNaturalGas # The lookup table provides efficiencies only for gas wall/floor furnace. Use efficiencies for gas wall/floor furnace when their fuel type is other than electricity.
+          end
+          heating_system.heating_efficiency_afue = HVAC.lookup_hvac_efficiency(year_installed, heating_system_type, heating_system_fuel, HPXML::UnitsAFUE)
         end
         heating_system.heating_efficiency_afue_isdefaulted = true
-      elsif heating_system_type == HPXML::HVACTypeBoiler
-        next unless heating_system.heating_efficiency_afue.nil?
-
-        if heating_system_fuel == HPXML::FuelTypeElectricity
-          heating_system.heating_efficiency_afue = 0.98
-        elsif [HPXML::FuelTypeNaturalGas, HPXML::FuelTypeOil, HPXML::FuelTypePropane].include? heating_system_fuel
-          heating_system.heating_efficiency_afue = HVAC.lookup_hvac_efficiency(year_installed, heating_system_type, heating_system_fuel, 'AFUE')
-        else
-          fail "Unexpected fuel type: Cannot find #{heating_system_fuel} #{heating_system_type} default efficiency."
-        end
-        heating_system.heating_efficiency_afue_isdefaulted = true
-      elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFixedHeater].include? heating_system_type
+      elsif [HPXML::HVACTypeElectricResistance].include? heating_system_type
         next unless heating_system.heating_efficiency_percent.nil?
 
         heating_system.heating_efficiency_percent = 0.98
         heating_system.heating_efficiency_percent_isdefaulted = true
-      elsif heating_system_type == HPXML::HVACTypeStove
+      elsif [HPXML::HVACTypeStove, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFixedHeater].include? heating_system_type
         next unless heating_system.heating_efficiency_percent.nil?
 
-        if heating_system_fuel == HPXML::FuelTypeWoodCord
-          heating_system.heating_efficiency_percent = 0.60
+        if heating_system_fuel == HPXML::FuelTypeElectricity
+          heating_system.heating_efficiency_percent = 0.98
+        elsif heating_system_fuel == HPXML::FuelTypeNaturalGas
+          heating_system.heating_efficiency_percent = 0.85 # https://www.yankeedoodleinc.com/stoves/gas/
+        elsif heating_system_fuel == HPXML::FuelTypeWoodCord
+          heating_system.heating_efficiency_percent = 0.60 # HEScore assumption
         elsif heating_system_fuel == HPXML::FuelTypeWoodPellets
-          heating_system.heating_efficiency_percent = 0.78
-        else
-          fail "Unexpected fuel type: Cannot find #{heating_system_fuel} #{heating_system_type} default efficiency."
+          heating_system.heating_efficiency_percent = 0.78 # HEScore assumption
+        elsif heating_system_fuel == HPXML::FuelTypePropane
+          heating_system.heating_efficiency_percent = 0.87 # https://www.yankeedoodleinc.com/stoves/gas/
+        elsif [HPXML::FuelTypeOil, HPXML::FuelTypeOil1, HPXML::FuelTypeOil2, HPXML::FuelTypeOil4, HPXML::FuelTypeOil5or6, HPXML::FuelTypeKerosene, HPXML::FuelTypeDiesel].include? heating_system_fuel
+          heating_system.heating_efficiency_percent = 0.82 # https://www.kumastoves.com/Store/ProductDetails/arctic
+        elsif [HPXML::FuelTypeCoal, HPXML::FuelTypeCoalAnthracite, HPXML::FuelTypeCoalBituminous, HPXML::FuelTypeCoke].include? heating_system_fuel
+          heating_system.heating_efficiency_percent = 0.75 # http://www.stanleycbierly.com/projects/the-warmth-and-economy-of-owning-a-coal-stove/
         end
         heating_system.heating_efficiency_percent_isdefaulted = true
       elsif heating_system_type == HPXML::HVACTypeFireplace
         next unless heating_system.heating_efficiency_percent.nil?
 
-        # FIXME: Need to use heating_efficiency_percent for fireplace
-        heating_system.heating_efficiency_percent = 0.98
+        if heating_system_fuel == HPXML::FuelTypeElectricity
+          heating_system.heating_efficiency_percent = 0.98
+        elsif heating_system_fuel == HPXML::FuelTypeNaturalGas
+          heating_system.heating_efficiency_percent = 0.75 # with inserts; https://www.volunteerenergy.com/energy-efficient-fireplace/
+        elsif [HPXML::FuelTypeWoodCord, HPXML::FuelTypeWoodPellets].include? heating_system_fuel
+          heating_system.heating_efficiency_percent = 0.70 # https://www.houselogic.com/organize-maintain/home-maintenance-tips/wood-burning-fireplace-inserts-save-energy/
+        elsif heating_system_fuel == HPXML::FuelTypePropane
+          heating_system.heating_efficiency_percent = 0.80 # https://www.propanenewyork.com/fireplace-propane-use/#:~:text=Efficiency%3A%20A%20propane%20fireplace%20runs,efficient%20than%20a%20wood%20fireplace.
+        elsif [HPXML::FuelTypeOil, HPXML::FuelTypeOil1, HPXML::FuelTypeOil2, HPXML::FuelTypeOil4, HPXML::FuelTypeOil5or6, HPXML::FuelTypeKerosene, HPXML::FuelTypeDiesel].include? heating_system_fuel
+          heating_system.heating_efficiency_percent = 0.82 # assume oil-burning stove efficiency as oil-burning fireplace efficiency
+        elsif [HPXML::FuelTypeCoal, HPXML::FuelTypeCoalAnthracite, HPXML::FuelTypeCoalBituminous, HPXML::FuelTypeCoke].include? heating_system_fuel
+          heating_system.heating_efficiency_percent = 0.75 # assume coal-burning stove efficiency as oil-burning fireplace efficiency
+        end
         heating_system.heating_efficiency_percent_isdefaulted = true
       end
     end
@@ -487,18 +496,13 @@ class HPXMLDefaults
       if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
         next unless cooling_system.cooling_efficiency_seer.nil?
         
-        cooling_system.cooling_efficiency_seer = HVAC.lookup_hvac_efficiency(year_installed, cooling_system_type, cooling_system_fuel, 'SEER')
+        cooling_system.cooling_efficiency_seer = HVAC.lookup_hvac_efficiency(year_installed, cooling_system_type, cooling_system_fuel, HPXML::UnitsSEER)
         cooling_system.cooling_efficiency_seer_isdefaulted = true
       elsif cooling_system_type == HPXML::HVACTypeRoomAirConditioner
         next unless cooling_system.cooling_efficiency_eer.nil?
 
-        cooling_system.cooling_efficiency_eer = HVAC.lookup_hvac_efficiency(year_installed, cooling_system_type, cooling_system_fuel, 'EER')
+        cooling_system.cooling_efficiency_eer = HVAC.lookup_hvac_efficiency(year_installed, cooling_system_type, cooling_system_fuel, HPXML::UnitsEER)
         cooling_system.cooling_efficiency_eer_isdefaulted = true
-      elsif cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner
-        next unless cooling_system.cooling_efficiency_seer.nil?
-
-        cooling_system.cooling_efficiency_seer = HVAC.lookup_hvac_efficiency(year_installed, cooling_system_type, cooling_system_fuel, 'SEER')
-        cooling_system.cooling_efficiency_seer_isdefaulted = true
       end
     end
 
@@ -507,15 +511,15 @@ class HPXMLDefaults
       heat_pump_type = heat_pump.heat_pump_type
       heat_pump_fuel = HPXML::FuelTypeElectricity
 
-      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
+      if [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump_type
         next unless (heat_pump.cooling_efficiency_seer.nil? || heat_pump.heating_efficiency_hspf.nil?)
 
         if heat_pump.cooling_efficiency_seer.nil?
-          heat_pump.cooling_efficiency_seer = HVAC.lookup_hvac_efficiency(year_installed, heat_pump_type, heat_pump_fuel, 'SEER')
+          heat_pump.cooling_efficiency_seer = HVAC.lookup_hvac_efficiency(year_installed, heat_pump_type, heat_pump_fuel, HPXML::UnitsSEER)
           heat_pump.cooling_efficiency_seer_isdefaulted = true
         end
         if heat_pump.heating_efficiency_hspf.nil?
-          heat_pump.heating_efficiency_hspf = HVAC.lookup_hvac_efficiency(year_installed, heat_pump_type, heat_pump_fuel, 'HSPF')
+          heat_pump.heating_efficiency_hspf = HVAC.lookup_hvac_efficiency(year_installed, heat_pump_type, heat_pump_fuel, HPXML::UnitsHSPF)
           heat_pump.heating_efficiency_hspf_isdefaulted = true
         end
       end
@@ -992,13 +996,13 @@ class HPXMLDefaults
           water_heating_system.tank_volume = Waterheater.get_default_tank_volume(water_heating_system.fuel_type, nbeds, hpxml.building_construction.number_of_bathrooms)
           water_heating_system.tank_volume_isdefaulted = true
         end
-        if water_heating_system.recovery_efficiency.nil?
-          water_heating_system.recovery_efficiency = Waterheater.get_default_recovery_efficiency(water_heating_system)
-          water_heating_system.recovery_efficiency_isdefaulted = true
-        end
         if water_heating_system.energy_factor.nil? && water_heating_system.uniform_energy_factor.nil?
           water_heating_system.energy_factor = Waterheater.lookup_water_heater_efficiency(water_heating_system.year_installed, water_heating_system.fuel_type)
           water_heating_system.energy_factor_isdefaulted = true
+        end
+        if water_heating_system.recovery_efficiency.nil?
+          water_heating_system.recovery_efficiency = Waterheater.get_default_recovery_efficiency(water_heating_system)
+          water_heating_system.recovery_efficiency_isdefaulted = true
         end
       end
       if water_heating_system.location.nil?
