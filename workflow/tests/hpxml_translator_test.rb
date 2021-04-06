@@ -29,7 +29,6 @@ class HPXMLTest < MiniTest::Test
     xmls = []
     sample_files_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files'))
     Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
-      next if xml.include? 'base-hvac-multiple' # FIXME: TEMPORARY
       xmls << File.absolute_path(xml)
     end
 
@@ -89,6 +88,30 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? osm_path)
     hpxml_defaults_path = File.join(File.dirname(xml), 'run', 'in.xml')
     assert(File.exist? hpxml_defaults_path)
+  end
+
+  def test_run_simulation_faster_performance
+    # Run w/ --skip-validation and w/o --add-component-loads arguments
+    os_cli = OpenStudio.getOpenStudioCLI
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    command = "#{os_cli} #{rb_path} -x #{xml} --skip-validation"
+    system(command, err: File::NULL)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+
+    # Check component loads don't exist
+    component_loads = {}
+    CSV.read(csv_output_path, headers: false).each do |data|
+      next unless data[0].to_s.start_with? 'Component Load'
+
+      component_loads[data[0]] = Float(data[1])
+    end
+    assert_equal(0, component_loads.size)
   end
 
   def test_template_osw
@@ -190,6 +213,7 @@ class HPXMLTest < MiniTest::Test
                                                             'Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1.'],
                             'hvac-distribution-return-duct-leakage-missing.xml' => ['Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"] [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution]'],
                             'hvac-inconsistent-fan-powers.xml' => ["Fan powers for heating system 'HeatingSystem' and cooling system 'CoolingSystem' are attached to a single distribution system and therefore must be the same."],
+                            'hvac-shared-negative-seer-eq.xml' => ["Negative SEER equivalent calculated for cooling system 'CoolingSystem', double check inputs."],
                             'invalid-assembly-effective-rvalue.xml' => ['Expected Insulation/AssemblyEffectiveRValue to be greater than 0 [context: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall]'],
                             'invalid-datatype-boolean.xml' => ["Cannot convert 'FOOBAR' to boolean for Roof/RadiantBarrier."],
                             'invalid-datatype-integer.xml' => ["Cannot convert '2.5' to integer for BuildingConstruction/NumberofBedrooms."],
@@ -292,6 +316,8 @@ class HPXMLTest < MiniTest::Test
     end
   end
 
+  private
+
   def _run_xml(xml, worker_num = nil, expect_error = false, expect_error_msgs = nil)
     print "Testing #{File.basename(xml)}...\n"
     rundir = File.join(@this_dir, "test#{worker_num}")
@@ -305,7 +331,7 @@ class HPXMLTest < MiniTest::Test
     elsif xml.include? 'multiple-buildings-wrong-building-id.xml'
       building_id = '--building-id MyFoo'
     end
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} -o #{rundir} --debug --monthly ALL #{building_id}"
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} --add-component-loads -o #{rundir} --debug --monthly ALL #{building_id}"
     workflow_start = Time.now
     success = system(command)
     workflow_time = Time.now - workflow_start
@@ -348,7 +374,7 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? timeseries_csv_path)
 
     # Get results
-    results = _get_results(rundir, workflow_time, annual_csv_path, xml)
+    results = _get_simulation_results(rundir, workflow_time, annual_csv_path, xml)
 
     # Check outputs
     hpxml_defaults_path = File.join(rundir, 'in.xml')
@@ -361,13 +387,13 @@ class HPXMLTest < MiniTest::Test
       end
       flunk "EPvalidator.xml error in #{hpxml_defaults_path}."
     end
-    sizing_results = _get_sizing_results(hpxml, xml)
+    sizing_results = _get_hvac_sizing_results(hpxml, xml)
     _verify_outputs(rundir, xml, results, hpxml)
 
     return results, sizing_results
   end
 
-  def _get_results(rundir, workflow_time, annual_csv_path, xml)
+  def _get_simulation_results(rundir, workflow_time, annual_csv_path, xml)
     # Grab all outputs from reporting measure CSV annual results
     results = {}
     CSV.foreach(annual_csv_path) do |row|
@@ -391,7 +417,7 @@ class HPXMLTest < MiniTest::Test
     return results
   end
 
-  def _get_sizing_results(hpxml, xml)
+  def _get_hvac_sizing_results(hpxml, xml)
     results = {}
     return if xml.include? 'ASHRAE_Standard_140'
 
