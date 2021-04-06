@@ -503,25 +503,12 @@ class HVAC
     end
 
     # Cooling Coil
-    clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit.new(model)
+    clg_total_cap_curve = create_curve_quad_linear(model, hp_ap.cool_cap_ft_spec[0], obj_name + ' clg total cap curve')
+    clg_sens_cap_curve = create_curve_quint_linear(model, hp_ap.cool_sh_ft_spec[0], obj_name + ' clg sens cap curve')
+    clg_power_curve = create_curve_quad_linear(model, hp_ap.cool_power_ft_spec[0], obj_name + ' clg power curve')
+    clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit.new(model, clg_total_cap_curve, clg_sens_cap_curve, clg_power_curve)
     clg_coil.setName(obj_name + ' clg coil')
     clg_coil.setRatedCoolingCoefficientofPerformance(1.0 / hp_ap.cool_rated_eirs[0])
-    clg_coil.setTotalCoolingCapacityCoefficient1(hp_ap.cool_cap_ft_spec[0][0])
-    clg_coil.setTotalCoolingCapacityCoefficient2(hp_ap.cool_cap_ft_spec[0][1])
-    clg_coil.setTotalCoolingCapacityCoefficient3(hp_ap.cool_cap_ft_spec[0][2])
-    clg_coil.setTotalCoolingCapacityCoefficient4(hp_ap.cool_cap_ft_spec[0][3])
-    clg_coil.setTotalCoolingCapacityCoefficient5(hp_ap.cool_cap_ft_spec[0][4])
-    clg_coil.setSensibleCoolingCapacityCoefficient1(hp_ap.cool_sh_ft_spec[0][0])
-    clg_coil.setSensibleCoolingCapacityCoefficient2(hp_ap.cool_sh_ft_spec[0][1])
-    clg_coil.setSensibleCoolingCapacityCoefficient3(hp_ap.cool_sh_ft_spec[0][2])
-    clg_coil.setSensibleCoolingCapacityCoefficient4(hp_ap.cool_sh_ft_spec[0][3])
-    clg_coil.setSensibleCoolingCapacityCoefficient5(hp_ap.cool_sh_ft_spec[0][4])
-    clg_coil.setSensibleCoolingCapacityCoefficient6(hp_ap.cool_sh_ft_spec[0][5])
-    clg_coil.setCoolingPowerConsumptionCoefficient1(hp_ap.cool_power_ft_spec[0][0])
-    clg_coil.setCoolingPowerConsumptionCoefficient2(hp_ap.cool_power_ft_spec[0][1])
-    clg_coil.setCoolingPowerConsumptionCoefficient3(hp_ap.cool_power_ft_spec[0][2])
-    clg_coil.setCoolingPowerConsumptionCoefficient4(hp_ap.cool_power_ft_spec[0][3])
-    clg_coil.setCoolingPowerConsumptionCoefficient5(hp_ap.cool_power_ft_spec[0][4])
     clg_coil.setNominalTimeforCondensateRemovaltoBegin(1000)
     clg_coil.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
     clg_coil.setRatedAirFlowRate(UnitConversions.convert(clg_cfm, 'cfm', 'm^3/s'))
@@ -531,19 +518,11 @@ class HVAC
     hvac_map[heat_pump.id] << clg_coil
 
     # Heating Coil
-    htg_coil = OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit.new(model)
+    htg_cap_curve = create_curve_quad_linear(model, hp_ap.heat_cap_ft_spec[0], obj_name + ' htg cap curve')
+    htg_power_curve = create_curve_quad_linear(model, hp_ap.heat_power_ft_spec[0], obj_name + ' htg power curve')
+    htg_coil = OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit.new(model, htg_cap_curve, htg_power_curve)
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setRatedHeatingCoefficientofPerformance(1.0 / hp_ap.heat_rated_eirs[0])
-    htg_coil.setHeatingCapacityCoefficient1(hp_ap.heat_cap_ft_spec[0][0])
-    htg_coil.setHeatingCapacityCoefficient2(hp_ap.heat_cap_ft_spec[0][1])
-    htg_coil.setHeatingCapacityCoefficient3(hp_ap.heat_cap_ft_spec[0][2])
-    htg_coil.setHeatingCapacityCoefficient4(hp_ap.heat_cap_ft_spec[0][3])
-    htg_coil.setHeatingCapacityCoefficient5(hp_ap.heat_cap_ft_spec[0][4])
-    htg_coil.setHeatingPowerConsumptionCoefficient1(hp_ap.heat_power_ft_spec[0][0])
-    htg_coil.setHeatingPowerConsumptionCoefficient2(hp_ap.heat_power_ft_spec[0][1])
-    htg_coil.setHeatingPowerConsumptionCoefficient3(hp_ap.heat_power_ft_spec[0][2])
-    htg_coil.setHeatingPowerConsumptionCoefficient4(hp_ap.heat_power_ft_spec[0][3])
-    htg_coil.setHeatingPowerConsumptionCoefficient5(hp_ap.heat_power_ft_spec[0][4])
     htg_coil.setRatedAirFlowRate(UnitConversions.convert(htg_cfm, 'cfm', 'm^3/s'))
     htg_coil.setRatedWaterFlowRate(UnitConversions.convert(hp_ap.GSHP_Loop_flow, 'gal/min', 'm^3/s'))
     htg_coil.setRatedHeatingCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
@@ -3045,6 +3024,29 @@ class HVAC
     curve.setCoefficient3Constant(coeff[2])
     curve.setMinimumValueofx(min_x)
     curve.setMaximumValueofx(max_x)
+    return curve
+  end
+
+  def self.create_curve_quad_linear(model, coeff, name)
+    curve = OpenStudio::Model::CurveQuadLinear.new(model)
+    curve.setName(name)
+    curve.setCoefficient1Constant(coeff[0])
+    curve.setCoefficient2w(coeff[1])
+    curve.setCoefficient3x(coeff[2])
+    curve.setCoefficient4y(coeff[3])
+    curve.setCoefficient5z(coeff[4])
+    return curve
+  end
+
+  def self.create_curve_quint_linear(model, coeff, name)
+    curve = OpenStudio::Model::CurveQuintLinear.new(model)
+    curve.setName(name)
+    curve.setCoefficient1Constant(coeff[0])
+    curve.setCoefficient2v(coeff[1])
+    curve.setCoefficient3w(coeff[2])
+    curve.setCoefficient4x(coeff[3])
+    curve.setCoefficient5y(coeff[4])
+    curve.setCoefficient6z(coeff[5])
     return curve
   end
 
