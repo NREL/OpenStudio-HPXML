@@ -1,17 +1,17 @@
 require 'csv'
 
 folder = 'comparisons'
-files = ['results.csv', 'results_ashrae_140.csv', 'results_hvac_sizing.csv']
+files = Dir[File.join(File.dirname(__FILE__), "master/results*")].map {|x| File.basename(x)}
 
-dir = File.join(File.dirname(__FILE__), 'tests', folder)
+dir = File.join(File.dirname(__FILE__), folder)
 unless Dir.exist?(dir)
   Dir.mkdir(dir)
 end
 
 files.each do |file|
   # load file
-  master_rows = CSV.read(File.join(File.dirname(__FILE__), "tests/master/#{file}"))
-  feature_rows = CSV.read(File.join(File.dirname(__FILE__), "tests/results/#{file}"))
+  master_rows = CSV.read(File.join(File.dirname(__FILE__), "master/#{file}"))
+  feature_rows = CSV.read(File.join(File.dirname(__FILE__), "results/#{file}"))
 
   # get columns
   master_cols = master_rows[0]
