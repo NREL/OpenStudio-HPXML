@@ -3063,7 +3063,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     end
   elsif ['base-hvac-furnace-elec-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
-    hpxml.heating_systems[0].heating_efficiency_afue = 1
+    hpxml.heating_systems[0].heating_efficiency_afue = 1.0
   elsif ['invalid_files/unattached-hvac-distribution.xml'].include? hpxml_file
     hpxml.heating_systems[0].distribution_system_idref = 'foobar'
   elsif ['invalid_files/hvac-invalid-distribution-system-type.xml'].include? hpxml_file

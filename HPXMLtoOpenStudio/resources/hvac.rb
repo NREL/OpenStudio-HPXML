@@ -1879,7 +1879,7 @@ class HVAC
       end
 
       # ANSI/RESNET/ICC 301-2019 Equation 4.4-5
-      return ((sp_kw / n_dweq) + aux_in) * 2080.0 # kWh/yr
+      return (((sp_kw / n_dweq) + aux_in) * 2080.0).round(2) # kWh/yr
 
     else # In-unit boilers
 
@@ -4062,11 +4062,13 @@ class HVAC
       end
 
       cooling_system.cooling_system_type = HPXML::HVACTypeCentralAirConditioner
-      cooling_system.cooling_efficiency_seer = seer_eq
+      cooling_system.cooling_efficiency_seer = seer_eq.round(2)
       cooling_system.cooling_efficiency_kw_per_ton = nil
       cooling_system.cooling_capacity = nil # Autosize the equipment
       cooling_system.is_shared_system = false
       cooling_system.number_of_units_served = nil
+      cooling_system.shared_loop_watts = nil
+      cooling_system.shared_loop_motor_efficiency = nil
 
       # Assign new distribution system to air conditioner
       if distribution_type == HPXML::HVACDistributionTypeHydronic
