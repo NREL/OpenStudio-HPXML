@@ -4478,7 +4478,6 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].tank_volume = nil
     hpxml.water_heating_systems[0].recovery_efficiency = nil
     hpxml.water_heating_systems[0].energy_factor = nil
-    hpxml.water_heating_systems[0].first_hour_rating = 46.0
     hpxml.water_heating_systems[0].year_installed = 2009
   elsif ['base-bldgtype-multifamily-shared-water-heater.xml'].include? hpxml_file
     hpxml.water_heating_systems.clear

@@ -316,7 +316,6 @@
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <YearInstalled>2009</YearInstalled>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <FirstHourRating>46.0</FirstHourRating>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution'/>
