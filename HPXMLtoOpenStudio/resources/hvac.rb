@@ -1301,11 +1301,13 @@ class HVAC
   def self.set_cool_curves_room_ac(cooling_system)
     clg_ap = cooling_system.additional_properties
 
-    # From Frigidaire 10.7 EER unit in Winkler et. al. Lab Testing of Window ACs (2013)
-    clg_ap.cool_cap_ft_spec = [[0.43945980246913574, -0.0008922469135802481, 0.00013984567901234569, 0.0038489259259259253, -5.6327160493827156e-05, 2.041358024691358e-05]]
-    clg_ap.cool_eir_ft_spec = [[6.310506172839506, -0.17705185185185185, 0.0014645061728395061, 0.012571604938271608, 0.0001493827160493827, -0.00040308641975308644]]
-    clg_ap.cool_cap_fflow_spec = [[0.887, 0.1128, 0]]
-    clg_ap.cool_eir_fflow_spec = [[1.763, -0.6081, 0]]
+    # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
+    # https://www.nrel.gov/docs/fy13osti/56354.pdf
+    clg_ap.cool_cap_ft_spec = [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
+    clg_ap.cool_eir_ft_spec = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
+    # Single stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
+    clg_ap.cool_cap_fflow_spec = [[0.718664047, 0.41797409, -0.136638137]]
+    clg_ap.cool_eir_fflow_spec = [[1.143487507, -0.13943972, -0.004047787]]
   end
 
   def self.set_cool_curves_mshp(heat_pump, num_speeds)
