@@ -25,7 +25,7 @@ jobs:
 
       - name: Compare results
         run: |
-          ruby workflow/compare.rb
+          ruby workflow/tests/compare.rb
 
       - name: Store results
         uses: actions/upload-artifact@v2
