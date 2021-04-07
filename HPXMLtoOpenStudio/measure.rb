@@ -318,7 +318,7 @@ class OSModel
     @default_azimuths = get_default_azimuths()
 
     # Apply defaults to HPXML object
-    HPXMLDefaults.apply(@hpxml, @eri_version, weather, epw_file)
+    HPXMLDefaults.apply(@hpxml, @eri_version, weather, epw_file: epw_file)
 
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 

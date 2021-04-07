@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>52426b89-2920-49a6-8576-88724d1f3d00</version_id>
-  <version_modified>20210331T201641Z</version_modified>
+  <version_id>2d37bca4-05f1-4d66-abcf-bdf088c2707f</version_id>
+  <version_modified>20210407T191435Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -518,28 +518,10 @@
       <checksum>EF9BC498</checksum>
     </file>
     <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F38F9875</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0021C3D6</checksum>
-    </file>
-    <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>73D23AF9</checksum>
-    </file>
-    <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3F2FDFC1</checksum>
     </file>
     <file>
       <filename>misc_loads.rb</filename>
@@ -556,7 +538,25 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>A91E3536</checksum>
+      <checksum>48D6E5F5</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>97B17FAA</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1A2ABE61</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>17D99E62</checksum>
     </file>
   </files>
 </measure>
