@@ -462,7 +462,8 @@ class HPXMLDefaults
           cooling_system.cooling_shr = 0.78
         end
         cooling_system.cooling_shr_isdefaulted = true
-      elsif cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
+      elsif cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner ||
+            cooling_system.cooling_system_type == HPXML::HVACTypePTAC
         cooling_system.cooling_shr = 0.65
         cooling_system.cooling_shr_isdefaulted = true
       elsif cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner
@@ -631,22 +632,22 @@ class HPXMLDefaults
     # Detailed HVAC performance
     hpxml.cooling_systems.each do |cooling_system|
       clg_ap = cooling_system.additional_properties
-      if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
+      if [HPXML::HVACTypeCentralAirConditioner,
+          HPXML::HVACTypeRoomAirConditioner,
+          HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
+        use_eer = true
         # Note: We use HP cooling curve so that a central AC behaves the same.
         HVAC.set_num_speeds(cooling_system)
-        HVAC.set_fan_power_rated(cooling_system)
-        HVAC.set_crankcase_assumptions(cooling_system)
+        if not [HPXML::HVACTypeRoomAirConditioner,
+                HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
+          HVAC.set_fan_power_rated(cooling_system)
+          HVAC.set_crankcase_assumptions(cooling_system)
+          HVAC.set_cool_rated_eirs(cooling_system)
+          use_eer = false
+        end
 
         HVAC.set_cool_c_d(cooling_system, clg_ap.num_speeds)
-        HVAC.set_cool_curves_ashp(cooling_system)
-        HVAC.set_cool_rated_cfm_per_ton(cooling_system)
-        HVAC.set_cool_rated_shrs_gross(cooling_system)
-        HVAC.set_cool_rated_eirs(cooling_system)
-
-      elsif [HPXML::HVACTypeRoomAirConditioner].include? cooling_system.cooling_system_type
-        HVAC.set_num_speeds(cooling_system)
-        HVAC.set_cool_c_d(cooling_system, clg_ap.num_speeds)
-        HVAC.set_cool_curves_room_ac(cooling_system)
+        HVAC.set_cool_curves_ashp(cooling_system, use_eer)
         HVAC.set_cool_rated_cfm_per_ton(cooling_system)
         HVAC.set_cool_rated_shrs_gross(cooling_system)
 
@@ -680,22 +681,27 @@ class HPXMLDefaults
     end
     hpxml.heat_pumps.each do |heat_pump|
       hp_ap = heat_pump.additional_properties
-      if [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
+      if [HPXML::HVACTypeHeatPumpAirToAir, 
+          HPXML::HVACTypeHeatPumpPTHP].include? heat_pump.heat_pump_type
+        use_eer_cop = true
         HVAC.set_num_speeds(heat_pump)
-        HVAC.set_fan_power_rated(heat_pump)
-        HVAC.set_crankcase_assumptions(heat_pump)
+        if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
+          HVAC.set_fan_power_rated(heat_pump)
+          HVAC.set_crankcase_assumptions(heat_pump)
+          HVAC.set_cool_rated_eirs(heat_pump)
+          HVAC.set_heat_rated_eirs(heat_pump)
+          use_eer_cop = false
+        end
         HVAC.set_heat_pump_temperatures(heat_pump)
 
         HVAC.set_cool_c_d(heat_pump, hp_ap.num_speeds)
-        HVAC.set_cool_curves_ashp(heat_pump)
+        HVAC.set_cool_curves_ashp(heat_pump, use_eer_cop)
         HVAC.set_cool_rated_cfm_per_ton(heat_pump)
         HVAC.set_cool_rated_shrs_gross(heat_pump)
-        HVAC.set_cool_rated_eirs(heat_pump)
 
         HVAC.set_heat_c_d(heat_pump, hp_ap.num_speeds)
-        HVAC.set_ashp_htg_curves(heat_pump)
+        HVAC.set_heat_curves_ashp(heat_pump, use_eer_cop)
         HVAC.set_heat_rated_cfm_per_ton(heat_pump)
-        HVAC.set_heat_rated_eirs(heat_pump)
 
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
         num_speeds = 10

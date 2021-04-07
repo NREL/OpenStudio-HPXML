@@ -1999,7 +1999,8 @@ class OSModel
 
       if [HPXML::HVACTypeCentralAirConditioner,
           HPXML::HVACTypeRoomAirConditioner,
-          HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
+          HPXML::HVACTypeMiniSplitAirConditioner,
+          HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
 
         HVAC.apply_central_air_source_hvac_systems(model, runner, cooling_system, heating_system,
                                                    @remaining_cool_load_frac, @remaining_heat_load_frac,
@@ -2086,7 +2087,8 @@ class OSModel
                                                living_zone, @hvac_map)
 
       elsif [HPXML::HVACTypeHeatPumpAirToAir,
-             HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
+             HPXML::HVACTypeHeatPumpMiniSplit,
+             HPXML::HVACTypeHeatPumpPTHP].include? heat_pump.heat_pump_type
 
         HVAC.apply_central_air_source_hvac_systems(model, runner, heat_pump, heat_pump,
                                                    @remaining_cool_load_frac,

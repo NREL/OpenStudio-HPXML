@@ -2663,7 +2663,11 @@ class HPXML < Object
     def attached_cooling_system
       return if distribution_system.nil? && @cooling_system_idref.nil?
 
+      # by heating system's idref
       if not @cooling_system_idref.nil?
+        if @heating_system_type != HVACTypePTACHeating
+          fail "Heating system type: #{@heating_system_type} should not be attached to a cooling system. Only PTAC allowed."
+        end
         @hpxml_object.cooling_systems.each do |cooling_system|
           next unless cooling_system.id == @cooling_system_idref
 
@@ -2672,6 +2676,7 @@ class HPXML < Object
         fail "Attached cooling system '#{@cooling_system_idref}' not found for HVAC system '#{@id}'."
       end
 
+      # by distribution system
       distribution_system.hvac_systems.each do |hvac_system|
         next if hvac_system.id == @id
 
@@ -2821,6 +2826,15 @@ class HPXML < Object
     end
 
     def attached_heating_system
+      # by heating system's idref, PTAC
+      @hpxml_object.heating_systems.each do |heating_system|
+        next if (heating_system.cooling_system_idref.nil?) || (heating_system.heating_system_type != HVACTypePTACHeating)
+        next unless heating_system.cooling_system_idref == @id
+        
+        return heating_system
+      end
+
+      # by distribution system
       return if distribution_system.nil?
 
       distribution_system.hvac_systems.each do |hvac_system|

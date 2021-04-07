@@ -1437,7 +1437,9 @@ class HVACSizing
       # FIXME: Why not use calc_airflow_rate?
       hvac_sizing_values.Cool_Airflow = hvac.RatedCFMperTonCooling[-1] * hvac.CapacityRatioCooling[-1] * UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton')
 
-    elsif hvac.CoolType == HPXML::HVACTypeRoomAirConditioner
+    elsif [HPXML::HVACTypeRoomAirConditioner, 
+           HPXML::HVACTypePTAC, 
+           HPXML::HVACTypeHeatPumpPTHP].include? hvac.CoolType
 
       enteringTemp = weather.design.CoolingDrybulb
       totalCap_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, enteringTemp, hvac.COOL_CAP_FT_SPEC[hvac.SizingSpeed])
@@ -1609,7 +1611,8 @@ class HVACSizing
       end
 
     elsif [HPXML::HVACTypeBoiler,
-           HPXML::HVACTypeElectricResistance].include? hvac.HeatType
+           HPXML::HVACTypeElectricResistance,
+           HPXML::HVACTypePTACHeating].include? hvac.HeatType
 
       hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
       hvac_sizing_values.Heat_Capacity_Supp = 0.0

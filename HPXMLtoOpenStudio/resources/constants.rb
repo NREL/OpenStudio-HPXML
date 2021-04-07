@@ -261,6 +261,14 @@ class Constants
     return 'mini split heat pump'
   end
 
+  def self.ObjectNamePTHP
+    return 'packaged terminal heat pump'
+  end
+
+  def self.ObjectNamePTAC
+    return 'packaged terminal air conditioner'
+  end
+
   def self.ObjectNameMiscGrill
     return 'misc grill'
   end
