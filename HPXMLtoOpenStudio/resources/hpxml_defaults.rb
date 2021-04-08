@@ -563,7 +563,9 @@ class HPXMLDefaults
     hpxml.heating_systems.each do |heating_system|
       if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
         if heating_system.fan_watts_per_cfm.nil?
-          if heating_system.heating_efficiency_afue > 0.9 # HEScore assumption
+          if heating_system.distribution_system.air_type == HPXML::AirTypeGravity
+            heating_system.fan_watts_per_cfm = 0.0
+          elsif heating_system.heating_efficiency_afue > 0.9 # HEScore assumption
             heating_system.fan_watts_per_cfm = ecm_watts_per_cfm
           else
             heating_system.fan_watts_per_cfm = psc_watts_per_cfm
