@@ -655,7 +655,8 @@ class HEScoreRuleset
     # HVACDistribution
     orig_hpxml.hvac_distributions.each do |orig_dist|
       new_hpxml.hvac_distributions.add(id: orig_dist.id,
-                                       distribution_system_type: HPXML::HVACDistributionTypeAir)
+                                       distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                       air_type: HPXML::AirTypeRegularVelocity)
 
       hvac_fraction = get_hvac_fraction(orig_hpxml, orig_dist.id)
       new_hpxml.hvac_distributions[-1].conditioned_floor_area_served = hvac_fraction * @cfa
