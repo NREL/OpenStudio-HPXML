@@ -4089,6 +4089,29 @@ class HVAC
                                        annual_heating_dse: 1.0)
           cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
         end
+      elsif (distribution_type == HPXML::HVACDistributionTypeAir) && (distribution_system.air_type == HPXML::AirTypeFanCoil)
+        # Convert "fan coil" air distribution system to "regular velocity"
+        if distribution_system.hvac_systems.size > 1
+          # Has attached heating system, so create a copy specifically for the cooling system
+          hpxml.hvac_distributions << distribution_system.dup
+          hpxml.hvac_distributions[-1].id += "#{cooling_system.id}AirDistributionSystem"
+          cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
+        end
+        hpxml.hvac_distributions[-1].air_type = HPXML::AirTypeRegularVelocity
+        if hpxml.hvac_distributions[-1].duct_leakage_measurements.select { |lm| (lm.duct_type == HPXML::DuctTypeSupply) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) }.size == 0
+          # Assign zero supply leakage
+          hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                                     duct_leakage_units: HPXML::UnitsCFM25,
+                                                                     duct_leakage_value: 0,
+                                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+        end
+        if hpxml.hvac_distributions[-1].duct_leakage_measurements.select { |lm| (lm.duct_type == HPXML::DuctTypeReturn) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) }.size == 0
+          # Assign zero return leakage
+          hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                                     duct_leakage_units: HPXML::UnitsCFM25,
+                                                                     duct_leakage_value: 0,
+                                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+        end
       end
     end
 
