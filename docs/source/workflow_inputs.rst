@@ -672,7 +672,7 @@ If a furnace is specified, additional information is entered in ``HeatingSystem`
   ===============================================  ======  =====  ===========  ========  =========  ================================================
 
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity" or "gravity") or DSE.
-  .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0.5 W/cfm if AFUE <= 0.9, else 0.375 W/cfm.
+  .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0 W/cfm if gravity distribution system, else 0.5 W/cfm if AFUE <= 0.9, else 0.375 W/cfm.
   .. [#] If there is a cooling system attached to the DistributionSystem, the heating and cooling systems cannot have different values for FanPowerWattsPerCFM.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
@@ -2418,28 +2418,28 @@ HPXML Locations
 
 The various locations used in an HPXML file are defined as follows:
 
-  ==============================  ===========================================  =======================================  =============
-  Value                           Description                                  Temperature                              Building Type
-  ==============================  ===========================================  =======================================  =============
-  outside                         Ambient environment                          Weather data                             Any
-  ground                                                                       EnergyPlus calculation                   Any
-  living space                    Above-grade conditioned floor area           EnergyPlus calculation                   Any
-  attic - vented                                                               EnergyPlus calculation                   Any
-  attic - unvented                                                             EnergyPlus calculation                   Any
-  basement - conditioned          Below-grade conditioned floor area           EnergyPlus calculation                   Any
-  basement - unconditioned                                                     EnergyPlus calculation                   Any
-  crawlspace - vented                                                          EnergyPlus calculation                   Any
-  crawlspace - unvented                                                        EnergyPlus calculation                   Any
-  garage                          Single-family garage (not shared parking)    EnergyPlus calculation                   Any
-  other housing unit              E.g., conditioned adjacent unit or corridor  Same as living space                     SFA/MF only
-  other heated space              E.g., shared laundry/equipment space         Avg of living space/outside; min of 68F  SFA/MF only
-  other multifamily buffer space  E.g., enclosed unconditioned stairwell       Avg of living space/outside; min of 50F  SFA/MF only
-  other non-freezing space        E.g., shared parking garage ceiling          Floats with outside; minimum of 40F      SFA/MF only
-  other exterior                  Water heater outside                         Weather data                             Any
-  exterior wall                   Ducts in exterior wall                       Avg of living space/outside              Any
-  under slab                      Ducts under slab (ground)                    EnergyPlus calculation                   Any
-  roof deck                       Ducts on roof deck (outside)                 Weather data                             Any
-  ==============================  ===========================================  =======================================  =============
+  ==============================  =======================================================  =======================================  =============
+  Value                           Description                                              Temperature                              Building Type
+  ==============================  =======================================================  =======================================  =============
+  outside                         Ambient environment                                      Weather data                             Any
+  ground                                                                                   EnergyPlus calculation                   Any
+  living space                    Above-grade conditioned floor area                       EnergyPlus calculation                   Any
+  attic - vented                                                                           EnergyPlus calculation                   Any
+  attic - unvented                                                                         EnergyPlus calculation                   Any
+  basement - conditioned          Below-grade conditioned floor area                       EnergyPlus calculation                   Any
+  basement - unconditioned                                                                 EnergyPlus calculation                   Any
+  crawlspace - vented                                                                      EnergyPlus calculation                   Any
+  crawlspace - unvented                                                                    EnergyPlus calculation                   Any
+  garage                          Single-family garage (not shared parking)                EnergyPlus calculation                   Any
+  other housing unit              E.g., conditioned adjacent unit or conditioned corridor  Same as living space                     SFA/MF only
+  other heated space              E.g., shared laundry/equipment space                     Avg of living space/outside; min of 68F  SFA/MF only
+  other multifamily buffer space  E.g., enclosed unconditioned stairwell                   Avg of living space/outside; min of 50F  SFA/MF only
+  other non-freezing space        E.g., shared parking garage ceiling                      Floats with outside; minimum of 40F      SFA/MF only
+  other exterior                  Water heater outside                                     Weather data                             Any
+  exterior wall                   Ducts in exterior wall                                   Avg of living space/outside              Any
+  under slab                      Ducts under slab (ground)                                EnergyPlus calculation                   Any
+  roof deck                       Ducts on roof deck (outside)                             Weather data                             Any
+  ==============================  =======================================================  =======================================  =============
 
 Validating & Debugging Errors
 -----------------------------

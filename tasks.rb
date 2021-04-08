@@ -2549,6 +2549,7 @@ def create_hpxmls
     'invalid_files/refrigerator-location.xml' => 'base.xml',
     'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/repeated-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'invalid_files/solar-fraction-one.xml' => 'base-dhw-solar-fraction.xml',
     'invalid_files/solar-thermal-system-with-combi-tankless.xml' => 'base-dhw-combi-tankless.xml',
     'invalid_files/solar-thermal-system-with-desuperheater.xml' => 'base-dhw-desuperheater.xml',
     'invalid_files/solar-thermal-system-with-dhw-indirect.xml' => 'base-dhw-combi-tankless.xml',
@@ -7085,6 +7086,8 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
                                     water_heating_system_idref: 'WaterHeater')
   elsif ['invalid_files/unattached-solar-thermal-system.xml'].include? hpxml_file
     hpxml.solar_thermal_systems[0].water_heating_system_idref = 'foobar'
+  elsif ['invalid_files/solar-fraction-one.xml'].include? hpxml_file
+    hpxml.solar_thermal_systems[0].solar_fraction = 1.0
   end
 end
 

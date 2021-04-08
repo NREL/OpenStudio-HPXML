@@ -1225,6 +1225,7 @@
       <sch:assert role='ERROR' test='count(h:SystemType) = 1'>Expected 1 element(s) for xpath: SystemType</sch:assert>
       <sch:assert role='ERROR' test='h:SystemType[text()="hot water"] or not(h:SystemType)'>Expected SystemType to be 'hot water'</sch:assert>
       <sch:assert role='ERROR' test='count(h:CollectorArea) + count(h:SolarFraction) = 1'>Expected 1 element(s) for xpath: CollectorArea | SolarFraction</sch:assert> <!-- See [SolarThermalSystemType=Detailed] or [SolarThermalSystemType=Simple] -->
+      <sch:assert role='ERROR' test='number(h:SolarFraction) &lt; 1 or not(h:SolarFraction)'>Expected SolarFraction to be less than 1</sch:assert>
     </sch:rule>
   </sch:pattern>
 
