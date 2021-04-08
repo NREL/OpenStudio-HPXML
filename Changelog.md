@@ -11,6 +11,7 @@ __New Features__
 - Moves additional error-checking from the ruby measure to the schematron validator.
 
 __Bugfixes__
+- Fixes room air conditioner performance curve.
 - Fixes ruby error if elements (e.g., `SystemIdentifier`) exist without the proper 'id'/'idref' attribute.
 - Fixes error if boiler/GSHP pump power is zero
 - Fixes possible "Electricity category end uses do not sum to total" error due to boiler pump energy.
