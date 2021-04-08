@@ -526,7 +526,7 @@ class ScheduleGenerator
       cluster_per_day.times do |cluster_count|
         todays_probable_steps = sink_activtiy_probable_mins[day * @mkc_ts_per_day...((day + 1) * @mkc_ts_per_day)]
         todays_probablities = todays_probable_steps.map.with_index { |p, i| p * hourly_onset_prob[i / @mkc_ts_per_hour] }
-        prob_sum = todays_probablities.reduce(0, :+)
+        prob_sum = todays_probablities.sum(0)
         normalized_probabilities = todays_probablities.map { |p| p * 1 / prob_sum }
         cluster_start_index = weighted_random(prng, normalized_probabilities)
         sink_activtiy_probable_mins[cluster_start_index] = 0 # mark the 15-min interval as unavailable for another sink event
@@ -885,16 +885,17 @@ class ScheduleGenerator
     new_array_size = array.size / group_size
     new_array = [0] * new_array_size
     new_array_size.times do |j|
-      new_array[j] = array[(j * group_size)...(j + 1) * group_size].reduce(0, :+)
+      new_array[j] = array[(j * group_size)...(j + 1) * group_size].sum(0)
     end
     return new_array
   end
 
   def apply_monthly_offsets(array:, weekday_monthly_shift_dict:, weekend_monthly_shift_dict:)
+    month_strs = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    new_array = []
     @total_days_in_year.times do |day|
       today = @sim_start_day + day
       day_of_week = today.wday
-      month_strs = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
       month = month_strs[today.month - 1]
       if [0, 6].include?(day_of_week)
         # Weekend
@@ -907,9 +908,9 @@ class ScheduleGenerator
         raise "Could not find the entry for month #{month}, day #{day_of_week} and state #{@state}"
       end
 
-      array[day * 1440, 1440] = array[day * 1440, 1440].rotate(lead)
+      new_array << array[day * 1440, 1440].rotate(lead)
     end
-    return array
+    return new_array.flatten!
   end
 
   def read_monthly_shift_minutes(resources_path:, daytype:)
