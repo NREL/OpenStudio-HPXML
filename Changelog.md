@@ -3,10 +3,12 @@
 __New Features__
 - **Breaking change**: Heating/cooling component loads no longer calculated by default for faster performance; use `--add-component-loads` argument if desired.
 - **Breaking change**: Replaces `Site/extension/ShelterCoefficient` with `Site/ShieldingofHome`.
+- **Breaking change**: `AirDistributionType` is now required for all air distribution systems.
+- Allows `DuctLeakageMeasurement` to not be specified for ductless fan coil systems.
 - Allows `Slab/ExposedPerimeter` to be zero.
 - Removes `ClothesDryer/ControlType` from being a required input, it is not used.
-- Moves additional error-checking from the ruby measure to the schematron validator.
 - Relaxes tolerance for duct leakage to outside warning when ducts solely in conditioned space.
+- Moves additional error-checking from the ruby measure to the schematron validator.
 
 __Bugfixes__
 - Fixes ruby error if elements (e.g., `SystemIdentifier`) exist without the proper 'id'/'idref' attribute.
