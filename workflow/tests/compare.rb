@@ -1,7 +1,7 @@
 require 'csv'
 
 folder = 'comparisons'
-files = Dir[File.join(File.dirname(__FILE__), "base_results/results*")].map {|x| File.basename(x)}
+files = Dir[File.join(File.dirname(__FILE__), 'base_results/results*')].map { |x| File.basename(x) }
 
 dir = File.join(File.dirname(__FILE__), folder)
 unless Dir.exist?(dir)
