@@ -68,8 +68,8 @@ jobs:
         shell: bash        
         run: |
           git status
-          cp -r results/results* workflow/tests/master
-          git add workflow/tests/master
+          cp -r results/results* workflow/tests/base_results
+          git add workflow/tests/base_results
           git status
           if [[ $(git diff --cached --exit-code) ]]; then
             git config --global user.email "github-action@users.noreply.github.com"
@@ -78,5 +78,5 @@ jobs:
             branch_name="${{ github.base_ref }}"
             #git pull origin $branch_name
             echo "Pushing to branch: $branch_name"
-            git push -u origin $branch_name
+            git push --force -u origin $branch_name
           fi

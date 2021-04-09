@@ -1,7 +1,7 @@
 require 'csv'
 
 folder = 'comparisons'
-files = Dir[File.join(File.dirname(__FILE__), "master/results*")].map {|x| File.basename(x)}
+files = Dir[File.join(File.dirname(__FILE__), "base_results/results*")].map {|x| File.basename(x)}
 
 dir = File.join(File.dirname(__FILE__), folder)
 unless Dir.exist?(dir)
@@ -10,21 +10,21 @@ end
 
 files.each do |file|
   # load file
-  master_rows = CSV.read(File.join(File.dirname(__FILE__), "master/#{file}"))
+  base_rows = CSV.read(File.join(File.dirname(__FILE__), "base_results/#{file}"))
   feature_rows = CSV.read(File.join(File.dirname(__FILE__), "results/#{file}"))
 
   # get columns
-  master_cols = master_rows[0]
+  base_cols = base_rows[0]
   feature_cols = feature_rows[0]
 
   # get data
-  master = {}
-  master_rows[1..-1].each do |row|
+  base = {}
+  base_rows[1..-1].each do |row|
     hpxml = row[0]
-    master[hpxml] = {}
+    base[hpxml] = {}
     row[1..-1].each_with_index do |field, i|
       begin
-        master[hpxml][master_cols[i + 1]] = Float(field)
+        base[hpxml][base_cols[i + 1]] = Float(field)
       rescue
       end
     end
@@ -43,12 +43,12 @@ files.each do |file|
   end
 
   # get hpxml union
-  master_hpxmls = master_rows.transpose[0][1..-1]
+  base_hpxmls = base_rows.transpose[0][1..-1]
   feature_hpxmls = feature_rows.transpose[0][1..-1]
-  hpxmls = master_hpxmls | feature_hpxmls
+  hpxmls = base_hpxmls | feature_hpxmls
 
   # get column union
-  cols = master_cols | feature_cols
+  cols = base_cols | feature_cols
 
   # create comparison table
   rows = [cols]
@@ -58,7 +58,7 @@ files.each do |file|
       next if col == 'HPXML'
 
       begin
-        master_field = master[hpxml][col]
+        base_field = base[hpxml][col]
       rescue
       end
 
@@ -68,8 +68,8 @@ files.each do |file|
       end
 
       m = 'N/A'
-      if (not master_field.nil?) && (not feature_field.nil?)
-        m = "#{(feature_field - master_field).round(1)}"
+      if (not base_field.nil?) && (not feature_field.nil?)
+        m = "#{(feature_field - base_field).round(1)}"
       end
 
       row << m
