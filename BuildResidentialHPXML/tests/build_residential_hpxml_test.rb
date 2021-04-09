@@ -133,7 +133,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'dhw-indirect-without-boiler.osw' => 'water_heater_type=space-heating boiler with storage tank and heating_system_type=Furnace',
       'foundation-wall-insulation-greater-than-height.osw' => 'foundation_wall_insulation_distance_to_bottom=6.0 and geometry_foundation_height=4.0',
       'conditioned-attic-with-one-floor-above-grade.osw' => 'geometry_num_floors_above_grade=1 and geometry_attic_type=ConditionedAttic',
-      'zero-number-of-bedrooms.osw' => 'geometry_num_bedrooms=0'
+      'zero-number-of-bedrooms.osw' => 'geometry_num_bedrooms=0',
+      'single-family-detached-with-shared-system.osw' => 'geometry_unit_type=single-family detached and heating_system_type=Shared Boiler w/ Baseboard'
     }
 
     measures = {}
@@ -267,6 +268,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         heating_system.electric_auxiliary_energy = nil # Detailed input not offered
         heating_system.fan_watts = nil # Detailed input not offered
         heating_system.fan_watts_per_cfm = nil # Detailed input not offered
+        heating_system.shared_loop_watts = nil # Always defaulted
+        heating_system.fan_coil_watts = nil # Always defaulted
       end
       hpxml.cooling_systems.each do |cooling_system|
         cooling_system.fan_watts_per_cfm = nil # Detailed input not offered

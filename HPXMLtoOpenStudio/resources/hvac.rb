@@ -1379,8 +1379,8 @@ class HVAC
     # From Frigidaire 10.7 EER unit in Winkler et. al. Lab Testing of Window ACs (2013)
     clg_ap.cool_cap_ft_spec = [[0.43945980246913574, -0.0008922469135802481, 0.00013984567901234569, 0.0038489259259259253, -5.6327160493827156e-05, 2.041358024691358e-05]]
     clg_ap.cool_eir_ft_spec = [[6.310506172839506, -0.17705185185185185, 0.0014645061728395061, 0.012571604938271608, 0.0001493827160493827, -0.00040308641975308644]]
-    clg_ap.cool_cap_fflow_spec = [[0.887, 0.1128, 0]]
-    clg_ap.cool_eir_fflow_spec = [[1.763, -0.6081, 0]]
+    clg_ap.cool_cap_fflow_spec = [[1, 0, 0]]
+    clg_ap.cool_eir_fflow_spec = [[1, 0, 0]]
   end
 
   def self.set_cool_curves_mshp(heat_pump, num_speeds)
@@ -4290,6 +4290,29 @@ class HVAC
                                        annual_cooling_dse: 1.0,
                                        annual_heating_dse: 1.0)
           cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
+        end
+      elsif (distribution_type == HPXML::HVACDistributionTypeAir) && (distribution_system.air_type == HPXML::AirTypeFanCoil)
+        # Convert "fan coil" air distribution system to "regular velocity"
+        if distribution_system.hvac_systems.size > 1
+          # Has attached heating system, so create a copy specifically for the cooling system
+          hpxml.hvac_distributions << distribution_system.dup
+          hpxml.hvac_distributions[-1].id += "#{cooling_system.id}AirDistributionSystem"
+          cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
+        end
+        hpxml.hvac_distributions[-1].air_type = HPXML::AirTypeRegularVelocity
+        if hpxml.hvac_distributions[-1].duct_leakage_measurements.select { |lm| (lm.duct_type == HPXML::DuctTypeSupply) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) }.size == 0
+          # Assign zero supply leakage
+          hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                                     duct_leakage_units: HPXML::UnitsCFM25,
+                                                                     duct_leakage_value: 0,
+                                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+        end
+        if hpxml.hvac_distributions[-1].duct_leakage_measurements.select { |lm| (lm.duct_type == HPXML::DuctTypeReturn) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) }.size == 0
+          # Assign zero return leakage
+          hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                                     duct_leakage_units: HPXML::UnitsCFM25,
+                                                                     duct_leakage_value: 0,
+                                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
         end
       end
     end
