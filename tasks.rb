@@ -3523,11 +3523,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
          'base-hvac-install-quality-all-ground-to-air-heat-pump.xml'].include? hpxml_file
     hpxml.heat_pumps[0].airflow_defect_ratio = -0.25
     hpxml.heat_pumps[0].fan_watts_per_cfm = 0.365
-    if hpxml_file != 'base-hvac-install-quality-all-ground-to-air-heat-pump.xml'
-      hpxml.heat_pumps[0].charge_defect_ratio = -0.25
-    else
-      hpxml.heat_pumps[0].charge_defect_ratio = 0.0
-    end
+    hpxml.heat_pumps[0].charge_defect_ratio = -0.25
   elsif hpxml_file.include?('base-hvac-autosize') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)
     hpxml.heat_pumps[0].cooling_capacity = nil
     hpxml.heat_pumps[0].heating_capacity = nil
