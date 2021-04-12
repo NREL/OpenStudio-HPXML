@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/minitest_helper'
 require 'openstudio'
 require 'openstudio/measure/ShowRunnerOutput'
-require 'minitest/autorun'
 require 'fileutils'
 require 'json'
 require 'parallel'
