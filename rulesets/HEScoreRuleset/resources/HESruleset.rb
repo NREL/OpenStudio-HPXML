@@ -307,10 +307,9 @@ class HEScoreRuleset
           slab_depth_below_grade = 0
           slab_thickness = 4
         end
-      elsif fnd_type.include?('Basement') || fnd_type.include?('Crawlspace')
+      elsif fnd_type.include?('Basement')
         orig_foundation.attached_frame_floors.each do |orig_frame_floor|
           slab_id = "#{orig_foundation.id}_slab"
-          slab_area = orig_frame_floor.area
           slab_perimeter_insulation_r_value = 0
           if fnd_type.include?('Basement')
             slab_thickness = 4
