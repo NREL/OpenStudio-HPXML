@@ -1,5 +1,12 @@
 name: ci
-on: [push]
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    types: [ synchronize, opened, ready_for_review ]
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,8 +23,58 @@ jobs:
         run: |
           bundle exec rake test_all
 
+      - name: Compare results
+        run: |
+          ruby workflow/tests/compare.rb
+
       - name: Store results
         uses: actions/upload-artifact@v2
         with:
           path: workflow/tests/results
-          name: results          
+          name: results
+
+      - name: Store comparisons
+        uses: actions/upload-artifact@v2
+        with:
+          path: workflow/tests/comparisons
+          name: comparisons
+
+  update-results:
+    if: github.event_name == 'pull_request' && github.event.pull_request.draft != true
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout for PR
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }} # Checkout the PR branch instead of the merge commit
+
+      - name: Setup git branch
+        shell: bash
+        run: |
+          branch_name="${{ github.head_ref }}"
+          echo "Checking out branch: $branch_name"
+          git checkout -b $branch_name || git checkout $branch_name
+
+      - name: Download results
+        uses: actions/download-artifact@v2
+        with:
+          path: |
+            results
+          name: results
+
+      - name: Commit latest results
+        shell: bash        
+        run: |
+          git status
+          cp -r results/results* workflow/tests/base_results
+          git add workflow/tests/base_results
+          git status
+          if [[ $(git diff --cached --exit-code) ]]; then
+            git config --global user.email "github-action@users.noreply.github.com"
+            git config --global user.name "GitHub Action"
+            git commit -m "Latest results."
+            branch_name="${{ github.head_ref }}"
+            echo "Pushing to branch: $branch_name"
+            git push -u origin $branch_name
+          fi
