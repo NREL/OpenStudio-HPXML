@@ -23,15 +23,40 @@ jobs:
         run: |
           bundle exec rake test_all
 
-      - name: Compare results
-        run: |
-          ruby workflow/tests/compare.rb
-
       - name: Store results
         uses: actions/upload-artifact@v2
         with:
           path: workflow/tests/results
           name: results
+
+  compare-results:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+
+      - name: Setup git branch
+        shell: bash
+        run: |
+          branch_name="${{ github.base_ref }}"
+          branch_sha="${{ github.event.pull_request.base.sha }}"
+          echo "Checking out: $branch_name, $branch_sha"
+          git checkout -b $branch_name || git checkout $branch_name
+          git pull origin $branch_name
+
+      - name: Download results
+        uses: actions/download-artifact@v2
+        with:
+          path: |
+            results
+          name: results
+
+      - name: Compare results
+        run: |
+          ruby workflow/tests/compare.rb
 
       - name: Store comparisons
         uses: actions/upload-artifact@v2
@@ -40,20 +65,20 @@ jobs:
           name: comparisons
 
   update-results:
-    if: github.event_name == 'pull_request' && github.event.pull_request.draft != true
+    if: github.event.pull_request.draft != true
     runs-on: ubuntu-latest
-    needs: build
+    needs: compare-results
     steps:
-      - name: Checkout for PR
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.pull_request.head.sha }} # Checkout the PR branch instead of the merge commit
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup git branch
         shell: bash
         run: |
           branch_name="${{ github.head_ref }}"
-          echo "Checking out branch: $branch_name"
+          branch_sha="${{ github.event.pull_request.head.sha }}"
+          echo "Checking out branch: $branch_name, $branch_sha"
           git checkout -b $branch_name || git checkout $branch_name
 
       - name: Download results
