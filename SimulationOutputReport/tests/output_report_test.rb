@@ -3,7 +3,6 @@
 require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
 require 'openstudio'
 require 'openstudio/measure/ShowRunnerOutput'
-require 'minitest/autorun'
 require 'fileutils'
 require 'csv'
 require_relative '../measure.rb'
@@ -69,6 +68,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'End Use: Fuel Oil: Lighting (MBtu)',
     'End Use: Fuel Oil: Fireplace (MBtu)',
     'End Use: Fuel Oil: Mech Vent Preheating (MBtu)',
+    'End Use: Fuel Oil: Generator (MBtu)',
     'End Use: Propane: Heating (MBtu)',
     'End Use: Propane: Hot Water (MBtu)',
     'End Use: Propane: Clothes Dryer (MBtu)',
@@ -86,6 +86,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'End Use: Wood Cord: Lighting (MBtu)',
     'End Use: Wood Cord: Fireplace (MBtu)',
     'End Use: Wood Cord: Mech Vent Preheating (MBtu)',
+    'End Use: Wood Cord: Generator (MBtu)',
     'End Use: Wood Pellets: Heating (MBtu)',
     'End Use: Wood Pellets: Hot Water (MBtu)',
     'End Use: Wood Pellets: Clothes Dryer (MBtu)',
@@ -94,6 +95,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'End Use: Wood Pellets: Lighting (MBtu)',
     'End Use: Wood Pellets: Fireplace (MBtu)',
     'End Use: Wood Pellets: Mech Vent Preheating (MBtu)',
+    'End Use: Wood Pellets: Generator (MBtu)',
     'End Use: Coal: Heating (MBtu)',
     'End Use: Coal: Hot Water (MBtu)',
     'End Use: Coal: Clothes Dryer (MBtu)',
@@ -102,6 +104,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'End Use: Coal: Lighting (MBtu)',
     'End Use: Coal: Fireplace (MBtu)',
     'End Use: Coal: Mech Vent Preheating (MBtu)',
+    'End Use: Coal: Generator (MBtu)',
     'Load: Heating (MBtu)',
     'Load: Cooling (MBtu)',
     'Load: Hot Water: Delivered (MBtu)',
@@ -212,6 +215,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'End Use: Fuel Oil: Grill',
     'End Use: Fuel Oil: Lighting',
     'End Use: Fuel Oil: Fireplace',
+    'End Use: Fuel Oil: Generator',
     'End Use: Propane: Heating',
     'End Use: Propane: Hot Water',
     'End Use: Propane: Clothes Dryer',
@@ -227,6 +231,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'End Use: Wood Cord: Grill',
     'End Use: Wood Cord: Lighting',
     'End Use: Wood Cord: Fireplace',
+    'End Use: Wood Cord: Generator',
     'End Use: Wood Pellets: Heating',
     'End Use: Wood Pellets: Hot Water',
     'End Use: Wood Pellets: Clothes Dryer',
@@ -234,6 +239,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'End Use: Wood Pellets: Grill',
     'End Use: Wood Pellets: Lighting',
     'End Use: Wood Pellets: Fireplace',
+    'End Use: Wood Pellets: Generator',
     'End Use: Coal: Heating',
     'End Use: Coal: Hot Water',
     'End Use: Coal: Clothes Dryer',
@@ -241,6 +247,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'End Use: Coal: Grill',
     'End Use: Coal: Lighting',
     'End Use: Coal: Fireplace',
+    'End Use: Coal: Generator',
   ]
 
   TimeseriesColsWaterUses = [
@@ -383,6 +390,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'enduseFuelOilClothesDryer',
     'enduseFuelOilRangeOven',
     'enduseFuelOilMechVentPreheating',
+    'enduseFuelOilGenerator',
     'endusePropaneHeating',
     'endusePropaneHotWater',
     'endusePropaneClothesDryer',
@@ -394,16 +402,19 @@ class SimulationOutputReportTest < MiniTest::Test
     'enduseWoodCordClothesDryer',
     'enduseWoodCordRangeOven',
     'enduseWoodCordMechVentPreheating',
+    'enduseWoodCordGenerator',
     'enduseWoodPelletsHeating',
     'enduseWoodPelletsHotWater',
     'enduseWoodPelletsClothesDryer',
     'enduseWoodPelletsRangeOven',
     'enduseWoodPelletsMechVentPreheating',
+    'enduseWoodPelletsGenerator',
     'enduseCoalHeating',
     'enduseCoalHotWater',
     'enduseCoalClothesDryer',
     'enduseCoalRangeOven',
     'enduseCoalMechVentPreheating',
+    'enduseCoalGenerator',
     'loadHeating',
     'loadCooling',
     'loadHotWaterDelivered',
@@ -426,6 +437,7 @@ class SimulationOutputReportTest < MiniTest::Test
 
   def test_annual_only
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
+                  'add_component_loads' => true,
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
                   'include_timeseries_end_use_consumptions' => false,
@@ -446,6 +458,7 @@ class SimulationOutputReportTest < MiniTest::Test
 
   def test_annual_only2
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
+                  'add_component_loads' => true,
                   'timeseries_frequency' => 'none',
                   'include_timeseries_fuel_consumptions' => true,
                   'include_timeseries_end_use_consumptions' => true,
@@ -554,6 +567,7 @@ class SimulationOutputReportTest < MiniTest::Test
 
   def test_timeseries_hourly_component_loads
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
+                  'add_component_loads' => true,
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
                   'include_timeseries_end_use_consumptions' => false,
@@ -1032,7 +1046,7 @@ class SimulationOutputReportTest < MiniTest::Test
     workflow.setWorkflowSteps(steps)
     osw_path = File.join(File.dirname(template_osw), 'test.osw')
     workflow.saveAs(osw_path)
-    assert_equal(11, found_args.size)
+    assert_equal(args_hash.size, found_args.size)
 
     # Run OSW
     success = system("#{OpenStudio.getOpenStudioCLI} run -w #{osw_path}")
