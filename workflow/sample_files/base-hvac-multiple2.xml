@@ -311,7 +311,6 @@
                 <Furnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>6400.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>1.0</Value>
@@ -325,7 +324,6 @@
                 <Furnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>6400.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
@@ -339,7 +337,6 @@
                 <Boiler/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>6400.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>1.0</Value>
@@ -352,7 +349,6 @@
                 <ElectricResistance/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>3200.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>
@@ -364,7 +360,6 @@
               <DistributionSystem idref='HVACDistribution'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>12000.0</CoolingCapacity>
               <CompressorType>single stage</CompressorType>
               <FractionCoolLoadServed>0.25</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -378,7 +373,6 @@
               <DistributionSystem idref='HVACDistribution2'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>9600.0</CoolingCapacity>
               <FractionCoolLoadServed>0.25</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
@@ -391,9 +385,6 @@
               <DistributionSystem idref='HVACDistribution4'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>4800.0</HeatingCapacity>
-              <HeatingCapacity17F>3024.0</HeatingCapacity17F>
-              <CoolingCapacity>4800.0</CoolingCapacity>
               <CompressorType>single stage</CompressorType>
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <BackupSystemFuel>electricity</BackupSystemFuel>
@@ -401,7 +392,6 @@
                 <Units>Percent</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>3412.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
               <FractionCoolLoadServed>0.2</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -418,15 +408,12 @@
               <DistributionSystem idref='HVACDistribution5'/>
               <HeatPumpType>ground-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>4800.0</HeatingCapacity>
-              <CoolingCapacity>4800.0</CoolingCapacity>
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>3412.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
               <FractionCoolLoadServed>0.2</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>

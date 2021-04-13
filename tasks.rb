@@ -512,6 +512,24 @@ def create_hpxmls
         set_hpxml_fuel_loads(hpxml_file, hpxml)
       end
 
+      (hpxml.heating_systems + hpxml.cooling_systems + hpxml.heat_pumps).each do |hvac_system|
+        next if hvac_system.is_shared_system
+        next if (hvac_system.is_a?(HPXML::HeatPump) && hvac_system.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir)
+
+        if hvac_system.respond_to?(:cooling_capacity)
+          hvac_system.cooling_capacity = nil
+        end
+        if hvac_system.respond_to?(:heating_capacity)
+          hvac_system.heating_capacity = nil
+        end
+        if hvac_system.respond_to?(:heating_capacity_17F)
+          hvac_system.heating_capacity_17F = nil
+        end
+        if hvac_system.respond_to?(:backup_heating_capacity)
+          hvac_system.backup_heating_capacity = nil
+        end
+      end
+
       hpxml_doc = hpxml.to_oga()
       hpxml_docs[File.basename(derivative)] = hpxml_doc
 

@@ -308,7 +308,6 @@
               <SystemIdentifier id='CoolingSystem'/>
               <CoolingSystemType>evaporative cooler</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>48000.0</CoolingCapacity>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
             </CoolingSystem>
           </HVACPlant>
