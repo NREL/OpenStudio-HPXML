@@ -310,7 +310,6 @@
                 <ElectricResistance/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>36000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>

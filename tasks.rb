@@ -512,24 +512,6 @@ def create_hpxmls
         set_hpxml_fuel_loads(hpxml_file, hpxml)
       end
 
-      (hpxml.heating_systems + hpxml.cooling_systems + hpxml.heat_pumps).each do |hvac_system|
-        next if hvac_system.is_shared_system
-        next if (hvac_system.is_a?(HPXML::HeatPump) && hvac_system.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir)
-
-        if hvac_system.respond_to?(:cooling_capacity)
-          hvac_system.cooling_capacity = -1
-        end
-        if hvac_system.respond_to?(:heating_capacity)
-          hvac_system.heating_capacity = -1
-        end
-        if hvac_system.respond_to?(:heating_capacity_17F)
-          hvac_system.heating_capacity_17F = -1
-        end
-        if hvac_system.respond_to?(:backup_heating_capacity)
-          hvac_system.backup_heating_capacity = -1
-        end
-      end
-
       hpxml_doc = hpxml.to_oga()
       hpxml_docs[File.basename(derivative)] = hpxml_doc
 
@@ -2877,7 +2859,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               distribution_system_idref: 'HVACDistribution',
                               heating_system_type: HPXML::HVACTypeFurnace,
                               heating_system_fuel: HPXML::FuelTypeNaturalGas,
-                              heating_capacity: 64000,
+                              heating_capacity: 36000,
                               heating_efficiency_afue: 0.92,
                               fraction_heat_load_served: 1)
   elsif ['base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -3133,6 +3115,20 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
   elsif ['invalid_files/boiler-invalid-afue.xml',
          'invalid_files/furnace-invalid-afue.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_efficiency_afue *= 100.0
+  elsif ['base-location-honolulu-hi.xml',
+         'base-location-miami-fl.xml',
+         'base-bldgtype-multifamily.xml'].include? hpxml_file
+    hpxml.heating_systems[0].heating_capacity = 12000
+  elsif ['base-location-dallas-tx.xml',
+         'base-location-baltimore-md.xml',
+         'base-location-phoenix-az.xml',
+         'base-location-portland-or.xml',
+         'base-bldgtype-single-family-attached.xml'].include? hpxml_file
+    hpxml.heating_systems[0].heating_capacity = 24000
+  elsif ['base-location-helena-mt.xml',
+         'base-enclosure-2stories.xml',
+         'base-enclosure-2stories-garage.xml'].include? hpxml_file
+    hpxml.heating_systems[0].heating_capacity = 48000
   elsif hpxml_file.include?('base-hvac-autosize') && (not hpxml.heating_systems.nil?) && (hpxml.heating_systems.size > 0)
     hpxml.heating_systems[0].heating_capacity = nil
   end
@@ -3144,7 +3140,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
                               distribution_system_idref: 'HVACDistribution',
                               cooling_system_type: HPXML::HVACTypeCentralAirConditioner,
                               cooling_system_fuel: HPXML::FuelTypeElectricity,
-                              cooling_capacity: 48000,
+                              cooling_capacity: 24000,
                               fraction_cool_load_served: 1,
                               cooling_efficiency_seer: 13,
                               cooling_shr: 0.73,
@@ -3303,6 +3299,11 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[1].distribution_system_idref += '2'
   elsif ['invalid_files/hvac-shared-negative-seer-eq.xml'].include? hpxml_file
     hpxml.cooling_systems[0].shared_loop_watts *= 100.0
+  elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].cooling_capacity = 12000
+  elsif ['base-enclosure-2stories.xml',
+         'base-enclosure-2stories-garage.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].cooling_capacity = 36000
   elsif hpxml_file.include?('base-hvac-autosize') && (not hpxml.cooling_systems.nil?) && (hpxml.cooling_systems.size > 0)
     hpxml.cooling_systems[0].cooling_capacity = nil
   end
@@ -3315,16 +3316,16 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          distribution_system_idref: 'HVACDistribution',
                          heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
-                         heating_capacity: 42000,
-                         cooling_capacity: 48000,
+                         heating_capacity: 36000,
+                         cooling_capacity: 36000,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
-                         backup_heating_capacity: 34121,
+                         backup_heating_capacity: 36000,
                          backup_heating_efficiency_percent: 1.0,
                          fraction_heat_load_served: 1,
                          fraction_cool_load_served: 1,
                          heating_efficiency_hspf: 7.7,
                          cooling_efficiency_seer: 13,
-                         heating_capacity_17F: 42000 * 0.630, # Based on OAT slope of default curves
+                         heating_capacity_17F: 36000 * 0.630, # Based on OAT slope of default curves
                          cooling_shr: 0.73,
                          compressor_type: HPXML::HVACCompressorTypeSingleStage)
     if hpxml_file == 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'
@@ -3335,16 +3336,16 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          distribution_system_idref: 'HVACDistribution',
                          heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
-                         heating_capacity: 42000,
-                         cooling_capacity: 48000,
+                         heating_capacity: 36000,
+                         cooling_capacity: 36000,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
-                         backup_heating_capacity: 34121,
+                         backup_heating_capacity: 36000,
                          backup_heating_efficiency_percent: 1.0,
                          fraction_heat_load_served: 1,
                          fraction_cool_load_served: 1,
                          heating_efficiency_hspf: 9.3,
                          cooling_efficiency_seer: 18,
-                         heating_capacity_17F: 42000 * 0.590, # Based on OAT slope of default curves
+                         heating_capacity_17F: 36000 * 0.590, # Based on OAT slope of default curves
                          cooling_shr: 0.73,
                          compressor_type: HPXML::HVACCompressorTypeTwoStage)
   elsif ['base-hvac-air-to-air-heat-pump-var-speed.xml'].include? hpxml_file
@@ -3352,16 +3353,16 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          distribution_system_idref: 'HVACDistribution',
                          heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
-                         heating_capacity: 42000,
-                         cooling_capacity: 48000,
+                         heating_capacity: 36000,
+                         cooling_capacity: 36000,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
-                         backup_heating_capacity: 34121,
+                         backup_heating_capacity: 36000,
                          backup_heating_efficiency_percent: 1.0,
                          fraction_heat_load_served: 1,
                          fraction_cool_load_served: 1,
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 22,
-                         heating_capacity_17F: 42000 * 0.640, # Based on OAT slope of default curves
+                         heating_capacity_17F: 36000 * 0.640, # Based on OAT slope of default curves
                          cooling_shr: 0.78,
                          compressor_type: HPXML::HVACCompressorTypeVariableSpeed)
   elsif ['base-hvac-ground-to-air-heat-pump.xml',
@@ -3370,10 +3371,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          distribution_system_idref: 'HVACDistribution',
                          heat_pump_type: HPXML::HVACTypeHeatPumpGroundToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
-                         heating_capacity: 42000,
-                         cooling_capacity: 48000,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
-                         backup_heating_capacity: 34121,
                          backup_heating_efficiency_percent: 1.0,
                          fraction_heat_load_served: 1,
                          fraction_cool_load_served: 1,
@@ -3386,6 +3384,13 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
       hpxml.heat_pumps[-1].number_of_units_served = 6
       hpxml.heat_pumps[-1].shared_loop_watts = 600
       hpxml.heat_pumps[-1].pump_watts_per_ton = 0.0
+      hpxml.heat_pumps[-1].heating_capacity = 12000
+      hpxml.heat_pumps[-1].cooling_capacity = 12000
+      hpxml.heat_pumps[-1].backup_heating_capacity = 12000
+    else
+      hpxml.heat_pumps[-1].heating_capacity = 36000
+      hpxml.heat_pumps[-1].cooling_capacity = 36000
+      hpxml.heat_pumps[-1].backup_heating_capacity = 36000
     end
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
@@ -3393,16 +3398,16 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          distribution_system_idref: 'HVACDistribution',
                          heat_pump_type: HPXML::HVACTypeHeatPumpMiniSplit,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
-                         heating_capacity: 52000,
-                         cooling_capacity: 48000,
+                         heating_capacity: 36000,
+                         cooling_capacity: 36000,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
-                         backup_heating_capacity: 34121,
+                         backup_heating_capacity: 36000,
                          backup_heating_efficiency_percent: 1.0,
                          fraction_heat_load_served: 1,
                          fraction_cool_load_served: 1,
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 19,
-                         heating_capacity_17F: 52000 * f,
+                         heating_capacity_17F: 36000 * f,
                          cooling_shr: 0.73)
   elsif ['base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml',
          'base-hvac-ground-to-air-heat-pump-heating-only.xml',

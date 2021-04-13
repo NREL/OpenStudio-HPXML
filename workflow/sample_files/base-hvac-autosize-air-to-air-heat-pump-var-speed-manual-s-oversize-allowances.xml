@@ -312,8 +312,6 @@
               <DistributionSystem idref='HVACDistribution'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>36000.0</HeatingCapacity>
-              <CoolingCapacity>24000.0</CoolingCapacity>
               <CompressorType>variable speed</CompressorType>
               <CoolingSensibleHeatFraction>0.78</CoolingSensibleHeatFraction>
               <BackupSystemFuel>electricity</BackupSystemFuel>
@@ -321,7 +319,6 @@
                 <Units>Percent</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>36000.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
