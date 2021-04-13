@@ -514,6 +514,7 @@ class HVAC
     else
       pump_w = heat_pump.pump_watts_per_ton * UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton')
     end
+    pump_w = [pump_w, 1.0].max # prevent error if zero
     pump.setRatedPowerConsumption(pump_w)
     pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead))
     hvac_map[heat_pump.id] << pump
@@ -659,6 +660,7 @@ class HVAC
 
     # Pump
     pump_w = heating_system.electric_auxiliary_energy / 2.08
+    pump_w = [pump_w, 1.0].max # prevent error if zero
     pump = OpenStudio::Model::PumpVariableSpeed.new(model)
     pump.setName(obj_name + ' hydronic pump')
     pump.setRatedPowerConsumption(pump_w)
@@ -1281,8 +1283,8 @@ class HVAC
     # From Frigidaire 10.7 EER unit in Winkler et. al. Lab Testing of Window ACs (2013)
     clg_ap.cool_cap_ft_spec = [[0.43945980246913574, -0.0008922469135802481, 0.00013984567901234569, 0.0038489259259259253, -5.6327160493827156e-05, 2.041358024691358e-05]]
     clg_ap.cool_eir_ft_spec = [[6.310506172839506, -0.17705185185185185, 0.0014645061728395061, 0.012571604938271608, 0.0001493827160493827, -0.00040308641975308644]]
-    clg_ap.cool_cap_fflow_spec = [[0.887, 0.1128, 0]]
-    clg_ap.cool_eir_fflow_spec = [[1.763, -0.6081, 0]]
+    clg_ap.cool_cap_fflow_spec = [[1, 0, 0]]
+    clg_ap.cool_eir_fflow_spec = [[1, 0, 0]]
   end
 
   def self.set_cool_curves_mshp(heat_pump, num_speeds)
@@ -1856,7 +1858,7 @@ class HVAC
       end
 
       # ANSI/RESNET/ICC 301-2019 Equation 4.4-5
-      return ((sp_kw / n_dweq) + aux_in) * 2080.0 # kWh/yr
+      return (((sp_kw / n_dweq) + aux_in) * 2080.0).round(2) # kWh/yr
 
     else # In-unit boilers
 
@@ -3977,9 +3979,9 @@ class HVAC
     return 30.0 # W/ton, per ANSI/RESNET/ICC 301-2019 Section 4.4.5 (closed loop)
   end
 
-  def self.apply_shared_systems(hpxml)
-    applied_clg = apply_shared_cooling_systems(hpxml)
-    applied_htg = apply_shared_heating_systems(hpxml)
+  def self.apply_shared_systems(hpxml, do_hvac_sizing = true)
+    applied_clg = apply_shared_cooling_systems(hpxml, do_hvac_sizing)
+    applied_htg = apply_shared_heating_systems(hpxml, do_hvac_sizing)
     return unless (applied_clg || applied_htg)
 
     # Remove WLHP if not serving heating nor cooling
@@ -4006,7 +4008,7 @@ class HVAC
     end
   end
 
-  def self.apply_shared_cooling_systems(hpxml)
+  def self.apply_shared_cooling_systems(hpxml, do_hvac_sizing)
     applied = false
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.is_shared_system
@@ -4057,12 +4059,22 @@ class HVAC
         fail "Unexpected cooling system type '#{cooling_system.cooling_system_type}'."
       end
 
+      if seer_eq <= 0
+        fail "Negative SEER equivalent calculated for cooling system '#{cooling_system.id}', double check inputs."
+      end
+
       cooling_system.cooling_system_type = HPXML::HVACTypeCentralAirConditioner
-      cooling_system.cooling_efficiency_seer = seer_eq
+      cooling_system.cooling_efficiency_seer = seer_eq.round(2)
       cooling_system.cooling_efficiency_kw_per_ton = nil
-      cooling_system.cooling_capacity = nil # Autosize the equipment
+      if do_hvac_sizing
+        cooling_system.cooling_capacity = nil # Autosize the equipment
+      else
+        cooling_system.cooling_capacity = -1 # Autosize the equipment
+      end
       cooling_system.is_shared_system = false
       cooling_system.number_of_units_served = nil
+      cooling_system.shared_loop_watts = nil
+      cooling_system.shared_loop_motor_efficiency = nil
 
       # Assign new distribution system to air conditioner
       if distribution_type == HPXML::HVACDistributionTypeHydronic
@@ -4079,13 +4091,36 @@ class HVAC
                                        annual_heating_dse: 1.0)
           cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
         end
+      elsif (distribution_type == HPXML::HVACDistributionTypeAir) && (distribution_system.air_type == HPXML::AirTypeFanCoil)
+        # Convert "fan coil" air distribution system to "regular velocity"
+        if distribution_system.hvac_systems.size > 1
+          # Has attached heating system, so create a copy specifically for the cooling system
+          hpxml.hvac_distributions << distribution_system.dup
+          hpxml.hvac_distributions[-1].id += "#{cooling_system.id}AirDistributionSystem"
+          cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
+        end
+        hpxml.hvac_distributions[-1].air_type = HPXML::AirTypeRegularVelocity
+        if hpxml.hvac_distributions[-1].duct_leakage_measurements.select { |lm| (lm.duct_type == HPXML::DuctTypeSupply) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) }.size == 0
+          # Assign zero supply leakage
+          hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                                     duct_leakage_units: HPXML::UnitsCFM25,
+                                                                     duct_leakage_value: 0,
+                                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+        end
+        if hpxml.hvac_distributions[-1].duct_leakage_measurements.select { |lm| (lm.duct_type == HPXML::DuctTypeReturn) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) }.size == 0
+          # Assign zero return leakage
+          hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                                     duct_leakage_units: HPXML::UnitsCFM25,
+                                                                     duct_leakage_value: 0,
+                                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+        end
       end
     end
 
     return applied
   end
 
-  def self.apply_shared_heating_systems(hpxml)
+  def self.apply_shared_heating_systems(hpxml, do_hvac_sizing)
     applied = false
     hpxml.heating_systems.each do |heating_system|
       next unless heating_system.is_shared_system
@@ -4113,7 +4148,11 @@ class HVAC
         heating_system.fraction_heat_load_served = fraction_heat_load_served * (1.0 - 1.0 / wlhp.heating_efficiency_cop)
       end
 
-      heating_system.heating_capacity = nil # Autosize the equipment
+      if do_hvac_sizing
+        heating_system.heating_capacity = nil # Autosize the equipment
+      else
+        heating_system.heating_capacity = -1 # Autosize the equipment
+      end
     end
 
     return applied

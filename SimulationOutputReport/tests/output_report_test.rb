@@ -3,7 +3,6 @@
 require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
 require 'openstudio'
 require 'openstudio/measure/ShowRunnerOutput'
-require 'minitest/autorun'
 require 'fileutils'
 require 'csv'
 require_relative '../measure.rb'
@@ -438,6 +437,7 @@ class SimulationOutputReportTest < MiniTest::Test
 
   def test_annual_only
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
+                  'add_component_loads' => true,
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
                   'include_timeseries_end_use_consumptions' => false,
@@ -458,6 +458,7 @@ class SimulationOutputReportTest < MiniTest::Test
 
   def test_annual_only2
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
+                  'add_component_loads' => true,
                   'timeseries_frequency' => 'none',
                   'include_timeseries_fuel_consumptions' => true,
                   'include_timeseries_end_use_consumptions' => true,
@@ -566,6 +567,7 @@ class SimulationOutputReportTest < MiniTest::Test
 
   def test_timeseries_hourly_component_loads
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
+                  'add_component_loads' => true,
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
                   'include_timeseries_end_use_consumptions' => false,
@@ -1044,7 +1046,7 @@ class SimulationOutputReportTest < MiniTest::Test
     workflow.setWorkflowSteps(steps)
     osw_path = File.join(File.dirname(template_osw), 'test.osw')
     workflow.saveAs(osw_path)
-    assert_equal(11, found_args.size)
+    assert_equal(args_hash.size, found_args.size)
 
     # Run OSW
     success = system("#{OpenStudio.getOpenStudioCLI} run -w #{osw_path}")
