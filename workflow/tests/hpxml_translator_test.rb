@@ -11,8 +11,6 @@ require_relative '../../HPXMLtoOpenStudio/resources/unit_conversions'
 require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper'
 
 class HPXMLTest < MiniTest::Test
-  @@workflow_runtime_key = 'Workflow Runtime'
-
   def before_setup
     @this_dir = File.dirname(__FILE__)
     @results_dir = File.join(@this_dir, 'results')
@@ -374,7 +372,7 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? timeseries_csv_path)
 
     # Get results
-    results = _get_simulation_results(rundir, workflow_time, annual_csv_path, xml)
+    results = _get_simulation_results(annual_csv_path, xml)
 
     # Check outputs
     hpxml_defaults_path = File.join(rundir, 'in.xml')
@@ -393,7 +391,7 @@ class HPXMLTest < MiniTest::Test
     return results, sizing_results
   end
 
-  def _get_simulation_results(rundir, workflow_time, annual_csv_path, xml)
+  def _get_simulation_results(annual_csv_path, xml)
     # Grab all outputs from reporting measure CSV annual results
     results = {}
     CSV.foreach(annual_csv_path) do |row|
@@ -411,8 +409,6 @@ class HPXMLTest < MiniTest::Test
       assert_operator(residual_htg_load.abs, :<, 0.5)
       assert_operator(residual_clg_load.abs, :<, 0.5)
     end
-
-    results[@@workflow_runtime_key] = workflow_time
 
     return results
   end
