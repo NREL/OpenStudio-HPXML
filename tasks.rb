@@ -3201,6 +3201,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].compressor_type = nil
   elsif ['base-hvac-room-ac-only-33percent.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fraction_cool_load_served = 0.33
+    hpxml.cooling_systems[0].cooling_capacity /= 3.0
   elsif ['base-hvac-evap-cooler-only-ducted.xml',
          'base-hvac-evap-cooler-furnace-gas.xml',
          'base-hvac-evap-cooler-only.xml'].include? hpxml_file
