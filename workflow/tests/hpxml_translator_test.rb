@@ -544,7 +544,6 @@ class HPXMLTest < MiniTest::Test
     # Check for unexpected warnings
     File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
       next unless err_line.include? '** Warning **'
-      next
 
       # General
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
