@@ -561,6 +561,7 @@ def create_hpxmls
         if errors.size > 0
           fail "ERRORS: #{errors}"
         end
+
         # Check for errors
         errors = hpxml.check_for_errors()
         if errors.size > 0
@@ -2626,6 +2627,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
           hpxml.windows[-1].fraction_operable = 1.0
         end
         next unless hpxml_file == 'base-enclosure-split-surfaces2.xml'
+
         hpxml.windows[-1].ufactor += 0.01 * i
         hpxml.windows[-1].interior_shading_factor_summer -= 0.02 * i
         hpxml.windows[-1].interior_shading_factor_winter -= 0.01 * i
@@ -2735,6 +2737,7 @@ def set_hpxml_skylights(hpxml_file, hpxml)
         hpxml.skylights[-1].id += i.to_s
         hpxml.skylights[-1].roof_idref += i.to_s if i % 2 == 0
         next unless hpxml_file == 'base-enclosure-split-surfaces2.xml'
+
         hpxml.skylights[-1].ufactor += 0.01 * i
         hpxml.skylights[-1].interior_shading_factor_summer -= 0.02 * i
         hpxml.skylights[-1].interior_shading_factor_winter -= 0.01 * i

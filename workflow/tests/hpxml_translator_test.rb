@@ -349,6 +349,7 @@ class HPXMLTest < MiniTest::Test
           found_error_msg = false
           run_log.each do |run_line|
             next unless run_line.start_with? 'Error: '
+
             n_errors += 1 if i == 0
 
             next unless run_line.include? error_msg
@@ -578,6 +579,7 @@ class HPXMLTest < MiniTest::Test
         next if err_line.include? 'SimHVAC: Maximum iterations (20) exceeded for all HVAC loops'
         next if err_line.include? 'Rated air volume flow rate per watt of rated total water heating capacity is out of range'
         next if err_line.include? 'For object = Coil:WaterHeating:AirToWaterHeatPump:Wrapped'
+        next if err_line.include? 'Enthalpy out of range (PsyTsatFnHPb)'
       end
       # HP defrost curves
       if hpxml.heat_pumps.select { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? hp.heat_pump_type }.size > 0

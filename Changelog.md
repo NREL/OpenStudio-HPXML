@@ -13,6 +13,7 @@ __New Features__
 - Moves additional error-checking from the ruby measure to the schematron validator.
 
 __Bugfixes__
+- Improves ground reflectance when there is shading of windows/skylights.
 - Fixes room air conditioner performance curve.
 - Fixes ruby error if elements (e.g., `SystemIdentifier`) exist without the proper 'id'/'idref' attribute.
 - Fixes error if boiler/GSHP pump power is zero
