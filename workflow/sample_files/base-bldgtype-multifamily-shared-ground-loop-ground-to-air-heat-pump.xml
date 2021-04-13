@@ -196,8 +196,8 @@
               <NumberofUnitsServed>6</NumberofUnitsServed>
               <HeatPumpType>ground-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>42000.0</HeatingCapacity>
-              <CoolingCapacity>48000.0</CoolingCapacity>
+              <HeatingCapacity>12000.0</HeatingCapacity>
+              <CoolingCapacity>12000.0</CoolingCapacity>
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>

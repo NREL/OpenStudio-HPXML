@@ -309,11 +309,10 @@
               <DistributionSystem idref='HVACDistribution'/>
               <HeatPumpType>ground-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>-1.0</HeatingCapacity>
-              <HeatingCapacity17F>-1.0</HeatingCapacity17F>
-              <CoolingCapacity>-1.0</CoolingCapacity>
+              <HeatingCapacity>36000.0</HeatingCapacity>
+              <CoolingCapacity>24000.0</CoolingCapacity>
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
-              <BackupHeatingCapacity>-1.0</BackupHeatingCapacity>
+              <BackupHeatingCapacity>36000.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>0.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>

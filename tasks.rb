@@ -856,12 +856,16 @@ end
 def set_hpxml_air_infiltration_measurements(hpxml_file, hpxml)
   infil_volume = hpxml.building_construction.conditioned_building_volume
   if ['ASHRAE_Standard_140/L100AC.xml',
-      'ASHRAE_Standard_140/L100AL.xml',
-      'base-enclosure-infil-natural-ach.xml'].include? hpxml_file
+      'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
     hpxml.air_infiltration_measurements.clear
     hpxml.air_infiltration_measurements.add(id: 'InfiltrationMeasurement',
                                             unit_of_measure: HPXML::UnitsACHNatural,
                                             air_leakage: 0.67)
+  elsif ['base-enclosure-infil-natural-ach.xml'].include? hpxml_file
+    hpxml.air_infiltration_measurements.clear
+    hpxml.air_infiltration_measurements.add(id: 'InfiltrationMeasurement',
+                                            unit_of_measure: HPXML::UnitsACHNatural,
+                                            air_leakage: 0.2)
   elsif ['ASHRAE_Standard_140/L322XC.xml'].include? hpxml_file
     hpxml.air_infiltration_measurements[0].air_leakage = 0.335
   elsif ['ASHRAE_Standard_140/L110AC.xml',
