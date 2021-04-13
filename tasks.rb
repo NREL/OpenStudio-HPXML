@@ -517,16 +517,16 @@ def create_hpxmls
         next if (hvac_system.is_a?(HPXML::HeatPump) && hvac_system.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir)
 
         if hvac_system.respond_to?(:cooling_capacity)
-          hvac_system.cooling_capacity = nil
+          hvac_system.cooling_capacity = -1
         end
         if hvac_system.respond_to?(:heating_capacity)
-          hvac_system.heating_capacity = nil
+          hvac_system.heating_capacity = -1
         end
         if hvac_system.respond_to?(:heating_capacity_17F)
-          hvac_system.heating_capacity_17F = nil
+          hvac_system.heating_capacity_17F = -1
         end
         if hvac_system.respond_to?(:backup_heating_capacity)
-          hvac_system.backup_heating_capacity = nil
+          hvac_system.backup_heating_capacity = -1
         end
       end
 
