@@ -890,6 +890,7 @@ class HVACSizing
             sum_ua_wall += (1.0 / wall.insulation_assembly_r_value * wall.net_area)
           end
           fail 'Could not find connected walls.' if sum_a_wall <= 0
+
           u_wall = sum_ua_wall / sum_a_wall
 
           # Calculate partition temperature different cooling (PTDC) per Manual J Figure A12-17

@@ -130,6 +130,7 @@ def create_hpxmls
     'invalid_files/refrigerator-location.xml' => 'base.xml',
     'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/repeated-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'invalid_files/solar-fraction-one.xml' => 'base-dhw-solar-fraction.xml',
     'invalid_files/solar-thermal-system-with-combi-tankless.xml' => 'base-dhw-combi-tankless.xml',
     'invalid_files/solar-thermal-system-with-desuperheater.xml' => 'base-dhw-desuperheater.xml',
     'invalid_files/solar-thermal-system-with-dhw-indirect.xml' => 'base-dhw-combi-tankless.xml',
@@ -560,6 +561,7 @@ def create_hpxmls
         if errors.size > 0
           fail "ERRORS: #{errors}"
         end
+
         # Check for errors
         errors = hpxml.check_for_errors()
         if errors.size > 0
@@ -2625,6 +2627,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
           hpxml.windows[-1].fraction_operable = 1.0
         end
         next unless hpxml_file == 'base-enclosure-split-surfaces2.xml'
+
         hpxml.windows[-1].ufactor += 0.01 * i
         hpxml.windows[-1].interior_shading_factor_summer -= 0.02 * i
         hpxml.windows[-1].interior_shading_factor_winter -= 0.01 * i
@@ -2734,6 +2737,7 @@ def set_hpxml_skylights(hpxml_file, hpxml)
         hpxml.skylights[-1].id += i.to_s
         hpxml.skylights[-1].roof_idref += i.to_s if i % 2 == 0
         next unless hpxml_file == 'base-enclosure-split-surfaces2.xml'
+
         hpxml.skylights[-1].ufactor += 0.01 * i
         hpxml.skylights[-1].interior_shading_factor_summer -= 0.02 * i
         hpxml.skylights[-1].interior_shading_factor_winter -= 0.01 * i
@@ -3572,7 +3576,8 @@ end
 def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.hvac_distributions.add(id: 'HVACDistribution',
-                                 distribution_system_type: HPXML::HVACDistributionTypeAir)
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 air_type: HPXML::AirTypeRegularVelocity)
     hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                               duct_leakage_units: HPXML::UnitsCFM25,
                                                               duct_leakage_value: 75,
@@ -3617,21 +3622,14 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeAir
     hpxml.hvac_distributions[0].air_type = HPXML::AirTypeFanCoil
-    hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                              duct_leakage_units: HPXML::UnitsCFM25,
-                                                              duct_leakage_value: 0,
-                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-    hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                              duct_leakage_units: HPXML::UnitsCFM25,
-                                                              duct_leakage_value: 0,
-                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronic
     hpxml.hvac_distributions[0].hydronic_type = HPXML::HydronicTypeBaseboard
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear
     hpxml.hvac_distributions[0].ducts.clear
     hpxml.hvac_distributions.add(id: 'HVACDistribution2',
-                                 distribution_system_type: HPXML::HVACDistributionTypeAir)
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 air_type: HPXML::AirTypeRegularVelocity)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
                                                                duct_leakage_value: 75,
@@ -3663,7 +3661,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.hvac_distributions.clear
     hpxml.hvac_distributions.add(id: 'HVACDistribution',
-                                 distribution_system_type: HPXML::HVACDistributionTypeAir)
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 air_type: HPXML::AirTypeRegularVelocity)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
                                                                duct_leakage_value: 75,
@@ -3703,7 +3702,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   elsif ['base-hvac-multiple2.xml'].include? hpxml_file
     hpxml.hvac_distributions.clear
     hpxml.hvac_distributions.add(id: 'HVACDistribution',
-                                 distribution_system_type: HPXML::HVACDistributionTypeAir)
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 air_type: HPXML::AirTypeRegularVelocity)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
                                                                duct_leakage_value: 75,
@@ -3865,22 +3865,21 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     if hpxml_file.include? 'fan-coil'
       hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeAir
       hpxml.hvac_distributions[0].air_type = HPXML::AirTypeFanCoil
-      hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 15
-      hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 10
     elsif hpxml_file.include? 'water-loop-heat-pump'
       hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronic
       hpxml.hvac_distributions[0].hydronic_type = HPXML::HydronicTypeWaterLoop
       hpxml.hvac_distributions.add(id: 'HVACDistributionWLHP',
-                                   distribution_system_type: HPXML::HVACDistributionTypeAir)
-      hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                                 duct_leakage_units: HPXML::UnitsCFM25,
-                                                                 duct_leakage_value: 15,
-                                                                 duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-      hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                                 duct_leakage_units: HPXML::UnitsCFM25,
-                                                                 duct_leakage_value: 10,
-                                                                 duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+                                   distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                   air_type: HPXML::AirTypeRegularVelocity)
     end
+    hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                               duct_leakage_units: HPXML::UnitsCFM25,
+                                                               duct_leakage_value: 15,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+    hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                               duct_leakage_units: HPXML::UnitsCFM25,
+                                                               duct_leakage_value: 10,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                            duct_insulation_r_value: 0,
                                            duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
@@ -3930,7 +3929,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   # Set ConditionedFloorAreaServed
   n_air_dists = hpxml.hvac_distributions.select { |d| [HPXML::HVACDistributionTypeAir].include? d.distribution_system_type }.size
   hpxml.hvac_distributions.each do |hvac_distribution|
-    if [HPXML::HVACDistributionTypeAir].include? hvac_distribution.distribution_system_type
+    if [HPXML::HVACDistributionTypeAir].include?(hvac_distribution.distribution_system_type) && (hvac_distribution.ducts.size > 0)
       hvac_distribution.conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area / n_air_dists
     else
       hvac_distribution.conditioned_floor_area_served = nil
@@ -3943,6 +3942,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   # Set number of return registers
   if not ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.hvac_distributions.each do |hvac_distribution|
+      hvac_distribution.number_of_return_registers = nil
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
       next unless hvac_distribution.ducts.select { |d| d.duct_type == HPXML::DuctTypeReturn }.size > 0
 
@@ -4648,6 +4648,8 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
                                     water_heating_system_idref: 'WaterHeater')
   elsif ['invalid_files/unattached-solar-thermal-system.xml'].include? hpxml_file
     hpxml.solar_thermal_systems[0].water_heating_system_idref = 'foobar'
+  elsif ['invalid_files/solar-fraction-one.xml'].include? hpxml_file
+    hpxml.solar_thermal_systems[0].solar_fraction = 1.0
   end
 end
 
@@ -4701,7 +4703,7 @@ def set_hpxml_generators(hpxml_file, hpxml)
                          annual_consumption_kbtu: 8500,
                          annual_output_kwh: 500)
     hpxml.generators.add(id: 'Generator2',
-                         fuel_type: HPXML::FuelTypePropane,
+                         fuel_type: HPXML::FuelTypeOil,
                          annual_consumption_kbtu: 8500,
                          annual_output_kwh: 500)
   elsif ['base-bldgtype-multifamily-shared-generator.xml'].include? hpxml_file
