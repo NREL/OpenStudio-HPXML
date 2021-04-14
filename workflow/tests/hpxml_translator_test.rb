@@ -75,16 +75,54 @@ class HPXMLTest < MiniTest::Test
     # Check for output files
     sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
     assert(File.exist? sql_path)
-    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.json')
-    assert(File.exist? csv_output_path)
-    csv_output_path = File.join(File.dirname(xml), 'run', 'results_timeseries.json')
-    assert(File.exist? csv_output_path)
+    json_output_path = File.join(File.dirname(xml), 'run', 'results_annual.json')
+    assert(File.exist? json_output_path)
+    json_output_path = File.join(File.dirname(xml), 'run', 'results_timeseries.json')
+    assert(File.exist? json_output_path)
 
     # Check for debug files
     osm_path = File.join(File.dirname(xml), 'run', 'in.osm')
     assert(File.exist? osm_path)
     hpxml_defaults_path = File.join(File.dirname(xml), 'run', 'in.xml')
     assert(File.exist? hpxml_defaults_path)
+  end
+
+  def test_run_simulation_epjson_input
+    # Check that we can run a simulation using epJSON (instead of IDF) if requested
+    os_cli = OpenStudio.getOpenStudioCLI
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    command = "#{os_cli} #{rb_path} -x #{xml} --ep-input-format epjson"
+    system(command, err: File::NULL)
+
+    # Check for epjson file
+    epjson = File.join(File.dirname(xml), 'run', 'in.epJSON')
+    assert(File.exist? epjson)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+  end
+
+  def test_run_simulation_idf_input
+    # Check that we can run a simulation using IDF (instead of epJSON) if requested
+    os_cli = OpenStudio.getOpenStudioCLI
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    command = "#{os_cli} #{rb_path} -x #{xml} --ep-input-format idf"
+    system(command, err: File::NULL)
+
+    # Check for idf file
+    idf = File.join(File.dirname(xml), 'run', 'in.idf')
+    assert(File.exist? idf)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
   end
 
   def test_run_simulation_faster_performance
