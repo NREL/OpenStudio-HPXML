@@ -75,16 +75,54 @@ class HPXMLTest < MiniTest::Test
     # Check for output files
     sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
     assert(File.exist? sql_path)
-    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.json')
-    assert(File.exist? csv_output_path)
-    csv_output_path = File.join(File.dirname(xml), 'run', 'results_timeseries.json')
-    assert(File.exist? csv_output_path)
+    json_output_path = File.join(File.dirname(xml), 'run', 'results_annual.json')
+    assert(File.exist? json_output_path)
+    json_output_path = File.join(File.dirname(xml), 'run', 'results_timeseries.json')
+    assert(File.exist? json_output_path)
 
     # Check for debug files
     osm_path = File.join(File.dirname(xml), 'run', 'in.osm')
     assert(File.exist? osm_path)
     hpxml_defaults_path = File.join(File.dirname(xml), 'run', 'in.xml')
     assert(File.exist? hpxml_defaults_path)
+  end
+
+  def test_run_simulation_epjson_input
+    # Check that we can run a simulation using epJSON (instead of IDF) if requested
+    os_cli = OpenStudio.getOpenStudioCLI
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    command = "#{os_cli} #{rb_path} -x #{xml} --ep-input-format epjson"
+    system(command, err: File::NULL)
+
+    # Check for epjson file
+    epjson = File.join(File.dirname(xml), 'run', 'in.epJSON')
+    assert(File.exist? epjson)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+  end
+
+  def test_run_simulation_idf_input
+    # Check that we can run a simulation using IDF (instead of epJSON) if requested
+    os_cli = OpenStudio.getOpenStudioCLI
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    command = "#{os_cli} #{rb_path} -x #{xml} --ep-input-format idf"
+    system(command, err: File::NULL)
+
+    # Check for idf file
+    idf = File.join(File.dirname(xml), 'run', 'in.idf')
+    assert(File.exist? idf)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
   end
 
   def test_run_simulation_faster_performance
@@ -549,12 +587,9 @@ class HPXMLTest < MiniTest::Test
 
       # General
       next if err_line.include? 'Plant Loop: SOLAR HOT WATER LOOP Supply Side is storing excess heat the majority of the time.'
-      next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input' # IDF
-      next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank schedule_type_limits_name input' # epJSON
-      next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input' # IDF
-      next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank schedule_type_limits_name input' # epJSON
-      next if err_line.include? 'Output:Meter: invalid Key Name' # IDF
-      next if err_line.include? 'Output:Meter: invalid key_name' # epJSON
+      next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
+      next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
+      next if err_line.include? 'Output:Meter: invalid Key Name'
       next if err_line.include? 'Entered Zone Volumes differ from calculated zone volume'
       next if err_line.include?('CalculateZoneVolume') && err_line.include?('not fully enclosed')
       next if err_line.include?('GetInputViewFactors') && err_line.include?('not enough values')
@@ -600,8 +635,7 @@ class HPXMLTest < MiniTest::Test
         # "The only valid controller type for an AirLoopHVAC is Controller:WaterCoil.", evap cooler doesn't need one.
         next if err_line.include?('GetAirPathData: AirLoopHVAC') && err_line.include?('has no Controllers')
         # input "Autosize" for Fixed Minimum Air Flow Rate is added by OS translation, now set it to 0 to skip potential sizing process, though no way to prevent this warning.
-        next if err_line.include? 'Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored' # IDF
-        next if err_line.include? 'Since zone_minimum_air_flow_input_method = CONSTANT, input for fixed_minimum_air_flow_rate will be ignored' # epJSON
+        next if err_line.include? 'Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored'
       end
       if hpxml.hvac_distributions.select { |d| d.air_type.to_s == HPXML::AirTypeFanCoil }.size > 0
         next if err_line.include? 'In calculating the design coil UA for Coil:Cooling:Water' # Warning for unused cooling coil for fan coil

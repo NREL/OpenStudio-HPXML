@@ -4,7 +4,7 @@ require 'fileutils'
 
 def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars: [],
                        output_meters: [], run_measures_only: false, print_prefix: '',
-                       ep_type: 'epjson')
+                       ep_input_format: 'epjson')
   rm_path(rundir)
   FileUtils.mkdir_p(rundir)
 
@@ -64,15 +64,15 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
   apply_energyplus_output_requests(measures_dir, measures, runner, model, workspace)
 
   # Write to file
-  if ep_type == 'idf'
+  if ep_input_format == 'idf'
     ep_input_filename = 'in.idf'
     File.open(File.join(rundir, ep_input_filename), 'w') { |f| f << workspace.to_s }
-  elsif ep_type == 'epjson'
+  elsif ep_input_format == 'epjson'
     ep_input_filename = 'in.epJSON'
     json = OpenStudio::EPJSON::toJSONString(workspace.toIdfFile)
     File.open(File.join(rundir, ep_input_filename), 'w') { |f| f << json.to_s }
   else
-    fail "Unexpected ep_type: #{ep_type}."
+    fail "Unexpected ep_input_format: #{ep_input_format}."
   end
 
   # Run simulation
