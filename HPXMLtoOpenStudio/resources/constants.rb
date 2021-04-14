@@ -365,6 +365,10 @@ class Constants
     return 'dhw source hx'
   end
 
+  def self.ObjectNameTotalLoadsProgram
+    return 'total loads program'
+  end
+
   def self.ObjectNameUnitHeater
     return 'unit heater'
   end
