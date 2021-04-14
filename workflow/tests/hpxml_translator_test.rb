@@ -565,6 +565,7 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too low) for fluid')
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too high) for fluid')
       next if err_line.include? 'Plant loop exceeding upper temperature limit'
+      next if err_line.include? 'Plant loop falling below lower temperature limit'
       next if err_line.include?('Foundation:Kiva') && err_line.include?('wall surfaces with more than four vertices') # TODO: Check alternative approach
       next if err_line.include? 'Temperature out of range [-100. to 200.] (PsyPsatFnTemp)'
       next if err_line.include? 'Enthalpy out of range (PsyTsatFnHPb)'
