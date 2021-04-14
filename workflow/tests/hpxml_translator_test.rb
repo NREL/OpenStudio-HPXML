@@ -1187,6 +1187,17 @@ class HPXMLTest < MiniTest::Test
       end
     end
 
+    # Check unmet loads
+    unmet_htg_load = results.select { |k, v| k.include? 'Unmet Load: Heating' }.map { |k, v| v }.sum(0.0)
+    unmet_clg_load = results.select { |k, v| k.include? 'Unmet Load: Cooling' }.map { |k, v| v }.sum(0.0)
+    if hpxml_path.include? 'base-hvac-undersized.xml'
+      assert_operator(unmet_htg_load, :>, 0.5)
+      assert_operator(unmet_clg_load, :>, 0.5)
+    else
+      assert_operator(unmet_htg_load, :<, 0.5)
+      assert_operator(unmet_clg_load, :<, 0.5)
+    end
+
     sqlFile.close
   end
 

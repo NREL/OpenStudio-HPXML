@@ -2700,7 +2700,7 @@ end
 def set_hpxml_skylights(hpxml_file, hpxml)
   if ['base-enclosure-skylights.xml'].include? hpxml_file
     hpxml.skylights.add(id: 'SkylightNorth',
-                        area: 45,
+                        area: 15,
                         azimuth: 0,
                         ufactor: 0.33,
                         shgc: 0.45,
@@ -2708,7 +2708,7 @@ def set_hpxml_skylights(hpxml_file, hpxml)
                         interior_shading_factor_winter: 1.0,
                         roof_idref: 'Roof')
     hpxml.skylights.add(id: 'SkylightSouth',
-                        area: 45,
+                        area: 15,
                         azimuth: 180,
                         ufactor: 0.35,
                         shgc: 0.47,
@@ -3590,9 +3590,9 @@ def set_hpxml_hvac_control(hpxml_file, hpxml)
     hpxml.hvac_controls[0].control_type = HPXML::HVACControlTypeProgrammable
     hpxml.hvac_controls[0].heating_setpoint_temp = nil
     hpxml.hvac_controls[0].cooling_setpoint_temp = nil
-    hpxml.hvac_controls[0].weekday_heating_setpoints = '64, 64, 64, 64, 64, 64, 64, 74, 74, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64'
-    hpxml.hvac_controls[0].weekend_heating_setpoints = '74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74'
-    hpxml.hvac_controls[0].weekday_cooling_setpoints = '82, 82, 82, 82, 82, 82, 82, 72, 72, 80, 80, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 82, 82'
+    hpxml.hvac_controls[0].weekday_heating_setpoints = '64, 64, 64, 64, 64, 64, 64, 70, 70, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64'
+    hpxml.hvac_controls[0].weekend_heating_setpoints = '68, 68, 68, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70'
+    hpxml.hvac_controls[0].weekday_cooling_setpoints = '80, 80, 80, 80, 80, 80, 80, 75, 75, 80, 80, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 80, 80'
     hpxml.hvac_controls[0].weekend_cooling_setpoints = '78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78'
   elsif ['base-hvac-setpoints.xml'].include? hpxml_file
     hpxml.hvac_controls[0].heating_setpoint_temp = 60
@@ -4207,36 +4207,36 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                used_for_seasonal_cooling_load_reduction: true)
     hpxml.ventilation_fans.add(id: 'Supply',
                                fan_type: HPXML::MechVentTypeSupply,
-                               tested_flow_rate: 110,
+                               tested_flow_rate: 27.5,
                                hours_in_operation: 24,
-                               fan_power: 30,
+                               fan_power: 7.5,
                                used_for_whole_building_ventilation: true)
     hpxml.ventilation_fans.add(id: 'Exhaust',
                                fan_type: HPXML::MechVentTypeExhaust,
-                               tested_flow_rate: 50,
+                               tested_flow_rate: 12.5,
                                hours_in_operation: 14,
-                               fan_power: 10,
+                               fan_power: 2.5,
                                used_for_whole_building_ventilation: true)
     hpxml.ventilation_fans.add(id: 'Balanced',
                                fan_type: HPXML::MechVentTypeBalanced,
-                               tested_flow_rate: 110,
+                               tested_flow_rate: 27.5,
                                hours_in_operation: 24,
-                               fan_power: 60,
+                               fan_power: 15,
                                used_for_whole_building_ventilation: true)
     hpxml.ventilation_fans.add(id: 'ERV',
                                fan_type: HPXML::MechVentTypeERV,
-                               tested_flow_rate: 50,
+                               tested_flow_rate: 12.5,
                                hours_in_operation: 24,
                                total_recovery_efficiency: 0.48,
                                sensible_recovery_efficiency: 0.72,
-                               fan_power: 30,
+                               fan_power: 6.25,
                                used_for_whole_building_ventilation: true)
     hpxml.ventilation_fans.add(id: 'HRV',
                                fan_type: HPXML::MechVentTypeHRV,
-                               tested_flow_rate: 60,
+                               tested_flow_rate: 15,
                                hours_in_operation: 24,
                                sensible_recovery_efficiency: 0.72,
-                               fan_power: 30,
+                               fan_power: 7.5,
                                used_for_whole_building_ventilation: true)
     hpxml.ventilation_fans.reverse_each do |vent_fan|
       vent_fan.fan_power /= 2.0
@@ -4249,16 +4249,16 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
     end
     hpxml.ventilation_fans.add(id: 'CFIS',
                                fan_type: HPXML::MechVentTypeCFIS,
-                               tested_flow_rate: 160,
+                               tested_flow_rate: 40,
                                hours_in_operation: 8,
-                               fan_power: 150,
+                               fan_power: 37.5,
                                used_for_whole_building_ventilation: true,
                                distribution_system_idref: 'HVACDistribution')
     hpxml.ventilation_fans.add(id: 'CFIS_2',
                                fan_type: HPXML::MechVentTypeCFIS,
-                               tested_flow_rate: 170,
+                               tested_flow_rate: 42.5,
                                hours_in_operation: 8,
-                               fan_power: 150,
+                               fan_power: 37.5,
                                used_for_whole_building_ventilation: true,
                                distribution_system_idref: 'HVACDistribution2')
   end

@@ -300,7 +300,7 @@
           </Skylight>
           <Skylight>
             <SystemIdentifier id='SkylightSouth'/>
-            <Area>45.0</Area>
+            <Area>15.0</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.35</UFactor>
             <SHGC>0.47</SHGC>
