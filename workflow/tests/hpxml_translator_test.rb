@@ -603,9 +603,6 @@ class HPXMLTest < MiniTest::Test
       if hpxml_path.include?('ASHRAE_Standard_140') || (hpxml.windows.size == 0)
         next if err_line.include? 'GetShadowingInput: DetailedSkyDiffuseModeling is chosen but not needed'
       end
-      if hpxml_path.include?('base-enclosure-split-surfaces2.xml') || hpxml_path.include?('base-enclosure-skylights.xml')
-        next if err_line.include? 'GetSurfaceData: Very small surface area' # FUTURE: Prevent this warning
-      end
       if hpxml_path.include?('ground-to-air-heat-pump-cooling-only.xml') || hpxml_path.include?('ground-to-air-heat-pump-heating-only.xml')
         next if err_line.include? 'COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT' # heating capacity is > 20% different than cooling capacity; safe to ignore
       end

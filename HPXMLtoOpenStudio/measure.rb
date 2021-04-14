@@ -772,14 +772,14 @@ class OSModel
     return transformation * vertices
   end
 
-  def self.add_wall_polygon(x, y, z, azimuth, offsets = [0] * 4, subsurface_area = 0)
+  def self.add_wall_polygon(x, y, z, azimuth, subsurface_area = 0)
     x = UnitConversions.convert(x, 'ft', 'm')
     y = UnitConversions.convert(y, 'ft', 'm')
     z = UnitConversions.convert(z, 'ft', 'm')
 
     vertices = OpenStudio::Point3dVector.new
-    vertices << OpenStudio::Point3d.new(0 - (x / 2) - offsets[1], 0, z - offsets[0])
-    vertices << OpenStudio::Point3d.new(0 - (x / 2) - offsets[1], 0, z + y + offsets[2])
+    vertices << OpenStudio::Point3d.new(0 - (x / 2), 0, z)
+    vertices << OpenStudio::Point3d.new(0 - (x / 2), 0, z + y)
     if subsurface_area > 0
       subsurface_area = UnitConversions.convert(subsurface_area, 'ft^2', 'm^2')
       sub_length = x / 10.0
@@ -788,13 +788,13 @@ class OSModel
         sub_height = y - 0.1
         sub_length = subsurface_area / sub_height
       end
-      vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3] - sub_length, 0, z + y + offsets[2])
-      vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3] - sub_length, 0, z + y + offsets[2] - sub_height)
-      vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3], 0, z + y + offsets[2] - sub_height)
+      vertices << OpenStudio::Point3d.new(x - (x / 2) - sub_length, 0, z + y)
+      vertices << OpenStudio::Point3d.new(x - (x / 2) - sub_length, 0, z + y - sub_height)
+      vertices << OpenStudio::Point3d.new(x - (x / 2), 0, z + y - sub_height)
     else
-      vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3], 0, z + y + offsets[2])
+      vertices << OpenStudio::Point3d.new(x - (x / 2), 0, z + y)
     end
-    vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3], 0, z - offsets[0])
+    vertices << OpenStudio::Point3d.new(x - (x / 2), 0, z)
 
     # Rotate about the z axis
     azimuth_rad = UnitConversions.convert(azimuth, 'deg', 'rad')
@@ -1429,7 +1429,7 @@ class OSModel
       subsurface_area = 0
     end
 
-    surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth, [0] * 4, subsurface_area), model)
+    surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth, subsurface_area), model)
     surface.additionalProperties.setFeature('Length', length)
     surface.additionalProperties.setFeature('Azimuth', azimuth)
     surface.additionalProperties.setFeature('Tilt', 90.0)
@@ -1694,8 +1694,9 @@ class OSModel
       if window.is_exterior
 
         # Create parent surface slightly bigger than window
-        surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                  window.azimuth, [0, 0.001, 0.001, 0.001]), model)
+        buffer = EPlus.calculate_subsurface_parent_buffer(window_width, window_height)
+        surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width + buffer, window_height + buffer, z_origin,
+                                                                  window.azimuth), model)
 
         surface.additionalProperties.setFeature('Length', window_width)
         surface.additionalProperties.setFeature('Azimuth', window.azimuth)
@@ -1706,7 +1707,7 @@ class OSModel
         set_surface_interior(model, spaces, surface, window.wall)
 
         sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                         window.azimuth, [-0.001, 0, 0.001, 0]), model)
+                                                                         window.azimuth), model)
         sub_surface.setName(window.id)
         sub_surface.setSurface(surface)
         sub_surface.setSubSurfaceType('FixedWindow')
@@ -1723,7 +1724,7 @@ class OSModel
         Constructions.apply_window(runner, model, sub_surface, 'WindowConstruction', window.ufactor, window.shgc)
 
         # Apply interior/exterior shading (as needed)
-        shading_polygon = add_wall_polygon(window_width, window_height, z_origin, window.azimuth, [0, 0, 0, 0])
+        shading_polygon = add_wall_polygon(window_width, window_height, z_origin, window.azimuth)
         shading_group = apply_shading(model, window, shading_polygon, surface, sub_surface, shading_group, shading_schedules, Constants.ObjectNameWindowShade)
       else
         # Window is on an interior surface, which E+ does not allow. Model
@@ -1731,8 +1732,9 @@ class OSModel
         # heat transfer; there is no solar gains anyway.
 
         # Create parent surface slightly bigger than window
-        surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                  window.azimuth, [0, 0.001, 0.001, 0.001]), model)
+        buffer = EPlus.calculate_subsurface_parent_buffer(window_width, window_height)
+        surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width + buffer, window_height + buffer, z_origin,
+                                                                  window.azimuth), model)
 
         surface.additionalProperties.setFeature('Length', window_width)
         surface.additionalProperties.setFeature('Azimuth', window.azimuth)
@@ -1743,7 +1745,7 @@ class OSModel
         set_surface_interior(model, spaces, surface, window.wall)
 
         sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                         window.azimuth, [0, 0, 0, 0]), model)
+                                                                         window.azimuth), model)
         sub_surface.setName(window.id)
         sub_surface.setSurface(surface)
         sub_surface.setSubSurfaceType('Door')
@@ -1774,7 +1776,8 @@ class OSModel
       z_origin = @walls_top + 0.5 * Math.sin(Math.atan(tilt)) * width
 
       # Create parent surface slightly bigger than skylight
-      surface = OpenStudio::Model::Surface.new(add_roof_polygon(length + 0.001, width + 0.001, z_origin,
+      buffer = EPlus.calculate_subsurface_parent_buffer(length, width)
+      surface = OpenStudio::Model::Surface.new(add_roof_polygon(length + buffer, width + buffer, z_origin,
                                                                 skylight.azimuth, tilt), model)
 
       surface.additionalProperties.setFeature('Length', length)
@@ -1850,8 +1853,9 @@ class OSModel
       z_origin = @foundation_top
 
       # Create parent surface slightly bigger than door
-      surface = OpenStudio::Model::Surface.new(add_wall_polygon(door_width, door_height, z_origin,
-                                                                door.azimuth, [0, 0.001, 0.001, 0.001]), model)
+      buffer = EPlus.calculate_subsurface_parent_buffer(door_width, door_height)
+      surface = OpenStudio::Model::Surface.new(add_wall_polygon(door_width + buffer, door_height + buffer, z_origin,
+                                                                door.azimuth), model)
 
       surface.additionalProperties.setFeature('Length', door_width)
       surface.additionalProperties.setFeature('Azimuth', door.azimuth)
@@ -1862,7 +1866,7 @@ class OSModel
       set_surface_interior(model, spaces, surface, door.wall)
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(door_width, door_height, z_origin,
-                                                                       door.azimuth, [0, 0, 0, 0]), model)
+                                                                       door.azimuth), model)
       sub_surface.setName(door.id)
       sub_surface.setSurface(surface)
       sub_surface.setSubSurfaceType('Door')

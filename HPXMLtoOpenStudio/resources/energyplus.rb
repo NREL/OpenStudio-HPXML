@@ -48,4 +48,12 @@ class EPlus
       fail "Unexpected HPXML fuel '#{hpxml_fuel}'."
     end
   end
+
+  def self.calculate_subsurface_parent_buffer(length, width)
+    # Calculates the minimum buffer distance that the parent surface
+    # needs relative to the subsurface in order to prevent E+ warnings
+    # about "Very small surface area".
+    min_surface_area = 0.1 # ft2
+    return 0.5 * (((length + width)**2 + 4.0 * min_surface_area)**0.5 - length - width)
+  end
 end
