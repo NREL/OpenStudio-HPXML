@@ -536,7 +536,6 @@ class HPXMLTest < MiniTest::Test
       next if log_line.start_with? 'Info: '
       next if log_line.start_with? 'Executing command'
       next if log_line.include? "-cache.csv' could not be found; regenerating it."
-      next if log_line.include? 'OS Message'
 
       if hpxml_path.include? 'base-atticroof-conditioned.xml'
         next if log_line.include?('Ducts are entirely within conditioned space but there is moderate leakage to the outside. Leakage to the outside is typically zero or near-zero in these situations, consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.')
@@ -586,7 +585,6 @@ class HPXMLTest < MiniTest::Test
       next unless err_line.include? '** Warning **'
 
       # General
-      next if err_line.include? 'Plant Loop: SOLAR HOT WATER LOOP Supply Side is storing excess heat the majority of the time.'
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
       next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
       next if err_line.include? 'Output:Meter: invalid Key Name'
