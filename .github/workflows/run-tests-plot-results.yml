@@ -1,5 +1,12 @@
 name: ci
-on: [push]
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    types: [ synchronize, opened, ready_for_review ]
+  workflow_dispatch:
+
 jobs:
   run-tests:
     runs-on: ubuntu-latest
@@ -15,6 +22,7 @@ jobs:
         with:
           name: test_results
           path: workflow/test_results
+
   make-plots:
     runs-on: ubuntu-latest
     needs: run-tests
@@ -37,3 +45,80 @@ jobs:
         with:
           name: plots
           path: plots/plots
+
+  compare-results:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    needs: run-tests
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+
+      - name: Setup git branch
+        shell: bash
+        run: |
+          branch_name="${{ github.base_ref }}"
+          branch_sha="${{ github.event.pull_request.base.sha }}"
+          echo "Checking out: $branch_name, $branch_sha"
+          git checkout -b $branch_name || git checkout $branch_name
+          # git pull origin $branch_name
+
+      - name: Download results
+        uses: actions/download-artifact@v2
+        with:
+          path: |
+            results
+          name: test_results
+
+      - name: Compare results
+        run: |
+          mkdir workflow/tests/results
+          cp -r results/results* workflow/tests/results
+          ruby workflow/tests/compare.rb
+
+      - name: Store comparisons
+        uses: actions/upload-artifact@v2
+        with:
+          path: workflow/tests/comparisons
+          name: comparisons
+
+  update-results:
+    if: github.event.pull_request.draft != true
+    runs-on: ubuntu-latest
+    needs: compare-results
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup git branch
+        shell: bash
+        run: |
+          branch_name="${{ github.head_ref }}"
+          branch_sha="${{ github.event.pull_request.head.sha }}"
+          echo "Checking out branch: $branch_name, $branch_sha"
+          git checkout -b $branch_name || git checkout $branch_name
+
+      - name: Download results
+        uses: actions/download-artifact@v2
+        with:
+          path: |
+            results
+          name: test_results
+
+      - name: Commit latest results
+        shell: bash        
+        run: |
+          git status
+          cp -r results/results* workflow/tests/base_results
+          git add workflow/tests/base_results
+          git status
+          if [[ $(git diff --cached --exit-code) ]]; then
+            git config --global user.email "github-action@users.noreply.github.com"
+            git config --global user.name "GitHub Action"
+            git commit -m "Latest results."
+            branch_name="${{ github.head_ref }}"
+            echo "Pushing to branch: $branch_name"
+            git push -u origin $branch_name
+          fi
