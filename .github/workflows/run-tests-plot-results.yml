@@ -74,7 +74,7 @@ jobs:
       - name: Compare results
         run: |
           mkdir workflow/tests/results
-          cp -r results/results* workflow/tests/results
+          cp -r results/results*.csv workflow/tests/results
           ruby workflow/tests/compare.rb
 
       - name: Store comparisons
