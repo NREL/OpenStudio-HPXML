@@ -353,10 +353,9 @@ class HEScoreTest < Minitest::Unit::TestCase
       column_headers << "#{key[0]}: #{key[1]} [#{key[2]}]"
     end
 
-    # Append unmet loads and runtime at the end
+    # Append unmet loads at the end
     column_headers << 'Unmet Heating Load [MBtu]'
     column_headers << 'Unmet Cooling Load [MBtu]'
-    column_headers << 'Runtime [s]'
 
     require 'csv'
     CSV.open(results_csv_path, 'w') do |csv|
