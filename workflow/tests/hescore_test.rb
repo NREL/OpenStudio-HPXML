@@ -155,14 +155,14 @@ class HEScoreTest < Minitest::Unit::TestCase
       # Add results.json to zip file for storage on CI
       zipfile.addFile(OpenStudio::Path.new(results_json), OpenStudio::Path.new(File.basename(xml.gsub('.xml', '_results.json'))))
 
-      results = _get_results(parent_dir, runtime)
+      results = _get_results(parent_dir)
       _test_results(xml, hpxml, results)
     end
 
     return results
   end
 
-  def _get_results(parent_dir, runtime)
+  def _get_results(parent_dir)
     # Retrieve results from results.json
     json_path = File.join(parent_dir, 'results', 'results.json')
     data = JSON.parse(File.read(json_path))
@@ -208,8 +208,6 @@ class HEScoreTest < Minitest::Unit::TestCase
     # Make sure we found the unmet load outputs:
     assert(results.keys.include? 'Unmet Load: Heating (MBtu)')
     assert(results.keys.include? 'Unmet Load: Cooling (MBtu)')
-
-    results['Runtime'] = runtime
 
     return results
   end
