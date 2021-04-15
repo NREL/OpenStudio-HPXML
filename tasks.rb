@@ -3416,6 +3416,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
     hpxml.heat_pumps[-1].distribution_system_idref = nil
     hpxml.heat_pumps[-1].heat_pump_type = HPXML::HVACTypeHeatPumpPTHP
     hpxml.heat_pumps[-1].cooling_efficiency_eer = 11.4
+    hpxml.heat_pumps[-1].cooling_shr = 0.65
     hpxml.heat_pumps[-1].pump_watts_per_ton = nil
     hpxml.heat_pumps[-1].compressor_type = HPXML::HVACCompressorTypeSingleStage
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file

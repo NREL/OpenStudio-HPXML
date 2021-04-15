@@ -308,16 +308,16 @@
               <SystemIdentifier id='HeatPump'/>
               <HeatPumpType>packaged terminal heat pump</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>42000.0</HeatingCapacity>
-              <CoolingCapacity>48000.0</CoolingCapacity>
+              <HeatingCapacity>36000.0</HeatingCapacity>
+              <CoolingCapacity>36000.0</CoolingCapacity>
               <CompressorType>single stage</CompressorType>
-              <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
+              <CoolingSensibleHeatFraction>0.65</CoolingSensibleHeatFraction>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>34121.0</BackupHeatingCapacity>
+              <BackupHeatingCapacity>36000.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>

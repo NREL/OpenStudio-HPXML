@@ -310,7 +310,7 @@
                 <PackagedTerminalAirConditionerHeating/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>64000.0</HeatingCapacity>
+              <HeatingCapacity>36000.0</HeatingCapacity>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <AttachedToCoolingSystem idref='CoolingPTAC'/>
             </HeatingSystem>
@@ -318,7 +318,7 @@
               <SystemIdentifier id='MismatchedCoolingPTAC'/>
               <CoolingSystemType>packaged terminal air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>48000.0</CoolingCapacity>
+              <CoolingCapacity>24000.0</CoolingCapacity>
               <CompressorType>single stage</CompressorType>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
