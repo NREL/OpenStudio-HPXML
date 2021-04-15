@@ -17,6 +17,7 @@ class HVAC
           obj_name = Constants.ObjectNameMiniSplitHeatPump
         elsif cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpPTHP
           obj_name = Constants.ObjectNamePTHP
+          fan_watts_per_cfm = 0.0
         else
           fail "Unexpected heat pump type: #{cooling_system.heat_pump_type}."
         end
@@ -2570,8 +2571,8 @@ class HVAC
   def self.set_cool_rated_cfm_per_ton(cooling_system)
     clg_ap = cooling_system.additional_properties
 
-    if (cooling_system.is_a? (HPXML::CoolingSystem) && ([HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type)) ||
-       (cooling_system.is_a? (HPXML::HeatPump) && (cooling_system.cooling_system_type == HPXML::HVACTypeHeatPumpPTHP))
+    if ((cooling_system.is_a? HPXML::CoolingSystem) && ([HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type)) ||
+       ((cooling_system.is_a? HPXML::HeatPump) && (cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpPTHP))
       clg_ap.cool_rated_cfm_per_ton = [312.0] # medium speed
     else
       clg_ap.cool_rated_cfm_per_ton = []
@@ -2585,7 +2586,7 @@ class HVAC
     htg_ap = heating_system.additional_properties
 
     if (heating_system.is_a? HPXML::HeatingSystem) ||
-       (cooling_system.is_a? (HPXML::HeatPump) && (cooling_system.cooling_system_type == HPXML::HVACTypeHeatPumpPTHP))
+       ((heating_system.is_a? HPXML::HeatPump) && (heating_system.heat_pump_type == HPXML::HVACTypeHeatPumpPTHP))
       htg_ap.heat_rated_cfm_per_ton = [350.0]
     else
       htg_ap.heat_rated_cfm_per_ton = []
@@ -2847,18 +2848,17 @@ class HVAC
 
       if htg_ap.num_speeds == 1
         htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
-        htg_coil.setRatedSupplyFanPowerPerVolumeFlowRate(htg_ap.fan_power_rated / UnitConversions.convert(1.0, 'cfm', 'm^3/s'))
         if heating_system.heating_efficiency_cop.nil?
           htg_coil.setRatedCOP(1.0 / htg_ap.heat_rated_eirs[i])
         else # PTHP
           htg_coil.setRatedCOP(heating_system.heating_efficiency_cop)
         end
-        if not htg_ap.crankcase_temp.nil?
+        if (htg_type != HPXML::HVACTypeHeatPumpPTHP) && (not htg_ap.crankcase_temp.nil?)
           htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(htg_ap.crankcase_temp, 'F', 'C'))
         end
         htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
         htg_coil.setRatedAirFlowRate(calc_rated_airflow(heating_system.heating_capacity, htg_ap.heat_rated_cfm_per_ton[0], 1.0))
-      else #Fixme: two speed PTHP?
+      else # Fixme: two speed PTHP?
         if htg_coil.nil?
           htg_coil = OpenStudio::Model::CoilHeatingDXMultiSpeed.new(model)
           htg_coil.setFuelType(EPlus::FuelTypeElectricity)
@@ -2887,7 +2887,7 @@ class HVAC
     if heating_system.fraction_heat_load_served == 0
       htg_coil.setResistiveDefrostHeaterCapacity(0)
     end
-    htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(htg_ap.crankcase_kw, 'kW', 'W'))
+    htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(htg_ap.crankcase_kw, 'kW', 'W')) unless (htg_type == HPXML::HVACTypeHeatPumpPTHP)
 
     return htg_coil
   end
@@ -2914,7 +2914,8 @@ class HVAC
     clg_ap = cooling_system.additional_properties
 
     # Convert SHRs from net to gross.
-    if cooling_system.is_a?(HPXML::CoolingSystem) && ([HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type)
+    if ((cooling_system.is_a? HPXML::CoolingSystem) && ([HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type)) ||
+       ((cooling_system.is_a? HPXML::HeatPump) && ([HPXML::HVACTypeHeatPumpPTHP].include? cooling_system.heat_pump_type))
       clg_ap.cool_rated_shrs_gross = [cooling_system.cooling_shr] # We don't model the fan separately, so set gross == net
     else
       clg_ap.cool_rated_shrs_gross = []
@@ -2943,8 +2944,8 @@ class HVAC
     clg_ap = cooling_system.additional_properties
 
     # Degradation coefficient for cooling
-    if (cooling_system.is_a?(HPXML::CoolingSystem) && ([HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type)) ||
-       (cooling_system.is_a?(HPXML::HeatPump) && (cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpPTHP))
+    if ((cooling_system.is_a? HPXML::CoolingSystem) && ([HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type)) ||
+       ((cooling_system.is_a? HPXML::HeatPump) && (cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpPTHP))
       clg_ap.cool_c_d = 0.22
     elsif num_speeds == 1
       if cooling_system.cooling_efficiency_seer < 13.0
@@ -2966,7 +2967,9 @@ class HVAC
     htg_ap = heating_system.additional_properties
 
     # Degradation coefficient for heating
-    if num_speeds == 1
+    if (heating_system.is_a? HPXML::HeatPump) && (heating_system.heat_pump_type == HPXML::HVACTypeHeatPumpPTHP)
+      htg_ap.heat_c_d = 0.22 # Fixme: Is it correct to use the same c_d with cooling?
+    elsif num_speeds == 1
       if heating_system.heating_efficiency_hspf < 7.0
         htg_ap.heat_c_d =  0.20
       else

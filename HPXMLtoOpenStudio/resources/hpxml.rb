@@ -2843,9 +2843,9 @@ class HPXML < Object
     def attached_heating_system
       # by heating system's idref, PTAC
       @hpxml_object.heating_systems.each do |heating_system|
-        next if (heating_system.cooling_system_idref.nil?) || (heating_system.heating_system_type != HVACTypePTACHeating)
+        next if heating_system.cooling_system_idref.nil? || (heating_system.heating_system_type != HVACTypePTACHeating)
         next unless heating_system.cooling_system_idref == @id
-        
+
         return heating_system
       end
 
