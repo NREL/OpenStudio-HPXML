@@ -111,7 +111,7 @@ jobs:
         shell: bash        
         run: |
           git status
-          cp -r results/results* workflow/tests/base_results
+          cp -r results/results*.csv workflow/tests/base_results
           git add workflow/tests/base_results
           git status
           if [[ $(git diff --cached --exit-code) ]]; then
