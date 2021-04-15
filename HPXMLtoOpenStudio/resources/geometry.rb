@@ -113,7 +113,7 @@ class Geometry
     z_origin = UnitConversions.convert(z_origin, 'ft', 'm')
 
     if add_buffer
-      buffer = calculate_subsurface_parent_buffer(length, height)
+      buffer = calculate_subsurface_parent_buffer(length, width)
       buffer /= 2.0 # Buffer on each side
     else
       buffer = 0
