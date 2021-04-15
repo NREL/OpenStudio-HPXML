@@ -3408,7 +3408,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          fraction_cool_load_served: 1,
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 19,
-                         heating_capacity_17F: 36000 * f,
+                         heating_capacity_17F: (36000 * f).round(0),
                          cooling_shr: 0.73)
   elsif ['base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml',
          'base-hvac-ground-to-air-heat-pump-heating-only.xml',
