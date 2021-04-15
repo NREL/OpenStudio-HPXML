@@ -11,7 +11,7 @@ require_relative '../../HPXMLtoOpenStudio/resources/unit_conversions'
 require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper'
 
 class HPXMLTest < MiniTest::Test
-  def before_setup
+  def setup
     @this_dir = File.dirname(__FILE__)
     @results_dir = File.join(@this_dir, 'results')
     FileUtils.mkdir_p @results_dir
@@ -621,7 +621,7 @@ class HPXMLTest < MiniTest::Test
       hpxml_value = hpxml.building_construction.conditioned_floor_area
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='InputVerificationandResultsSummary' AND ReportForString='Entire Facility' AND TableName='Zone Summary' AND RowName='Conditioned Total' AND ColumnName='Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      assert_in_epsilon(hpxml_value, sql_value, 0.1)
     end
 
     # Enclosure Roofs
@@ -640,7 +640,7 @@ class HPXMLTest < MiniTest::Test
         query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
       end
       sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
-      assert_in_epsilon(hpxml_value, sql_value, 0.1) # TODO: Higher due to outside air film?
+      assert_in_epsilon(hpxml_value, sql_value, 0.1)
 
       # Net area
       hpxml_value = roof.area
@@ -652,7 +652,7 @@ class HPXMLTest < MiniTest::Test
       query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Net Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_operator(sql_value, :>, 0.01)
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      assert_in_epsilon(hpxml_value, sql_value, 0.1)
 
       # Solar absorptance
       hpxml_value = roof.solar_absorptance
@@ -719,7 +719,7 @@ class HPXMLTest < MiniTest::Test
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Gross Area' AND Units='m2'"
         sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
         assert_operator(sql_value, :>, 0.01)
-        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+        assert_in_epsilon(hpxml_value, sql_value, 0.1)
 
         # Tilt
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Tilt' AND Units='deg'"
@@ -769,7 +769,7 @@ class HPXMLTest < MiniTest::Test
           query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
         end
         sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
-        assert_in_epsilon(hpxml_value, sql_value, 0.03)
+        assert_in_epsilon(hpxml_value, sql_value, 0.1)
       end
 
       # Net area
@@ -813,7 +813,7 @@ class HPXMLTest < MiniTest::Test
       end
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_operator(sql_value, :>, 0.01)
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      assert_in_epsilon(hpxml_value, sql_value, 0.1)
 
       # Solar absorptance
       if wall.respond_to? :solar_absorptance
@@ -883,14 +883,14 @@ class HPXMLTest < MiniTest::Test
         query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{frame_floor_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
       end
       sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
-      assert_in_epsilon(hpxml_value, sql_value, 0.03)
+      assert_in_epsilon(hpxml_value, sql_value, 0.1)
 
       # Area
       hpxml_value = frame_floor.area
       query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{frame_floor_id}' AND ColumnName='Net Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_operator(sql_value, :>, 0.01)
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      assert_in_epsilon(hpxml_value, sql_value, 0.1)
 
       # Tilt
       if frame_floor.is_ceiling
@@ -923,7 +923,7 @@ class HPXMLTest < MiniTest::Test
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='#{col_name}' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_operator(sql_value, :>, 0.01)
-      assert_in_epsilon(hpxml_value, sql_value, 0.03)
+      assert_in_epsilon(hpxml_value, sql_value, 0.1)
 
       # U-Factor
       if subsurface.is_exterior
@@ -993,7 +993,7 @@ class HPXMLTest < MiniTest::Test
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{door_id}' AND ColumnName='Gross Area' AND Units='m2'"
         sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
         assert_operator(sql_value, :>, 0.01)
-        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+        assert_in_epsilon(hpxml_value, sql_value, 0.1)
       end
 
       # R-Value
@@ -1011,7 +1011,7 @@ class HPXMLTest < MiniTest::Test
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{door_id}' AND ColumnName='#{col_name}' AND Units='W/m2-K'"
       sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
-      assert_in_epsilon(hpxml_value, sql_value, 0.02)
+      assert_in_epsilon(hpxml_value, sql_value, 0.1)
     end
 
     # HVAC Load Fractions
