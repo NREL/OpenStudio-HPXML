@@ -3,7 +3,6 @@
 require_relative '../resources/minitest_helper'
 require 'openstudio'
 require 'openstudio/measure/ShowRunnerOutput'
-require 'minitest/autorun'
 require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
@@ -12,7 +11,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   ConstantDaySchedule = '0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1'
   ConstantMonthSchedule = '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
 
-  def before_setup
+  def setup
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
     @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
@@ -25,7 +24,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     @args_hash['output_dir'] = File.absolute_path(@tmp_output_path)
   end
 
-  def after_teardown
+  def teardown
     File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
     FileUtils.rm_rf(@tmp_output_path)
   end
@@ -496,6 +495,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_furnace_values(hpxml_default, 0.5, 0, nil, 0.848)
+
+    # Test defaults w/ gravity distribution system
+    hpxml = _create_hpxml('base-hvac-furnace-gas-only.xml')
+    hpxml.heating_systems[0].distribution_system.air_type = HPXML::AirTypeGravity
+    hpxml.heating_systems[0].fan_watts_per_cfm = nil
+    hpxml.heating_systems[0].airflow_defect_ratio = nil
+    hpxml.heating_systems[0].heating_capacity = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_furnace_values(hpxml_default, 0.0, 0, nil)
   end
 
   def test_wall_furnaces
