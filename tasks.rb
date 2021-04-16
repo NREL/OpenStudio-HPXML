@@ -3973,9 +3973,13 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions.each do |hvac_distribution|
       hvac_distribution.number_of_return_registers = nil
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
-      next unless hvac_distribution.ducts.select { |d| d.duct_type == HPXML::DuctTypeReturn }.size > 0
 
-      hvac_distribution.number_of_return_registers = hpxml.building_construction.number_of_conditioned_floors.ceil
+      if hvac_distribution.ducts.select { |d| d.duct_type == HPXML::DuctTypeReturn }.size > 0
+        hvac_distribution.number_of_return_registers = hpxml.building_construction.number_of_conditioned_floors.ceil
+      elsif hvac_distribution.ducts.select { |d| d.duct_type == HPXML::DuctTypeSupply }.size > 0
+        # E.g., evap cooler w/ only supply ducts
+        hvac_distribution.number_of_return_registers = 0
+      end
     end
   end
 end
