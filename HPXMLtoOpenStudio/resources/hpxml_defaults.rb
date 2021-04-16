@@ -491,6 +491,9 @@ class HPXMLDefaults
       elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
         heat_pump.cooling_shr = 0.732
         heat_pump.cooling_shr_isdefaulted = true
+      elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpPTHP
+        heat_pump.cooling_shr = 0.65 # Fixme: is it ok to use the same default as roomac and ptac?
+        heat_pump.cooling_shr_isdefaulted = true
       end
     end
 

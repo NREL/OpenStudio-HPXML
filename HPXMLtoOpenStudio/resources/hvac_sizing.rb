@@ -1584,11 +1584,12 @@ class HVACSizing
 
       hvac_sizing_values.Heat_Airflow = calc_airflow_rate(hvac_sizing_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
 
-    elsif hvac.HeatType == HPXML::HVACTypeFurnace
+    elsif [HPXML::HVACTypeFurnace, HPXML::HVACTypePTACHeating].include? hvac.HeatType
 
       hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
       hvac_sizing_values.Heat_Capacity_Supp = 0.0
 
+      # Is fan supposed to run at the same air flow rate in cooling and heating modes? Or a different air flow rate for each mode? 
       hvac_sizing_values.Heat_Airflow = calc_airflow_rate(hvac_sizing_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
 
     elsif [HPXML::HVACTypeStove,
@@ -1611,8 +1612,7 @@ class HVACSizing
       end
 
     elsif [HPXML::HVACTypeBoiler,
-           HPXML::HVACTypeElectricResistance,
-           HPXML::HVACTypePTACHeating].include? hvac.HeatType
+           HPXML::HVACTypeElectricResistance].include? hvac.HeatType
 
       hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
       hvac_sizing_values.Heat_Capacity_Supp = 0.0
