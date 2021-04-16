@@ -504,7 +504,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].heating_capacity = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_furnace_values(hpxml_default, 0.0, 0, nil)
+    _test_default_furnace_values(hpxml_default, 0.0, 0, nil, 0.92)
   end
 
   def test_wall_furnaces
