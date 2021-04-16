@@ -4263,9 +4263,13 @@ class HVAC
     return { rh_setpoint: rh_setpoint, ief: ief }
   end
 
-  def self.lookup_hvac_efficiency(year, hvac_type, fuel_type, units)
+  def self.get_default_hvac_efficiency(year, hvac_type, fuel_type, units)
     year = 0 if year.nil?
 
+    if [HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace].include? hvac_type
+      fuel_type = HPXML::FuelTypeNaturalGas # The lookup table only provides efficiencies for wall/floor furnaces that uses natural gas. Use these efficiencies for the furnaces that use fuel other than electricity.
+    end
+    
     type_id = { HPXML::HVACTypeCentralAirConditioner => 'split_dx',
                 HPXML::HVACTypeRoomAirConditioner => 'packaged_dx',
                 HPXML::HVACTypeHeatPumpAirToAir => 'heat_pump',

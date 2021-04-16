@@ -1912,77 +1912,89 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def test_hvac_lookup
-    central_air_conditioner_seer = HVAC.lookup_hvac_efficiency(1970, 'central air conditioner', 'electricity', 'SEER')
+    central_air_conditioner_seer = HVAC.get_default_hvac_efficiency(1970, 'central air conditioner', 'electricity', 'SEER')
     assert_equal(central_air_conditioner_seer, 8.0)
 
-    room_air_conditioner_eer = HVAC.lookup_hvac_efficiency(1993, 'room air conditioner', 'electricity', 'EER')
+    room_air_conditioner_eer = HVAC.get_default_hvac_efficiency(1993, 'room air conditioner', 'electricity', 'EER')
     assert_equal(room_air_conditioner_eer, 9.05)
 
-    furnace_afue = HVAC.lookup_hvac_efficiency(1997, 'Furnace', 'natural gas', 'AFUE')
+    furnace_afue = HVAC.get_default_hvac_efficiency(1997, 'Furnace', 'natural gas', 'AFUE')
     assert_equal(furnace_afue, 0.829)
 
-    wall_furnace_afue = HVAC.lookup_hvac_efficiency(1997, 'WallFurnace', 'natural gas', 'AFUE')
+    furnace_afue = HVAC.get_default_hvac_efficiency(1981, 'Furnace', 'diesel', 'AFUE')
+    assert_equal(furnace_afue, 0.768)
+
+    wall_furnace_afue = HVAC.get_default_hvac_efficiency(1997, 'WallFurnace', 'natural gas', 'AFUE')
     assert_equal(wall_furnace_afue, 0.656)
 
-    boiler_afue = HVAC.lookup_hvac_efficiency(1985, 'Boiler', 'fuel oil', 'AFUE')
-    assert_equal(boiler_afue, 0.774)
+    wall_furnace_afue = HVAC.get_default_hvac_efficiency(1971, 'WallFurnace', 'propane', 'AFUE')
+    assert_equal(wall_furnace_afue, 0.548)
 
-    heatpump_seer = HVAC.lookup_hvac_efficiency(1991, 'air-to-air', 'electricity', 'SEER')
+    wall_furnace_afue = HVAC.get_default_hvac_efficiency(1970, 'FloorFurnace', 'natural gas', 'AFUE')
+    assert_equal(wall_furnace_afue, 0.5)
+
+    boiler_afue = HVAC.get_default_hvac_efficiency(2004, 'Boiler', 'propane', 'AFUE')
+    assert_equal(boiler_afue, 0.831)
+
+    heatpump_seer = HVAC.get_default_hvac_efficiency(1991, 'air-to-air', 'electricity', 'SEER')
     assert_equal(heatpump_seer, 9.77)
 
-    heatpump_hspf = HVAC.lookup_hvac_efficiency(1988, 'air-to-air', 'electricity', 'HSPF')
+    heatpump_hspf = HVAC.get_default_hvac_efficiency(1988, 'air-to-air', 'electricity', 'HSPF')
     assert_equal(heatpump_hspf, 6.88)
 
     assert_equal(
-      HVAC.lookup_hvac_efficiency(2010, 'air-to-air', 'electricity', 'SEER'),
-      HVAC.lookup_hvac_efficiency(2011, 'air-to-air', 'electricity', 'SEER')
+      HVAC.get_default_hvac_efficiency(2010, 'air-to-air', 'electricity', 'SEER'),
+      HVAC.get_default_hvac_efficiency(2011, 'air-to-air', 'electricity', 'SEER')
     )
 
     assert_equal(
-      HVAC.lookup_hvac_efficiency(2010, 'Furnace', 'natural gas', 'AFUE'),
-      HVAC.lookup_hvac_efficiency(2020, 'Furnace', 'natural gas', 'AFUE')
+      HVAC.get_default_hvac_efficiency(2010, 'Furnace', 'natural gas', 'AFUE'),
+      HVAC.get_default_hvac_efficiency(2020, 'Furnace', 'natural gas', 'AFUE')
     )
 
     assert_equal(
-      HVAC.lookup_hvac_efficiency(1969, 'Boiler', 'fuel oil', 'AFUE'),
-      HVAC.lookup_hvac_efficiency(1970, 'Boiler', 'fuel oil', 'AFUE')
+      HVAC.get_default_hvac_efficiency(1969, 'Boiler', 'fuel oil', 'AFUE'),
+      HVAC.get_default_hvac_efficiency(1970, 'Boiler', 'fuel oil', 'AFUE')
     )
 
     assert_equal(
-      HVAC.lookup_hvac_efficiency(1955, 'central air conditioner', 'electricity', 'SEER'),
-      HVAC.lookup_hvac_efficiency(1970, 'central air conditioner', 'electricity', 'SEER')
+      HVAC.get_default_hvac_efficiency(1955, 'central air conditioner', 'electricity', 'SEER'),
+      HVAC.get_default_hvac_efficiency(1970, 'central air conditioner', 'electricity', 'SEER')
     )
   end
 
   def test_dhw_lookup
-    waterheater_elec_ef = Waterheater.lookup_water_heater_efficiency(2006, 'electricity')
+    waterheater_elec_ef = Waterheater.get_default_water_heater_efficiency(2006, 'electricity')
     assert_equal(waterheater_elec_ef, 0.9)
 
-    waterheater_natural_gas_ef = Waterheater.lookup_water_heater_efficiency(1998, 'natural gas')
+    waterheater_natural_gas_ef = Waterheater.get_default_water_heater_efficiency(1998, 'natural gas')
     assert_equal(waterheater_natural_gas_ef, 0.501)
 
-    waterheater_propane_ef = Waterheater.lookup_water_heater_efficiency(2007, 'propane')
+    waterheater_propane_ef = Waterheater.get_default_water_heater_efficiency(2007, 'propane')
     assert_equal(waterheater_propane_ef, 0.55)
 
-    waterheater_fuel_oil_ef = Waterheater.lookup_water_heater_efficiency(1989, 'fuel oil')
+    waterheater_fuel_oil_ef = Waterheater.get_default_water_heater_efficiency(1989, 'fuel oil')
+    assert_equal(waterheater_fuel_oil_ef, 0.54)
+
+    waterheater_fuel_oil_ef = Waterheater.get_default_water_heater_efficiency(1989, 'wood')
     assert_equal(waterheater_fuel_oil_ef, 0.54)
 
     ['natural gas', 'electricity', 'propane', 'fuel oil'].each do |fuel_type|
       assert_equal(
-        Waterheater.lookup_water_heater_efficiency(2010, fuel_type),
-        Waterheater.lookup_water_heater_efficiency(2011, fuel_type)
+        Waterheater.get_default_water_heater_efficiency(2010, fuel_type),
+        Waterheater.get_default_water_heater_efficiency(2011, fuel_type)
       )
       assert_equal(
-        Waterheater.lookup_water_heater_efficiency(2010, fuel_type),
-        Waterheater.lookup_water_heater_efficiency(2020, fuel_type)
+        Waterheater.get_default_water_heater_efficiency(2010, fuel_type),
+        Waterheater.get_default_water_heater_efficiency(2020, fuel_type)
       )
       assert_equal(
-        Waterheater.lookup_water_heater_efficiency(1971, fuel_type),
-        Waterheater.lookup_water_heater_efficiency(1972, fuel_type)
+        Waterheater.get_default_water_heater_efficiency(1971, fuel_type),
+        Waterheater.get_default_water_heater_efficiency(1972, fuel_type)
       )
       assert_equal(
-        Waterheater.lookup_water_heater_efficiency(1955, fuel_type),
-        Waterheater.lookup_water_heater_efficiency(1972, fuel_type)
+        Waterheater.get_default_water_heater_efficiency(1955, fuel_type),
+        Waterheater.get_default_water_heater_efficiency(1972, fuel_type)
       )
     end
   end

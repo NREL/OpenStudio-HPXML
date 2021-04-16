@@ -440,10 +440,7 @@ class HPXMLDefaults
         if heating_system_fuel == HPXML::FuelTypeElectricity
           heating_system.heating_efficiency_afue = 0.98
         else
-          if [HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace].include? heating_system_type
-            heating_system_fuel = HPXML::FuelTypeNaturalGas # The lookup table provides efficiencies only for gas wall/floor furnace. Use efficiencies for gas wall/floor furnace when their fuel type is other than electricity.
-          end
-          heating_system.heating_efficiency_afue = HVAC.lookup_hvac_efficiency(year_installed, heating_system_type, heating_system_fuel, HPXML::UnitsAFUE)
+          heating_system.heating_efficiency_afue = HVAC.get_default_hvac_efficiency(year_installed, heating_system_type, heating_system_fuel, HPXML::UnitsAFUE)
         end
         heating_system.heating_efficiency_afue_isdefaulted = true
       elsif [HPXML::HVACTypeElectricResistance].include? heating_system_type
@@ -498,12 +495,12 @@ class HPXMLDefaults
       if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
         next unless cooling_system.cooling_efficiency_seer.nil?
 
-        cooling_system.cooling_efficiency_seer = HVAC.lookup_hvac_efficiency(year_installed, cooling_system_type, cooling_system_fuel, HPXML::UnitsSEER)
+        cooling_system.cooling_efficiency_seer = HVAC.get_default_hvac_efficiency(year_installed, cooling_system_type, cooling_system_fuel, HPXML::UnitsSEER)
         cooling_system.cooling_efficiency_seer_isdefaulted = true
       elsif cooling_system_type == HPXML::HVACTypeRoomAirConditioner
         next unless cooling_system.cooling_efficiency_eer.nil?
 
-        cooling_system.cooling_efficiency_eer = HVAC.lookup_hvac_efficiency(year_installed, cooling_system_type, cooling_system_fuel, HPXML::UnitsEER)
+        cooling_system.cooling_efficiency_eer = HVAC.get_default_hvac_efficiency(year_installed, cooling_system_type, cooling_system_fuel, HPXML::UnitsEER)
         cooling_system.cooling_efficiency_eer_isdefaulted = true
       end
     end
@@ -517,11 +514,11 @@ class HPXMLDefaults
       next unless (heat_pump.cooling_efficiency_seer.nil? || heat_pump.heating_efficiency_hspf.nil?)
 
       if heat_pump.cooling_efficiency_seer.nil?
-        heat_pump.cooling_efficiency_seer = HVAC.lookup_hvac_efficiency(year_installed, heat_pump_type, heat_pump_fuel, HPXML::UnitsSEER)
+        heat_pump.cooling_efficiency_seer = HVAC.get_default_hvac_efficiency(year_installed, heat_pump_type, heat_pump_fuel, HPXML::UnitsSEER)
         heat_pump.cooling_efficiency_seer_isdefaulted = true
       end
       if heat_pump.heating_efficiency_hspf.nil?
-        heat_pump.heating_efficiency_hspf = HVAC.lookup_hvac_efficiency(year_installed, heat_pump_type, heat_pump_fuel, HPXML::UnitsHSPF)
+        heat_pump.heating_efficiency_hspf = HVAC.get_default_hvac_efficiency(year_installed, heat_pump_type, heat_pump_fuel, HPXML::UnitsHSPF)
         heat_pump.heating_efficiency_hspf_isdefaulted = true
       end
     end
@@ -1012,7 +1009,7 @@ class HPXMLDefaults
           water_heating_system.tank_volume_isdefaulted = true
         end
         if water_heating_system.energy_factor.nil? && water_heating_system.uniform_energy_factor.nil?
-          water_heating_system.energy_factor = Waterheater.lookup_water_heater_efficiency(water_heating_system.year_installed, water_heating_system.fuel_type)
+          water_heating_system.energy_factor = Waterheater.get_default_water_heater_efficiency(water_heating_system.year_installed, water_heating_system.fuel_type)
           water_heating_system.energy_factor_isdefaulted = true
         end
         if water_heating_system.recovery_efficiency.nil?

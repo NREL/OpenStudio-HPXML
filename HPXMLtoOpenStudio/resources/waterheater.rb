@@ -1729,7 +1729,7 @@ class Waterheater
     return solar_fraction.to_f
   end
 
-  def self.lookup_water_heater_efficiency(year, fuel_type)
+  def self.get_default_water_heater_efficiency(year, fuel_type)
     year = 0 if year.nil?
 
     fuel_primary_id = { HPXML::FuelTypeElectricity => 'electric',
