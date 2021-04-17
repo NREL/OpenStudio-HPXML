@@ -3156,6 +3156,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-boiler-wood-only.xml',
          'base-hvac-elec-resistance-only.xml',
          'base-hvac-fireplace-wood-only.xml',
+         'base-hvac-fixed-heater-gas-only.xml',
          'base-hvac-floor-furnace-propane-only.xml',
          'base-hvac-furnace-coal-only.xml',
          'base-hvac-furnace-elec-only.xml',
@@ -3166,6 +3167,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-ground-to-air-heat-pump.xml',
          'base-hvac-mini-split-heat-pump-ducted.xml',
          'base-hvac-none.xml',
+         'base-hvac-portable-heater-gas-only.xml',
          'base-hvac-stove-oil-only.xml',
          'base-hvac-stove-wood-pellets-only.xml',
          'base-hvac-wall-furnace-elec-only.xml',
@@ -3680,8 +3682,10 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'base-hvac-evap-cooler-only.xml',
          'base-hvac-fireplace-wood-only.xml',
          'base-hvac-floor-furnace-propane-only.xml',
+         'base-hvac-fixed-heater-gas-only.xml',
          'base-hvac-mini-split-heat-pump-ductless.xml',
          'base-hvac-mini-split-air-conditioner-only-ductless.xml',
+         'base-hvac-portable-heater-gas-only.xml',
          'base-hvac-room-ac-only.xml',
          'base-hvac-stove-oil-only.xml',
          'base-hvac-stove-wood-pellets-only.xml',
@@ -3956,15 +3960,17 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   end
 
   # Set ConditionedFloorAreaServed
-  n_air_dists = hpxml.hvac_distributions.select { |d| [HPXML::HVACDistributionTypeAir].include? d.distribution_system_type }.size
-  hpxml.hvac_distributions.each do |hvac_distribution|
-    if [HPXML::HVACDistributionTypeAir].include?(hvac_distribution.distribution_system_type) && (hvac_distribution.ducts.size > 0)
-      hvac_distribution.conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area / n_air_dists
-    else
-      hvac_distribution.conditioned_floor_area_served = nil
+  if not hpxml_file.include?('invalid_files')
+    n_hvac_dists = hpxml.hvac_distributions.select { |sys| sys.hydronic_type != HPXML::HydronicTypeWaterLoop }.size
+    n_hvac_dists += hpxml.hvac_systems.select { |sys| sys.distribution_system_idref.nil? }.size # Count ductless systems too
+    hpxml.hvac_distributions.each do |hvac_distribution|
+      if [HPXML::HVACDistributionTypeAir].include?(hvac_distribution.distribution_system_type) && (hvac_distribution.ducts.size > 0)
+        hvac_distribution.conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area / n_hvac_dists
+      else
+        hvac_distribution.conditioned_floor_area_served = nil
+      end
     end
-  end
-  if ['invalid_files/invalid-distribution-cfa-served.xml'].include? hpxml_file
+  elsif ['invalid_files/invalid-distribution-cfa-served.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area + 1.1
   end
 
