@@ -1017,11 +1017,16 @@ class HVAC
   end
 
   def self.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan)
-    # Assume heating/cooling seasons are year-round
-    htg_start_month = 1
-    htg_end_month = 12
-    clg_start_month = 1
-    clg_end_month = 12
+    htg_start_month = hvac_control.seasons_heating_begin_month
+    htg_start_day = hvac_control.seasons_heating_begin_day # FIXME
+    htg_end_month = hvac_control.seasons_heating_end_month
+    htg_end_day = hvac_control.seasons_heating_end_day # FIXME
+    clg_start_month = hvac_control.seasons_cooling_begin_month
+    clg_start_day = hvac_control.seasons_cooling_begin_day # FIXME
+    clg_end_month = hvac_control.seasons_cooling_end_month
+    clg_end_day = hvac_control.seasons_cooling_end_day # FIXME
+
+    # TODO: switch to using daily heating/cooling seasons instead of monthly
 
     if hvac_control.weekday_heating_setpoints.nil? || hvac_control.weekend_heating_setpoints.nil?
       # Base heating setpoint
