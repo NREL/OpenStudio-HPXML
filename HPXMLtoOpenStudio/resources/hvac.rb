@@ -4057,7 +4057,7 @@ class HVAC
       else
         cooling_system.cooling_capacity = -1 # Autosize the equipment
       end
-      cooling_system.is_shared_system = false
+      cooling_system.is_shared_system = nil
       cooling_system.number_of_units_served = nil
       cooling_system.shared_loop_watts = nil
       cooling_system.shared_loop_motor_efficiency = nil
