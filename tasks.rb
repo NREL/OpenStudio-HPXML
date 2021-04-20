@@ -5621,8 +5621,8 @@ end
 if ARGV[0].to_sym == :create_release_zips
   require_relative 'HPXMLtoOpenStudio/resources/version'
 
-  release_map = { File.join(File.dirname(__FILE__), "OpenStudio-HPXML-v#{Version::OS_HPXML_Version}-minimal.zip") => false}#,
-                  #File.join(File.dirname(__FILE__), "OpenStudio-HPXML-v#{Version::OS_HPXML_Version}-full.zip") => true }
+  release_map = { File.join(File.dirname(__FILE__), "OpenStudio-HPXML-v#{Version::OS_HPXML_Version}-minimal.zip") => false,
+                  File.join(File.dirname(__FILE__), "OpenStudio-HPXML-v#{Version::OS_HPXML_Version}-full.zip") => true }
 
   release_map.keys.each do |zip_path|
     File.delete(zip_path) if File.exist? zip_path
