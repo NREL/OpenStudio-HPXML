@@ -3,7 +3,6 @@
 require_relative '../resources/minitest_helper'
 require 'openstudio'
 require 'openstudio/measure/ShowRunnerOutput'
-require 'minitest/autorun'
 require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
@@ -12,7 +11,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   ConstantDaySchedule = '0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1'
   ConstantMonthSchedule = '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
 
-  def before_setup
+  def setup
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
     @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
@@ -25,7 +24,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     @args_hash['output_dir'] = File.absolute_path(@tmp_output_path)
   end
 
-  def after_teardown
+  def teardown
     File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
     FileUtils.rm_rf(@tmp_output_path)
   end
@@ -487,6 +486,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_furnace_values(hpxml_default, 0.375, 0, nil)
+
+    # Test defaults w/ gravity distribution system
+    hpxml = _create_hpxml('base-hvac-furnace-gas-only.xml')
+    hpxml.heating_systems[0].distribution_system.air_type = HPXML::AirTypeGravity
+    hpxml.heating_systems[0].fan_watts_per_cfm = nil
+    hpxml.heating_systems[0].airflow_defect_ratio = nil
+    hpxml.heating_systems[0].heating_capacity = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_furnace_values(hpxml_default, 0.0, 0, nil)
   end
 
   def test_wall_furnaces
@@ -861,8 +870,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     expected_supply_locations = ['basement - conditioned', 'basement - conditioned'] * hpxml_default.hvac_distributions.size
     expected_return_locations = ['basement - conditioned', 'basement - conditioned'] * hpxml_default.hvac_distributions.size
-    expected_supply_areas = [91.125, 91.125] * hpxml_default.hvac_distributions.size
-    expected_return_areas = [33.75, 33.75] * hpxml_default.hvac_distributions.size
+    expected_supply_areas = [33.08, 33.08] * hpxml_default.hvac_distributions.size
+    expected_return_areas = [12.25, 12.25] * hpxml_default.hvac_distributions.size
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
 
@@ -879,8 +888,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     expected_supply_locations = ['basement - conditioned', 'basement - conditioned', 'living space', 'living space'] * hpxml_default.hvac_distributions.size
     expected_return_locations = ['basement - conditioned', 'basement - conditioned', 'living space', 'living space'] * hpxml_default.hvac_distributions.size
-    expected_supply_areas = [68.34, 68.34, 22.78, 22.78] * hpxml_default.hvac_distributions.size
-    expected_return_areas = [25.31, 25.31, 8.44, 8.44] * hpxml_default.hvac_distributions.size
+    expected_supply_areas = [24.81, 24.81, 8.27, 8.27] * hpxml_default.hvac_distributions.size
+    expected_return_areas = [9.19, 9.19, 3.06, 3.06] * hpxml_default.hvac_distributions.size
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
   end

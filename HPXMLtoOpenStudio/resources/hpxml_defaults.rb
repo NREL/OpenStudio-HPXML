@@ -6,7 +6,7 @@ class HPXMLDefaults
   # being written to the HPXML file. This is useful to associate additional values
   # with the HPXML objects that will ultimately get passed around.
 
-  def self.apply(hpxml, eri_version, weather, epw_file = nil)
+  def self.apply(hpxml, eri_version, weather, epw_file: nil, do_hvac_sizing: true)
     cfa = hpxml.building_construction.conditioned_floor_area
     nbeds = hpxml.building_construction.number_of_bedrooms
     ncfl = hpxml.building_construction.number_of_conditioned_floors
@@ -27,7 +27,7 @@ class HPXMLDefaults
     apply_slabs(hpxml)
     apply_windows(hpxml)
     apply_skylights(hpxml)
-    apply_hvac(hpxml, weather)
+    apply_hvac(hpxml, weather, do_hvac_sizing)
     apply_hvac_control(hpxml)
     apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
     apply_ventilation_fans(hpxml)
@@ -43,6 +43,8 @@ class HPXMLDefaults
     apply_fuel_loads(hpxml, cfa, nbeds)
     apply_pv_systems(hpxml)
     apply_generators(hpxml)
+
+    return unless do_hvac_sizing
 
     # Do HVAC sizing after all other defaults have been applied
     apply_hvac_sizing(hpxml, weather, cfa, nbeds)
@@ -423,8 +425,8 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac(hpxml, weather)
-    HVAC.apply_shared_systems(hpxml)
+  def self.apply_hvac(hpxml, weather, do_hvac_sizing)
+    HVAC.apply_shared_systems(hpxml, do_hvac_sizing)
 
     # Default AC/HP compressor type
     hpxml.cooling_systems.each do |cooling_system|
@@ -446,6 +448,7 @@ class HPXMLDefaults
       heating_system.electric_auxiliary_energy_isdefaulted = true
       heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system)
       heating_system.shared_loop_watts = nil
+      heating_system.shared_loop_motor_efficiency = nil
       heating_system.fan_coil_watts = nil
     end
 
@@ -563,7 +566,9 @@ class HPXMLDefaults
     hpxml.heating_systems.each do |heating_system|
       if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
         if heating_system.fan_watts_per_cfm.nil?
-          if heating_system.heating_efficiency_afue > 0.9 # HEScore assumption
+          if heating_system.distribution_system.air_type == HPXML::AirTypeGravity
+            heating_system.fan_watts_per_cfm = 0.0
+          elsif heating_system.heating_efficiency_afue > 0.9 # HEScore assumption
             heating_system.fan_watts_per_cfm = ecm_watts_per_cfm
           else
             heating_system.fan_watts_per_cfm = psc_watts_per_cfm
@@ -960,6 +965,8 @@ class HPXMLDefaults
   end
 
   def self.apply_water_fixtures(hpxml)
+    return if hpxml.hot_water_distributions.size == 0
+
     if hpxml.water_heating.water_fixtures_usage_multiplier.nil?
       hpxml.water_heating.water_fixtures_usage_multiplier = 1.0
       hpxml.water_heating.water_fixtures_usage_multiplier_isdefaulted = true
