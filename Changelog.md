@@ -9,8 +9,10 @@ __New Features__
 - Allows `DuctLeakageMeasurement` & `ConditionedFloorAreaServed` to not be specified for ductless fan coil systems.
 - Allows `Slab/ExposedPerimeter` to be zero.
 - Removes `ClothesDryer/ControlType` from being a required input, it is not used.
+- Switches room air conditioner model to use Cutler performance curves.
+- Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
 - Relaxes tolerance for duct leakage to outside warning when ducts solely in conditioned space.
-- Moves additional error-checking from the ruby measure to the schematron validator.
+- Moves additional error-checking from the ruby measure to the schematron validator. 
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
