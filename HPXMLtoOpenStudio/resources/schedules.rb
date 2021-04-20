@@ -241,12 +241,6 @@ class HourlyByDaySchedule
 
   def createSchedule()
     year_description = @model.getYearDescription
-    # leap_offset = 0
-    # if year_description.isLeapYear
-    # leap_offset = 1
-    # end
-    # day_endm = [0, 31, 59 + leap_offset, 90 + leap_offset, 120 + leap_offset, 151 + leap_offset, 181 + leap_offset, 212 + leap_offset, 243 + leap_offset, 273 + leap_offset, 304 + leap_offset, 334 + leap_offset, 365 + leap_offset]
-    # day_startm = [0, 1, 32, 60 + leap_offset, 91 + leap_offset, 121 + leap_offset, 152 + leap_offset, 182 + leap_offset, 213 + leap_offset, 244 + leap_offset, 274 + leap_offset, 305 + leap_offset, 335 + leap_offset]
 
     time = []
     for h in 1..24

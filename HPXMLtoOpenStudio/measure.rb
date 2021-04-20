@@ -1625,7 +1625,7 @@ class OSModel
 
         HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
                                                    @remaining_cool_load_frac, @remaining_heat_load_frac,
-                                                   living_zone, @hvac_map)
+                                                   living_zone, @hvac_map, @hpxml.hvac_controls[0])
 
         if not heating_system.nil?
           @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
@@ -1674,7 +1674,7 @@ class OSModel
 
         HVAC.apply_central_air_conditioner_furnace(model, runner, nil, heating_system,
                                                    nil, @remaining_heat_load_frac,
-                                                   living_zone, @hvac_map)
+                                                   living_zone, @hvac_map, @hpxml.hvac_controls[0])
 
       elsif [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
@@ -1765,7 +1765,7 @@ class OSModel
           fail 'Unexpected weather file for ASHRAE 140 run.'
         end
       end
-      HVAC.apply_ideal_air_loads(model, runner, obj_name, cooling_load_frac, heating_load_frac, living_zone)
+      HVAC.apply_ideal_air_loads(model, runner, obj_name, cooling_load_frac, heating_load_frac, living_zone, @hpxml.hvac_controls[0])
       return
     end
 
@@ -1785,7 +1785,7 @@ class OSModel
     end
     if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
       HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
-                                 living_zone)
+                                 living_zone, @hpxml.hvac_controls[0])
     end
   end
 
@@ -1812,7 +1812,7 @@ class OSModel
     end
     if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
       HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
-                                 living_zone)
+                                 living_zone, @hpxml.hvac_controls[0])
     end
   end
 
