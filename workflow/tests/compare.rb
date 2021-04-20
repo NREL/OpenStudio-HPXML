@@ -3,7 +3,7 @@
 require 'csv'
 
 folder = 'comparisons'
-files = Dir[File.join(File.dirname(__FILE__), 'base_results/results*')].map { |x| File.basename(x) }
+files = Dir[File.join(File.dirname(__FILE__), 'base_results/*.csv')].map { |x| File.basename(x) }
 
 dir = File.join(File.dirname(__FILE__), folder)
 unless Dir.exist?(dir)
@@ -11,9 +11,17 @@ unless Dir.exist?(dir)
 end
 
 files.each do |file|
-  # load file
-  base_rows = CSV.read(File.join(File.dirname(__FILE__), "base_results/#{file}"))
-  feature_rows = CSV.read(File.join(File.dirname(__FILE__), "results/#{file}"))
+  # load files
+  base_file = "base_results/#{file}"
+  base_rows = CSV.read(File.join(File.dirname(__FILE__), base_file))
+
+  begin
+    feature_file = "results/#{file}"
+    feature_rows = CSV.read(File.join(File.dirname(__FILE__), feature_file))
+  rescue
+    next
+    puts "Could not find #{feature_file}."
+  end
 
   # get columns
   base_cols = base_rows[0]
@@ -54,19 +62,21 @@ files.each do |file|
 
   # create comparison table
   rows = [cols]
-  hpxmls.each do |hpxml|
+  hpxmls.sort.each do |hpxml|
     row = [hpxml]
     cols.each do |col|
-      next if col == 'HPXML'
+      next if col.include?('HPXML')
 
       begin
         base_field = base[hpxml][col]
       rescue
+        base_field = nil
       end
 
       begin
         feature_field = feature[hpxml][col]
       rescue
+        feature_field = nil
       end
 
       m = 'N/A'
