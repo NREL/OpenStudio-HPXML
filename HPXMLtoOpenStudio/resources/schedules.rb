@@ -171,6 +171,177 @@ class HourlyByMonthSchedule
   end
 end
 
+# Annual schedule defined by 365 24-hour values for weekdays and weekends.
+class HourlyByDaySchedule
+  # weekday_day_by_hour_values must be a 365-element array of 24-element arrays of numbers.
+  # weekend_day_by_hour_values must be a 365-element array of 24-element arrays of numbers.
+  def initialize(model, sch_name, weekday_day_by_hour_values, weekend_day_by_hour_values,
+                 schedule_type_limits_name = nil, normalize_values = true)
+    @model = model
+    @sch_name = sch_name
+    @schedule = nil
+    @weekday_day_by_hour_values = validateValues(weekday_day_by_hour_values, 365, 24)
+    @weekend_day_by_hour_values = validateValues(weekend_day_by_hour_values, 365, 24)
+    @schedule_type_limits_name = schedule_type_limits_name
+
+    if normalize_values
+      @maxval = calcMaxval()
+    else
+      @maxval = 1.0
+    end
+    @schedule = createSchedule()
+  end
+
+  def calcDesignLevel(val)
+    return val * 1000
+  end
+
+  def schedule
+    return @schedule
+  end
+
+  def maxval
+    return @maxval
+  end
+
+  private
+
+  def validateValues(vals, num_outter_values, num_inner_values)
+    err_msg = "A #{num_outter_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
+    if not vals.is_a?(Array)
+      fail err_msg
+    end
+
+    begin
+      if vals.length != num_outter_values
+        fail err_msg
+      end
+
+      vals.each do |val|
+        if not val.is_a?(Array)
+          fail err_msg
+        end
+        if val.length != num_inner_values
+          fail err_msg
+        end
+      end
+    rescue
+      fail err_msg
+    end
+    return vals
+  end
+
+  def calcMaxval()
+    maxval = [@weekday_month_by_hour_values.flatten.max, @weekend_month_by_hour_values.flatten.max].max
+    if maxval == 0.0
+      maxval = 1.0 # Prevent divide by zero
+    end
+    return maxval
+  end
+
+  def createSchedule()
+    year_description = @model.getYearDescription
+    # leap_offset = 0
+    # if year_description.isLeapYear
+    # leap_offset = 1
+    # end
+    # day_endm = [0, 31, 59 + leap_offset, 90 + leap_offset, 120 + leap_offset, 151 + leap_offset, 181 + leap_offset, 212 + leap_offset, 243 + leap_offset, 273 + leap_offset, 304 + leap_offset, 334 + leap_offset, 365 + leap_offset]
+    # day_startm = [0, 1, 32, 60 + leap_offset, 91 + leap_offset, 121 + leap_offset, 152 + leap_offset, 182 + leap_offset, 213 + leap_offset, 244 + leap_offset, 274 + leap_offset, 305 + leap_offset, 335 + leap_offset]
+
+    time = []
+    for h in 1..24
+      time[h] = OpenStudio::Time.new(0, h, 0, 0)
+    end
+
+    schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
+    schedule.setName(@sch_name)
+
+    assumedYear = year_description.assumedYear # prevent excessive OS warnings about 'UseWeatherFile'
+
+    prev_wkdy_vals = nil
+    prev_wkdy_rule = nil
+    prev_wknd_vals = nil
+    prev_wknd_rule = nil
+    for d in 1..365
+      date_s = OpenStudio::Date::fromDayOfYear(d, assumedYear)
+      date_e = OpenStudio::Date::fromDayOfYear(d, assumedYear)
+
+      wkdy_vals = []
+      wknd_vals = []
+      for h in 1..24
+        wkdy_vals[h] = (@weekday_day_by_hour_values[d - 1][h - 1]) / @maxval
+        wknd_vals[h] = (@weekend_day_by_hour_values[d - 1][h - 1]) / @maxval
+      end
+
+      if (wkdy_vals == prev_wkdy_vals) && (wknd_vals == prev_wknd_vals)
+        # Extend end date of current rule(s)
+        prev_wkdy_rule.setEndDate(date_e) unless prev_wkdy_rule.nil?
+        prev_wknd_rule.setEndDate(date_e) unless prev_wknd_rule.nil?
+      elsif wkdy_vals == wknd_vals
+        # Alldays
+        wkdy_rule = OpenStudio::Model::ScheduleRule.new(schedule)
+        wkdy_rule.setName(@sch_name + " #{Schedule.allday_name} ruleset#{d}")
+        wkdy = wkdy_rule.daySchedule
+        wkdy.setName(@sch_name + " #{Schedule.allday_name}#{d}")
+        previous_value = wkdy_vals[1]
+        for h in 1..24
+          next if (h != 24) && (wkdy_vals[h + 1] == previous_value)
+
+          wkdy.addValue(time[h], previous_value)
+          previous_value = wkdy_vals[h + 1]
+        end
+        Schedule.set_weekday_rule(wkdy_rule)
+        Schedule.set_weekend_rule(wkdy_rule)
+        wkdy_rule.setStartDate(date_s)
+        wkdy_rule.setEndDate(date_e)
+        prev_wkdy_rule = wkdy_rule
+        prev_wknd_rule = nil
+      else
+        # Weekdays
+        wkdy_rule = OpenStudio::Model::ScheduleRule.new(schedule)
+        wkdy_rule.setName(@sch_name + " #{Schedule.weekday_name} ruleset#{d}")
+        wkdy = wkdy_rule.daySchedule
+        wkdy.setName(@sch_name + " #{Schedule.weekday_name}#{d}")
+        previous_value = wkdy_vals[1]
+        for h in 1..24
+          next if (h != 24) && (wkdy_vals[h + 1] == previous_value)
+
+          wkdy.addValue(time[h], previous_value)
+          previous_value = wkdy_vals[h + 1]
+        end
+        Schedule.set_weekday_rule(wkdy_rule)
+        wkdy_rule.setStartDate(date_s)
+        wkdy_rule.setEndDate(date_e)
+        prev_wkdy_rule = wkdy_rule
+
+        # Weekends
+        wknd_rule = OpenStudio::Model::ScheduleRule.new(schedule)
+        wknd_rule.setName(@sch_name + " #{Schedule.weekend_name} ruleset#{d}")
+        wknd = wknd_rule.daySchedule
+        wknd.setName(@sch_name + " #{Schedule.weekend_name}#{d}")
+        previous_value = wknd_vals[1]
+        for h in 1..24
+          next if (h != 24) && (wknd_vals[h + 1] == previous_value)
+
+          wknd.addValue(time[h], previous_value)
+          previous_value = wknd_vals[h + 1]
+        end
+        Schedule.set_weekend_rule(wknd_rule)
+        wknd_rule.setStartDate(date_s)
+        wknd_rule.setEndDate(date_e)
+        prev_wknd_rule = wknd_rule
+      end
+
+      prev_wkdy_vals = wkdy_vals
+      prev_wknd_vals = wknd_vals
+    end
+
+    Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
+
+    return schedule
+  end
+end
+
 # Annual schedule defined by 24 weekday hourly values, 24 weekend hourly values, and 12 monthly values
 class MonthWeekdayWeekendSchedule
   # weekday_hourly_values can either be a comma-separated string of 24 numbers or a 24-element array of numbers.
