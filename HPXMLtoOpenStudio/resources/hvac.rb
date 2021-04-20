@@ -177,8 +177,8 @@ class HVAC
     ptac.addToThermalZone(control_zone)
     hvac_map[cooling_system.id] << ptac
 
-    control_zone.setSequentialCoolingFractionSchedule(ptac, get_sequential_load_schedule(model, sequential_cool_load_frac))
-    control_zone.setSequentialHeatingFractionSchedule(ptac, get_sequential_load_schedule(model, 0))
+    control_zone.setSequentialCoolingFractionSchedule(ptac, get_sequential_load_schedule(model, sequential_cool_load_frac, 'cooling', hvac_control))
+    control_zone.setSequentialHeatingFractionSchedule(ptac, get_sequential_load_schedule(model, 0, 'heating', hvac_control))
   end
 
   def self.apply_evaporative_cooler(model, runner, cooling_system,
@@ -644,7 +644,7 @@ class HVAC
 
   def self.apply_boiler(model, runner, heating_system,
                         remaining_heat_load_frac, control_zone,
-                        hvac_map)
+                        hvac_map, hvac_control)
 
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameBoiler
@@ -825,13 +825,13 @@ class HVAC
       hvac_map[heating_system.id] += disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil)
     end
 
-    control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_frac))
-    control_zone.setSequentialCoolingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, 0))
+    control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_frac, 'heating', hvac_control))
+    control_zone.setSequentialCoolingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, 0, 'cooling', hvac_control))
   end
 
   def self.apply_electric_baseboard(model, runner, heating_system,
                                     remaining_heat_load_frac, control_zone,
-                                    hvac_map)
+                                    hvac_map, hvac_control)
 
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameElectricBaseboard
@@ -845,13 +845,13 @@ class HVAC
     zone_hvac.addToThermalZone(control_zone)
     hvac_map[heating_system.id] << zone_hvac
 
-    control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_frac))
-    control_zone.setSequentialCoolingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, 0))
+    control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_frac, 'heating', hvac_control))
+    control_zone.setSequentialCoolingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, 0, 'cooling', hvac_control))
   end
 
   def self.apply_unit_heater(model, runner, heating_system,
                              remaining_heat_load_frac, control_zone,
-                             hvac_map)
+                             hvac_map, hvac_control)
 
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameUnitHeater
@@ -888,12 +888,12 @@ class HVAC
     unitary_system.addToThermalZone(control_zone)
     hvac_map[heating_system.id] << unitary_system
 
-    control_zone.setSequentialHeatingFractionSchedule(unitary_system, get_sequential_load_schedule(model, sequential_heat_load_frac))
-    control_zone.setSequentialCoolingFractionSchedule(unitary_system, get_sequential_load_schedule(model, 0))
+    control_zone.setSequentialHeatingFractionSchedule(unitary_system, get_sequential_load_schedule(model, sequential_heat_load_frac, 'heating', hvac_control))
+    control_zone.setSequentialCoolingFractionSchedule(unitary_system, get_sequential_load_schedule(model, 0, 'cooling', hvac_control))
   end
 
   def self.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac,
-                                 sequential_heat_load_frac, control_zone, hvac_control)
+                                 sequential_heat_load_frac, control_zone, hvac_control, ideal = false, residual = false)
 
     # Ideal Air System
     ideal_air = OpenStudio::Model::ZoneHVACIdealLoadsAirSystem.new(model)
@@ -918,8 +918,8 @@ class HVAC
     ideal_air.setHumidificationControlType('None')
     ideal_air.addToThermalZone(control_zone)
 
-    control_zone.setSequentialCoolingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_cool_load_frac, 'cooling', hvac_control))
-    control_zone.setSequentialHeatingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_heat_load_frac, 'heating', hvac_control))
+    control_zone.setSequentialCoolingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_cool_load_frac, 'cooling', hvac_control, ideal, residual))
+    control_zone.setSequentialHeatingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_heat_load_frac, 'heating', hvac_control, ideal, residual))
   end
 
   def self.apply_dehumidifiers(model, runner, dehumidifiers, living_space, hvac_map)
@@ -3661,7 +3661,7 @@ class HVAC
     return sequential_load_frac
   end
 
-  def self.get_sequential_load_schedule(model, value, heating_or_cooling, hvac_control)
+  def self.get_sequential_load_schedule(model, value, heating_or_cooling, hvac_control, ideal = false, residual = false)
     htg_start_month = hvac_control.seasons_heating_begin_month
     htg_start_day = hvac_control.seasons_heating_begin_day
     htg_end_month = hvac_control.seasons_heating_end_month
@@ -3686,6 +3686,12 @@ class HVAC
       end
     end
 
+    if ideal
+      # TODO
+    elsif residual
+      # TODO
+    end
+
     if values.uniq.length == 1
       s = OpenStudio::Model::ScheduleConstant.new(model)
       s.setName('Sequential Fraction Schedule')
@@ -3697,7 +3703,7 @@ class HVAC
     else
       start_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, model.getYearDescription.assumedYear)
       timestep_day = OpenStudio::Time.new(1, 0)
-      ts = OpenStudio::TimeSeries.new(start_date, timestep_day, OpenStudio::createVector(values), "")
+      ts = OpenStudio::TimeSeries.new(start_date, timestep_day, OpenStudio::createVector(values), '')
       s = OpenStudio::Model::ScheduleInterval.fromTimeSeries(ts, model).get
     end
 
