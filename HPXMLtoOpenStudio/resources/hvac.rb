@@ -893,7 +893,7 @@ class HVAC
   end
 
   def self.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac,
-                                 sequential_heat_load_frac, control_zone, hvac_control, ideal = false, residual = false)
+                                 sequential_heat_load_frac, control_zone, hvac_control)
 
     # Ideal Air System
     ideal_air = OpenStudio::Model::ZoneHVACIdealLoadsAirSystem.new(model)
@@ -918,8 +918,8 @@ class HVAC
     ideal_air.setHumidificationControlType('None')
     ideal_air.addToThermalZone(control_zone)
 
-    control_zone.setSequentialCoolingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_cool_load_frac, 'cooling', hvac_control, ideal, residual))
-    control_zone.setSequentialHeatingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_heat_load_frac, 'heating', hvac_control, ideal, residual))
+    control_zone.setSequentialCoolingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_cool_load_frac, 'cooling', hvac_control))
+    control_zone.setSequentialHeatingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_heat_load_frac, 'heating', hvac_control))
   end
 
   def self.apply_dehumidifiers(model, runner, dehumidifiers, living_space, hvac_map)
@@ -3661,7 +3661,7 @@ class HVAC
     return sequential_load_frac
   end
 
-  def self.get_sequential_load_schedule(model, value, heating_or_cooling, hvac_control, ideal = false, residual = false)
+  def self.get_sequential_load_schedule(model, value, heating_or_cooling, hvac_control)
     htg_start_month = hvac_control.seasons_heating_begin_month
     htg_start_day = hvac_control.seasons_heating_begin_day
     htg_end_month = hvac_control.seasons_heating_end_month
@@ -3684,12 +3684,6 @@ class HVAC
       cooling_season.each do |mult|
         values.push(value * mult)
       end
-    end
-
-    if ideal
-      # TODO
-    elsif residual
-      # TODO
     end
 
     if values.uniq.length == 1

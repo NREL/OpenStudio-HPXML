@@ -1785,7 +1785,7 @@ class OSModel
     end
     if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
       HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
-                                 living_zone, @hpxml.hvac_controls[0], true)
+                                 living_zone, @hpxml.hvac_controls[0])
     end
   end
 
@@ -1812,7 +1812,7 @@ class OSModel
     end
     if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
       HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
-                                 living_zone, @hpxml.hvac_controls[0], false, true)
+                                 living_zone, @hpxml.hvac_controls[0])
     end
   end
 
