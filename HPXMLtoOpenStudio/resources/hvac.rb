@@ -594,7 +594,7 @@ class HVAC
 
   def self.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
                                              remaining_heat_load_frac, remaining_cool_load_frac,
-                                             control_zone, hvac_map)
+                                             control_zone, hvac_map, hvac_control)
     if heat_pump.fraction_cool_load_served > 0
       # WLHPs connected to chillers or cooling towers should have already been converted to
       # central air conditioners
