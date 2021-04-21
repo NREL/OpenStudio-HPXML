@@ -751,17 +751,17 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.hvac_controls[0].cooling_setup_start_hour = 12
     hpxml.hvac_controls[0].seasons_heating_enabled = true
     hpxml.hvac_controls[0].seasons_heating_begin_month = 1
-    hpxml.hvac_controls[0].seasons_heating_begin_day = 5
-    hpxml.hvac_controls[0].seasons_heating_end_month = 12
-    hpxml.hvac_controls[0].seasons_heating_end_day = 15
+    hpxml.hvac_controls[0].seasons_heating_begin_day = 1
+    hpxml.hvac_controls[0].seasons_heating_end_month = 6
+    hpxml.hvac_controls[0].seasons_heating_end_day = 30
     hpxml.hvac_controls[0].seasons_cooling_enabled = true
-    hpxml.hvac_controls[0].seasons_cooling_begin_month = 1
-    hpxml.hvac_controls[0].seasons_cooling_begin_day = 10
+    hpxml.hvac_controls[0].seasons_cooling_begin_month = 7
+    hpxml.hvac_controls[0].seasons_cooling_begin_day = 1
     hpxml.hvac_controls[0].seasons_cooling_end_month = 12
-    hpxml.hvac_controls[0].seasons_cooling_end_day = 20
+    hpxml.hvac_controls[0].seasons_cooling_end_day = 31
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hvac_control_values(hpxml_default, 12, 12, true, 1, 5, 12, 15, true, 1, 10, 12, 20)
+    _test_default_hvac_control_values(hpxml_default, 12, 12, true, 1, 1, 6, 30, true, 7, 1, 12, 31)
 
     # Test defaults
     hpxml.hvac_controls[0].heating_setback_start_hour = nil
