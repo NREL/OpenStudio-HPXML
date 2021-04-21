@@ -1026,17 +1026,19 @@ class HVAC
     clg_end_month = hvac_control.seasons_cooling_end_month
     clg_end_day = hvac_control.seasons_cooling_end_day
 
+    num_days = Constants.YearNumDays(model)
+
     if hvac_control.weekday_heating_setpoints.nil? || hvac_control.weekend_heating_setpoints.nil?
       # Base heating setpoint
       htg_setpoint = hvac_control.heating_setpoint_temp
-      htg_weekday_setpoints = [[htg_setpoint] * 24] * 365
+      htg_weekday_setpoints = [[htg_setpoint] * 24] * num_days
 
       # Apply heating setback?
       htg_setback = hvac_control.heating_setback_temp
       if not htg_setback.nil?
         htg_setback_hrs_per_week = hvac_control.heating_setback_hours_per_week
         htg_setback_start_hr = hvac_control.heating_setback_start_hour
-        for d in 1..365
+        for d in 1..num_days
           for hr in htg_setback_start_hr..htg_setback_start_hr + Integer(htg_setback_hrs_per_week / 7.0) - 1
             htg_weekday_setpoints[d - 1][hr % 24] = htg_setback
           end
@@ -1046,23 +1048,23 @@ class HVAC
     else
       # 24-hr weekday/weekend heating setpoint schedules
       htg_weekday_setpoints = hvac_control.weekday_heating_setpoints.split(',').map { |i| Float(i) }
-      htg_weekday_setpoints = [htg_weekday_setpoints] * 365
+      htg_weekday_setpoints = [htg_weekday_setpoints] * num_days
 
       htg_weekend_setpoints = hvac_control.weekend_heating_setpoints.split(',').map { |i| Float(i) }
-      htg_weekend_setpoints = [htg_weekend_setpoints] * 365
+      htg_weekend_setpoints = [htg_weekend_setpoints] * num_days
     end
 
     if hvac_control.weekday_cooling_setpoints.nil? || hvac_control.weekend_cooling_setpoints.nil?
       # Base cooling setpoint
       clg_setpoint = hvac_control.cooling_setpoint_temp
-      clg_weekday_setpoints = [[clg_setpoint] * 24] * 365
+      clg_weekday_setpoints = [[clg_setpoint] * 24] * num_days
 
       # Apply cooling setup?
       clg_setup = hvac_control.cooling_setup_temp
       if not clg_setup.nil?
         clg_setup_hrs_per_week = hvac_control.cooling_setup_hours_per_week
         clg_setup_start_hr = hvac_control.cooling_setup_start_hour
-        for d in 1..365
+        for d in 1..num_days
           for hr in clg_setup_start_hr..clg_setup_start_hr + Integer(clg_setup_hrs_per_week / 7.0) - 1
             clg_weekday_setpoints[d - 1][hr % 24] = clg_setup
           end
@@ -1072,10 +1074,10 @@ class HVAC
     else
       # 24-hr weekday/weekend cooling setpoint schedules
       clg_weekday_setpoints = hvac_control.weekday_cooling_setpoints.split(',').map { |i| Float(i) }
-      clg_weekday_setpoints = [clg_weekday_setpoints] * 365
+      clg_weekday_setpoints = [clg_weekday_setpoints] * num_days
 
       clg_weekend_setpoints = hvac_control.weekend_cooling_setpoints.split(',').map { |i| Float(i) }
-      clg_weekend_setpoints = [clg_weekend_setpoints] * 365
+      clg_weekend_setpoints = [clg_weekend_setpoints] * num_days
     end
 
     # Apply cooling setpoint offset due to ceiling fan?
@@ -1092,12 +1094,11 @@ class HVAC
     end
 
     # Create heating/cooling season schedules
-    year = model.getYearDescription.assumedYear
-    heating_season = get_daily_season(year, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
-    cooling_season = get_daily_season(year, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
+    heating_season = get_daily_season(model, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
+    cooling_season = get_daily_season(model, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
 
     # Create setpoint schedules
-    (0..364).to_a.each do |i|
+    (0..(num_days - 1)).to_a.each do |i|
       if (heating_season[i] == 1) && (cooling_season[i] == 1) # overlap seasons
         htg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
         htg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
@@ -1137,13 +1138,14 @@ class HVAC
     living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
   end
 
-  def self.get_daily_season(year, start_month, start_day, end_month, end_day)
+  def self.get_daily_season(model, start_month, start_day, end_month, end_day)
+    year = model.getYearDescription.assumedYear
     day_ts = Time.new(year, 1, 1)
     start_ts = Time.new(year, start_month, start_day)
     end_ts = Time.new(year, end_month, end_day)
-
-    season = Array.new(365, 0)
-    (0..364).each do |i|
+    num_days = Constants.YearNumDays(model)
+    season = Array.new(num_days, 0)
+    (0..(num_days - 1)).each do |i|
       if start_ts <= end_ts
         season[i] = 1 if start_ts <= day_ts && day_ts <= end_ts
       else
@@ -3658,9 +3660,8 @@ class HVAC
     clg_end_month = hvac_control.seasons_cooling_end_month
     clg_end_day = hvac_control.seasons_cooling_end_day
 
-    year = model.getYearDescription.assumedYear
-    heating_season = get_daily_season(year, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
-    cooling_season = get_daily_season(year, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
+    heating_season = get_daily_season(model, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
+    cooling_season = get_daily_season(model, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
 
     values = []
     if heating_or_cooling == 'heating'

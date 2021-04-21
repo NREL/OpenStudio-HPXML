@@ -180,8 +180,9 @@ class HourlyByDaySchedule
     @model = model
     @sch_name = sch_name
     @schedule = nil
-    @weekday_day_by_hour_values = validateValues(weekday_day_by_hour_values, 365, 24)
-    @weekend_day_by_hour_values = validateValues(weekend_day_by_hour_values, 365, 24)
+    @num_days = Constants.YearNumDays(model)
+    @weekday_day_by_hour_values = validateValues(weekday_day_by_hour_values, @num_days, 24)
+    @weekend_day_by_hour_values = validateValues(weekend_day_by_hour_values, @num_days, 24)
     @schedule_type_limits_name = schedule_type_limits_name
 
     if normalize_values
@@ -256,7 +257,7 @@ class HourlyByDaySchedule
     prev_wkdy_rule = nil
     prev_wknd_vals = nil
     prev_wknd_rule = nil
-    for d in 1..365
+    for d in 1..@num_days
       date_s = OpenStudio::Date::fromDayOfYear(d, assumedYear)
       date_e = OpenStudio::Date::fromDayOfYear(d, assumedYear)
 
