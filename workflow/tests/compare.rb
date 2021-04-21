@@ -65,7 +65,7 @@ files.each do |file|
   hpxmls.sort.each do |hpxml|
     row = [hpxml]
     cols.each do |col|
-      next if col.include?('HPXML')
+      next if i == 0
 
       begin
         base_field = base[hpxml][col]
