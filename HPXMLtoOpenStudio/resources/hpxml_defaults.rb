@@ -448,6 +448,7 @@ class HPXMLDefaults
       heating_system.electric_auxiliary_energy_isdefaulted = true
       heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system)
       heating_system.shared_loop_watts = nil
+      heating_system.shared_loop_motor_efficiency = nil
       heating_system.fan_coil_watts = nil
     end
 

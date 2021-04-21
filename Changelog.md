@@ -7,6 +7,7 @@ __New Features__
 - Allows `DuctLeakageMeasurement` & `ConditionedFloorAreaServed` to not be specified for ductless fan coil systems.
 - Allows `Slab/ExposedPerimeter` to be zero.
 - Removes `ClothesDryer/ControlType` from being a required input, it is not used.
+- Switches room air conditioner model to use Cutler performance curves.
 - Relaxes tolerance for duct leakage to outside warning when ducts solely in conditioned space.
 - Moves additional error-checking from the ruby measure to the schematron validator. 
 
