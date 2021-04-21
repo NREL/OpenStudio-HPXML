@@ -1506,6 +1506,7 @@ def get_values(osw_file, step)
   elsif ['base-hvac-fixed-heater-gas-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeFixedHeater)
     step.setArgument('heating_system_heating_efficiency', 1.0)
+    step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-floor-furnace-propane-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeFloorFurnace)
     step.setArgument('heating_system_fuel', HPXML::FuelTypePropane)
@@ -1649,6 +1650,7 @@ def get_values(osw_file, step)
   elsif ['base-hvac-portable-heater-gas-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypePortableHeater)
     step.setArgument('heating_system_heating_efficiency', 1.0)
+    step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-programmable-thermostat-detailed.osw'].include? osw_file
     step.setArgument('setpoint_heating_weekday', '64, 64, 64, 64, 64, 64, 64, 70, 70, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64')
     step.setArgument('setpoint_heating_weekend', '68, 68, 68, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70')
@@ -6296,11 +6298,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
 
   # Set ConditionedFloorAreaServed
   if not hpxml_file.include?('invalid_files')
-    n_hvac_dists = hpxml.hvac_distributions.select { |sys| sys.hydronic_type != HPXML::HydronicTypeWaterLoop }.size
-    n_hvac_dists += hpxml.hvac_systems.select { |sys| sys.distribution_system_idref.nil? }.size # Count ductless systems too
+    n_htg_systems = (hpxml.heating_systems + hpxml.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.size
+    n_clg_systems = (hpxml.cooling_systems + hpxml.heat_pumps).select { |h| h.fraction_cool_load_served.to_f > 0 }.size
     hpxml.hvac_distributions.each do |hvac_distribution|
       if [HPXML::HVACDistributionTypeAir].include?(hvac_distribution.distribution_system_type) && (hvac_distribution.ducts.size > 0)
-        hvac_distribution.conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area / n_hvac_dists
+        n_hvac_systems = [n_htg_systems, n_clg_systems].max
+        hvac_distribution.conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area / n_hvac_systems
       else
         hvac_distribution.conditioned_floor_area_served = nil
       end

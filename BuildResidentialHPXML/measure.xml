@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>f533fc5e-ab41-495e-a092-9d2a452fba33</version_id>
-  <version_modified>20210421T164237Z</version_modified>
+  <version_id>24c329bd-57b6-4c94-a803-4f3deb3cab77</version_id>
+  <version_modified>20210421T193426Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -2524,7 +2524,7 @@
     <argument>
       <name>ducts_number_of_return_registers</name>
       <display_name>Ducts: Number of Return Registers</display_name>
-      <description>The number of return registers of the ducts.</description>
+      <description>The number of return registers of the ducts. Ignored for ducted evaporative cooler.</description>
       <type>String</type>
       <units>#</units>
       <required>true</required>
@@ -6273,17 +6273,6 @@
       <checksum>5DF19335</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>AE7F6E5A</checksum>
-    </file>
-    <file>
       <filename>base-hvac-air-to-air-heat-pump-1-speed-heating-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -7074,18 +7063,6 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>D41169E3</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-fixed-heater-gas-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>860DDD43</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-portable-heater-gas-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>AF95AF6A</checksum>
     </file>
     <file>
       <filename>base-hvac-furnace-gas-only.osw</filename>
@@ -8118,6 +8095,41 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>921F05FF</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>9AE98715</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-fixed-heater-gas-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>11CBC797</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-portable-heater-gas-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A71061DF</checksum>
+    </file>
+    <file>
+      <filename>test_measure.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6B72F6D8</checksum>
+    </file>
+    <file>
+      <filename>test_rakefile.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>BB03716F</checksum>
     </file>
   </files>
 </measure>
