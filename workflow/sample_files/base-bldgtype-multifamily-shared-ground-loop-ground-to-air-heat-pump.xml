@@ -192,6 +192,7 @@
             <HeatPump>
               <SystemIdentifier id='HeatPump'/>
               <DistributionSystem idref='HVACDistribution'/>
+              <IsPackagedSystem>true</IsPackagedSystem>
               <IsSharedSystem>true</IsSharedSystem>
               <NumberofUnitsServed>6</NumberofUnitsServed>
               <HeatPumpType>ground-to-air</HeatPumpType>
