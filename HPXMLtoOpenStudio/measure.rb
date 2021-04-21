@@ -1731,7 +1731,7 @@ class OSModel
         HVAC.apply_mini_split_heat_pump(model, runner, heat_pump,
                                         @remaining_heat_load_frac,
                                         @remaining_cool_load_frac,
-                                        living_zone, @hvac_map, @hpxml.hvac_controls)
+                                        living_zone, @hvac_map, @hpxml.hvac_controls[0])
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
 
