@@ -3862,11 +3862,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
 
   # Set ConditionedFloorAreaServed
   if not hpxml_file.include?('invalid_files')
-    n_hvac_dists = hpxml.hvac_distributions.select { |sys| sys.hydronic_type != HPXML::HydronicTypeWaterLoop }.size
-    n_hvac_dists += hpxml.hvac_systems.select { |sys| sys.distribution_system_idref.nil? }.size # Count ductless systems too
+    n_htg_systems = (hpxml.heating_systems + hpxml.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.size
+    n_clg_systems = (hpxml.cooling_systems + hpxml.heat_pumps).select { |h| h.fraction_cool_load_served.to_f > 0 }.size
     hpxml.hvac_distributions.each do |hvac_distribution|
       if [HPXML::HVACDistributionTypeAir].include?(hvac_distribution.distribution_system_type) && (hvac_distribution.ducts.size > 0)
-        hvac_distribution.conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area / n_hvac_dists
+        n_hvac_systems = [n_htg_systems, n_clg_systems].max
+        hvac_distribution.conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area / n_hvac_systems
       else
         hvac_distribution.conditioned_floor_area_served = nil
       end

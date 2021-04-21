@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>f1fc9878-f6fd-474a-ba6b-1485f41521bb</version_id>
-  <version_modified>20210421T221820Z</version_modified>
+  <version_id>4f4fb6f1-8e80-4609-a555-650b08565942</version_id>
+  <version_modified>20210421T231243Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -512,28 +512,16 @@
       <checksum>F2A35638</checksum>
     </file>
     <file>
-      <filename>hpxml_defaults.rb</filename>
+      <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6298AAEF</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0A482E23</checksum>
+      <checksum>3F162C51</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>20EB60F3</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3F162C51</checksum>
     </file>
     <file>
       <version>
@@ -547,16 +535,28 @@
       <checksum>F4C3199D</checksum>
     </file>
     <file>
-      <filename>test_defaults.rb</filename>
+      <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>16ECFF50</checksum>
+      <usage_type>resource</usage_type>
+      <checksum>6298AAEF</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>0A482E23</checksum>
     </file>
     <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>356FED8E</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A18567EF</checksum>
     </file>
   </files>
 </measure>
