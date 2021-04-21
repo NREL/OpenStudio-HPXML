@@ -1,6 +1,6 @@
 require 'csv'
 
-folder = 'comparisons'
+folder = 'comparisons' # where delta csvs go
 files = Dir[File.join(File.dirname(__FILE__), 'base_results/*.csv')].map { |x| File.basename(x) }
 
 dir = File.join(File.dirname(__FILE__), folder)
