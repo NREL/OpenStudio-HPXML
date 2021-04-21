@@ -1641,7 +1641,7 @@ class OSModel
 
         HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
                                                    @remaining_cool_load_frac, @remaining_heat_load_frac,
-                                                   living_zone, @hvac_map)
+                                                   living_zone, @hvac_map, @hpxml.hvac_controls[0])
 
         if not heating_system.nil?
           @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
@@ -1651,19 +1651,19 @@ class OSModel
 
         HVAC.apply_room_air_conditioner(model, runner, cooling_system,
                                         @remaining_cool_load_frac, living_zone,
-                                        @hvac_map)
+                                        @hvac_map, @hpxml.hvac_controls[0])
 
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
 
         HVAC.apply_evaporative_cooler(model, runner, cooling_system,
                                       @remaining_cool_load_frac, living_zone,
-                                      @hvac_map)
+                                      @hvac_map, @hpxml.hvac_controls[0])
 
       elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
 
         HVAC.apply_mini_split_air_conditioner(model, runner, cooling_system,
                                               @remaining_cool_load_frac,
-                                              living_zone, @hvac_map)
+                                              living_zone, @hvac_map, @hpxml.hvac_controls[0])
       end
 
       @remaining_cool_load_frac -= cooling_system.fraction_cool_load_served
@@ -1690,17 +1690,17 @@ class OSModel
 
         HVAC.apply_central_air_conditioner_furnace(model, runner, nil, heating_system,
                                                    nil, @remaining_heat_load_frac,
-                                                   living_zone, @hvac_map)
+                                                   living_zone, @hvac_map, @hpxml.hvac_controls[0])
 
       elsif [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
         HVAC.apply_boiler(model, runner, heating_system,
-                          @remaining_heat_load_frac, living_zone, @hvac_map)
+                          @remaining_heat_load_frac, living_zone, @hvac_map, @hpxml.hvac_controls[0])
 
       elsif [HPXML::HVACTypeElectricResistance].include? heating_system.heating_system_type
 
         HVAC.apply_electric_baseboard(model, runner, heating_system,
-                                      @remaining_heat_load_frac, living_zone, @hvac_map)
+                                      @remaining_heat_load_frac, living_zone, @hvac_map, @hpxml.hvac_controls[0])
 
       elsif [HPXML::HVACTypeStove,
              HPXML::HVACTypePortableHeater,
@@ -1710,7 +1710,7 @@ class OSModel
              HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
 
         HVAC.apply_unit_heater(model, runner, heating_system,
-                               @remaining_heat_load_frac, living_zone, @hvac_map)
+                               @remaining_heat_load_frac, living_zone, @hvac_map, @hpxml.hvac_controls[0])
       end
 
       @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
@@ -1733,28 +1733,28 @@ class OSModel
         HVAC.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
                                                @remaining_heat_load_frac,
                                                @remaining_cool_load_frac,
-                                               living_zone, @hvac_map)
+                                               living_zone, @hvac_map, @hpxml.hvac_controls[0])
 
       elsif [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
 
         HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
                                                 @remaining_heat_load_frac,
                                                 @remaining_cool_load_frac,
-                                                living_zone, @hvac_map)
+                                                living_zone, @hvac_map, @hpxml.hvac_controls[0])
 
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
 
         HVAC.apply_mini_split_heat_pump(model, runner, heat_pump,
                                         @remaining_heat_load_frac,
                                         @remaining_cool_load_frac,
-                                        living_zone, @hvac_map)
+                                        living_zone, @hvac_map, @hpxml.hvac_controls[0])
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
 
         HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                            @remaining_heat_load_frac,
                                            @remaining_cool_load_frac,
-                                           living_zone, @hvac_map)
+                                           living_zone, @hvac_map, @hpxml.hvac_controls[0])
 
       end
 
@@ -1781,7 +1781,7 @@ class OSModel
           fail 'Unexpected weather file for ASHRAE 140 run.'
         end
       end
-      HVAC.apply_ideal_air_loads(model, runner, obj_name, cooling_load_frac, heating_load_frac, living_zone)
+      HVAC.apply_ideal_air_loads(model, runner, obj_name, cooling_load_frac, heating_load_frac, living_zone, @hpxml.hvac_controls[0])
       return
     end
 
@@ -1801,7 +1801,7 @@ class OSModel
     end
     if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
       HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
-                                 living_zone)
+                                 living_zone, @hpxml.hvac_controls[0])
     end
   end
 
@@ -1828,18 +1828,17 @@ class OSModel
     end
     if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
       HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
-                                 living_zone)
+                                 living_zone, @hpxml.hvac_controls[0])
     end
   end
 
   def self.add_setpoints(runner, model, weather, spaces)
     return if @hpxml.hvac_controls.size == 0
 
-    hvac_control = @hpxml.hvac_controls[0]
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     has_ceiling_fan = (@hpxml.ceiling_fans.size > 0)
 
-    HVAC.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan)
+    HVAC.apply_setpoints(model, runner, weather, @hpxml.hvac_controls[0], living_zone, has_ceiling_fan)
   end
 
   def self.add_ceiling_fans(runner, model, weather, spaces)
