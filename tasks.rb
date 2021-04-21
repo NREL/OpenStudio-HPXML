@@ -5651,21 +5651,11 @@ if ARGV[0].to_sym == :create_release_zips
            'workflow/sample_files/*.xml',
            'workflow/tests/*.rb',
            'workflow/tests/ASHRAE_Standard_140/*.xml',
+           'workflow/tests/base_results/*.csv',
            'documentation/index.html',
            'documentation/_static/**/*.*']
 
   if not ENV['CI']
-    # Run ASHRAE 140 files
-    puts 'Running ASHRAE 140 tests (this will take a minute)...'
-    command = "#{OpenStudio.getOpenStudioCLI} workflow/tests/hpxml_translator_test.rb --name=test_ashrae_140 > log.txt"
-    system(command)
-    results_csv_path = 'workflow/tests/results/results_ashrae_140.csv'
-    if not File.exist? results_csv_path
-      puts 'ASHRAE 140 results CSV file not generated. Aborting...'
-      exit!
-    end
-    File.delete('log.txt')
-
     # Generate documentation
     puts 'Generating documentation...'
     command = 'sphinx-build -b singlehtml docs/source documentation'
@@ -5704,9 +5694,6 @@ if ARGV[0].to_sym == :create_release_zips
   release_map.each do |zip_path, include_all_epws|
     puts "Creating #{zip_path}..."
     zip = OpenStudio::ZipFile.new(zip_path, false)
-    if not ENV['CI']
-      zip.addFile(results_csv_path, File.join('OpenStudio-HPXML', results_csv_path))
-    end
     files.each do |f|
       Dir[f].each do |file|
         if file.start_with? 'documentation'
