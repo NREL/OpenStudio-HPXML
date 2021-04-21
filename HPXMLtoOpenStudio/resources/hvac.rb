@@ -302,7 +302,7 @@ class HVAC
 
   def self.apply_mini_split_air_conditioner(model, runner, cooling_system,
                                             remaining_cool_load_frac,
-                                            control_zone, hvac_map)
+                                            control_zone, hvac_map, hvac_control)
 
     hvac_map[cooling_system.id] = []
     obj_name = Constants.ObjectNameMiniSplitAirConditioner
@@ -344,7 +344,7 @@ class HVAC
   def self.apply_mini_split_heat_pump(model, runner, heat_pump,
                                       remaining_heat_load_frac,
                                       remaining_cool_load_frac,
-                                      control_zone, hvac_map)
+                                      control_zone, hvac_map, hvac_control)
 
     hvac_map[heat_pump.id] = []
     obj_name = Constants.ObjectNameMiniSplitHeatPump
@@ -396,7 +396,7 @@ class HVAC
 
   def self.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                          remaining_heat_load_frac, remaining_cool_load_frac,
-                                         control_zone, hvac_map)
+                                         control_zone, hvac_map, hvac_control)
 
     hvac_map[heat_pump.id] = []
     obj_name = Constants.ObjectNameGroundSourceHeatPump
