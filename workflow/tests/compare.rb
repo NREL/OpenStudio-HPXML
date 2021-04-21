@@ -34,8 +34,12 @@ files.each do |file|
       results[key][hpxml] = {}
       row[1..-1].each_with_index do |field, i|
         begin
-          results[key][hpxml][results[key]['cols'][i + 1]] = Float(field)
+          results[key][hpxml][results[key]['cols'][i + 1]] = field.split(',').map { |x| Float(x) }
         rescue
+          begin
+            results[key][hpxml][results[key]['cols'][i + 1]] = field.to_s
+          rescue
+          end
         end
       end
     end
@@ -61,9 +65,20 @@ files.each do |file|
       begin
         base_field = results['base'][hpxml][col]
         feature_field = results['feature'][hpxml][col]
-        m = "#{(feature_field - base_field).round(1)}"
+        m = []
+        base_field.zip(feature_field).each do |b, f|
+          m << (f - b).round(1)
+        end
+        m = m.join(',')
       rescue
-        m = 'N/A'
+        begin
+          m = 0
+          if base_field != feature_field
+            m = 1
+          end
+        rescue
+          m = 'N/A'
+        end
       end
 
       row << m
