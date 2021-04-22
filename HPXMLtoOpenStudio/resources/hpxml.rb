@@ -3228,7 +3228,6 @@ class HPXML < Object
              :ceiling_fan_cooling_setpoint_temp_offset,
              :weekday_heating_setpoints, :weekend_heating_setpoints,
              :weekday_cooling_setpoints, :weekend_cooling_setpoints,
-             :seasons_heating_enabled, :seasons_cooling_enabled,
              :seasons_heating_begin_month, :seasons_heating_begin_day, :seasons_heating_end_month, :seasons_heating_end_day,
              :seasons_cooling_begin_month, :seasons_cooling_begin_day, :seasons_cooling_end_month, :seasons_cooling_end_day]
     attr_accessor(*ATTRS)
@@ -3301,17 +3300,15 @@ class HPXML < Object
       if (not @seasons_heating_enabled.nil?) || (not @seasons_heating_begin_month.nil?) || (not @seasons_heating_begin_day.nil?) || (not @seasons_heating_end_month.nil?) || (not @seasons_heating_end_day.nil?) || (not @seasons_cooling_enabled.nil?) || (not @seasons_cooling_begin_month.nil?) || (not @seasons_cooling_begin_day.nil?) || (not @seasons_cooling_end_month.nil?) || (not @seasons_cooling_end_day.nil?)
         extension = XMLHelper.create_elements_as_needed(hvac_control, ['extension'])
         seasons = XMLHelper.add_element(extension, 'Seasons')
-        if (not @seasons_heating_enabled.nil?) || (not @seasons_heating_begin_month.nil?) || (not @seasons_heating_begin_day.nil?) || (not @seasons_heating_end_month.nil?) || (not @seasons_heating_end_day.nil?)
+        if (not @seasons_heating_begin_month.nil?) || (not @seasons_heating_begin_day.nil?) || (not @seasons_heating_end_month.nil?) || (not @seasons_heating_end_day.nil?)
           heating = XMLHelper.add_element(seasons, 'Heating')
-          XMLHelper.add_element(heating, 'Enabled', @seasons_heating_enabled, :boolean, @seasons_heating_enabled_isdefaulted) unless @seasons_heating_enabled.nil?
           XMLHelper.add_element(heating, 'BeginMonth', @seasons_heating_begin_month, :integer, @seasons_heating_begin_month_isdefaulted) unless @seasons_heating_begin_month.nil?
           XMLHelper.add_element(heating, 'BeginDayOfMonth', @seasons_heating_begin_day, :integer, @seasons_heating_begin_day_isdefaulted) unless @seasons_heating_begin_day.nil?
           XMLHelper.add_element(heating, 'EndMonth', @seasons_heating_end_month, :integer, @seasons_heating_end_month_isdefaulted) unless @seasons_heating_end_month.nil?
           XMLHelper.add_element(heating, 'EndDayOfMonth', @seasons_heating_end_day, :integer, @seasons_heating_end_day_isdefaulted) unless @seasons_heating_end_day.nil?
         end
-        if (not @seasons_cooling_enabled.nil?) || (not @seasons_cooling_begin_month.nil?) || (not @seasons_cooling_begin_day.nil?) || (not @seasons_cooling_end_month.nil?) || (not @seasons_cooling_end_day.nil?)
+        if (not @seasons_cooling_begin_month.nil?) || (not @seasons_cooling_begin_day.nil?) || (not @seasons_cooling_end_month.nil?) || (not @seasons_cooling_end_day.nil?)
           cooling = XMLHelper.add_element(seasons, 'Cooling')
-          XMLHelper.add_element(cooling, 'Enabled', @seasons_cooling_enabled, :boolean, @seasons_cooling_enabled_isdefaulted) unless @seasons_heating_enabled.nil?
           XMLHelper.add_element(cooling, 'BeginMonth', @seasons_cooling_begin_month, :integer, @seasons_cooling_begin_month_isdefaulted) unless @seasons_cooling_begin_month.nil?
           XMLHelper.add_element(cooling, 'BeginDayOfMonth', @seasons_cooling_begin_day, :integer, @seasons_cooling_begin_day_isdefaulted) unless @seasons_cooling_begin_day.nil?
           XMLHelper.add_element(cooling, 'EndMonth', @seasons_cooling_end_month, :integer, @seasons_cooling_end_month_isdefaulted) unless @seasons_cooling_end_month.nil?
@@ -3338,12 +3335,10 @@ class HPXML < Object
       @weekend_heating_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekendSetpointTempsHeatingSeason', :string)
       @weekday_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekdaySetpointTempsCoolingSeason', :string)
       @weekend_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekendSetpointTempsCoolingSeason', :string)
-      @seasons_heating_enabled = XMLHelper.get_value(hvac_control, 'extension/Seasons/Heating/Enabled', :boolean)
       @seasons_heating_begin_month = XMLHelper.get_value(hvac_control, 'extension/Seasons/Heating/BeginMonth', :integer)
       @seasons_heating_begin_day = XMLHelper.get_value(hvac_control, 'extension/Seasons/Heating/BeginDayOfMonth', :integer)
       @seasons_heating_end_month = XMLHelper.get_value(hvac_control, 'extension/Seasons/Heating/EndMonth', :integer)
       @seasons_heating_end_day = XMLHelper.get_value(hvac_control, 'extension/Seasons/Heating/EndDayOfMonth', :integer)
-      @seasons_cooling_enabled = XMLHelper.get_value(hvac_control, 'extension/Seasons/Cooling/Enabled', :boolean)
       @seasons_cooling_begin_month = XMLHelper.get_value(hvac_control, 'extension/Seasons/Cooling/BeginMonth', :integer)
       @seasons_cooling_begin_day = XMLHelper.get_value(hvac_control, 'extension/Seasons/Cooling/BeginDayOfMonth', :integer)
       @seasons_cooling_end_month = XMLHelper.get_value(hvac_control, 'extension/Seasons/Cooling/EndMonth', :integer)
