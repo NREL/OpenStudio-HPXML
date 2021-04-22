@@ -1,6 +1,8 @@
 require 'csv'
 
-folder = 'comparisons' # where delta csvs go
+base = 'base'
+feature = 'feature'
+folder = 'comparisons' # comparison csv files will be exported to this folder
 files = Dir[File.join(File.dirname(__FILE__), 'base_results/*.csv')].map { |x| File.basename(x) }
 
 dir = File.join(File.dirname(__FILE__), folder)
@@ -9,22 +11,28 @@ unless Dir.exist?(dir)
 end
 
 files.each do |file|
-  results = { 'base' => {}, 'feature' => {} }
+  results = { base => {}, feature => {} }
 
   # load files
   results.keys.each do |key|
-    begin
+    if key == base
+      results[key]['file'] = "base_results/#{file}"
+    elsif key == feature
       results[key]['file'] = "results/#{file}"
-      results[key]['rows'] = CSV.read(File.join(File.dirname(__FILE__), results[key]['file']))
-    rescue
-      puts "Could not find #{results[key]['file']}."
+    end
+
+    filepath = File.join(File.dirname(__FILE__), results[key]['file'])
+    if File.exist?(filepath)
+      results[key]['rows'] = CSV.read(filepath)
+    else
+      puts "Could not find #{filepath}."
       next
     end
   end
 
   # get columns
   results.keys.each do |key|
-    results[key]['cols'] = results[key]['rows'][0]
+    results[key]['cols'] = results[key]['rows'][0][1..-1] # exclude index column
   end
 
   # get data
@@ -33,56 +41,75 @@ files.each do |file|
       hpxml = row[0]
       results[key][hpxml] = {}
       row[1..-1].each_with_index do |field, i|
-        begin
-          results[key][hpxml][results[key]['cols'][i + 1]] = field.split(',').map { |x| Float(x) }
-        rescue
+        col = results[key]['cols'][i]
+
+        if field.nil?
+          vals = [''] # string
+        elsif field.include?(',')
+          vals = field.split(',').map { |x| Float(x) } # float
+        else
           begin
-            results[key][hpxml][results[key]['cols'][i + 1]] = field.to_s
-          rescue
+            vals = [Float(field)] # float
+          rescue ArgumentError
+            vals = [field] # string
           end
         end
+
+        results[key][hpxml][col] = vals
       end
     end
   end
 
   # get hpxml union
-  base_hpxmls = results['base']['rows'].transpose[0][1..-1]
-  feature_hpxmls = results['feature']['rows'].transpose[0][1..-1]
+  base_hpxmls = results[base]['rows'].transpose[0][1..-1]
+  feature_hpxmls = results[feature]['rows'].transpose[0][1..-1]
   hpxmls = base_hpxmls | feature_hpxmls
 
   # get column union
-  base_cols = results['base']['cols']
-  feature_cols = results['feature']['cols']
+  base_cols = results[base]['cols']
+  feature_cols = results[feature]['cols']
   cols = base_cols | feature_cols
 
   # create comparison table
-  rows = [cols]
+  rows = [[results[base]['rows'][0][0]] + cols] # index column + union of all other columns
+
+  # populate the rows hash
   hpxmls.sort.each do |hpxml|
     row = [hpxml]
     cols.each_with_index do |col, i|
-      next if i == 0
+      if results[base].keys.include?(hpxml) && (not results[feature].keys.include?(hpxml)) # feature removed an xml
+        m = 'N/A'
+      elsif (not results[base].keys.include?(hpxml)) && results[feature].keys.include?(hpxml) # feature added an xml
+        m = 'N/A'
+      elsif results[base][hpxml].keys.include?(col) && (not results[feature][hpxml].keys.include?(col)) # feature removed a column
+        m = 'N/A'
+      elsif (not results[base][hpxml].keys.include?(col)) && results[feature][hpxml].keys.include?(col) # feature added a column
+        m = 'N/A'
+      else
+        base_field = results[base][hpxml][col]
+        feature_field = results[feature][hpxml][col]
 
-      begin
-        base_field = results['base'][hpxml][col]
-        feature_field = results['feature'][hpxml][col]
-        m = []
-        base_field.zip(feature_field).each do |b, f|
-          m << (f - b).round(1)
-        end
-        m = m.join(',')
-      rescue
         begin
-          m = 0
-          if base_field != feature_field
-            m = 1
+          m = []
+          base_field.zip(feature_field).each do |b, f|
+            m << (f - b).round(1)
           end
-        rescue
-          m = 'N/A'
+        rescue NoMethodError
+          m = []
+          base_field.zip(feature_field).each do |b, f|
+            n = 0
+            if b != f
+              n = 1
+            end
+            m << n
+          end
         end
+        m = m.reduce(:+)
       end
 
       row << m
     end
+
     rows << row
   end
 
