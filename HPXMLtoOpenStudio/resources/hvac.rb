@@ -3,7 +3,7 @@
 class HVAC
   def self.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
                                                  remaining_cool_load_frac, remaining_heat_load_frac,
-                                                 control_zone, hvac_map, hvac_control)
+                                                 control_zone, hvac_map, heating_season, cooling_season)
 
     hvac_map[cooling_system.id] = [] unless cooling_system.nil?
     hvac_map[heating_system.id] = [] unless heating_system.nil?
@@ -109,7 +109,7 @@ class HVAC
     end
 
     # Air Loop
-    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, fan_cfm, hvac_control)
+    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, fan_cfm, heating_season, cooling_season)
     if not cooling_system.nil?
       hvac_map[cooling_system.id] << air_loop
     end
@@ -123,7 +123,7 @@ class HVAC
 
   def self.apply_room_air_conditioner(model, runner, cooling_system,
                                       remaining_cool_load_frac, control_zone,
-                                      hvac_map, hvac_control)
+                                      hvac_map, cooling_season)
 
     hvac_map[cooling_system.id] = []
     obj_name = Constants.ObjectNameRoomAirConditioner
@@ -177,13 +177,13 @@ class HVAC
     ptac.addToThermalZone(control_zone)
     hvac_map[cooling_system.id] << ptac
 
-    control_zone.setSequentialCoolingFractionSchedule(ptac, get_sequential_load_schedule(model, sequential_cool_load_frac, 'cooling', hvac_control))
-    control_zone.setSequentialHeatingFractionSchedule(ptac, get_sequential_load_schedule(model, 0, 'heating', hvac_control))
+    control_zone.setSequentialCoolingFractionSchedule(ptac, get_sequential_load_schedule(model, sequential_cool_load_frac, cooling_season))
+    control_zone.setSequentialHeatingFractionSchedule(ptac, get_sequential_load_schedule(model, 0, []))
   end
 
   def self.apply_evaporative_cooler(model, runner, cooling_system,
                                     remaining_cool_load_frac, control_zone,
-                                    hvac_map, hvac_control)
+                                    hvac_map, cooling_season)
 
     hvac_map[cooling_system.id] = []
     obj_name = Constants.ObjectNameEvaporativeCooler
@@ -203,7 +203,7 @@ class HVAC
     hvac_map[cooling_system.id] << evap_cooler
 
     # Air Loop
-    air_loop = create_air_loop(model, obj_name, evap_cooler, control_zone, 0, sequential_cool_load_frac, clg_cfm, hvac_control)
+    air_loop = create_air_loop(model, obj_name, evap_cooler, control_zone, 0, sequential_cool_load_frac, clg_cfm, [], cooling_season)
     hvac_map[cooling_system.id] << air_loop
 
     # Fan
@@ -248,7 +248,7 @@ class HVAC
   def self.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
                                               remaining_heat_load_frac,
                                               remaining_cool_load_frac,
-                                              control_zone, hvac_map, hvac_control)
+                                              control_zone, hvac_map, heating_season, cooling_season)
 
     hvac_map[heat_pump.id] = []
     obj_name = Constants.ObjectNameAirSourceHeatPump
@@ -293,7 +293,7 @@ class HVAC
     end
 
     # Air Loop
-    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, fan_cfm, hvac_control)
+    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, fan_cfm, heating_season, cooling_season)
     hvac_map[heat_pump.id] << air_loop
 
     # HVAC Installation Quality
@@ -302,7 +302,7 @@ class HVAC
 
   def self.apply_mini_split_air_conditioner(model, runner, cooling_system,
                                             remaining_cool_load_frac,
-                                            control_zone, hvac_map, hvac_control)
+                                            control_zone, hvac_map, cooling_season)
 
     hvac_map[cooling_system.id] = []
     obj_name = Constants.ObjectNameMiniSplitAirConditioner
@@ -334,7 +334,7 @@ class HVAC
     air_loop_unitary.setDesignSpecificationMultispeedObject(perf)
 
     # Air Loop
-    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, 0, sequential_cool_load_frac, clg_cfm, hvac_control)
+    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, 0, sequential_cool_load_frac, clg_cfm, [], cooling_season)
     hvac_map[cooling_system.id] << air_loop
 
     # HVAC Installation Quality
@@ -344,7 +344,7 @@ class HVAC
   def self.apply_mini_split_heat_pump(model, runner, heat_pump,
                                       remaining_heat_load_frac,
                                       remaining_cool_load_frac,
-                                      control_zone, hvac_map, hvac_control)
+                                      control_zone, hvac_map, heating_season, cooling_season)
 
     hvac_map[heat_pump.id] = []
     obj_name = Constants.ObjectNameMiniSplitHeatPump
@@ -387,7 +387,7 @@ class HVAC
     air_loop_unitary.setDesignSpecificationMultispeedObject(perf)
 
     # Air Loop
-    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, fan_cfm, hvac_control)
+    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, fan_cfm, heating_season, cooling_season)
     hvac_map[heat_pump.id] << air_loop
 
     # HVAC Installation Quality
@@ -396,7 +396,7 @@ class HVAC
 
   def self.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                          remaining_heat_load_frac, remaining_cool_load_frac,
-                                         control_zone, hvac_map, hvac_control)
+                                         control_zone, hvac_map, heating_season, cooling_season)
 
     hvac_map[heat_pump.id] = []
     obj_name = Constants.ObjectNameGroundSourceHeatPump
@@ -585,7 +585,7 @@ class HVAC
     end
 
     # Air Loop
-    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, fan_cfm, hvac_control)
+    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, fan_cfm, heating_season, cooling_season)
     hvac_map[heat_pump.id] << air_loop
 
     # HVAC Installation Quality
@@ -594,7 +594,7 @@ class HVAC
 
   def self.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
                                              remaining_heat_load_frac, remaining_cool_load_frac,
-                                             control_zone, hvac_map, hvac_control)
+                                             control_zone, hvac_map, heating_season, cooling_season)
     if heat_pump.fraction_cool_load_served > 0
       # WLHPs connected to chillers or cooling towers should have already been converted to
       # central air conditioners
@@ -638,13 +638,13 @@ class HVAC
     hvac_map[heat_pump.id] << air_loop_unitary
 
     # Air Loop
-    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, htg_cfm, hvac_control)
+    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, htg_cfm, heating_season, cooling_season)
     hvac_map[heat_pump.id] << air_loop
   end
 
   def self.apply_boiler(model, runner, heating_system,
                         remaining_heat_load_frac, control_zone,
-                        hvac_map, hvac_control)
+                        hvac_map, heating_season)
 
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameBoiler
@@ -825,13 +825,13 @@ class HVAC
       hvac_map[heating_system.id] += disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil)
     end
 
-    control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_frac, 'heating', hvac_control))
-    control_zone.setSequentialCoolingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, 0, 'cooling', hvac_control))
+    control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_frac, heating_season))
+    control_zone.setSequentialCoolingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, 0, []))
   end
 
   def self.apply_electric_baseboard(model, runner, heating_system,
                                     remaining_heat_load_frac, control_zone,
-                                    hvac_map, hvac_control)
+                                    hvac_map, heating_season)
 
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameElectricBaseboard
@@ -845,13 +845,13 @@ class HVAC
     zone_hvac.addToThermalZone(control_zone)
     hvac_map[heating_system.id] << zone_hvac
 
-    control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_frac, 'heating', hvac_control))
-    control_zone.setSequentialCoolingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, 0, 'cooling', hvac_control))
+    control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_frac, heating_season))
+    control_zone.setSequentialCoolingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, 0, []))
   end
 
   def self.apply_unit_heater(model, runner, heating_system,
                              remaining_heat_load_frac, control_zone,
-                             hvac_map, hvac_control)
+                             hvac_map, heating_season)
 
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameUnitHeater
@@ -888,12 +888,12 @@ class HVAC
     unitary_system.addToThermalZone(control_zone)
     hvac_map[heating_system.id] << unitary_system
 
-    control_zone.setSequentialHeatingFractionSchedule(unitary_system, get_sequential_load_schedule(model, sequential_heat_load_frac, 'heating', hvac_control))
-    control_zone.setSequentialCoolingFractionSchedule(unitary_system, get_sequential_load_schedule(model, 0, 'cooling', hvac_control))
+    control_zone.setSequentialHeatingFractionSchedule(unitary_system, get_sequential_load_schedule(model, sequential_heat_load_frac, heating_season))
+    control_zone.setSequentialCoolingFractionSchedule(unitary_system, get_sequential_load_schedule(model, 0, []))
   end
 
   def self.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac,
-                                 sequential_heat_load_frac, control_zone, hvac_control)
+                                 sequential_heat_load_frac, control_zone, heating_season, cooling_season)
 
     # Ideal Air System
     ideal_air = OpenStudio::Model::ZoneHVACIdealLoadsAirSystem.new(model)
@@ -918,8 +918,8 @@ class HVAC
     ideal_air.setHumidificationControlType('None')
     ideal_air.addToThermalZone(control_zone)
 
-    control_zone.setSequentialCoolingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_cool_load_frac, 'cooling', hvac_control))
-    control_zone.setSequentialHeatingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_heat_load_frac, 'heating', hvac_control))
+    control_zone.setSequentialCoolingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_cool_load_frac, cooling_season))
+    control_zone.setSequentialHeatingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_heat_load_frac, heating_season))
   end
 
   def self.apply_dehumidifiers(model, runner, dehumidifiers, living_space, hvac_map)
@@ -1016,16 +1016,7 @@ class HVAC
     equip.setSchedule(ceiling_fan_sch.schedule)
   end
 
-  def self.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan)
-    htg_start_month = hvac_control.seasons_heating_begin_month
-    htg_start_day = hvac_control.seasons_heating_begin_day
-    htg_end_month = hvac_control.seasons_heating_end_month
-    htg_end_day = hvac_control.seasons_heating_end_day
-    clg_start_month = hvac_control.seasons_cooling_begin_month
-    clg_start_day = hvac_control.seasons_cooling_begin_day
-    clg_end_month = hvac_control.seasons_cooling_end_month
-    clg_end_day = hvac_control.seasons_cooling_end_day
-
+  def self.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, heating_season, cooling_season)
     num_days = Constants.YearNumDays(model)
 
     if hvac_control.weekday_heating_setpoints.nil? || hvac_control.weekend_heating_setpoints.nil?
@@ -1092,10 +1083,6 @@ class HVAC
         end
       end
     end
-
-    # Create heating/cooling season schedules
-    heating_season = get_daily_season(model, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
-    cooling_season = get_daily_season(model, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
 
     # Create setpoint schedules
     (0..(num_days - 1)).to_a.each do |i|
@@ -1792,7 +1779,7 @@ class HVAC
     return air_loop_unitary
   end
 
-  def self.create_air_loop(model, obj_name, system, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, airflow_cfm, hvac_control)
+  def self.create_air_loop(model, obj_name, system, control_zone, sequential_heat_load_frac, sequential_cool_load_frac, airflow_cfm, heating_season, cooling_season)
     air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
     air_loop.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     air_loop.setName(obj_name + ' airloop')
@@ -1813,8 +1800,8 @@ class HVAC
     air_terminal.setName(obj_name + ' terminal')
     air_loop.multiAddBranchForZone(control_zone, air_terminal)
 
-    control_zone.setSequentialHeatingFractionSchedule(air_terminal, get_sequential_load_schedule(model, sequential_heat_load_frac, 'heating', hvac_control))
-    control_zone.setSequentialCoolingFractionSchedule(air_terminal, get_sequential_load_schedule(model, sequential_cool_load_frac, 'cooling', hvac_control))
+    control_zone.setSequentialHeatingFractionSchedule(air_terminal, get_sequential_load_schedule(model, sequential_heat_load_frac, heating_season))
+    control_zone.setSequentialCoolingFractionSchedule(air_terminal, get_sequential_load_schedule(model, sequential_cool_load_frac, cooling_season))
 
     return air_loop
   end
@@ -3650,37 +3637,21 @@ class HVAC
     return sequential_load_frac
   end
 
-  def self.get_sequential_load_schedule(model, value, heating_or_cooling, hvac_control)
-    htg_start_month = hvac_control.seasons_heating_begin_month
-    htg_start_day = hvac_control.seasons_heating_begin_day
-    htg_end_month = hvac_control.seasons_heating_end_month
-    htg_end_day = hvac_control.seasons_heating_end_day
-    clg_start_month = hvac_control.seasons_cooling_begin_month
-    clg_start_day = hvac_control.seasons_cooling_begin_day
-    clg_end_month = hvac_control.seasons_cooling_end_month
-    clg_end_day = hvac_control.seasons_cooling_end_day
-
-    heating_season = get_daily_season(model, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
-    cooling_season = get_daily_season(model, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
-
+  def self.get_sequential_load_schedule(model, value, multipliers)
     values = []
-    if heating_or_cooling == 'heating'
-      heating_season.each do |mult|
-        values.push(value * mult)
-      end
-    elsif heating_or_cooling == 'cooling'
-      cooling_season.each do |mult|
-        values.push(value * mult)
-      end
+    multipliers.each do |mult|
+      values.push(value * mult)
     end
+
+    values << value if values.empty?
 
     if values.uniq.length == 1
       s = OpenStudio::Model::ScheduleConstant.new(model)
       s.setName('Sequential Fraction Schedule')
-      if value > 1
+      if values[0] > 1
         s.setValue(1.0)
       else
-        s.setValue(value.round(5))
+        s.setValue(values[0].round(5))
       end
     else
       start_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, model.getYearDescription.assumedYear)
