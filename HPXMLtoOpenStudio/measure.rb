@@ -2766,6 +2766,8 @@ class OSModel
   end
 
   def self.set_heating_and_cooling_seasons(model)
+    return if @hpxml.hvac_controls.size == 0
+
     hvac_control = @hpxml.hvac_controls[0]
 
     htg_start_month = hvac_control.seasons_heating_begin_month
