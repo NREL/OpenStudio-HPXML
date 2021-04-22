@@ -864,6 +864,16 @@
   </sch:pattern>
 
   <sch:pattern>
+    <sch:title>[Seasons]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl/h:extension/h:Seasons'>
+      <sch:assert role='ERROR' test='count(h:Heating) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Heating</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Heating/h:BeginMonth) + count(h:Heating/h:BeginDayOfMonth) + count(h:Heating/h:EndMonth) + count(h:Heating/h:EndDayOfMonth) = 0 or count(h:Heating/h:BeginMonth) + count(h:Heating/h:BeginDayOfMonth) + count(h:Heating/h:EndMonth) + count(h:Heating/h:EndDayOfMonth) = 4'>Expected 0 or 4 element(s) for xpath: BeginMonth | BeginDayOfMonth | EndMonth | EndDayOfMonth</sch:assert> <!-- integer -->
+      <sch:assert role='ERROR' test='count(h:Cooling) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Cooling</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Cooling/h:BeginMonth) + count(h:Cooling/h:BeginDayOfMonth) + count(h:Cooling/h:EndMonth) + count(h:Cooling/h:EndDayOfMonth) = 0 or count(h:Cooling/h:BeginMonth) + count(h:Cooling/h:BeginDayOfMonth) + count(h:Cooling/h:EndMonth) + count(h:Cooling/h:EndDayOfMonth) = 4'>Expected 0 or 4 element(s) for xpath: BeginMonth | BeginDayOfMonth | EndMonth | EndDayOfMonth</sch:assert> <!-- integer -->
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
     <sch:title>[HVACControlType=HeatingSetback]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl[h:SetbackTempHeatingSeason]'>
       <sch:assert role='ERROR' test='count(h:TotalSetbackHoursperWeekHeating) = 1'>Expected 1 element(s) for xpath: TotalSetbackHoursperWeekHeating</sch:assert>

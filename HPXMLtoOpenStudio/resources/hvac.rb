@@ -1121,7 +1121,7 @@ class HVAC
         clg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? c : c }
         clg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? c : c }
       else
-        fail 'Unhandled case.'
+        fail 'Must be in either heating or cooling season.'
       end
       htg_weekday_setpoints[i] = htg_wkdy
       htg_weekend_setpoints[i] = htg_wked

@@ -760,23 +760,7 @@ class HPXMLDefaults
         end
       end
 
-      if hvac_control.seasons_heating_enabled.nil?
-        hvac_control.seasons_heating_enabled = false
-        hvac_control.seasons_heating_enabled_isdefaulted = true
-      end
-
-      if hvac_control.seasons_heating_enabled
-        if hvac_control.seasons_heating_begin_month.nil? || hvac_control.seasons_heating_begin_day.nil? || hvac_control.seasons_heating_end_month.nil? || hvac_control.seasons_heating_end_day.nil?
-          hvac_control.seasons_heating_begin_month = 1 # TODO
-          hvac_control.seasons_heating_begin_day = 1 # TODO
-          hvac_control.seasons_heating_end_month = 12 # TODO
-          hvac_control.seasons_heating_end_day = 31 # TODO
-          hvac_control.seasons_heating_begin_month_isdefaulted = true
-          hvac_control.seasons_heating_begin_day_isdefaulted = true
-          hvac_control.seasons_heating_end_month_isdefaulted = true
-          hvac_control.seasons_heating_end_day_isdefaulted = true
-        end
-      else # year-round
+      if hvac_control.seasons_heating_begin_month.nil? || hvac_control.seasons_heating_begin_day.nil? || hvac_control.seasons_heating_end_month.nil? || hvac_control.seasons_heating_end_day.nil?
         hvac_control.seasons_heating_begin_month = 1
         hvac_control.seasons_heating_begin_day = 1
         hvac_control.seasons_heating_end_month = 12
@@ -787,32 +771,15 @@ class HPXMLDefaults
         hvac_control.seasons_heating_end_day_isdefaulted = true
       end
 
-      if hvac_control.seasons_cooling_enabled.nil?
-        hvac_control.seasons_cooling_enabled = false
-        hvac_control.seasons_cooling_enabled_isdefaulted = true
-      end
-
-      if hvac_control.seasons_cooling_enabled
-        if hvac_control.seasons_cooling_begin_month.nil? || hvac_control.seasons_cooling_begin_day.nil? || hvac_control.seasons_cooling_end_month.nil? || hvac_control.seasons_cooling_end_day.nil?
-          hvac_control.seasons_cooling_begin_month = 1 # TODO
-          hvac_control.seasons_cooling_begin_day = 1 # TODO
-          hvac_control.seasons_cooling_end_month = 12 # TODO
-          hvac_control.seasons_cooling_end_day = 31 # TODO
-          hvac_control.seasons_cooling_begin_month_isdefaulted = true
-          hvac_control.seasons_cooling_begin_day_isdefaulted = true
-          hvac_control.seasons_cooling_end_month_isdefaulted = true
-          hvac_control.seasons_cooling_end_day_isdefaulted = true
-        end
-      else # year-round
-        hvac_control.seasons_cooling_begin_month = 1
-        hvac_control.seasons_cooling_begin_day = 1
-        hvac_control.seasons_cooling_end_month = 12
-        hvac_control.seasons_cooling_end_day = 31
-        hvac_control.seasons_cooling_begin_month_isdefaulted = true
-        hvac_control.seasons_cooling_begin_day_isdefaulted = true
-        hvac_control.seasons_cooling_end_month_isdefaulted = true
-        hvac_control.seasons_cooling_end_day_isdefaulted = true
-      end
+      next unless hvac_control.seasons_cooling_begin_month.nil? || hvac_control.seasons_cooling_begin_day.nil? || hvac_control.seasons_cooling_end_month.nil? || hvac_control.seasons_cooling_end_day.nil?
+      hvac_control.seasons_cooling_begin_month = 1
+      hvac_control.seasons_cooling_begin_day = 1
+      hvac_control.seasons_cooling_end_month = 12
+      hvac_control.seasons_cooling_end_day = 31
+      hvac_control.seasons_cooling_begin_month_isdefaulted = true
+      hvac_control.seasons_cooling_begin_day_isdefaulted = true
+      hvac_control.seasons_cooling_end_month_isdefaulted = true
+      hvac_control.seasons_cooling_end_day_isdefaulted = true
     end
   end
 

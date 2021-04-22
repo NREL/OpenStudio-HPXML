@@ -2527,6 +2527,7 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-inconsistent-fan-powers.xml' => 'base.xml',
+    'invalid_files/hvac-seasons-less-than-a-year.xml' => 'base.xml',
     'invalid_files/hvac-shared-negative-seer-eq.xml' => 'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
     'invalid_files/generator-number-of-bedrooms-served.xml' => 'base-bldgtype-multifamily-shared-generator.xml',
     'invalid_files/generator-output-greater-than-consumption.xml' => 'base-misc-generators.xml',
@@ -2808,7 +2809,6 @@ def create_hpxmls
     'base-hvac-ground-to-air-heat-pump-cooling-only.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-hvac-ground-to-air-heat-pump-heating-only.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-hvac-heating-cooling-seasons-custom.xml' => 'base.xml',
-    'base-hvac-heating-cooling-seasons-enabled.xml' => 'base.xml',
     'base-hvac-install-quality-none-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-install-quality-airflow-defect-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-install-quality-charge-defect-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
@@ -5965,19 +5965,14 @@ def set_hpxml_hvac_control(hpxml_file, hpxml)
                             heating_setpoint_temp: 68,
                             cooling_setpoint_temp: 78)
   elsif ['base-hvac-heating-cooling-seasons-custom.xml'].include? hpxml_file
-    hpxml.hvac_controls[0].seasons_heating_enabled = true
     hpxml.hvac_controls[0].seasons_heating_begin_month = 10
     hpxml.hvac_controls[0].seasons_heating_begin_day = 1
     hpxml.hvac_controls[0].seasons_heating_end_month = 5
     hpxml.hvac_controls[0].seasons_heating_end_day = 31
-    hpxml.hvac_controls[0].seasons_cooling_enabled = true
     hpxml.hvac_controls[0].seasons_cooling_begin_month = 5
     hpxml.hvac_controls[0].seasons_cooling_begin_day = 1
     hpxml.hvac_controls[0].seasons_cooling_end_month = 9
     hpxml.hvac_controls[0].seasons_cooling_end_day = 30
-  elsif ['base-hvac-heating-cooling-seasons-enabled.xml'].include? hpxml_file
-    hpxml.hvac_controls[0].seasons_heating_enabled = true
-    hpxml.hvac_controls[0].seasons_cooling_enabled = true
   elsif ['base-hvac-none.xml'].include? hpxml_file
     hpxml.hvac_controls.clear
   elsif ['base-hvac-programmable-thermostat.xml'].include? hpxml_file
@@ -6001,6 +5996,15 @@ def set_hpxml_hvac_control(hpxml_file, hpxml)
     hpxml.hvac_controls[0].cooling_setpoint_temp = 80
   elsif ['base-lighting-ceiling-fans.xml'].include? hpxml_file
     hpxml.hvac_controls[0].ceiling_fan_cooling_setpoint_temp_offset = 0.5
+  elsif ['invalid_files/hvac-seasons-less-than-a-year.xml'].include? hpxml_file
+    hpxml.hvac_controls[0].seasons_heating_begin_month = 10
+    hpxml.hvac_controls[0].seasons_heating_begin_day = 1
+    hpxml.hvac_controls[0].seasons_heating_end_month = 5
+    hpxml.hvac_controls[0].seasons_heating_end_day = 31
+    hpxml.hvac_controls[0].seasons_cooling_begin_month = 7
+    hpxml.hvac_controls[0].seasons_cooling_begin_day = 1
+    hpxml.hvac_controls[0].seasons_cooling_end_month = 9
+    hpxml.hvac_controls[0].seasons_cooling_end_day = 30
   end
 end
 
