@@ -462,6 +462,7 @@
             <HeatPump>
               <SystemIdentifier id='HeatPump2'/>
               <DistributionSystem idref='HVACDistribution6'/>
+              <IsPackagedSystem>true</IsPackagedSystem>
               <HeatPumpType>ground-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>4800.0</HeatingCapacity>

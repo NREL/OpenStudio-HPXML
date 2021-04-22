@@ -3431,7 +3431,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
                          cooling_shr: 0.73,
-                         pump_watts_per_ton: 30.0)
+                         pump_watts_per_ton: 30.0,
+                         is_packaged_system: true)
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     hpxml.heat_pumps.add(id: 'HeatPump3',
                          heat_pump_type: HPXML::HVACTypeHeatPumpMiniSplit,
