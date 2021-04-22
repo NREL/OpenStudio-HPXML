@@ -4,7 +4,7 @@ require 'fileutils'
 
 def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars: [],
                        output_meters: [], run_measures_only: false, print_prefix: '',
-                       ep_input_format: 'epjson')
+                       ep_input_format: 'idf')
   rm_path(rundir)
   FileUtils.mkdir_p(rundir)
 
