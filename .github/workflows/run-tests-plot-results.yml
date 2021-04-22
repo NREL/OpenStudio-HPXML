@@ -63,19 +63,33 @@ jobs:
           echo "Checking out: $branch_name, $branch_sha"
           #git checkout -b $branch_name || git checkout $branch_name
 
-      - name: Download results
+      - name: Store base results
+        uses: actions/upload-artifact@v2
+        with:
+          path: workflow/tests/base_results
+          name: base_results
+
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Download base results
+        uses: actions/download-artifact@v2
+        with:
+          path: |
+            base_results
+          name: base_results
+
+      - name: Download feature results
         uses: actions/download-artifact@v2
         with:
           path: |
             results
           name: test_results
 
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-
       - name: Compare results
         run: |
+          cp -r base_results/results*.csv workflow/tests/base_results
           mkdir workflow/tests/results
           cp -r results/results*.csv workflow/tests/results
           ruby hpxml-measures/workflow/tests/compare.rb
