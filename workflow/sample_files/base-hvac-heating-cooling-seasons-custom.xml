@@ -341,14 +341,12 @@
             <extension>
               <Seasons>
                 <Heating>
-                  <Enabled>true</Enabled>
                   <BeginMonth>10</BeginMonth>
                   <BeginDayOfMonth>1</BeginDayOfMonth>
                   <EndMonth>5</EndMonth>
                   <EndDayOfMonth>31</EndDayOfMonth>
                 </Heating>
                 <Cooling>
-                  <Enabled>true</Enabled>
                   <BeginMonth>5</BeginMonth>
                   <BeginDayOfMonth>1</BeginDayOfMonth>
                   <EndMonth>9</EndMonth>
