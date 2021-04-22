@@ -94,7 +94,7 @@ files.each do |file|
           base_field.zip(feature_field).each do |b, f|
             m << (f - b).round(1)
           end
-        rescue NoMethodError
+        rescue NoMethodError # not float
           m = []
           base_field.zip(feature_field).each do |b, f|
             n = 0
