@@ -74,7 +74,7 @@ jobs:
         run: |
           mkdir workflow/tests/results
           cp -r results/results*.csv workflow/tests/results
-          ruby workflow/tests/compare.rb
+          ruby hpxml-measures/workflow/tests/compare.rb
 
       - name: Store comparisons
         uses: actions/upload-artifact@v2
