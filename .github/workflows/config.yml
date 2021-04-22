@@ -45,7 +45,6 @@ jobs:
           branch_sha="${{ github.event.pull_request.base.sha }}"
           echo "Checking out: $branch_name, $branch_sha"
           git checkout -b $branch_name || git checkout $branch_name
-          # git pull origin $branch_name
 
       - name: Download results
         uses: actions/download-artifact@v2
