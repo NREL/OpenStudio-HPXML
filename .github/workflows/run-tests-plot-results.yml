@@ -55,14 +55,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.base.sha }}
 
-      - name: Setup git branch
-        shell: bash
-        run: |
-          branch_name="${{ github.base_ref }}"
-          branch_sha="${{ github.event.pull_request.base.sha }}"
-          echo "Checking out: $branch_name, $branch_sha"
-          #git checkout -b $branch_name || git checkout $branch_name
-
       - name: Store base results
         uses: actions/upload-artifact@v2
         with:
@@ -115,9 +107,9 @@ jobs:
           branch_name="${{ github.head_ref }}"
           branch_sha="${{ github.event.pull_request.head.sha }}"
           echo "Checking out branch: $branch_name, $branch_sha"
-          #git checkout -b $branch_name || git checkout $branch_name
+          git checkout -b $branch_name || git checkout $branch_name
 
-      - name: Download results
+      - name: Download feature results
         uses: actions/download-artifact@v2
         with:
           path: |
