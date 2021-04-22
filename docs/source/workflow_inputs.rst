@@ -1168,6 +1168,20 @@ To define detailed thermostat setpoints, additional information is entered in ``
   ``extension/WeekendSetpointTempsCoolingSeason``  array  F                     Yes                  24 comma-separated weekend cooling setpoints
   ===============================================  =====  =======  ===========  ========  =========  ============================================
 
+Seasons
+~~~~~~~
+
+Heating and cooling seasons can be defined using ``extension/Seasons/Heating`` and ``extension/Seasons/Cooling``, respectively.
+
+  ======================================  ========  =====  =================  ========  =============================  ===========
+  Element                                 Type      Units  Constraints        Required  Default                        Description
+  ======================================  ========  =====  =================  ========  =============================  ===========
+  ``BeginMonth`` and ``BeginDayOfMonth``  integer          1 - 12 and 1 - 31  No        1/1                            Start date
+  ``EndMonth`` and ``EndDayOfMonth``      integer          1 - 12 and 1 - 31  No        12/31                          End date
+  ======================================  ========  =====  =================  ========  =============================  ===========
+
+Heating and cooling seasons, when combined, must cover the entire year.
+
 HPXML HVAC Distribution
 ***********************
 
