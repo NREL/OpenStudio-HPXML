@@ -46,7 +46,11 @@ files.each do |file|
         if field.nil?
           vals = [''] # string
         elsif field.include?(',')
-          vals = field.split(',').map { |x| Float(x) } # float
+          begin
+            vals = field.split(',').map { |x| Float(x) } # float
+          rescue ArgumentError
+            vals = [field] # string
+          end
         else
           begin
             vals = [Float(field)] # float
@@ -90,21 +94,23 @@ files.each do |file|
         feature_field = results[feature][hpxml][col]
 
         begin
+          # float comparisons
           m = []
           base_field.zip(feature_field).each do |b, f|
             m << (f - b).round(1)
           end
         rescue NoMethodError
+          # string comparisons
           m = []
           base_field.zip(feature_field).each do |b, f|
-            n = 0
             if b != f
-              n = 1
+              m << 1
+            else
+              m << 0
             end
-            m << n
           end
         end
-        m = m.reduce(:+)
+        m = m.sum()
       end
 
       row << m
