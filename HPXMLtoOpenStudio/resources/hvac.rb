@@ -629,7 +629,7 @@ class HVAC
     hvac_map[heat_pump.id] << htg_supp_coil
 
     # Fan
-    fan_power_installed = 0.5 # FIXME
+    fan_power_installed = 0.0 # Use provided net COP
     fan = create_supply_fan(model, obj_name, 1, fan_power_installed, htg_cfm)
     hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
