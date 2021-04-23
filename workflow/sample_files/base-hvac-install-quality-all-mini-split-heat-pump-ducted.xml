@@ -307,7 +307,6 @@
             <HeatPump>
               <SystemIdentifier id='HeatPump'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <IsPackagedSystem>false</IsPackagedSystem>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>36000.0</HeatingCapacity>

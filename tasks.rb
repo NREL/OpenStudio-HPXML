@@ -3378,12 +3378,12 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
          'base-hvac-mini-split-heat-pump-ducted-heating-only.xml'].include? hpxml_file
     hpxml.heat_pumps[0].cooling_capacity = 0
     hpxml.heat_pumps[0].fraction_cool_load_served = 0
-    hpxml.heat_pumps[0].is_packaged_system = true
+    hpxml.heat_pumps[0].is_packaged_system = true if hpxml_file == 'base-hvac-ground-to-air-heat-pump-heating-only.xml'
   elsif ['base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml',
          'base-hvac-ground-to-air-heat-pump-cooling-only.xml',
          'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml'].include? hpxml_file
     hpxml.heat_pumps[0].heating_capacity = 0
-    hpxml.heat_pumps[0].is_packaged_system = true
+    hpxml.heat_pumps[0].is_packaged_system = true if hpxml_file == 'base-hvac-ground-to-air-heat-pump-cooling-only.xml'
     if not ['base-hvac-ground-to-air-heat-pump-cooling-only.xml'].include? hpxml_file
       hpxml.heat_pumps[0].heating_capacity_17F = 0
     end
@@ -3487,7 +3487,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
     hpxml.heat_pumps[0].airflow_defect_ratio = -0.25
     hpxml.heat_pumps[0].fan_watts_per_cfm = 0.365
     hpxml.heat_pumps[0].charge_defect_ratio = -0.25
-    hpxml.heat_pumps[0].is_packaged_system = false
+    hpxml.heat_pumps[0].is_packaged_system = false if hpxml_file == 'base-hvac-install-quality-all-ground-to-air-heat-pump.xml'
   elsif hpxml_file.include?('base-hvac-autosize') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)
     hpxml.heat_pumps[0].cooling_capacity = nil
     hpxml.heat_pumps[0].heating_capacity = nil
