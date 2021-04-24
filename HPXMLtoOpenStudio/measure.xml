@@ -476,12 +476,6 @@
       <checksum>B185ACE7</checksum>
     </file>
     <file>
-      <filename>meta_measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F85CA141</checksum>
-    </file>
-    <file>
       <filename>simcontrols.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -563,6 +557,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>CDBA0B58</checksum>
+    </file>
+    <file>
+      <filename>meta_measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6B409E9A</checksum>
     </file>
   </files>
 </measure>

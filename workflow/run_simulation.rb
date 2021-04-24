@@ -97,7 +97,7 @@ OptionParser.new do |opts|
   end
 
   options[:ep_input_format] = 'idf'
-  opts.on('--ep-input-format TYPE', 'EnergyPlus input file format (idf, epsjon)') do |t|
+  opts.on('--ep-input-format TYPE', 'EnergyPlus input file format (idf, epjson)') do |t|
     options[:ep_input_format] = t
   end
 

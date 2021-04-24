@@ -4,7 +4,7 @@ require 'fileutils'
 
 def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars: [],
                        output_meters: [], run_measures_only: false, print_prefix: '',
-                       ep_input_format: 'epjson')
+                       ep_input_format: 'idf')
   rm_path(rundir)
   FileUtils.mkdir_p(rundir)
 
@@ -425,6 +425,7 @@ def report_os_warnings(os_log, rundir)
       next if s.logMessage.include? 'WorkflowStepResult value called with undefined stepResult'
       next if s.logMessage.include?("Object of type 'Schedule:Constant' and named 'Always") && s.logMessage.include?('points to an object named') && s.logMessage.include?('but that object cannot be located')
       next if s.logMessage.include? 'Appears there are no design condition fields in the EPW file'
+      next if s.logMessage.include?('Using EnergyPlusVersion version') && s.logMessage.include?("which should have 'Year' field, but it's always zero")
 
       f << "OS Message: #{s.logMessage}\n"
     end
