@@ -322,6 +322,7 @@
                 <Value>3.6</Value>
               </AnnualHeatingEfficiency>
               <extension>
+                <ChargeDefectRatio>0.0</ChargeDefectRatio>
                 <PumpPowerWattsPerTon>30.0</PumpPowerWattsPerTon>
               </extension>
             </HeatPump>
