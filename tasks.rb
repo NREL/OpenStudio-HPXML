@@ -3857,12 +3857,11 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
 
   # Set ConditionedFloorAreaServed
   if not hpxml_file.include?('invalid_files')
-    n_htg_systems = (hpxml.heating_systems + hpxml.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.size
-    n_clg_systems = (hpxml.cooling_systems + hpxml.heat_pumps).select { |h| h.fraction_cool_load_served.to_f > 0 }.size
+    n_hvac_dists = hpxml.hvac_distributions.select { |sys| sys.hydronic_type != HPXML::HydronicTypeWaterLoop }.size
+    n_hvac_dists += hpxml.hvac_systems.select { |sys| sys.distribution_system_idref.nil? }.size # Count ductless systems too
     hpxml.hvac_distributions.each do |hvac_distribution|
       if [HPXML::HVACDistributionTypeAir].include?(hvac_distribution.distribution_system_type) && (hvac_distribution.ducts.size > 0)
-        n_hvac_systems = [n_htg_systems, n_clg_systems].max
-        hvac_distribution.conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area / n_hvac_systems
+        hvac_distribution.conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area / n_hvac_dists
       else
         hvac_distribution.conditioned_floor_area_served = nil
       end
@@ -5661,11 +5660,21 @@ if ARGV[0].to_sym == :create_release_zips
            'workflow/sample_files/*.xml',
            'workflow/tests/*.rb',
            'workflow/tests/ASHRAE_Standard_140/*.xml',
-           'workflow/tests/base_results/*.csv',
            'documentation/index.html',
            'documentation/_static/**/*.*']
 
   if not ENV['CI']
+    # Run ASHRAE 140 files
+    puts 'Running ASHRAE 140 tests (this will take a minute)...'
+    command = "#{OpenStudio.getOpenStudioCLI} workflow/tests/hpxml_translator_test.rb --name=test_ashrae_140 > log.txt"
+    system(command)
+    results_csv_path = 'workflow/tests/results/results_ashrae_140.csv'
+    if not File.exist? results_csv_path
+      puts 'ASHRAE 140 results CSV file not generated. Aborting...'
+      exit!
+    end
+    File.delete('log.txt')
+
     # Generate documentation
     puts 'Generating documentation...'
     command = 'sphinx-build -b singlehtml docs/source documentation'
@@ -5704,6 +5713,9 @@ if ARGV[0].to_sym == :create_release_zips
   release_map.each do |zip_path, include_all_epws|
     puts "Creating #{zip_path}..."
     zip = OpenStudio::ZipFile.new(zip_path, false)
+    if not ENV['CI']
+      zip.addFile(results_csv_path, File.join('OpenStudio-HPXML', results_csv_path))
+    end
     files.each do |f|
       Dir[f].each do |file|
         if file.start_with? 'documentation'
