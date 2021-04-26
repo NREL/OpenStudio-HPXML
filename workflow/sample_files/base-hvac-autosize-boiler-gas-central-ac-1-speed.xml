@@ -382,7 +382,7 @@
                 <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>1350.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

@@ -568,7 +568,7 @@
                 <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>245.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>270.0</ConditionedFloorAreaServed>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution2'/>
@@ -618,7 +618,7 @@
                 <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>245.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>270.0</ConditionedFloorAreaServed>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution3'/>
@@ -684,7 +684,7 @@
                 <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>245.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>270.0</ConditionedFloorAreaServed>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution6'/>
@@ -734,7 +734,7 @@
                 <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>245.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>270.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
