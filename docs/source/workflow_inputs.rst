@@ -765,7 +765,8 @@ If a stove is specified, additional information is entered in ``HeatingSystem``.
   ``extension/FanPowerWatts``                         double  W      >= 0         No        40         Fan power
   ==================================================  ======  =====  ===========  ========  =========  ===================
 
-  .. [#] Defaulted to 0.60 if FuelType is "wood", 0.78 if FuelType is "wood pellets".
+  .. [#] Defaulted to 0.98 if FuelType is "electricity", 0.84 if FuelType is "natural gas", "propane", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "kerosene", 
+         0.75 if FuelType is "coal", "coke", "anthracite coal", "bituminous coal", 0.60 if FuelType is "wood", 0.78 if FuelType is "wood pellets".
 
 Portable/Fixed Heater
 ~~~~~~~~~~~~~~~~~~~~~
@@ -775,9 +776,12 @@ If a portable heater or fixed heater is specified, additional information is ent
   ==================================================  ======  =====  ===========  ========  =========  ===================
   Element                                             Type    Units  Constraints  Required  Default    Notes
   ==================================================  ======  =====  ===========  ========  =========  ===================
-  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        Yes                  Efficiency
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        No        See [#]_   Efficiency
   ``extension/FanPowerWatts``                         double  W      >= 0         No        0          Fan power
   ==================================================  ======  =====  ===========  ========  =========  ===================
+
+  .. [#] Defaulted to 0.98 if FuelType is "electricity", 0.84 if FuelType is "natural gas", "propane", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "kerosene", 
+         0.75 if FuelType is "coal", "coke", "anthracite coal", "bituminous coal", 0.60 if FuelType is "wood", 0.78 if FuelType is "wood pellets".
 
 Fireplace
 ~~~~~~~~~
@@ -787,9 +791,12 @@ If a fireplace is specified, additional information is entered in ``HeatingSyste
   ==================================================  ======  =====  ===========  ========  =========  ===================
   Element                                             Type    Units  Constraints  Required  Default    Notes
   ==================================================  ======  =====  ===========  ========  =========  ===================
-  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        Yes                  Efficiency
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        No        See [#]_   Efficiency
   ``extension/FanPowerWatts``                         double  W      >= 0         No        0          Fan power
   ==================================================  ======  =====  ===========  ========  =========  ===================
+
+  .. [#] Defaulted to 0.98 if FuelType is "electricity", 0.80 if FuelType is "natural gas", "propane", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "kerosene",
+         0.75 if FuelType is "coal", "coke", "anthracite coal", "bituminous coal", 0.70 if FuelType is "wood", "wood pellets".
 
 .. _hvac_cooling:
 
