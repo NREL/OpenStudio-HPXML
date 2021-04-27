@@ -599,7 +599,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].heating_efficiency_percent = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_stove_values(hpxml_default, 40, nil, 0.82)
+    _test_default_stove_values(hpxml_default, 40, nil, 0.84)
   end
 
   def test_portable_heaters
@@ -618,7 +618,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].heating_efficiency_percent = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_portable_heater_values(hpxml_default, 0, nil, 0.85)
+    _test_default_portable_heater_values(hpxml_default, 0, nil, 0.84)
   end
 
   def test_fixed_heaters
@@ -637,7 +637,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].heating_efficiency_percent = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_fixed_heater_values(hpxml_default, 0, nil, 0.85)
+    _test_default_fixed_heater_values(hpxml_default, 0, nil, 0.84)
   end
 
   def test_fireplaces

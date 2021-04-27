@@ -453,16 +453,14 @@ class HPXMLDefaults
 
         if heating_system_fuel == HPXML::FuelTypeElectricity
           heating_system.heating_efficiency_percent = 0.98
-        elsif heating_system_fuel == HPXML::FuelTypeNaturalGas
-          heating_system.heating_efficiency_percent = 0.85 # https://www.yankeedoodleinc.com/stoves/gas/
+        elsif [HPXML::FuelTypePropane, HPXML::FuelTypeNaturalGas, HPXML::FuelTypeOil, 
+               HPXML::FuelTypeOil1, HPXML::FuelTypeOil2, HPXML::FuelTypeOil4, HPXML::FuelTypeOil5or6, 
+               HPXML::FuelTypeKerosene, HPXML::FuelTypeDiesel].include? heating_system_fuel
+          heating_system.heating_efficiency_percent = 0.84 # https://www.yankeedoodleinc.com/stoves/gas/ and https://www.kumastoves.com/Store/ProductDetails/arctic
         elsif heating_system_fuel == HPXML::FuelTypeWoodCord
           heating_system.heating_efficiency_percent = 0.60 # HEScore assumption
         elsif heating_system_fuel == HPXML::FuelTypeWoodPellets
           heating_system.heating_efficiency_percent = 0.78 # HEScore assumption
-        elsif heating_system_fuel == HPXML::FuelTypePropane
-          heating_system.heating_efficiency_percent = 0.87 # https://www.yankeedoodleinc.com/stoves/gas/
-        elsif [HPXML::FuelTypeOil, HPXML::FuelTypeOil1, HPXML::FuelTypeOil2, HPXML::FuelTypeOil4, HPXML::FuelTypeOil5or6, HPXML::FuelTypeKerosene, HPXML::FuelTypeDiesel].include? heating_system_fuel
-          heating_system.heating_efficiency_percent = 0.82 # https://www.kumastoves.com/Store/ProductDetails/arctic
         elsif [HPXML::FuelTypeCoal, HPXML::FuelTypeCoalAnthracite, HPXML::FuelTypeCoalBituminous, HPXML::FuelTypeCoke].include? heating_system_fuel
           heating_system.heating_efficiency_percent = 0.75 # http://www.stanleycbierly.com/projects/the-warmth-and-economy-of-owning-a-coal-stove/
         end
@@ -472,14 +470,12 @@ class HPXMLDefaults
 
         if heating_system_fuel == HPXML::FuelTypeElectricity
           heating_system.heating_efficiency_percent = 0.98
-        elsif heating_system_fuel == HPXML::FuelTypeNaturalGas
-          heating_system.heating_efficiency_percent = 0.75 # with inserts; https://www.volunteerenergy.com/energy-efficient-fireplace/
+        elsif [HPXML::FuelTypeNaturalGas, HPXML::FuelTypePropane, HPXML::FuelTypeOil, 
+               HPXML::FuelTypeOil1, HPXML::FuelTypeOil2, HPXML::FuelTypeOil4, HPXML::FuelTypeOil5or6, 
+               HPXML::FuelTypeKerosene, HPXML::FuelTypeDiesel].include? heating_system_fuel
+          heating_system.heating_efficiency_percent = 0.80 # with inserts; https://www.volunteerenergy.com/energy-efficient-fireplace/
         elsif [HPXML::FuelTypeWoodCord, HPXML::FuelTypeWoodPellets].include? heating_system_fuel
           heating_system.heating_efficiency_percent = 0.70 # https://www.houselogic.com/organize-maintain/home-maintenance-tips/wood-burning-fireplace-inserts-save-energy/
-        elsif heating_system_fuel == HPXML::FuelTypePropane
-          heating_system.heating_efficiency_percent = 0.80 # https://www.propanenewyork.com/fireplace-propane-use/#:~:text=Efficiency%3A%20A%20propane%20fireplace%20runs,efficient%20than%20a%20wood%20fireplace.
-        elsif [HPXML::FuelTypeOil, HPXML::FuelTypeOil1, HPXML::FuelTypeOil2, HPXML::FuelTypeOil4, HPXML::FuelTypeOil5or6, HPXML::FuelTypeKerosene, HPXML::FuelTypeDiesel].include? heating_system_fuel
-          heating_system.heating_efficiency_percent = 0.82 # assume oil-burning stove efficiency as oil-burning fireplace efficiency
         elsif [HPXML::FuelTypeCoal, HPXML::FuelTypeCoalAnthracite, HPXML::FuelTypeCoalBituminous, HPXML::FuelTypeCoke].include? heating_system_fuel
           heating_system.heating_efficiency_percent = 0.75 # assume coal-burning stove efficiency as oil-burning fireplace efficiency
         end

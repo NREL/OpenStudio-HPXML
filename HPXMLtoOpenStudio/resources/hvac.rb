@@ -4278,22 +4278,13 @@ class HVAC
                 HPXML::HVACTypeFloorFurnace => 'wall_furnace', # floor furnaces mapped to wall furnaces
                 HPXML::HVACTypeBoiler => 'boiler' }[hvac_type]
 
-    fuel_primary_id = { HPXML::FuelTypeElectricity => 'electric',
-                        HPXML::FuelTypeNaturalGas => 'natural_gas',
-                        HPXML::FuelTypeOil => 'fuel_oil',
-                        HPXML::FuelTypeOil1 => 'fuel_oil', # assumption
-                        HPXML::FuelTypeOil2 => 'fuel_oil', # assumption
-                        HPXML::FuelTypeOil4 => 'fuel_oil', # assumption
-                        HPXML::FuelTypeOil5or6 => 'fuel_oil', # assumption
-                        HPXML::FuelTypeKerosene => 'fuel_oil', # assumption
-                        HPXML::FuelTypeDiesel => 'fuel_oil', # assumption
-                        HPXML::FuelTypeCoal => 'fuel_oil', # assumption
-                        HPXML::FuelTypeCoalAnthracite => 'fuel_oil', # assumption
-                        HPXML::FuelTypeCoalBituminous => 'fuel_oil', # assumption
-                        HPXML::FuelTypeCoke => 'fuel_oil', # assumption
-                        HPXML::FuelTypeWoodCord => 'fuel_oil', # assumption
-                        HPXML::FuelTypeWoodPellets => 'fuel_oil', # assumption
-                        HPXML::FuelTypePropane => 'lpg' }[fuel_type]
+    fuel_primary_id = { EPlus::FuelTypeElectricity => 'electric',
+                        EPlus::FuelTypeNaturalGas => 'natural_gas',
+                        EPlus::FuelTypeOil => 'fuel_oil',
+                        EPlus::FuelTypeCoal => 'fuel_oil', # assumption
+                        EPlus::FuelTypeWoodCord => 'fuel_oil', # assumption
+                        EPlus::FuelTypeWoodPellets => 'fuel_oil', # assumption
+                        EPlus::FuelTypePropane => 'lpg' }[EPlus.fuel_type(fuel_type)]
 
     metric_id = units.downcase
     value = nil
