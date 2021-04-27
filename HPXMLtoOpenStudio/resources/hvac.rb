@@ -4177,8 +4177,6 @@ class HVAC
     hvac_systems = []
 
     hpxml.cooling_systems.each do |cooling_system|
-      next if cooling_system.is_shared_system
-
       heating_system = nil
       if is_central_air_conditioner_and_furnace(hpxml, cooling_system.attached_heating_system, cooling_system)
         heating_system = cooling_system.attached_heating_system
@@ -4188,8 +4186,6 @@ class HVAC
     end
 
     hpxml.heating_systems.each do |heating_system|
-      next if heating_system.is_shared_system
-
       if is_central_air_conditioner_and_furnace(hpxml, heating_system, heating_system.attached_cooling_system)
         next # Already processed combined AC+furnace
       end
@@ -4198,9 +4194,6 @@ class HVAC
     end
 
     hpxml.heat_pumps.each do |heat_pump|
-      next if heat_pump.is_shared_system
-      next if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir
-
       hvac_systems << { cooling: heat_pump,
                         heating: heat_pump }
     end
