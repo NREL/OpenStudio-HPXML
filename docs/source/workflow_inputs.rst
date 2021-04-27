@@ -636,15 +636,15 @@ Each heating system (other than a heat pump) is entered as an ``/HPXML/Building/
   =================================  ========  ======  ===========  ========  =========  ===============================
   ``SystemIdentifier``               id                             Yes                  Unique identifier
   ``HeatingSystemType``              element           1 [#]_       Yes                  Type of heating system
-  ``FractionHeatLoadServed``         double    frac    0 - 1 [#]_   Yes                  Fraction of heating load served
   ``HeatingSystemFuel``              string            See [#]_     Yes                  Fuel type
   ``HeatingCapacity``                double    Btu/hr  >= 0         No        autosized  Input heating capacity
+  ``FractionHeatLoadServed``         double    frac    0 - 1 [#]_   Yes                  Fraction of heating load served
   =================================  ========  ======  ===========  ========  =========  ===============================
 
   .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``PortableHeater``, ``FixedHeater``, or ``Fireplace``.
-  .. [#] The sum of all ``FractionHeatLoadServed`` (across both HeatingSystems and HeatPumps) must be less than or equal to 1.
   .. [#] HeatingSystemFuel choices are  "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
          For ``ElectricResistance``, "electricity" is required.
+  .. [#] The sum of all ``FractionHeatLoadServed`` (across both HeatingSystems and HeatPumps) must be less than or equal to 1.
 
 Electric Resistance
 ~~~~~~~~~~~~~~~~~~~
@@ -712,7 +712,6 @@ If a boiler is specified, additional information is entered in ``HeatingSystem``
   ``DistributionSystem``                                                      idref             See [#]_     Yes                 ID of attached distribution system
   ``YearInstalled``                                                           integer                        See [#]_            Year installed
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``                             double    frac    0 - 1        See [#]_  See [#]_  Rated efficiency
-  ``ElectricAuxiliaryEnergy``                                                 double    kWh/yr  >= 0         No [#]_   See [#]_  Electric auxiliary energy
   ==========================================================================  ========  ======  ===========  ========  ========  =========================================
 
   .. [#] For in-unit boilers, HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or DSE.
@@ -721,20 +720,38 @@ If a boiler is specified, additional information is entered in ``HeatingSystem``
   .. [#] YearInstalled only required if AnnualHeatingEfficiency[Units="AFUE"]/Value is not provided.
   .. [#] AnnualHeatingEfficiency[Units="AFUE"]/Value only required if YearInstalled is not provided.
   .. [#] Defaulted to 0.98 if FuelType is "electricity", else AFUE from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
-  .. [#] | For shared boilers, ElectricAuxiliaryEnergy can alternatively be calculated as follows per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
-         | EAE = (SP / N_dweq + aux_in) * HLH
-         | where
-         | SP = Shared pump power [W] provided as ``extension/SharedLoopWatts``,
-         | N_dweq = Number of units served by the shared system provided as ``NumberofUnitsServed``,
-         | aux_in = In-unit fan coil power [W] provided as ``extension/FanCoilWatts``,
-         | HLH = Annual heating load hours.
-  .. [#] If ElectricAuxiliaryEnergy not provided (nor calculated for shared boilers), defaults as follows per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+         
 
-         - **Oil boiler**: 330
-         - **Gas boiler (in-unit)**: 170
-         - **Gas boiler (shared, w/ baseboard)**: 220
-         - **Gas boiler (shared, w/ water loop heat pump)**: 265
-         - **Gas boiler (shared, w/ fan coil)**: 438
+If an in-unit boiler if specified, additional information is entered in ``HeatingSystem``.
+
+  ===========================  ========  ======  ===========  ========  ========  =========================
+  Element                      Type      Units   Constraints  Required  Default   Notes
+  ===========================  ========  ======  ===========  ========  ========  =========================
+  ``ElectricAuxiliaryEnergy``  double    kWh/yr  >= 0         No        See [#]_  Electric auxiliary energy
+  ===========================  ========  ======  ===========  ========  ========  =========================
+
+  .. [#] If ElectricAuxiliaryEnergy not provided, defaults as follows:
+
+         - **Oil boiler**: 330 kWh/yr
+         - **Gas boiler**: 170 kWh/yr
+
+If instead a shared boiler is specified, additional information is entered in ``HeatingSystem``.
+
+  ============================================================  ========  ===========  ===========  ========  ========  =========================
+  Element                                                       Type      Units        Constraints  Required  Default   Notes
+  ============================================================  ========  ===========  ===========  ========  ========  =========================
+  ``NumberofUnitsServed``                                       integer                > 1          Yes                 Number of dwelling units served
+  ``ElectricAuxiliaryEnergy`` or ``extension/SharedLoopWatts``  double    kWh/yr or W  >= 0         No        See [#]_  Electric auxiliary energy or shared loop power
+  ``ElectricAuxiliaryEnergy`` or ``extension/FanCoilWatts``     double    kWh/yr or W  >= 0         No [#]_             Electric auxiliary energy or fan coil power
+  ============================================================  ========  ===========  ===========  ========  ========  =========================
+
+  .. [#] If ElectricAuxiliaryEnergy nor SharedLoopWatts provided, defaults as follows:
+  
+         - **Shared boiler w/ baseboard**: 220 kWh/yr
+         - **Shared boiler w/ water loop heat pump**: 265 kWh/yr
+         - **Shared boiler w/ fan coil**: 438 kWh/yr
+
+  .. [#] FanCoilWatts only used if boiler connected to fan coil and SharedLoopWatts provided.
 
 Stove
 ~~~~~
@@ -910,7 +927,7 @@ If a chiller is specified, additional information is entered in ``CoolingSystem`
 
   .. [#] HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or AirDistribution (type: "fan coil").
          If the chiller has "water loop" distribution, a :ref:`hvac_heatpump_wlhp` must also be specified.
-  .. [#] FanCoilWatts only required if chiller connected to a fan coil.
+  .. [#] FanCoilWatts only required if chiller connected to fan coil.
   
 .. note::
 
@@ -1058,7 +1075,7 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   ===============================================  ========  ======  ===========  ========  =========  ==============================================
   Element                                          Type      Units   Constraints  Required  Default    Notes
   ===============================================  ========  ======  ===========  ========  =========  ==============================================
-  ``IsSharedSystem``                               boolean                        No        false      Whether it serves multiple dwelling units [#]_
+  ``IsSharedSystem``                               boolean                        No        false      Whether it has a shared hydronic circulation loop [#]_
   ``DistributionSystem``                           idref             See [#]_     Yes                  ID of attached distribution system
   ``HeatingCapacity``                              double    Btu/hr  >= 0         No        autosized  Heating capacity (excluding any backup heating)
   ``CoolingCapacity``                              double    Btu/hr  >= 0         No        autosized  Cooling capacity
