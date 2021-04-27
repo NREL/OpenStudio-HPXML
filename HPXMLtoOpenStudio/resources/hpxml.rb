@@ -798,6 +798,7 @@ class HPXML < Object
             end
           end
           next unless (not end_day.nil?) && (months.include? end_month)
+
           if not valid_days.include? end_day
             errors << "#{sim_ctl} End Day of Month (#{end_day}) must be one of: #{valid_days.join(', ')}."
           end
@@ -807,12 +808,14 @@ class HPXML < Object
       { 'Run Period' => [@sim_begin_month, @sim_begin_day, @sim_end_month, @sim_end_day] }.each do |sim_ctl, months_and_days|
         begin_month, begin_day, end_month, end_day = months_and_days
         next unless (not begin_month.nil?) && (not end_month.nil?)
+
         if begin_month > end_month
           errors << "#{sim_ctl} Begin Month (#{begin_month}) cannot come after #{sim_ctl} End Month (#{end_month})."
         end
 
         next unless (not begin_day.nil?) && (not end_day.nil?)
         next unless begin_month == end_month
+
         if begin_day > end_day
           errors << "#{sim_ctl} Begin Day of Month (#{begin_day}) cannot come after #{sim_ctl} End Day of Month (#{end_day}) for the same month (#{begin_month})."
         end

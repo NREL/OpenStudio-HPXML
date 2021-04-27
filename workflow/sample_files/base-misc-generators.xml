@@ -422,7 +422,7 @@
             </Generator>
             <Generator>
               <SystemIdentifier id='Generator2'/>
-              <FuelType>propane</FuelType>
+              <FuelType>fuel oil</FuelType>
               <AnnualConsumptionkBtu>8500.0</AnnualConsumptionkBtu>
               <AnnualOutputkWh>500.0</AnnualOutputkWh>
             </Generator>
