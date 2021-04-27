@@ -629,7 +629,7 @@ class HVAC
     hvac_map[heat_pump.id] << htg_supp_coil
 
     # Fan
-    fan_power_installed = 0.5 # FIXME
+    fan_power_installed = 0.0 # Use provided net COP
     fan = create_supply_fan(model, obj_name, 1, fan_power_installed, htg_cfm)
     hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
@@ -3965,9 +3965,9 @@ class HVAC
     return 30.0 # W/ton, per ANSI/RESNET/ICC 301-2019 Section 4.4.5 (closed loop)
   end
 
-  def self.apply_shared_systems(hpxml, do_hvac_sizing = true)
-    applied_clg = apply_shared_cooling_systems(hpxml, do_hvac_sizing)
-    applied_htg = apply_shared_heating_systems(hpxml, do_hvac_sizing)
+  def self.apply_shared_systems(hpxml = true)
+    applied_clg = apply_shared_cooling_systems(hpxml)
+    applied_htg = apply_shared_heating_systems(hpxml)
     return unless (applied_clg || applied_htg)
 
     # Remove WLHP if not serving heating nor cooling
@@ -3994,7 +3994,7 @@ class HVAC
     end
   end
 
-  def self.apply_shared_cooling_systems(hpxml, do_hvac_sizing)
+  def self.apply_shared_cooling_systems(hpxml)
     applied = false
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.is_shared_system
@@ -4052,12 +4052,8 @@ class HVAC
       cooling_system.cooling_system_type = HPXML::HVACTypeCentralAirConditioner
       cooling_system.cooling_efficiency_seer = seer_eq.round(2)
       cooling_system.cooling_efficiency_kw_per_ton = nil
-      if do_hvac_sizing
-        cooling_system.cooling_capacity = nil # Autosize the equipment
-      else
-        cooling_system.cooling_capacity = -1 # Autosize the equipment
-      end
-      cooling_system.is_shared_system = nil
+      cooling_system.cooling_capacity = nil # Autosize the equipment
+      cooling_system.is_shared_system = false
       cooling_system.number_of_units_served = nil
       cooling_system.shared_loop_watts = nil
       cooling_system.shared_loop_motor_efficiency = nil
@@ -4107,7 +4103,7 @@ class HVAC
     return applied
   end
 
-  def self.apply_shared_heating_systems(hpxml, do_hvac_sizing)
+  def self.apply_shared_heating_systems(hpxml)
     applied = false
     hpxml.heating_systems.each do |heating_system|
       next unless heating_system.is_shared_system
@@ -4135,11 +4131,7 @@ class HVAC
         heating_system.fraction_heat_load_served = fraction_heat_load_served * (1.0 - 1.0 / wlhp.heating_efficiency_cop)
       end
 
-      if do_hvac_sizing
-        heating_system.heating_capacity = nil # Autosize the equipment
-      else
-        heating_system.heating_capacity = -1 # Autosize the equipment
-      end
+      heating_system.heating_capacity = nil # Autosize the equipment
     end
 
     return applied
