@@ -3876,11 +3876,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
 
   # Set ConditionedFloorAreaServed
   if not hpxml_file.include?('invalid_files')
-    n_hvac_dists = hpxml.hvac_distributions.select { |sys| sys.hydronic_type != HPXML::HydronicTypeWaterLoop }.size
-    n_hvac_dists += hpxml.hvac_systems.select { |sys| sys.distribution_system_idref.nil? }.size # Count ductless systems too
+    n_htg_systems = (hpxml.heating_systems + hpxml.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.size
+    n_clg_systems = (hpxml.cooling_systems + hpxml.heat_pumps).select { |h| h.fraction_cool_load_served.to_f > 0 }.size
     hpxml.hvac_distributions.each do |hvac_distribution|
       if [HPXML::HVACDistributionTypeAir].include?(hvac_distribution.distribution_system_type) && (hvac_distribution.ducts.size > 0)
-        hvac_distribution.conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area / n_hvac_dists
+        n_hvac_systems = [n_htg_systems, n_clg_systems].max
+        hvac_distribution.conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area / n_hvac_systems
       else
         hvac_distribution.conditioned_floor_area_served = nil
       end
@@ -4422,7 +4423,8 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].heating_capacity = nil
     hpxml.water_heating_systems[0].tank_volume = nil
     hpxml.water_heating_systems[0].recovery_efficiency = nil
-  elsif ['base-bldgtype-multifamily-shared-water-heater.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-water-heater.xml',
+         'base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
     hpxml.water_heating_systems.clear
     hpxml.water_heating_systems.add(id: 'SharedWaterHeater',
                                     is_shared_system: true,
@@ -4436,14 +4438,6 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     energy_factor: 0.59,
                                     recovery_efficiency: 0.76,
                                     temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
-  elsif ['base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].location = HPXML::LocationLivingSpace
-    hpxml.water_heating_systems << hpxml.water_heating_systems[0].dup
-    hpxml.water_heating_systems[1].id = 'SharedWaterHeater'
-    hpxml.water_heating_systems[1].is_shared_system = true
-    hpxml.water_heating_systems[1].number_of_units_served = 6
-    hpxml.water_heating_systems[1].fraction_dhw_load_served = 0
-    hpxml.water_heating_systems[1].location = HPXML::LocationOtherHeatedSpace
   elsif ['invalid_files/multifamily-reference-water-heater.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
   elsif ['invalid_files/dhw-invalid-ef-tank.xml'].include? hpxml_file
