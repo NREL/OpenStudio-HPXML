@@ -102,14 +102,14 @@ jobs:
       - name: Commit latest results
         shell: bash        
         run: |
+          branch_name="${{ github.head_ref }}"
+          git pull origin $branch_name
           cp -r results/results* workflow/tests/base_results
           git add workflow/tests/base_results
           git status
           if [[ $(git diff --cached --exit-code) ]]; then
             git config --global user.email "github-action@users.noreply.github.com"
             git config --global user.name "GitHub Action"
-            branch_name="${{ github.head_ref }}"
-            git pull origin $branch_name
             git commit -m "Latest results."
             echo "Pushing to branch: $branch_name"
             git push -u origin $branch_name
