@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>d827b731-3952-49c1-82f0-8977f0bbbde6</version_id>
-  <version_modified>20210427T143905Z</version_modified>
+  <version_id>4ea2d5e2-8785-46f6-945f-288578790275</version_id>
+  <version_modified>20210428T141235Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -473,7 +473,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6B040960</checksum>
+      <checksum>D99580D0</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -544,19 +544,19 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9504C475</checksum>
+      <checksum>395907EE</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A026ACA6</checksum>
+      <checksum>980F99A1</checksum>
     </file>
     <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>87A88DC6</checksum>
+      <checksum>29626BF1</checksum>
     </file>
   </files>
 </measure>

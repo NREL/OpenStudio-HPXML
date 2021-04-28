@@ -30,6 +30,13 @@ class HVACSizing
     hvac_systems.each do |hvac_system|
       hvac = get_hvac_information(hvac_system)
 
+      # These shared systems should be converted to other equivalent
+      # systems before being autosized
+      next if [HPXML::HVACTypeChiller,
+               HPXML::HVACTypeCoolingTower].include?(hvac.CoolType)
+      next if [HPXML::HVACTypeHeatPumpWaterLoopToAir].include?(hvac.HeatType) &&
+              hvac.HeatingLoadFraction.nil?
+
       # Add duct losses
       apply_hvac_temperatures(hvac, bldg_design_loads)
       apply_load_ducts_heating(bldg_design_loads, weather, hvac)
