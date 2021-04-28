@@ -102,7 +102,6 @@ jobs:
       - name: Commit latest results
         shell: bash        
         run: |
-          git status
           cp -r results/results* workflow/tests/base_results
           git add workflow/tests/base_results
           git status
