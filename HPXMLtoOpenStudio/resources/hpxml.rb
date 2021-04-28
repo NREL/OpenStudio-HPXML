@@ -386,7 +386,10 @@ class HPXML < Object
       fuel_fracs[fuel] += heat_pump.fraction_heat_load_served.to_f
     end
     return FuelTypeElectricity if fuel_fracs.empty?
+    return FuelTypeElectricity if fuel_fracs[FuelTypeElectricity].to_f > 0.5
 
+    # Choose fossil fuel
+    fuel_fracs.delete FuelTypeElectricity
     return fuel_fracs.key(fuel_fracs.values.max)
   end
 
@@ -394,11 +397,17 @@ class HPXML < Object
     fuel_fracs = {}
     @water_heating_systems.each do |water_heating_system|
       fuel = water_heating_system.fuel_type
+      if fuel.nil? # Combi boiler
+        fuel = water_heating_system.related_hvac_system.heating_system_fuel
+      end
       fuel_fracs[fuel] = 0.0 if fuel_fracs[fuel].nil?
       fuel_fracs[fuel] += water_heating_system.fraction_dhw_load_served
     end
     return FuelTypeElectricity if fuel_fracs.empty?
+    return FuelTypeElectricity if fuel_fracs[FuelTypeElectricity].to_f > 0.5
 
+    # Choose fossil fuel
+    fuel_fracs.delete FuelTypeElectricity
     return fuel_fracs.key(fuel_fracs.values.max)
   end
 
