@@ -108,7 +108,7 @@ jobs:
           if [[ $(git diff --cached --exit-code) ]]; then
             git config --global user.email "github-action@users.noreply.github.com"
             git config --global user.name "GitHub Action"
-            git fetch
+            git pull origin $branch_name
             git commit -m "Latest results."
             branch_name="${{ github.head_ref }}"
             echo "Pushing to branch: $branch_name"
