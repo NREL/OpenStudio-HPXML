@@ -5636,14 +5636,16 @@ if ARGV[0].to_sym == :create_release_zips
     end
   end
 
-  files = ['HPXMLtoOpenStudio/measure.*',
+  files = ['Changelog.md',
+           'LICENSE.md',
+           'HPXMLtoOpenStudio/measure.*',
            'HPXMLtoOpenStudio/resources/*.*',
            'SimulationOutputReport/measure.*',
            'SimulationOutputReport/resources/*.*',
            'weather/*.*',
            'workflow/*.*',
            'workflow/sample_files/*.xml',
-           'workflow/tests/*.rb',
+           'workflow/tests/*test*.rb',
            'workflow/tests/ASHRAE_Standard_140/*.xml',
            'workflow/tests/base_results/*.csv',
            'documentation/index.html',
