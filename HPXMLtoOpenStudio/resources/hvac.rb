@@ -607,6 +607,7 @@ class HVAC
     else
       pump_w = heat_pump.pump_watts_per_ton * UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton')
     end
+    pump_w = [pump_w, 1.0].max # prevent error if zero
     pump.setRatedPowerConsumption(pump_w)
     pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead))
     hvac_map[heat_pump.id] << pump
@@ -700,7 +701,7 @@ class HVAC
     hvac_map[heat_pump.id] << htg_supp_coil
 
     # Fan
-    fan_power_installed = 0.5 # FIXME
+    fan_power_installed = 0.0 # Use provided net COP
     fan = create_supply_fan(model, obj_name, 1, fan_power_installed, htg_cfm)
     hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
@@ -752,6 +753,7 @@ class HVAC
 
     # Pump
     pump_w = heating_system.electric_auxiliary_energy / 2.08
+    pump_w = [pump_w, 1.0].max # prevent error if zero
     pump = OpenStudio::Model::PumpVariableSpeed.new(model)
     pump.setName(obj_name + ' hydronic pump')
     pump.setRatedPowerConsumption(pump_w)
@@ -1384,11 +1386,12 @@ class HVAC
   def self.set_cool_curves_room_ac(cooling_system)
     clg_ap = cooling_system.additional_properties
 
-    # From Frigidaire 10.7 EER unit in Winkler et. al. Lab Testing of Window ACs (2013)
-    clg_ap.cool_cap_ft_spec = [[0.43945980246913574, -0.0008922469135802481, 0.00013984567901234569, 0.0038489259259259253, -5.6327160493827156e-05, 2.041358024691358e-05]]
-    clg_ap.cool_eir_ft_spec = [[6.310506172839506, -0.17705185185185185, 0.0014645061728395061, 0.012571604938271608, 0.0001493827160493827, -0.00040308641975308644]]
-    clg_ap.cool_cap_fflow_spec = [[0.887, 0.1128, 0]]
-    clg_ap.cool_eir_fflow_spec = [[1.763, -0.6081, 0]]
+    # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
+    # https://www.nrel.gov/docs/fy13osti/56354.pdf
+    clg_ap.cool_cap_ft_spec = [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
+    clg_ap.cool_eir_ft_spec = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
+    clg_ap.cool_cap_fflow_spec = [[1, 0, 0]]
+    clg_ap.cool_eir_fflow_spec = [[1, 0, 0]]
   end
 
   def self.set_cool_curves_mshp(heat_pump, num_speeds)
@@ -1928,41 +1931,28 @@ class HVAC
       distribution_system = heating_system.distribution_system
       distribution_type = distribution_system.distribution_system_type
 
-      if distribution_type == HPXML::HVACDistributionTypeHydronic
-        if distribution_system.hydronic_type == HPXML::HydronicTypeWaterLoop
-          # Shared boiler w/ WLHP
-          if heating_system.shared_loop_watts.nil?
-            return 265.0 # kWh/yr, per ANSI/RESNET/ICC 301-2019 Table 4.5.2(5)
-          else
-            sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
-            n_dweq = heating_system.number_of_units_served.to_f
-            aux_in = 0.0 # ANSI/RESNET/ICC 301-2019 Section 4.4.7.2
-          end
+      if not heating_system.shared_loop_watts.nil?
+        sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
+        n_dweq = heating_system.number_of_units_served.to_f
+        if distribution_system.air_type == HPXML::AirTypeFanCoil
+          aux_in = UnitConversions.convert(heating_system.fan_coil_watts, 'W', 'kW')
         else
-          # Shared boiler w/ baseboard/radiators/etc
-          if heating_system.shared_loop_watts.nil?
-            return 220.0 # kWh/yr, per ANSI/RESNET/ICC 301-2019 Table 4.5.2(5)
-          else
-            sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
-            n_dweq = heating_system.number_of_units_served.to_f
-            aux_in = 0.0
-          end
+          aux_in = 0.0 # ANSI/RESNET/ICC 301-2019 Section 4.4.7.2
+        end
+        # ANSI/RESNET/ICC 301-2019 Equation 4.4-5
+        return (((sp_kw / n_dweq) + aux_in) * 2080.0).round(2) # kWh/yr
+      elsif distribution_type == HPXML::HVACDistributionTypeHydronic
+        # kWh/yr, per ANSI/RESNET/ICC 301-2019 Table 4.5.2(5)
+        if distribution_system.hydronic_type == HPXML::HydronicTypeWaterLoop # Shared boiler w/ WLHP
+          return 265.0
+        else # Shared boiler w/ baseboard/radiators/etc
+          return 220.0
         end
       elsif distribution_type == HPXML::HVACDistributionTypeAir
-        if distribution_system.air_type == HPXML::AirTypeFanCoil
-          # Shared boiler w/ fan coil
-          if heating_system.shared_loop_watts.nil? || heating_system.fan_coil_watts.nil?
-            return 438.0 # kWh/yr, per ANSI/RESNET/ICC 301-2019 Table 4.5.2(5)
-          else
-            sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
-            n_dweq = heating_system.number_of_units_served.to_f
-            aux_in = UnitConversions.convert(heating_system.fan_coil_watts, 'W', 'kW')
-          end
+        if distribution_system.air_type == HPXML::AirTypeFanCoil # Shared boiler w/ fan coil
+          return 438.0
         end
       end
-
-      # ANSI/RESNET/ICC 301-2019 Equation 4.4-5
-      return ((sp_kw / n_dweq) + aux_in) * 2080.0 # kWh/yr
 
     else # In-unit boilers
 
@@ -4319,7 +4309,7 @@ class HVAC
     # Remove any orphaned HVAC distributions
     hpxml.hvac_distributions.each do |hvac_distribution|
       hvac_systems = []
-      (hpxml.heating_systems + hpxml.cooling_systems + hpxml.heat_pumps).each do |hvac_system|
+      hpxml.hvac_systems.each do |hvac_system|
         next if hvac_system.distribution_system_idref.nil?
         next unless hvac_system.distribution_system_idref == hvac_distribution.id
 
@@ -4382,12 +4372,19 @@ class HVAC
         fail "Unexpected cooling system type '#{cooling_system.cooling_system_type}'."
       end
 
+      if seer_eq <= 0
+        fail "Negative SEER equivalent calculated for cooling system '#{cooling_system.id}', double check inputs."
+      end
+
       cooling_system.cooling_system_type = HPXML::HVACTypeCentralAirConditioner
-      cooling_system.cooling_efficiency_seer = seer_eq
+      cooling_system.cooling_efficiency_seer = seer_eq.round(2)
       cooling_system.cooling_efficiency_kw_per_ton = nil
       cooling_system.cooling_capacity = nil # Autosize the equipment
       cooling_system.is_shared_system = false
       cooling_system.number_of_units_served = nil
+      cooling_system.shared_loop_watts = nil
+      cooling_system.shared_loop_motor_efficiency = nil
+      cooling_system.fan_coil_watts = nil
 
       # Assign new distribution system to air conditioner
       if distribution_type == HPXML::HVACDistributionTypeHydronic
@@ -4403,6 +4400,29 @@ class HVAC
                                        annual_cooling_dse: 1.0,
                                        annual_heating_dse: 1.0)
           cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
+        end
+      elsif (distribution_type == HPXML::HVACDistributionTypeAir) && (distribution_system.air_type == HPXML::AirTypeFanCoil)
+        # Convert "fan coil" air distribution system to "regular velocity"
+        if distribution_system.hvac_systems.size > 1
+          # Has attached heating system, so create a copy specifically for the cooling system
+          hpxml.hvac_distributions << distribution_system.dup
+          hpxml.hvac_distributions[-1].id += "#{cooling_system.id}AirDistributionSystem"
+          cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
+        end
+        hpxml.hvac_distributions[-1].air_type = HPXML::AirTypeRegularVelocity
+        if hpxml.hvac_distributions[-1].duct_leakage_measurements.select { |lm| (lm.duct_type == HPXML::DuctTypeSupply) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) }.size == 0
+          # Assign zero supply leakage
+          hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                                     duct_leakage_units: HPXML::UnitsCFM25,
+                                                                     duct_leakage_value: 0,
+                                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+        end
+        if hpxml.hvac_distributions[-1].duct_leakage_measurements.select { |lm| (lm.duct_type == HPXML::DuctTypeReturn) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) }.size == 0
+          # Assign zero return leakage
+          hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                                     duct_leakage_units: HPXML::UnitsCFM25,
+                                                                     duct_leakage_value: 0,
+                                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
         end
       end
     end
