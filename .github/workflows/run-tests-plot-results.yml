@@ -120,7 +120,7 @@ jobs:
         shell: bash        
         run: |
           branch_name="${{ github.head_ref }}"
-          # git pull origin $branch_name
+          git pull origin $branch_name
           cp -r results/results*.csv workflow/tests/base_results
           git add workflow/tests/base_results
           git status
