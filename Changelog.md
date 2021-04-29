@@ -1,4 +1,4 @@
-## OpenStudio-HPXML v1.2.0 (Pending)
+## OpenStudio-HPXML v1.2.0
 
 __New Features__
 - **Breaking change**: Heating/cooling component loads no longer calculated by default for faster performance; use `--add-component-loads` argument if desired.
