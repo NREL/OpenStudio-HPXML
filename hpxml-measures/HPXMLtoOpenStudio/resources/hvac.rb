@@ -1305,8 +1305,8 @@ class HVAC
     # https://www.nrel.gov/docs/fy13osti/56354.pdf
     clg_ap.cool_cap_ft_spec = [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
     clg_ap.cool_eir_ft_spec = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
-    clg_ap.cool_cap_fflow_spec = [[1.05, 0, 0]]
-    clg_ap.cool_eir_fflow_spec = [[1.05, 0, 0]]
+    clg_ap.cool_cap_fflow_spec = [[1, 0, 0]]
+    clg_ap.cool_eir_fflow_spec = [[1, 0, 0]]
   end
 
   def self.set_cool_curves_mshp(heat_pump, num_speeds)
