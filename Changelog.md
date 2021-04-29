@@ -3,7 +3,6 @@
 __New Features__
 - **Breaking change**: Heating/cooling component loads no longer calculated by default for faster performance; use `--add-component-loads` argument if desired.
 - **Breaking change**: Replaces `Site/extension/ShelterCoefficient` with `Site/ShieldingofHome`.
-- **Breaking change**: `AirDistributionType` is now required for all air distribution systems.
 - Allows `Seasons/Heating` & `Seasons/Cooling` to be specified for defining heating and cooling seasons.
 - Allows `DuctLeakageMeasurement` & `ConditionedFloorAreaServed` to not be specified for ductless fan coil systems; **Breaking change**: `AirDistributionType` is now required for all air distribution systems.
 - Allows `Slab/ExposedPerimeter` to be zero.
