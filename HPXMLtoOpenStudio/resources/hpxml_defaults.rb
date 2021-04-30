@@ -6,7 +6,7 @@ class HPXMLDefaults
   # being written to the HPXML file. This is useful to associate additional values
   # with the HPXML objects that will ultimately get passed around.
 
-  def self.apply(hpxml, eri_version, weather, epw_file: nil)
+  def self.apply(hpxml, eri_version, weather, epw_file: nil, convert_shared_systems: true)
     cfa = hpxml.building_construction.conditioned_floor_area
     nbeds = hpxml.building_construction.number_of_bedrooms
     ncfl = hpxml.building_construction.number_of_conditioned_floors
@@ -27,7 +27,7 @@ class HPXMLDefaults
     apply_slabs(hpxml)
     apply_windows(hpxml)
     apply_skylights(hpxml)
-    apply_hvac(hpxml, weather)
+    apply_hvac(hpxml, weather, convert_shared_systems)
     apply_hvac_control(hpxml)
     apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
     apply_ventilation_fans(hpxml)
@@ -423,8 +423,10 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac(hpxml, weather)
-    HVAC.apply_shared_systems(hpxml)
+  def self.apply_hvac(hpxml, weather, convert_shared_systems)
+    if convert_shared_systems
+      HVAC.apply_shared_systems(hpxml)
+    end
 
     # Default AC/HP compressor type
     hpxml.cooling_systems.each do |cooling_system|

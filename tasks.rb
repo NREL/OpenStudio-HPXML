@@ -4403,7 +4403,8 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].heating_capacity = nil
     hpxml.water_heating_systems[0].tank_volume = nil
     hpxml.water_heating_systems[0].recovery_efficiency = nil
-  elsif ['base-bldgtype-multifamily-shared-water-heater.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-water-heater.xml',
+         'base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
     hpxml.water_heating_systems.clear
     hpxml.water_heating_systems.add(id: 'SharedWaterHeater',
                                     is_shared_system: true,
@@ -4417,14 +4418,6 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     energy_factor: 0.59,
                                     recovery_efficiency: 0.76,
                                     temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
-  elsif ['base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].location = HPXML::LocationLivingSpace
-    hpxml.water_heating_systems << hpxml.water_heating_systems[0].dup
-    hpxml.water_heating_systems[1].id = 'SharedWaterHeater'
-    hpxml.water_heating_systems[1].is_shared_system = true
-    hpxml.water_heating_systems[1].number_of_units_served = 6
-    hpxml.water_heating_systems[1].fraction_dhw_load_served = 0
-    hpxml.water_heating_systems[1].location = HPXML::LocationOtherHeatedSpace
   elsif ['invalid_files/multifamily-reference-water-heater.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
   elsif ['invalid_files/dhw-invalid-ef-tank.xml'].include? hpxml_file
@@ -5651,14 +5644,16 @@ if ARGV[0].to_sym == :create_release_zips
     end
   end
 
-  files = ['HPXMLtoOpenStudio/measure.*',
+  files = ['Changelog.md',
+           'LICENSE.md',
+           'HPXMLtoOpenStudio/measure.*',
            'HPXMLtoOpenStudio/resources/*.*',
            'SimulationOutputReport/measure.*',
            'SimulationOutputReport/resources/*.*',
            'weather/*.*',
            'workflow/*.*',
            'workflow/sample_files/*.xml',
-           'workflow/tests/*.rb',
+           'workflow/tests/*test*.rb',
            'workflow/tests/ASHRAE_Standard_140/*.xml',
            'documentation/index.html',
            'documentation/_static/**/*.*']

@@ -3995,7 +3995,7 @@ class HVAC
     return 30.0 # W/ton, per ANSI/RESNET/ICC 301-2019 Section 4.4.5 (closed loop)
   end
 
-  def self.apply_shared_systems(hpxml = true)
+  def self.apply_shared_systems(hpxml)
     applied_clg = apply_shared_cooling_systems(hpxml)
     applied_htg = apply_shared_heating_systems(hpxml)
     return unless (applied_clg || applied_htg)
