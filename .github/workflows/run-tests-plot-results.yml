@@ -18,11 +18,16 @@ jobs:
         run: rm -f Gemfile.lock && bundle install
       - name: Run tests
         run: bundle exec rake test_all
-      - uses: actions/upload-artifact@v2
+      - name: Store results
+        uses: actions/upload-artifact@v2
         with:
           name: test_results
           path: workflow/test_results
-
+      - name: Store code coverage
+        uses: actions/upload-artifact@v2
+        with:
+          path: coverage
+          name: coverage
   make-plots:
     runs-on: ubuntu-latest
     needs: run-tests
