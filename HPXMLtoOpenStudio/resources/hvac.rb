@@ -1016,15 +1016,18 @@ class HVAC
       # https://www.nrel.gov/docs/fy13osti/56354.pdf
       hp_ap.cool_cap_ft_spec = [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
       hp_ap.cool_eir_ft_spec = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
-      # Single stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
-      hp_ap.cool_cap_fflow_spec = [[0.718664047, 0.41797409, -0.136638137]]
-      hp_ap.cool_eir_fflow_spec = [[1.143487507, -0.13943972, -0.004047787]]
       if not use_eer
         hp_ap.cool_capacity_ratios = [1.0]
         hp_ap.cool_fan_speed_ratios = [1.0]
         hp_ap.cool_rated_shrs_net = [heat_pump.cooling_shr]
         hp_ap.cool_rated_airflow_rate = 394.2 # cfm/ton of rated capacity
+        # Single stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
+        hp_ap.cool_cap_fflow_spec = [[0.718664047, 0.41797409, -0.136638137]]
+        hp_ap.cool_eir_fflow_spec = [[1.143487507, -0.13943972, -0.004047787]]
         hp_ap.cool_eers = [calc_eer_cooling_1speed(heat_pump.cooling_efficiency_seer, hp_ap.cool_c_d, hp_ap.fan_power_rated, hp_ap.cool_eir_ft_spec)]
+      else
+        hp_ap.cool_cap_fflow_spec = [[1.0,0.0,0.0]]
+        hp_ap.cool_eir_fflow_spec = [[1.0,0.0,0.0]]
       end
     elsif hp_ap.num_speeds == 2
       # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
@@ -1132,17 +1135,6 @@ class HVAC
       end
       hp_ap.heat_cops = calc_cops_heating_4speed(heat_pump.heating_efficiency_hspf, hp_ap.heat_c_d, hp_ap.heat_capacity_ratios, hp_ap.heat_fan_speed_ratios, hp_ap.fan_power_rated, hp_ap.heat_eir_ft_spec, hp_ap.heat_cap_ft_spec)
     end
-  end
-
-  def self.set_cool_curves_room_ac_ptac(cooling_system)
-    clg_ap = cooling_system.additional_properties
-
-    # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
-    # https://www.nrel.gov/docs/fy13osti/56354.pdf
-    clg_ap.cool_cap_ft_spec = [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
-    clg_ap.cool_eir_ft_spec = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
-    clg_ap.cool_cap_fflow_spec = [[1, 0, 0]]
-    clg_ap.cool_eir_fflow_spec = [[1, 0, 0]]
   end
 
   def self.set_cool_curves_mshp(heat_pump, num_speeds)
@@ -2749,10 +2741,8 @@ class HVAC
     for i in 0..(clg_ap.num_speeds - 1)
       cap_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_cap_ft_spec[i])
       eir_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_eir_ft_spec[i])
-      # cap_ft_curve = create_curve_biquadratic(model, cap_ft_spec_si, "Cool-CAP-fT#{i + 1}", 13.88, 23.88, 18.33, 51.66)
-      # eir_ft_curve = create_curve_biquadratic(model, eir_ft_spec_si, "Cool-EIR-fT#{i + 1}", 13.88, 23.88, 18.33, 51.66)
-      cap_ft_curve = create_curve_biquadratic(model, cap_ft_spec_si, "Cool-CAP-fT#{i + 1}", 0, 100, 0, 100)
-      eir_ft_curve = create_curve_biquadratic(model, eir_ft_spec_si, "Cool-EIR-fT#{i + 1}", 0, 100, 0, 100)
+      cap_ft_curve = create_curve_biquadratic(model, cap_ft_spec_si, "Cool-CAP-fT#{i + 1}", -100, 100, -100, 100)
+      eir_ft_curve = create_curve_biquadratic(model, eir_ft_spec_si, "Cool-EIR-fT#{i + 1}", -100, 100, -100, 100)
       plf_fplr_curve = create_curve_quadratic(model, clg_ap.cool_plf_fplr_spec[i], "Cool-PLF-fPLR#{i + 1}", 0, 1, 0.7, 1)
       cap_fff_curve = create_curve_quadratic(model, clg_ap.cool_cap_fflow_spec[i], "Cool-CAP-fFF#{i + 1}", 0, 2, 0, 2)
       eir_fff_curve = create_curve_quadratic(model, clg_ap.cool_eir_fflow_spec[i], "Cool-EIR-fFF#{i + 1}", 0, 2, 0, 2)
