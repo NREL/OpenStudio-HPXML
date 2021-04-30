@@ -1796,25 +1796,19 @@ class HVACSizing
           a2_CH_Qgr_h = qgr_values[1]
           a3_CH_Qgr_h = qgr_values[2]
 
-          ff_ch_h = (1 / (1 + (qgr_values[0] + qgr_values[1] * ff_chg_values[0] + qgr_values[2] * f_ch) * f_ch)).round(3)
-
           qh1_CH = a1_CH_Qgr_h
           qh2_CH = a2_CH_Qgr_h * tout_heat
           qh3_CH = a3_CH_Qgr_h * f_ch
           y_CH_Q_h = 1 + ((qh1_CH + qh2_CH + qh3_CH) * f_ch)
 
-          qh0_AF_CH = a1_AF_Qgr_h
-          qh1_AF_CH = a2_AF_Qgr_h * ff_ch_h
-          qh2_AF_CH = a3_AF_Qgr_h * ff_ch_h * ff_ch_h
-          p_CH_Q_h = y_CH_Q_h / (qh0_AF_CH + qh1_AF_CH + qh2_AF_CH)
-
+          ff_ch_h = (1 / (1 + (qgr_values[0] + qgr_values[1] * ff_chg_values[0] + qgr_values[2] * f_ch) * f_ch)).round(3)
           ff_AF_h = heat_airflow_rated_defect_ratio[speed].round(3)
           ff_AF_comb_h = ff_ch_h * ff_AF_h
+          
+          qh_AF_CH = a1_AF_Qgr_h + (a2_AF_Qgr_h * ff_ch_h) + (a3_AF_Qgr_h * ff_ch_h * ff_ch_h)
+          p_CH_Q_h = y_CH_Q_h / qh_AF_CH
 
-          qh0_AF_comb = a1_AF_Qgr_h
-          qh1_AF_comb = a2_AF_Qgr_h * ff_AF_comb_h
-          qh2_AF_comb = a3_AF_Qgr_h * ff_AF_comb_h * ff_AF_comb_h
-          p_AF_Q_h = qh0_AF_comb + qh1_AF_comb + qh2_AF_comb
+          p_AF_Q_h = a1_AF_Qgr_h + (a2_AF_Qgr_h * ff_AF_comb_h) + (a3_AF_Qgr_h * ff_AF_comb_h * ff_AF_comb_h)
 
           heat_cap_fff = (p_CH_Q_h * p_AF_Q_h)
 
