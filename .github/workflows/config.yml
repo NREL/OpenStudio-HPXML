@@ -19,10 +19,14 @@ jobs:
 
       - name: Install gems
         run: |
+          echo $PWD
+          git status
           rm -f Gemfile.lock && bundle install
 
       - name: Run tests
         run: |
+          echo $PWD
+          git status
           bundle exec rake test_all
 
       - name: Store results
@@ -42,6 +46,8 @@ jobs:
       - name: Commit latest results
         shell: bash        
         run: |
+          echo $PWD
+          git status
           branch_name="${{ github.head_ref }}"
           git pull origin $branch_name
           cp -r workflow/tests/results/results* workflow/tests/base_results
