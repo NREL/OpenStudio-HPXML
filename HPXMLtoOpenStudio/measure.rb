@@ -1620,12 +1620,22 @@ class OSModel
       heating_system = hvac_system[:heating]
 
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
+      hvac_control = @hpxml.hvac_controls[0]
+      is_realistic_staging = false
+      is_ddb_control = (not hvac_control.onoff_thermostat_deadband.nil?) && (hvac_control.onoff_thermostat_deadband > 0) && (cooling_system.additional_properties.num_speeds == 1)
 
       if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
-
-        HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
-                                                   @remaining_cool_load_frac, @remaining_heat_load_frac,
-                                                   living_zone, @hvac_map)
+        if (cooling_system.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
+          is_realistic_staging = true
+          is_ddb_control = true
+          HVAC.apply_central_air_conditioner_furnace_two_speed_realistic(model, runner, cooling_system, heating_system,
+                                                                         @remaining_cool_load_frac, @remaining_heat_load_frac,
+                                                                         living_zone, @hvac_map)
+        else
+          HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
+                                                     @remaining_cool_load_frac, @remaining_heat_load_frac,
+                                                     living_zone, @hvac_map, is_ddb_control)
+        end
 
         if not heating_system.nil?
           @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
@@ -1635,7 +1645,7 @@ class OSModel
 
         HVAC.apply_room_air_conditioner(model, runner, cooling_system,
                                         @remaining_cool_load_frac, living_zone,
-                                        @hvac_map)
+                                        @hvac_map, is_ddb_control)
 
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
 
@@ -1674,7 +1684,7 @@ class OSModel
 
         HVAC.apply_central_air_conditioner_furnace(model, runner, nil, heating_system,
                                                    nil, @remaining_heat_load_frac,
-                                                   living_zone, @hvac_map)
+                                                   living_zone, @hvac_map, @hpxml.hvac_controls[0])
 
       elsif [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
@@ -1712,6 +1722,9 @@ class OSModel
 
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
+      hvac_control = @hpxml.hvac_controls[0]
+      is_realistic_staging = false
+      is_ddb_control = (not hvac_control.onoff_thermostat_deadband.nil?) && (hvac_control.onoff_thermostat_deadband > 0) && (heat_pump.additional_properties.num_speeds == 1)
       if [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
 
         HVAC.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
@@ -1721,11 +1734,18 @@ class OSModel
 
       elsif [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
 
-        HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
-                                                @remaining_heat_load_frac,
-                                                @remaining_cool_load_frac,
-                                                living_zone, @hvac_map)
-
+        if (cooling_system.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
+          is_realistic_staging = true
+          is_ddb_control = true
+          HVAC.apply_central_air_to_air_heat_pump_two_speed_realistic(model, runner, cooling_system, heating_system,
+                                                                      @remaining_cool_load_frac, @remaining_heat_load_frac,
+                                                                      living_zone, @hvac_map)
+        else
+          HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
+                                                  @remaining_heat_load_frac,
+                                                  @remaining_cool_load_frac,
+                                                  living_zone, @hvac_map, @hpxml.hvac_controls[0])
+        end
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
 
         HVAC.apply_mini_split_heat_pump(model, runner, heat_pump,
@@ -1799,20 +1819,23 @@ class OSModel
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     obj_name = Constants.ObjectNameIdealAirSystemResidual
 
-    if @remaining_cool_load_frac < 1.0
-      sequential_cool_load_frac = 1.0
-    else
-      sequential_cool_load_frac = 0.0 # no cooling system, don't add ideal air for cooling either
-    end
+    # only enable residual ideal system when hvac's not on on/off thermostat control
+    if @hpxml.hvac_controls[0].onoff_thermostat_deadband.nil? || (@hpxml.hvac_controls[0].onoff_thermostat_deadband == 0.0)
+      if @remaining_cool_load_frac < 1.0
+        sequential_cool_load_frac = 1.0
+      else
+        sequential_cool_load_frac = 0.0 # no cooling system, don't add ideal air for cooling
+      end
 
-    if @remaining_heat_load_frac < 1.0
-      sequential_heat_load_frac = 1.0
-    else
-      sequential_heat_load_frac = 0.0 # no heating system, don't add ideal air for heating either
-    end
-    if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
-      HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
-                                 living_zone)
+      if @remaining_heat_load_frac < 1.0
+        sequential_heat_load_frac = 1.0
+      else
+        sequential_heat_load_frac = 0.0 # no heating system, don't add ideal air for heating either
+      end
+      if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
+        HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
+                                   living_zone)
+      end
     end
   end
 
@@ -1822,6 +1845,13 @@ class OSModel
     hvac_control = @hpxml.hvac_controls[0]
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     has_ceiling_fan = (@hpxml.ceiling_fans.size > 0)
+    timestep = @hpxml.header.timestep
+    # Do not apply on off thermostat if timestep is >= 2
+    # Only availabe with 1 min time step
+    if timestep >= 2 && (not hvac_control.onoff_thermostat_deadband.nil?) && hvac_control.onoff_thermostat_deadband > 0
+      hvac_control.onoff_thermostat_deadband = nil
+      runner.registerWarning('Time step too large to enable on-off thermostat deadband. Continute without on-off control.')
+    end
 
     HVAC.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan)
   end
