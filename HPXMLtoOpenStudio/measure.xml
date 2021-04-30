@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>e97f6425-fcc1-4c14-9fac-d918159cb7cd</version_id>
-  <version_modified>20210428T142928Z</version_modified>
+  <version_id>5f98ed8e-a98d-485f-8834-7b7f5ac6ae02</version_id>
+  <version_modified>20210430T212523Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -290,12 +290,6 @@
       <checksum>6BF095D2</checksum>
     </file>
     <file>
-      <filename>validator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7039FF35</checksum>
-    </file>
-    <file>
       <filename>unit_conversions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -374,12 +368,6 @@
       <checksum>2BD03B80</checksum>
     </file>
     <file>
-      <filename>test_water_heater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E507D3D1</checksum>
-    </file>
-    <file>
       <filename>test_generator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -396,12 +384,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>E962DB16</checksum>
-    </file>
-    <file>
-      <filename>EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E88FE4FD</checksum>
     </file>
     <file>
       <filename>test_airflow.rb</filename>
@@ -434,12 +416,6 @@
       <checksum>C18610A9</checksum>
     </file>
     <file>
-      <filename>test_validation.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E4E8816E</checksum>
-    </file>
-    <file>
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -456,6 +432,30 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>D99580D0</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>95FBB68A</checksum>
+    </file>
+    <file>
+      <filename>test_water_heater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C8BB1267</checksum>
+    </file>
+    <file>
+      <filename>validator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BF53D293</checksum>
+    </file>
+    <file>
+      <filename>test_validation.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4C662AE0</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -511,12 +511,6 @@
       <checksum>19DA45A2</checksum>
     </file>
     <file>
-      <filename>version.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FB55E123</checksum>
-    </file>
-    <file>
       <filename>generator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -527,6 +521,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>DC769B27</checksum>
+    </file>
+    <file>
+      <filename>version.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1277B716</checksum>
     </file>
     <file>
       <filename>schedules.rb</filename>
