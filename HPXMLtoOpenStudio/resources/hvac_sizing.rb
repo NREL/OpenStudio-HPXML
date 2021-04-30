@@ -1987,6 +1987,7 @@ class HVACSizing
     heatCap_Rated = (hvac_sizing_values.Heat_Load / MathTools.biquadratic(@heat_setpoint, weather.design.HeatingDrybulb, coefficients)) / capacity_ratio
 
     if heatCap_Rated >= hvac_sizing_values.Cool_Capacity
+      cfm_per_btuh = hvac_sizing_values.Cool_Airflow / hvac_sizing_values.Cool_Capacity
       load_shr = hvac_sizing_values.Cool_Load_Sens / hvac_sizing_values.Cool_Load_Tot
       if ((weather.data.HDD65F / weather.data.CDD50F) < 2.0) || (load_shr < 0.95)
         # Mild winter or has a latent cooling load
@@ -1996,7 +1997,6 @@ class HVACSizing
         hvac_sizing_values.Cool_Capacity = [(hvac_sizing_values.Cool_Load_Tot + hvac.OverSizeDelta) / totalCap_CurveValue, heatCap_Rated].min
       end
       if hvac.HeatType == HPXML::HVACTypeHeatPumpAirToAir
-        cfm_per_btuh = hvac_sizing_values.Cool_Airflow / hvac_sizing_values.Cool_Capacity
         hvac_sizing_values.Cool_Airflow = cfm_per_btuh * hvac_sizing_values.Cool_Capacity
       elsif hvac.HeatType == HPXML::HVACTypeHeatPumpMiniSplit
         hvac_sizing_values.Cool_Airflow = hvac.RatedCFMperTonCooling[-1] * hvac.CapacityRatioCooling[-1] * UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton')
