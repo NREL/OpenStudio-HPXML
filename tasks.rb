@@ -328,6 +328,8 @@ def create_hpxmls
     'base-hvac-autosize-room-ac-only.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-autosize-stove-oil-only.xml' => 'base-hvac-stove-oil-only.xml',
     'base-hvac-autosize-wall-furnace-elec-only.xml' => 'base-hvac-wall-furnace-elec-only.xml',
+    'base-hvac-autosize-ptac-electric-resistance.xml' => 'base-hvac-ptac-electric-resistance.xml',
+    'base-hvac-autosize-pthp.xml' => 'base-hvac-pthp.xml',
     'base-hvac-boiler-coal-only.xml' => 'base.xml',
     'base-hvac-boiler-elec-only.xml' => 'base.xml',
     'base-hvac-boiler-gas-central-ac-1-speed.xml' => 'base.xml',

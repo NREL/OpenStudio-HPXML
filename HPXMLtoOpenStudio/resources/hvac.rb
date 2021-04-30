@@ -1026,8 +1026,8 @@ class HVAC
         hp_ap.cool_eir_fflow_spec = [[1.143487507, -0.13943972, -0.004047787]]
         hp_ap.cool_eers = [calc_eer_cooling_1speed(heat_pump.cooling_efficiency_seer, hp_ap.cool_c_d, hp_ap.fan_power_rated, hp_ap.cool_eir_ft_spec)]
       else
-        hp_ap.cool_cap_fflow_spec = [[1.0,0.0,0.0]]
-        hp_ap.cool_eir_fflow_spec = [[1.0,0.0,0.0]]
+        hp_ap.cool_cap_fflow_spec = [[1.0, 0.0, 0.0]]
+        hp_ap.cool_eir_fflow_spec = [[1.0, 0.0, 0.0]]
       end
     elsif hp_ap.num_speeds == 2
       # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
