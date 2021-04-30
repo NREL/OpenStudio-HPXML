@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.head_ref }}
 
       - name: Install gems
         run: |
@@ -31,13 +31,13 @@ jobs:
           path: workflow/tests/results
           name: results
 
-      - name: Setup git branch
-        shell: bash
-        run: |
-          branch_name="${{ github.head_ref }}"
-          branch_sha="${{ github.event.pull_request.head.sha }}"
-          echo "Checking out branch: $branch_name, $branch_sha"
-          git checkout -b $branch_name || git checkout $branch_name
+      # - name: Setup git branch
+        # shell: bash
+        # run: |
+          # branch_name="${{ github.head_ref }}"
+          # branch_sha="${{ github.event.pull_request.head.sha }}"
+          # echo "Checking out branch: $branch_name, $branch_sha"
+          # git checkout -b $branch_name || git checkout $branch_name
 
       - name: Commit latest results
         shell: bash        
