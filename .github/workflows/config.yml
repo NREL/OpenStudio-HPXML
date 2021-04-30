@@ -4,7 +4,7 @@ on:
   push:
     branches: [ master ]
   pull_request:
-    types: [ synchronize, opened, ready_for_review ]
+    types: [ synchronize, opened ]
   workflow_dispatch:
 
 jobs:
