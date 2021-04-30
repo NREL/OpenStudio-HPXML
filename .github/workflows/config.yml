@@ -64,22 +64,22 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.base.sha }}
 
-      - name: Store base results
-        uses: actions/upload-artifact@v2
-        with:
-          path: workflow/tests/base_results
-          name: base_results
+      # - name: Store base results
+        # uses: actions/upload-artifact@v2
+        # with:
+          # path: workflow/tests/base_results
+          # name: base_results
 
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
+      # - uses: actions/checkout@v2
+        # with:
+          # ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Download base results
-        uses: actions/download-artifact@v2
-        with:
-          path: |
-            base_results
-          name: base_results
+      # - name: Download base results
+        # uses: actions/download-artifact@v2
+        # with:
+          # path: |
+            # base_results
+          # name: base_results
 
       - name: Download feature results
         uses: actions/download-artifact@v2
@@ -90,7 +90,7 @@ jobs:
 
       - name: Compare results
         run: |
-          cp -r base_results/results*.csv workflow/tests/base_results
+          # cp -r base_results/results*.csv workflow/tests/base_results
           mkdir workflow/tests/results
           cp -r results/results* workflow/tests/results
           ruby workflow/tests/compare.rb
