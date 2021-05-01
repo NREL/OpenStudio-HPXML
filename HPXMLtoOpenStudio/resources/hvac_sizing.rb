@@ -1554,7 +1554,6 @@ class HVACSizing
     elsif hvac.HeatType == HPXML::HVACTypeHeatPumpGroundToAir
 
       if hvac_sizing_values.Cool_Capacity > 0
-        coil_bf = gshp_coil_bf
         hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
         hvac_sizing_values.Heat_Capacity_Supp = hvac_sizing_values.Heat_Load
 
@@ -1571,7 +1570,7 @@ class HVACSizing
 
         hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
         cool_Load_SensCap_Design = (hvac_sizing_values.Cool_Capacity_Sens * sensibleCap_CurveValue /
-                                   (1.0 + (1.0 - coil_bf * bypassFactor_CurveValue) *
+                                   (1.0 + (1.0 - gshp_coil_bf * bypassFactor_CurveValue) *
                                    (80.0 - @cool_setpoint) / (@cool_setpoint - hvac.LeavingAirTemp)))
         hvac_sizing_values.Cool_Airflow = calc_airflow_rate(cool_Load_SensCap_Design, (@cool_setpoint - hvac.LeavingAirTemp))
       else
@@ -1681,8 +1680,6 @@ class HVACSizing
             a2_AF_Qgr_c = hvac.COOL_CAP_FFLOW_SPEC[speed][1]
             a3_AF_Qgr_c = hvac.COOL_CAP_FFLOW_SPEC[speed][2]
           else
-            # calculate water flow based on current capacity.
-            loop_flow = [1.0, UnitConversions.convert([hvac_sizing_values.Heat_Capacity, hvac_sizing_values.Cool_Capacity].max, 'Btu/hr', 'ton')].max.floor * 3.0
             # Fixme: Please review these coefficients. Relationship independent of other variables to mimic fFF curves.
             a1_AF_Qgr_c = 1 - hvac.COOL_CAP_CURVE_SPEC[hvac.SizingSpeed][3]
             a2_AF_Qgr_c = hvac.COOL_CAP_CURVE_SPEC[hvac.SizingSpeed][3]
@@ -1737,11 +1734,12 @@ class HVACSizing
           design_wb_temp = UnitConversions.convert(@wetbulb_indoor_cooling, 'f', 'k')
           design_db_temp = UnitConversions.convert(@cool_setpoint, 'f', 'k')
           design_w_temp = UnitConversions.convert(hvac.GSHP_design_chw, 'f', 'k')
-          coil_bf = gshp_coil_bf
-          sensibleCap_CurveValue = calc_gshp_clg_curve_value(hvac, design_wb_temp, design_db_temp, design_w_temp, UnitConversions.convert(hvac_sizing_values.Cool_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioCooling), UnitConversions.convert(loop_flow, 'gal/min', 'm^3/s'))[1]
+          # calculate water flow based on current capacity.
+          loop_flow = [1.0, UnitConversions.convert([hvac_sizing_values.Heat_Capacity, hvac_sizing_values.Cool_Capacity].max, 'Btu/hr', 'ton')].max.floor * 3.0
+          sensibleCap_CurveValue = calc_gshp_clg_curve_value(hvac, design_wb_temp, design_db_temp, design_w_temp, UnitConversions.convert(hvac_sizing_values.Cool_Airflow, 'cfm', 'm^3/s'), UnitConversions.convert(loop_flow, 'gal/min', 'm^3/s'))[1]
           bypassFactor_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, @cool_setpoint, gshp_coil_bf_ft_spec)
           cool_Load_SensCap_Design = (hvac_sizing_values.Cool_Capacity_Sens * sensibleCap_CurveValue /
-                                     (1.0 + (1.0 - coil_bf * bypassFactor_CurveValue) *
+                                     (1.0 + (1.0 - gshp_coil_bf * bypassFactor_CurveValue) *
                                      (80.0 - @cool_setpoint) / (@cool_setpoint - hvac.LeavingAirTemp)))
           hvac_sizing_values.Cool_Airflow = calc_airflow_rate(cool_Load_SensCap_Design, (@cool_setpoint - hvac.LeavingAirTemp))
         end
