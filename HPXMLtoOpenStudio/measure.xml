@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>d98ca089-74d0-409b-b429-b5ff577ffabd</version_id>
-  <version_modified>20210501T001139Z</version_modified>
+  <version_id>ad960581-f03f-4ca9-86b1-47d446e8acf3</version_id>
+  <version_modified>20210501T001318Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -487,12 +487,6 @@
       <checksum>3065BE57</checksum>
     </file>
     <file>
-      <filename>minitest_helper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FEC94D37</checksum>
-    </file>
-    <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -541,6 +535,18 @@
       <checksum>4C662AE0</checksum>
     </file>
     <file>
+      <filename>minitest_helper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>02AE0222</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>99EB6060</checksum>
+    </file>
+    <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -551,12 +557,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>33E46C96</checksum>
-    </file>
-    <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>99EB6060</checksum>
     </file>
   </files>
 </measure>
