@@ -128,6 +128,10 @@ class Airflow
     return (1.0 / 150.0).round(6) # Table 4.2.2(1) - Crawlspaces
   end
 
+  def self.get_default_unvented_space_ach()
+    return 0.1 # Assumption
+  end
+
   def self.get_default_mech_vent_fan_power(vent_fan)
     # 301-2019: Table 4.2.2(1b)
     # Returns fan power in W/cfm
@@ -1112,7 +1116,7 @@ class Airflow
 
     space = @spaces[HPXML::LocationBasementUnconditioned]
     volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
-    ach = 0.1 # Assumption
+    ach = get_default_unvented_space_ach()
     cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
     apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
   end
@@ -1134,7 +1138,7 @@ class Airflow
 
     space = @spaces[HPXML::LocationCrawlspaceUnvented]
     volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
-    ach = 0.1 # Assumption
+    ach = get_default_unvented_space_ach()
     cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
     apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
   end
@@ -1180,7 +1184,7 @@ class Airflow
 
     space = @spaces[HPXML::LocationAtticUnvented]
     volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
-    ach = 0.1 # Assumption
+    ach = get_default_unvented_space_ach()
     cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
     apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
   end

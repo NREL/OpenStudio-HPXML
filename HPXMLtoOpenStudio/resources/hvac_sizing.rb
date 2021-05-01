@@ -2589,7 +2589,7 @@ class HVACSizing
       end
       ach = Airflow.get_infiltration_ACH_from_SLA(sla, 8.202, weather) if ach.nil?
     else # Unvented space
-      ach = 0.1 # Assumption
+      ach = Airflow.get_default_unvented_space_ach()
     end
     volume = Geometry.calculate_zone_volume(@hpxml, space_type)
     infiltration_cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
