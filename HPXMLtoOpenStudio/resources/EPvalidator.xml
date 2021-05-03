@@ -1348,8 +1348,8 @@
       <sch:assert role='ERROR' test='count(h:FuelType) = 1'>Expected 1 element(s) for xpath: FuelType</sch:assert>
       <sch:assert role='ERROR' test='h:FuelType[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="anthracite coal" or text()="electricity" or text()="wood" or text()="wood pellets"] or not(h:FuelType)'>Expected FuelType to be 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'anthracite coal' or 'electricity' or 'wood' or 'wood pellets'</sch:assert>
       <sch:assert role='ERROR' test='count(h:CombinedEnergyFactor) + count(h:EnergyFactor) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CombinedEnergyFactor | EnergyFactor</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Vented) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Vented</sch:assert> <!-- See [ClothesDryerType=Vented] -->
       <sch:assert role='ERROR' test='count(h:extension/h:UsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/UsageMultiplier</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:IsVented) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/IsVented</sch:assert> <!-- See [ClothesDryerType=Vented] -->
     </sch:rule>
   </sch:pattern>
 
@@ -1362,8 +1362,8 @@
 
   <sch:pattern>
     <sch:title>[ClothesDryerType=Vented]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer[h:extension/h:IsVented="true"]'>
-      <sch:assert role='ERROR' test='count(h:extension/h:VentedFlowRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/VentedFlowRate</sch:assert>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer[h:Vented="true"]'>
+      <sch:assert role='ERROR' test='count(h:VentilationFlowRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: VentilationFlowRate</sch:assert>
     </sch:rule>
   </sch:pattern>
 
