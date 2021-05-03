@@ -65,7 +65,7 @@
       <sch:assert role='ERROR' test='count(h:SystemIdentifier[@id]) = 1 or not (h:SystemIdentifier)'>Expected id attribute for SystemIdentifier</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof/h:Insulation'>
-      <sch:assert role='ERROR' test='number(h:AssemblyEffectiveRValue) &gt;= 0 or not(h:AssemblyEffectiveRValue)'>Expected AssemblyEffectiveRValue to be greater than or equal to 0</sch:assert>
+      <sch:assert role='ERROR' test='number(h:AssemblyEffectiveRValue) &gt; 0 or not(h:AssemblyEffectiveRValue)'>Expected AssemblyEffectiveRValue to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier[@id]) = 1 or not (h:SystemIdentifier)'>Expected id attribute for SystemIdentifier</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist'>
@@ -83,7 +83,7 @@
       <sch:assert role='ERROR' test='count(h:SystemIdentifier[@id]) = 1 or not (h:SystemIdentifier)'>Expected id attribute for SystemIdentifier</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist/h:Insulation'>
-      <sch:assert role='ERROR' test='number(h:AssemblyEffectiveRValue) &gt;= 0 or not(h:AssemblyEffectiveRValue)'>Expected AssemblyEffectiveRValue to be greater than or equal to 0</sch:assert>
+      <sch:assert role='ERROR' test='number(h:AssemblyEffectiveRValue) &gt; 0 or not(h:AssemblyEffectiveRValue)'>Expected AssemblyEffectiveRValue to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier[@id]) = 1 or not (h:SystemIdentifier)'>Expected id attribute for SystemIdentifier</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall'>
@@ -101,7 +101,7 @@
       <sch:assert role='ERROR' test='count(h:SystemIdentifier[@id]) = 1 or not (h:SystemIdentifier)'>Expected id attribute for SystemIdentifier</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall/h:Insulation'>
-      <sch:assert role='ERROR' test='number(h:AssemblyEffectiveRValue) &gt;= 0 or not(h:AssemblyEffectiveRValue)'>Expected AssemblyEffectiveRValue to be greater than or equal to 0</sch:assert>
+      <sch:assert role='ERROR' test='number(h:AssemblyEffectiveRValue) &gt; 0 or not(h:AssemblyEffectiveRValue)'>Expected AssemblyEffectiveRValue to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier[@id]) = 1 or not (h:SystemIdentifier)'>Expected id attribute for SystemIdentifier</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall'>
@@ -116,7 +116,7 @@
       <sch:assert role='ERROR' test='count(h:SystemIdentifier[@id]) = 1 or not (h:SystemIdentifier)'>Expected id attribute for SystemIdentifier</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:Insulation'>
-      <sch:assert role='ERROR' test='number(h:AssemblyEffectiveRValue) &gt;= 0 or not(h:AssemblyEffectiveRValue)'>Expected AssemblyEffectiveRValue to be greater than or equal to 0</sch:assert>
+      <sch:assert role='ERROR' test='number(h:AssemblyEffectiveRValue) &gt; 0 or not(h:AssemblyEffectiveRValue)'>Expected AssemblyEffectiveRValue to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier[@id]) = 1 or not (h:SystemIdentifier)'>Expected id attribute for SystemIdentifier</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:Insulation/h:Layer'>
@@ -130,7 +130,7 @@
       <sch:assert role='ERROR' test='count(h:SystemIdentifier[@id]) = 1 or not (h:SystemIdentifier)'>Expected id attribute for SystemIdentifier</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FrameFloors/h:FrameFloor/h:Insulation'>
-      <sch:assert role='ERROR' test='number(h:AssemblyEffectiveRValue) &gt;= 0 or not(h:AssemblyEffectiveRValue)'>Expected AssemblyEffectiveRValue to be greater than or equal to 0</sch:assert>
+      <sch:assert role='ERROR' test='number(h:AssemblyEffectiveRValue) &gt; 0 or not(h:AssemblyEffectiveRValue)'>Expected AssemblyEffectiveRValue to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier[@id]) = 1 or not (h:SystemIdentifier)'>Expected id attribute for SystemIdentifier</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Slabs/h:Slab'>

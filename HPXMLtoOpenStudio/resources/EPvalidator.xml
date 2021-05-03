@@ -232,7 +232,6 @@
       <sch:assert role='ERROR' test='count(h:RadiantBarrier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RadiantBarrier</sch:assert> <!-- See [RadiantBarrier] -->
       <sch:assert role='ERROR' test='count(h:Insulation/h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: Insulation/SystemIdentifier</sch:assert>
       <sch:assert role='ERROR' test='count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/AssemblyEffectiveRValue</sch:assert>
-      <sch:assert role='ERROR' test='number(h:Insulation/h:AssemblyEffectiveRValue) &gt; 0 or not(h:Insulation/h:AssemblyEffectiveRValue)'>Expected Insulation/AssemblyEffectiveRValue to be greater than 0</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -266,7 +265,6 @@
       <sch:assert role='ERROR' test='count(h:Emittance) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Emittance</sch:assert>
       <sch:assert role='ERROR' test='count(h:Insulation/h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: Insulation/SystemIdentifier</sch:assert>
       <sch:assert role='ERROR' test='count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/AssemblyEffectiveRValue</sch:assert>
-      <sch:assert role='ERROR' test='number(h:Insulation/h:AssemblyEffectiveRValue) &gt; 0 or not(h:Insulation/h:AssemblyEffectiveRValue)'>Expected Insulation/AssemblyEffectiveRValue to be greater than 0</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -287,7 +285,6 @@
       <sch:assert role='ERROR' test='count(h:Emittance) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Emittance</sch:assert>
       <sch:assert role='ERROR' test='count(h:Insulation/h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: Insulation/SystemIdentifier</sch:assert>
       <sch:assert role='ERROR' test='count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/AssemblyEffectiveRValue</sch:assert>
-      <sch:assert role='ERROR' test='number(h:Insulation/h:AssemblyEffectiveRValue) &gt; 0 or not(h:Insulation/h:AssemblyEffectiveRValue)'>Expected Insulation/AssemblyEffectiveRValue to be greater than 0</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -309,7 +306,6 @@
       <!-- Insulation: either specify interior and exterior layers OR assembly R-value: -->
       <sch:assert role='ERROR' test='count(h:Insulation/h:Layer[h:InstallationType[text()="continuous - interior"]]) + count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/Layer[InstallationType[text()="continuous - interior"]] | Insulation/AssemblyEffectiveRValue</sch:assert> <!-- See [FoundationWallInsulationLayer] -->
       <sch:assert role='ERROR' test='count(h:Insulation/h:Layer[h:InstallationType[text()="continuous - exterior"]]) + count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/Layer[InstallationType[text()="continuous - exterior"]] | Insulation/AssemblyEffectiveRValue</sch:assert> <!-- See [FoundationWallInsulationLayer] -->
-      <sch:assert role='ERROR' test='number(h:Insulation/h:AssemblyEffectiveRValue) &gt; 0 or not(h:Insulation/h:AssemblyEffectiveRValue)'>Expected Insulation/AssemblyEffectiveRValue to be greater than 0</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -342,7 +338,6 @@
       <sch:assert role='ERROR' test='count(h:Area) = 1'>Expected 1 element(s) for xpath: Area</sch:assert>
       <sch:assert role='ERROR' test='count(h:Insulation/h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: Insulation/SystemIdentifier</sch:assert>
       <sch:assert role='ERROR' test='count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/AssemblyEffectiveRValue</sch:assert>
-      <sch:assert role='ERROR' test='number(h:Insulation/h:AssemblyEffectiveRValue) &gt; 0 or not(h:Insulation/h:AssemblyEffectiveRValue)'>Expected Insulation/AssemblyEffectiveRValue to be greater than 0</sch:assert>
     </sch:rule>
   </sch:pattern>
 
