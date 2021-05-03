@@ -1,3 +1,10 @@
+## OpenStudio-HPXML v1.3.0 (Pending)
+
+__New Features__
+- Introduces a small amount of infiltration for unvented spaces.
+
+__Bugfixes__
+
 ## OpenStudio-HPXML v1.2.0
 
 __New Features__
