@@ -1363,7 +1363,7 @@
   <sch:pattern>
     <sch:title>[ClothesDryerType=Vented]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer[h:Vented="true"]'>
-      <sch:assert role='ERROR' test='count(h:VentilationFlowRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: VentilationFlowRate</sch:assert>
+      <sch:assert role='ERROR' test='count(h:VentedFlowRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: VentedFlowRate</sch:assert>
     </sch:rule>
   </sch:pattern>
 

@@ -2,7 +2,7 @@
 
 __New Features__
 - Introduces a small amount of infiltration for unvented spaces.
-- **Breaking change**: Replaces `ClothesDryer/extension/IsVented` and `ClothesDryer/extension/VentedFlowRate` with `ClothesDryer/Vented` and `ClothesDryer/VentilationFlowRate`.
+- **Breaking change**: Replaces ClothesDryer `extension/IsVented` and `extension/VentedFlowRate` with `Vented` and `VentedFlowRate`.
 
 __Bugfixes__
 

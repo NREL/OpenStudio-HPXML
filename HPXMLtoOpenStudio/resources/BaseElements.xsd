@@ -265,7 +265,7 @@
 					</xs:element>
 					<xs:element maxOccurs="unbounded" minOccurs="0" name="ControlType" type="ClothesDryerControlType"> </xs:element>
 					<xs:element minOccurs="0" name="Vented" type="HPXMLBoolean"/>
-					<xs:element minOccurs="0" name="VentilationFlowRate" type="FlowRate"/>
+					<xs:element minOccurs="0" name="VentedFlowRate" type="FlowRate"/>
 					<xs:element ref="extension" minOccurs="0"/>
 				</xs:sequence>
 			</xs:extension>
