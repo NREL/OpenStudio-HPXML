@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>ad960581-f03f-4ca9-86b1-47d446e8acf3</version_id>
-  <version_modified>20210501T001318Z</version_modified>
+  <version_id>5a602a0a-62c5-4ac1-b9af-f668b29d1554</version_id>
+  <version_modified>20210503T200131Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -350,24 +350,6 @@
       <checksum>E5A74D5B</checksum>
     </file>
     <file>
-      <filename>HPXMLvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BCC4746A</checksum>
-    </file>
-    <file>
-      <filename>HPXMLDataTypes.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4F3B76D8</checksum>
-    </file>
-    <file>
-      <filename>BaseElements.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7EA2CFE9</checksum>
-    </file>
-    <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -505,12 +487,6 @@
       <checksum>2AD627A4</checksum>
     </file>
     <file>
-      <filename>EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>95FBB68A</checksum>
-    </file>
-    <file>
       <filename>test_water_heater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -557,6 +533,30 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>33E46C96</checksum>
+    </file>
+    <file>
+      <filename>HPXMLvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>25C5E8C4</checksum>
+    </file>
+    <file>
+      <filename>HPXMLDataTypes.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3259B8DD</checksum>
+    </file>
+    <file>
+      <filename>BaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>CAF4AA69</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>2CC230A6</checksum>
     </file>
   </files>
 </measure>
