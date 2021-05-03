@@ -4433,9 +4433,9 @@ class HPXML < Object
       XMLHelper.add_element(clothes_dryer, 'EnergyFactor', @energy_factor, :float) unless @energy_factor.nil?
       XMLHelper.add_element(clothes_dryer, 'CombinedEnergyFactor', @combined_energy_factor, :float, @combined_energy_factor_isdefaulted) unless @combined_energy_factor.nil?
       XMLHelper.add_element(clothes_dryer, 'ControlType', @control_type, :string, @control_type_isdefaulted) unless @control_type.nil?
+      XMLHelper.add_element(clothes_dryer, 'Vented', @is_vented, :boolean, @is_vented_isdefaulted) unless @is_vented.nil?
+      XMLHelper.add_element(clothes_dryer, 'VentedFlowRate', @vented_flow_rate, :float, @vented_flow_rate_isdefaulted) unless @vented_flow_rate.nil?
       XMLHelper.add_extension(clothes_dryer, 'UsageMultiplier', @usage_multiplier, :float, @usage_multiplier_isdefaulted) unless @usage_multiplier.nil?
-      XMLHelper.add_extension(clothes_dryer, 'IsVented', @is_vented, :boolean, @is_vented_isdefaulted) unless @is_vented.nil?
-      XMLHelper.add_extension(clothes_dryer, 'VentedFlowRate', @vented_flow_rate, :float, @vented_flow_rate_isdefaulted) unless @vented_flow_rate.nil?
     end
 
     def from_oga(clothes_dryer)
@@ -4450,9 +4450,9 @@ class HPXML < Object
       @energy_factor = XMLHelper.get_value(clothes_dryer, 'EnergyFactor', :float)
       @combined_energy_factor = XMLHelper.get_value(clothes_dryer, 'CombinedEnergyFactor', :float)
       @control_type = XMLHelper.get_value(clothes_dryer, 'ControlType', :string)
+      @is_vented = XMLHelper.get_value(clothes_dryer, 'Vented', :boolean)
+      @vented_flow_rate = XMLHelper.get_value(clothes_dryer, 'VentedFlowRate', :float)
       @usage_multiplier = XMLHelper.get_value(clothes_dryer, 'extension/UsageMultiplier', :float)
-      @is_vented = XMLHelper.get_value(clothes_dryer, 'extension/IsVented', :boolean)
-      @vented_flow_rate = XMLHelper.get_value(clothes_dryer, 'extension/VentedFlowRate', :float)
     end
   end
 

@@ -6,7 +6,7 @@ class HPXMLDefaults
   # being written to the HPXML file. This is useful to associate additional values
   # with the HPXML objects that will ultimately get passed around.
 
-  def self.apply(hpxml, eri_version, weather, epw_file: nil)
+  def self.apply(hpxml, eri_version, weather, epw_file: nil, convert_shared_systems: true)
     cfa = hpxml.building_construction.conditioned_floor_area
     nbeds = hpxml.building_construction.number_of_bedrooms
     ncfl = hpxml.building_construction.number_of_conditioned_floors
@@ -27,7 +27,7 @@ class HPXMLDefaults
     apply_slabs(hpxml)
     apply_windows(hpxml)
     apply_skylights(hpxml)
-    apply_hvac(hpxml, weather)
+    apply_hvac(hpxml, weather, convert_shared_systems)
     apply_hvac_control(hpxml)
     apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
     apply_ventilation_fans(hpxml)
@@ -423,8 +423,10 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac(hpxml, weather)
-    HVAC.apply_shared_systems(hpxml)
+  def self.apply_hvac(hpxml, weather, convert_shared_systems)
+    if convert_shared_systems
+      HVAC.apply_shared_systems(hpxml)
+    end
 
     # HVAC efficiencies (HEScore Assumption)
     hpxml.heating_systems.each do |heating_system|
@@ -451,8 +453,8 @@ class HPXMLDefaults
 
         if heating_system_fuel == HPXML::FuelTypeElectricity
           heating_system.heating_efficiency_percent = 0.98
-        elsif [HPXML::FuelTypePropane, HPXML::FuelTypeNaturalGas, HPXML::FuelTypeOil, 
-               HPXML::FuelTypeOil1, HPXML::FuelTypeOil2, HPXML::FuelTypeOil4, HPXML::FuelTypeOil5or6, 
+        elsif [HPXML::FuelTypePropane, HPXML::FuelTypeNaturalGas, HPXML::FuelTypeOil,
+               HPXML::FuelTypeOil1, HPXML::FuelTypeOil2, HPXML::FuelTypeOil4, HPXML::FuelTypeOil5or6,
                HPXML::FuelTypeKerosene, HPXML::FuelTypeDiesel].include? heating_system_fuel
           heating_system.heating_efficiency_percent = 0.84 # https://www.yankeedoodleinc.com/stoves/gas/ and https://www.kumastoves.com/Store/ProductDetails/arctic
         elsif heating_system_fuel == HPXML::FuelTypeWoodCord
@@ -468,8 +470,8 @@ class HPXMLDefaults
 
         if heating_system_fuel == HPXML::FuelTypeElectricity
           heating_system.heating_efficiency_percent = 0.98
-        elsif [HPXML::FuelTypeNaturalGas, HPXML::FuelTypePropane, HPXML::FuelTypeOil, 
-               HPXML::FuelTypeOil1, HPXML::FuelTypeOil2, HPXML::FuelTypeOil4, HPXML::FuelTypeOil5or6, 
+        elsif [HPXML::FuelTypeNaturalGas, HPXML::FuelTypePropane, HPXML::FuelTypeOil,
+               HPXML::FuelTypeOil1, HPXML::FuelTypeOil2, HPXML::FuelTypeOil4, HPXML::FuelTypeOil5or6,
                HPXML::FuelTypeKerosene, HPXML::FuelTypeDiesel].include? heating_system_fuel
           heating_system.heating_efficiency_percent = 0.80 # with inserts; https://www.volunteerenergy.com/energy-efficient-fireplace/
         elsif [HPXML::FuelTypeWoodCord, HPXML::FuelTypeWoodPellets].include? heating_system_fuel
