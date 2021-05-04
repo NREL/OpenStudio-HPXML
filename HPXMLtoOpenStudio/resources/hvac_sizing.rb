@@ -2589,26 +2589,9 @@ class HVACSizing
       end
       ach = Airflow.get_infiltration_ACH_from_SLA(sla, 8.202, weather) if ach.nil?
     else # Unvented space
-      ach = 0.1 # Assumption
+      ach = Airflow.get_default_unvented_space_ach()
     end
-    # FUTURE: Reuse code from Geometry.set_zone_volumes()
-    if [HPXML::LocationAtticVented, HPXML::LocationAtticUnvented].include? space_type
-      floor_area = @hpxml.frame_floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? space_type }.map { |s| s.area }.sum(0.0)
-      roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }
-      avg_pitch = roofs.map { |r| r.pitch }.sum(0.0) / roofs.size
-      # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
-      length = floor_area**0.5
-      height = 0.5 * Math.sin(Math.atan(avg_pitch / 12.0)) * length
-      volume = [floor_area * height / 3.0, 0.01].max
-    else # foundation/garage space
-      floor_area = @hpxml.slabs.select { |s| s.interior_adjacent_to == space_type }.map { |s| s.area }.sum(0.0)
-      if space_type == HPXML::LocationGarage
-        height = 8.0
-      else
-        height = @hpxml.foundation_walls.select { |w| w.interior_adjacent_to == space_type }.map { |w| w.height }.max
-      end
-      volume = floor_area * height
-    end
+    volume = Geometry.calculate_zone_volume(@hpxml, space_type)
     infiltration_cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
     outside_air_density = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * (weather.data.AnnualAvgDrybulb + 460.0))
     space_UAs['infil'] = infiltration_cfm * outside_air_density * Gas.Air.cp * UnitConversions.convert(1.0, 'hr', 'min')
