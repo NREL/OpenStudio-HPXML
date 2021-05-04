@@ -1615,6 +1615,33 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
+	<xs:simpleType name="WindowType_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="double hung"/>
+			<xs:enumeration value="single hung"/>
+			<xs:enumeration value="casement"/>
+			<xs:enumeration value="horizontal slider"/>
+			<xs:enumeration value="picture"/>
+			<xs:enumeration value="awning"/>
+			<xs:enumeration value="egress"/>
+			<xs:enumeration value="jalousie"/>
+			<xs:enumeration value="bay"/>
+			<xs:enumeration value="garden"/>
+			<xs:enumeration value="glass block"/>
+			<xs:enumeration value="bow"/>
+			<xs:enumeration value="hopper"/>
+			<xs:enumeration value="door window"/>
+			<xs:enumeration value="sliding glass door"/>
+			<xs:enumeration value="other"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="WindowType">
+		<xs:simpleContent>
+			<xs:extension base="WindowType_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
 	<xs:simpleType name="GlassLayers_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="single-pane"/>
@@ -2958,6 +2985,20 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
+	<xs:simpleType name="GlazingMaterial_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="glass"/>
+			<xs:enumeration value="plastic"/>
+			<xs:enumeration value="other"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="GlazingMaterial">
+		<xs:simpleContent>
+			<xs:extension base="GlazingMaterial_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
 	<xs:simpleType name="ClothesWasherType_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="top loader"/>
@@ -4292,6 +4333,20 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
+	<xs:simpleType name="FramingType_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="platform"/>
+			<xs:enumeration value="balloon"/>
+			<xs:enumeration value="timber"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="FramingType">
+		<xs:simpleContent>
+			<xs:extension base="FramingType_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
 	<xs:simpleType name="AtticWallType_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="gable"/>
@@ -4692,6 +4747,41 @@
 		</xs:annotation>
 		<xs:simpleContent>
 			<xs:extension base="PerformanceClass_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="Season">
+		<xs:sequence>
+			<xs:element name="BeginMonth" type="Month"/>
+			<xs:element maxOccurs="1" minOccurs="0" name="BeginDayOfMonth" type="DayOfMonth"/>
+			<xs:element name="EndMonth" type="Month"/>
+			<xs:element minOccurs="0" name="EndDayOfMonth" type="DayOfMonth"/>
+		</xs:sequence>
+		<xs:attribute name="dataSource" type="DataSource"/>
+	</xs:complexType>
+	<xs:simpleType name="Month_simple">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="1"/>
+			<xs:maxInclusive value="12"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="Month">
+		<xs:simpleContent>
+			<xs:extension base="Month_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="DayOfMonth_simple">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="1"/>
+			<xs:maxInclusive value="31"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="DayOfMonth">
+		<xs:simpleContent>
+			<xs:extension base="DayOfMonth_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
