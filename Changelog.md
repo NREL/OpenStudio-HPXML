@@ -1,3 +1,11 @@
+## OpenStudio-HPXML v1.3.0 (Pending)
+
+__New Features__
+- Introduces a small amount of infiltration for unvented spaces.
+- **Breaking change**: Replaces ClothesDryer `extension/IsVented` and `extension/VentedFlowRate` with `Vented` and `VentedFlowRate`.
+
+__Bugfixes__
+
 ## OpenStudio-HPXML v1.2.0
 
 __New Features__
@@ -10,6 +18,7 @@ __New Features__
 - Switches room air conditioner model to use Cutler performance curves.
 - Relaxes tolerance for duct leakage to outside warning when ducts solely in conditioned space.
 - Removes limitation that a shared water heater serving a shared laundry room can't also serve dwelling unit fixtures (i.e., FractionDHWLoadServed is no longer required to be zero).
+- Adds IDs to schematron validation errors/warnings when possible.
 - Moves additional error-checking from the ruby measure to the schematron validator. 
 
 __Bugfixes__
