@@ -31,7 +31,7 @@ def get_output_hpxml_path(resultsdir, rundir)
   return File.join(resultsdir, File.basename(rundir) + '.xml')
 end
 
-def run_design(basedir, rundir, design, resultsdir, hpxml, json, debug, skip_simulation)
+def run_design(basedir, rundir, design, resultsdir, input_file, debug, skip_simulation)
   measures_dir = File.join(basedir, '..')
   output_hpxml_path = get_output_hpxml_path(resultsdir, rundir)
 
@@ -40,8 +40,7 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, json, debug, skip_sim
   # Add HEScore measure to workflow
   measure_subdir = 'rulesets/HEScoreRuleset'
   args = {}
-  args['hpxml_path'] = hpxml
-  args['json_path'] = json
+  args['input_file_path'] = input_file
   args['hpxml_output_path'] = output_hpxml_path
   update_args_hash(measures, measure_subdir, args)
 
@@ -182,12 +181,8 @@ options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage: #{File.basename(__FILE__)} -x building.xml\n e.g., #{File.basename(__FILE__)} -x sample_files/valid.xml\n"
 
-  opts.on('-x', '--xml <FILE>', 'HPXML file') do |t|
-    options[:hpxml] = t
-  end
-
-  opts.on('-j', '--json <FILE>', 'JSON file') do |t|
-    options[:json] = t
+  opts.on('-x', '--input-file <FILE>', 'HPXML or JSON file') do |t|
+    options[:input_file] = t
   end
 
   opts.on('-o', '--output-dir <DIR>', 'Output directory') do |t|
@@ -218,25 +213,20 @@ if options[:epws]
   download_epws
 end
 
-if (not (options[:hpxml] || options[:json])) || (options[:hpxml] && options[:json])
-  fail "One of HPXML and JSON arguments is required. Call #{File.basename(__FILE__)} -h for usage."
+if not options[:input_file]
+  fail "Input file argument is required. Call #{File.basename(__FILE__)} -h for usage."
 end
 
-if options[:hpxml]
-  unless (Pathname.new options[:hpxml]).absolute?
-    options[:hpxml] = File.expand_path(options[:hpxml])
+if options[:input_file]
+  unless (Pathname.new options[:input_file]).absolute?
+    options[:input_file] = File.expand_path(options[:input_file])
   end
-  unless File.exist?(options[:hpxml]) && options[:hpxml].downcase.end_with?('.xml')
-    fail "'#{options[:hpxml]}' does not exist or is not an .xml file."
-  end
-end
-
-if options[:json]
-  unless (Pathname.new options[:json]).absolute?
-    options[:json] = File.expand_path(options[:json])
-  end
-  unless File.exist?(options[:json]) && options[:json].downcase.end_with?('.json')
-    fail "'#{options[:json]}' does not exist or is not an .json file."
+  unless File.exist?(options[:input_file])
+    if options[:input_file].downcase.end_with?('.xml')
+      fail "'#{options[:input_file]}' does not exist or is not an .xml file."
+    elsif options[:input_file].downcase.end_with?('.json')
+      fail "'#{options[:input_file]}' does not exist or is not a .json file."
+    end
   end
 end
 
@@ -258,15 +248,15 @@ rm_path(resultsdir)
 Dir.mkdir(resultsdir)
 
 # Run design
-if options[:hpxml]
-  puts "HPXML: #{options[:hpxml]}"
-elsif options[:json]
-  puts "JSON: #{options[:json]}"
+if options[:input_file].downcase.end_with?('.xml')
+  puts "HPXML: #{options[:input_file]}"
+elsif options[:input_file].downcase.end_with?('.json')
+  puts "JSON: #{options[:input_file]}"
 end
 design = 'HEScoreDesign'
 rundir = get_rundir(options[:output_dir], design)
 
-success = run_design(basedir, rundir, design, resultsdir, options[:hpxml], options[:json], options[:debug], options[:skip_simulation])
+success = run_design(basedir, rundir, design, resultsdir, options[:input_file], options[:debug], options[:skip_simulation])
 
 if not success
   exit! 1
