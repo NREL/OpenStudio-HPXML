@@ -2,7 +2,7 @@
 
 class Airflow
   def self.apply(model, runner, weather, spaces, hpxml, cfa, nbeds,
-                 ncfl_ag, duct_systems, nv_clg_ssn_sensor, hvac_map, eri_version,
+                 ncfl_ag, duct_systems, clg_ssn_sensor, hvac_map, eri_version,
                  frac_windows_operable, apply_ashrae140_assumptions)
 
     # Global variables
@@ -106,10 +106,10 @@ class Airflow
       vented_crawl = foundation
     end
 
-    apply_natural_ventilation_and_whole_house_fan(model, weather, hpxml.site, vent_fans_whf, open_window_area, nv_clg_ssn_sensor)
+    apply_natural_ventilation_and_whole_house_fan(model, weather, hpxml.site, vent_fans_whf, open_window_area, clg_ssn_sensor)
     apply_infiltration_and_ventilation_fans(model, weather, hpxml.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                             hpxml.building_construction.has_flue_or_chimney, hpxml.air_infiltration_measurements,
-                                            vented_attic, vented_crawl, hvac_map)
+                                            vented_attic, vented_crawl, hvac_map, clg_ssn_sensor)
   end
 
   def self.get_default_fraction_of_windows_operable()
@@ -1519,7 +1519,7 @@ class Airflow
     end
   end
 
-  def self.calculate_precond_loads(model, infil_program, vent_mech_preheat, vent_mech_precool, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, hvac_map)
+  def self.calculate_precond_loads(model, infil_program, vent_mech_preheat, vent_mech_precool, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, hvac_map, clg_ssn_sensor)
     # Preconditioning
     # Assume introducing no sensible loads to zone if preconditioned
     if not vent_mech_preheat.empty?
@@ -1535,7 +1535,7 @@ class Airflow
       infil_program.addLine("Set ClgStp = #{clg_stp_sensor.name}") # cooling thermostat setpoint
     end
     vent_mech_preheat.each_with_index do |f_preheat, i|
-      infil_program.addLine('If OASupInTemp < HtgStp')
+      infil_program.addLine("If (OASupInTemp < HtgStp) && (#{clg_ssn_sensor.name} < 1)")
       htg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent preheating energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: f_preheat.preheating_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
       hvac_map["#{f_preheat.id}_preheat"] = [htg_energy_actuator.actuatedComponent.get]
       infil_program.addLine("  Set Qpreheat = #{UnitConversions.convert(f_preheat.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)}")
@@ -1560,7 +1560,7 @@ class Airflow
       infil_program.addLine('EndIf')
     end
     vent_mech_precool.each_with_index do |f_precool, i|
-      infil_program.addLine('If OASupInTemp > ClgStp')
+      infil_program.addLine("If (OASupInTemp > ClgStp) && (#{clg_ssn_sensor.name} > 0)")
       clg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent precooling energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: f_precool.precooling_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
       hvac_map["#{f_precool.id}_precool"] = [clg_energy_actuator.actuatedComponent.get]
       infil_program.addLine("  Set Qprecool = #{UnitConversions.convert(f_precool.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)}")
@@ -1587,7 +1587,7 @@ class Airflow
   end
 
   def self.apply_infiltration_and_mechanical_ventilation(model, site, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, vented_dryers,
-                                                         range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map, has_flue_chimney, hvac_map)
+                                                         range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map, has_flue_chimney, hvac_map, clg_ssn_sensor)
     # Categorize fans into different types
     vent_mech_preheat = vent_fans_mech.select { |vent_mech| (not vent_mech.preheating_efficiency_cop.nil?) }
     vent_mech_precool = vent_fans_mech.select { |vent_mech| (not vent_mech.precooling_efficiency_cop.nil?) }
@@ -1662,7 +1662,7 @@ class Airflow
     calculate_fan_loads(model, infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, 'Qload')
 
     # Address preconditioning
-    calculate_precond_loads(model, infil_program, vent_mech_preheat, vent_mech_precool, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, hvac_map)
+    calculate_precond_loads(model, infil_program, vent_mech_preheat, vent_mech_precool, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, hvac_map, clg_ssn_sensor)
 
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{infil_program.name} calling manager")
@@ -1671,7 +1671,7 @@ class Airflow
   end
 
   def self.apply_infiltration_and_ventilation_fans(model, weather, site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
-                                                   has_flue_chimney, air_infils, vented_attic, vented_crawl, hvac_map)
+                                                   has_flue_chimney, air_infils, vented_attic, vented_crawl, hvac_map, clg_ssn_sensor)
     # Get living space infiltration
     living_ach50 = nil
     living_const_ach = nil
@@ -1709,7 +1709,7 @@ class Airflow
 
     # Get mechanical ventilation
     apply_infiltration_and_mechanical_ventilation(model, site, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, vented_dryers,
-                                                  range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map, has_flue_chimney, hvac_map)
+                                                  range_sch_sensors_map, bath_sch_sensors_map, dryer_exhaust_sch_sensors_map, has_flue_chimney, hvac_map, clg_ssn_sensor)
   end
 
   def self.apply_infiltration_to_living(site, living_ach50, living_const_ach, infil_program, weather, has_flue_chimney)
