@@ -18,7 +18,7 @@ class HEScoreRulesetTest < MiniTest::Test
     Dir["#{this_dir}/../../../workflow/sample_files/*.xml"].sort.each do |xml|
       puts "Testing #{File.absolute_path(xml)}..."
 
-      args_hash['hpxml_path'] = File.absolute_path(xml)
+      args_hash['input_file_path'] = File.absolute_path(xml)
       args_hash['hpxml_output_path'] = File.absolute_path(xml).gsub('.xml', '.xml.out')
 
       _test_schema_validation(this_dir, xml)
@@ -36,7 +36,7 @@ class HEScoreRulesetTest < MiniTest::Test
     xml = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Base_hpxml.xml")
 
     args_hash = {
-      'hpxml_path' => xml,
+      'input_file_path' => xml,
       'hpxml_output_path' => xml.gsub('.xml', '.xml.out')
     }
 
@@ -518,7 +518,7 @@ class HEScoreRulesetTest < MiniTest::Test
   end
 
   def _test_assembly_effective_rvalues(args_hash)
-    in_doc = XMLHelper.parse_file(args_hash['hpxml_path'])
+    in_doc = XMLHelper.parse_file(args_hash['input_file_path'])
     out_doc = XMLHelper.parse_file(args_hash['hpxml_output_path'])
 
     wall_code_by_id = {}
@@ -550,7 +550,7 @@ class HEScoreRulesetTest < MiniTest::Test
   end
 
   def _test_conditioned_building_volume(args_hash)
-    in_doc = XMLHelper.parse_file(args_hash['hpxml_path'])
+    in_doc = XMLHelper.parse_file(args_hash['input_file_path'])
     out_doc = XMLHelper.parse_file(args_hash['hpxml_output_path'])
 
     cfa = XMLHelper.get_value(in_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea', :float)
