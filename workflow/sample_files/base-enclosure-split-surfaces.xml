@@ -954,108 +954,108 @@
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
-        <FrameFloors>
-          <FrameFloor>
-            <SystemIdentifier id='FloorBelowAttic'/>
+        <Ceilings>
+          <Ceiling>
+            <SystemIdentifier id='Ceiling'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>150.0</Area>
             <Insulation>
-              <SystemIdentifier id='FloorBelowAtticInsulation'/>
+              <SystemIdentifier id='CeilingInsulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </FrameFloor>
-          <FrameFloor>
-            <SystemIdentifier id='FloorBelowAttic2'/>
+          </Ceiling>
+          <Ceiling>
+            <SystemIdentifier id='Ceiling2'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>150.0</Area>
             <Insulation>
-              <SystemIdentifier id='FloorBelowAttic2Insulation'/>
+              <SystemIdentifier id='Ceiling2Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </FrameFloor>
-          <FrameFloor>
-            <SystemIdentifier id='FloorBelowAttic3'/>
+          </Ceiling>
+          <Ceiling>
+            <SystemIdentifier id='Ceiling3'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>150.0</Area>
             <Insulation>
-              <SystemIdentifier id='FloorBelowAttic3Insulation'/>
+              <SystemIdentifier id='Ceiling3Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </FrameFloor>
-          <FrameFloor>
-            <SystemIdentifier id='FloorBelowAttic4'/>
+          </Ceiling>
+          <Ceiling>
+            <SystemIdentifier id='Ceiling4'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>150.0</Area>
             <Insulation>
-              <SystemIdentifier id='FloorBelowAttic4Insulation'/>
+              <SystemIdentifier id='Ceiling4Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </FrameFloor>
-          <FrameFloor>
-            <SystemIdentifier id='FloorBelowAttic5'/>
+          </Ceiling>
+          <Ceiling>
+            <SystemIdentifier id='Ceiling5'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>150.0</Area>
             <Insulation>
-              <SystemIdentifier id='FloorBelowAttic5Insulation'/>
+              <SystemIdentifier id='Ceiling5Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </FrameFloor>
-          <FrameFloor>
-            <SystemIdentifier id='FloorBelowAttic6'/>
+          </Ceiling>
+          <Ceiling>
+            <SystemIdentifier id='Ceiling6'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>150.0</Area>
             <Insulation>
-              <SystemIdentifier id='FloorBelowAttic6Insulation'/>
+              <SystemIdentifier id='Ceiling6Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </FrameFloor>
-          <FrameFloor>
-            <SystemIdentifier id='FloorBelowAttic7'/>
+          </Ceiling>
+          <Ceiling>
+            <SystemIdentifier id='Ceiling7'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>150.0</Area>
             <Insulation>
-              <SystemIdentifier id='FloorBelowAttic7Insulation'/>
+              <SystemIdentifier id='Ceiling7Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </FrameFloor>
-          <FrameFloor>
-            <SystemIdentifier id='FloorBelowAttic8'/>
+          </Ceiling>
+          <Ceiling>
+            <SystemIdentifier id='Ceiling8'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>150.0</Area>
             <Insulation>
-              <SystemIdentifier id='FloorBelowAttic8Insulation'/>
+              <SystemIdentifier id='Ceiling8Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </FrameFloor>
-          <FrameFloor>
-            <SystemIdentifier id='FloorBelowAttic9'/>
+          </Ceiling>
+          <Ceiling>
+            <SystemIdentifier id='Ceiling9'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>150.0</Area>
             <Insulation>
-              <SystemIdentifier id='FloorBelowAttic9Insulation'/>
+              <SystemIdentifier id='Ceiling9Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </FrameFloor>
-          <FrameFloor>
-            <SystemIdentifier id='TinyFloor'/>
+          </Ceiling>
+          <Ceiling>
+            <SystemIdentifier id='TinyCeiling'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>0.05</Area>
             <Insulation>
-              <SystemIdentifier id='TinyFloorInsulation'/>
+              <SystemIdentifier id='TinyCeilingInsulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </FrameFloor>
-        </FrameFloors>
+          </Ceiling>
+        </Ceilings>
         <Slabs>
           <Slab>
             <SystemIdentifier id='Slab'/>

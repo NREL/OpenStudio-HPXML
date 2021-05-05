@@ -104,32 +104,28 @@
             </Insulation>
           </Wall>
         </Walls>
+        <Ceilings>
+          <Ceiling>
+            <SystemIdentifier id='Ceiling'/>
+            <ExteriorAdjacentTo>other non-freezing space</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>900.0</Area>
+            <Insulation>
+              <SystemIdentifier id='CeilingInsulation'/>
+              <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
+            </Insulation>
+          </Ceiling>
+        </Ceilings>
         <FrameFloors>
           <FrameFloor>
-            <SystemIdentifier id='FloorOther'/>
+            <SystemIdentifier id='Floor'/>
             <ExteriorAdjacentTo>other non-freezing space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>900.0</Area>
             <Insulation>
-              <SystemIdentifier id='FloorOtherInsulation'/>
+              <SystemIdentifier id='FloorInsulation'/>
               <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
             </Insulation>
-            <extension>
-              <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
-            </extension>
-          </FrameFloor>
-          <FrameFloor>
-            <SystemIdentifier id='CeilingOther'/>
-            <ExteriorAdjacentTo>other non-freezing space</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>900.0</Area>
-            <Insulation>
-              <SystemIdentifier id='CeilingOtherInsulation'/>
-              <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
-            </Insulation>
-            <extension>
-              <OtherSpaceAboveOrBelow>above</OtherSpaceAboveOrBelow>
-            </extension>
           </FrameFloor>
         </FrameFloors>
         <Windows>

@@ -478,6 +478,7 @@ def create_hpxmls
         set_hpxml_rim_joists(hpxml_file, hpxml)
         set_hpxml_walls(hpxml_file, hpxml)
         set_hpxml_foundation_walls(hpxml_file, hpxml)
+        set_hpxml_ceilings(hpxml_file, hpxml)
         set_hpxml_frame_floors(hpxml_file, hpxml)
         set_hpxml_slabs(hpxml_file, hpxml)
         set_hpxml_windows(hpxml_file, hpxml)
@@ -1969,83 +1970,127 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
   end
 end
 
+def set_hpxml_ceilings(hpxml_file, hpxml)
+  if ['ASHRAE_Standard_140/L100AC.xml',
+      'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
+    hpxml.ceilings.add(id: 'Ceiling',
+                       exterior_adjacent_to: HPXML::LocationAtticVented,
+                       interior_adjacent_to: HPXML::LocationLivingSpace,
+                       area: 1539,
+                       insulation_assembly_r_value: 18.45)
+  elsif ['ASHRAE_Standard_140/L120AC.xml',
+         'ASHRAE_Standard_140/L120AL.xml'].include? hpxml_file
+    hpxml.ceilings[0].insulation_assembly_r_value = 57.49
+  elsif ['ASHRAE_Standard_140/L200AC.xml',
+         'ASHRAE_Standard_140/L200AL.xml'].include? hpxml_file
+    hpxml.ceilings[0].insulation_assembly_r_value = 11.75
+  elsif ['base.xml'].include? hpxml_file
+    hpxml.ceilings.add(id: 'Ceiling',
+                       exterior_adjacent_to: HPXML::LocationAtticUnvented,
+                       interior_adjacent_to: HPXML::LocationLivingSpace,
+                       area: 1350,
+                       insulation_assembly_r_value: 39.3)
+  elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
+    hpxml.ceilings.clear
+    hpxml.ceilings.add(id: 'Ceiling',
+                       exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
+                       interior_adjacent_to: HPXML::LocationLivingSpace,
+                       area: 900,
+                       insulation_assembly_r_value: 2.1)
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'].include? hpxml_file
+    hpxml.ceilings[0].exterior_adjacent_to = HPXML::LocationOtherHousingUnit
+  elsif ['base-bldgtype-multifamily-adjacent-to-other-heated-space.xml'].include? hpxml_file
+    hpxml.ceilings[0].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
+    hpxml.ceilings[0].insulation_assembly_r_value = 18.7
+  elsif ['base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml'].include? hpxml_file
+    hpxml.ceilings[0].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
+    hpxml.ceilings[0].insulation_assembly_r_value = 18.7
+  elsif ['base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml'].include? hpxml_file
+    hpxml.ceilings[0].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
+    hpxml.ceilings[0].insulation_assembly_r_value = 18.7
+  elsif ['base-bldgtype-single-family-attached.xml'].include? hpxml_file
+    hpxml.ceilings[0].area = 900
+  elsif ['base-atticroof-flat.xml',
+         'base-atticroof-cathedral.xml'].include? hpxml_file
+    hpxml.ceilings.delete_at(0)
+  elsif ['base-atticroof-vented.xml'].include? hpxml_file
+    hpxml.ceilings[0].exterior_adjacent_to = HPXML::LocationAtticVented
+  elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
+    hpxml.ceilings[0].area = 450
+  elsif ['base-enclosure-garage.xml'].include? hpxml_file
+    hpxml.ceilings.add(id: 'FloorBetweenAtticGarage',
+                       exterior_adjacent_to: HPXML::LocationAtticUnvented,
+                       interior_adjacent_to: HPXML::LocationGarage,
+                       area: 600,
+                       insulation_assembly_r_value: 2.1)
+  elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
+    hpxml.ceilings[0].insulation_assembly_r_value = 2.1
+  elsif ['base-enclosure-split-surfaces.xml',
+         'base-enclosure-split-surfaces2.xml'].include? hpxml_file
+    for n in 1..hpxml.ceilings.size
+      hpxml.ceilings[n - 1].area /= 9.0
+      for i in 2..9
+        hpxml.ceilings << hpxml.ceilings[n - 1].dup
+        hpxml.ceilings[-1].id += i.to_s
+        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
+          hpxml.ceilings[-1].insulation_assembly_r_value += 0.01 * i
+        end
+      end
+    end
+    hpxml.ceilings << hpxml.ceilings[-1].dup
+    hpxml.ceilings[-1].id = 'TinyCeiling'
+    hpxml.ceilings[-1].area = 0.05
+  elsif ['invalid_files/enclosure-living-missing-ceiling-roof.xml'].include? hpxml_file
+    hpxml.ceilings[0].delete
+  elsif ['invalid_files/enclosure-basement-missing-ceiling.xml',
+         'invalid_files/enclosure-garage-missing-roof-ceiling.xml'].include? hpxml_file
+    hpxml.ceilings[1].delete
+  elsif ['invalid_files/multifamily-reference-surface.xml'].include? hpxml_file
+    hpxml.ceilings << hpxml.ceilings[0].dup
+    hpxml.ceilings[1].id += '2'
+    hpxml.ceilings[1].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
+  elsif ['invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
+    hpxml.ceilings.add(id: 'CeilingOther',
+                       exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
+                       interior_adjacent_to: HPXML::LocationLivingSpace,
+                       area: 900,
+                       insulation_assembly_r_value: 2.1)
+  end
+end
+
 def set_hpxml_frame_floors(hpxml_file, hpxml)
   if ['ASHRAE_Standard_140/L100AC.xml',
       'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: 'FloorUnderAttic',
-                           exterior_adjacent_to: HPXML::LocationAtticVented,
-                           interior_adjacent_to: HPXML::LocationLivingSpace,
-                           area: 1539,
-                           insulation_assembly_r_value: 18.45)
-    hpxml.frame_floors.add(id: 'FloorOverFoundation',
+    hpxml.frame_floors.add(id: 'Floor',
                            exterior_adjacent_to: HPXML::LocationOutside,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1539,
                            insulation_assembly_r_value: 14.15)
-  elsif ['ASHRAE_Standard_140/L120AC.xml',
-         'ASHRAE_Standard_140/L120AL.xml'].include? hpxml_file
-    hpxml.frame_floors[0].insulation_assembly_r_value = 57.49
   elsif ['ASHRAE_Standard_140/L200AC.xml',
          'ASHRAE_Standard_140/L200AL.xml'].include? hpxml_file
-    hpxml.frame_floors[0].insulation_assembly_r_value = 11.75
-    hpxml.frame_floors[1].insulation_assembly_r_value = 4.24
+    hpxml.frame_floors[0].insulation_assembly_r_value = 4.24
   elsif ['ASHRAE_Standard_140/L302XC.xml',
          'ASHRAE_Standard_140/L322XC.xml',
          'ASHRAE_Standard_140/L324XC.xml'].include? hpxml_file
-    hpxml.frame_floors.delete_at(1)
-  elsif ['base.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: 'FloorBelowAttic',
-                           exterior_adjacent_to: HPXML::LocationAtticUnvented,
-                           interior_adjacent_to: HPXML::LocationLivingSpace,
-                           area: 1350,
-                           insulation_assembly_r_value: 39.3)
+    hpxml.frame_floors.delete_at(0)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.frame_floors.clear
-    hpxml.frame_floors.add(id: 'FloorOther',
+    hpxml.frame_floors.add(id: 'Floor',
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
-                           insulation_assembly_r_value: 2.1,
-                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
-    hpxml.frame_floors.add(id: 'CeilingOther',
-                           exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
-                           interior_adjacent_to: HPXML::LocationLivingSpace,
-                           area: 900,
-                           insulation_assembly_r_value: 2.1,
-                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceAbove)
+                           insulation_assembly_r_value: 2.1)
   elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'].include? hpxml_file
     hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHousingUnit
-    hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherHousingUnit
   elsif ['base-bldgtype-multifamily-adjacent-to-other-heated-space.xml'].include? hpxml_file
     hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
     hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
-    hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
-    hpxml.frame_floors[1].insulation_assembly_r_value = 18.7
   elsif ['base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml'].include? hpxml_file
     hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
     hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
-    hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
-    hpxml.frame_floors[1].insulation_assembly_r_value = 18.7
   elsif ['base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml'].include? hpxml_file
     hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
     hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
-    hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
-    hpxml.frame_floors[1].insulation_assembly_r_value = 18.7
-  elsif ['base-bldgtype-single-family-attached.xml'].include? hpxml_file
-    hpxml.frame_floors[0].area = 900
-  elsif ['base-atticroof-flat.xml',
-         'base-atticroof-cathedral.xml'].include? hpxml_file
-    hpxml.frame_floors.delete_at(0)
-  elsif ['base-atticroof-vented.xml'].include? hpxml_file
-    hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationAtticVented
-  elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    hpxml.frame_floors[0].area = 450
-  elsif ['base-enclosure-garage.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: 'FloorBetweenAtticGarage',
-                           exterior_adjacent_to: HPXML::LocationAtticUnvented,
-                           interior_adjacent_to: HPXML::LocationGarage,
-                           area: 600,
-                           insulation_assembly_r_value: 2.1)
   elsif ['base-foundation-ambient.xml'].include? hpxml_file
     hpxml.frame_floors.add(id: 'FloorAboveAmbient',
                            exterior_adjacent_to: HPXML::LocationOutside,
@@ -2059,7 +2104,7 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            area: 1350,
                            insulation_assembly_r_value: 18.7)
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
-    hpxml.frame_floors[1].insulation_assembly_r_value = 2.1
+    hpxml.frame_floors[0].insulation_assembly_r_value = 2.1
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
     hpxml.frame_floors.add(id: 'FloorAboveUnventedCrawl',
                            exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
@@ -2073,7 +2118,7 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            area: 1350,
                            insulation_assembly_r_value: 18.7)
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
-    hpxml.frame_floors[1].area = 675
+    hpxml.frame_floors[0].area = 675
     hpxml.frame_floors.add(id: 'FloorAboveUnventedCrawlspace',
                            exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -2091,72 +2136,35 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 400,
                            insulation_assembly_r_value: 39.3)
-  elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
-    hpxml.frame_floors[0].insulation_assembly_r_value = 2.1
   elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
     hpxml.frame_floors[0].delete
     hpxml.frame_floors.add(id: 'FloorAboveNonFreezingSpace',
                            exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 550,
-                           insulation_assembly_r_value: 18.7,
-                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
+                           insulation_assembly_r_value: 18.7)
     hpxml.frame_floors.add(id: 'FloorAboveMultifamilyBuffer',
                            exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 200,
-                           insulation_assembly_r_value: 18.7,
-                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
+                           insulation_assembly_r_value: 18.7)
     hpxml.frame_floors.add(id: 'FloorAboveOtherHeatedSpace',
                            exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 150,
-                           insulation_assembly_r_value: 2.1,
-                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
-  elsif ['base-enclosure-split-surfaces.xml',
-         'base-enclosure-split-surfaces2.xml'].include? hpxml_file
-    for n in 1..hpxml.frame_floors.size
-      hpxml.frame_floors[n - 1].area /= 9.0
-      for i in 2..9
-        hpxml.frame_floors << hpxml.frame_floors[n - 1].dup
-        hpxml.frame_floors[-1].id += i.to_s
-        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
-          hpxml.frame_floors[-1].insulation_assembly_r_value += 0.01 * i
-        end
-      end
-    end
-    hpxml.frame_floors << hpxml.frame_floors[-1].dup
-    hpxml.frame_floors[-1].id = 'TinyFloor'
-    hpxml.frame_floors[-1].area = 0.05
+                           insulation_assembly_r_value: 2.1)
   elsif ['invalid_files/base-enclosure-conditioned-basement-slab-insulation.xml'].include? hpxml_file
     hpxml.frame_floors.add(id: 'FloorAboveCondBasement',
                            exterior_adjacent_to: HPXML::LocationBasementConditioned,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1350,
                            insulation_assembly_r_value: 3.9)
-  elsif ['invalid_files/enclosure-living-missing-ceiling-roof.xml'].include? hpxml_file
-    hpxml.frame_floors[0].delete
-  elsif ['invalid_files/enclosure-basement-missing-ceiling.xml',
-         'invalid_files/enclosure-garage-missing-roof-ceiling.xml'].include? hpxml_file
-    hpxml.frame_floors[1].delete
-  elsif ['invalid_files/multifamily-reference-surface.xml'].include? hpxml_file
-    hpxml.frame_floors << hpxml.frame_floors[0].dup
-    hpxml.frame_floors[1].id += '2'
-    hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
-    hpxml.frame_floors[1].other_space_above_or_below = HPXML::FrameFloorOtherSpaceAbove
   elsif ['invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
     hpxml.frame_floors.add(id: 'FloorOther',
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
-                           insulation_assembly_r_value: 2.1,
-                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
-    hpxml.frame_floors.add(id: 'CeilingOther',
-                           exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
-                           interior_adjacent_to: HPXML::LocationLivingSpace,
-                           area: 900,
-                           insulation_assembly_r_value: 2.1,
-                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceAbove)
+                           insulation_assembly_r_value: 2.1)
   end
 end
 
@@ -5468,6 +5476,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
   id_names = ['SystemIdentifier',
               'BuildingID']
   idref_names = ['AttachedToRoof',
+                 'AttachedToCeiling',
                  'AttachedToFrameFloor',
                  'AttachedToSlab',
                  'AttachedToFoundationWall',

@@ -149,20 +149,19 @@
             </Insulation>
           </Wall>
         </Walls>
-        <FrameFloors>
-          <FrameFloor>
-            <SystemIdentifier id='CeilingOther'/>
+        <Ceilings>
+          <Ceiling>
+            <SystemIdentifier id='Ceiling'/>
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>900.0</Area>
             <Insulation>
-              <SystemIdentifier id='CeilingOtherInsulation'/>
+              <SystemIdentifier id='CeilingInsulation'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
-            <extension>
-              <OtherSpaceAboveOrBelow>above</OtherSpaceAboveOrBelow>
-            </extension>
-          </FrameFloor>
+          </Ceiling>
+        </Ceilings>
+        <FrameFloors>
           <FrameFloor>
             <SystemIdentifier id='FloorAboveNonFreezingSpace'/>
             <ExteriorAdjacentTo>other non-freezing space</ExteriorAdjacentTo>
@@ -172,9 +171,6 @@
               <SystemIdentifier id='FloorAboveNonFreezingSpaceInsulation'/>
               <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
             </Insulation>
-            <extension>
-              <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
-            </extension>
           </FrameFloor>
           <FrameFloor>
             <SystemIdentifier id='FloorAboveMultifamilyBuffer'/>
@@ -185,9 +181,6 @@
               <SystemIdentifier id='FloorAboveMultifamilyBufferInsulation'/>
               <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
             </Insulation>
-            <extension>
-              <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
-            </extension>
           </FrameFloor>
           <FrameFloor>
             <SystemIdentifier id='FloorAboveOtherHeatedSpace'/>
@@ -198,9 +191,6 @@
               <SystemIdentifier id='FloorAboveOtherHeatedSpaceInsulation'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
-            <extension>
-              <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
-            </extension>
           </FrameFloor>
         </FrameFloors>
         <Windows>

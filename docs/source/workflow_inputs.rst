@@ -306,7 +306,7 @@ HPXML Roofs
 
 Each pitched or flat roof surface that is exposed to ambient conditions is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof``.
 
-For a multifamily building where the dwelling unit has another dwelling unit above it, the surface between the two dwelling units should be considered a ``FrameFloor`` and not a ``Roof``.
+For a multifamily building where the dwelling unit has another dwelling unit above it, the surface between the two dwelling units should be considered a ``Ceiling`` and not a ``Roof``.
 
   ======================================  ================  ============  =================  =========  ==============================  ==================================
   Element                                 Type              Units         Constraints        Required   Default                         Notes
@@ -466,8 +466,15 @@ If insulation layers are provided, additional information is entered in each ``F
   ``extension/DistanceToBottomOfInsulation``  double    ft            DistanceToTopOfInsulation - Height  Yes                Vertical distance from top of foundation wall to bottom of insulation
   ==========================================  ========  ============  ==================================  ========  =======  =====================================================================
 
+HPXML Ceilings
+**************
+
+FIXME FIXME
+
 HPXML Frame Floors
 ******************
+
+FIXME FIXME
 
 Each horizontal floor/ceiling surface that is not in contact with the ground (Slab) nor adjacent to ambient conditions above (Roof) is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor``.
 

@@ -51,7 +51,7 @@ require 'ostruct'
 class HPXML < Object
   HPXML_ATTRS = [:header, :site, :neighbor_buildings, :building_occupancy, :building_construction,
                  :climate_and_risk_zones, :air_infiltration_measurements, :attics, :foundations,
-                 :roofs, :rim_joists, :walls, :foundation_walls, :frame_floors, :slabs, :windows,
+                 :roofs, :rim_joists, :walls, :foundation_walls, :ceilings, :frame_floors, :slabs, :windows,
                  :skylights, :doors, :heating_systems, :cooling_systems, :heat_pumps, :hvac_plant,
                  :hvac_controls, :hvac_distributions, :ventilation_fans, :water_heating_systems,
                  :hot_water_distributions, :water_fixtures, :water_heating, :solar_thermal_systems,
@@ -103,8 +103,6 @@ class HPXML < Object
   FoundationTypeCrawlspaceUnvented = 'UnventedCrawlspace'
   FoundationTypeCrawlspaceVented = 'VentedCrawlspace'
   FoundationTypeSlab = 'SlabOnGrade'
-  FrameFloorOtherSpaceAbove = 'above'
-  FrameFloorOtherSpaceBelow = 'below'
   FuelLoadTypeGrill = 'grill'
   FuelLoadTypeLighting = 'lighting'
   FuelLoadTypeFireplace = 'fireplace'
@@ -357,7 +355,7 @@ class HPXML < Object
 
   def has_space_type(space_type)
     # Look for surfaces attached to this space type
-    (@roofs + @rim_joists + @walls + @foundation_walls + @frame_floors + @slabs).each do |surface|
+    (@roofs + @rim_joists + @walls + @foundation_walls + @ceilings + @frame_floors + @slabs).each do |surface|
       return true if surface.interior_adjacent_to == space_type
       return true if surface.exterior_adjacent_to == space_type
     end
@@ -496,7 +494,7 @@ class HPXML < Object
 
     # Get surfaces bounding infiltration volume
     spaces_within_infil_volume.each do |space_type|
-      (@roofs + @rim_joists + @walls + @foundation_walls + @frame_floors + @slabs).each do |surface|
+      (@roofs + @rim_joists + @walls + @foundation_walls + @ceilings + @frame_floors + @slabs).each do |surface|
         next unless [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? space_type
 
         # Exclude surfaces between two spaces that are both within infiltration volume
@@ -561,6 +559,7 @@ class HPXML < Object
     @rim_joists.to_oga(@doc)
     @walls.to_oga(@doc)
     @foundation_walls.to_oga(@doc)
+    @ceilings.to_oga(@doc)
     @frame_floors.to_oga(@doc)
     @slabs.to_oga(@doc)
     @windows.to_oga(@doc)
@@ -612,6 +611,7 @@ class HPXML < Object
     @rim_joists = RimJoists.new(self, hpxml)
     @walls = Walls.new(self, hpxml)
     @foundation_walls = FoundationWalls.new(self, hpxml)
+    @ceilings = Ceilings.new(self, hpxml)
     @frame_floors = FrameFloors.new(self, hpxml)
     @slabs = Slabs.new(self, hpxml)
     @windows = Windows.new(self, hpxml)
@@ -1216,7 +1216,7 @@ class HPXML < Object
 
   class Attic < BaseElement
     ATTRS = [:id, :attic_type, :vented_attic_sla, :vented_attic_ach, :within_infiltration_volume,
-             :attached_to_roof_idrefs, :attached_to_frame_floor_idrefs]
+             :attached_to_roof_idrefs, :attached_to_ceiling_idrefs]
     attr_accessor(*ATTRS)
 
     def attached_roofs
@@ -1230,12 +1230,12 @@ class HPXML < Object
       return list
     end
 
-    def attached_frame_floors
-      return [] if @attached_to_frame_floor_idrefs.nil?
+    def attached_ceilings
+      return [] if @attached_to_ceiling_idrefs.nil?
 
-      list = @hpxml_object.frame_floors.select { |frame_floor| @attached_to_frame_floor_idrefs.include? frame_floor.id }
-      if @attached_to_frame_floor_idrefs.size > list.size
-        fail "Attached frame floor not found for attic '#{@id}'."
+      list = @hpxml_object.frame_floors.select { |frame_floor| @attached_to_ceiling_idrefs.include? frame_floor.id }
+      if @attached_to_ceiling_idrefs.size > list.size
+        fail "Attached ceiling not found for attic '#{@id}'."
       end
 
       return list
@@ -1262,7 +1262,7 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; attached_roofs; rescue StandardError => e; errors << e.message; end
-      begin; attached_frame_floors; rescue StandardError => e; errors << e.message; end
+      begin; attached_ceilings; rescue StandardError => e; errors << e.message; end
       begin; to_location; rescue StandardError => e; errors << e.message; end
       return errors
     end
@@ -1327,9 +1327,9 @@ class HPXML < Object
       XMLHelper.get_elements(attic, 'AttachedToRoof').each do |roof|
         @attached_to_roof_idrefs << HPXML::get_idref(roof)
       end
-      @attached_to_frame_floor_idrefs = []
-      XMLHelper.get_elements(attic, 'AttachedToFrameFloor').each do |frame_floor|
-        @attached_to_frame_floor_idrefs << HPXML::get_idref(frame_floor)
+      @attached_to_ceiling_idrefs = []
+      XMLHelper.get_elements(attic, 'AttachedToCeiling').each do |ceiling|
+        @attached_to_ceiling_idrefs << HPXML::get_idref(ceiling)
       end
     end
   end
@@ -2056,6 +2056,108 @@ class HPXML < Object
     end
   end
 
+  class Ceilings < BaseArrayElement
+    def add(**kwargs)
+      self << Ceiling.new(@hpxml_object, **kwargs)
+    end
+
+    def from_oga(hpxml)
+      return if hpxml.nil?
+
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Enclosure/Ceilings/Ceiling').each do |ceiling|
+        self << Ceiling.new(@hpxml_object, ceiling)
+      end
+    end
+  end
+
+  class Ceiling < BaseElement
+    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :insulation_id,
+             :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value]
+    attr_accessor(*ATTRS)
+
+    def is_exterior
+      if @exterior_adjacent_to == LocationOutside
+        return true
+      end
+
+      return false
+    end
+
+    def is_interior
+      return !is_exterior
+    end
+
+    def is_adiabatic
+      return HPXML::is_adiabatic(self)
+    end
+
+    def is_thermal_boundary
+      return HPXML::is_thermal_boundary(self)
+    end
+
+    def is_exterior_thermal_boundary
+      return (is_exterior && is_thermal_boundary)
+    end
+
+    def delete
+      @hpxml_object.ceilings.delete(self)
+      @hpxml_object.attics.each do |attic|
+        attic.attached_to_ceiling_idrefs.delete(@id) unless attic.attached_to_ceiling_idrefs.nil?
+      end
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_oga(doc)
+      return if nil?
+
+      ceilings = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Ceilings'])
+      ceiling = XMLHelper.add_element(ceilings, 'Ceiling')
+      sys_id = XMLHelper.add_element(ceiling, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(ceiling, 'ExteriorAdjacentTo', @exterior_adjacent_to, :string) unless @exterior_adjacent_to.nil?
+      XMLHelper.add_element(ceiling, 'InteriorAdjacentTo', @interior_adjacent_to, :string) unless @interior_adjacent_to.nil?
+      XMLHelper.add_element(ceiling, 'Area', @area, :float) unless @area.nil?
+      insulation = XMLHelper.add_element(ceiling, 'Insulation')
+      sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
+      if not @insulation_id.nil?
+        XMLHelper.add_attribute(sys_id, 'id', @insulation_id)
+      else
+        XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
+      end
+      XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', @insulation_assembly_r_value, :float) unless @insulation_assembly_r_value.nil?
+      if not @insulation_cavity_r_value.nil?
+        layer = XMLHelper.add_element(insulation, 'Layer')
+        XMLHelper.add_element(layer, 'InstallationType', 'cavity', :string)
+        XMLHelper.add_element(layer, 'NominalRValue', @insulation_cavity_r_value, :float)
+      end
+      if not @insulation_continuous_r_value.nil?
+        layer = XMLHelper.add_element(insulation, 'Layer')
+        XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
+        XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
+      end
+    end
+
+    def from_oga(ceiling)
+      return if ceiling.nil?
+
+      @id = HPXML::get_id(ceiling)
+      @exterior_adjacent_to = XMLHelper.get_value(ceiling, 'ExteriorAdjacentTo', :string)
+      @interior_adjacent_to = XMLHelper.get_value(ceiling, 'InteriorAdjacentTo', :string)
+      @area = XMLHelper.get_value(ceiling, 'Area', :float)
+      insulation = XMLHelper.get_element(ceiling, 'Insulation')
+      if not insulation.nil?
+        @insulation_id = HPXML::get_id(insulation)
+        @insulation_assembly_r_value = XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue', :float)
+        @insulation_cavity_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue", :float)
+        @insulation_continuous_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue", :float)
+      end
+    end
+  end
+
   class FrameFloors < BaseArrayElement
     def add(**kwargs)
       self << FrameFloor.new(@hpxml_object, **kwargs)
@@ -2072,25 +2174,8 @@ class HPXML < Object
 
   class FrameFloor < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :insulation_id,
-             :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
-             :other_space_above_or_below]
+             :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value]
     attr_accessor(*ATTRS)
-
-    def is_ceiling
-      if [LocationAtticVented, LocationAtticUnvented].include? @interior_adjacent_to
-        return true
-      elsif [LocationAtticVented, LocationAtticUnvented].include? @exterior_adjacent_to
-        return true
-      elsif [LocationOtherHousingUnit, LocationOtherHeatedSpace, LocationOtherMultifamilyBufferSpace, LocationOtherNonFreezingSpace].include?(@exterior_adjacent_to) && (@other_space_above_or_below == FrameFloorOtherSpaceAbove)
-        return true
-      end
-
-      return false
-    end
-
-    def is_floor
-      !is_ceiling
-    end
 
     def is_exterior
       if @exterior_adjacent_to == LocationOutside
@@ -2118,9 +2203,6 @@ class HPXML < Object
 
     def delete
       @hpxml_object.frame_floors.delete(self)
-      @hpxml_object.attics.each do |attic|
-        attic.attached_to_frame_floor_idrefs.delete(@id) unless attic.attached_to_frame_floor_idrefs.nil?
-      end
       @hpxml_object.foundations.each do |foundation|
         foundation.attached_to_frame_floor_idrefs.delete(@id) unless foundation.attached_to_frame_floor_idrefs.nil?
       end
@@ -2159,7 +2241,6 @@ class HPXML < Object
         XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
         XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
       end
-      XMLHelper.add_extension(frame_floor, 'OtherSpaceAboveOrBelow', @other_space_above_or_below, :string) unless @other_space_above_or_below.nil?
     end
 
     def from_oga(frame_floor)
@@ -2176,7 +2257,6 @@ class HPXML < Object
         @insulation_cavity_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue", :float)
         @insulation_continuous_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue", :float)
       end
-      @other_space_above_or_below = XMLHelper.get_value(frame_floor, 'extension/OtherSpaceAboveOrBelow', :string)
     end
   end
 
@@ -5352,6 +5432,7 @@ class HPXML < Object
                    walls: @walls,
                    rim_joists: @rim_joists,
                    foundation_walls: @foundation_walls,
+                   ceilings: @ceilings,
                    frame_floors: @frame_floors,
                    slabs: @slabs,
                    windows: @windows,
@@ -5415,7 +5496,7 @@ class HPXML < Object
   end
 
   def delete_tiny_surfaces()
-    (@rim_joists + @walls + @foundation_walls + @frame_floors + @roofs + @windows + @skylights + @doors + @slabs).reverse_each do |surface|
+    (@rim_joists + @walls + @foundation_walls + @ceilings + @frame_floors + @roofs + @windows + @skylights + @doors + @slabs).reverse_each do |surface|
       next if surface.area.nil? || (surface.area > 1.0)
 
       surface.delete
@@ -5573,7 +5654,7 @@ class HPXML < Object
     # Check for objects referencing SFA/MF spaces where the building type is not SFA/MF
     if [ResidentialTypeSFD, ResidentialTypeManufactured].include? @building_construction.residential_facility_type
       mf_spaces = [LocationOtherHeatedSpace, LocationOtherHousingUnit, LocationOtherMultifamilyBufferSpace, LocationOtherNonFreezingSpace]
-      (@roofs + @rim_joists + @walls + @foundation_walls + @frame_floors + @slabs).each do |surface|
+      (@roofs + @rim_joists + @walls + @foundation_walls + @ceilings + @frame_floors + @slabs).each do |surface|
         if mf_spaces.include? surface.interior_adjacent_to
           errors << "The building is of type '#{@building_construction.residential_facility_type}' but the surface '#{surface.id}' is adjacent to Attached/Multifamily space '#{surface.interior_adjacent_to}'."
         end

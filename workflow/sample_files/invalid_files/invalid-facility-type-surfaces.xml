@@ -242,17 +242,29 @@
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
-        <FrameFloors>
-          <FrameFloor>
-            <SystemIdentifier id='FloorBelowAttic'/>
+        <Ceilings>
+          <Ceiling>
+            <SystemIdentifier id='Ceiling'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>1350.0</Area>
             <Insulation>
-              <SystemIdentifier id='FloorBelowAtticInsulation'/>
+              <SystemIdentifier id='CeilingInsulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </FrameFloor>
+          </Ceiling>
+          <Ceiling>
+            <SystemIdentifier id='CeilingOther'/>
+            <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>900.0</Area>
+            <Insulation>
+              <SystemIdentifier id='CeilingOtherInsulation'/>
+              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
+            </Insulation>
+          </Ceiling>
+        </Ceilings>
+        <FrameFloors>
           <FrameFloor>
             <SystemIdentifier id='FloorOther'/>
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
@@ -262,22 +274,6 @@
               <SystemIdentifier id='FloorOtherInsulation'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
-            <extension>
-              <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
-            </extension>
-          </FrameFloor>
-          <FrameFloor>
-            <SystemIdentifier id='CeilingOther'/>
-            <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>900.0</Area>
-            <Insulation>
-              <SystemIdentifier id='CeilingOtherInsulation'/>
-              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
-            </Insulation>
-            <extension>
-              <OtherSpaceAboveOrBelow>above</OtherSpaceAboveOrBelow>
-            </extension>
           </FrameFloor>
         </FrameFloors>
         <Slabs>

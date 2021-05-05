@@ -117,7 +117,7 @@ class HVACSizing
     @heat_design_temps = {}
 
     space_types = []
-    (@hpxml.roofs + @hpxml.rim_joists + @hpxml.walls + @hpxml.foundation_walls + @hpxml.frame_floors + @hpxml.slabs).each do |surface|
+    (@hpxml.roofs + @hpxml.rim_joists + @hpxml.walls + @hpxml.foundation_walls + @hpxml.ceilings + @hpxml.frame_floors + @hpxml.slabs).each do |surface|
       space_types << surface.interior_adjacent_to
       space_types << surface.exterior_adjacent_to
     end
@@ -156,13 +156,13 @@ class HVACSizing
 
     elsif (space_type == HPXML::LocationAtticUnvented) || (space_type == HPXML::LocationAtticVented)
 
-      attic_floors = @hpxml.frame_floors.select { |f| f.is_ceiling && [f.interior_adjacent_to, f.exterior_adjacent_to].include?(space_type) }
-      avg_floor_rvalue = calculate_average_r_value(attic_floors)
+      ceilings = @hpxml.ceilings.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include?(space_type) }
+      avg_ceiling_rvalue = calculate_average_r_value(ceilings)
 
-      attic_roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }
-      avg_roof_rvalue = calculate_average_r_value(attic_roofs)
+      roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }
+      avg_roof_rvalue = calculate_average_r_value(roofs)
 
-      if avg_floor_rvalue < avg_roof_rvalue
+      if avg_ceiling_rvalue < avg_roof_rvalue
         # Attic is considered to be encapsulated. MJ8 says to use an attic
         # temperature of 95F, however alternative approaches are permissible
         if space_type == HPXML::LocationAtticVented
@@ -197,11 +197,11 @@ class HVACSizing
 
         area_total += roof.area
       end
-      @hpxml.frame_floors.each do |frame_floor|
-        next unless [frame_floor.interior_adjacent_to, frame_floor.exterior_adjacent_to].include? space_type
+      @hpxml.ceilings.each do |ceiling|
+        next unless ceiling.interior_adjacent_to == space_type
 
-        area_total += frame_floor.area
-        area_conditioned += frame_floor.area if frame_floor.is_thermal_boundary
+        area_total += ceiling.area
+        area_conditioned += ceiling.area if ceiling.is_thermal_boundary
       end
       if area_total == 0
         garage_frac_under_conditioned = 0.5
@@ -227,13 +227,13 @@ class HVACSizing
 
     elsif (space_type == HPXML::LocationAtticUnvented) || (space_type == HPXML::LocationAtticVented)
 
-      attic_floors = @hpxml.frame_floors.select { |f| f.is_ceiling && [f.interior_adjacent_to, f.exterior_adjacent_to].include?(space_type) }
-      avg_floor_rvalue = calculate_average_r_value(attic_floors)
+      ceilings = @hpxml.ceilings.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include?(space_type) }
+      avg_ceiling_rvalue = calculate_average_r_value(ceilings)
 
-      attic_roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }
-      avg_roof_rvalue = calculate_average_r_value(attic_roofs)
+      roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }
+      avg_roof_rvalue = calculate_average_r_value(roofs)
 
-      if avg_floor_rvalue < avg_roof_rvalue
+      if avg_ceiling_rvalue < avg_roof_rvalue
         # Attic is considered to be encapsulated. MJ8 says to use an attic
         # temperature of 95F, however alternative approaches are permissible
         if space_type == HPXML::LocationAtticVented
@@ -845,17 +845,16 @@ class HVACSizing
     bldg_design_loads.Heat_Ceilings = 0.0
     bldg_design_loads.Cool_Ceilings = 0.0
 
-    @hpxml.frame_floors.each do |frame_floor|
-      next unless frame_floor.is_ceiling
-      next unless frame_floor.is_thermal_boundary
+    @hpxml.ceilings.each do |ceiling|
+      next unless ceiling.is_thermal_boundary
 
-      if frame_floor.is_exterior
-        bldg_design_loads.Cool_Ceilings += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@ctd - 5.0 + @daily_range_temp_adjust[@daily_range_num])
-        bldg_design_loads.Heat_Ceilings += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * @htd
+      if ceiling.is_exterior
+        bldg_design_loads.Cool_Ceilings += (1.0 / ceiling.insulation_assembly_r_value) * ceiling.area * (@ctd - 5.0 + @daily_range_temp_adjust[@daily_range_num])
+        bldg_design_loads.Heat_Ceilings += (1.0 / ceiling.insulation_assembly_r_value) * ceiling.area * @htd
       else
-        adjacent_space = frame_floor.exterior_adjacent_to
-        bldg_design_loads.Cool_Ceilings += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@cool_design_temps[adjacent_space] - @cool_setpoint)
-        bldg_design_loads.Heat_Ceilings += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@heat_setpoint - @heat_design_temps[adjacent_space])
+        adjacent_space = ceiling.exterior_adjacent_to
+        bldg_design_loads.Cool_Ceilings += (1.0 / ceiling.insulation_assembly_r_value) * ceiling.area * (@cool_design_temps[adjacent_space] - @cool_setpoint)
+        bldg_design_loads.Heat_Ceilings += (1.0 / ceiling.insulation_assembly_r_value) * ceiling.area * (@heat_setpoint - @heat_design_temps[adjacent_space])
       end
     end
   end
@@ -869,7 +868,6 @@ class HVACSizing
     bldg_design_loads.Cool_Floors = 0.0
 
     @hpxml.frame_floors.each do |frame_floor|
-      next unless frame_floor.is_floor
       next unless frame_floor.is_thermal_boundary
 
       if frame_floor.is_exterior
@@ -877,7 +875,7 @@ class HVACSizing
         bldg_design_loads.Heat_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * @htd
       else # Partition floor
         adjacent_space = frame_floor.exterior_adjacent_to
-        if frame_floor.is_floor && [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned].include?(adjacent_space)
+        if [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned].include?(adjacent_space)
           u_floor = 1.0 / frame_floor.insulation_assembly_r_value
 
           sum_ua_wall = 0.0
@@ -1137,43 +1135,43 @@ class HVACSizing
 
     elsif [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? duct.Location
 
-      ceilings = @hpxml.frame_floors.select { |f| f.is_floor && [f.interior_adjacent_to, f.exterior_adjacent_to].include?(duct.Location) }
-      avg_ceiling_rvalue = calculate_average_r_value(ceilings)
-      ceiling_insulated = (avg_ceiling_rvalue > 4)
+      floors = @hpxml.frame_floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include?(duct.Location) }
+      avg_ceiling_rvalue = calculate_average_r_value(floors)
+      floor_insulated = (avg_ceiling_rvalue > 4)
 
       walls = @hpxml.foundation_walls.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? duct.Location }
       avg_wall_rvalue = calculate_average_r_value(walls)
       walls_insulated = (avg_wall_rvalue > 4)
 
       if duct.Location == HPXML::LocationBasementUnconditioned
-        if not ceiling_insulated
+        if not floor_insulated
           if not walls_insulated
-            dse_Fregain = 0.50 # Uninsulated ceiling, uninsulated walls
+            dse_Fregain = 0.50 # Uninsulated floor, uninsulated walls
           else
-            dse_Fregain = 0.75 # Uninsulated ceiling, insulated walls
+            dse_Fregain = 0.75 # Uninsulated floor, insulated walls
           end
         else
-          dse_Fregain = 0.30 # Insulated ceiling
+          dse_Fregain = 0.30 # Insulated floor
         end
       elsif duct.Location == HPXML::LocationCrawlspaceVented
-        if ceiling_insulated && walls_insulated
-          dse_Fregain = 0.17 # Insulated ceiling, insulated walls
-        elsif ceiling_insulated && (not walls_insulated)
-          dse_Fregain = 0.12 # Insulated ceiling, uninsulated walls
-        elsif (not ceiling_insulated) && walls_insulated
-          dse_Fregain = 0.66 # Uninsulated ceiling, insulated walls
-        elsif (not ceiling_insulated) && (not walls_insulated)
-          dse_Fregain = 0.50 # Uninsulated ceiling, uninsulated walls
+        if floor_insulated && walls_insulated
+          dse_Fregain = 0.17 # Insulated floor, insulated walls
+        elsif floor_insulated && (not walls_insulated)
+          dse_Fregain = 0.12 # Insulated floor, uninsulated walls
+        elsif (not floor_insulated) && walls_insulated
+          dse_Fregain = 0.66 # Uninsulated floor, insulated walls
+        elsif (not floor_insulated) && (not walls_insulated)
+          dse_Fregain = 0.50 # Uninsulated floor, uninsulated walls
         end
       elsif duct.Location == HPXML::LocationCrawlspaceUnvented
-        if ceiling_insulated && walls_insulated
-          dse_Fregain = 0.30 # Insulated ceiling, insulated walls
-        elsif ceiling_insulated && (not walls_insulated)
-          dse_Fregain = 0.16 # Insulated ceiling, uninsulated walls
-        elsif (not ceiling_insulated) && walls_insulated
-          dse_Fregain = 0.76 # Uninsulated ceiling, insulated walls
-        elsif (not ceiling_insulated) && (not walls_insulated)
-          dse_Fregain = 0.60 # Uninsulated ceiling, uninsulated walls
+        if floor_insulated && walls_insulated
+          dse_Fregain = 0.30 # Insulated floor, insulated walls
+        elsif floor_insulated && (not walls_insulated)
+          dse_Fregain = 0.16 # Insulated floor, uninsulated walls
+        elsif (not floor_insulated) && walls_insulated
+          dse_Fregain = 0.76 # Uninsulated floor, insulated walls
+        elsif (not floor_insulated) && (not walls_insulated)
+          dse_Fregain = 0.60 # Uninsulated floor, uninsulated walls
         end
       end
 
@@ -2554,7 +2552,7 @@ class HVACSizing
                   HPXML::LocationLivingSpace => 0.0 }
 
     # Surface UAs
-    (@hpxml.roofs + @hpxml.frame_floors + @hpxml.walls + @hpxml.foundation_walls).each do |surface|
+    (@hpxml.roofs + @hpxml.ceilings + @hpxml.frame_floors + @hpxml.walls + @hpxml.foundation_walls).each do |surface|
       next unless ((space_type == surface.interior_adjacent_to && space_UAs.keys.include?(surface.exterior_adjacent_to)) ||
                    (space_type == surface.exterior_adjacent_to && space_UAs.keys.include?(surface.interior_adjacent_to)))
 

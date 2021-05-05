@@ -345,7 +345,7 @@ class Geometry
       end
       return floor_area * height
     elsif [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? space_type
-      floor_area = hpxml.frame_floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? space_type }.map { |s| s.area }.sum(0.0)
+      floor_area = hpxml.ceilings.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? space_type }.map { |s| s.area }.sum(0.0)
       roofs = hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }
       avg_pitch = roofs.map { |r| r.pitch }.sum(0.0) / roofs.size
       # Assume square hip roof for volume calculation
