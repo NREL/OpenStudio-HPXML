@@ -615,7 +615,6 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
       next if err_line.include? 'Air-cooled condenser inlet dry-bulb temperature below 0 C.'
       next if err_line.include? 'Low condenser dry-bulb temperature error continues.'
-      next if err_line.include? 'AirLoopHVAC:UnitarySystem = ROOM AC UNITARY SYSTEM'
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
@@ -644,8 +643,14 @@ class HPXMLTest < MiniTest::Test
       if hpxml.hvac_distributions.select { |d| d.air_type.to_s == HPXML::AirTypeFanCoil }.size > 0
         next if err_line.include? 'In calculating the design coil UA for Coil:Cooling:Water' # Warning for unused cooling coil for fan coil
       end
+      if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeRoomAirConditioner }.size > 0
+        next if err_line.include? 'AirLoopHVAC:UnitarySystem = ROOM AC UNITARY SYSTEM' # Warning for unused heating coil
+      end
       if hpxml_path.include?('ground-to-air-heat-pump-cooling-only.xml') || hpxml_path.include?('ground-to-air-heat-pump-heating-only.xml')
         next if err_line.include? 'COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT' # heating capacity is > 20% different than cooling capacity; safe to ignore
+      end
+      if hpxml_path.include('base-hvac-multiple.xml')
+        next if err_line.include? 'Coil control failed to converge'
       end
       if hpxml.solar_thermal_systems.size > 0
         next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
