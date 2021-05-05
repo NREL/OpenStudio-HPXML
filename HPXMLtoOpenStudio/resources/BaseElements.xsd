@@ -1042,6 +1042,9 @@
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Ceilings">
+				<xs:annotation>
+					<xs:documentation>Use Ceilings for horizontal surfaces above living space (e.g., sufaces between living space and attic).</xs:documentation>
+				</xs:annotation>
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element name="Ceiling" maxOccurs="unbounded" minOccurs="1">
@@ -1069,6 +1072,9 @@
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="FrameFloors">
+				<xs:annotation>
+					<xs:documentation>Use FrameFloors for horizontal surfaces below living space (e.g., sufaces between living space and crawlspace/basement/ambient foundations).</xs:documentation>
+				</xs:annotation>
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element name="FrameFloor" maxOccurs="unbounded" minOccurs="1">
