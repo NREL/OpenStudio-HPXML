@@ -1,21 +1,30 @@
-## OpenStudio-HPXML v1.2.0 (Pending)
+## OpenStudio-HPXML v1.3.0 (Pending)
 
 __New Features__
 - Updates to OpenStudio 3.2.0/EnergyPlus 9.5.0.
-- **Breaking change**: Heating/cooling component loads no longer calculated by default for faster performance; use `--add-component-loads` argument if desired.
-- **Breaking change**: Replaces `Site/extension/ShelterCoefficient` with `Site/ShieldingofHome`.
-- **Breaking change**: `AirDistributionType` is now required for all air distribution systems.
+- Introduces a small amount of infiltration for unvented spaces.
+- **Breaking change**: Replaces ClothesDryer `extension/IsVented` and `extension/VentedFlowRate` with `Vented` and `VentedFlowRate`.
 - Allows additional fuel types for generators.
-- Allows `DuctLeakageMeasurement` & `ConditionedFloorAreaServed` to not be specified for ductless fan coil systems.
-- Allows `Slab/ExposedPerimeter` to be zero.
-- Removes `ClothesDryer/ControlType` from being a required input, it is not used.
-- Switches room air conditioner model to use Cutler performance curves.
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
-- Relaxes tolerance for duct leakage to outside warning when ducts solely in conditioned space.
-- Moves additional error-checking from the ruby measure to the schematron validator. 
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
+
+## OpenStudio-HPXML v1.2.0
+
+__New Features__
+- **Breaking change**: Heating/cooling component loads no longer calculated by default for faster performance; use `--add-component-loads` argument if desired.
+- **Breaking change**: Replaces `Site/extension/ShelterCoefficient` with `Site/ShieldingofHome`.
+- Allows `DuctLeakageMeasurement` & `ConditionedFloorAreaServed` to not be specified for ductless fan coil systems; **Breaking change**: `AirDistributionType` is now required for all air distribution systems.
+- Allows `Slab/ExposedPerimeter` to be zero.
+- Removes `ClothesDryer/ControlType` from being a required input, it is not used.
+- Switches room air conditioner model to use Cutler performance curves.
+- Relaxes tolerance for duct leakage to outside warning when ducts solely in conditioned space.
+- Removes limitation that a shared water heater serving a shared laundry room can't also serve dwelling unit fixtures (i.e., FractionDHWLoadServed is no longer required to be zero).
+- Adds IDs to schematron validation errors/warnings when possible.
+- Moves additional error-checking from the ruby measure to the schematron validator. 
+
+__Bugfixes__
 - Fixes room air conditioner performance curve.
 - Fixes ruby error if elements (e.g., `SystemIdentifier`) exist without the proper 'id'/'idref' attribute.
 - Fixes error if boiler/GSHP pump power is zero
