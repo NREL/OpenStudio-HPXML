@@ -1812,7 +1812,7 @@ If not entered, the simulation will not include generators.
   ``NumberofBedroomsServed``  integer           > 1          See [#]_           Number of bedrooms served
   ==========================  =======  =======  ===========  ========  =======  ============================================
 
-  .. [#] FuelType choices are "natural gas" or "propane".
+  .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "wood", or "wood pellets".
   .. [#] AnnualOutputkWh must also be < AnnualConsumptionkBtu*3.412 (i.e., the generator must consume more energy than it produces).
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true, in which case it must be > NumberofBedrooms.
          Annual consumption and annual production will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the generator.
