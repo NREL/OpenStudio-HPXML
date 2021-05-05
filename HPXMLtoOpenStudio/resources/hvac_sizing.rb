@@ -197,11 +197,11 @@ class HVACSizing
 
         area_total += roof.area
       end
-      @hpxml.ceilings.each do |ceiling|
-        next unless ceiling.interior_adjacent_to == space_type
+      (@hpxml.ceilings + @hpxml.frame_floors).each do |ceilingfloor|
+        next unless [ceilingfloor.interior_adjacent_to, ceilingfloor.exterior_adjacent_to].include? space_type
 
-        area_total += ceiling.area
-        area_conditioned += ceiling.area if ceiling.is_thermal_boundary
+        area_total += ceilingfloor.area
+        area_conditioned += ceilingfloor.area if ceilingfloor.is_thermal_boundary
       end
       if area_total == 0
         garage_frac_under_conditioned = 0.5
