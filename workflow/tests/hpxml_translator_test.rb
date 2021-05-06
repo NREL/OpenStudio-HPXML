@@ -651,6 +651,7 @@ class HPXMLTest < MiniTest::Test
       end
       if hpxml_path.include?('base-hvac-multiple.xml')
         next if err_line.include? 'Coil control failed to converge'
+        next if err_line.include? 'Iteration limit exceeded in calculating sensible part-load ratio error continues.'
       end
       if hpxml.solar_thermal_systems.size > 0
         next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
