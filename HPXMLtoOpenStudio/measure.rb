@@ -1313,10 +1313,10 @@ class OSModel
 
   def self.add_shading_schedule(runner, model, weather)
     # Use BAHSP cooling season, and not year-round or user-specified cooling season, to ensure windows use appropriate interior shading factors
-    default_heating_season, @default_cooling_season = HVAC.get_default_heating_and_cooling_seasons(weather)
+    default_heating_months, @default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather)
 
     # Create cooling season schedule
-    clg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'cooling season schedule', Array.new(24, 1), Array.new(24, 1), @default_cooling_season, Constants.ScheduleTypeLimitsFraction)
+    clg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'cooling season schedule', Array.new(24, 1), Array.new(24, 1), @default_cooling_months, Constants.ScheduleTypeLimitsFraction)
     @clg_ssn_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     @clg_ssn_sensor.setName('cool_season')
     @clg_ssn_sensor.setKeyName(clg_season_sch.schedule.name.to_s)
@@ -1385,7 +1385,7 @@ class OSModel
         # Apply interior/exterior shading (as needed)
         shading_vertices = Geometry.create_wall_vertices(window_length, window_height, z_origin, window.azimuth)
         shading_group = Constructions.apply_window_skylight_shading(model, window, i, shading_vertices, surface, sub_surface, shading_group,
-                                                                    shading_schedules, shading_ems, Constants.ObjectNameWindowShade, @default_cooling_season)
+                                                                    shading_schedules, shading_ems, Constants.ObjectNameWindowShade, @default_cooling_months)
       else
         # Window is on an interior surface, which E+ does not allow. Model
         # as a door instead so that we can get the appropriate conduction
@@ -1461,7 +1461,7 @@ class OSModel
       # Apply interior/exterior shading (as needed)
       shading_vertices = Geometry.create_roof_vertices(length, width, z_origin, skylight.azimuth, tilt)
       shading_group = Constructions.apply_window_skylight_shading(model, skylight, i, shading_vertices, surface, sub_surface, shading_group,
-                                                                  shading_schedules, shading_ems, Constants.ObjectNameSkylightShade, @default_cooling_season)
+                                                                  shading_schedules, shading_ems, Constants.ObjectNameSkylightShade, @default_cooling_months)
     end
 
     apply_adiabatic_construction(runner, model, surfaces, 'roof')
@@ -1635,7 +1635,7 @@ class OSModel
 
         HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
                                                    @remaining_cool_load_frac, @remaining_heat_load_frac,
-                                                   living_zone, @hvac_map, @heating_season, @cooling_season)
+                                                   living_zone, @hvac_map, @heating_days, @cooling_days)
 
         if not heating_system.nil?
           @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
@@ -1645,19 +1645,19 @@ class OSModel
 
         HVAC.apply_room_air_conditioner(model, runner, cooling_system,
                                         @remaining_cool_load_frac, living_zone,
-                                        @hvac_map, @cooling_season)
+                                        @hvac_map, @cooling_days)
 
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
 
         HVAC.apply_evaporative_cooler(model, runner, cooling_system,
                                       @remaining_cool_load_frac, living_zone,
-                                      @hvac_map, @cooling_season)
+                                      @hvac_map, @cooling_days)
 
       elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
 
         HVAC.apply_mini_split_air_conditioner(model, runner, cooling_system,
                                               @remaining_cool_load_frac,
-                                              living_zone, @hvac_map, @cooling_season)
+                                              living_zone, @hvac_map, @cooling_days)
       end
 
       @remaining_cool_load_frac -= cooling_system.fraction_cool_load_served
@@ -1684,17 +1684,17 @@ class OSModel
 
         HVAC.apply_central_air_conditioner_furnace(model, runner, nil, heating_system,
                                                    nil, @remaining_heat_load_frac,
-                                                   living_zone, @hvac_map, @heating_season, @cooling_season)
+                                                   living_zone, @hvac_map, @heating_days, @cooling_days)
 
       elsif [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
         HVAC.apply_boiler(model, runner, heating_system,
-                          @remaining_heat_load_frac, living_zone, @hvac_map, @heating_season)
+                          @remaining_heat_load_frac, living_zone, @hvac_map, @heating_days)
 
       elsif [HPXML::HVACTypeElectricResistance].include? heating_system.heating_system_type
 
         HVAC.apply_electric_baseboard(model, runner, heating_system,
-                                      @remaining_heat_load_frac, living_zone, @hvac_map, @heating_season)
+                                      @remaining_heat_load_frac, living_zone, @hvac_map, @heating_days)
 
       elsif [HPXML::HVACTypeStove,
              HPXML::HVACTypePortableHeater,
@@ -1704,7 +1704,7 @@ class OSModel
              HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
 
         HVAC.apply_unit_heater(model, runner, heating_system,
-                               @remaining_heat_load_frac, living_zone, @hvac_map, @heating_season)
+                               @remaining_heat_load_frac, living_zone, @hvac_map, @heating_days)
       end
 
       @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
@@ -1727,28 +1727,28 @@ class OSModel
         HVAC.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
                                                @remaining_heat_load_frac,
                                                @remaining_cool_load_frac,
-                                               living_zone, @hvac_map, @heating_season, @cooling_season)
+                                               living_zone, @hvac_map, @heating_days, @cooling_days)
 
       elsif [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
 
         HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
                                                 @remaining_heat_load_frac,
                                                 @remaining_cool_load_frac,
-                                                living_zone, @hvac_map, @heating_season, @cooling_season)
+                                                living_zone, @hvac_map, @heating_days, @cooling_days)
 
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
 
         HVAC.apply_mini_split_heat_pump(model, runner, heat_pump,
                                         @remaining_heat_load_frac,
                                         @remaining_cool_load_frac,
-                                        living_zone, @hvac_map, @heating_season, @cooling_season)
+                                        living_zone, @hvac_map, @heating_days, @cooling_days)
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
 
         HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                            @remaining_heat_load_frac,
                                            @remaining_cool_load_frac,
-                                           living_zone, @hvac_map, @heating_season, @cooling_season)
+                                           living_zone, @hvac_map, @heating_days, @cooling_days)
 
       end
 
@@ -1775,7 +1775,7 @@ class OSModel
           fail 'Unexpected weather file for ASHRAE 140 run.'
         end
       end
-      HVAC.apply_ideal_air_loads(model, runner, obj_name, cooling_load_frac, heating_load_frac, living_zone, @heating_season, @cooling_season)
+      HVAC.apply_ideal_air_loads(model, runner, obj_name, cooling_load_frac, heating_load_frac, living_zone, @heating_days, @cooling_days)
       return
     end
 
@@ -1795,7 +1795,7 @@ class OSModel
     end
     if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
       HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
-                                 living_zone, @heating_season, @cooling_season)
+                                 living_zone, @heating_days, @cooling_days)
     end
   end
 
@@ -1822,7 +1822,7 @@ class OSModel
     end
     if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
       HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
-                                 living_zone, @heating_season, @cooling_season)
+                                 living_zone, @heating_days, @cooling_days)
     end
   end
 
@@ -1833,7 +1833,7 @@ class OSModel
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     has_ceiling_fan = (@hpxml.ceiling_fans.size > 0)
 
-    HVAC.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, @heating_season, @cooling_season)
+    HVAC.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, @heating_days, @cooling_days)
   end
 
   def self.add_ceiling_fans(runner, model, weather, spaces)
@@ -2787,8 +2787,8 @@ class OSModel
     clg_end_month = hvac_control.seasons_cooling_end_month
     clg_end_day = hvac_control.seasons_cooling_end_day
 
-    @heating_season = HVAC.get_daily_season(model, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
-    @cooling_season = HVAC.get_daily_season(model, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
+    @heating_days = HVAC.get_daily_season(model, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
+    @cooling_days = HVAC.get_daily_season(model, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
   end
 end
 
