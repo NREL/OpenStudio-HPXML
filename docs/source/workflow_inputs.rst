@@ -1360,44 +1360,44 @@ Shared System
 
 If the specified system is a shared system (i.e., serving multiple dwelling units), additional information is entered in ``VentilationFan``.
 
-  ============================  =======  =====  ===========  ========  =======  ====================================================
-  Element                       Type     Units  Constraints  Required  Default  Notes
-  ============================  =======  =====  ===========  ========  =======  ====================================================
-  ``FractionRecirculation``     double   frac   0 - 1        Yes                Fraction of supply air that is recirculated [#]_
-  ``extension/InUnitFlowRate``  double   cfm    >= 0 [#]_    Yes                Flow rate delivered to the dwelling unit
-  ``extension/PreHeating``      element         0 - 1        No        <none>   Supply air preconditioned by heating equipment? [#]_
-  ``extension/PreCooling``      element         0 - 1        No        <none>   Supply air preconditioned by cooling equipment? [#]_
-  ============================  =======  =====  ===========  ========  =======  ====================================================
+  ================================  =======  =====  ===========  ========  =======  ====================================================
+  Element                           Type     Units  Constraints  Required  Default  Notes
+  ================================  =======  =====  ===========  ========  =======  ====================================================
+  ``FractionRecirculation``         double   frac   0 - 1        Yes                Fraction of supply air that is recirculated [#]_
+  ``extension/InUnitFlowRate``      double   cfm    >= 0 [#]_    Yes                Flow rate delivered to the dwelling unit
+  ``PreconditioningHeatingSystem``  element         0 - 1        No        <none>   Supply air preconditioned by heating equipment? [#]_
+  ``PreconditioningCoolingSystem``  element         0 - 1        No        <none>   Supply air preconditioned by cooling equipment? [#]_
+  ================================  =======  =====  ===========  ========  =======  ====================================================
 
   .. [#] 1-FractionRecirculation is assumed to be the fraction of supply air that is provided from outside.
          The value must be 0 for exhaust only systems.
   .. [#] InUnitFlowRate must also be < TestedFlowRate (or RatedFlowRate).
-  .. [#] PreHeating not allowed for exhaust only systems.
-  .. [#] PreCooling not allowed for exhaust only systems.
+  .. [#] PreconditioningHeatingSystem not allowed for exhaust only systems.
+  .. [#] PreconditioningCoolingSystem not allowed for exhaust only systems.
 
-If pre-heating is specified, additional information is entered in ``extension/PreHeating``.
+If a preconditioning heating system is specified, additional information is entered in ``PreconditioningHeatingSystem``.
 
   ==============================================  =======  =====  ===========  ========  =======  ====================================================================
   Element                                         Type     Units  Constraints  Required  Default  Notes
   ==============================================  =======  =====  ===========  ========  =======  ====================================================================
-  ``Fuel``                                        string          See [#]_     Yes                Pre-heating equipment fuel type
+  ``HeatingSystemFuel``                           string          See [#]_     Yes                Pre-heating equipment fuel type
   ``AnnualHeatingEfficiency[Units="COP"]/Value``  double   W/W    > 0          Yes                Pre-heating equipment annual COP
-  ``FractionVentilationHeatLoadServed``           double   frac   0 - 1        Yes                Fraction of ventilation heating load served by pre-heating equipment
+  ``FractionHeatLoadServed``                      double   frac   0 - 1        Yes                Fraction of ventilation heating load served by pre-heating equipment
   ==============================================  =======  =====  ===========  ========  =======  ====================================================================
 
-  .. [#] Fuel choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
+  .. [#] HeatingSystemFuel choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
 
-If pre-cooling is specified, additional information is entered in ``extension/PreCooling``.
+If a preconditioning cooling system is specified, additional information is entered in ``PreconditioningCoolingSystem``.
 
   ==============================================  =======  =====  ===========  ========  =======  ====================================================================
   Element                                         Type     Units  Constraints  Required  Default  Notes
   ==============================================  =======  =====  ===========  ========  =======  ====================================================================
-  ``Fuel``                                        string          See [#]_     Yes                Pre-cooling equipment fuel type
+  ``CoolingSystemFuel``                           string          See [#]_     Yes                Pre-cooling equipment fuel type
   ``AnnualCoolingEfficiency[Units="COP"]/Value``  double   W/W    > 0          Yes                Pre-cooling equipment annual COP
-  ``FractionVentilationCoolLoadServed``           double   frac   0 - 1        Yes                Fraction of ventilation cooling load served by pre-cooling equipment
+  ``FractionCoolLoadServed``                      double   frac   0 - 1        Yes                Fraction of ventilation cooling load served by pre-cooling equipment
   ==============================================  =======  =====  ===========  ========  =======  ====================================================================
 
-  .. [#] Fuel only choice is "electricity".
+  .. [#] CoolingSystemFuel only choice is "electricity".
 
 HPXML Local Ventilation Fan
 ***************************

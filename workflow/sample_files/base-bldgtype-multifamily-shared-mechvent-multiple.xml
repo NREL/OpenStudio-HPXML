@@ -340,24 +340,24 @@
               <IsSharedSystem>true</IsSharedSystem>
               <FractionRecirculation>0.0</FractionRecirculation>
               <FanPower>300.0</FanPower>
+              <PreconditioningHeatingSystem>
+                <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+                <AnnualHeatingEfficiency>
+                  <Value>0.92</Value>
+                  <Units>COP</Units>
+                </AnnualHeatingEfficiency>
+                <FractionHeatLoadServed>0.8</FractionHeatLoadServed>
+              </PreconditioningHeatingSystem>
+              <PreconditioningCoolingSystem>
+                <CoolingSystemFuel>electricity</CoolingSystemFuel>
+                <AnnualCoolingEfficiency>
+                  <Value>4.0</Value>
+                  <Units>COP</Units>
+                </AnnualCoolingEfficiency>
+                <FractionCoolLoadServed>0.8</FractionCoolLoadServed>
+              </PreconditioningCoolingSystem>
               <extension>
                 <InUnitFlowRate>100.0</InUnitFlowRate>
-                <PreHeating>
-                  <Fuel>natural gas</Fuel>
-                  <AnnualHeatingEfficiency>
-                    <Value>0.92</Value>
-                    <Units>COP</Units>
-                  </AnnualHeatingEfficiency>
-                  <FractionVentilationHeatLoadServed>0.8</FractionVentilationHeatLoadServed>
-                </PreHeating>
-                <PreCooling>
-                  <Fuel>electricity</Fuel>
-                  <AnnualCoolingEfficiency>
-                    <Value>4.0</Value>
-                    <Units>COP</Units>
-                  </AnnualCoolingEfficiency>
-                  <FractionVentilationCoolLoadServed>0.8</FractionVentilationCoolLoadServed>
-                </PreCooling>
               </extension>
             </VentilationFan>
             <VentilationFan>
@@ -371,24 +371,24 @@
               <TotalRecoveryEfficiency>0.48</TotalRecoveryEfficiency>
               <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
               <FanPower>150.0</FanPower>
+              <PreconditioningHeatingSystem>
+                <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+                <AnnualHeatingEfficiency>
+                  <Value>0.87</Value>
+                  <Units>COP</Units>
+                </AnnualHeatingEfficiency>
+                <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              </PreconditioningHeatingSystem>
+              <PreconditioningCoolingSystem>
+                <CoolingSystemFuel>electricity</CoolingSystemFuel>
+                <AnnualCoolingEfficiency>
+                  <Value>3.5</Value>
+                  <Units>COP</Units>
+                </AnnualCoolingEfficiency>
+                <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+              </PreconditioningCoolingSystem>
               <extension>
                 <InUnitFlowRate>50.0</InUnitFlowRate>
-                <PreHeating>
-                  <Fuel>natural gas</Fuel>
-                  <AnnualHeatingEfficiency>
-                    <Value>0.87</Value>
-                    <Units>COP</Units>
-                  </AnnualHeatingEfficiency>
-                  <FractionVentilationHeatLoadServed>1.0</FractionVentilationHeatLoadServed>
-                </PreHeating>
-                <PreCooling>
-                  <Fuel>electricity</Fuel>
-                  <AnnualCoolingEfficiency>
-                    <Value>3.5</Value>
-                    <Units>COP</Units>
-                  </AnnualCoolingEfficiency>
-                  <FractionVentilationCoolLoadServed>1.0</FractionVentilationCoolLoadServed>
-                </PreCooling>
               </extension>
             </VentilationFan>
             <VentilationFan>
@@ -401,24 +401,24 @@
               <FractionRecirculation>0.3</FractionRecirculation>
               <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
               <FanPower>150.0</FanPower>
+              <PreconditioningHeatingSystem>
+                <HeatingSystemFuel>electricity</HeatingSystemFuel>
+                <AnnualHeatingEfficiency>
+                  <Value>4.0</Value>
+                  <Units>COP</Units>
+                </AnnualHeatingEfficiency>
+                <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              </PreconditioningHeatingSystem>
+              <PreconditioningCoolingSystem>
+                <CoolingSystemFuel>electricity</CoolingSystemFuel>
+                <AnnualCoolingEfficiency>
+                  <Value>4.5</Value>
+                  <Units>COP</Units>
+                </AnnualCoolingEfficiency>
+                <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+              </PreconditioningCoolingSystem>
               <extension>
                 <InUnitFlowRate>50.0</InUnitFlowRate>
-                <PreHeating>
-                  <Fuel>electricity</Fuel>
-                  <AnnualHeatingEfficiency>
-                    <Value>4.0</Value>
-                    <Units>COP</Units>
-                  </AnnualHeatingEfficiency>
-                  <FractionVentilationHeatLoadServed>1.0</FractionVentilationHeatLoadServed>
-                </PreHeating>
-                <PreCooling>
-                  <Fuel>electricity</Fuel>
-                  <AnnualCoolingEfficiency>
-                    <Value>4.5</Value>
-                    <Units>COP</Units>
-                  </AnnualCoolingEfficiency>
-                  <FractionVentilationCoolLoadServed>1.0</FractionVentilationCoolLoadServed>
-                </PreCooling>
               </extension>
             </VentilationFan>
             <VentilationFan>
@@ -430,24 +430,24 @@
               <IsSharedSystem>true</IsSharedSystem>
               <FractionRecirculation>0.3</FractionRecirculation>
               <FanPower>150.0</FanPower>
+              <PreconditioningHeatingSystem>
+                <HeatingSystemFuel>electricity</HeatingSystemFuel>
+                <AnnualHeatingEfficiency>
+                  <Value>3.5</Value>
+                  <Units>COP</Units>
+                </AnnualHeatingEfficiency>
+                <FractionHeatLoadServed>0.9</FractionHeatLoadServed>
+              </PreconditioningHeatingSystem>
+              <PreconditioningCoolingSystem>
+                <CoolingSystemFuel>electricity</CoolingSystemFuel>
+                <AnnualCoolingEfficiency>
+                  <Value>4.0</Value>
+                  <Units>COP</Units>
+                </AnnualCoolingEfficiency>
+                <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+              </PreconditioningCoolingSystem>
               <extension>
                 <InUnitFlowRate>30.0</InUnitFlowRate>
-                <PreHeating>
-                  <Fuel>electricity</Fuel>
-                  <AnnualHeatingEfficiency>
-                    <Value>3.5</Value>
-                    <Units>COP</Units>
-                  </AnnualHeatingEfficiency>
-                  <FractionVentilationHeatLoadServed>0.9</FractionVentilationHeatLoadServed>
-                </PreHeating>
-                <PreCooling>
-                  <Fuel>electricity</Fuel>
-                  <AnnualCoolingEfficiency>
-                    <Value>4.0</Value>
-                    <Units>COP</Units>
-                  </AnnualCoolingEfficiency>
-                  <FractionVentilationCoolLoadServed>1.0</FractionVentilationCoolLoadServed>
-                </PreCooling>
               </extension>
             </VentilationFan>
             <VentilationFan>

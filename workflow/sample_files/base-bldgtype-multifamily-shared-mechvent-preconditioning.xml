@@ -274,24 +274,24 @@
               <IsSharedSystem>true</IsSharedSystem>
               <FractionRecirculation>0.5</FractionRecirculation>
               <FanPower>240.0</FanPower>
+              <PreconditioningHeatingSystem>
+                <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+                <AnnualHeatingEfficiency>
+                  <Value>0.92</Value>
+                  <Units>COP</Units>
+                </AnnualHeatingEfficiency>
+                <FractionHeatLoadServed>0.7</FractionHeatLoadServed>
+              </PreconditioningHeatingSystem>
+              <PreconditioningCoolingSystem>
+                <CoolingSystemFuel>electricity</CoolingSystemFuel>
+                <AnnualCoolingEfficiency>
+                  <Value>4.0</Value>
+                  <Units>COP</Units>
+                </AnnualCoolingEfficiency>
+                <FractionCoolLoadServed>0.8</FractionCoolLoadServed>
+              </PreconditioningCoolingSystem>
               <extension>
                 <InUnitFlowRate>80.0</InUnitFlowRate>
-                <PreHeating>
-                  <Fuel>natural gas</Fuel>
-                  <AnnualHeatingEfficiency>
-                    <Value>0.92</Value>
-                    <Units>COP</Units>
-                  </AnnualHeatingEfficiency>
-                  <FractionVentilationHeatLoadServed>0.7</FractionVentilationHeatLoadServed>
-                </PreHeating>
-                <PreCooling>
-                  <Fuel>electricity</Fuel>
-                  <AnnualCoolingEfficiency>
-                    <Value>4.0</Value>
-                    <Units>COP</Units>
-                  </AnnualCoolingEfficiency>
-                  <FractionVentilationCoolLoadServed>0.8</FractionVentilationCoolLoadServed>
-                </PreCooling>
               </extension>
             </VentilationFan>
             <VentilationFan>

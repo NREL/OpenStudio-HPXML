@@ -3747,24 +3747,24 @@ class HPXML < Object
         attached_to_hvac_distribution_system = XMLHelper.add_element(ventilation_fan, 'AttachedToHVACDistributionSystem')
         XMLHelper.add_attribute(attached_to_hvac_distribution_system, 'idref', @distribution_system_idref)
       end
-      XMLHelper.add_extension(ventilation_fan, 'StartHour', @start_hour, :integer, @start_hour_isdefaulted) unless @start_hour.nil?
-      XMLHelper.add_extension(ventilation_fan, 'InUnitFlowRate', @in_unit_flow_rate, :float) unless @in_unit_flow_rate.nil?
       if (not @preheating_fuel.nil?) && (not @preheating_efficiency_cop.nil?)
-        precond_htg = XMLHelper.create_elements_as_needed(ventilation_fan, ['extension', 'PreHeating'])
-        XMLHelper.add_element(precond_htg, 'Fuel', @preheating_fuel, :string) unless @preheating_fuel.nil?
+        precond_htg = XMLHelper.create_elements_as_needed(ventilation_fan, ['PreconditioningHeatingSystem'])
+        XMLHelper.add_element(precond_htg, 'HeatingSystemFuel', @preheating_fuel, :string) unless @preheating_fuel.nil?
         eff = XMLHelper.add_element(precond_htg, 'AnnualHeatingEfficiency') unless @preheating_efficiency_cop.nil?
         XMLHelper.add_element(eff, 'Value', @preheating_efficiency_cop, :float) unless eff.nil?
         XMLHelper.add_element(eff, 'Units', UnitsCOP, :string) unless eff.nil?
-        XMLHelper.add_element(precond_htg, 'FractionVentilationHeatLoadServed', @preheating_fraction_load_served, :float) unless @preheating_fraction_load_served.nil?
+        XMLHelper.add_element(precond_htg, 'FractionHeatLoadServed', @preheating_fraction_load_served, :float) unless @preheating_fraction_load_served.nil?
       end
       if (not @precooling_fuel.nil?) && (not @precooling_efficiency_cop.nil?)
-        precond_clg = XMLHelper.create_elements_as_needed(ventilation_fan, ['extension', 'PreCooling'])
-        XMLHelper.add_element(precond_clg, 'Fuel', @precooling_fuel, :string) unless @precooling_fuel.nil?
+        precond_clg = XMLHelper.create_elements_as_needed(ventilation_fan, ['PreconditioningCoolingSystem'])
+        XMLHelper.add_element(precond_clg, 'CoolingSystemFuel', @precooling_fuel, :string) unless @precooling_fuel.nil?
         eff = XMLHelper.add_element(precond_clg, 'AnnualCoolingEfficiency') unless @precooling_efficiency_cop.nil?
         XMLHelper.add_element(eff, 'Value', @precooling_efficiency_cop, :float) unless eff.nil?
         XMLHelper.add_element(eff, 'Units', UnitsCOP, :string) unless eff.nil?
-        XMLHelper.add_element(precond_clg, 'FractionVentilationCoolLoadServed', @precooling_fraction_load_served, :float) unless @precooling_fraction_load_served.nil?
+        XMLHelper.add_element(precond_clg, 'FractionCoolLoadServed', @precooling_fraction_load_served, :float) unless @precooling_fraction_load_served.nil?
       end
+      XMLHelper.add_extension(ventilation_fan, 'StartHour', @start_hour, :integer, @start_hour_isdefaulted) unless @start_hour.nil?
+      XMLHelper.add_extension(ventilation_fan, 'InUnitFlowRate', @in_unit_flow_rate, :float) unless @in_unit_flow_rate.nil?
       XMLHelper.add_extension(ventilation_fan, 'FlowRateNotTested', @flow_rate_not_tested, :boolean) unless @flow_rate_not_tested.nil?
       XMLHelper.add_extension(ventilation_fan, 'FanPowerDefaulted', @fan_power_defaulted, :boolean) unless @fan_power_defaulted.nil?
     end
@@ -3790,14 +3790,14 @@ class HPXML < Object
       @sensible_recovery_efficiency_adjusted = XMLHelper.get_value(ventilation_fan, 'AdjustedSensibleRecoveryEfficiency', :float)
       @fan_power = XMLHelper.get_value(ventilation_fan, 'FanPower', :float)
       @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(ventilation_fan, 'AttachedToHVACDistributionSystem'))
+      @preheating_fuel = XMLHelper.get_value(ventilation_fan, 'PreconditioningHeatingSystem/HeatingSystemFuel', :string)
+      @preheating_efficiency_cop = XMLHelper.get_value(ventilation_fan, "PreconditioningHeatingSystem/AnnualHeatingEfficiency[Units='#{UnitsCOP}']/Value", :float)
+      @preheating_fraction_load_served = XMLHelper.get_value(ventilation_fan, 'PreconditioningHeatingSystem/FractionHeatLoadServed', :float)
+      @precooling_fuel = XMLHelper.get_value(ventilation_fan, 'PreconditioningCoolingSystem/CoolingSystemFuel', :string)
+      @precooling_efficiency_cop = XMLHelper.get_value(ventilation_fan, "PreconditioningCoolingSystem/AnnualCoolingEfficiency[Units='#{UnitsCOP}']/Value", :float)
+      @precooling_fraction_load_served = XMLHelper.get_value(ventilation_fan, 'PreconditioningCoolingSystem/FractionCoolLoadServed', :float)
       @start_hour = XMLHelper.get_value(ventilation_fan, 'extension/StartHour', :integer)
       @in_unit_flow_rate = XMLHelper.get_value(ventilation_fan, 'extension/InUnitFlowRate', :float)
-      @preheating_fuel = XMLHelper.get_value(ventilation_fan, 'extension/PreHeating/Fuel', :string)
-      @preheating_efficiency_cop = XMLHelper.get_value(ventilation_fan, "extension/PreHeating/AnnualHeatingEfficiency[Units='#{UnitsCOP}']/Value", :float)
-      @preheating_fraction_load_served = XMLHelper.get_value(ventilation_fan, 'extension/PreHeating/FractionVentilationHeatLoadServed', :float)
-      @precooling_fuel = XMLHelper.get_value(ventilation_fan, 'extension/PreCooling/Fuel', :string)
-      @precooling_efficiency_cop = XMLHelper.get_value(ventilation_fan, "extension/PreCooling/AnnualCoolingEfficiency[Units='#{UnitsCOP}']/Value", :float)
-      @precooling_fraction_load_served = XMLHelper.get_value(ventilation_fan, 'extension/PreCooling/FractionVentilationCoolLoadServed', :float)
       @flow_rate_not_tested = XMLHelper.get_value(ventilation_fan, 'extension/FlowRateNotTested', :boolean)
       @fan_power_defaulted = XMLHelper.get_value(ventilation_fan, 'extension/FanPowerDefaulted', :boolean)
     end
