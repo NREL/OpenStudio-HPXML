@@ -1386,6 +1386,7 @@ class HPXMLDefaults
       end
 
       next unless pool.heater_type != HPXML::TypeNone
+
       # Heater
       if pool.heater_load_value.nil?
         default_heater_load_units, default_heater_load_value = MiscLoads.get_pool_heater_default_values(cfa, nbeds, pool.heater_type)
@@ -1439,6 +1440,7 @@ class HPXMLDefaults
       end
 
       next unless hot_tub.heater_type != HPXML::TypeNone
+
       # Heater
       if hot_tub.heater_load_value.nil?
         default_heater_load_units, default_heater_load_value = MiscLoads.get_hot_tub_heater_default_values(cfa, nbeds, hot_tub.heater_type)
