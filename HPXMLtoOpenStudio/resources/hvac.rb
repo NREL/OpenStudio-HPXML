@@ -997,7 +997,7 @@ class HVAC
   end
 
   def self.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, heating_days, cooling_days)
-    num_days = Constants.YearNumDays(model)
+    num_days = Schedule.YearNumDays(model)
 
     if hvac_control.weekday_heating_setpoints.nil? || hvac_control.weekend_heating_setpoints.nil?
       # Base heating setpoint
@@ -1402,7 +1402,7 @@ class HVAC
     return days
   end
 
-  def self.get_default_heating_and_cooling_dayss(weather)
+  def self.get_default_heating_and_cooling_seasons(weather)
     # Calculates heating/cooling seasons from BAHSP definition
 
     monthly_temps = weather.data.MonthlyAvgDrybulbs
@@ -3651,7 +3651,6 @@ class HVAC
       s = OpenStudio::Model::ScheduleConstant.new(model)
       s.setName('Sequential Fraction Schedule')
       s.setValue(values[0])
-      end
     else
       start_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, model.getYearDescription.assumedYear)
       timestep_day = OpenStudio::Time.new(1, 0)

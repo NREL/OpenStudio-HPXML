@@ -971,7 +971,7 @@ class Schedule
     day_ts = Time.new(year, 1, 1)
     start_ts = Time.new(year, start_month, start_day)
     end_ts = Time.new(year, end_month, end_day)
-    num_days = Constants.YearNumDays(model)
+    num_days = YearNumDays(model)
     season = Array.new(num_days, 0)
     (0..(num_days - 1)).each do |i|
       if start_ts <= end_ts
