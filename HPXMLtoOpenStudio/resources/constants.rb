@@ -15,14 +15,6 @@ class Constants
     return [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
   end
 
-  def self.YearNumDays(model)
-    if model.getYearDescription.isLeapYear
-      return 366
-    else
-      return 365
-    end
-  end
-
   def self.small
     return 1e-9
   end

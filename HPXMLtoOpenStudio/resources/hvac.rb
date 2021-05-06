@@ -1411,7 +1411,7 @@ class HVAC
 
   def self.get_default_ceiling_fan_days(model, weather)
     months = get_default_ceiling_fan_months(weather)
-    num_days = Constants.YearNumDays(model)
+    num_days = Schedule.YearNumDays(model)
     days = [0] * num_days
     day_num = 0
     (0..11).to_a.each do |month_num|

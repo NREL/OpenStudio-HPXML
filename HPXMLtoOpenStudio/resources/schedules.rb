@@ -180,7 +180,7 @@ class HourlyByDaySchedule
     @model = model
     @sch_name = sch_name
     @schedule = nil
-    @num_days = Constants.YearNumDays(model)
+    @num_days = Schedule.YearNumDays(model)
     @weekday_day_by_hour_values = validateValues(weekday_day_by_hour_values, @num_days, 24)
     @weekend_day_by_hour_values = validateValues(weekend_day_by_hour_values, @num_days, 24)
     @schedule_type_limits_name = schedule_type_limits_name
@@ -956,5 +956,13 @@ class Schedule
   def self.set_weekend_rule(rule)
     rule.setApplySaturday(true)
     rule.setApplySunday(true)
+  end
+
+  def self.YearNumDays(model)
+    if model.getYearDescription.isLeapYear
+      return 366
+    else
+      return 365
+    end
   end
 end
