@@ -314,12 +314,13 @@
               <CoolingCapacity>36000.0</CoolingCapacity>
               <CompressorType>variable speed</CompressorType>
               <CoolingSensibleHeatFraction>0.78</CoolingSensibleHeatFraction>
-              <BackupSystemFuel>electricity</BackupSystemFuel>
+              <BackupSystemFuel>natural gas</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
-                <Units>Percent</Units>
-                <Value>1.0</Value>
+                <Units>AFUE</Units>
+                <Value>0.95</Value>
               </BackupAnnualHeatingEfficiency>
               <BackupHeatingCapacity>36000.0</BackupHeatingCapacity>
+              <BackupHeatingSwitchoverTemperature>25.0</BackupHeatingSwitchoverTemperature>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -332,7 +333,7 @@
               </AnnualHeatingEfficiency>
               <extension>
                 <DemandFlexibility>
-                  <IHPIceStorage>true</IHPIceStorage>
+                  <IHPPcmStorage>true</IHPPcmStorage>
                 </DemandFlexibility>
               </extension>
             </HeatPump>
