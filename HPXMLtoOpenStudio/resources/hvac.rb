@@ -3636,7 +3636,13 @@ class HVAC
   def self.get_sequential_load_schedule(model, value, multipliers)
     values = []
     multipliers.each do |mult|
-      values.push(value * mult)
+      val = value + mult
+      if val > 1
+        val = 1.0
+      else
+        val = val.round(5)
+      end
+      values.push(val)
     end
 
     values << value if values.empty?
@@ -3644,10 +3650,7 @@ class HVAC
     if values.uniq.length == 1
       s = OpenStudio::Model::ScheduleConstant.new(model)
       s.setName('Sequential Fraction Schedule')
-      if values[0] > 1
-        s.setValue(1.0)
-      else
-        s.setValue(values[0].round(5))
+      s.setValue(values[0])
       end
     else
       start_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, model.getYearDescription.assumedYear)
