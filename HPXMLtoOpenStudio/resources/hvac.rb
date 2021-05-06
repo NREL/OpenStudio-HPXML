@@ -1055,11 +1055,11 @@ class HVAC
     if has_ceiling_fan
       clg_ceiling_fan_offset = hvac_control.ceiling_fan_cooling_setpoint_temp_offset
       if not clg_ceiling_fan_offset.nil?
-        get_default_ceiling_fan_months(weather).each_with_index do |operation, m|
-          next unless operation == 1
+        get_default_ceiling_fan_days(model, weather).each_with_index do |operation, d|
+          next if operation != 1
 
-          clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
-          clg_weekend_setpoints[m] = [clg_weekend_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
+          clg_weekday_setpoints[d] = [clg_weekday_setpoints[d], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
+          clg_weekend_setpoints[d] = [clg_weekend_setpoints[d], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
         end
       end
     end
@@ -1407,6 +1407,20 @@ class HVAC
       months[m] = 1
     end
     return months
+  end
+
+  def self.get_default_ceiling_fan_days(model, weather)
+    months = get_default_ceiling_fan_months(weather)
+    num_days = Constants.YearNumDays(model)
+    days = [0] * num_days
+    day_num = 0
+    (0..11).to_a.each do |month_num|
+      num_days_in_month = Constants.MonthNumDays[month_num]
+      num_days_in_month += 1 if month_num == 1 && model.getYearDescription.isLeapYear
+      days.fill(months[month_num], day_num, num_days_in_month)
+      day_num += num_days_in_month
+    end
+    return days
   end
 
   def self.get_default_heating_and_cooling_seasons(weather)
