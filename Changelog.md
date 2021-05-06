@@ -6,6 +6,7 @@ __New Features__
 - **Breaking change**: Replaces ClothesDryer `extension/IsVented` and `extension/VentedFlowRate` with `Vented` and `VentedFlowRate`.
 - Allows additional fuel types for generators.
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
+- Allows `Seasons/Heating` & `Seasons/Cooling` to be specified for defining heating and cooling seasons.
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
@@ -15,7 +16,6 @@ __Bugfixes__
 __New Features__
 - **Breaking change**: Heating/cooling component loads no longer calculated by default for faster performance; use `--add-component-loads` argument if desired.
 - **Breaking change**: Replaces `Site/extension/ShelterCoefficient` with `Site/ShieldingofHome`.
-- Allows `Seasons/Heating` & `Seasons/Cooling` to be specified for defining heating and cooling seasons.
 - Allows `DuctLeakageMeasurement` & `ConditionedFloorAreaServed` to not be specified for ductless fan coil systems; **Breaking change**: `AirDistributionType` is now required for all air distribution systems.
 - Allows `Slab/ExposedPerimeter` to be zero.
 - Removes `ClothesDryer/ControlType` from being a required input, it is not used.
