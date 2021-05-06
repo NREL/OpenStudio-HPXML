@@ -965,4 +965,25 @@ class Schedule
       return 365
     end
   end
+
+  def self.get_daily_season(model, start_month, start_day, end_month, end_day)
+    year = model.getYearDescription.assumedYear
+    day_ts = Time.new(year, 1, 1)
+    start_ts = Time.new(year, start_month, start_day)
+    end_ts = Time.new(year, end_month, end_day)
+    num_days = Constants.YearNumDays(model)
+    season = Array.new(num_days, 0)
+    (0..(num_days - 1)).each do |i|
+      if start_ts <= end_ts
+        season[i] = 1 if start_ts <= day_ts && day_ts <= end_ts
+      else
+        season[i] = 1 if start_ts <= day_ts && day_ts <= Time.new(year, 12, 31)
+        season[i] = 1 if Time.new(year, 1, 1) <= day_ts && day_ts <= end_ts
+      end
+
+      day_ts += (60 * 60 * 24) # 1 day
+    end
+
+    return season
+  end
 end

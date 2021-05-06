@@ -2787,8 +2787,8 @@ class OSModel
     clg_end_month = hvac_control.seasons_cooling_end_month
     clg_end_day = hvac_control.seasons_cooling_end_day
 
-    @heating_days = HVAC.get_daily_season(model, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
-    @cooling_days = HVAC.get_daily_season(model, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
+    @heating_days = Schedule.get_daily_season(model, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
+    @cooling_days = Schedule.get_daily_season(model, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
   end
 end
 

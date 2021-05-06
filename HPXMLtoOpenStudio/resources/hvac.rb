@@ -1082,7 +1082,7 @@ class HVAC
         clg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? c : c }
         clg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? c : c }
       else
-        fail 'Must be in either heating or cooling season.'
+        fail 'HeatingSeason and CoolingSeason, when combined, must span the entire year.'
       end
       htg_weekday_setpoints[i] = htg_wkdy
       htg_weekend_setpoints[i] = htg_wked
@@ -1103,27 +1103,6 @@ class HVAC
     thermostat_setpoint.setHeatingSetpointTemperatureSchedule(heating_setpoint.schedule)
     thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_setpoint.schedule)
     living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
-  end
-
-  def self.get_daily_season(model, start_month, start_day, end_month, end_day)
-    year = model.getYearDescription.assumedYear
-    day_ts = Time.new(year, 1, 1)
-    start_ts = Time.new(year, start_month, start_day)
-    end_ts = Time.new(year, end_month, end_day)
-    num_days = Constants.YearNumDays(model)
-    season = Array.new(num_days, 0)
-    (0..(num_days - 1)).each do |i|
-      if start_ts <= end_ts
-        season[i] = 1 if start_ts <= day_ts && day_ts <= end_ts
-      else
-        season[i] = 1 if start_ts <= day_ts && day_ts <= Time.new(year, 12, 31)
-        season[i] = 1 if Time.new(year, 1, 1) <= day_ts && day_ts <= end_ts
-      end
-
-      day_ts += (60 * 60 * 24) # 1 day
-    end
-
-    return season
   end
 
   def self.get_default_heating_setpoint(control_type)
