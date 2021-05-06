@@ -649,7 +649,7 @@ class HPXMLTest < MiniTest::Test
       if hpxml_path.include?('ground-to-air-heat-pump-cooling-only.xml') || hpxml_path.include?('ground-to-air-heat-pump-heating-only.xml')
         next if err_line.include? 'COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT' # heating capacity is > 20% different than cooling capacity; safe to ignore
       end
-      if hpxml_path.include('base-hvac-multiple.xml')
+      if hpxml_path.include?('base-hvac-multiple.xml')
         next if err_line.include? 'Coil control failed to converge'
       end
       if hpxml.solar_thermal_systems.size > 0
