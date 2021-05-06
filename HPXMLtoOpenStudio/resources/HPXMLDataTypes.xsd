@@ -1143,10 +1143,37 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="AdjacentTo_simple">
-		<xs:annotation>
-			<xs:documentation>NOTE: "other housing unit above" and "other housing unit below" will be deprecated in v4.0. Use "other housing unit" instead.</xs:documentation>
-		</xs:annotation>
+	<xs:simpleType name="InteriorAdjacentTo_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="attic"/>
+			<xs:enumeration value="attic - conditioned"/>
+			<xs:enumeration value="attic - unconditioned"/>
+			<xs:enumeration value="attic - unvented"/>
+			<xs:enumeration value="attic - vented"/>
+			<xs:enumeration value="basement"/>
+			<xs:enumeration value="basement - conditioned"/>
+			<xs:enumeration value="basement - unconditioned"/>
+			<xs:enumeration value="crawlspace"/>
+			<xs:enumeration value="crawlspace - conditioned"/>
+			<xs:enumeration value="crawlspace - unconditioned"/>
+			<xs:enumeration value="crawlspace - unvented"/>
+			<xs:enumeration value="crawlspace - vented"/>
+			<xs:enumeration value="garage"/>
+			<xs:enumeration value="garage - conditioned"/>
+			<xs:enumeration value="garage - unconditioned"/>
+			<xs:enumeration value="living space"/>
+			<xs:enumeration value="other"/>
+			<xs:enumeration value="unconditioned space"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="InteriorAdjacentTo">
+		<xs:simpleContent>
+			<xs:extension base="InteriorAdjacentTo_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="ExteriorAdjacentTo_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="attic"/>
 			<xs:enumeration value="attic - conditioned"/>
@@ -1165,7 +1192,6 @@
 			<xs:enumeration value="garage - conditioned"/>
 			<xs:enumeration value="garage - unconditioned"/>
 			<xs:enumeration value="ground"/>
-			<xs:enumeration value="living space"/>
 			<xs:enumeration value="other"/>
 			<xs:enumeration value="other heated space"/>
 			<xs:enumeration value="other housing unit"/>
@@ -1177,9 +1203,12 @@
 			<xs:enumeration value="unconditioned space"/>
 		</xs:restriction>
 	</xs:simpleType>
-	<xs:complexType name="AdjacentTo">
+	<xs:complexType name="ExteriorAdjacentTo">
+		<xs:annotation>
+			<xs:documentation>DEPRECATION WARNING: Choices "other housing unit above" and "other housing unit below" will be deprecated in the future. Use Ceiling vs FrameFloor to describe whether "other housing unit" is above or below the given surface.</xs:documentation>
+		</xs:annotation>
 		<xs:simpleContent>
-			<xs:extension base="AdjacentTo_simple">
+			<xs:extension base="ExteriorAdjacentTo_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
@@ -1924,81 +1953,7 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<!--Heating System Information Below-->
-	<xs:simpleType name="AFUE_simple">
-		<xs:restriction base="xs:double">
-			<xs:minInclusive value="1"/>
-			<xs:maxInclusive value="100"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="AFUE">
-		<xs:simpleContent>
-			<xs:extension base="AFUE_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="COP_simple">
-		<xs:restriction base="xs:double">
-			<xs:minExclusive value="0"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="COP">
-		<xs:simpleContent>
-			<xs:extension base="COP_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
 	<!--HVAC Distribution Below-->
-	<xs:simpleType name="HSPF_simple">
-		<xs:restriction base="xs:double">
-			<xs:minInclusive value="0"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="HSPF">
-		<xs:simpleContent>
-			<xs:extension base="HSPF_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="SEER_simple">
-		<xs:restriction base="xs:double">
-			<xs:minInclusive value="0"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="SEER">
-		<xs:simpleContent>
-			<xs:extension base="SEER_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="EER_simple">
-		<xs:restriction base="xs:double">
-			<xs:minInclusive value="0"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="EER">
-		<xs:simpleContent>
-			<xs:extension base="EER_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="kWperTon_simple">
-		<xs:restriction base="xs:double">
-			<xs:minInclusive value="0"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="kWperTon">
-		<xs:simpleContent>
-			<xs:extension base="kWperTon_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
 	<xs:simpleType name="DuctType_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="supply"/>
@@ -4753,10 +4708,10 @@
 	</xs:complexType>
 	<xs:complexType name="Season">
 		<xs:sequence>
-			<xs:element name="BeginMonth" type="Month"/>
+			<xs:element maxOccurs="1" minOccurs="0" name="BeginMonth" type="Month"/>
 			<xs:element maxOccurs="1" minOccurs="0" name="BeginDayOfMonth" type="DayOfMonth"/>
-			<xs:element name="EndMonth" type="Month"/>
-			<xs:element minOccurs="0" name="EndDayOfMonth" type="DayOfMonth"/>
+			<xs:element maxOccurs="1" minOccurs="0" name="EndMonth" type="Month"/>
+			<xs:element maxOccurs="1" minOccurs="0" name="EndDayOfMonth" type="DayOfMonth"/>
 		</xs:sequence>
 		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
