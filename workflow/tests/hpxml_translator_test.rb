@@ -88,6 +88,7 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_run_simulation_epjson_input
+    skip
     # Check that we can run a simulation using epJSON (instead of IDF) if requested
     os_cli = OpenStudio.getOpenStudioCLI
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
