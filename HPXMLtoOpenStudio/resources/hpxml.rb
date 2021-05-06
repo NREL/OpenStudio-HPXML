@@ -3589,7 +3589,7 @@ class HPXML < Object
              :used_for_local_ventilation, :total_recovery_efficiency, :total_recovery_efficiency_adjusted,
              :sensible_recovery_efficiency, :sensible_recovery_efficiency_adjusted,
              :fan_power, :fan_power_defaulted, :quantity, :fan_location, :distribution_system_idref, :start_hour,
-             :is_shared_system, :in_unit_flow_rate, :fraction_recirculation,
+             :is_shared_system, :in_unit_flow_rate, :fraction_recirculation, :preheating_id, :precooling_id,
              :preheating_fuel, :preheating_efficiency_cop, :preheating_fraction_load_served, :precooling_fuel,
              :precooling_efficiency_cop, :precooling_fraction_load_served]
     attr_accessor(*ATTRS)
@@ -3749,6 +3749,12 @@ class HPXML < Object
       end
       if (not @preheating_fuel.nil?) && (not @preheating_efficiency_cop.nil?)
         precond_htg = XMLHelper.create_elements_as_needed(ventilation_fan, ['PreconditioningHeatingSystem'])
+        precond_htg_sys_id = XMLHelper.add_element(precond_htg, 'SystemIdentifier')
+        if not @preheating_id.nil?
+          XMLHelper.add_attribute(precond_htg_sys_id, 'id', @preheating_id)
+        else
+          XMLHelper.add_attribute(precond_htg_sys_id, 'id', @id + 'PreHeating')
+        end
         XMLHelper.add_element(precond_htg, 'HeatingSystemFuel', @preheating_fuel, :string) unless @preheating_fuel.nil?
         eff = XMLHelper.add_element(precond_htg, 'AnnualHeatingEfficiency') unless @preheating_efficiency_cop.nil?
         XMLHelper.add_element(eff, 'Value', @preheating_efficiency_cop, :float) unless eff.nil?
@@ -3757,6 +3763,12 @@ class HPXML < Object
       end
       if (not @precooling_fuel.nil?) && (not @precooling_efficiency_cop.nil?)
         precond_clg = XMLHelper.create_elements_as_needed(ventilation_fan, ['PreconditioningCoolingSystem'])
+        precond_clg_sys_id = XMLHelper.add_element(precond_clg, 'SystemIdentifier')
+        if not @preheating_id.nil?
+          XMLHelper.add_attribute(precond_clg_sys_id, 'id', @precooling_id)
+        else
+          XMLHelper.add_attribute(precond_clg_sys_id, 'id', @id + 'PreCooling')
+        end
         XMLHelper.add_element(precond_clg, 'CoolingSystemFuel', @precooling_fuel, :string) unless @precooling_fuel.nil?
         eff = XMLHelper.add_element(precond_clg, 'AnnualCoolingEfficiency') unless @precooling_efficiency_cop.nil?
         XMLHelper.add_element(eff, 'Value', @precooling_efficiency_cop, :float) unless eff.nil?

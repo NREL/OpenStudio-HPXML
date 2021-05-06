@@ -275,6 +275,7 @@
               <FractionRecirculation>0.5</FractionRecirculation>
               <FanPower>240.0</FanPower>
               <PreconditioningHeatingSystem>
+                <SystemIdentifier id='SharedSupplyFanPreHeating'/>
                 <HeatingSystemFuel>natural gas</HeatingSystemFuel>
                 <AnnualHeatingEfficiency>
                   <Value>0.92</Value>
@@ -283,6 +284,7 @@
                 <FractionHeatLoadServed>0.7</FractionHeatLoadServed>
               </PreconditioningHeatingSystem>
               <PreconditioningCoolingSystem>
+                <SystemIdentifier id='SharedSupplyFanPreCooling'/>
                 <CoolingSystemFuel>electricity</CoolingSystemFuel>
                 <AnnualCoolingEfficiency>
                   <Value>4.0</Value>

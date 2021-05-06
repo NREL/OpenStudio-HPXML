@@ -1380,6 +1380,7 @@ If a preconditioning heating system is specified, additional information is ente
   ==============================================  =======  =====  ===========  ========  =======  ====================================================================
   Element                                         Type     Units  Constraints  Required  Default  Notes
   ==============================================  =======  =====  ===========  ========  =======  ====================================================================
+  ``SystemIdentifier``                            id                           Yes                Unique identifier  
   ``HeatingSystemFuel``                           string          See [#]_     Yes                Pre-heating equipment fuel type
   ``AnnualHeatingEfficiency[Units="COP"]/Value``  double   W/W    > 0          Yes                Pre-heating equipment annual COP
   ``FractionHeatLoadServed``                      double   frac   0 - 1        Yes                Fraction of ventilation heating load served by pre-heating equipment
@@ -1392,6 +1393,7 @@ If a preconditioning cooling system is specified, additional information is ente
   ==============================================  =======  =====  ===========  ========  =======  ====================================================================
   Element                                         Type     Units  Constraints  Required  Default  Notes
   ==============================================  =======  =====  ===========  ========  =======  ====================================================================
+  ``SystemIdentifier``                            id                           Yes                Unique identifier  
   ``CoolingSystemFuel``                           string          See [#]_     Yes                Pre-cooling equipment fuel type
   ``AnnualCoolingEfficiency[Units="COP"]/Value``  double   W/W    > 0          Yes                Pre-cooling equipment annual COP
   ``FractionCoolLoadServed``                      double   frac   0 - 1        Yes                Fraction of ventilation cooling load served by pre-cooling equipment
