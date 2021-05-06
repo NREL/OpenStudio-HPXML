@@ -3636,7 +3636,7 @@ class HVAC
   def self.get_sequential_load_schedule(model, value, multipliers)
     values = []
     multipliers.each do |mult|
-      val = value + mult
+      val = value * mult
       if val > 1
         val = 1.0
       else

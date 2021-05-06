@@ -803,6 +803,52 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
   end
 
+  def test_custom_seasons
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-heating-cooling-seasons-custom.xml'))
+    model, hpxml = _test_measure(args_hash)
+    
+    # Get HPXML values
+    hvac_control = hpxml.hvac_controls[0]
+    seasons_heating_begin_month = hvac_control.seasons_heating_begin_month
+    seasons_heating_begin_day = hvac_control.seasons_heating_begin_day
+    seasons_heating_end_month = hvac_control.seasons_heating_end_month
+    seasons_heating_end_day = hvac_control.seasons_heating_end_day
+    seasons_cooling_begin_month = hvac_control.seasons_cooling_begin_month
+    seasons_cooling_begin_day = hvac_control.seasons_cooling_begin_day
+    seasons_cooling_end_month = hvac_control.seasons_cooling_end_month
+    seasons_cooling_end_day = hvac_control.seasons_cooling_end_day
+
+    # Get zone
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    zone = unitary_system.controllingZoneorThermostatLocation.get
+
+    # Check heating season
+    heating_days = zone.sequentialHeatingFractionSchedule(zone.airLoopHVACTerminals[0]).get.to_ScheduleFixedInterval.get
+    cooling_days = zone.sequentialCoolingFractionSchedule(zone.airLoopHVACTerminals[0]).get.to_ScheduleFixedInterval.get
+    assert_equal(1, heating_days.startMonth)
+    assert_equal(2, heating_days.startDay) # FIXME? (mains temperature schedule is the same)
+    values = []
+    heating_days.timeSeries.values.each do |value|
+      values.push(value)
+    end
+    start_date = Time.new(model.getYearDescription.assumedYear, seasons_heating_begin_month, seasons_heating_begin_day)
+    end_date = Time.new(model.getYearDescription.assumedYear, seasons_heating_end_month, seasons_heating_end_day)
+    assert_equal(365 - (start_date - end_date) / 86400 + 1, values.sum) # seconds to days
+    
+    # Check cooling season   
+    cooling_days = zone.sequentialCoolingFractionSchedule(zone.airLoopHVACTerminals[0]).get.to_ScheduleFixedInterval.get
+    assert_equal(1, cooling_days.startMonth)
+    assert_equal(2, cooling_days.startDay) # FIXME? (mains temperature schedule is the same)
+    values = []
+    cooling_days.timeSeries.values.each do |value|
+      values.push(value)
+    end
+    start_date = Time.new(model.getYearDescription.assumedYear, seasons_cooling_begin_month, seasons_cooling_begin_day)
+    end_date = Time.new(model.getYearDescription.assumedYear, seasons_cooling_end_month, seasons_cooling_end_day)
+    assert_equal((end_date - start_date) / 86400 + 1, values.sum) # seconds to days
+  end
+
   def _test_measure(args_hash)
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new
