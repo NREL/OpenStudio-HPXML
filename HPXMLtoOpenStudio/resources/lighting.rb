@@ -234,6 +234,7 @@ class Lighting
 
     monthly_kwh_per_day = []
     days_m = Schedule.MonthNumDays(model)
+    days_m[1] -= 1 if model.getYearDescription.isLeapYear
     wtd_avg_monthly_kwh_per_day = 0
     for monthNum in 1..12
       month = monthNum - 1
@@ -277,7 +278,7 @@ class Lighting
         normalized_hourly_lighting[month][hour] = ltg_hour / sum_kWh
         monthly_kwh_per_day[month] = sum_kWh / 2.0
       end
-      wtd_avg_monthly_kwh_per_day += monthly_kwh_per_day[month] * days_m[month] / Schedule.YearNumDays(model)
+      wtd_avg_monthly_kwh_per_day += monthly_kwh_per_day[month] * days_m[month] / 365.0
     end
 
     # Calculate normalized monthly lighting fractions
