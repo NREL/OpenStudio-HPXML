@@ -465,8 +465,12 @@ class MonthWeekdayWeekendSchedule
   end
 
   def createSchedule()
+    month_num_days = Schedule.MonthNumDays(@model)
+    month_num_days[@end_month - 1] = @end_day
+
     day_startm = Schedule.day_start_months(@model)
-    day_endm = Schedule.day_end_months(@model)
+    day_startm[@begin_month - 1] += @begin_day - 1
+    day_endm = [Schedule.day_start_months(@model), month_num_days].transpose.map { |i| i.reduce(:+) - 1 }
 
     time = []
     for h in 1..24
