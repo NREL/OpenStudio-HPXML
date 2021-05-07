@@ -9,6 +9,7 @@ __New Features__
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
+- Fixes furnace fan power when attached to a single-speed air conditioner.
 
 ## OpenStudio-HPXML v1.2.0
 
