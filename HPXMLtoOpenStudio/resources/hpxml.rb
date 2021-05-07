@@ -779,40 +779,7 @@ class HPXML < Object
         end
       end
 
-      { 'Run Period' => @sim_begin_month, 'Daylight Saving' => @dst_begin_month }.each do |sim_ctl, begin_month|
-        next unless not begin_month.nil?
-
-        valid_months = (1..12).to_a
-        if not valid_months.include? begin_month
-          errors << "#{sim_ctl} Begin Month (#{begin_month}) must be one of: #{valid_months.join(', ')}."
-        end
-      end
-
-      { 'Run Period' => @sim_end_month, 'Daylight Saving' => @dst_end_month }.each do |sim_ctl, end_month|
-        next unless not end_month.nil?
-
-        valid_months = (1..12).to_a
-        if not valid_months.include? end_month
-          errors << "#{sim_ctl} End Month (#{end_month}) must be one of: #{valid_months.join(', ')}."
-        end
-      end
-
-      months_days = { [1, 3, 5, 7, 8, 10, 12] => (1..31).to_a, [4, 6, 9, 11] => (1..30).to_a, [2] => (1..28).to_a }
-      months_days.each do |months, valid_days|
-        { 'Run Period' => [@sim_begin_month, @sim_begin_day, @sim_end_month, @sim_end_day], 'Daylight Saving' => [@dst_begin_month, @dst_begin_day, @dst_end_month, @dst_end_day] }.each do |sim_ctl, months_and_days|
-          begin_month, begin_day, end_month, end_day = months_and_days
-          if (not begin_day.nil?) && (months.include? begin_month)
-            if not valid_days.include? begin_day
-              errors << "#{sim_ctl} Begin Day of Month (#{begin_day}) must be one of: #{valid_days.join(', ')}."
-            end
-          end
-          next unless (not end_day.nil?) && (months.include? end_month)
-
-          if not valid_days.include? end_day
-            errors << "#{sim_ctl} End Day of Month (#{end_day}) must be one of: #{valid_days.join(', ')}."
-          end
-        end
-      end
+      errors += HPXML::check_dates('Run Period', @sim_begin_month, @sim_begin_day, @sim_end_month, @sim_end_day)
 
       { 'Run Period' => [@sim_begin_month, @sim_begin_day, @sim_end_month, @sim_end_day] }.each do |sim_ctl, months_and_days|
         begin_month, begin_day, end_month, end_day = months_and_days
@@ -823,12 +790,14 @@ class HPXML < Object
         end
 
         next unless (not begin_day.nil?) && (not end_day.nil?)
-        next unless begin_month == end_month
+        next if begin_month != end_month
 
         if begin_day > end_day
           errors << "#{sim_ctl} Begin Day of Month (#{begin_day}) cannot come after #{sim_ctl} End Day of Month (#{end_day}) for the same month (#{begin_month})."
         end
       end
+
+      errors += HPXML::check_dates('Daylight Saving', @dst_begin_month, @dst_begin_day, @dst_end_month, @dst_end_day)
 
       return errors
     end
@@ -3251,39 +3220,9 @@ class HPXML < Object
     def check_for_errors
       errors = []
 
-      { 'Heating Season' => @seasons_heating_begin_month, 'Cooling Season' => @seasons_cooling_begin_month }.each do |season, begin_month|
-        next unless not begin_month.nil?
+      errors += HPXML::check_dates('Heating Season', @seasons_heating_begin_month, @season_heating_begin_day, @season_heating_end_month, @season_heating_end_day)
 
-        valid_months = (1..12).to_a
-        if not valid_months.include? begin_month
-          errors << "#{season} Begin Month (#{begin_month}) must be one of: #{valid_months.join(', ')}."
-        end
-      end
-
-      { 'Heating Season' => @seasons_heating_end_month, 'Cooling Season' => @seasons_cooling_end_month }.each do |season, end_month|
-        next unless not end_month.nil?
-
-        valid_months = (1..12).to_a
-        if not valid_months.include? end_month
-          errors << "#{season} End Month (#{end_month}) must be one of: #{valid_months.join(', ')}."
-        end
-      end
-
-      months_days = { [1, 3, 5, 7, 8, 10, 12] => (1..31).to_a, [4, 6, 9, 11] => (1..30).to_a, [2] => (1..28).to_a }
-      months_days.each do |months, valid_days|
-        { 'Heating Season' => [@seasons_heating_begin_month, @seasons_heating_begin_day, @seasons_heating_end_month, @seasons_heating_end_day], 'Cooling Season' => [@seasons_cooling_begin_month, @seasons_cooling_begin_day, @seasons_cooling_end_month, @seasons_cooling_end_day] }.each do |season, months_and_days|
-          begin_month, begin_day, end_month, end_day = months_and_days
-          if (not begin_day.nil?) && (months.include? begin_month)
-            if not valid_days.include? begin_day
-              errors << "#{sim_ctl} Begin Day of Month (#{begin_day}) must be one of: #{valid_days.join(', ')}."
-            end
-          end
-          next unless (not end_day.nil?) && (months.include? end_month)
-          if not valid_days.include? end_day
-            errors << "#{sim_ctl} End Day of Month (#{end_day}) must be one of: #{valid_days.join(', ')}."
-          end
-        end
-      end
+      errors += HPXML::check_dates('Cooling Season', @seasons_cooling_begin_month, @season_cooling_begin_day, @season_cooling_end_month, @season_cooling_end_day)
 
       return errors
     end
@@ -5724,5 +5663,41 @@ class HPXML < Object
 
   def self.get_idref(element)
     return XMLHelper.get_attribute_value(element, 'idref')
+  end
+
+  def self.check_dates(str, begin_month, begin_day, end_month, end_day)
+    errors = []
+
+    # Check for valid months
+    valid_months = (1..12).to_a
+
+    if not begin_month.nil?
+      if not valid_months.include? begin_month
+        errors << "#{str} Begin Month (#{begin_month}) must be one of: #{valid_months.join(', ')}."
+      end
+    end
+
+    if not end_month.nil?
+      if not valid_months.include? end_month
+        errors << "#{str} End Month (#{end_month}) must be one of: #{valid_months.join(', ')}."
+      end
+    end
+
+    # Check for valid days
+    months_days = { [1, 3, 5, 7, 8, 10, 12] => (1..31).to_a, [4, 6, 9, 11] => (1..30).to_a, [2] => (1..28).to_a }
+    months_days.each do |months, valid_days|
+      if (not begin_day.nil?) && (months.include? begin_month)
+        if not valid_days.include? begin_day
+          errors << "#{str} Begin Day of Month (#{begin_day}) must be one of: #{valid_days.join(', ')}."
+        end
+      end
+      next unless (not end_day.nil?) && (months.include? end_month)
+
+      if not valid_days.include? end_day
+        errors << "#{str} End Day of Month (#{end_day}) must be one of: #{valid_days.join(', ')}."
+      end
+    end
+
+    return errors
   end
 end

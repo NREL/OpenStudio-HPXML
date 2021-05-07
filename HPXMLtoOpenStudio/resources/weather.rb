@@ -312,9 +312,10 @@ class WeatherProcess
 
     first_day = 0
     for month in 1..12
-      ndays = Constants.MonthNumDays[month - 1] # Number of days in current month
+      month_num_days = Schedule.MonthNumDays(@model)
+      ndays = month_num_days[month - 1] # Number of days in current month
       if month > 1
-        first_day += Constants.MonthNumDays[month - 2] # Number of days in previous month
+        first_day += month_num_days[month - 2] # Number of days in previous month
       end
       avg_high = daily_high_dbs[first_day, ndays].sum(0.0) / ndays.to_f
       avg_low = daily_low_dbs[first_day, ndays].sum(0.0) / ndays.to_f

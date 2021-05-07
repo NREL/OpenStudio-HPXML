@@ -958,12 +958,14 @@ class Schedule
     rule.setApplySunday(true)
   end
 
+  def self.MonthNumDays(model)
+    month_num_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    month_num_days[1] += 1 if model.getYearDescription.isLeapYear
+    return month_num_days
+  end
+
   def self.YearNumDays(model)
-    if model.getYearDescription.isLeapYear
-      return 366
-    else
-      return 365
-    end
+    return MonthNumDays(model).sum
   end
 
   def self.get_daily_season(model, start_month, start_day, end_month, end_day)

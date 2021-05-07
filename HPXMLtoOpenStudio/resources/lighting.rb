@@ -233,7 +233,7 @@ class Lighting
     stdDevCons2 = 2.36567663279954
 
     monthly_kwh_per_day = []
-    days_m = Constants.MonthNumDays
+    days_m = Schedule.MonthNumDays(model)
     wtd_avg_monthly_kwh_per_day = 0
     for monthNum in 1..12
       month = monthNum - 1
@@ -277,7 +277,7 @@ class Lighting
         normalized_hourly_lighting[month][hour] = ltg_hour / sum_kWh
         monthly_kwh_per_day[month] = sum_kWh / 2.0
       end
-      wtd_avg_monthly_kwh_per_day += monthly_kwh_per_day[month] * days_m[month] / 365.0
+      wtd_avg_monthly_kwh_per_day += monthly_kwh_per_day[month] * days_m[month] / Schedule.YearNumDays(model)
     end
 
     # Calculate normalized monthly lighting fractions

@@ -1394,8 +1394,8 @@ class HVAC
     days = [0] * num_days
     day_num = 0
     (0..11).to_a.each do |month_num|
-      num_days_in_month = Constants.MonthNumDays[month_num]
-      num_days_in_month += 1 if month_num == 1 && model.getYearDescription.isLeapYear
+      month_num_days = Schedule.MonthNumDays(model)
+      num_days_in_month = month_num_days[month_num]
       days.fill(months[month_num], day_num, num_days_in_month)
       day_num += num_days_in_month
     end
