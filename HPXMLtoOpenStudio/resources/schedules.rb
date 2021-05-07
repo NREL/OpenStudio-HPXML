@@ -968,12 +968,10 @@ class Schedule
     return MonthNumDays(model).sum
   end
 
-  def self.get_daily_season(model, start_month, start_day, end_month, end_day)
-    year = model.getYearDescription.assumedYear
+  def self.get_daily_season(year, num_days, start_month, start_day, end_month, end_day)
     day_ts = Time.new(year, 1, 1)
     start_ts = Time.new(year, start_month, start_day)
     end_ts = Time.new(year, end_month, end_day)
-    num_days = YearNumDays(model)
     season = Array.new(num_days, 0)
     (0..(num_days - 1)).each do |i|
       if start_ts <= end_ts

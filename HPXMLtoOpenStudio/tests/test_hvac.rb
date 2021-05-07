@@ -807,7 +807,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-heating-cooling-seasons-custom.xml'))
     model, hpxml = _test_measure(args_hash)
-    
+
     # Get HPXML values
     hvac_control = hpxml.hvac_controls[0]
     seasons_heating_begin_month = hvac_control.seasons_heating_begin_month
@@ -832,11 +832,10 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     heating_days.timeSeries.values.each do |value|
       values.push(value)
     end
-    start_date = Time.new(model.getYearDescription.assumedYear, seasons_heating_begin_month, seasons_heating_begin_day)
-    end_date = Time.new(model.getYearDescription.assumedYear, seasons_heating_end_month, seasons_heating_end_day)
-    assert_equal(365 - (start_date - end_date) / 86400 + 1, values.sum) # seconds to days
-    
-    # Check cooling season   
+    heating_season = Schedule.get_daily_season(model.getYearDescription.assumedYear, Schedule.YearNumDays(model), seasons_heating_begin_month, seasons_heating_begin_day, seasons_heating_end_month, seasons_heating_end_day)
+    assert_equal(heating_season.sum, values.sum)
+
+    # Check cooling season
     cooling_days = zone.sequentialCoolingFractionSchedule(zone.airLoopHVACTerminals[0]).get.to_ScheduleFixedInterval.get
     assert_equal(1, cooling_days.startMonth)
     assert_equal(2, cooling_days.startDay) # FIXME? (mains temperature schedule is the same)
@@ -844,9 +843,8 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     cooling_days.timeSeries.values.each do |value|
       values.push(value)
     end
-    start_date = Time.new(model.getYearDescription.assumedYear, seasons_cooling_begin_month, seasons_cooling_begin_day)
-    end_date = Time.new(model.getYearDescription.assumedYear, seasons_cooling_end_month, seasons_cooling_end_day)
-    assert_equal((end_date - start_date) / 86400 + 1, values.sum) # seconds to days
+    cooling_season = Schedule.get_daily_season(model.getYearDescription.assumedYear, Schedule.YearNumDays(model), seasons_cooling_begin_month, seasons_cooling_begin_day, seasons_cooling_end_month, seasons_cooling_end_day)
+    assert_equal(cooling_season.sum, values.sum)
   end
 
   def _test_measure(args_hash)
