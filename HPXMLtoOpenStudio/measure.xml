@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>16aeb53a-9e03-4c47-a644-1edeb2d606f3</version_id>
-  <version_modified>20210507T165348Z</version_modified>
+  <version_id>b7c15f6d-9147-485f-bbbd-4299347d2dee</version_id>
+  <version_modified>20210507T194830Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -518,12 +518,6 @@
       <checksum>97D7CB5C</checksum>
     </file>
     <file>
-      <filename>lighting.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>49F2DDE5</checksum>
-    </file>
-    <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -534,12 +528,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>3A10970A</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4DE65F07</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -559,10 +547,22 @@
       <checksum>BB220B90</checksum>
     </file>
     <file>
+      <filename>lighting.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>828E605B</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>41074990</checksum>
+    </file>
+    <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>983179A1</checksum>
+      <checksum>BB0F1837</checksum>
     </file>
   </files>
 </measure>

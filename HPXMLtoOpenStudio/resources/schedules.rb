@@ -69,13 +69,8 @@ class HourlyByMonthSchedule
   end
 
   def createSchedule()
-    year_description = @model.getYearDescription
-    leap_offset = 0
-    if year_description.isLeapYear
-      leap_offset = 1
-    end
-    day_endm = [0, 31, 59 + leap_offset, 90 + leap_offset, 120 + leap_offset, 151 + leap_offset, 181 + leap_offset, 212 + leap_offset, 243 + leap_offset, 273 + leap_offset, 304 + leap_offset, 334 + leap_offset, 365 + leap_offset]
-    day_startm = [0, 1, 32, 60 + leap_offset, 91 + leap_offset, 121 + leap_offset, 152 + leap_offset, 182 + leap_offset, 213 + leap_offset, 244 + leap_offset, 274 + leap_offset, 305 + leap_offset, 335 + leap_offset]
+    day_startm = Schedule.day_start_months(@model)
+    day_endm = Schedule.day_end_months(@model)
 
     time = []
     for h in 1..24
@@ -85,15 +80,15 @@ class HourlyByMonthSchedule
     schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
     schedule.setName(@sch_name)
 
-    assumedYear = year_description.assumedYear # prevent excessive OS warnings about 'UseWeatherFile'
+    assumedYear = @model.getYearDescription.assumedYear # prevent excessive OS warnings about 'UseWeatherFile'
 
     prev_wkdy_vals = nil
     prev_wkdy_rule = nil
     prev_wknd_vals = nil
     prev_wknd_rule = nil
     for m in 1..12
-      date_s = OpenStudio::Date::fromDayOfYear(day_startm[m], assumedYear)
-      date_e = OpenStudio::Date::fromDayOfYear(day_endm[m], assumedYear)
+      date_s = OpenStudio::Date::fromDayOfYear(day_startm[m - 1], assumedYear)
+      date_e = OpenStudio::Date::fromDayOfYear(day_endm[m - 1], assumedYear)
 
       wkdy_vals = []
       wknd_vals = []
@@ -470,24 +465,9 @@ class MonthWeekdayWeekendSchedule
   end
 
   def createSchedule()
-    year_description = @model.getYearDescription
-    leap_offset = 0
-    if year_description.isLeapYear
-      leap_offset = 1
-    end
+    day_startm = Schedule.day_start_months(@model)
+    day_endm = Schedule.day_end_months(@model)
 
-    num_days_in_each_month = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    num_days_in_each_month[@end_month] = @end_day
-    num_days_in_each_month.each_index do |i|
-      num_days_in_each_month[i] += leap_offset if i == 2
-    end
-    orig_day_startm = [0, 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]
-    orig_day_startm.each_index do |i|
-      orig_day_startm[i] += leap_offset if i > 2
-    end
-    day_startm = orig_day_startm.map(&:clone)
-    day_startm[@begin_month] = orig_day_startm[@begin_month] + @begin_day - 1
-    day_endm = [orig_day_startm, num_days_in_each_month].transpose.map { |i| (i != [0, 0]) ? i.reduce(:+) - 1 : 0 }
     time = []
     for h in 1..24
       time[h] = OpenStudio::Time.new(0, h, 0, 0)
@@ -496,7 +476,7 @@ class MonthWeekdayWeekendSchedule
     schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
     schedule.setName(@sch_name)
 
-    assumedYear = year_description.assumedYear # prevent excessive OS warnings about 'UseWeatherFile'
+    assumedYear = @model.getYearDescription.assumedYear # prevent excessive OS warnings about 'UseWeatherFile'
 
     prev_wkdy_vals = nil
     prev_wkdy_rule = nil
@@ -512,8 +492,8 @@ class MonthWeekdayWeekendSchedule
 
     periods.each do |period|
       for m in period[0]..period[1]
-        date_s = OpenStudio::Date::fromDayOfYear(day_startm[m], assumedYear)
-        date_e = OpenStudio::Date::fromDayOfYear(day_endm[m], assumedYear)
+        date_s = OpenStudio::Date::fromDayOfYear(day_startm[m - 1], assumedYear)
+        date_e = OpenStudio::Date::fromDayOfYear(day_endm[m - 1], assumedYear)
 
         wkdy_vals = []
         wknd_vals = []
@@ -766,11 +746,9 @@ class HotWaterSchedule
       return
     end
 
-    year_description = @model.getYearDescription
-    assumed_year = year_description.assumedYear
+    assumed_year = @model.getYearDescription.assumedYear
 
-    last_day_of_year = 365
-    last_day_of_year += 1 if year_description.isLeapYear
+    last_day_of_year = Schedule.YearNumDays(@model)
 
     # Create ScheduleRuleset with repeating weeks
 
@@ -998,5 +976,22 @@ class Schedule
       day_num += num_days_in_month
     end
     return days
+  end
+
+  def self.day_start_months(model)
+    day_end_months = day_end_months(model)
+    month_num_days = MonthNumDays(model)
+    month_num_days = [day_end_months, month_num_days].transpose.map { |i| i.reduce(:-) + 1 }
+    return month_num_days
+  end
+
+  def self.day_end_months(model)
+    month_num_days = MonthNumDays(model)
+    month_num_days.each_with_index do |m, i|
+      next if i == 0
+
+      month_num_days[i] += month_num_days[i - 1]
+    end
+    return month_num_days
   end
 end
