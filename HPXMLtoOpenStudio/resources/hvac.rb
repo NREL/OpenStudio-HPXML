@@ -1055,7 +1055,8 @@ class HVAC
     if has_ceiling_fan
       clg_ceiling_fan_offset = hvac_control.ceiling_fan_cooling_setpoint_temp_offset
       if not clg_ceiling_fan_offset.nil?
-        get_default_ceiling_fan_days(model, weather).each_with_index do |operation, d|
+        months = get_default_ceiling_fan_months(weather)
+        Schedule.months_to_days(model, months).each_with_index do |operation, d|
           next if operation != 1
 
           clg_weekday_setpoints[d] = [clg_weekday_setpoints[d], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
@@ -1386,20 +1387,6 @@ class HVAC
       months[m] = 1
     end
     return months
-  end
-
-  def self.get_default_ceiling_fan_days(model, weather)
-    months = get_default_ceiling_fan_months(weather)
-    num_days = Schedule.YearNumDays(model)
-    days = [0] * num_days
-    day_num = 0
-    (0..11).to_a.each do |month_num|
-      month_num_days = Schedule.MonthNumDays(model)
-      num_days_in_month = month_num_days[month_num]
-      days.fill(months[month_num], day_num, num_days_in_month)
-      day_num += num_days_in_month
-    end
-    return days
   end
 
   def self.get_default_heating_and_cooling_seasons(weather)
