@@ -3757,8 +3757,8 @@ class HPXML < Object
         end
         XMLHelper.add_element(precond_htg, 'HeatingSystemFuel', @preheating_fuel, :string) unless @preheating_fuel.nil?
         eff = XMLHelper.add_element(precond_htg, 'AnnualHeatingEfficiency') unless @preheating_efficiency_cop.nil?
-        XMLHelper.add_element(eff, 'Value', @preheating_efficiency_cop, :float) unless eff.nil?
         XMLHelper.add_element(eff, 'Units', UnitsCOP, :string) unless eff.nil?
+        XMLHelper.add_element(eff, 'Value', @preheating_efficiency_cop, :float) unless eff.nil?
         XMLHelper.add_element(precond_htg, 'FractionHeatLoadServed', @preheating_fraction_load_served, :float) unless @preheating_fraction_load_served.nil?
       end
       if (not @precooling_fuel.nil?) && (not @precooling_efficiency_cop.nil?)
@@ -3770,10 +3770,10 @@ class HPXML < Object
           XMLHelper.add_attribute(precond_clg_sys_id, 'id', @id + 'PreCooling')
         end
         XMLHelper.add_element(precond_clg, 'CoolingSystemFuel', @precooling_fuel, :string) unless @precooling_fuel.nil?
-        eff = XMLHelper.add_element(precond_clg, 'AnnualCoolingEfficiency') unless @precooling_efficiency_cop.nil?
-        XMLHelper.add_element(eff, 'Value', @precooling_efficiency_cop, :float) unless eff.nil?
-        XMLHelper.add_element(eff, 'Units', UnitsCOP, :string) unless eff.nil?
         XMLHelper.add_element(precond_clg, 'FractionCoolLoadServed', @precooling_fraction_load_served, :float) unless @precooling_fraction_load_served.nil?
+        eff = XMLHelper.add_element(precond_clg, 'AnnualCoolingEfficiency') unless @precooling_efficiency_cop.nil?
+        XMLHelper.add_element(eff, 'Units', UnitsCOP, :string) unless eff.nil?
+        XMLHelper.add_element(eff, 'Value', @precooling_efficiency_cop, :float) unless eff.nil?
       end
       XMLHelper.add_extension(ventilation_fan, 'StartHour', @start_hour, :integer, @start_hour_isdefaulted) unless @start_hour.nil?
       XMLHelper.add_extension(ventilation_fan, 'InUnitFlowRate', @in_unit_flow_rate, :float) unless @in_unit_flow_rate.nil?

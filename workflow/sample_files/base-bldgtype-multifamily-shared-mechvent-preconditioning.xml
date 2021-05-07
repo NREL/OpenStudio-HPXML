@@ -278,19 +278,19 @@
                 <SystemIdentifier id='SharedSupplyFanPreHeating'/>
                 <HeatingSystemFuel>natural gas</HeatingSystemFuel>
                 <AnnualHeatingEfficiency>
-                  <Value>0.92</Value>
                   <Units>COP</Units>
+                  <Value>0.92</Value>
                 </AnnualHeatingEfficiency>
                 <FractionHeatLoadServed>0.7</FractionHeatLoadServed>
               </PreconditioningHeatingSystem>
               <PreconditioningCoolingSystem>
                 <SystemIdentifier id='SharedSupplyFanPreCooling'/>
                 <CoolingSystemFuel>electricity</CoolingSystemFuel>
-                <AnnualCoolingEfficiency>
-                  <Value>4.0</Value>
-                  <Units>COP</Units>
-                </AnnualCoolingEfficiency>
                 <FractionCoolLoadServed>0.8</FractionCoolLoadServed>
+                <AnnualCoolingEfficiency>
+                  <Units>COP</Units>
+                  <Value>4.0</Value>
+                </AnnualCoolingEfficiency>
               </PreconditioningCoolingSystem>
               <extension>
                 <InUnitFlowRate>80.0</InUnitFlowRate>

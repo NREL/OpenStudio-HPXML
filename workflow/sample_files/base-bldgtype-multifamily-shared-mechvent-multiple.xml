@@ -344,19 +344,19 @@
                 <SystemIdentifier id='SharedSupplyPreHeating'/>
                 <HeatingSystemFuel>natural gas</HeatingSystemFuel>
                 <AnnualHeatingEfficiency>
-                  <Value>0.92</Value>
                   <Units>COP</Units>
+                  <Value>0.92</Value>
                 </AnnualHeatingEfficiency>
                 <FractionHeatLoadServed>0.8</FractionHeatLoadServed>
               </PreconditioningHeatingSystem>
               <PreconditioningCoolingSystem>
                 <SystemIdentifier id='SharedSupplyPreCooling'/>
                 <CoolingSystemFuel>electricity</CoolingSystemFuel>
-                <AnnualCoolingEfficiency>
-                  <Value>4.0</Value>
-                  <Units>COP</Units>
-                </AnnualCoolingEfficiency>
                 <FractionCoolLoadServed>0.8</FractionCoolLoadServed>
+                <AnnualCoolingEfficiency>
+                  <Units>COP</Units>
+                  <Value>4.0</Value>
+                </AnnualCoolingEfficiency>
               </PreconditioningCoolingSystem>
               <extension>
                 <InUnitFlowRate>100.0</InUnitFlowRate>
@@ -377,19 +377,19 @@
                 <SystemIdentifier id='SharedERVPreHeating'/>
                 <HeatingSystemFuel>natural gas</HeatingSystemFuel>
                 <AnnualHeatingEfficiency>
-                  <Value>0.87</Value>
                   <Units>COP</Units>
+                  <Value>0.87</Value>
                 </AnnualHeatingEfficiency>
                 <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               </PreconditioningHeatingSystem>
               <PreconditioningCoolingSystem>
                 <SystemIdentifier id='SharedERVPreCooling'/>
                 <CoolingSystemFuel>electricity</CoolingSystemFuel>
-                <AnnualCoolingEfficiency>
-                  <Value>3.5</Value>
-                  <Units>COP</Units>
-                </AnnualCoolingEfficiency>
                 <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+                <AnnualCoolingEfficiency>
+                  <Units>COP</Units>
+                  <Value>3.5</Value>
+                </AnnualCoolingEfficiency>
               </PreconditioningCoolingSystem>
               <extension>
                 <InUnitFlowRate>50.0</InUnitFlowRate>
@@ -409,19 +409,19 @@
                 <SystemIdentifier id='SharedHRVPreHeating'/>
                 <HeatingSystemFuel>electricity</HeatingSystemFuel>
                 <AnnualHeatingEfficiency>
-                  <Value>4.0</Value>
                   <Units>COP</Units>
+                  <Value>4.0</Value>
                 </AnnualHeatingEfficiency>
                 <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               </PreconditioningHeatingSystem>
               <PreconditioningCoolingSystem>
                 <SystemIdentifier id='SharedHRVPreCooling'/>
                 <CoolingSystemFuel>electricity</CoolingSystemFuel>
-                <AnnualCoolingEfficiency>
-                  <Value>4.5</Value>
-                  <Units>COP</Units>
-                </AnnualCoolingEfficiency>
                 <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+                <AnnualCoolingEfficiency>
+                  <Units>COP</Units>
+                  <Value>4.5</Value>
+                </AnnualCoolingEfficiency>
               </PreconditioningCoolingSystem>
               <extension>
                 <InUnitFlowRate>50.0</InUnitFlowRate>
@@ -440,19 +440,19 @@
                 <SystemIdentifier id='SharedBalancedPreHeating'/>
                 <HeatingSystemFuel>electricity</HeatingSystemFuel>
                 <AnnualHeatingEfficiency>
-                  <Value>3.5</Value>
                   <Units>COP</Units>
+                  <Value>3.5</Value>
                 </AnnualHeatingEfficiency>
                 <FractionHeatLoadServed>0.9</FractionHeatLoadServed>
               </PreconditioningHeatingSystem>
               <PreconditioningCoolingSystem>
                 <SystemIdentifier id='SharedBalancedPreCooling'/>
                 <CoolingSystemFuel>electricity</CoolingSystemFuel>
-                <AnnualCoolingEfficiency>
-                  <Value>4.0</Value>
-                  <Units>COP</Units>
-                </AnnualCoolingEfficiency>
                 <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+                <AnnualCoolingEfficiency>
+                  <Units>COP</Units>
+                  <Value>4.0</Value>
+                </AnnualCoolingEfficiency>
               </PreconditioningCoolingSystem>
               <extension>
                 <InUnitFlowRate>30.0</InUnitFlowRate>
