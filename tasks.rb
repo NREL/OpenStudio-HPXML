@@ -4018,7 +4018,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
     hpxml.ventilation_fans[0].precooling_efficiency_cop = 4.0
     hpxml.ventilation_fans[0].precooling_fraction_load_served = 0.8
   elsif ['base-bldgtype-multifamily-shared-mechvent-multiple.xml'].include? hpxml_file
-    hpxml.ventilation_fans.add(id: 'SharedSupplyPreconditioned',
+    hpxml.ventilation_fans.add(id: 'SharedSupply',
                                fan_type: HPXML::MechVentTypeSupply,
                                is_shared_system: true,
                                in_unit_flow_rate: 100,
@@ -4033,7 +4033,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                precooling_fuel: HPXML::FuelTypeElectricity,
                                precooling_efficiency_cop: 4.0,
                                precooling_fraction_load_served: 0.8)
-    hpxml.ventilation_fans.add(id: 'SharedERVPreconditioned',
+    hpxml.ventilation_fans.add(id: 'SharedERV',
                                fan_type: HPXML::MechVentTypeERV,
                                is_shared_system: true,
                                in_unit_flow_rate: 50,
@@ -4050,7 +4050,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                precooling_fuel: HPXML::FuelTypeElectricity,
                                precooling_efficiency_cop: 3.5,
                                precooling_fraction_load_served: 1.0)
-    hpxml.ventilation_fans.add(id: 'SharedHRVPreconditioned',
+    hpxml.ventilation_fans.add(id: 'SharedHRV',
                                fan_type: HPXML::MechVentTypeHRV,
                                is_shared_system: true,
                                in_unit_flow_rate: 50,
@@ -4066,7 +4066,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                precooling_efficiency_cop: 4.5,
                                preheating_fraction_load_served: 1.0,
                                precooling_fraction_load_served: 1.0)
-    hpxml.ventilation_fans.add(id: 'SharedBalancedPreconditioned',
+    hpxml.ventilation_fans.add(id: 'SharedBalanced',
                                fan_type: HPXML::MechVentTypeBalanced,
                                is_shared_system: true,
                                in_unit_flow_rate: 30,

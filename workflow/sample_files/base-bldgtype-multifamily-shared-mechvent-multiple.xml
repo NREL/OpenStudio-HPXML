@@ -332,7 +332,7 @@
         <MechanicalVentilation>
           <VentilationFans>
             <VentilationFan>
-              <SystemIdentifier id='SharedSupplyPreconditioned'/>
+              <SystemIdentifier id='SharedSupply'/>
               <FanType>supply only</FanType>
               <RatedFlowRate>1000.0</RatedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
@@ -340,28 +340,30 @@
               <IsSharedSystem>true</IsSharedSystem>
               <FractionRecirculation>0.0</FractionRecirculation>
               <FanPower>300.0</FanPower>
+              <PreconditioningHeatingSystem>
+                <SystemIdentifier id='SharedSupplyPreHeating'/>
+                <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+                <AnnualHeatingEfficiency>
+                  <Units>COP</Units>
+                  <Value>0.92</Value>
+                </AnnualHeatingEfficiency>
+                <FractionHeatLoadServed>0.8</FractionHeatLoadServed>
+              </PreconditioningHeatingSystem>
+              <PreconditioningCoolingSystem>
+                <SystemIdentifier id='SharedSupplyPreCooling'/>
+                <CoolingSystemFuel>electricity</CoolingSystemFuel>
+                <FractionCoolLoadServed>0.8</FractionCoolLoadServed>
+                <AnnualCoolingEfficiency>
+                  <Units>COP</Units>
+                  <Value>4.0</Value>
+                </AnnualCoolingEfficiency>
+              </PreconditioningCoolingSystem>
               <extension>
                 <InUnitFlowRate>100.0</InUnitFlowRate>
-                <PreHeating>
-                  <Fuel>natural gas</Fuel>
-                  <AnnualHeatingEfficiency>
-                    <Value>0.92</Value>
-                    <Units>COP</Units>
-                  </AnnualHeatingEfficiency>
-                  <FractionVentilationHeatLoadServed>0.8</FractionVentilationHeatLoadServed>
-                </PreHeating>
-                <PreCooling>
-                  <Fuel>electricity</Fuel>
-                  <AnnualCoolingEfficiency>
-                    <Value>4.0</Value>
-                    <Units>COP</Units>
-                  </AnnualCoolingEfficiency>
-                  <FractionVentilationCoolLoadServed>0.8</FractionVentilationCoolLoadServed>
-                </PreCooling>
               </extension>
             </VentilationFan>
             <VentilationFan>
-              <SystemIdentifier id='SharedERVPreconditioned'/>
+              <SystemIdentifier id='SharedERV'/>
               <FanType>energy recovery ventilator</FanType>
               <RatedFlowRate>500.0</RatedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
@@ -371,28 +373,30 @@
               <TotalRecoveryEfficiency>0.48</TotalRecoveryEfficiency>
               <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
               <FanPower>150.0</FanPower>
+              <PreconditioningHeatingSystem>
+                <SystemIdentifier id='SharedERVPreHeating'/>
+                <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+                <AnnualHeatingEfficiency>
+                  <Units>COP</Units>
+                  <Value>0.87</Value>
+                </AnnualHeatingEfficiency>
+                <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              </PreconditioningHeatingSystem>
+              <PreconditioningCoolingSystem>
+                <SystemIdentifier id='SharedERVPreCooling'/>
+                <CoolingSystemFuel>electricity</CoolingSystemFuel>
+                <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+                <AnnualCoolingEfficiency>
+                  <Units>COP</Units>
+                  <Value>3.5</Value>
+                </AnnualCoolingEfficiency>
+              </PreconditioningCoolingSystem>
               <extension>
                 <InUnitFlowRate>50.0</InUnitFlowRate>
-                <PreHeating>
-                  <Fuel>natural gas</Fuel>
-                  <AnnualHeatingEfficiency>
-                    <Value>0.87</Value>
-                    <Units>COP</Units>
-                  </AnnualHeatingEfficiency>
-                  <FractionVentilationHeatLoadServed>1.0</FractionVentilationHeatLoadServed>
-                </PreHeating>
-                <PreCooling>
-                  <Fuel>electricity</Fuel>
-                  <AnnualCoolingEfficiency>
-                    <Value>3.5</Value>
-                    <Units>COP</Units>
-                  </AnnualCoolingEfficiency>
-                  <FractionVentilationCoolLoadServed>1.0</FractionVentilationCoolLoadServed>
-                </PreCooling>
               </extension>
             </VentilationFan>
             <VentilationFan>
-              <SystemIdentifier id='SharedHRVPreconditioned'/>
+              <SystemIdentifier id='SharedHRV'/>
               <FanType>heat recovery ventilator</FanType>
               <RatedFlowRate>500.0</RatedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
@@ -401,28 +405,30 @@
               <FractionRecirculation>0.3</FractionRecirculation>
               <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
               <FanPower>150.0</FanPower>
+              <PreconditioningHeatingSystem>
+                <SystemIdentifier id='SharedHRVPreHeating'/>
+                <HeatingSystemFuel>electricity</HeatingSystemFuel>
+                <AnnualHeatingEfficiency>
+                  <Units>COP</Units>
+                  <Value>4.0</Value>
+                </AnnualHeatingEfficiency>
+                <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              </PreconditioningHeatingSystem>
+              <PreconditioningCoolingSystem>
+                <SystemIdentifier id='SharedHRVPreCooling'/>
+                <CoolingSystemFuel>electricity</CoolingSystemFuel>
+                <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+                <AnnualCoolingEfficiency>
+                  <Units>COP</Units>
+                  <Value>4.5</Value>
+                </AnnualCoolingEfficiency>
+              </PreconditioningCoolingSystem>
               <extension>
                 <InUnitFlowRate>50.0</InUnitFlowRate>
-                <PreHeating>
-                  <Fuel>electricity</Fuel>
-                  <AnnualHeatingEfficiency>
-                    <Value>4.0</Value>
-                    <Units>COP</Units>
-                  </AnnualHeatingEfficiency>
-                  <FractionVentilationHeatLoadServed>1.0</FractionVentilationHeatLoadServed>
-                </PreHeating>
-                <PreCooling>
-                  <Fuel>electricity</Fuel>
-                  <AnnualCoolingEfficiency>
-                    <Value>4.5</Value>
-                    <Units>COP</Units>
-                  </AnnualCoolingEfficiency>
-                  <FractionVentilationCoolLoadServed>1.0</FractionVentilationCoolLoadServed>
-                </PreCooling>
               </extension>
             </VentilationFan>
             <VentilationFan>
-              <SystemIdentifier id='SharedBalancedPreconditioned'/>
+              <SystemIdentifier id='SharedBalanced'/>
               <FanType>balanced</FanType>
               <RatedFlowRate>300.0</RatedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
@@ -430,24 +436,26 @@
               <IsSharedSystem>true</IsSharedSystem>
               <FractionRecirculation>0.3</FractionRecirculation>
               <FanPower>150.0</FanPower>
+              <PreconditioningHeatingSystem>
+                <SystemIdentifier id='SharedBalancedPreHeating'/>
+                <HeatingSystemFuel>electricity</HeatingSystemFuel>
+                <AnnualHeatingEfficiency>
+                  <Units>COP</Units>
+                  <Value>3.5</Value>
+                </AnnualHeatingEfficiency>
+                <FractionHeatLoadServed>0.9</FractionHeatLoadServed>
+              </PreconditioningHeatingSystem>
+              <PreconditioningCoolingSystem>
+                <SystemIdentifier id='SharedBalancedPreCooling'/>
+                <CoolingSystemFuel>electricity</CoolingSystemFuel>
+                <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+                <AnnualCoolingEfficiency>
+                  <Units>COP</Units>
+                  <Value>4.0</Value>
+                </AnnualCoolingEfficiency>
+              </PreconditioningCoolingSystem>
               <extension>
                 <InUnitFlowRate>30.0</InUnitFlowRate>
-                <PreHeating>
-                  <Fuel>electricity</Fuel>
-                  <AnnualHeatingEfficiency>
-                    <Value>3.5</Value>
-                    <Units>COP</Units>
-                  </AnnualHeatingEfficiency>
-                  <FractionVentilationHeatLoadServed>0.9</FractionVentilationHeatLoadServed>
-                </PreHeating>
-                <PreCooling>
-                  <Fuel>electricity</Fuel>
-                  <AnnualCoolingEfficiency>
-                    <Value>4.0</Value>
-                    <Units>COP</Units>
-                  </AnnualCoolingEfficiency>
-                  <FractionVentilationCoolLoadServed>1.0</FractionVentilationCoolLoadServed>
-                </PreCooling>
               </extension>
             </VentilationFan>
             <VentilationFan>
