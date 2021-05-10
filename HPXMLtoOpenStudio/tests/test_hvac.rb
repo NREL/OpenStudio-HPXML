@@ -832,7 +832,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     heating_days.timeSeries.values.each do |value|
       values.push(value)
     end
-    heating_season = Schedule.get_daily_season(model.getYearDescription.assumedYear, Schedule.YearNumDays(model), seasons_heating_begin_month, seasons_heating_begin_day, seasons_heating_end_month, seasons_heating_end_day)
+    heating_season = Schedule.get_daily_season(model, seasons_heating_begin_month, seasons_heating_begin_day, seasons_heating_end_month, seasons_heating_end_day)
     assert_equal(heating_season.sum, values.sum)
 
     # Check cooling season
@@ -843,7 +843,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     cooling_days.timeSeries.values.each do |value|
       values.push(value)
     end
-    cooling_season = Schedule.get_daily_season(model.getYearDescription.assumedYear, Schedule.YearNumDays(model), seasons_cooling_begin_month, seasons_cooling_begin_day, seasons_cooling_end_month, seasons_cooling_end_day)
+    cooling_season = Schedule.get_daily_season(model, seasons_cooling_begin_month, seasons_cooling_begin_day, seasons_cooling_end_month, seasons_cooling_end_day)
     assert_equal(cooling_season.sum, values.sum)
   end
 

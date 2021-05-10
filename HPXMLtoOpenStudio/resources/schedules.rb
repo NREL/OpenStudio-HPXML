@@ -175,7 +175,7 @@ class HourlyByDaySchedule
     @model = model
     @sch_name = sch_name
     @schedule = nil
-    @num_days = Schedule.YearNumDays(model)
+    @num_days = Schedule.get_num_days_in_year(model)
     @weekday_day_by_hour_values = validateValues(weekday_day_by_hour_values, @num_days, 24)
     @weekend_day_by_hour_values = validateValues(weekend_day_by_hour_values, @num_days, 24)
     @schedule_type_limits_name = schedule_type_limits_name
@@ -465,7 +465,7 @@ class MonthWeekdayWeekendSchedule
   end
 
   def createSchedule()
-    month_num_days = Schedule.MonthNumDays(@model)
+    month_num_days = Schedule.get_num_days_per_month(@model)
     month_num_days[@end_month - 1] = @end_day
 
     day_startm = Schedule.day_start_months(@model)
@@ -752,7 +752,7 @@ class HotWaterSchedule
 
     assumed_year = @model.getYearDescription.assumedYear
 
-    last_day_of_year = Schedule.YearNumDays(@model)
+    last_day_of_year = Schedule.get_num_days_in_year(@model)
 
     # Create ScheduleRuleset with repeating weeks
 
@@ -940,62 +940,57 @@ class Schedule
     rule.setApplySunday(true)
   end
 
-  def self.MonthNumDays(model)
+  def self.get_num_days_per_month(model)
     month_num_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    month_num_days[1] += 1 if model.getYearDescription.isLeapYear
+    month_num_days[1] += 1 if (!model.nil? && model.getYearDescription.isLeapYear)
     return month_num_days
   end
 
-  def self.YearNumDays(model)
-    return MonthNumDays(model).sum
+  def self.get_num_days_in_year(model)
+    return get_num_days_per_month(model).sum
   end
 
-  def self.get_daily_season(year, num_days, start_month, start_day, end_month, end_day)
-    day_ts = Time.new(year, 1, 1)
-    start_ts = Time.new(year, start_month, start_day)
-    end_ts = Time.new(year, end_month, end_day)
-    season = Array.new(num_days, 0)
-    (0..(num_days - 1)).each do |i|
-      if start_ts <= end_ts
-        season[i] = 1 if start_ts <= day_ts && day_ts <= end_ts
-      else
-        season[i] = 1 if start_ts <= day_ts && day_ts <= Time.new(year, 12, 31)
-        season[i] = 1 if Time.new(year, 1, 1) <= day_ts && day_ts <= end_ts
-      end
-
-      day_ts += (60 * 60 * 24) # 1 day
+  def self.get_day_num_from_month_day(model, month, day)
+    # Returns a value between 1 and 365 (or 366 for a leap year)
+    # Returns e.g. 32 for month=2 and day=1 (Feb 1)
+    month_num_days = get_num_days_per_month(model)
+    day_num = day
+    for m in 0..month - 2
+      day_num += month_num_days[m]
     end
+    return day_num
+  end
 
+  def self.get_daily_season(model, start_month, start_day, end_month, end_day)
+    start_day_num = get_day_num_from_month_day(model, start_month, start_day)
+    end_day_num = get_day_num_from_month_day(model, end_month, end_day)
+
+    season = Array.new(get_num_days_in_year(model), 0)
+    if end_day_num > start_day_num
+      season.fill(1, start_day_num - 1, end_day_num - start_day_num + 1) # Fill between start/end days
+    else # Wrap around year
+      season.fill(1, start_day_num - 1) # Fill between start day and end of year
+      season.fill(1, 0, end_day_num) # Fill between start of year and end day
+    end
     return season
   end
 
   def self.months_to_days(model, months)
-    num_days = Schedule.YearNumDays(model)
-    days = [0] * num_days
-    day_num = 0
-    (0..11).to_a.each do |month_num|
-      month_num_days = Schedule.MonthNumDays(model)
-      num_days_in_month = month_num_days[month_num]
-      days.fill(months[month_num], day_num, num_days_in_month)
-      day_num += num_days_in_month
+    month_num_days = get_num_days_per_month(model)
+    days = []
+    for m in 0..11
+      days.concat([months[m]] * month_num_days[m])
     end
     return days
   end
 
   def self.day_start_months(model)
-    day_end_months = day_end_months(model)
-    month_num_days = MonthNumDays(model)
-    month_num_days = [day_end_months, month_num_days].transpose.map { |i| i.reduce(:-) + 1 }
-    return month_num_days
+    month_num_days = get_num_days_per_month(model)
+    return month_num_days.each_with_index.map { |n, i| get_day_num_from_month_day(model, i + 1, 1) }
   end
 
   def self.day_end_months(model)
-    month_num_days = MonthNumDays(model)
-    month_num_days.each_with_index do |m, i|
-      next if i == 0
-
-      month_num_days[i] += month_num_days[i - 1]
-    end
-    return month_num_days
+    month_num_days = get_num_days_per_month(model)
+    return month_num_days.each_with_index.map { |n, i| get_day_num_from_month_day(model, i + 1, n) }
   end
 end

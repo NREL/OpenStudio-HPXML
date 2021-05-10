@@ -997,7 +997,7 @@ class HVAC
   end
 
   def self.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, heating_days, cooling_days)
-    num_days = Schedule.YearNumDays(model)
+    num_days = Schedule.get_num_days_in_year(model)
 
     if hvac_control.weekday_heating_setpoints.nil? || hvac_control.weekend_heating_setpoints.nil?
       # Base heating setpoint

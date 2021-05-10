@@ -3216,24 +3216,8 @@ class HPXML < Object
     def check_for_errors
       errors = []
 
-      errors += HPXML::check_dates('Heating Season', @seasons_heating_begin_month, @season_heating_begin_day, @season_heating_end_month, @season_heating_end_day)
-
-      errors += HPXML::check_dates('Cooling Season', @seasons_cooling_begin_month, @season_cooling_begin_day, @season_cooling_end_month, @season_cooling_end_day)
-
-      heating_season = Array.new(365, 1)
-      if (not @seasons_heating_begin_month.nil?) && (not @seasons_heating_begin_day.nil?) && (not @seasons_heating_end_month.nil?) && (not @seasons_heating_end_day.nil?)
-        heating_season = Schedule.get_daily_season(2007, 365, @seasons_heating_begin_month, @seasons_heating_begin_day, @seasons_heating_end_month, @seasons_heating_end_day)
-      end
-
-      cooling_season = Array.new(365, 1)
-      if (not @seasons_cooling_begin_month.nil?) && (not @seasons_cooling_begin_day.nil?) && (not @seasons_cooling_end_month.nil?) && (not @seasons_cooling_end_day.nil?)
-        cooling_season = Schedule.get_daily_season(2007, 365, @seasons_cooling_begin_month, @seasons_cooling_begin_day, @seasons_cooling_end_month, @seasons_cooling_end_day)
-      end
-
-      seasons = [heating_season, cooling_season].transpose.map { |i| i.sum }
-      if seasons.include? 0
-        errors << 'HeatingSeason and CoolingSeason, when combined, must span the entire year.'
-      end
+      errors += HPXML::check_dates('Heating Season', @seasons_heating_begin_month, @seasons_heating_begin_day, @seasons_heating_end_month, @seasons_heating_end_day)
+      errors += HPXML::check_dates('Cooling Season', @seasons_cooling_begin_month, @seasons_cooling_begin_day, @seasons_cooling_end_month, @seasons_cooling_end_day)
 
       return errors
     end
