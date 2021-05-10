@@ -966,7 +966,7 @@ class Schedule
     end_day_num = get_day_num_from_month_day(model, end_month, end_day)
 
     season = Array.new(get_num_days_in_year(model), 0)
-    if end_day_num > start_day_num
+    if end_day_num >= start_day_num
       season.fill(1, start_day_num - 1, end_day_num - start_day_num + 1) # Fill between start/end days
     else # Wrap around year
       season.fill(1, start_day_num - 1) # Fill between start day and end of year
