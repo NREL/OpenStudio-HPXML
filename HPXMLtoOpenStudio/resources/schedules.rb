@@ -993,4 +993,28 @@ class Schedule
     month_num_days = get_num_days_per_month(model)
     return month_num_days.each_with_index.map { |n, i| get_day_num_from_month_day(model, i + 1, n) }
   end
+
+  def self.create_ruleset_from_daily_season(model, values)
+    s = OpenStudio::Model::ScheduleRuleset.new(model)
+    start_value = values[0]
+    start_date = OpenStudio::Date::fromDayOfYear(1, model.getYearDescription.assumedYear)
+    values.each_with_index do |value, i|
+      i += 1
+      next unless value != start_value || i == values.length
+      rule = OpenStudio::Model::ScheduleRule.new(s)
+      set_weekday_rule(rule)
+      set_weekend_rule(rule)
+      i += 1 if i == values.length
+      end_date = OpenStudio::Date::fromDayOfYear(i - 1, model.getYearDescription.assumedYear)
+      rule.setStartDate(start_date)
+      rule.setEndDate(end_date)
+      day_schedule = rule.daySchedule
+      day_schedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), start_value)
+      break if i == values.length + 1
+
+      start_date = OpenStudio::Date::fromDayOfYear(i, model.getYearDescription.assumedYear)
+      start_value = value
+    end
+    return s
+  end
 end

@@ -824,27 +824,12 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     zone = unitary_system.controllingZoneorThermostatLocation.get
 
     # Check heating season
-    heating_days = zone.sequentialHeatingFractionSchedule(zone.airLoopHVACTerminals[0]).get.to_ScheduleFixedInterval.get
-    cooling_days = zone.sequentialCoolingFractionSchedule(zone.airLoopHVACTerminals[0]).get.to_ScheduleFixedInterval.get
-    assert_equal(1, heating_days.startMonth)
-    assert_equal(2, heating_days.startDay) # FIXME? (mains temperature schedule is the same)
-    values = []
-    heating_days.timeSeries.values.each do |value|
-      values.push(value)
-    end
-    heating_season = Schedule.get_daily_season(model, seasons_heating_begin_month, seasons_heating_begin_day, seasons_heating_end_month, seasons_heating_end_day)
-    assert_equal(heating_season.sum, values.sum)
+    heating_days = zone.sequentialHeatingFractionSchedule(zone.airLoopHVACTerminals[0]).get.to_ScheduleRuleset.get
+    assert_equal(heating_days.scheduleRules.size, 3)
 
     # Check cooling season
-    cooling_days = zone.sequentialCoolingFractionSchedule(zone.airLoopHVACTerminals[0]).get.to_ScheduleFixedInterval.get
-    assert_equal(1, cooling_days.startMonth)
-    assert_equal(2, cooling_days.startDay) # FIXME? (mains temperature schedule is the same)
-    values = []
-    cooling_days.timeSeries.values.each do |value|
-      values.push(value)
-    end
-    cooling_season = Schedule.get_daily_season(model, seasons_cooling_begin_month, seasons_cooling_begin_day, seasons_cooling_end_month, seasons_cooling_end_day)
-    assert_equal(cooling_season.sum, values.sum)
+    cooling_days = zone.sequentialCoolingFractionSchedule(zone.airLoopHVACTerminals[0]).get.to_ScheduleRuleset.get
+    assert_equal(cooling_days.scheduleRules.size, 3)
   end
 
   def _test_measure(args_hash)

@@ -1396,25 +1396,25 @@ class HVAC
     heat_design_db = weather.design.HeatingDrybulb
 
     # create basis lists with zero for every month
-    cooling_days_temp_basis = Array.new(monthly_temps.length, 0.0)
-    heating_days_temp_basis = Array.new(monthly_temps.length, 0.0)
+    cooling_season_temp_basis = Array.new(monthly_temps.length, 0.0)
+    heating_season_temp_basis = Array.new(monthly_temps.length, 0.0)
 
     monthly_temps.each_with_index do |temp, i|
       if temp < 66.0
-        heating_days_temp_basis[i] = 1.0
+        heating_season_temp_basis[i] = 1.0
       elsif temp >= 66.0
-        cooling_days_temp_basis[i] = 1.0
+        cooling_season_temp_basis[i] = 1.0
       end
 
       if ((i == 0) || (i == 11)) && (heat_design_db < 59.0)
-        heating_days_temp_basis[i] = 1.0
+        heating_season_temp_basis[i] = 1.0
       elsif (i == 6) || (i == 7)
-        cooling_days_temp_basis[i] = 1.0
+        cooling_season_temp_basis[i] = 1.0
       end
     end
 
-    cooling_days = Array.new(monthly_temps.length, 0.0)
-    heating_days = Array.new(monthly_temps.length, 0.0)
+    cooling_season = Array.new(monthly_temps.length, 0.0)
+    heating_season = Array.new(monthly_temps.length, 0.0)
 
     monthly_temps.each_with_index do |temp, i|
       # Heating overlaps with cooling at beginning of summer
@@ -1424,28 +1424,28 @@ class HVAC
         prevmonth = i - 1
       end
 
-      if ((heating_days_temp_basis[i] == 1.0) || ((cooling_days_temp_basis[prevmonth] == 0.0) && (cooling_days_temp_basis[i] == 1.0)))
-        heating_days[i] = 1.0
+      if ((heating_season_temp_basis[i] == 1.0) || ((cooling_season_temp_basis[prevmonth] == 0.0) && (cooling_season_temp_basis[i] == 1.0)))
+        heating_season[i] = 1.0
       else
-        heating_days[i] = 0.0
+        heating_season[i] = 0.0
       end
 
-      if ((cooling_days_temp_basis[i] == 1.0) || ((heating_days_temp_basis[prevmonth] == 0.0) && (heating_days_temp_basis[i] == 1.0)))
-        cooling_days[i] = 1.0
+      if ((cooling_season_temp_basis[i] == 1.0) || ((heating_season_temp_basis[prevmonth] == 0.0) && (heating_season_temp_basis[i] == 1.0)))
+        cooling_season[i] = 1.0
       else
-        cooling_days[i] = 0.0
+        cooling_season[i] = 0.0
       end
     end
 
     # Find the first month of cooling and add one month
     (1...12).to_a.each do |i|
-      if cooling_days[i] == 1.0
-        cooling_days[i - 1] = 1.0
+      if cooling_season[i] == 1.0
+        cooling_season[i - 1] = 1.0
         break
       end
     end
 
-    return heating_days, cooling_days
+    return heating_season, cooling_season
   end
 
   private
@@ -3636,15 +3636,12 @@ class HVAC
 
     if values.uniq.length == 1
       s = OpenStudio::Model::ScheduleConstant.new(model)
-      s.setName('Sequential Fraction Schedule')
       s.setValue(values[0])
     else
-      start_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, model.getYearDescription.assumedYear)
-      timestep_day = OpenStudio::Time.new(1, 0)
-      ts = OpenStudio::TimeSeries.new(start_date, timestep_day, OpenStudio::createVector(values), '')
-      s = OpenStudio::Model::ScheduleInterval.fromTimeSeries(ts, model).get
+      s = Schedule.create_ruleset_from_daily_season(model, values)
     end
 
+    s.setName('Sequential Fraction Schedule')
     Schedule.set_schedule_type_limits(model, s, Constants.ScheduleTypeLimitsFraction)
     return s
   end
