@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+$VERBOSE = nil # Prevents ruby warnings, see https://github.com/NREL/OpenStudio/issues/4301
+
 def create_hpxmls
   require 'oga'
   require_relative 'HPXMLtoOpenStudio/resources/constants'
@@ -559,6 +561,7 @@ def create_hpxmls
         if errors.size > 0
           fail "ERRORS: #{errors}"
         end
+
         # Check for errors
         errors = hpxml.check_for_errors()
         if errors.size > 0
@@ -2628,6 +2631,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
           hpxml.windows[-1].fraction_operable = 1.0
         end
         next unless hpxml_file == 'base-enclosure-split-surfaces2.xml'
+
         hpxml.windows[-1].ufactor += 0.01 * i
         hpxml.windows[-1].interior_shading_factor_summer -= 0.02 * i
         hpxml.windows[-1].interior_shading_factor_winter -= 0.01 * i
@@ -2737,6 +2741,7 @@ def set_hpxml_skylights(hpxml_file, hpxml)
         hpxml.skylights[-1].id += i.to_s
         hpxml.skylights[-1].roof_idref += i.to_s if i % 2 == 0
         next unless hpxml_file == 'base-enclosure-split-surfaces2.xml'
+
         hpxml.skylights[-1].ufactor += 0.01 * i
         hpxml.skylights[-1].interior_shading_factor_summer -= 0.02 * i
         hpxml.skylights[-1].interior_shading_factor_winter -= 0.01 * i
@@ -4402,7 +4407,8 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].recovery_efficiency = nil
     hpxml.water_heating_systems[0].energy_factor = nil
     hpxml.water_heating_systems[0].year_installed = 2009
-  elsif ['base-bldgtype-multifamily-shared-water-heater.xml'].include? hpxml_file
+  elsif ['base-bldgtype-multifamily-shared-water-heater.xml',
+         'base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
     hpxml.water_heating_systems.clear
     hpxml.water_heating_systems.add(id: 'SharedWaterHeater',
                                     is_shared_system: true,
@@ -4416,14 +4422,6 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     energy_factor: 0.59,
                                     recovery_efficiency: 0.76,
                                     temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
-  elsif ['base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].location = HPXML::LocationLivingSpace
-    hpxml.water_heating_systems << hpxml.water_heating_systems[0].dup
-    hpxml.water_heating_systems[1].id = 'SharedWaterHeater'
-    hpxml.water_heating_systems[1].is_shared_system = true
-    hpxml.water_heating_systems[1].number_of_units_served = 6
-    hpxml.water_heating_systems[1].fraction_dhw_load_served = 0
-    hpxml.water_heating_systems[1].location = HPXML::LocationOtherHeatedSpace
   elsif ['invalid_files/multifamily-reference-water-heater.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
   elsif ['invalid_files/dhw-invalid-ef-tank.xml'].include? hpxml_file
@@ -4637,7 +4635,7 @@ def set_hpxml_generators(hpxml_file, hpxml)
                          annual_consumption_kbtu: 8500,
                          annual_output_kwh: 500)
     hpxml.generators.add(id: 'Generator2',
-                         fuel_type: HPXML::FuelTypePropane,
+                         fuel_type: HPXML::FuelTypeOil,
                          annual_consumption_kbtu: 8500,
                          annual_output_kwh: 500)
   elsif ['base-bldgtype-multifamily-shared-generator.xml'].include? hpxml_file
@@ -5650,14 +5648,16 @@ if ARGV[0].to_sym == :create_release_zips
     end
   end
 
-  files = ['HPXMLtoOpenStudio/measure.*',
+  files = ['Changelog.md',
+           'LICENSE.md',
+           'HPXMLtoOpenStudio/measure.*',
            'HPXMLtoOpenStudio/resources/*.*',
            'SimulationOutputReport/measure.*',
            'SimulationOutputReport/resources/*.*',
            'weather/*.*',
            'workflow/*.*',
            'workflow/sample_files/*.xml',
-           'workflow/tests/*.rb',
+           'workflow/tests/*test*.rb',
            'workflow/tests/ASHRAE_Standard_140/*.xml',
            'workflow/tests/base_results/*.csv',
            'documentation/index.html',

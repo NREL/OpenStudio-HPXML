@@ -6,7 +6,7 @@ class HPXMLDefaults
   # being written to the HPXML file. This is useful to associate additional values
   # with the HPXML objects that will ultimately get passed around.
 
-  def self.apply(hpxml, eri_version, weather, epw_file: nil)
+  def self.apply(hpxml, eri_version, weather, epw_file: nil, convert_shared_systems: true)
     cfa = hpxml.building_construction.conditioned_floor_area
     nbeds = hpxml.building_construction.number_of_bedrooms
     ncfl = hpxml.building_construction.number_of_conditioned_floors
@@ -27,7 +27,7 @@ class HPXMLDefaults
     apply_slabs(hpxml)
     apply_windows(hpxml)
     apply_skylights(hpxml)
-    apply_hvac(hpxml, weather)
+    apply_hvac(hpxml, weather, convert_shared_systems)
     apply_hvac_control(hpxml)
     apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
     apply_ventilation_fans(hpxml)
@@ -423,8 +423,10 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac(hpxml, weather)
-    HVAC.apply_shared_systems(hpxml)
+  def self.apply_hvac(hpxml, weather, convert_shared_systems)
+    if convert_shared_systems
+      HVAC.apply_shared_systems(hpxml)
+    end
 
     # HVAC efficiencies (based on HEScore assumption)
     hpxml.heating_systems.each do |heating_system|
@@ -824,6 +826,7 @@ class HPXMLDefaults
       end
 
       next unless not hvac_control.cooling_setup_temp.nil?
+
       if hvac_control.cooling_setup_start_hour.nil?
         hvac_control.cooling_setup_start_hour = 9 # 9 am
         hvac_control.cooling_setup_start_hour_isdefaulted = true
@@ -1438,6 +1441,7 @@ class HPXMLDefaults
       end
 
       next unless pool.heater_type != HPXML::TypeNone
+
       # Heater
       if pool.heater_load_value.nil?
         default_heater_load_units, default_heater_load_value = MiscLoads.get_pool_heater_default_values(cfa, nbeds, pool.heater_type)
@@ -1491,6 +1495,7 @@ class HPXMLDefaults
       end
 
       next unless hot_tub.heater_type != HPXML::TypeNone
+
       # Heater
       if hot_tub.heater_load_value.nil?
         default_heater_load_units, default_heater_load_value = MiscLoads.get_hot_tub_heater_default_values(cfa, nbeds, hot_tub.heater_type)
