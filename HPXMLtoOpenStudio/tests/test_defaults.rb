@@ -656,7 +656,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].heating_efficiency_percent = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_fireplace_values(hpxml_default, 0, nil, 0.81)
+    _test_default_fireplace_values(hpxml_default, 0, nil, 0.60)
   end
 
   def test_air_source_heat_pumps
