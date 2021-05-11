@@ -1537,6 +1537,7 @@ class Airflow
     vent_mech_preheat.each_with_index do |f_preheat, i|
       infil_program.addLine("If (OASupInTemp < HtgStp) && (#{clg_ssn_sensor.name} < 1)")
       htg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent preheating energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: f_preheat.preheating_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
+      htg_load_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "Precond_HeatingLoad_#{i}")
       hvac_map["#{f_preheat.id}_preheat"] = [htg_energy_actuator.actuatedComponent.get]
       infil_program.addLine("  Set Qpreheat = #{UnitConversions.convert(f_preheat.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)}")
       if [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? f_preheat.fan_type
@@ -1548,20 +1549,22 @@ class Airflow
 
       infil_program.addLine('  If ZoneInTemp < HtgStp')
       infil_program.addLine('    Set FanSensToSpt = Fan_MFR * ZoneCp * (ZoneInTemp - HtgStp)')
-      infil_program.addLine("    Set PreHeatingEnergy = (-FanSensToSpt) * #{f_preheat.preheating_fraction_load_served}")
-      infil_program.addLine("    Set #{fan_sens_load_actuator.name} = #{fan_sens_load_actuator.name}  + PreHeatingEnergy")
+      infil_program.addLine("    Set PreHeatingWatt = (-FanSensToSpt) * #{f_preheat.preheating_fraction_load_served}")
+      infil_program.addLine("    Set #{fan_sens_load_actuator.name} = #{fan_sens_load_actuator.name} + PreHeatingWatt")
       infil_program.addLine("    Set #{fan_lat_load_actuator.name} = #{fan_lat_load_actuator.name} - FanLatToLv") # Fixme:Does this assumption still apply?
-      infil_program.addLine("    Set #{htg_energy_actuator.name} = PreHeatingEnergy / #{f_preheat.preheating_efficiency_cop}")
       infil_program.addLine('  Else')
-      infil_program.addLine("    Set #{htg_energy_actuator.name} = 0.0")
+      infil_program.addLine("    Set PreHeatingWatt = 0.0")
       infil_program.addLine('  EndIf')
       infil_program.addLine('Else')
-      infil_program.addLine("  Set #{htg_energy_actuator.name} = 0.0")
+      infil_program.addLine("  Set PreHeatingWatt = 0.0")
       infil_program.addLine('EndIf')
+      infil_program.addLine("Set #{htg_load_var.name.get} = PreHeatingWatt * ZoneTimeStep*3600")
+      infil_program.addLine("Set #{htg_energy_actuator.name} = PreHeatingWatt / #{f_preheat.preheating_efficiency_cop}")
     end
     vent_mech_precool.each_with_index do |f_precool, i|
       infil_program.addLine("If (OASupInTemp > ClgStp) && (#{clg_ssn_sensor.name} > 0)")
       clg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent precooling energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: f_precool.precooling_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
+      clg_load_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "Precond_CoolingLoad_#{i}")
       hvac_map["#{f_precool.id}_precool"] = [clg_energy_actuator.actuatedComponent.get]
       infil_program.addLine("  Set Qprecool = #{UnitConversions.convert(f_precool.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)}")
       if [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? f_precool.fan_type
@@ -1573,16 +1576,17 @@ class Airflow
 
       infil_program.addLine('  If ZoneInTemp > ClgStp')
       infil_program.addLine('    Set FanSensToSpt = Fan_MFR * ZoneCp * (ZoneInTemp - ClgStp)')
-      infil_program.addLine("    Set PreCoolingEnergy = FanSensToSpt * #{f_precool.precooling_fraction_load_served}")
-      infil_program.addLine("    Set #{fan_sens_load_actuator.name} = #{fan_sens_load_actuator.name}  - PreCoolingEnergy")
+      infil_program.addLine("    Set PreCoolingWatt = FanSensToSpt * #{f_precool.precooling_fraction_load_served}")
+      infil_program.addLine("    Set #{fan_sens_load_actuator.name} = #{fan_sens_load_actuator.name}  - PreCoolingWatt")
       infil_program.addLine("    Set #{fan_lat_load_actuator.name} = #{fan_lat_load_actuator.name} - FanLatToLv") # Fixme:Does this assumption still apply?
-      infil_program.addLine("    Set #{clg_energy_actuator.name} = PreCoolingEnergy / #{f_precool.precooling_efficiency_cop}")
       infil_program.addLine('  Else')
-      infil_program.addLine("    Set #{clg_energy_actuator.name} = 0.0")
+      infil_program.addLine("    Set PreCoolingWatt = 0.0")
       infil_program.addLine('  EndIf')
       infil_program.addLine('Else')
-      infil_program.addLine("  Set #{clg_energy_actuator.name} = 0.0")
+      infil_program.addLine("  Set PreCoolingWatt = 0.0")
       infil_program.addLine('EndIf')
+      infil_program.addLine("Set #{clg_load_var.name.get} = PreCoolingWatt * ZoneTimeStep*3600")
+      infil_program.addLine("Set #{clg_energy_actuator.name} = PreCoolingWatt / #{f_precool.precooling_efficiency_cop}")
     end
   end
 

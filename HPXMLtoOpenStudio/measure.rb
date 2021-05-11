@@ -2096,7 +2096,7 @@ class OSModel
     tot_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling:EnergyTransfer')
     tot_load_sensors[:clg].setName('clg_load_tot')
 
-    # Need to adjusted E+ EnergyTransfer meters for dehumidifiers
+    # Need to adjust E+ EnergyTransfer meters for dehumidifiers
     intgain_dehumidifier = nil
     model.getZoneHVACDehumidifierDXs.each do |e|
       next unless e.thermalZone.get.name.to_s == living_zone.name.to_s
@@ -2113,14 +2113,25 @@ class OSModel
     program.setName(Constants.ObjectNameTotalLoadsProgram)
     program.addLine('Set loads_htg_tot = 0')
     program.addLine('Set loads_clg_tot = 0')
+    # Need to adjust E+ EnergyTransfer meters for mech vent preconditioning
+    # Fixme: is it possible to have cooling in hvac but heating in mech vent preconditioning? How to report load in that case?
+    # Fixme: Proceed reporting both
+    model.getEnergyManagementSystemGlobalVariables.sort.each do |ems_var|
+      next unless ems_var.name.to_s.start_with? 'Precond_'
+      if ems_var.name.to_s.start_with? 'Precond_HeatingLoad'
+        program.addLine("Set loads_htg_tot = loads_htg_tot + #{ems_var.name.get}")
+      else
+        program.addLine("Set loads_clg_tot = loads_clg_tot + #{ems_var.name.get}")
+      end
+    end
     program.addLine("If #{liv_load_sensors[:htg].name} > 0")
-    s = "  Set loads_htg_tot = #{tot_load_sensors[:htg].name} - #{tot_load_sensors[:clg].name}"
+    s = "  Set loads_htg_tot = loads_htg_tot + #{tot_load_sensors[:htg].name} - #{tot_load_sensors[:clg].name}"
     if not intgain_dehumidifier.nil?
       s += " - #{intgain_dehumidifier.name}"
     end
     program.addLine(s)
     program.addLine("ElseIf #{liv_load_sensors[:clg].name} > 0")
-    s = "  Set loads_clg_tot = #{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}"
+    s = "  Set loads_clg_tot = loads_clg_tot + #{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}"
     if not intgain_dehumidifier.nil?
       s += " + #{intgain_dehumidifier.name}"
     end
@@ -2490,6 +2501,15 @@ class OSModel
     program.addLine('Set hr_mechvent = 0')
     mechvent_sensors.each do |sensor|
       program.addLine("Set hr_mechvent = hr_mechvent - #{sensor.name}")
+    end
+    # Adjust component load reporting for preconditioning
+    model.getEnergyManagementSystemGlobalVariables.sort.each do |ems_var|
+      next unless ems_var.name.to_s.start_with? 'Precond_'
+      if ems_var.name.to_s.start_with? 'Precond_HeatingLoad'
+        program.addLine("Set hr_mechvent = hr_mechvent - #{ems_var.name.get}")
+      else
+        program.addLine("Set hr_mechvent = hr_mechvent + #{ems_var.name.get}")
+      end
     end
     program.addLine('Set hr_ducts = 0')
     ducts_sensors.each do |duct_sensors|
