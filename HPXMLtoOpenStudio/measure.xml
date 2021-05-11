@@ -344,6 +344,12 @@
       <checksum>411B7AF9</checksum>
     </file>
     <file>
+      <filename>test_lighting.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CC725437</checksum>
+    </file>
+    <file>
       <filename>test_location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
