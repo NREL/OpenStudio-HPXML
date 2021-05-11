@@ -2506,9 +2506,9 @@ class OSModel
     model.getEnergyManagementSystemGlobalVariables.sort.each do |ems_var|
       next unless ems_var.name.to_s.start_with? 'Precond_'
       if ems_var.name.to_s.start_with? 'Precond_HeatingLoad'
-        program.addLine("Set hr_mechvent = hr_mechvent - #{ems_var.name.get}")
-      else
         program.addLine("Set hr_mechvent = hr_mechvent + #{ems_var.name.get}")
+      else
+        program.addLine("Set hr_mechvent = hr_mechvent - #{ems_var.name.get}")
       end
     end
     program.addLine('Set hr_ducts = 0')
