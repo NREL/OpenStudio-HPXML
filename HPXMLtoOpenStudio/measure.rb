@@ -386,7 +386,7 @@ class OSModel
       innermost_material.setVisibleAbsorptance(0.0)
       next if adj_surface.nil?
 
-      # Create new construction in case of shared construciton.
+      # Create new construction in case of shared construction.
       layered_const_adj = OpenStudio::Model::Construction.new(model)
       layered_const_adj.setName(cond_bsmnt_surface.construction.get.name.get + ' Reversed Bsmnt')
       adj_surface.setConstruction(layered_const_adj)
@@ -1631,36 +1631,42 @@ class OSModel
 
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
 
+      # Calculate cooling sequential load fractions
+      sequential_cool_load_fracs = HVAC.calc_sequential_load_fractions(cooling_system.fraction_cool_load_served.to_f, @remaining_cool_load_frac, @cooling_days)
+      @remaining_cool_load_frac -= cooling_system.fraction_cool_load_served.to_f
+
+      # Calculate heating sequential load fractions
+      if not heating_system.nil?
+        sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heating_system.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
+        @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
+      else
+        sequential_heat_load_fracs = [0]
+      end
+
       if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
 
         HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
-                                                   @remaining_cool_load_frac, @remaining_heat_load_frac,
-                                                   living_zone, @hvac_map, @heating_days, @cooling_days)
-
-        if not heating_system.nil?
-          @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
-        end
+                                                   sequential_cool_load_fracs, sequential_heat_load_fracs,
+                                                   living_zone, @hvac_map)
 
       elsif [HPXML::HVACTypeRoomAirConditioner].include? cooling_system.cooling_system_type
 
         HVAC.apply_room_air_conditioner(model, runner, cooling_system,
-                                        @remaining_cool_load_frac, living_zone,
-                                        @hvac_map, @cooling_days)
+                                        sequential_cool_load_fracs, living_zone,
+                                        @hvac_map)
 
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
 
         HVAC.apply_evaporative_cooler(model, runner, cooling_system,
-                                      @remaining_cool_load_frac, living_zone,
-                                      @hvac_map, @cooling_days)
+                                      sequential_cool_load_fracs, living_zone,
+                                      @hvac_map)
 
       elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
 
         HVAC.apply_mini_split_air_conditioner(model, runner, cooling_system,
-                                              @remaining_cool_load_frac,
-                                              living_zone, @hvac_map, @cooling_days)
+                                              sequential_cool_load_fracs,
+                                              living_zone, @hvac_map)
       end
-
-      @remaining_cool_load_frac -= cooling_system.fraction_cool_load_served
     end
   end
 
@@ -1676,25 +1682,29 @@ class OSModel
 
       check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
 
+      if (heating_system.heating_system_type == HPXML::HVACTypeFurnace) && (not cooling_system.nil?)
+        next # Already processed combined AC+furnace
+      end
+
+      # Calculate heating sequential load fractions
+      sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heating_system.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
+      @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
+
       if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
 
-        if not cooling_system.nil?
-          next # Already processed combined AC+furnace
-        end
-
         HVAC.apply_central_air_conditioner_furnace(model, runner, nil, heating_system,
-                                                   nil, @remaining_heat_load_frac,
-                                                   living_zone, @hvac_map, @heating_days, @cooling_days)
+                                                   [0], sequential_heat_load_fracs,
+                                                   living_zone, @hvac_map)
 
       elsif [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
         HVAC.apply_boiler(model, runner, heating_system,
-                          @remaining_heat_load_frac, living_zone, @hvac_map, @heating_days)
+                          sequential_heat_load_fracs, living_zone, @hvac_map)
 
       elsif [HPXML::HVACTypeElectricResistance].include? heating_system.heating_system_type
 
         HVAC.apply_electric_baseboard(model, runner, heating_system,
-                                      @remaining_heat_load_frac, living_zone, @hvac_map, @heating_days)
+                                      sequential_heat_load_fracs, living_zone, @hvac_map)
 
       elsif [HPXML::HVACTypeStove,
              HPXML::HVACTypePortableHeater,
@@ -1704,10 +1714,8 @@ class OSModel
              HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
 
         HVAC.apply_unit_heater(model, runner, heating_system,
-                               @remaining_heat_load_frac, living_zone, @hvac_map, @heating_days)
+                               sequential_heat_load_fracs, living_zone, @hvac_map)
       end
-
-      @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
     end
   end
 
@@ -1722,44 +1730,48 @@ class OSModel
 
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
+      # Calculate heating sequential load fractions
+      sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heat_pump.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
+      @remaining_heat_load_frac -= heat_pump.fraction_heat_load_served
+
+      # Calculate cooling sequential load fractions
+      sequential_cool_load_fracs = HVAC.calc_sequential_load_fractions(heat_pump.fraction_cool_load_served, @remaining_cool_load_frac, @cooling_days)
+      @remaining_cool_load_frac -= heat_pump.fraction_cool_load_served
+
       if [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
 
         HVAC.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
-                                               @remaining_heat_load_frac,
-                                               @remaining_cool_load_frac,
-                                               living_zone, @hvac_map, @heating_days, @cooling_days)
+                                               sequential_heat_load_fracs, sequential_cool_load_fracs,
+                                               living_zone, @hvac_map)
 
       elsif [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
 
         HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
-                                                @remaining_heat_load_frac,
-                                                @remaining_cool_load_frac,
-                                                living_zone, @hvac_map, @heating_days, @cooling_days)
+                                                sequential_heat_load_fracs, sequential_cool_load_fracs,
+                                                living_zone, @hvac_map)
 
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
 
         HVAC.apply_mini_split_heat_pump(model, runner, heat_pump,
-                                        @remaining_heat_load_frac,
-                                        @remaining_cool_load_frac,
-                                        living_zone, @hvac_map, @heating_days, @cooling_days)
+                                        sequential_heat_load_fracs, sequential_cool_load_fracs,
+                                        living_zone, @hvac_map)
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
 
         HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
-                                           @remaining_heat_load_frac,
-                                           @remaining_cool_load_frac,
-                                           living_zone, @hvac_map, @heating_days, @cooling_days)
+                                           sequential_heat_load_fracs, sequential_cool_load_fracs,
+                                           living_zone, @hvac_map)
 
       end
-
-      @remaining_heat_load_frac -= heat_pump.fraction_heat_load_served
-      @remaining_cool_load_frac -= heat_pump.fraction_cool_load_served
     end
   end
 
   def self.add_ideal_system(runner, model, spaces, epw_path)
-    # Adds an ideal air system as needed to meet the load (i.e., because the sum of fractions load
-    # served is less than 1 or because we're using an ideal air system for e.g. ASHRAE 140 loads).
+    # Adds an ideal air system as needed to meet the load under certain circumstances:
+    # 1. the sum of fractions load served is less than 1, or
+    # 2. there are non-year-round HVAC seasons, or
+    # 3. we're using an ideal air system for e.g. ASHRAE 140 loads calculation.
+    # The energy transferred by this ideal air system is not counted towards unmet loads.
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     obj_name = Constants.ObjectNameIdealAirSystem
 
@@ -1775,36 +1787,44 @@ class OSModel
           fail 'Unexpected weather file for ASHRAE 140 run.'
         end
       end
-      HVAC.apply_ideal_air_loads(model, runner, obj_name, cooling_load_frac, heating_load_frac, living_zone, @heating_days, @cooling_days)
+      HVAC.apply_ideal_air_loads(model, runner, obj_name, [cooling_load_frac], [heating_load_frac],
+                                 living_zone)
       return
     end
 
-    # Only fraction of heating load is met
     if (@hpxml.total_fraction_heat_load_served < 1.0) && (@hpxml.total_fraction_heat_load_served > 0.0)
       sequential_heat_load_frac = @remaining_heat_load_frac - @hpxml.total_fraction_heat_load_served
       @remaining_heat_load_frac -= sequential_heat_load_frac
     else
       sequential_heat_load_frac = 0.0
     end
-    # Only fraction of cooling load is met
+
     if (@hpxml.total_fraction_cool_load_served < 1.0) && (@hpxml.total_fraction_cool_load_served > 0.0)
       sequential_cool_load_frac = @remaining_cool_load_frac - @hpxml.total_fraction_cool_load_served
       @remaining_cool_load_frac -= sequential_cool_load_frac
     else
       sequential_cool_load_frac = 0.0
     end
-    if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
-      HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
-                                 living_zone, @heating_days, @cooling_days)
+
+    return if @heating_days.nil?
+
+    # For periods of the year outside the HVAC season, operate this ideal air system to meet
+    # 100% of the load; for all other periods, operate to meet the fraction of the load not
+    # met by the HVAC system(s).
+    sequential_heat_load_fracs = @heating_days.map { |d| d == 0 ? 1.0 : sequential_heat_load_frac }
+    sequential_cool_load_fracs = @cooling_days.map { |d| d == 0 ? 1.0 : sequential_cool_load_frac }
+
+    if (sequential_heat_load_fracs.sum > 0.0) || (sequential_cool_load_fracs.sum > 0.0)
+      HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_fracs, sequential_heat_load_fracs,
+                                 living_zone)
     end
   end
 
   def self.add_residual_ideal_system(runner, model, spaces)
-    # Adds an ideal air system to meet unexpected load (i.e., because the HVAC systems are undersized to meet the load)
-    #
-    # Addressing unmet load ensures we can correctly calculate total heating/cooling loads without having
-    # to run an additional EnergyPlus simulation solely for that purpose, as well as allows us to report
-    # the unmet load (i.e., the energy delivered by the ideal air system).
+    # Adds a residual ideal air system to meet loads not met by all preceding HVAC systems (i.e., because
+    # the HVAC systems are undersized to meet the load). This allows us to correctly calculate total
+    # heating/cooling loads without having to run an additional EnergyPlus simulation solely for that purpose,
+    # as well as allows us to report the unmet load (i.e., the energy transferred by this ideal air system).
 
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     obj_name = Constants.ObjectNameIdealAirSystemResidual
@@ -1820,9 +1840,12 @@ class OSModel
     else
       sequential_heat_load_frac = 0.0 # no heating system, don't add ideal air for heating either
     end
+
     if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
-      HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
-                                 living_zone, @heating_days, @cooling_days)
+      # Note: Residual ideal air system is configured to run year-round; it should not depend
+      # on the HVAC system availability.
+      HVAC.apply_ideal_air_loads(model, runner, obj_name, [sequential_cool_load_frac], [sequential_heat_load_frac],
+                                 living_zone)
     end
   end
 
