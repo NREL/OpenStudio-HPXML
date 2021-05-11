@@ -819,17 +819,44 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     seasons_cooling_end_month = hvac_control.seasons_cooling_end_month
     seasons_cooling_end_day = hvac_control.seasons_cooling_end_day
 
-    # Get zone
+    # Get objects
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
     zone = unitary_system.controllingZoneorThermostatLocation.get
+    year = model.getYearDescription.assumedYear
 
     # Check heating season
+    start_day_num = Schedule.get_day_num_from_month_day(model, seasons_heating_begin_month, seasons_heating_begin_day)
+    end_day_num = Schedule.get_day_num_from_month_day(model, seasons_heating_end_month, seasons_heating_end_day)
+    start_date = OpenStudio::Date::fromDayOfYear(start_day_num, year)
+    end_date = OpenStudio::Date::fromDayOfYear(end_day_num, year)
     heating_days = zone.sequentialHeatingFractionSchedule(zone.airLoopHVACTerminals[0]).get.to_ScheduleRuleset.get
     assert_equal(heating_days.scheduleRules.size, 3)
+    start_dates = []
+    end_dates = []
+    heating_days.scheduleRules.each do |schedule_rule|
+      next unless schedule_rule.daySchedule.values.include? 1
+
+      start_dates.push(schedule_rule.startDate.get)
+      end_dates.push(schedule_rule.endDate.get)
+    end
+    assert_includes(start_dates, start_date)
+    assert_includes(end_dates, end_date)
 
     # Check cooling season
+    start_day_num = Schedule.get_day_num_from_month_day(model, seasons_cooling_begin_month, seasons_cooling_begin_day)
+    end_day_num = Schedule.get_day_num_from_month_day(model, seasons_cooling_end_month, seasons_cooling_end_day)
+    start_date = OpenStudio::Date::fromDayOfYear(start_day_num, year)
+    end_date = OpenStudio::Date::fromDayOfYear(end_day_num, year)
     cooling_days = zone.sequentialCoolingFractionSchedule(zone.airLoopHVACTerminals[0]).get.to_ScheduleRuleset.get
     assert_equal(cooling_days.scheduleRules.size, 3)
+    cooling_days.scheduleRules.each do |schedule_rule|
+      next unless schedule_rule.daySchedule.values.include? 1
+
+      start_dates.push(schedule_rule.startDate.get)
+      end_dates.push(schedule_rule.endDate.get)
+    end
+    assert_includes(start_dates, start_date)
+    assert_includes(end_dates, end_date)
   end
 
   def _test_measure(args_hash)
