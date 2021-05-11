@@ -805,7 +805,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
   def test_custom_seasons
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-heating-cooling-seasons-custom.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-seasons.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values

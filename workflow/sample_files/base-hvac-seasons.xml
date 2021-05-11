@@ -339,16 +339,16 @@
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
             <HeatingSeason>
-              <BeginMonth>10</BeginMonth>
+              <BeginMonth>11</BeginMonth>
               <BeginDayOfMonth>1</BeginDayOfMonth>
-              <EndMonth>5</EndMonth>
-              <EndDayOfMonth>31</EndDayOfMonth>
+              <EndMonth>6</EndMonth>
+              <EndDayOfMonth>30</EndDayOfMonth>
             </HeatingSeason>
             <CoolingSeason>
-              <BeginMonth>5</BeginMonth>
+              <BeginMonth>6</BeginMonth>
               <BeginDayOfMonth>1</BeginDayOfMonth>
-              <EndMonth>9</EndMonth>
-              <EndDayOfMonth>30</EndDayOfMonth>
+              <EndMonth>10</EndMonth>
+              <EndDayOfMonth>31</EndDayOfMonth>
             </CoolingSeason>
           </HVACControl>
           <HVACDistribution>
