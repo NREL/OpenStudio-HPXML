@@ -1,79 +1,83 @@
 # frozen_string_literal: true
 
 class HEScoreRuleset
-  def self.apply_ruleset(orig_hpxml, weather)
+  def self.apply_ruleset(json, weather)
     # Create new HPXML object
     new_hpxml = HPXML.new
-    new_hpxml.header.xml_type = orig_hpxml.header.xml_type
+    new_hpxml.header.xml_type = nil  # FIXME: does json contain this information?
     new_hpxml.header.xml_generated_by = 'OpenStudio-HEScore'
-    new_hpxml.header.transaction = orig_hpxml.header.transaction
-    new_hpxml.header.building_id = orig_hpxml.header.building_id
-    new_hpxml.header.event_type = orig_hpxml.header.event_type
+    new_hpxml.header.transaction = 'create'  # FIXME: does json contain this information?
+    new_hpxml.header.building_id = json['building']['building_id']
+    new_hpxml.header.event_type = 'construction-period testing/daily test out'  # FIXME: does json contain this information?
 
     # BuildingSummary
-    set_summary(orig_hpxml, new_hpxml)
+    set_summary(json, new_hpxml)
 
     # ClimateAndRiskZones
-    set_climate(orig_hpxml, new_hpxml)
+    set_climate(json, new_hpxml)
 
     # Enclosure
-    set_enclosure_air_infiltration(orig_hpxml, new_hpxml)
-    set_enclosure_roofs(orig_hpxml, new_hpxml)
-    set_enclosure_rim_joists(orig_hpxml, new_hpxml)
-    set_enclosure_walls(orig_hpxml, new_hpxml)
-    set_enclosure_foundation_walls(orig_hpxml, new_hpxml)
-    set_enclosure_framefloors(orig_hpxml, new_hpxml)
-    set_enclosure_slabs(orig_hpxml, new_hpxml)
-    set_enclosure_windows(orig_hpxml, new_hpxml)
-    set_enclosure_skylights(orig_hpxml, new_hpxml)
-    set_enclosure_doors(orig_hpxml, new_hpxml)
+    set_enclosure_air_infiltration(json, new_hpxml)
+    # set_enclosure_roofs(json, new_hpxml)
+    # set_enclosure_rim_joists(json, new_hpxml)
+    # set_enclosure_walls(json, new_hpxml)
+    # set_enclosure_foundation_walls(json, new_hpxml)
+    # set_enclosure_framefloors(json, new_hpxml)
+    # set_enclosure_slabs(json, new_hpxml)
+    # set_enclosure_windows(json, new_hpxml)
+    # set_enclosure_skylights(json, new_hpxml)
+    # set_enclosure_doors(json, new_hpxml)
 
-    # Systems
-    set_systems_hvac(orig_hpxml, new_hpxml)
-    set_systems_mechanical_ventilation(orig_hpxml, new_hpxml)
-    set_systems_water_heater(orig_hpxml, new_hpxml)
-    set_systems_water_heating_use(orig_hpxml, new_hpxml)
-    set_systems_photovoltaics(orig_hpxml, new_hpxml)
+    # # Systems
+    # set_systems_hvac(json, new_hpxml)
+    # set_systems_mechanical_ventilation(json, new_hpxml)
+    # set_systems_water_heater(json, new_hpxml)
+    # set_systems_water_heating_use(json, new_hpxml)
+    # set_systems_photovoltaics(json, new_hpxml)
 
-    # Appliances
-    set_appliances_clothes_washer(orig_hpxml, new_hpxml)
-    set_appliances_clothes_dryer(orig_hpxml, new_hpxml)
-    set_appliances_dishwasher(orig_hpxml, new_hpxml)
-    set_appliances_refrigerator(orig_hpxml, new_hpxml)
-    set_appliances_cooking_range_oven(orig_hpxml, new_hpxml)
+    # # Appliances
+    # set_appliances_clothes_washer(json, new_hpxml)
+    # set_appliances_clothes_dryer(json, new_hpxml)
+    # set_appliances_dishwasher(json, new_hpxml)
+    # set_appliances_refrigerator(json, new_hpxml)
+    # set_appliances_cooking_range_oven(json, new_hpxml)
 
-    # Lighting
-    set_lighting(orig_hpxml, new_hpxml)
-    set_ceiling_fans(orig_hpxml, new_hpxml)
+    # # Lighting
+    # set_lighting(json, new_hpxml)
+    # set_ceiling_fans(json, new_hpxml)
 
-    # MiscLoads
-    set_misc_plug_loads(orig_hpxml, new_hpxml)
-    set_misc_television(orig_hpxml, new_hpxml)
+    # # MiscLoads
+    # set_misc_plug_loads(json, new_hpxml)
+    # set_misc_television(json, new_hpxml)
 
-    # Prevent downstream errors in OS-HPXML
-    adjust_floor_areas(new_hpxml)
+    # # Prevent downstream errors in OS-HPXML
+    # adjust_floor_areas(new_hpxml)
 
     HPXMLDefaults.apply(new_hpxml, Constants.ERIVersions[-1], weather)
 
     return new_hpxml
   end
 
-  def self.set_summary(orig_hpxml, new_hpxml)
+  def self.set_summary(json, new_hpxml)
     # Get HPXML values
-    @bldg_type = orig_hpxml.building_construction.residential_facility_type
-    @bldg_orient = orig_hpxml.site.orientation_of_front_of_home
+    if json['building']['about']['town_house_walls']
+      @bldg_type = HPXML::ResidentialTypeSFA  # FIXME: double-check
+    else
+      @bldg_type = HPXML::ResidentialTypeSFD
+    end
+    @bldg_orient = json['building']['about']['orientation']
     @bldg_azimuth = orientation_to_azimuth(@bldg_orient)
 
-    @year_built = orig_hpxml.building_construction.year_built
-    @nbeds = orig_hpxml.building_construction.number_of_bedrooms
-    @cfa = orig_hpxml.building_construction.conditioned_floor_area # ft^2
+    @year_built = json['building']['about']['year_built']
+    @nbeds = json['building']['about']['number_bedrooms']
+    @cfa = json['building']['about']['conditioned_floor_area'] # ft^2
     @is_townhouse = (@bldg_type == HPXML::ResidentialTypeSFA)
-    @fnd_areas = get_foundation_areas(orig_hpxml)
-    @ducts = get_ducts_details(orig_hpxml)
+    @fnd_areas = get_foundation_areas(json)
+    @ducts = get_ducts_details(json)
     @cfa_basement = @fnd_areas[HPXML::LocationBasementConditioned]
     @cfa_basement = 0 if @cfa_basement.nil?
-    @ncfl_ag = orig_hpxml.building_construction.number_of_conditioned_floors_above_grade
-    @ceil_height = orig_hpxml.building_construction.average_ceiling_height # ft
+    @ncfl_ag = json['building']['about']['num_floor_above_grade']  # FIXME: double-check
+    @ceil_height = json['building']['about']['floor_to_ceiling_height']  # ft
 
     # Calculate geometry
     @has_cond_bsmnt = @fnd_areas.key?(HPXML::LocationBasementConditioned)
@@ -89,7 +93,7 @@ class HEScoreRuleset
     @bldg_perimeter = 2.0 * @bldg_length_front + 2.0 * @bldg_length_side # ft
     @roof_angle = 30.0 # deg
     @roof_angle_rad = UnitConversions.convert(@roof_angle, 'deg', 'rad') # radians
-    @cvolume = calc_conditioned_volume(orig_hpxml)
+    @cvolume = calc_conditioned_volume(json)
 
     # Neighboring buildings to left/right, 12ft offset, same height as building.
     new_hpxml.neighbor_buildings.add(azimuth: sanitize_azimuth(@bldg_azimuth + 90.0),
@@ -108,36 +112,41 @@ class HEScoreRuleset
     new_hpxml.building_construction.has_flue_or_chimney = false
   end
 
-  def self.set_climate(orig_hpxml, new_hpxml)
-    new_hpxml.climate_and_risk_zones.weather_station_id = orig_hpxml.climate_and_risk_zones.weather_station_id
-    new_hpxml.climate_and_risk_zones.weather_station_name = orig_hpxml.climate_and_risk_zones.weather_station_name
-    new_hpxml.climate_and_risk_zones.weather_station_wmo = orig_hpxml.climate_and_risk_zones.weather_station_wmo
-    new_hpxml.climate_and_risk_zones.weather_station_epw_filepath = orig_hpxml.climate_and_risk_zones.weather_station_epw_filepath
+  def self.set_climate(json, new_hpxml)
+    # FIXME: map zipcode to wmo to get this information
+    new_hpxml.climate_and_risk_zones.weather_station_id = json.climate_and_risk_zones.weather_station_id  
+    new_hpxml.climate_and_risk_zones.weather_station_name = json.climate_and_risk_zones.weather_station_name
+    new_hpxml.climate_and_risk_zones.weather_station_wmo = json.climate_and_risk_zones.weather_station_wmo
+    new_hpxml.climate_and_risk_zones.weather_station_epw_filepath = json.climate_and_risk_zones.weather_station_epw_filepath
 
-    @iecc_zone = orig_hpxml.climate_and_risk_zones.iecc_zone
+    @iecc_zone = json.climate_and_risk_zones.iecc_zone
   end
 
-  def self.set_enclosure_air_infiltration(orig_hpxml, new_hpxml)
-    orig_hpxml.air_infiltration_measurements.each do |orig_infil_measurement|
-      cfm50 = orig_infil_measurement.air_leakage
-      desc = orig_infil_measurement.leakiness_description
+  def self.set_enclosure_air_infiltration(json, new_hpxml)
+    if not json['building']['about']['blower_door_test'].nil?
+      cfm50 = json['building']['about']['envelope_leakage']
+      if json['building']['about']['air_sealing_present	'] == 1
+        desc = HPXML::LeakinessTight
+      else
+        desc = HPXML::LeakinessAverage
+      end
 
       # Convert to ACH50
       if not cfm50.nil?
         ach50 = cfm50 * 60.0 / @cvolume
       else
-        ach50 = calc_ach50(@ncfl_ag, @cfa, @ceil_height, @cvolume, desc, @year_built, @iecc_zone, @fnd_areas, @ducts)
+        ach50 = calc_ach50(@ncfl_ag, @cfa, @ceil_height, @cvolume, desc, @year_built, '5A', @fnd_areas, @ducts)  # TODO: use @iecc_zone instead of hard-coded iecc_zone
       end
 
-      new_hpxml.air_infiltration_measurements.add(id: orig_infil_measurement.id,
+      new_hpxml.air_infiltration_measurements.add(id: 'hescore_blower_door_test',
                                                   house_pressure: 50,
                                                   unit_of_measure: HPXML::UnitsACH,
                                                   air_leakage: ach50)
     end
   end
 
-  def self.set_enclosure_roofs(orig_hpxml, new_hpxml)
-    orig_hpxml.attics.each do |orig_attic|
+  def self.set_enclosure_roofs(json, new_hpxml)
+    json.attics.each do |orig_attic|
       attic_location = orig_attic.to_location
 
       orig_attic.attached_roofs.each do |orig_roof|
@@ -180,13 +189,13 @@ class HEScoreRuleset
     end
   end
 
-  def self.set_enclosure_rim_joists(orig_hpxml, new_hpxml)
+  def self.set_enclosure_rim_joists(json, new_hpxml)
     # No rim joists
   end
 
-  def self.set_enclosure_walls(orig_hpxml, new_hpxml)
+  def self.set_enclosure_walls(json, new_hpxml)
     # Above-grade walls
-    orig_hpxml.walls.each do |orig_wall|
+    json.walls.each do |orig_wall|
       wall_area = nil
       if (@bldg_orient == orig_wall.orientation) || (@bldg_orient == reverse_orientation(orig_wall.orientation))
         wall_area = @ceil_height * @bldg_length_front * @ncfl_ag
@@ -222,8 +231,8 @@ class HEScoreRuleset
     end
   end
 
-  def self.set_enclosure_foundation_walls(orig_hpxml, new_hpxml)
-    orig_hpxml.foundations.each do |orig_foundation|
+  def self.set_enclosure_foundation_walls(json, new_hpxml)
+    json.foundations.each do |orig_foundation|
       fnd_location = orig_foundation.to_location
       fnd_area = orig_foundation.area
       next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? fnd_location
@@ -239,7 +248,7 @@ class HEScoreRuleset
                                        exterior_adjacent_to: HPXML::LocationGround,
                                        interior_adjacent_to: fnd_location,
                                        height: fndwall_height,
-                                       area: fndwall_height * get_foundation_perimeter(orig_hpxml, orig_foundation),
+                                       area: fndwall_height * get_foundation_perimeter(json, orig_foundation),
                                        thickness: 10,
                                        depth_below_grade: fndwall_height - 1.0,
                                        insulation_interior_r_value: 0,
@@ -252,9 +261,9 @@ class HEScoreRuleset
     end
   end
 
-  def self.set_enclosure_framefloors(orig_hpxml, new_hpxml)
+  def self.set_enclosure_framefloors(json, new_hpxml)
     # Floors above foundation
-    orig_hpxml.foundations.each do |orig_foundation|
+    json.foundations.each do |orig_foundation|
       fnd_location = orig_foundation.to_location
       orig_foundation.attached_frame_floors.each do |orig_frame_floor|
         next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? fnd_location
@@ -270,7 +279,7 @@ class HEScoreRuleset
     end
 
     # Floors below attic
-    orig_hpxml.attics.each do |orig_attic|
+    json.attics.each do |orig_attic|
       attic_location = orig_attic.to_location
       fail "Unvented attics shouldn't exist in HEScore." if attic_location == HPXML::LocationAtticUnvented
       next unless attic_location == HPXML::LocationAtticVented
@@ -287,8 +296,8 @@ class HEScoreRuleset
     end
   end
 
-  def self.set_enclosure_slabs(orig_hpxml, new_hpxml)
-    orig_hpxml.foundations.each do |orig_foundation|
+  def self.set_enclosure_slabs(json, new_hpxml)
+    json.foundations.each do |orig_foundation|
       fnd_location = orig_foundation.to_location
       fnd_type = orig_foundation.foundation_type
       fnd_area = orig_foundation.area
@@ -326,7 +335,7 @@ class HEScoreRuleset
                           interior_adjacent_to: fnd_location,
                           area: slab_area,
                           thickness: slab_thickness,
-                          exposed_perimeter: get_foundation_perimeter(orig_hpxml, orig_foundation),
+                          exposed_perimeter: get_foundation_perimeter(json, orig_foundation),
                           perimeter_insulation_depth: 2,
                           under_slab_insulation_width: 0,
                           depth_below_grade: slab_depth_below_grade,
@@ -337,8 +346,8 @@ class HEScoreRuleset
     end
   end
 
-  def self.set_enclosure_windows(orig_hpxml, new_hpxml)
-    orig_hpxml.windows.each do |orig_window|
+  def self.set_enclosure_windows(json, new_hpxml)
+    json.windows.each do |orig_window|
       ufactor = orig_window.ufactor
       shgc = orig_window.shgc
       if ufactor.nil?
@@ -375,8 +384,8 @@ class HEScoreRuleset
     end
   end
 
-  def self.set_enclosure_skylights(orig_hpxml, new_hpxml)
-    orig_hpxml.skylights.each do |orig_skylight|
+  def self.set_enclosure_skylights(json, new_hpxml)
+    json.skylights.each do |orig_skylight|
       ufactor = orig_skylight.ufactor
       shgc = orig_skylight.shgc
       if ufactor.nil?
@@ -416,9 +425,9 @@ class HEScoreRuleset
     end
   end
 
-  def self.set_enclosure_doors(orig_hpxml, new_hpxml)
+  def self.set_enclosure_doors(json, new_hpxml)
     front_wall = nil
-    orig_hpxml.walls.each do |orig_wall|
+    json.walls.each do |orig_wall|
       next if orig_wall.orientation != @bldg_orient
 
       front_wall = orig_wall
@@ -432,11 +441,11 @@ class HEScoreRuleset
                         r_value: 1.0 / 0.51)
   end
 
-  def self.set_systems_hvac(orig_hpxml, new_hpxml)
+  def self.set_systems_hvac(json, new_hpxml)
     additional_hydronic_ids = []
 
     # HeatingSystem
-    orig_hpxml.heating_systems.each do |orig_heating|
+    json.heating_systems.each do |orig_heating|
       distribution_system_idref = orig_heating.distribution_system_idref
       heating_system_type = orig_heating.heating_system_type
       heating_system_fuel = orig_heating.heating_system_fuel
@@ -463,7 +472,7 @@ class HEScoreRuleset
                                                            heating_system_fuel,
                                                            'AFUE',
                                                            'energy_star',
-                                                           orig_hpxml.header.state_code)
+                                                           json.header.state_code)
         elsif not year_installed.nil?
           heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
                                                            heating_system_type,
@@ -514,7 +523,7 @@ class HEScoreRuleset
     end
 
     # CoolingSystem
-    orig_hpxml.cooling_systems.each do |orig_cooling|
+    json.cooling_systems.each do |orig_cooling|
       distribution_system_idref = orig_cooling.distribution_system_idref
       cooling_system_type = orig_cooling.cooling_system_type
       cooling_system_fuel = HPXML::FuelTypeElectricity
@@ -567,7 +576,7 @@ class HEScoreRuleset
     end
 
     # HeatPump
-    orig_hpxml.heat_pumps.each do |orig_hp|
+    json.heat_pumps.each do |orig_hp|
       heat_pump_fuel = HPXML::FuelTypeElectricity
       backup_heating_fuel = HPXML::FuelTypeElectricity
       backup_heating_efficiency_percent = 1.0
@@ -653,12 +662,12 @@ class HEScoreRuleset
                                 cooling_setpoint_temp: clg_sp)
 
     # HVACDistribution
-    orig_hpxml.hvac_distributions.each do |orig_dist|
+    json.hvac_distributions.each do |orig_dist|
       new_hpxml.hvac_distributions.add(id: orig_dist.id,
                                        distribution_system_type: HPXML::HVACDistributionTypeAir,
                                        air_type: HPXML::AirTypeRegularVelocity)
 
-      hvac_fraction = get_hvac_fraction(orig_hpxml, orig_dist.id)
+      hvac_fraction = get_hvac_fraction(json, orig_dist.id)
       new_hpxml.hvac_distributions[-1].conditioned_floor_area_served = hvac_fraction * @cfa
 
       frac_inside = 0.0
@@ -722,12 +731,12 @@ class HEScoreRuleset
     end
   end
 
-  def self.set_systems_mechanical_ventilation(orig_hpxml, new_hpxml)
+  def self.set_systems_mechanical_ventilation(json, new_hpxml)
     # No mechanical ventilation
   end
 
-  def self.set_systems_water_heater(orig_hpxml, new_hpxml)
-    orig_hpxml.water_heating_systems.each do |orig_water_heater|
+  def self.set_systems_water_heater(json, new_hpxml)
+    json.water_heating_systems.each do |orig_water_heater|
       energy_factor = orig_water_heater.energy_factor
       fuel_type = orig_water_heater.fuel_type
       water_heater_type = orig_water_heater.water_heater_type
@@ -785,7 +794,7 @@ class HEScoreRuleset
     end
   end
 
-  def self.set_systems_water_heating_use(orig_hpxml, new_hpxml)
+  def self.set_systems_water_heating_use(json, new_hpxml)
     new_hpxml.hot_water_distributions.add(id: 'HotWaterDistribution',
                                           system_type: HPXML::DHWDistTypeStandard,
                                           pipe_r_value: 0)
@@ -795,10 +804,10 @@ class HEScoreRuleset
                                  low_flow: false)
   end
 
-  def self.set_systems_photovoltaics(orig_hpxml, new_hpxml)
-    return if orig_hpxml.pv_systems.size == 0
+  def self.set_systems_photovoltaics(json, new_hpxml)
+    return if json.pv_systems.size == 0
 
-    orig_pv_system = orig_hpxml.pv_systems[0]
+    orig_pv_system = json.pv_systems[0]
 
     max_power_output = orig_pv_system.max_power_output
     if max_power_output.nil?
@@ -817,33 +826,33 @@ class HEScoreRuleset
                              year_modules_manufactured: orig_pv_system.year_modules_manufactured)
   end
 
-  def self.set_appliances_clothes_washer(orig_hpxml, new_hpxml)
+  def self.set_appliances_clothes_washer(json, new_hpxml)
     new_hpxml.clothes_washers.add(id: 'ClothesWasher')
   end
 
-  def self.set_appliances_clothes_dryer(orig_hpxml, new_hpxml)
+  def self.set_appliances_clothes_dryer(json, new_hpxml)
     new_hpxml.clothes_dryers.add(id: 'ClothesDryer',
                                  fuel_type: HPXML::FuelTypeElectricity,
                                  is_vented: true,
                                  vented_flow_rate: 0.0)
   end
 
-  def self.set_appliances_dishwasher(orig_hpxml, new_hpxml)
+  def self.set_appliances_dishwasher(json, new_hpxml)
     new_hpxml.dishwashers.add(id: 'Dishwasher')
   end
 
-  def self.set_appliances_refrigerator(orig_hpxml, new_hpxml)
+  def self.set_appliances_refrigerator(json, new_hpxml)
     new_hpxml.refrigerators.add(id: 'Refrigerator')
   end
 
-  def self.set_appliances_cooking_range_oven(orig_hpxml, new_hpxml)
+  def self.set_appliances_cooking_range_oven(json, new_hpxml)
     new_hpxml.cooking_ranges.add(id: 'CookingRange',
                                  fuel_type: HPXML::FuelTypeElectricity)
 
     new_hpxml.ovens.add(id: 'Oven')
   end
 
-  def self.set_lighting(orig_hpxml, new_hpxml)
+  def self.set_lighting(json, new_hpxml)
     ltg_fracs = Lighting.get_default_fractions()
     ltg_fracs.each_with_index do |(key, fraction), i|
       location, lighting_type = key
@@ -854,16 +863,16 @@ class HEScoreRuleset
     end
   end
 
-  def self.set_ceiling_fans(orig_hpxml, new_hpxml)
+  def self.set_ceiling_fans(json, new_hpxml)
     # No ceiling fans
   end
 
-  def self.set_misc_plug_loads(orig_hpxml, new_hpxml)
+  def self.set_misc_plug_loads(json, new_hpxml)
     new_hpxml.plug_loads.add(id: 'PlugLoadOther',
                              plug_load_type: HPXML::PlugLoadTypeOther)
   end
 
-  def self.set_misc_television(orig_hpxml, new_hpxml)
+  def self.set_misc_television(json, new_hpxml)
     new_hpxml.plug_loads.add(id: 'PlugLoadTV',
                              plug_load_type: HPXML::PlugLoadTypeTelevision)
   end
@@ -895,8 +904,8 @@ class HEScoreRuleset
     end
   end
 
-  def self.get_foundation_perimeter(orig_hpxml, foundation)
-    n_foundations = orig_hpxml.foundations.size
+  def self.get_foundation_perimeter(json, foundation)
+    n_foundations = json.foundations.size
     if n_foundations == 1
       return @bldg_perimeter
     elsif n_foundations == 2
@@ -904,7 +913,7 @@ class HEScoreRuleset
       long_side = [@bldg_length_front, @bldg_length_side].max
       short_side = [@bldg_length_front, @bldg_length_side].min
       total_foundation_area = 0
-      orig_hpxml.foundations.each do |a_foundation|
+      json.foundations.each do |a_foundation|
         total_foundation_area += a_foundation.area
       end
       fnd_frac = fnd_area / total_foundation_area
@@ -1308,11 +1317,11 @@ def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fn
   sum_fnd_area = 0.0
   fnd_types.each do |fnd_type, area|
     sum_fnd_area += area
-    if fnd_type == HPXML::LocationLivingSpace
+    if fnd_type == 'slab_on_grade'
       c_foundation += -0.036992 * area
-    elsif (fnd_type == HPXML::LocationBasementConditioned) || (fnd_type == HPXML::LocationCrawlspaceUnvented)
+    elsif (fnd_type == 'cond_basement') || (fnd_type == 'unvented_crawl')
       c_foundation += 0.108713 * area
-    elsif (fnd_type == HPXML::LocationBasementUnconditioned) || (fnd_type == HPXML::LocationCrawlspaceVented)
+    elsif (fnd_type == 'uncond_basement') || (fnd_type == 'vented_crawl')
       c_foundation += 0.180352 * area
     else
       fail "Unexpected foundation type: #{fnd_type}"
@@ -1335,13 +1344,13 @@ def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fn
   end
   c_duct = 0.0
   ducts.each do |hvac_frac, duct_frac, duct_location|
-    if duct_location == HPXML::LocationLivingSpace
+    if duct_location == 'cond_space'
       c_duct += -0.12381 * duct_frac * hvac_frac
-    elsif (duct_location == HPXML::LocationAtticUnconditioned) || (duct_location == HPXML::LocationBasementUnconditioned)
+    elsif (duct_location == 'uncond_attic') || (duct_location == 'uncond_basement')
       c_duct += 0.07126 * duct_frac * hvac_frac
-    elsif duct_location == HPXML::LocationCrawlspaceVented
+    elsif duct_location == 'vented_crawl'
       c_duct += 0.18072 * duct_frac * hvac_frac
-    elsif duct_location == HPXML::LocationCrawlspaceUnvented
+    elsif duct_location == 'unvented_crawl'
       c_duct += 0.07126 * duct_frac * hvac_frac
     else
       fail "Unexpected duct location: #{duct_location}"
@@ -1418,78 +1427,76 @@ def hpxml_to_hescore_fuel(fuel_type)
            HPXML::FuelTypePropane => 'lpg' }[fuel_type]
 end
 
-def get_foundation_areas(orig_hpxml)
+def get_foundation_areas(json)
   # Returns a hash of foundation location => area
   fnd_types = {}
-  orig_hpxml.foundations.each do |orig_foundation|
-    fnd_types[orig_foundation.to_location] = orig_foundation.area
+  json['building']['zone']['zone_floor'].each do |orig_foundation|
+    fnd_types[orig_foundation['foundation_type']] = orig_foundation['floor_area']
   end
   return fnd_types
 end
 
-def get_ducts_details(orig_hpxml)
+def get_ducts_details(json)
   # Returns a list of [hvac_frac, duct_frac, duct_location]
   ducts = []
-  orig_hpxml.hvac_distributions.each do |orig_dist|
-    hvac_frac = get_hvac_fraction(orig_hpxml, orig_dist.id)
+  json['building']['systems']['hvac'].each do |orig_hvac|
+    hvac_frac = orig_hvac['hvac_fraction'] / 100  # get_hvac_fraction(json, orig_dist['name'])
 
-    orig_dist.ducts.each do |orig_duct|
-      ducts << [hvac_frac, orig_duct.duct_fraction_area, orig_duct.duct_location]
+    orig_hvac['hvac_distribution'].each do |orig_duct|
+      ducts << [hvac_frac, orig_duct['fraction'], orig_duct['location']]
     end
   end
   return ducts
 end
 
-def get_hvac_fraction(orig_hpxml, dist_id)
-  orig_hpxml.heating_systems.each do |orig_heating|
-    next unless orig_heating.distribution_system_idref == dist_id
-    next unless orig_heating.fraction_heat_load_served > 0
+# def get_hvac_fraction(json, dist_id)
+#   json.heating_systems.each do |orig_heating|
+#     next unless orig_heating.distribution_system_idref == dist_id
+#     next unless orig_heating.fraction_heat_load_served > 0
 
-    return orig_heating.fraction_heat_load_served
-  end
-  orig_hpxml.cooling_systems.each do |orig_cooling|
-    next unless orig_cooling.distribution_system_idref == dist_id
-    next unless orig_cooling.fraction_cool_load_served > 0
+#     return orig_heating.fraction_heat_load_served
+#   end
+#   json.cooling_systems.each do |orig_cooling|
+#     next unless orig_cooling.distribution_system_idref == dist_id
+#     next unless orig_cooling.fraction_cool_load_served > 0
 
-    return orig_cooling.fraction_cool_load_served
-  end
-  orig_hpxml.heat_pumps.each do |orig_hp|
-    next unless orig_hp.distribution_system_idref == dist_id
+#     return orig_cooling.fraction_cool_load_served
+#   end
+#   json.heat_pumps.each do |orig_hp|
+#     next unless orig_hp.distribution_system_idref == dist_id
 
-    if orig_hp.fraction_cool_load_served > 0
-      return orig_hp.fraction_cool_load_served
-    elsif orig_hp.fraction_heat_load_served > 0
-      return orig_hp.fraction_heat_load_served
-    end
-  end
-  return
-end
+#     if orig_hp.fraction_cool_load_served > 0
+#       return orig_hp.fraction_cool_load_served
+#     elsif orig_hp.fraction_heat_load_served > 0
+#       return orig_hp.fraction_heat_load_served
+#     end
+#   end
+#   return
+# end
 
-def calc_conditioned_volume(orig_hpxml)
+def calc_conditioned_volume(json)
   cvolume = @cfa * @ceil_height
-  orig_hpxml.attics.each do |orig_attic|
-    is_conditioned_attic = (orig_attic.attic_type == HPXML::AtticTypeConditioned)
-    is_cathedral_ceiling = (orig_attic.attic_type == HPXML::AtticTypeCathedral)
+  json['building']['zone']['zone_roof'].each do |orig_roof|
+    is_conditioned_attic = (orig_roof['roof_type'] == 'cond_attic')
+    is_cathedral_ceiling = (orig_roof['roof_type'] == 'cath_ceiling')
     next unless is_conditioned_attic || is_cathedral_ceiling
 
-    orig_attic.attached_roofs.each do |orig_roof|
-      # Half of the length of short side of the house
-      a = 0.5 * [@bldg_length_front, @bldg_length_side].min
-      # Ridge height
-      b = a * Math.tan(@roof_angle_rad)
-      # The hypotenuse
-      c = a / Math.cos(@roof_angle_rad)
-      # The depth this attic area goes back on the non-gable side
-      d = 0.5 * orig_roof.area / c
+    # Half of the length of short side of the house
+    a = 0.5 * [@bldg_length_front, @bldg_length_side].min
+    # Ridge height
+    b = a * Math.tan(@roof_angle_rad)
+    # The hypotenuse
+    c = a / Math.cos(@roof_angle_rad)
+    # The depth this attic area goes back on the non-gable side
+    d = 0.5 * orig_roof['roof_area'] / c
 
-      if is_conditioned_attic
-        # Remove erroneous full height volume from the conditioned volume
-        cvolume -= @ceil_height * 2 * a * d
-      end
-
-      # Add the volume under the roof and above the "ceiling"
-      cvolume += d * a * b
+    if is_conditioned_attic
+      # Remove erroneous full height volume from the conditioned volume
+      cvolume -= @ceil_height * 2 * a * d
     end
+
+    # Add the volume under the roof and above the "ceiling"
+    cvolume += d * a * b
   end
   return cvolume
 end
