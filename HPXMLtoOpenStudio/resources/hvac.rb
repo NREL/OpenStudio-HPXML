@@ -4248,9 +4248,10 @@ class HVAC
     year = 0 if year.nil?
 
     if [HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace].include? hvac_type
-      fuel_type = HPXML::FuelTypeNaturalGas # The lookup table only provides efficiencies for wall/floor furnaces that uses natural gas. Use these efficiencies for the furnaces that use fuel other than electricity.
+      # For wall/floor furnaces, map other fuel types to natural gas because the lookup table only provides efficiencies for natural gas.
+      fuel_type = HPXML::FuelTypeNaturalGas
     end
-    
+
     type_id = { HPXML::HVACTypeCentralAirConditioner => 'split_dx',
                 HPXML::HVACTypeRoomAirConditioner => 'packaged_dx',
                 HPXML::HVACTypeHeatPumpAirToAir => 'heat_pump',

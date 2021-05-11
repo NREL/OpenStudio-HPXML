@@ -426,7 +426,7 @@ class HPXMLDefaults
   def self.apply_hvac(hpxml, weather)
     HVAC.apply_shared_systems(hpxml)
 
-    # HVAC efficiencies (HEScore Assumption)
+    # HVAC efficiencies (based on HEScore assumption)
     hpxml.heating_systems.each do |heating_system|
       year_installed = heating_system.year_installed
       heating_system_type = heating_system.heating_system_type
@@ -446,36 +446,17 @@ class HPXMLDefaults
 
         heating_system.heating_efficiency_percent = 0.98
         heating_system.heating_efficiency_percent_isdefaulted = true
-      elsif [HPXML::HVACTypeStove, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFixedHeater].include? heating_system_type
+      elsif [HPXML::HVACTypeStove, HPXML::HVACTypeFireplace, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFixedHeater].include? heating_system_type
         next unless heating_system.heating_efficiency_percent.nil?
 
         if heating_system_fuel == HPXML::FuelTypeElectricity
           heating_system.heating_efficiency_percent = 0.98
-        elsif [HPXML::FuelTypePropane, HPXML::FuelTypeNaturalGas, HPXML::FuelTypeOil, 
-               HPXML::FuelTypeOil1, HPXML::FuelTypeOil2, HPXML::FuelTypeOil4, HPXML::FuelTypeOil5or6, 
-               HPXML::FuelTypeKerosene, HPXML::FuelTypeDiesel].include? heating_system_fuel
-          heating_system.heating_efficiency_percent = 0.84 # https://www.yankeedoodleinc.com/stoves/gas/ and https://www.kumastoves.com/Store/ProductDetails/arctic
         elsif heating_system_fuel == HPXML::FuelTypeWoodCord
-          heating_system.heating_efficiency_percent = 0.60 # HEScore assumption
+          heating_system.heating_efficiency_percent = 0.60  # HEScore assumption
         elsif heating_system_fuel == HPXML::FuelTypeWoodPellets
-          heating_system.heating_efficiency_percent = 0.78 # HEScore assumption
-        elsif [HPXML::FuelTypeCoal, HPXML::FuelTypeCoalAnthracite, HPXML::FuelTypeCoalBituminous, HPXML::FuelTypeCoke].include? heating_system_fuel
-          heating_system.heating_efficiency_percent = 0.75 # http://www.stanleycbierly.com/projects/the-warmth-and-economy-of-owning-a-coal-stove/
-        end
-        heating_system.heating_efficiency_percent_isdefaulted = true
-      elsif heating_system_type == HPXML::HVACTypeFireplace
-        next unless heating_system.heating_efficiency_percent.nil?
-
-        if heating_system_fuel == HPXML::FuelTypeElectricity
-          heating_system.heating_efficiency_percent = 0.98
-        elsif [HPXML::FuelTypeNaturalGas, HPXML::FuelTypePropane, HPXML::FuelTypeOil, 
-               HPXML::FuelTypeOil1, HPXML::FuelTypeOil2, HPXML::FuelTypeOil4, HPXML::FuelTypeOil5or6, 
-               HPXML::FuelTypeKerosene, HPXML::FuelTypeDiesel].include? heating_system_fuel
-          heating_system.heating_efficiency_percent = 0.80 # with inserts; https://www.volunteerenergy.com/energy-efficient-fireplace/
-        elsif [HPXML::FuelTypeWoodCord, HPXML::FuelTypeWoodPellets].include? heating_system_fuel
-          heating_system.heating_efficiency_percent = 0.70 # https://www.houselogic.com/organize-maintain/home-maintenance-tips/wood-burning-fireplace-inserts-save-energy/
-        elsif [HPXML::FuelTypeCoal, HPXML::FuelTypeCoalAnthracite, HPXML::FuelTypeCoalBituminous, HPXML::FuelTypeCoke].include? heating_system_fuel
-          heating_system.heating_efficiency_percent = 0.75 # assume coal-burning stove efficiency as oil-burning fireplace efficiency
+          heating_system.heating_efficiency_percent = 0.78  # HEScore assumption
+        else
+          heating_system.heating_efficiency_percent = 0.81  # https://www.lopistoves.com/products/ and https://www.kozyheat.com/products/
         end
         heating_system.heating_efficiency_percent_isdefaulted = true
       end
