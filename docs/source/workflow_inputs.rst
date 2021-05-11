@@ -1161,8 +1161,10 @@ If a heating and/or cooling season is defined, additional information is entered
   ======================================  ========  =====  =================  ========  =============================  ===========
   Element                                 Type      Units  Constraints        Required  Default                        Description
   ======================================  ========  =====  =================  ========  =============================  ===========
-  ``BeginMonth`` and ``BeginDayOfMonth``  integer          1 - 12 and 1 - 31  No                                       Start date
-  ``EndMonth`` and ``EndDayOfMonth``      integer          1 - 12 and 1 - 31  No                                       End date
+  ``BeginMonth`                           integer          1 - 12             Yes                                      Begin month
+  ``BeginDayOfMonth``                     integer          1 - 31             Yes                                      Begin day
+  ``EndMonth``                            integer          1 - 12             Yes                                      End month
+  ``EndDayOfMonth``                       integer          1 - 31             Yes                                      End day
   ======================================  ========  =====  =================  ========  =============================  ===========
 
 Heating and cooling seasons, when combined, must span the entire year.
