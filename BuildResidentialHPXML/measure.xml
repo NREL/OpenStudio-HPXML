@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>04769ada-e677-4dea-ae4d-ce7920887c3b</version_id>
-  <version_modified>20210428T142624Z</version_modified>
+  <version_id>01fbc953-404a-4beb-8619-39da1b66a04a</version_id>
+  <version_modified>20210512T162702Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -6339,12 +6339,6 @@
       <checksum>93F6AE8D</checksum>
     </file>
     <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>5DF19335</checksum>
-    </file>
-    <file>
       <filename>base-hvac-air-to-air-heat-pump-1-speed-heating-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -8196,6 +8190,12 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>A699124C</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>25C55935</checksum>
     </file>
   </files>
 </measure>

@@ -69,13 +69,8 @@ class HourlyByMonthSchedule
   end
 
   def createSchedule()
-    year_description = @model.getYearDescription
-    leap_offset = 0
-    if year_description.isLeapYear
-      leap_offset = 1
-    end
-    day_endm = [0, 31, 59 + leap_offset, 90 + leap_offset, 120 + leap_offset, 151 + leap_offset, 181 + leap_offset, 212 + leap_offset, 243 + leap_offset, 273 + leap_offset, 304 + leap_offset, 334 + leap_offset, 365 + leap_offset]
-    day_startm = [0, 1, 32, 60 + leap_offset, 91 + leap_offset, 121 + leap_offset, 152 + leap_offset, 182 + leap_offset, 213 + leap_offset, 244 + leap_offset, 274 + leap_offset, 305 + leap_offset, 335 + leap_offset]
+    day_startm = Schedule.day_start_months(@model)
+    day_endm = Schedule.day_end_months(@model)
 
     time = []
     for h in 1..24
@@ -85,15 +80,15 @@ class HourlyByMonthSchedule
     schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
     schedule.setName(@sch_name)
 
-    assumedYear = year_description.assumedYear # prevent excessive OS warnings about 'UseWeatherFile'
+    assumedYear = @model.getYearDescription.assumedYear # prevent excessive OS warnings about 'UseWeatherFile'
 
     prev_wkdy_vals = nil
     prev_wkdy_rule = nil
     prev_wknd_vals = nil
     prev_wknd_rule = nil
     for m in 1..12
-      date_s = OpenStudio::Date::fromDayOfYear(day_startm[m], assumedYear)
-      date_e = OpenStudio::Date::fromDayOfYear(day_endm[m], assumedYear)
+      date_s = OpenStudio::Date::fromDayOfYear(day_startm[m - 1], assumedYear)
+      date_e = OpenStudio::Date::fromDayOfYear(day_endm[m - 1], assumedYear)
 
       wkdy_vals = []
       wknd_vals = []
@@ -180,7 +175,7 @@ class HourlyByDaySchedule
     @model = model
     @sch_name = sch_name
     @schedule = nil
-    @num_days = Constants.YearNumDays(model)
+    @num_days = Schedule.get_num_days_in_year(model)
     @weekday_day_by_hour_values = validateValues(weekday_day_by_hour_values, @num_days, 24)
     @weekend_day_by_hour_values = validateValues(weekend_day_by_hour_values, @num_days, 24)
     @schedule_type_limits_name = schedule_type_limits_name
@@ -470,24 +465,13 @@ class MonthWeekdayWeekendSchedule
   end
 
   def createSchedule()
-    year_description = @model.getYearDescription
-    leap_offset = 0
-    if year_description.isLeapYear
-      leap_offset = 1
-    end
+    month_num_days = Schedule.get_num_days_per_month(@model)
+    month_num_days[@end_month - 1] = @end_day
 
-    num_days_in_each_month = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    num_days_in_each_month[@end_month] = @end_day
-    num_days_in_each_month.each_index do |i|
-      num_days_in_each_month[i] += leap_offset if i == 2
-    end
-    orig_day_startm = [0, 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]
-    orig_day_startm.each_index do |i|
-      orig_day_startm[i] += leap_offset if i > 2
-    end
-    day_startm = orig_day_startm.map(&:clone)
-    day_startm[@begin_month] = orig_day_startm[@begin_month] + @begin_day - 1
-    day_endm = [orig_day_startm, num_days_in_each_month].transpose.map { |i| (i != [0, 0]) ? i.reduce(:+) - 1 : 0 }
+    day_startm = Schedule.day_start_months(@model)
+    day_startm[@begin_month - 1] += @begin_day - 1
+    day_endm = [Schedule.day_start_months(@model), month_num_days].transpose.map { |i| i.reduce(:+) - 1 }
+
     time = []
     for h in 1..24
       time[h] = OpenStudio::Time.new(0, h, 0, 0)
@@ -496,7 +480,7 @@ class MonthWeekdayWeekendSchedule
     schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
     schedule.setName(@sch_name)
 
-    assumedYear = year_description.assumedYear # prevent excessive OS warnings about 'UseWeatherFile'
+    assumedYear = @model.getYearDescription.assumedYear # prevent excessive OS warnings about 'UseWeatherFile'
 
     prev_wkdy_vals = nil
     prev_wkdy_rule = nil
@@ -512,8 +496,8 @@ class MonthWeekdayWeekendSchedule
 
     periods.each do |period|
       for m in period[0]..period[1]
-        date_s = OpenStudio::Date::fromDayOfYear(day_startm[m], assumedYear)
-        date_e = OpenStudio::Date::fromDayOfYear(day_endm[m], assumedYear)
+        date_s = OpenStudio::Date::fromDayOfYear(day_startm[m - 1], assumedYear)
+        date_e = OpenStudio::Date::fromDayOfYear(day_endm[m - 1], assumedYear)
 
         wkdy_vals = []
         wknd_vals = []
@@ -771,11 +755,9 @@ class HotWaterSchedule
       return
     end
 
-    year_description = @model.getYearDescription
-    assumed_year = year_description.assumedYear
+    assumed_year = @model.getYearDescription.assumedYear
 
-    last_day_of_year = 365
-    last_day_of_year += 1 if year_description.isLeapYear
+    last_day_of_year = Schedule.get_num_days_in_year(@model)
 
     # Create ScheduleRuleset with repeating weeks
 
@@ -1190,6 +1172,85 @@ class Schedule
 
   def self.HotTubHeaterMonthlyMultipliers
     return '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
+  end
+
+  def self.get_num_days_per_month(model)
+    month_num_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    month_num_days[1] += 1 if (!model.nil? && model.getYearDescription.isLeapYear)
+    return month_num_days
+  end
+
+  def self.get_num_days_in_year(model)
+    return get_num_days_per_month(model).sum
+  end
+
+  def self.get_day_num_from_month_day(model, month, day)
+    # Returns a value between 1 and 365 (or 366 for a leap year)
+    # Returns e.g. 32 for month=2 and day=1 (Feb 1)
+    month_num_days = get_num_days_per_month(model)
+    day_num = day
+    for m in 0..month - 2
+      day_num += month_num_days[m]
+    end
+    return day_num
+  end
+
+  def self.get_daily_season(model, start_month, start_day, end_month, end_day)
+    start_day_num = get_day_num_from_month_day(model, start_month, start_day)
+    end_day_num = get_day_num_from_month_day(model, end_month, end_day)
+
+    season = Array.new(get_num_days_in_year(model), 0)
+    if end_day_num >= start_day_num
+      season.fill(1, start_day_num - 1, end_day_num - start_day_num + 1) # Fill between start/end days
+    else # Wrap around year
+      season.fill(1, start_day_num - 1) # Fill between start day and end of year
+      season.fill(1, 0, end_day_num) # Fill between start of year and end day
+    end
+    return season
+  end
+
+  def self.months_to_days(model, months)
+    month_num_days = get_num_days_per_month(model)
+    days = []
+    for m in 0..11
+      days.concat([months[m]] * month_num_days[m])
+    end
+    return days
+  end
+
+  def self.day_start_months(model)
+    month_num_days = get_num_days_per_month(model)
+    return month_num_days.each_with_index.map { |n, i| get_day_num_from_month_day(model, i + 1, 1) }
+  end
+
+  def self.day_end_months(model)
+    month_num_days = get_num_days_per_month(model)
+    return month_num_days.each_with_index.map { |n, i| get_day_num_from_month_day(model, i + 1, n) }
+  end
+
+  def self.create_ruleset_from_daily_season(model, values)
+    s = OpenStudio::Model::ScheduleRuleset.new(model)
+    year = model.getYearDescription.assumedYear
+    start_value = values[0]
+    start_date = OpenStudio::Date::fromDayOfYear(1, year)
+    values.each_with_index do |value, i|
+      i += 1
+      next unless value != start_value || i == values.length
+      rule = OpenStudio::Model::ScheduleRule.new(s)
+      set_weekday_rule(rule)
+      set_weekend_rule(rule)
+      i += 1 if i == values.length
+      end_date = OpenStudio::Date::fromDayOfYear(i - 1, year)
+      rule.setStartDate(start_date)
+      rule.setEndDate(end_date)
+      day_schedule = rule.daySchedule
+      day_schedule.addValue(OpenStudio::Time.new(0, 24, 0, 0), start_value)
+      break if i == values.length + 1
+
+      start_date = OpenStudio::Date::fromDayOfYear(i, year)
+      start_value = value
+    end
+    return s
   end
 end
 

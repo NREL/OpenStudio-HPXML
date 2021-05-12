@@ -833,6 +833,21 @@ class HPXMLDefaults
           duct.duct_location_isdefaulted = true
         end
       end
+
+      # Also update FractionDuctArea for informational purposes
+      supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
+      return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
+      total_supply_area = supply_ducts.map { |d| d.duct_surface_area }.sum
+      total_return_area = return_ducts.map { |d| d.duct_surface_area }.sum
+      (supply_ducts + return_ducts).each do |duct|
+        if duct.duct_type == HPXML::DuctTypeSupply
+          duct.duct_fraction_area = (duct.duct_surface_area / total_supply_area).round(3)
+          duct.duct_fraction_area_isdefaulted = true
+        elsif duct.duct_type == HPXML::DuctTypeReturn
+          duct.duct_fraction_area = (duct.duct_surface_area / total_return_area).round(3)
+          duct.duct_fraction_area_isdefaulted = true
+        end
+      end
     end
   end
 
