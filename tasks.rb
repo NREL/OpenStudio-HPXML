@@ -152,6 +152,7 @@ def create_hpxmls
     'invalid_files/invalid-distribution-cfa-served.xml' => 'base.xml',
     'invalid_files/refrigerators-multiple-primary.xml' => 'base.xml',
     'invalid_files/refrigerators-no-primary.xml' => 'base.xml',
+    'invalid_files/packaged-system-charge-defect-ratio.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-appliances-coal.xml' => 'base.xml',
     'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
     'base-appliances-dehumidifier-ief-portable.xml' => 'base-appliances-dehumidifier.xml',
@@ -3361,6 +3362,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
       hpxml.heat_pumps[-1].cooling_capacity = 36000
       hpxml.heat_pumps[-1].backup_heating_capacity = 36000
     end
+  elsif ['invalid_files/packaged-system-charge-defect-ratio.xml'].include? hpxml_file
+    hpxml.heat_pumps[-1].charge_defect_ratio = -0.25
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     hpxml.heat_pumps.add(id: 'HeatPump',

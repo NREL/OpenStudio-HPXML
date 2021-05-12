@@ -1790,7 +1790,7 @@ class HVACSizing
           ff_ch_h = (1 / (1 + (qgr_values[0] + qgr_values[1] * ff_chg_values[0] + qgr_values[2] * f_ch) * f_ch)).round(3)
           ff_AF_h = heat_airflow_rated_defect_ratio[speed].round(3)
           ff_AF_comb_h = ff_ch_h * ff_AF_h
-          
+
           qh_AF_CH = a1_AF_Qgr_h + (a2_AF_Qgr_h * ff_ch_h) + (a3_AF_Qgr_h * ff_ch_h * ff_ch_h)
           p_CH_Q_h = y_CH_Q_h / qh_AF_CH
 
