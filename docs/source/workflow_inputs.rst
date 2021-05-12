@@ -1136,6 +1136,8 @@ To define simple thermostat setpoints, additional information is entered in ``HV
   ``CoolingSeason``              element                         No                   Cooling season
   =============================  ========  =======  ===========  ========  =========  ============================
 
+If heating and cooling seasons are not provided, they both default to year-round.
+
 If there is a heating temperature setback, additional information is entered in ``HVACControl``.
 
   =====================================  ========  ========  ===========  ========  =========  =========================================
