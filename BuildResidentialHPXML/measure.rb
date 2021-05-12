@@ -3093,6 +3093,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = [HPXML::ResidentialTypeSFD].include?(args[:geometry_unit_type]) && args[:heating_system_type].include?('Shared')
     errors << "geometry_unit_type=#{args[:geometry_unit_type]} and heating_system_type=#{args[:heating_system_type]}" if error
 
+    # heating season incomplete
+    error = [args[:season_heating_begin_month].is_initialized, args[:season_heating_begin_day_of_month].is_initialized, args[:season_heating_end_month].is_initialized, args[:season_heating_end_day_of_month].is_initialized].uniq.size == 2
+    errors << "season_heating_begin_month=#{args[:season_heating_begin_month].is_initialized} and season_heating_begin_day_of_month=#{args[:season_heating_begin_day_of_month].is_initialized} and season_heating_end_month=#{args[:season_heating_end_month].is_initialized} and seasons_heating_end_day_of_month=#{args[:season_heating_end_day_of_month].is_initialized}" if error
+
+    # cooling season incomplete
+    error = [args[:season_cooling_begin_month].is_initialized, args[:season_cooling_begin_day_of_month].is_initialized, args[:season_cooling_end_month].is_initialized, args[:season_cooling_end_day_of_month].is_initialized].uniq.size == 2
+    errors << "season_cooling_begin_month=#{args[:season_cooling_begin_month].is_initialized} and season_cooling_begin_day_of_month=#{args[:season_cooling_begin_day_of_month].is_initialized} and season_cooling_end_month=#{args[:season_cooling_end_month].is_initialized} and season_cooling_end_day_of_month=#{args[:season_cooling_end_day_of_month].is_initialized}" if error
+
     return warnings, errors
   end
 

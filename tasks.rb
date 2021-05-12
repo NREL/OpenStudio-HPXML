@@ -420,7 +420,9 @@ def create_osws
     'invalid_files/foundation-wall-insulation-greater-than-height.osw' => 'base-foundation-vented-crawlspace.osw',
     'invalid_files/conditioned-attic-with-one-floor-above-grade.osw' => 'base.osw',
     'invalid_files/zero-number-of-bedrooms.osw' => 'base.osw',
-    'invalid_files/single-family-detached-with-shared-system.osw' => 'base.osw'
+    'invalid_files/single-family-detached-with-shared-system.osw' => 'base.osw',
+    'invalid_files/hvac-seasons-incomplete-heating-season.osw' => 'base.osw',
+    'invalid_files/hvac-seasons-incomplete-cooling-season.osw' => 'base.osw'
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -2439,6 +2441,12 @@ def get_values(osw_file, step)
     step.setArgument('geometry_num_bedrooms', 0)
   elsif ['invalid_files/single-family-detached-with-shared-system.osw'].include? osw_file
     step.setArgument('heating_system_type', "Shared #{HPXML::HVACTypeBoiler} w/ Baseboard")
+  elsif ['invalid_files/hvac-seasons-incomplete-heating-season.osw'].include? osw_file
+    step.setArgument('season_heating_begin_month', 11)
+    step.setArgument('season_heating_end_month', 6)
+  elsif ['invalid_files/hvac-seasons-incomplete-cooling-season.osw'].include? osw_file
+    step.setArgument('season_cooling_begin_day_of_month', 1)
+    step.setArgument('season_cooling_end_day_of_month', 31)
   end
   return step
 end
