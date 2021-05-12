@@ -314,13 +314,17 @@ class HVAC
         # Storage
         if heat_pump.ihp_ice_storage || heat_pump.ihp_pcm_storage
           chiller_coil = chiller_coil(model, obj_name)
-          # hvac_map[heat_pump.id] << chiller_coil
+          hvac_map[heat_pump.id] << chiller_coil
 
           supp_chiller_coil = supp_chiller_coil(model, obj_name)
-          # hvac_map[heat_pump.id] << supp_chiller_coil
+          if heat_pump.ihp_ice_storage
+            supp_chiller_coil.setDesignInletWaterTemperature(7.0)
+          elsif heat_pump.ihp_pcm_storage
+            supp_chiller_coil.setDesignInletWaterTemperature(10.0)
+          end
 
           storage = thermal_storage(model, heat_pump.ihp_ice_storage, heat_pump.ihp_pcm_storage, obj_name)
-          # hvac_map[heat_pump.id] << storage
+          hvac_map[heat_pump.id] << storage
 
           chw_loop = OpenStudio::Model::PlantLoop.new(model)
           pri_chw_pump = OpenStudio::Model::HeaderedPumpsConstantSpeed.new(model)
@@ -342,6 +346,7 @@ class HVAC
           chw_loop.setLoopTemperatureSetpointNode(storage.outletModelObject.get.to_Node.get)
 
           pair = OpenStudio::Model::ThermalStorageCoolingPair.new(model, clg_coil, storage)
+          pair.setMaximumPeakOperationHours(12)
 
           sat_f = 55
           sat_c = OpenStudio.convert(sat_f, 'F', 'C').get
@@ -375,6 +380,12 @@ class HVAC
   def self.chiller_coil(model, obj_name)
     chiller_coil = OpenStudio::Model::CoilChillerAirSourceVariableSpeed.new(model)
     chiller_coil.setName(obj_name + ' chiller coil')
+    chiller_coil.setRatedEvaporatorInletWaterTemperature(-1.1)
+    chiller_coil.setRatedEvaporatorWaterFlowRate(0.00063)
+    chiller_coil.setFractionofEvaporatorPumpHeattoWater(0.1)
+    chiller_coil.setCrankcaseHeaterCapacity(100.0)
+    chiller_coil.setMaximumAmbientTemperatureforCrankcaseHeaterOperation(5.0)
+    chiller_coil.setMaxSpeedLevelDuringGridResponsiveControl(0)
     chiller_coil_speed_1 = OpenStudio::Model::CoilChillerAirSourceVariableSpeedSpeedData.new(model)
     chiller_coil.addSpeed(chiller_coil_speed_1)
     plf_curve = OpenStudio::Model::CurveQuadratic.new(model)
@@ -387,7 +398,6 @@ class HVAC
     supp_chiller_coil.setName(obj_name + ' supp chiller coil')
     supp_chiller_coil.setDesignWaterFlowRate(0.0022)
     supp_chiller_coil.setDesignAirFlowRate(1.45)
-    supp_chiller_coil.setDesignInletWaterTemperature(7.0)
     supp_chiller_coil.setDesignInletAirTemperature(26.0)
     supp_chiller_coil.setDesignOutletAirTemperature(16.0)
     supp_chiller_coil.setDesignInletAirHumidityRatio(0.0113)
@@ -398,8 +408,17 @@ class HVAC
   def self.thermal_storage(model, ice, pcm, obj_name)
     if ice
       thermal_storage = OpenStudio::Model::ThermalStorageIceDetailed.new(model)
+      thermal_storage.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      thermal_storage.setCapacity(1.0)
+      thermal_storage.setParasiticElectricLoadDuringDischarging(0)
+      thermal_storage.setParasiticElectricLoadDuringCharging(0)
+      thermal_storage.setTankLossCoefficient(0)
     elsif pcm
       thermal_storage = OpenStudio::Model::ThermalStoragePcmSimple.new(model)
+      thermal_storage.setOnsetTemperatureOfPhaseChange(5.0)
+      thermal_storage.setFinishTemperatureOfPhaseChange(6.0)
+      thermal_storage.setUAAtSolidPhaseOfPhaseChangeMaterial(2000.0)
+      thermal_storage.setUAAtLiquidPhaseOfPhaseChangeMaterial(2000.0)
     end
     thermal_storage.setName(obj_name + ' thermal storage')
     return thermal_storage
