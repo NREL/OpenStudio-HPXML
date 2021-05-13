@@ -307,7 +307,6 @@ class HPXMLTest < MiniTest::Test
                             'multiple-shared-heating-systems.xml' => ['More than one shared heating system found.'],
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for surface 'Wall'."],
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for surface 'Roof'."],
-                            'num-bedrooms-exceeds-limit.xml' => ['Expected NumberofBedrooms to be less than or equal to (ConditionedFloorArea-120)/70 [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]'],
                             'orphaned-hvac-distribution.xml' => ["Distribution system 'HVACDistribution' found but no HVAC system attached to it."],
                             'refrigerator-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'refrigerators-multiple-primary.xml' => ['More than one refrigerator designated as the primary.'],
