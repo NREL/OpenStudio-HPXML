@@ -2596,7 +2596,6 @@ def create_hpxmls
     'invalid_files/multiple-shared-heating-systems.xml' => 'base-bldgtype-multifamily-shared-boiler-only-baseboard.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
-    'invalid_files/num-bedrooms-exceeds-limit.xml' => 'base.xml',
     'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'invalid_files/refrigerator-location.xml' => 'base.xml',
     'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
@@ -3237,8 +3236,6 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.conditioned_floor_area = 1348.8
   elsif ['invalid_files/enclosure-floor-area-exceeds-cfa2.xml'].include? hpxml_file
     hpxml.building_construction.conditioned_floor_area = 898.8
-  elsif ['invalid_files/num-bedrooms-exceeds-limit.xml'].include? hpxml_file
-    hpxml.building_construction.number_of_bedrooms = 40
   elsif ['invalid_files/invalid-facility-type-equipment.xml',
          'invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFD
