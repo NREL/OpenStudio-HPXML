@@ -146,12 +146,6 @@
       <checksum>BB8F37B8</checksum>
     </file>
     <file>
-      <filename>weather.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A951F41D</checksum>
-    </file>
-    <file>
       <filename>data_ashrae_622_wsf.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -290,12 +284,6 @@
       <checksum>6BF095D2</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C2B5A5E7</checksum>
-    </file>
-    <file>
       <filename>unit_conversions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -308,22 +296,10 @@
       <checksum>CB27A3C5</checksum>
     </file>
     <file>
-      <filename>lighting.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>45BBD265</checksum>
-    </file>
-    <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>E5A74D5B</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F76E3AB7</checksum>
     </file>
     <file>
       <filename>misc_loads.rb</filename>
@@ -565,10 +541,10 @@
       <checksum>2CEB5892</checksum>
     </file>
     <file>
-      <filename>hvac_sizing.rb</filename>
+      <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>25E2DA28</checksum>
+      <checksum>9BDDB2C2</checksum>
     </file>
     <file>
       <filename>pv.rb</filename>
@@ -592,19 +568,19 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>0858010C</checksum>
+      <checksum>BB81D4C0</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3F802C5B</checksum>
+      <checksum>EDF78BC3</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D167F388</checksum>
+      <checksum>EC5DCE66</checksum>
     </file>
   </files>
 </measure>
