@@ -550,7 +550,17 @@ def create_hpxmls
         building_element = XMLHelper.get_element(hpxml_element, 'Building')
         for i in 2..3
           new_building_element = Marshal.load(Marshal.dump(building_element))
-          XMLHelper.add_attribute(XMLHelper.get_element(new_building_element, 'BuildingID'), 'id', "MyBuilding#{i}")
+
+          # Make all IDs unique so the HPXML is valid
+          new_building_element.each_node do |node|
+            next unless node.is_a?(Oga::XML::Element)
+
+            id = XMLHelper.get_attribute_value(node, 'id')
+            next if id.nil?
+
+            XMLHelper.add_attribute(node, 'id', "#{id}_#{i}")
+          end
+
           hpxml_element.children << new_building_element
         end
         XMLHelper.write_file(hpxml_doc, hpxml_path)
