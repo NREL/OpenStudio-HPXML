@@ -131,16 +131,17 @@ class HVAC
     roomac_plf_fplr_curve = create_curve_quadratic(model, clg_ap.cool_plf_fplr_spec[0], 'Cool-PLF-fPLR', 0, 1, 0, 1)
 
     # Cooling Coil
+    coil_name = obj_name + ' clg coil'
     if is_ddb_control
       # Zero out impact of part load ratio
       roomac_plf_fplr_curve = [1.0, 0.0, 0.0] * num_speeds
       clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, roomac_cap_ft_curve, roomac_cap_fff_curve, roomac_eir_ft_curve, roomcac_eir_fff_curve, roomac_plf_fplr_curve)
       # Apply startup degradation
-      apply_capacity_degradation_EMS(model, clg_ap, clg_coil.name.get, true, roomac_cap_fff_curve, roomcac_eir_fff_curve)
+      apply_capacity_degradation_EMS(model, clg_ap, coil_name, true, roomac_cap_fff_curve, roomcac_eir_fff_curve)
     else
       clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, roomac_cap_ft_curve, roomac_cap_fff_curve, roomac_eir_ft_curve, roomcac_eir_fff_curve, roomac_plf_fplr_curve)
     end
-    clg_coil.setName(obj_name + ' clg coil')
+    clg_coil.setName(coil_name)
     clg_coil.setRatedSensibleHeatRatio(cooling_system.cooling_shr)
     clg_coil.setRatedCOP(UnitConversions.convert(cooling_system.cooling_efficiency_eer, 'Btu/hr', 'W'))
     clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(773.3)
@@ -2885,6 +2886,7 @@ class HVAC
     end
 
     clg_coil = nil
+    coil_name = obj_name + ' clg coil'
 
     for i in 0..(clg_ap.num_speeds - 1)
       cap_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_cap_ft_spec[i])
@@ -2916,7 +2918,7 @@ class HVAC
         clg_coil.setRatedAirFlowRate(calc_rated_airflow(cooling_system.cooling_capacity, clg_ap.cool_rated_cfm_per_ton[0], 1.0))
         if is_ddb_control
           # Apply startup capacity degradation
-          apply_capacity_degradation_EMS(model, clg_ap, clg_coil.name.get, true, cap_fff_curve, eir_fff_curve)
+          apply_capacity_degradation_EMS(model, clg_ap, coil_name, true, cap_fff_curve, eir_fff_curve)
         end
       else
         if clg_coil.nil?
@@ -2943,7 +2945,7 @@ class HVAC
       end
     end
 
-    clg_coil.setName(obj_name + ' clg coil')
+    clg_coil.setName(coil_name)
     clg_coil.setCondenserType('AirCooled')
     clg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(clg_ap.crankcase_kw, 'kW', 'W'))
 
@@ -2964,6 +2966,7 @@ class HVAC
     end
 
     htg_coil = nil
+    coil_name = obj_name + ' htg coil'
 
     for i in 0..(htg_ap.num_speeds - 1)
       cap_ft_spec_si = convert_curve_biquadratic(htg_ap.heat_cap_ft_spec[i])
@@ -2990,7 +2993,7 @@ class HVAC
         htg_coil.setRatedAirFlowRate(calc_rated_airflow(heating_system.heating_capacity, htg_ap.heat_rated_cfm_per_ton[0], 1.0))
         if is_ddb_control
           # Apply startup capacity degradation
-          apply_capacity_degradation_EMS(model, htg_ap, htg_coil.name.get, false, cap_fff_curve, eir_fff_curve)
+          apply_capacity_degradation_EMS(model, htg_ap, coil_name, false, cap_fff_curve, eir_fff_curve)
         end
       else
         if htg_coil.nil?
@@ -3011,7 +3014,7 @@ class HVAC
       end
     end
 
-    htg_coil.setName(obj_name + ' htg coil')
+    htg_coil.setName(coil_name)
     htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(htg_ap.hp_min_temp, 'F', 'C'))
     htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(UnitConversions.convert(40.0, 'F', 'C'))
     defrost_eir_curve = create_curve_biquadratic(model, [0.1528, 0, 0, 0, 0, 0], 'Defrosteir', -100, 100, -100, 100) # Heating defrost curve for reverse cycle
