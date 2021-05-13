@@ -614,7 +614,7 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem'>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: SystemIdentifier</sch:assert>
       <sch:assert role='ERROR' test='count(../../h:HVACControl) = 1'>Expected 1 element(s) for xpath: ../../HVACControl</sch:assert> <!-- See [HVACControl] -->
-      <sch:assert role='ERROR' test='count(h:CoolingSystemType) = 1'>Expected 1 element(s) for xpath: CoolingSystemType</sch:assert> <!-- See [CoolingSystemType=CentralAC] or [CoolingSystemType=RoomAC or CoolingSystemType=PTAC] or [CoolingSystemType=EvapCooler] or [CoolingSystemType=MiniSplitAC] or [CoolingSystemType=SharedChiller] or [CoolingSystemType=SharedCoolingTowerWLHP] -->
+      <sch:assert role='ERROR' test='count(h:CoolingSystemType) = 1'>Expected 1 element(s) for xpath: CoolingSystemType</sch:assert> <!-- See [CoolingSystemType=CentralAC] or [CoolingSystemType=RoomAC or PTAC] or [CoolingSystemType=EvapCooler] or [CoolingSystemType=MiniSplitAC] or [CoolingSystemType=SharedChiller] or [CoolingSystemType=SharedCoolingTowerWLHP] -->
       <sch:assert role='ERROR' test='h:CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler" or text()="mini-split" or text()="chiller" or text()="cooling tower" or text()="packaged terminal air conditioner"] or not(h:CoolingSystemType)'>Expected CoolingSystemType to be 'central air conditioner' or 'room air conditioner' or 'evaporative cooler' or 'mini-split' or 'chiller' or 'cooling tower' or 'packaged terminal air conditioner'</sch:assert>
       <sch:assert role='ERROR' test='count(h:CoolingSystemFuel) = 1'>Expected 1 element(s) for xpath: CoolingSystemFuel</sch:assert>
       <sch:assert role='ERROR' test='h:CoolingSystemFuel[text()="electricity"] or not(h:CoolingSystemFuel)'>Expected CoolingSystemFuel to be 'electricity'</sch:assert>
@@ -642,7 +642,7 @@
   </sch:pattern>
 
   <sch:pattern>
-    <sch:title>[CoolingSystemType=RoomAC or CoolingSystemType=PTAC]</sch:title>
+    <sch:title>[CoolingSystemType=RoomAC or PTAC]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem[h:CoolingSystemType="room air conditioner" or h:CoolingSystemType="packaged terminal air conditioner"]'>
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 0'>Expected 0 element(s) for xpath: DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='count(h:CoolingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingCapacity</sch:assert>

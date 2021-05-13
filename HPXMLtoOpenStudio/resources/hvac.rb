@@ -35,11 +35,6 @@ class HVAC
         elsif cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
           obj_name = Constants.ObjectNameRoomAirConditioner
           fan_watts_per_cfm = 0.0
-          htg_cfm = 0.00001
-          # Heating Coil (none)
-          htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOffDiscreteSchedule())
-          htg_coil.setNominalCapacity(0.0)
-          htg_coil.setName(obj_name + ' htg coil')
         elsif cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner
           obj_name = Constants.ObjectNameMiniSplitAirConditioner
         elsif cooling_system.cooling_system_type == HPXML::HVACTypePTAC
@@ -49,7 +44,6 @@ class HVAC
           fail "Unexpected cooling system type: #{cooling_system.cooling_system_type}."
         end
       end
-      sequential_cool_load_frac = calc_sequential_load_fraction(cooling_system.fraction_cool_load_served, remaining_cool_load_frac)
       # Cooling Coil
       clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system)
       hvac_map[cooling_system.id] << clg_coil
@@ -59,13 +53,11 @@ class HVAC
       clg_cfm = cooling_system.cooling_airflow_cfm
     else
       obj_name = Constants.ObjectNameFurnace
-      sequential_cool_load_frac = 0.0
       num_speeds = 1
     end
 
     if not heating_system.nil?
       htg_ap = heating_system.additional_properties
-      sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
         # Heating Coil
@@ -96,8 +88,6 @@ class HVAC
         hvac_map[heating_system.id] << htg_coil
       end
       htg_cfm = heating_system.heating_airflow_cfm
-    else
-      sequential_heat_load_frac = 0.0
     end
 
     # Fan

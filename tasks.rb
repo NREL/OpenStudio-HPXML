@@ -407,6 +407,7 @@ def create_hpxmls
     'base-hvac-undersized-allow-increased-fixed-capacities.xml' => 'base-hvac-undersized.xml',
     'base-hvac-wall-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-ptac-electric-resistance.xml' => 'base.xml',
+    'base-hvac-ptac-cooling-only.xml' => 'base-hvac-ptac-electric-resistance.xml',
     'base-hvac-pthp.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-lighting-ceiling-fans.xml' => 'base.xml',
     'base-lighting-detailed.xml' => 'base.xml',
@@ -2885,6 +2886,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-room-ac-only.xml',
          'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
          'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml',
+         'base-hvac-ptac-cooling-only.xml',
          'invalid_files/orphaned-hvac-distribution.xml'].include? hpxml_file
     hpxml.heating_systems.clear
   elsif ['base-hvac-boiler-elec-only.xml'].include? hpxml_file
