@@ -2646,7 +2646,8 @@ class HPXML < Object
              :third_party_certification, :seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :fan_watts_per_cfm,
              :fan_power_not_tested, :airflow_defect_ratio, :airflow_not_tested,
-             :fan_watts, :heating_airflow_cfm, :location]
+             :fan_watts, :heating_airflow_cfm, :location,
+             :modulating, :dual_source]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2795,7 +2796,8 @@ class HPXML < Object
              :cooling_shr, :third_party_certification, :seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :airflow_defect_ratio,
              :fan_watts_per_cfm, :fan_power_not_tested, :airflow_not_tested, :charge_defect_ratio,
-             :charge_not_tested, :cooling_airflow_cfm, :location]
+             :charge_not_tested, :cooling_airflow_cfm, :location,
+             :modulating, :dual_source]
     attr_accessor(*ATTRS)
 
     def distribution_system
