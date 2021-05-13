@@ -170,7 +170,7 @@ def create_osws
     'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.osw' => 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.osw',
     'base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.osw' => 'base-hvac-air-to-air-heat-pump-2-speed.osw',
     'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.osw' => 'base-hvac-air-to-air-heat-pump-var-speed.osw',
-    'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed-flex.osw' => 'base-hvac-air-to-air-heat-pump-var-speed.osw',
+    'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed-flex.osw' => 'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.osw',
     'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed-flex-modulating.osw' => 'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.osw',
     'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed-flex-dual-source.osw' => 'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.osw',
     'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed-flex-ihp-grid-ac.osw' => 'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.osw',
