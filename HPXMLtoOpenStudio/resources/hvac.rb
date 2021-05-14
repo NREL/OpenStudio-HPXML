@@ -70,7 +70,7 @@ class HVAC
     if not cooling_system.nil?
       fan_cfm *= clg_ap.cool_fan_speed_ratios.max
     end
-    fan = create_supply_fan(model, obj_name, num_speeds, fan_watts_per_cfm, fan_cfm)
+    fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfm)
     if not cooling_system.nil?
       hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil)
     end
@@ -145,7 +145,7 @@ class HVAC
 
     # Fan
     clg_cfm = cooling_system.cooling_airflow_cfm
-    fan = create_supply_fan(model, obj_name, 1, 0.0, clg_cfm) # Fan power included in EER (net COP) above
+    fan = create_supply_fan(model, obj_name, 0.0, clg_cfm) # Fan power included in EER (net COP) above
     hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil)
 
     # Heating Coil (none)
@@ -195,20 +195,8 @@ class HVAC
     hvac_map[cooling_system.id] << air_loop
 
     # Fan
-    # Use VariableVolume object
-    fan = OpenStudio::Model::FanVariableVolume.new(model, model.alwaysOnDiscreteSchedule)
-    fan.setName(obj_name + ' supply fan')
-    fan.setEndUseSubcategory('supply fan')
-    fan.setMotorEfficiency(1)
-    fan.setMotorInAirstreamFraction(0)
-    fan.setFanPowerCoefficient1(0)
-    fan.setFanPowerCoefficient2(1)
-    fan.setFanPowerCoefficient3(0)
-    fan.setFanPowerCoefficient4(0)
-    fan.setFanPowerCoefficient5(0)
-    fan.setMaximumFlowRate(UnitConversions.convert(clg_cfm, 'cfm', 'm^3/s'))
     fan_watts_per_cfm = [2.79 * clg_cfm**-0.29, 0.6].min # W/cfm; fit of efficacy to air flow from the CEC listed equipment
-    set_fan_power(fan, fan_watts_per_cfm)
+    fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, clg_cfm)
     fan.addToNode(air_loop.supplyInletNode)
     hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, evap_cooler, nil)
 
@@ -259,7 +247,7 @@ class HVAC
     htg_cfm = heat_pump.heating_airflow_cfm
     clg_cfm = heat_pump.cooling_airflow_cfm
     fan_cfm = hp_ap.cool_fan_speed_ratios.max * [htg_cfm, clg_cfm].max
-    fan = create_supply_fan(model, obj_name, num_speeds, heat_pump.fan_watts_per_cfm, fan_cfm)
+    fan = create_supply_fan(model, obj_name, heat_pump.fan_watts_per_cfm, fan_cfm)
     hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
     # Unitary System
@@ -301,7 +289,7 @@ class HVAC
     # Fan
     num_speeds = clg_ap.num_speeds
     clg_cfm = cooling_system.cooling_airflow_cfm
-    fan = create_supply_fan(model, obj_name, num_speeds, cooling_system.fan_watts_per_cfm, clg_cfm)
+    fan = create_supply_fan(model, obj_name, cooling_system.fan_watts_per_cfm, clg_cfm)
     hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil)
 
     # Unitary System
@@ -351,7 +339,7 @@ class HVAC
     htg_cfm = heat_pump.heating_airflow_cfm
     clg_cfm = heat_pump.cooling_airflow_cfm
     fan_cfm = hp_ap.cool_fan_speed_ratios.max * [htg_cfm, clg_cfm].max
-    fan = create_supply_fan(model, obj_name, num_speeds, heat_pump.fan_watts_per_cfm, fan_cfm)
+    fan = create_supply_fan(model, obj_name, heat_pump.fan_watts_per_cfm, fan_cfm)
     hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
     # Unitary System
@@ -513,7 +501,7 @@ class HVAC
 
     # Fan
     fan_cfm = [htg_cfm, clg_cfm].max
-    fan = create_supply_fan(model, obj_name, 1, heat_pump.fan_watts_per_cfm, fan_cfm)
+    fan = create_supply_fan(model, obj_name, heat_pump.fan_watts_per_cfm, fan_cfm)
     hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
     # Unitary System
@@ -586,7 +574,7 @@ class HVAC
 
     # Fan
     fan_power_installed = 0.0 # Use provided net COP
-    fan = create_supply_fan(model, obj_name, 1, fan_power_installed, htg_cfm)
+    fan = create_supply_fan(model, obj_name, fan_power_installed, htg_cfm)
     hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
     # Unitary System
@@ -723,7 +711,7 @@ class HVAC
 
     if heating_system.distribution_system.air_type.to_s == HPXML::AirTypeFanCoil
       # Fan
-      fan = create_supply_fan(model, obj_name, 1, 0.0, fan_cfm) # fan energy included in above pump via Electric Auxiliary Energy (EAE)
+      fan = create_supply_fan(model, obj_name, 0.0, fan_cfm) # fan energy included in above pump via Electric Auxiliary Energy (EAE)
 
       # Heating Coil
       htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, model.alwaysOnDiscreteSchedule)
@@ -832,7 +820,7 @@ class HVAC
     # Fan
     htg_cfm = heating_system.heating_airflow_cfm
     fan_watts_per_cfm = heating_system.fan_watts / htg_cfm
-    fan = create_supply_fan(model, obj_name, 1, fan_watts_per_cfm, htg_cfm)
+    fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, htg_cfm)
     hvac_map[heating_system.id] += disaggregate_fan_or_pump(model, fan, htg_coil, nil, nil)
 
     # Unitary System
@@ -1477,7 +1465,7 @@ class HVAC
 
     hvac_objects = []
 
-    if fan_or_pump.is_a?(OpenStudio::Model::FanOnOff) || fan_or_pump.is_a?(OpenStudio::Model::FanSystemModel) || fan_or_pump.is_a?(OpenStudio::Model::FanVariableVolume)
+    if fan_or_pump.is_a?(OpenStudio::Model::FanSystemModel) || fan_or_pump.is_a?(OpenStudio::Model::FanVariableVolume)
       fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan #{EPlus::FuelTypeElectricity} Energy")
     elsif fan_or_pump.is_a? OpenStudio::Model::PumpVariableSpeed
       fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Pump #{EPlus::FuelTypeElectricity} Energy")
@@ -1663,7 +1651,7 @@ class HVAC
     return htg_supp_coil
   end
 
-  def self.create_supply_fan(model, obj_name, num_speeds, fan_watts_per_cfm, fan_cfm)
+  def self.create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfm)
     fan_power_curve = create_curve_exponent(model, [0, 1, 3], obj_name + ' fan power curve', -100, 100)
     fan = OpenStudio::Model::FanSystemModel.new(model)
     fan.setSpeedControlMethod('Discrete')
@@ -3104,15 +3092,8 @@ class HVAC
       fan_eff = 1
       pressure_rise = 0
     end
-    if fan.is_a? OpenStudio::Model::FanOnOff
-      fan.setFanEfficiency(fan_eff)
-      fan.setPressureRise(pressure_rise)
-    elsif fan.is_a? OpenStudio::Model::FanSystemModel
-      fan.setFanTotalEfficiency(fan_eff)
-      fan.setDesignPressureRise(pressure_rise)
-    else
-      fail 'Unexpected fan type.'
-    end
+    fan.setFanTotalEfficiency(fan_eff)
+    fan.setDesignPressureRise(pressure_rise)
   end
 
   def self.calc_pump_rated_flow_rate(pump_eff, pump_w, pump_head_pa)
