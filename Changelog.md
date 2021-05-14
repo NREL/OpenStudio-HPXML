@@ -7,7 +7,8 @@ __New Features__
 - Allows additional fuel types for generators.
 - Allows non-zero refrigerant charge defect ratios for *split* ground source heat pumps. **Breaking change**: `IsPackagedSystem` is now a required GSHP input.
 - Allows `HeatingSeason` & `CoolingSeason` to be specified for defining heating and cooling equipment availability.
-- Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
+- Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
+- Revises shared mechanical ventilation preconditioning control logic to operate less often.
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
