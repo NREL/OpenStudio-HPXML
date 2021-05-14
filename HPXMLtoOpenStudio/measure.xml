@@ -4,8 +4,8 @@
   <error>Unable to extract OpenStudio::Measure::OSMeasure object from /mnt/c/git/openstudio-hpxml/HPXMLtoOpenStudio/measure.rb. The script should contain a class that derives from OpenStudio::Measure::OSMeasure and should close with a line stating the class name followed by .new.registerWithApplication.</error>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>d586f4eb-a32d-4992-a3c6-2fe36406c53e</version_id>
-  <version_modified>20210514T162212Z</version_modified>
+  <version_id>d138fe72-9091-48ea-a423-33bacdf1e6c2</version_id>
+  <version_modified>20210514T181254Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -578,13 +578,13 @@
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>83748A59</checksum>
+      <checksum>A033C140</checksum>
     </file>
     <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DE7126B7</checksum>
+      <checksum>D358E9AE</checksum>
     </file>
   </files>
 </measure>

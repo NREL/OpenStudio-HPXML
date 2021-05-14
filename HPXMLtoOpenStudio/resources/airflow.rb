@@ -531,18 +531,9 @@ class Airflow
     @fan_mfr_max_var[air_loop].setName("#{air_loop.name} max sup fan mfr")
     @fan_mfr_max_var[air_loop].setInternalDataIndexKeyName(supply_fan.name.to_s)
 
-    if supply_fan.to_FanSystemModel.is_initialized
-      @fan_rtf_sensor[air_loop] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Fan Runtime Fraction')
-      @fan_rtf_sensor[air_loop].setName("#{@fan_rtf_var[air_loop].name} s")
-      @fan_rtf_sensor[air_loop].setKeyName(supply_fan.name.to_s)
-    elsif supply_fan.to_FanVariableVolume.is_initialized # Evaporative cooler
-      @fan_mfr_sensor[air_loop] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Fan Air Mass Flow Rate')
-      @fan_mfr_sensor[air_loop].setName("#{supply_fan.name} air MFR")
-      @fan_mfr_sensor[air_loop].setKeyName("#{supply_fan.name}")
-      @fan_rtf_sensor[air_loop] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{@fan_rtf_var[air_loop].name}_s")
-    else
-      fail "Unexpected fan: #{supply_fan.name}"
-    end
+    @fan_rtf_sensor[air_loop] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Fan Runtime Fraction')
+    @fan_rtf_sensor[air_loop].setName("#{@fan_rtf_var[air_loop].name} s")
+    @fan_rtf_sensor[air_loop].setKeyName(supply_fan.name.to_s)
   end
 
   def self.initialize_fan_coil_objects(model, fan_coil)

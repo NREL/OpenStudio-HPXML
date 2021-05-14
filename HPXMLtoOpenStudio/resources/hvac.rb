@@ -736,6 +736,7 @@ class HVAC
 
       # Fan Coil
       zone_hvac = OpenStudio::Model::ZoneHVACFourPipeFanCoil.new(model, model.alwaysOnDiscreteSchedule, fan, clg_coil, htg_coil)
+      zone_hvac.setCapacityControlMethod('ConstantFanVariableFlow')
       zone_hvac.setName(obj_name + ' fan coil')
       zone_hvac.setMaximumSupplyAirTemperatureInHeatingMode(UnitConversions.convert(120.0, 'F', 'C'))
       zone_hvac.setHeatingConvergenceTolerance(0.001)
@@ -3090,7 +3091,7 @@ class HVAC
       pressure_rise = fan_eff * fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s') # Pa
     else
       fan_eff = 1
-      pressure_rise = 0
+      pressure_rise = 0.000001
     end
     fan.setFanTotalEfficiency(fan_eff)
     fan.setDesignPressureRise(pressure_rise)
