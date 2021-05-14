@@ -1662,7 +1662,7 @@ class HVACSizing
       cool_airflow_rated_defect_ratio = []
       cool_airflow_rated_ratio = []
       cool_cfm_m3s = UnitConversions.convert(hvac_sizing_values.Cool_Airflow, 'cfm', 'm^3/s')
-      if not hvac.CoolType == HPXML::HVACTypeHeatPumpGroundToAir
+      if hvac.CoolType != HPXML::HVACTypeHeatPumpGroundToAir
         for speed in 0..(hvac.NumSpeedsCooling - 1)
           cool_airflow_rated_ratio << cool_cfm_m3s / HVAC.calc_rated_airflow(hvac_sizing_values.Cool_Capacity, hvac.RatedCFMperTonCooling[speed], hvac.CapacityRatioCooling[speed])
           cool_airflow_rated_defect_ratio << cool_cfm_m3s * (1 + hvac.AirflowDefectRatioCooling) / HVAC.calc_rated_airflow(hvac_sizing_values.Cool_Capacity, hvac.RatedCFMperTonCooling[speed], hvac.CapacityRatioCooling[speed])
@@ -1675,12 +1675,11 @@ class HVACSizing
         cap_clg_ratios = []
         for speed in 0..(hvac.NumSpeedsCooling - 1)
           # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
-          if not hvac.CoolType == HPXML::HVACTypeHeatPumpGroundToAir
+          if hvac.CoolType != HPXML::HVACTypeHeatPumpGroundToAir
             a1_AF_Qgr_c = hvac.COOL_CAP_FFLOW_SPEC[speed][0]
             a2_AF_Qgr_c = hvac.COOL_CAP_FFLOW_SPEC[speed][1]
             a3_AF_Qgr_c = hvac.COOL_CAP_FFLOW_SPEC[speed][2]
           else
-            # Fixme: Please review these coefficients. Relationship independent of other variables to mimic fFF curves.
             a1_AF_Qgr_c = 1 - hvac.COOL_CAP_CURVE_SPEC[hvac.SizingSpeed][3]
             a2_AF_Qgr_c = hvac.COOL_CAP_CURVE_SPEC[hvac.SizingSpeed][3]
             a3_AF_Qgr_c = 0
@@ -1712,7 +1711,7 @@ class HVACSizing
 
           # calculate the capacity impact by defects
           ff_AF_c_nodefect = cool_airflow_rated_ratio[speed].round(3)
-          if not hvac.CoolType == HPXML::HVACTypeHeatPumpGroundToAir
+          if hvac.CoolType != HPXML::HVACTypeHeatPumpGroundToAir
             cool_cap_fff_nodefect = a1_AF_Qgr_c + a2_AF_Qgr_c * ff_AF_c_nodefect + a3_AF_Qgr_c * ff_AF_c_nodefect * ff_AF_c_nodefect
           else
             cool_cap_fff_nodefect = 1
@@ -1724,7 +1723,7 @@ class HVACSizing
         prev_capacity = hvac_sizing_values.Cool_Capacity
         hvac_sizing_values.Cool_Capacity *= cap_clg_ratios.max
         hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
-        if not hvac.CoolType == HPXML::HVACTypeHeatPumpGroundToAir
+        if hvac.CoolType != HPXML::HVACTypeHeatPumpGroundToAir
           if prev_capacity > 0 # Preserve cfm/ton
             hvac_sizing_values.Cool_Airflow = hvac_sizing_values.Cool_Airflow * hvac_sizing_values.Cool_Capacity / prev_capacity
           else
@@ -1753,7 +1752,7 @@ class HVACSizing
       heat_airflow_rated_defect_ratio = []
       heat_airflow_rated_ratio = []
       heat_cfm_m3s = UnitConversions.convert(hvac_sizing_values.Heat_Airflow, 'cfm', 'm^3/s')
-      if not hvac.HeatType == HPXML::HVACTypeHeatPumpGroundToAir
+      if hvac.HeatType != HPXML::HVACTypeHeatPumpGroundToAir
         for speed in 0..(hvac.NumSpeedsHeating - 1)
           heat_airflow_rated_ratio << heat_cfm_m3s / HVAC.calc_rated_airflow(hvac_sizing_values.Heat_Capacity, hvac.RatedCFMperTonHeating[speed], hvac.CapacityRatioHeating[speed])
           heat_airflow_rated_defect_ratio << heat_cfm_m3s * (1 + hvac.AirflowDefectRatioHeating) / HVAC.calc_rated_airflow(hvac_sizing_values.Heat_Capacity, hvac.RatedCFMperTonHeating[speed], hvac.CapacityRatioHeating[speed])
@@ -1765,7 +1764,7 @@ class HVACSizing
       if not heat_airflow_rated_defect_ratio.empty?
         cap_htg_ratios = []
         for speed in 0..(hvac.NumSpeedsHeating - 1)
-          if not hvac.HeatType == HPXML::HVACTypeHeatPumpGroundToAir
+          if hvac.HeatType != HPXML::HVACTypeHeatPumpGroundToAir
             a1_AF_Qgr_h = hvac.HEAT_CAP_FFLOW_SPEC[speed][0]
             a2_AF_Qgr_h = hvac.HEAT_CAP_FFLOW_SPEC[speed][1]
             a3_AF_Qgr_h = hvac.HEAT_CAP_FFLOW_SPEC[speed][2]
@@ -1800,7 +1799,7 @@ class HVACSizing
 
           # calculate the capacity impact by defects
           ff_AF_h_nodefect = heat_airflow_rated_ratio[speed].round(3)
-          if not hvac.HeatType == HPXML::HVACTypeHeatPumpGroundToAir
+          if hvac.HeatType != HPXML::HVACTypeHeatPumpGroundToAir
             heat_cap_fff_nodefect = a1_AF_Qgr_h + a2_AF_Qgr_h * ff_AF_h_nodefect + a3_AF_Qgr_h * ff_AF_h_nodefect * ff_AF_h_nodefect
           else
             heat_cap_fff_nodefect = 1
