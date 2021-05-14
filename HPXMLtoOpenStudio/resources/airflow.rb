@@ -531,7 +531,7 @@ class Airflow
     @fan_mfr_max_var[air_loop].setName("#{air_loop.name} max sup fan mfr")
     @fan_mfr_max_var[air_loop].setInternalDataIndexKeyName(supply_fan.name.to_s)
 
-    if supply_fan.to_FanOnOff.is_initialized
+    if supply_fan.to_FanOnOff.is_initialized || supply_fan.to_FanSystemModel.is_initialized
       @fan_rtf_sensor[air_loop] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Fan Runtime Fraction')
       @fan_rtf_sensor[air_loop].setName("#{@fan_rtf_var[air_loop].name} s")
       @fan_rtf_sensor[air_loop].setKeyName(supply_fan.name.to_s)
@@ -561,7 +561,7 @@ class Airflow
     @fan_mfr_max_var[fan_coil].setName("#{fan_coil.name} max sup fan mfr")
     @fan_mfr_max_var[fan_coil].setInternalDataIndexKeyName(supply_fan.name.to_s)
 
-    if supply_fan.to_FanOnOff.is_initialized
+    if supply_fan.to_FanOnOff.is_initialized || supply_fan.to_FanSystemModel.is_initialized
       @fan_rtf_sensor[fan_coil] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Fan Runtime Fraction')
       @fan_rtf_sensor[fan_coil].setName("#{@fan_rtf_var[fan_coil].name} s")
       @fan_rtf_sensor[fan_coil].setKeyName(supply_fan.name.to_s)

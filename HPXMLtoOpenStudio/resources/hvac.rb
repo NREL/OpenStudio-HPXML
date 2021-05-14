@@ -1477,7 +1477,7 @@ class HVAC
 
     hvac_objects = []
 
-    if fan_or_pump.is_a?(OpenStudio::Model::FanOnOff) || fan_or_pump.is_a?(OpenStudio::Model::FanVariableVolume)
+    if fan_or_pump.is_a?(OpenStudio::Model::FanOnOff) || fan_or_pump.is_a?(OpenStudio::Model::FanSystemModel) || fan_or_pump.is_a?(OpenStudio::Model::FanVariableVolume)
       fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan #{EPlus::FuelTypeElectricity} Energy")
     elsif fan_or_pump.is_a? OpenStudio::Model::PumpVariableSpeed
       fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Pump #{EPlus::FuelTypeElectricity} Energy")
@@ -1664,19 +1664,18 @@ class HVAC
   end
 
   def self.create_supply_fan(model, obj_name, num_speeds, fan_watts_per_cfm, fan_cfm)
-    if num_speeds == 1
-      fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
-    else
-      fan_power_curve = create_curve_exponent(model, [0, 1, 3], obj_name + ' fan power curve', -100, 100)
-      fan_eff_curve = create_curve_cubic(model, [0, 1, 0, 0], obj_name + ' fan eff curve', 0, 1, 0.01, 1)
-      fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule, fan_power_curve, fan_eff_curve)
-    end
+    fan_power_curve = create_curve_exponent(model, [0, 1, 3], obj_name + ' fan power curve', -100, 100)
+    fan = OpenStudio::Model::FanSystemModel.new(model)
+    fan.setSpeedControlMethod('Discrete')
+    fan.setDesignPowerSizingMethod('TotalEfficiencyAndPressure')
+    fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+    fan.setElectricPowerFunctionofFlowFractionCurve(fan_power_curve)
     set_fan_power(fan, fan_watts_per_cfm)
     fan.setName(obj_name + ' supply fan')
     fan.setEndUseSubcategory('supply fan')
     fan.setMotorEfficiency(1.0)
-    fan.setMotorInAirstreamFraction(1.0)
-    fan.setMaximumFlowRate(UnitConversions.convert(fan_cfm, 'cfm', 'm^3/s'))
+    fan.setMotorInAirStreamFraction(1.0)
+    fan.setDesignMaximumAirFlowRate(UnitConversions.convert(fan_cfm, 'cfm', 'm^3/s'))
     return fan
   end
 
@@ -3100,11 +3099,19 @@ class HVAC
   def self.set_fan_power(fan, fan_watts_per_cfm)
     if fan_watts_per_cfm > 0
       fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
-      fan.setFanEfficiency(fan_eff)
-      fan.setPressureRise(fan_eff * fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s')) # Pa
+      pressure_rise = fan_eff * fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s') # Pa
     else
-      fan.setFanEfficiency(1)
-      fan.setPressureRise(0)
+      fan_eff = 1
+      pressure_rise = 0
+    end
+    if fan.is_a? OpenStudio::Model::FanOnOff
+      fan.setFanEfficiency(fan_eff)
+      fan.setPressureRise(pressure_rise)
+    elsif fan.is_a? OpenStudio::Model::FanSystemModel
+      fan.setFanTotalEfficiency(fan_eff)
+      fan.setDesignPressureRise(pressure_rise)
+    else
+      fail 'Unexpected fan type.'
     end
   end
 
