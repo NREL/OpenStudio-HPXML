@@ -399,6 +399,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].airflow_defect_ratio = -0.22
     hpxml.cooling_systems[0].cooling_capacity = 12345
     hpxml.cooling_systems[0].cooling_efficiency_seer = 12.5
+    hpxml.cooling_systems[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_central_air_conditioner_values(hpxml_default, 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 12.5)
@@ -423,6 +424,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].cooling_shr = 0.88
     hpxml.cooling_systems[0].cooling_capacity = 12345
     hpxml.cooling_systems[0].cooling_efficiency_eer = 12.5
+    hpxml.cooling_systems[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_room_air_conditioner_values(hpxml_default, 0.88, 12345, 12.5)
@@ -482,6 +484,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].airflow_defect_ratio = -0.22
     hpxml.heating_systems[0].heating_capacity = 12345
     hpxml.heating_systems[0].heating_efficiency_afue = 0.85
+    hpxml.heating_systems[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_furnace_values(hpxml_default, 0.66, -0.22, 12345, 0.85)
@@ -502,6 +505,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].fan_watts_per_cfm = nil
     hpxml.heating_systems[0].airflow_defect_ratio = nil
     hpxml.heating_systems[0].heating_capacity = nil
+    hpxml.heating_systems[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_furnace_values(hpxml_default, 0.0, 0, nil, 0.92)
@@ -513,6 +517,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].fan_watts = 22
     hpxml.heating_systems[0].heating_capacity = 12345
     hpxml.heating_systems[0].heating_efficiency_afue = 0.60
+    hpxml.heating_systems[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_wall_furnace_values(hpxml_default, 22, 12345, 0.60)
@@ -533,6 +538,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].fan_watts = 22
     hpxml.heating_systems[0].heating_capacity = 12345
     hpxml.heating_systems[0].heating_efficiency_afue = 0.60
+    hpxml.heating_systems[0].year_installed = 1980
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_floor_furnace_values(hpxml_default, 22, 12345, 0.60)
@@ -552,6 +558,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].electric_auxiliary_energy = 99.9
     hpxml.heating_systems[0].heating_capacity = 12345
     hpxml.heating_systems[0].heating_efficiency_afue = 0.85
+    hpxml.heating_systems[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_boiler_values(hpxml_default, 99.9, 12345, 0.85)
@@ -570,6 +577,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].shared_loop_watts = nil
     hpxml.heating_systems[0].electric_auxiliary_energy = 99.9
     hpxml.heating_systems[0].heating_efficiency_afue = 0.85
+    hpxml.heating_systems[0].year_installed = 1980
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_boiler_values(hpxml_default, 99.9, nil, 0.85)
@@ -589,6 +597,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].fan_watts = 22
     hpxml.heating_systems[0].heating_capacity = 12345
     hpxml.heating_systems[0].heating_efficiency_percent = 0.70
+    hpxml.heating_systems[0].year_installed = 1980
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_stove_values(hpxml_default, 22, 12345, 0.70)
@@ -597,6 +606,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].fan_watts = nil
     hpxml.heating_systems[0].heating_capacity = nil
     hpxml.heating_systems[0].heating_efficiency_percent = nil
+    hpxml.heating_systems[0].year_installed = 1980
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_stove_values(hpxml_default, 40, nil, 0.81)
@@ -608,6 +618,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].fan_watts = 22
     hpxml.heating_systems[0].heating_capacity = 12345
     hpxml.heating_systems[0].heating_efficiency_percent = 0.65
+    hpxml.heating_systems[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_portable_heater_values(hpxml_default, 22, 12345, 0.65)
@@ -616,6 +627,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].fan_watts = nil
     hpxml.heating_systems[0].heating_capacity = nil
     hpxml.heating_systems[0].heating_efficiency_percent = nil
+    hpxml.heating_systems[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_portable_heater_values(hpxml_default, 0, nil, 0.81)
@@ -627,6 +639,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].fan_watts = 22
     hpxml.heating_systems[0].heating_capacity = 12345
     hpxml.heating_systems[0].heating_efficiency_percent = 0.60
+    hpxml.heating_systems[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_fixed_heater_values(hpxml_default, 22, 12345, 0.60)
@@ -635,6 +648,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].fan_watts = nil
     hpxml.heating_systems[0].heating_capacity = nil
     hpxml.heating_systems[0].heating_efficiency_percent = nil
+    hpxml.heating_systems[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_fixed_heater_values(hpxml_default, 0, nil, 0.81)
@@ -646,6 +660,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].fan_watts = 22
     hpxml.heating_systems[0].heating_capacity = 12345
     hpxml.heating_systems[0].heating_efficiency_percent = 0.50
+    hpxml.heating_systems[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_fireplace_values(hpxml_default, 22, 12345, 0.50)
@@ -654,6 +669,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heating_systems[0].fan_watts = nil
     hpxml.heating_systems[0].heating_capacity = nil
     hpxml.heating_systems[0].heating_efficiency_percent = nil
+    hpxml.heating_systems[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_fireplace_values(hpxml_default, 0, nil, 0.60)
@@ -673,6 +689,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.heat_pumps[0].backup_heating_capacity = 34567
     hpxml.heat_pumps[0].cooling_efficiency_seer = 14.0
     hpxml.heat_pumps[0].heating_efficiency_hspf = 8.0
+    hpxml.heat_pumps[0].year_installed = 2010
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_air_to_air_heat_pump_values(hpxml_default, 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 23456, 9876, 34567, 14.0, 8.0)
@@ -1052,6 +1069,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       wh.location = HPXML::LocationLivingSpace
       wh.temperature = 111
       wh.energy_factor = 0.90
+      wh.year_installed = 2003
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
@@ -1944,89 +1962,89 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def test_hvac_lookup
-    central_air_conditioner_seer = HVAC.get_default_hvac_efficiency(1970, 'central air conditioner', 'electricity', 'SEER')
+    central_air_conditioner_seer = HVAC.get_default_hvac_efficiency_by_year_installed(1970, 'central air conditioner', 'electricity', 'SEER')
     assert_equal(central_air_conditioner_seer, 8.0)
 
-    room_air_conditioner_eer = HVAC.get_default_hvac_efficiency(1993, 'room air conditioner', 'electricity', 'EER')
+    room_air_conditioner_eer = HVAC.get_default_hvac_efficiency_by_year_installed(1993, 'room air conditioner', 'electricity', 'EER')
     assert_equal(room_air_conditioner_eer, 9.05)
 
-    furnace_afue = HVAC.get_default_hvac_efficiency(1997, 'Furnace', 'natural gas', 'AFUE')
+    furnace_afue = HVAC.get_default_hvac_efficiency_by_year_installed(1997, 'Furnace', 'natural gas', 'AFUE')
     assert_equal(furnace_afue, 0.829)
 
-    furnace_afue = HVAC.get_default_hvac_efficiency(1981, 'Furnace', 'diesel', 'AFUE')
+    furnace_afue = HVAC.get_default_hvac_efficiency_by_year_installed(1981, 'Furnace', 'diesel', 'AFUE')
     assert_equal(furnace_afue, 0.768)
 
-    wall_furnace_afue = HVAC.get_default_hvac_efficiency(1997, 'WallFurnace', 'natural gas', 'AFUE')
+    wall_furnace_afue = HVAC.get_default_hvac_efficiency_by_year_installed(1997, 'WallFurnace', 'natural gas', 'AFUE')
     assert_equal(wall_furnace_afue, 0.656)
 
-    wall_furnace_afue = HVAC.get_default_hvac_efficiency(1971, 'WallFurnace', 'propane', 'AFUE')
+    wall_furnace_afue = HVAC.get_default_hvac_efficiency_by_year_installed(1971, 'WallFurnace', 'propane', 'AFUE')
     assert_equal(wall_furnace_afue, 0.548)
 
-    wall_furnace_afue = HVAC.get_default_hvac_efficiency(1970, 'FloorFurnace', 'natural gas', 'AFUE')
+    wall_furnace_afue = HVAC.get_default_hvac_efficiency_by_year_installed(1970, 'FloorFurnace', 'natural gas', 'AFUE')
     assert_equal(wall_furnace_afue, 0.5)
 
-    boiler_afue = HVAC.get_default_hvac_efficiency(2004, 'Boiler', 'propane', 'AFUE')
+    boiler_afue = HVAC.get_default_hvac_efficiency_by_year_installed(2004, 'Boiler', 'propane', 'AFUE')
     assert_equal(boiler_afue, 0.831)
 
-    heatpump_seer = HVAC.get_default_hvac_efficiency(1991, 'air-to-air', 'electricity', 'SEER')
+    heatpump_seer = HVAC.get_default_hvac_efficiency_by_year_installed(1991, 'air-to-air', 'electricity', 'SEER')
     assert_equal(heatpump_seer, 9.77)
 
-    heatpump_hspf = HVAC.get_default_hvac_efficiency(1988, 'air-to-air', 'electricity', 'HSPF')
+    heatpump_hspf = HVAC.get_default_hvac_efficiency_by_year_installed(1988, 'air-to-air', 'electricity', 'HSPF')
     assert_equal(heatpump_hspf, 6.88)
 
     assert_equal(
-      HVAC.get_default_hvac_efficiency(2010, 'air-to-air', 'electricity', 'SEER'),
-      HVAC.get_default_hvac_efficiency(2011, 'air-to-air', 'electricity', 'SEER')
+      HVAC.get_default_hvac_efficiency_by_year_installed(2010, 'air-to-air', 'electricity', 'SEER'),
+      HVAC.get_default_hvac_efficiency_by_year_installed(2011, 'air-to-air', 'electricity', 'SEER')
     )
 
     assert_equal(
-      HVAC.get_default_hvac_efficiency(2010, 'Furnace', 'natural gas', 'AFUE'),
-      HVAC.get_default_hvac_efficiency(2020, 'Furnace', 'natural gas', 'AFUE')
+      HVAC.get_default_hvac_efficiency_by_year_installed(2010, 'Furnace', 'natural gas', 'AFUE'),
+      HVAC.get_default_hvac_efficiency_by_year_installed(2020, 'Furnace', 'natural gas', 'AFUE')
     )
 
     assert_equal(
-      HVAC.get_default_hvac_efficiency(1969, 'Boiler', 'fuel oil', 'AFUE'),
-      HVAC.get_default_hvac_efficiency(1970, 'Boiler', 'fuel oil', 'AFUE')
+      HVAC.get_default_hvac_efficiency_by_year_installed(1969, 'Boiler', 'fuel oil', 'AFUE'),
+      HVAC.get_default_hvac_efficiency_by_year_installed(1970, 'Boiler', 'fuel oil', 'AFUE')
     )
 
     assert_equal(
-      HVAC.get_default_hvac_efficiency(1955, 'central air conditioner', 'electricity', 'SEER'),
-      HVAC.get_default_hvac_efficiency(1970, 'central air conditioner', 'electricity', 'SEER')
+      HVAC.get_default_hvac_efficiency_by_year_installed(1955, 'central air conditioner', 'electricity', 'SEER'),
+      HVAC.get_default_hvac_efficiency_by_year_installed(1970, 'central air conditioner', 'electricity', 'SEER')
     )
   end
 
   def test_dhw_lookup
-    waterheater_elec_ef = Waterheater.get_default_water_heater_efficiency(2006, 'electricity')
+    waterheater_elec_ef = Waterheater.get_default_water_heater_efficiency_by_year_installed(2006, 'electricity')
     assert_equal(waterheater_elec_ef, 0.9)
 
-    waterheater_natural_gas_ef = Waterheater.get_default_water_heater_efficiency(1998, 'natural gas')
+    waterheater_natural_gas_ef = Waterheater.get_default_water_heater_efficiency_by_year_installed(1998, 'natural gas')
     assert_equal(waterheater_natural_gas_ef, 0.501)
 
-    waterheater_propane_ef = Waterheater.get_default_water_heater_efficiency(2007, 'propane')
+    waterheater_propane_ef = Waterheater.get_default_water_heater_efficiency_by_year_installed(2007, 'propane')
     assert_equal(waterheater_propane_ef, 0.55)
 
-    waterheater_fuel_oil_ef = Waterheater.get_default_water_heater_efficiency(1989, 'fuel oil')
+    waterheater_fuel_oil_ef = Waterheater.get_default_water_heater_efficiency_by_year_installed(1989, 'fuel oil')
     assert_equal(waterheater_fuel_oil_ef, 0.54)
 
-    waterheater_fuel_oil_ef = Waterheater.get_default_water_heater_efficiency(1989, 'wood')
+    waterheater_fuel_oil_ef = Waterheater.get_default_water_heater_efficiency_by_year_installed(1989, 'wood')
     assert_equal(waterheater_fuel_oil_ef, 0.54)
 
     ['natural gas', 'electricity', 'propane', 'fuel oil'].each do |fuel_type|
       assert_equal(
-        Waterheater.get_default_water_heater_efficiency(2010, fuel_type),
-        Waterheater.get_default_water_heater_efficiency(2011, fuel_type)
+        Waterheater.get_default_water_heater_efficiency_by_year_installed(2010, fuel_type),
+        Waterheater.get_default_water_heater_efficiency_by_year_installed(2011, fuel_type)
       )
       assert_equal(
-        Waterheater.get_default_water_heater_efficiency(2010, fuel_type),
-        Waterheater.get_default_water_heater_efficiency(2020, fuel_type)
+        Waterheater.get_default_water_heater_efficiency_by_year_installed(2010, fuel_type),
+        Waterheater.get_default_water_heater_efficiency_by_year_installed(2020, fuel_type)
       )
       assert_equal(
-        Waterheater.get_default_water_heater_efficiency(1971, fuel_type),
-        Waterheater.get_default_water_heater_efficiency(1972, fuel_type)
+        Waterheater.get_default_water_heater_efficiency_by_year_installed(1971, fuel_type),
+        Waterheater.get_default_water_heater_efficiency_by_year_installed(1972, fuel_type)
       )
       assert_equal(
-        Waterheater.get_default_water_heater_efficiency(1955, fuel_type),
-        Waterheater.get_default_water_heater_efficiency(1972, fuel_type)
+        Waterheater.get_default_water_heater_efficiency_by_year_installed(1955, fuel_type),
+        Waterheater.get_default_water_heater_efficiency_by_year_installed(1972, fuel_type)
       )
     end
   end
@@ -2543,7 +2561,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     storage_water_heaters = hpxml.water_heating_systems.select { |w| w.water_heater_type == HPXML::WaterHeaterTypeStorage }
     assert_equal(expected_wh_values.size, storage_water_heaters.size)
     storage_water_heaters.each_with_index do |wh_system, idx|
-      is_shared, heating_capacity, tank_volume, recovery_efficiency, location, temperature, energy_factor, first_hour_rating = expected_wh_values[idx]
+      is_shared, heating_capacity, tank_volume, recovery_efficiency, location, temperature, energy_factor = expected_wh_values[idx]
 
       assert_equal(is_shared, wh_system.is_shared_system)
       assert_in_epsilon(heating_capacity, wh_system.heating_capacity, 0.01)
@@ -2555,11 +2573,6 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
         assert_nil(wh_system.energy_factor)
       else
         assert_equal(energy_factor, wh_system.energy_factor)
-      end
-      if first_hour_rating.nil?
-        assert_nil(wh_system.first_hour_rating)
-      else
-        assert_equal(first_hour_rating, wh_system.first_hour_rating)
       end
     end
   end

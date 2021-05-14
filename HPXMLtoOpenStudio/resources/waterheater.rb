@@ -1730,9 +1730,7 @@ class Waterheater
     return solar_fraction.to_f
   end
 
-  def self.get_default_water_heater_efficiency(year, fuel_type)
-    year = 0 if year.nil?
-
+  def self.get_default_water_heater_efficiency_by_year_installed(year, fuel_type)
     fuel_primary_id = { EPlus::FuelTypeElectricity => 'electric',
                         EPlus::FuelTypeNaturalGas => 'natural_gas',
                         EPlus::FuelTypeOil => 'fuel_oil',
