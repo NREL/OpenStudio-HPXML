@@ -663,6 +663,7 @@ class HPXMLDefaults
       elsif [HPXML::HVACTypeRoomAirConditioner].include? cooling_system.cooling_system_type
         HVAC.set_num_speeds(cooling_system)
         HVAC.set_cool_c_d(cooling_system, clg_ap.num_speeds)
+        HVAC.set_cool_ceer(cooling_system)
         HVAC.set_cool_curves_room_ac(cooling_system)
         HVAC.set_cool_rated_cfm_per_ton(cooling_system)
         HVAC.set_cool_rated_shrs_gross(cooling_system)
