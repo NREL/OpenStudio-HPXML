@@ -446,13 +446,13 @@ class HPXMLDefaults
       elsif [HPXML::HVACTypeElectricResistance].include? heating_system_type
         next unless heating_system.heating_efficiency_percent.nil?
 
-        heating_system.heating_efficiency_percent = 0.98
+        heating_system.heating_efficiency_percent = 1.0
         heating_system.heating_efficiency_percent_isdefaulted = true
       elsif [HPXML::HVACTypeStove, HPXML::HVACTypeFireplace, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFixedHeater].include? heating_system_type
         next unless heating_system.heating_efficiency_percent.nil?
 
         if heating_system_fuel == HPXML::FuelTypeElectricity
-          heating_system.heating_efficiency_percent = 0.98
+          heating_system.heating_efficiency_percent = 1.0
         elsif heating_system_fuel == HPXML::FuelTypeWoodCord
           heating_system.heating_efficiency_percent = 0.60  # HEScore assumption
         elsif heating_system_fuel == HPXML::FuelTypeWoodPellets

@@ -477,6 +477,23 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_mini_split_air_conditioner_values(hpxml_default, 0.73, 0.18, 0, 0, nil)
   end
 
+  def test_elec_resistance
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base-hvac-elec-resistance-only.xml')
+    hpxml.heating_systems[0].heating_efficiency_percent = 0.98
+    hpxml.heating_systems[0].year_installed = 2010
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_elec_resistance(hpxml_default, 0.98)
+
+    # Test defaults
+    hpxml.heating_systems[0].heating_efficiency_percent = nil
+    hpxml.heating_systems[0].year_installed = 2010
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_elec_resistance(hpxml_default, 1.0)
+  end
+
   def test_furnaces
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
@@ -673,6 +690,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_fireplace_values(hpxml_default, 0, nil, 0.60)
+
+    # Test defaults with electric fireplace
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
+    hpxml.heating_systems[0].fan_watts = nil
+    hpxml.heating_systems[0].heating_capacity = nil
+    hpxml.heating_systems[0].heating_efficiency_percent = nil
+    hpxml.heating_systems[0].year_installed = 2010
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_fireplace_values(hpxml_default, 0, nil, 1.0)
   end
 
   def test_air_source_heat_pumps
@@ -2258,6 +2285,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       assert(cooling_system.cooling_capacity > 0)
     else
       assert_equal(cooling_system.cooling_capacity, cooling_capacity)
+    end
+  end
+
+  def _test_default_elec_resistance(hpxml, heating_efficiency_percent)
+    heating_system = hpxml.heating_systems[0]
+
+    if heating_efficiency_percent.nil?
+      assert_nil(heating_system.heating_efficiency_percent)
+    else
+      assert_equal(heating_system.heating_efficiency_percent, heating_efficiency_percent)
     end
   end
 
