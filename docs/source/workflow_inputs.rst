@@ -1334,13 +1334,19 @@ If not entered, the simulation will not include mechanical ventilation.
   ``FanType``                              string             See [#]_     Yes                  Type of ventilation system
   ``TestedFlowRate`` or ``RatedFlowRate``  double    cfm      >= 0         Yes                  Flow rate [#]_
   ``HoursInOperation``                     double    hrs/day  0 - 24       No        See [#]_   Hours per day of operation
-  ``FanPower``                             double    W        >= 0         Yes                  Fan power
+  ``FanPower``                             double    W        >= 0         No        See [#]_   Fan power
   =======================================  ========  =======  ===========  ========  =========  =========================================
 
   .. [#] For central fan integrated supply systems, IsSharedSystem must be false.
   .. [#] FanType choices are "energy recovery ventilator", "heat recovery ventilator", "exhaust only", "supply only", "balanced", or "central fan integrated supply".
   .. [#] For a central fan integrated supply system, the flow rate should equal the amount of outdoor air provided to the distribution system.
   .. [#] If HoursInOperation not provided, defaults to 24 (i.e., running continuously) for all system types other than central fan integrated supply (CFIS), and 8.0 (i.e., running intermittently) for CFIS systems.
+  .. [#] If FanPower not provided, defaults based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+         
+         - "energy recovery ventilator", "heat recovery ventilator", or shared system: 1.0 W/cfm
+         - "balanced": 0.7 W/cfm
+         - "central fan integrated supply": 0.5 W/cfm
+         - "exhaust only" or "supply only": 0.35 W/cfm
 
 Exhaust/Supply Only
 ~~~~~~~~~~~~~~~~~~~
