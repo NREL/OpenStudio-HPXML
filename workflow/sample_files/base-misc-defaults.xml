@@ -299,6 +299,12 @@
         <MechanicalVentilation>
           <VentilationFans>
             <VentilationFan>
+              <SystemIdentifier id='MechanicalVentilation'/>
+              <FanType>exhaust only</FanType>
+              <TestedFlowRate>110.0</TestedFlowRate>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+            </VentilationFan>
+            <VentilationFan>
               <SystemIdentifier id='KitchenRangeFan'/>
               <FanLocation>kitchen</FanLocation>
               <UsedForLocalVentilation>true</UsedForLocalVentilation>

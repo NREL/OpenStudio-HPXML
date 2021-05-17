@@ -945,6 +945,10 @@ class HPXMLDefaults
         vent_fan.hours_in_operation = (vent_fan.fan_type == HPXML::MechVentTypeCFIS) ? 8.0 : 24.0
         vent_fan.hours_in_operation_isdefaulted = true
       end
+      if vent_fan.fan_power.nil?
+        flow_rate = [vent_fan.rated_flow_rate.to_f, vent_fan.tested_flow_rate.to_f].max
+        vent_fan.fan_power = flow_rate * Airflow.get_default_mech_vent_fan_power(vent_fan)
+      end
     end
 
     # Default kitchen fan
