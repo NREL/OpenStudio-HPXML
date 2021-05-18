@@ -1244,6 +1244,12 @@ class HPXML < Object
       attic = XMLHelper.add_element(attics, 'Attic')
       sys_id = XMLHelper.add_element(attic, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      if not @attached_to_roof_idrefs.nil?
+        @attached_to_roof_idrefs.each do |roof|
+          roof_attached = XMLHelper.add_element(attic, 'AttachedToRoof')
+          XMLHelper.add_attribute(roof_attached, 'idref', roof)
+        end
+      end
       if not @attic_type.nil?
         attic_type_el = XMLHelper.add_element(attic, 'AtticType')
         if @attic_type == AtticTypeUnvented
@@ -1430,6 +1436,12 @@ class HPXML < Object
           XMLHelper.add_element(crawlspace, 'Vented', false, :boolean)
         else
           fail "Unhandled foundation type '#{@foundation_type}'."
+        end
+      end
+      if not @attached_to_slab_idrefs.nil?
+        @attached_to_slab_idrefs.each do |slab|
+          slab_attached = XMLHelper.add_element(foundation, 'AttachedToSlab')
+          XMLHelper.add_attribute(slab_attached, 'idref', slab)
         end
       end
       XMLHelper.add_element(foundation, 'WithinInfiltrationVolume', @within_infiltration_volume, :boolean) unless @within_infiltration_volume.nil?

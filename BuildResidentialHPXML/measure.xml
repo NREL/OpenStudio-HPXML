@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>7b42e3c1-6ed1-4482-91e2-498cc958421b</version_id>
-  <version_modified>20210512T220351Z</version_modified>
+  <version_id>404578c0-a40e-48ca-a058-310780f0ce38</version_id>
+  <version_modified>20210518T232107Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -249,6 +249,14 @@
           <display_name>rural</display_name>
         </choice>
       </choices>
+    </argument>
+    <argument>
+      <name>vintage</name>
+      <display_name>Building Construction: Vintage</display_name>
+      <description>The building vintage</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>geometry_unit_type</name>
@@ -6333,12 +6341,6 @@
       <checksum>5FC694CF</checksum>
     </file>
     <file>
-      <filename>geometry.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>93F6AE8D</checksum>
-    </file>
-    <file>
       <filename>base-hvac-air-to-air-heat-pump-1-speed-heating-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -8181,6 +8183,24 @@
       <checksum>A824015F</checksum>
     </file>
     <file>
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>AED92973</checksum>
+    </file>
+    <file>
+      <filename>test_measure.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E8825190</checksum>
+    </file>
+    <file>
+      <filename>test_rakefile.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6CFE6A7E</checksum>
+    </file>
+    <file>
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -8195,7 +8215,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>1A51BB49</checksum>
+      <checksum>CAC3CB72</checksum>
     </file>
   </files>
 </measure>
