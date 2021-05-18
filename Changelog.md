@@ -10,6 +10,8 @@ __New Features__
 - Allows `HeatingSeason` & `CoolingSeason` to be specified for defining heating and cooling equipment availability.
 - Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
 - Revises shared mechanical ventilation preconditioning control logic to operate less often.
+- Allows defaulting of HVAC/DHW system efficiency (by age).
+- Allows defaulting of mechanical ventilation fan power (by type).
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
