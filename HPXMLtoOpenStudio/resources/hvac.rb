@@ -3080,16 +3080,12 @@ class HVAC
   def self.set_fan_power_rated(hvac_system)
     hvac_ap = hvac_system.additional_properties
 
-    if (hvac_system.is_a?(HPXML::CoolingSystem) && (hvac_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner)) ||
-       (hvac_system.is_a?(HPXML::HeatPump) && (hvac_system.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit))
-      if not hvac_system.distribution_system.nil?
-        # Ducted, installed fan power may differ from rated fan power
-        hvac_ap.fan_power_rated = 0.18 # W/cfm, ducted
-      else
-        # Ductless, installed and rated value should be equal
-        hvac_ap.fan_power_rated = 0.07 # W/cfm
-        hvac_system.fan_watts_per_cfm = hvac_ap.fan_power_rated # W/cfm
-      end
+    if hvac_system.distribution_system.nil?
+      # Ductless, installed and rated value should be equal
+      hvac_ap.fan_power_rated = hvac_system.fan_watts_per_cfm # W/cfm
+    elsif (hvac_system.is_a?(HPXML::CoolingSystem) && (hvac_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner)) ||
+          (hvac_system.is_a?(HPXML::HeatPump) && (hvac_system.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit))
+      hvac_ap.fan_power_rated = 0.18 # W/cfm
     elsif hvac_system.cooling_efficiency_seer <= 15
       hvac_ap.fan_power_rated = 0.365 # W/cfm
     else
