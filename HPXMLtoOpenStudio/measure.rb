@@ -275,6 +275,7 @@ class OSModel
 
     add_loads_output(runner, model, spaces, add_component_loads)
     add_output_control_files(runner, model)
+    add_cambium_carbon_output(runner, model)
     # Uncomment to debug EMS
     # add_ems_debug_output(runner, model)
 
@@ -2562,6 +2563,43 @@ class OSModel
     ocf.setOutputRDD(false)
     ocf.setOutputSHD(false)
     ocf.setOutputTabular(false)
+  end
+  
+  def self.add_cambium_carbon_output(runner, model)
+    oeif = OpenStudio::Model::OutputEnvironmentalImpactFactors.new(model)
+    oeif.setReportingFrequency('hourly')
+    
+    oeif2 = OpenStudio::Model::OutputEnvironmentalImpactFactors.new(model)
+    oeif2.setReportingFrequency('runperiod')
+    
+    #eif = model.getEnvironmentalImpactFactors
+    #eif.setDistrictHeatingEfficiency(0.3)
+    #eif.setDistrictCoolingCOP(3.0)
+    
+    cambium_csv = File.join(File.dirname(__FILE__), 'resources', 'StdScen20_MidCase_hourly_usa_2018.csv')
+    ext_file = OpenStudio::Model::ExternalFile.getExternalFile(model, cambium_csv)
+    sch = OpenStudio::Model::ScheduleFile.new(ext_file.get, 23, 3)
+    
+    ff = OpenStudio::Model::FuelFactors.new(model)
+    ff.setExistingFuelResourceName('Electricity')
+    ff.setCO2EmissionFactor(1.0)
+    ff.setCO2EmissionFactorSchedule(sch)
+    ff.setSourceEnergyFactor(0)
+    ff.setCOEmissionFactor(0)
+    ff.setCH4EmissionFactor(0)
+    ff.setNOxEmissionFactor(0)
+    ff.setN2OEmissionFactor(0)
+    ff.setSO2EmissionFactor(0)
+    ff.setPMEmissionFactor(0)
+    ff.setPM10EmissionFactor(0)
+    ff.setPM25EmissionFactor(0)
+    ff.setNH3EmissionFactor(0)
+    ff.setNMVOCEmissionFactor(0)
+    ff.setHgEmissionFactor(0)
+    ff.setPbEmissionFactor(0)
+    ff.setWaterEmissionFactor(0)
+    ff.setNuclearHighLevelEmissionFactor(0)
+    ff.setNuclearLowLevelEmissionFactor(0)
   end
 
   def self.add_ems_debug_output(runner, model)
