@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+$VERBOSE = nil # Prevents ruby warnings, see https://github.com/NREL/OpenStudio/issues/4301
+
 def create_hpxmls
   require 'oga'
   require_relative 'HPXMLtoOpenStudio/resources/constants'
@@ -7,6 +9,7 @@ def create_hpxmls
   require_relative 'HPXMLtoOpenStudio/resources/hpxml'
   require_relative 'HPXMLtoOpenStudio/resources/location'
   require_relative 'HPXMLtoOpenStudio/resources/misc_loads'
+  require_relative 'HPXMLtoOpenStudio/resources/schedules'
   require_relative 'HPXMLtoOpenStudio/resources/waterheater'
   require_relative 'HPXMLtoOpenStudio/resources/xmlhelper'
 
@@ -86,6 +89,7 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-inconsistent-fan-powers.xml' => 'base.xml',
+    'invalid_files/hvac-seasons-less-than-a-year.xml' => 'base.xml',
     'invalid_files/hvac-shared-negative-seer-eq.xml' => 'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
     'invalid_files/generator-number-of-bedrooms-served.xml' => 'base-bldgtype-multifamily-shared-generator.xml',
     'invalid_files/generator-output-greater-than-consumption.xml' => 'base-misc-generators.xml',
@@ -125,7 +129,6 @@ def create_hpxmls
     'invalid_files/multiple-shared-heating-systems.xml' => 'base-bldgtype-multifamily-shared-boiler-only-baseboard.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
-    'invalid_files/num-bedrooms-exceeds-limit.xml' => 'base.xml',
     'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'invalid_files/refrigerator-location.xml' => 'base.xml',
     'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
@@ -366,6 +369,7 @@ def create_hpxmls
     'base-hvac-ground-to-air-heat-pump.xml' => 'base.xml',
     'base-hvac-ground-to-air-heat-pump-cooling-only.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-hvac-ground-to-air-heat-pump-heating-only.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'base-hvac-seasons.xml' => 'base.xml',
     'base-hvac-install-quality-none-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-install-quality-airflow-defect-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-install-quality-charge-defect-furnace-gas-central-ac-1-speed.xml' => 'base.xml',
@@ -559,6 +563,7 @@ def create_hpxmls
         if errors.size > 0
           fail "ERRORS: #{errors}"
         end
+
         # Check for errors
         errors = hpxml.check_for_errors()
         if errors.size > 0
@@ -749,8 +754,6 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.conditioned_floor_area = 1348.8
   elsif ['invalid_files/enclosure-floor-area-exceeds-cfa2.xml'].include? hpxml_file
     hpxml.building_construction.conditioned_floor_area = 898.8
-  elsif ['invalid_files/num-bedrooms-exceeds-limit.xml'].include? hpxml_file
-    hpxml.building_construction.number_of_bedrooms = 40
   elsif ['invalid_files/invalid-facility-type-equipment.xml',
          'invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFD
@@ -2628,6 +2631,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
           hpxml.windows[-1].fraction_operable = 1.0
         end
         next unless hpxml_file == 'base-enclosure-split-surfaces2.xml'
+
         hpxml.windows[-1].ufactor += 0.01 * i
         hpxml.windows[-1].interior_shading_factor_summer -= 0.02 * i
         hpxml.windows[-1].interior_shading_factor_winter -= 0.01 * i
@@ -2737,6 +2741,7 @@ def set_hpxml_skylights(hpxml_file, hpxml)
         hpxml.skylights[-1].id += i.to_s
         hpxml.skylights[-1].roof_idref += i.to_s if i % 2 == 0
         next unless hpxml_file == 'base-enclosure-split-surfaces2.xml'
+
         hpxml.skylights[-1].ufactor += 0.01 * i
         hpxml.skylights[-1].interior_shading_factor_summer -= 0.02 * i
         hpxml.skylights[-1].interior_shading_factor_winter -= 0.01 * i
@@ -3503,6 +3508,15 @@ def set_hpxml_hvac_control(hpxml_file, hpxml)
                             control_type: HPXML::HVACControlTypeManual,
                             heating_setpoint_temp: 68,
                             cooling_setpoint_temp: 78)
+  elsif ['base-hvac-seasons.xml'].include? hpxml_file
+    hpxml.hvac_controls[0].seasons_heating_begin_month = 11
+    hpxml.hvac_controls[0].seasons_heating_begin_day = 1
+    hpxml.hvac_controls[0].seasons_heating_end_month = 6
+    hpxml.hvac_controls[0].seasons_heating_end_day = 30
+    hpxml.hvac_controls[0].seasons_cooling_begin_month = 6
+    hpxml.hvac_controls[0].seasons_cooling_begin_day = 1
+    hpxml.hvac_controls[0].seasons_cooling_end_month = 10
+    hpxml.hvac_controls[0].seasons_cooling_end_day = 31
   elsif ['base-hvac-none.xml'].include? hpxml_file
     hpxml.hvac_controls.clear
   elsif ['base-hvac-programmable-thermostat.xml'].include? hpxml_file
@@ -3526,6 +3540,15 @@ def set_hpxml_hvac_control(hpxml_file, hpxml)
     hpxml.hvac_controls[0].cooling_setpoint_temp = 80
   elsif ['base-lighting-ceiling-fans.xml'].include? hpxml_file
     hpxml.hvac_controls[0].ceiling_fan_cooling_setpoint_temp_offset = 0.5
+  elsif ['invalid_files/hvac-seasons-less-than-a-year.xml'].include? hpxml_file
+    hpxml.hvac_controls[0].seasons_heating_begin_month = 10
+    hpxml.hvac_controls[0].seasons_heating_begin_day = 1
+    hpxml.hvac_controls[0].seasons_heating_end_month = 5
+    hpxml.hvac_controls[0].seasons_heating_end_day = 31
+    hpxml.hvac_controls[0].seasons_cooling_begin_month = 7
+    hpxml.hvac_controls[0].seasons_cooling_begin_day = 1
+    hpxml.hvac_controls[0].seasons_cooling_end_month = 9
+    hpxml.hvac_controls[0].seasons_cooling_end_day = 30
   end
 end
 
@@ -4623,7 +4646,7 @@ def set_hpxml_generators(hpxml_file, hpxml)
                          annual_consumption_kbtu: 8500,
                          annual_output_kwh: 500)
     hpxml.generators.add(id: 'Generator2',
-                         fuel_type: HPXML::FuelTypePropane,
+                         fuel_type: HPXML::FuelTypeOil,
                          annual_consumption_kbtu: 8500,
                          annual_output_kwh: 500)
   elsif ['base-bldgtype-multifamily-shared-generator.xml'].include? hpxml_file

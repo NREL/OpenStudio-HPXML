@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>he_score_measure</name>
   <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
-  <version_id>bbac7d57-9e07-429e-a12a-113220d1e57d</version_id>
-  <version_modified>20210412T222148Z</version_modified>
+  <version_id>5aee0973-44a3-48c8-9309-08f2a2592ba0</version_id>
+  <version_modified>20210505T214836Z</version_modified>
   <xml_checksum>2AF3A68E</xml_checksum>
   <class_name>HEScoreMeasure</class_name>
   <display_name>Apply Home Energy Score Ruleset</display_name>
@@ -12,9 +12,9 @@
   <modeler_description>TODO</modeler_description>
   <arguments>
     <argument>
-      <name>hpxml_path</name>
-      <display_name>HPXML File Path</display_name>
-      <description>Absolute (or relative) path of the HPXML file.</description>
+      <name>input_file_path</name>
+      <display_name>Input File Path</display_name>
+      <description>Absolute (or relative) path of the HPXML/JSON file.</description>
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -87,6 +87,12 @@
       <checksum>DB516BAF</checksum>
     </file>
     <file>
+      <filename>HESruleset.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5B0023CF</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.7.0</identifier>
@@ -95,19 +101,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>0865700F</checksum>
+      <checksum>A0C951DB</checksum>
     </file>
     <file>
       <filename>test_hescore_ruleset.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>ADA93431</checksum>
+      <checksum>5B659D92</checksum>
     </file>
     <file>
-      <filename>HESruleset.rb</filename>
+      <filename>json_to_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5B0023CF</checksum>
+      <checksum>7CB5A78F</checksum>
     </file>
   </files>
 </measure>
