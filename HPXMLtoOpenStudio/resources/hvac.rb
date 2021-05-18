@@ -1170,7 +1170,7 @@ class HVAC
       elsif seer > 21
         return HPXML::HVACCompressorTypeVariableSpeed
       end
-    else if [HPXML::HVACTypePTAC, HPXML::HVACTypeHeatPumpPTHP].include? hvac_type
+    elsif [HPXML::HVACTypePTAC, HPXML::HVACTypeHeatPumpPTHP].include? hvac_type
       return HPXML::HVACCompressorTypeSingleStage
     end
     return
