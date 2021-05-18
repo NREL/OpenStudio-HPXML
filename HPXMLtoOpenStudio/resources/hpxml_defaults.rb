@@ -443,7 +443,7 @@ class HPXMLDefaults
           heating_system.heating_efficiency_afue = HVAC.get_default_hvac_efficiency_by_year_installed(year_installed, heating_system_type, heating_system_fuel, HPXML::UnitsAFUE)
         end
         heating_system.heating_efficiency_afue_isdefaulted = true
-      elsif [HPXML::HVACTypeElectricResistance].include? heating_system_type
+      elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypePTACHeating].include? heating_system_type
         next unless heating_system.heating_efficiency_percent.nil?
 
         heating_system.heating_efficiency_percent = 1.0
@@ -474,7 +474,7 @@ class HPXMLDefaults
 
         cooling_system.cooling_efficiency_seer = HVAC.get_default_hvac_efficiency_by_year_installed(year_installed, cooling_system_type, cooling_system_fuel, HPXML::UnitsSEER)
         cooling_system.cooling_efficiency_seer_isdefaulted = true
-      elsif cooling_system_type == HPXML::HVACTypeRoomAirConditioner
+      elsif [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system_type
         next unless cooling_system.cooling_efficiency_eer.nil?
 
         cooling_system.cooling_efficiency_eer = HVAC.get_default_hvac_efficiency_by_year_installed(year_installed, cooling_system_type, cooling_system_fuel, HPXML::UnitsEER)
@@ -564,7 +564,7 @@ class HPXMLDefaults
         heat_pump.cooling_shr = 0.732
         heat_pump.cooling_shr_isdefaulted = true
       elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpPTHP
-        heat_pump.cooling_shr = 0.65 # Fixme: is it ok to use the same default as roomac and ptac?
+        heat_pump.cooling_shr = 0.65
         heat_pump.cooling_shr_isdefaulted = true
       end
     end

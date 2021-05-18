@@ -152,6 +152,7 @@ def create_hpxmls
     'invalid_files/refrigerators-multiple-primary.xml' => 'base.xml',
     'invalid_files/refrigerators-no-primary.xml' => 'base.xml',
     'invalid_files/ptac-unattached-cooling-system.xml' => 'base-hvac-ptac-electric-resistance.xml',
+    'invalid_files/furnace-attached-to-cooling-system.xml' => 'base.xml',
     'base-appliances-coal.xml' => 'base.xml',
     'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
     'base-appliances-dehumidifier-ief-portable.xml' => 'base-appliances-dehumidifier.xml',
@@ -2932,6 +2933,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypePTACHeating
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
     hpxml.heating_systems[0].heating_efficiency_afue = nil
+  elsif ['invalid_files/furnace-attached-to-cooling-system.xml'].include? hpxml_file
+    hpxml.heating_systems[0].cooling_system_idref = 'CoolingSystem'
   elsif ['base-hvac-furnace-elec-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
     hpxml.heating_systems[0].heating_efficiency_afue = 0.98
@@ -2951,48 +2954,55 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 1,
-                              fraction_heat_load_served: 0.1)
+                              fraction_heat_load_served: 0.091)
     hpxml.heating_systems.add(id: 'HeatingSystem2',
+                              heating_system_type: HPXML::HVACTypePTACHeating,
+                              heating_system_fuel: HPXML::FuelTypeElectricity,
+                              heating_capacity: 6400,
+                              heating_efficiency_percent: 1,
+                              fraction_heat_load_served: 0.091,
+                              cooling_system_idref: 'CoolingSystemPTAC')
+    hpxml.heating_systems.add(id: 'HeatingSystem3',
                               distribution_system_idref: 'HVACDistribution2',
                               heating_system_type: HPXML::HVACTypeFurnace,
                               heating_system_fuel: HPXML::FuelTypeNaturalGas,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.92,
-                              fraction_heat_load_served: 0.1)
-    hpxml.heating_systems.add(id: 'HeatingSystem3',
+                              fraction_heat_load_served: 0.091)
+    hpxml.heating_systems.add(id: 'HeatingSystem4',
                               distribution_system_idref: 'HVACDistribution3',
                               heating_system_type: HPXML::HVACTypeBoiler,
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 1,
-                              fraction_heat_load_served: 0.1)
-    hpxml.heating_systems.add(id: 'HeatingSystem4',
+                              fraction_heat_load_served: 0.091)
+    hpxml.heating_systems.add(id: 'HeatingSystem5',
                               distribution_system_idref: 'HVACDistribution4',
                               heating_system_type: HPXML::HVACTypeBoiler,
                               heating_system_fuel: HPXML::FuelTypeNaturalGas,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.92,
-                              fraction_heat_load_served: 0.1,
+                              fraction_heat_load_served: 0.091,
                               electric_auxiliary_energy: 200)
-    hpxml.heating_systems.add(id: 'HeatingSystem5',
+    hpxml.heating_systems.add(id: 'HeatingSystem6',
                               heating_system_type: HPXML::HVACTypeElectricResistance,
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_percent: 1,
-                              fraction_heat_load_served: 0.1)
-    hpxml.heating_systems.add(id: 'HeatingSystem6',
+                              fraction_heat_load_served: 0.091)
+    hpxml.heating_systems.add(id: 'HeatingSystem7',
                               heating_system_type: HPXML::HVACTypeStove,
                               heating_system_fuel: HPXML::FuelTypeOil,
                               heating_capacity: 6400,
                               heating_efficiency_percent: 0.8,
-                              fraction_heat_load_served: 0.1,
+                              fraction_heat_load_served: 0.091,
                               fan_watts: 40.0)
-    hpxml.heating_systems.add(id: 'HeatingSystem7',
+    hpxml.heating_systems.add(id: 'HeatingSystem8',
                               heating_system_type: HPXML::HVACTypeWallFurnace,
                               heating_system_fuel: HPXML::FuelTypePropane,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.8,
-                              fraction_heat_load_served: 0.1,
+                              fraction_heat_load_served: 0.091,
                               fan_watts: 0.0)
   elsif ['base-mechvent-multiple.xml',
          'base-bldgtype-multifamily-shared-mechvent-multiple.xml'].include? hpxml_file
@@ -3228,14 +3238,21 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     end
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.cooling_systems[0].distribution_system_idref = 'HVACDistribution2'
-    hpxml.cooling_systems[0].fraction_cool_load_served = 0.2
-    hpxml.cooling_systems[0].cooling_capacity *= 0.2
+    hpxml.cooling_systems[0].fraction_cool_load_served = 0.1667
+    hpxml.cooling_systems[0].cooling_capacity *= 0.1667
     hpxml.cooling_systems.add(id: 'CoolingSystem2',
                               cooling_system_type: HPXML::HVACTypeRoomAirConditioner,
                               cooling_system_fuel: HPXML::FuelTypeElectricity,
                               cooling_capacity: 9600,
-                              fraction_cool_load_served: 0.2,
+                              fraction_cool_load_served: 0.1667,
                               cooling_efficiency_eer: 8.5,
+                              cooling_shr: 0.65)
+    hpxml.cooling_systems.add(id: 'CoolingSystemPTAC',
+                              cooling_system_type: HPXML::HVACTypePTAC,
+                              cooling_system_fuel: HPXML::FuelTypeElectricity,
+                              cooling_capacity: 9600,
+                              fraction_cool_load_served: 0.1667,
+                              cooling_efficiency_eer: 10.7,
                               cooling_shr: 0.65)
   elsif ['base-mechvent-multiple.xml',
          'base-bldgtype-multifamily-shared-mechvent-multiple.xml'].include? hpxml_file
@@ -3454,8 +3471,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
                          backup_heating_capacity: 3412,
                          backup_heating_efficiency_percent: 1.0,
-                         fraction_heat_load_served: 0.1,
-                         fraction_cool_load_served: 0.2,
+                         fraction_heat_load_served: 0.091,
+                         fraction_cool_load_served: 0.1667,
                          heating_efficiency_hspf: 7.7,
                          cooling_efficiency_seer: 13,
                          heating_capacity_17F: 4800 * 0.630, # Based on OAT slope of default curves
@@ -3470,8 +3487,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
                          backup_heating_capacity: 3412,
                          backup_heating_efficiency_percent: 1.0,
-                         fraction_heat_load_served: 0.1,
-                         fraction_cool_load_served: 0.2,
+                         fraction_heat_load_served: 0.091,
+                         fraction_cool_load_served: 0.1667,
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
                          cooling_shr: 0.73,
@@ -3485,8 +3502,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
                          backup_heating_capacity: 3412,
                          backup_heating_efficiency_percent: 1.0,
-                         fraction_heat_load_served: 0.1,
-                         fraction_cool_load_served: 0.2,
+                         fraction_heat_load_served: 0.091,
+                         fraction_cool_load_served: 0.1667,
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 19,
                          heating_capacity_17F: 4800 * f,

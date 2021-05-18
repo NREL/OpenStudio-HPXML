@@ -21,7 +21,7 @@ class HVAC
         else
           fail "Unexpected heat pump type: #{cooling_system.heat_pump_type}."
         end
-      else
+      elsif cooling_system.is_a? HPXML::CoolingSystem
         if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
           if heating_system.nil?
             obj_name = Constants.ObjectNameCentralAirConditioner
@@ -51,9 +51,11 @@ class HVAC
       clg_ap = cooling_system.additional_properties
       num_speeds = clg_ap.num_speeds
       clg_cfm = cooling_system.cooling_airflow_cfm
-    else
+    elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace)
       obj_name = Constants.ObjectNameFurnace
       num_speeds = 1
+    else
+      fail "Unexpected heating system type: #{heating_system.heating_system_type}, expect central air source hvac systems."
     end
 
     if not heating_system.nil?
@@ -72,7 +74,7 @@ class HVAC
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
           htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
           if heating_system.heating_system_type == HPXML::HVACTypePTACHeating
-            htg_coil.setEfficiency(1.0) # Default to 1
+            htg_coil.setEfficiency(heating_system.heating_efficiency_percent)
           else
             htg_coil.setEfficiency(heating_system.heating_efficiency_afue)
           end
@@ -2796,7 +2798,7 @@ class HVAC
         end
         htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
         htg_coil.setRatedAirFlowRate(calc_rated_airflow(heating_system.heating_capacity, htg_ap.heat_rated_cfm_per_ton[0], 1.0))
-      else # Fixme: two speed PTHP?
+      else
         if htg_coil.nil?
           htg_coil = OpenStudio::Model::CoilHeatingDXMultiSpeed.new(model)
           htg_coil.setFuelType(EPlus::FuelTypeElectricity)
@@ -3968,22 +3970,12 @@ class HVAC
     return UnitConversions.convert(capacity, 'Btu/hr', 'ton') * UnitConversions.convert(rated_cfm_per_ton, 'cfm', 'm^3/s') * capacity_ratio
   end
 
-  def self.is_central_air_conditioner_and_furnace(hpxml, heating_system, cooling_system)
-    if not (hpxml.heating_systems.include?(heating_system) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace))
+  def self.is_attached_heating_and_cooling_systems(hpxml, heating_system, cooling_system)
+    # Now only allows furnace+AC and PTAC
+    if not (hpxml.heating_systems.include?(heating_system) && ([HPXML::HVACTypeFurnace, HPXML::HVACTypePTACHeating].include? heating_system.heating_system_type))
       return false
     end
-    if not (hpxml.cooling_systems.include?(cooling_system) && (cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner))
-      return false
-    end
-
-    return true
-  end
-
-  def self.is_ptac(hpxml, heating_system, cooling_system)
-    if not (hpxml.heating_systems.include?(heating_system) && (heating_system.heating_system_type == HPXML::HVACTypePTACHeating))
-      return false
-    end
-    if not (hpxml.cooling_systems.include?(cooling_system) && (cooling_system.cooling_system_type == HPXML::HVACTypePTAC))
+    if not (hpxml.cooling_systems.include?(cooling_system) && ([HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type))
       return false
     end
 
@@ -3998,9 +3990,7 @@ class HVAC
 
     hpxml.cooling_systems.each do |cooling_system|
       heating_system = nil
-      if is_central_air_conditioner_and_furnace(hpxml, cooling_system.attached_heating_system, cooling_system)
-        heating_system = cooling_system.attached_heating_system
-      elsif is_ptac(hpxml, cooling_system.attached_heating_system, cooling_system)
+      if is_attached_heating_and_cooling_systems(hpxml, cooling_system.attached_heating_system, cooling_system)
         heating_system = cooling_system.attached_heating_system
       end
       hvac_systems << { cooling: cooling_system,
@@ -4008,8 +3998,8 @@ class HVAC
     end
 
     hpxml.heating_systems.each do |heating_system|
-      if is_central_air_conditioner_and_furnace(hpxml, heating_system, heating_system.attached_cooling_system)
-        next # Already processed combined AC+furnace
+      if is_attached_heating_and_cooling_systems(hpxml, heating_system, heating_system.attached_cooling_system)
+        next # Already processed with cooling
       end
       hvac_systems << { cooling: nil,
                         heating: heating_system }
@@ -4074,6 +4064,7 @@ class HVAC
 
     type_id = { HPXML::HVACTypeCentralAirConditioner => 'split_dx',
                 HPXML::HVACTypeRoomAirConditioner => 'packaged_dx',
+                HPXML::HVACTypePTAC => 'packaged_dx',
                 HPXML::HVACTypeHeatPumpAirToAir => 'heat_pump',
                 HPXML::HVACTypeFurnace => 'central_furnace',
                 HPXML::HVACTypeWallFurnace => 'wall_furnace',

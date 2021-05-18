@@ -28,6 +28,7 @@ __New Features__
 - Removes limitation that a shared water heater serving a shared laundry room can't also serve dwelling unit fixtures (i.e., FractionDHWLoadServed is no longer required to be zero).
 - Adds IDs to schematron validation errors/warnings when possible.
 - Moves additional error-checking from the ruby measure to the schematron validator. 
+- Allows modeling PTAC and PTHP hvac systems. 
 
 __Bugfixes__
 - Fixes room air conditioner performance curve.

@@ -641,9 +641,10 @@ Each heating system (other than a heat pump) is entered as an ``/HPXML/Building/
   ``FractionHeatLoadServed``         double    frac    0 - 1 [#]_   Yes                  Fraction of heating load served
   =================================  ========  ======  ===========  ========  =========  ===============================
 
-  .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``PortableHeater``, ``FixedHeater``, or ``Fireplace``.
+  .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``PortableHeater``, ``FixedHeater``, ``Fireplace``, or ``PackagedTerminalAirConditionerHeating``.
   .. [#] HeatingSystemFuel choices are  "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
          For ``ElectricResistance``, "electricity" is required.
+         For ``PackagedTerminalAirConditionerHeating``, "electricity" is currently the only choice.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across both HeatingSystems and HeatPumps) must be less than or equal to 1.
 
 Electric Resistance
@@ -657,6 +658,19 @@ If electric resistance heating is specified, additional information is entered i
   ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        No        1.0      Efficiency
   ==================================================  ======  =====  ===========  ========  =======  ==========
 
+PTAC - Heating
+~~~~~~~~~~~~~~
+
+If electric resistance heating is specified, additional information is entered in ``HeatingSystem``.
+
+  ==================================================  ======  =========  ===========  ========  =======  ==================================
+  Element                                             Type    Units      Constraints  Required  Default  Notes
+  ==================================================  ======  =========  ===========  ========  =======  ==================================
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac       0 - 1        No        1.0      Efficiency
+  ``AttachedToCoolingSystem``                         idref   See [#]_                No                 ID of attached ptac cooling system
+  ==================================================  ======  =========  ===========  ========  =======  ==================================
+
+  .. [#] AttachedToCoolingSystem is required for ``PackagedTerminalAirConditionerHeating``. The cooling system being attached must be of type "packaged terminal air conditioner".
 Furnace
 ~~~~~~~
 
@@ -802,7 +816,7 @@ Each cooling system (other than a heat pump) is entered as an ``/HPXML/Building/
   ``FractionCoolLoadServed``  double    frac    0 - 1 [#]_   Yes                Fraction of cooling load served
   ==========================  ========  ======  ===========  ========  =======  ===============================
 
-  .. [#] CoolingSystemType choices are "central air conditioner", "room air conditioner", "evaporative cooler", "mini-split", "chiller", or "cooling tower".
+  .. [#] CoolingSystemType choices are "central air conditioner", "room air conditioner", "evaporative cooler", "mini-split", "chiller", "cooling tower", or "packaged terminal air conditioner".
   .. [#] CoolingSystemFuel only choice is "electricity".
   .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
 
@@ -849,6 +863,26 @@ If a room air conditioner is specified, additional information is entered in ``C
   ===================================================================  =================  ===========  ===============  ========  =========  ==================================
 
   .. [#] If AnnualCoolingEfficiency[Units="EER"]/Value not provided, defaults to EER from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
+
+.. _hvac_cooling_ptac:
+
+Packaged Terminal Air Conditioner
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If a ptac is specified, additional information is entered in ``CoolingSystem``.
+
+  ===================================================================  =================  ===========  ===============  ========  =========  ==================================
+  Element                                                              Type               Units        Constraints      Required  Default    Notes
+  ===================================================================  =================  ===========  ===============  ========  =========  ==================================
+  ``YearInstalled`` or ``AnnualCoolingEfficiency[Units="EER"]/Value``  integer or double  # or Btu/Wh  > 1600 or > 0    Yes       See [#]_   Year installed or Rated efficiency
+  ``CoolingCapacity``                                                  double             Btu/hr       >= 0             No        autosized  Cooling capacity
+  ``SensibleHeatFraction``                                             double             frac         0 - 1            No                   Sensible heat fraction
+  ``CompressorType``                                                   string             See [#]_                      No        See [#]_   Type of compressor
+  ===================================================================  =================  ===========  ===============  ========  =========  ==================================
+
+  .. [#] If AnnualCoolingEfficiency[Units="EER"]/Value not provided, defaults to EER from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
+  .. [#] The only CompressorType choice supported is "single stage" for now.
+  .. [#] If CompressorType not provided, defaults to "single stage".
 
 Evaporative Cooler
 ~~~~~~~~~~~~~~~~~~

@@ -316,10 +316,24 @@
                 <Units>AFUE</Units>
                 <Value>1.0</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.2</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.191</FractionHeatLoadServed>
             </HeatingSystem>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem2'/>
+              <HeatingSystemType>
+                <PackagedTerminalAirConditionerHeating/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>electricity</HeatingSystemFuel>
+              <HeatingCapacity>6400.0</HeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>Percent</Units>
+                <Value>1.0</Value>
+              </AnnualHeatingEfficiency>
+              <FractionHeatLoadServed>0.091</FractionHeatLoadServed>
+              <AttachedToCoolingSystem idref='CoolingSystemPTAC'/>
+            </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem3'/>
               <DistributionSystem idref='HVACDistribution2'/>
               <HeatingSystemType>
                 <Furnace/>
@@ -330,10 +344,10 @@
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.091</FractionHeatLoadServed>
             </HeatingSystem>
             <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem3'/>
+              <SystemIdentifier id='HeatingSystem4'/>
               <DistributionSystem idref='HVACDistribution3'/>
               <HeatingSystemType>
                 <Boiler/>
@@ -344,10 +358,10 @@
                 <Units>AFUE</Units>
                 <Value>1.0</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.091</FractionHeatLoadServed>
             </HeatingSystem>
             <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem4'/>
+              <SystemIdentifier id='HeatingSystem5'/>
               <DistributionSystem idref='HVACDistribution4'/>
               <HeatingSystemType>
                 <Boiler/>
@@ -358,11 +372,11 @@
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.091</FractionHeatLoadServed>
               <ElectricAuxiliaryEnergy>200.0</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem5'/>
+              <SystemIdentifier id='HeatingSystem6'/>
               <HeatingSystemType>
                 <ElectricResistance/>
               </HeatingSystemType>
@@ -372,10 +386,10 @@
                 <Units>Percent</Units>
                 <Value>1.0</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.091</FractionHeatLoadServed>
             </HeatingSystem>
             <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem6'/>
+              <SystemIdentifier id='HeatingSystem7'/>
               <HeatingSystemType>
                 <Stove/>
               </HeatingSystemType>
@@ -385,13 +399,13 @@
                 <Units>Percent</Units>
                 <Value>0.8</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.091</FractionHeatLoadServed>
               <extension>
                 <FanPowerWatts>40.0</FanPowerWatts>
               </extension>
             </HeatingSystem>
             <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem7'/>
+              <SystemIdentifier id='HeatingSystem8'/>
               <HeatingSystemType>
                 <WallFurnace/>
               </HeatingSystemType>
@@ -401,7 +415,7 @@
                 <Units>AFUE</Units>
                 <Value>0.8</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.091</FractionHeatLoadServed>
               <extension>
                 <FanPowerWatts>0.0</FanPowerWatts>
               </extension>
@@ -411,9 +425,9 @@
               <DistributionSystem idref='HVACDistribution2'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>4800.0</CoolingCapacity>
+              <CoolingCapacity>4000.7999999999997</CoolingCapacity>
               <CompressorType>single stage</CompressorType>
-              <FractionCoolLoadServed>0.4</FractionCoolLoadServed>
+              <FractionCoolLoadServed>0.3667</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>13.0</Value>
@@ -425,10 +439,22 @@
               <CoolingSystemType>room air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>9600.0</CoolingCapacity>
-              <FractionCoolLoadServed>0.2</FractionCoolLoadServed>
+              <FractionCoolLoadServed>0.1667</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>
                 <Value>8.5</Value>
+              </AnnualCoolingEfficiency>
+              <SensibleHeatFraction>0.65</SensibleHeatFraction>
+            </CoolingSystem>
+            <CoolingSystem>
+              <SystemIdentifier id='CoolingSystemPTAC'/>
+              <CoolingSystemType>packaged terminal air conditioner</CoolingSystemType>
+              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity>9600.0</CoolingCapacity>
+              <FractionCoolLoadServed>0.1667</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>EER</Units>
+                <Value>10.7</Value>
               </AnnualCoolingEfficiency>
               <SensibleHeatFraction>0.65</SensibleHeatFraction>
             </CoolingSystem>
@@ -448,8 +474,8 @@
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
               <BackupHeatingCapacity>3412.0</BackupHeatingCapacity>
-              <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0.2</FractionCoolLoadServed>
+              <FractionHeatLoadServed>0.091</FractionHeatLoadServed>
+              <FractionCoolLoadServed>0.1667</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>13.0</Value>
@@ -473,8 +499,8 @@
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
               <BackupHeatingCapacity>3412.0</BackupHeatingCapacity>
-              <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0.2</FractionCoolLoadServed>
+              <FractionHeatLoadServed>0.091</FractionHeatLoadServed>
+              <FractionCoolLoadServed>0.1667</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>
                 <Value>16.6</Value>
@@ -501,8 +527,8 @@
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
               <BackupHeatingCapacity>3412.0</BackupHeatingCapacity>
-              <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0.2</FractionCoolLoadServed>
+              <FractionHeatLoadServed>0.091</FractionHeatLoadServed>
+              <FractionCoolLoadServed>0.1667</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>19.0</Value>
@@ -567,7 +593,7 @@
                 <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>270.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>245.0</ConditionedFloorAreaServed>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution2'/>
@@ -617,7 +643,7 @@
                 <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>270.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>245.0</ConditionedFloorAreaServed>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution3'/>
@@ -683,7 +709,7 @@
                 <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>270.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>245.0</ConditionedFloorAreaServed>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution6'/>
@@ -733,7 +759,7 @@
                 <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>270.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>245.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
