@@ -307,7 +307,6 @@
             <HeatPump>
               <SystemIdentifier id='HeatPump'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <IsPackagedSystem>true</IsPackagedSystem>
               <HeatPumpType>ground-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>0.0</HeatingCapacity>
@@ -324,7 +323,6 @@
                 <Value>3.6</Value>
               </AnnualHeatingEfficiency>
               <extension>
-                <ChargeDefectRatio>0.0</ChargeDefectRatio>
                 <PumpPowerWattsPerTon>30.0</PumpPowerWattsPerTon>
               </extension>
             </HeatPump>

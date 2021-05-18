@@ -1,10 +1,11 @@
 <?xml version="1.0"?>
 <measure>
   <schema_version>3.0</schema_version>
+  <error>Unable to extract OpenStudio::Measure::OSMeasure object from /mnt/c/git/openstudio-hpxml/HPXMLtoOpenStudio/measure.rb. The script should contain a class that derives from OpenStudio::Measure::OSMeasure and should close with a line stating the class name followed by .new.registerWithApplication.</error>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>1fa52ada-3183-4d0b-bc1f-fa17b62454b0</version_id>
-  <version_modified>20210430T210803Z</version_modified>
+  <version_id>c89d95fd-9eb8-4615-ba22-692b860f42e8</version_id>
+  <version_modified>20210518T180145Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -16,22 +17,31 @@
       <display_name>HPXML File Path</display_name>
       <description>Absolute/relative path of the HPXML file.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>output_dir</name>
       <display_name>Directory for Output Files</display_name>
       <description>Absolute/relative path for the output files directory.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>debug</name>
       <display_name>Debug Mode?</display_name>
       <description>If true: 1) Writes in.osm file, 2) Generates additional log output, and 3) Creates all EnergyPlus output files.</description>
       <type>Boolean</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -45,12 +55,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>add_component_loads</name>
       <display_name>Add component loads?</display_name>
       <description>If true, adds the calculation of heating/cooling component loads (not enabled by default for faster performance).</description>
       <type>Boolean</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -64,12 +77,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>skip_validation</name>
       <display_name>Skip Validation?</display_name>
       <description>If true, bypasses HPXML input validation for faster performance. WARNING: This should only be used if the supplied HPXML file has already been validated against the Schema &amp; Schematron documents.</description>
       <type>Boolean</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -83,14 +99,20 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>building_id</name>
       <display_name>BuildingID</display_name>
       <description>The ID of the HPXML Building. Only required if there are multiple Building elements in the HPXML file.</description>
       <type>String</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
   </arguments>
   <outputs />
@@ -150,12 +172,6 @@
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
       <checksum>BB8F37B8</checksum>
-    </file>
-    <file>
-      <filename>weather.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A951F41D</checksum>
     </file>
     <file>
       <filename>data_ashrae_622_wsf.csv</filename>
@@ -296,12 +312,6 @@
       <checksum>6BF095D2</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C2B5A5E7</checksum>
-    </file>
-    <file>
       <filename>unit_conversions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -314,28 +324,10 @@
       <checksum>CB27A3C5</checksum>
     </file>
     <file>
-      <filename>lighting.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>45BBD265</checksum>
-    </file>
-    <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>E5A74D5B</checksum>
-    </file>
-    <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>02160BC4</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F76E3AB7</checksum>
     </file>
     <file>
       <filename>misc_loads.rb</filename>
@@ -396,12 +388,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>C18610A9</checksum>
-    </file>
-    <file>
-      <filename>geometry.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F2A35638</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
@@ -476,23 +462,6 @@
       <checksum>CA9A2E46</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.1.1</identifier>
-        <min_compatible>2.1.1</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>C3F9378E</checksum>
-    </file>
-    <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7E2C2773</checksum>
-    </file>
-    <file>
       <filename>version.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -505,64 +474,117 @@
       <checksum>B185ACE7</checksum>
     </file>
     <file>
+      <filename>weather.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9BDDB2C2</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>38A6C75D</checksum>
+    </file>
+    <file>
+      <filename>lighting.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C028223B</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E5C505B7</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F895FFF9</checksum>
+    </file>
+    <file>
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3AB6308D</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.1.1</identifier>
+        <min_compatible>2.1.1</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>76BEB7AB</checksum>
+    </file>
+    <file>
       <filename>HPXMLvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E6573CFC</checksum>
+      <checksum>E14BA8AB</checksum>
     </file>
     <file>
       <filename>HPXMLDataTypes.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
-      <checksum>38FAF739</checksum>
+      <checksum>CA8F8CC3</checksum>
     </file>
     <file>
       <filename>BaseElements.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AE0C9987</checksum>
+      <checksum>FD773DB8</checksum>
     </file>
     <file>
       <filename>test_hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>61197224</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7AF428AF</checksum>
+      <checksum>D1B2EEE6</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7A72A5C1</checksum>
+      <checksum>DB29573A</checksum>
     </file>
     <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E375D7BB</checksum>
-    </file>
-    <file>
-      <filename>EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E5F82294</checksum>
-    </file>
-    <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3065BE57</checksum>
+      <checksum>A319068F</checksum>
     </file>
     <file>
       <filename>minitest_helper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FEC94D37</checksum>
+      <checksum>F3E1BE58</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>EDF78BC3</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>27259D94</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>BB81D4C0</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4BBE084E</checksum>
     </file>
   </files>
 </measure>

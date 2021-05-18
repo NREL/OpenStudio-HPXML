@@ -2790,7 +2790,7 @@ class HPXML < Object
              :cooling_shr, :third_party_certification, :seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :airflow_defect_ratio,
              :fan_watts_per_cfm, :fan_power_not_tested, :airflow_not_tested, :charge_defect_ratio,
-             :charge_not_tested, :cooling_airflow_cfm, :location, :is_packaged_system]
+             :charge_not_tested, :cooling_airflow_cfm, :location]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2844,7 +2844,6 @@ class HPXML < Object
         distribution_system = XMLHelper.add_element(cooling_system, 'DistributionSystem')
         XMLHelper.add_attribute(distribution_system, 'idref', @distribution_system_idref)
       end
-      XMLHelper.add_element(cooling_system, 'IsPackagedSystem', @is_packaged_system, :boolean) unless @is_packaged_system.nil?
       XMLHelper.add_element(cooling_system, 'IsSharedSystem', @is_shared_system, :boolean) unless @is_shared_system.nil?
       XMLHelper.add_element(cooling_system, 'NumberofUnitsServed', @number_of_units_served, :integer) unless @number_of_units_served.nil?
       XMLHelper.add_element(cooling_system, 'CoolingSystemType', @cooling_system_type, :string) unless @cooling_system_type.nil?
@@ -2892,7 +2891,6 @@ class HPXML < Object
       @year_installed = XMLHelper.get_value(cooling_system, 'YearInstalled', :integer)
       @third_party_certification = XMLHelper.get_value(cooling_system, 'ThirdPartyCertification', :string)
       @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(cooling_system, 'DistributionSystem'))
-      @is_packaged_system = XMLHelper.get_value(cooling_system, 'IsPackagedSystem', :boolean)
       @is_shared_system = XMLHelper.get_value(cooling_system, 'IsSharedSystem', :boolean)
       @number_of_units_served = XMLHelper.get_value(cooling_system, 'NumberofUnitsServed', :integer)
       @cooling_system_type = XMLHelper.get_value(cooling_system, 'CoolingSystemType', :string)
@@ -2955,7 +2953,7 @@ class HPXML < Object
              :fan_watts_per_cfm, :fan_power_not_tested, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :airflow_defect_ratio, :airflow_not_tested,
              :charge_defect_ratio, :charge_not_tested, :heating_airflow_cfm, :cooling_airflow_cfm,
-             :location, :is_packaged_system]
+             :location]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2998,7 +2996,6 @@ class HPXML < Object
         distribution_system = XMLHelper.add_element(heat_pump, 'DistributionSystem')
         XMLHelper.add_attribute(distribution_system, 'idref', @distribution_system_idref)
       end
-      XMLHelper.add_element(heat_pump, 'IsPackagedSystem', @is_packaged_system, :boolean) unless @is_packaged_system.nil?
       XMLHelper.add_element(heat_pump, 'IsSharedSystem', @is_shared_system, :boolean) unless @is_shared_system.nil?
       XMLHelper.add_element(heat_pump, 'NumberofUnitsServed', @number_of_units_served, :integer) unless @number_of_units_served.nil?
       XMLHelper.add_element(heat_pump, 'HeatPumpType', @heat_pump_type, :string) unless @heat_pump_type.nil?
@@ -3070,7 +3067,6 @@ class HPXML < Object
       @year_installed = XMLHelper.get_value(heat_pump, 'YearInstalled', :integer)
       @third_party_certification = XMLHelper.get_value(heat_pump, 'ThirdPartyCertification', :string)
       @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(heat_pump, 'DistributionSystem'))
-      @is_packaged_system = XMLHelper.get_value(heat_pump, 'IsPackagedSystem', :boolean)
       @is_shared_system = XMLHelper.get_value(heat_pump, 'IsSharedSystem', :boolean)
       @number_of_units_served = XMLHelper.get_value(heat_pump, 'NumberofUnitsServed', :integer)
       @heat_pump_type = XMLHelper.get_value(heat_pump, 'HeatPumpType', :string)

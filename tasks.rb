@@ -98,6 +98,7 @@ def create_hpxmls
     'invalid_files/invalid-datatype-float.xml' => 'base.xml',
     'invalid_files/invalid-datatype-integer.xml' => 'base.xml',
     'invalid_files/invalid-daylight-saving.xml' => 'base-simcontrol-daylight-saving-custom.xml',
+    'invalid_files/invalid-distribution-cfa-served.xml' => 'base.xml',
     'invalid_files/invalid-epw-filepath.xml' => 'base.xml',
     'invalid_files/invalid-facility-type-equipment.xml' => 'base-bldgtype-multifamily-shared-laundry-room.xml',
     'invalid_files/invalid-facility-type-surfaces.xml' => 'base.xml',
@@ -118,6 +119,7 @@ def create_hpxmls
     'invalid_files/invalid-timestep.xml' => 'base.xml',
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
+    'invalid_files/missing-duct-location.xml' => 'base-hvac-multiple.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
     'invalid_files/multifamily-reference-appliance.xml' => 'base.xml',
     'invalid_files/multifamily-reference-duct.xml' => 'base.xml',
@@ -131,6 +133,8 @@ def create_hpxmls
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
     'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'invalid_files/refrigerator-location.xml' => 'base.xml',
+    'invalid_files/refrigerators-multiple-primary.xml' => 'base.xml',
+    'invalid_files/refrigerators-no-primary.xml' => 'base.xml',
     'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/repeated-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'invalid_files/solar-fraction-one.xml' => 'base-dhw-solar-fraction.xml',
@@ -147,11 +151,6 @@ def create_hpxmls
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
-    'invalid_files/missing-duct-location.xml' => 'base-hvac-multiple.xml',
-    'invalid_files/invalid-distribution-cfa-served.xml' => 'base.xml',
-    'invalid_files/refrigerators-multiple-primary.xml' => 'base.xml',
-    'invalid_files/refrigerators-no-primary.xml' => 'base.xml',
-    'invalid_files/packaged-system-charge-defect-ratio.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-appliances-coal.xml' => 'base.xml',
     'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
     'base-appliances-dehumidifier-ief-portable.xml' => 'base-appliances-dehumidifier.xml',
@@ -3354,8 +3353,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
                          cooling_shr: 0.73,
-                         pump_watts_per_ton: 30.0,
-                         is_packaged_system: true)
+                         pump_watts_per_ton: 30.0)
     if hpxml_file == 'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml'
       hpxml.heat_pumps[-1].is_shared_system = true
       hpxml.heat_pumps[-1].number_of_units_served = 6
@@ -3369,8 +3367,6 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
       hpxml.heat_pumps[-1].cooling_capacity = 36000
       hpxml.heat_pumps[-1].backup_heating_capacity = 36000
     end
-  elsif ['invalid_files/packaged-system-charge-defect-ratio.xml'].include? hpxml_file
-    hpxml.heat_pumps[-1].charge_defect_ratio = -0.25
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     hpxml.heat_pumps.add(id: 'HeatPump',
@@ -3393,18 +3389,11 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
          'base-hvac-mini-split-heat-pump-ducted-heating-only.xml'].include? hpxml_file
     hpxml.heat_pumps[0].cooling_capacity = 0
     hpxml.heat_pumps[0].fraction_cool_load_served = 0
-    if hpxml_file == 'base-hvac-ground-to-air-heat-pump-heating-only.xml'
-      hpxml.heat_pumps[0].is_packaged_system = true
-      hpxml.heat_pumps[0].charge_defect_ratio = 0.0
-    end
   elsif ['base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml',
          'base-hvac-ground-to-air-heat-pump-cooling-only.xml',
          'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml'].include? hpxml_file
     hpxml.heat_pumps[0].heating_capacity = 0
-    if hpxml_file == 'base-hvac-ground-to-air-heat-pump-cooling-only.xml'
-      hpxml.heat_pumps[0].is_packaged_system = true
-      hpxml.heat_pumps[0].charge_defect_ratio = 0.0
-    else
+    if hpxml_file != 'base-hvac-ground-to-air-heat-pump-cooling-only.xml'
       hpxml.heat_pumps[0].heating_capacity_17F = 0
     end
     hpxml.heat_pumps[0].fraction_heat_load_served = 0
@@ -3451,8 +3440,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
                          cooling_shr: 0.73,
-                         pump_watts_per_ton: 30.0,
-                         is_packaged_system: true)
+                         pump_watts_per_ton: 30.0)
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     hpxml.heat_pumps.add(id: 'HeatPump3',
                          heat_pump_type: HPXML::HVACTypeHeatPumpMiniSplit,
@@ -3507,7 +3495,6 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
     hpxml.heat_pumps[0].airflow_defect_ratio = -0.25
     hpxml.heat_pumps[0].fan_watts_per_cfm = 0.365
     hpxml.heat_pumps[0].charge_defect_ratio = -0.25
-    hpxml.heat_pumps[0].is_packaged_system = false if hpxml_file == 'base-hvac-install-quality-all-ground-to-air-heat-pump.xml'
   elsif hpxml_file.include?('base-hvac-autosize') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)
     hpxml.heat_pumps[0].cooling_capacity = nil
     hpxml.heat_pumps[0].heating_capacity = nil

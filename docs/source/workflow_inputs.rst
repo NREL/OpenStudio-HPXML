@@ -821,6 +821,7 @@ If a central air conditioner is specified, additional information is entered in 
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
+         A non-zero charge defect should typically only be applied for systems that are pre-charged on site.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
 
 Room Air Conditioner
@@ -996,6 +997,7 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
+         A non-zero charge defect should typically only be applied for systems that are pre-charged on site.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
 
 Mini-Split Heat Pump
@@ -1045,7 +1047,6 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   Element                                          Type      Units   Constraints  Required  Default    Notes
   ===============================================  ========  ======  ===========  ========  =========  ==============================================
   ``IsSharedSystem``                               boolean                        No        false      Whether it has a shared hydronic circulation loop [#]_
-  ``IsPackagedSystem``                             boolean                        Yes                  Whether it is a packaged system
   ``DistributionSystem``                           idref             See [#]_     Yes                  ID of attached distribution system
   ``HeatingCapacity``                              double    Btu/hr  >= 0         No        autosized  Heating capacity (excluding any backup heating)
   ``CoolingCapacity``                              double    Btu/hr  >= 0         No        autosized  Cooling capacity
@@ -1076,7 +1077,7 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
-         Note that most residential GSHPs are *packaged* systems where ``IsPackagedSystem`` should be true and charge defect ratio must be 0.0, whereas *split* systems can have a non-zero charge defect ratio with ``IsPackagedSystem`` to be false, but are less common.
+         A non-zero charge defect should typically only be applied for systems that are pre-charged on site.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
 
 .. _hvac_heatpump_wlhp:
