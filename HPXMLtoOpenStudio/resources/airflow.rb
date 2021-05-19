@@ -993,10 +993,6 @@ class Airflow
       duct_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
       duct_program.setName(object_name_idx + ' duct program')
       duct_program.addLine("Set #{ah_mfr_var.name} = #{ah_mfr_sensor.name}")
-      # FIXME: This no longer applies. Did it ever apply?
-      # if @fan_rtf_sensor[object].is_a? OpenStudio::Model::EnergyManagementSystemGlobalVariable
-      #  duct_program.addLine("Set #{@fan_rtf_sensor[object].name} = #{@fan_mfr_sensor[object].name} / #{@fan_mfr_max_var[object].name}")
-      # end
       duct_program.addLine("Set #{@fan_rtf_var[object].name} = 0")
       @fan_rtf_sensor[object].each do |rtf_sensor|
         duct_program.addLine("Set #{@fan_rtf_var[object].name} = #{@fan_rtf_var[object].name} + #{rtf_sensor.name}")
