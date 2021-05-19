@@ -547,7 +547,7 @@ class Airflow
           var_name = "Fan Runtime Fraction Speed #{i}"
         end
         rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var_name)
-        rtf_sensor.setName("#{rtf_sensor.name} s")
+        rtf_sensor.setName("#{@fan_rtf_var[osm_object].name} s")
         rtf_sensor.setKeyName(supply_fan.name.to_s)
         @fan_rtf_sensor[osm_object] << rtf_sensor
       end
