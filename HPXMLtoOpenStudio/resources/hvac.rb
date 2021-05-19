@@ -54,6 +54,10 @@ class HVAC
     elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace)
       obj_name = Constants.ObjectNameFurnace
       num_speeds = 1
+    elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypePTACHeating)
+      obj_name = Constants.ObjectNamePTACHeating
+      fan_watts_per_cfm = 0.0
+      num_speeds = 1
     else
       fail "Unexpected heating system type: #{heating_system.heating_system_type}, expect central air source hvac systems."
     end

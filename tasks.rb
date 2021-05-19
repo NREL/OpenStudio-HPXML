@@ -152,7 +152,6 @@ def create_hpxmls
     'invalid_files/refrigerators-multiple-primary.xml' => 'base.xml',
     'invalid_files/refrigerators-no-primary.xml' => 'base.xml',
     'invalid_files/ptac-unattached-cooling-system.xml' => 'base-hvac-ptac-electric-resistance.xml',
-    'invalid_files/furnace-attached-to-cooling-system.xml' => 'base.xml',
     'base-appliances-coal.xml' => 'base.xml',
     'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
     'base-appliances-dehumidifier-ief-portable.xml' => 'base-appliances-dehumidifier.xml',
@@ -2929,12 +2928,9 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
   elsif ['base-hvac-ptac-electric-resistance.xml'].include? hpxml_file
     hpxml.heating_systems[0].id = 'HeatingPTAC'
     hpxml.heating_systems[0].distribution_system_idref = nil
-    hpxml.heating_systems[0].cooling_system_idref = 'CoolingPTAC'
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypePTACHeating
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
     hpxml.heating_systems[0].heating_efficiency_afue = nil
-  elsif ['invalid_files/furnace-attached-to-cooling-system.xml'].include? hpxml_file
-    hpxml.heating_systems[0].cooling_system_idref = 'CoolingSystem'
   elsif ['base-hvac-furnace-elec-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
     hpxml.heating_systems[0].heating_efficiency_afue = 0.98
@@ -2960,8 +2956,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_percent: 1,
-                              fraction_heat_load_served: 0.091,
-                              cooling_system_idref: 'CoolingSystemPTAC')
+                              fraction_heat_load_served: 0.091)
     hpxml.heating_systems.add(id: 'HeatingSystem3',
                               distribution_system_idref: 'HVACDistribution2',
                               heating_system_type: HPXML::HVACTypeFurnace,

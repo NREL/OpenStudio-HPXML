@@ -311,7 +311,6 @@
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-              <AttachedToCoolingSystem idref='CoolingPTAC'/>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingPTAC'/>

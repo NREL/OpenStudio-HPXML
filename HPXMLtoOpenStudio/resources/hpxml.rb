@@ -2644,7 +2644,7 @@ class HPXML < Object
              :third_party_certification, :seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :fan_watts_per_cfm,
              :fan_power_not_tested, :airflow_defect_ratio, :airflow_not_tested,
-             :fan_watts, :heating_airflow_cfm, :location, :cooling_system_idref]
+             :fan_watts, :heating_airflow_cfm, :location]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2659,20 +2659,7 @@ class HPXML < Object
     end
 
     def attached_cooling_system
-      return if distribution_system.nil? && @cooling_system_idref.nil?
-
-      # by heating system's idref
-      if not @cooling_system_idref.nil?
-        if @heating_system_type != HVACTypePTACHeating
-          fail "Heating system type: #{@heating_system_type} should not be attached to a cooling system. Only PTAC allowed."
-        end
-        @hpxml_object.cooling_systems.each do |cooling_system|
-          next unless cooling_system.id == @cooling_system_idref
-
-          return cooling_system
-        end
-        fail "Attached cooling system '#{@cooling_system_idref}' not found for HVAC system '#{@id}'."
-      end
+      return if distribution_system.nil?
 
       # by distribution system
       distribution_system.hvac_systems.each do |hvac_system|
@@ -2740,10 +2727,6 @@ class HPXML < Object
       end
       XMLHelper.add_element(heating_system, 'FractionHeatLoadServed', @fraction_heat_load_served, :float, @fraction_heat_load_served_isdefaulted) unless @fraction_heat_load_served.nil?
       XMLHelper.add_element(heating_system, 'ElectricAuxiliaryEnergy', @electric_auxiliary_energy, :float, @electric_auxiliary_energy_isdefaulted) unless @electric_auxiliary_energy.nil?
-      if not @cooling_system_idref.nil?
-        cooling_system = XMLHelper.add_element(heating_system, 'AttachedToCoolingSystem')
-        XMLHelper.add_attribute(cooling_system, 'idref', @cooling_system_idref)
-      end
       XMLHelper.add_extension(heating_system, 'SharedLoopWatts', @shared_loop_watts, :float) unless @shared_loop_watts.nil?
       XMLHelper.add_extension(heating_system, 'SharedLoopMotorEfficiency', @shared_loop_motor_efficiency, :float) unless @shared_loop_motor_efficiency.nil?
       XMLHelper.add_extension(heating_system, 'FanCoilWatts', @fan_coil_watts, :float) unless @fan_coil_watts.nil?
@@ -2764,7 +2747,6 @@ class HPXML < Object
       @year_installed = XMLHelper.get_value(heating_system, 'YearInstalled', :integer)
       @third_party_certification = XMLHelper.get_value(heating_system, 'ThirdPartyCertification', :string)
       @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(heating_system, 'DistributionSystem'))
-      @cooling_system_idref = HPXML::get_idref(XMLHelper.get_element(heating_system, 'AttachedToCoolingSystem'))
       @is_shared_system = XMLHelper.get_value(heating_system, 'IsSharedSystem', :boolean)
       @number_of_units_served = XMLHelper.get_value(heating_system, 'NumberofUnitsServed', :integer)
       @heating_system_type = XMLHelper.get_child_name(heating_system, 'HeatingSystemType')
@@ -2830,14 +2812,6 @@ class HPXML < Object
     end
 
     def attached_heating_system
-      # by heating system's idref, PTAC
-      @hpxml_object.heating_systems.each do |heating_system|
-        next if heating_system.cooling_system_idref.nil? || (heating_system.heating_system_type != HVACTypePTACHeating)
-        next unless heating_system.cooling_system_idref == @id
-
-        return heating_system
-      end
-
       # by distribution system
       return if distribution_system.nil?
 

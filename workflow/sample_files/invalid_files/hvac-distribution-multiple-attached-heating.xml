@@ -330,7 +330,6 @@
                 <Value>1.0</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.091</FractionHeatLoadServed>
-              <AttachedToCoolingSystem idref='CoolingSystemPTAC'/>
             </HeatingSystem>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem3'/>

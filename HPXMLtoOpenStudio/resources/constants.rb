@@ -181,6 +181,10 @@ class Constants
     return 'furnace'
   end
 
+  def self.ObjectNamePTACHeating
+    return 'ptac heating'
+  end
+
   def self.ObjectNameFurniture
     return 'furniture'
   end

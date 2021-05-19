@@ -1676,7 +1676,7 @@ class OSModel
       if (heating_system.heating_system_type == HPXML::HVACTypeFurnace) && (not cooling_system.nil?)
         next # Already processed combined AC+furnace
       end
-      if (heating_system.heating_system_type == HPXML::HVACTypePTACHeating)
+      if (heating_system.heating_system_type == HPXML::HVACTypePTACHeating) && (not cooling_system.nil?)
         next # Processed with PTAC cooling in add_cooling_system
       end
 
@@ -1684,7 +1684,7 @@ class OSModel
       sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heating_system.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
       @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
 
-      if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
+      if [HPXML::HVACTypeFurnace, HPXML::HVACTypePTACHeating].include? heating_system.heating_system_type
 
         HVAC.apply_central_air_source_hvac_systems(model, runner, nil, heating_system,
                                                    [0], sequential_heat_load_fracs,
