@@ -582,7 +582,6 @@ class HPXMLDefaults
 
       cooling_system.charge_defect_ratio = 0.0
       cooling_system.charge_defect_ratio_isdefaulted = true
-      cooling_system.charge_not_tested = nil
     end
     hpxml.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
@@ -592,7 +591,6 @@ class HPXMLDefaults
 
       heat_pump.charge_defect_ratio = 0.0
       heat_pump.charge_defect_ratio_isdefaulted = true
-      heat_pump.charge_not_tested = nil
     end
 
     # Airflow defect ratio
@@ -602,38 +600,30 @@ class HPXMLDefaults
 
       heating_system.airflow_defect_ratio = 0.0
       heating_system.airflow_defect_ratio_isdefaulted = true
-      heating_system.airflow_not_tested = nil
     end
     hpxml.cooling_systems.each do |cooling_system|
       next unless [HPXML::HVACTypeCentralAirConditioner,
                    HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
-      if cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner && cooling_system.distribution_system_idref.nil?
-        next # Ducted mini-splits only
-      end
       next unless cooling_system.airflow_defect_ratio.nil?
 
       cooling_system.airflow_defect_ratio = 0.0
       cooling_system.airflow_defect_ratio_isdefaulted = true
-      cooling_system.airflow_not_tested = nil
     end
     hpxml.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
                    HPXML::HVACTypeHeatPumpGroundToAir,
                    HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
-      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit && heat_pump.distribution_system_idref.nil?
-        next # Ducted mini-splits only
-      end
       next unless heat_pump.airflow_defect_ratio.nil?
 
       heat_pump.airflow_defect_ratio = 0.0
       heat_pump.airflow_defect_ratio_isdefaulted = true
-      heat_pump.airflow_not_tested = nil
     end
 
     # Fan power
     psc_watts_per_cfm = 0.5 # W/cfm, PSC fan
     ecm_watts_per_cfm = 0.375 # W/cfm, ECM fan
-    mini_split_ducted_watts_per_cfm = 0.18 # W/cfm, ducted mini split
+    mini_split_ductless_watts_per_cfm = 0.07 # W/cfm
+    mini_split_ducted_watts_per_cfm = 0.18 # W/cfm
     hpxml.heating_systems.each do |heating_system|
       if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
         if heating_system.fan_watts_per_cfm.nil?
@@ -645,7 +635,6 @@ class HPXMLDefaults
             heating_system.fan_watts_per_cfm = psc_watts_per_cfm
           end
           heating_system.fan_watts_per_cfm_isdefaulted = true
-          heating_system.fan_power_not_tested = nil
         end
       elsif [HPXML::HVACTypeStove].include? heating_system.heating_system_type
         if heating_system.fan_watts.nil?
@@ -669,7 +658,6 @@ class HPXMLDefaults
       if (not cooling_system.attached_heating_system.nil?) && (not cooling_system.attached_heating_system.fan_watts_per_cfm.nil?)
         cooling_system.fan_watts_per_cfm = cooling_system.attached_heating_system.fan_watts_per_cfm
         cooling_system.fan_watts_per_cfm_isdefaulted = true
-        cooling_system.fan_power_not_tested = nil
       elsif [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
         if cooling_system.cooling_efficiency_seer > 13.5 # HEScore assumption
           cooling_system.fan_watts_per_cfm = ecm_watts_per_cfm
@@ -677,13 +665,13 @@ class HPXMLDefaults
           cooling_system.fan_watts_per_cfm = psc_watts_per_cfm
         end
         cooling_system.fan_watts_per_cfm_isdefaulted = true
-        cooling_system.fan_power_not_tested = nil
       elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
         if not cooling_system.distribution_system.nil?
           cooling_system.fan_watts_per_cfm = mini_split_ducted_watts_per_cfm
+        else
+          cooling_system.fan_watts_per_cfm = mini_split_ductless_watts_per_cfm
         end
         cooling_system.fan_watts_per_cfm_isdefaulted = true
-        cooling_system.fan_power_not_tested = nil
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
         # Depends on airflow rate, so defaulted in hvac_sizing.rb
       end
@@ -698,7 +686,6 @@ class HPXMLDefaults
           heat_pump.fan_watts_per_cfm = psc_watts_per_cfm
         end
         heat_pump.fan_watts_per_cfm_isdefaulted = true
-        heat_pump.fan_power_not_tested = nil
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
         if heat_pump.heating_efficiency_cop > 8.75 / 3.2 # HEScore assumption
           heat_pump.fan_watts_per_cfm = ecm_watts_per_cfm
@@ -706,13 +693,13 @@ class HPXMLDefaults
           heat_pump.fan_watts_per_cfm = psc_watts_per_cfm
         end
         heat_pump.fan_watts_per_cfm_isdefaulted = true
-        heat_pump.fan_power_not_tested = nil
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
         if not heat_pump.distribution_system.nil?
           heat_pump.fan_watts_per_cfm = mini_split_ducted_watts_per_cfm
+        else
+          heat_pump.fan_watts_per_cfm = mini_split_ductless_watts_per_cfm
         end
         heat_pump.fan_watts_per_cfm_isdefaulted = true
-        heat_pump.fan_power_not_tested = nil
       end
     end
 
@@ -938,6 +925,10 @@ class HPXMLDefaults
       if vent_fan.hours_in_operation.nil?
         vent_fan.hours_in_operation = (vent_fan.fan_type == HPXML::MechVentTypeCFIS) ? 8.0 : 24.0
         vent_fan.hours_in_operation_isdefaulted = true
+      end
+      if vent_fan.fan_power.nil?
+        flow_rate = [vent_fan.rated_flow_rate.to_f, vent_fan.tested_flow_rate.to_f].max
+        vent_fan.fan_power = flow_rate * Airflow.get_default_mech_vent_fan_power(vent_fan)
       end
     end
 

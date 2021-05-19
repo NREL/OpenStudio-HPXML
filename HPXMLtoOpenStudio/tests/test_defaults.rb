@@ -475,6 +475,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_mini_split_air_conditioner_values(hpxml_default, 0.73, 0.18, 0, 0, nil)
+
+    # Test defaults w/ ductless
+    hpxml.cooling_systems[0].distribution_system.delete
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_mini_split_air_conditioner_values(hpxml_default, 0.73, 0.07, 0, 0, nil)
   end
 
   def test_elec_resistance
@@ -766,6 +772,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_mini_split_heat_pump_values(hpxml_default, 0.73, 0.18, 0, 0, nil, nil, nil, nil)
+
+    # Test defaults w/ ductless
+    hpxml.heat_pumps[0].distribution_system.delete
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_mini_split_heat_pump_values(hpxml_default, 0.73, 0.07, 0, 0, nil, nil, nil, nil)
   end
 
   def test_ground_source_heat_pumps
@@ -1005,7 +1017,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def test_mech_ventilation_fans
-    # Test inputs not overridden by defaults
+    # Test inputs not overridden by defaults w/ shared exhaust system
     hpxml = _create_hpxml('base-mechvent-exhaust.xml')
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
     vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
@@ -1013,9 +1025,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     vent_fan.fraction_recirculation = 0.0
     vent_fan.in_unit_flow_rate = 10.0
     vent_fan.hours_in_operation = 22.0
+    vent_fan.fan_power = 12.5
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mech_vent_values(hpxml_default, true, 22.0)
+    _test_default_mech_vent_values(hpxml_default, true, 22.0, 12.5)
 
     # Test defaults
     vent_fan.rated_flow_rate = nil
@@ -1025,25 +1038,46 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     vent_fan.fraction_recirculation = nil
     vent_fan.in_unit_flow_rate = nil
     vent_fan.hours_in_operation = nil
+    vent_fan.fan_power = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mech_vent_values(hpxml_default, false, 24.0)
+    _test_default_mech_vent_values(hpxml_default, false, 24.0, 38.5)
 
     # Test inputs not overridden by defaults w/ CFIS
     hpxml = _create_hpxml('base-mechvent-cfis.xml')
     vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
     vent_fan.is_shared_system = false
     vent_fan.hours_in_operation = 12.0
+    vent_fan.fan_power = 12.5
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mech_vent_values(hpxml_default, false, 12.0)
+    _test_default_mech_vent_values(hpxml_default, false, 12.0, 12.5)
 
     # Test defaults w/ CFIS
     vent_fan.is_shared_system = nil
     vent_fan.hours_in_operation = nil
+    vent_fan.fan_power = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_mech_vent_values(hpxml_default, false, 8.0)
+    _test_default_mech_vent_values(hpxml_default, false, 8.0, 165.0)
+
+    # Test inputs not overridden by defaults w/ ERV
+    hpxml = _create_hpxml('base-mechvent-erv.xml')
+    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
+    vent_fan.is_shared_system = false
+    vent_fan.hours_in_operation = 20.0
+    vent_fan.fan_power = 45.0
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_mech_vent_values(hpxml_default, false, 20.0, 45.0)
+
+    # Test defaults w/ CFIS
+    vent_fan.is_shared_system = nil
+    vent_fan.hours_in_operation = nil
+    vent_fan.fan_power = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_mech_vent_values(hpxml_default, false, 24.0, 110.0)
   end
 
   def test_local_ventilation_fans
@@ -2567,11 +2601,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_mech_vent_values(hpxml, is_shared_system, hours_in_operation)
+  def _test_default_mech_vent_values(hpxml, is_shared_system, hours_in_operation, fan_power)
     vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
 
     assert_equal(is_shared_system, vent_fan.is_shared_system)
     assert_equal(hours_in_operation, vent_fan.hours_in_operation)
+    assert_equal(fan_power, vent_fan.fan_power)
   end
 
   def _test_default_kitchen_fan_values(hpxml, quantity, rated_flow_rate, hours_in_operation, fan_power, start_hour)
