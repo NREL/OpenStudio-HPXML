@@ -808,8 +808,8 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     rated_airflow_cfm_htg = UnitConversions.convert(htg_coil.ratedAirFlowRate.get, 'm^3/s', 'cfm')
 
     # Fan
-    fanonoff = unitary_system.supplyFan.get.to_FanOnOff.get
-    assert_in_epsilon(fan_watts_cfm, fanonoff.pressureRise / fanonoff.fanEfficiency * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+    fan = unitary_system.supplyFan.get.to_FanSystemModel.get
+    assert_in_epsilon(fan_watts_cfm, fan.designPressureRise / fan.fanTotalEfficiency * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
 
     # Check installation quality EMS
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
