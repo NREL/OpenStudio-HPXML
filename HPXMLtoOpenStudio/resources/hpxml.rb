@@ -2640,8 +2640,7 @@ class HPXML < Object
              :heating_efficiency_percent, :fraction_heat_load_served, :electric_auxiliary_energy,
              :third_party_certification, :seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :fan_watts_per_cfm,
-             :fan_power_not_tested, :airflow_defect_ratio, :airflow_not_tested,
-             :fan_watts, :heating_airflow_cfm, :location]
+             :airflow_defect_ratio, :fan_watts, :heating_airflow_cfm, :location]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2709,14 +2708,16 @@ class HPXML < Object
       if [HVACTypeFurnace, HVACTypeWallFurnace, HVACTypeFloorFurnace, HVACTypeBoiler].include? @heating_system_type
         efficiency_units = UnitsAFUE
         efficiency_value = @heating_efficiency_afue
+        efficiency_value_isdefaulted = @heating_efficiency_afue_isdefaulted
       elsif [HVACTypeElectricResistance, HVACTypeStove, HVACTypePortableHeater, HVACTypeFixedHeater, HVACTypeFireplace].include? @heating_system_type
         efficiency_units = UnitsPercent
         efficiency_value = @heating_efficiency_percent
+        efficiency_value_isdefaulted = @heating_efficiency_percent_isdefaulted
       end
       if not efficiency_value.nil?
         annual_efficiency = XMLHelper.add_element(heating_system, 'AnnualHeatingEfficiency')
         XMLHelper.add_element(annual_efficiency, 'Units', efficiency_units, :string)
-        XMLHelper.add_element(annual_efficiency, 'Value', efficiency_value, :float)
+        XMLHelper.add_element(annual_efficiency, 'Value', efficiency_value, :float, efficiency_value_isdefaulted)
       end
       XMLHelper.add_element(heating_system, 'FractionHeatLoadServed', @fraction_heat_load_served, :float, @fraction_heat_load_served_isdefaulted) unless @fraction_heat_load_served.nil?
       XMLHelper.add_element(heating_system, 'ElectricAuxiliaryEnergy', @electric_auxiliary_energy, :float, @electric_auxiliary_energy_isdefaulted) unless @electric_auxiliary_energy.nil?
@@ -2725,9 +2726,7 @@ class HPXML < Object
       XMLHelper.add_extension(heating_system, 'FanCoilWatts', @fan_coil_watts, :float) unless @fan_coil_watts.nil?
       XMLHelper.add_extension(heating_system, 'FanPowerWattsPerCFM', @fan_watts_per_cfm, :float, @fan_watts_per_cfm_isdefaulted) unless @fan_watts_per_cfm.nil?
       XMLHelper.add_extension(heating_system, 'FanPowerWatts', @fan_watts, :float, @fan_watts_isdefaulted) unless @fan_watts.nil?
-      XMLHelper.add_extension(heating_system, 'FanPowerNotTested', @fan_power_not_tested, :boolean) unless @fan_power_not_tested.nil?
       XMLHelper.add_extension(heating_system, 'AirflowDefectRatio', @airflow_defect_ratio, :float, @airflow_defect_ratio_isdefaulted) unless @airflow_defect_ratio.nil?
-      XMLHelper.add_extension(heating_system, 'AirflowNotTested', @airflow_not_tested, :boolean) unless @airflow_not_tested.nil?
       XMLHelper.add_extension(heating_system, 'HeatingAirflowCFM', @heating_airflow_cfm, :float, @heating_airflow_cfm_isdefaulted) unless @heating_airflow_cfm.nil?
       XMLHelper.add_extension(heating_system, 'SeedId', @seed_id, :string) unless @seed_id.nil?
     end
@@ -2757,9 +2756,7 @@ class HPXML < Object
       @fan_coil_watts = XMLHelper.get_value(heating_system, 'extension/FanCoilWatts', :float)
       @fan_watts_per_cfm = XMLHelper.get_value(heating_system, 'extension/FanPowerWattsPerCFM', :float)
       @fan_watts = XMLHelper.get_value(heating_system, 'extension/FanPowerWatts', :float)
-      @fan_power_not_tested = XMLHelper.get_value(heating_system, 'extension/FanPowerNotTested', :boolean)
       @airflow_defect_ratio = XMLHelper.get_value(heating_system, 'extension/AirflowDefectRatio', :float)
-      @airflow_not_tested = XMLHelper.get_value(heating_system, 'extension/AirflowNotTested', :boolean)
       @heating_airflow_cfm = XMLHelper.get_value(heating_system, 'extension/HeatingAirflowCFM', :float)
       @seed_id = XMLHelper.get_value(heating_system, 'extension/SeedId', :string)
     end
@@ -2789,8 +2786,7 @@ class HPXML < Object
              :cooling_efficiency_seer, :cooling_efficiency_eer, :cooling_efficiency_kw_per_ton,
              :cooling_shr, :third_party_certification, :seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :airflow_defect_ratio,
-             :fan_watts_per_cfm, :fan_power_not_tested, :airflow_not_tested, :charge_defect_ratio,
-             :charge_not_tested, :cooling_airflow_cfm, :location]
+             :fan_watts_per_cfm, :charge_defect_ratio, :cooling_airflow_cfm, :location]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2857,25 +2853,25 @@ class HPXML < Object
       if [HVACTypeCentralAirConditioner, HVACTypeMiniSplitAirConditioner].include? @cooling_system_type
         efficiency_units = UnitsSEER
         efficiency_value = @cooling_efficiency_seer
+        efficiency_value_isdefaulted = @cooling_efficiency_seer_isdefaulted
       elsif [HVACTypeRoomAirConditioner].include? @cooling_system_type
         efficiency_units = UnitsEER
         efficiency_value = @cooling_efficiency_eer
+        efficiency_value_isdefaulted = @cooling_efficiency_eer_isdefaulted
       elsif [HVACTypeChiller].include? @cooling_system_type
         efficiency_units = UnitsKwPerTon
         efficiency_value = @cooling_efficiency_kw_per_ton
+        efficiency_value_isdefaulted = @cooling_efficiency_kw_per_ton_isdefaulted
       end
       if not efficiency_value.nil?
         annual_efficiency = XMLHelper.add_element(cooling_system, 'AnnualCoolingEfficiency')
         XMLHelper.add_element(annual_efficiency, 'Units', efficiency_units, :string)
-        XMLHelper.add_element(annual_efficiency, 'Value', efficiency_value, :float)
+        XMLHelper.add_element(annual_efficiency, 'Value', efficiency_value, :float, efficiency_value_isdefaulted)
       end
       XMLHelper.add_element(cooling_system, 'SensibleHeatFraction', @cooling_shr, :float, @cooling_shr_isdefaulted) unless @cooling_shr.nil?
       XMLHelper.add_extension(cooling_system, 'AirflowDefectRatio', @airflow_defect_ratio, :float, @airflow_defect_ratio_isdefaulted) unless @airflow_defect_ratio.nil?
       XMLHelper.add_extension(cooling_system, 'ChargeDefectRatio', @charge_defect_ratio, :float, @charge_defect_ratio_isdefaulted) unless @charge_defect_ratio.nil?
-      XMLHelper.add_extension(cooling_system, 'ChargeNotTested', @charge_not_tested, :boolean) unless @charge_not_tested.nil?
       XMLHelper.add_extension(cooling_system, 'FanPowerWattsPerCFM', @fan_watts_per_cfm, :float, @fan_watts_per_cfm_isdefaulted) unless @fan_watts_per_cfm.nil?
-      XMLHelper.add_extension(cooling_system, 'FanPowerNotTested', @fan_power_not_tested, :boolean) unless @fan_power_not_tested.nil?
-      XMLHelper.add_extension(cooling_system, 'AirflowNotTested', @airflow_not_tested, :boolean) unless @airflow_not_tested.nil?
       XMLHelper.add_extension(cooling_system, 'CoolingAirflowCFM', @cooling_airflow_cfm, :float, @cooling_airflow_cfm_isdefaulted) unless @cooling_airflow_cfm.nil?
       XMLHelper.add_extension(cooling_system, 'SharedLoopWatts', @shared_loop_watts, :float) unless @shared_loop_watts.nil?
       XMLHelper.add_extension(cooling_system, 'SharedLoopMotorEfficiency', @shared_loop_motor_efficiency, :float) unless @shared_loop_motor_efficiency.nil?
@@ -2908,10 +2904,7 @@ class HPXML < Object
       @cooling_shr = XMLHelper.get_value(cooling_system, 'SensibleHeatFraction', :float)
       @airflow_defect_ratio = XMLHelper.get_value(cooling_system, 'extension/AirflowDefectRatio', :float)
       @charge_defect_ratio = XMLHelper.get_value(cooling_system, 'extension/ChargeDefectRatio', :float)
-      @charge_not_tested = XMLHelper.get_value(cooling_system, 'extension/ChargeNotTested', :boolean)
       @fan_watts_per_cfm = XMLHelper.get_value(cooling_system, 'extension/FanPowerWattsPerCFM', :float)
-      @fan_power_not_tested = XMLHelper.get_value(cooling_system, 'extension/FanPowerNotTested', :boolean)
-      @airflow_not_tested = XMLHelper.get_value(cooling_system, 'extension/AirflowNotTested', :boolean)
       @cooling_airflow_cfm = XMLHelper.get_value(cooling_system, 'extension/CoolingAirflowCFM', :float)
       @shared_loop_watts = XMLHelper.get_value(cooling_system, 'extension/SharedLoopWatts', :float)
       @shared_loop_motor_efficiency = XMLHelper.get_value(cooling_system, 'extension/SharedLoopMotorEfficiency', :float)
@@ -2950,10 +2943,9 @@ class HPXML < Object
              :backup_heating_switchover_temp, :fraction_heat_load_served, :fraction_cool_load_served,
              :cooling_efficiency_seer, :cooling_efficiency_eer, :heating_efficiency_hspf,
              :heating_efficiency_cop, :third_party_certification, :seed_id, :pump_watts_per_ton,
-             :fan_watts_per_cfm, :fan_power_not_tested, :is_shared_system, :number_of_units_served,
-             :shared_loop_watts, :shared_loop_motor_efficiency, :airflow_defect_ratio, :airflow_not_tested,
-             :charge_defect_ratio, :charge_not_tested, :heating_airflow_cfm, :cooling_airflow_cfm,
-             :location]
+             :fan_watts_per_cfm, :is_shared_system, :number_of_units_served, :shared_loop_watts,
+             :shared_loop_motor_efficiency, :airflow_defect_ratio, :charge_defect_ratio,
+             :heating_airflow_cfm, :cooling_airflow_cfm, :location]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -3027,30 +3019,31 @@ class HPXML < Object
       if [HVACTypeHeatPumpAirToAir, HVACTypeHeatPumpMiniSplit].include? @heat_pump_type
         clg_efficiency_units = UnitsSEER
         clg_efficiency_value = @cooling_efficiency_seer
+        clg_efficiency_value_isdefaulted = @cooling_efficiency_seer_isdefaulted
         htg_efficiency_units = UnitsHSPF
         htg_efficiency_value = @heating_efficiency_hspf
+        htg_efficiency_value_isdefaulted = @heating_efficiency_hspf_isdefaulted
       elsif [HVACTypeHeatPumpGroundToAir, HVACTypeHeatPumpWaterLoopToAir].include? @heat_pump_type
         clg_efficiency_units = UnitsEER
         clg_efficiency_value = @cooling_efficiency_eer
+        clg_efficiency_value_isdefaulted = @cooling_efficiency_eer_isdefaulted
         htg_efficiency_units = UnitsCOP
         htg_efficiency_value = @heating_efficiency_cop
+        htg_efficiency_value_isdefaulted = @heating_efficiency_cop_isdefaulted
       end
       if not clg_efficiency_value.nil?
         annual_efficiency = XMLHelper.add_element(heat_pump, 'AnnualCoolingEfficiency')
         XMLHelper.add_element(annual_efficiency, 'Units', clg_efficiency_units, :string)
-        XMLHelper.add_element(annual_efficiency, 'Value', clg_efficiency_value, :float)
+        XMLHelper.add_element(annual_efficiency, 'Value', clg_efficiency_value, :float, clg_efficiency_value_isdefaulted)
       end
       if not htg_efficiency_value.nil?
         annual_efficiency = XMLHelper.add_element(heat_pump, 'AnnualHeatingEfficiency')
         XMLHelper.add_element(annual_efficiency, 'Units', htg_efficiency_units, :string)
-        XMLHelper.add_element(annual_efficiency, 'Value', htg_efficiency_value, :float)
+        XMLHelper.add_element(annual_efficiency, 'Value', htg_efficiency_value, :float, htg_efficiency_value_isdefaulted)
       end
       XMLHelper.add_extension(heat_pump, 'AirflowDefectRatio', @airflow_defect_ratio, :float, @airflow_defect_ratio_isdefaulted) unless @airflow_defect_ratio.nil?
       XMLHelper.add_extension(heat_pump, 'ChargeDefectRatio', @charge_defect_ratio, :float, @charge_defect_ratio_isdefaulted) unless @charge_defect_ratio.nil?
-      XMLHelper.add_extension(heat_pump, 'ChargeNotTested', @charge_not_tested, :boolean) unless @charge_not_tested.nil?
       XMLHelper.add_extension(heat_pump, 'FanPowerWattsPerCFM', @fan_watts_per_cfm, :float, @fan_watts_per_cfm_isdefaulted) unless @fan_watts_per_cfm.nil?
-      XMLHelper.add_extension(heat_pump, 'FanPowerNotTested', @fan_power_not_tested, :boolean) unless @fan_power_not_tested.nil?
-      XMLHelper.add_extension(heat_pump, 'AirflowNotTested', @airflow_not_tested, :boolean) unless @airflow_not_tested.nil?
       XMLHelper.add_extension(heat_pump, 'HeatingAirflowCFM', @heating_airflow_cfm, :float, @heating_airflow_cfm_isdefaulted) unless @heating_airflow_cfm.nil?
       XMLHelper.add_extension(heat_pump, 'CoolingAirflowCFM', @cooling_airflow_cfm, :float, @cooling_airflow_cfm_isdefaulted) unless @cooling_airflow_cfm.nil?
       XMLHelper.add_extension(heat_pump, 'PumpPowerWattsPerTon', @pump_watts_per_ton, :float, @pump_watts_per_ton_isdefaulted) unless @pump_watts_per_ton.nil?
@@ -3095,10 +3088,7 @@ class HPXML < Object
       end
       @airflow_defect_ratio = XMLHelper.get_value(heat_pump, 'extension/AirflowDefectRatio', :float)
       @charge_defect_ratio = XMLHelper.get_value(heat_pump, 'extension/ChargeDefectRatio', :float)
-      @charge_not_tested = XMLHelper.get_value(heat_pump, 'extension/ChargeNotTested', :boolean)
       @fan_watts_per_cfm = XMLHelper.get_value(heat_pump, 'extension/FanPowerWattsPerCFM', :float)
-      @fan_power_not_tested = XMLHelper.get_value(heat_pump, 'extension/FanPowerNotTested', :boolean)
-      @airflow_not_tested = XMLHelper.get_value(heat_pump, 'extension/AirflowNotTested', :boolean)
       @heating_airflow_cfm = XMLHelper.get_value(heat_pump, 'extension/HeatingAirflowCFM', :float)
       @cooling_airflow_cfm = XMLHelper.get_value(heat_pump, 'extension/CoolingAirflowCFM', :float)
       @pump_watts_per_ton = XMLHelper.get_value(heat_pump, 'extension/PumpPowerWattsPerTon', :float)
@@ -3862,7 +3852,7 @@ class HPXML < Object
       XMLHelper.add_element(water_heating_system, 'TankVolume', @tank_volume, :float, @tank_volume_isdefaulted) unless @tank_volume.nil?
       XMLHelper.add_element(water_heating_system, 'FractionDHWLoadServed', @fraction_dhw_load_served, :float) unless @fraction_dhw_load_served.nil?
       XMLHelper.add_element(water_heating_system, 'HeatingCapacity', @heating_capacity, :float, @heating_capacity_isdefaulted) unless @heating_capacity.nil?
-      XMLHelper.add_element(water_heating_system, 'EnergyFactor', @energy_factor, :float) unless @energy_factor.nil?
+      XMLHelper.add_element(water_heating_system, 'EnergyFactor', @energy_factor, :float, @energy_factor_isdefaulted) unless @energy_factor.nil?
       XMLHelper.add_element(water_heating_system, 'UniformEnergyFactor', @uniform_energy_factor, :float) unless @uniform_energy_factor.nil?
       XMLHelper.add_element(water_heating_system, 'FirstHourRating', @first_hour_rating, :float) unless @first_hour_rating.nil?
       XMLHelper.add_element(water_heating_system, 'RecoveryEfficiency', @recovery_efficiency, :float, @recovery_efficiency_isdefaulted) unless @recovery_efficiency.nil?
