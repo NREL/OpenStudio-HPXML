@@ -1132,7 +1132,7 @@ class HVAC
       hp_ap.cool_rated_airflow_rate = 344.1 # cfm/ton
       hp_ap.cool_capacity_ratios = [0.72, 1.0]
       hp_ap.cool_fan_speed_ratios = [0.86, 1.0]
-      hp_ap.cool_rated_shrs_net = [heat_pump.cooling_shr - 0.014, heat_pump.cooling_shr] # TODO: is the following assumption correct (revisit Dylan's data?)? OR should value from HPXML be used for both stages?
+      hp_ap.cool_rated_shrs_net = [heat_pump.cooling_shr - 0.014, heat_pump.cooling_shr]
       hp_ap.cool_cap_ft_spec = [[3.998418659, -0.108728222, 0.001056818, 0.007512314, -0.0000139, -0.000164716],
                                 [3.466810106, -0.091476056, 0.000901205, 0.004163355, -0.00000919, -0.000110829]]
       hp_ap.cool_eir_ft_spec = [[-4.282911381, 0.181023691, -0.001357391, -0.026310378, 0.000333282, -0.000197405],

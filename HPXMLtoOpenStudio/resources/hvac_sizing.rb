@@ -1769,7 +1769,6 @@ class HVACSizing
             a2_AF_Qgr_h = hvac.HEAT_CAP_FFLOW_SPEC[speed][1]
             a3_AF_Qgr_h = hvac.HEAT_CAP_FFLOW_SPEC[speed][2]
           else
-            # Fixme: Please review these coefficients. Relationship independent of other variables, to mimic fFF curves.
             a1_AF_Qgr_h = 1 - hvac.HEAT_CAP_CURVE_SPEC[hvac.SizingSpeed][3]
             a2_AF_Qgr_h = hvac.HEAT_CAP_CURVE_SPEC[hvac.SizingSpeed][3]
             a3_AF_Qgr_h = 0
