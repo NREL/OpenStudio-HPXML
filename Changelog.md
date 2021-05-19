@@ -6,6 +6,7 @@ __New Features__
 - **Breaking change**: Replaces ClothesDryer `extension/IsVented` and `extension/VentedFlowRate` with `Vented` and `VentedFlowRate`.
 - Allows additional fuel types for generators.
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
+- Allows non-zero refrigerant charge defect ratios for ground source heat pumps.
 - Allows `HeatingSeason` & `CoolingSeason` to be specified for defining heating and cooling equipment availability.
 - Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
 - Revises shared mechanical ventilation preconditioning control logic to operate less often.
