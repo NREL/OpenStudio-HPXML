@@ -94,13 +94,32 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Get HPXML values
     cooling_system = hpxml.cooling_systems[0]
     eer = cooling_system.cooling_efficiency_eer
+    ceer = eer / 1.01 # convert to ceer
+    cop = UnitConversions.convert(ceer, 'Btu/hr', 'W') # Expected value
     capacity = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W')
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    cop = 2.49 # Expected value
-    assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.01)
+    assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.001)
+    assert_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
+  end
+
+  def test_room_air_conditioner_ceer
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-room-ac-only-ceer.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    cooling_system = hpxml.cooling_systems[0]
+    ceer = cooling_system.cooling_efficiency_ceer
+    cop = UnitConversions.convert(ceer, 'Btu/hr', 'W') # Expected value
+    capacity = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W')
+
+    # Check cooling coil
+    assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
+    clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
+    assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.001)
     assert_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
   end
 

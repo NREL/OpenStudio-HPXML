@@ -10,6 +10,7 @@ __New Features__
 - Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
 - Revises shared mechanical ventilation preconditioning control logic to operate less often.
 - Allows age-based defaulting of HVAC/DHW systems.
+- Allows CEER(Combined Energy Efficiency Ratio) efficiency unit for window AC.
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.

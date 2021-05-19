@@ -2867,6 +2867,7 @@ class HPXML < Object
           efficiency_value = @cooling_efficiency_eer
           efficiency_value_isdefaulted = @cooling_efficiency_eer_isdefaulted
         else
+          # Fixme: In this way if efficiency is specified in EER, CEER will not show up in the xml generated(in.xml), even though in the simulation we're using ceer being converted to.
           efficiency_units = UnitsCEER
           efficiency_value = @cooling_efficiency_ceer
           efficiency_value_isdefaulted = @cooling_efficiency_ceer_isdefaulted
