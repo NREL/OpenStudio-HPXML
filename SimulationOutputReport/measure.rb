@@ -5,6 +5,7 @@
 
 require_relative 'resources/constants.rb'
 require_relative '../HPXMLtoOpenStudio/resources/constants.rb'
+require_relative '../HPXMLtoOpenStudio/resources/energyplus.rb'
 require_relative '../HPXMLtoOpenStudio/resources/hpxml.rb'
 require_relative '../HPXMLtoOpenStudio/resources/unit_conversions.rb'
 
@@ -1479,6 +1480,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         eec_cools[sys_id] = get_eri_eec_value_numerator('SEER') / clg_system.cooling_efficiency_seer
       elsif not clg_system.cooling_efficiency_eer.nil?
         eec_cools[sys_id] = get_eri_eec_value_numerator('EER') / clg_system.cooling_efficiency_eer
+      elsif not clg_system.cooling_efficiency_ceer.nil?
+        eec_cools[sys_id] = get_eri_eec_value_numerator('CEER') / clg_system.cooling_efficiency_ceer
       end
 
       if clg_system.cooling_system_type == HPXML::HVACTypeEvaporativeCooler
@@ -1559,7 +1562,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_eri_eec_value_numerator(unit)
-    if ['HSPF', 'SEER', 'EER'].include? unit
+    if ['HSPF', 'SEER', 'EER', 'CEER'].include? unit
       return 3.413
     elsif ['AFUE', 'COP', 'Percent', 'EF'].include? unit
       return 1.0
