@@ -114,12 +114,21 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     setup_outputs
 
+    all_outputs = []
+    all_outputs << @fuels
+    all_outputs << @end_uses
+    all_outputs << @loads
+    all_outputs << @unmet_loads
+    all_outputs << @peak_fuels
+    all_outputs << @peak_loads
+    all_outputs << @component_loads
+    all_outputs << @hot_water_uses
+
     output_names = []
-    @fuels.each do |fuel_type, fuel|
-      output_names << get_runner_output_name(fuel)
-    end
-    @end_uses.each do |key, end_use|
-      output_names << get_runner_output_name(end_use)
+    all_outputs.each do |outputs|
+      outputs.each do |key, obj|
+        output_names << get_runner_output_name(obj)
+      end
     end
 
     output_names.each do |output_name|
