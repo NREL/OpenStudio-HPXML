@@ -134,7 +134,12 @@ class HVAC
     clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, roomac_cap_ft_curve, roomac_cap_fff_curve, roomac_eir_ft_curve, roomcac_eir_fff_curve, roomac_plf_fplr_curve)
     clg_coil.setName(obj_name + ' clg coil')
     clg_coil.setRatedSensibleHeatRatio(cooling_system.cooling_shr)
-    clg_coil.setRatedCOP(UnitConversions.convert(cooling_system.cooling_efficiency_eer, 'Btu/hr', 'W'))
+    if cooling_system.cooling_efficiency_ceer.nil?
+      ceer = calc_ceer_from_eer(cooling_system)
+    else
+      ceer = cooling_system.cooling_efficiency_ceer
+    end
+    clg_coil.setRatedCOP(UnitConversions.convert(ceer, 'Btu/hr', 'W'))
     clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(773.3)
     clg_coil.setEvaporativeCondenserEffectiveness(0.9)
     clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(10)
@@ -3329,6 +3334,13 @@ class HVAC
     end
 
     htg_ap.heat_plf_fplr_spec = [calc_plr_coefficients(htg_ap.heat_c_d)] * num_speeds
+  end
+
+  def self.calc_ceer_from_eer(cooling_system)
+    return if cooling_system.cooling_system_type != HPXML::HVACTypeRoomAirConditioner
+
+    # Reference: http://documents.dps.ny.gov/public/Common/ViewDoc.aspx?DocRefId=%7BB6A57FC0-6376-4401-92BD-D66EC1930DCF%7D
+    return cooling_system.cooling_efficiency_eer / 1.01
   end
 
   def self.set_fan_power_rated(hvac_system)

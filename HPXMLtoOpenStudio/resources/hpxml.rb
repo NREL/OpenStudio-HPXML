@@ -252,6 +252,7 @@ class HPXML < Object
   UnitsCFM25 = 'CFM25'
   UnitsCOP = 'COP'
   UnitsEER = 'EER'
+  UnitsCEER = 'CEER'
   UnitsHSPF = 'HSPF'
   UnitsKwhPerYear = 'kWh/year'
   UnitsKwPerTon = 'kW/ton'
@@ -2789,7 +2790,7 @@ class HPXML < Object
   class CoolingSystem < BaseElement
     ATTRS = [:id, :distribution_system_idref, :year_installed, :cooling_system_type,
              :cooling_system_fuel, :cooling_capacity, :compressor_type, :fraction_cool_load_served,
-             :cooling_efficiency_seer, :cooling_efficiency_eer, :cooling_efficiency_kw_per_ton,
+             :cooling_efficiency_seer, :cooling_efficiency_eer, :cooling_efficiency_ceer, :cooling_efficiency_kw_per_ton,
              :cooling_shr, :third_party_certification, :seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :airflow_defect_ratio,
              :fan_watts_per_cfm, :charge_defect_ratio, :cooling_airflow_cfm, :location,
@@ -2862,9 +2863,15 @@ class HPXML < Object
         efficiency_value = @cooling_efficiency_seer
         efficiency_value_isdefaulted = @cooling_efficiency_seer_isdefaulted
       elsif [HVACTypeRoomAirConditioner].include? @cooling_system_type
-        efficiency_units = UnitsEER
-        efficiency_value = @cooling_efficiency_eer
-        efficiency_value_isdefaulted = @cooling_efficiency_eer_isdefaulted
+        if not @cooling_efficiency_eer.nil?
+          efficiency_units = UnitsEER
+          efficiency_value = @cooling_efficiency_eer
+          efficiency_value_isdefaulted = @cooling_efficiency_eer_isdefaulted
+        elsif not @cooling_efficiency_ceer.nil?
+          efficiency_units = UnitsCEER
+          efficiency_value = @cooling_efficiency_ceer
+          efficiency_value_isdefaulted = @cooling_efficiency_ceer_isdefaulted
+        end
       elsif [HVACTypeChiller].include? @cooling_system_type
         efficiency_units = UnitsKwPerTon
         efficiency_value = @cooling_efficiency_kw_per_ton
@@ -2905,6 +2912,7 @@ class HPXML < Object
         @cooling_efficiency_seer = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsSEER}']/Value", :float)
       elsif [HVACTypeRoomAirConditioner].include? @cooling_system_type
         @cooling_efficiency_eer = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsEER}']/Value", :float)
+        @cooling_efficiency_ceer = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsCEER}']/Value", :float)
       elsif [HVACTypeChiller].include? @cooling_system_type
         @cooling_efficiency_kw_per_ton = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsKwPerTon}']/Value", :float)
       end

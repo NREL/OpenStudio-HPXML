@@ -223,6 +223,7 @@ def create_osws
     'base-hvac-programmable-thermostat-detailed.osw' => 'base.osw',
     'base-hvac-room-ac-only.osw' => 'base.osw',
     'base-hvac-room-ac-only-33percent.osw' => 'base.osw',
+    # 'base-hvac-room-ac-only-ceer.osw' => 'base-hvac-room-ac-only.osw',
     'base-hvac-setpoints.osw' => 'base.osw',
     'base-hvac-stove-oil-only.osw' => 'base.osw',
     'base-hvac-stove-wood-pellets-only.osw' => 'base.osw',
@@ -2856,6 +2857,7 @@ def create_hpxmls
     'base-hvac-programmable-thermostat-detailed.xml' => 'base.xml',
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
+    'base-hvac-room-ac-only-ceer.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
     'base-hvac-stove-oil-only.xml' => 'base.xml',
     'base-hvac-stove-wood-pellets-only.xml' => 'base.xml',
@@ -5662,6 +5664,9 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
   elsif ['base-hvac-room-ac-only-33percent.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fraction_cool_load_served = 0.33
     hpxml.cooling_systems[0].cooling_capacity /= 3.0
+  elsif ['base-hvac-room-ac-only-ceer.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].cooling_efficiency_eer = nil
+    hpxml.cooling_systems[0].cooling_efficiency_ceer = 8.4
   elsif ['base-hvac-evap-cooler-only-ducted.xml',
          'base-hvac-evap-cooler-furnace-gas.xml',
          'base-hvac-evap-cooler-only.xml'].include? hpxml_file
@@ -8097,9 +8102,22 @@ if ARGV[0].to_sym == :update_measures
   system(command)
 
   # Update measures XMLs
-  command = "#{OpenStudio.getOpenStudioCLI} measure -t '#{File.dirname(__FILE__)}'"
   puts 'Updating measure.xmls...'
-  system(command, [:out, :err] => File::NULL)
+  Dir['**/measure.xml'].each do |measure_xml|
+    measure_dir = File.dirname(measure_xml)
+    command = "#{OpenStudio.getOpenStudioCLI} measure -u '#{measure_dir}'"
+    system(command, [:out, :err] => File::NULL)
+
+    # Check for error
+    xml_doc = XMLHelper.parse_file(measure_xml)
+    err_val = XMLHelper.get_value(xml_doc, '/measure/error', :string)
+    if err_val.nil?
+      err_val = XMLHelper.get_value(xml_doc, '/error', :string)
+    end
+    if not err_val.nil?
+      fail "#{measure_xml}: #{err_val}"
+    end
+  end
 
   puts 'Done.'
 end
