@@ -5,6 +5,7 @@
 
 require_relative 'resources/constants.rb'
 require_relative '../HPXMLtoOpenStudio/resources/constants.rb'
+require_relative '../HPXMLtoOpenStudio/resources/energyplus.rb'
 require_relative '../HPXMLtoOpenStudio/resources/hpxml.rb'
 require_relative '../HPXMLtoOpenStudio/resources/unit_conversions.rb'
 
