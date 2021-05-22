@@ -265,7 +265,7 @@ class HVAC
     hvac_map[heat_pump.id] << htg_coil
 
     # Supplemental Heating Coil
-    htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
+    htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump, control_zone, is_ddb_control)
     hvac_map[heat_pump.id] << htg_supp_coil
 
     # Fan
@@ -1663,7 +1663,7 @@ class HVAC
     program_calling_manager.addProgram(program)
   end
 
-  def self.create_supp_heating_coil(model, obj_name, heat_pump)
+  def self.create_supp_heating_coil(model, obj_name, heat_pump, control_zone=nil, is_ddb_control = false)
     fuel = heat_pump.backup_heating_fuel
     capacity = heat_pump.backup_heating_capacity
     efficiency = heat_pump.backup_heating_efficiency_percent
@@ -1687,6 +1687,9 @@ class HVAC
     end
     htg_supp_coil.setNominalCapacity(UnitConversions.convert(capacity, 'Btu/hr', 'W'))
     htg_supp_coil.setName(obj_name + ' ' + Constants.ObjectNameBackupHeatingCoil)
+    if is_ddb_control
+      apply_supp_control_for_ddb_thermostat(model, htg_supp_coil, control_zone)
+    end
     return htg_supp_coil
   end
 
@@ -3077,6 +3080,50 @@ class HVAC
     end
   end
 
+  def self.apply_supp_control_for_ddb_thermostat(model, supp_coil, control_zone)
+    # Sensors
+    tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
+    tin_sensor.setName("zone air temp")
+    tin_sensor.setKeyName(control_zone.name.to_s)
+
+    htg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    htg_sp_ss.setName('htg_setpoint')
+    htg_sp_ss.setKeyName(Constants.ObjectNameHeatingSetpoint)
+
+    clg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    clg_sp_ss.setName('clg_setpoint')
+    clg_sp_ss.setKeyName(Constants.ObjectNameCoolingSetpoint)
+
+    ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
+
+    # Actuators
+    # Create a new schedule for supp availability
+    supp_avail_sch = supp_coil.availabilitySchedule.clone.to_ScheduleConstant.get
+    supp_avail_sch.setName('supp coil avail sch')
+    supp_coil.setAvailabilitySchedule(supp_avail_sch)
+    supp_coil_avail_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(supp_avail_sch, *EPlus::EMSActuatorScheduleConstantValue)
+    supp_coil_avail_actuator.setName(supp_coil.name.get.gsub('-', '_') + ' avail')
+
+    # Program
+    supp_coil_avail_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    supp_coil_avail_program.addLine("Set living_t = #{tin_sensor.name}")
+    supp_coil_avail_program.addLine("Set htg_sp_l = #{htg_sp_ss.name}")
+    supp_coil_avail_program.addLine("Set htg_sp_h = #{htg_sp_ss.name} + #{ddb}")
+    supp_coil_avail_program.addLine("Set clg_sp_l = #{clg_sp_ss.name} - #{ddb}")
+    supp_coil_avail_program.addLine("Set clg_sp_h = #{clg_sp_ss.name}")
+    supp_coil_avail_program.addLine('If (living_t < clg_sp_h) && (living_t > htg_sp_l)')
+    supp_coil_avail_program.addLine("  Set #{supp_coil_avail_actuator.name} = 0")
+    supp_coil_avail_program.addLine('Else')
+    supp_coil_avail_program.addLine("  Set #{supp_coil_avail_actuator.name} = 1")
+    supp_coil_avail_program.addLine('EndIf')
+
+    # ProgramCallingManagers
+    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    program_calling_manager.setName("#{supp_coil_avail_program.name} ProgramManager")
+    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
+    program_calling_manager.addProgram(supp_coil_avail_program)
+  end
+
   def self.apply_capacity_degradation_EMS(model, system_ap, coil_name, is_cooling, cap_fff_curve, eir_fff_curve)
     # Note: Currently only available in 1 min time step
     cap_time = 2 # Assumed minutes to take to ramp up to full capacity
@@ -3110,9 +3157,9 @@ class HVAC
     energy_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
 
     # Actuators
-    cc_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(cap_fff_curve, 'Curve', 'Curve Result')
+    cc_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(cap_fff_curve, *EPlus::EMSActuatorCurveResult)
     cc_actuator.setName(cap_fff_curve.name.get.gsub('-', '_') + ' value')
-    ec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(eir_fff_curve, 'Curve', 'Curve Result')
+    ec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(eir_fff_curve, *EPlus::EMSActuatorCurveResult)
     ec_actuator.setName(eir_fff_curve.name.get.gsub('-', '_') + ' value')
 
     # Program
@@ -3180,11 +3227,6 @@ class HVAC
     program_calling_manager.setName("#{cycling_degrad_program.name} ProgramManager")
     program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
     program_calling_manager.addProgram(cycling_degrad_program)
-
-    # oems = model.getOutputEnergyManagementSystem
-    # oems.setActuatorAvailabilityDictionaryReporting('Verbose')
-    # oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
-    # oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
   end
 
   def self.calc_plr_coefficients(c_d)
@@ -3943,11 +3985,11 @@ class HVAC
 
       for speed in 0..(num_speeds - 1)
         cool_cap_fff_curve = cool_cap_fff_curves[speed]
-        cool_cap_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(cool_cap_fff_curve, 'Curve', 'Curve Result')
+        cool_cap_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(cool_cap_fff_curve, *EPlus::EMSActuatorCurveResult)
         cool_cap_fff_act.setName("#{obj_name} cap clg act")
 
         cool_eir_fff_curve = cool_eir_fff_curves[speed]
-        cool_eir_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(cool_eir_fff_curve, 'Curve', 'Curve Result')
+        cool_eir_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(cool_eir_fff_curve, *EPlus::EMSActuatorCurveResult)
         cool_eir_fff_act.setName("#{obj_name} eir clg act")
 
         # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
@@ -4040,11 +4082,11 @@ class HVAC
       end
       for speed in 0..(num_speeds - 1)
         heat_cap_fff_curve = heat_cap_fff_curves[speed]
-        heat_cap_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(heat_cap_fff_curve, 'Curve', 'Curve Result')
+        heat_cap_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(heat_cap_fff_curve, *EPlus::EMSActuatorCurveResult)
         heat_cap_fff_act.setName("#{obj_name} cap htg act")
 
         heat_eir_fff_curve = heat_eir_fff_curves[speed]
-        heat_eir_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(heat_eir_fff_curve, 'Curve', 'Curve Result')
+        heat_eir_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(heat_eir_fff_curve, *EPlus::EMSActuatorCurveResult)
         heat_eir_fff_act.setName("#{obj_name} eir htg act")
 
         # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
