@@ -1663,7 +1663,7 @@ class HVAC
     program_calling_manager.addProgram(program)
   end
 
-  def self.create_supp_heating_coil(model, obj_name, heat_pump, control_zone=nil, is_ddb_control = false)
+  def self.create_supp_heating_coil(model, obj_name, heat_pump, control_zone = nil, is_ddb_control = false)
     fuel = heat_pump.backup_heating_fuel
     capacity = heat_pump.backup_heating_capacity
     efficiency = heat_pump.backup_heating_efficiency_percent
@@ -3083,7 +3083,7 @@ class HVAC
   def self.apply_supp_control_for_ddb_thermostat(model, supp_coil, control_zone)
     # Sensors
     tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
-    tin_sensor.setName("zone air temp")
+    tin_sensor.setName('zone air temp')
     tin_sensor.setKeyName(control_zone.name.to_s)
 
     htg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
