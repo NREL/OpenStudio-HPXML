@@ -12,6 +12,7 @@ __New Features__
 - Revises shared mechanical ventilation preconditioning control logic to operate less often.
 - Allows defaulting of HVAC/DHW system efficiency (by age).
 - Allows defaulting of mechanical ventilation fan power (by type).
+- Allows CEER (Combined Energy Efficiency Ratio) efficiency unit for room AC.
 - Allows modeling PTAC and PTHP hvac systems. 
 
 __Bugfixes__

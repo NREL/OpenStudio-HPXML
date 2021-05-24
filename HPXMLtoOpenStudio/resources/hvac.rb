@@ -2723,7 +2723,12 @@ class HVAC
           clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(10)
         end
         if [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC, HPXML::HVACTypeHeatPumpPTHP].include? clg_type
-          clg_coil.setRatedCOP(UnitConversions.convert(cooling_system.cooling_efficiency_eer, 'Btu/hr', 'W'))
+          if cooling_system.cooling_efficiency_ceer.nil?
+            ceer = calc_ceer_from_eer(cooling_system)
+          else
+            ceer = cooling_system.cooling_efficiency_ceer
+          end
+          clg_coil.setRatedCOP(UnitConversions.convert(ceer, 'Btu/hr', 'W'))
         else
           clg_coil.setRatedCOP(1.0 / clg_ap.cool_rated_eirs[i])
         end
@@ -2930,6 +2935,13 @@ class HVAC
     end
 
     htg_ap.heat_plf_fplr_spec = [calc_plr_coefficients(htg_ap.heat_c_d)] * num_speeds
+  end
+
+  def self.calc_ceer_from_eer(cooling_system)
+    return unless [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC, HPXML::HVACTypeHeatPumpPTHP].include? cooling_system.cooling_system_type
+
+    # Reference: http://documents.dps.ny.gov/public/Common/ViewDoc.aspx?DocRefId=%7BB6A57FC0-6376-4401-92BD-D66EC1930DCF%7D
+    return cooling_system.cooling_efficiency_eer / 1.01
   end
 
   def self.set_fan_power_rated(hvac_system)
