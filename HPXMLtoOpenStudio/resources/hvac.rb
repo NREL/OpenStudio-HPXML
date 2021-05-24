@@ -3090,12 +3090,6 @@ class HVAC
     htg_sp_ss.setName('htg_setpoint')
     htg_sp_ss.setKeyName(Constants.ObjectNameHeatingSetpoint)
 
-    clg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    clg_sp_ss.setName('clg_setpoint')
-    clg_sp_ss.setKeyName(Constants.ObjectNameCoolingSetpoint)
-
-    ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
-
     # Actuators
     # Create a new schedule for supp availability
     supp_avail_sch = supp_coil.availabilitySchedule.clone.to_ScheduleConstant.get
@@ -3108,10 +3102,7 @@ class HVAC
     supp_coil_avail_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     supp_coil_avail_program.addLine("Set living_t = #{tin_sensor.name}")
     supp_coil_avail_program.addLine("Set htg_sp_l = #{htg_sp_ss.name}")
-    supp_coil_avail_program.addLine("Set htg_sp_h = #{htg_sp_ss.name} + #{ddb}")
-    supp_coil_avail_program.addLine("Set clg_sp_l = #{clg_sp_ss.name} - #{ddb}")
-    supp_coil_avail_program.addLine("Set clg_sp_h = #{clg_sp_ss.name}")
-    supp_coil_avail_program.addLine('If (living_t < clg_sp_h) && (living_t > htg_sp_l)')
+    supp_coil_avail_program.addLine('If living_t > htg_sp_l')
     supp_coil_avail_program.addLine("  Set #{supp_coil_avail_actuator.name} = 0")
     supp_coil_avail_program.addLine('Else')
     supp_coil_avail_program.addLine("  Set #{supp_coil_avail_actuator.name} = 1")
