@@ -2723,7 +2723,7 @@ class HVAC
           clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(10)
         end
         if [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC, HPXML::HVACTypeHeatPumpPTHP].include? clg_type
-          if clg_type == HPXML::HVACTypeHeatPumpPTHP or cooling_system.cooling_efficiency_ceer.nil?
+          if cooling_system.cooling_efficiency_ceer.nil?
             ceer = calc_ceer_from_eer(cooling_system)
           else
             ceer = cooling_system.cooling_efficiency_ceer
@@ -2938,7 +2938,6 @@ class HVAC
   end
 
   def self.calc_ceer_from_eer(cooling_system)
-
     # Reference: http://documents.dps.ny.gov/public/Common/ViewDoc.aspx?DocRefId=%7BB6A57FC0-6376-4401-92BD-D66EC1930DCF%7D
     return cooling_system.cooling_efficiency_eer / 1.01
   end

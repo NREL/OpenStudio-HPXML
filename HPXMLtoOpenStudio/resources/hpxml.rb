@@ -2955,7 +2955,7 @@ class HPXML < Object
              :cooling_shr, :backup_heating_fuel, :backup_heating_capacity,
              :backup_heating_efficiency_percent, :backup_heating_efficiency_afue,
              :backup_heating_switchover_temp, :fraction_heat_load_served, :fraction_cool_load_served,
-             :cooling_efficiency_seer, :cooling_efficiency_eer, :heating_efficiency_hspf,
+             :cooling_efficiency_seer, :cooling_efficiency_eer, :cooling_efficiency_ceer, :heating_efficiency_hspf,
              :heating_efficiency_cop, :third_party_certification, :seed_id, :pump_watts_per_ton,
              :fan_watts_per_cfm, :is_shared_system, :number_of_units_served, :shared_loop_watts,
              :shared_loop_motor_efficiency, :airflow_defect_ratio, :charge_defect_ratio,
@@ -3038,9 +3038,21 @@ class HPXML < Object
         htg_efficiency_value = @heating_efficiency_hspf
         htg_efficiency_value_isdefaulted = @heating_efficiency_hspf_isdefaulted
       elsif [HVACTypeHeatPumpGroundToAir, HVACTypeHeatPumpWaterLoopToAir, HVACTypeHeatPumpPTHP].include? @heat_pump_type
-        clg_efficiency_units = UnitsEER
-        clg_efficiency_value = @cooling_efficiency_eer
-        clg_efficiency_value_isdefaulted = @cooling_efficiency_eer_isdefaulted
+        if @heat_pump_type == HVACTypeHeatPumpPTHP
+          if not @cooling_efficiency_eer.nil?
+            clg_efficiency_units = UnitsEER
+            clg_efficiency_value = @cooling_efficiency_eer
+            clg_efficiency_value_isdefaulted = @cooling_efficiency_eer_isdefaulted
+          elsif not @cooling_efficiency_ceer.nil?
+            clg_efficiency_units = UnitsCEER
+            clg_efficiency_value = @cooling_efficiency_ceer
+            clg_efficiency_value_isdefaulted = @cooling_efficiency_ceer_isdefaulted
+          end
+        else
+          clg_efficiency_units = UnitsEER
+          clg_efficiency_value = @cooling_efficiency_eer
+          clg_efficiency_value_isdefaulted = @cooling_efficiency_eer_isdefaulted
+        end
         htg_efficiency_units = UnitsCOP
         htg_efficiency_value = @heating_efficiency_cop
         htg_efficiency_value_isdefaulted = @heating_efficiency_cop_isdefaulted
@@ -3094,6 +3106,7 @@ class HPXML < Object
         @cooling_efficiency_seer = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsSEER}']/Value", :float)
       elsif [HVACTypeHeatPumpGroundToAir, HVACTypeHeatPumpWaterLoopToAir, HVACTypeHeatPumpPTHP].include? @heat_pump_type
         @cooling_efficiency_eer = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsEER}']/Value", :float)
+        @cooling_efficiency_ceer = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsCEER}']/Value", :float)
       end
       if [HVACTypeHeatPumpAirToAir, HVACTypeHeatPumpMiniSplit].include? @heat_pump_type
         @heating_efficiency_hspf = XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='#{UnitsHSPF}']/Value", :float)
