@@ -13,6 +13,7 @@ __New Features__
 - Allows defaulting of HVAC/DHW system efficiency (by age).
 - Allows defaulting of mechanical ventilation fan power (by type).
 - Allows CEER (Combined Energy Efficiency Ratio) efficiency unit for room AC.
+- Updates the reporting measure to register all outputs from the annual CSV with the OS runner (for use in, e.g., PAT).
 - Allows modeling PTAC and PTHP hvac systems. 
 
 __Bugfixes__
