@@ -137,7 +137,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'zero-number-of-bedrooms.osw' => 'geometry_num_bedrooms=0',
       'single-family-detached-with-shared-system.osw' => 'geometry_unit_type=single-family detached and heating_system_type=Shared Boiler w/ Baseboard',
       'hvac-seasons-incomplete-heating-season.osw' => 'season_heating_begin_month=true and season_heating_begin_day_of_month=false and season_heating_end_month=true and seasons_heating_end_day_of_month=false',
-      'hvac-seasons-incomplete-cooling-season.osw' => 'season_cooling_begin_month=false and season_cooling_begin_day_of_month=true and season_cooling_end_month=false and season_cooling_end_day_of_month=true'
+      'hvac-seasons-incomplete-cooling-season.osw' => 'season_cooling_begin_month=false and season_cooling_begin_day_of_month=true and season_cooling_end_month=false and season_cooling_end_day_of_month=true',
+      'schedules-vacancy-incomplete.osw' => 'schedules_vacancy_begin_month=true and schedules_vacancy_begin_day_of_month=false and schedules_vacancy_end_month=true and schedules_vacancy_end_day_of_month=false'
     }
 
     measures = {}
