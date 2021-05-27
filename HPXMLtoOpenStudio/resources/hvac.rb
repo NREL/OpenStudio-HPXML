@@ -1684,7 +1684,7 @@ class HVAC
     fan.setEndUseSubcategory('supply fan')
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirStreamFraction(1.0)
-    max_fan_cfm = fan_cfms.max
+    max_fan_cfm = Float(fan_cfms.max) # Convert to float to prevent integer division below
     fan.setDesignMaximumAirFlowRate(UnitConversions.convert(max_fan_cfm, 'cfm', 'm^3/s'))
     fan_cfms.sort.each do |fan_cfm|
       fan_ratio = fan_cfm / max_fan_cfm
