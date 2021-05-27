@@ -752,7 +752,7 @@ class HVAC
 
       # Fan Coil
       zone_hvac = OpenStudio::Model::ZoneHVACFourPipeFanCoil.new(model, model.alwaysOnDiscreteSchedule, fan, clg_coil, htg_coil)
-      zone_hvac.setCapacityControlMethod('ConstantFanVariableFlow')
+      zone_hvac.setCapacityControlMethod('CyclingFan')
       zone_hvac.setName(obj_name + ' fan coil')
       zone_hvac.setMaximumSupplyAirTemperatureInHeatingMode(UnitConversions.convert(120.0, 'F', 'C'))
       zone_hvac.setHeatingConvergenceTolerance(0.001)
@@ -1482,7 +1482,7 @@ class HVAC
 
     hvac_objects = []
 
-    if fan_or_pump.is_a?(OpenStudio::Model::FanSystemModel)
+    if fan_or_pump.is_a? OpenStudio::Model::FanSystemModel
       fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan #{EPlus::FuelTypeElectricity} Energy")
     elsif fan_or_pump.is_a? OpenStudio::Model::PumpVariableSpeed
       fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Pump #{EPlus::FuelTypeElectricity} Energy")
