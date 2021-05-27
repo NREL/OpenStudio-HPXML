@@ -420,7 +420,8 @@ def create_osws
     'invalid_files/single-family-detached-with-shared-system.osw' => 'base.osw',
     'invalid_files/hvac-seasons-incomplete-heating-season.osw' => 'base.osw',
     'invalid_files/hvac-seasons-incomplete-cooling-season.osw' => 'base.osw',
-    'invalid_files/schedules-vacancy-incomplete.osw' => 'base.osw'
+    'invalid_files/schedules-vacancy-incomplete.osw' => 'base.osw',
+    'invalid_files/schedules-vacancy-invalid.osw' => 'base.osw'
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -2442,6 +2443,11 @@ def get_values(osw_file, step)
   elsif ['invalid_files/schedules-vacancy-incomplete.osw'].include? osw_file
     step.setArgument('schedules_vacancy_begin_month', 1)
     step.setArgument('schedules_vacancy_end_month', 2)
+  elsif ['invalid_files/schedules-vacancy-invalid.osw'].include? osw_file
+    step.setArgument('schedules_vacancy_begin_month', 1)
+    step.setArgument('schedules_vacancy_begin_day_of_month', 1)
+    step.setArgument('schedules_vacancy_end_month', 4)
+    step.setArgument('schedules_vacancy_end_day_of_month', 31)
   end
   return step
 end
