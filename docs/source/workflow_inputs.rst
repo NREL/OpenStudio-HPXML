@@ -841,15 +841,15 @@ Room Air Conditioner
 
 If a room air conditioner is specified, additional information is entered in ``CoolingSystem``.
 
-  ===================================================================  =================  ===========  ===============  ========  =========  ==================================
-  Element                                                              Type               Units        Constraints      Required  Default    Notes
-  ===================================================================  =================  ===========  ===============  ========  =========  ==================================
-  ``AnnualCoolingEfficiency[Units="EER"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600    Yes       See [#]_   Rated efficiency or Year installed
-  ``CoolingCapacity``                                                  double             Btu/hr       >= 0             No        autosized  Cooling capacity
-  ``SensibleHeatFraction``                                             double             frac         0 - 1            No                   Sensible heat fraction
-  ===================================================================  =================  ===========  ===============  ========  =========  ==================================
+  ===================================================================================  =================  ===========  ===============  ========  =========  ==================================
+  Element                                                                              Type               Units        Constraints      Required  Default    Notes
+  ===================================================================================  =================  ===========  ===============  ========  =========  ==================================
+  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600    Yes       See [#]_   Rated efficiency or Year installed
+  ``CoolingCapacity``                                                                  double             Btu/hr       >= 0             No        autosized  Cooling capacity
+  ``SensibleHeatFraction``                                                             double             frac         0 - 1            No                   Sensible heat fraction
+  ===================================================================================  =================  ===========  ===============  ========  =========  ==================================
 
-  .. [#] If AnnualCoolingEfficiency[Units="EER"]/Value not provided, defaults to EER from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
+  .. [#] If AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value not provided, defaults to EER from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
 
 Evaporative Cooler
 ~~~~~~~~~~~~~~~~~~

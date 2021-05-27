@@ -12,6 +12,8 @@ __New Features__
 - Revises shared mechanical ventilation preconditioning control logic to operate less often.
 - Allows defaulting of HVAC/DHW system efficiency (by age).
 - Allows defaulting of mechanical ventilation fan power (by type).
+- Allows CEER (Combined Energy Efficiency Ratio) efficiency unit for room AC.
+- Updates the reporting measure to register all outputs from the annual CSV with the OS runner (for use in, e.g., PAT).
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
