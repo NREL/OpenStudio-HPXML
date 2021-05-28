@@ -449,9 +449,8 @@ class HPXMLTest < MiniTest::Test
       sum_component_clg_loads = results.select { |k, v| k.start_with? 'Component Load: Cooling:' }.map { |k, v| v }.sum(0.0)
       residual_htg_load = results['Load: Heating (MBtu)'] - sum_component_htg_loads
       residual_clg_load = results['Load: Cooling (MBtu)'] - sum_component_clg_loads
-      # FIXME: Temporarily disabled
-      # assert_operator(residual_htg_load.abs, :<, 0.5)
-      # assert_operator(residual_clg_load.abs, :<, 0.5)
+      assert_operator(residual_htg_load.abs, :<, 0.5)
+      assert_operator(residual_clg_load.abs, :<, 0.5)
     end
 
     return results
