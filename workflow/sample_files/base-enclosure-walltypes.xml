@@ -179,6 +179,7 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>19.0</Area>
+            <Siding>none</Siding>
             <Color>medium</Color>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -276,6 +277,7 @@
               <SolidConcrete/>
             </WallType>
             <Area>109.0</Area>
+            <Siding>none</Siding>
             <Color>medium</Color>
             <Emittance>0.92</Emittance>
             <Insulation>
