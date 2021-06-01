@@ -3,7 +3,6 @@
 $VERBOSE = nil # Prevents ruby warnings, see https://github.com/NREL/OpenStudio/issues/4301
 
 def create_hpxmls
-  require 'oga'
   require_relative 'HPXMLtoOpenStudio/resources/constants'
   require_relative 'HPXMLtoOpenStudio/resources/hotwater_appliances'
   require_relative 'HPXMLtoOpenStudio/resources/hpxml'
@@ -11,7 +10,6 @@ def create_hpxmls
   require_relative 'HPXMLtoOpenStudio/resources/misc_loads'
   require_relative 'HPXMLtoOpenStudio/resources/schedules'
   require_relative 'HPXMLtoOpenStudio/resources/waterheater'
-  require_relative 'HPXMLtoOpenStudio/resources/xmlhelper'
 
   this_dir = File.dirname(__FILE__)
   sample_files_dir = File.join(this_dir, 'workflow/sample_files')
@@ -5577,6 +5575,9 @@ if ARGV[0].to_sym == :update_measures
   ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
   ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
 
+  require 'oga'
+  require_relative 'HPXMLtoOpenStudio/resources/xmlhelper'
+
   # Create sample/test HPXMLs
   hpxml_docs = create_hpxmls()
 
@@ -5609,7 +5610,7 @@ if ARGV[0].to_sym == :update_measures
   # Update measures XMLs
   puts 'Updating measure.xmls...'
   Dir['**/measure.xml'].each do |measure_xml|
-    for n_attempts in 1..5 # For some reason CLI randomly generates errors, so try multiple times
+    for n_attempt in 1..5 # For some reason CLI randomly generates errors, so try multiple times; FIXME: Fix CLI so this doesn't happen
       measure_dir = File.dirname(measure_xml)
       command = "#{OpenStudio.getOpenStudioCLI} measure -u '#{measure_dir}'"
       system(command, [:out, :err] => File::NULL)
@@ -5622,8 +5623,16 @@ if ARGV[0].to_sym == :update_measures
       end
       if err_val.nil?
         break # Successfully updated
-      elsif n_attempts == 5
-        fail "#{measure_xml}: #{err_val}" # Error generated all 5 times, fail
+      else
+        if n_attempt == 5
+          fail "#{measure_xml}: #{err_val}" # Error generated all 5 times, fail
+        else
+          # Remove error from measure XML, try again
+          new_lines = File.readlines(measure_xml).select { |l| !l.include?('<error>') }
+          File.open(measure_xml, 'w') do |file|
+            file.puts new_lines
+          end
+        end
       end
     end
   end
