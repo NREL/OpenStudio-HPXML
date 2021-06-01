@@ -3090,6 +3090,15 @@ class HVAC
     htg_sp_ss.setName('htg_setpoint')
     htg_sp_ss.setKeyName(Constants.ObjectNameHeatingSetpoint)
 
+    coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electricity Energy')
+    coil_energy.setName('htg coil electric energy')
+    coil_energy.setKeyName(supp_coil.name.get)
+
+    # Trend variable
+    energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, coil_energy)
+    energy_trend.setName("#{coil_energy.name} Trend")
+    energy_trend.setNumberOfTimestepsToBeLogged(1)
+
     # Actuators
     # Create a new schedule for supp availability
     supp_avail_sch = supp_coil.availabilitySchedule.clone.to_ScheduleConstant.get
@@ -3098,14 +3107,24 @@ class HVAC
     supp_coil_avail_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(supp_avail_sch, *EPlus::EMSActuatorScheduleConstantValue)
     supp_coil_avail_actuator.setName(supp_coil.name.get.gsub('-', '_') + ' avail')
 
+    ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
     # Program
     supp_coil_avail_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     supp_coil_avail_program.addLine("Set living_t = #{tin_sensor.name}")
     supp_coil_avail_program.addLine("Set htg_sp_l = #{htg_sp_ss.name}")
-    supp_coil_avail_program.addLine('If living_t > htg_sp_l')
-    supp_coil_avail_program.addLine("  Set #{supp_coil_avail_actuator.name} = 0")
-    supp_coil_avail_program.addLine('Else')
-    supp_coil_avail_program.addLine("  Set #{supp_coil_avail_actuator.name} = 1")
+    supp_coil_avail_program.addLine("Set htg_sp_h = #{htg_sp_ss.name} + #{ddb}")
+    supp_coil_avail_program.addLine("If (@TRENDVALUE #{energy_trend.name} 1) > 0") # backup coil is turned on, keep it on until reaching upper end of ddb in case of high frequency oscillations
+    supp_coil_avail_program.addLine('  If living_t > htg_sp_h')
+    supp_coil_avail_program.addLine("    Set #{supp_coil_avail_actuator.name} = 0")
+    supp_coil_avail_program.addLine('  Else')
+    supp_coil_avail_program.addLine("    Set #{supp_coil_avail_actuator.name} = 1")
+    supp_coil_avail_program.addLine('  EndIf')
+    supp_coil_avail_program.addLine('Else') # Only turn on the backup coil when temprature is below lower end of ddb.
+    supp_coil_avail_program.addLine('  If living_t > htg_sp_l')
+    supp_coil_avail_program.addLine("    Set #{supp_coil_avail_actuator.name} = 0")
+    supp_coil_avail_program.addLine('  Else')
+    supp_coil_avail_program.addLine("    Set #{supp_coil_avail_actuator.name} = 1")
+    supp_coil_avail_program.addLine('  EndIf')
     supp_coil_avail_program.addLine('EndIf')
 
     # ProgramCallingManagers
