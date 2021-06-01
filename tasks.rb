@@ -3624,7 +3624,8 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                     [HPXML::SidingTypeBrick, HPXML::ColorReflective],
                     [HPXML::SidingTypeFiberCement, HPXML::ColorMediumDark],
                     [HPXML::SidingTypeStucco, HPXML::ColorMedium],
-                    [HPXML::SidingTypeVinyl, HPXML::ColorLight]]
+                    [HPXML::SidingTypeVinyl, HPXML::ColorLight],
+                    [HPXML::SidingTypeNone, HPXML::ColorMedium]]
     hpxml.rim_joists.clear
     siding_types.each_with_index do |siding_type, i|
       hpxml.rim_joists.add(id: "RimJoistFoundation#{i + 1}",
@@ -3953,7 +3954,8 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     [HPXML::SidingTypeBrick, HPXML::ColorMediumDark],
                     [HPXML::SidingTypeFiberCement, HPXML::ColorMedium],
                     [HPXML::SidingTypeStucco, HPXML::ColorLight],
-                    [HPXML::SidingTypeVinyl, HPXML::ColorDark]]
+                    [HPXML::SidingTypeVinyl, HPXML::ColorDark],
+                    [HPXML::SidingTypeNone, HPXML::ColorMedium]]
     last_wall = hpxml.walls[-1]
     hpxml.walls.clear
     walls_map.each_with_index do |(wall_type, assembly_r), i|
