@@ -3454,7 +3454,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
   elsif ['base.xml'].include? hpxml_file
     hpxml.roofs.add(id: 'Roof',
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
-                    area: 1510,
+                    area: 1509.3,
                     roof_type: HPXML::RoofTypeAsphaltShingles,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -3473,7 +3473,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     roof_types.each_with_index do |roof_type, i|
       hpxml.roofs.add(id: "Roof#{i + 1}",
                       interior_adjacent_to: HPXML::LocationAtticUnvented,
-                      area: 1510 / roof_types.size,
+                      area: 1509.3 / roof_types.size,
                       roof_type: roof_type[0],
                       roof_color: roof_type[1],
                       emittance: 0.92,
@@ -3519,7 +3519,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs[0].insulation_assembly_r_value = 25.8
   elsif ['base-enclosure-garage.xml',
          'base-foundation-basement-garage.xml'].include? hpxml_file
-    hpxml.roofs[0].area += 670
+    hpxml.roofs[0].area += 671
   elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
     hpxml.roofs[0].insulation_assembly_r_value = 25.8
   elsif ['base-enclosure-split-surfaces.xml',
@@ -3625,7 +3625,8 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                     [HPXML::SidingTypeBrick, HPXML::ColorReflective],
                     [HPXML::SidingTypeFiberCement, HPXML::ColorMediumDark],
                     [HPXML::SidingTypeStucco, HPXML::ColorMedium],
-                    [HPXML::SidingTypeVinyl, HPXML::ColorLight]]
+                    [HPXML::SidingTypeVinyl, HPXML::ColorLight],
+                    [HPXML::SidingTypeNone, HPXML::ColorMedium]]
     hpxml.rim_joists.clear
     siding_types.each_with_index do |siding_type, i|
       hpxml.rim_joists.add(id: "RimJoistFoundation#{i + 1}",
@@ -3954,7 +3955,8 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     [HPXML::SidingTypeBrick, HPXML::ColorMediumDark],
                     [HPXML::SidingTypeFiberCement, HPXML::ColorMedium],
                     [HPXML::SidingTypeStucco, HPXML::ColorLight],
-                    [HPXML::SidingTypeVinyl, HPXML::ColorDark]]
+                    [HPXML::SidingTypeVinyl, HPXML::ColorDark],
+                    [HPXML::SidingTypeNone, HPXML::ColorMedium]]
     last_wall = hpxml.walls[-1]
     hpxml.walls.clear
     walls_map.each_with_index do |(wall_type, assembly_r), i|
@@ -5245,12 +5247,12 @@ def set_hpxml_doors(hpxml_file, hpxml)
   elsif ['base.xml'].include? hpxml_file
     hpxml.doors.add(id: 'DoorNorth',
                     wall_idref: 'Wall',
-                    area: 40,
+                    area: 20,
                     azimuth: 0,
                     r_value: 4.4)
     hpxml.doors.add(id: 'DoorSouth',
                     wall_idref: 'Wall',
-                    area: 40,
+                    area: 20,
                     azimuth: 180,
                     r_value: 4.4)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
@@ -5321,12 +5323,12 @@ def set_hpxml_doors(hpxml_file, hpxml)
     hpxml.doors.clear
     hpxml.doors.add(id: 'DoorNorth',
                     wall_idref: 'Wall9',
-                    area: 40,
+                    area: 20,
                     azimuth: 0,
                     r_value: 4.4)
     hpxml.doors.add(id: 'DoorSouth',
                     wall_idref: 'Wall10',
-                    area: 40,
+                    area: 20,
                     azimuth: 180,
                     r_value: 4.4)
   end
