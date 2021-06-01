@@ -5609,18 +5609,22 @@ if ARGV[0].to_sym == :update_measures
   # Update measures XMLs
   puts 'Updating measure.xmls...'
   Dir['**/measure.xml'].each do |measure_xml|
-    measure_dir = File.dirname(measure_xml)
-    command = "#{OpenStudio.getOpenStudioCLI} measure -u '#{measure_dir}'"
-    system(command, [:out, :err] => File::NULL)
+    for n_attempts in 1..5 # For some reason CLI randomly generates errors, so try multiple times
+      measure_dir = File.dirname(measure_xml)
+      command = "#{OpenStudio.getOpenStudioCLI} measure -u '#{measure_dir}'"
+      system(command, [:out, :err] => File::NULL)
 
-    # Check for error
-    xml_doc = XMLHelper.parse_file(measure_xml)
-    err_val = XMLHelper.get_value(xml_doc, '/measure/error', :string)
-    if err_val.nil?
-      err_val = XMLHelper.get_value(xml_doc, '/error', :string)
-    end
-    if not err_val.nil?
-      fail "#{measure_xml}: #{err_val}"
+      # Check for error
+      xml_doc = XMLHelper.parse_file(measure_xml)
+      err_val = XMLHelper.get_value(xml_doc, '/measure/error', :string)
+      if err_val.nil?
+        err_val = XMLHelper.get_value(xml_doc, '/error', :string)
+      end
+      if err_val.nil?
+        break # Successfully updated
+      elsif n_attempts == 5
+        fail "#{measure_xml}: #{err_val}" # Error generated all 5 times, fail
+      end
     end
   end
 
