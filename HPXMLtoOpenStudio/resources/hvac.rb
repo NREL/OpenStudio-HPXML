@@ -312,7 +312,6 @@ class HVAC
     apply_installation_quality(model, heat_pump, heat_pump, air_loop_unitary, htg_coil, clg_coil, control_zone)
   end
 
->>>>>>> 6d276007149f495daa701e102e3169d31b42cf5b
   def self.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                          sequential_heat_load_fracs, sequential_cool_load_fracs,
                                          control_zone, hvac_map)
@@ -1049,16 +1048,16 @@ class HVAC
     return clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr
   end
 
-  def self.set_cool_curves_ashp(heat_pump, use_eer = false)
+  def self.set_cool_curves_central_air_source(heat_pump, use_eer = false)
     hp_ap = heat_pump.additional_properties
     if hp_ap.num_speeds == 1
       # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
       # https://www.nrel.gov/docs/fy13osti/56354.pdf
       hp_ap.cool_cap_ft_spec = [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
       hp_ap.cool_eir_ft_spec = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
+      hp_ap.cool_capacity_ratios = [1.0]
+      hp_ap.cool_fan_speed_ratios = [1.0]
       if not use_eer
-        hp_ap.cool_capacity_ratios = [1.0]
-        hp_ap.cool_fan_speed_ratios = [1.0]
         hp_ap.cool_rated_shrs_net = [heat_pump.cooling_shr]
         hp_ap.cool_rated_airflow_rate = 394.2 # cfm/ton of rated capacity
         # Single stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.

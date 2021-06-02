@@ -724,7 +724,7 @@ class HPXMLDefaults
         HVAC.set_fan_power_rated(cooling_system) unless use_eer
         HVAC.set_crankcase_assumptions(cooling_system) unless use_eer
         HVAC.set_cool_c_d(cooling_system, clg_ap.num_speeds)
-        HVAC.set_cool_curves_ashp(cooling_system, use_eer)
+        HVAC.set_cool_curves_central_air_source(cooling_system, use_eer)
         HVAC.set_cool_rated_cfm_per_ton(cooling_system)
         HVAC.set_cool_rated_shrs_gross(cooling_system)
         HVAC.set_cool_rated_eirs(cooling_system) unless use_eer
@@ -772,7 +772,7 @@ class HPXMLDefaults
         HVAC.set_heat_pump_temperatures(heat_pump)
 
         HVAC.set_cool_c_d(heat_pump, hp_ap.num_speeds)
-        HVAC.set_cool_curves_ashp(heat_pump, use_eer_cop)
+        HVAC.set_cool_curves_central_air_source(heat_pump, use_eer_cop)
         HVAC.set_cool_rated_cfm_per_ton(heat_pump)
         HVAC.set_cool_rated_shrs_gross(heat_pump)
         HVAC.set_cool_rated_eirs(heat_pump) unless use_eer_cop
