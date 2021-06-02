@@ -114,12 +114,21 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     setup_outputs
 
+    all_outputs = []
+    all_outputs << @fuels
+    all_outputs << @end_uses
+    all_outputs << @loads
+    all_outputs << @unmet_loads
+    all_outputs << @peak_fuels
+    all_outputs << @peak_loads
+    all_outputs << @component_loads
+    all_outputs << @hot_water_uses
+
     output_names = []
-    @fuels.each do |fuel_type, fuel|
-      output_names << get_runner_output_name(fuel)
-    end
-    @end_uses.each do |key, end_use|
-      output_names << get_runner_output_name(end_use)
+    all_outputs.each do |outputs|
+      outputs.each do |key, obj|
+        output_names << get_runner_output_name(obj)
+      end
     end
 
     output_names.each do |output_name|
@@ -422,7 +431,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Write/report results
     write_annual_output_results(runner, outputs, output_format, annual_output_path)
-    report_sim_outputs(outputs, runner)
+    report_sim_outputs(runner)
     write_eri_output_results(outputs, eri_output_path)
     write_timeseries_output_results(runner, output_format,
                                     timeseries_output_path,
@@ -989,16 +998,25 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     runner.registerInfo("Wrote annual output results to #{annual_output_path}.")
   end
 
-  def report_sim_outputs(outputs, runner)
-    @fuels.each do |fuel_type, fuel|
-      output_name = get_runner_output_name(fuel)
-      runner.registerValue(output_name, fuel.annual_output.round(2))
-      runner.registerInfo("Registering #{fuel.annual_output.round(2)} for #{output_name}.")
+  def report_sim_outputs(runner)
+    all_outputs = []
+    all_outputs << @fuels
+    all_outputs << @end_uses
+    all_outputs << @loads
+    all_outputs << @unmet_loads
+    all_outputs << @peak_fuels
+    all_outputs << @peak_loads
+    if @component_loads.values.map { |load| load.annual_output }.sum != 0 # Skip if component loads not calculated
+      all_outputs << @component_loads
     end
-    @end_uses.each do |key, end_use|
-      output_name = get_runner_output_name(end_use)
-      runner.registerValue(output_name, end_use.annual_output.round(2))
-      runner.registerInfo("Registering #{end_use.annual_output.round(2)} for #{output_name}.")
+    all_outputs << @hot_water_uses
+
+    all_outputs.each do |outputs|
+      outputs.each do |key, obj|
+        output_name = get_runner_output_name(obj)
+        runner.registerValue(output_name, obj.annual_output.round(2))
+        runner.registerInfo("Registering #{obj.annual_output.round(2)} for #{output_name}.")
+      end
     end
   end
 
@@ -2407,7 +2425,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       return { 'OpenStudio::Model::WaterHeaterMixed' => ["Water Heater #{fuel} Energy", "Water Heater Off Cycle Parasitic #{fuel} Energy", "Water Heater On Cycle Parasitic #{fuel} Energy"],
                'OpenStudio::Model::WaterHeaterStratified' => ["Water Heater #{fuel} Energy", "Water Heater Off Cycle Parasitic #{fuel} Energy", "Water Heater On Cycle Parasitic #{fuel} Energy"],
                'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => ["Cooling Coil Water Heating #{fuel} Energy"],
-               'OpenStudio::Model::FanOnOff' => ["Fan #{fuel} Energy"] }
+               'OpenStudio::Model::FanOnOff' => ["Fan #{fuel} Energy"] } # TOOD: Update if this changes to FanSystemModel per https://github.com/NREL/OpenStudio/issues/4334
     end
 
     def self.WaterHeatingLoad
