@@ -52,6 +52,15 @@ class HVAC
       num_speeds = clg_ap.num_speeds
       clg_cfm = cooling_system.cooling_airflow_cfm
       clg_fan_speed_ratios = clg_ap.cool_fan_speed_ratios
+    elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace)
+      obj_name = Constants.ObjectNameFurnace
+      num_speeds = 1
+    elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypePTACHeating)
+      obj_name = Constants.ObjectNamePTACHeating
+      fan_watts_per_cfm = 0.0
+      num_speeds = 1
+    else
+      fail "Unexpected heating system type: #{heating_system.heating_system_type}, expect central air source hvac systems."
     end
 
     if not heating_system.nil?
@@ -67,16 +76,6 @@ class HVAC
         htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system)
         hvac_map[heating_system.id] << htg_supp_coil
       else
-        if heating_system.heating_system_type == HPXML::HVACTypeFurnace
-          obj_name = Constants.ObjectNameFurnace
-          num_speeds = 1
-        elsif heating_system.heating_system_type == HPXML::HVACTypePTACHeating
-          obj_name = Constants.ObjectNamePTACHeating
-          fan_watts_per_cfm = 0.0
-          num_speeds = 1
-        else
-          fail "Unexpected heating system type: #{heating_system.heating_system_type}, expect central air source hvac systems."
-        end
         # Heating Coil
         htg_fan_speed_ratios = [1.0]
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
