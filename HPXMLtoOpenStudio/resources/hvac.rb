@@ -8,7 +8,6 @@ class HVAC
     hvac_map[heating_system.id] = [] unless heating_system.nil?
 
     is_heatpump = false
-    fan_cfms = []
     if not cooling_system.nil?
       if cooling_system.is_a? HPXML::HeatPump
         is_heatpump = true
@@ -45,16 +44,8 @@ class HVAC
           fail "Unexpected cooling system type: #{cooling_system.cooling_system_type}."
         end
       end
-      # Cooling Coil
-      clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system)
-      hvac_map[cooling_system.id] << clg_coil
-
       clg_ap = cooling_system.additional_properties
       num_speeds = clg_ap.num_speeds
-      clg_cfm = cooling_system.cooling_airflow_cfm
-      clg_ap.cool_fan_speed_ratios.each do |r|
-        fan_cfms << clg_cfm * r
-      end
     elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace)
       obj_name = Constants.ObjectNameFurnace
       num_speeds = 1
@@ -64,6 +55,18 @@ class HVAC
       num_speeds = 1
     else
       fail "Unexpected heating system type: #{heating_system.heating_system_type}, expect central air source hvac systems."
+    end
+
+    fan_cfms = []
+    if not cooling_system.nil?
+      # Cooling Coil
+      clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system)
+      hvac_map[cooling_system.id] << clg_coil
+
+      clg_cfm = cooling_system.cooling_airflow_cfm
+      clg_ap.cool_fan_speed_ratios.each do |r|
+        fan_cfms << clg_cfm * r
+      end
     end
 
     if not heating_system.nil?
@@ -113,9 +116,7 @@ class HVAC
         fan_watts_per_cfm = heating_system.fan_watts_per_cfm
       end
     end
-
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms)
-
     if not cooling_system.nil?
       hvac_map[cooling_system.id] += disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil)
     end
