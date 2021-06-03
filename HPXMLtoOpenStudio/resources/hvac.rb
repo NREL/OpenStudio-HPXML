@@ -8,6 +8,7 @@ class HVAC
     hvac_map[heating_system.id] = [] unless heating_system.nil?
 
     is_heatpump = false
+    fan_cfms = []
     if not cooling_system.nil?
       if cooling_system.is_a? HPXML::HeatPump
         is_heatpump = true
@@ -51,7 +52,9 @@ class HVAC
       clg_ap = cooling_system.additional_properties
       num_speeds = clg_ap.num_speeds
       clg_cfm = cooling_system.cooling_airflow_cfm
-      clg_fan_speed_ratios = clg_ap.cool_fan_speed_ratios
+      clg_ap.cool_fan_speed_ratios.each do |r|
+        fan_cfms << clg_cfm * r
+      end
     elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace)
       obj_name = Constants.ObjectNameFurnace
       num_speeds = 1
@@ -97,6 +100,9 @@ class HVAC
         hvac_map[heating_system.id] << htg_coil
       end
       htg_cfm = heating_system.heating_airflow_cfm
+      htg_fan_speed_ratios.each do |r|
+        fan_cfms << htg_cfm * r
+      end
     end
 
     # Fan
@@ -108,19 +114,6 @@ class HVAC
       end
     end
 
-    fan_cfms = []
-    if not heating_system.nil?
-      htg_cfm = heating_system.heating_airflow_cfm
-      htg_fan_speed_ratios.each do |r|
-        fan_cfms << htg_cfm * r
-      end
-    end
-    if not cooling_system.nil?
-      clg_cfm = cooling_system.cooling_airflow_cfm
-      clg_fan_speed_ratios.each do |r|
-        fan_cfms << clg_cfm * r
-      end
-    end
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms)
 
     if not cooling_system.nil?
