@@ -51,21 +51,14 @@ class HVAC
       clg_ap = cooling_system.additional_properties
       num_speeds = clg_ap.num_speeds
       clg_cfm = cooling_system.cooling_airflow_cfm
-    elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace)
-      obj_name = Constants.ObjectNameFurnace
-      num_speeds = 1
-    elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypePTACHeating)
-      obj_name = Constants.ObjectNamePTACHeating
-      fan_watts_per_cfm = 0.0
-      num_speeds = 1
-    else
-      fail "Unexpected heating system type: #{heating_system.heating_system_type}, expect central air source hvac systems."
+      clg_fan_speed_ratios = clg_ap.cool_fan_speed_ratios
     end
 
     if not heating_system.nil?
       htg_ap = heating_system.additional_properties
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
+        htg_fan_speed_ratios = htg_ap.heat_fan_speed_ratios
         # Heating Coil
         htg_coil = create_dx_heating_coil(model, obj_name, heating_system)
         hvac_map[heating_system.id] << htg_coil
@@ -74,7 +67,18 @@ class HVAC
         htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system)
         hvac_map[heating_system.id] << htg_supp_coil
       else
+        if heating_system.heating_system_type == HPXML::HVACTypeFurnace
+          obj_name = Constants.ObjectNameFurnace
+          num_speeds = 1
+        elsif heating_system.heating_system_type == HPXML::HVACTypePTACHeating
+          obj_name = Constants.ObjectNamePTACHeating
+          fan_watts_per_cfm = 0.0
+          num_speeds = 1
+        else
+          fail "Unexpected heating system type: #{heating_system.heating_system_type}, expect central air source hvac systems."
+        end
         # Heating Coil
+        htg_fan_speed_ratios = [1.0]
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
           htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
           if heating_system.heating_system_type == HPXML::HVACTypePTACHeating
@@ -108,11 +112,13 @@ class HVAC
     fan_cfms = []
     if not heating_system.nil?
       htg_cfm = heating_system.heating_airflow_cfm
-      fan_cfms << htg_cfm
+      htg_fan_speed_ratios.each do |r|
+        fan_cfms << htg_cfm * r
+      end
     end
     if not cooling_system.nil?
       clg_cfm = cooling_system.cooling_airflow_cfm
-      clg_ap.cool_fan_speed_ratios.each do |r|
+      clg_fan_speed_ratios.each do |r|
         fan_cfms << clg_cfm * r
       end
     end
@@ -1115,7 +1121,7 @@ class HVAC
     end
   end
 
-  def self.set_heat_curves_ashp(heat_pump, use_cop = false)
+  def self.set_heat_curves_central_air_source(heat_pump, use_cop = false)
     hp_ap = heat_pump.additional_properties
     if hp_ap.num_speeds == 1
       # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al

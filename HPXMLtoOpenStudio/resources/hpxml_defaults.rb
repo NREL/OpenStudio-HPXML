@@ -778,7 +778,7 @@ class HPXMLDefaults
         HVAC.set_cool_rated_eirs(heat_pump) unless use_eer_cop
 
         HVAC.set_heat_c_d(heat_pump, hp_ap.num_speeds)
-        HVAC.set_heat_curves_ashp(heat_pump, use_eer_cop)
+        HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
         HVAC.set_heat_rated_cfm_per_ton(heat_pump)
         HVAC.set_heat_rated_eirs(heat_pump) unless use_eer_cop
 
