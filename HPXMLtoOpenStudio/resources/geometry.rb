@@ -5,6 +5,10 @@ class Geometry
     if not spaces.keys.include? space_type
       thermal_zone = OpenStudio::Model::ThermalZone.new(model)
       thermal_zone.setName(space_type)
+      
+      if [HPXML::LocationAtticVented, HPXML::LocationAtticUnvented, HPXML::LocationAtticUnconditioned].include? space_type
+        thermal_zone.setZoneInsideConvectionAlgorithm('ASTMC1340')
+      end
 
       space = OpenStudio::Model::Space.new(model)
       space.setName(space_type)
