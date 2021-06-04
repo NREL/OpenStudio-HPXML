@@ -3816,8 +3816,8 @@ class HVAC
           fault_program.addLine("Set a1_AF_EIR_c = #{cool_eir_fff_curve.coefficient1Constant}")
           fault_program.addLine("Set a2_AF_EIR_c = #{cool_eir_fff_curve.coefficient2x}")
           fault_program.addLine("Set a3_AF_EIR_c = #{cool_eir_fff_curve.coefficient3xPOW2}")
-          fault_program.addLine("Set AF_Qgr_residual = 0")
-          fault_program.addLine("Set AF_EIR_residual = 0")
+          fault_program.addLine("Set AF_Qgr_c_residual = 0")
+          fault_program.addLine("Set AF_EIR_c_residual = 0")
         else
           fault_program.addLine("Set a1_AF_Qgr_c = 1 - #{cool_cap_fff_curve.coefficient4y}")
           fault_program.addLine("Set a2_AF_Qgr_c = #{cool_cap_fff_curve.coefficient4y}")
