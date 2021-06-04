@@ -3816,13 +3816,17 @@ class HVAC
           fault_program.addLine("Set a1_AF_EIR_c = #{cool_eir_fff_curve.coefficient1Constant}")
           fault_program.addLine("Set a2_AF_EIR_c = #{cool_eir_fff_curve.coefficient2x}")
           fault_program.addLine("Set a3_AF_EIR_c = #{cool_eir_fff_curve.coefficient3xPOW2}")
+          fault_program.addLine("Set AF_Qgr_residual = 0")
+          fault_program.addLine("Set AF_EIR_residual = 0")
         else
-          fault_program.addLine("Set a1_AF_Qgr_c = #{cool_cap_fff_curve.coefficient1Constant} + (#{cool_cap_fff_curve.coefficient2w}*#{var1_sensor.name}) + (#{cool_cap_fff_curve.coefficient3x}*#{var2_sensor.name}) + (#{cool_cap_fff_curve.coefficient5z}*#{var4_sensor.name})")
+          fault_program.addLine("Set a1_AF_Qgr_c = 1 - #{cool_cap_fff_curve.coefficient4y}")
           fault_program.addLine("Set a2_AF_Qgr_c = #{cool_cap_fff_curve.coefficient4y}")
           fault_program.addLine('Set a3_AF_Qgr_c = 0')
-          fault_program.addLine("Set a1_AF_EIR_c = #{cool_eir_fff_curve.coefficient1Constant} + (#{cool_eir_fff_curve.coefficient2w}*#{var1_sensor.name}) + (#{cool_eir_fff_curve.coefficient3x}*#{var2_sensor.name}) + (#{cool_eir_fff_curve.coefficient5z}*#{var4_sensor.name})")
+          fault_program.addLine("Set a1_AF_EIR_c = 1 - #{cool_eir_fff_curve.coefficient4y}")
           fault_program.addLine("Set a2_AF_EIR_c = #{cool_eir_fff_curve.coefficient4y}")
           fault_program.addLine('Set a3_AF_EIR_c = 0')
+          fault_program.addLine("Set AF_Qgr_residual = #{cool_cap_fff_curve.coefficient1Constant} + (#{cool_cap_fff_curve.coefficient2w}*#{var1_sensor.name}) + (#{cool_cap_fff_curve.coefficient3x}*#{var2_sensor.name}) + (#{cool_cap_fff_curve.coefficient5z}*#{var4_sensor.name}) - 1") # residual from other terms
+          fault_program.addLine("Set AF_EIR_residual = #{cool_eir_fff_curve.coefficient1Constant} + (#{cool_eir_fff_curve.coefficient2w}*#{var1_sensor.name}) + (#{cool_eir_fff_curve.coefficient3x}*#{var2_sensor.name}) + (#{cool_eir_fff_curve.coefficient5z}*#{var4_sensor.name}) - 1") # residual from other terms
         end
 
         qgr_values, p_values, ff_chg_values = get_installation_quality_cooling_coeff(f_chg)
@@ -3864,8 +3868,8 @@ class HVAC
         fault_program.addLine('Set p_AF_Q_c = (a1_AF_Qgr_c) + (a2_AF_Qgr_c*FF_AF_comb_c) + (a3_AF_Qgr_c*FF_AF_comb_c*FF_AF_comb_c)')
         fault_program.addLine('Set p_AF_COP_c = 1.0 / ((a1_AF_EIR_c) + (a2_AF_EIR_c*FF_AF_comb_c) + (a3_AF_EIR_c*FF_AF_comb_c*FF_AF_comb_c))')
 
-        fault_program.addLine("Set #{cool_cap_fff_act.name} = (p_CH_Q_c * p_AF_Q_c)")
-        fault_program.addLine("Set #{cool_eir_fff_act.name} = (1.0 / (p_CH_COP_c * p_AF_COP_c))")
+        fault_program.addLine("Set #{cool_cap_fff_act.name} = (p_CH_Q_c * p_AF_Q_c) + AF_Qgr_residual")
+        fault_program.addLine("Set #{cool_eir_fff_act.name} = (1.0 / (p_CH_COP_c * p_AF_COP_c)) + AF_EIR_residual")
       end
     end
 
