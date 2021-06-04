@@ -16,6 +16,7 @@ __New Features__
 - Allows "none" for wall/rim joist siding.
 - Updates the reporting measure to register all outputs from the annual CSV with the OS runner (for use in, e.g., PAT).
 - Switches to the EnergyPlus Fan:SystemModel object for all HVAC systems.
+- Allows modeling PTAC and PTHP hvac systems. 
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.

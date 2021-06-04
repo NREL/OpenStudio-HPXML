@@ -145,13 +145,16 @@ class HPXML < Object
   HVACTypeFixedHeater = 'FixedHeater'
   HVACTypeFloorFurnace = 'FloorFurnace'
   HVACTypeFurnace = 'Furnace'
+  HVACTypePTACHeating = 'PackagedTerminalAirConditionerHeating'
   HVACTypeHeatPumpAirToAir = 'air-to-air'
   HVACTypeHeatPumpGroundToAir = 'ground-to-air'
   HVACTypeHeatPumpMiniSplit = 'mini-split'
   HVACTypeHeatPumpWaterLoopToAir = 'water-loop-to-air'
+  HVACTypeHeatPumpPTHP = 'packaged terminal heat pump'
   HVACTypeMiniSplitAirConditioner = 'mini-split'
   HVACTypePortableHeater = 'PortableHeater'
   HVACTypeRoomAirConditioner = 'room air conditioner'
+  HVACTypePTAC = 'packaged terminal air conditioner'
   HVACTypeStove = 'Stove'
   HVACTypeWallFurnace = 'WallFurnace'
   HydronicTypeBaseboard = 'baseboard'
@@ -2659,11 +2662,13 @@ class HPXML < Object
     def attached_cooling_system
       return if distribution_system.nil?
 
+      # by distribution system
       distribution_system.hvac_systems.each do |hvac_system|
         next if hvac_system.id == @id
 
         return hvac_system
       end
+
       return
     end
 
@@ -2711,7 +2716,7 @@ class HPXML < Object
         efficiency_units = UnitsAFUE
         efficiency_value = @heating_efficiency_afue
         efficiency_value_isdefaulted = @heating_efficiency_afue_isdefaulted
-      elsif [HVACTypeElectricResistance, HVACTypeStove, HVACTypePortableHeater, HVACTypeFixedHeater, HVACTypeFireplace].include? @heating_system_type
+      elsif [HVACTypeElectricResistance, HVACTypeStove, HVACTypePortableHeater, HVACTypeFixedHeater, HVACTypeFireplace, HVACTypePTACHeating].include? @heating_system_type
         efficiency_units = UnitsPercent
         efficiency_value = @heating_efficiency_percent
         efficiency_value_isdefaulted = @heating_efficiency_percent_isdefaulted
@@ -2748,7 +2753,7 @@ class HPXML < Object
       @heating_capacity = XMLHelper.get_value(heating_system, 'HeatingCapacity', :float)
       if [HVACTypeFurnace, HVACTypeWallFurnace, HVACTypeFloorFurnace, HVACTypeBoiler].include? @heating_system_type
         @heating_efficiency_afue = XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='#{UnitsAFUE}']/Value", :float)
-      elsif [HVACTypeElectricResistance, HVACTypeStove, HVACTypePortableHeater, HVACTypeFixedHeater, HVACTypeFireplace].include? @heating_system_type
+      elsif [HVACTypeElectricResistance, HVACTypeStove, HVACTypePortableHeater, HVACTypeFixedHeater, HVACTypeFireplace, HVACTypePTACHeating].include? @heating_system_type
         @heating_efficiency_percent = XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='Percent']/Value", :float)
       end
       @fraction_heat_load_served = XMLHelper.get_value(heating_system, 'FractionHeatLoadServed', :float)
@@ -2803,6 +2808,7 @@ class HPXML < Object
     end
 
     def attached_heating_system
+      # by distribution system
       return if distribution_system.nil?
 
       distribution_system.hvac_systems.each do |hvac_system|
@@ -2856,7 +2862,7 @@ class HPXML < Object
         efficiency_units = UnitsSEER
         efficiency_value = @cooling_efficiency_seer
         efficiency_value_isdefaulted = @cooling_efficiency_seer_isdefaulted
-      elsif [HVACTypeRoomAirConditioner].include? @cooling_system_type
+      elsif [HVACTypeRoomAirConditioner, HVACTypePTAC].include? @cooling_system_type
         if not @cooling_efficiency_eer.nil?
           efficiency_units = UnitsEER
           efficiency_value = @cooling_efficiency_eer
@@ -2904,7 +2910,7 @@ class HPXML < Object
       @fraction_cool_load_served = XMLHelper.get_value(cooling_system, 'FractionCoolLoadServed', :float)
       if [HVACTypeCentralAirConditioner, HVACTypeMiniSplitAirConditioner].include? @cooling_system_type
         @cooling_efficiency_seer = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsSEER}']/Value", :float)
-      elsif [HVACTypeRoomAirConditioner].include? @cooling_system_type
+      elsif [HVACTypeRoomAirConditioner, HVACTypePTAC].include? @cooling_system_type
         @cooling_efficiency_eer = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsEER}']/Value", :float)
         @cooling_efficiency_ceer = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsCEER}']/Value", :float)
       elsif [HVACTypeChiller].include? @cooling_system_type
@@ -2950,7 +2956,7 @@ class HPXML < Object
              :cooling_shr, :backup_heating_fuel, :backup_heating_capacity,
              :backup_heating_efficiency_percent, :backup_heating_efficiency_afue,
              :backup_heating_switchover_temp, :fraction_heat_load_served, :fraction_cool_load_served,
-             :cooling_efficiency_seer, :cooling_efficiency_eer, :heating_efficiency_hspf,
+             :cooling_efficiency_seer, :cooling_efficiency_eer, :cooling_efficiency_ceer, :heating_efficiency_hspf,
              :heating_efficiency_cop, :third_party_certification, :seed_id, :pump_watts_per_ton,
              :fan_watts_per_cfm, :is_shared_system, :number_of_units_served, :shared_loop_watts,
              :shared_loop_motor_efficiency, :airflow_defect_ratio, :charge_defect_ratio,
@@ -3032,10 +3038,22 @@ class HPXML < Object
         htg_efficiency_units = UnitsHSPF
         htg_efficiency_value = @heating_efficiency_hspf
         htg_efficiency_value_isdefaulted = @heating_efficiency_hspf_isdefaulted
-      elsif [HVACTypeHeatPumpGroundToAir, HVACTypeHeatPumpWaterLoopToAir].include? @heat_pump_type
-        clg_efficiency_units = UnitsEER
-        clg_efficiency_value = @cooling_efficiency_eer
-        clg_efficiency_value_isdefaulted = @cooling_efficiency_eer_isdefaulted
+      elsif [HVACTypeHeatPumpGroundToAir, HVACTypeHeatPumpWaterLoopToAir, HVACTypeHeatPumpPTHP].include? @heat_pump_type
+        if @heat_pump_type == HVACTypeHeatPumpPTHP
+          if not @cooling_efficiency_eer.nil?
+            clg_efficiency_units = UnitsEER
+            clg_efficiency_value = @cooling_efficiency_eer
+            clg_efficiency_value_isdefaulted = @cooling_efficiency_eer_isdefaulted
+          elsif not @cooling_efficiency_ceer.nil?
+            clg_efficiency_units = UnitsCEER
+            clg_efficiency_value = @cooling_efficiency_ceer
+            clg_efficiency_value_isdefaulted = @cooling_efficiency_ceer_isdefaulted
+          end
+        else
+          clg_efficiency_units = UnitsEER
+          clg_efficiency_value = @cooling_efficiency_eer
+          clg_efficiency_value_isdefaulted = @cooling_efficiency_eer_isdefaulted
+        end
         htg_efficiency_units = UnitsCOP
         htg_efficiency_value = @heating_efficiency_cop
         htg_efficiency_value_isdefaulted = @heating_efficiency_cop_isdefaulted
@@ -3087,12 +3105,13 @@ class HPXML < Object
       @fraction_cool_load_served = XMLHelper.get_value(heat_pump, 'FractionCoolLoadServed', :float)
       if [HVACTypeHeatPumpAirToAir, HVACTypeHeatPumpMiniSplit].include? @heat_pump_type
         @cooling_efficiency_seer = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsSEER}']/Value", :float)
-      elsif [HVACTypeHeatPumpGroundToAir, HVACTypeHeatPumpWaterLoopToAir].include? @heat_pump_type
+      elsif [HVACTypeHeatPumpGroundToAir, HVACTypeHeatPumpWaterLoopToAir, HVACTypeHeatPumpPTHP].include? @heat_pump_type
         @cooling_efficiency_eer = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsEER}']/Value", :float)
+        @cooling_efficiency_ceer = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsCEER}']/Value", :float)
       end
       if [HVACTypeHeatPumpAirToAir, HVACTypeHeatPumpMiniSplit].include? @heat_pump_type
         @heating_efficiency_hspf = XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='#{UnitsHSPF}']/Value", :float)
-      elsif [HVACTypeHeatPumpGroundToAir, HVACTypeHeatPumpWaterLoopToAir].include? @heat_pump_type
+      elsif [HVACTypeHeatPumpGroundToAir, HVACTypeHeatPumpWaterLoopToAir, HVACTypeHeatPumpPTHP].include? @heat_pump_type
         @heating_efficiency_cop = XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='#{UnitsCOP}']/Value", :float)
       end
       @airflow_defect_ratio = XMLHelper.get_value(heat_pump, 'extension/AirflowDefectRatio', :float)

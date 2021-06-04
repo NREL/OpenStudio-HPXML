@@ -328,6 +328,8 @@ def create_hpxmls
     'base-hvac-autosize-room-ac-only.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-autosize-stove-oil-only.xml' => 'base-hvac-stove-oil-only.xml',
     'base-hvac-autosize-wall-furnace-elec-only.xml' => 'base-hvac-wall-furnace-elec-only.xml',
+    'base-hvac-autosize-ptac-electric-resistance.xml' => 'base-hvac-ptac-electric-resistance.xml',
+    'base-hvac-autosize-pthp.xml' => 'base-hvac-pthp.xml',
     'base-hvac-boiler-coal-only.xml' => 'base.xml',
     'base-hvac-boiler-elec-only.xml' => 'base.xml',
     'base-hvac-boiler-gas-central-ac-1-speed.xml' => 'base.xml',
@@ -398,6 +400,9 @@ def create_hpxmls
     'base-hvac-undersized.xml' => 'base.xml',
     'base-hvac-undersized-allow-increased-fixed-capacities.xml' => 'base-hvac-undersized.xml',
     'base-hvac-wall-furnace-elec-only.xml' => 'base.xml',
+    'base-hvac-ptac-electric-resistance.xml' => 'base.xml',
+    'base-hvac-ptac-cooling-only.xml' => 'base-hvac-ptac-electric-resistance.xml',
+    'base-hvac-pthp.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-lighting-ceiling-fans.xml' => 'base.xml',
     'base-lighting-detailed.xml' => 'base.xml',
     'base-lighting-none.xml' => 'base.xml',
@@ -2887,6 +2892,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-room-ac-only.xml',
          'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml',
          'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml',
+         'base-hvac-ptac-cooling-only.xml',
          'invalid_files/orphaned-hvac-distribution.xml'].include? hpxml_file
     hpxml.heating_systems.clear
   elsif ['base-hvac-boiler-elec-only.xml'].include? hpxml_file
@@ -2915,6 +2921,12 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].heating_efficiency_percent = 1
+  elsif ['base-hvac-ptac-electric-resistance.xml'].include? hpxml_file
+    hpxml.heating_systems[0].id = 'HeatingPTAC'
+    hpxml.heating_systems[0].distribution_system_idref = nil
+    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypePTACHeating
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
+    hpxml.heating_systems[0].heating_efficiency_afue = nil
   elsif ['base-hvac-furnace-elec-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
     hpxml.heating_systems[0].heating_efficiency_afue = 0.98
@@ -2934,48 +2946,54 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 1,
-                              fraction_heat_load_served: 0.1)
+                              fraction_heat_load_served: 0.091)
     hpxml.heating_systems.add(id: 'HeatingSystem2',
+                              heating_system_type: HPXML::HVACTypePTACHeating,
+                              heating_system_fuel: HPXML::FuelTypeElectricity,
+                              heating_capacity: 6400,
+                              heating_efficiency_percent: 1,
+                              fraction_heat_load_served: 0.091)
+    hpxml.heating_systems.add(id: 'HeatingSystem3',
                               distribution_system_idref: 'HVACDistribution2',
                               heating_system_type: HPXML::HVACTypeFurnace,
                               heating_system_fuel: HPXML::FuelTypeNaturalGas,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.92,
-                              fraction_heat_load_served: 0.1)
-    hpxml.heating_systems.add(id: 'HeatingSystem3',
+                              fraction_heat_load_served: 0.091)
+    hpxml.heating_systems.add(id: 'HeatingSystem4',
                               distribution_system_idref: 'HVACDistribution3',
                               heating_system_type: HPXML::HVACTypeBoiler,
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 1,
-                              fraction_heat_load_served: 0.1)
-    hpxml.heating_systems.add(id: 'HeatingSystem4',
+                              fraction_heat_load_served: 0.091)
+    hpxml.heating_systems.add(id: 'HeatingSystem5',
                               distribution_system_idref: 'HVACDistribution4',
                               heating_system_type: HPXML::HVACTypeBoiler,
                               heating_system_fuel: HPXML::FuelTypeNaturalGas,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.92,
-                              fraction_heat_load_served: 0.1,
+                              fraction_heat_load_served: 0.091,
                               electric_auxiliary_energy: 200)
-    hpxml.heating_systems.add(id: 'HeatingSystem5',
+    hpxml.heating_systems.add(id: 'HeatingSystem6',
                               heating_system_type: HPXML::HVACTypeElectricResistance,
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_percent: 1,
-                              fraction_heat_load_served: 0.1)
-    hpxml.heating_systems.add(id: 'HeatingSystem6',
+                              fraction_heat_load_served: 0.091)
+    hpxml.heating_systems.add(id: 'HeatingSystem7',
                               heating_system_type: HPXML::HVACTypeStove,
                               heating_system_fuel: HPXML::FuelTypeOil,
                               heating_capacity: 6400,
                               heating_efficiency_percent: 0.8,
-                              fraction_heat_load_served: 0.1,
+                              fraction_heat_load_served: 0.091,
                               fan_watts: 40.0)
-    hpxml.heating_systems.add(id: 'HeatingSystem7',
+    hpxml.heating_systems.add(id: 'HeatingSystem8',
                               heating_system_type: HPXML::HVACTypeWallFurnace,
                               heating_system_fuel: HPXML::FuelTypePropane,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.8,
-                              fraction_heat_load_served: 0.1,
+                              fraction_heat_load_served: 0.091,
                               fan_watts: 0.0)
   elsif ['base-mechvent-multiple.xml',
          'base-bldgtype-multifamily-shared-mechvent-multiple.xml'].include? hpxml_file
@@ -3179,6 +3197,13 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].cooling_efficiency_eer = 8.5
     hpxml.cooling_systems[0].cooling_shr = 0.65
     hpxml.cooling_systems[0].compressor_type = nil
+  elsif ['base-hvac-ptac-electric-resistance.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].id = 'CoolingPTAC'
+    hpxml.cooling_systems[0].distribution_system_idref = nil
+    hpxml.cooling_systems[0].cooling_system_type = HPXML::HVACTypePTAC
+    hpxml.cooling_systems[0].cooling_efficiency_seer = nil
+    hpxml.cooling_systems[0].cooling_efficiency_eer = 10.7
+    hpxml.cooling_systems[0].cooling_shr = 0.65
   elsif ['base-hvac-room-ac-only-33percent.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fraction_cool_load_served = 0.33
     hpxml.cooling_systems[0].cooling_capacity /= 3.0
@@ -3199,14 +3224,21 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     end
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.cooling_systems[0].distribution_system_idref = 'HVACDistribution2'
-    hpxml.cooling_systems[0].fraction_cool_load_served = 0.2
-    hpxml.cooling_systems[0].cooling_capacity *= 0.2
+    hpxml.cooling_systems[0].fraction_cool_load_served = 0.1667
+    hpxml.cooling_systems[0].cooling_capacity *= 0.1667
     hpxml.cooling_systems.add(id: 'CoolingSystem2',
                               cooling_system_type: HPXML::HVACTypeRoomAirConditioner,
                               cooling_system_fuel: HPXML::FuelTypeElectricity,
                               cooling_capacity: 9600,
-                              fraction_cool_load_served: 0.2,
+                              fraction_cool_load_served: 0.1667,
                               cooling_efficiency_eer: 8.5,
+                              cooling_shr: 0.65)
+    hpxml.cooling_systems.add(id: 'CoolingSystemPTAC',
+                              cooling_system_type: HPXML::HVACTypePTAC,
+                              cooling_system_fuel: HPXML::FuelTypeElectricity,
+                              cooling_capacity: 9600,
+                              fraction_cool_load_served: 0.1667,
+                              cooling_efficiency_eer: 10.7,
                               cooling_shr: 0.65)
   elsif ['base-mechvent-multiple.xml',
          'base-bldgtype-multifamily-shared-mechvent-multiple.xml'].include? hpxml_file
@@ -3357,6 +3389,13 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
       hpxml.heat_pumps[-1].cooling_capacity = 36000
       hpxml.heat_pumps[-1].backup_heating_capacity = 36000
     end
+  elsif ['base-hvac-pthp.xml'].include? hpxml_file
+    hpxml.heat_pumps[-1].distribution_system_idref = nil
+    hpxml.heat_pumps[-1].heat_pump_type = HPXML::HVACTypeHeatPumpPTHP
+    hpxml.heat_pumps[-1].cooling_efficiency_eer = 11.4
+    hpxml.heat_pumps[-1].cooling_shr = 0.65
+    hpxml.heat_pumps[-1].pump_watts_per_ton = nil
+    hpxml.heat_pumps[-1].compressor_type = HPXML::HVACCompressorTypeSingleStage
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     hpxml.heat_pumps.add(id: 'HeatPump',
@@ -3409,8 +3448,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
                          backup_heating_capacity: 3412,
                          backup_heating_efficiency_percent: 1.0,
-                         fraction_heat_load_served: 0.1,
-                         fraction_cool_load_served: 0.2,
+                         fraction_heat_load_served: 0.091,
+                         fraction_cool_load_served: 0.1667,
                          heating_efficiency_hspf: 7.7,
                          cooling_efficiency_seer: 13,
                          heating_capacity_17F: 4800 * 0.630, # Based on OAT slope of default curves
@@ -3425,8 +3464,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
                          backup_heating_capacity: 3412,
                          backup_heating_efficiency_percent: 1.0,
-                         fraction_heat_load_served: 0.1,
-                         fraction_cool_load_served: 0.2,
+                         fraction_heat_load_served: 0.091,
+                         fraction_cool_load_served: 0.1667,
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
                          cooling_shr: 0.73,
@@ -3440,8 +3479,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
                          backup_heating_capacity: 3412,
                          backup_heating_efficiency_percent: 1.0,
-                         fraction_heat_load_served: 0.1,
-                         fraction_cool_load_served: 0.2,
+                         fraction_heat_load_served: 0.091,
+                         fraction_cool_load_served: 0.1667,
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 19,
                          heating_capacity_17F: 4800 * f,
@@ -3633,7 +3672,9 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'base-hvac-room-ac-only.xml',
          'base-hvac-stove-oil-only.xml',
          'base-hvac-stove-wood-pellets-only.xml',
-         'base-hvac-wall-furnace-elec-only.xml'].include? hpxml_file
+         'base-hvac-wall-furnace-elec-only.xml',
+         'base-hvac-ptac-electric-resistance.xml',
+         'base-hvac-pthp.xml'].include? hpxml_file
     hpxml.hvac_distributions.clear
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.hvac_distributions.clear
