@@ -274,6 +274,7 @@ Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/A
 HPXML Attics
 ************
 
+For attics, ASTM C1340 convection coefficients are used for inside surfaces based on `Fontanini et al., 2018 <https://www.sciencedirect.com/science/article/pii/S0378778817337544?casa_token=YCV2ZzSGtjIAAAAA:8iffAehxYs3NjkGRs-L9DdViNwZbKVW9fCCMI2Pkr11KL30HyAis0wwPfHNp71ByuXqbKTaEhHg>`_. 
 If the dwelling unit has a vented attic, attic ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="true"]]/VentilationRate``.
 
   =================  ======  =====  ===========  ========  ==========  ==========================
