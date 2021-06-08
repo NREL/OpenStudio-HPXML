@@ -112,12 +112,12 @@
         </Walls>
         <FrameFloors>
           <FrameFloor>
-            <SystemIdentifier id='FloorOther'/>
+            <SystemIdentifier id='FloorAboveOther'/>
             <ExteriorAdjacentTo>other heated space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>900.0</Area>
             <Insulation>
-              <SystemIdentifier id='FloorOtherInsulation'/>
+              <SystemIdentifier id='FloorAboveOtherInsulation'/>
               <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
             </Insulation>
             <extension>
@@ -125,7 +125,7 @@
             </extension>
           </FrameFloor>
           <FrameFloor>
-            <SystemIdentifier id='CeilingOther'/>
+            <SystemIdentifier id='CeilingBelowOther'/>
             <ExteriorAdjacentTo>other heated space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>900.0</Area>
@@ -133,7 +133,7 @@
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='CeilingOtherInsulation'/>
+              <SystemIdentifier id='CeilingBelowOtherInsulation'/>
               <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
             </Insulation>
             <extension>

@@ -1062,6 +1062,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
     hpxml.roofs[0].interior_adjacent_to = HPXML::LocationLivingSpace
     hpxml.roofs[0].insulation_assembly_r_value = 25.8
+    hpxml.roofs[0].interior_finish_type = HPXML::InteriorFinishGypsumBoard
   elsif ['base-enclosure-garage.xml',
          'base-foundation-basement-garage.xml'].include? hpxml_file
     hpxml.roofs[0].area += 671
@@ -1426,6 +1427,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
     hpxml.walls[1].interior_adjacent_to = HPXML::LocationLivingSpace
     hpxml.walls[1].insulation_assembly_r_value = 23.0
+    hpxml.walls[1].interior_finish_type = HPXML::InteriorFinishGypsumBoard
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     hpxml.walls.delete_at(1)
     hpxml.walls.add(id: 'WallAtticKneeWall',
@@ -2043,14 +2045,14 @@ end
 def set_hpxml_frame_floors(hpxml_file, hpxml)
   if ['ASHRAE_Standard_140/L100AC.xml',
       'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: 'FloorUnderAttic',
+    hpxml.frame_floors.add(id: 'CeilingBelowAttic',
                            exterior_adjacent_to: HPXML::LocationAtticVented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1539,
                            interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                            interior_finish_thickness: 0.5,
                            insulation_assembly_r_value: 18.45)
-    hpxml.frame_floors.add(id: 'FloorOverFoundation',
+    hpxml.frame_floors.add(id: 'FloorAboveFoundation',
                            exterior_adjacent_to: HPXML::LocationOutside,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1539,
@@ -2067,7 +2069,7 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
          'ASHRAE_Standard_140/L324XC.xml'].include? hpxml_file
     hpxml.frame_floors.delete_at(1)
   elsif ['base.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: 'FloorBelowAttic',
+    hpxml.frame_floors.add(id: 'CeilingBelowAttic',
                            exterior_adjacent_to: HPXML::LocationAtticUnvented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1350,
@@ -2075,13 +2077,13 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            insulation_assembly_r_value: 39.3)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.frame_floors.clear
-    hpxml.frame_floors.add(id: 'FloorOther',
+    hpxml.frame_floors.add(id: 'FloorAboveOther',
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
                            insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
-    hpxml.frame_floors.add(id: 'CeilingOther',
+    hpxml.frame_floors.add(id: 'CeilingBelowOther',
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
@@ -2220,13 +2222,13 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
     hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
     hpxml.frame_floors[1].other_space_above_or_below = HPXML::FrameFloorOtherSpaceAbove
   elsif ['invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: 'FloorOther',
+    hpxml.frame_floors.add(id: 'FloorAboveOther',
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
                            insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
-    hpxml.frame_floors.add(id: 'CeilingOther',
+    hpxml.frame_floors.add(id: 'CeilingBelowOther',
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
