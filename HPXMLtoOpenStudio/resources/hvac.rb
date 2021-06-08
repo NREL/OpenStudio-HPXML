@@ -1683,13 +1683,13 @@ class HVAC
     # than the cooling design airflow rate).
     fan_ratios_powers = {}
     fan_htg_cfms.each do |fan_htg_cfm|
-      fan_htg_ratio = fan_htg_cfm / max_fan_htg_cfm
-      power_fraction = (fan_htg_cfm / max_fan_cfm)**3 # fan power curve, using fan ratio relative to max heating cfm
+      fan_htg_ratio = fan_htg_cfm / max_fan_cfm
+      power_fraction = (fan_htg_cfm / max_fan_htg_cfm)**3 # fan power curve, using fan ratio relative to max heating cfm
       fan_ratios_powers[fan_htg_ratio] = power_fraction
     end
     fan_clg_cfms.each do |fan_clg_cfm|
-      fan_clg_ratio = fan_clg_cfm / max_fan_clg_cfm
-      power_fraction = (fan_clg_cfm / max_fan_cfm)**3 # fan power curve, using fan ratio relative to max cooling cfm
+      fan_clg_ratio = fan_clg_cfm / max_fan_cfm
+      power_fraction = (fan_clg_cfm / max_fan_clg_cfm)**3 # fan power curve, using fan ratio relative to max cooling cfm
       fan_ratios_powers[fan_clg_ratio] = power_fraction
     end
     fan_ratios_powers.sort.each do |fan_ratio, power_fraction|
