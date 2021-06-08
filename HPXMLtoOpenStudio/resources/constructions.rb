@@ -5,9 +5,8 @@ class Constructions
 
   def self.apply_wood_stud_wall(runner, model, surfaces, wall, constr_name,
                                 cavity_r, install_grade, cavity_depth_in, cavity_filled,
-                                framing_factor, drywall_thick_in, osb_thick_in,
-                                rigid_r, mat_ext_finish, otherside_drywall_thick_in,
-                                inside_film, outside_film)
+                                framing_factor, mat_int_finish, osb_thick_in,
+                                rigid_r, mat_ext_finish, inside_film, outside_film)
 
     return if surfaces.empty?
 
@@ -46,9 +45,6 @@ class Constructions
     if not mat_ext_finish.nil?
       constr.add_layer(mat_ext_finish)
     end
-    if otherside_drywall_thick_in > 0 # E.g., interior partition wall
-      constr.add_layer(Material.GypsumWall(otherside_drywall_thick_in))
-    end
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
@@ -56,8 +52,8 @@ class Constructions
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_framing, mat_cavity, mat_gap], 'WallStudAndCavity')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if not mat_int_finish.nil?
+      constr.add_layer(mat_int_finish)
     end
     constr.add_layer(inside_film)
 
@@ -68,7 +64,7 @@ class Constructions
   def self.apply_double_stud_wall(runner, model, surfaces, wall, constr_name,
                                   cavity_r, install_grade, stud_depth_in, gap_depth_in,
                                   framing_factor, framing_spacing, is_staggered,
-                                  drywall_thick_in, osb_thick_in, rigid_r,
+                                  mat_int_finish, osb_thick_in, rigid_r,
                                   mat_ext_finish, inside_film, outside_film)
 
     return if surfaces.empty?
@@ -124,8 +120,8 @@ class Constructions
       constr.add_layer([mat_framing_middle, mat_ins_middle, mat_ins_middle, mat_gap_middle, mat_ins_middle], 'WallCavity')
     end
     constr.add_layer([mat_framing_inner_outer, mat_stud, mat_ins_inner_outer, mat_gap_inner_outer, mat_ins_inner_outer], 'WallStudandCavityInner')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if not mat_int_finish.nil?
+      constr.add_layer(mat_int_finish)
     end
     constr.add_layer(inside_film)
 
@@ -136,7 +132,7 @@ class Constructions
   def self.apply_cmu_wall(runner, model, surfaces, wall, constr_name,
                           thick_in, conductivity, density, framing_factor,
                           furring_r, furring_cavity_depth, furring_spacing,
-                          drywall_thick_in, osb_thick_in, rigid_r,
+                          mat_int_finish, osb_thick_in, rigid_r,
                           mat_ext_finish, inside_film, outside_film)
 
     return if surfaces.empty?
@@ -191,8 +187,8 @@ class Constructions
     else
       constr.add_layer([mat_framing, mat_cmu], 'WallCMU')
     end
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if not mat_int_finish.nil?
+      constr.add_layer(mat_int_finish)
     end
     constr.add_layer(inside_film)
 
@@ -202,7 +198,7 @@ class Constructions
 
   def self.apply_icf_wall(runner, model, surfaces, wall, constr_name,
                           icf_r, ins_thick_in, concrete_thick_in, framing_factor,
-                          drywall_thick_in, osb_thick_in, rigid_r,
+                          mat_int_finish, osb_thick_in, rigid_r,
                           mat_ext_finish, inside_film, outside_film)
 
     return if surfaces.empty?
@@ -240,8 +236,8 @@ class Constructions
     constr.add_layer([mat_framing_inner_outer, mat_ins], 'WallICFInsFormOuter')
     constr.add_layer([mat_framing_middle, mat_conc], 'WallICFConcrete')
     constr.add_layer([mat_framing_inner_outer, mat_ins], 'WallICFInsFormInner')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if not mat_int_finish.nil?
+      constr.add_layer(mat_int_finish)
     end
     constr.add_layer(inside_film)
 
@@ -251,7 +247,7 @@ class Constructions
 
   def self.apply_sip_wall(runner, model, surfaces, wall, constr_name, sip_r,
                           sip_thick_in, framing_factor, sheathing_thick_in,
-                          drywall_thick_in, osb_thick_in, rigid_r,
+                          mat_int_finish, osb_thick_in, rigid_r,
                           mat_ext_finish, inside_film, outside_film)
 
     return if surfaces.empty?
@@ -296,8 +292,8 @@ class Constructions
     constr.add_layer([mat_framing_middle, mat_ins_middle, mat_ins_middle], 'WallIns')
     constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], 'WallSplineLayerInner')
     constr.add_layer(mat_int_sheath)
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if not mat_int_finish.nil?
+      constr.add_layer(mat_int_finish)
     end
     constr.add_layer(inside_film)
 
@@ -308,7 +304,7 @@ class Constructions
   def self.apply_steel_stud_wall(runner, model, surfaces, wall, constr_name,
                                  cavity_r, install_grade, cavity_depth,
                                  cavity_filled, framing_factor, correction_factor,
-                                 drywall_thick_in, osb_thick_in, rigid_r,
+                                 mat_int_finish, osb_thick_in, rigid_r,
                                  mat_ext_finish, inside_film, outside_film)
 
     return if surfaces.empty?
@@ -355,8 +351,8 @@ class Constructions
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_cavity, mat_gap], 'WallStudAndCavity')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if not mat_int_finish.nil?
+      constr.add_layer(mat_int_finish)
     end
     constr.add_layer(inside_film)
 
@@ -366,7 +362,7 @@ class Constructions
 
   def self.apply_generic_layered_wall(runner, model, surfaces, wall, constr_name,
                                       thick_ins, conds, denss, specheats,
-                                      drywall_thick_in, osb_thick_in, rigid_r,
+                                      mat_int_finish, osb_thick_in, rigid_r,
                                       mat_ext_finish, inside_film, outside_film)
 
     return if surfaces.empty?
@@ -421,8 +417,8 @@ class Constructions
     mats.each do |mat|
       constr.add_layer(mat)
     end
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if not mat_int_finish.nil?
+      constr.add_layer(mat_int_finish)
     end
     constr.add_layer(inside_film)
 
@@ -432,7 +428,7 @@ class Constructions
 
   def self.apply_rim_joist(runner, model, surfaces, rim_joist, constr_name,
                            cavity_r, install_grade, framing_factor,
-                           drywall_thick_in, osb_thick_in,
+                           mat_int_finish, osb_thick_in,
                            rigid_r, mat_ext_finish, inside_film,
                            outside_film)
 
@@ -478,8 +474,8 @@ class Constructions
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RimJoistStudAndCavity')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if not mat_int_finish.nil?
+      constr.add_layer(mat_int_finish)
     end
     constr.add_layer(inside_film)
 
@@ -558,7 +554,7 @@ class Constructions
 
   def self.apply_closed_cavity_roof(runner, model, surfaces, constr_name,
                                     cavity_r, install_grade, cavity_depth,
-                                    filled_cavity, framing_factor, drywall_thick_in,
+                                    filled_cavity, framing_factor, mat_int_finish,
                                     osb_thick_in, rigid_r, mat_roofing, has_radiant_barrier,
                                     inside_film, outside_film, radiant_barrier_grade)
 
@@ -610,8 +606,8 @@ class Constructions
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RoofStudAndCavity')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if not mat_int_finish.nil?
+      constr.add_layer(mat_int_finish)
     end
     if not mat_rb.nil?
       constr.add_layer(mat_rb)
@@ -625,9 +621,9 @@ class Constructions
   def self.apply_ceiling(runner, model, surfaces, constr_name,
                          cavity_r, install_grade, ins_thick_in,
                          framing_factor, joist_height_in,
-                         drywall_thick_in, inside_film, outside_film)
+                         mat_int_finish, inside_film, outside_film)
 
-    # Drywall below, open cavity above (e.g., attic floor)
+    # Interior finish below, open cavity above (e.g., attic floor)
 
     return if surfaces.empty?
 
@@ -664,8 +660,8 @@ class Constructions
       constr.add_layer(mat_addtl_ins)
     end
     constr.add_layer([mat_framing, mat_cavity, mat_gap], 'CeilingStudAndCavity')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if not mat_int_finish.nil?
+      constr.add_layer(mat_int_finish)
     end
     constr.add_layer(inside_film)
 
@@ -723,13 +719,14 @@ class Constructions
 
   def self.apply_foundation_wall(runner, model, wall_surfaces, wall_constr_name,
                                  ext_rigid_ins_offset, int_rigid_ins_offset, ext_rigid_ins_height,
-                                 int_rigid_ins_height, ext_rigid_r, int_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in, wall_height_above_grade)
+                                 int_rigid_ins_height, ext_rigid_r, int_rigid_r, wall_mat_int_finish,
+                                 wall_concrete_thick_in, wall_height_above_grade)
 
     # Create Kiva foundation
     foundation = apply_kiva_walled_foundation(model, ext_rigid_r, int_rigid_r, ext_rigid_ins_offset,
                                               int_rigid_ins_offset, ext_rigid_ins_height,
                                               int_rigid_ins_height, wall_height_above_grade,
-                                              wall_concrete_thick_in, wall_drywall_thick_in)
+                                              wall_concrete_thick_in, wall_mat_int_finish)
 
     # Define materials
     mat_concrete = Material.Concrete(wall_concrete_thick_in)
@@ -737,8 +734,8 @@ class Constructions
     # Define construction
     constr = Construction.new(wall_constr_name, [1])
     constr.add_layer(mat_concrete)
-    if wall_drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(wall_drywall_thick_in))
+    if not wall_mat_int_finish.nil?
+      constr.add_layer(wall_mat_int_finish)
     end
 
     # Create and assign construction to surfaces
@@ -839,7 +836,7 @@ class Constructions
     apply_window_skylight(runner, model, 'Skylight', subsurface, constr_name, ufactor, shgc)
   end
 
-  def self.apply_partition_walls(runner, model, constr_name, drywall_thick_in, frac_of_ffa,
+  def self.apply_partition_walls(runner, model, constr_name, mat_int_finish, frac_of_ffa,
                                  basement_frac_of_cfa, cond_base_surfaces, living_space)
 
     imdefs = []
@@ -867,7 +864,7 @@ class Constructions
 
     apply_wood_stud_wall(runner, model, imdefs, nil, constr_name,
                          0, 1, 3.5, false, 0.16,
-                         drywall_thick_in, 0, 0, nil, drywall_thick_in,
+                         mat_int_finish, 0, 0, mat_int_finish,
                          Material.AirFilmVertical,
                          Material.AirFilmVertical)
   end
@@ -1072,7 +1069,7 @@ class Constructions
 
   def self.apply_kiva_walled_foundation(model, ext_vert_r, int_vert_r,
                                         ext_vert_offset, int_vert_offset, ext_vert_depth, int_vert_depth,
-                                        wall_height_above_grade, wall_concrete_thick_in, wall_drywall_thick_in)
+                                        wall_height_above_grade, wall_concrete_thick_in, wall_mat_int_finish)
 
     # Create the Foundation:Kiva object for crawl/basement foundations
     foundation = OpenStudio::Model::FoundationKiva.new(model)
@@ -1091,7 +1088,7 @@ class Constructions
       ext_vert_mat = create_insulation_material(model, 'FoundationExtVertIns', ext_vert_r)
       foundation.addCustomBlock(ext_vert_mat,
                                 UnitConversions.convert(ext_vert_depth, 'ft', 'm'),
-                                UnitConversions.convert(wall_concrete_thick_in + wall_drywall_thick_in, 'in', 'm'),
+                                UnitConversions.convert(wall_concrete_thick_in + wall_mat_int_finish.thick_in, 'in', 'm'),
                                 UnitConversions.convert(ext_vert_offset, 'ft', 'm'))
     end
 
@@ -1234,8 +1231,8 @@ class Constructions
   def self.calc_non_cavity_r(film_r, constr_set)
     # Calculate R-value for all non-cavity layers
     non_cavity_r = film_r
-    if not constr_set.exterior_material.nil?
-      non_cavity_r += constr_set.exterior_material.rvalue
+    if not constr_set.mat_ext_finish.nil?
+      non_cavity_r += constr_set.mat_ext_finish.rvalue
     end
     if not constr_set.rigid_r.nil?
       non_cavity_r += constr_set.rigid_r
@@ -1243,14 +1240,14 @@ class Constructions
     if not constr_set.osb_thick_in.nil?
       non_cavity_r += Material.Plywood(constr_set.osb_thick_in).rvalue
     end
-    if not constr_set.drywall_thick_in.nil?
-      non_cavity_r += Material.GypsumWall(constr_set.drywall_thick_in).rvalue
+    if not constr_set.mat_int_finish.nil?
+      non_cavity_r += constr_set.mat_int_finish.rvalue
     end
     return non_cavity_r
   end
 
   def self.apply_wall_construction(runner, model, surfaces, wall, wall_id, wall_type, assembly_r,
-                                   drywall_thick_in, inside_film, outside_film, mat_ext_finish)
+                                   mat_int_finish, inside_film, outside_film, mat_ext_finish)
 
     film_r = inside_film.rvalue + outside_film.rvalue
     if mat_ext_finish.nil?
@@ -1264,47 +1261,47 @@ class Constructions
       cavity_filled = true
 
       constr_sets = [
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 20.0, 0.5, drywall_thick_in, mat_ext_finish), # 2x6, 24" o.c. + R20
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 10.0, 0.5, drywall_thick_in, mat_ext_finish), # 2x6, 24" o.c. + R10
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x6, 24" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.23, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x4, 16" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, fallback_mat_ext_finish),      # Fallback
+        WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 20.0, 0.5, mat_int_finish, mat_ext_finish), # 2x6, 24" o.c. + R20
+        WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 10.0, 0.5, mat_int_finish, mat_ext_finish), # 2x6, 24" o.c. + R10
+        WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 0.0, 0.5, mat_int_finish, mat_ext_finish),  # 2x6, 24" o.c.
+        WoodStudConstructionSet.new(Material.Stud2x4, 0.23, 0.0, 0.5, mat_int_finish, mat_ext_finish),  # 2x4, 16" o.c.
+        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, nil, fallback_mat_ext_finish),    # Fallback
       ]
       match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
       apply_wood_stud_wall(runner, model, surfaces, wall, "#{wall_id} construction",
                            cavity_r, install_grade, constr_set.stud.thick_in,
                            cavity_filled, constr_set.framing_factor,
-                           constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                           constr_set.rigid_r, constr_set.exterior_material,
-                           0, inside_film, outside_film)
+                           constr_set.mat_int_finish, constr_set.osb_thick_in,
+                           constr_set.rigid_r, constr_set.mat_ext_finish,
+                           inside_film, outside_film)
     elsif wall_type == HPXML::WallTypeSteelStud
       install_grade = 1
       cavity_filled = true
       corr_factor = 0.45
 
       constr_sets = [
-        SteelStudConstructionSet.new(5.5, corr_factor, 0.20, 10.0, 0.5, drywall_thick_in, mat_ext_finish), # 2x6, 24" o.c. + R20
-        SteelStudConstructionSet.new(5.5, corr_factor, 0.20, 10.0, 0.5, drywall_thick_in, mat_ext_finish), # 2x6, 24" o.c. + R10
-        SteelStudConstructionSet.new(5.5, corr_factor, 0.20, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x6, 24" o.c.
-        SteelStudConstructionSet.new(3.5, corr_factor, 0.23, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x4, 16" o.c.
-        SteelStudConstructionSet.new(3.5, 1.0, 0.01, 0.0, 0.0, 0.0, fallback_mat_ext_finish),              # Fallback
+        SteelStudConstructionSet.new(5.5, corr_factor, 0.20, 10.0, 0.5, mat_int_finish, mat_ext_finish), # 2x6, 24" o.c. + R20
+        SteelStudConstructionSet.new(5.5, corr_factor, 0.20, 10.0, 0.5, mat_int_finish, mat_ext_finish), # 2x6, 24" o.c. + R10
+        SteelStudConstructionSet.new(5.5, corr_factor, 0.20, 0.0, 0.5, mat_int_finish, mat_ext_finish),  # 2x6, 24" o.c.
+        SteelStudConstructionSet.new(3.5, corr_factor, 0.23, 0.0, 0.5, mat_int_finish, mat_ext_finish),  # 2x4, 16" o.c.
+        SteelStudConstructionSet.new(3.5, 1.0, 0.01, 0.0, 0.0, nil, fallback_mat_ext_finish),            # Fallback
       ]
       match, constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
       apply_steel_stud_wall(runner, model, surfaces, wall, "#{wall_id} construction",
                             cavity_r, install_grade, constr_set.cavity_thick_in,
                             cavity_filled, constr_set.framing_factor,
-                            constr_set.corr_factor, constr_set.drywall_thick_in,
+                            constr_set.corr_factor, constr_set.mat_int_finish,
                             constr_set.osb_thick_in, constr_set.rigid_r,
-                            constr_set.exterior_material, inside_film, outside_film)
+                            constr_set.mat_ext_finish, inside_film, outside_film)
     elsif wall_type == HPXML::WallTypeDoubleWoodStud
       install_grade = 1
       is_staggered = false
 
       constr_sets = [
-        DoubleStudConstructionSet.new(Material.Stud2x4, 0.23, 24.0, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x4, 24" o.c.
-        DoubleStudConstructionSet.new(Material.Stud2x4, 0.01, 16.0, 0.0, 0.0, 0.0, fallback_mat_ext_finish),      # Fallback
+        DoubleStudConstructionSet.new(Material.Stud2x4, 0.23, 24.0, 0.0, 0.5, mat_int_finish, mat_ext_finish),  # 2x4, 24" o.c.
+        DoubleStudConstructionSet.new(Material.Stud2x4, 0.01, 16.0, 0.0, 0.0, nil, fallback_mat_ext_finish),    # Fallback
       ]
       match, constr_set, cavity_r = pick_double_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
@@ -1312,8 +1309,8 @@ class Constructions
                              cavity_r, install_grade, constr_set.stud.thick_in,
                              constr_set.stud.thick_in, constr_set.framing_factor,
                              constr_set.framing_spacing, is_staggered,
-                             constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                             constr_set.rigid_r, constr_set.exterior_material,
+                             constr_set.mat_int_finish, constr_set.osb_thick_in,
+                             constr_set.rigid_r, constr_set.mat_ext_finish,
                              inside_film, outside_film)
     elsif wall_type == HPXML::WallTypeCMU
       density = 119.0 # lb/ft^3
@@ -1322,8 +1319,8 @@ class Constructions
       furring_spacing = 0
 
       constr_sets = [
-        CMUConstructionSet.new(8.0, 1.4, 0.08, 0.5, drywall_thick_in, mat_ext_finish),  # 8" perlite-filled CMU
-        CMUConstructionSet.new(6.0, 5.29, 0.01, 0.0, 0.0, fallback_mat_ext_finish),     # Fallback (6" hollow CMU)
+        CMUConstructionSet.new(8.0, 1.4, 0.08, 0.5, mat_int_finish, mat_ext_finish),  # 8" perlite-filled CMU
+        CMUConstructionSet.new(6.0, 5.29, 0.01, 0.0, nil, fallback_mat_ext_finish),   # Fallback (6" hollow CMU)
       ]
       match, constr_set, rigid_r = pick_cmu_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
@@ -1331,42 +1328,42 @@ class Constructions
                      constr_set.thick_in, constr_set.cond_in, density,
                      constr_set.framing_factor, furring_r,
                      furring_cavity_depth_in, furring_spacing,
-                     constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                     rigid_r, constr_set.exterior_material, inside_film,
+                     constr_set.mat_int_finish, constr_set.osb_thick_in,
+                     rigid_r, constr_set.mat_ext_finish, inside_film,
                      outside_film)
     elsif wall_type == HPXML::WallTypeSIP
       sheathing_thick_in = 0.44
 
       constr_sets = [
-        SIPConstructionSet.new(10.0, 0.16, 0.0, sheathing_thick_in, 0.5, drywall_thick_in, mat_ext_finish), # 10" SIP core
-        SIPConstructionSet.new(5.0, 0.16, 0.0, sheathing_thick_in, 0.5, drywall_thick_in, mat_ext_finish),  # 5" SIP core
-        SIPConstructionSet.new(1.0, 0.01, 0.0, sheathing_thick_in, 0.0, 0.0, fallback_mat_ext_finish),      # Fallback
+        SIPConstructionSet.new(10.0, 0.16, 0.0, sheathing_thick_in, 0.5, mat_int_finish, mat_ext_finish), # 10" SIP core
+        SIPConstructionSet.new(5.0, 0.16, 0.0, sheathing_thick_in, 0.5, mat_int_finish, mat_ext_finish),  # 5" SIP core
+        SIPConstructionSet.new(1.0, 0.01, 0.0, sheathing_thick_in, 0.0, nil, fallback_mat_ext_finish),    # Fallback
       ]
       match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
       apply_sip_wall(runner, model, surfaces, wall, "#{wall_id} construction",
                      cavity_r, constr_set.thick_in, constr_set.framing_factor,
-                     constr_set.sheath_thick_in, constr_set.drywall_thick_in,
+                     constr_set.sheath_thick_in, constr_set.mat_int_finish,
                      constr_set.osb_thick_in, constr_set.rigid_r,
-                     constr_set.exterior_material, inside_film, outside_film)
+                     constr_set.mat_ext_finish, inside_film, outside_film)
     elsif wall_type == HPXML::WallTypeICF
       constr_sets = [
-        ICFConstructionSet.new(2.0, 4.0, 0.08, 0.0, 0.5, drywall_thick_in, mat_ext_finish), # ICF w/4" concrete and 2" rigid ins layers
-        ICFConstructionSet.new(1.0, 1.0, 0.01, 0.0, 0.0, 0.0, fallback_mat_ext_finish),     # Fallback
+        ICFConstructionSet.new(2.0, 4.0, 0.08, 0.0, 0.5, mat_int_finish, mat_ext_finish), # ICF w/4" concrete and 2" rigid ins layers
+        ICFConstructionSet.new(1.0, 1.0, 0.01, 0.0, 0.0, nil, fallback_mat_ext_finish),   # Fallback
       ]
       match, constr_set, icf_r = pick_icf_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
       apply_icf_wall(runner, model, surfaces, wall, "#{wall_id} construction",
                      icf_r, constr_set.ins_thick_in,
                      constr_set.concrete_thick_in, constr_set.framing_factor,
-                     constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                     constr_set.rigid_r, constr_set.exterior_material,
+                     constr_set.mat_int_finish, constr_set.osb_thick_in,
+                     constr_set.rigid_r, constr_set.mat_ext_finish,
                      inside_film, outside_film)
     elsif [HPXML::WallTypeConcrete, HPXML::WallTypeBrick, HPXML::WallTypeAdobe, HPXML::WallTypeStrawBale, HPXML::WallTypeStone, HPXML::WallTypeLog].include? wall_type
       constr_sets = [
-        GenericConstructionSet.new(10.0, 0.5, drywall_thick_in, mat_ext_finish), # w/R-10 rigid
-        GenericConstructionSet.new(0.0, 0.5, drywall_thick_in, mat_ext_finish),  # Standard
-        GenericConstructionSet.new(0.0, 0.0, 0.0, fallback_mat_ext_finish),      # Fallback
+        GenericConstructionSet.new(10.0, 0.5, mat_int_finish, mat_ext_finish), # w/R-10 rigid
+        GenericConstructionSet.new(0.0, 0.5, mat_int_finish, mat_ext_finish),  # Standard
+        GenericConstructionSet.new(0.0, 0.0, nil, fallback_mat_ext_finish),    # Fallback
       ]
       match, constr_set, layer_r = pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
@@ -1400,8 +1397,8 @@ class Constructions
 
       apply_generic_layered_wall(runner, model, surfaces, wall, "#{wall_id} construction",
                                  thick_ins, conds, denss, specheats,
-                                 constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                                 constr_set.rigid_r, constr_set.exterior_material,
+                                 constr_set.mat_int_finish, constr_set.osb_thick_in,
+                                 constr_set.rigid_r, constr_set.mat_ext_finish,
                                  inside_film, outside_film)
     else
       fail "Unexpected wall type '#{wall_type}'."
@@ -1937,88 +1934,88 @@ class Construction
 end
 
 class WoodStudConstructionSet
-  def initialize(stud, framing_factor, rigid_r, osb_thick_in, drywall_thick_in, exterior_material)
+  def initialize(stud, framing_factor, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @stud = stud
     @framing_factor = framing_factor
     @rigid_r = rigid_r
     @osb_thick_in = osb_thick_in
-    @drywall_thick_in = drywall_thick_in
-    @exterior_material = exterior_material
+    @mat_int_finish = mat_int_finish
+    @mat_ext_finish = mat_ext_finish
   end
-  attr_accessor(:stud, :framing_factor, :rigid_r, :osb_thick_in, :drywall_thick_in, :exterior_material)
+  attr_accessor(:stud, :framing_factor, :rigid_r, :osb_thick_in, :mat_int_finish, :mat_ext_finish)
 end
 
 class SteelStudConstructionSet
-  def initialize(cavity_thick_in, corr_factor, framing_factor, rigid_r, osb_thick_in, drywall_thick_in, exterior_material)
+  def initialize(cavity_thick_in, corr_factor, framing_factor, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @cavity_thick_in = cavity_thick_in
     @corr_factor = corr_factor
     @framing_factor = framing_factor
     @rigid_r = rigid_r
     @osb_thick_in = osb_thick_in
-    @drywall_thick_in = drywall_thick_in
-    @exterior_material = exterior_material
+    @mat_int_finish = mat_int_finish
+    @mat_ext_finish = mat_ext_finish
   end
-  attr_accessor(:cavity_thick_in, :corr_factor, :framing_factor, :rigid_r, :osb_thick_in, :drywall_thick_in, :exterior_material)
+  attr_accessor(:cavity_thick_in, :corr_factor, :framing_factor, :rigid_r, :osb_thick_in, :mat_int_finish, :mat_ext_finish)
 end
 
 class DoubleStudConstructionSet
-  def initialize(stud, framing_factor, framing_spacing, rigid_r, osb_thick_in, drywall_thick_in, exterior_material)
+  def initialize(stud, framing_factor, framing_spacing, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @stud = stud
     @framing_factor = framing_factor
     @framing_spacing = framing_spacing
     @rigid_r = rigid_r
     @osb_thick_in = osb_thick_in
-    @drywall_thick_in = drywall_thick_in
-    @exterior_material = exterior_material
+    @mat_int_finish = mat_int_finish
+    @mat_ext_finish = mat_ext_finish
   end
-  attr_accessor(:stud, :framing_factor, :framing_spacing, :rigid_r, :osb_thick_in, :drywall_thick_in, :exterior_material)
+  attr_accessor(:stud, :framing_factor, :framing_spacing, :rigid_r, :osb_thick_in, :mat_int_finish, :mat_ext_finish)
 end
 
 class SIPConstructionSet
-  def initialize(thick_in, framing_factor, rigid_r, sheath_thick_in, osb_thick_in, drywall_thick_in, exterior_material)
+  def initialize(thick_in, framing_factor, rigid_r, sheath_thick_in, osb_thick_in, mat_int_finish, mat_ext_finish)
     @thick_in = thick_in
     @framing_factor = framing_factor
     @rigid_r = rigid_r
     @sheath_thick_in = sheath_thick_in
     @osb_thick_in = osb_thick_in
-    @drywall_thick_in = drywall_thick_in
-    @exterior_material = exterior_material
+    @mat_int_finish = mat_int_finish
+    @mat_ext_finish = mat_ext_finish
   end
-  attr_accessor(:thick_in, :framing_factor, :rigid_r, :sheath_thick_in, :osb_thick_in, :drywall_thick_in, :exterior_material)
+  attr_accessor(:thick_in, :framing_factor, :rigid_r, :sheath_thick_in, :osb_thick_in, :mat_int_finish, :mat_ext_finish)
 end
 
 class CMUConstructionSet
-  def initialize(thick_in, cond_in, framing_factor, osb_thick_in, drywall_thick_in, exterior_material)
+  def initialize(thick_in, cond_in, framing_factor, osb_thick_in, mat_int_finish, mat_ext_finish)
     @thick_in = thick_in
     @cond_in = cond_in
     @framing_factor = framing_factor
     @osb_thick_in = osb_thick_in
-    @drywall_thick_in = drywall_thick_in
-    @exterior_material = exterior_material
+    @mat_int_finish = mat_int_finish
+    @mat_ext_finish = mat_ext_finish
     @rigid_r = nil # solved for
   end
-  attr_accessor(:thick_in, :cond_in, :framing_factor, :rigid_r, :osb_thick_in, :drywall_thick_in, :exterior_material)
+  attr_accessor(:thick_in, :cond_in, :framing_factor, :rigid_r, :osb_thick_in, :mat_int_finish, :mat_ext_finish)
 end
 
 class ICFConstructionSet
-  def initialize(ins_thick_in, concrete_thick_in, framing_factor, rigid_r, osb_thick_in, drywall_thick_in, exterior_material)
+  def initialize(ins_thick_in, concrete_thick_in, framing_factor, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @ins_thick_in = ins_thick_in
     @concrete_thick_in = concrete_thick_in
     @framing_factor = framing_factor
     @rigid_r = rigid_r
     @osb_thick_in = osb_thick_in
-    @drywall_thick_in = drywall_thick_in
-    @exterior_material = exterior_material
+    @mat_int_finish = mat_int_finish
+    @mat_ext_finish = mat_ext_finish
   end
-  attr_accessor(:ins_thick_in, :concrete_thick_in, :framing_factor, :rigid_r, :osb_thick_in, :drywall_thick_in, :exterior_material)
+  attr_accessor(:ins_thick_in, :concrete_thick_in, :framing_factor, :rigid_r, :osb_thick_in, :mat_int_finish, :mat_ext_finish)
 end
 
 class GenericConstructionSet
-  def initialize(rigid_r, osb_thick_in, drywall_thick_in, exterior_material)
+  def initialize(rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @rigid_r = rigid_r
     @osb_thick_in = osb_thick_in
-    @drywall_thick_in = drywall_thick_in
-    @exterior_material = exterior_material
+    @mat_int_finish = mat_int_finish
+    @mat_ext_finish = mat_ext_finish
   end
-  attr_accessor(:rigid_r, :osb_thick_in, :drywall_thick_in, :exterior_material)
+  attr_accessor(:rigid_r, :osb_thick_in, :mat_int_finish, :mat_ext_finish)
 end
