@@ -96,7 +96,7 @@
           <Roof>
             <SystemIdentifier id='Roof'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>1510.0</Area>
+            <Area>1509.3</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -288,14 +288,14 @@
           <Door>
             <SystemIdentifier id='DoorNorth'/>
             <AttachedToWall idref='Wall'/>
-            <Area>40.0</Area>
+            <Area>20.0</Area>
             <Azimuth>0</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='DoorSouth'/>
             <AttachedToWall idref='Wall'/>
-            <Area>40.0</Area>
+            <Area>20.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
           </Door>
@@ -304,43 +304,52 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <HeatPump>
-              <SystemIdentifier id='HeatPump'/>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <HeatPumpType>ground-to-air</HeatPumpType>
-              <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingSystemType>
+                <Furnace/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
               <HeatingCapacity>36000.0</HeatingCapacity>
-              <CoolingCapacity>36000.0</CoolingCapacity>
-              <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
-              <BackupSystemFuel>electricity</BackupSystemFuel>
-              <BackupAnnualHeatingEfficiency>
-                <Units>Percent</Units>
-                <Value>1.0</Value>
-              </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>36000.0</BackupHeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>AFUE</Units>
+                <Value>0.92</Value>
+              </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+            </HeatingSystem>
+            <CoolingSystem>
+              <SystemIdentifier id='CoolingSystem'/>
+              <DistributionSystem idref='HVACDistribution'/>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
+              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity>24000.0</CoolingCapacity>
+              <CompressorType>single stage</CompressorType>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
-                <Units>EER</Units>
-                <Value>16.6</Value>
+                <Units>SEER</Units>
+                <Value>13.0</Value>
               </AnnualCoolingEfficiency>
-              <AnnualHeatingEfficiency>
-                <Units>COP</Units>
-                <Value>3.6</Value>
-              </AnnualHeatingEfficiency>
-              <extension>
-                <AirflowDefectRatio>-0.25</AirflowDefectRatio>
-                <ChargeDefectRatio>0.0</ChargeDefectRatio>
-                <FanPowerWattsPerCFM>0.365</FanPowerWattsPerCFM>
-                <PumpPowerWattsPerTon>30.0</PumpPowerWattsPerTon>
-              </extension>
-            </HeatPump>
+              <SensibleHeatFraction>0.73</SensibleHeatFraction>
+            </CoolingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>
             <ControlType>manual thermostat</ControlType>
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
+            <HeatingSeason>
+              <BeginMonth>10</BeginMonth>
+              <BeginDayOfMonth>1</BeginDayOfMonth>
+              <EndMonth>5</EndMonth>
+              <EndDayOfMonth>31</EndDayOfMonth>
+            </HeatingSeason>
+            <CoolingSeason>
+              <BeginMonth>7</BeginMonth>
+              <BeginDayOfMonth>1</BeginDayOfMonth>
+              <EndMonth>9</EndMonth>
+              <EndDayOfMonth>30</EndDayOfMonth>
+            </CoolingSeason>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution'/>

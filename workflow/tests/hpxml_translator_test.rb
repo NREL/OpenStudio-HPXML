@@ -34,6 +34,7 @@ class HPXMLTest < MiniTest::Test
     all_results = {}
     all_sizing_results = {}
     Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
+      _test_schema_validation(xml)
       xml_name = File.basename(xml)
       all_results[xml_name], all_sizing_results[xml_name] = _run_xml(xml, Parallel.worker_number)
     end
@@ -85,6 +86,7 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? osm_path)
     hpxml_defaults_path = File.join(File.dirname(xml), 'run', 'in.xml')
     assert(File.exist? hpxml_defaults_path)
+    _test_schema_validation(hpxml_defaults_path)
   end
 
   def test_run_simulation_epjson_input
@@ -248,6 +250,7 @@ class HPXMLTest < MiniTest::Test
                                                             'Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1.'],
                             'hvac-inconsistent-fan-powers.xml' => ["Fan powers for heating system 'HeatingSystem' and cooling system 'CoolingSystem' are attached to a single distribution system and therefore must be the same."],
                             'hvac-invalid-distribution-system-type.xml' => ["Incorrect HVAC distribution system type for HVAC type: 'Furnace'. Should be one of: ["],
+                            'hvac-seasons-less-than-a-year.xml' => ['HeatingSeason and CoolingSeason, when combined, must span the entire year.'],
                             'hvac-shared-negative-seer-eq.xml' => ["Negative SEER equivalent calculated for cooling system 'CoolingSystem', double check inputs."],
                             'invalid-assembly-effective-rvalue.xml' => ['Expected AssemblyEffectiveRValue to be greater than 0 [context: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation, id: "WallInsulation"]'],
                             'invalid-datatype-boolean.xml' => ["Cannot convert 'FOOBAR' to boolean for Roof/RadiantBarrier."],
@@ -306,7 +309,6 @@ class HPXMLTest < MiniTest::Test
                             'multiple-shared-heating-systems.xml' => ['More than one shared heating system found.'],
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for surface 'Wall'."],
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for surface 'Roof'."],
-                            'num-bedrooms-exceeds-limit.xml' => ['Expected NumberofBedrooms to be less than or equal to (ConditionedFloorArea-120)/70 [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]'],
                             'orphaned-hvac-distribution.xml' => ["Distribution system 'HVACDistribution' found but no HVAC system attached to it."],
                             'refrigerator-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'refrigerators-multiple-primary.xml' => ['More than one refrigerator designated as the primary.'],
@@ -330,7 +332,7 @@ class HPXMLTest < MiniTest::Test
 
     # Test simulations
     xmls = Dir["#{sample_files_dir}/invalid_files/*.xml"].sort
-    Parallel.map(xmls, in_threads: 1) do |xml|
+    Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
       _run_xml(File.absolute_path(xml), Parallel.worker_number, true, expected_error_msgs[File.basename(xml)])
     end
   end
@@ -519,6 +521,17 @@ class HPXMLTest < MiniTest::Test
     return results
   end
 
+  def _test_schema_validation(xml)
+    # TODO: Remove this when schema validation is included with CLI calls
+    schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources'))
+    hpxml_doc = XMLHelper.parse_file(xml)
+    errors = XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), nil)
+    if errors.size > 0
+      puts "#{xml}: #{errors}"
+    end
+    assert_equal(0, errors.size)
+  end
+
   def _verify_outputs(rundir, hpxml_path, results, hpxml)
     sql_path = File.join(rundir, 'eplusout.sql')
     assert(File.exist? sql_path)
@@ -614,6 +627,10 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
       next if err_line.include? 'Air-cooled condenser inlet dry-bulb temperature below 0 C.'
       next if err_line.include? 'Low condenser dry-bulb temperature error continues.'
+      next if err_line.include? 'Coil control failed to converge for AirLoopHVAC:UnitarySystem'
+      next if err_line.include? 'Coil control failed for AirLoopHVAC:UnitarySystem'
+      next if err_line.include? 'sensible part-load ratio out of range error continues'
+      next if err_line.include? 'Iteration limit exceeded in calculating sensible part-load ratio error continues'
 
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
