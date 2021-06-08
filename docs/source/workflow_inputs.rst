@@ -365,7 +365,7 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
   .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
-  .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", or "aluminum siding".
+  .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", "aluminum siding", or "none".
   .. [#] Color choices are "light", "medium", "medium dark", "dark", or "reflective".
   .. [#] If SolarAbsorptance not provided, defaults based on Color:
 
@@ -404,7 +404,7 @@ Each wall that has no contact with the ground and bounds a space type is entered
          See :ref:`hpxmllocations` for descriptions.
   .. [#] WallType child element choices are ``WoodStud``, ``DoubleWoodStud``, ``ConcreteMasonryUnit``, ``StructurallyInsulatedPanel``, ``InsulatedConcreteForms``, ``SteelFrame``, ``SolidConcrete``, ``StructuralBrick``, ``StrawBale``, ``Stone``, ``LogWall``, or ``Adobe``.
   .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
-  .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", or "aluminum siding".
+  .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", "aluminum siding", or "none".
   .. [#] Color choices are "light", "medium", "medium dark", "dark", or "reflective".
   .. [#] If SolarAbsorptance not provided, defaults based on Color:
 
@@ -654,7 +654,7 @@ If electric resistance heating is specified, additional information is entered i
   ==================================================  ======  =====  ===========  ========  =======  ==========
   Element                                             Type    Units  Constraints  Required  Default  Notes
   ==================================================  ======  =====  ===========  ========  =======  ==========
-  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        Yes                Efficiency
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        No        1.0      Efficiency
   ==================================================  ======  =====  ===========  ========  =======  ==========
 
 Furnace
@@ -662,16 +662,17 @@ Furnace
 
 If a furnace is specified, additional information is entered in ``HeatingSystem``.
 
-  ===============================================  ======  =====  ===========  ========  =========  ================================================
-  Element                                          Type    Units  Constraints  Required  Default    Notes
-  ===============================================  ======  =====  ===========  ========  =========  ================================================
-  ``DistributionSystem``                           idref          See [#]_     Yes                  ID of attached distribution system
-  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``  double  frac   0 - 1        Yes                  Rated efficiency
-  ``extension/FanPowerWattsPerCFM``                double  W/cfm  >= 0         No        See [#]_   Fan power [#]_
-  ``extension/AirflowDefectRatio``                 double  frac   > -1         No        0.0        Deviation between design/installed airflows [#]_
-  ===============================================  ======  =====  ===========  ========  =========  ================================================
+  ====================================================================  =================  =========  ===============  ========  ========  ================================================
+  Element                                                               Type               Units      Constraints      Required  Default   Notes
+  ====================================================================  =================  =========  ===============  ========  ========  ================================================
+  ``DistributionSystem``                                                idref              See [#]_                    Yes                 ID of attached distribution system
+  ``AnnualHeatingEfficiency[Units="AFUE"]/Value`` or ``YearInstalled``  double or integer  frac or #  0 - 1 or > 1600  Yes       See [#]_  Rated efficiency or Year installed
+  ``extension/FanPowerWattsPerCFM``                                     double             W/cfm      >= 0             No        See [#]_  Fan efficiency at maximum airflow rate [#]_
+  ``extension/AirflowDefectRatio``                                      double             frac       > -1             No        0.0       Deviation between design/installed airflows [#]_
+  ====================================================================  =================  =========  ===============  ========  ========  ================================================
 
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity" or "gravity") or DSE.
+  .. [#] If AnnualHeatingEfficiency[Units="AFUE"]/Value not provided, defaults to 0.98 if FuelType is "electricity", else AFUE from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
   .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0 W/cfm if gravity distribution system, else 0.5 W/cfm if AFUE <= 0.9, else 0.375 W/cfm.
   .. [#] If there is a cooling system attached to the DistributionSystem, the heating and cooling systems cannot have different values for FanPowerWattsPerCFM.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
@@ -682,12 +683,14 @@ Wall/Floor Furnace
 
 If a wall furnace or floor furnace is specified, additional information is entered in ``HeatingSystem``.
 
-  ===============================================  ======  =====  ===========  ========  =======  ===================
-  Element                                          Type    Units  Constraints  Required  Default  Notes
-  ===============================================  ======  =====  ===========  ========  =======  ===================
-  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``  double  frac   0 - 1        Yes                Rated efficiency
-  ``extension/FanPowerWatts``                      double  W      >= 0         No        0        Fan power
-  ===============================================  ======  =====  ===========  ========  =======  ===================
+  ====================================================================  =================  =========  ===============  ========  ========  ==================================
+  Element                                                               Type               Units      Constraints      Required  Default   Notes
+  ====================================================================  =================  =========  ===============  ========  ========  ==================================
+  ``AnnualHeatingEfficiency[Units="AFUE"]/Value`` or ``YearInstalled``  double or integer  frac or #  0 - 1 or > 1600  Yes       See [#]_  Rated efficiency or Year installed
+  ``extension/FanPowerWatts``                                           double             W          >= 0             No        0         Fan power
+  ====================================================================  =================  =========  ===============  ========  ========  ==================================
+
+  .. [#] If AnnualHeatingEfficiency[Units="AFUE"]/Value not provided, defaults to 0.98 if FuelType is "electricity", else AFUE from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
 
 .. _hvac_heating_boiler:
 
@@ -696,17 +699,19 @@ Boiler
 
 If a boiler is specified, additional information is entered in ``HeatingSystem``.
 
-  ==========================================================================  ========  ======  ===========  ========  ========  =========================================
-  Element                                                                     Type      Units   Constraints  Required  Default   Notes
-  ==========================================================================  ========  ======  ===========  ========  ========  =========================================
-  ``IsSharedSystem``                                                          boolean                        No        false     Whether it serves multiple dwelling units
-  ``DistributionSystem``                                                      idref             See [#]_     Yes                 ID of attached distribution system
-  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``                             double    frac    0 - 1        Yes                 Rated efficiency
-  ==========================================================================  ========  ======  ===========  ========  ========  =========================================
+  ====================================================================  =================  =========  ===============  ========  ========  =========================================
+  Element                                                               Type               Units      Constraints      Required  Default   Notes
+  ====================================================================  =================  =========  ===============  ========  ========  =========================================
+  ``IsSharedSystem``                                                    boolean                       No               false               Whether it serves multiple dwelling units
+  ``DistributionSystem``                                                idref              See [#]_   Yes                                  ID of attached distribution system
+  ``AnnualHeatingEfficiency[Units="AFUE"]/Value`` or ``YearInstalled``  double or integer  frac or #  0 - 1 or > 1600  Yes       See [#]_  Rated efficiency or Year installed
+  ====================================================================  =================  =========  ===============  ========  ========  =========================================
 
   .. [#] For in-unit boilers, HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or DSE.
          For shared boilers, HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or AirDistribution (type: "fan coil").
          If the shared boiler has "water loop" distribution, a :ref:`hvac_heatpump_wlhp` must also be specified.
+  .. [#] If AnnualHeatingEfficiency[Units="AFUE"]/Value not provided, defaults to 0.98 if FuelType is "electricity", else AFUE from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
+         
 
 If an in-unit boiler if specified, additional information is entered in ``HeatingSystem``.
 
@@ -747,9 +752,11 @@ If a stove is specified, additional information is entered in ``HeatingSystem``.
   ==================================================  ======  =====  ===========  ========  =========  ===================
   Element                                             Type    Units  Constraints  Required  Default    Notes
   ==================================================  ======  =====  ===========  ========  =========  ===================
-  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        Yes                  Efficiency
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        No        See [#]_   Efficiency
   ``extension/FanPowerWatts``                         double  W      >= 0         No        40         Fan power
   ==================================================  ======  =====  ===========  ========  =========  ===================
+
+  .. [#] Defaulted to 1.0 if FuelType is "electricity", 0.60 if FuelType is "wood", 0.78 if FuelType is "wood pellets", otherwise 0.81.
 
 Portable/Fixed Heater
 ~~~~~~~~~~~~~~~~~~~~~
@@ -759,9 +766,11 @@ If a portable heater or fixed heater is specified, additional information is ent
   ==================================================  ======  =====  ===========  ========  =========  ===================
   Element                                             Type    Units  Constraints  Required  Default    Notes
   ==================================================  ======  =====  ===========  ========  =========  ===================
-  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        Yes                  Efficiency
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        No        See [#]_   Efficiency
   ``extension/FanPowerWatts``                         double  W      >= 0         No        0          Fan power
   ==================================================  ======  =====  ===========  ========  =========  ===================
+
+  .. [#] Defaulted to 1.0 if FuelType is "electricity", 0.60 if FuelType is "wood", 0.78 if FuelType is "wood pellets", otherwise 0.81.
 
 Fireplace
 ~~~~~~~~~
@@ -771,9 +780,11 @@ If a fireplace is specified, additional information is entered in ``HeatingSyste
   ==================================================  ======  =====  ===========  ========  =========  ===================
   Element                                             Type    Units  Constraints  Required  Default    Notes
   ==================================================  ======  =====  ===========  ========  =========  ===================
-  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        Yes                  Efficiency
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        No        See [#]_   Efficiency
   ``extension/FanPowerWatts``                         double  W      >= 0         No        0          Fan power
   ==================================================  ======  =====  ===========  ========  =========  ===================
+
+  .. [#] Defaulted to 1.0 if FuelType is "electricity", 0.60 if FuelType is "wood", 0.78 if FuelType is "wood pellets", otherwise 0.81.
 
 .. _hvac_cooling:
 
@@ -800,20 +811,21 @@ Central Air Conditioner
 
 If a central air conditioner is specified, additional information is entered in ``CoolingSystem``.
 
-  ===============================================  ========  ======  ===========  ========  =========  ================================================
-  Element                                          Type      Units   Constraints  Required  Default    Notes
-  ===============================================  ========  ======  ===========  ========  =========  ================================================
-  ``DistributionSystem``                           idref             See [#]_     Yes                  ID of attached distribution system
-  ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  > 0          Yes                  Rated efficiency
-  ``CoolingCapacity``                              double    Btu/hr  >= 0         No        autosized  Cooling capacity
-  ``SensibleHeatFraction``                         double    frac    0 - 1        No                   Sensible heat fraction
-  ``CompressorType``                               string            See [#]_     No        See [#]_   Type of compressor
-  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan power [#]_
-  ``extension/AirflowDefectRatio``                 double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
-  ``extension/ChargeDefectRatio``                  double    frac    > -1         No        0.0        Deviation between design/installed charges [#]_
-  ===============================================  ========  ======  ===========  ========  =========  ================================================
+  ====================================================================  =================  ===========  ===============  ========  =========  ================================================
+  Element                                                               Type               Units        Constraints      Required  Default    Notes
+  ====================================================================  =================  ===========  ===============  ========  =========  ================================================
+  ``DistributionSystem``                                                idref              See [#]_     Yes                                   ID of attached distribution system
+  ``AnnualCoolingEfficiency[Units="SEER"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600    Yes       See [#]_   Rated efficiency or Year installed
+  ``CoolingCapacity``                                                   double             Btu/hr       >= 0             No        autosized  Cooling capacity
+  ``SensibleHeatFraction``                                              double             frac         0 - 1            No                   Sensible heat fraction
+  ``CompressorType``                                                    string                          See [#]_         No        See [#]_   Type of compressor
+  ``extension/FanPowerWattsPerCFM``                                     double             W/cfm        >= 0             No        See [#]_   Fan efficiency at maximum airflow rate [#]_
+  ``extension/AirflowDefectRatio``                                      double             frac         > -1             No        0.0        Deviation between design/installed airflows [#]_
+  ``extension/ChargeDefectRatio``                                       double             frac         > -1             No        0.0        Deviation between design/installed charges [#]_
+  ====================================================================  =================  ===========  ===============  ========  =========  ================================================
 
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
+  .. [#] If AnnualCoolingEfficiency[Units="SEER"]/Value not provided, defaults to SEER from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
   .. [#] CompressorType choices are "single stage", "two stage", or "variable speed".
   .. [#] If CompressorType not provided, defaults to "single stage" if SEER <= 15, else "two stage" if SEER <= 21, else "variable speed".
   .. [#] If FanPowerWattsPerCFM not provided, defaults to using attached furnace W/cfm if available, else 0.5 W/cfm if SEER <= 13.5, else 0.375 W/cfm.
@@ -821,6 +833,7 @@ If a central air conditioner is specified, additional information is entered in 
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
+         A non-zero charge defect should typically only be applied for systems that are pre-charged on site.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
 
 Room Air Conditioner
@@ -828,13 +841,15 @@ Room Air Conditioner
 
 If a room air conditioner is specified, additional information is entered in ``CoolingSystem``.
 
-  ==============================================  ========  ======  ===========  ========  =========  ======================
-  Element                                         Type      Units   Constraints  Required  Default    Notes
-  ==============================================  ========  ======  ===========  ========  =========  ======================
-  ``AnnualCoolingEfficiency[Units="EER"]/Value``  double    Btu/Wh  > 0          Yes                  Rated efficiency
-  ``CoolingCapacity``                             double    Btu/hr  >= 0         No        autosized  Cooling capacity
-  ``SensibleHeatFraction``                        double    frac    0 - 1        No                   Sensible heat fraction
-  ==============================================  ========  ======  ===========  ========  =========  ======================
+  ===================================================================================  =================  ===========  ===============  ========  =========  ==================================
+  Element                                                                              Type               Units        Constraints      Required  Default    Notes
+  ===================================================================================  =================  ===========  ===============  ========  =========  ==================================
+  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600    Yes       See [#]_   Rated efficiency or Year installed
+  ``CoolingCapacity``                                                                  double             Btu/hr       >= 0             No        autosized  Cooling capacity
+  ``SensibleHeatFraction``                                                             double             frac         0 - 1            No                   Sensible heat fraction
+  ===================================================================================  =================  ===========  ===============  ========  =========  ==================================
+
+  .. [#] If AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value not provided, defaults to EER from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
 
 Evaporative Cooler
 ~~~~~~~~~~~~~~~~~~
@@ -862,23 +877,18 @@ If a mini-split is specified, additional information is entered in ``CoolingSyst
   ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  > 0          Yes                  Rated cooling efficiency
   ``CoolingCapacity``                              double    Btu/hr  >= 0         No        autosized  Cooling capacity
   ``SensibleHeatFraction``                         double    frac    0 - 1        No                   Sensible heat fraction
+  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan efficiency at maximum airflow rate
+  ``extension/AirflowDefectRatio``                 double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                  double    frac    > -1         No        0.0        Deviation between design/installed charges [#]_
   ===============================================  ========  ======  ===========  ========  =========  ===============================================
 
   .. [#] If provided, HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
-  .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
-         See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
-
-If a ducted mini-split is specified (i.e., a ``DistributionSystem`` has been entered), additional information is entered in ``CoolingSystem``.
-
-  =================================  ========  ======  ===========  ========  =========  ===============================================
-  Element                            Type      Units   Constraints  Required  Default    Notes
-  =================================  ========  ======  ===========  ========  =========  ===============================================
-  ``extension/FanPowerWattsPerCFM``  double    W/cfm   >= 0         No        0.18       Fan power
-  ``extension/AirflowDefectRatio``   double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
-  =================================  ========  ======  ===========  ========  =========  ===============================================
-
+  .. [#] FanPowerWattsPerCFM defaults to 0.07 W/cfm for ductless systems and 0.18 W/cfm for ducted systems.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
+         A non-zero airflow defect should typically only be applied for systems attached to ducts.
+         See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
+  .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
+         A non-zero charge defect should typically only be applied for systems that are pre-charged on site.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
 
 .. _hvac_cooling_chiller:
@@ -969,33 +979,36 @@ Air-to-Air Heat Pump
 
 If an air-to-air heat pump is specified, additional information is entered in ``HeatPump``.
 
-  ===============================================  ========  ======  ===========  ========  =========  ================================================
-  Element                                          Type      Units   Constraints  Required  Default    Notes
-  ===============================================  ========  ======  ===========  ========  =========  ================================================
-  ``DistributionSystem``                           idref             See [#]_     Yes                  ID of attached distribution system
-  ``CompressorType``                               string            See [#]_     No        See [#]_   Type of compressor
-  ``HeatingCapacity``                              double    Btu/hr  >= 0         No        autosized  Heating capacity (excluding any backup heating)
-  ``HeatingCapacity17F``                           double    Btu/hr  >= 0         No                   Heating capacity at 17F, if available
-  ``CoolingCapacity``                              double    Btu/hr  >= 0         No        autosized  Cooling capacity
-  ``CoolingSensibleHeatFraction``                  double    frac    0 - 1        No                   Sensible heat fraction
-  ``FractionHeatLoadServed``                       double    frac    0 - 1 [#]_   Yes                  Fraction of heating load served
-  ``FractionCoolLoadServed``                       double    frac    0 - 1 [#]_   Yes                  Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  > 0          Yes                  Rated cooling efficiency
-  ``AnnualHeatingEfficiency[Units="HSPF"]/Value``  double    Btu/Wh  > 0          Yes                  Rated heating efficiency
-  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan power
-  ``extension/AirflowDefectRatio``                 double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
-  ``extension/ChargeDefectRatio``                  double    frac    > -1         No        0.0        Deviation between design/installed charges [#]_
-  ===============================================  ========  ======  ===========  ========  =========  ================================================
+  ====================================================================  =================  ===========  ===============  ========  =========  =================================================
+  Element                                                               Type               Units        Constraints      Required  Default    Notes
+  ====================================================================  =================  ===========  ===============  ========  =========  =================================================
+  ``DistributionSystem``                                                idref                           See [#]_         Yes                  ID of attached distribution system
+  ``CompressorType``                                                    string                          See [#]_         No        See [#]_   Type of compressor
+  ``HeatingCapacity``                                                   double             Btu/hr       >= 0             No        autosized  Heating capacity (excluding any backup heating)
+  ``HeatingCapacity17F``                                                double             Btu/hr       >= 0             No                   Heating capacity at 17F, if available
+  ``CoolingCapacity``                                                   double             Btu/hr       >= 0             No        autosized  Cooling capacity
+  ``CoolingSensibleHeatFraction``                                       double             frac         0 - 1            No                   Sensible heat fraction
+  ``FractionHeatLoadServed``                                            double             frac         0 - 1 [#]_       Yes                  Fraction of heating load served
+  ``FractionCoolLoadServed``                                            double             frac         0 - 1 [#]_       Yes                  Fraction of cooling load served
+  ``AnnualCoolingEfficiency[Units="SEER"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600    Yes       See [#]_   Rated cooling efficiency or Year installed
+  ``AnnualHeatingEfficiency[Units="HSPF"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600    Yes       See [#]_   Rated heating efficiency or Year installed
+  ``extension/FanPowerWattsPerCFM``                                     double             W/cfm        >= 0             No        See [#]_   Fan efficiency at maximum airflow rate
+  ``extension/AirflowDefectRatio``                                      double             frac         > -1             No        0.0        Deviation between design/installed airflows [#]_
+  ``extension/ChargeDefectRatio``                                       double             frac         > -1             No        0.0        Deviation between design/installed charges [#]_
+  ====================================================================  =================  ===========  ===============  ========  =========  =================================================
 
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
   .. [#] CompressorType choices are "single stage", "two stage", or "variable speed".
   .. [#] If CompressorType not provided, defaults to "single stage" if SEER <= 15, else "two stage" if SEER <= 21, else "variable speed".
   .. [#] The sum of all ``FractionHeatLoadServed`` (across both HeatingSystems and HeatPumps) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
+  .. [#] If AnnualCoolingEfficiency[Units="SEER"]/Value not provided, defaults to SEER from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
+  .. [#] If AnnualHeatingEfficiency[Units="HSPF"]/Value not provided, defaults to HSPF from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
   .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0.5 W/cfm if HSPF <= 8.75, else 0.375 W/cfm.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
+         A non-zero charge defect should typically only be applied for systems that are pre-charged on site.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
 
 Mini-Split Heat Pump
@@ -1015,25 +1028,20 @@ If a mini-split heat pump is specified, additional information is entered in ``H
   ``FractionCoolLoadServed``                       double    frac    0 - 1 [#]_   Yes                  Fraction of cooling load served
   ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  > 0          Yes                  Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="HSPF"]/Value``  double    Btu/Wh  > 0          Yes                  Rated heating efficiency
+  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan efficiency at maximum airflow rate
+  ``extension/AirflowDefectRatio``                 double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                  double    frac    > -1         No        0.0        Deviation between design/installed charges [#]_
   ===============================================  ========  ======  ===========  ========  =========  ==============================================
 
   .. [#] If provided, HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across both HeatingSystems and HeatPumps) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
-  .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
-         See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
-
-If a ducted mini-split is specified (i.e., a ``DistributionSystem`` has been entered), additional information is entered in ``HeatPump``.
-
-  =================================  ========  ======  ===========  ========  =========  ===============================================
-  Element                            Type      Units   Constraints  Required  Default    Notes
-  =================================  ========  ======  ===========  ========  =========  ===============================================
-  ``extension/FanPowerWattsPerCFM``  double    W/cfm   >= 0         No        0.18       Fan power
-  ``extension/AirflowDefectRatio``   double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
-  =================================  ========  ======  ===========  ========  =========  ===============================================
-
+  .. [#] FanPowerWattsPerCFM defaults to 0.07 W/cfm for ductless systems and 0.18 W/cfm for ducted systems.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
+         A non-zero airflow defect should typically only be applied for systems attached to ducts.
+         See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
+  .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
+         A non-zero charge defect should typically only be applied for systems that are pre-charged on site.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
 
 Ground-to-Air Heat Pump
@@ -1056,9 +1064,9 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   ``NumberofUnitsServed``                          integer           > 0          See [#]_             Number of dwelling units served
   ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0         No        See [#]_   Pump power [#]_
   ``extension/SharedLoopWatts``                    double    W       >= 0         See [#]_             Shared pump power [#]_
-  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan power
+  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan efficiency at maximum airflow rate
   ``extension/AirflowDefectRatio``                 double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
-  ``extension/ChargeDefectRatio``                  double    frac    0.0 [#]_     No        0.0        Deviation between design/installed charges [#]_
+  ``extension/ChargeDefectRatio``                  double    frac    > -1         No        0.0        Deviation between design/installed charges [#]_
   ===============================================  ========  ======  ===========  ========  =========  ==============================================
 
   .. [#] IsSharedSystem should be true if the SFA/MF building has multiple ground source heat pumps connected to a shared hydronic circulation loop.
@@ -1074,8 +1082,8 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0.5 W/cfm if COP <= 8.75/3.2, else 0.375 W/cfm.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
-  .. [#] ChargeDefectRatio currently constrained to zero for ground-to-air heat pumps due to an EnergyPlus limitation; this constraint will be relaxed in the future.
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
+         A non-zero charge defect should typically only be applied for systems that are pre-charged on site.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
 
 .. _hvac_heatpump_wlhp:
@@ -1318,13 +1326,19 @@ If not entered, the simulation will not include mechanical ventilation.
   ``FanType``                              string             See [#]_     Yes                  Type of ventilation system
   ``TestedFlowRate`` or ``RatedFlowRate``  double    cfm      >= 0         Yes                  Flow rate [#]_
   ``HoursInOperation``                     double    hrs/day  0 - 24       No        See [#]_   Hours per day of operation
-  ``FanPower``                             double    W        >= 0         Yes                  Fan power
+  ``FanPower``                             double    W        >= 0         No        See [#]_   Fan power
   =======================================  ========  =======  ===========  ========  =========  =========================================
 
   .. [#] For central fan integrated supply systems, IsSharedSystem must be false.
   .. [#] FanType choices are "energy recovery ventilator", "heat recovery ventilator", "exhaust only", "supply only", "balanced", or "central fan integrated supply".
   .. [#] For a central fan integrated supply system, the flow rate should equal the amount of outdoor air provided to the distribution system.
   .. [#] If HoursInOperation not provided, defaults to 24 (i.e., running continuously) for all system types other than central fan integrated supply (CFIS), and 8.0 (i.e., running intermittently) for CFIS systems.
+  .. [#] If FanPower not provided, defaults based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+         
+         - "energy recovery ventilator", "heat recovery ventilator", or shared system: 1.0 W/cfm
+         - "balanced": 0.7 W/cfm
+         - "central fan integrated supply": 0.5 W/cfm
+         - "exhaust only" or "supply only": 0.35 W/cfm
 
 Exhaust/Supply Only
 ~~~~~~~~~~~~~~~~~~~
@@ -1498,21 +1512,22 @@ Conventional Storage
 
 If a conventional storage water heater is specified, additional information is entered in ``WaterHeatingSystem``.
 
-  =============================================  =======  ============  ===========  ========  ========  ==========================================
-  Element                                        Type     Units         Constraints  Required  Default   Notes
-  =============================================  =======  ============  ===========  ========  ========  ==========================================
-  ``FuelType``                                   string                 See [#]_     Yes                 Fuel type
-  ``TankVolume``                                 double   gal           > 0          No        See [#]_  Tank volume
-  ``HeatingCapacity``                            double   Btuh          > 0          No        See [#]_  Heating capacity
-  ``UniformEnergyFactor`` or ``EnergyFactor``    double   frac          < 1          Yes                 EnergyGuide label rated efficiency
-  ``FirstHourRating``                            double   gal/hr        > 0          See [#]_            EnergyGuide label first hour rating
-  ``RecoveryEfficiency``                         double   frac          0 - 1        No        See [#]_  Recovery efficiency
-  ``WaterHeaterInsulation/Jacket/JacketRValue``  double   F-ft2-hr/Btu  >= 0         No        0         R-value of additional tank insulation wrap
-  =============================================  =======  ============  ===========  ========  ========  ==========================================
+  ================================================================  =================  ============  =============  ========  ========  ====================================================
+  Element                                                           Type               Units         Constraints    Required  Default   Notes
+  ================================================================  =================  ============  =============  ========  ========  ====================================================
+  ``FuelType``                                                      string                           See [#]_       Yes                 Fuel type
+  ``TankVolume``                                                    double             gal           > 0            No        See [#]_  Tank volume
+  ``HeatingCapacity``                                               double             Btuh          > 0            No        See [#]_  Heating capacity
+  ``UniformEnergyFactor`` or ``EnergyFactor`` or ``YearInstalled``  double or integer  frac or #     < 1 or > 1600  Yes       See [#]_  EnergyGuide label rated efficiency or Year installed
+  ``FirstHourRating``                                               double             gal/hr        > 0            See [#]_            EnergyGuide label first hour rating
+  ``RecoveryEfficiency``                                            double             frac          0 - 1          No        See [#]_  Recovery efficiency
+  ``WaterHeaterInsulation/Jacket/JacketRValue``                     double             F-ft2-hr/Btu  >= 0           No        0         R-value of additional tank insulation wrap
+  ================================================================  =================  ============  =============  ========  ========  ====================================================
   
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
   .. [#] If TankVolume not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
   .. [#] If HeatingCapacity not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
+  .. [#] If UniformEnergyFactor and EnergyFactor not provided, defaults to EnergyFactor from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_water_heater_efficiency.csv`` based on YearInstalled.
   .. [#] FirstHourRating only required if UniformEnergyFactor provided.
   .. [#] If RecoveryEfficiency not provided, defaults as follows based on a regression analysis of `AHRI certified water heaters <https://www.ahridirectory.org/NewSearch?programId=24&searchTypeId=3>`_:
   
@@ -1906,7 +1921,7 @@ If not entered, the simulation will not include a clothes dryer.
   ``FuelType``                                  string           See [#]_     Yes                     Fuel type
   ``CombinedEnergyFactor`` or ``EnergyFactor``  double   lb/kWh  > 0          No        See [#]_      EnergyGuide label efficiency [#]_
   ``Vented``                                    boolean                       No        true          Whether dryer is vented
-  ``VentedFlowRate``                            double   cfm     >= 0         No        100 [#]_      Exhust flow rate during operation
+  ``VentedFlowRate``                            double   cfm     >= 0         No        100 [#]_      Exhaust flow rate during operation
   ``extension/UsageMultiplier``                 double           >= 0         No        1.0           Multiplier on energy use
   ============================================  =======  ======  ===========  ========  ============  ==============================================
 

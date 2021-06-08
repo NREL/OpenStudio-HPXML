@@ -853,7 +853,7 @@ class Waterheater
 
   def self.setup_hpwh_fan(hpwh, obj_name_hpwh, airflow_rate)
     fan_power = 0.0462 # W/cfm, Based on 1st gen AO Smith HPWH, could be updated but pretty minor impact
-    fan = hpwh.fan.to_FanOnOff.get
+    fan = hpwh.fan.to_FanOnOff.get # TOOD: Update reporting measure if this changes to FanSystemModel per https://github.com/NREL/OpenStudio/issues/4334
     fan.setName("#{obj_name_hpwh} fan")
     fan.setFanEfficiency(65.0 / fan_power * UnitConversions.convert(1.0, 'ft^3/min', 'm^3/s'))
     fan.setPressureRise(65.0)
@@ -1728,5 +1728,29 @@ class Waterheater
       solar_fraction = solar_thermal_system.solar_fraction
     end
     return solar_fraction.to_f
+  end
+
+  def self.get_default_water_heater_efficiency_by_year_installed(year, fuel_type)
+    fuel_primary_id = { EPlus::FuelTypeElectricity => 'electric',
+                        EPlus::FuelTypeNaturalGas => 'natural_gas',
+                        EPlus::FuelTypeOil => 'fuel_oil',
+                        EPlus::FuelTypeCoal => 'fuel_oil', # assumption
+                        EPlus::FuelTypeWoodCord => 'fuel_oil', # assumption
+                        EPlus::FuelTypeWoodPellets => 'fuel_oil', # assumption
+                        EPlus::FuelTypePropane => 'lpg' }[EPlus.fuel_type(fuel_type)]
+
+    value = nil
+    lookup_year = 0
+    CSV.foreach(File.join(File.dirname(__FILE__), 'lu_water_heater_efficiency.csv'), headers: true) do |row|
+      next unless row['fuel_primary_id'] == fuel_primary_id
+
+      row_year = Integer(row['year'])
+      if (row_year - year).abs <= (lookup_year - year).abs
+        lookup_year = row_year
+        value = Float(row['value'])
+      end
+    end
+
+    return value
   end
 end

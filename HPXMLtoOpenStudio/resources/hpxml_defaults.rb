@@ -428,6 +428,77 @@ class HPXMLDefaults
       HVAC.apply_shared_systems(hpxml)
     end
 
+    # HVAC efficiencies (based on HEScore assumption)
+    hpxml.heating_systems.each do |heating_system|
+      year_installed = heating_system.year_installed
+      heating_system_type = heating_system.heating_system_type
+      heating_system_fuel = heating_system.heating_system_fuel
+
+      if [HPXML::HVACTypeBoiler, HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace].include? heating_system_type
+        next unless heating_system.heating_efficiency_afue.nil?
+
+        if heating_system_fuel == HPXML::FuelTypeElectricity
+          heating_system.heating_efficiency_afue = 0.98
+        else
+          heating_system.heating_efficiency_afue = HVAC.get_default_hvac_efficiency_by_year_installed(year_installed, heating_system_type, heating_system_fuel, HPXML::UnitsAFUE)
+        end
+        heating_system.heating_efficiency_afue_isdefaulted = true
+      elsif [HPXML::HVACTypeElectricResistance].include? heating_system_type
+        next unless heating_system.heating_efficiency_percent.nil?
+
+        heating_system.heating_efficiency_percent = 1.0
+        heating_system.heating_efficiency_percent_isdefaulted = true
+      elsif [HPXML::HVACTypeStove, HPXML::HVACTypeFireplace, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFixedHeater].include? heating_system_type
+        next unless heating_system.heating_efficiency_percent.nil?
+
+        if heating_system_fuel == HPXML::FuelTypeElectricity
+          heating_system.heating_efficiency_percent = 1.0
+        elsif heating_system_fuel == HPXML::FuelTypeWoodCord
+          heating_system.heating_efficiency_percent = 0.60  # HEScore assumption
+        elsif heating_system_fuel == HPXML::FuelTypeWoodPellets
+          heating_system.heating_efficiency_percent = 0.78  # HEScore assumption
+        else
+          heating_system.heating_efficiency_percent = 0.81  # https://www.lopistoves.com/products/ and https://www.kozyheat.com/products/
+        end
+        heating_system.heating_efficiency_percent_isdefaulted = true
+      end
+    end
+
+    hpxml.cooling_systems.each do |cooling_system|
+      year_installed = cooling_system.year_installed
+      cooling_system_type = cooling_system.cooling_system_type
+      cooling_system_fuel = HPXML::FuelTypeElectricity
+
+      if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+        next unless cooling_system.cooling_efficiency_seer.nil?
+
+        cooling_system.cooling_efficiency_seer = HVAC.get_default_hvac_efficiency_by_year_installed(year_installed, cooling_system_type, cooling_system_fuel, HPXML::UnitsSEER)
+        cooling_system.cooling_efficiency_seer_isdefaulted = true
+      elsif cooling_system_type == HPXML::HVACTypeRoomAirConditioner
+        next unless cooling_system.cooling_efficiency_eer.nil? && cooling_system.cooling_efficiency_ceer.nil?
+
+        cooling_system.cooling_efficiency_eer = HVAC.get_default_hvac_efficiency_by_year_installed(year_installed, cooling_system_type, cooling_system_fuel, HPXML::UnitsEER)
+        cooling_system.cooling_efficiency_eer_isdefaulted = true
+      end
+    end
+
+    hpxml.heat_pumps.each do |heat_pump|
+      year_installed = heat_pump.year_installed
+      heat_pump_type = heat_pump.heat_pump_type
+      heat_pump_fuel = HPXML::FuelTypeElectricity
+
+      next unless [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump_type
+
+      if heat_pump.cooling_efficiency_seer.nil?
+        heat_pump.cooling_efficiency_seer = HVAC.get_default_hvac_efficiency_by_year_installed(year_installed, heat_pump_type, heat_pump_fuel, HPXML::UnitsSEER)
+        heat_pump.cooling_efficiency_seer_isdefaulted = true
+      end
+      if heat_pump.heating_efficiency_hspf.nil?
+        heat_pump.heating_efficiency_hspf = HVAC.get_default_hvac_efficiency_by_year_installed(year_installed, heat_pump_type, heat_pump_fuel, HPXML::UnitsHSPF)
+        heat_pump.heating_efficiency_hspf_isdefaulted = true
+      end
+    end
+
     # Default AC/HP compressor type
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.compressor_type.nil?
@@ -511,7 +582,6 @@ class HPXMLDefaults
 
       cooling_system.charge_defect_ratio = 0.0
       cooling_system.charge_defect_ratio_isdefaulted = true
-      cooling_system.charge_not_tested = nil
     end
     hpxml.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
@@ -521,7 +591,6 @@ class HPXMLDefaults
 
       heat_pump.charge_defect_ratio = 0.0
       heat_pump.charge_defect_ratio_isdefaulted = true
-      heat_pump.charge_not_tested = nil
     end
 
     # Airflow defect ratio
@@ -531,38 +600,30 @@ class HPXMLDefaults
 
       heating_system.airflow_defect_ratio = 0.0
       heating_system.airflow_defect_ratio_isdefaulted = true
-      heating_system.airflow_not_tested = nil
     end
     hpxml.cooling_systems.each do |cooling_system|
       next unless [HPXML::HVACTypeCentralAirConditioner,
                    HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
-      if cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner && cooling_system.distribution_system_idref.nil?
-        next # Ducted mini-splits only
-      end
       next unless cooling_system.airflow_defect_ratio.nil?
 
       cooling_system.airflow_defect_ratio = 0.0
       cooling_system.airflow_defect_ratio_isdefaulted = true
-      cooling_system.airflow_not_tested = nil
     end
     hpxml.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
                    HPXML::HVACTypeHeatPumpGroundToAir,
                    HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
-      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit && heat_pump.distribution_system_idref.nil?
-        next # Ducted mini-splits only
-      end
       next unless heat_pump.airflow_defect_ratio.nil?
 
       heat_pump.airflow_defect_ratio = 0.0
       heat_pump.airflow_defect_ratio_isdefaulted = true
-      heat_pump.airflow_not_tested = nil
     end
 
     # Fan power
     psc_watts_per_cfm = 0.5 # W/cfm, PSC fan
     ecm_watts_per_cfm = 0.375 # W/cfm, ECM fan
-    mini_split_ducted_watts_per_cfm = 0.18 # W/cfm, ducted mini split
+    mini_split_ductless_watts_per_cfm = 0.07 # W/cfm
+    mini_split_ducted_watts_per_cfm = 0.18 # W/cfm
     hpxml.heating_systems.each do |heating_system|
       if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
         if heating_system.fan_watts_per_cfm.nil?
@@ -574,7 +635,6 @@ class HPXMLDefaults
             heating_system.fan_watts_per_cfm = psc_watts_per_cfm
           end
           heating_system.fan_watts_per_cfm_isdefaulted = true
-          heating_system.fan_power_not_tested = nil
         end
       elsif [HPXML::HVACTypeStove].include? heating_system.heating_system_type
         if heating_system.fan_watts.nil?
@@ -598,7 +658,6 @@ class HPXMLDefaults
       if (not cooling_system.attached_heating_system.nil?) && (not cooling_system.attached_heating_system.fan_watts_per_cfm.nil?)
         cooling_system.fan_watts_per_cfm = cooling_system.attached_heating_system.fan_watts_per_cfm
         cooling_system.fan_watts_per_cfm_isdefaulted = true
-        cooling_system.fan_power_not_tested = nil
       elsif [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
         if cooling_system.cooling_efficiency_seer > 13.5 # HEScore assumption
           cooling_system.fan_watts_per_cfm = ecm_watts_per_cfm
@@ -606,13 +665,13 @@ class HPXMLDefaults
           cooling_system.fan_watts_per_cfm = psc_watts_per_cfm
         end
         cooling_system.fan_watts_per_cfm_isdefaulted = true
-        cooling_system.fan_power_not_tested = nil
       elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
         if not cooling_system.distribution_system.nil?
           cooling_system.fan_watts_per_cfm = mini_split_ducted_watts_per_cfm
+        else
+          cooling_system.fan_watts_per_cfm = mini_split_ductless_watts_per_cfm
         end
         cooling_system.fan_watts_per_cfm_isdefaulted = true
-        cooling_system.fan_power_not_tested = nil
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
         # Depends on airflow rate, so defaulted in hvac_sizing.rb
       end
@@ -627,7 +686,6 @@ class HPXMLDefaults
           heat_pump.fan_watts_per_cfm = psc_watts_per_cfm
         end
         heat_pump.fan_watts_per_cfm_isdefaulted = true
-        heat_pump.fan_power_not_tested = nil
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
         if heat_pump.heating_efficiency_cop > 8.75 / 3.2 # HEScore assumption
           heat_pump.fan_watts_per_cfm = ecm_watts_per_cfm
@@ -635,13 +693,13 @@ class HPXMLDefaults
           heat_pump.fan_watts_per_cfm = psc_watts_per_cfm
         end
         heat_pump.fan_watts_per_cfm_isdefaulted = true
-        heat_pump.fan_power_not_tested = nil
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
         if not heat_pump.distribution_system.nil?
           heat_pump.fan_watts_per_cfm = mini_split_ducted_watts_per_cfm
+        else
+          heat_pump.fan_watts_per_cfm = mini_split_ductless_watts_per_cfm
         end
         heat_pump.fan_watts_per_cfm_isdefaulted = true
-        heat_pump.fan_power_not_tested = nil
       end
     end
 
@@ -864,6 +922,10 @@ class HPXMLDefaults
         vent_fan.hours_in_operation = (vent_fan.fan_type == HPXML::MechVentTypeCFIS) ? 8.0 : 24.0
         vent_fan.hours_in_operation_isdefaulted = true
       end
+      if vent_fan.fan_power.nil?
+        flow_rate = [vent_fan.rated_flow_rate.to_f, vent_fan.tested_flow_rate.to_f].max
+        vent_fan.fan_power = flow_rate * Airflow.get_default_mech_vent_fan_power(vent_fan)
+      end
     end
 
     # Default kitchen fan
@@ -950,6 +1012,10 @@ class HPXMLDefaults
         if water_heating_system.tank_volume.nil?
           water_heating_system.tank_volume = Waterheater.get_default_tank_volume(water_heating_system.fuel_type, nbeds, hpxml.building_construction.number_of_bathrooms)
           water_heating_system.tank_volume_isdefaulted = true
+        end
+        if water_heating_system.energy_factor.nil? && water_heating_system.uniform_energy_factor.nil?
+          water_heating_system.energy_factor = Waterheater.get_default_water_heater_efficiency_by_year_installed(water_heating_system.year_installed, water_heating_system.fuel_type)
+          water_heating_system.energy_factor_isdefaulted = true
         end
         if water_heating_system.recovery_efficiency.nil?
           water_heating_system.recovery_efficiency = Waterheater.get_default_recovery_efficiency(water_heating_system)
