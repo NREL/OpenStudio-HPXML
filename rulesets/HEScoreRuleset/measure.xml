@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>he_score_measure</name>
   <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
-  <version_id>5aee0973-44a3-48c8-9309-08f2a2592ba0</version_id>
-  <version_modified>20210505T214836Z</version_modified>
+  <version_id>0f412a07-e26b-46f5-8a73-84795313a7cd</version_id>
+  <version_modified>20210609T142937Z</version_modified>
   <xml_checksum>2AF3A68E</xml_checksum>
   <class_name>HEScoreMeasure</class_name>
   <display_name>Apply Home Energy Score Ruleset</display_name>
@@ -12,9 +12,9 @@
   <modeler_description>TODO</modeler_description>
   <arguments>
     <argument>
-      <name>input_file_path</name>
-      <display_name>Input File Path</display_name>
-      <description>Absolute (or relative) path of the HPXML/JSON file.</description>
+      <name>hpxml_path</name>
+      <display_name>HPXML File Path</display_name>
+      <description>Absolute (or relative) path of the HPXML file.</description>
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -101,19 +101,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>A0C951DB</checksum>
+      <checksum>0865700F</checksum>
     </file>
     <file>
       <filename>test_hescore_ruleset.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>5B659D92</checksum>
-    </file>
-    <file>
-      <filename>json_to_hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7CB5A78F</checksum>
+      <checksum>ADA93431</checksum>
     </file>
   </files>
 </measure>
