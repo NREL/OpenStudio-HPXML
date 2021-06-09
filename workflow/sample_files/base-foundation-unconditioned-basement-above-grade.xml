@@ -171,7 +171,7 @@
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>4.0</DepthBelowGrade>
             <InteriorFinish>
-              <Type>gypsum board</Type>
+              <Type>none</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='FoundationWallInsulation'/>

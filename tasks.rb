@@ -1824,6 +1824,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls[0].interior_adjacent_to = HPXML::LocationBasementUnconditioned
     hpxml.foundation_walls[0].insulation_exterior_distance_to_bottom = 0
     hpxml.foundation_walls[0].insulation_exterior_r_value = 0
+    hpxml.foundation_walls[0].interior_finish_type = HPXML::InteriorFinishNone
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
     hpxml.foundation_walls[0].insulation_exterior_distance_to_bottom = 4
     hpxml.foundation_walls[0].insulation_exterior_r_value = 8.9
@@ -1848,6 +1849,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls[0].area /= 2.0
     hpxml.foundation_walls[0].depth_below_grade -= 4
     hpxml.foundation_walls[0].insulation_exterior_distance_to_bottom -= 4
+    hpxml.foundation_walls[0].interior_finish_type = HPXML::InteriorFinishNone
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
     hpxml.foundation_walls[0].area = 600
     hpxml.foundation_walls.add(id: 'FoundationWallInterior',

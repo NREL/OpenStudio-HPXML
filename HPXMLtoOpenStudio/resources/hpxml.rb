@@ -1532,6 +1532,10 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def is_conditioned
+      return HPXML::is_conditioned(self)
+    end
+
     def delete
       @hpxml_object.roofs.delete(self)
       skylights.reverse_each do |skylight|
@@ -1663,6 +1667,10 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def is_conditioned
+      return HPXML::is_conditioned(self)
     end
 
     def delete
@@ -1797,6 +1805,10 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def is_conditioned
+      return HPXML::is_conditioned(self)
     end
 
     def delete
@@ -1965,6 +1977,10 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def is_conditioned
+      return HPXML::is_conditioned(self)
+    end
+
     def delete
       @hpxml_object.foundation_walls.delete(self)
       windows.reverse_each do |window|
@@ -2120,6 +2136,10 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def is_conditioned
+      return HPXML::is_conditioned(self)
+    end
+
     def delete
       @hpxml_object.frame_floors.delete(self)
       @hpxml_object.attics.each do |attic|
@@ -2234,6 +2254,10 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def is_conditioned
+      return HPXML::is_conditioned(self)
     end
 
     def delete
@@ -2360,6 +2384,10 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def is_conditioned
+      return HPXML::is_conditioned(self)
     end
 
     def delete
@@ -2503,6 +2531,10 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def is_conditioned
+      return HPXML::is_conditioned(self)
+    end
+
     def delete
       @hpxml_object.skylights.delete(self)
     end
@@ -2624,6 +2656,10 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def is_conditioned
+      return HPXML::is_conditioned(self)
     end
 
     def delete
@@ -5673,6 +5709,10 @@ class HPXML < Object
     return [HPXML::LocationLivingSpace,
             HPXML::LocationBasementConditioned,
             HPXML::LocationOtherHousingUnit]
+  end
+
+  def self.is_conditioned(surface)
+    return conditioned_locations.include?(surface.interior_adjacent_to)
   end
 
   def self.is_adiabatic(surface)
