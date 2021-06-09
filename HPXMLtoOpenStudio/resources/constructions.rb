@@ -1086,9 +1086,10 @@ class Constructions
     # Exterior vertical insulation
     if (ext_vert_r > 0) && (ext_vert_depth > 0)
       ext_vert_mat = create_insulation_material(model, 'FoundationExtVertIns', ext_vert_r)
+      wall_mat_int_finish_thick_in = wall_mat_int_finish.nil? ? 0.0 : wall_mat_int_finish.thick_in
       foundation.addCustomBlock(ext_vert_mat,
                                 UnitConversions.convert(ext_vert_depth, 'ft', 'm'),
-                                UnitConversions.convert(wall_concrete_thick_in + wall_mat_int_finish.thick_in, 'in', 'm'),
+                                UnitConversions.convert(wall_concrete_thick_in + wall_mat_int_finish_thick_in, 'in', 'm'),
                                 UnitConversions.convert(ext_vert_offset, 'ft', 'm'))
     end
 
