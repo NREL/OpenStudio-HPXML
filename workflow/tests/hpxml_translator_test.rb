@@ -622,7 +622,6 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'Plant loop falling below lower temperature limit'
       next if err_line.include?('Foundation:Kiva') && err_line.include?('wall surfaces with more than four vertices') # TODO: Check alternative approach
       next if err_line.include? 'Temperature out of range [-100. to 200.] (PsyPsatFnTemp)'
-      next if err_line.include? 'Temperature out of range [-100. to 200.] (PsyTwbFnTdbWPb)'
       next if err_line.include? 'Enthalpy out of range (PsyTsatFnHPb)'
       next if err_line.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.'
       next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
