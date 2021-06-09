@@ -223,37 +223,18 @@ class Material
     return Material.new(name = 'Wood Floor', thick_in = 0.625, mat_base = nil, k_in = 0.8004, rho = 34.0, cp = 0.29)
   end
 
-  def self.InteriorFinishMaterialWall(type, thick_in)
+  def self.InteriorFinishMaterial(type, thick_in)
     if (type == HPXML::InteriorFinishNone) || (thick_in <= 0)
       return
     else
-      tAbs = 0.9
-      sAbs = 0.5
-      vAbs = 0.1
+      emittance = 0.9
+      solar_absorptance = 0.6
       if [HPXML::InteriorFinishGypsumBoard,
           HPXML::InteriorFinishGypsumCompositeBoard,
           HPXML::InteriorFinishPlaster].include? type
-        return new(type, thick_in, BaseMaterial.Gypsum, nil, nil, nil, tAbs, sAbs, vAbs)
+        return new(type, thick_in, BaseMaterial.Gypsum, nil, nil, nil, emittance, solar_absorptance, solar_absorptance)
       elsif [HPXML::InteriorFinishWood].include? type
-        return new(type, thick_in, BaseMaterial.Wood, nil, nil, nil, tAbs, sAbs, vAbs)
-      end
-    end
-    fail "Unexpected type: #{type}."
-  end
-
-  def self.InteriorFinishMaterialCeiling(type, thick_in)
-    if (type == HPXML::InteriorFinishNone) || (thick_in <= 0)
-      return
-    else
-      tAbs = 0.9
-      sAbs = 0.3
-      vAbs = 0.1
-      if [HPXML::InteriorFinishGypsumBoard,
-          HPXML::InteriorFinishGypsumCompositeBoard,
-          HPXML::InteriorFinishPlaster].include? type
-        return new(type, thick_in, BaseMaterial.Gypsum, nil, nil, nil, tAbs, sAbs, vAbs)
-      elsif [HPXML::InteriorFinishWood].include? type
-        return new(type, thick_in, BaseMaterial.Wood, nil, nil, nil, tAbs, sAbs, vAbs)
+        return new(type, thick_in, BaseMaterial.Wood, nil, nil, nil, emittance, solar_absorptance, solar_absorptance)
       end
     end
     fail "Unexpected type: #{type}."

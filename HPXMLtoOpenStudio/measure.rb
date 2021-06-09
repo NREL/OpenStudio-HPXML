@@ -635,7 +635,7 @@ class OSModel
         inside_film = Material.AirFilmRoofASHRAE140
         outside_film = Material.AirFilmOutsideASHRAE140
       end
-      mat_int_finish = Material.InteriorFinishMaterialCeiling(roof.interior_finish_type, roof.interior_finish_thickness)
+      mat_int_finish = Material.InteriorFinishMaterial(roof.interior_finish_type, roof.interior_finish_thickness)
 
       install_grade = 1
       assembly_r = roof.insulation_assembly_r_value
@@ -745,7 +745,7 @@ class OSModel
         inside_film = Material.AirFilmVerticalASHRAE140
         outside_film = Material.AirFilmOutsideASHRAE140
       end
-      mat_int_finish = Material.InteriorFinishMaterialWall(wall.interior_finish_type, wall.interior_finish_thickness)
+      mat_int_finish = Material.InteriorFinishMaterial(wall.interior_finish_type, wall.interior_finish_thickness)
 
       Constructions.apply_wall_construction(runner, model, surfaces, wall, wall.id, wall.wall_type, wall.insulation_assembly_r_value,
                                             mat_int_finish, inside_film, outside_film, mat_ext_finish)
@@ -865,7 +865,7 @@ class OSModel
           inside_film = Material.AirFilmFloorAverage
           outside_film = Material.AirFilmFloorAverage
         end
-        mat_int_finish = Material.InteriorFinishMaterialCeiling(frame_floor.interior_finish_type, frame_floor.interior_finish_thickness)
+        mat_int_finish = Material.InteriorFinishMaterial(frame_floor.interior_finish_type, frame_floor.interior_finish_thickness)
         constr_sets = [
           WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.0, mat_int_finish, nil),  # 2x6, 24" o.c.
           WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.0, mat_int_finish, nil),  # 2x4, 16" o.c.
@@ -1052,7 +1052,7 @@ class OSModel
         inside_film = Material.AirFilmVertical
         outside_film = Material.AirFilmVertical
         assembly_r = foundation_wall.insulation_assembly_r_value
-        mat_int_finish = Material.InteriorFinishMaterialWall(foundation_wall.interior_finish_type, foundation_wall.interior_finish_thickness)
+        mat_int_finish = Material.InteriorFinishMaterial(foundation_wall.interior_finish_type, foundation_wall.interior_finish_thickness)
         if assembly_r.nil?
           concrete_thick_in = foundation_wall.thickness
           int_r = foundation_wall.insulation_interior_r_value
@@ -1110,7 +1110,7 @@ class OSModel
 
     concrete_thick_in = foundation_wall.thickness
     assembly_r = foundation_wall.insulation_assembly_r_value
-    mat_int_finish = Material.InteriorFinishMaterialWall(foundation_wall.interior_finish_type, foundation_wall.interior_finish_thickness)
+    mat_int_finish = Material.InteriorFinishMaterial(foundation_wall.interior_finish_type, foundation_wall.interior_finish_thickness)
     if not assembly_r.nil?
       ext_rigid_height = height
       ext_rigid_offset = 0.0
@@ -1279,13 +1279,13 @@ class OSModel
     cfa_basement = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationBasementConditioned }.map { |s| s.area }.sum(0.0)
     if @apply_ashrae140_assumptions
       # 1024 ft2 of interior partition wall mass, no furniture mass
-      mat_int_finish = Material.InteriorFinishMaterialWall(HPXML::InteriorFinishGypsumBoard, 0.5)
+      mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
       partition_frac_of_cfa = (1024.0 * 2) / @cfa # Ratio of exposed partition wall area (both sides) to conditioned floor area
       basement_frac_of_cfa = cfa_basement / @cfa
       Constructions.apply_partition_walls(runner, model, 'PartitionWallConstruction', mat_int_finish, partition_frac_of_cfa,
                                           basement_frac_of_cfa, @cond_bsmnt_surfaces, spaces[HPXML::LocationLivingSpace])
     else
-      mat_int_finish = Material.InteriorFinishMaterialWall(HPXML::InteriorFinishGypsumBoard, 0.5)
+      mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
       partition_frac_of_cfa = 1.0 # Ratio of exposed partition wall area (both sides) to conditioned floor area
       basement_frac_of_cfa = cfa_basement / @cfa
       Constructions.apply_partition_walls(runner, model, 'PartitionWallConstruction', mat_int_finish, partition_frac_of_cfa,
@@ -1507,7 +1507,7 @@ class OSModel
     return if surfaces.empty?
 
     if type == 'wall'
-      mat_int_finish = Material.InteriorFinishMaterialWall(HPXML::InteriorFinishGypsumBoard, 0.5)
+      mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
       mat_ext_finish = Material.ExteriorFinishMaterial(HPXML::SidingTypeWood, 0.90, 0.75)
       Constructions.apply_wood_stud_wall(runner, model, surfaces, nil, 'AdiabaticWallConstruction',
                                          0, 1, 3.5, true, 0.1, mat_int_finish, 0, 99, mat_ext_finish,
