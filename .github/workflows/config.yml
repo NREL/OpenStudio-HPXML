@@ -45,9 +45,9 @@ jobs:
       - name: Install plotting dependencies
         run: python -m pip install --upgrade pip bokeh pandas lxml
       - name: Plot comparison
-        run: python plots/make_comparison_plots.py plots/doe2_enduse_v8_4.csv /tmp/data/test_results/results.csv
-      - name: Plot comparison w/ERI setpoints
-        run: python plots/make_comparison_plots.py plots/doe2_enduse_v8_4_eri_setpoints.csv /tmp/data/test_results/results.csv
+        run: python plots/make_comparison_plots.py plots/doe2_enduse_v9_0.csv /tmp/data/test_results/results.csv
+#      - name: Plot comparison w/ERI setpoints
+#        run: python plots/make_comparison_plots.py plots/doe2_enduse_v9_0_eri_setpoints.csv /tmp/data/test_results/results.csv
       - uses: actions/upload-artifact@v2
         with:
           name: plots

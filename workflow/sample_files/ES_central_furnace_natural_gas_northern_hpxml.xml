@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 9.3</Address1>
+        <Address1>ENERGY STAR run 5</Address1>
         <CityMunicipality>New York</CityMunicipality>
         <StateCode>NY</StateCode>
         <ZipCode>10001</ZipCode>

@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 9.131</Address1>
+        <Address1>ENERGY STAR run 9</Address1>
         <CityMunicipality>Phoenix</CityMunicipality>
         <StateCode>AZ</StateCode>
         <ZipCode>85001</ZipCode>
