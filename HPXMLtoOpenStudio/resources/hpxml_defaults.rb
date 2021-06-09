@@ -312,10 +312,8 @@ class HPXMLDefaults
       next unless roof.interior_finish_thickness.nil?
       if roof.interior_finish_type != HPXML::InteriorFinishNone
         roof.interior_finish_thickness = 0.5
-      else
-        roof.interior_finish_thickness = 0.0
+        roof.interior_finish_thickness_isdefaulted = true
       end
-      roof.interior_finish_thickness_isdefaulted = true
     end
   end
 
@@ -371,10 +369,8 @@ class HPXMLDefaults
       next unless wall.interior_finish_thickness.nil?
       if wall.interior_finish_type != HPXML::InteriorFinishNone
         wall.interior_finish_thickness = 0.5
-      else
-        wall.interior_finish_thickness = 0.0
+        wall.interior_finish_thickness_isdefaulted = true
       end
-      wall.interior_finish_thickness_isdefaulted = true
     end
   end
 
@@ -395,10 +391,8 @@ class HPXMLDefaults
       next unless foundation_wall.interior_finish_thickness.nil?
       if foundation_wall.interior_finish_type != HPXML::InteriorFinishNone
         foundation_wall.interior_finish_thickness = 0.5
-      else
-        foundation_wall.interior_finish_thickness = 0.0
+        foundation_wall.interior_finish_thickness_isdefaulted = true
       end
-      foundation_wall.interior_finish_thickness_isdefaulted = true
     end
   end
 
@@ -417,10 +411,8 @@ class HPXMLDefaults
       next unless frame_floor.interior_finish_thickness.nil?
       if frame_floor.interior_finish_type != HPXML::InteriorFinishNone
         frame_floor.interior_finish_thickness = 0.5
-      else
-        frame_floor.interior_finish_thickness = 0.0
+        frame_floor.interior_finish_thickness_isdefaulted = true
       end
-      frame_floor.interior_finish_thickness_isdefaulted = true
     end
   end
 

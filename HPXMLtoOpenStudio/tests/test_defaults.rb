@@ -235,7 +235,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.roofs[0].interior_finish_type = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_roof_values(hpxml_default.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.99, HPXML::ColorDark, 0.90, false, HPXML::InteriorFinishNone, 0.0)
+    _test_default_roof_values(hpxml_default.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.99, HPXML::ColorDark, 0.90, false, HPXML::InteriorFinishNone, nil)
 
     # Test defaults w/ conditioned space
     hpxml = _create_hpxml('base-atticroof-cathedral.xml')
@@ -319,7 +319,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.walls[1].interior_finish_thickness = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_wall_values(hpxml_default.walls[1], HPXML::SidingTypeWood, 0.5, HPXML::ColorLight, 0.90, HPXML::InteriorFinishNone, 0.0)
+    _test_default_wall_values(hpxml_default.walls[1], HPXML::SidingTypeWood, 0.5, HPXML::ColorLight, 0.90, HPXML::InteriorFinishNone, nil)
   end
 
   def test_foundation_walls
@@ -347,7 +347,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.foundation_walls[0].interior_finish_thickness = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_foundation_wall_values(hpxml_default.foundation_walls[0], 8.0, HPXML::InteriorFinishNone, 0.0)
+    _test_default_foundation_wall_values(hpxml_default.foundation_walls[0], 8.0, HPXML::InteriorFinishNone, nil)
   end
 
   def test_frame_floors
@@ -372,7 +372,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.frame_floors[1].interior_finish_thickness = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_frame_floor_values(hpxml_default.frame_floors[1], HPXML::InteriorFinishNone, 0.0)
+    _test_default_frame_floor_values(hpxml_default.frame_floors[1], HPXML::InteriorFinishNone, nil)
   end
 
   def test_slabs
@@ -2268,7 +2268,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(emittance, roof.emittance)
     assert_equal(radiant_barrier, roof.radiant_barrier)
     assert_equal(int_finish_type, roof.interior_finish_type)
-    assert_equal(int_finish_thickness, roof.interior_finish_thickness)
+    if not int_finish_thickness.nil?
+      assert_equal(int_finish_thickness, roof.interior_finish_thickness)
+    else
+      assert_nil(roof.interior_finish_thickness)
+    end
   end
 
   def _test_default_rim_joist_values(rim_joist, siding, solar_absorptance, color, emittance)
@@ -2284,18 +2288,30 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(color, wall.color)
     assert_equal(emittance, wall.emittance)
     assert_equal(int_finish_type, wall.interior_finish_type)
-    assert_equal(int_finish_thickness, wall.interior_finish_thickness)
+    if not int_finish_thickness.nil?
+      assert_equal(int_finish_thickness, wall.interior_finish_thickness)
+    else
+      assert_nil(wall.interior_finish_thickness)
+    end
   end
 
   def _test_default_foundation_wall_values(foundation_wall, thickness, int_finish_type, int_finish_thickness)
     assert_equal(thickness, foundation_wall.thickness)
     assert_equal(int_finish_type, foundation_wall.interior_finish_type)
-    assert_equal(int_finish_thickness, foundation_wall.interior_finish_thickness)
+    if not int_finish_thickness.nil?
+      assert_equal(int_finish_thickness, foundation_wall.interior_finish_thickness)
+    else
+      assert_nil(foundation_wall.interior_finish_thickness)
+    end
   end
 
   def _test_default_frame_floor_values(frame_floor, int_finish_type, int_finish_thickness)
     assert_equal(int_finish_type, frame_floor.interior_finish_type)
-    assert_equal(int_finish_thickness, frame_floor.interior_finish_thickness)
+    if not int_finish_thickness.nil?
+      assert_equal(int_finish_thickness, frame_floor.interior_finish_thickness)
+    else
+      assert_nil(frame_floor.interior_finish_thickness)
+    end
   end
 
   def _test_default_slab_values(slab, thickness, carpet_r_value, carpet_fraction)
