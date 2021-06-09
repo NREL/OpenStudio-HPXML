@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2020-08-11T17:06:51-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2021-06-08T17:49:39+00:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-7784.55777">
+    <BuildingID id="bid-327879.464195">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,15 +19,15 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 8.170</Address1>
-        <CityMunicipality>St Louis</CityMunicipality>
-        <StateCode>MO</StateCode>
-        <ZipCode>63101</ZipCode>
+        <Address1>Regression run 9.130</Address1>
+        <CityMunicipality>New York</CityMunicipality>
+        <StateCode>NY</StateCode>
+        <ZipCode>10001</ZipCode>
       </Address>
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2020-08-03</Date>
+      <Date>2021-06-07</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -47,7 +47,7 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>PV year 2020</comments>
+          <comments>Heating fuel lpg north</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -57,8 +57,8 @@
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id="wmo"/>
-          <Name>Cahokia St Louis</Name>
-          <WMO>725314</WMO>
+          <Name>NY Central Prk Obs Belv</Name>
+          <WMO>725033</WMO>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>
@@ -305,7 +305,7 @@
               <HeatingSystemType>
                 <Furnace/>
               </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatingSystemFuel>propane</HeatingSystemFuel>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>0.8</Value>
@@ -349,14 +349,6 @@
             <EnergyFactor>0.6</EnergyFactor>
           </WaterHeatingSystem>
         </WaterHeating>
-        <Photovoltaics>
-          <PVSystem>
-            <SystemIdentifier id="pv1"/>
-            <ArrayOrientation>south</ArrayOrientation>
-            <MaxPowerOutput>4000</MaxPowerOutput>
-            <YearModulesManufactured>2020</YearModulesManufactured>
-          </PVSystem>
-        </Photovoltaics>
       </Systems>
     </BuildingDetails>
   </Building>

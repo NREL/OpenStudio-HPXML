@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2020-08-11T17:01:52-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2021-06-08T17:49:49+00:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-7755.55748">
+    <BuildingID id="bid-327880.464196">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,15 +19,15 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 8.141</Address1>
-        <CityMunicipality>St Louis</CityMunicipality>
-        <StateCode>MO</StateCode>
-        <ZipCode>63101</ZipCode>
+        <Address1>Regression run 9.131</Address1>
+        <CityMunicipality>Phoenix</CityMunicipality>
+        <StateCode>AZ</StateCode>
+        <ZipCode>85001</ZipCode>
       </Address>
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2020-08-03</Date>
+      <Date>2021-06-07</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -47,18 +47,18 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>Cooling year 2020</comments>
+          <comments>Heating fuel lpg south</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
           <Year>2012</Year>
-          <ClimateZone>4A</ClimateZone>
+          <ClimateZone>2B</ClimateZone>
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id="wmo"/>
-          <Name>Cahokia St Louis</Name>
-          <WMO>725314</WMO>
+          <Name>Phoenix Sky Harbor IAP</Name>
+          <WMO>722780</WMO>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>
@@ -305,7 +305,7 @@
               <HeatingSystemType>
                 <Furnace/>
               </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatingSystemFuel>propane</HeatingSystemFuel>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>0.8</Value>
@@ -314,10 +314,13 @@
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id="hvac1_cool"/>
-              <YearInstalled>2020</YearInstalled>
               <DistributionSystem idref="hvac1_dist"/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <FractionCoolLoadServed>1</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>13</Value>
+              </AnnualCoolingEfficiency>
             </CoolingSystem>
           </HVACPlant>
           <HVACDistribution>
