@@ -24,6 +24,7 @@ class HPXMLDefaults
     apply_rim_joists(hpxml)
     apply_walls(hpxml)
     apply_foundation_walls(hpxml)
+    apply_ceilings(hpxml)
     apply_slabs(hpxml)
     apply_windows(hpxml)
     apply_skylights(hpxml)
@@ -300,6 +301,19 @@ class HPXMLDefaults
         roof.solar_absorptance = Constructions.get_default_roof_solar_absorptance(roof.roof_type, roof.roof_color)
         roof.solar_absorptance_isdefaulted = true
       end
+      if roof.interior_finish_type.nil?
+        if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? roof.interior_adjacent_to
+          roof.interior_finish_type = HPXML::InteriorFinishGypsumBoard
+        else
+          roof.interior_finish_type = HPXML::InteriorFinishNone
+        end
+        roof.interior_finish_type_isdefaulted = true
+      end
+      next unless roof.interior_finish_thickness.nil?
+      if roof.interior_finish_type != HPXML::InteriorFinishNone
+        roof.interior_finish_thickness = 0.5
+        roof.interior_finish_thickness_isdefaulted = true
+      end
     end
   end
 
@@ -327,22 +341,35 @@ class HPXMLDefaults
 
   def self.apply_walls(hpxml)
     hpxml.walls.each do |wall|
-      next unless wall.is_exterior
-
-      if wall.emittance.nil?
-        wall.emittance = 0.90
-        wall.emittance_isdefaulted = true
+      if wall.is_exterior
+        if wall.emittance.nil?
+          wall.emittance = 0.90
+          wall.emittance_isdefaulted = true
+        end
+        if wall.siding.nil?
+          wall.siding = HPXML::SidingTypeWood
+          wall.siding_isdefaulted = true
+        end
+        if wall.color.nil?
+          wall.color = Constructions.get_default_wall_color(wall.solar_absorptance)
+          wall.color_isdefaulted = true
+        elsif wall.solar_absorptance.nil?
+          wall.solar_absorptance = Constructions.get_default_wall_solar_absorptance(wall.color)
+          wall.solar_absorptance_isdefaulted = true
+        end
       end
-      if wall.siding.nil?
-        wall.siding = HPXML::SidingTypeWood
-        wall.siding_isdefaulted = true
+      if wall.interior_finish_type.nil?
+        if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? wall.interior_adjacent_to
+          wall.interior_finish_type = HPXML::InteriorFinishGypsumBoard
+        else
+          wall.interior_finish_type = HPXML::InteriorFinishNone
+        end
+        wall.interior_finish_type_isdefaulted = true
       end
-      if wall.color.nil?
-        wall.color = Constructions.get_default_wall_color(wall.solar_absorptance)
-        wall.color_isdefaulted = true
-      elsif wall.solar_absorptance.nil?
-        wall.solar_absorptance = Constructions.get_default_wall_solar_absorptance(wall.color)
-        wall.solar_absorptance_isdefaulted = true
+      next unless wall.interior_finish_thickness.nil?
+      if wall.interior_finish_type != HPXML::InteriorFinishNone
+        wall.interior_finish_thickness = 0.5
+        wall.interior_finish_thickness_isdefaulted = true
       end
     end
   end
@@ -352,6 +379,37 @@ class HPXMLDefaults
       if foundation_wall.thickness.nil?
         foundation_wall.thickness = 8.0
         foundation_wall.thickness_isdefaulted = true
+      end
+      if foundation_wall.interior_finish_type.nil?
+        if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? foundation_wall.interior_adjacent_to
+          foundation_wall.interior_finish_type = HPXML::InteriorFinishGypsumBoard
+        else
+          foundation_wall.interior_finish_type = HPXML::InteriorFinishNone
+        end
+        foundation_wall.interior_finish_type_isdefaulted = true
+      end
+      next unless foundation_wall.interior_finish_thickness.nil?
+      if foundation_wall.interior_finish_type != HPXML::InteriorFinishNone
+        foundation_wall.interior_finish_thickness = 0.5
+        foundation_wall.interior_finish_thickness_isdefaulted = true
+      end
+    end
+  end
+
+  def self.apply_ceilings(hpxml)
+    hpxml.ceilings.each do |ceiling|
+      if ceiling.interior_finish_type.nil?
+        if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? ceiling.interior_adjacent_to
+          ceiling.interior_finish_type = HPXML::InteriorFinishGypsumBoard
+        else
+          ceiling.interior_finish_type = HPXML::InteriorFinishNone
+        end
+        ceiling.interior_finish_type_isdefaulted = true
+      end
+      next unless ceiling.interior_finish_thickness.nil?
+      if ceiling.interior_finish_type != HPXML::InteriorFinishNone
+        ceiling.interior_finish_thickness = 0.5
+        ceiling.interior_finish_thickness_isdefaulted = true
       end
     end
   end
