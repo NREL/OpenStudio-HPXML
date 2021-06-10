@@ -167,6 +167,7 @@ class HPXML < Object
   LeakinessTight = 'tight'
   LeakinessAverage = 'average'
   LightingTypeCFL = 'CompactFluorescent'
+  LightingTypeIncandescent = 'Incandescent'
   LightingTypeLED = 'LightEmittingDiode'
   LightingTypeLFL = 'FluorescentTube'
   LocationAtticUnconditioned = 'attic - unconditioned'
@@ -4901,7 +4902,7 @@ class HPXML < Object
   end
 
   class LightingGroup < BaseElement
-    ATTRS = [:id, :location, :fraction_of_units_in_location, :lighting_type]
+    ATTRS = [:id, :location, :fraction_of_units_in_location, :lighting_type, :number_of_units]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4920,8 +4921,9 @@ class HPXML < Object
       lighting_group = XMLHelper.add_element(lighting, 'LightingGroup')
       sys_id = XMLHelper.add_element(lighting_group, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      XMLHelper.add_element(lighting_group, 'Location', @location, :string) unless @location.nil?
-      XMLHelper.add_element(lighting_group, 'FractionofUnitsInLocation', @fraction_of_units_in_location, :float) unless @fraction_of_units_in_location.nil?
+      XMLHelper.add_element(lighting_group, 'Location', @location, :string, @location_isdefaulted) unless @location.nil?
+      XMLHelper.add_element(lighting_group, 'NumberofUnits', @number_of_units, :integer, @number_of_units_isdefaulted) unless @number_of_units.nil?
+      XMLHelper.add_element(lighting_group, 'FractionofUnitsInLocation', @fraction_of_units_in_location, :float, @fraction_of_units_in_location_isdefaulted) unless @fraction_of_units_in_location.nil?
       if not @lighting_type.nil?
         lighting_type = XMLHelper.add_element(lighting_group, 'LightingType')
         XMLHelper.add_element(lighting_type, @lighting_type)
@@ -4933,6 +4935,7 @@ class HPXML < Object
 
       @id = HPXML::get_id(lighting_group)
       @location = XMLHelper.get_value(lighting_group, 'Location', :string)
+      @number_of_units = XMLHelper.get_value(lighting_group, 'NumberofUnits', :integer)
       @fraction_of_units_in_location = XMLHelper.get_value(lighting_group, 'FractionofUnitsInLocation', :float)
       @lighting_type = XMLHelper.get_child_name(lighting_group, 'LightingType')
     end
@@ -5590,20 +5593,6 @@ class HPXML < Object
     frac_dhw_load = @water_heating_systems.map { |dhw| dhw.fraction_dhw_load_served.to_f }.sum(0.0)
     if (frac_dhw_load > 0) && ((frac_dhw_load < 0.99) || (frac_dhw_load > 1.01)) # Use 0.99/1.01 in case of rounding
       errors << "Expected FractionDHWLoadServed to sum to 1, but calculated sum is #{frac_dhw_load.round(2)}."
-    end
-
-    # Check sum of lighting fractions in a location <= 1
-    ltg_fracs = {}
-    @lighting_groups.each do |lighting_group|
-      next if lighting_group.location.nil? || lighting_group.fraction_of_units_in_location.nil?
-
-      ltg_fracs[lighting_group.location] = 0 if ltg_fracs[lighting_group.location].nil?
-      ltg_fracs[lighting_group.location] += lighting_group.fraction_of_units_in_location
-    end
-    ltg_fracs.each do |location, sum|
-      next if sum <= 1.01 # Use 1.01 in case of rounding
-
-      errors << "Sum of fractions of #{location} lighting (#{sum}) is greater than 1."
     end
 
     # Check for HVAC systems referenced by multiple water heating systems

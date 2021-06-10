@@ -1408,6 +1408,20 @@ class HPXMLDefaults
   def self.apply_lighting(hpxml)
     return if hpxml.lighting_groups.empty?
 
+    hpxml.lighting_groups.each do |lighting_group|
+      next unless lighting_group.fraction_of_units_in_location.nil?
+
+      lighting_groups_in_location = hpxml.lighting_groups.select { |lg| lg.location == lighting_group.location }
+      number_of_units_in_location = Float(lighting_groups_in_location.map { |lg| lg.number_of_units }.sum)
+
+      if number_of_units_in_location > 0
+        lighting_group.fraction_of_units_in_location = (lighting_group.number_of_units / number_of_units_in_location).round(4)
+      else
+        lighting_group.fraction_of_units_in_location = 0.0
+      end
+      lighting_group.fraction_of_units_in_location_isdefaulted = true
+    end
+
     if hpxml.lighting.interior_usage_multiplier.nil?
       hpxml.lighting.interior_usage_multiplier = 1.0
       hpxml.lighting.interior_usage_multiplier_isdefaulted = true

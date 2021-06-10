@@ -401,6 +401,7 @@ def create_hpxmls
     'base-lighting-ceiling-fans.xml' => 'base.xml',
     'base-lighting-detailed.xml' => 'base.xml',
     'base-lighting-none.xml' => 'base.xml',
+    'base-lighting-number-of-units.xml' => 'base.xml',
     'base-location-AMY-2012.xml' => 'base.xml',
     'base-location-baltimore-md.xml' => 'base-foundation-unvented-crawlspace.xml',
     'base-location-dallas-tx.xml' => 'base-foundation-slab.xml',
@@ -5150,6 +5151,43 @@ def set_hpxml_lighting(hpxml_file, hpxml)
     hpxml.lighting.exterior_usage_multiplier = 0.9
   elsif ['base-lighting-none.xml'].include? hpxml_file
     hpxml.lighting_groups.clear
+  elsif ['base-lighting-number-of-units.xml'].include? hpxml_file
+    hpxml.lighting_groups.clear
+    hpxml.lighting_groups.add(id: 'Lighting_Incandescent_Interior',
+                              location: HPXML::LocationInterior,
+                              number_of_units: 30,
+                              lighting_type: HPXML::LightingTypeIncandescent)
+    hpxml.lighting_groups.add(id: 'Lighting_LED_Interior',
+                              location: HPXML::LocationInterior,
+                              number_of_units: 20,
+                              lighting_type: HPXML::LightingTypeLED)
+    hpxml.lighting_groups.add(id: 'Lighting_Incandescent_Exterior',
+                              location: HPXML::LocationExterior,
+                              number_of_units: 5,
+                              lighting_type: HPXML::LightingTypeIncandescent)
+    hpxml.lighting_groups.add(id: 'Lighting_Incandescent_Garage',
+                              location: HPXML::LocationGarage,
+                              number_of_units: 8,
+                              lighting_type: HPXML::LightingTypeIncandescent)
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.lighting_groups.clear
+    hpxml.lighting_groups.add(id: 'Lighting_LED_Interior',
+                              location: HPXML::LocationInterior,
+                              fraction_of_units_in_location: 0.5,
+                              lighting_type: HPXML::LightingTypeLED)
+    hpxml.lighting_groups.add(id: 'Lighting_LED_Exterior',
+                              location: HPXML::LocationExterior,
+                              fraction_of_units_in_location: 0.5,
+                              lighting_type: HPXML::LightingTypeLED)
+    hpxml.lighting_groups.add(id: 'Lighting_LED_Garage',
+                              location: HPXML::LocationGarage,
+                              fraction_of_units_in_location: 0.5,
+                              lighting_type: HPXML::LightingTypeLED)
+  elsif ['invalid_files/lighting-number-of-units-zero.xml'].include? hpxml_file
+    hpxml.lighting_groups.each do |lg|
+      next unless lg.location == HPXML::LocationExterior
+      lg.number_of_units = 0
+    end
   end
 end
 

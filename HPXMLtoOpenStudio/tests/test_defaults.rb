@@ -1847,6 +1847,33 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
                                     grg_month_mult: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248' })
   end
 
+  def test_lighting_groups
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base.xml')
+    hpxml.lighting_groups[0].fraction_of_units_in_location = 0.0
+    hpxml.lighting_groups[1].fraction_of_units_in_location = 0.25
+    hpxml.lighting_groups[2].fraction_of_units_in_location = 0.0
+    hpxml.lighting_groups[3].fraction_of_units_in_location = 0.1
+    hpxml.lighting_groups[4].fraction_of_units_in_location = 0.25
+    hpxml.lighting_groups[5].fraction_of_units_in_location = 0.0
+    hpxml.lighting_groups[6].fraction_of_units_in_location = 0.3
+    hpxml.lighting_groups[7].fraction_of_units_in_location = 0.25
+    hpxml.lighting_groups[8].fraction_of_units_in_location = 0.0
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_lighting_group_values(hpxml_default, 0.0, 0.25, 0.0, 0.1, 0.25, 0.0, 0.3, 0.25, 0.0, nil, nil, nil)
+
+    # Test defaults w/ NumberofUnits
+    hpxml = _create_hpxml('base-lighting-number-of-units.xml')
+    hpxml.lighting_groups[0].number_of_units = 10
+    hpxml.lighting_groups[1].number_of_units = 20
+    hpxml.lighting_groups[2].number_of_units = 30
+    hpxml.lighting_groups[3].number_of_units = 40
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_lighting_group_values(hpxml_default, nil, nil, nil, nil, nil, nil, 0.667, nil, nil, 0.333, 1.0, 1.0)
+  end
+
   def test_ceiling_fans
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-lighting-ceiling-fans.xml')
@@ -2954,6 +2981,32 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_nil(hpxml.lighting.holiday_weekend_fractions)
     end
+  end
+
+  def _test_default_lighting_group_values(hpxml, f_int_cfl, f_ext_cfl, f_grg_cfl, f_int_lfl, f_ext_lfl, f_grg_lfl,
+                                          f_int_led, f_ext_led, f_grg_led, f_int_inc, f_ext_inc, f_grg_inc)
+    fractions = { [HPXML::LocationInterior, HPXML::LightingTypeCFL] => f_int_cfl,
+                  [HPXML::LocationExterior, HPXML::LightingTypeCFL] => f_ext_cfl,
+                  [HPXML::LocationGarage, HPXML::LightingTypeCFL] => f_grg_cfl,
+                  [HPXML::LocationInterior, HPXML::LightingTypeLFL] => f_int_lfl,
+                  [HPXML::LocationExterior, HPXML::LightingTypeLFL] => f_ext_lfl,
+                  [HPXML::LocationGarage, HPXML::LightingTypeLFL] => f_grg_lfl,
+                  [HPXML::LocationInterior, HPXML::LightingTypeLED] => f_int_led,
+                  [HPXML::LocationExterior, HPXML::LightingTypeLED] => f_ext_led,
+                  [HPXML::LocationGarage, HPXML::LightingTypeLED] => f_grg_led,
+                  [HPXML::LocationInterior, HPXML::LightingTypeIncandescent] => f_int_inc,
+                  [HPXML::LocationExterior, HPXML::LightingTypeIncandescent] => f_ext_inc,
+                  [HPXML::LocationGarage, HPXML::LightingTypeIncandescent] => f_grg_inc }
+
+    n_compare = 0
+    hpxml.lighting_groups.each do |lg|
+      frac = fractions[[lg.location, lg.lighting_type]]
+      next if frac.nil?
+
+      n_compare += 1
+      assert_in_epsilon(frac, lg.fraction_of_units_in_location, 0.001)
+    end
+    assert_equal(n_compare, hpxml.lighting_groups.size)
   end
 
   def _test_default_ceiling_fan_values(ceiling_fan, quantity, efficiency)

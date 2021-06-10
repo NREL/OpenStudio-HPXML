@@ -2125,27 +2125,23 @@ Lighting and ceiling fans are entered in ``/HPXML/Building/BuildingDetails/Light
 HPXML Lighting
 **************
 
-Nine ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` elements must be provided, each of which is the combination of:
-
-- ``LightingType``: 'LightEmittingDiode', 'CompactFluorescent', and 'FluorescentTube'
-- ``Location``: 'interior', 'garage', and 'exterior'
+One or more ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` elements must be provided for each of three locations ('interior', 'garage', and 'exterior').
 
 Information is entered in each ``LightingGroup``.
 
-  =============================  =======  ======  ===========  ========  =======  ===========================================================================
-  Element                        Type     Units   Constraints  Required  Default  Notes
-  =============================  =======  ======  ===========  ========  =======  ===========================================================================
-  ``SystemIdentifier``           id                            Yes                Unique identifier
-  ``LightingType``               element          1 [#]_       Yes                Lighting type
-  ``Location``                   string           See [#]_     Yes                See [#]_
-  ``FractionofUnitsInLocation``  double   frac    0 - 1 [#]_   Yes                Fraction of light fixtures in the location with the specified lighting type
-  =============================  =======  ======  ===========  ========  =======  ===========================================================================
+  ======================================================  ==================  =========  ==================  ========  =======  =====================================================================
+  Element                                                 Type                Units      Constraints         Required  Default  Notes
+  ======================================================  ==================  =========  ==================  ========  =======  =====================================================================
+  ``SystemIdentifier``                                    id                                                 Yes                Unique identifier
+  ``LightingType``                                        element                        1 [#]_              Yes                Lighting type
+  ``Location``                                            string                         See [#]_            Yes                See [#]_
+  ``FractionofUnitsInLocation`` and/or ``NumberofUnits``  double or integer   frac or #  0 - 1 [#]_ or >= 0  Yes                Fraction/number of lamps in the location with the given lighting type
+  ======================================================  ==================  =========  ==================  ========  =======  =====================================================================
 
-  .. [#] LightingType child element choices are ``LightEmittingDiode``, ``CompactFluorescent``, or ``FluorescentTube``.
+  .. [#] LightingType child element choices are ``Incandescent``, ``LightEmittingDiode``, ``CompactFluorescent``, or ``FluorescentTube``.
   .. [#] Location choices are "interior", "garage", or "exterior".
   .. [#] Garage lighting is ignored if the building has no garage specified elsewhere.
-  .. [#] The sum of FractionofUnitsInLocation for a given Location (e.g., interior) must be less than or equal to 1.
-         If the fractions sum to less than 1, the remainder is assumed to be incandescent lighting.
+  .. [#] If FractionofUnitsInLocation provided, the sum across all LightingGroups for a given Location (e.g., interior) must be less than or equal to one.
 
 Additional information is entered in ``Lighting``.
 

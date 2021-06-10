@@ -15,6 +15,8 @@ __New Features__
 - Allows CEER (Combined Energy Efficiency Ratio) efficiency unit for room AC.
 - Allows "none" for wall/rim joist siding.
 - Allows interior finish inputs (e.g., 0.5" drywall) for walls, ceilings, and roofs.
+- Allows `LightingGroup/NumberofUnits` to be used instead of `LightingGroup/FractionofUnitsInLocation`.
+- Allows excluding LightingGroups where the lighting type is not present in the given location.
 - Updates the reporting measure to register all outputs from the annual CSV with the OS runner (for use in, e.g., PAT).
 - Switches to the EnergyPlus Fan:SystemModel object for all HVAC systems.
 
