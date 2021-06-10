@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2020-08-11T17:00:31-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2021-06-08T19:01:30+00:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-7747.55740">
+    <BuildingID id="bid-327700.463517">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,15 +19,15 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 8.133</Address1>
-        <CityMunicipality>Phoenix</CityMunicipality>
-        <StateCode>AZ</StateCode>
-        <ZipCode>85001</ZipCode>
+        <Address1>ENERGY STAR run 12</Address1>
+        <CityMunicipality>St Louis</CityMunicipality>
+        <StateCode>MO</StateCode>
+        <ZipCode>63101</ZipCode>
       </Address>
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2020-08-03</Date>
+      <Date>2021-06-07</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -47,18 +47,18 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>Heating furnace south</comments>
+          <comments>Heating fuel oil  boiler</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
           <Year>2012</Year>
-          <ClimateZone>2B</ClimateZone>
+          <ClimateZone>4A</ClimateZone>
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id="wmo"/>
-          <Name>Phoenix Sky Harbor IAP</Name>
-          <WMO>722780</WMO>
+          <Name>Cahokia St Louis</Name>
+          <WMO>725314</WMO>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>
@@ -301,15 +301,11 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id="hvac1_heat"/>
-              <DistributionSystem idref="hvac1_dist"/>
+              <ThirdPartyCertification>Energy Star</ThirdPartyCertification>
               <HeatingSystemType>
-                <Furnace/>
+                <Boiler/>
               </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.6</Value>
-              </AnnualHeatingEfficiency>
+              <HeatingSystemFuel>fuel oil</HeatingSystemFuel>
               <FractionHeatLoadServed>1</FractionHeatLoadServed>
             </HeatingSystem>
             <CoolingSystem>

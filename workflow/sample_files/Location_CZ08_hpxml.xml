@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2020-08-11T16:39:05-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2021-06-08T17:29:49+00:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-7621.55614">
+    <BuildingID id="bid-327756.464072">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 8.7</Address1>
+        <Address1>Regression run 9.7</Address1>
         <CityMunicipality>Atlanta</CityMunicipality>
         <StateCode>GA</StateCode>
         <ZipCode>30301</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2020-08-03</Date>
+      <Date>2021-06-07</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
