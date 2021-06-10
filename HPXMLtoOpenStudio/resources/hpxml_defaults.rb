@@ -24,7 +24,7 @@ class HPXMLDefaults
     apply_rim_joists(hpxml)
     apply_walls(hpxml)
     apply_foundation_walls(hpxml)
-    apply_frame_floors(hpxml)
+    apply_ceilings(hpxml)
     apply_slabs(hpxml)
     apply_windows(hpxml)
     apply_skylights(hpxml)
@@ -396,22 +396,20 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_frame_floors(hpxml)
-    hpxml.frame_floors.each do |frame_floor|
-      if frame_floor.interior_finish_type.nil?
-        if frame_floor.is_floor
-          frame_floor.interior_finish_type = HPXML::InteriorFinishNone
-        elsif [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? frame_floor.interior_adjacent_to
-          frame_floor.interior_finish_type = HPXML::InteriorFinishGypsumBoard
+  def self.apply_ceilings(hpxml)
+    hpxml.ceilings.each do |ceiling|
+      if ceiling.interior_finish_type.nil?
+        if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? ceiling.interior_adjacent_to
+          ceiling.interior_finish_type = HPXML::InteriorFinishGypsumBoard
         else
-          frame_floor.interior_finish_type = HPXML::InteriorFinishNone
+          ceiling.interior_finish_type = HPXML::InteriorFinishNone
         end
-        frame_floor.interior_finish_type_isdefaulted = true
+        ceiling.interior_finish_type_isdefaulted = true
       end
-      next unless frame_floor.interior_finish_thickness.nil?
-      if frame_floor.interior_finish_type != HPXML::InteriorFinishNone
-        frame_floor.interior_finish_thickness = 0.5
-        frame_floor.interior_finish_thickness_isdefaulted = true
+      next unless ceiling.interior_finish_thickness.nil?
+      if ceiling.interior_finish_type != HPXML::InteriorFinishNone
+        ceiling.interior_finish_thickness = 0.5
+        ceiling.interior_finish_thickness_isdefaulted = true
       end
     end
   end

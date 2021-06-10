@@ -408,8 +408,8 @@
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
-        <FrameFloors>
-          <FrameFloor>
+        <Ceilings>
+          <Ceiling>
             <SystemIdentifier id='CeilingBelowAttic'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
@@ -422,8 +422,8 @@
               <SystemIdentifier id='CeilingBelowAtticInsulation'/>
               <AssemblyEffectiveRValue>18.45</AssemblyEffectiveRValue>
             </Insulation>
-          </FrameFloor>
-        </FrameFloors>
+          </Ceiling>
+        </Ceilings>
         <Slabs>
           <Slab>
             <SystemIdentifier id='Slab'/>

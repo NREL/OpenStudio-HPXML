@@ -110,22 +110,9 @@
             </Insulation>
           </Wall>
         </Walls>
-        <FrameFloors>
-          <FrameFloor>
-            <SystemIdentifier id='FloorAboveOther'/>
-            <ExteriorAdjacentTo>other non-freezing space</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>900.0</Area>
-            <Insulation>
-              <SystemIdentifier id='FloorAboveOtherInsulation'/>
-              <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
-            </Insulation>
-            <extension>
-              <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
-            </extension>
-          </FrameFloor>
-          <FrameFloor>
-            <SystemIdentifier id='CeilingBelowOther'/>
+        <Ceilings>
+          <Ceiling>
+            <SystemIdentifier id='CeilingBelowOtherHousingUnit'/>
             <ExteriorAdjacentTo>other non-freezing space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>900.0</Area>
@@ -133,12 +120,21 @@
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='CeilingBelowOtherInsulation'/>
+              <SystemIdentifier id='CeilingBelowOtherHousingUnitInsulation'/>
               <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
             </Insulation>
-            <extension>
-              <OtherSpaceAboveOrBelow>above</OtherSpaceAboveOrBelow>
-            </extension>
+          </Ceiling>
+        </Ceilings>
+        <FrameFloors>
+          <FrameFloor>
+            <SystemIdentifier id='FloorAboveOtherHousingUnit'/>
+            <ExteriorAdjacentTo>other non-freezing space</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>900.0</Area>
+            <Insulation>
+              <SystemIdentifier id='FloorAboveOtherHousingUnitInsulation'/>
+              <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
+            </Insulation>
           </FrameFloor>
         </FrameFloors>
         <Windows>

@@ -164,9 +164,9 @@
             </Insulation>
           </Wall>
         </Walls>
-        <FrameFloors>
-          <FrameFloor>
-            <SystemIdentifier id='CeilingBelowOther'/>
+        <Ceilings>
+          <Ceiling>
+            <SystemIdentifier id='CeilingBelowOtherHousingUnit'/>
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>900.0</Area>
@@ -174,13 +174,12 @@
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='CeilingBelowOtherInsulation'/>
+              <SystemIdentifier id='CeilingBelowOtherHousingUnitInsulation'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
-            <extension>
-              <OtherSpaceAboveOrBelow>above</OtherSpaceAboveOrBelow>
-            </extension>
-          </FrameFloor>
+          </Ceiling>
+        </Ceilings>
+        <FrameFloors>
           <FrameFloor>
             <SystemIdentifier id='FloorAboveNonFreezingSpace'/>
             <ExteriorAdjacentTo>other non-freezing space</ExteriorAdjacentTo>
@@ -190,9 +189,6 @@
               <SystemIdentifier id='FloorAboveNonFreezingSpaceInsulation'/>
               <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
             </Insulation>
-            <extension>
-              <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
-            </extension>
           </FrameFloor>
           <FrameFloor>
             <SystemIdentifier id='FloorAboveMultifamilyBuffer'/>
@@ -203,9 +199,6 @@
               <SystemIdentifier id='FloorAboveMultifamilyBufferInsulation'/>
               <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
             </Insulation>
-            <extension>
-              <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
-            </extension>
           </FrameFloor>
           <FrameFloor>
             <SystemIdentifier id='FloorAboveOtherHeatedSpace'/>
@@ -216,9 +209,6 @@
               <SystemIdentifier id='FloorAboveOtherHeatedSpaceInsulation'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
-            <extension>
-              <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
-            </extension>
           </FrameFloor>
         </FrameFloors>
         <Windows>

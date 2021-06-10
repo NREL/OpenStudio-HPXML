@@ -306,7 +306,7 @@ HPXML Roofs
 
 Each pitched or flat roof surface that is exposed to ambient conditions is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof``.
 
-For a multifamily building where the dwelling unit has another dwelling unit above it, the surface between the two dwelling units should be considered a ``FrameFloor`` and not a ``Roof``.
+For a multifamily building where the dwelling unit has another dwelling unit above it, the surface between the two dwelling units should be considered a ``Ceiling`` and not a ``Roof``.
 
   ======================================  ================  ============  =================  =========  ==============================  ==================================
   Element                                 Type              Units         Constraints        Required   Default                         Notes
@@ -478,10 +478,10 @@ If insulation layers are provided, additional information is entered in each ``F
   ``extension/DistanceToBottomOfInsulation``  double    ft            DistanceToTopOfInsulation - Height  Yes                Vertical distance from top of foundation wall to bottom of insulation
   ==========================================  ========  ============  ==================================  ========  =======  =====================================================================
 
-HPXML Frame Floors
-******************
+HPXML Ceilings
+**************
 
-Each horizontal floor/ceiling surface that is not in contact with the ground (Slab) nor adjacent to ambient conditions above (Roof) is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor``.
+Each horizontal ceiling surface that is above living space or garage space (and not adjacent to ambient conditions above (i.e., Roof)) is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Ceilings/Ceiling``.
 
   ======================================  ========  ============  ===========  ========  ========  ============================
   Element                                 Type      Units         Constraints  Required  Default   Notes
@@ -496,23 +496,35 @@ Each horizontal floor/ceiling surface that is not in contact with the ground (Sl
   ``Insulation/AssemblyEffectiveRValue``  double    F-ft2-hr/Btu  > 0          Yes                 Assembly R-value [#]_
   ======================================  ========  ============  ===========  ========  ========  ============================
 
-  .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+  .. [#] ExteriorAdjacentTo choices are "attic - vented", "attic - unvented", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
+  .. [#] InteriorAdjacentTo choices are "living space" or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
-  .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is living space and the surface is a ceiling, otherwise "none".
+  .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is living space, otherwise "none".
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
-For frame floors adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space", additional information is entered in ``FrameFloor``.
+HPXML Frame Floors
+******************
 
-  ======================================  ========  =====  ==============  ========  =======  ==========================================
-  Element                                 Type      Units  Constraints     Required  Default  Notes
-  ======================================  ========  =====  ==============  ========  =======  ==========================================
-  ``extension/OtherSpaceAboveOrBelow``    string           See [#]_        Yes                Specifies if above/below the MF space type
-  ======================================  ========  =====  ==============  ========  =======  ==========================================
+Each horizontal floor surface that is below living space (and not in contact with the ground (i.e., Slab)) is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor``.
 
-  .. [#] OtherSpaceAboveOrBelow choices are "above" or "below".
+  ======================================  ========  ============  ===========  ========  ========  ============================
+  Element                                 Type      Units         Constraints  Required  Default   Notes
+  ======================================  ========  ============  ===========  ========  ========  ============================
+  ``SystemIdentifier``                    id                                   Yes                 Unique identifier
+  ``ExteriorAdjacentTo``                  string                  See [#]_     Yes                 Exterior adjacent space type
+  ``InteriorAdjacentTo``                  string                  See [#]_     Yes                 Interior adjacent space type
+  ``Area``                                double    ft2           > 0          Yes                 Gross area
+  ``Insulation/SystemIdentifier``         id                                   Yes                 Unique identifier
+  ``Insulation/AssemblyEffectiveRValue``  double    F-ft2-hr/Btu  > 0          Yes                 Assembly R-value [#]_
+  ======================================  ========  ============  ===========  ========  ========  ============================
+
+  .. [#] ExteriorAdjacentTo choices are "outside", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+         See :ref:`hpxmllocations` for descriptions.
+  .. [#] InteriorAdjacentTo only choice is "living space".
+         See :ref:`hpxmllocations` for descriptions.
+  .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
 HPXML Slabs
 ***********

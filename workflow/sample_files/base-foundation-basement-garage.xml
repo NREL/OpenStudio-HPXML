@@ -227,8 +227,8 @@
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
-        <FrameFloors>
-          <FrameFloor>
+        <Ceilings>
+          <Ceiling>
             <SystemIdentifier id='CeilingBelowAttic'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
@@ -240,14 +240,16 @@
               <SystemIdentifier id='CeilingBelowAtticInsulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </FrameFloor>
+          </Ceiling>
+        </Ceilings>
+        <FrameFloors>
           <FrameFloor>
-            <SystemIdentifier id='FloorAbovegarage'/>
+            <SystemIdentifier id='FloorAboveGarage'/>
             <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>400.0</Area>
             <Insulation>
-              <SystemIdentifier id='FloorAbovegarageInsulation'/>
+              <SystemIdentifier id='FloorAboveGarageInsulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
