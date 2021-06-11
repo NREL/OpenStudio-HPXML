@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>0f811ee5-7b00-4ec9-be81-48cad6f74e39</version_id>
-  <version_modified>20210611T160017Z</version_modified>
+  <version_id>b49ee282-55cd-4591-992d-aaebec0f662b</version_id>
+  <version_modified>20210611T221959Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -3248,7 +3248,32 @@
       <units>gal/hr</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>56</default_value>
+    </argument>
+    <argument>
+      <name>water_heater_usage_bin</name>
+      <display_name>Water Heater: Usage Bin</display_name>
+      <description>The usage of the water heater. Required if Efficiency Type is UniformEnergyFactor and Type is not instantaneous water heater. Does not apply to space-heating boilers.</description>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>very small</value>
+          <display_name>very small</display_name>
+        </choice>
+        <choice>
+          <value>low</value>
+          <display_name>low</display_name>
+        </choice>
+        <choice>
+          <value>medium</value>
+          <display_name>medium</display_name>
+        </choice>
+        <choice>
+          <value>high</value>
+          <display_name>high</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>water_heater_recovery_efficiency</name>
@@ -7447,24 +7472,6 @@
       <checksum>F8EB2D2D</checksum>
     </file>
     <file>
-      <filename>base-dhw-tank-elec-uef.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>91364EC5</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tank-gas-uef.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1A6A6A62</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tank-heat-pump-uef.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>9DAA166B</checksum>
-    </file>
-    <file>
       <filename>base-dhw-tankless-electric-uef.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -8167,10 +8174,46 @@
       <checksum>9625682A</checksum>
     </file>
     <file>
+      <filename>base-dhw-tank-heat-pump-uef.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C7381FBE</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tank-elec-uef.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B4FDB65C</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tank-gas-uef-fhr.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B025727E</checksum>
+    </file>
+    <file>
+      <filename>test_rakefile.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>00D77531</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tank-gas-uef.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>430C8FAC</checksum>
+    </file>
+    <file>
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>A842B19C</checksum>
+    </file>
+    <file>
+      <filename>test_measure.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9C2746D4</checksum>
     </file>
     <file>
       <version>
@@ -8181,7 +8224,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>7A6C32F7</checksum>
+      <checksum>56769BB3</checksum>
     </file>
   </files>
 </measure>
