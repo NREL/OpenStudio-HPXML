@@ -159,6 +159,11 @@ class HPXML < Object
   HydronicTypeRadiantFloor = 'radiant floor'
   HydronicTypeRadiator = 'radiator'
   HydronicTypeWaterLoop = 'water loop'
+  InteriorFinishGypsumBoard = 'gypsum board'
+  InteriorFinishGypsumCompositeBoard = 'gypsum composite board'
+  InteriorFinishNone = 'none'
+  InteriorFinishPlaster = 'plaster'
+  InteriorFinishWood = 'wood'
   LeakinessTight = 'tight'
   LeakinessAverage = 'average'
   LightingTypeCFL = 'CompactFluorescent'
@@ -280,6 +285,10 @@ class HPXML < Object
   WaterHeaterTypeHeatPump = 'heat pump water heater'
   WaterHeaterTypeTankless = 'instantaneous water heater'
   WaterHeaterTypeStorage = 'storage water heater'
+  WaterHeaterUsageBinVerySmall = 'very small'
+  WaterHeaterUsageBinLow = 'low'
+  WaterHeaterUsageBinMedium = 'medium'
+  WaterHeaterUsageBinHigh = 'high'
   WindowFrameTypeAluminum = 'Aluminum'
   WindowFrameTypeComposite = 'Composite'
   WindowFrameTypeFiberglass = 'Fiberglass'
@@ -1486,7 +1495,8 @@ class HPXML < Object
     ATTRS = [:id, :interior_adjacent_to, :area, :azimuth, :orientation, :roof_type,
              :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier,
              :insulation_id, :insulation_assembly_r_value, :insulation_cavity_r_value,
-             :insulation_continuous_r_value, :radiant_barrier_grade]
+             :insulation_continuous_r_value, :radiant_barrier_grade,
+             :interior_finish_type, :interior_finish_thickness]
     attr_accessor(*ATTRS)
 
     def skylights
@@ -1526,6 +1536,10 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def is_conditioned
+      return HPXML::is_conditioned(self)
+    end
+
     def delete
       @hpxml_object.roofs.delete(self)
       skylights.reverse_each do |skylight|
@@ -1557,6 +1571,11 @@ class HPXML < Object
       XMLHelper.add_element(roof, 'RoofColor', @roof_color, :string, @roof_color_isdefaulted) unless @roof_color.nil?
       XMLHelper.add_element(roof, 'SolarAbsorptance', @solar_absorptance, :float, @solar_absorptance_isdefaulted) unless @solar_absorptance.nil?
       XMLHelper.add_element(roof, 'Emittance', @emittance, :float, @emittance_isdefaulted) unless @emittance.nil?
+      if (not @interior_finish_type.nil?) || (not @interior_finish_thickness.nil?)
+        interior_finish = XMLHelper.add_element(roof, 'InteriorFinish')
+        XMLHelper.add_element(interior_finish, 'Type', @interior_finish_type, :string, @interior_finish_type_isdefaulted) unless @interior_finish_type.nil?
+        XMLHelper.add_element(interior_finish, 'Thickness', @interior_finish_thickness, :float, @interior_finish_thickness_isdefaulted) unless @interior_finish_thickness.nil?
+      end
       XMLHelper.add_element(roof, 'Pitch', @pitch, :float) unless @pitch.nil?
       XMLHelper.add_element(roof, 'RadiantBarrier', @radiant_barrier, :boolean, @radiant_barrier_isdefaulted) unless @radiant_barrier.nil?
       XMLHelper.add_element(roof, 'RadiantBarrierGrade', @radiant_barrier_grade, :integer) unless @radiant_barrier_grade.nil?
@@ -1592,6 +1611,11 @@ class HPXML < Object
       @roof_color = XMLHelper.get_value(roof, 'RoofColor', :string)
       @solar_absorptance = XMLHelper.get_value(roof, 'SolarAbsorptance', :float)
       @emittance = XMLHelper.get_value(roof, 'Emittance', :float)
+      interior_finish = XMLHelper.get_element(roof, 'InteriorFinish')
+      if not interior_finish.nil?
+        @interior_finish_type = XMLHelper.get_value(interior_finish, 'Type', :string)
+        @interior_finish_thickness = XMLHelper.get_value(interior_finish, 'Thickness', :float)
+      end
       @pitch = XMLHelper.get_value(roof, 'Pitch', :float)
       @radiant_barrier = XMLHelper.get_value(roof, 'RadiantBarrier', :boolean)
       @radiant_barrier_grade = XMLHelper.get_value(roof, 'RadiantBarrierGrade', :integer)
@@ -1647,6 +1671,10 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def is_conditioned
+      return HPXML::is_conditioned(self)
     end
 
     def delete
@@ -1734,7 +1762,8 @@ class HPXML < Object
   class Wall < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :wall_type, :optimum_value_engineering,
              :area, :orientation, :azimuth, :siding, :color, :solar_absorptance, :emittance, :insulation_id,
-             :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value]
+             :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
+             :interior_finish_type, :interior_finish_thickness]
     attr_accessor(*ATTRS)
 
     def windows
@@ -1782,6 +1811,10 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def is_conditioned
+      return HPXML::is_conditioned(self)
+    end
+
     def delete
       @hpxml_object.walls.delete(self)
       windows.reverse_each do |window|
@@ -1821,6 +1854,11 @@ class HPXML < Object
       XMLHelper.add_element(wall, 'Color', @color, :string, @color_isdefaulted) unless @color.nil?
       XMLHelper.add_element(wall, 'SolarAbsorptance', @solar_absorptance, :float, @solar_absorptance_isdefaulted) unless @solar_absorptance.nil?
       XMLHelper.add_element(wall, 'Emittance', @emittance, :float, @emittance_isdefaulted) unless @emittance.nil?
+      if (not @interior_finish_type.nil?) || (not @interior_finish_thickness.nil?)
+        interior_finish = XMLHelper.add_element(wall, 'InteriorFinish')
+        XMLHelper.add_element(interior_finish, 'Type', @interior_finish_type, :string, @interior_finish_type_isdefaulted) unless @interior_finish_type.nil?
+        XMLHelper.add_element(interior_finish, 'Thickness', @interior_finish_thickness, :float, @interior_finish_thickness_isdefaulted) unless @interior_finish_thickness.nil?
+      end
       insulation = XMLHelper.add_element(wall, 'Insulation')
       sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
       if not @insulation_id.nil?
@@ -1858,6 +1896,11 @@ class HPXML < Object
       @color = XMLHelper.get_value(wall, 'Color', :string)
       @solar_absorptance = XMLHelper.get_value(wall, 'SolarAbsorptance', :float)
       @emittance = XMLHelper.get_value(wall, 'Emittance', :float)
+      interior_finish = XMLHelper.get_element(wall, 'InteriorFinish')
+      if not interior_finish.nil?
+        @interior_finish_type = XMLHelper.get_value(interior_finish, 'Type', :string)
+        @interior_finish_thickness = XMLHelper.get_value(interior_finish, 'Thickness', :float)
+      end
       insulation = XMLHelper.get_element(wall, 'Insulation')
       if not insulation.nil?
         @insulation_id = HPXML::get_id(insulation)
@@ -1888,7 +1931,7 @@ class HPXML < Object
              :insulation_interior_distance_to_top, :insulation_interior_distance_to_bottom,
              :insulation_exterior_r_value, :insulation_exterior_distance_to_top,
              :insulation_exterior_distance_to_bottom, :insulation_assembly_r_value,
-             :insulation_continuous_r_value]
+             :insulation_continuous_r_value, :interior_finish_type, :interior_finish_thickness]
     attr_accessor(*ATTRS)
 
     def windows
@@ -1938,6 +1981,10 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def is_conditioned
+      return HPXML::is_conditioned(self)
+    end
+
     def delete
       @hpxml_object.foundation_walls.delete(self)
       windows.reverse_each do |window|
@@ -1972,6 +2019,11 @@ class HPXML < Object
       XMLHelper.add_element(foundation_wall, 'Azimuth', @azimuth, :integer) unless @azimuth.nil?
       XMLHelper.add_element(foundation_wall, 'Thickness', @thickness, :float, @thickness_isdefaulted) unless @thickness.nil?
       XMLHelper.add_element(foundation_wall, 'DepthBelowGrade', @depth_below_grade, :float) unless @depth_below_grade.nil?
+      if (not @interior_finish_type.nil?) || (not @interior_finish_thickness.nil?)
+        interior_finish = XMLHelper.add_element(foundation_wall, 'InteriorFinish')
+        XMLHelper.add_element(interior_finish, 'Type', @interior_finish_type, :string, @interior_finish_type_isdefaulted) unless @interior_finish_type.nil?
+        XMLHelper.add_element(interior_finish, 'Thickness', @interior_finish_thickness, :float, @interior_finish_thickness_isdefaulted) unless @interior_finish_thickness.nil?
+      end
       insulation = XMLHelper.add_element(foundation_wall, 'Insulation')
       sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
       if not @insulation_id.nil?
@@ -2008,6 +2060,11 @@ class HPXML < Object
       @azimuth = XMLHelper.get_value(foundation_wall, 'Azimuth', :integer)
       @thickness = XMLHelper.get_value(foundation_wall, 'Thickness', :float)
       @depth_below_grade = XMLHelper.get_value(foundation_wall, 'DepthBelowGrade', :float)
+      interior_finish = XMLHelper.get_element(foundation_wall, 'InteriorFinish')
+      if not interior_finish.nil?
+        @interior_finish_type = XMLHelper.get_value(interior_finish, 'Type', :string)
+        @interior_finish_thickness = XMLHelper.get_value(interior_finish, 'Thickness', :float)
+      end
       insulation = XMLHelper.get_element(foundation_wall, 'Insulation')
       if not insulation.nil?
         @insulation_id = HPXML::get_id(insulation)
@@ -2040,7 +2097,7 @@ class HPXML < Object
   class FrameFloor < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
-             :other_space_above_or_below]
+             :other_space_above_or_below, :interior_finish_type, :interior_finish_thickness]
     attr_accessor(*ATTRS)
 
     def is_ceiling
@@ -2083,6 +2140,10 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def is_conditioned
+      return HPXML::is_conditioned(self)
+    end
+
     def delete
       @hpxml_object.frame_floors.delete(self)
       @hpxml_object.attics.each do |attic|
@@ -2108,6 +2169,11 @@ class HPXML < Object
       XMLHelper.add_element(frame_floor, 'ExteriorAdjacentTo', @exterior_adjacent_to, :string) unless @exterior_adjacent_to.nil?
       XMLHelper.add_element(frame_floor, 'InteriorAdjacentTo', @interior_adjacent_to, :string) unless @interior_adjacent_to.nil?
       XMLHelper.add_element(frame_floor, 'Area', @area, :float) unless @area.nil?
+      if (not @interior_finish_type.nil?) || (not @interior_finish_thickness.nil?)
+        interior_finish = XMLHelper.add_element(frame_floor, 'InteriorFinish')
+        XMLHelper.add_element(interior_finish, 'Type', @interior_finish_type, :string, @interior_finish_type_isdefaulted) unless @interior_finish_type.nil?
+        XMLHelper.add_element(interior_finish, 'Thickness', @interior_finish_thickness, :float, @interior_finish_thickness_isdefaulted) unless @interior_finish_thickness.nil?
+      end
       insulation = XMLHelper.add_element(frame_floor, 'Insulation')
       sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
       if not @insulation_id.nil?
@@ -2136,6 +2202,11 @@ class HPXML < Object
       @exterior_adjacent_to = XMLHelper.get_value(frame_floor, 'ExteriorAdjacentTo', :string)
       @interior_adjacent_to = XMLHelper.get_value(frame_floor, 'InteriorAdjacentTo', :string)
       @area = XMLHelper.get_value(frame_floor, 'Area', :float)
+      interior_finish = XMLHelper.get_element(frame_floor, 'InteriorFinish')
+      if not interior_finish.nil?
+        @interior_finish_type = XMLHelper.get_value(interior_finish, 'Type', :string)
+        @interior_finish_thickness = XMLHelper.get_value(interior_finish, 'Thickness', :float)
+      end
       insulation = XMLHelper.get_element(frame_floor, 'Insulation')
       if not insulation.nil?
         @insulation_id = HPXML::get_id(insulation)
@@ -2187,6 +2258,10 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def is_conditioned
+      return HPXML::is_conditioned(self)
     end
 
     def delete
@@ -2313,6 +2388,10 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def is_conditioned
+      return HPXML::is_conditioned(self)
     end
 
     def delete
@@ -2456,6 +2535,10 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def is_conditioned
+      return HPXML::is_conditioned(self)
+    end
+
     def delete
       @hpxml_object.skylights.delete(self)
     end
@@ -2577,6 +2660,10 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def is_conditioned
+      return HPXML::is_conditioned(self)
     end
 
     def delete
@@ -3813,7 +3900,7 @@ class HPXML < Object
 
   class WaterHeatingSystem < BaseElement
     ATTRS = [:id, :year_installed, :fuel_type, :water_heater_type, :location, :performance_adjustment,
-             :tank_volume, :fraction_dhw_load_served, :heating_capacity, :energy_factor,
+             :tank_volume, :fraction_dhw_load_served, :heating_capacity, :energy_factor, :usage_bin,
              :uniform_energy_factor, :first_hour_rating, :recovery_efficiency, :uses_desuperheater, :jacket_r_value,
              :related_hvac_idref, :third_party_certification, :standby_loss, :temperature, :is_shared_system,
              :number_of_units_served]
@@ -3866,6 +3953,7 @@ class HPXML < Object
       XMLHelper.add_element(water_heating_system, 'EnergyFactor', @energy_factor, :float, @energy_factor_isdefaulted) unless @energy_factor.nil?
       XMLHelper.add_element(water_heating_system, 'UniformEnergyFactor', @uniform_energy_factor, :float) unless @uniform_energy_factor.nil?
       XMLHelper.add_element(water_heating_system, 'FirstHourRating', @first_hour_rating, :float) unless @first_hour_rating.nil?
+      XMLHelper.add_element(water_heating_system, 'UsageBin', @usage_bin, :string, @usage_bin_isdefaulted) unless @usage_bin.nil?
       XMLHelper.add_element(water_heating_system, 'RecoveryEfficiency', @recovery_efficiency, :float, @recovery_efficiency_isdefaulted) unless @recovery_efficiency.nil?
       if not @jacket_r_value.nil?
         water_heater_insulation = XMLHelper.add_element(water_heating_system, 'WaterHeaterInsulation')
@@ -3899,6 +3987,7 @@ class HPXML < Object
       @energy_factor = XMLHelper.get_value(water_heating_system, 'EnergyFactor', :float)
       @uniform_energy_factor = XMLHelper.get_value(water_heating_system, 'UniformEnergyFactor', :float)
       @first_hour_rating = XMLHelper.get_value(water_heating_system, 'FirstHourRating', :float)
+      @usage_bin = XMLHelper.get_value(water_heating_system, 'UsageBin', :string)
       @recovery_efficiency = XMLHelper.get_value(water_heating_system, 'RecoveryEfficiency', :float)
       @jacket_r_value = XMLHelper.get_value(water_heating_system, 'WaterHeaterInsulation/Jacket/JacketRValue', :float)
       @standby_loss = XMLHelper.get_value(water_heating_system, 'StandbyLoss', :float)
@@ -5628,6 +5717,10 @@ class HPXML < Object
     return [HPXML::LocationLivingSpace,
             HPXML::LocationBasementConditioned,
             HPXML::LocationOtherHousingUnit]
+  end
+
+  def self.is_conditioned(surface)
+    return conditioned_locations.include?(surface.interior_adjacent_to)
   end
 
   def self.is_adiabatic(surface)
