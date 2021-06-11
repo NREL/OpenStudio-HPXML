@@ -3100,7 +3100,7 @@ class HVAC
     htg_sp_ss.setKeyName(Constants.ObjectNameHeatingSetpoint)
 
     coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electricity Energy')
-    coil_energy.setName('htg coil electric energy')
+    coil_energy.setName('supp coil electric energy')
     coil_energy.setKeyName(supp_coil.name.get)
 
     # Trend variable
@@ -3119,6 +3119,7 @@ class HVAC
     ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
     # Program
     supp_coil_avail_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    supp_coil_avail_program.setName("#{supp_coil.name.get} control program")
     supp_coil_avail_program.addLine("Set living_t = #{tin_sensor.name}")
     supp_coil_avail_program.addLine("Set htg_sp_l = #{htg_sp_ss.name}")
     supp_coil_avail_program.addLine("Set htg_sp_h = #{htg_sp_ss.name} + #{ddb}")
