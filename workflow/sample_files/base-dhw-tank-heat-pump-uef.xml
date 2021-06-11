@@ -396,7 +396,7 @@
             <TankVolume>50.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <HeatingCapacity>18767.0</HeatingCapacity>
-            <FirstHourRating>60.0</FirstHourRating>
+            <UniformEnergyFactor>3.75</UniformEnergyFactor>
             <UsageBin>medium</UsageBin>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>

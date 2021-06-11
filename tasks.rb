@@ -4384,8 +4384,8 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
   elsif ['base-dhw-tank-heat-pump-uef.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeHeatPump
     hpxml.water_heating_systems[0].energy_factor = nil
+    hpxml.water_heating_systems[0].uniform_energy_factor = 3.75
     hpxml.water_heating_systems[0].usage_bin = HPXML::WaterHeaterUsageBinMedium
-    hpxml.water_heating_systems[0].first_hour_rating = 60.0
     hpxml.water_heating_systems[0].tank_volume = 50.0
   elsif ['base-dhw-tankless-gas-uef.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
