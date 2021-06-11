@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>3adb65be-ec01-4635-98e1-13813ab7217f</version_id>
-  <version_modified>20210611T142339Z</version_modified>
+  <version_id>0f811ee5-7b00-4ec9-be81-48cad6f74e39</version_id>
+  <version_modified>20210611T160017Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -306,7 +306,7 @@
     <argument>
       <name>geometry_orientation</name>
       <display_name>Geometry: Orientation</display_name>
-      <description>The unit's orientation is measured clockwise from north when viewed from above (e.g., North=0, East=90, South=180, West=270).</description>
+      <description>The unit's orientation is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).</description>
       <type>Double</type>
       <units>degrees</units>
       <required>true</required>
@@ -3579,7 +3579,7 @@
     <argument>
       <name>solar_thermal_collector_azimuth</name>
       <display_name>Solar Thermal: Collector Azimuth</display_name>
-      <description>The collector azimuth of the solar thermal system.</description>
+      <description>The collector azimuth of the solar thermal system. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).</description>
       <type>Double</type>
       <units>degrees</units>
       <required>true</required>
@@ -3724,7 +3724,7 @@
     <argument>
       <name>pv_system_array_azimuth_1</name>
       <display_name>Photovoltaics 1: Array Azimuth</display_name>
-      <description>Array azimuth of the PV system 1.</description>
+      <description>Array azimuth of the PV system 1. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).</description>
       <type>Double</type>
       <units>degrees</units>
       <required>true</required>
@@ -3867,7 +3867,7 @@
     <argument>
       <name>pv_system_array_azimuth_2</name>
       <display_name>Photovoltaics 2: Array Azimuth</display_name>
-      <description>Array azimuth of the PV system 2.</description>
+      <description>Array azimuth of the PV system 2. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).</description>
       <type>Double</type>
       <units>degrees</units>
       <required>true</required>
@@ -8181,7 +8181,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C4BAADCD</checksum>
+      <checksum>7A6C32F7</checksum>
     </file>
   </files>
 </measure>
