@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>b49ee282-55cd-4591-992d-aaebec0f662b</version_id>
-  <version_modified>20210611T221959Z</version_modified>
+  <version_id>f430d729-b24a-4ca2-8cb3-3784f4dc81ea</version_id>
+  <version_modified>20210615T150530Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -903,20 +903,12 @@
           <display_name>asphalt or fiberglass shingles</display_name>
         </choice>
         <choice>
-          <value>concrete</value>
-          <display_name>concrete</display_name>
-        </choice>
-        <choice>
           <value>slate or tile shingles</value>
           <display_name>slate or tile shingles</display_name>
         </choice>
         <choice>
           <value>metal surfacing</value>
           <display_name>metal surfacing</display_name>
-        </choice>
-        <choice>
-          <value>plastic/rubber/synthetic sheeting</value>
-          <display_name>plastic/rubber/synthetic sheeting</display_name>
         </choice>
         <choice>
           <value>wood shingles or shakes</value>
@@ -8192,12 +8184,6 @@
       <checksum>B025727E</checksum>
     </file>
     <file>
-      <filename>test_rakefile.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>00D77531</checksum>
-    </file>
-    <file>
       <filename>base-dhw-tank-gas-uef.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -8210,12 +8196,6 @@
       <checksum>A842B19C</checksum>
     </file>
     <file>
-      <filename>test_measure.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>9C2746D4</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.0</identifier>
@@ -8224,7 +8204,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>56769BB3</checksum>
+      <checksum>37FD39F5</checksum>
     </file>
   </files>
 </measure>

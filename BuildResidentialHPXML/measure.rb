@@ -565,10 +565,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     roof_material_type_choices = OpenStudio::StringVector.new
     roof_material_type_choices << HPXML::RoofTypeAsphaltShingles
-    roof_material_type_choices << HPXML::RoofTypeConcrete
     roof_material_type_choices << HPXML::RoofTypeClayTile
     roof_material_type_choices << HPXML::RoofTypeMetal
-    roof_material_type_choices << HPXML::RoofTypePlasticRubber
     roof_material_type_choices << HPXML::RoofTypeWoodShingles
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('roof_material_type', roof_material_type_choices, false)
