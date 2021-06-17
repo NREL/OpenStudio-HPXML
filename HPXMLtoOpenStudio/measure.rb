@@ -736,7 +736,7 @@ class OSModel
       inside_film = Material.AirFilmVertical
       if wall.is_exterior
         outside_film = Material.AirFilmOutside
-        mat_ext_finish = Material.ExteriorFinishMaterial(wall.siding, wall.emittance, wall.solar_absorptance)
+        mat_ext_finish = Material.ExteriorFinishMaterial(wall.siding)
       else
         outside_film = Material.AirFilmVertical
         mat_ext_finish = nil
@@ -797,7 +797,7 @@ class OSModel
       inside_film = Material.AirFilmVertical
       if rim_joist.is_exterior
         outside_film = Material.AirFilmOutside
-        mat_ext_finish = Material.ExteriorFinishMaterial(rim_joist.siding, rim_joist.emittance, rim_joist.solar_absorptance)
+        mat_ext_finish = Material.ExteriorFinishMaterial(rim_joist.siding)
       else
         outside_film = Material.AirFilmVertical
         mat_ext_finish = nil
@@ -818,7 +818,8 @@ class OSModel
                                     cavity_r, install_grade, constr_set.framing_factor,
                                     constr_set.mat_int_finish, constr_set.osb_thick_in,
                                     constr_set.rigid_r, constr_set.mat_ext_finish,
-                                    inside_film, outside_film)
+                                    inside_film, outside_film, rim_joist.solar_absorptance,
+                                    rim_joist.emittance)
       Constructions.check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
     end
   end
@@ -1508,8 +1509,8 @@ class OSModel
 
     if type == 'wall'
       mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
-      mat_ext_finish = Material.ExteriorFinishMaterial(HPXML::SidingTypeWood, 0.90, 0.75)
-      Constructions.apply_wood_stud_wall(runner, model, surfaces, nil, 'AdiabaticWallConstruction',
+      mat_ext_finish = Material.ExteriorFinishMaterial(HPXML::SidingTypeWood)
+      Constructions.apply_wood_stud_wall(runner, model, surfaces, 'AdiabaticWallConstruction',
                                          0, 1, 3.5, true, 0.1, mat_int_finish, 0, 99, mat_ext_finish,
                                          Material.AirFilmVertical, Material.AirFilmVertical)
     elsif type == 'floor'

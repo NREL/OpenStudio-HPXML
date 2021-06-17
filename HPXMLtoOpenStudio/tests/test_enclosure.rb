@@ -9,11 +9,147 @@ require_relative '../resources/util.rb'
 require_relative 'util.rb'
 
 class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
+  def setup
+    @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
+    @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
+    @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
+    @tmp_output_path = File.join(@sample_files_path, 'tmp_output')
+    FileUtils.mkdir_p(@tmp_output_path)
+  end
+
+  def teardown
+    File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
+    FileUtils.rm_rf(@tmp_output_path)
+  end
+
   def sample_files_dir
     return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
 
+  def test_roofs
+    # TODO
+  end
+
+  def test_rim_joists
+    # TODO
+  end
+
+  def test_walls
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+
+    air_films = Material.AirFilmOutside.rvalue + Material.AirFilmVertical.rvalue
+
+    # Wood Stud wall
+    walls_values = [{ assembly_r: 0.1, layer_names: ['wall stud and cavity'] },
+                    { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall stud and cavity'] },
+                    { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'wall stud and cavity'] }]
+
+    hpxml = _create_hpxml('base.xml')
+    walls_values.each do |wall_values|
+      hpxml.walls[0].insulation_assembly_r_value = wall_values[:assembly_r]
+      XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+      model, hpxml = _test_measure(args_hash)
+
+      expected_layer_names = wall_values[:layer_names]
+      if hpxml.walls[0].siding != HPXML::SidingTypeNone # Add exterior finish
+        expected_layer_names = [hpxml.walls[0].siding] + expected_layer_names
+      end
+      if hpxml.walls[0].interior_finish_type != HPXML::InteriorFinishNone # Add interior finish
+        expected_layer_names << hpxml.walls[0].interior_finish_type
+      end
+
+      # Check wall properties
+      os_wall = model.getSurfaces.select { |w| w.name.to_s.start_with? "#{hpxml.walls[0].id}:" }[0]
+      os_construction = os_wall.construction.get.to_LayeredConstruction.get
+      _check_layered_construction(hpxml.walls[0], os_construction, expected_layer_names)
+    end
+
+    walls_values = [
+      # CMU wall
+      [{ assembly_r: 0.1, layer_names: ['concrete block'] },
+       { assembly_r: 5.0 + air_films, layer_names: ['wall rigid ins', 'concrete block'] },
+       { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'concrete block'] }],
+      # Double Stud wall
+      [{ assembly_r: 0.1, layer_names: ['wall stud and cavity', 'wall cavity', 'wall stud and cavity'] },
+       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall stud and cavity', 'wall cavity', 'wall stud and cavity'] },
+       { assembly_r: 20.0 + air_films, layer_names: ['osb sheathing', 'wall stud and cavity', 'wall cavity', 'wall stud and cavity'] }],
+      # ICF wall
+      [{ assembly_r: 0.1, layer_names: ['wall ins form', 'wall concrete', 'wall ins form'] },
+       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall ins form', 'wall concrete', 'wall ins form'] },
+       { assembly_r: 20.0 + air_films, layer_names: ['osb sheathing', 'wall ins form', 'wall concrete', 'wall ins form'] }],
+      # Log wall
+      [{ assembly_r: 0.1, layer_names: ['wall layer'] },
+       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall layer'] },
+       { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'wall layer'] }],
+      # SIP wall
+      [{ assembly_r: 0.1, layer_names: ['wall spline layer', 'wall ins layer', 'wall spline layer', 'osb sheathing'] },
+       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall spline layer', 'wall ins layer', 'wall spline layer', 'osb sheathing'] },
+       { assembly_r: 20.0 + air_films, layer_names: ['osb sheathing', 'wall spline layer', 'wall ins layer', 'wall spline layer', 'osb sheathing'] }],
+      # Solid Concrete wall
+      [{ assembly_r: 0.1, layer_names: ['wall layer'] },
+       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall layer'] },
+       { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'wall layer'] }],
+      # Steel frame wall
+      [{ assembly_r: 0.1, layer_names: ['wall stud and cavity'] },
+       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall stud and cavity'] },
+       { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'wall stud and cavity'] }],
+      # Stone wall
+      [{ assembly_r: 0.1, layer_names: ['wall layer'] },
+       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall layer'] },
+       { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'wall layer'] }],
+      # Straw Bale wall
+      [{ assembly_r: 0.1, layer_names: ['wall layer'] },
+       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall layer'] },
+       { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'wall layer'] }],
+      # Structural Brick wall
+      [{ assembly_r: 0.1, layer_names: ['wall layer'] },
+       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall layer'] },
+       { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'wall layer'] }],
+      # Adobe wall
+      [{ assembly_r: 0.1, layer_names: ['wall layer'] },
+       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall layer'] },
+       { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'wall layer'] }],
+
+    ]
+
+    hpxml = _create_hpxml('base-enclosure-walltypes.xml')
+    for i in 0..hpxml.walls.size - 2
+      walls_values[i].each do |wall_values|
+        hpxml.walls[i].insulation_assembly_r_value = wall_values[:assembly_r]
+        XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+        model, hpxml = _test_measure(args_hash)
+
+        expected_layer_names = wall_values[:layer_names]
+        if hpxml.walls[i].siding != HPXML::SidingTypeNone # Add exterior finish
+          expected_layer_names = [hpxml.walls[i].siding] + expected_layer_names
+        end
+        if hpxml.walls[i].interior_finish_type != HPXML::InteriorFinishNone # Add interior finish
+          expected_layer_names << hpxml.walls[i].interior_finish_type
+        end
+
+        # Check wall properties
+        os_wall = model.getSurfaces.select { |w| w.name.to_s.start_with? "#{hpxml.walls[i].id}:" }[0]
+        os_construction = os_wall.construction.get.to_LayeredConstruction.get
+        _check_layered_construction(hpxml.walls[i], os_construction, expected_layer_names)
+      end
+    end
+  end
+
+  def test_foundation_walls
+    # TODO
+  end
+
+  def test_frame_floors
+    # TODO
+  end
+
+  def test_slabs
+    # TODO
+  end
+
   def test_windows
+    # Window properties
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -26,9 +162,8 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       assert_equal(window.shgc, os_simple_glazing.solarHeatGainCoefficient)
       assert_in_epsilon(window.ufactor, UnitConversions.convert(os_simple_glazing.uFactor, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)'), 0.001)
     end
-  end
 
-  def test_windows_shading
+    # Window shading
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-enclosure-windows-shading.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -63,6 +198,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
   end
 
   def test_skylights
+    # Skylight properties
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-enclosure-skylights.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -75,9 +211,8 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       assert_equal(skylight.shgc, os_simple_glazing.solarHeatGainCoefficient)
       assert_in_epsilon(skylight.ufactor / 1.2, UnitConversions.convert(os_simple_glazing.uFactor, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)'), 0.001)
     end
-  end
 
-  def test_skylights_shading
+    # Skylight shading
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-enclosure-skylights-shading.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -108,6 +243,33 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       skylight_actuator = model.getEnergyManagementSystemActuators.select { |w| w.actuatedComponent.get.name.to_s == skylight.id }[0]
       program_values = get_ems_values(model.getEnergyManagementSystemPrograms, 'skylight view factor to ground program')
       assert_equal(subsurface_view_factor, program_values["#{skylight_actuator.name.to_s}"][0])
+    end
+  end
+
+  def test_doors
+    # TODO
+  end
+
+  def _check_layered_construction(hpxml_surface, os_construction, expected_layer_names)
+    # Check exterior solar absorptance and emittance
+    exterior_layer = os_construction.getLayer(0).to_OpaqueMaterial.get
+    assert_equal(hpxml_surface.solar_absorptance, exterior_layer.solarAbsorptance)
+    assert_equal(hpxml_surface.emittance, exterior_layer.thermalAbsorptance)
+
+    # Check interior finish solar absorptance and emittance
+    if hpxml_surface.interior_finish_type != HPXML::InteriorFinishNone
+      interior_layer = os_construction.getLayer(os_construction.numLayers - 1).to_OpaqueMaterial.get
+      assert_equal(0.6, interior_layer.solarAbsorptance)
+      assert_equal(0.9, interior_layer.thermalAbsorptance)
+    end
+
+    # Check for appropriate layers
+    assert_equal(expected_layer_names.size, os_construction.numLayers)
+    for i in 0..os_construction.numLayers - 1
+      if not os_construction.getLayer(i).name.to_s.start_with? expected_layer_names[i]
+        puts "'#{os_construction.getLayer(i).name}' does not start with '#{expected_layer_names[i]}'"
+      end
+      assert(os_construction.getLayer(i).name.to_s.start_with? expected_layer_names[i])
     end
   end
 
@@ -142,10 +304,14 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)
 
-    hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
+    hpxml = HPXML.new(hpxml_path: File.join(File.dirname(__FILE__), 'in.xml'))
 
     File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
 
     return model, hpxml
+  end
+
+  def _create_hpxml(hpxml_name)
+    return HPXML.new(hpxml_path: File.join(@sample_files_path, hpxml_name))
   end
 end
