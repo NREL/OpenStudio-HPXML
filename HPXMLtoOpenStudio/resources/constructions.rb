@@ -1951,12 +1951,33 @@ class Construction
         material.ufactor = max_ufactor.round(2)
       end
 
+      # Material already exists?
+      model.getSimpleGlazings.each do |mat|
+        next if (mat.uFactor - UnitConversions.convert(material.ufactor, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)')).abs > tolerance
+        next if (mat.solarHeatGainCoefficient - material.shgc).abs > tolerance
+
+        return mat
+      end
+
       # New material
       mat = OpenStudio::Model::SimpleGlazing.new(model)
       mat.setName(name)
       mat.setUFactor(UnitConversions.convert(material.ufactor, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'))
       mat.setSolarHeatGainCoefficient(material.shgc)
     else
+      # Material already exists?
+      model.getStandardOpaqueMaterials.each do |mat|
+        next if mat.roughness.downcase.to_s != 'rough'
+        next if (mat.thickness - UnitConversions.convert(material.thick_in, 'in', 'm')).abs > tolerance
+        next if (mat.conductivity - UnitConversions.convert(material.k, 'Btu/(hr*ft*R)', 'W/(m*K)')).abs > tolerance
+        next if (mat.density - UnitConversions.convert(material.rho, 'lbm/ft^3', 'kg/m^3')).abs > tolerance
+        next if (mat.specificHeat - UnitConversions.convert(material.cp, 'Btu/(lbm*R)', 'J/(kg*K)')).abs > tolerance
+        next if (mat.thermalAbsorptance - material.tAbs.to_f).abs > tolerance
+        next if (mat.solarAbsorptance - material.sAbs.to_f).abs > tolerance
+
+        return mat
+      end
+
       # New material
       mat = OpenStudio::Model::StandardOpaqueMaterial.new(model)
       mat.setName(name)

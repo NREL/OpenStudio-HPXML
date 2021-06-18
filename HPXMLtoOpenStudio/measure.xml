@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>81a35178-ad94-412b-832d-1abb64be14a9</version_id>
-  <version_modified>20210618T142310Z</version_modified>
+  <version_id>a5d14760-865e-4381-9efb-21f023aa176c</version_id>
+  <version_modified>20210618T200645Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -527,12 +527,6 @@
       <checksum>B15B5FA9</checksum>
     </file>
     <file>
-      <filename>materials.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>01C2EFFC</checksum>
-    </file>
-    <file>
       <filename>test_enclosure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -604,10 +598,16 @@
       <checksum>ECAE5E9F</checksum>
     </file>
     <file>
+      <filename>materials.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E5748498</checksum>
+    </file>
+    <file>
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E33A9B68</checksum>
+      <checksum>ABEB4EC1</checksum>
     </file>
   </files>
 </measure>

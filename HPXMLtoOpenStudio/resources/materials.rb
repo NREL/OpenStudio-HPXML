@@ -7,9 +7,9 @@ class Material
   # k_in - Conductivity [Btu-in/h-ft^2-F]
   # rho - Density [lb/ft^3]
   # cp - Specific heat [Btu/lb*F]
-  # tAbs - thermal absorptance (emittance)
-  # sAbs - solar absorptance
-  def initialize(name: nil, thick_in: nil, mat_base: nil, k_in: nil, rho: nil, cp: nil, tAbs: nil, sAbs: nil)
+  # tAbs - thermal absorptance (emittance); 0.9 is EnergyPlus default
+  # sAbs - solar absorptance; 0.7 is EnergyPlus default
+  def initialize(name: nil, thick_in: nil, mat_base: nil, k_in: nil, rho: nil, cp: nil, tAbs: 0.9, sAbs: 0.7)
     @name = name
 
     if not thick_in.nil?
@@ -196,7 +196,7 @@ class Material
   end
 
   def self.ExteriorFinishMaterial(type, thick_in = nil)
-    if type == HPXML::SidingTypeNone
+    if (type == HPXML::SidingTypeNone) || (!thick_in.nil? && thick_in <= 0)
       return
     elsif type == HPXML::SidingTypeWood
       thick_in = 1.0 if thick_in.nil?
@@ -224,10 +224,11 @@ class Material
     return new(name: 'Wood Floor', thick_in: 0.625, k_in: 0.8004, rho: 34.0, cp: 0.29)
   end
 
-  def self.InteriorFinishMaterial(type, thick_in)
-    if (type == HPXML::InteriorFinishNone) || (thick_in <= 0)
+  def self.InteriorFinishMaterial(type, thick_in = nil)
+    if (type == HPXML::InteriorFinishNone) || (!thick_in.nil? && thick_in <= 0)
       return
     else
+      thick_in = 0.5 if thick_in.nil?
       if [HPXML::InteriorFinishGypsumBoard,
           HPXML::InteriorFinishGypsumCompositeBoard,
           HPXML::InteriorFinishPlaster].include? type
