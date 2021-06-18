@@ -747,8 +747,9 @@ class OSModel
       end
       mat_int_finish = Material.InteriorFinishMaterial(wall.interior_finish_type, wall.interior_finish_thickness)
 
-      Constructions.apply_wall_construction(runner, model, surfaces, wall, wall.id, wall.wall_type, wall.insulation_assembly_r_value,
-                                            mat_int_finish, inside_film, outside_film, mat_ext_finish)
+      Constructions.apply_wall_construction(runner, model, surfaces, wall.id, wall.wall_type, wall.insulation_assembly_r_value,
+                                            mat_int_finish, inside_film, outside_film, mat_ext_finish, wall.solar_absorptance,
+                                            wall.emittance)
     end
   end
 
@@ -814,7 +815,7 @@ class OSModel
       match, constr_set, cavity_r = Constructions.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, rim_joist.id)
       install_grade = 1
 
-      Constructions.apply_rim_joist(runner, model, surfaces, rim_joist, "#{rim_joist.id} construction",
+      Constructions.apply_rim_joist(runner, model, surfaces, "#{rim_joist.id} construction",
                                     cavity_r, install_grade, constr_set.framing_factor,
                                     constr_set.mat_int_finish, constr_set.osb_thick_in,
                                     constr_set.rigid_r, constr_set.mat_ext_finish,
@@ -1064,8 +1065,8 @@ class OSModel
         end
         mat_ext_finish = nil
 
-        Constructions.apply_wall_construction(runner, model, [surface], foundation_wall, foundation_wall.id, wall_type, assembly_r,
-                                              mat_int_finish, inside_film, outside_film, mat_ext_finish)
+        Constructions.apply_wall_construction(runner, model, [surface], foundation_wall.id, wall_type, assembly_r,
+                                              mat_int_finish, inside_film, outside_film, mat_ext_finish, nil, nil)
       end
     end
   end

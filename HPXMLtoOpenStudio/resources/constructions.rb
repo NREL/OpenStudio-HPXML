@@ -65,7 +65,7 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
   end
 
-  def self.apply_double_stud_wall(runner, model, surfaces, wall, constr_name,
+  def self.apply_double_stud_wall(runner, model, surfaces, constr_name,
                                   cavity_r, install_grade, stud_depth_in, gap_depth_in,
                                   framing_factor, framing_spacing, is_staggered,
                                   mat_int_finish, osb_thick_in, rigid_r,
@@ -138,7 +138,7 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
   end
 
-  def self.apply_cmu_wall(runner, model, surfaces, wall, constr_name,
+  def self.apply_cmu_wall(runner, model, surfaces, constr_name,
                           thick_in, conductivity, density, framing_factor,
                           furring_r, furring_cavity_depth, furring_spacing,
                           mat_int_finish, osb_thick_in, rigid_r,
@@ -209,7 +209,7 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
   end
 
-  def self.apply_icf_wall(runner, model, surfaces, wall, constr_name,
+  def self.apply_icf_wall(runner, model, surfaces, constr_name,
                           icf_r, ins_thick_in, concrete_thick_in, framing_factor,
                           mat_int_finish, osb_thick_in, rigid_r,
                           mat_ext_finish, inside_film, outside_film,
@@ -262,7 +262,7 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
   end
 
-  def self.apply_sip_wall(runner, model, surfaces, wall, constr_name, sip_r,
+  def self.apply_sip_wall(runner, model, surfaces, constr_name, sip_r,
                           sip_thick_in, framing_factor, sheathing_thick_in,
                           mat_int_finish, osb_thick_in, rigid_r,
                           mat_ext_finish, inside_film, outside_film,
@@ -322,7 +322,7 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
   end
 
-  def self.apply_steel_stud_wall(runner, model, surfaces, wall, constr_name,
+  def self.apply_steel_stud_wall(runner, model, surfaces, constr_name,
                                  cavity_r, install_grade, cavity_depth,
                                  cavity_filled, framing_factor, correction_factor,
                                  mat_int_finish, osb_thick_in, rigid_r,
@@ -385,7 +385,7 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
   end
 
-  def self.apply_generic_layered_wall(runner, model, surfaces, wall, constr_name,
+  def self.apply_generic_layered_wall(runner, model, surfaces, constr_name,
                                       thick_ins, conds, denss, specheats,
                                       mat_int_finish, osb_thick_in, rigid_r,
                                       mat_ext_finish, inside_film, outside_film,
@@ -455,7 +455,7 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
   end
 
-  def self.apply_rim_joist(runner, model, surfaces, rim_joist, constr_name,
+  def self.apply_rim_joist(runner, model, surfaces, constr_name,
                            cavity_r, install_grade, framing_factor,
                            mat_int_finish, osb_thick_in,
                            rigid_r, mat_ext_finish, inside_film,
@@ -749,33 +749,33 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
   end
 
-  def self.apply_foundation_wall(runner, model, wall_surfaces, wall_constr_name,
+  def self.apply_foundation_wall(runner, model, surfaces, constr_name,
                                  ext_rigid_ins_offset, int_rigid_ins_offset, ext_rigid_ins_height,
-                                 int_rigid_ins_height, ext_rigid_r, int_rigid_r, wall_mat_int_finish,
-                                 wall_concrete_thick_in, wall_height_above_grade)
+                                 int_rigid_ins_height, ext_rigid_r, int_rigid_r, mat_int_finish,
+                                 concrete_thick_in, height_above_grade)
 
     # Create Kiva foundation
     foundation = apply_kiva_walled_foundation(model, ext_rigid_r, int_rigid_r, ext_rigid_ins_offset,
                                               int_rigid_ins_offset, ext_rigid_ins_height,
-                                              int_rigid_ins_height, wall_height_above_grade,
-                                              wall_concrete_thick_in, wall_mat_int_finish)
+                                              int_rigid_ins_height, height_above_grade,
+                                              concrete_thick_in, mat_int_finish)
 
     # Define materials
-    mat_concrete = Material.Concrete(wall_concrete_thick_in)
+    mat_concrete = Material.Concrete(concrete_thick_in)
 
     # Define construction
-    constr = Construction.new(wall_constr_name, [1])
+    constr = Construction.new(constr_name, [1])
     constr.add_layer(mat_concrete)
-    if not wall_mat_int_finish.nil?
-      constr.add_layer(wall_mat_int_finish)
+    if not mat_int_finish.nil?
+      constr.add_layer(mat_int_finish)
     end
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(runner, wall_surfaces, model)
+    constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Assign surfaces to Kiva foundation
-    wall_surfaces.each do |wall_surface|
-      wall_surface.setAdjacentFoundation(foundation)
+    surfaces.each do |surface|
+      surface.setAdjacentFoundation(foundation)
     end
   end
 
@@ -1279,8 +1279,9 @@ class Constructions
     return non_cavity_r
   end
 
-  def self.apply_wall_construction(runner, model, surfaces, wall, wall_id, wall_type, assembly_r,
-                                   mat_int_finish, inside_film, outside_film, mat_ext_finish)
+  def self.apply_wall_construction(runner, model, surfaces, wall_id, wall_type, assembly_r,
+                                   mat_int_finish, inside_film, outside_film, mat_ext_finish,
+                                   solar_absorptance, emittance)
 
     film_r = inside_film.rvalue + outside_film.rvalue
     if mat_ext_finish.nil?
@@ -1312,8 +1313,8 @@ class Constructions
                            cavity_filled, constr_set.framing_factor,
                            constr_set.mat_int_finish, constr_set.osb_thick_in,
                            constr_set.rigid_r, constr_set.mat_ext_finish,
-                           inside_film, outside_film, wall.solar_absorptance,
-                           wall.emittance)
+                           inside_film, outside_film, solar_absorptance,
+                           emittance)
     elsif wall_type == HPXML::WallTypeSteelStud
       install_grade = 1
       cavity_filled = true
@@ -1328,13 +1329,13 @@ class Constructions
       ]
       match, constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
-      apply_steel_stud_wall(runner, model, surfaces, wall, "#{wall_id} construction",
+      apply_steel_stud_wall(runner, model, surfaces, "#{wall_id} construction",
                             cavity_r, install_grade, constr_set.cavity_thick_in,
                             cavity_filled, constr_set.framing_factor,
                             constr_set.corr_factor, constr_set.mat_int_finish,
                             constr_set.osb_thick_in, constr_set.rigid_r,
                             constr_set.mat_ext_finish, inside_film, outside_film,
-                            wall.solar_absorptance, wall.emittance)
+                            solar_absorptance, emittance)
     elsif wall_type == HPXML::WallTypeDoubleWoodStud
       install_grade = 1
       is_staggered = false
@@ -1345,14 +1346,14 @@ class Constructions
       ]
       match, constr_set, cavity_r = pick_double_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
-      apply_double_stud_wall(runner, model, surfaces, wall, "#{wall_id} construction",
+      apply_double_stud_wall(runner, model, surfaces, "#{wall_id} construction",
                              cavity_r, install_grade, constr_set.stud.thick_in,
                              constr_set.stud.thick_in, constr_set.framing_factor,
                              constr_set.framing_spacing, is_staggered,
                              constr_set.mat_int_finish, constr_set.osb_thick_in,
                              constr_set.rigid_r, constr_set.mat_ext_finish,
-                             inside_film, outside_film, wall.solar_absorptance,
-                             wall.emittance)
+                             inside_film, outside_film, solar_absorptance,
+                             emittance)
     elsif wall_type == HPXML::WallTypeCMU
       density = 119.0 # lb/ft^3
       furring_r = 0
@@ -1365,13 +1366,13 @@ class Constructions
       ]
       match, constr_set, rigid_r = pick_cmu_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
-      apply_cmu_wall(runner, model, surfaces, wall, "#{wall_id} construction",
+      apply_cmu_wall(runner, model, surfaces, "#{wall_id} construction",
                      constr_set.thick_in, constr_set.cond_in, density,
                      constr_set.framing_factor, furring_r,
                      furring_cavity_depth_in, furring_spacing,
                      constr_set.mat_int_finish, constr_set.osb_thick_in,
                      rigid_r, constr_set.mat_ext_finish, inside_film,
-                     outside_film, wall.solar_absorptance, wall.emittance)
+                     outside_film, solar_absorptance, emittance)
     elsif wall_type == HPXML::WallTypeSIP
       sheathing_thick_in = 0.44
 
@@ -1382,12 +1383,12 @@ class Constructions
       ]
       match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
-      apply_sip_wall(runner, model, surfaces, wall, "#{wall_id} construction",
+      apply_sip_wall(runner, model, surfaces, "#{wall_id} construction",
                      cavity_r, constr_set.thick_in, constr_set.framing_factor,
                      constr_set.sheath_thick_in, constr_set.mat_int_finish,
                      constr_set.osb_thick_in, constr_set.rigid_r,
                      constr_set.mat_ext_finish, inside_film, outside_film,
-                     wall.solar_absorptance, wall.emittance)
+                     solar_absorptance, emittance)
     elsif wall_type == HPXML::WallTypeICF
       constr_sets = [
         ICFConstructionSet.new(2.0, 4.0, 0.08, 0.0, 0.5, mat_int_finish, mat_ext_finish),                   # ICF w/4" concrete and 2" rigid ins layers
@@ -1395,13 +1396,13 @@ class Constructions
       ]
       match, constr_set, icf_r = pick_icf_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
-      apply_icf_wall(runner, model, surfaces, wall, "#{wall_id} construction",
+      apply_icf_wall(runner, model, surfaces, "#{wall_id} construction",
                      icf_r, constr_set.ins_thick_in,
                      constr_set.concrete_thick_in, constr_set.framing_factor,
                      constr_set.mat_int_finish, constr_set.osb_thick_in,
                      constr_set.rigid_r, constr_set.mat_ext_finish,
-                     inside_film, outside_film, wall.solar_absorptance,
-                     wall.emittance)
+                     inside_film, outside_film, solar_absorptance,
+                     emittance)
     elsif [HPXML::WallTypeConcrete, HPXML::WallTypeBrick, HPXML::WallTypeAdobe, HPXML::WallTypeStrawBale, HPXML::WallTypeStone, HPXML::WallTypeLog].include? wall_type
       constr_sets = [
         GenericConstructionSet.new(10.0, 0.5, mat_int_finish, mat_ext_finish),                  # w/R-10 rigid
@@ -1438,12 +1439,12 @@ class Constructions
       denss = [base_mat.rho]
       specheats = [base_mat.cp]
 
-      apply_generic_layered_wall(runner, model, surfaces, wall, "#{wall_id} construction",
+      apply_generic_layered_wall(runner, model, surfaces, "#{wall_id} construction",
                                  thick_ins, conds, denss, specheats,
                                  constr_set.mat_int_finish, constr_set.osb_thick_in,
                                  constr_set.rigid_r, constr_set.mat_ext_finish,
-                                 inside_film, outside_film, wall.solar_absorptance,
-                                 wall.emittance)
+                                 inside_film, outside_film, solar_absorptance,
+                                 emittance)
     else
       fail "Unexpected wall type '#{wall_type}'."
     end
