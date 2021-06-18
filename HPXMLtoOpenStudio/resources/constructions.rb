@@ -1953,6 +1953,7 @@ class Construction
 
       # Material already exists?
       model.getSimpleGlazings.each do |mat|
+        next if !mat.name.to_s.start_with?(material.name)
         next if (mat.uFactor - UnitConversions.convert(material.ufactor, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)')).abs > tolerance
         next if (mat.solarHeatGainCoefficient - material.shgc).abs > tolerance
 
@@ -1967,6 +1968,7 @@ class Construction
     else
       # Material already exists?
       model.getStandardOpaqueMaterials.each do |mat|
+        next if !mat.name.to_s.start_with?(material.name)
         next if mat.roughness.downcase.to_s != 'rough'
         next if (mat.thickness - UnitConversions.convert(material.thick_in, 'in', 'm')).abs > tolerance
         next if (mat.conductivity - UnitConversions.convert(material.k, 'Btu/(hr*ft*R)', 'W/(m*K)')).abs > tolerance
