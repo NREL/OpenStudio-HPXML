@@ -1689,9 +1689,9 @@ class HVAC
 
     # For each fan speed, we preserve the W/cfm instead of using the fan power law. This
     # ensures that, e.g., a standalone furnace has the same fan power as a furnace attached
-    # to a # central air conditioner. For multi-speed systems or systems with different
+    # to a central air conditioner. For multi-speed systems or systems with different
     # heating and cooling airflow rates, this essentially means that the W/cfm is treated
-    # as an average value over a range of airflow rates, as opposed to the value at maximum
+    # as an average value over the range of airflow rates, as opposed to the value at maximum
     # airflow rate.
     fan_cfms.sort.each do |fan_cfm|
       fan_ratio = fan_cfm / max_fan_cfm
