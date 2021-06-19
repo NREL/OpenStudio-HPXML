@@ -3819,14 +3819,14 @@ class HVAC
           fault_program.addLine("Set AF_Qgr_c_residual = 0")
           fault_program.addLine("Set AF_EIR_c_residual = 0")
         else
-          fault_program.addLine("Set a1_AF_Qgr_c = 1 - #{cool_cap_fff_curve.coefficient4y}")
+          fault_program.addLine("Set a1_AF_Qgr_c = 1 - (#{cool_cap_fff_curve.coefficient4y})")
           fault_program.addLine("Set a2_AF_Qgr_c = #{cool_cap_fff_curve.coefficient4y}")
           fault_program.addLine('Set a3_AF_Qgr_c = 0')
-          fault_program.addLine("Set a1_AF_EIR_c = 1 - #{cool_eir_fff_curve.coefficient4y}")
+          fault_program.addLine("Set a1_AF_EIR_c = 1 - (#{cool_eir_fff_curve.coefficient4y})")
           fault_program.addLine("Set a2_AF_EIR_c = #{cool_eir_fff_curve.coefficient4y}")
           fault_program.addLine('Set a3_AF_EIR_c = 0')
-          fault_program.addLine("Set AF_Qgr_c_residual = #{cool_cap_fff_curve.coefficient1Constant} + (#{cool_cap_fff_curve.coefficient2w}*#{var1_sensor.name}) + (#{cool_cap_fff_curve.coefficient3x}*#{var2_sensor.name}) + (#{cool_cap_fff_curve.coefficient5z}*#{var4_sensor.name}) - 1") # residual from other terms
-          fault_program.addLine("Set AF_EIR_c_residual = #{cool_eir_fff_curve.coefficient1Constant} + (#{cool_eir_fff_curve.coefficient2w}*#{var1_sensor.name}) + (#{cool_eir_fff_curve.coefficient3x}*#{var2_sensor.name}) + (#{cool_eir_fff_curve.coefficient5z}*#{var4_sensor.name}) - 1") # residual from other terms
+          fault_program.addLine("Set AF_Qgr_c_residual = #{cool_cap_fff_curve.coefficient1Constant} + (#{cool_cap_fff_curve.coefficient2w}*#{var1_sensor.name}) + (#{cool_cap_fff_curve.coefficient3x}*#{var2_sensor.name}) + (#{cool_cap_fff_curve.coefficient5z}*#{var4_sensor.name}) - a1_AF_Qgr_c") # residual from other terms
+          fault_program.addLine("Set AF_EIR_c_residual = #{cool_eir_fff_curve.coefficient1Constant} + (#{cool_eir_fff_curve.coefficient2w}*#{var1_sensor.name}) + (#{cool_eir_fff_curve.coefficient3x}*#{var2_sensor.name}) + (#{cool_eir_fff_curve.coefficient5z}*#{var4_sensor.name}) - a1_AF_EIR_c") # residual from other terms
         end
 
         qgr_values, p_values, ff_chg_values = get_installation_quality_cooling_coeff(f_chg)
@@ -3920,14 +3920,14 @@ class HVAC
           fault_program.addLine("Set AF_Qgr_h_residual = 0")
           fault_program.addLine("Set AF_EIR_h_residual = 0")
         else
-          fault_program.addLine("Set a1_AF_Qgr_h = 1 - #{heat_cap_fff_curve.coefficient4y}")
+          fault_program.addLine("Set a1_AF_Qgr_h = 1 - (#{heat_cap_fff_curve.coefficient4y})")
           fault_program.addLine("Set a2_AF_Qgr_h = #{heat_cap_fff_curve.coefficient4y}")
           fault_program.addLine('Set a3_AF_Qgr_h = 0')
-          fault_program.addLine("Set a1_AF_EIR_h = 1 - #{heat_eir_fff_curve.coefficient4y}")
+          fault_program.addLine("Set a1_AF_EIR_h = 1 - (#{heat_eir_fff_curve.coefficient4y})")
           fault_program.addLine("Set a2_AF_EIR_h = #{heat_eir_fff_curve.coefficient4y}")
           fault_program.addLine('Set a3_AF_EIR_h = 0')
-          fault_program.addLine("Set AF_Qgr_h_residual = #{heat_cap_fff_curve.coefficient1Constant} + (#{heat_cap_fff_curve.coefficient2w}*#{var1_sensor.name}) + (#{heat_cap_fff_curve.coefficient3x}*#{var2_sensor.name}) + (#{heat_cap_fff_curve.coefficient5z}*#{var4_sensor.name}) - 1")
-          fault_program.addLine("Set AF_EIR_h_residual = #{heat_eir_fff_curve.coefficient1Constant} + (#{heat_eir_fff_curve.coefficient2w}*#{var1_sensor.name}) + (#{heat_eir_fff_curve.coefficient3x}*#{var2_sensor.name}) + (#{heat_eir_fff_curve.coefficient5z}*#{var4_sensor.name}) - 1")
+          fault_program.addLine("Set AF_Qgr_h_residual = #{heat_cap_fff_curve.coefficient1Constant} + (#{heat_cap_fff_curve.coefficient2w}*#{var1_sensor.name}) + (#{heat_cap_fff_curve.coefficient3x}*#{var2_sensor.name}) + (#{heat_cap_fff_curve.coefficient5z}*#{var4_sensor.name}) - a1_AF_Qgr_h")
+          fault_program.addLine("Set AF_EIR_h_residual = #{heat_eir_fff_curve.coefficient1Constant} + (#{heat_eir_fff_curve.coefficient2w}*#{var1_sensor.name}) + (#{heat_eir_fff_curve.coefficient3x}*#{var2_sensor.name}) + (#{heat_eir_fff_curve.coefficient5z}*#{var4_sensor.name}) - a1_AF_EIR_h")
         end
 
         qgr_values, p_values, ff_chg_values = get_installation_quality_heating_coeff(f_chg)
