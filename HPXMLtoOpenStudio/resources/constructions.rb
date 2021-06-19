@@ -483,7 +483,7 @@ class Constructions
     mat_rigid = nil
     if rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
-      mat_rigid = Material.new(name: 'RimJoistRigidIns', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
+      mat_rigid = Material.new(name: 'rim joist rigid ins', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
     end
 
     # Set paths
@@ -502,7 +502,7 @@ class Constructions
     if not mat_osb.nil?
       constr.add_layer(mat_osb)
     end
-    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RimJoistStudAndCavity')
+    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'rim joist stud and cavity')
     if not mat_int_finish.nil?
       constr.add_layer(mat_int_finish)
     end
@@ -520,7 +520,8 @@ class Constructions
                                   framing_factor, framing_thick_in,
                                   osb_thick_in, rigid_r,
                                   mat_roofing, has_radiant_barrier,
-                                  inside_film, outside_film, radiant_barrier_grade)
+                                  inside_film, outside_film, radiant_barrier_grade,
+                                  solar_absorptance = nil, emittance = nil)
 
     return if surfaces.empty?
 
@@ -549,7 +550,7 @@ class Constructions
     mat_rigid = nil
     if rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
-      mat_rigid = Material.new(name: 'RoofRigidIns', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
+      mat_rigid = Material.new(name: 'roof rigid ins', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
     end
     mat_rb = nil
     if has_radiant_barrier
@@ -573,12 +574,15 @@ class Constructions
       constr.add_layer(mat_osb)
     end
     if framing_thick_in > 0
-      constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RoofStudAndCavity')
+      constr.add_layer([mat_framing, mat_cavity, mat_gap], 'roof stud and cavity')
     end
     if not mat_rb.nil?
       constr.add_layer(mat_rb)
     end
     constr.add_layer(inside_film)
+
+    constr.set_exterior_material_properties(solar_absorptance, emittance)
+    constr.set_interior_material_properties()
 
     # Create and assign construction to roof surfaces
     constr.create_and_assign_constructions(runner, surfaces, model)
@@ -588,7 +592,8 @@ class Constructions
                                     cavity_r, install_grade, cavity_depth,
                                     filled_cavity, framing_factor, mat_int_finish,
                                     osb_thick_in, rigid_r, mat_roofing, has_radiant_barrier,
-                                    inside_film, outside_film, radiant_barrier_grade)
+                                    inside_film, outside_film, radiant_barrier_grade,
+                                    solar_absorptance = nil, emittance = nil)
 
     return if surfaces.empty?
 
@@ -614,7 +619,7 @@ class Constructions
     mat_rigid = nil
     if rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
-      mat_rigid = Material.new(name: 'RoofRigidIns', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
+      mat_rigid = Material.new(name: 'roof rigid ins', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
     end
     mat_rb = nil
     if has_radiant_barrier
@@ -637,7 +642,7 @@ class Constructions
     if not mat_osb.nil?
       constr.add_layer(mat_osb)
     end
-    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RoofStudAndCavity')
+    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'roof stud and cavity')
     if not mat_int_finish.nil?
       constr.add_layer(mat_int_finish)
     end
@@ -645,6 +650,9 @@ class Constructions
       constr.add_layer(mat_rb)
     end
     constr.add_layer(inside_film)
+
+    constr.set_exterior_material_properties(solar_absorptance, emittance)
+    constr.set_interior_material_properties()
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(runner, surfaces, model)

@@ -621,8 +621,6 @@ class OSModel
       next if surfaces.empty?
 
       # Apply construction
-      solar_abs = roof.solar_absorptance
-      emitt = roof.emittance
       has_radiant_barrier = roof.radiant_barrier
       if has_radiant_barrier
         radiant_barrier_grade = roof.radiant_barrier_grade
@@ -630,12 +628,17 @@ class OSModel
       # FUTURE: Create Constructions.get_air_film(surface) method; use in measure.rb and hpxml_translator_test.rb
       inside_film = Material.AirFilmRoof(Geometry.get_roof_pitch([surfaces[0]]))
       outside_film = Material.AirFilmOutside
-      mat_roofing = Material.RoofMaterial(roof.roof_type, emitt, solar_abs)
+      mat_roofing = Material.RoofMaterial(roof.roof_type)
       if @apply_ashrae140_assumptions
         inside_film = Material.AirFilmRoofASHRAE140
         outside_film = Material.AirFilmOutsideASHRAE140
       end
       mat_int_finish = Material.InteriorFinishMaterial(roof.interior_finish_type, roof.interior_finish_thickness)
+      if mat_int_finish.nil?
+        fallback_mat_int_finish = nil
+      else
+        fallback_mat_int_finish = Material.InteriorFinishMaterial(mat_int_finish.name, 0.1) # Try thin material
+      end
 
       install_grade = 1
       assembly_r = roof.insulation_assembly_r_value
@@ -643,12 +646,12 @@ class OSModel
       if not mat_int_finish.nil?
         # Closed cavity
         constr_sets = [
-          WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 20.0, 0.75, mat_int_finish, mat_roofing), # 2x8, 24" o.c. + R20
-          WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 10.0, 0.75, mat_int_finish, mat_roofing), # 2x8, 24" o.c. + R10
-          WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 0.0, 0.75, mat_int_finish, mat_roofing),  # 2x8, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 0.0, 0.75, mat_int_finish, mat_roofing),      # 2x6, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.07, 0.0, 0.5, mat_int_finish, mat_roofing),       # 2x4, 16" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, nil, mat_roofing),                  # Fallback
+          WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 20.0, 0.75, mat_int_finish, mat_roofing),    # 2x8, 24" o.c. + R20
+          WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 10.0, 0.75, mat_int_finish, mat_roofing),    # 2x8, 24" o.c. + R10
+          WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 0.0, 0.75, mat_int_finish, mat_roofing),     # 2x8, 24" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 0.0, 0.75, mat_int_finish, mat_roofing),         # 2x6, 24" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.07, 0.0, 0.5, mat_int_finish, mat_roofing),          # 2x4, 16" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, fallback_mat_int_finish, mat_roofing), # Fallback
         ]
         match, constr_set, cavity_r = Constructions.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, roof.id)
 
@@ -659,7 +662,8 @@ class OSModel
                                                constr_set.mat_int_finish,
                                                constr_set.osb_thick_in, constr_set.rigid_r,
                                                constr_set.mat_ext_finish, has_radiant_barrier,
-                                               inside_film, outside_film, radiant_barrier_grade)
+                                               inside_film, outside_film, radiant_barrier_grade,
+                                               roof.solar_absorptance, roof.emittance)
       else
         # Open cavity
         constr_sets = [
@@ -679,7 +683,8 @@ class OSModel
                                              framing_factor, framing_thick_in,
                                              constr_set.osb_thick_in, layer_r + constr_set.rigid_r,
                                              mat_roofing, has_radiant_barrier,
-                                             inside_film, outside_film, radiant_barrier_grade)
+                                             inside_film, outside_film, radiant_barrier_grade,
+                                             roof.solar_absorptance, roof.emittance)
       end
       Constructions.check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
     end
@@ -1521,7 +1526,7 @@ class OSModel
     elsif type == 'roof'
       Constructions.apply_open_cavity_roof(runner, model, surfaces, 'AdiabaticRoofConstruction',
                                            0, 1, 7.25, 0.07, 7.25, 0.75, 99,
-                                           Material.RoofMaterial(HPXML::RoofTypeAsphaltShingles, 0.90, 0.75),
+                                           Material.RoofMaterial(HPXML::RoofTypeAsphaltShingles),
                                            false, Material.AirFilmOutside,
                                            Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)), nil)
     end

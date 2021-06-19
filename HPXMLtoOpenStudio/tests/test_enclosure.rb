@@ -27,23 +27,146 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
   end
 
   def test_roofs
-    # TODO
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+
+    # Open cavity, asphalt shingles roof
+    roofs_values = [{ assembly_r: 0.1, layer_names: ['asphalt or fiberglass shingles'] },
+                    { assembly_r: 5.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing'] },
+                    { assembly_r: 20.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing'] }]
+
+    hpxml = _create_hpxml('base.xml')
+    roofs_values.each do |roof_values|
+      hpxml.roofs[0].insulation_assembly_r_value = roof_values[:assembly_r]
+      XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+      model, hpxml = _test_measure(args_hash)
+
+      # Check properties
+      os_surface = model.getSurfaces.select { |s| s.name.to_s.start_with? "#{hpxml.roofs[0].id}:" }[0]
+      os_construction = os_surface.construction.get.to_LayeredConstruction.get
+      _check_layered_construction(hpxml.roofs[0], os_construction, roof_values[:layer_names])
+    end
+
+    # Closed cavity, asphalt shingles roof
+    roofs_values = [{ assembly_r: 0.1, layer_names: ['asphalt or fiberglass shingles', 'roof stud and cavity', 'gypsum board'] },
+                    { assembly_r: 5.0, layer_names: ['asphalt or fiberglass shingles', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] },
+                    { assembly_r: 20.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] }]
+
+    hpxml = _create_hpxml('base-atticroof-cathedral.xml')
+    roofs_values.each do |roof_values|
+      hpxml.roofs[0].insulation_assembly_r_value = roof_values[:assembly_r]
+      XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+      model, hpxml = _test_measure(args_hash)
+
+      # Check properties
+      os_surface = model.getSurfaces.select { |s| s.name.to_s.start_with? "#{hpxml.roofs[0].id}:" }[0]
+      os_construction = os_surface.construction.get.to_LayeredConstruction.get
+      _check_layered_construction(hpxml.roofs[0], os_construction, roof_values[:layer_names])
+    end
+
+    # Closed cavity, Miscellaneous
+    roofs_values = [
+      # Slate or tile
+      [{ assembly_r: 0.1, layer_names: ['slate or tile shingles', 'roof stud and cavity', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['slate or tile shingles', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] },
+       { assembly_r: 20.0, layer_names: ['slate or tile shingles', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity', 'gypsum board'] }],
+      # Metal
+      [{ assembly_r: 0.1, layer_names: ['metal surfacing', 'roof stud and cavity', 'plaster'] },
+       { assembly_r: 5.0, layer_names: ['metal surfacing', 'osb sheathing', 'roof stud and cavity', 'plaster'] },
+       { assembly_r: 20.0, layer_names: ['metal surfacing', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity', 'plaster'] }],
+      # Wood shingles
+      [{ assembly_r: 0.1, layer_names: ['wood shingles or shakes', 'roof stud and cavity', 'wood'] },
+       { assembly_r: 5.0, layer_names: ['wood shingles or shakes', 'osb sheathing', 'roof stud and cavity', 'wood'] },
+       { assembly_r: 20.0, layer_names: ['wood shingles or shakes', 'roof rigid ins', 'osb sheathing', 'roof stud and cavity', 'wood'] }],
+    ]
+
+    hpxml = _create_hpxml('base-enclosure-rooftypes.xml')
+    for i in 0..hpxml.roofs.size - 1
+      roofs_values[i].each do |roof_values|
+        hpxml.roofs[i].insulation_assembly_r_value = roof_values[:assembly_r]
+        XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+        model, hpxml = _test_measure(args_hash)
+
+        # Check properties
+        os_surface = model.getSurfaces.select { |s| s.name.to_s.start_with? "#{hpxml.roofs[i].id}:" }[0]
+        os_construction = os_surface.construction.get.to_LayeredConstruction.get
+        _check_layered_construction(hpxml.roofs[i], os_construction, roof_values[:layer_names])
+      end
+    end
   end
 
   def test_rim_joists
-    # TODO
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+
+    # Wood siding
+    rimjs_values = [{ assembly_r: 0.1, layer_names: ['wood siding', 'rim joist stud and cavity'] },
+                    { assembly_r: 5.0, layer_names: ['wood siding', 'rim joist stud and cavity'] },
+                    { assembly_r: 20.0, layer_names: ['wood siding', 'rim joist rigid ins', 'osb sheathing', 'rim joist stud and cavity'] }]
+
+    hpxml = _create_hpxml('base.xml')
+    rimjs_values.each do |rimj_values|
+      hpxml.rim_joists[0].insulation_assembly_r_value = rimj_values[:assembly_r]
+      XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+      model, hpxml = _test_measure(args_hash)
+
+      # Check properties
+      os_surface = model.getSurfaces.select { |s| s.name.to_s.start_with? "#{hpxml.rim_joists[0].id}:" }[0]
+      os_construction = os_surface.construction.get.to_LayeredConstruction.get
+      _check_layered_construction(hpxml.rim_joists[0], os_construction, rimj_values[:layer_names])
+    end
+
+    # Miscellaneous
+    rimjs_values = [
+      # Aluminum siding
+      [{ assembly_r: 0.1, layer_names: ['aluminum siding', 'rim joist stud and cavity'] },
+       { assembly_r: 5.0, layer_names: ['aluminum siding', 'osb sheathing', 'rim joist stud and cavity'] },
+       { assembly_r: 20.0, layer_names: ['aluminum siding', 'rim joist rigid ins', 'osb sheathing', 'rim joist stud and cavity'] }],
+      # Brick veneer
+      [{ assembly_r: 0.1, layer_names: ['brick veneer', 'rim joist stud and cavity'] },
+       { assembly_r: 5.0, layer_names: ['brick veneer', 'osb sheathing', 'rim joist stud and cavity'] },
+       { assembly_r: 20.0, layer_names: ['brick veneer', 'rim joist rigid ins', 'osb sheathing', 'rim joist stud and cavity'] }],
+      # Fiber cement siding
+      [{ assembly_r: 0.1, layer_names: ['fiber cement siding', 'rim joist stud and cavity'] },
+       { assembly_r: 5.0, layer_names: ['fiber cement siding', 'osb sheathing', 'rim joist stud and cavity'] },
+       { assembly_r: 20.0, layer_names: ['fiber cement siding', 'rim joist rigid ins', 'osb sheathing', 'rim joist stud and cavity'] }],
+      # Stucco
+      [{ assembly_r: 0.1, layer_names: ['stucco', 'rim joist stud and cavity'] },
+       { assembly_r: 5.0, layer_names: ['stucco', 'osb sheathing', 'rim joist stud and cavity'] },
+       { assembly_r: 20.0, layer_names: ['stucco', 'rim joist rigid ins', 'osb sheathing', 'rim joist stud and cavity'] }],
+      # Vinyl siding
+      [{ assembly_r: 0.1, layer_names: ['vinyl siding', 'rim joist stud and cavity'] },
+       { assembly_r: 5.0, layer_names: ['vinyl siding', 'osb sheathing', 'rim joist stud and cavity'] },
+       { assembly_r: 20.0, layer_names: ['vinyl siding', 'rim joist rigid ins', 'osb sheathing', 'rim joist stud and cavity'] }],
+      # None
+      [{ assembly_r: 0.1, layer_names: ['rim joist stud and cavity', 'rim joist stud and cavity'] }, # Note: Below grade material doubled in update_solar_absorptances()
+       { assembly_r: 5.0, layer_names: ['osb sheathing', 'rim joist stud and cavity'] },
+       { assembly_r: 20.0, layer_names: ['rim joist rigid ins', 'osb sheathing', 'rim joist stud and cavity'] }],
+    ]
+
+    hpxml = _create_hpxml('base-enclosure-walltypes.xml')
+    for i in 0..hpxml.rim_joists.size - 1
+      rimjs_values[i].each do |rimj_values|
+        hpxml.rim_joists[i].insulation_assembly_r_value = rimj_values[:assembly_r]
+        XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+        model, hpxml = _test_measure(args_hash)
+
+        # Check properties
+        os_surface = model.getSurfaces.select { |s| s.name.to_s.start_with? "#{hpxml.rim_joists[i].id}:" }[0]
+        os_construction = os_surface.construction.get.to_LayeredConstruction.get
+        _check_layered_construction(hpxml.rim_joists[i], os_construction, rimj_values[:layer_names])
+      end
+    end
   end
 
   def test_walls
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
 
-    air_films = Material.AirFilmOutside.rvalue + Material.AirFilmVertical.rvalue
-
     # Wood Stud wall
-    walls_values = [{ assembly_r: 0.1, layer_names: ['wall stud and cavity'] },
-                    { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall stud and cavity'] },
-                    { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'wall stud and cavity'] }]
+    walls_values = [{ assembly_r: 0.1, layer_names: ['wood siding', 'wall stud and cavity', 'gypsum board'] },
+                    { assembly_r: 5.0, layer_names: ['wood siding', 'osb sheathing', 'wall stud and cavity', 'gypsum board'] },
+                    { assembly_r: 20.0, layer_names: ['wood siding', 'wall rigid ins', 'osb sheathing', 'wall stud and cavity', 'gypsum board'] }]
 
     hpxml = _create_hpxml('base.xml')
     walls_values.each do |wall_values|
@@ -51,66 +174,58 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
       model, hpxml = _test_measure(args_hash)
 
-      expected_layer_names = wall_values[:layer_names]
-      if hpxml.walls[0].siding != HPXML::SidingTypeNone # Add exterior finish
-        expected_layer_names = [hpxml.walls[0].siding] + expected_layer_names
-      end
-      if hpxml.walls[0].interior_finish_type != HPXML::InteriorFinishNone # Add interior finish
-        expected_layer_names << hpxml.walls[0].interior_finish_type
-      end
-
-      # Check wall properties
-      os_wall = model.getSurfaces.select { |w| w.name.to_s.start_with? "#{hpxml.walls[0].id}:" }[0]
-      os_construction = os_wall.construction.get.to_LayeredConstruction.get
-      _check_layered_construction(hpxml.walls[0], os_construction, expected_layer_names)
+      # Check properties
+      os_surface = model.getSurfaces.select { |s| s.name.to_s.start_with? "#{hpxml.walls[0].id}:" }[0]
+      os_construction = os_surface.construction.get.to_LayeredConstruction.get
+      _check_layered_construction(hpxml.walls[0], os_construction, wall_values[:layer_names])
     end
 
+    # Miscellaneous
     walls_values = [
       # CMU wall
-      [{ assembly_r: 0.1, layer_names: ['concrete block'] },
-       { assembly_r: 5.0 + air_films, layer_names: ['wall rigid ins', 'concrete block'] },
-       { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'concrete block'] }],
+      [{ assembly_r: 0.1, layer_names: ['aluminum siding', 'concrete block', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['aluminum siding', 'wall rigid ins', 'concrete block', 'gypsum board'] },
+       { assembly_r: 20.0, layer_names: ['aluminum siding', 'wall rigid ins', 'osb sheathing', 'concrete block', 'gypsum board'] }],
       # Double Stud wall
-      [{ assembly_r: 0.1, layer_names: ['wall stud and cavity', 'wall cavity', 'wall stud and cavity'] },
-       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall stud and cavity', 'wall cavity', 'wall stud and cavity'] },
-       { assembly_r: 20.0 + air_films, layer_names: ['osb sheathing', 'wall stud and cavity', 'wall cavity', 'wall stud and cavity'] }],
+      [{ assembly_r: 0.1, layer_names: ['brick veneer', 'wall stud and cavity', 'wall cavity', 'wall stud and cavity', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['brick veneer', 'osb sheathing', 'wall stud and cavity', 'wall cavity', 'wall stud and cavity', 'gypsum board'] },
+       { assembly_r: 20.0, layer_names: ['brick veneer', 'osb sheathing', 'wall stud and cavity', 'wall cavity', 'wall stud and cavity', 'gypsum board'] }],
       # ICF wall
-      [{ assembly_r: 0.1, layer_names: ['wall ins form', 'wall concrete', 'wall ins form'] },
-       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall ins form', 'wall concrete', 'wall ins form'] },
-       { assembly_r: 20.0 + air_films, layer_names: ['osb sheathing', 'wall ins form', 'wall concrete', 'wall ins form'] }],
+      [{ assembly_r: 0.1, layer_names: ['fiber cement siding', 'wall ins form', 'wall concrete', 'wall ins form', 'gypsum composite board'] },
+       { assembly_r: 5.0, layer_names: ['fiber cement siding', 'osb sheathing', 'wall ins form', 'wall concrete', 'wall ins form', 'gypsum composite board'] },
+       { assembly_r: 20.0, layer_names: ['fiber cement siding', 'osb sheathing', 'wall ins form', 'wall concrete', 'wall ins form', 'gypsum composite board'] }],
       # Log wall
-      [{ assembly_r: 0.1, layer_names: ['wall layer'] },
-       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall layer'] },
-       { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'wall layer'] }],
+      [{ assembly_r: 0.1, layer_names: ['stucco', 'wall layer', 'plaster'] },
+       { assembly_r: 5.0, layer_names: ['stucco', 'osb sheathing', 'wall layer', 'plaster'] },
+       { assembly_r: 20.0, layer_names: ['stucco', 'wall rigid ins', 'osb sheathing', 'wall layer', 'plaster'] }],
       # SIP wall
-      [{ assembly_r: 0.1, layer_names: ['wall spline layer', 'wall ins layer', 'wall spline layer', 'osb sheathing'] },
-       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall spline layer', 'wall ins layer', 'wall spline layer', 'osb sheathing'] },
-       { assembly_r: 20.0 + air_films, layer_names: ['osb sheathing', 'wall spline layer', 'wall ins layer', 'wall spline layer', 'osb sheathing'] }],
+      [{ assembly_r: 0.1, layer_names: ['vinyl siding', 'wall spline layer', 'wall ins layer', 'wall spline layer', 'osb sheathing', 'wood'] },
+       { assembly_r: 5.0, layer_names: ['vinyl siding', 'osb sheathing', 'wall spline layer', 'wall ins layer', 'wall spline layer', 'osb sheathing', 'wood'] },
+       { assembly_r: 20.0, layer_names: ['vinyl siding', 'osb sheathing', 'wall spline layer', 'wall ins layer', 'wall spline layer', 'osb sheathing', 'wood'] }],
       # Solid Concrete wall
       [{ assembly_r: 0.1, layer_names: ['wall layer'] },
-       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall layer'] },
-       { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'wall layer'] }],
+       { assembly_r: 5.0, layer_names: ['osb sheathing', 'wall layer'] },
+       { assembly_r: 20.0, layer_names: ['wall rigid ins', 'osb sheathing', 'wall layer'] }],
       # Steel frame wall
-      [{ assembly_r: 0.1, layer_names: ['wall stud and cavity'] },
-       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall stud and cavity'] },
-       { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'wall stud and cavity'] }],
+      [{ assembly_r: 0.1, layer_names: ['aluminum siding', 'wall stud and cavity', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['aluminum siding', 'osb sheathing', 'wall stud and cavity', 'gypsum board'] },
+       { assembly_r: 20.0, layer_names: ['aluminum siding', 'wall rigid ins', 'osb sheathing', 'wall stud and cavity', 'gypsum board'] }],
       # Stone wall
-      [{ assembly_r: 0.1, layer_names: ['wall layer'] },
-       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall layer'] },
-       { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'wall layer'] }],
+      [{ assembly_r: 0.1, layer_names: ['brick veneer', 'wall layer', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['brick veneer', 'osb sheathing', 'wall layer', 'gypsum board'] },
+       { assembly_r: 20.0, layer_names: ['brick veneer', 'wall rigid ins', 'osb sheathing', 'wall layer', 'gypsum board'] }],
       # Straw Bale wall
-      [{ assembly_r: 0.1, layer_names: ['wall layer'] },
-       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall layer'] },
-       { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'wall layer'] }],
+      [{ assembly_r: 0.1, layer_names: ['fiber cement siding', 'wall layer', 'gypsum composite board'] },
+       { assembly_r: 5.0, layer_names: ['fiber cement siding', 'osb sheathing', 'wall layer', 'gypsum composite board'] },
+       { assembly_r: 20.0, layer_names: ['fiber cement siding', 'wall rigid ins', 'osb sheathing', 'wall layer', 'gypsum composite board'] }],
       # Structural Brick wall
-      [{ assembly_r: 0.1, layer_names: ['wall layer'] },
-       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall layer'] },
-       { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'wall layer'] }],
+      [{ assembly_r: 0.1, layer_names: ['stucco', 'wall layer', 'plaster'] },
+       { assembly_r: 5.0, layer_names: ['stucco', 'osb sheathing', 'wall layer', 'plaster'] },
+       { assembly_r: 20.0, layer_names: ['stucco', 'wall rigid ins', 'osb sheathing', 'wall layer', 'plaster'] }],
       # Adobe wall
-      [{ assembly_r: 0.1, layer_names: ['wall layer'] },
-       { assembly_r: 5.0 + air_films, layer_names: ['osb sheathing', 'wall layer'] },
-       { assembly_r: 20.0 + air_films, layer_names: ['wall rigid ins', 'osb sheathing', 'wall layer'] }],
-
+      [{ assembly_r: 0.1, layer_names: ['vinyl siding', 'wall layer', 'wood'] },
+       { assembly_r: 5.0, layer_names: ['vinyl siding', 'osb sheathing', 'wall layer', 'wood'] },
+       { assembly_r: 20.0, layer_names: ['vinyl siding', 'wall rigid ins', 'osb sheathing', 'wall layer', 'wood'] }],
     ]
 
     hpxml = _create_hpxml('base-enclosure-walltypes.xml')
@@ -120,18 +235,10 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
         XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
         model, hpxml = _test_measure(args_hash)
 
-        expected_layer_names = wall_values[:layer_names]
-        if hpxml.walls[i].siding != HPXML::SidingTypeNone # Add exterior finish
-          expected_layer_names = [hpxml.walls[i].siding] + expected_layer_names
-        end
-        if hpxml.walls[i].interior_finish_type != HPXML::InteriorFinishNone # Add interior finish
-          expected_layer_names << hpxml.walls[i].interior_finish_type
-        end
-
-        # Check wall properties
-        os_wall = model.getSurfaces.select { |w| w.name.to_s.start_with? "#{hpxml.walls[i].id}:" }[0]
-        os_construction = os_wall.construction.get.to_LayeredConstruction.get
-        _check_layered_construction(hpxml.walls[i], os_construction, expected_layer_names)
+        # Check properties
+        os_surface = model.getSurfaces.select { |s| s.name.to_s.start_with? "#{hpxml.walls[i].id}:" }[0]
+        os_construction = os_surface.construction.get.to_LayeredConstruction.get
+        _check_layered_construction(hpxml.walls[i], os_construction, wall_values[:layer_names])
       end
     end
   end
@@ -257,7 +364,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     assert_equal(hpxml_surface.emittance, exterior_layer.thermalAbsorptance)
 
     # Check interior finish solar absorptance and emittance
-    if hpxml_surface.interior_finish_type != HPXML::InteriorFinishNone
+    if ![HPXML::RimJoist].include?(hpxml_surface.class) && hpxml_surface.interior_finish_type != HPXML::InteriorFinishNone
       interior_layer = os_construction.getLayer(os_construction.numLayers - 1).to_OpaqueMaterial.get
       assert_equal(0.6, interior_layer.solarAbsorptance)
       assert_equal(0.9, interior_layer.thermalAbsorptance)

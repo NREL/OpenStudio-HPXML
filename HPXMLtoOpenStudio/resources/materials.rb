@@ -283,8 +283,9 @@ class Material
     return new(name: 'Radiant Barrier', thick_in: 0.0084, k_in: 1629.6, rho: 168.6, cp: 0.22, tAbs: emittance, sAbs: 0.05)
   end
 
-  def self.RoofMaterial(name, emissivity, absorptivity)
-    return new(name: name, thick_in: 0.375, k_in: 1.128, rho: 70, cp: 0.35, tAbs: emissivity, sAbs: absorptivity)
+  def self.RoofMaterial(type, thick_in = nil)
+    thick_in = 0.375 if thick_in.nil?
+    return new(name: type, thick_in: thick_in, k_in: 1.128, rho: 70, cp: 0.35)
   end
 end
 
