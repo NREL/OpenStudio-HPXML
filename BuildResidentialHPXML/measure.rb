@@ -3227,10 +3227,6 @@ class HPXMLFile
       args[:geometry_rim_joist_height] = 0.0
     end
 
-    if args[:geometry_attic_type] == HPXML::AtticTypeConditioned
-      args[:geometry_num_floors_above_grade] -= 1
-    end
-
     if args[:geometry_unit_type] == HPXML::ResidentialTypeSFD
       success = Geometry.create_single_family_detached(runner: runner, model: model, **args)
     elsif args[:geometry_unit_type] == HPXML::ResidentialTypeSFA
