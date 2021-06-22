@@ -2934,6 +2934,10 @@ def set_hpxml_doors(hpxml_file, hpxml)
                     area: 20,
                     azimuth: 180,
                     r_value: 4.4)
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.doors.each do |door|
+      door.azimuth = nil
+    end
   end
 end
 
