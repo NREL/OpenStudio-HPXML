@@ -3836,8 +3836,8 @@ class HVAC
         fault_program.addLine("Set EIR_c3 = #{eir_fff_curve.coefficient3x}")
         fault_program.addLine("Set EIR_c4 = #{eir_fff_curve.coefficient4y}")
         fault_program.addLine("Set EIR_c5 = #{eir_fff_curve.coefficient5z}")
-        fault_program.addLine("Set cap_curve_v_pre = CAP_c1 + (CAP_c2}*#{var1_sensor.name}) + (CAP_c3*#{var2_sensor.name}) + (CAP_c4*FF_AF_c) + (CAP_c5*#{var4_sensor.name})")
-        fault_program.addLine("Set eir_curve_v_pre = EIR_c1 + (EIR_c2}*#{var1_sensor.name}) + (EIR_c3*#{var2_sensor.name}) + (EIR_c4*FF_AF_c)+ (EIR_c5*#{var4_sensor.name})")
+        fault_program.addLine("Set cap_curve_v_pre = CAP_c1 + ((CAP_c2)*#{var1_sensor.name}) + (CAP_c3*#{var2_sensor.name}) + (CAP_c4*FF_AF) + (CAP_c5*#{var4_sensor.name})")
+        fault_program.addLine("Set eir_curve_v_pre = EIR_c1 + ((EIR_c2)*#{var1_sensor.name}) + (EIR_c3*#{var2_sensor.name}) + (EIR_c4*FF_AF)+ (EIR_c5*#{var4_sensor.name})")
       end
 
       # charge defect impact
