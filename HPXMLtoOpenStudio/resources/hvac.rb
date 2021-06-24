@@ -3791,100 +3791,99 @@ class HVAC
       end
     end
 
+    # Apply Cutler curve airflow coefficients to later equations
+    if mode == :clg
+      cap_fflow_spec, eir_fflow_spec = get_airflow_fault_cooling_coeff()
+      qgr_values, p_values, ff_chg_values = get_charge_fault_cooling_coeff(f_chg)
+      suffix = 'clg'
+    elsif mode == :htg
+      cap_fflow_spec, eir_fflow_spec = get_airflow_fault_heating_coeff()
+      qgr_values, p_values, ff_chg_values = get_charge_fault_heating_coeff(f_chg)
+      suffix = 'htg'
+    end
+    fault_program.addLine("Set a1_AF_Qgr_#{suffix} = #{cap_fflow_spec[0]}")
+    fault_program.addLine("Set a2_AF_Qgr_#{suffix} = #{cap_fflow_spec[1]}")
+    fault_program.addLine("Set a3_AF_Qgr_#{suffix} = #{cap_fflow_spec[2]}")
+    fault_program.addLine("Set a1_AF_EIR_#{suffix} = #{eir_fflow_spec[0]}")
+    fault_program.addLine("Set a2_AF_EIR_#{suffix} = #{eir_fflow_spec[1]}")
+    fault_program.addLine("Set a3_AF_EIR_#{suffix} = #{eir_fflow_spec[2]}")
+
+    # charge fault coefficients
+    fault_program.addLine("Set a1_CH_Qgr_#{suffix} = #{qgr_values[0]}")
+    fault_program.addLine("Set a2_CH_Qgr_#{suffix} = #{qgr_values[1]}")
+    fault_program.addLine("Set a3_CH_Qgr_#{suffix} = #{qgr_values[2]}")
+    fault_program.addLine("Set a4_CH_Qgr_#{suffix} = #{qgr_values[3]}")
+
+    fault_program.addLine("Set a1_CH_P_#{suffix} = #{p_values[0]}")
+    fault_program.addLine("Set a2_CH_P_#{suffix} = #{p_values[1]}")
+    fault_program.addLine("Set a3_CH_P_#{suffix} = #{p_values[2]}")
+    fault_program.addLine("Set a4_CH_P_#{suffix} = #{p_values[3]}")
+
+    fault_program.addLine("Set q0_CH_#{suffix} = a1_CH_Qgr_#{suffix}")
+    fault_program.addLine("Set q1_CH_#{suffix} = a2_CH_Qgr_#{suffix}*#{tin_sensor.name}")
+    fault_program.addLine("Set q2_CH_#{suffix} = a3_CH_Qgr_#{suffix}*#{tout_sensor.name}")
+    fault_program.addLine("Set q3_CH_#{suffix} = a4_CH_Qgr_#{suffix}*F_CH")
+    fault_program.addLine("Set Y_CH_Q_#{suffix} = 1 + ((q0_CH_#{suffix}+(q1_CH_#{suffix})+(q2_CH_#{suffix})+(q3_CH_#{suffix}))*F_CH)")
+
+    fault_program.addLine("Set p1_CH_#{suffix} = a1_CH_P_#{suffix}")
+    fault_program.addLine("Set p2_CH_#{suffix} = a2_CH_P_#{suffix}*#{tin_sensor.name}")
+    fault_program.addLine("Set p3_CH_#{suffix} = a3_CH_P_#{suffix}*#{tout_sensor.name}")
+    fault_program.addLine("Set p4_CH_#{suffix} = a4_CH_P_#{suffix}*F_CH")
+    fault_program.addLine("Set Y_CH_COP_#{suffix} = Y_CH_Q_#{suffix}/(1 + (p1_CH_#{suffix}+(p2_CH_#{suffix})+(p3_CH_#{suffix})+(p4_CH_#{suffix}))*F_CH)")
+
+    # air flow defect and charge defect combined to modify airflow curve output
+    ff_ch = 1.0 / (1.0 + (qgr_values[0] + (qgr_values[1] * ff_chg_values[0]) + (qgr_values[2] * ff_chg_values[1]) + (qgr_values[3] * f_chg)) * f_chg)
+    fault_program.addLine("Set FF_CH = #{ff_ch.round(3)}")
+
     for speed in 0..(num_speeds - 1)
       cap_fff_curve = cap_fff_curves[speed]
       cap_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(cap_fff_curve, 'Curve', 'Curve Result')
-      cap_fff_act.setName("#{obj_name} cap clg act")
+      cap_fff_act.setName("#{obj_name} cap act #{suffix}")
 
       eir_fff_curve = eir_fff_curves[speed]
       eir_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(eir_fff_curve, 'Curve', 'Curve Result')
-      eir_fff_act.setName("#{obj_name} eir clg act")
+      eir_fff_act.setName("#{obj_name} eir act #{suffix}")
 
-      # Apply Cutler curve airflow coefficients to later equations
-      if mode == :clg
-        cap_fflow_spec, eir_fflow_spec = get_airflow_fault_cooling_coeff()
-        qgr_values, p_values, ff_chg_values = get_charge_fault_cooling_coeff(f_chg)
-      elsif mode == :htg
-        cap_fflow_spec, eir_fflow_spec = get_airflow_fault_heating_coeff()
-        qgr_values, p_values, ff_chg_values = get_charge_fault_heating_coeff(f_chg)
-      end
-      fault_program.addLine("Set a1_AF_Qgr = #{cap_fflow_spec[0]}")
-      fault_program.addLine("Set a2_AF_Qgr = #{cap_fflow_spec[1]}")
-      fault_program.addLine("Set a3_AF_Qgr = #{cap_fflow_spec[2]}")
-      fault_program.addLine("Set a1_AF_EIR = #{eir_fflow_spec[0]}")
-      fault_program.addLine("Set a2_AF_EIR = #{eir_fflow_spec[1]}")
-      fault_program.addLine("Set a3_AF_EIR = #{eir_fflow_spec[2]}")
-      fault_program.addLine("Set FF_AF = 1.0 + #{airflow_rated_defect_ratio[speed].round(3)}")
+      fault_program.addLine("Set FF_AF_#{suffix} = 1.0 + (#{airflow_rated_defect_ratio[speed].round(3)})")
+      fault_program.addLine("Set q_AF_CH_#{suffix} = (a1_AF_Qgr_#{suffix}) + ((a2_AF_Qgr_#{suffix})*FF_CH) + ((a3_AF_Qgr_#{suffix})*FF_CH*FF_CH)")
+      fault_program.addLine("Set eir_AF_CH_#{suffix} = (a1_AF_EIR_#{suffix}) + ((a2_AF_EIR_#{suffix})*FF_CH) + ((a3_AF_EIR_#{suffix})*FF_CH*FF_CH)")
+      fault_program.addLine("Set p_CH_Q_#{suffix} = Y_CH_Q_#{suffix}/q_AF_CH_#{suffix}")
+      fault_program.addLine("Set p_CH_COP_#{suffix} = Y_CH_COP_#{suffix}*eir_AF_CH_#{suffix}")
+      fault_program.addLine("Set FF_AF_comb_#{suffix} = FF_CH * FF_AF_#{suffix}")
+      fault_program.addLine("Set p_AF_Q_#{suffix} = (a1_AF_Qgr_#{suffix}) + ((a2_AF_Qgr_#{suffix})*FF_AF_comb_#{suffix}) + ((a3_AF_Qgr_#{suffix})*FF_AF_comb_#{suffix}*FF_AF_comb_#{suffix})")
+      fault_program.addLine("Set p_AF_COP_#{suffix} = 1.0 / ((a1_AF_EIR_#{suffix}) + ((a2_AF_EIR_#{suffix})*FF_AF_comb_#{suffix}) + ((a3_AF_EIR_#{suffix})*FF_AF_comb_#{suffix}*FF_AF_comb_#{suffix}))")
+      fault_program.addLine("Set CAP_Cutler_Curve_Pre_#{suffix} = (a1_AF_Qgr_#{suffix}) + ((a2_AF_Qgr_#{suffix})*FF_AF_#{suffix}) + ((a3_AF_Qgr_#{suffix})*FF_AF_#{suffix}*FF_AF_#{suffix})")
+      fault_program.addLine("Set EIR_Cutler_Curve_Pre_#{suffix} = (a1_AF_EIR_#{suffix}) + ((a2_AF_EIR_#{suffix})*FF_AF_#{suffix}) + ((a3_AF_EIR_#{suffix})*FF_AF_#{suffix}*FF_AF_#{suffix})")
+      fault_program.addLine("Set CAP_Cutler_Curve_After_#{suffix} = p_CH_Q_#{suffix} * p_AF_Q_#{suffix}")
+      fault_program.addLine("Set EIR_Cutler_Curve_After_#{suffix} = (1.0 / (p_CH_COP_#{suffix} * p_AF_COP_#{suffix}))")
+      fault_program.addLine("Set CAP_IQ_adj_#{suffix} = CAP_Cutler_Curve_After_#{suffix} / CAP_Cutler_Curve_Pre_#{suffix}")
+      fault_program.addLine("Set EIR_IQ_adj_#{suffix} = EIR_Cutler_Curve_After_#{suffix} / EIR_Cutler_Curve_Pre_#{suffix}")
       # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
       if (not clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit) && (not clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit)
-        fault_program.addLine("Set CAP_c1 = #{cap_fff_curve.coefficient1Constant}")
-        fault_program.addLine("Set CAP_c2 = #{cap_fff_curve.coefficient2x}")
-        fault_program.addLine("Set CAP_c3 = #{cap_fff_curve.coefficient3xPOW2}")
-        fault_program.addLine("Set EIR_c1 = #{eir_fff_curve.coefficient1Constant}")
-        fault_program.addLine("Set EIR_c2 = #{eir_fff_curve.coefficient2x}")
-        fault_program.addLine("Set EIR_c3 = #{eir_fff_curve.coefficient3xPOW2}")
-        fault_program.addLine('Set cap_curve_v_pre = (CAP_c1) + ((CAP_c2)*FF_AF) + ((CAP_c3)*FF_AF*FF_AF)')
-        fault_program.addLine('Set eir_curve_v_pre = (EIR_c1) + ((EIR_c2)*FF_AF) + ((EIR_c3)*FF_AF*FF_AF)')
+        fault_program.addLine("Set CAP_c1_#{suffix} = #{cap_fff_curve.coefficient1Constant}")
+        fault_program.addLine("Set CAP_c2_#{suffix} = #{cap_fff_curve.coefficient2x}")
+        fault_program.addLine("Set CAP_c3_#{suffix} = #{cap_fff_curve.coefficient3xPOW2}")
+        fault_program.addLine("Set EIR_c1_#{suffix} = #{eir_fff_curve.coefficient1Constant}")
+        fault_program.addLine("Set EIR_c2_#{suffix} = #{eir_fff_curve.coefficient2x}")
+        fault_program.addLine("Set EIR_c3_#{suffix} = #{eir_fff_curve.coefficient3xPOW2}")
+        fault_program.addLine("Set cap_curve_v_pre_#{suffix} = (CAP_c1_#{suffix}) + ((CAP_c2_#{suffix})*FF_AF_#{suffix}) + ((CAP_c3_#{suffix})*FF_AF_#{suffix}*FF_AF_#{suffix})")
+        fault_program.addLine("Set eir_curve_v_pre_#{suffix} = (EIR_c1_#{suffix}) + ((EIR_c2_#{suffix})*FF_AF_#{suffix}) + ((EIR_c3_#{suffix})*FF_AF_#{suffix}*FF_AF_#{suffix})")
       else
-        fault_program.addLine("Set CAP_c1 = #{cap_fff_curve.coefficient1Constant}")
-        fault_program.addLine("Set CAP_c2 = #{cap_fff_curve.coefficient2w}")
-        fault_program.addLine("Set CAP_c3 = #{cap_fff_curve.coefficient3x}")
-        fault_program.addLine("Set CAP_c4 = #{cap_fff_curve.coefficient4y}")
-        fault_program.addLine("Set CAP_c5 = #{cap_fff_curve.coefficient5z}")
-        fault_program.addLine("Set EIR_c1 = #{eir_fff_curve.coefficient1Constant}")
-        fault_program.addLine("Set EIR_c2 = #{eir_fff_curve.coefficient2w}")
-        fault_program.addLine("Set EIR_c3 = #{eir_fff_curve.coefficient3x}")
-        fault_program.addLine("Set EIR_c4 = #{eir_fff_curve.coefficient4y}")
-        fault_program.addLine("Set EIR_c5 = #{eir_fff_curve.coefficient5z}")
-        fault_program.addLine("Set cap_curve_v_pre = CAP_c1 + ((CAP_c2)*#{var1_sensor.name}) + (CAP_c3*#{var2_sensor.name}) + (CAP_c4*FF_AF) + (CAP_c5*#{var4_sensor.name})")
-        fault_program.addLine("Set eir_curve_v_pre = EIR_c1 + ((EIR_c2)*#{var1_sensor.name}) + (EIR_c3*#{var2_sensor.name}) + (EIR_c4*FF_AF)+ (EIR_c5*#{var4_sensor.name})")
+        fault_program.addLine("Set CAP_c1_#{suffix} = #{cap_fff_curve.coefficient1Constant}")
+        fault_program.addLine("Set CAP_c2_#{suffix} = #{cap_fff_curve.coefficient2w}")
+        fault_program.addLine("Set CAP_c3_#{suffix} = #{cap_fff_curve.coefficient3x}")
+        fault_program.addLine("Set CAP_c4_#{suffix} = #{cap_fff_curve.coefficient4y}")
+        fault_program.addLine("Set CAP_c5_#{suffix} = #{cap_fff_curve.coefficient5z}")
+        fault_program.addLine("Set EIR_c1_#{suffix} = #{eir_fff_curve.coefficient1Constant}")
+        fault_program.addLine("Set EIR_c2_#{suffix} = #{eir_fff_curve.coefficient2w}")
+        fault_program.addLine("Set EIR_c3_#{suffix} = #{eir_fff_curve.coefficient3x}")
+        fault_program.addLine("Set EIR_c4_#{suffix} = #{eir_fff_curve.coefficient4y}")
+        fault_program.addLine("Set EIR_c5_#{suffix} = #{eir_fff_curve.coefficient5z}")
+        fault_program.addLine("Set cap_curve_v_pre_#{suffix} = CAP_c1_#{suffix} + ((CAP_c2_#{suffix})*#{var1_sensor.name}) + (CAP_c3_#{suffix}*#{var2_sensor.name}) + (CAP_c4_#{suffix}*FF_AF_#{suffix}) + (CAP_c5_#{suffix}*#{var4_sensor.name})")
+        fault_program.addLine("Set eir_curve_v_pre_#{suffix} = EIR_c1_#{suffix} + ((EIR_c2_#{suffix})*#{var1_sensor.name}) + (EIR_c3_#{suffix}*#{var2_sensor.name}) + (EIR_c4_#{suffix}*FF_AF_#{suffix})+ (EIR_c5_#{suffix}*#{var4_sensor.name})")
       end
-
-      # charge defect impact
-      fault_program.addLine("Set a1_CH_Qgr = #{qgr_values[0]}")
-      fault_program.addLine("Set a2_CH_Qgr = #{qgr_values[1]}")
-      fault_program.addLine("Set a3_CH_Qgr = #{qgr_values[2]}")
-      fault_program.addLine("Set a4_CH_Qgr = #{qgr_values[3]}")
-
-      fault_program.addLine("Set a1_CH_P = #{p_values[0]}")
-      fault_program.addLine("Set a2_CH_P = #{p_values[1]}")
-      fault_program.addLine("Set a3_CH_P = #{p_values[2]}")
-      fault_program.addLine("Set a4_CH_P = #{p_values[3]}")
-
-      fault_program.addLine('Set q0_CH = a1_CH_Qgr')
-      fault_program.addLine("Set q1_CH = a2_CH_Qgr*#{tin_sensor.name}")
-      fault_program.addLine("Set q2_CH = a3_CH_Qgr*#{tout_sensor.name}")
-      fault_program.addLine('Set q3_CH = a4_CH_Qgr*F_CH')
-      fault_program.addLine('Set Y_CH_Q = 1 + ((q0_CH+(q1_CH)+(q2_CH)+(q3_CH))*F_CH)')
-
-      fault_program.addLine('Set p1_CH = a1_CH_P')
-      fault_program.addLine("Set p2_CH = a2_CH_P*#{tin_sensor.name}")
-      fault_program.addLine("Set p3_CH = a3_CH_P*#{tout_sensor.name}")
-      fault_program.addLine('Set p4_CH = a4_CH_P*F_CH')
-      fault_program.addLine('Set Y_CH_COP = Y_CH_Q/(1 + (p1_CH+(p2_CH)+(p3_CH)+(p4_CH))*F_CH)')
-
-      # air flow defect and charge defect combined to modify airflow curve output
-      ff_ch = 1.0 / (1.0 + (qgr_values[0] + (qgr_values[1] * ff_chg_values[0]) + (qgr_values[2] * ff_chg_values[1]) + (qgr_values[3] * f_chg)) * f_chg)
-      fault_program.addLine("Set FF_CH = #{ff_ch.round(3)}")
-      fault_program.addLine('Set FF_AF_comb = FF_CH * FF_AF')
-
-      fault_program.addLine('Set q_AF_CH = (a1_AF_Qgr) + ((a2_AF_Qgr)*FF_CH) + ((a3_AF_Qgr)*FF_CH*FF_CH)')
-      fault_program.addLine('Set eir_AF_CH = (a1_AF_EIR) + ((a2_AF_EIR)*FF_CH) + ((a3_AF_EIR)*FF_CH*FF_CH)')
-      fault_program.addLine('Set p_CH_Q = Y_CH_Q/q_AF_CH')
-      fault_program.addLine('Set p_CH_COP = Y_CH_COP*eir_AF_CH')
-
-      fault_program.addLine('Set p_AF_Q = (a1_AF_Qgr) + ((a2_AF_Qgr)*FF_AF_comb) + ((a3_AF_Qgr)*FF_AF_comb*FF_AF_comb)')
-      fault_program.addLine('Set p_AF_COP = 1.0 / ((a1_AF_EIR) + ((a2_AF_EIR)*FF_AF_comb) + ((a3_AF_EIR)*FF_AF_comb*FF_AF_comb))')
-
-      fault_program.addLine('Set CAP_Cutler_Curve_Pre = (a1_AF_Qgr) + ((a2_AF_Qgr)*FF_AF) + ((a3_AF_Qgr)*FF_AF*FF_AF)')
-      fault_program.addLine('Set EIR_Cutler_Curve_Pre = (a1_AF_EIR) + ((a2_AF_EIR)*FF_AF) + ((a3_AF_EIR)*FF_AF*FF_AF)')
-      fault_program.addLine('Set CAP_Cutler_Curve_After = p_CH_Q * p_AF_Q')
-      fault_program.addLine('Set EIR_Cutler_Curve_After = (1.0 / (p_CH_COP * p_AF_COP))')
-      fault_program.addLine('Set CAP_IQ_adjustment = CAP_Cutler_Curve_After / CAP_Cutler_Curve_Pre')
-      fault_program.addLine('Set EIR_IQ_adjustment = EIR_Cutler_Curve_After / EIR_Cutler_Curve_Pre')
-
-      fault_program.addLine("Set #{cap_fff_act.name} = cap_curve_v_pre * CAP_IQ_adjustment")
-      fault_program.addLine("Set #{eir_fff_act.name} = eir_curve_v_pre * EIR_IQ_adjustment")
+      fault_program.addLine("Set #{cap_fff_act.name} = cap_curve_v_pre_#{suffix} * CAP_IQ_adj_#{suffix}")
+      fault_program.addLine("Set #{eir_fff_act.name} = eir_curve_v_pre_#{suffix} * EIR_IQ_adj_#{suffix}")
     end
   end
 
@@ -3922,7 +3921,7 @@ class HVAC
 
     return if cool_airflow_rated_defect_ratio.empty? && heat_airflow_rated_defect_ratio.empty?
 
-    obj_name = "#{unitary_system.name} install quality"
+    obj_name = "#{unitary_system.name} IQ"
 
     tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
     tin_sensor.setName("#{obj_name} tin s")
