@@ -21,6 +21,7 @@ __New Features__
 - For water heaters w/ UEF, allows `UsageBin` instead of `FirstHourRating` (or defaults if neither provided).
 - Updates the reporting measure to register all outputs from the annual CSV with the OS runner (for use in, e.g., PAT).
 - Switches to the EnergyPlus Fan:SystemModel object for all HVAC systems.
+- Use constant Cutler curve coefficients in installation quality calculations instead of coil curve coefficients for two-speed, variable-speed systems and ground source heat pump.
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
