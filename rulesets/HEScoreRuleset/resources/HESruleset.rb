@@ -729,6 +729,7 @@ class HEScoreRuleset
   def self.set_systems_water_heater(orig_hpxml, new_hpxml)
     orig_hpxml.water_heating_systems.each do |orig_water_heater|
       energy_factor = orig_water_heater.energy_factor
+      uniform_energy_factor = orig_water_heater.uniform_energy_factor
       fuel_type = orig_water_heater.fuel_type
       water_heater_type = orig_water_heater.water_heater_type
       year_installed = orig_water_heater.year_installed
@@ -736,10 +737,9 @@ class HEScoreRuleset
 
       if not energy_factor.nil?
         # Do nothing, we already have the energy factor
-      elsif not orig_water_heater.uniform_energy_factor.nil?
+      elsif not uniform_energy_factor.nil?
         # Convert to EF
-        # FUTURE: Remove this conversion and use UEF directly; requires FHR input/assumption for storage water heaters
-        energy_factor = Waterheater.calc_ef_from_uef(orig_water_heater)
+        first_hour_rating = 60.0 # Maps to "medium" bin
       elsif energy_star
         energy_factor = lookup_water_heater_efficiency(year_installed,
                                                        fuel_type,
@@ -781,6 +781,8 @@ class HEScoreRuleset
                                           fraction_dhw_load_served: 1.0,
                                           heating_capacity: heating_capacity,
                                           energy_factor: energy_factor,
+                                          uniform_energy_factor: uniform_energy_factor,
+                                          first_hour_rating: first_hour_rating,
                                           related_hvac_idref: orig_water_heater.related_hvac_idref)
     end
   end
