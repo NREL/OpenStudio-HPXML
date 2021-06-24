@@ -667,6 +667,7 @@ class HEScoreRuleset
 
         frac_inside += orig_duct.duct_fraction_area
       end
+      sealed = orig_dist.duct_system_sealed
 
       cfm25_s = cfm25_r = nil
       orig_dist.duct_leakage_measurements.each do |m|
@@ -682,8 +683,10 @@ class HEScoreRuleset
       if (cfm25_s.nil? || cfm25_r.nil?) && (orig_dist.duct_leakage_measurements.size > 0)
         fail 'Invalid DuctLeakageMeasurements provided.'
       end
+      if (not cfm_25_s.nil?) && (not sealed.nil?)
+        fail 'Both DuctLeakageMeasurements and DuctSystemSealed were provided.'
+      end
 
-      sealed = orig_dist.duct_system_sealed
       lto_units, lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(@ncfl_ag, @cfa, sealed, frac_inside, cfm25_s, cfm25_r)
 
       # Supply duct leakage to the outside
