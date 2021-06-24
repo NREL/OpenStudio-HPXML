@@ -683,7 +683,7 @@ class HEScoreRuleset
       if (cfm25_s.nil? || cfm25_r.nil?) && (orig_dist.duct_leakage_measurements.size > 0)
         fail 'Invalid DuctLeakageMeasurements provided.'
       end
-      if (not cfm_25_s.nil?) && (not sealed.nil?)
+      if (not cfm25_s.nil?) && (not sealed.nil?)
         fail 'Both DuctLeakageMeasurements and DuctSystemSealed were provided.'
       end
 
