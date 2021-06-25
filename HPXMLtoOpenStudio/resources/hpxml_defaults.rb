@@ -269,6 +269,7 @@ class HPXMLDefaults
     default_ach = nil
     hpxml.attics.each do |attic|
       next unless attic.attic_type == HPXML::AtticTypeVented
+
       # check existing sla and ach
       default_sla = attic.vented_attic_sla unless attic.vented_attic_sla.nil?
       default_ach = attic.vented_attic_ach unless attic.vented_attic_ach.nil?
@@ -283,6 +284,7 @@ class HPXMLDefaults
     end
     vented_attics.each do |vented_attic|
       next unless (vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_ach.nil?)
+
       if not default_ach.nil? # ACH specified
         vented_attic.vented_attic_ach = default_ach
       else # Use SLA
@@ -299,6 +301,7 @@ class HPXMLDefaults
     default_sla = Airflow.get_default_vented_crawl_sla()
     hpxml.foundations.each do |foundation|
       next unless foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented
+
       # check existing sla
       default_sla = foundation.vented_crawlspace_sla unless foundation.vented_crawlspace_sla.nil?
 
@@ -312,6 +315,7 @@ class HPXMLDefaults
     end
     vented_crawls.each do |vented_crawl|
       next unless vented_crawl.vented_crawlspace_sla.nil?
+
       vented_crawl.vented_crawlspace_sla = default_sla
       vented_crawl.vented_crawlspace_sla_isdefaulted = true
     end
@@ -351,6 +355,7 @@ class HPXMLDefaults
         roof.interior_finish_type_isdefaulted = true
       end
       next unless roof.interior_finish_thickness.nil?
+
       if roof.interior_finish_type != HPXML::InteriorFinishNone
         roof.interior_finish_thickness = 0.5
         roof.interior_finish_thickness_isdefaulted = true
@@ -416,6 +421,7 @@ class HPXMLDefaults
         wall.interior_finish_type_isdefaulted = true
       end
       next unless wall.interior_finish_thickness.nil?
+
       if wall.interior_finish_type != HPXML::InteriorFinishNone
         wall.interior_finish_thickness = 0.5
         wall.interior_finish_thickness_isdefaulted = true
@@ -438,6 +444,7 @@ class HPXMLDefaults
         foundation_wall.interior_finish_type_isdefaulted = true
       end
       next unless foundation_wall.interior_finish_thickness.nil?
+
       if foundation_wall.interior_finish_type != HPXML::InteriorFinishNone
         foundation_wall.interior_finish_thickness = 0.5
         foundation_wall.interior_finish_thickness_isdefaulted = true
@@ -458,6 +465,7 @@ class HPXMLDefaults
         frame_floor.interior_finish_type_isdefaulted = true
       end
       next unless frame_floor.interior_finish_thickness.nil?
+
       if frame_floor.interior_finish_type != HPXML::InteriorFinishNone
         frame_floor.interior_finish_thickness = 0.5
         frame_floor.interior_finish_thickness_isdefaulted = true
@@ -639,6 +647,7 @@ class HPXMLDefaults
     # Default boiler EAE
     hpxml.heating_systems.each do |heating_system|
       next unless heating_system.electric_auxiliary_energy.nil?
+
       heating_system.electric_auxiliary_energy_isdefaulted = true
       heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system)
       heating_system.shared_loop_watts = nil
@@ -874,6 +883,7 @@ class HPXMLDefaults
                    HPXML::HVACTypeWallFurnace,
                    HPXML::HVACTypeFloorFurnace,
                    HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
+
       HVAC.set_heat_rated_cfm_per_ton(heating_system)
     end
     hpxml.heat_pumps.each do |heat_pump|
@@ -953,6 +963,7 @@ class HPXMLDefaults
       end
 
       next unless hvac_control.seasons_cooling_begin_month.nil? || hvac_control.seasons_cooling_begin_day.nil? || hvac_control.seasons_cooling_end_month.nil? || hvac_control.seasons_cooling_end_day.nil?
+
       hvac_control.seasons_cooling_begin_month = 1
       hvac_control.seasons_cooling_begin_day = 1
       hvac_control.seasons_cooling_end_month = 12
@@ -1150,6 +1161,7 @@ class HPXMLDefaults
         water_heating_system.location_isdefaulted = true
       end
       next unless water_heating_system.usage_bin.nil? && (not water_heating_system.uniform_energy_factor.nil?) # FHR & UsageBin only applies to UEF
+
       if not water_heating_system.first_hour_rating.nil?
         water_heating_system.usage_bin = Waterheater.get_usage_bin_from_first_hour_rating(water_heating_system.first_hour_rating)
       else

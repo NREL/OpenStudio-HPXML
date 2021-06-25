@@ -1562,6 +1562,7 @@ class HVAC
       if (sensors.size != 1) || (mode != 'primary_htg')
         fail 'Unexpected situation.'
       end
+
       fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{mode} = #{fan_or_pump_sensor.name}")
     else
       sensors.each do |mode, sensor|
@@ -4196,6 +4197,7 @@ class HVAC
       if is_central_air_conditioner_and_furnace(hpxml, heating_system, heating_system.attached_cooling_system)
         next # Already processed combined AC+furnace
       end
+
       hvac_systems << { cooling: nil,
                         heating: heating_system }
     end
