@@ -362,7 +362,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     require 'csv'
     CSV.open(results_csv_path, 'w') do |csv|
       csv << column_headers
-      results.each do |xml, xml_results|
+      results.sort.each do |xml, xml_results|
         csv << [xml] + xml_results.values.map { |v| v.round(2) }
       end
     end
