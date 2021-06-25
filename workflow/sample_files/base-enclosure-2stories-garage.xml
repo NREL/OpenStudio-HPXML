@@ -463,6 +463,30 @@
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>84.375</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <DuctType>return</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>28.125</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <DuctType>supply</DuctType>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
+                  <DuctLocation>exterior wall</DuctLocation>
+                  <DuctSurfaceArea>9.375</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <DuctType>return</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>living space</DuctLocation>
+                  <DuctSurfaceArea>3.125</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <DuctType>supply</DuctType>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>112.5</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
@@ -470,18 +494,6 @@
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>37.5</DuctSurfaceArea>
-                </Ducts>
-                <Ducts>
-                  <DuctType>supply</DuctType>
-                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
-                  <DuctLocation>exterior wall</DuctLocation>
-                  <DuctSurfaceArea>37.5</DuctSurfaceArea>
-                </Ducts>
-                <Ducts>
-                  <DuctType>return</DuctType>
-                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>living space</DuctLocation>
-                  <DuctSurfaceArea>12.5</DuctSurfaceArea>
                 </Ducts>
                 <NumberofReturnRegisters>3</NumberofReturnRegisters>
               </AirDistribution>

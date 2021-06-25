@@ -5557,6 +5557,8 @@ class HPXML < Object
     # Check for errors across objects #
     # ------------------------------- #
 
+    # FUTURE: Move these to EPvalidator.xml
+
     # Check for globally unique SystemIdentifier IDs and empty IDs
     sys_ids = {}
     self.class::HPXML_ATTRS.each do |attribute|
@@ -5593,9 +5595,24 @@ class HPXML < Object
     end
 
     # Check sum of HVAC FractionDHWLoadServed == 1
-    frac_dhw_load = @water_heating_systems.map { |dhw| dhw.fraction_dhw_load_served.to_f }.sum(0.0)
-    if (frac_dhw_load > 0) && ((frac_dhw_load < 0.99) || (frac_dhw_load > 1.01)) # Use 0.99/1.01 in case of rounding
-      errors << "Expected FractionDHWLoadServed to sum to 1, but calculated sum is #{frac_dhw_load.round(2)}."
+    if @water_heating_systems.size > 0
+      frac_dhw_load = @water_heating_systems.map { |dhw| dhw.fraction_dhw_load_served.to_f }.sum(0.0)
+      if (frac_dhw_load < 0.99) || (frac_dhw_load > 1.01) # Use 0.99/1.01 in case of rounding
+        errors << "Expected FractionDHWLoadServed to sum to 1, but calculated sum is #{frac_dhw_load.round(2)}."
+      end
+    end
+
+    # Check sum of Ducts FractionDuctArea == 1
+    @hvac_distributions.each do |hvac_dist|
+      [HPXML::DuctTypeSupply, HPXML::DuctTypeReturn].each do |duct_type|
+        ducts_with_fractions = hvac_dist.ducts.select { |du| du.duct_type == duct_type && !du.duct_fraction_area.nil? }
+        next unless ducts_with_fractions.size > 0
+
+        ducts_frac_area = ducts_with_fractions.map { |du| Float(du.duct_fraction_area) }.sum()
+        if (ducts_frac_area < 0.99) || (ducts_frac_area > 1.01) # Use 0.99/1.01 in case of rounding
+          errors << "Expected FractionDuctArea for Ducts (of type #{duct_type}) to sum to 1, but calculated sum is #{ducts_frac_area.round(2)}."
+        end
+      end
     end
 
     # Check sum of lighting fractions in a location <= 1

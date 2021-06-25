@@ -965,15 +965,6 @@ class HPXMLDefaults
   end
 
   def self.apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
-    # Check either all ducts have location and surface area or all ducts have no location and surface area
-    n_ducts = 0
-    n_ducts_to_be_defaulted = 0
-    hpxml.hvac_distributions.each do |hvac_distribution|
-      n_ducts += hvac_distribution.ducts.size
-      n_ducts_to_be_defaulted += hvac_distribution.ducts.select { |duct| duct.duct_surface_area.nil? && duct.duct_location.nil? }.size
-    end
-    fail if n_ducts_to_be_defaulted > 0 && (n_ducts != n_ducts_to_be_defaulted) # EPvalidator.xml should prevent this
-
     hpxml.hvac_distributions.each do |hvac_distribution|
       next unless [HPXML::HVACDistributionTypeAir].include? hvac_distribution.distribution_system_type
 
@@ -983,44 +974,63 @@ class HPXMLDefaults
         hvac_distribution.number_of_return_registers_isdefaulted = true
       end
 
+      next if hvac_distribution.ducts.empty?
+
       # Default ducts
+
       cfa_served = hvac_distribution.conditioned_floor_area_served
       n_returns = hvac_distribution.number_of_return_registers
-
       supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
       return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
-      [supply_ducts, return_ducts].each do |ducts|
-        ducts.each do |duct|
-          next unless duct.duct_surface_area.nil?
 
-          primary_duct_area, secondary_duct_area = HVAC.get_default_duct_surface_area(duct.duct_type, ncfl_ag, cfa_served, n_returns).map { |area| area / ducts.size }
-          primary_duct_location, secondary_duct_location = HVAC.get_default_duct_locations(hpxml)
-          if primary_duct_location.nil? # If a home doesn't have any non-living spaces (outside living space), place all ducts in living space.
-            duct.duct_surface_area = primary_duct_area + secondary_duct_area
-            duct.duct_location = secondary_duct_location
-          else
-            duct.duct_surface_area = primary_duct_area
-            duct.duct_location = primary_duct_location
-            if secondary_duct_area > 0
-              hvac_distribution.ducts.add(duct_type: duct.duct_type,
-                                          duct_insulation_r_value: duct.duct_insulation_r_value,
-                                          duct_location: secondary_duct_location,
-                                          duct_location_isdefaulted: true,
-                                          duct_surface_area: secondary_duct_area,
-                                          duct_surface_area_isdefaulted: true)
+      if hvac_distribution.ducts[0].duct_location.nil?
+        # Default both duct location(s) and duct surface area(s)
+        [supply_ducts, return_ducts].each do |ducts|
+          ducts.each do |duct|
+            primary_duct_area, secondary_duct_area = HVAC.get_default_duct_surface_area(duct.duct_type, ncfl_ag, cfa_served, n_returns).map { |area| area / ducts.size }
+            primary_duct_location, secondary_duct_location = HVAC.get_default_duct_locations(hpxml)
+            if primary_duct_location.nil? # If a home doesn't have any non-living spaces (outside living space), place all ducts in living space.
+              duct.duct_surface_area = primary_duct_area + secondary_duct_area
+              duct.duct_surface_area_isdefaulted = true
+              duct.duct_location = secondary_duct_location
+              duct.duct_location_isdefaulted = true
+            else
+              duct.duct_surface_area = primary_duct_area
+              duct.duct_surface_area_isdefaulted = true
+              duct.duct_location = primary_duct_location
+              duct.duct_location_isdefaulted = true
+
+              if secondary_duct_area > 0
+                hvac_distribution.ducts.add(duct_type: duct.duct_type,
+                                            duct_insulation_r_value: duct.duct_insulation_r_value,
+                                            duct_location: secondary_duct_location,
+                                            duct_location_isdefaulted: true,
+                                            duct_surface_area: secondary_duct_area,
+                                            duct_surface_area_isdefaulted: true)
+              end
             end
           end
-          duct.duct_surface_area_isdefaulted = true
-          duct.duct_location_isdefaulted = true
+        end
+
+      elsif hvac_distribution.ducts[0].duct_surface_area.nil?
+        # Default duct surface area(s)
+        [supply_ducts, return_ducts].each do |ducts|
+          ducts.each do |duct|
+            total_duct_area = HVAC.get_default_duct_surface_area(duct.duct_type, ncfl_ag, cfa_served, n_returns).sum()
+            duct.duct_surface_area = total_duct_area * duct.duct_fraction_area
+            duct.duct_surface_area_isdefaulted = true
+          end
         end
       end
 
-      # Also update FractionDuctArea for informational purposes
+      # Calculate FractionDuctArea from DuctSurfaceArea
       supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
       return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
       total_supply_area = supply_ducts.map { |d| d.duct_surface_area }.sum
       total_return_area = return_ducts.map { |d| d.duct_surface_area }.sum
       (supply_ducts + return_ducts).each do |duct|
+        next unless duct.duct_fraction_area.nil?
+
         if duct.duct_type == HPXML::DuctTypeSupply
           duct.duct_fraction_area = (duct.duct_surface_area / total_supply_area).round(3)
           duct.duct_fraction_area_isdefaulted = true

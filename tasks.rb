@@ -97,6 +97,7 @@ def create_hpxmls
     'invalid_files/invalid-datatype-integer.xml' => 'base.xml',
     'invalid_files/invalid-daylight-saving.xml' => 'base-simcontrol-daylight-saving-custom.xml',
     'invalid_files/invalid-distribution-cfa-served.xml' => 'base.xml',
+    'invalid_files/invalid-duct-area-fractions.xml' => 'base-hvac-ducts-area-fractions.xml',
     'invalid_files/invalid-epw-filepath.xml' => 'base.xml',
     'invalid_files/invalid-facility-type-equipment.xml' => 'base-bldgtype-multifamily-shared-laundry-room.xml',
     'invalid_files/invalid-facility-type-surfaces.xml' => 'base.xml',
@@ -118,6 +119,7 @@ def create_hpxmls
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
     'invalid_files/missing-duct-location.xml' => 'base-hvac-multiple.xml',
+    'invalid_files/missing-duct-area.xml' => 'base-hvac-multiple.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
     'invalid_files/multifamily-reference-appliance.xml' => 'base.xml',
     'invalid_files/multifamily-reference-duct.xml' => 'base.xml',
@@ -347,6 +349,7 @@ def create_hpxmls
     'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-ducts-leakage-percent.xml' => 'base.xml',
+    'base-hvac-ducts-area-fractions.xml' => 'base-enclosure-2stories.xml',
     'base-hvac-elec-resistance-only.xml' => 'base.xml',
     'base-hvac-evap-cooler-furnace-gas.xml' => 'base.xml',
     'base-hvac-evap-cooler-only.xml' => 'base.xml',
@@ -3839,8 +3842,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                           duct_insulation_r_value: 0,
                                           duct_location: HPXML::LocationRoofDeck,
                                           duct_surface_area: 50)
-  elsif ['base-enclosure-2stories.xml'].include? hpxml_file
-  elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
+  elsif ['base-enclosure-2stories.xml',
+         'base-enclosure-2stories-garage.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[0].ducts[0].dup
     hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[0].ducts[1].dup
     hpxml.hvac_distributions[0].ducts[0].duct_surface_area *= 0.75
@@ -3914,6 +3917,13 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                           duct_insulation_r_value: 0,
                                           duct_location: HPXML::LocationAtticUnvented,
                                           duct_surface_area: 50)
+  elsif ['base-hvac-ducts-area-fractions.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts.each do |d|
+      d.duct_fraction_area = d.duct_surface_area / hpxml.hvac_distributions[0].ducts.select { |du| du.duct_type == d.duct_type }.map { |du| du.duct_surface_area }.sum
+    end
+    hpxml.hvac_distributions[0].ducts.each do |d|
+      d.duct_surface_area = nil
+    end
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
@@ -3923,11 +3933,21 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
         duct.duct_location = nil
       end
     end
+  elsif ['invalid_files/invalid-duct-area-fractions.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts.each do |d|
+      d.duct_fraction_area -= 0.1
+    end
   elsif ['invalid_files/missing-duct-location.xml'].include? hpxml_file
     hpxml.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
 
       hvac_distribution.ducts[1].duct_location = nil
+    end
+  elsif ['invalid_files/missing-duct-area.xml'].include? hpxml_file
+    hpxml.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+
+      hvac_distribution.ducts[1].duct_surface_area = nil
     end
   elsif ['invalid_files/multifamily-reference-duct.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherMultifamilyBufferSpace
