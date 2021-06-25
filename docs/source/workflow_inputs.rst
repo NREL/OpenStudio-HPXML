@@ -1271,20 +1271,20 @@ Additional information is entered in each ``DuctLeakageMeasurement``.
 
 Additional information is entered in each ``Ducts``.
 
-  ===============================================  =======  ============  ===========  ========  =========  ===============================
-  Element                                          Type     Units         Constraints  Required  Default    Notes
-  ===============================================  =======  ============  ===========  ========  =========  ===============================
-  ``DuctInsulationRValue``                         double   F-ft2-hr/Btu  >= 0         Yes                  R-value of duct insulation [#]_
-  ``DuctLocation``                                 string                 See [#]_     No        See [#]_   Duct location
-  ``FractionDuctArea`` and/or ``DuctSurfaceArea``  double   frac or ft2   >= 0 [#]_    See [#]_  See [#]_   Duct fraction/surface area in location
-  ===============================================  =======  ============  ===========  ========  =========  ===============================
+  ===============================================  =======  ============  ================  ========  =========  ======================================
+  Element                                          Type     Units         Constraints       Required  Default    Notes
+  ===============================================  =======  ============  ================  ========  =========  ======================================
+  ``DuctInsulationRValue``                         double   F-ft2-hr/Btu  >= 0              Yes                  R-value of duct insulation [#]_
+  ``DuctLocation``                                 string                 See [#]_          No        See [#]_   Duct location
+  ``FractionDuctArea`` and/or ``DuctSurfaceArea``  double   frac or ft2   0-1 [#]_ or >= 0  See [#]_  See [#]_   Duct fraction/surface area in location
+  ===============================================  =======  ============  ================  ========  =========  ======================================
 
   .. [#] DuctInsulationRValue should not include air films (i.e., use 0 for an uninsulated duct).
   .. [#] DuctLocation choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - unvented", "crawlspace - vented", "attic - unvented", "attic - vented", "garage", "outside", "exterior wall", "under slab", "roof deck", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If DuctLocation not provided, defaults to the first present space type: "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "attic - vented", "attic - unvented", "garage", or "living space".
          If NumberofConditionedFloorsAboveGrade > 1, secondary ducts will be located in "living space".
-  .. [#] The sum of all ``FractionDuctArea`` (for the supply Ducts of the AirDistribution and for the return Ducts of the AirDistribution) must equal to 1.
+  .. [#] The sum of all ``[DuctType="supply"]/FractionDuctArea`` and ``[DuctType="return"]/FractionDuctArea`` must each equal to 1.
   .. [#] Either FractionDuctArea or DuctSurfaceArea (or both) are required if DuctLocation is provided.
   .. [#] If DuctSurfaceArea not provided, duct surface areas will be calculated based on FractionDuctArea if provided.
          If FractionDuctArea also not provided, duct surface areas will be calculated based on `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_:
