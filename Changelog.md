@@ -10,6 +10,7 @@ __New Features__
 - Allows `HeatingSeason` & `CoolingSeason` to be specified for defining heating and cooling equipment availability.
 - Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
 - Revises shared mechanical ventilation preconditioning control logic to operate less often.
+- Allows `Ducts/FractionDuctArea` to be provided instead of `Ducts/DuctSurfaceArea`.
 - Allows CEER (Combined Energy Efficiency Ratio) efficiency unit for room AC.
 - Allows "none" for wall/rim joist siding.
 - Allows interior finish inputs (e.g., 0.5" drywall) for walls, ceilings, and roofs.
