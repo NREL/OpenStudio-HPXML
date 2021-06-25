@@ -1,7 +1,7 @@
 ## OpenStudio-HPXML v1.3.0 (Pending)
 
 __New Features__
-- Updates to OpenStudio 3.2.0/EnergyPlus 9.5.0.
+- Updates to OpenStudio 3.2.1/EnergyPlus 9.5.0.
 - Introduces a small amount of infiltration for unvented spaces.
 - **Breaking change**: Replaces ClothesDryer `extension/IsVented` and `extension/VentedFlowRate` with `Vented` and `VentedFlowRate`.
 - Allows additional fuel types for generators.
