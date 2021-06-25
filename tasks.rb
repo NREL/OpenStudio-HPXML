@@ -1091,7 +1091,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs.each do |roof|
       roof.roof_type = nil
       roof.solar_absorptance = nil
-      roof.roof_color = HPXML::ColorLight
+      roof.roof_color = nil
       roof.emittance = nil
       roof.radiant_barrier = nil
       roof.interior_finish_type = nil
@@ -1243,7 +1243,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.rim_joists.each do |rim_joist|
       rim_joist.siding = nil
       rim_joist.solar_absorptance = nil
-      rim_joist.color = HPXML::ColorMedium
+      rim_joist.color = nil
       rim_joist.emittance = nil
     end
   end
@@ -1664,7 +1664,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls.each do |wall|
       wall.siding = nil
       wall.solar_absorptance = nil
-      wall.color = HPXML::ColorMedium
+      wall.color = nil
       wall.emittance = nil
       wall.interior_finish_type = nil
       wall.interior_finish_thickness = nil
@@ -2932,6 +2932,10 @@ def set_hpxml_doors(hpxml_file, hpxml)
                     area: 20,
                     azimuth: 180,
                     r_value: 4.4)
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.doors.each do |door|
+      door.azimuth = nil
+    end
   end
 end
 

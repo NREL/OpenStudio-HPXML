@@ -28,6 +28,7 @@ class HPXMLDefaults
     apply_slabs(hpxml)
     apply_windows(hpxml)
     apply_skylights(hpxml)
+    apply_doors(hpxml)
     apply_hvac(hpxml, weather, convert_shared_systems)
     apply_hvac_control(hpxml)
     apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
@@ -47,6 +48,42 @@ class HPXMLDefaults
 
     # Do HVAC sizing after all other defaults have been applied
     apply_hvac_sizing(hpxml, weather, cfa, nbeds)
+  end
+
+  def self.get_default_azimuths(hpxml)
+    def self.sanitize_azimuth(azimuth)
+      # Ensure 0 <= orientation < 360
+      while azimuth < 0
+        azimuth += 360
+      end
+      while azimuth >= 360
+        azimuth -= 360
+      end
+      return azimuth
+    end
+
+    # Returns a list of four azimuths (facing each direction). Determined based
+    # on the primary azimuth, as defined by the azimuth with the largest surface
+    # area, plus azimuths that are offset by 90/180/270 degrees. Used for
+    # surfaces that may not have an azimuth defined (e.g., walls).
+    azimuth_areas = {}
+    (hpxml.roofs + hpxml.rim_joists + hpxml.walls + hpxml.foundation_walls +
+     hpxml.windows + hpxml.skylights + hpxml.doors).each do |surface|
+      az = surface.azimuth
+      next if az.nil?
+
+      azimuth_areas[az] = 0 if azimuth_areas[az].nil?
+      azimuth_areas[az] += surface.area
+    end
+    if azimuth_areas.empty?
+      primary_azimuth = 0
+    else
+      primary_azimuth = azimuth_areas.max_by { |k, v| v }[0]
+    end
+    return [primary_azimuth,
+            sanitize_azimuth(primary_azimuth + 90),
+            sanitize_azimuth(primary_azimuth + 180),
+            sanitize_azimuth(primary_azimuth + 270)].sort
   end
 
   private
@@ -298,6 +335,10 @@ class HPXMLDefaults
         roof.radiant_barrier = false
         roof.radiant_barrier_isdefaulted = true
       end
+      if roof.roof_color.nil? && roof.solar_absorptance.nil?
+        roof.roof_color = HPXML::ColorMedium
+        roof.roof_color_isdefaulted = true
+      end
       if roof.roof_color.nil?
         roof.roof_color = Constructions.get_default_roof_color(roof.roof_type, roof.solar_absorptance)
         roof.roof_color_isdefaulted = true
@@ -334,6 +375,10 @@ class HPXMLDefaults
         rim_joist.siding = HPXML::SidingTypeWood
         rim_joist.siding_isdefaulted = true
       end
+      if rim_joist.color.nil? && rim_joist.solar_absorptance.nil?
+        rim_joist.color = HPXML::ColorMedium
+        rim_joist.color_isdefaulted = true
+      end
       if rim_joist.color.nil?
         rim_joist.color = Constructions.get_default_wall_color(rim_joist.solar_absorptance)
         rim_joist.color_isdefaulted = true
@@ -354,6 +399,10 @@ class HPXMLDefaults
         if wall.siding.nil?
           wall.siding = HPXML::SidingTypeWood
           wall.siding_isdefaulted = true
+        end
+        if wall.color.nil? && wall.solar_absorptance.nil?
+          wall.color = HPXML::ColorMedium
+          wall.color_isdefaulted = true
         end
         if wall.color.nil?
           wall.color = Constructions.get_default_wall_color(wall.solar_absorptance)
@@ -487,6 +536,20 @@ class HPXMLDefaults
       if skylight.exterior_shading_factor_winter.nil?
         skylight.exterior_shading_factor_winter = 1.0
         skylight.exterior_shading_factor_winter_isdefaulted = true
+      end
+    end
+  end
+
+  def self.apply_doors(hpxml)
+    hpxml.doors.each do |door|
+      next unless door.azimuth.nil?
+
+      if (not door.wall.nil?) && (not door.wall.azimuth.nil?)
+        door.azimuth = door.wall.azimuth
+      else
+        primary_azimuth = get_default_azimuths(hpxml)[0]
+        door.azimuth = primary_azimuth
+        door.azimuth_isdefaulted = true
       end
     end
   end

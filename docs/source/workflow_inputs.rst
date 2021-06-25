@@ -195,7 +195,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   ``ResidentialFacilityType``                                string               See [#]_                           Yes                 Type of dwelling unit
   ``NumberofConditionedFloors``                              double               > 0                                Yes                 Number of conditioned floors (including a basement)
   ``NumberofConditionedFloorsAboveGrade``                    double               > 0, <= NumberofConditionedFloors  Yes                 Number of conditioned floors above grade (including a walkout basement)
-  ``NumberofBedrooms``                                       integer              > 0 [#]_                           Yes                 Number of bedrooms [#]_
+  ``NumberofBedrooms``                                       integer              > 0                                Yes                 Number of bedrooms [#]_
   ``NumberofBathrooms``                                      integer              > 0                                No        See [#]_  Number of bathrooms
   ``ConditionedFloorArea``                                   double    ft2        > 0                                Yes                 Floor area within conditioned space boundary
   ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``  double    ft3 or ft  > 0                                No        See [#]_  Volume/ceiling height within conditioned space boundary
@@ -203,7 +203,6 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   =========================================================  ========  =========  =================================  ========  ========  =======================================================================
 
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
-  .. [#] NumberofBedrooms must also be <= (ConditionedFloorArea-120)/70.
   .. [#] NumberofBedrooms is currently used to determine usage of plug loads, appliances, hot water, etc.
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to 8.0.
@@ -316,7 +315,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   ``Area``                                double            ft2           > 0                Yes                                        Gross area (including skylights)
   ``Azimuth``                             integer           deg           0 - 359            No         See [#]_                        Azimuth (clockwise from North)
   ``RoofType``                            string                          See [#]_           No         asphalt or fiberglass shingles  Roof type
-  ``SolarAbsorptance`` or ``RoofColor``   double or string                0 - 1 or See [#]_  Yes        See [#]_                        Solar absorptance or color
+  ``RoofColor`` or ``SolarAbsorptance``   string or double                See [#]_ or 0 - 1  No         medium                          Roof color or solar absorptance [#]_
   ``Emittance``                           double                          0 - 1              No         0.90                            Emittance
   ``InteriorFinish/Type``                 string                          See [#]_           No         See [#]_                        Interior finish material
   ``InteriorFinish/Thickness``            double            in            >= 0               No         0.5                             Interior finish thickness
@@ -332,7 +331,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
   .. [#] RoofType choices are "asphalt or fiberglass shingles", "wood shingles or shakes", "slate or tile shingles", or "metal surfacing".
   .. [#] RoofColor choices are "light", "medium", "medium dark", "dark", or "reflective".
-  .. [#] If SolarAbsorptance not provided, defaults based on RoofColor/RoofType:
+  .. [#] If SolarAbsorptance not provided, defaults based on RoofType and RoofColor:
          
          - **asphalt or fiberglass shingles**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
          - **wood shingles or shakes**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
@@ -358,7 +357,7 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
   ``Area``                                double            ft2           > 0                Yes                    Gross area
   ``Azimuth``                             integer           deg           0 - 359            No        See [#]_     Azimuth (clockwise from North)
   ``Siding``                              string                          See [#]_           No        wood siding  Siding material
-  ``SolarAbsorptance`` or ``Color``       double or string                0 - 1 or See [#]_  Yes       See [#]_     Solar absorptance or color
+  ``Color`` or ``SolarAbsorptance``       string or double                See [#]_ or 0 - 1  No        medium       Color or solar absorptance [#]_
   ``Emittance``                           double                          0 - 1              No        0.90         Emittance
   ``Insulation/SystemIdentifier``         id                                                 Yes                    Unique identifier
   ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0                Yes                    Assembly R-value [#]_
@@ -396,7 +395,7 @@ Each wall that has no contact with the ground and bounds a space type is entered
   ``Area``                                double            ft2           > 0                Yes                         Gross area (including doors/windows)
   ``Azimuth``                             integer           deg           0 - 359            No             See [#]_     Azimuth (clockwise from North)
   ``Siding``                              string                          See [#]_           No             wood siding  Siding material
-  ``SolarAbsorptance`` or ``Color``       double or string                0 - 1 or See [#]_  Yes            See [#]_     Solar absorptance or color
+  ``Color`` or ``SolarAbsorptance``       string or double                See [#]_ or 0 - 1  No             medium       Color or solar absorptance [#]_
   ``Emittance``                           double                          0 - 1              No             0.90         Emittance
   ``InteriorFinish/Type``                 string                          See [#]_           No             See [#]_     Interior finish material
   ``InteriorFinish/Thickness``            double            in            >= 0               No             0.5          Interior finish thickness
@@ -629,11 +628,12 @@ Each opaque door is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Do
   ``SystemIdentifier``                          id                                   Yes                  Unique identifier
   ``AttachedToWall``                            idref                   See [#]_     Yes                  ID of attached wall
   ``Area``                                      double    ft2           > 0          Yes                  Total area
-  ``Azimuth``                                   integer   deg           0 - 359      Yes                  Azimuth (clockwise from North)
+  ``Azimuth``                                   integer   deg           0 - 359      No        See [#]_   Azimuth (clockwise from North)
   ``RValue``                                    double    F-ft2-hr/Btu  > 0          Yes                  R-value
   ============================================  ========  ============  ===========  ========  =========  ==============================
 
   .. [#] AttachedToWall must reference a ``Wall`` or ``FoundationWall``.
+  .. [#] If neither Azimuth nor attached wall azimuth provided, defaults to the azimuth with the largest surface area defined in the HPXML file.
 
 HPXML Systems
 -------------
