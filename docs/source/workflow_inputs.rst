@@ -160,14 +160,15 @@ Building site information is entered in ``/HPXML/Building/BuildingDetails/Buildi
 
 For each neighboring building defined, additional information is entered in a ``extension/Neighbors/NeighborBuilding``.
 
-  ============  ========  =======  ===========  ========  ========  =============================================
-  Element       Type      Units    Constraints  Required  Default   Notes
-  ============  ========  =======  ===========  ========  ========  =============================================
-  ``Azimuth``   integer   deg      0 - 359      Yes                 Direction of neighbors (clockwise from North)
-  ``Distance``  double    ft       > 0          Yes                 Distance of neighbor from the dwelling unit
-  ``Height``    double    ft       > 0          No        See [#]_  Height of neighbor
-  ============  ========  =======  ===========  ========  ========  =============================================
+  ==============================  =================  ================  ===============  ========  ========  =============================================
+  Element                         Type               Units             Constraints      Required  Default   Notes
+  ==============================  =================  ================  ===============  ========  ========  =============================================
+  ``Azimuth`` or ``Orientation``  integer or string  deg or direction  0 - 359 or [#]_  Yes                 Direction of neighbors (clockwise from North)
+  ``Distance``                    double             ft                > 0              Yes                 Distance of neighbor from the dwelling unit
+  ``Height``                      double             ft                > 0              No        See [#]_  Height of neighbor
+  ==============================  =================  ================  ===============  ========  ========  =============================================
   
+  .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] If Height not provided, assumed to be same height as the dwelling unit.
 
 HPXML Building Occupancy
@@ -247,8 +248,8 @@ For example, a foundation wall between the unit's vented crawlspace and the neig
   It is the software tool's responsibility to provide the appropriate building surfaces. 
   While some error-checking is in place, it is not possible to know whether some surfaces are incorrectly missing.
 
-Also note that wall and roof surfaces do not require an azimuth to be specified. 
-Rather, only the windows/skylights themselves require an azimuth. 
+Also note that wall and roof surfaces do not require an azimuth/orientation to be specified. 
+Rather, only the windows/skylights themselves require an azimuth/orientation. 
 Thus, software tools can choose to use a single wall (or roof) surface to represent multiple wall (or roof) surfaces for the entire building if all their other properties (construction type, interior/exterior adjacency, etc.) are identical.
 
 HPXML Air Infiltration
@@ -307,28 +308,29 @@ Each pitched or flat roof surface that is exposed to ambient conditions is enter
 
 For a multifamily building where the dwelling unit has another dwelling unit above it, the surface between the two dwelling units should be considered a ``FrameFloor`` and not a ``Roof``.
 
-  ======================================  ================  ============  =================  =========  ==============================  ==================================
-  Element                                 Type              Units         Constraints        Required   Default                         Notes
-  ======================================  ================  ============  =================  =========  ==============================  ==================================
-  ``SystemIdentifier``                    id                                                 Yes                                        Unique identifier
-  ``InteriorAdjacentTo``                  string                          See [#]_           Yes                                        Interior adjacent space type
-  ``Area``                                double            ft2           > 0                Yes                                        Gross area (including skylights)
-  ``Azimuth``                             integer           deg           0 - 359            No         See [#]_                        Azimuth (clockwise from North)
-  ``RoofType``                            string                          See [#]_           No         asphalt or fiberglass shingles  Roof type
-  ``RoofColor`` or ``SolarAbsorptance``   string or double                See [#]_ or 0 - 1  No         medium                          Roof color or solar absorptance [#]_
-  ``Emittance``                           double                          0 - 1              No         0.90                            Emittance
-  ``InteriorFinish/Type``                 string                          See [#]_           No         See [#]_                        Interior finish material
-  ``InteriorFinish/Thickness``            double            in            >= 0               No         0.5                             Interior finish thickness
-  ``Pitch``                               integer           ?:12          >= 0               Yes                                        Pitch
-  ``RadiantBarrier``                      boolean                                            No         false                           Presence of radiant barrier
-  ``RadiantBarrierGrade``                 integer                         1 - 3              See [#]_                                   Radiant barrier installation grade
-  ``Insulation/SystemIdentifier``         id                                                 Yes                                        Unique identifier
-  ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0                Yes                                        Assembly R-value [#]_
-  ======================================  ================  ============  =================  =========  ==============================  ==================================
+  ======================================  =================  ================  =================  =========  ==============================  ==================================
+  Element                                 Type               Units             Constraints        Required   Default                         Notes
+  ======================================  =================  ================  =================  =========  ==============================  ==================================
+  ``SystemIdentifier``                    id                                                      Yes                                        Unique identifier
+  ``InteriorAdjacentTo``                  string                               See [#]_           Yes                                        Interior adjacent space type
+  ``Area``                                double             ft2               > 0                Yes                                        Gross area (including skylights)
+  ``Azimuth`` or ``Orientation``          integer or string  deg or direction  0 - 359 or [#]_    No         See [#]_                        Direction (clockwise from North)
+  ``RoofType``                            string                               See [#]_           No         asphalt or fiberglass shingles  Roof type
+  ``RoofColor`` or ``SolarAbsorptance``   string or double                     See [#]_ or 0 - 1  No         medium                          Roof color or solar absorptance [#]_
+  ``Emittance``                           double                               0 - 1              No         0.90                            Emittance
+  ``InteriorFinish/Type``                 string                               See [#]_           No         See [#]_                        Interior finish material
+  ``InteriorFinish/Thickness``            double             in                >= 0               No         0.5                             Interior finish thickness
+  ``Pitch``                               integer            ?:12              >= 0               Yes                                        Pitch
+  ``RadiantBarrier``                      boolean                                                 No         false                           Presence of radiant barrier
+  ``RadiantBarrierGrade``                 integer                              1 - 3              See [#]_                                   Radiant barrier installation grade
+  ``Insulation/SystemIdentifier``         id                                                      Yes                                        Unique identifier
+  ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                Yes                                        Assembly R-value [#]_
+  ======================================  =================  ================  =================  =========  ==============================  ==================================
 
   .. [#] InteriorAdjacentTo choices are "attic - vented", "attic - unvented", "living space", or "garage".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
+  .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
+  .. [#] If neither Azimuth nor Orientation provided, modeled as four surfaces of equal area facing every direction.
   .. [#] RoofType choices are "asphalt or fiberglass shingles", "wood shingles or shakes", "slate or tile shingles", or "metal surfacing".
   .. [#] RoofColor choices are "light", "medium", "medium dark", "dark", or "reflective".
   .. [#] If SolarAbsorptance not provided, defaults based on RoofType and RoofColor:
@@ -348,26 +350,27 @@ HPXML Rim Joists
 
 Each rim joist surface (i.e., the perimeter of floor joists typically found between stories of a building or on top of a foundation wall) is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist``.
 
-  ======================================  ================  ============  =================  ========  ===========  ==============================
-  Element                                 Type              Units         Constraints        Required  Default      Notes
-  ======================================  ================  ============  =================  ========  ===========  ==============================
-  ``SystemIdentifier``                    id                                                 Yes                    Unique identifier
-  ``ExteriorAdjacentTo``                  string                          See [#]_           Yes                    Exterior adjacent space type
-  ``InteriorAdjacentTo``                  string                          See [#]_           Yes                    Interior adjacent space type
-  ``Area``                                double            ft2           > 0                Yes                    Gross area
-  ``Azimuth``                             integer           deg           0 - 359            No        See [#]_     Azimuth (clockwise from North)
-  ``Siding``                              string                          See [#]_           No        wood siding  Siding material
-  ``Color`` or ``SolarAbsorptance``       string or double                See [#]_ or 0 - 1  No        medium       Color or solar absorptance [#]_
-  ``Emittance``                           double                          0 - 1              No        0.90         Emittance
-  ``Insulation/SystemIdentifier``         id                                                 Yes                    Unique identifier
-  ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0                Yes                    Assembly R-value [#]_
-  ======================================  ================  ============  =================  ========  ===========  ==============================
+  ======================================  =================  ================  =================  ========  ===========  ==============================
+  Element                                 Type               Units             Constraints        Required  Default      Notes
+  ======================================  =================  ================  =================  ========  ===========  ==============================
+  ``SystemIdentifier``                    id                                                      Yes                    Unique identifier
+  ``ExteriorAdjacentTo``                  string                               See [#]_           Yes                    Exterior adjacent space type
+  ``InteriorAdjacentTo``                  string                               See [#]_           Yes                    Interior adjacent space type
+  ``Area``                                double             ft2               > 0                Yes                    Gross area
+  ``Azimuth`` or ``Orientation``          integer or string  deg or direction  0 - 359 or [#]_    No        See [#]_     Direction (clockwise from North)
+  ``Siding``                              string                               See [#]_           No        wood siding  Siding material
+  ``Color`` or ``SolarAbsorptance``       string or double                     See [#]_ or 0 - 1  No        medium       Color or solar absorptance [#]_
+  ``Emittance``                           double                               0 - 1              No        0.90         Emittance
+  ``Insulation/SystemIdentifier``         id                                                      Yes                    Unique identifier
+  ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                Yes                    Assembly R-value [#]_
+  ======================================  =================  ================  =================  ========  ===========  ==============================
 
   .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
+  .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
+  .. [#] If neither Azimuth nor Orientation provided, modeled as four surfaces of equal area facing every direction.
   .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", "aluminum siding", or "none".
   .. [#] Color choices are "light", "medium", "medium dark", "dark", or "reflective".
   .. [#] If SolarAbsorptance not provided, defaults based on Color:
@@ -385,30 +388,31 @@ HPXML Walls
 
 Each wall that has no contact with the ground and bounds a space type is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall``.
 
-  ======================================  ================  ============  =================  =============  ===========  ====================================
-  Element                                 Type              Units         Constraints        Required       Default      Notes
-  ======================================  ================  ============  =================  =============  ===========  ====================================
-  ``SystemIdentifier``                    id                                                 Yes                         Unique identifier
-  ``ExteriorAdjacentTo``                  string                          See [#]_           Yes                         Exterior adjacent space type
-  ``InteriorAdjacentTo``                  string                          See [#]_           Yes                         Interior adjacent space type
-  ``WallType``                            element                         1 [#]_             Yes                         Wall type (for thermal mass)
-  ``Area``                                double            ft2           > 0                Yes                         Gross area (including doors/windows)
-  ``Azimuth``                             integer           deg           0 - 359            No             See [#]_     Azimuth (clockwise from North)
-  ``Siding``                              string                          See [#]_           No             wood siding  Siding material
-  ``Color`` or ``SolarAbsorptance``       string or double                See [#]_ or 0 - 1  No             medium       Color or solar absorptance [#]_
-  ``Emittance``                           double                          0 - 1              No             0.90         Emittance
-  ``InteriorFinish/Type``                 string                          See [#]_           No             See [#]_     Interior finish material
-  ``InteriorFinish/Thickness``            double            in            >= 0               No             0.5          Interior finish thickness
-  ``Insulation/SystemIdentifier``         id                                                 Yes                         Unique identifier
-  ``Insulation/AssemblyEffectiveRValue``  double            F-ft2-hr/Btu  > 0                Yes                         Assembly R-value [#]_
-  ======================================  ================  ============  =================  =============  ===========  ====================================
+  ======================================  =================  ================  =================  =============  ===========  ====================================
+  Element                                 Type               Units             Constraints        Required       Default      Notes
+  ======================================  =================  ================  =================  =============  ===========  ====================================
+  ``SystemIdentifier``                    id                                                      Yes                         Unique identifier
+  ``ExteriorAdjacentTo``                  string                               See [#]_           Yes                         Exterior adjacent space type
+  ``InteriorAdjacentTo``                  string                               See [#]_           Yes                         Interior adjacent space type
+  ``WallType``                            element                              1 [#]_             Yes                         Wall type (for thermal mass)
+  ``Area``                                double             ft2               > 0                Yes                         Gross area (including doors/windows)
+  ``Azimuth`` or ``Orientation``          integer or string  deg or direction  0 - 359 or [#]_    No             See [#]_     Direction (clockwise from North)
+  ``Siding``                              string                               See [#]_           No             wood siding  Siding material
+  ``Color`` or ``SolarAbsorptance``       string or double                     See [#]_ or 0 - 1  No             medium       Color or solar absorptance [#]_
+  ``Emittance``                           double                               0 - 1              No             0.90         Emittance
+  ``InteriorFinish/Type``                 string                               See [#]_           No             See [#]_     Interior finish material
+  ``InteriorFinish/Thickness``            double             in                >= 0               No             0.5          Interior finish thickness
+  ``Insulation/SystemIdentifier``         id                                                      Yes                         Unique identifier
+  ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                Yes                         Assembly R-value [#]_
+  ======================================  =================  ==============  =================  =============  ===========  ====================================
 
   .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] WallType child element choices are ``WoodStud``, ``DoubleWoodStud``, ``ConcreteMasonryUnit``, ``StructurallyInsulatedPanel``, ``InsulatedConcreteForms``, ``SteelFrame``, ``SolidConcrete``, ``StructuralBrick``, ``StrawBale``, ``Stone``, ``LogWall``, or ``Adobe``.
-  .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
+  .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
+  .. [#] If neither Azimuth nor Orientation provided, modeled as four surfaces of equal area facing every direction.
   .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", "aluminum siding", or "none".
   .. [#] Color choices are "light", "medium", "medium dark", "dark", or "reflective".
   .. [#] If SolarAbsorptance not provided, defaults based on Color:
@@ -430,31 +434,32 @@ Each wall that is in contact with the ground should be specified as an ``/HPXML/
 
 Other walls (e.g., wood framed walls) that are connected to a below-grade space but have no contact with the ground should be specified as a ``Wall`` and not a ``FoundationWall``.
 
-  ==============================================================  ========  ============  ===========  =========  ========  ====================================
-  Element                                                         Type      Units         Constraints  Required   Default   Notes
-  ==============================================================  ========  ============  ===========  =========  ========  ====================================
-  ``SystemIdentifier``                                            id                                   Yes                  Unique identifier
-  ``ExteriorAdjacentTo``                                          string                  See [#]_     Yes                  Exterior adjacent space type [#]_
-  ``InteriorAdjacentTo``                                          string                  See [#]_     Yes                  Interior adjacent space type
-  ``Height``                                                      double    ft            > 0          Yes                  Total height
-  ``Area``                                                        double    ft2           > 0          Yes                  Gross area (including doors/windows)
-  ``Azimuth``                                                     integer   deg           0 - 359      No         See [#]_  Azimuth (clockwise from North)
-  ``Thickness``                                                   double    inches        > 0          No         8.0       Thickness excluding interior framing
-  ``DepthBelowGrade``                                             double    ft            0 - Height   Yes                  Depth below grade [#]_
-  ``InteriorFinish/Type``                                         string                  See [#]_     No         See [#]_  Interior finish material
-  ``InteriorFinish/Thickness``                                    double    in            >= 0         No         0.5       Interior finish thickness
-  ``Insulation/SystemIdentifier``                                 id                                   Yes                  Unique identifier
-  ``Insulation/Layer[InstallationType="continuous - interior"]``  element                 0 - 1        See [#]_             Interior insulation layer
-  ``Insulation/Layer[InstallationType="continuous - exterior"]``  element                 0 - 1        See [#]_             Exterior insulation layer
-  ``Insulation/AssemblyEffectiveRValue``                          double    F-ft2-hr/Btu  > 0          See [#]_             Assembly R-value [#]_
-  ==============================================================  ========  ============  ===========  =========  ========  ====================================
+  ==============================================================  =================  ================  ===============  =========  ========  ====================================
+  Element                                                         Type               Units             Constraints      Required   Default   Notes
+  ==============================================================  =================  ================  ===============  =========  ========  ====================================
+  ``SystemIdentifier``                                            id                                                    Yes                  Unique identifier
+  ``ExteriorAdjacentTo``                                          string                               See [#]_         Yes                  Exterior adjacent space type [#]_
+  ``InteriorAdjacentTo``                                          string                               See [#]_         Yes                  Interior adjacent space type
+  ``Height``                                                      double             ft                > 0              Yes                  Total height
+  ``Area``                                                        double             ft2               > 0              Yes                  Gross area (including doors/windows)
+  ``Azimuth`` or ``Orientation``                                  integer or string  deg or direction  0 - 359 or [#]_  No         See [#]_  Direction (clockwise from North)
+  ``Thickness``                                                   double             inches            > 0              No         8.0       Thickness excluding interior framing
+  ``DepthBelowGrade``                                             double             ft                0 - Height       Yes                  Depth below grade [#]_
+  ``InteriorFinish/Type``                                         string                               See [#]_         No         See [#]_  Interior finish material
+  ``InteriorFinish/Thickness``                                    double             in                >= 0             No         0.5       Interior finish thickness
+  ``Insulation/SystemIdentifier``                                 id                                                    Yes                  Unique identifier
+  ``Insulation/Layer[InstallationType="continuous - interior"]``  element                              0 - 1            See [#]_             Interior insulation layer
+  ``Insulation/Layer[InstallationType="continuous - exterior"]``  element                              0 - 1            See [#]_             Exterior insulation layer
+  ``Insulation/AssemblyEffectiveRValue``                          double             F-ft2-hr/Btu      > 0              See [#]_             Assembly R-value [#]_
+  ==============================================================  =================  ================  ===============  =========  ========  ====================================
 
   .. [#] ExteriorAdjacentTo choices are "ground", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] Interior foundation walls (e.g., between basement and crawlspace) should **not** use "ground" even if the foundation wall has some contact with the ground due to the difference in below-grade depths of the two adjacent spaces.
-  .. [#] If Azimuth not provided, modeled as four surfaces of equal area facing every direction.
+  .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
+  .. [#] If neither Azimuth nor Orientation provided, modeled as four surfaces of equal area facing every direction.
   .. [#] For exterior foundation walls, depth below grade is relative to the ground plane.
          For interior foundation walls, depth below grade is the vertical span of foundation wall in contact with the ground.
          For example, an interior foundation wall between an 8 ft conditioned basement and a 3 ft crawlspace has a height of 8 ft and a depth below grade of 5 ft.
@@ -558,23 +563,24 @@ HPXML Windows
 
 Each window or glass door area is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Windows/Window``.
 
-  ============================================  ========  ============  ===========  ========  =========  =============================================================
-  Element                                       Type      Units         Constraints  Required  Default    Notes
-  ============================================  ========  ============  ===========  ========  =========  =============================================================
-  ``SystemIdentifier``                          id                                   Yes                  Unique identifier
-  ``Area``                                      double    ft2           > 0          Yes                  Total area
-  ``Azimuth``                                   integer   deg           0 - 359      Yes                  Azimuth (clockwise from North)
-  ``UFactor``                                   double    Btu/F-ft2-hr  > 0          Yes                  Full-assembly NFRC U-factor
-  ``SHGC``                                      double                  0 - 1        Yes                  Full-assembly NFRC solar heat gain coefficient
-  ``ExteriorShading/SummerShadingCoefficient``  double    frac          0 - 1        No        1.00       Exterior summer shading coefficient (1=transparent, 0=opaque)
-  ``ExteriorShading/WinterShadingCoefficient``  double    frac          0 - 1        No        1.00       Exterior winter shading coefficient (1=transparent, 0=opaque)
-  ``InteriorShading/SummerShadingCoefficient``  double    frac          0 - 1        No        0.70 [#]_  Interior summer shading coefficient (1=transparent, 0=opaque)
-  ``InteriorShading/WinterShadingCoefficient``  double    frac          0 - 1        No        0.85 [#]_  Interior winter shading coefficient (1=transparent, 0=opaque)
-  ``Overhangs``                                 element                 0 - 1        No        <none>     Presence of overhangs (including roof eaves)
-  ``FractionOperable``                          double    frac          0 - 1        No        0.67       Operable fraction [#]_
-  ``AttachedToWall``                            idref                   See [#]_     Yes                  ID of attached wall
-  ============================================  ========  ============  ===========  ========  =========  =============================================================
+  ============================================  =================  ================  ===============  ========  =========  =============================================================
+  Element                                       Type               Units             Constraints      Required  Default    Notes
+  ============================================  =================  ================  ===============  ========  =========  =============================================================
+  ``SystemIdentifier``                          id                                                    Yes                  Unique identifier
+  ``Area``                                      double             ft2               > 0              Yes                  Total area
+  ``Azimuth`` or ``Orientation``                integer or string  deg or direction  0 - 359 or [#]_  Yes                  Direction (clockwise from North)
+  ``UFactor``                                   double             Btu/F-ft2-hr      > 0              Yes                  Full-assembly NFRC U-factor
+  ``SHGC``                                      double                               0 - 1            Yes                  Full-assembly NFRC solar heat gain coefficient
+  ``ExteriorShading/SummerShadingCoefficient``  double             frac              0 - 1            No        1.00       Exterior summer shading coefficient (1=transparent, 0=opaque)
+  ``ExteriorShading/WinterShadingCoefficient``  double             frac              0 - 1            No        1.00       Exterior winter shading coefficient (1=transparent, 0=opaque)
+  ``InteriorShading/SummerShadingCoefficient``  double             frac              0 - 1            No        0.70 [#]_  Interior summer shading coefficient (1=transparent, 0=opaque)
+  ``InteriorShading/WinterShadingCoefficient``  double             frac              0 - 1            No        0.85 [#]_  Interior winter shading coefficient (1=transparent, 0=opaque)
+  ``Overhangs``                                 element                              0 - 1            No        <none>     Presence of overhangs (including roof eaves)
+  ``FractionOperable``                          double             frac              0 - 1            No        0.67       Operable fraction [#]_
+  ``AttachedToWall``                            idref                                See [#]_         Yes                  ID of attached wall
+  ============================================  =================  ================  ===============  ========  =========  =============================================================
 
+  .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] InteriorShading/SummerShadingCoefficient default value indicates 30% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
   .. [#] InteriorShading/WinterShadingCoefficient default value indicates 15% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
   .. [#] FractionOperable reflects whether the windows are operable (can be opened), not how they are used by the occupants.
@@ -600,21 +606,22 @@ HPXML Skylights
 
 Each skylight is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight``.
 
-  ============================================  ========  ============  ===========  ========  ==========  =============================================================
-  Element                                       Type      Units         Constraints  Required  Default     Notes
-  ============================================  ========  ============  ===========  ========  ==========  =============================================================
-  ``SystemIdentifier``                          id                                   Yes                   Unique identifier
-  ``Area``                                      double    ft2           > 0          Yes                   Total area
-  ``Azimuth``                                   integer   deg           0 - 359      Yes                   Azimuth (clockwise from North)
-  ``UFactor``                                   double    Btu/F-ft2-hr  > 0          Yes                   Full-assembly NFRC U-factor
-  ``SHGC``                                      double                  0 - 1        Yes                   Full-assembly NFRC solar heat gain coefficient
-  ``ExteriorShading/SummerShadingCoefficient``  double    frac          0 - 1        No        1.00        Exterior summer shading coefficient (1=transparent, 0=opaque)
-  ``ExteriorShading/WinterShadingCoefficient``  double    frac          0 - 1        No        1.00        Exterior winter shading coefficient (1=transparent, 0=opaque)
-  ``InteriorShading/SummerShadingCoefficient``  double    frac          0 - 1        No        1.00        Interior summer shading coefficient (1=transparent, 0=opaque)
-  ``InteriorShading/WinterShadingCoefficient``  double    frac          0 - 1        No        1.00        Interior winter shading coefficient (1=transparent, 0=opaque)
-  ``AttachedToRoof``                            idref                   See [#]_     Yes                   ID of attached roof
-  ============================================  ========  ============  ===========  ========  ==========  =============================================================
+  ============================================  =================  ================  ===============  ========  =========  =============================================================
+  Element                                       Type               Units             Constraints      Required  Default    Notes
+  ============================================  =================  ================  ===============  ========  =========  =============================================================
+  ``SystemIdentifier``                          id                                                    Yes                  Unique identifier
+  ``Area``                                      double             ft2               > 0              Yes                  Total area
+  ``Azimuth`` or ``Orientation``                integer or string  deg or direction  0 - 359 or [#]_  Yes                  Direction (clockwise from North)
+  ``UFactor``                                   double             Btu/F-ft2-hr      > 0              Yes                  Full-assembly NFRC U-factor
+  ``SHGC``                                      double                               0 - 1            Yes                  Full-assembly NFRC solar heat gain coefficient
+  ``ExteriorShading/SummerShadingCoefficient``  double             frac              0 - 1            No        1.00       Exterior summer shading coefficient (1=transparent, 0=opaque)
+  ``ExteriorShading/WinterShadingCoefficient``  double             frac              0 - 1            No        1.00       Exterior winter shading coefficient (1=transparent, 0=opaque)
+  ``InteriorShading/SummerShadingCoefficient``  double             frac              0 - 1            No        1.00       Interior summer shading coefficient (1=transparent, 0=opaque)
+  ``InteriorShading/WinterShadingCoefficient``  double             frac              0 - 1            No        1.00       Interior winter shading coefficient (1=transparent, 0=opaque)
+  ``AttachedToRoof``                            idref                                See [#]_         Yes                  ID of attached roof
+  ============================================  =================  ================  ===============  ========  =========  =============================================================
 
+  .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] AttachedToRoof must reference a ``Roof``.
 
 HPXML Doors
@@ -622,18 +629,19 @@ HPXML Doors
 
 Each opaque door is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Doors/Door``.
 
-  ============================================  ========  ============  ===========  ========  =========  ==============================
-  Element                                       Type      Units         Constraints  Required  Default    Notes
-  ============================================  ========  ============  ===========  ========  =========  ==============================
-  ``SystemIdentifier``                          id                                   Yes                  Unique identifier
-  ``AttachedToWall``                            idref                   See [#]_     Yes                  ID of attached wall
-  ``Area``                                      double    ft2           > 0          Yes                  Total area
-  ``Azimuth``                                   integer   deg           0 - 359      No        See [#]_   Azimuth (clockwise from North)
-  ``RValue``                                    double    F-ft2-hr/Btu  > 0          Yes                  R-value
-  ============================================  ========  ============  ===========  ========  =========  ==============================
+  ============================================  =================  ============  ===============  ========  =========  ==============================
+  Element                                       Type               Units         Constraints      Required  Default    Notes
+  ============================================  =================  ============  ===============  ========  =========  ==============================
+  ``SystemIdentifier``                          id                                                Yes                  Unique identifier
+  ``AttachedToWall``                            idref                            See [#]_         Yes                  ID of attached wall
+  ``Area``                                      double             ft2           > 0              Yes                  Total area
+  ``Azimuth`` or ``Orientation``                integer or string  deg           0 - 359 or [#]_  No        See [#]_   Direction (clockwise from North)
+  ``RValue``                                    double             F-ft2-hr/Btu  > 0              Yes                  R-value
+  ============================================  =================  ============  ===============  ========  =========  ==============================
 
   .. [#] AttachedToWall must reference a ``Wall`` or ``FoundationWall``.
-  .. [#] If neither Azimuth nor attached wall azimuth provided, defaults to the azimuth with the largest surface area defined in the HPXML file.
+  .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
+  .. [#] If neither Azimuth nor Orientation nor AttachedToWall azimuth provided, defaults to the azimuth with the largest surface area defined in the HPXML file.
 
 HPXML Systems
 -------------
@@ -1796,22 +1804,23 @@ Detailed Inputs
 
 To define a detailed solar hot water system, additional information is entered in ``SolarThermalSystem``.
 
-  ===================================  =======  ============  ===========  ========  ========  ==============================
-  Element                              Type     Units         Constraints  Required  Default   Notes
-  ===================================  =======  ============  ===========  ========  ========  ==============================
-  ``CollectorArea``                    double   ft2           > 0          Yes                 Area
-  ``CollectorLoopType``                string                 See [#]_     Yes                 Loop type
-  ``CollectorType``                    string                 See [#]_     Yes                 System type
-  ``CollectorAzimuth``                 integer  deg           0 - 359      Yes                 Azimuth (clockwise from North)
-  ``CollectorTilt``                    double   deg           0 - 90       Yes                 Tilt relative to horizontal
-  ``CollectorRatedOpticalEfficiency``  double   frac          0 - 1        Yes                 Rated optical efficiency [#]_
-  ``CollectorRatedThermalLosses``      double   Btu/hr-ft2-R  > 0          Yes                 Rated thermal losses [#]_
-  ``StorageVolume``                    double   gal           > 0          No        See [#]_  Hot water storage volume
-  ``ConnectedTo``                      idref                  See [#]_     Yes                 Connected water heater
-  ===================================  =======  ============  ===========  ========  ========  ==============================
+  ================================================  =================  ================  ===============  ========  ========  ==============================
+  Element                                           Type               Units             Constraints      Required  Default   Notes
+  ================================================  =================  ================  ===============  ========  ========  ==============================
+  ``CollectorArea``                                 double             ft2               > 0              Yes                 Area
+  ``CollectorLoopType``                             string                               See [#]_         Yes                 Loop type
+  ``CollectorType``                                 string                               See [#]_         Yes                 System type
+  ``CollectorAzimuth`` or ``CollectorOrientation``  integer or string  deg or direction  0 - 359 or [#]_  Yes                 Direction panels face (clockwise from North)
+  ``CollectorTilt``                                 double             deg               0 - 90           Yes                 Tilt relative to horizontal
+  ``CollectorRatedOpticalEfficiency``               double             frac              0 - 1            Yes                 Rated optical efficiency [#]_
+  ``CollectorRatedThermalLosses``                   double             Btu/hr-ft2-R      > 0              Yes                 Rated thermal losses [#]_
+  ``StorageVolume``                                 double             gal               > 0              No        See [#]_  Hot water storage volume
+  ``ConnectedTo``                                   idref                                See [#]_         Yes                 Connected water heater
+  ================================================  =================  ================  ===============  ========  ========  ==============================
   
   .. [#] CollectorLoopType choices are "liquid indirect", "liquid direct", or "passive thermosyphon".
   .. [#] CollectorType choices are "single glazing black", "double glazing black", "evacuated tube", or "integrated collector storage".
+  .. [#] CollectorOrientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] CollectorRatedOpticalEfficiency is FRTA (y-intercept) from the `Directory of SRCC OG-100 Certified Solar Collector Ratings <https://solar-rating.org/programs/og-100-program/>`_.
   .. [#] CollectorRatedThermalLosses is FRUL (slope) from the `Directory of SRCC OG-100 Certified Solar Collector Ratings <https://solar-rating.org/programs/og-100-program/>`_.
   .. [#] If StorageVolume not provided, calculated as 1.5 gal/ft2 * CollectorArea.
@@ -1825,25 +1834,26 @@ If not entered, the simulation will not include photovoltaics.
 
 Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov>`_.
 
-  =======================================================  =================  =========  ===============  ========  ========  ============================================
-  Element                                                  Type               Units      Constraints      Required  Default   Notes
-  =======================================================  =================  =========  ===============  ========  ========  ============================================
-  ``SystemIdentifier``                                     id                                             Yes                 Unique identifier
-  ``IsSharedSystem``                                       boolean                                        No        false     Whether it serves multiple dwelling units
-  ``Location``                                             string                        See [#]_         No        roof      Mounting location
-  ``ModuleType``                                           string                        See [#]_         No        standard  Type of module
-  ``Tracking``                                             string                        See [#]_         No        fixed     Type of tracking
-  ``ArrayAzimuth``                                         integer            deg        0 - 359          Yes                 Direction panels face (clockwise from North)
-  ``ArrayTilt``                                            double             deg        0 - 90           Yes                 Tilt relative to horizontal
-  ``MaxPowerOutput``                                       double             W          >= 0             Yes                 Peak power
-  ``InverterEfficiency``                                   double             frac       0 - 1            No        0.96      Inverter efficiency
-  ``SystemLossesFraction`` or ``YearModulesManufactured``  double or integer  frac or #  0 - 1 or > 1600  No        0.14      System losses [#]_
-  ``extension/NumberofBedroomsServed``                     integer                       > 1              See [#]_            Number of bedrooms served
-  =======================================================  =================  =========  ===============  ========  ========  ============================================
+  =======================================================  =================  ================  ===============  ========  ========  ============================================
+  Element                                                  Type               Units             Constraints      Required  Default   Notes
+  =======================================================  =================  ================  ===============  ========  ========  ============================================
+  ``SystemIdentifier``                                     id                                                    Yes                 Unique identifier
+  ``IsSharedSystem``                                       boolean                                               No        false     Whether it serves multiple dwelling units
+  ``Location``                                             string                               See [#]_         No        roof      Mounting location
+  ``ModuleType``                                           string                               See [#]_         No        standard  Type of module
+  ``Tracking``                                             string                               See [#]_         No        fixed     Type of tracking
+  ``ArrayAzimuth`` or ``ArrayOrientation``                 integer or string  deg or direction  0 - 359 or [#]_  Yes                 Direction panels face (clockwise from North)
+  ``ArrayTilt``                                            double             deg               0 - 90           Yes                 Tilt relative to horizontal
+  ``MaxPowerOutput``                                       double             W                 >= 0             Yes                 Peak power
+  ``InverterEfficiency``                                   double             frac              0 - 1            No        0.96      Inverter efficiency
+  ``SystemLossesFraction`` or ``YearModulesManufactured``  double or integer  frac or #         0 - 1 or > 1600  No        0.14      System losses [#]_
+  ``extension/NumberofBedroomsServed``                     integer                              > 1              See [#]_            Number of bedrooms served
+  =======================================================  =================  ================  ===============  ========  ========  ============================================
   
   .. [#] Location choices are "ground" or "roof" mounted.
   .. [#] ModuleType choices are "standard", "premium", or "thin film".
   .. [#] Tracking choices are "fixed", "1-axis", "1-axis backtracked", or "2-axis".
+  .. [#] ArrayOrientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] System losses due to soiling, shading, snow, mismatch, wiring, degradation, etc.
          If YearModulesManufactured provided but not SystemLossesFraction, system losses calculated as:
          SystemLossesFraction = 1.0 - (1.0 - 0.14) * (1.0 - (1.0 - 0.995^(CurrentYear - YearModulesManufactured))).
