@@ -395,8 +395,8 @@ class HVAC
     hp_ap = heat_pump.additional_properties
     htg_cfm = heat_pump.heating_airflow_cfm
     clg_cfm = heat_pump.cooling_airflow_cfm
-    htg_cfm_rated = heat_pump.airflow_defect_ratio.nil?? htg_cfm : (htg_cfm / (1.0 + heat_pump.airflow_defect_ratio))
-    clg_cfm_rated = heat_pump.airflow_defect_ratio.nil?? clg_cfm : (clg_cfm / (1.0 + heat_pump.airflow_defect_ratio))
+    htg_cfm_rated = heat_pump.airflow_defect_ratio.nil? ? htg_cfm : (htg_cfm / (1.0 + heat_pump.airflow_defect_ratio))
+    clg_cfm_rated = heat_pump.airflow_defect_ratio.nil? ? clg_cfm : (clg_cfm / (1.0 + heat_pump.airflow_defect_ratio))
 
     if hp_ap.frac_glycol == 0
       hp_ap.fluid_type = Constants.FluidWater
