@@ -269,6 +269,7 @@ class HPXMLDefaults
     default_ach = nil
     hpxml.attics.each do |attic|
       next unless attic.attic_type == HPXML::AtticTypeVented
+
       # check existing sla and ach
       default_sla = attic.vented_attic_sla unless attic.vented_attic_sla.nil?
       default_ach = attic.vented_attic_ach unless attic.vented_attic_ach.nil?
@@ -283,6 +284,7 @@ class HPXMLDefaults
     end
     vented_attics.each do |vented_attic|
       next unless (vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_ach.nil?)
+
       if not default_ach.nil? # ACH specified
         vented_attic.vented_attic_ach = default_ach
       else # Use SLA
@@ -299,6 +301,7 @@ class HPXMLDefaults
     default_sla = Airflow.get_default_vented_crawl_sla()
     hpxml.foundations.each do |foundation|
       next unless foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented
+
       # check existing sla
       default_sla = foundation.vented_crawlspace_sla unless foundation.vented_crawlspace_sla.nil?
 
@@ -312,6 +315,7 @@ class HPXMLDefaults
     end
     vented_crawls.each do |vented_crawl|
       next unless vented_crawl.vented_crawlspace_sla.nil?
+
       vented_crawl.vented_crawlspace_sla = default_sla
       vented_crawl.vented_crawlspace_sla_isdefaulted = true
     end
@@ -351,6 +355,7 @@ class HPXMLDefaults
         roof.interior_finish_type_isdefaulted = true
       end
       next unless roof.interior_finish_thickness.nil?
+
       if roof.interior_finish_type != HPXML::InteriorFinishNone
         roof.interior_finish_thickness = 0.5
         roof.interior_finish_thickness_isdefaulted = true
@@ -416,6 +421,7 @@ class HPXMLDefaults
         wall.interior_finish_type_isdefaulted = true
       end
       next unless wall.interior_finish_thickness.nil?
+
       if wall.interior_finish_type != HPXML::InteriorFinishNone
         wall.interior_finish_thickness = 0.5
         wall.interior_finish_thickness_isdefaulted = true
@@ -438,6 +444,7 @@ class HPXMLDefaults
         foundation_wall.interior_finish_type_isdefaulted = true
       end
       next unless foundation_wall.interior_finish_thickness.nil?
+
       if foundation_wall.interior_finish_type != HPXML::InteriorFinishNone
         foundation_wall.interior_finish_thickness = 0.5
         foundation_wall.interior_finish_thickness_isdefaulted = true
@@ -458,6 +465,7 @@ class HPXMLDefaults
         frame_floor.interior_finish_type_isdefaulted = true
       end
       next unless frame_floor.interior_finish_thickness.nil?
+
       if frame_floor.interior_finish_type != HPXML::InteriorFinishNone
         frame_floor.interior_finish_thickness = 0.5
         frame_floor.interior_finish_thickness_isdefaulted = true
@@ -639,6 +647,7 @@ class HPXMLDefaults
     # Default boiler EAE
     hpxml.heating_systems.each do |heating_system|
       next unless heating_system.electric_auxiliary_energy.nil?
+
       heating_system.electric_auxiliary_energy_isdefaulted = true
       heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system)
       heating_system.shared_loop_watts = nil
@@ -874,6 +883,7 @@ class HPXMLDefaults
                    HPXML::HVACTypeWallFurnace,
                    HPXML::HVACTypeFloorFurnace,
                    HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
+
       HVAC.set_heat_rated_cfm_per_ton(heating_system)
     end
     hpxml.heat_pumps.each do |heat_pump|
@@ -953,6 +963,7 @@ class HPXMLDefaults
       end
 
       next unless hvac_control.seasons_cooling_begin_month.nil? || hvac_control.seasons_cooling_begin_day.nil? || hvac_control.seasons_cooling_end_month.nil? || hvac_control.seasons_cooling_end_day.nil?
+
       hvac_control.seasons_cooling_begin_month = 1
       hvac_control.seasons_cooling_begin_day = 1
       hvac_control.seasons_cooling_end_month = 12
@@ -965,15 +976,6 @@ class HPXMLDefaults
   end
 
   def self.apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
-    # Check either all ducts have location and surface area or all ducts have no location and surface area
-    n_ducts = 0
-    n_ducts_to_be_defaulted = 0
-    hpxml.hvac_distributions.each do |hvac_distribution|
-      n_ducts += hvac_distribution.ducts.size
-      n_ducts_to_be_defaulted += hvac_distribution.ducts.select { |duct| duct.duct_surface_area.nil? && duct.duct_location.nil? }.size
-    end
-    fail if n_ducts_to_be_defaulted > 0 && (n_ducts != n_ducts_to_be_defaulted) # EPvalidator.xml should prevent this
-
     hpxml.hvac_distributions.each do |hvac_distribution|
       next unless [HPXML::HVACDistributionTypeAir].include? hvac_distribution.distribution_system_type
 
@@ -983,44 +985,63 @@ class HPXMLDefaults
         hvac_distribution.number_of_return_registers_isdefaulted = true
       end
 
+      next if hvac_distribution.ducts.empty?
+
       # Default ducts
+
       cfa_served = hvac_distribution.conditioned_floor_area_served
       n_returns = hvac_distribution.number_of_return_registers
-
       supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
       return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
-      [supply_ducts, return_ducts].each do |ducts|
-        ducts.each do |duct|
-          next unless duct.duct_surface_area.nil?
 
-          primary_duct_area, secondary_duct_area = HVAC.get_default_duct_surface_area(duct.duct_type, ncfl_ag, cfa_served, n_returns).map { |area| area / ducts.size }
-          primary_duct_location, secondary_duct_location = HVAC.get_default_duct_locations(hpxml)
-          if primary_duct_location.nil? # If a home doesn't have any non-living spaces (outside living space), place all ducts in living space.
-            duct.duct_surface_area = primary_duct_area + secondary_duct_area
-            duct.duct_location = secondary_duct_location
-          else
-            duct.duct_surface_area = primary_duct_area
-            duct.duct_location = primary_duct_location
-            if secondary_duct_area > 0
-              hvac_distribution.ducts.add(duct_type: duct.duct_type,
-                                          duct_insulation_r_value: duct.duct_insulation_r_value,
-                                          duct_location: secondary_duct_location,
-                                          duct_location_isdefaulted: true,
-                                          duct_surface_area: secondary_duct_area,
-                                          duct_surface_area_isdefaulted: true)
+      if hvac_distribution.ducts[0].duct_location.nil?
+        # Default both duct location(s) and duct surface area(s)
+        [supply_ducts, return_ducts].each do |ducts|
+          ducts.each do |duct|
+            primary_duct_area, secondary_duct_area = HVAC.get_default_duct_surface_area(duct.duct_type, ncfl_ag, cfa_served, n_returns).map { |area| area / ducts.size }
+            primary_duct_location, secondary_duct_location = HVAC.get_default_duct_locations(hpxml)
+            if primary_duct_location.nil? # If a home doesn't have any non-living spaces (outside living space), place all ducts in living space.
+              duct.duct_surface_area = primary_duct_area + secondary_duct_area
+              duct.duct_surface_area_isdefaulted = true
+              duct.duct_location = secondary_duct_location
+              duct.duct_location_isdefaulted = true
+            else
+              duct.duct_surface_area = primary_duct_area
+              duct.duct_surface_area_isdefaulted = true
+              duct.duct_location = primary_duct_location
+              duct.duct_location_isdefaulted = true
+
+              if secondary_duct_area > 0
+                hvac_distribution.ducts.add(duct_type: duct.duct_type,
+                                            duct_insulation_r_value: duct.duct_insulation_r_value,
+                                            duct_location: secondary_duct_location,
+                                            duct_location_isdefaulted: true,
+                                            duct_surface_area: secondary_duct_area,
+                                            duct_surface_area_isdefaulted: true)
+              end
             end
           end
-          duct.duct_surface_area_isdefaulted = true
-          duct.duct_location_isdefaulted = true
+        end
+
+      elsif hvac_distribution.ducts[0].duct_surface_area.nil?
+        # Default duct surface area(s)
+        [supply_ducts, return_ducts].each do |ducts|
+          ducts.each do |duct|
+            total_duct_area = HVAC.get_default_duct_surface_area(duct.duct_type, ncfl_ag, cfa_served, n_returns).sum()
+            duct.duct_surface_area = total_duct_area * duct.duct_fraction_area
+            duct.duct_surface_area_isdefaulted = true
+          end
         end
       end
 
-      # Also update FractionDuctArea for informational purposes
+      # Calculate FractionDuctArea from DuctSurfaceArea
       supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
       return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
       total_supply_area = supply_ducts.map { |d| d.duct_surface_area }.sum
       total_return_area = return_ducts.map { |d| d.duct_surface_area }.sum
       (supply_ducts + return_ducts).each do |duct|
+        next unless duct.duct_fraction_area.nil?
+
         if duct.duct_type == HPXML::DuctTypeSupply
           duct.duct_fraction_area = (duct.duct_surface_area / total_supply_area).round(3)
           duct.duct_fraction_area_isdefaulted = true
@@ -1150,6 +1171,7 @@ class HPXMLDefaults
         water_heating_system.location_isdefaulted = true
       end
       next unless water_heating_system.usage_bin.nil? && (not water_heating_system.uniform_energy_factor.nil?) # FHR & UsageBin only applies to UEF
+
       if not water_heating_system.first_hour_rating.nil?
         water_heating_system.usage_bin = Waterheater.get_usage_bin_from_first_hour_rating(water_heating_system.first_hour_rating)
       else
