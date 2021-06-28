@@ -395,8 +395,8 @@ class HVAC
     hp_ap = heat_pump.additional_properties
     htg_cfm = heat_pump.heating_airflow_cfm
     clg_cfm = heat_pump.cooling_airflow_cfm
-    htg_cfm_rated = heat_pump.airflow_defect_ratio.nil?? htg_cfm : (htg_cfm / (1.0 + heat_pump.airflow_defect_ratio))
-    clg_cfm_rated = heat_pump.airflow_defect_ratio.nil?? clg_cfm : (clg_cfm / (1.0 + heat_pump.airflow_defect_ratio))
+    htg_cfm_rated = heat_pump.airflow_defect_ratio.nil? ? htg_cfm : (htg_cfm / (1.0 + heat_pump.airflow_defect_ratio))
+    clg_cfm_rated = heat_pump.airflow_defect_ratio.nil? ? clg_cfm : (clg_cfm / (1.0 + heat_pump.airflow_defect_ratio))
 
     if hp_ap.frac_glycol == 0
       hp_ap.fluid_type = Constants.FluidWater
@@ -1564,6 +1564,7 @@ class HVAC
       if (sensors.size != 1) || (mode != 'primary_htg')
         fail 'Unexpected situation.'
       end
+
       fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{mode} = #{fan_or_pump_sensor.name}")
     else
       sensors.each do |mode, sensor|
@@ -4180,6 +4181,7 @@ class HVAC
       if is_central_air_conditioner_and_furnace(hpxml, heating_system, heating_system.attached_cooling_system)
         next # Already processed combined AC+furnace
       end
+
       hvac_systems << { cooling: nil,
                         heating: heating_system }
     end
