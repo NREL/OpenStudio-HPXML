@@ -170,6 +170,7 @@
       <sch:assert role='ERROR' test='number(h:Area) &gt; 0 or not(h:Area)'>Expected Area to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:Azimuth) &gt;= 0 or not(h:Azimuth)'>Expected Azimuth to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:Azimuth) &lt; 360 or not(h:Azimuth)'>Expected Azimuth to be less than 360</sch:assert>
+      <sch:assert role='ERROR' test='h:Orientation[text()="north" or text()="northwest" or text()="west" or text()="southwest" or text()="south" or text()="southeast" or text()="east" or text()="northeast"] or not(h:Orientation)'>Expected Orientation to be 'north' or 'northwest' or 'west' or 'southwest' or 'south' or 'southeast' or 'east' or 'northeast'</sch:assert>
       <sch:assert role='ERROR' test='number(h:UFactor) &gt; 0 or not(h:UFactor)'>Expected UFactor to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:SHGC) &gt; 0 or not(h:SHGC)'>Expected SHGC to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:SHGC) &lt; 1 or not(h:SHGC)'>Expected SHGC to be less than 1</sch:assert>
@@ -225,6 +226,7 @@
       <sch:assert role='ERROR' test='number(h:Area) &gt; 0 or not(h:Area)'>Expected Area to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:Azimuth) &gt;= 0 or not(h:Azimuth)'>Expected Azimuth to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:Azimuth) &lt; 360 or not(h:Azimuth)'>Expected Azimuth to be less than 360</sch:assert>
+      <sch:assert role='ERROR' test='h:Orientation[text()="north" or text()="northwest" or text()="west" or text()="southwest" or text()="south" or text()="southeast" or text()="east" or text()="northeast"] or not(h:Orientation)'>Expected Orientation to be 'north' or 'northwest' or 'west' or 'southwest' or 'south' or 'southeast' or 'east' or 'northeast'</sch:assert>
       <sch:assert role='ERROR' test='number(h:RValue) &gt;= 0 or not(h:RValue)'>Expected RValue to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier[@id]) = 1 or not (h:SystemIdentifier)'>Expected id attribute for SystemIdentifier</sch:assert>
       <sch:assert role='ERROR' test='count(h:AttachedToWall[@idref]) = 1 or not(h:AttachedToWall)'>Expected idref attribute for AttachedToWall</sch:assert>

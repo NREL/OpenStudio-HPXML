@@ -262,6 +262,7 @@ def create_hpxmls
     'base-enclosure-infil-cfm50.xml' => 'base.xml',
     'base-enclosure-infil-flue.xml' => 'base.xml',
     'base-enclosure-infil-natural-ach.xml' => 'base.xml',
+    'base-enclosure-orientations.xml' => 'base.xml',
     'base-enclosure-overhangs.xml' => 'base.xml',
     'base-enclosure-rooftypes.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
@@ -2523,6 +2524,15 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
+  elsif ['base-enclosure-orientations.xml'].include? hpxml_file
+    hpxml.windows[0].azimuth = nil
+    hpxml.windows[0].orientation = HPXML::OrientationNorth
+    hpxml.windows[1].azimuth = nil
+    hpxml.windows[1].orientation = HPXML::OrientationSouth
+    hpxml.windows[2].azimuth = nil
+    hpxml.windows[2].orientation = HPXML::OrientationEast
+    hpxml.windows[3].azimuth = nil
+    hpxml.windows[3].orientation = HPXML::OrientationWest
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.windows.clear
     hpxml.windows.add(id: 'WindowNorth',
@@ -2859,6 +2869,11 @@ def set_hpxml_doors(hpxml_file, hpxml)
                     area: 20,
                     azimuth: 180,
                     r_value: 4.4)
+  elsif ['base-enclosure-orientations.xml'].include? hpxml_file
+    hpxml.doors[0].azimuth = nil
+    hpxml.doors[0].orientation = HPXML::OrientationNorth
+    hpxml.doors[1].azimuth = nil
+    hpxml.doors[1].orientation = HPXML::OrientationSouth
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.doors.clear
     hpxml.doors.add(id: 'Door',
