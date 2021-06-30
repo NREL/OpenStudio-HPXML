@@ -37,118 +37,28 @@ class Compare:
 
 
   def results(self, base_folder, feature_folder, export_folder, aggregate_by=[]):
-    base = 'base'
-    feature = 'feature'
-
     files = []
     for file in os.listdir(base_folder):
       if file.endswith('.csv'):
         files.append(file)
 
     for file in files:
-      results = { base: {}, feature: {} }
+      base_df = pd.read_csv(os.path.join(base_folder, file), index_col=0)
+      feature_df = pd.read_csv(os.path.join(feature_folder, file), index_col=0)
 
-      # load files
-      for key in results.keys():
-        if key == base:
-          results[key]['file'] = 'workflow/tests/base_results/{file}'.format(file=file)
-        elif key == feature:
-          results[key]['file'] = 'workflow/tests/results/{file}'.format(file=file)
-
-        filepath = os.path.join(os.getcwd(), results[key]['file'])
-        if os.path.isfile(filepath):
-          with open(filepath) as f:
-            results[key]['rows'] = list(csv.reader(f))
-        else:
-          print('Could not find {filepath}.'.format(filepath=filepath))
-
-      if (not 'rows' in results[base].keys()) or (not 'rows' in results[feature].keys()):
-        continue
-
-      # get columns
-      for key in results.keys():
-        results[key]['cols'] = results[key]['rows'][0][1:-1] # exclude index column
-
-      # get data
-      for key in results.keys():
-        for row in results[key]['rows'][1:-1]:
-          hpxml = row[0]
-          results[key][hpxml] = {}
-          for i, field in enumerate(row[1:-1]):
-            col = results[key]['cols'][i]
-
-            if field is None:
-              vals = [''] # string
-            elif ',' in field:
-              try:
-                # vals = field.split(',').map { |x| Float(x) } # float
-                vals = [float(x) for x in field.split(',')]
-              except ValueError:
-                vals = [field] # string
-            else:
-              try:
-                vals = [Float(field)] # float
-              except ValueError:
-                vals = [field] # string
-
-            results[key][hpxml][col] = vals
-
-      # get hpxml union
-      base_hpxmls = list(map(list, zip(*results[base]['rows'])))[0][1:-1]
-      feature_hpxmls = list(map(list, zip(*results[feature]['rows'])))[0][1:-1]
-      hpxmls = list(set(base_hpxmls) | set(feature_hpxmls))
-
-      # get column union
-      base_cols = results[base]['cols']
-      feature_cols = results[feature]['cols']
-      cols = list(set(base_cols) | set(feature_cols))
-
-      # create comparison table
-      rows = [[results[base]['rows'][0][0]] + cols] # index column + union of all other columns
-
-      # populate the rows hash
-      for hpxml in sorted(hpxmls):
-        row = [hpxml]
-        for i, col in enumerate(cols):
-          if hpxml in results[base].keys() and (not hpxml in results[feature].keys()): # feature removed an xml
-            m = 'N/A'
-          elif (not hpxml in results[base].keys()) and hpxml in results[feature].keys(): # feature added an xml
-            m = 'N/A'
-          elif col in results[base][hpxml].keys() and (not col in results[feature][hpxml].keys()): # feature removed a column
-            m = 'N/A'
-          elif (not col in results[base][hpxml].keys()) and col in results[feature][hpxml].keys(): # feature added a column
-            m = 'N/A'
-          else:
-            base_field = results[base][hpxml][col]
-            feature_field = results[feature][hpxml][col]
-
-            try:
-              # float comparisons
-              m = []
-              for b, f in list(zip(base_field, feature_field)):
-                m.append(round((f - b), 1))
-            except TypeError:
-              # string comparisons
-              m = []
-              for b, f in list(zip(base_field, feature_field)):
-                if b != f:
-                  m.append(1)
-                else:
-                  m.append(0)
-
-            m = sum(m)
-
-          row.append(m)
-
-        rows.append(row)
-
-      # export comparison table
-      with open(os.path.join(export_folder, file), 'w', newline='') as f:
-        w = csv.writer(f)
-        w.writerows(rows)
+      df = feature_df - base_df
+      df = df.fillna('NA')
+      df.to_csv(os.path.join(export_folder, file))
 
   def visualize(self, base_folder, feature_folder, export_folder):
-    return None
+    files = []
+    for file in os.listdir(base_folder):
+      if file.endswith('.csv'):
+        files.append(file)
+
+    for file in files:
+      base_df = pd.read_csv(os.path.join(base_folder, file), index_col=0)
+      feature_df = pd.read_csv(os.path.join(feature_folder, file), index_col=0)
 
 
 

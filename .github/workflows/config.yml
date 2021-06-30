@@ -75,6 +75,7 @@ jobs:
           cp -r base_results/results*.csv workflow/tests/base_results
           mkdir workflow/tests/results
           cp -r results/results* workflow/tests/results
+          pip install pandas
           python workflow/tests/compare.py -a results
 
       - name: Store comparisons
