@@ -75,8 +75,11 @@ jobs:
           cp -r base_results/results*.csv workflow/tests/base_results
           mkdir workflow/tests/results
           cp -r results/results* workflow/tests/results
+          pip install numpy
           pip install pandas
+          pip install plotly
           python workflow/tests/compare.py -a results
+          python workflow/tests/compare.py -a visualize
 
       - name: Store comparisons
         uses: actions/upload-artifact@v2
