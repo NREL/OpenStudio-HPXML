@@ -78,6 +78,7 @@ jobs:
           pip install numpy
           pip install pandas
           pip install plotly
+          pip install kaleido
           python workflow/tests/compare.py -a results
           python workflow/tests/compare.py -a visualize
 
