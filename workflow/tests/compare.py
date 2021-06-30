@@ -3,6 +3,7 @@ import argparse
 import numpy as np
 import pandas as pd
 import csv
+import plotly
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -130,6 +131,7 @@ class Compare:
       if groupby:
         basename += '_{groupby}'.format(groupby=groupby[0])
       fig.write_image(os.path.join(export_folder, '{basename}.svg'.format(basename=basename)))
+      plotly.offline.plot(fig, filename=os.path.join(export_folder, '{basename}.html'.format(basename=basename)), auto_open=False)
 
 if __name__ == '__main__':
 
