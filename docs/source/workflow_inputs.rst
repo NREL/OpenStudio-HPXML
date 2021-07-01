@@ -477,8 +477,8 @@ If insulation layers are provided, additional information is entered in each ``F
   Element                                     Type      Units         Constraints                         Required  Default  Notes
   ==========================================  ========  ============  ==================================  ========  =======  =====================================================================
   ``NominalRValue``                           double    F-ft2-hr/Btu  >= 0                                Yes                R-value of the foundation wall insulation; use zero if no insulation
-  ``extension/DistanceToTopOfInsulation``     double    ft            >= 0                                Yes                Vertical distance from top of foundation wall to top of insulation
-  ``extension/DistanceToBottomOfInsulation``  double    ft            DistanceToTopOfInsulation - Height  Yes                Vertical distance from top of foundation wall to bottom of insulation
+  ``extension/DistanceToTopOfInsulation``     double    ft            >= 0                                No        0        Vertical distance from top of foundation wall to top of insulation
+  ``extension/DistanceToBottomOfInsulation``  double    ft            DistanceToTopOfInsulation - Height  No        Height   Vertical distance from top of foundation wall to bottom of insulation
   ==========================================  ========  ============  ==================================  ========  =======  =====================================================================
 
 HPXML Frame Floors

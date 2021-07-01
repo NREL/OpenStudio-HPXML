@@ -17,6 +17,7 @@ __New Features__
   - HVAC/DHW system efficiency (by age).
   - Mechanical ventilation fan power (by type).
   - Color (solar absorptance) for walls, roofs, and rim joists.
+  - Foundation wall distance to top/bottom of insulation.
   - Door azimuth.
   - Radiant barrier grade.
 - For water heaters w/ UEF, allows `UsageBin` instead of `FirstHourRating` (or defaults if neither provided).
