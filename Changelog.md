@@ -12,6 +12,7 @@ __New Features__
 - Allows "none" for wall/rim joist siding.
 - Allows interior finish inputs (e.g., 0.5" drywall) for walls, ceilings, and roofs.
 - Allows `Orientation` to be provided instead of `Azimuth` for all applicable surfaces, PV systems, and solar thermal systems.
+- Allows `Length` to be provided instead of `Area` for foundation walls.
 - Allows additional fuel types for generators.
 - Allows more defaulting (optional inputs):
   - HVAC/DHW system efficiency (by age).

@@ -115,8 +115,8 @@
             <SystemIdentifier id='FoundationWall'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Length>150.0</Length>
             <Height>8.0</Height>
-            <Area>1200.0</Area>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <Insulation>
               <SystemIdentifier id='FoundationWallInsulation'/>

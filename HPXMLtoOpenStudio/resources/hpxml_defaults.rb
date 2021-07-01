@@ -483,6 +483,10 @@ class HPXMLDefaults
         foundation_wall.thickness = 8.0
         foundation_wall.thickness_isdefaulted = true
       end
+      if foundation_wall.area.nil?
+        foundation_wall.area = foundation_wall.length * foundation_wall.height
+        foundation_wall.area_isdefaulted = true
+      end
       if foundation_wall.interior_finish_type.nil?
         if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? foundation_wall.interior_adjacent_to
           foundation_wall.interior_finish_type = HPXML::InteriorFinishGypsumBoard
