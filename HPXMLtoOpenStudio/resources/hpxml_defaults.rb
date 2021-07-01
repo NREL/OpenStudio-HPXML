@@ -499,6 +499,22 @@ class HPXMLDefaults
         end
         foundation_wall.interior_finish_type_isdefaulted = true
       end
+      if foundation_wall.insulation_interior_distance_to_top.nil?
+        foundation_wall.insulation_interior_distance_to_top = 0.0
+        foundation_wall.insulation_interior_distance_to_top_isdefaulted = true
+      end
+      if foundation_wall.insulation_interior_distance_to_bottom.nil?
+        foundation_wall.insulation_interior_distance_to_bottom = foundation_wall.height
+        foundation_wall.insulation_interior_distance_to_bottom_isdefaulted = true
+      end
+      if foundation_wall.insulation_exterior_distance_to_top.nil?
+        foundation_wall.insulation_exterior_distance_to_top = 0.0
+        foundation_wall.insulation_exterior_distance_to_top_isdefaulted = true
+      end
+      if foundation_wall.insulation_exterior_distance_to_bottom.nil?
+        foundation_wall.insulation_exterior_distance_to_bottom = foundation_wall.height
+        foundation_wall.insulation_exterior_distance_to_bottom_isdefaulted = true
+      end
       next unless foundation_wall.interior_finish_thickness.nil?
 
       if foundation_wall.interior_finish_type != HPXML::InteriorFinishNone

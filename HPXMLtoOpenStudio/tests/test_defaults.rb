@@ -384,9 +384,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.foundation_walls[0].interior_finish_thickness = 0.625
     hpxml.foundation_walls[0].azimuth = 123
     hpxml.foundation_walls[0].area = 789
+    hpxml.foundation_walls[0].insulation_interior_distance_to_top = 0.5
+    hpxml.foundation_walls[0].insulation_interior_distance_to_bottom = 7.75
+    hpxml.foundation_walls[0].insulation_exterior_distance_to_top = 0.75
+    hpxml.foundation_walls[0].insulation_exterior_distance_to_bottom = 7.5
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_foundation_wall_values(hpxml_default.foundation_walls[0], 7.0, HPXML::InteriorFinishGypsumCompositeBoard, 0.625, 123, 789)
+    _test_default_foundation_wall_values(hpxml_default.foundation_walls[0], 7.0, HPXML::InteriorFinishGypsumCompositeBoard, 0.625, 123,
+                                         789, 0.5, 7.75, 0.75, 7.5)
 
     # Test defaults
     hpxml.foundation_walls[0].thickness = nil
@@ -396,9 +401,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.foundation_walls[0].azimuth = nil
     hpxml.foundation_walls[0].area = nil
     hpxml.foundation_walls[0].length = 100
+    hpxml.foundation_walls[0].insulation_interior_distance_to_bottom = nil
+    hpxml.foundation_walls[0].insulation_exterior_distance_to_bottom = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_foundation_wall_values(hpxml_default.foundation_walls[0], 8.0, HPXML::InteriorFinishGypsumBoard, 0.5, 135, 800)
+    _test_default_foundation_wall_values(hpxml_default.foundation_walls[0], 8.0, HPXML::InteriorFinishGypsumBoard, 0.5, 135,
+                                         800, 0.5, 8.0, 0.75, 8.0)
 
     # Test defaults w/ unconditioned surfaces
     hpxml = _create_hpxml('base-foundation-unconditioned-basement.xml')
@@ -410,9 +418,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.foundation_walls[0].area = nil
     hpxml.foundation_walls[0].length = 100
     hpxml.foundation_walls[0].height = 10
+    hpxml.foundation_walls[0].insulation_interior_distance_to_top = nil
+    hpxml.foundation_walls[0].insulation_interior_distance_to_bottom = nil
+    hpxml.foundation_walls[0].insulation_exterior_distance_to_top = nil
+    hpxml.foundation_walls[0].insulation_exterior_distance_to_bottom = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_foundation_wall_values(hpxml_default.foundation_walls[0], 8.0, HPXML::InteriorFinishNone, nil, 135, 1000)
+    _test_default_foundation_wall_values(hpxml_default.foundation_walls[0], 8.0, HPXML::InteriorFinishNone, nil, 135,
+                                         1000, 0.0, 10.0, 0.0, 10.0)
   end
 
   def test_frame_floors
@@ -2488,7 +2501,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_foundation_wall_values(foundation_wall, thickness, int_finish_type, int_finish_thickness, azimuth, area)
+  def _test_default_foundation_wall_values(foundation_wall, thickness, int_finish_type, int_finish_thickness, azimuth, area,
+                                           ins_int_top, ins_int_bottom, ins_ext_top, ins_ext_bottom)
     assert_equal(thickness, foundation_wall.thickness)
     assert_equal(int_finish_type, foundation_wall.interior_finish_type)
     if not int_finish_thickness.nil?
@@ -2498,6 +2512,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
     assert_equal(azimuth, foundation_wall.azimuth)
     assert_equal(area, foundation_wall.area)
+    assert_equal(ins_int_top, foundation_wall.insulation_interior_distance_to_top)
+    assert_equal(ins_int_bottom, foundation_wall.insulation_interior_distance_to_bottom)
+    assert_equal(ins_ext_top, foundation_wall.insulation_exterior_distance_to_top)
+    assert_equal(ins_ext_bottom, foundation_wall.insulation_exterior_distance_to_bottom)
   end
 
   def _test_default_frame_floor_values(frame_floor, int_finish_type, int_finish_thickness)
