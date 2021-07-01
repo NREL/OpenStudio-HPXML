@@ -357,6 +357,10 @@ class HPXMLDefaults
         roof.radiant_barrier = false
         roof.radiant_barrier_isdefaulted = true
       end
+      if roof.radiant_barrier && roof.radiant_barrier_grade.nil?
+        roof.radiant_barrier_grade = 1
+        roof.radiant_barrier_grade_isdefaulted = true
+      end
       if roof.roof_color.nil? && roof.solar_absorptance.nil?
         roof.roof_color = HPXML::ColorMedium
         roof.roof_color_isdefaulted = true

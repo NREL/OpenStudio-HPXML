@@ -322,7 +322,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   ``InteriorFinish/Thickness``            double             in                >= 0                   No         0.5                             Interior finish thickness
   ``Pitch``                               integer            ?:12              >= 0                   Yes                                        Pitch
   ``RadiantBarrier``                      boolean                                                     No         false                           Presence of radiant barrier
-  ``RadiantBarrierGrade``                 integer                              1 - 3                  See [#]_                                   Radiant barrier installation grade
+  ``RadiantBarrierGrade``                 integer                              1 - 3                  No         1                               Radiant barrier installation grade
   ``Insulation/SystemIdentifier``         id                                                          Yes                                        Unique identifier
   ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                    Yes                                        Assembly R-value [#]_
   ======================================  =================  ================  =====================  =========  ==============================  ==================================
@@ -342,7 +342,6 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
 
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is living space, otherwise "none".
-  .. [#] RadiantBarrierGrade only required if RadiantBarrier is provided.
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
 HPXML Rim Joists
