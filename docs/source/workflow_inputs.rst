@@ -440,7 +440,7 @@ Other walls (e.g., wood framed walls) that are connected to a below-grade space 
   ``ExteriorAdjacentTo``                                          string                               See [#]_             Yes                  Exterior adjacent space type [#]_
   ``InteriorAdjacentTo``                                          string                               See [#]_             Yes                  Interior adjacent space type
   ``Height``                                                      double             ft                > 0                  Yes                  Total height
-  ``Area``                                                        double             ft2               > 0                  Yes                  Gross area (including doors/windows)
+  ``Area`` or ``Length``                                          double             ft2 or ft         > 0                  Yes                  Gross area (including doors/windows) or length
   ``Azimuth`` or ``Orientation``                                  integer or string  deg or direction  0 - 359 or See [#]_  No         See [#]_  Direction (clockwise from North)
   ``Thickness``                                                   double             inches            > 0                  No         8.0       Thickness excluding interior framing
   ``DepthBelowGrade``                                             double             ft                0 - Height           Yes                  Depth below grade [#]_
