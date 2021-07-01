@@ -18,6 +18,7 @@ __New Features__
   - Mechanical ventilation fan power (by type).
   - Color (solar absorptance) for walls, roofs, and rim joists.
   - Door azimuth.
+  - Radiant barrier grade.
 - For water heaters w/ UEF, allows `UsageBin` instead of `FirstHourRating` (or defaults if neither provided).
 - Switches to the EnergyPlus Fan:SystemModel object for all HVAC systems.
 - Introduces a small amount of infiltration for unvented spaces.
