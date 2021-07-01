@@ -238,36 +238,38 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.roofs[0].interior_finish_type = HPXML::InteriorFinishPlaster
     hpxml.roofs[0].interior_finish_thickness = 0.25
     hpxml.roofs[0].azimuth = 123
+    hpxml.roofs[0].radiant_barrier_grade = 3
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_roof_values(hpxml_default.roofs[0], HPXML::RoofTypeMetal, 0.77, HPXML::ColorDark, 0.88, true, HPXML::InteriorFinishPlaster, 0.25, 123)
+    _test_default_roof_values(hpxml_default.roofs[0], HPXML::RoofTypeMetal, 0.77, HPXML::ColorDark, 0.88, true, 3, HPXML::InteriorFinishPlaster, 0.25, 123)
 
     # Test defaults w/ RoofColor
     hpxml.roofs[0].roof_type = nil
     hpxml.roofs[0].solar_absorptance = nil
     hpxml.roofs[0].roof_color = HPXML::ColorLight
     hpxml.roofs[0].emittance = nil
-    hpxml.roofs[0].radiant_barrier = nil
     hpxml.roofs[0].interior_finish_thickness = nil
     hpxml.roofs[0].orientation = HPXML::OrientationNortheast
     hpxml.roofs[0].azimuth = nil
+    hpxml.roofs[0].radiant_barrier_grade = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_roof_values(hpxml_default.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.75, HPXML::ColorLight, 0.90, false, HPXML::InteriorFinishPlaster, 0.5, 45)
+    _test_default_roof_values(hpxml_default.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.75, HPXML::ColorLight, 0.90, true, 1, HPXML::InteriorFinishPlaster, 0.5, 45)
 
     # Test defaults w/ SolarAbsorptance
     hpxml.roofs[0].solar_absorptance = 0.99
     hpxml.roofs[0].roof_color = nil
     hpxml.roofs[0].interior_finish_type = nil
+    hpxml.roofs[0].radiant_barrier = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_roof_values(hpxml_default.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.99, HPXML::ColorDark, 0.90, false, HPXML::InteriorFinishNone, nil, 45)
+    _test_default_roof_values(hpxml_default.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.99, HPXML::ColorDark, 0.90, false, nil, HPXML::InteriorFinishNone, nil, 45)
 
     # Test defaults w/o RoofColor & SolarAbsorptance
     hpxml.roofs[0].solar_absorptance = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_roof_values(hpxml_default.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.85, HPXML::ColorMedium, 0.90, false, HPXML::InteriorFinishNone, nil, 45)
+    _test_default_roof_values(hpxml_default.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.85, HPXML::ColorMedium, 0.90, false, nil, HPXML::InteriorFinishNone, nil, 45)
 
     # Test defaults w/ conditioned space
     hpxml = _create_hpxml('base-atticroof-cathedral.xml')
@@ -281,7 +283,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.roofs[0].azimuth = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_roof_values(hpxml_default.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.75, HPXML::ColorLight, 0.90, false, HPXML::InteriorFinishGypsumBoard, 0.5, 45)
+    _test_default_roof_values(hpxml_default.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.75, HPXML::ColorLight, 0.90, false, nil, HPXML::InteriorFinishGypsumBoard, 0.5, 45)
   end
 
   def test_rim_joists
@@ -2438,12 +2440,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_in_epsilon(sla, foundation.vented_crawlspace_sla, 0.001)
   end
 
-  def _test_default_roof_values(roof, roof_type, solar_absorptance, roof_color, emittance, radiant_barrier, int_finish_type, int_finish_thickness, azimuth)
+  def _test_default_roof_values(roof, roof_type, solar_absorptance, roof_color, emittance, radiant_barrier,
+                                radiant_barrier_grade, int_finish_type, int_finish_thickness, azimuth)
     assert_equal(roof_type, roof.roof_type)
     assert_equal(solar_absorptance, roof.solar_absorptance)
     assert_equal(roof_color, roof.roof_color)
     assert_equal(emittance, roof.emittance)
     assert_equal(radiant_barrier, roof.radiant_barrier)
+    if not radiant_barrier_grade.nil?
+      assert_equal(radiant_barrier_grade, roof.radiant_barrier_grade)
+    else
+      assert_nil(roof.radiant_barrier_grade)
+    end
     assert_equal(int_finish_type, roof.interior_finish_type)
     if not int_finish_thickness.nil?
       assert_equal(int_finish_thickness, roof.interior_finish_thickness)
