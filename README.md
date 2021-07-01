@@ -1,26 +1,40 @@
-<img src="https://user-images.githubusercontent.com/1276021/85608250-1ff46b80-b612-11ea-903e-4ced367e5940.jpg" width="280">
+# OpenStudio-HPXML
 
-The `develop` branch is under active development. Find the latest release [here](https://github.com/NREL/resstock/releases).
+[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/NREL/OpenStudio-HPXML?include_prereleases)](https://github.com/NREL/OpenStudio-HPXML/releases)
+[![ci](https://github.com/NREL/OpenStudio-HPXML/workflows/ci/badge.svg)](https://github.com/NREL/OpenStudio-HPXML/actions)
+[![Documentation Status](https://readthedocs.org/projects/openstudio-hpxml/badge/?version=latest)](https://openstudio-hpxml.readthedocs.io/en/latest/?badge=latest)
 
-[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/NREL/resstock?include_prereleases)](https://github.com/NREL/resstock/releases)
-[![ci](https://github.com/NREL/resstock/workflows/ci/badge.svg)](https://github.com/NREL/resstock/actions)
-[![Documentation Status](https://readthedocs.org/projects/resstock/badge/?version=latest)](https://resstock.readthedocs.io/en/latest/?badge=latest)
+OpenStudio-HPXML allows running residential EnergyPlus simulations using an [HPXML file](https://hpxml.nrel.gov/) for the building description.
+A Schematron document (`HPXMLtoOpenStudio/resources/EPvalidator.xml`) for the EnergyPlus use case is used to validate that the appropriate HPXML inputs are provided to run EnergyPlus.
 
-[ResStock™](https://www.nrel.gov/buildings/resstock.html), built on the [OpenStudio platform](http://openstudio.net), is a project geared at modeling existing residential building stocks at national, regional, or local scales with a high-degree of granularity (e.g., one physics-based simulation model for every 200 dwelling units), using the [EnergyPlus simulation engine](http://energyplus.net). Information about ComStock™, a sister tool for modeling the commercial building stock, can be found [here](https://www.nrel.gov/buildings/comstock.html). 
+OpenStudio-HPXML can accommodate a wide range of different building technologies and geometries.
+End-to-end simulations typically run in 3-10 seconds, depending on complexity, computer platform and speed, etc.
 
-This repository contains:
+For more information on running simulations, generating HPXML files, etc., please visit the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest).
 
-- [Housing characteristics of the U.S. residential building stock](https://github.com/NREL/resstock/tree/main/project_national/housing_characteristics), in the form of conditional probability distributions stored as tab-separated value (.tsv) files. A visualization of the dependency structure can be found [here](https://htmlpreview.github.io/?https://github.com/NREL/resstock/blob/main/project_national/util/dependency_wheel/dep_wheel.html).
-- [A library of housing characteristic "options"](https://github.com/NREL/resstock/blob/main/resources/options_lookup.tsv) that translate high-level characteristic parameters into arguments for [OpenStudio Measures](https://github.com/NREL/resstock/tree/main/resources/measures), and which are referenced by the housing characteristic .tsv files and building energy upgrades defined in project definition files
-- Project definition files:
-  - v2.3.0 and later: [buildstockbatch YML files openable in any text editor](https://github.com/NREL/resstock/blob/main/project_national/national.yml)
-  - v2.2.5 and prior: [Project folder openable in PAT](https://github.com/NREL/resstock/tree/v2.2.5/project_singlefamilydetached)
-- [Building-level OpenStudio Measures](https://github.com/NREL/resstock/tree/main/resources/measures) for automatically constructing OpenStudio Models of each representative building model
-- [Higher-level OpenStudio Measures](https://github.com/NREL/resstock/tree/main/measures) for controlling simulation inputs and outputs
+## Workflows
 
-This repository does not contain software for running ResStock simulations, which can be found as follows:
+A simple [run_simulation.rb script](https://github.com/NREL/OpenStudio-HPXML/blob/master/workflow/run_simulation.rb) is provided to run a residential EnergyPlus simulation from an HPXML file.
+See the [Getting Started](https://openstudio-hpxml.readthedocs.io/en/latest/getting_started.html#getting-started) section of the documentation for running simulations.
 
- - [Versions 2.3.0](https://github.com/NREL/resstock/releases/tag/untagged-af060c990f21d5ca539f) and later only support the use of [buildstockbatch](https://github.com/NREL/buildstockbatch) for deploying simulations on high-performance or cloud computing. Version 2.3.0 also removed separate projects for single-family detached and multifamily buildings, in lieu of a combined `project_national` representing the U.S. residential building stock. See the [changelog](https://github.com/NREL/resstock/blob/main/CHANGELOG.md) for more details. 
- - [Versions 2.2.5](https://github.com/NREL/resstock/releases/tag/v2.2.5) and prior support the use of the publicly available [OpenStudio-PAT](https://github.com/NREL/OpenStudio-PAT) software as an interface for deploying simulations on cloud computing. Read the [documentation for v2.2.5](https://resstock.readthedocs.io/en/v2.2.5/).
+Since [OpenStudio measures](http://nrel.github.io/OpenStudio-user-documentation/getting_started/about_measures/) are used for model generation, additional OpenStudio-based workflows and interfaces can be used instead if desired.
 
-Note that calibration/validation of the multifamily sector, as well as timeseries output, is still ongoing, under the [End-Use Load Profile for the U.S. Building Stock project](https://www.nrel.gov/buildings/end-use-load-profiles.html).
+## Measures
+
+This repository contains three OpenStudio measures:
+- `BuildResidentialHPXML`: A measure that translates a set of building unit argument values to an HPXML file.
+- `HPXMLtoOpenStudio`: A measure that translates an HPXML file to an OpenStudio model.
+- `SimulationOutputReport`: A reporting measure that generates a variety of annual/timeseries CSV outputs for a residential HPXML-based model.
+
+## Projects
+
+The OpenStudio-HPXML workflow is used by a number of other residential projects, including:
+- [Energy Rating Index (ERI) and ENERGY STAR](https://github.com/NREL/OpenStudio-ERI)
+- [Home Energy Score](https://betterbuildingssolutioncenter.energy.gov/home-energy-score)
+- [UrbanOpt](https://www.nrel.gov/buildings/urbanopt.html)
+- ResStock (pending)
+- Weatherization Assistant (pending)
+
+## License
+
+This project is available under a BSD-3-like license, which is a free, open-source, and permissive license. For more information, check out the [license file](https://github.com/NREL/OpenStudio-HPXML/blob/master/LICENSE.md).
