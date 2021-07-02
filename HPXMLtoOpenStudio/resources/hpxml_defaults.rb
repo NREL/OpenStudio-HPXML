@@ -15,6 +15,7 @@ class HPXMLDefaults
 
     apply_header(hpxml, epw_file)
     apply_site(hpxml)
+    apply_neighbor_buildings(hpxml)
     apply_building_occupancy(hpxml, nbeds)
     apply_building_construction(hpxml, cfa, nbeds)
     apply_infiltration(hpxml)
@@ -180,6 +181,19 @@ class HPXMLDefaults
     hpxml.site.additional_properties.aim2_shelter_coeff = Airflow.get_aim2_shelter_coefficient(hpxml.site.shielding_of_home)
   end
 
+  def self.apply_neighbor_buildings(hpxml)
+    hpxml.neighbor_buildings.each do |neighbor_building|
+      if neighbor_building.azimuth.nil?
+        neighbor_building.azimuth = get_azimuth_from_orientation(neighbor_building.orientation)
+        neighbor_building.azimuth_isdefaulted = true
+      end
+      if neighbor_building.orientation.nil?
+        neighbor_building.orientation = get_orientation_from_azimuth(neighbor_building.azimuth)
+        neighbor_building.orientation_isdefaulted = true
+      end
+    end
+  end
+
   def self.apply_building_occupancy(hpxml, nbeds)
     if hpxml.building_occupancy.number_of_residents.nil?
       hpxml.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(nbeds)
@@ -323,6 +337,14 @@ class HPXMLDefaults
 
   def self.apply_roofs(hpxml)
     hpxml.roofs.each do |roof|
+      if roof.azimuth.nil?
+        roof.azimuth = get_azimuth_from_orientation(roof.orientation)
+        roof.azimuth_isdefaulted = true
+      end
+      if roof.orientation.nil?
+        roof.orientation = get_orientation_from_azimuth(roof.azimuth)
+        roof.orientation_isdefaulted = true
+      end
       if roof.roof_type.nil?
         roof.roof_type = HPXML::RoofTypeAsphaltShingles
         roof.roof_type_isdefaulted = true
@@ -334,6 +356,10 @@ class HPXMLDefaults
       if roof.radiant_barrier.nil?
         roof.radiant_barrier = false
         roof.radiant_barrier_isdefaulted = true
+      end
+      if roof.radiant_barrier && roof.radiant_barrier_grade.nil?
+        roof.radiant_barrier_grade = 1
+        roof.radiant_barrier_grade_isdefaulted = true
       end
       if roof.roof_color.nil? && roof.solar_absorptance.nil?
         roof.roof_color = HPXML::ColorMedium
@@ -365,6 +391,15 @@ class HPXMLDefaults
 
   def self.apply_rim_joists(hpxml)
     hpxml.rim_joists.each do |rim_joist|
+      if rim_joist.azimuth.nil?
+        rim_joist.azimuth = get_azimuth_from_orientation(rim_joist.orientation)
+        rim_joist.azimuth_isdefaulted = true
+      end
+      if rim_joist.orientation.nil?
+        rim_joist.orientation = get_orientation_from_azimuth(rim_joist.azimuth)
+        rim_joist.orientation_isdefaulted = true
+      end
+
       next unless rim_joist.is_exterior
 
       if rim_joist.emittance.nil?
@@ -391,6 +426,15 @@ class HPXMLDefaults
 
   def self.apply_walls(hpxml)
     hpxml.walls.each do |wall|
+      if wall.azimuth.nil?
+        wall.azimuth = get_azimuth_from_orientation(wall.orientation)
+        wall.azimuth_isdefaulted = true
+      end
+      if wall.orientation.nil?
+        wall.orientation = get_orientation_from_azimuth(wall.azimuth)
+        wall.orientation_isdefaulted = true
+      end
+
       if wall.is_exterior
         if wall.emittance.nil?
           wall.emittance = 0.90
@@ -431,9 +475,21 @@ class HPXMLDefaults
 
   def self.apply_foundation_walls(hpxml)
     hpxml.foundation_walls.each do |foundation_wall|
+      if foundation_wall.azimuth.nil?
+        foundation_wall.azimuth = get_azimuth_from_orientation(foundation_wall.orientation)
+        foundation_wall.azimuth_isdefaulted = true
+      end
+      if foundation_wall.orientation.nil?
+        foundation_wall.orientation = get_orientation_from_azimuth(foundation_wall.azimuth)
+        foundation_wall.orientation_isdefaulted = true
+      end
       if foundation_wall.thickness.nil?
         foundation_wall.thickness = 8.0
         foundation_wall.thickness_isdefaulted = true
+      end
+      if foundation_wall.area.nil?
+        foundation_wall.area = foundation_wall.length * foundation_wall.height
+        foundation_wall.area_isdefaulted = true
       end
       if foundation_wall.interior_finish_type.nil?
         if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? foundation_wall.interior_adjacent_to
@@ -442,6 +498,22 @@ class HPXMLDefaults
           foundation_wall.interior_finish_type = HPXML::InteriorFinishNone
         end
         foundation_wall.interior_finish_type_isdefaulted = true
+      end
+      if foundation_wall.insulation_interior_distance_to_top.nil?
+        foundation_wall.insulation_interior_distance_to_top = 0.0
+        foundation_wall.insulation_interior_distance_to_top_isdefaulted = true
+      end
+      if foundation_wall.insulation_interior_distance_to_bottom.nil?
+        foundation_wall.insulation_interior_distance_to_bottom = foundation_wall.height
+        foundation_wall.insulation_interior_distance_to_bottom_isdefaulted = true
+      end
+      if foundation_wall.insulation_exterior_distance_to_top.nil?
+        foundation_wall.insulation_exterior_distance_to_top = 0.0
+        foundation_wall.insulation_exterior_distance_to_top_isdefaulted = true
+      end
+      if foundation_wall.insulation_exterior_distance_to_bottom.nil?
+        foundation_wall.insulation_exterior_distance_to_bottom = foundation_wall.height
+        foundation_wall.insulation_exterior_distance_to_bottom_isdefaulted = true
       end
       next unless foundation_wall.interior_finish_thickness.nil?
 
@@ -496,6 +568,14 @@ class HPXMLDefaults
   def self.apply_windows(hpxml)
     default_shade_summer, default_shade_winter = Constructions.get_default_interior_shading_factors()
     hpxml.windows.each do |window|
+      if window.azimuth.nil?
+        window.azimuth = get_azimuth_from_orientation(window.orientation)
+        window.azimuth_isdefaulted = true
+      end
+      if window.orientation.nil?
+        window.orientation = get_orientation_from_azimuth(window.azimuth)
+        window.orientation_isdefaulted = true
+      end
       if window.interior_shading_factor_summer.nil?
         window.interior_shading_factor_summer = default_shade_summer
         window.interior_shading_factor_summer_isdefaulted = true
@@ -521,6 +601,14 @@ class HPXMLDefaults
 
   def self.apply_skylights(hpxml)
     hpxml.skylights.each do |skylight|
+      if skylight.azimuth.nil?
+        skylight.azimuth = get_azimuth_from_orientation(skylight.orientation)
+        skylight.azimuth_isdefaulted = true
+      end
+      if skylight.orientation.nil?
+        skylight.orientation = get_orientation_from_azimuth(skylight.azimuth)
+        skylight.orientation_isdefaulted = true
+      end
       if skylight.interior_shading_factor_summer.nil?
         skylight.interior_shading_factor_summer = 1.0
         skylight.interior_shading_factor_summer_isdefaulted = true
@@ -542,6 +630,15 @@ class HPXMLDefaults
 
   def self.apply_doors(hpxml)
     hpxml.doors.each do |door|
+      if door.azimuth.nil?
+        door.azimuth = get_azimuth_from_orientation(door.orientation)
+        door.azimuth_isdefaulted = true
+      end
+      if door.orientation.nil?
+        door.orientation = get_orientation_from_azimuth(door.azimuth)
+        door.orientation_isdefaulted = true
+      end
+
       next unless door.azimuth.nil?
 
       if (not door.wall.nil?) && (not door.wall.azimuth.nil?)
@@ -1229,14 +1326,17 @@ class HPXMLDefaults
   end
 
   def self.apply_solar_thermal_systems(hpxml)
-    return if hpxml.solar_thermal_systems.size == 0
-
-    solar_thermal_system = hpxml.solar_thermal_systems[0]
-    collector_area = solar_thermal_system.collector_area
-
-    if not collector_area.nil? # Detailed solar water heater
-      if solar_thermal_system.storage_volume.nil?
-        solar_thermal_system.storage_volume = Waterheater.calc_default_solar_thermal_system_storage_volume(collector_area)
+    hpxml.solar_thermal_systems.each do |solar_thermal_system|
+      if solar_thermal_system.collector_azimuth.nil?
+        solar_thermal_system.collector_azimuth = get_azimuth_from_orientation(solar_thermal_system.collector_orientation)
+        solar_thermal_system.collector_azimuth_isdefaulted = true
+      end
+      if solar_thermal_system.collector_orientation.nil?
+        solar_thermal_system.collector_orientation = get_orientation_from_azimuth(solar_thermal_system.collector_azimuth)
+        solar_thermal_system.collector_orientation_isdefaulted = true
+      end
+      if solar_thermal_system.storage_volume.nil? && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
+        solar_thermal_system.storage_volume = Waterheater.calc_default_solar_thermal_system_storage_volume(solar_thermal_system.collector_area)
         solar_thermal_system.storage_volume_isdefaulted = true
       end
     end
@@ -1244,6 +1344,14 @@ class HPXMLDefaults
 
   def self.apply_pv_systems(hpxml)
     hpxml.pv_systems.each do |pv_system|
+      if pv_system.array_azimuth.nil?
+        pv_system.array_azimuth = get_azimuth_from_orientation(pv_system.array_orientation)
+        pv_system.array_azimuth_isdefaulted = true
+      end
+      if pv_system.array_orientation.nil?
+        pv_system.array_orientation = get_orientation_from_azimuth(pv_system.array_azimuth)
+        pv_system.array_orientation_isdefaulted = true
+      end
       if pv_system.is_shared_system.nil?
         pv_system.is_shared_system = false
         pv_system.is_shared_system_isdefaulted = true
@@ -2044,6 +2152,52 @@ class HPXMLDefaults
       # Cooling airflow
       clg_sys.cooling_airflow_cfm = hvac_sizing_values.Cool_Airflow.round
       clg_sys.cooling_airflow_cfm_isdefaulted = true
+    end
+  end
+
+  def self.get_azimuth_from_orientation(orientation)
+    return if orientation.nil?
+
+    if orientation == HPXML::OrientationNorth
+      return 0
+    elsif orientation == HPXML::OrientationNortheast
+      return 45
+    elsif orientation == HPXML::OrientationEast
+      return 90
+    elsif orientation == HPXML::OrientationSoutheast
+      return 135
+    elsif orientation == HPXML::OrientationSouth
+      return 180
+    elsif orientation == HPXML::OrientationSouthwest
+      return 225
+    elsif orientation == HPXML::OrientationWest
+      return 270
+    elsif orientation == HPXML::OrientationNorthwest
+      return 315
+    end
+
+    fail "Unexpected orientation: #{orientation}."
+  end
+
+  def self.get_orientation_from_azimuth(azimuth)
+    return if azimuth.nil?
+
+    if (azimuth >= 0.0 - 22.5 + 360.0) || (azimuth < 0.0 + 22.5)
+      return HPXML::OrientationNorth
+    elsif (azimuth >= 45.0 - 22.5) && (azimuth < 45.0 + 22.5)
+      return HPXML::OrientationNortheast
+    elsif (azimuth >= 90.0 - 22.5) && (azimuth < 90.0 + 22.5)
+      return HPXML::OrientationEast
+    elsif (azimuth >= 135.0 - 22.5) && (azimuth < 135.0 + 22.5)
+      return HPXML::OrientationSoutheast
+    elsif (azimuth >= 180.0 - 22.5) && (azimuth < 180.0 + 22.5)
+      return HPXML::OrientationSouth
+    elsif (azimuth >= 225.0 - 22.5) && (azimuth < 225.0 + 22.5)
+      return HPXML::OrientationSouthwest
+    elsif (azimuth >= 270.0 - 22.5) && (azimuth < 270.0 + 22.5)
+      return HPXML::OrientationWest
+    elsif (azimuth >= 315.0 - 22.5) && (azimuth < 315.0 + 22.5)
+      return HPXML::OrientationNorthwest
     end
   end
 end
