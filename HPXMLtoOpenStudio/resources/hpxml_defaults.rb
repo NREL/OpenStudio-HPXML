@@ -357,6 +357,10 @@ class HPXMLDefaults
         roof.radiant_barrier = false
         roof.radiant_barrier_isdefaulted = true
       end
+      if roof.radiant_barrier && roof.radiant_barrier_grade.nil?
+        roof.radiant_barrier_grade = 1
+        roof.radiant_barrier_grade_isdefaulted = true
+      end
       if roof.roof_color.nil? && roof.solar_absorptance.nil?
         roof.roof_color = HPXML::ColorMedium
         roof.roof_color_isdefaulted = true
@@ -483,6 +487,10 @@ class HPXMLDefaults
         foundation_wall.thickness = 8.0
         foundation_wall.thickness_isdefaulted = true
       end
+      if foundation_wall.area.nil?
+        foundation_wall.area = foundation_wall.length * foundation_wall.height
+        foundation_wall.area_isdefaulted = true
+      end
       if foundation_wall.interior_finish_type.nil?
         if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? foundation_wall.interior_adjacent_to
           foundation_wall.interior_finish_type = HPXML::InteriorFinishGypsumBoard
@@ -490,6 +498,22 @@ class HPXMLDefaults
           foundation_wall.interior_finish_type = HPXML::InteriorFinishNone
         end
         foundation_wall.interior_finish_type_isdefaulted = true
+      end
+      if foundation_wall.insulation_interior_distance_to_top.nil?
+        foundation_wall.insulation_interior_distance_to_top = 0.0
+        foundation_wall.insulation_interior_distance_to_top_isdefaulted = true
+      end
+      if foundation_wall.insulation_interior_distance_to_bottom.nil?
+        foundation_wall.insulation_interior_distance_to_bottom = foundation_wall.height
+        foundation_wall.insulation_interior_distance_to_bottom_isdefaulted = true
+      end
+      if foundation_wall.insulation_exterior_distance_to_top.nil?
+        foundation_wall.insulation_exterior_distance_to_top = 0.0
+        foundation_wall.insulation_exterior_distance_to_top_isdefaulted = true
+      end
+      if foundation_wall.insulation_exterior_distance_to_bottom.nil?
+        foundation_wall.insulation_exterior_distance_to_bottom = foundation_wall.height
+        foundation_wall.insulation_exterior_distance_to_bottom_isdefaulted = true
       end
       next unless foundation_wall.interior_finish_thickness.nil?
 

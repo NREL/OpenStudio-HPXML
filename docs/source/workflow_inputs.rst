@@ -322,7 +322,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   ``InteriorFinish/Thickness``            double             in                >= 0                   No         0.5                             Interior finish thickness
   ``Pitch``                               integer            ?:12              >= 0                   Yes                                        Pitch
   ``RadiantBarrier``                      boolean                                                     No         false                           Presence of radiant barrier
-  ``RadiantBarrierGrade``                 integer                              1 - 3                  See [#]_                                   Radiant barrier installation grade
+  ``RadiantBarrierGrade``                 integer                              1 - 3                  No         1                               Radiant barrier installation grade
   ``Insulation/SystemIdentifier``         id                                                          Yes                                        Unique identifier
   ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                    Yes                                        Assembly R-value [#]_
   ======================================  =================  ================  =====================  =========  ==============================  ==================================
@@ -342,7 +342,6 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
 
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is living space, otherwise "none".
-  .. [#] RadiantBarrierGrade only required if RadiantBarrier is provided.
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
 HPXML Rim Joists
@@ -441,7 +440,7 @@ Other walls (e.g., wood framed walls) that are connected to a below-grade space 
   ``ExteriorAdjacentTo``                                          string                               See [#]_             Yes                  Exterior adjacent space type [#]_
   ``InteriorAdjacentTo``                                          string                               See [#]_             Yes                  Interior adjacent space type
   ``Height``                                                      double             ft                > 0                  Yes                  Total height
-  ``Area``                                                        double             ft2               > 0                  Yes                  Gross area (including doors/windows)
+  ``Area`` or ``Length``                                          double             ft2 or ft         > 0                  Yes                  Gross area (including doors/windows) or length
   ``Azimuth`` or ``Orientation``                                  integer or string  deg or direction  0 - 359 or See [#]_  No         See [#]_  Direction (clockwise from North)
   ``Thickness``                                                   double             inches            > 0                  No         8.0       Thickness excluding interior framing
   ``DepthBelowGrade``                                             double             ft                0 - Height           Yes                  Depth below grade [#]_
@@ -478,8 +477,8 @@ If insulation layers are provided, additional information is entered in each ``F
   Element                                     Type      Units         Constraints                         Required  Default  Notes
   ==========================================  ========  ============  ==================================  ========  =======  =====================================================================
   ``NominalRValue``                           double    F-ft2-hr/Btu  >= 0                                Yes                R-value of the foundation wall insulation; use zero if no insulation
-  ``extension/DistanceToTopOfInsulation``     double    ft            >= 0                                Yes                Vertical distance from top of foundation wall to top of insulation
-  ``extension/DistanceToBottomOfInsulation``  double    ft            DistanceToTopOfInsulation - Height  Yes                Vertical distance from top of foundation wall to bottom of insulation
+  ``extension/DistanceToTopOfInsulation``     double    ft            >= 0                                No        0        Vertical distance from top of foundation wall to top of insulation
+  ``extension/DistanceToBottomOfInsulation``  double    ft            DistanceToTopOfInsulation - Height  No        Height   Vertical distance from top of foundation wall to bottom of insulation
   ==========================================  ========  ============  ==================================  ========  =======  =====================================================================
 
 HPXML Frame Floors

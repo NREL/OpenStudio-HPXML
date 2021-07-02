@@ -2022,6 +2022,12 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
       fwall.thickness = nil
       fwall.interior_finish_type = nil
       fwall.interior_finish_thickness = nil
+      fwall.insulation_interior_distance_to_top = nil
+      fwall.insulation_interior_distance_to_bottom = nil
+      fwall.insulation_exterior_distance_to_top = nil
+      fwall.insulation_exterior_distance_to_bottom = nil
+      fwall.length = (fwall.area / fwall.height).round(2)
+      fwall.area = nil
     end
   elsif ['invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
     hpxml.foundation_walls.add(id: 'FoundationWallOther',

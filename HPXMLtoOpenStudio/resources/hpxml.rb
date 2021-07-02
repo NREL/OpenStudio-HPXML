@@ -1580,7 +1580,7 @@ class HPXML < Object
       end
       XMLHelper.add_element(roof, 'Pitch', @pitch, :float) unless @pitch.nil?
       XMLHelper.add_element(roof, 'RadiantBarrier', @radiant_barrier, :boolean, @radiant_barrier_isdefaulted) unless @radiant_barrier.nil?
-      XMLHelper.add_element(roof, 'RadiantBarrierGrade', @radiant_barrier_grade, :integer) unless @radiant_barrier_grade.nil?
+      XMLHelper.add_element(roof, 'RadiantBarrierGrade', @radiant_barrier_grade, :integer, @radiant_barrier_grade_isdefaulted) unless @radiant_barrier_grade.nil?
       insulation = XMLHelper.add_element(roof, 'Insulation')
       sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
       if not @insulation_id.nil?
@@ -1928,8 +1928,8 @@ class HPXML < Object
   end
 
   class FoundationWall < BaseElement
-    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :height, :area, :orientation, :azimuth,
-             :thickness, :depth_below_grade, :insulation_id, :insulation_interior_r_value,
+    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :length, :height, :area, :orientation,
+             :azimuth, :thickness, :depth_below_grade, :insulation_id, :insulation_interior_r_value,
              :insulation_interior_distance_to_top, :insulation_interior_distance_to_bottom,
              :insulation_exterior_r_value, :insulation_exterior_distance_to_top,
              :insulation_exterior_distance_to_bottom, :insulation_assembly_r_value,
@@ -2015,8 +2015,9 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(foundation_wall, 'ExteriorAdjacentTo', @exterior_adjacent_to, :string) unless @exterior_adjacent_to.nil?
       XMLHelper.add_element(foundation_wall, 'InteriorAdjacentTo', @interior_adjacent_to, :string) unless @interior_adjacent_to.nil?
+      XMLHelper.add_element(foundation_wall, 'Length', @length, :float) unless @length.nil?
       XMLHelper.add_element(foundation_wall, 'Height', @height, :float) unless @height.nil?
-      XMLHelper.add_element(foundation_wall, 'Area', @area, :float) unless @area.nil?
+      XMLHelper.add_element(foundation_wall, 'Area', @area, :float, @area_isdefaulted) unless @area.nil?
       XMLHelper.add_element(foundation_wall, 'Orientation', @orientation, :string, @orientation_isdefaulted) unless @orientation.nil?
       XMLHelper.add_element(foundation_wall, 'Azimuth', @azimuth, :integer, @azimuth_isdefaulted) unless @azimuth.nil?
       XMLHelper.add_element(foundation_wall, 'Thickness', @thickness, :float, @thickness_isdefaulted) unless @thickness.nil?
@@ -2038,15 +2039,15 @@ class HPXML < Object
         layer = XMLHelper.add_element(insulation, 'Layer')
         XMLHelper.add_element(layer, 'InstallationType', 'continuous - exterior', :string)
         XMLHelper.add_element(layer, 'NominalRValue', @insulation_exterior_r_value, :float)
-        XMLHelper.add_extension(layer, 'DistanceToTopOfInsulation', @insulation_exterior_distance_to_top, :float) unless @insulation_exterior_distance_to_top.nil?
-        XMLHelper.add_extension(layer, 'DistanceToBottomOfInsulation', @insulation_exterior_distance_to_bottom, :float) unless @insulation_exterior_distance_to_bottom.nil?
+        XMLHelper.add_extension(layer, 'DistanceToTopOfInsulation', @insulation_exterior_distance_to_top, :float, @insulation_exterior_distance_to_top_isdefaulted) unless @insulation_exterior_distance_to_top.nil?
+        XMLHelper.add_extension(layer, 'DistanceToBottomOfInsulation', @insulation_exterior_distance_to_bottom, :float, @insulation_exterior_distance_to_bottom_isdefaulted) unless @insulation_exterior_distance_to_bottom.nil?
       end
       if not @insulation_interior_r_value.nil?
         layer = XMLHelper.add_element(insulation, 'Layer')
         XMLHelper.add_element(layer, 'InstallationType', 'continuous - interior', :string)
         XMLHelper.add_element(layer, 'NominalRValue', @insulation_interior_r_value, :float)
-        XMLHelper.add_extension(layer, 'DistanceToTopOfInsulation', @insulation_interior_distance_to_top, :float) unless @insulation_interior_distance_to_top.nil?
-        XMLHelper.add_extension(layer, 'DistanceToBottomOfInsulation', @insulation_interior_distance_to_bottom, :float) unless @insulation_interior_distance_to_bottom.nil?
+        XMLHelper.add_extension(layer, 'DistanceToTopOfInsulation', @insulation_interior_distance_to_top, :float, @insulation_interior_distance_to_top_isdefaulted) unless @insulation_interior_distance_to_top.nil?
+        XMLHelper.add_extension(layer, 'DistanceToBottomOfInsulation', @insulation_interior_distance_to_bottom, :float, @insulation_interior_distance_to_bottom_isdefaulted) unless @insulation_interior_distance_to_bottom.nil?
       end
     end
 
@@ -2056,6 +2057,7 @@ class HPXML < Object
       @id = HPXML::get_id(foundation_wall)
       @exterior_adjacent_to = XMLHelper.get_value(foundation_wall, 'ExteriorAdjacentTo', :string)
       @interior_adjacent_to = XMLHelper.get_value(foundation_wall, 'InteriorAdjacentTo', :string)
+      @length = XMLHelper.get_value(foundation_wall, 'Length', :float)
       @height = XMLHelper.get_value(foundation_wall, 'Height', :float)
       @area = XMLHelper.get_value(foundation_wall, 'Area', :float)
       @orientation = XMLHelper.get_value(foundation_wall, 'Orientation', :string)

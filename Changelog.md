@@ -12,12 +12,15 @@ __New Features__
 - Allows "none" for wall/rim joist siding.
 - Allows interior finish inputs (e.g., 0.5" drywall) for walls, ceilings, and roofs.
 - Allows `Orientation` to be provided instead of `Azimuth` for all applicable surfaces, PV systems, and solar thermal systems.
+- Allows `Length` to be provided instead of `Area` for foundation walls.
 - Allows additional fuel types for generators.
 - Allows more defaulting (optional inputs):
   - HVAC/DHW system efficiency (by age).
   - Mechanical ventilation fan power (by type).
   - Color (solar absorptance) for walls, roofs, and rim joists.
+  - Foundation wall distance to top/bottom of insulation.
   - Door azimuth.
+  - Radiant barrier grade.
 - For water heaters w/ UEF, allows `UsageBin` instead of `FirstHourRating` (or defaults if neither provided).
 - Switches to the EnergyPlus Fan:SystemModel object for all HVAC systems.
 - Introduces a small amount of infiltration for unvented spaces.
