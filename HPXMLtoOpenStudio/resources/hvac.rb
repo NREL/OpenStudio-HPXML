@@ -129,17 +129,17 @@ class HVAC
     roomac_cap_fff_curve = create_curve_quadratic(model, clg_ap.cool_cap_fflow_spec[0], 'Cool-CAP-fFF', 0, 2, 0, 2)
     roomac_eir_ft_curve = create_curve_biquadratic(model, cool_eir_ft_spec_si, 'Cool-EIR-fT', 0, 100, 0, 100)
     roomcac_eir_fff_curve = create_curve_quadratic(model, clg_ap.cool_eir_fflow_spec[0], 'Cool-EIR-fFF', 0, 2, 0, 2)
-    roomac_plf_fplr_curve = create_curve_quadratic(model, clg_ap.cool_plf_fplr_spec[0], 'Cool-PLF-fPLR', 0, 1, 0, 1)
 
     # Cooling Coil
     coil_name = obj_name + ' clg coil'
     if is_ddb_control
       # Zero out impact of part load ratio
-      roomac_plf_fplr_curve = [1.0, 0.0, 0.0] * num_speeds
+      roomac_plf_fplr_curve = create_curve_quadratic(model, [1.0, 0.0, 0.0], "Cool-PLF-fPLR", 0, 1, 0, 1)
       clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, roomac_cap_ft_curve, roomac_cap_fff_curve, roomac_eir_ft_curve, roomcac_eir_fff_curve, roomac_plf_fplr_curve)
       # Apply startup degradation
       apply_capacity_degradation_EMS(model, clg_ap, coil_name, true, roomac_cap_fff_curve, roomcac_eir_fff_curve)
     else
+      roomac_plf_fplr_curve = create_curve_quadratic(model, clg_ap.cool_plf_fplr_spec[0], 'Cool-PLF-fPLR', 0, 1, 0, 1)
       clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, roomac_cap_ft_curve, roomac_cap_fff_curve, roomac_eir_ft_curve, roomcac_eir_fff_curve, roomac_plf_fplr_curve)
     end
     clg_coil.setName(coil_name)
