@@ -291,7 +291,6 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
   end
 
   def test_windows
-    # Window properties
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -305,7 +304,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       assert_in_epsilon(window.ufactor, UnitConversions.convert(os_simple_glazing.uFactor, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)'), 0.001)
     end
 
-    # Window shading
+    # Check window shading
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-enclosure-windows-shading.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -340,7 +339,6 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
   end
 
   def test_skylights
-    # Skylight properties
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-enclosure-skylights.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -354,7 +352,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       assert_in_epsilon(skylight.ufactor / 1.2, UnitConversions.convert(os_simple_glazing.uFactor, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)'), 0.001)
     end
 
-    # Skylight shading
+    # Check skylight shading
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-enclosure-skylights-shading.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -389,7 +387,25 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
   end
 
   def test_doors
-    # TODO
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+
+    # Door
+    doors_values = [{ assembly_r: 0.1, layer_names: ['door material'] },
+                    { assembly_r: 5.0, layer_names: ['door material'] },
+                    { assembly_r: 20.0, layer_names: ['door material'] }]
+
+    hpxml = _create_hpxml('base.xml')
+    doors_values.each do |door_values|
+      hpxml.doors[0].r_value = door_values[:assembly_r]
+      XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+      model, hpxml = _test_measure(args_hash)
+
+      # Check properties
+      os_surface = model.getSubSurfaces.select { |s| s.name.to_s == hpxml.doors[0].id }[0]
+      os_construction = os_surface.construction.get.to_LayeredConstruction.get
+      _check_layered_construction(hpxml.doors[0], os_construction, door_values[:layer_names])
+    end
   end
 
   def _check_layered_construction(hpxml_surface, os_construction, expected_layer_names)
@@ -403,7 +419,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     end
 
     # Check interior finish solar absorptance and emittance
-    if hpxml_surface.interior_finish_type != HPXML::InteriorFinishNone && ![HPXML::RimJoist].include?(hpxml_surface.class)
+    if hpxml_surface.respond_to?(:interior_finish_type) && hpxml_surface.interior_finish_type != HPXML::InteriorFinishNone
       interior_layer = os_construction.getLayer(os_construction.numLayers - 1).to_OpaqueMaterial.get
       assert_equal(0.6, interior_layer.solarAbsorptance)
       assert_equal(0.9, interior_layer.thermalAbsorptance)
