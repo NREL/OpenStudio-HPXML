@@ -19,7 +19,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     ]
 
     test_base = true
-    test_extra = false
+    test_extra = true
 
     osws = []
     test_dirs.each do |test_dir|
@@ -224,7 +224,12 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.attics.clear
       hpxml.foundation_walls.each do |foundation_wall|
         foundation_wall.interior_finish_type = nil
+        foundation_wall.length = nil
+        foundation_wall.area = nil
+        foundation_wall.insulation_interior_distance_to_top = nil
+        foundation_wall.insulation_interior_distance_to_bottom = nil
         next if foundation_wall.insulation_assembly_r_value.nil?
+
         foundation_wall.insulation_assembly_r_value = foundation_wall.insulation_assembly_r_value.round(2)
       end
       if hpxml.rim_joists.length > 0
@@ -396,6 +401,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       # Round values
       (hpxml.roofs + hpxml.rim_joists + hpxml.walls + hpxml.foundation_walls + hpxml.frame_floors + hpxml.slabs).each do |surface|
         next if surface.area.nil?
+
         surface.area = surface.area.round
       end
       hpxml.slabs.each do |slab|
