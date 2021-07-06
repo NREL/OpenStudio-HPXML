@@ -659,7 +659,7 @@ class Constructions
   end
 
   def self.apply_ceiling(runner, model, surfaces, constr_name,
-                         cavity_r, install_grade, ins_thick_in,
+                         cavity_r, install_grade, addtl_r,
                          framing_factor, joist_height_in,
                          mat_int_finish, inside_film, outside_film)
 
@@ -669,22 +669,16 @@ class Constructions
 
     # Define materials
     mat_addtl_ins = nil
-    if ins_thick_in >= joist_height_in
-      # If the ceiling insulation thickness is greater than the joist thickness
-      cavity_k = ins_thick_in / cavity_r
-      if ins_thick_in > joist_height_in
+    if cavity_r == 0
+      mat_cavity = Material.AirCavityOpen(joist_height_in)
+    else
+      if addtl_r > 0
         # If there is additional insulation beyond the rafter height,
         # these inputs are used for defining an additional layer
-        mat_addtl_ins = Material.new(name: 'CeilingAdditionalIns', thick_in: (ins_thick_in - joist_height_in), mat_base: BaseMaterial.InsulationGenericLoosefill, k_in: cavity_k)
+        addtl_thick_in = addtl_r / 3.0 # Assume roughly R-3 per inch of loose-fill above cavity
+        mat_addtl_ins = Material.new(name: 'ceiling loosefill ins', thick_in: addtl_thick_in, mat_base: BaseMaterial.InsulationGenericLoosefill, k_in: addtl_thick_in / addtl_r)
       end
-      mat_cavity = Material.new(thick_in: joist_height_in, mat_base: BaseMaterial.InsulationGenericLoosefill, k_in: cavity_k)
-    else
-      # Else the joist thickness is greater than the ceiling insulation thickness
-      if cavity_r == 0
-        mat_cavity = Material.AirCavityOpen(joist_height_in)
-      else
-        mat_cavity = Material.new(thick_in: joist_height_in, mat_base: BaseMaterial.InsulationGenericLoosefill, k_in: joist_height_in / cavity_r)
-      end
+      mat_cavity = Material.new(thick_in: joist_height_in, mat_base: BaseMaterial.InsulationGenericLoosefill, k_in: joist_height_in / cavity_r)
     end
     mat_framing = Material.new(thick_in: joist_height_in, mat_base: BaseMaterial.Wood)
     mat_gap = Material.AirCavityOpen(joist_height_in)
@@ -699,11 +693,13 @@ class Constructions
     if not mat_addtl_ins.nil?
       constr.add_layer(mat_addtl_ins)
     end
-    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'CeilingStudAndCavity')
+    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'ceiling stud and cavity')
     if not mat_int_finish.nil?
       constr.add_layer(mat_int_finish)
     end
     constr.add_layer(inside_film)
+
+    constr.set_interior_material_properties(debug: true)
 
     # Create and assign construction to ceiling surfaces
     constr.create_and_assign_constructions(runner, surfaces, model)
@@ -731,7 +727,7 @@ class Constructions
     mat_rigid = nil
     if rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
-      mat_rigid = Material.new(name: 'FloorRigidIns', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
+      mat_rigid = Material.new(name: 'floor rigid ins', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / rigid_r)
     end
 
     # Set paths
@@ -741,17 +737,19 @@ class Constructions
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
-    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'FloorStudAndCavity')
+    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'floor stud and cavity')
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
     if plywood_thick_in > 0
-      constr.add_layer(Material.Plywood(plywood_thick_in))
+      constr.add_layer(Material.OSBSheathing(plywood_thick_in))
     end
     if not mat_floor_covering.nil?
       constr.add_layer(mat_floor_covering)
     end
     constr.add_layer(inside_film)
+
+    constr.set_interior_material_properties()
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(runner, surfaces, model)
@@ -1279,7 +1277,7 @@ class Constructions
       non_cavity_r += constr_set.rigid_r
     end
     if not constr_set.osb_thick_in.nil?
-      non_cavity_r += Material.Plywood(constr_set.osb_thick_in).rvalue
+      non_cavity_r += Material.OSBSheathing(constr_set.osb_thick_in).rvalue
     end
     if not constr_set.mat_int_finish.nil?
       non_cavity_r += constr_set.mat_int_finish.rvalue
@@ -1770,7 +1768,7 @@ class Construction
     end
   end
 
-  def set_interior_material_properties(solar_absorptance = 0.6, emittance = 0.9)
+  def set_interior_material_properties(solar_absorptance = 0.6, emittance = 0.9, debug: false)
     if @layers_materials.size > 3 # Only apply if there is a separate interior material
       @layers_materials[-2].each do |interior_material|
         interior_material.sAbs = solar_absorptance

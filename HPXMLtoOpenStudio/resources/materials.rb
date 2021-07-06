@@ -188,7 +188,7 @@ class Material
   def self.CoveringBare(floorFraction = 0.8, rvalue = 2.08)
     # Combined layer of, e.g., carpet and bare floor
     thick_in = 0.5 # in
-    return new(name: 'Floor Covering', thick_in: thick_in, k_in: thick_in / (rvalue * floorFraction), rho: 3.4, cp: 0.32, tAbs: 0.9, sAbs: 0.9)
+    return new(name: 'floor covering', thick_in: thick_in, k_in: thick_in / (rvalue * floorFraction), rho: 3.4, cp: 0.32, tAbs: 0.9, sAbs: 0.9)
   end
 
   def self.Concrete(thick_in)
@@ -260,10 +260,6 @@ class Material
 
   def self.Stud2x8
     return new(name: 'Stud 2x8', thick_in: 7.25, mat_base: BaseMaterial.Wood)
-  end
-
-  def self.Plywood(thick_in)
-    return new(name: "plywood #{thick_in} in.", thick_in: thick_in, mat_base: BaseMaterial.Wood)
   end
 
   def self.OSBSheathing(thick_in)

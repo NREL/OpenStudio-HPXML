@@ -248,7 +248,42 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
   end
 
   def test_frame_floors
-    # TODO
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+
+    # Ceilings
+    ceilings_values = [{ assembly_r: 0.1, layer_names: ['ceiling stud and cavity', 'gypsum board'] },
+                       { assembly_r: 5.0, layer_names: ['ceiling stud and cavity', 'gypsum board'] },
+                       { assembly_r: 50.0, layer_names: ['ceiling loosefill ins', 'ceiling stud and cavity', 'gypsum board'] }]
+
+    hpxml = _create_hpxml('base-foundation-vented-crawlspace.xml')
+    ceilings_values.each do |ceiling_values|
+      hpxml.frame_floors[0].insulation_assembly_r_value = ceiling_values[:assembly_r]
+      XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+      model, hpxml = _test_measure(args_hash)
+
+      # Check properties
+      os_surface = model.getSurfaces.select { |s| s.name.to_s == hpxml.frame_floors[0].id }[0]
+      os_construction = os_surface.construction.get.to_LayeredConstruction.get
+      _check_layered_construction(hpxml.frame_floors[0], os_construction, ceiling_values[:layer_names])
+    end
+
+    # Floors
+    floors_values = [{ assembly_r: 0.1, layer_names: ['floor stud and cavity', 'floor covering'] },
+                     { assembly_r: 5.0, layer_names: ['floor stud and cavity', 'osb sheathing', 'floor covering'] },
+                     { assembly_r: 50.0, layer_names: ['floor stud and cavity', 'floor rigid ins', 'osb sheathing', 'floor covering'] }]
+
+    hpxml = _create_hpxml('base-foundation-vented-crawlspace.xml')
+    floors_values.each do |floor_values|
+      hpxml.frame_floors[1].insulation_assembly_r_value = floor_values[:assembly_r]
+      XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+      model, hpxml = _test_measure(args_hash)
+
+      # Check properties
+      os_surface = model.getSurfaces.select { |s| s.name.to_s == hpxml.frame_floors[1].id }[0]
+      os_construction = os_surface.construction.get.to_LayeredConstruction.get
+      _check_layered_construction(hpxml.frame_floors[1], os_construction, floor_values[:layer_names])
+    end
   end
 
   def test_slabs
@@ -360,11 +395,15 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
   def _check_layered_construction(hpxml_surface, os_construction, expected_layer_names)
     # Check exterior solar absorptance and emittance
     exterior_layer = os_construction.getLayer(0).to_OpaqueMaterial.get
-    assert_equal(hpxml_surface.solar_absorptance, exterior_layer.solarAbsorptance)
-    assert_equal(hpxml_surface.emittance, exterior_layer.thermalAbsorptance)
+    if hpxml_surface.respond_to? :solar_absorptance
+      assert_equal(hpxml_surface.solar_absorptance, exterior_layer.solarAbsorptance)
+    end
+    if hpxml_surface.respond_to? :emittance
+      assert_equal(hpxml_surface.emittance, exterior_layer.thermalAbsorptance)
+    end
 
     # Check interior finish solar absorptance and emittance
-    if ![HPXML::RimJoist].include?(hpxml_surface.class) && hpxml_surface.interior_finish_type != HPXML::InteriorFinishNone
+    if hpxml_surface.interior_finish_type != HPXML::InteriorFinishNone && ![HPXML::RimJoist].include?(hpxml_surface.class)
       interior_layer = os_construction.getLayer(os_construction.numLayers - 1).to_OpaqueMaterial.get
       assert_equal(0.6, interior_layer.solarAbsorptance)
       assert_equal(0.9, interior_layer.thermalAbsorptance)

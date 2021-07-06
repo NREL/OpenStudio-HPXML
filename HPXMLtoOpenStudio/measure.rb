@@ -837,10 +837,19 @@ class OSModel
           outside_film = Material.AirFilmFloorAverage
         end
         mat_int_finish = Material.InteriorFinishMaterial(frame_floor.interior_finish_type, frame_floor.interior_finish_thickness)
+        if mat_int_finish.nil?
+          fallback_mat_int_finish = nil
+        else
+          fallback_mat_int_finish = Material.InteriorFinishMaterial(mat_int_finish.name, 0.1) # Try thin material
+        end
         constr_sets = [
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.0, mat_int_finish, nil),  # 2x6, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.0, mat_int_finish, nil),  # 2x4, 16" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, nil, nil),             # Fallback
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 50.0, 0.0, mat_int_finish, nil),         # 2x6, 24" o.c. + R50
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 40.0, 0.0, mat_int_finish, nil),         # 2x6, 24" o.c. + R40
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 30.0, 0.0, mat_int_finish, nil),         # 2x6, 24" o.c. + R30
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 20.0, 0.0, mat_int_finish, nil),         # 2x6, 24" o.c. + R20
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 10.0, 0.0, mat_int_finish, nil),         # 2x6, 24" o.c. + R10
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.0, mat_int_finish, nil),          # 2x4, 16" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, fallback_mat_int_finish, nil), # Fallback
         ]
       else # Floor
         if @apply_ashrae140_assumptions
@@ -860,12 +869,17 @@ class OSModel
             covering = Material.CoveringBare
           end
         end
+        if covering.nil?
+          fallback_covering = nil
+        else
+          fallback_covering = Material.CoveringBare(0.8, 0.01) # Try thin material
+        end
         constr_sets = [
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 20.0, 0.75, nil, covering), # 2x6, 24" o.c. + R20
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, nil, covering), # 2x6, 24" o.c. + R10
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, nil, covering),  # 2x6, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, nil, covering),   # 2x4, 16" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, nil, nil),        # Fallback
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 20.0, 0.75, nil, covering),        # 2x6, 24" o.c. + R20
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 10.0, 0.75, nil, covering),        # 2x6, 24" o.c. + R10
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 0.0, 0.75, nil, covering),         # 2x6, 24" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.07, 0.0, 0.5, nil, covering),          # 2x4, 16" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, nil, fallback_covering), # Fallback
         ]
       end
       assembly_r = frame_floor.insulation_assembly_r_value
@@ -874,9 +888,10 @@ class OSModel
 
       install_grade = 1
       if frame_floor.is_ceiling
+
         Constructions.apply_ceiling(runner, model, [surface], "#{frame_floor.id} construction",
                                     cavity_r, install_grade,
-                                    constr_set.stud.thick_in, constr_set.framing_factor,
+                                    constr_set.rigid_r, constr_set.framing_factor,
                                     constr_set.stud.thick_in, constr_set.mat_int_finish,
                                     inside_film, outside_film)
 
