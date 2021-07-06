@@ -1132,7 +1132,11 @@ To define simple thermostat setpoints, additional information is entered in ``HV
   =============================  ========  =======  ===========  ========  =========  ============================
   ``SetpointTempHeatingSeason``  double    F                     Yes                  Heating setpoint temperature
   ``SetpointTempCoolingSeason``  double    F                     Yes                  Cooling setpoint temperature
+  ``HeatingSeason``              element                         No                   Heating season        
+  ``CoolingSeason``              element                         No                   Cooling season
   =============================  ========  =======  ===========  ========  =========  ============================
+
+If heating and cooling seasons are not provided, they both default to year-round.
 
 If there is a heating temperature setback, additional information is entered in ``HVACControl``.
 
@@ -1153,6 +1157,19 @@ If there is a cooling temperature setup, additional information is entered in ``
   ``TotalSetupHoursperWeekCooling``      integer   hrs/week  > 0          Yes                  Hours/week of cooling temperature setup
   ``extension/SetupStartHourCooling``    integer             0 - 23       No        9 (9am)    Daily setup start hour
   =====================================  ========  ========  ===========  ========  =========  =========================================
+
+If a heating and/or cooling season is defined, additional information is entered in ``HVACControl/HeatingSeason`` and/or ``HVACControl/CoolingSeason``.
+
+  ======================================  ========  =====  =================  ========  =============================  ===========
+  Element                                 Type      Units  Constraints        Required  Default                        Description
+  ======================================  ========  =====  =================  ========  =============================  ===========
+  ``BeginMonth`                           integer          1 - 12             Yes                                      Begin month
+  ``BeginDayOfMonth``                     integer          1 - 31             Yes                                      Begin day
+  ``EndMonth``                            integer          1 - 12             Yes                                      End month
+  ``EndDayOfMonth``                       integer          1 - 31             Yes                                      End day
+  ======================================  ========  =====  =================  ========  =============================  ===========
+
+Heating and cooling seasons, when combined, must span the entire year.
 
 Detailed Inputs
 ~~~~~~~~~~~~~~~
@@ -1812,7 +1829,7 @@ If not entered, the simulation will not include generators.
   ``NumberofBedroomsServed``  integer           > 1          See [#]_           Number of bedrooms served
   ==========================  =======  =======  ===========  ========  =======  ============================================
 
-  .. [#] FuelType choices are "natural gas" or "propane".
+  .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "wood", or "wood pellets".
   .. [#] AnnualOutputkWh must also be < AnnualConsumptionkBtu*3.412 (i.e., the generator must consume more energy than it produces).
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true, in which case it must be > NumberofBedrooms.
          Annual consumption and annual production will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the generator.
@@ -1888,9 +1905,9 @@ If not entered, the simulation will not include a clothes dryer.
   ``Location``                                  string           See [#]_     No        living space  Location
   ``FuelType``                                  string           See [#]_     Yes                     Fuel type
   ``CombinedEnergyFactor`` or ``EnergyFactor``  double   lb/kWh  > 0          No        See [#]_      EnergyGuide label efficiency [#]_
+  ``Vented``                                    boolean                       No        true          Whether dryer is vented
+  ``VentedFlowRate``                            double   cfm     >= 0         No        100 [#]_      Exhust flow rate during operation
   ``extension/UsageMultiplier``                 double           >= 0         No        1.0           Multiplier on energy use
-  ``extension/IsVented``                        boolean                       No        true          Whether dryer is vented
-  ``extension/VentedFlowRate``                  double   cfm     >= 0         See [#]_  100 [#]_      Exhust flow rate during operation
   ============================================  =======  ======  ===========  ========  ============  ==============================================
 
   .. [#] For example, a clothes dryer in a shared laundry room of a MF building.
@@ -1901,7 +1918,6 @@ If not entered, the simulation will not include a clothes dryer.
          CombinedEnergyFactor = 3.01.
   .. [#] If EnergyFactor (EF) provided instead of CombinedEnergyFactor (CEF), it will be converted using the following equation based on the `Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-10-Section-4.2.2.5.2.8-Clothes-Dryer-CEF-Rating.pdf>`_:
          CEF = EF / 1.15.
-  .. [#] VentedFlowRate only required if IsVented is true.
   .. [#] VentedFlowRate default based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
 Clothes dryer energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 Addendum A <https://www.resnet.us/wp-content/uploads/ANSI_RESNET_ICC-301-2019-Addendum-A-2019_7.16.20-1.pdf>`_.

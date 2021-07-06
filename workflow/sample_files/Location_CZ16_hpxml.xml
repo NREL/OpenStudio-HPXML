@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2020-08-11T16:40:26-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2021-06-08T17:31:06+00:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-7629.55622">
+    <BuildingID id="bid-327764.464080">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 8.15</Address1>
+        <Address1>Regression run 9.15</Address1>
         <CityMunicipality>Albuquerque</CityMunicipality>
         <StateCode>NM</StateCode>
         <ZipCode>87101</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2020-08-03</Date>
+      <Date>2021-06-07</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>

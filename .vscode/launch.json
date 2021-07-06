@@ -24,17 +24,6 @@
             "args": [
                 "-n", "test_foundation_area_lookup"
             ]
-        },
-        {
-            "name": "Make Plots",
-            "type": "python",
-            "request": "launch",
-            "program": "plots/make_comparison_plots.py",
-            "cwd": "${workspaceFolder}",
-            "args": [
-                "plots/doe2_enduse_v8_4.csv",
-                "../results_os.csv"
-            ]
         }
     ]
 }
