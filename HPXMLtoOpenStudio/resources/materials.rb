@@ -217,6 +217,7 @@ class Material
       thick_in = 0.375 if thick_in.nil?
       return new(name: type, thick_in: thick_in, mat_base: BaseMaterial.Aluminum)
     end
+
     fail "Unexpected type: #{type}."
   end
 
@@ -237,6 +238,7 @@ class Material
         return new(name: type, thick_in: thick_in, mat_base: BaseMaterial.Wood)
       end
     end
+
     fail "Unexpected type: #{type}."
   end
 

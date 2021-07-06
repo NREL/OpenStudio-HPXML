@@ -300,7 +300,7 @@ class OSModel
     @ncfl = @hpxml.building_construction.number_of_conditioned_floors
     @ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade
     @nbeds = @hpxml.building_construction.number_of_bedrooms
-    @default_azimuths = get_default_azimuths()
+    @default_azimuths = HPXMLDefaults.get_default_azimuths(@hpxml)
 
     # Apply defaults to HPXML object
     HPXMLDefaults.apply(@hpxml, @eri_version, weather, epw_file: epw_file)
@@ -533,42 +533,6 @@ class OSModel
     return if num_occ <= 0
 
     Geometry.apply_occupants(model, num_occ, @cfa, spaces[HPXML::LocationLivingSpace])
-  end
-
-  def self.get_default_azimuths()
-    def self.sanitize_azimuth(azimuth)
-      # Ensure 0 <= orientation < 360
-      while azimuth < 0
-        azimuth += 360
-      end
-      while azimuth >= 360
-        azimuth -= 360
-      end
-      return azimuth
-    end
-
-    # Returns a list of four azimuths (facing each direction). Determined based
-    # on the primary azimuth, as defined by the azimuth with the largest surface
-    # area, plus azimuths that are offset by 90/180/270 degrees. Used for
-    # surfaces that may not have an azimuth defined (e.g., walls).
-    azimuth_areas = {}
-    (@hpxml.roofs + @hpxml.rim_joists + @hpxml.walls + @hpxml.foundation_walls +
-     @hpxml.windows + @hpxml.skylights + @hpxml.doors).each do |surface|
-      az = surface.azimuth
-      next if az.nil?
-
-      azimuth_areas[az] = 0 if azimuth_areas[az].nil?
-      azimuth_areas[az] += surface.area
-    end
-    if azimuth_areas.empty?
-      primary_azimuth = 0
-    else
-      primary_azimuth = azimuth_areas.max_by { |k, v| v }[0]
-    end
-    return [primary_azimuth,
-            sanitize_azimuth(primary_azimuth + 90),
-            sanitize_azimuth(primary_azimuth + 180),
-            sanitize_azimuth(primary_azimuth + 270)].sort
   end
 
   def self.create_or_get_space(model, spaces, spacetype)
@@ -1304,9 +1268,6 @@ class OSModel
       Constructions.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft, mat,
                                     basement_frac_of_cfa, @cond_bsmnt_surfaces, spaces[HPXML::LocationLivingSpace])
     end
-  end
-
-  def self.add_neighbors(runner, model, length)
   end
 
   def self.add_shading_schedule(runner, model, weather)
