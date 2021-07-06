@@ -843,11 +843,11 @@ class OSModel
           fallback_mat_int_finish = Material.InteriorFinishMaterial(mat_int_finish.name, 0.1) # Try thin material
         end
         constr_sets = [
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 50.0, 0.0, mat_int_finish, nil),         # 2x6, 24" o.c. + R50
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 40.0, 0.0, mat_int_finish, nil),         # 2x6, 24" o.c. + R40
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 30.0, 0.0, mat_int_finish, nil),         # 2x6, 24" o.c. + R30
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 20.0, 0.0, mat_int_finish, nil),         # 2x6, 24" o.c. + R20
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 10.0, 0.0, mat_int_finish, nil),         # 2x6, 24" o.c. + R10
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 50.0, 0.0, mat_int_finish, nil),         # 2x6, 24" o.c. + R50
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 40.0, 0.0, mat_int_finish, nil),         # 2x6, 24" o.c. + R40
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 30.0, 0.0, mat_int_finish, nil),         # 2x6, 24" o.c. + R30
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 20.0, 0.0, mat_int_finish, nil),         # 2x6, 24" o.c. + R20
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.0, mat_int_finish, nil),         # 2x6, 24" o.c. + R10
           WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.0, mat_int_finish, nil),          # 2x4, 16" o.c.
           WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, fallback_mat_int_finish, nil), # Fallback
         ]
@@ -875,10 +875,10 @@ class OSModel
           fallback_covering = Material.CoveringBare(0.8, 0.01) # Try thin material
         end
         constr_sets = [
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 20.0, 0.75, nil, covering),        # 2x6, 24" o.c. + R20
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 10.0, 0.75, nil, covering),        # 2x6, 24" o.c. + R10
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 0.0, 0.75, nil, covering),         # 2x6, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.07, 0.0, 0.5, nil, covering),          # 2x4, 16" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 20.0, 0.75, nil, covering),        # 2x6, 24" o.c. + R20
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, nil, covering),        # 2x6, 24" o.c. + R10
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, nil, covering),         # 2x6, 24" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, nil, covering),          # 2x4, 16" o.c.
           WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, nil, fallback_covering), # Fallback
         ]
       end
