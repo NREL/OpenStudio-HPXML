@@ -125,7 +125,7 @@ class HEScoreRuleset
   def self.set_enclosure_air_infiltration(json, new_hpxml)
     if not json['building']['about']['blower_door_test'].nil?
       cfm50 = json['building']['about']['envelope_leakage']
-      if json['building']['about']['air_sealing_present	'] == 1
+      if json['building']['about']['air_sealing_present'] == true
         desc = HPXML::LeakinessTight
       else
         desc = HPXML::LeakinessAverage
