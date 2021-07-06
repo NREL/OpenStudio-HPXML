@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-$VERBOSE = nil # Prevents ruby warnings, see https://github.com/NREL/OpenStudio/issues/4301
-
 require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
@@ -21,7 +19,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     ]
 
     test_base = true
-    test_extra = true
+    test_extra = false
 
     osws = []
     test_dirs.each do |test_dir|

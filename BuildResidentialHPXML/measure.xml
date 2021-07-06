@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>df7efc15-6ef1-4fef-b034-871a60f02f4e</version_id>
-  <version_modified>20210616T152542Z</version_modified>
+  <version_id>5b628569-0b23-4b4a-986b-e4483151b804</version_id>
+  <version_modified>20210706T171835Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -6789,12 +6789,6 @@
       <checksum>AB29EE55</checksum>
     </file>
     <file>
-      <filename>geometry.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>749C4897</checksum>
-    </file>
-    <file>
       <filename>base-hvac-air-to-air-heat-pump-1-speed-heating-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -7917,12 +7911,6 @@
       <checksum>9208C5C5</checksum>
     </file>
     <file>
-      <filename>base-enclosure-2stories.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>10E4FB25</checksum>
-    </file>
-    <file>
       <filename>base-enclosure-infil-natural-ach.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -8175,10 +8163,10 @@
       <checksum>430C8FAC</checksum>
     </file>
     <file>
-      <filename>build_residential_hpxml_test.rb</filename>
+      <filename>geometry.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A842B19C</checksum>
+      <usage_type>resource</usage_type>
+      <checksum>5EFE7669</checksum>
     </file>
     <file>
       <version>
@@ -8189,7 +8177,235 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>FFF9A171</checksum>
+      <checksum>8F30A542</checksum>
+    </file>
+    <file>
+      <filename>base-enclosure-2stories.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A57D0C4B</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-ducts-area-fractions.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>675C1B98</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-boiler-elec-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5562224A</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-boiler-gas-central-ac-1-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F5C63CE0</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-boiler-gas-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2BEA230B</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-central-ac-only-1-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6992B34D</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-central-ac-only-2-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>31E1A4C7</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-central-ac-only-var-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>909D0B92</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-elec-resistance-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1816F5AC</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-evap-cooler-furnace-gas.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2194D82B</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-floor-furnace-propane-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9A19FF2C</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-furnace-elec-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A284C38A</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-furnace-gas-central-ac-2-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A27B85F3</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-furnace-gas-central-ac-var-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4E8B6F57</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-furnace-gas-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>823E2A5E</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-furnace-gas-room-ac.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F13B586E</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-room-ac-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>522AFC9B</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-stove-oil-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>21895080</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-wall-furnace-elec-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B05F2364</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4D3D58C3</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9BCB8F8A</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-ground-to-air-heat-pump-cooling-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4749DC41</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-ground-to-air-heat-pump-heating-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1A0C5287</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-ground-to-air-heat-pump.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2512C9D1</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F5A1DF40</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-air-to-air-heat-pump-1-speed-heating-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B691C761</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-air-to-air-heat-pump-2-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C275759E</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-air-to-air-heat-pump-var-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6C425F2C</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-central-ac-plus-air-to-air-heat-pump-heating.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>12682C25</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-dual-fuel-air-to-air-heat-pump-1-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FAE48534</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-dual-fuel-mini-split-heat-pump-ducted.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CB5D71E6</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-mini-split-heat-pump-ducted-cooling-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A6D54653</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-mini-split-heat-pump-ducted-heating-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>331E623E</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-mini-split-heat-pump-ducted.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E20C9124</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-air-to-air-heat-pump-1-speed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>EC8F8E1B</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-autosize-mini-split-air-conditioner-only-ducted.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DD52CA62</checksum>
+    </file>
+    <file>
+      <filename>test_rakefile.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>ACF0D6BF</checksum>
+    </file>
+    <file>
+      <filename>test_measure.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FA3466B1</checksum>
     </file>
   </files>
 </measure>
