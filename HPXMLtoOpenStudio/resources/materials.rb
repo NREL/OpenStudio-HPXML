@@ -192,7 +192,7 @@ class Material
   end
 
   def self.Concrete(thick_in)
-    return new(name: "Concrete #{thick_in} in.", thick_in: thick_in, mat_base: BaseMaterial.Concrete, tAbs: 0.9)
+    return new(name: "concrete #{thick_in} in.", thick_in: thick_in, mat_base: BaseMaterial.Concrete, tAbs: 0.9)
   end
 
   def self.ExteriorFinishMaterial(type, thick_in = nil)
@@ -221,10 +221,6 @@ class Material
     fail "Unexpected type: #{type}."
   end
 
-  def self.FloorWood
-    return new(name: 'Wood Floor', thick_in: 0.625, k_in: 0.8004, rho: 34.0, cp: 0.29)
-  end
-
   def self.InteriorFinishMaterial(type, thick_in = nil)
     if (type == HPXML::InteriorFinishNone) || (!thick_in.nil? && thick_in <= 0)
       return
@@ -243,23 +239,23 @@ class Material
   end
 
   def self.Soil(thick_in)
-    return new(name: "Soil #{thick_in} in.", thick_in: thick_in, mat_base: BaseMaterial.Soil)
+    return new(name: "soil #{thick_in} in.", thick_in: thick_in, mat_base: BaseMaterial.Soil)
   end
 
   def self.Stud2x(thick_in)
-    return new(name: "Stud 2x #{thick_in} in.", thick_in: thick_in, mat_base: BaseMaterial.Wood)
+    return new(name: "stud 2x #{thick_in} in.", thick_in: thick_in, mat_base: BaseMaterial.Wood)
   end
 
   def self.Stud2x4
-    return new(name: 'Stud 2x4', thick_in: 3.5, mat_base: BaseMaterial.Wood)
+    return new(name: 'stud 2x4', thick_in: 3.5, mat_base: BaseMaterial.Wood)
   end
 
   def self.Stud2x6
-    return new(name: 'Stud 2x6', thick_in: 5.5, mat_base: BaseMaterial.Wood)
+    return new(name: 'stud 2x6', thick_in: 5.5, mat_base: BaseMaterial.Wood)
   end
 
   def self.Stud2x8
-    return new(name: 'Stud 2x8', thick_in: 7.25, mat_base: BaseMaterial.Wood)
+    return new(name: 'stud 2x8', thick_in: 7.25, mat_base: BaseMaterial.Wood)
   end
 
   def self.OSBSheathing(thick_in)
@@ -278,7 +274,7 @@ class Material
     rb_emittance = 0.05
     non_rb_emittance = 0.90
     emittance = rb_emittance * (1.0 - gap_frac) + non_rb_emittance * gap_frac
-    return new(name: 'Radiant Barrier', thick_in: 0.0084, k_in: 1629.6, rho: 168.6, cp: 0.22, tAbs: emittance, sAbs: 0.05)
+    return new(name: 'radiant barrier', thick_in: 0.0084, k_in: 1629.6, rho: 168.6, cp: 0.22, tAbs: emittance, sAbs: 0.05)
   end
 
   def self.RoofMaterial(type, thick_in = nil)

@@ -1181,7 +1181,11 @@ class OSModel
       end
       slab_whole_r = 0
     end
-    slab_gap_r = slab_under_r
+    if slab_under_r + slab_whole_r > 0
+      slab_gap_r = 5.0 # Assume gap insulation when insulation under slab is present
+    else
+      slab_gap_r = 0
+    end
 
     mat_carpet = nil
     if (slab.carpet_fraction > 0) && (slab.carpet_r_value > 0)

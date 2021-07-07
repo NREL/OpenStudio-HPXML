@@ -802,7 +802,7 @@ class Constructions
     else
       # Kiva foundation (for crawlspace/basement) exists
       if (under_r > 0) && (under_width > 0)
-        int_horiz_mat = create_insulation_material(model, 'FoundationIntHorizIns', under_r)
+        int_horiz_mat = create_insulation_material(model, 'interior horizontal ins', under_r)
         foundation.setInteriorHorizontalInsulationMaterial(int_horiz_mat)
         foundation.setInteriorHorizontalInsulationDepth(0)
         foundation.setInteriorHorizontalInsulationWidth(UnitConversions.convert(under_width, 'ft', 'm'))
@@ -821,7 +821,7 @@ class Constructions
     mat_rigid = nil
     if whole_r > 0
       rigid_thick_in = whole_r * BaseMaterial.InsulationRigid.k_in
-      mat_rigid = Material.new(name: 'SlabRigidIns', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / whole_r)
+      mat_rigid = Material.new(name: 'slab rigid ins', thick_in: rigid_thick_in, mat_base: BaseMaterial.InsulationRigid, k_in: rigid_thick_in / whole_r)
     end
 
     # Define construction
@@ -1077,7 +1077,7 @@ class Constructions
 
     # Interior horizontal insulation
     if (int_horiz_r > 0) && (int_horiz_width > 0)
-      int_horiz_mat = create_insulation_material(model, 'FoundationIntHorizIns', int_horiz_r)
+      int_horiz_mat = create_insulation_material(model, 'interior horizontal ins', int_horiz_r)
       foundation.setInteriorHorizontalInsulationMaterial(int_horiz_mat)
       foundation.setInteriorHorizontalInsulationDepth(0)
       foundation.setInteriorHorizontalInsulationWidth(UnitConversions.convert(int_horiz_width, 'ft', 'm'))
@@ -1085,14 +1085,14 @@ class Constructions
 
     # Interior vertical insulation
     if int_vert_r > 0
-      int_vert_mat = create_insulation_material(model, 'FoundationIntVertIns', int_vert_r)
+      int_vert_mat = create_insulation_material(model, 'interior vertical ins', int_vert_r)
       foundation.setInteriorVerticalInsulationMaterial(int_vert_mat)
       foundation.setInteriorVerticalInsulationDepth(UnitConversions.convert(int_vert_depth, 'ft', 'm'))
     end
 
     # Exterior vertical insulation
     if (ext_vert_r > 0) && (ext_vert_depth > 0)
-      ext_vert_mat = create_insulation_material(model, 'FoundationExtVertIns', ext_vert_r)
+      ext_vert_mat = create_insulation_material(model, 'exterior vertical ins', ext_vert_r)
       foundation.setExteriorVerticalInsulationMaterial(ext_vert_mat)
       foundation.setExteriorVerticalInsulationDepth(UnitConversions.convert(ext_vert_depth, 'ft', 'm'))
     end
@@ -1114,7 +1114,7 @@ class Constructions
 
     # Interior vertical insulation
     if (int_vert_r > 0) && (int_vert_depth > 0)
-      int_vert_mat = create_insulation_material(model, 'FoundationIntVertIns', int_vert_r)
+      int_vert_mat = create_insulation_material(model, 'interior vertical ins', int_vert_r)
       foundation.addCustomBlock(int_vert_mat,
                                 UnitConversions.convert(int_vert_depth, 'ft', 'm'),
                                 -int_vert_mat.thickness,
@@ -1123,7 +1123,7 @@ class Constructions
 
     # Exterior vertical insulation
     if (ext_vert_r > 0) && (ext_vert_depth > 0)
-      ext_vert_mat = create_insulation_material(model, 'FoundationExtVertIns', ext_vert_r)
+      ext_vert_mat = create_insulation_material(model, 'exterior vertical ins', ext_vert_r)
       wall_mat_int_finish_thick_in = wall_mat_int_finish.nil? ? 0.0 : wall_mat_int_finish.thick_in
       foundation.addCustomBlock(ext_vert_mat,
                                 UnitConversions.convert(ext_vert_depth, 'ft', 'm'),
