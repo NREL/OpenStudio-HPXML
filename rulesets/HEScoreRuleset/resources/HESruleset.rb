@@ -114,12 +114,33 @@ class HEScoreRuleset
 
   def self.set_climate(json, new_hpxml)
     # FIXME: map zipcode to wmo to get this information
-    new_hpxml.climate_and_risk_zones.weather_station_id = json.climate_and_risk_zones.weather_station_id  
-    new_hpxml.climate_and_risk_zones.weather_station_name = json.climate_and_risk_zones.weather_station_name
-    new_hpxml.climate_and_risk_zones.weather_station_wmo = json.climate_and_risk_zones.weather_station_wmo
-    new_hpxml.climate_and_risk_zones.weather_station_epw_filepath = json.climate_and_risk_zones.weather_station_epw_filepath
+    zipcode = json['building_address']['zip_code']
 
-    @iecc_zone = json.climate_and_risk_zones.iecc_zone
+    zipcode_city = nil
+    zipcode_state = nil
+    station_name = nil
+    station_wmo = nil
+    epw_filename = nil
+    iecc_zone = nil
+    CSV.foreach(File.join(File.dirname(__FILE__), 'zipcodes_wx.csv'), headers: true) do |row|
+      next unless row['postal_code'] == zipcode[0..6]
+
+      zipcode_city = row['city']
+      zipcode_state = row['state_zipcode']
+      station_name = row['name']
+      station_wmo = row['nearest_weather_station']
+      epw_filename = row['weather_filename']
+      iecc_zone = row['iecc_cz']
+      break
+    end
+    fail "Could not lookup weather station for zipcode #{zipcode}." if epw_filename.nil?
+
+    new_hpxml.climate_and_risk_zones.weather_station_id = "#{zipcode_city}_#{zipcode_state}"
+    new_hpxml.climate_and_risk_zones.weather_station_name = station_name
+    new_hpxml.climate_and_risk_zones.weather_station_wmo = station_wmo
+    new_hpxml.climate_and_risk_zones.weather_station_epw_filepath = epw_filename
+
+    @iecc_zone = iecc_zone
   end
 
   def self.set_enclosure_air_infiltration(json, new_hpxml)
