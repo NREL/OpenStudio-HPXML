@@ -69,7 +69,13 @@ jobs:
           cp -r base_results/results*.csv workflow/tests/base_results
           mkdir workflow/tests/results
           cp -r results/results*.csv workflow/tests/results
-          ruby hpxml-measures/workflow/tests/compare.rb
+          
+          pip install numpy
+          pip install pandas
+          pip install plotly
+          pip install kaleido
+          
+          ruby hpxml-measures/workflow/tests/compare.py
 
       - name: Store comparisons
         uses: actions/upload-artifact@v2
