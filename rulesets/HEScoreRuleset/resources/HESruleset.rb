@@ -18,7 +18,7 @@ class HEScoreRuleset
 
     # Enclosure
     set_enclosure_air_infiltration(json, new_hpxml)
-    # set_enclosure_roofs(json, new_hpxml)
+    set_enclosure_roofs(json, new_hpxml)
     # set_enclosure_rim_joists(json, new_hpxml)
     # set_enclosure_walls(json, new_hpxml)
     # set_enclosure_foundation_walls(json, new_hpxml)
@@ -167,45 +167,34 @@ class HEScoreRuleset
   end
 
   def self.set_enclosure_roofs(json, new_hpxml)
-    json.attics.each do |orig_attic|
+    json['building']['zone']['zone_roof'].each do |orig_roof|
+      orig_attic = orig_roof['roof_type']
       attic_location = orig_attic.to_location
-
-      orig_attic.attached_roofs.each do |orig_roof|
-        # Roof: Two surfaces per HES zone_roof
-        roof_area = orig_roof.area
-        roof_solar_abs = orig_roof.solar_absorptance
-        if roof_solar_abs.nil?
-          roof_solar_abs = get_roof_solar_absorptance(orig_roof.roof_color)
-        end
-        roof_r = get_roof_assembly_r(orig_roof.insulation_cavity_r_value,
-                                     orig_roof.insulation_continuous_r_value,
-                                     orig_roof.roof_type)
-        if roof_area.nil?
-          orig_attic.attached_frame_floors.each do |orig_frame_floor|
-            roof_area = orig_frame_floor.area / Math.cos(@roof_angle_rad)
-          end
-        end
-        if @is_townhouse
-          roof_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270]
-        else
-          roof_azimuths = [@bldg_azimuth, @bldg_azimuth + 180]
-        end
-        rb_grade = nil
-        if orig_roof.radiant_barrier
-          rb_grade = 1
-        end
-        roof_azimuths.each_with_index do |roof_azimuth, idx|
-          new_hpxml.roofs.add(id: "#{orig_roof.id}_#{idx}",
-                              interior_adjacent_to: attic_location,
-                              area: roof_area / 2.0,
-                              azimuth: sanitize_azimuth(roof_azimuth),
-                              solar_absorptance: roof_solar_abs,
-                              emittance: 0.9,
-                              pitch: Math.tan(@roof_angle_rad) * 12,
-                              radiant_barrier: orig_roof.radiant_barrier,
-                              radiant_barrier_grade: rb_grade,
-                              insulation_assembly_r_value: roof_r)
-        end
+      # Roof: Two surfaces per HES zone_roof
+      roof_area = orig_roof['roof_area']
+      roof_solar_abs = get_roof_solar_absorptance(orig_roof['roof_color'])
+      roof_doe2code = orig_roof['roof_assembly_code']
+      roof_r = get_roof_effective_r_from_doe2code(roof_doe2code)
+      if @is_townhouse
+        roof_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270]
+      else
+        roof_azimuths = [@bldg_azimuth, @bldg_azimuth + 180]
+      end
+      has_radiant_barrier = false
+      if orig_roof['roof_assembly_code'].include? 'rb'
+        has_radiant_barrier = true
+      end
+      roof_azimuths.each_with_index do |roof_azimuth, idx|
+        new_hpxml.roofs.add(id: "#{orig_roof.id}_#{idx}",
+                            interior_adjacent_to: attic_location,
+                            area: roof_area / 2.0,
+                            azimuth: sanitize_azimuth(roof_azimuth),
+                            solar_absorptance: roof_solar_abs,
+                            emittance: 0.9,
+                            pitch: Math.tan(@roof_angle_rad) * 12,
+                            radiant_barrier: has_radiant_barrier,
+                            radiant_barrier_grade: 1,  # FIXME: json doesn't seem to provide radiant barrier grade
+                            insulation_assembly_r_value: roof_r)
       end
     end
   end
@@ -1120,32 +1109,6 @@ def get_roof_effective_r_from_doe2code(doe2code)
     break
   end
   return val
-end
-
-def get_roof_assembly_r(r_cavity, r_cont, material)
-  # Roof Assembly R-value
-  materials_map = {
-    HPXML::RoofTypeAsphaltShingles => 'co',  # Composition Shingles
-    HPXML::RoofTypeWoodShingles => 'wo',     # Wood Shakes
-    HPXML::RoofTypeClayTile => 'rc',         # Clay Tile
-    HPXML::RoofTypeConcrete => 'lc',         # Concrete Tile
-    HPXML::RoofTypePlasticRubber => 'tg'     # Tar and Gravel
-  }
-  has_r_cont = !r_cont.nil?
-  if not has_r_cont
-    # Wood Frame
-    doe2rooftype = 'wf'
-  else
-    # Wood Frame with Rigid Foam Sheathing
-    doe2rooftype = 'ps'
-  end
-
-  doe2code = 'rf%s%02.0f%s' % [doe2rooftype, r_cavity, materials_map[material]]
-  val = get_roof_effective_r_from_doe2code(doe2code)
-
-  return val if not val.nil?
-
-  fail "Could not get default roof assembly R-value for R-cavity '#{r_cavity}' and R-cont '#{r_cont}' and material '#{material}' and radiant barrier '#{has_radiant_barrier}'"
 end
 
 def get_ceiling_assembly_r(r_cavity)
