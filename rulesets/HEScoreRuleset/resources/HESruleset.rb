@@ -156,7 +156,7 @@ class HEScoreRuleset
       if not cfm50.nil?
         ach50 = cfm50 * 60.0 / @cvolume
       else
-        ach50 = calc_ach50(@ncfl_ag, @cfa, @ceil_height, @cvolume, desc, @year_built, '5A', @fnd_areas, @ducts)  # TODO: use @iecc_zone instead of hard-coded iecc_zone
+        ach50 = calc_ach50(@ncfl_ag, @cfa, @ceil_height, @cvolume, desc, @year_built, @iecc_zone, @fnd_areas, @ducts)
       end
 
       new_hpxml.air_infiltration_measurements.add(id: 'hescore_blower_door_test',
