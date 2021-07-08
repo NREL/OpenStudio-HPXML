@@ -669,25 +669,22 @@ class HEScoreRuleset
       end
       sealed = orig_dist.duct_system_sealed
 
-      cfm25_s = cfm25_r = nil
+      cfm25 = nil
       orig_dist.duct_leakage_measurements.each do |m|
         next unless m.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside
         next unless m.duct_leakage_units == HPXML::UnitsCFM25
 
-        if m.duct_type == HPXML::DuctTypeSupply
-          cfm25_s = m.duct_leakage_value
-        elsif m.duct_type == HPXML::DuctTypeReturn
-          cfm25_r = m.duct_leakage_value
+        if not cfm25.nil?
+          fail 'Multiple duct leakage values provided.'
         end
+
+        cfm25 = m.duct_leakage_value
       end
-      if (cfm25_s.nil? || cfm25_r.nil?) && (orig_dist.duct_leakage_measurements.size > 0)
-        fail 'Invalid DuctLeakageMeasurements provided.'
-      end
-      if (not cfm25_s.nil?) && (not sealed.nil?)
+      if (not cfm25.nil?) && (not sealed.nil?)
         fail 'Both DuctLeakageMeasurements and DuctSystemSealed were provided.'
       end
 
-      lto_units, lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(@ncfl_ag, @cfa, sealed, frac_inside, cfm25_s, cfm25_r)
+      lto_units, lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(@ncfl_ag, @cfa, sealed, frac_inside, cfm25)
 
       # Supply duct leakage to the outside
       new_hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
@@ -1234,7 +1231,7 @@ def get_roof_solar_absorptance(roof_color)
   fail "Could not get roof absorptance for color '#{roof_color}'"
 end
 
-def calc_duct_values(ncfl_ag, cfa, is_sealed, frac_inside, cfm25_s = nil, cfm25_r = nil)
+def calc_duct_values(ncfl_ag, cfa, is_sealed, frac_inside, cfm25 = nil)
   # Fraction of ducts that are outside conditioned space
   if frac_inside > 0
     f_out_s = 1.0 - frac_inside
@@ -1256,7 +1253,9 @@ def calc_duct_values(ncfl_ag, cfa, is_sealed, frac_inside, cfm25_s = nil, cfm25_
   uncond_area_s = 0.27 * f_out_s * cfa
   uncond_area_r = 0.05 * ncfl_ag * f_out_r * cfa
 
-  if not cfm25_s.nil? # Duct blaster measurements provided
+  if not cfm25.nil? # Duct blaster measurements provided
+    cfm25_s = cfm25 / 2.0
+    cfm25_r = cfm25 / 2.0
     return HPXML::UnitsCFM25, cfm25_s.round(2), cfm25_r.round(2), uncond_area_s.round(2), uncond_area_r.round(2)
   else
     # Total leakage fraction of air handler flow
