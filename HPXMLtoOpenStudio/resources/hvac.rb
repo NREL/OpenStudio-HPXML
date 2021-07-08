@@ -134,7 +134,7 @@ class HVAC
     coil_name = obj_name + ' clg coil'
     if is_ddb_control
       # Zero out impact of part load ratio
-      roomac_plf_fplr_curve = create_curve_quadratic(model, [1.0, 0.0, 0.0], "Cool-PLF-fPLR", 0, 1, 0, 1)
+      roomac_plf_fplr_curve = create_curve_quadratic(model, [1.0, 0.0, 0.0], 'Cool-PLF-fPLR', 0, 1, 0, 1)
       clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, roomac_cap_ft_curve, roomac_cap_fff_curve, roomac_eir_ft_curve, roomcac_eir_fff_curve, roomac_plf_fplr_curve)
       # Apply startup degradation
       apply_capacity_degradation_EMS(model, clg_ap, coil_name, true, roomac_cap_fff_curve, roomcac_eir_fff_curve)

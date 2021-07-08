@@ -5596,6 +5596,19 @@ class HPXML < Object
       errors << "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is #{total_fraction_heat_load_served.round(2)}."
     end
 
+    # check hvac sums when on-off thermostat is enabled.
+    if (not @hvac_controls[0].nil?) && (not @hvac_controls[0].onoff_thermostat_deadband.nil?) && (@hvac_controls[0].onoff_thermostat_deadband > 0) && (@header.timestep == 1)
+      # Check sum of HVAC FractionCoolLoadServeds == 1
+      if (total_fraction_cool_load_served > 0) && ((total_fraction_cool_load_served < 0.99) || (total_fraction_cool_load_served > 1.01)) # Use 0.99/1.01 in case of rounding
+        errors << "Expected FractionCoolLoadServed to sum to == 1 when on off thermostat is enabled, but calculated sum is #{total_fraction_cool_load_served.round(2)}."
+      end
+
+      # Check sum of HVAC FractionHeatLoadServeds == 1
+      if (total_fraction_heat_load_served > 0) && ((total_fraction_heat_load_served < 0.99) || (total_fraction_heat_load_served > 1.01)) # Use 0.99/1.01 in case of rounding
+        errors << "Expected FractionHeatLoadServed to sum to == 1 when on off thermostat is enabled, but calculated sum is #{total_fraction_heat_load_served.round(2)}."
+      end
+    end
+
     # Check sum of dehumidifier FractionDehumidificationLoadServed <= 1
     total_fraction_dehum_load_served = @dehumidifiers.map { |d| d.fraction_served }.sum(0.0)
     if total_fraction_dehum_load_served > 1.01 # Use 1.01 in case of rounding

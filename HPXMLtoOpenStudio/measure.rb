@@ -1724,6 +1724,8 @@ class OSModel
     # 2. there are non-year-round HVAC seasons, or
     # 3. we're using an ideal air system for e.g. ASHRAE 140 loads calculation.
     # The energy transferred by this ideal air system is not counted towards unmet loads.
+    return if (not @hpxml.hvac_controls.empty?) && (not @hpxml.hvac_controls[0].onoff_thermostat_deadband.nil?) && (@hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0) # do not create ideal system when onoff thermostat is modeled
+
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     obj_name = Constants.ObjectNameIdealAirSystem
 
@@ -1778,30 +1780,28 @@ class OSModel
     # heating/cooling loads without having to run an additional EnergyPlus simulation solely for that purpose,
     # as well as allows us to report the unmet load (i.e., the energy transferred by this ideal air system).
     return if @hpxml.hvac_controls.empty? # no hvac system
+    return if (not @hpxml.hvac_controls[0].onoff_thermostat_deadband.nil?) && (@hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0) # do not create ideal system when onoff thermostat is modeled
 
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     obj_name = Constants.ObjectNameIdealAirSystemResidual
 
-    # only enable residual ideal system when hvac's not on on/off thermostat control
-    if @hpxml.hvac_controls[0].onoff_thermostat_deadband.nil? || (@hpxml.hvac_controls[0].onoff_thermostat_deadband == 0.0)
-      if @remaining_cool_load_frac < 1.0
-        sequential_cool_load_frac = 1.0
-      else
-        sequential_cool_load_frac = 0.0 # no cooling system, don't add ideal air for cooling
-      end
+    if @remaining_cool_load_frac < 1.0
+      sequential_cool_load_frac = 1.0
+    else
+      sequential_cool_load_frac = 0.0 # no cooling system, don't add ideal air for cooling
+    end
 
-      if @remaining_heat_load_frac < 1.0
-        sequential_heat_load_frac = 1.0
-      else
-        sequential_heat_load_frac = 0.0 # no heating system, don't add ideal air for heating either
-      end
+    if @remaining_heat_load_frac < 1.0
+      sequential_heat_load_frac = 1.0
+    else
+      sequential_heat_load_frac = 0.0 # no heating system, don't add ideal air for heating either
+    end
 
-      if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
-        # Note: Residual ideal air system is configured to run year-round; it should not depend
-        # on the HVAC system availability.
-        HVAC.apply_ideal_air_loads(model, runner, obj_name, [sequential_cool_load_frac], [sequential_heat_load_frac],
-                                   living_zone)
-      end
+    if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
+      # Note: Residual ideal air system is configured to run year-round; it should not depend
+      # on the HVAC system availability.
+      HVAC.apply_ideal_air_loads(model, runner, obj_name, [sequential_cool_load_frac], [sequential_heat_load_frac],
+                                 living_zone)
     end
   end
 

@@ -130,6 +130,7 @@ def create_hpxmls
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
     'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
+    'invalid_files/onoff-thermostat-partially-conditioned.xml' => 'base-hvac-onoff-thermostat-deadband.xml',
     'invalid_files/refrigerator-location.xml' => 'base.xml',
     'invalid_files/refrigerators-multiple-primary.xml' => 'base.xml',
     'invalid_files/refrigerators-no-primary.xml' => 'base.xml',
@@ -3588,6 +3589,9 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
     hpxml.heat_pumps[0].airflow_defect_ratio = -0.25
     hpxml.heat_pumps[0].fan_watts_per_cfm = 0.365
     hpxml.heat_pumps[0].charge_defect_ratio = -0.25
+  elsif ['invalid_files/onoff-thermostat-partially-conditioned.xml'].include? hpxml_file
+    hpxml.heat_pumps[0].fraction_heat_load_served = 0.5
+    hpxml.heat_pumps[0].fraction_cool_load_served = 0.8
   elsif hpxml_file.include?('base-hvac-autosize') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)
     hpxml.heat_pumps[0].cooling_capacity = nil
     hpxml.heat_pumps[0].heating_capacity = nil
