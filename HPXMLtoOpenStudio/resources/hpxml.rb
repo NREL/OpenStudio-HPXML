@@ -3292,7 +3292,7 @@ class HPXML < Object
     ATTRS = [:id, :control_type, :heating_setpoint_temp, :heating_setback_temp,
              :heating_setback_hours_per_week, :heating_setback_start_hour, :cooling_setpoint_temp,
              :cooling_setup_temp, :cooling_setup_hours_per_week, :cooling_setup_start_hour,
-             :ceiling_fan_cooling_setpoint_temp_offset,
+             :ceiling_fan_cooling_setpoint_temp_offset, :onoff_thermostat_deadband,
              :weekday_heating_setpoints, :weekend_heating_setpoints,
              :weekday_cooling_setpoints, :weekend_cooling_setpoints,
              :seasons_heating_begin_month, :seasons_heating_begin_day, :seasons_heating_end_month, :seasons_heating_end_day,
@@ -3310,6 +3310,15 @@ class HPXML < Object
       errors += HPXML::check_dates('Cooling Season', @seasons_cooling_begin_month, @seasons_cooling_begin_day, @seasons_cooling_end_month, @seasons_cooling_end_day)
 
       return errors
+    end
+
+    def is_deadband_control
+      if not @onoff_thermostat_deadband.nil?
+        if @onoff_thermostat_deadband > 0.0
+          return true
+        end
+      end
+      return false
     end
 
     def to_oga(doc)
@@ -3347,6 +3356,7 @@ class HPXML < Object
       XMLHelper.add_extension(hvac_control, 'WeekendSetpointTempsHeatingSeason', @weekend_heating_setpoints, :string) unless @weekend_heating_setpoints.nil?
       XMLHelper.add_extension(hvac_control, 'WeekdaySetpointTempsCoolingSeason', @weekday_cooling_setpoints, :string) unless @weekday_cooling_setpoints.nil?
       XMLHelper.add_extension(hvac_control, 'WeekendSetpointTempsCoolingSeason', @weekend_cooling_setpoints, :string) unless @weekend_cooling_setpoints.nil?
+      XMLHelper.add_extension(hvac_control, 'OnOffThermostatDeadband', @onoff_thermostat_deadband, :float) unless @onoff_thermostat_deadband.nil?
     end
 
     def from_oga(hvac_control)
@@ -3375,6 +3385,7 @@ class HPXML < Object
       @weekend_heating_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekendSetpointTempsHeatingSeason', :string)
       @weekday_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekdaySetpointTempsCoolingSeason', :string)
       @weekend_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekendSetpointTempsCoolingSeason', :string)
+      @onoff_thermostat_deadband = XMLHelper.get_value(hvac_control, 'extension/OnOffThermostatDeadband', :float)
     end
   end
 
@@ -5592,6 +5603,19 @@ class HPXML < Object
     # Check sum of HVAC FractionHeatLoadServeds <= 1
     if total_fraction_heat_load_served > 1.01 # Use 1.01 in case of rounding
       errors << "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is #{total_fraction_heat_load_served.round(2)}."
+    end
+
+    # check hvac sums when on-off thermostat is enabled.
+    if (not @hvac_controls[0].nil?) && (not @hvac_controls[0].onoff_thermostat_deadband.nil?) && (@hvac_controls[0].onoff_thermostat_deadband > 0) && (@header.timestep == 1)
+      # Check sum of HVAC FractionCoolLoadServeds == 1
+      if (total_fraction_cool_load_served > 0) && ((total_fraction_cool_load_served < 0.99) || (total_fraction_cool_load_served > 1.01)) # Use 0.99/1.01 in case of rounding
+        errors << "Expected FractionCoolLoadServed to sum to == 1 when on off thermostat is enabled, but calculated sum is #{total_fraction_cool_load_served.round(2)}."
+      end
+
+      # Check sum of HVAC FractionHeatLoadServeds == 1
+      if (total_fraction_heat_load_served > 0) && ((total_fraction_heat_load_served < 0.99) || (total_fraction_heat_load_served > 1.01)) # Use 0.99/1.01 in case of rounding
+        errors << "Expected FractionHeatLoadServed to sum to == 1 when on off thermostat is enabled, but calculated sum is #{total_fraction_heat_load_served.round(2)}."
+      end
     end
 
     # Check sum of dehumidifier FractionDehumidificationLoadServed <= 1

@@ -130,6 +130,7 @@ def create_hpxmls
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
     'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
+    'invalid_files/onoff-thermostat-partially-conditioned.xml' => 'base-hvac-onoff-thermostat-deadband.xml',
     'invalid_files/refrigerator-location.xml' => 'base.xml',
     'invalid_files/refrigerators-multiple-primary.xml' => 'base.xml',
     'invalid_files/refrigerators-no-primary.xml' => 'base.xml',
@@ -391,6 +392,7 @@ def create_hpxmls
     'base-hvac-none.xml' => 'base.xml',
     'base-hvac-portable-heater-gas-only.xml' => 'base.xml',
     'base-hvac-programmable-thermostat.xml' => 'base.xml',
+    'base-hvac-onoff-thermostat-deadband.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-programmable-thermostat-detailed.xml' => 'base.xml',
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
@@ -653,6 +655,8 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.dst_end_day = 31
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.header.timestep = nil
+  elsif ['base-hvac-onoff-thermostat-deadband.xml'].include? hpxml_file
+    hpxml.header.timestep = 1
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
     hpxml.header.transaction = 'modify'
   end
@@ -3585,6 +3589,9 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
     hpxml.heat_pumps[0].airflow_defect_ratio = -0.25
     hpxml.heat_pumps[0].fan_watts_per_cfm = 0.365
     hpxml.heat_pumps[0].charge_defect_ratio = -0.25
+  elsif ['invalid_files/onoff-thermostat-partially-conditioned.xml'].include? hpxml_file
+    hpxml.heat_pumps[0].fraction_heat_load_served = 0.5
+    hpxml.heat_pumps[0].fraction_cool_load_served = 0.8
   elsif hpxml_file.include?('base-hvac-autosize') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)
     hpxml.heat_pumps[0].cooling_capacity = nil
     hpxml.heat_pumps[0].heating_capacity = nil
@@ -3636,6 +3643,8 @@ def set_hpxml_hvac_control(hpxml_file, hpxml)
     hpxml.hvac_controls[0].cooling_setpoint_temp = 80
   elsif ['base-lighting-ceiling-fans.xml'].include? hpxml_file
     hpxml.hvac_controls[0].ceiling_fan_cooling_setpoint_temp_offset = 0.5
+  elsif ['base-hvac-onoff-thermostat-deadband.xml'].include? hpxml_file
+    hpxml.hvac_controls[0].onoff_thermostat_deadband = 2.0
   elsif ['invalid_files/hvac-seasons-less-than-a-year.xml'].include? hpxml_file
     hpxml.hvac_controls[0].seasons_heating_begin_month = 10
     hpxml.hvac_controls[0].seasons_heating_begin_day = 1
