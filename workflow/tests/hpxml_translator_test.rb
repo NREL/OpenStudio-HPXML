@@ -316,7 +316,7 @@ class HPXMLTest < MiniTest::Test
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for surface 'Wall'."],
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for surface 'Roof'."],
                             'orphaned-hvac-distribution.xml' => ["Distribution system 'HVACDistribution' found but no HVAC system attached to it."],
-                            'onoff-thermostat-partially-conditioned.xml' => ['Expected FractionCoolLoadServed to sum to == 1 when on off thermostat is enabled, but calculated sum is 0.8.', 
+                            'onoff-thermostat-partially-conditioned.xml' => ['Expected FractionCoolLoadServed to sum to == 1 when on off thermostat is enabled, but calculated sum is 0.8.',
                                                                              'Expected FractionHeatLoadServed to sum to == 1 when on off thermostat is enabled, but calculated sum is 0.5.'],
                             'refrigerator-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'refrigerators-multiple-primary.xml' => ['More than one refrigerator designated as the primary.'],

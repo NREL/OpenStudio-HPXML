@@ -3312,6 +3312,15 @@ class HPXML < Object
       return errors
     end
 
+    def is_deadband_control
+      if not @onoff_thermostat_deadband.nil?
+        if @onoff_thermostat_deadband > 0.0
+          return true
+        end
+      end
+      return false
+    end
+
     def to_oga(doc)
       return if nil?
 

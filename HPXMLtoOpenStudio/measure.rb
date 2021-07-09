@@ -1604,8 +1604,7 @@ class OSModel
       heating_system = hvac_system[:heating]
 
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
-      hvac_control = @hpxml.hvac_controls[0]
-      is_ddb_control = (not hvac_control.onoff_thermostat_deadband.nil?) && (hvac_control.onoff_thermostat_deadband > 0) && (cooling_system.additional_properties.num_speeds == 1)
+      is_ddb_control = @hpxml.hvac_controls[0].is_deadband_control && (cooling_system.additional_properties.num_speeds == 1)
 
       # Calculate cooling sequential load fractions
       sequential_cool_load_fracs = HVAC.calc_sequential_load_fractions(cooling_system.fraction_cool_load_served.to_f, @remaining_cool_load_frac, @cooling_days)
@@ -1705,8 +1704,7 @@ class OSModel
       heat_pump = hvac_system[:cooling]
 
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
-      hvac_control = @hpxml.hvac_controls[0]
-      is_ddb_control = (not hvac_control.onoff_thermostat_deadband.nil?) && (hvac_control.onoff_thermostat_deadband > 0) && (heat_pump.additional_properties.num_speeds == 1)
+      is_ddb_control = @hpxml.hvac_controls[0].is_deadband_control && (heat_pump.additional_properties.num_speeds == 1)
 
       # Calculate heating sequential load fractions
       sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heat_pump.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
@@ -1750,7 +1748,7 @@ class OSModel
     # 2. there are non-year-round HVAC seasons, or
     # 3. we're using an ideal air system for e.g. ASHRAE 140 loads calculation.
     # The energy transferred by this ideal air system is not counted towards unmet loads.
-    return if (not @hpxml.hvac_controls.empty?) && (not @hpxml.hvac_controls[0].onoff_thermostat_deadband.nil?) && (@hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0) # do not create ideal system when onoff thermostat is modeled
+    return if (not @hpxml.hvac_controls.empty?) && @hpxml.hvac_controls[0].is_deadband_control # do not create ideal system when onoff thermostat is modeled
 
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     obj_name = Constants.ObjectNameIdealAirSystem
@@ -1805,8 +1803,7 @@ class OSModel
     # the HVAC systems are undersized to meet the load). This allows us to correctly calculate total
     # heating/cooling loads without having to run an additional EnergyPlus simulation solely for that purpose,
     # as well as allows us to report the unmet load (i.e., the energy transferred by this ideal air system).
-    return if @hpxml.hvac_controls.empty? # no hvac system
-    return if (not @hpxml.hvac_controls[0].onoff_thermostat_deadband.nil?) && (@hpxml.hvac_controls[0].onoff_thermostat_deadband > 0.0) # do not create ideal system when onoff thermostat is modeled
+    return if (not @hpxml.hvac_controls.empty?) && @hpxml.hvac_controls[0].is_deadband_control # do not create ideal system when onoff thermostat is modeled
 
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     obj_name = Constants.ObjectNameIdealAirSystemResidual
