@@ -175,7 +175,7 @@ class HPXMLDefaults
     end
 
     if hpxml.site.shielding_of_home.nil?
-      hpxml.site.shielding_of_home = HPXML::ShieldingNormal
+      hpxml.site.shielding_of_home = HPXML::ShieldingExposed
       hpxml.site.shielding_of_home_isdefaulted = true
     end
     hpxml.site.additional_properties.aim2_shelter_coeff = Airflow.get_aim2_shelter_coefficient(hpxml.site.shielding_of_home)

@@ -18,9 +18,9 @@ class SimulationOutputReportTest < MiniTest::Test
     'Fuel Use: Wood Pellets: Total (MBtu)',
     'Fuel Use: Coal: Total (MBtu)',
     'End Use: Electricity: Heating (MBtu)',
-    'End Use: Electricity: Heating Fans/Pumps (MBtu)',
+    'End Use: Electricity: Heating Fans Pumps (MBtu)',
     'End Use: Electricity: Cooling (MBtu)',
-    'End Use: Electricity: Cooling Fans/Pumps (MBtu)',
+    'End Use: Electricity: Cooling Fans Pumps (MBtu)',
     'End Use: Electricity: Hot Water (MBtu)',
     'End Use: Electricity: Hot Water Recirc Pump (MBtu)',
     'End Use: Electricity: Hot Water Solar Thermal Pump (MBtu)',
@@ -169,9 +169,9 @@ class SimulationOutputReportTest < MiniTest::Test
 
   TimeseriesColsEndUses = [
     'End Use: Electricity: Heating',
-    'End Use: Electricity: Heating Fans/Pumps',
+    'End Use: Electricity: Heating Fans Pumps',
     'End Use: Electricity: Cooling',
-    'End Use: Electricity: Cooling Fans/Pumps',
+    'End Use: Electricity: Cooling Fans Pumps',
     'End Use: Electricity: Hot Water',
     'End Use: Electricity: Hot Water Recirc Pump',
     'End Use: Electricity: Hot Water Solar Thermal Pump',
