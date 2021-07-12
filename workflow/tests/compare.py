@@ -178,7 +178,7 @@ class BaseCompare:
             base_df = pd.read_csv(os.path.join(self.base_folder, file), index_col=0)
             feature_df = pd.read_csv(os.path.join(self.feature_folder, file), index_col=0)
 
-            cols = sorted(list(set(base_df.columns) | set(feature_df.columns)))
+            cols = sorted(list(set(base_df.columns) & set(feature_df.columns)))
             cols = remove_columns(cols)
 
             groups = [None]
