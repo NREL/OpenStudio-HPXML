@@ -300,7 +300,7 @@ class Material
       thick_in = 0.75 if thick_in.nil?
       return new(name: type, thick_in: thick_in, k_in: 5.83, rho: 118.6, cp: 0.191)
     elsif [HPXML::RoofTypeEPS].include? type
-      thick_in = 1.25 if thick_in.nil?
+      thick_in = 1.0 if thick_in.nil?
       return new(name: type, thick_in: thick_in, mat_base: BaseMaterial.InsulationRigid)
     elsif [HPXML::RoofTypePlasticRubber].include? type
       thick_in = 0.25 if thick_in.nil?

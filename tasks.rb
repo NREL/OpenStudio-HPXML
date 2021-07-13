@@ -104,6 +104,7 @@ def create_hpxmls
     'invalid_files/invalid-id2.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/invalid-infiltration-volume.xml' => 'base.xml',
     'invalid_files/invalid-input-parameters.xml' => 'base.xml',
+    'invalid_files/invalid-insulation-top.xml' => 'base.xml',
     'invalid_files/invalid-neighbor-shading-azimuth.xml' => 'base-misc-neighbor-shading.xml',
     'invalid_files/invalid-number-of-bedrooms-served.xml' => 'base-bldgtype-multifamily-shared-pv.xml',
     'invalid_files/invalid-number-of-conditioned-floors.xml' => 'base.xml',
@@ -1030,7 +1031,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
                       radiant_barrier: false,
                       interior_finish_type: int_finish_types[i % int_finish_types.size][0],
                       interior_finish_thickness: int_finish_types[i % int_finish_types.size][1],
-                      insulation_assembly_r_value: 2.3)
+                      insulation_assembly_r_value: roof_type[0] == HPXML::RoofTypeEPS ? 7.0 : 2.3)
     end
   elsif ['base-atticroof-flat.xml'].include? hpxml_file
     hpxml.roofs.clear
@@ -2063,6 +2064,8 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls[0].insulation_interior_distance_to_top = 12
     hpxml.foundation_walls[0].insulation_interior_distance_to_bottom = 10
     hpxml.foundation_walls[0].depth_below_grade = 9
+  elsif ['invalid_files/invalid-insulation-top.xml'].include? hpxml_file
+    hpxml.foundation_walls[0].insulation_exterior_distance_to_top = -0.5
   end
 end
 
