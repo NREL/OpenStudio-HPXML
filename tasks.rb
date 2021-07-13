@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-$VERBOSE = nil # Prevents ruby warnings, see https://github.com/NREL/OpenStudio/issues/4301
-
 def create_hpxmls
   require_relative 'HPXMLtoOpenStudio/resources/constants'
   require_relative 'HPXMLtoOpenStudio/resources/hotwater_appliances'
@@ -97,6 +95,7 @@ def create_hpxmls
     'invalid_files/invalid-datatype-integer.xml' => 'base.xml',
     'invalid_files/invalid-daylight-saving.xml' => 'base-simcontrol-daylight-saving-custom.xml',
     'invalid_files/invalid-distribution-cfa-served.xml' => 'base.xml',
+    'invalid_files/invalid-duct-area-fractions.xml' => 'base-hvac-ducts-area-fractions.xml',
     'invalid_files/invalid-epw-filepath.xml' => 'base.xml',
     'invalid_files/invalid-facility-type-equipment.xml' => 'base-bldgtype-multifamily-shared-laundry-room.xml',
     'invalid_files/invalid-facility-type-surfaces.xml' => 'base.xml',
@@ -105,6 +104,7 @@ def create_hpxmls
     'invalid_files/invalid-id2.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/invalid-infiltration-volume.xml' => 'base.xml',
     'invalid_files/invalid-input-parameters.xml' => 'base.xml',
+    'invalid_files/invalid-insulation-top.xml' => 'base.xml',
     'invalid_files/invalid-neighbor-shading-azimuth.xml' => 'base-misc-neighbor-shading.xml',
     'invalid_files/invalid-number-of-bedrooms-served.xml' => 'base-bldgtype-multifamily-shared-pv.xml',
     'invalid_files/invalid-number-of-conditioned-floors.xml' => 'base.xml',
@@ -117,6 +117,7 @@ def create_hpxmls
     'invalid_files/invalid-timestep.xml' => 'base.xml',
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
+    'invalid_files/missing-duct-area.xml' => 'base-hvac-multiple.xml',
     'invalid_files/missing-duct-location.xml' => 'base-hvac-multiple.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
     'invalid_files/multifamily-reference-appliance.xml' => 'base.xml',
@@ -262,6 +263,7 @@ def create_hpxmls
     'base-enclosure-infil-cfm50.xml' => 'base.xml',
     'base-enclosure-infil-flue.xml' => 'base.xml',
     'base-enclosure-infil-natural-ach.xml' => 'base.xml',
+    'base-enclosure-orientations.xml' => 'base.xml',
     'base-enclosure-overhangs.xml' => 'base.xml',
     'base-enclosure-rooftypes.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
@@ -347,6 +349,7 @@ def create_hpxmls
     'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-ducts-leakage-percent.xml' => 'base.xml',
+    'base-hvac-ducts-area-fractions.xml' => 'base-enclosure-2stories.xml',
     'base-hvac-elec-resistance-only.xml' => 'base.xml',
     'base-hvac-evap-cooler-furnace-gas.xml' => 'base.xml',
     'base-hvac-evap-cooler-only.xml' => 'base.xml',
@@ -1007,7 +1010,12 @@ def set_hpxml_roofs(hpxml_file, hpxml)
   elsif ['base-enclosure-rooftypes.xml'].include? hpxml_file
     roof_types = [[HPXML::RoofTypeClayTile, HPXML::ColorLight],
                   [HPXML::RoofTypeMetal, HPXML::ColorReflective],
-                  [HPXML::RoofTypeWoodShingles, HPXML::ColorDark]]
+                  [HPXML::RoofTypeWoodShingles, HPXML::ColorDark],
+                  [HPXML::RoofTypeShingles, HPXML::ColorMediumDark],
+                  [HPXML::RoofTypePlasticRubber, HPXML::ColorLight],
+                  [HPXML::RoofTypeEPS, HPXML::ColorMedium],
+                  [HPXML::RoofTypeConcrete, HPXML::ColorLight],
+                  [HPXML::RoofTypeCool, HPXML::ColorReflective]]
     int_finish_types = [[HPXML::InteriorFinishGypsumBoard, 0.5],
                         [HPXML::InteriorFinishPlaster, 0.5],
                         [HPXML::InteriorFinishWood, 0.5]]
@@ -1023,7 +1031,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
                       radiant_barrier: false,
                       interior_finish_type: int_finish_types[i % int_finish_types.size][0],
                       interior_finish_thickness: int_finish_types[i % int_finish_types.size][1],
-                      insulation_assembly_r_value: 2.3)
+                      insulation_assembly_r_value: roof_type[0] == HPXML::RoofTypeEPS ? 7.0 : 2.3)
     end
   elsif ['base-atticroof-flat.xml'].include? hpxml_file
     hpxml.roofs.clear
@@ -1162,9 +1170,13 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.rim_joists.clear
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
     siding_types = [[HPXML::SidingTypeAluminum, HPXML::ColorDark],
+                    [HPXML::SidingTypeAsbestos, HPXML::ColorMedium],
                     [HPXML::SidingTypeBrick, HPXML::ColorReflective],
+                    [HPXML::SidingTypeCompositeShingle, HPXML::ColorDark],
                     [HPXML::SidingTypeFiberCement, HPXML::ColorMediumDark],
+                    [HPXML::SidingTypeMasonite, HPXML::ColorLight],
                     [HPXML::SidingTypeStucco, HPXML::ColorMedium],
+                    [HPXML::SidingTypeSyntheticStucco, HPXML::ColorMediumDark],
                     [HPXML::SidingTypeVinyl, HPXML::ColorLight],
                     [HPXML::SidingTypeNone, HPXML::ColorMedium]]
     hpxml.rim_joists.clear
@@ -1510,9 +1522,13 @@ def set_hpxml_walls(hpxml_file, hpxml)
                   HPXML::WallTypeBrick => 7.9,
                   HPXML::WallTypeAdobe => 5.0 }
     siding_types = [[HPXML::SidingTypeAluminum, HPXML::ColorReflective],
+                    [HPXML::SidingTypeAsbestos, HPXML::ColorLight],
                     [HPXML::SidingTypeBrick, HPXML::ColorMediumDark],
+                    [HPXML::SidingTypeCompositeShingle, HPXML::ColorReflective],
                     [HPXML::SidingTypeFiberCement, HPXML::ColorMedium],
+                    [HPXML::SidingTypeMasonite, HPXML::ColorDark],
                     [HPXML::SidingTypeStucco, HPXML::ColorLight],
+                    [HPXML::SidingTypeSyntheticStucco, HPXML::ColorMedium],
                     [HPXML::SidingTypeVinyl, HPXML::ColorDark],
                     [HPXML::SidingTypeNone, HPXML::ColorMedium]]
     int_finish_types = [[HPXML::InteriorFinishGypsumBoard, 0.5],
@@ -2020,6 +2036,12 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
       fwall.thickness = nil
       fwall.interior_finish_type = nil
       fwall.interior_finish_thickness = nil
+      fwall.insulation_interior_distance_to_top = nil
+      fwall.insulation_interior_distance_to_bottom = nil
+      fwall.insulation_exterior_distance_to_top = nil
+      fwall.insulation_exterior_distance_to_bottom = nil
+      fwall.length = (fwall.area / fwall.height).round(2)
+      fwall.area = nil
     end
   elsif ['invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
     hpxml.foundation_walls.add(id: 'FoundationWallOther',
@@ -2042,6 +2064,8 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls[0].insulation_interior_distance_to_top = 12
     hpxml.foundation_walls[0].insulation_interior_distance_to_bottom = 10
     hpxml.foundation_walls[0].depth_below_grade = 9
+  elsif ['invalid_files/invalid-insulation-top.xml'].include? hpxml_file
+    hpxml.foundation_walls[0].insulation_exterior_distance_to_top = -0.5
   end
 end
 
@@ -2522,6 +2546,15 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
+  elsif ['base-enclosure-orientations.xml'].include? hpxml_file
+    hpxml.windows[0].azimuth = nil
+    hpxml.windows[0].orientation = HPXML::OrientationNorth
+    hpxml.windows[1].azimuth = nil
+    hpxml.windows[1].orientation = HPXML::OrientationSouth
+    hpxml.windows[2].azimuth = nil
+    hpxml.windows[2].orientation = HPXML::OrientationEast
+    hpxml.windows[3].azimuth = nil
+    hpxml.windows[3].orientation = HPXML::OrientationWest
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.windows.clear
     hpxml.windows.add(id: 'WindowNorth',
@@ -2858,6 +2891,11 @@ def set_hpxml_doors(hpxml_file, hpxml)
                     area: 20,
                     azimuth: 180,
                     r_value: 4.4)
+  elsif ['base-enclosure-orientations.xml'].include? hpxml_file
+    hpxml.doors[0].azimuth = nil
+    hpxml.doors[0].orientation = HPXML::OrientationNorth
+    hpxml.doors[1].azimuth = nil
+    hpxml.doors[1].orientation = HPXML::OrientationSouth
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.doors.clear
     hpxml.doors.add(id: 'Door',
@@ -2934,6 +2972,10 @@ def set_hpxml_doors(hpxml_file, hpxml)
                     area: 20,
                     azimuth: 180,
                     r_value: 4.4)
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.doors.each do |door|
+      door.azimuth = nil
+    end
   end
 end
 
@@ -3836,7 +3878,6 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                           duct_location: HPXML::LocationRoofDeck,
                                           duct_surface_area: 50)
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
-  elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[0].ducts[0].dup
     hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[0].ducts[1].dup
     hpxml.hvac_distributions[0].ducts[0].duct_surface_area *= 0.75
@@ -3910,6 +3951,13 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                           duct_insulation_r_value: 0,
                                           duct_location: HPXML::LocationAtticUnvented,
                                           duct_surface_area: 50)
+  elsif ['base-hvac-ducts-area-fractions.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts.each do |d|
+      d.duct_fraction_area = d.duct_surface_area / hpxml.hvac_distributions[0].ducts.select { |du| du.duct_type == d.duct_type }.map { |du| du.duct_surface_area }.sum
+    end
+    hpxml.hvac_distributions[0].ducts.each do |d|
+      d.duct_surface_area = nil
+    end
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
@@ -3919,11 +3967,21 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
         duct.duct_location = nil
       end
     end
+  elsif ['invalid_files/invalid-duct-area-fractions.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts.each do |d|
+      d.duct_fraction_area -= 0.1
+    end
   elsif ['invalid_files/missing-duct-location.xml'].include? hpxml_file
     hpxml.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
 
       hvac_distribution.ducts[1].duct_location = nil
+    end
+  elsif ['invalid_files/missing-duct-area.xml'].include? hpxml_file
+    hpxml.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+
+      hvac_distribution.ducts[1].duct_surface_area = nil
     end
   elsif ['invalid_files/multifamily-reference-duct.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherMultifamilyBufferSpace
@@ -5664,7 +5722,7 @@ if ARGV[0].to_sym == :update_measures
   # Apply rubocop
   cops = ['Layout',
           'Lint/DeprecatedClassMethods',
-          # 'Lint/RedundantStringCoercion', # Enable when rubocop is upgraded
+          'Lint/RedundantStringCoercion',
           'Style/AndOr',
           'Style/FrozenStringLiteralComment',
           'Style/HashSyntax',
