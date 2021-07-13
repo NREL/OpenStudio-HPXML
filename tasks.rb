@@ -1010,7 +1010,12 @@ def set_hpxml_roofs(hpxml_file, hpxml)
   elsif ['base-enclosure-rooftypes.xml'].include? hpxml_file
     roof_types = [[HPXML::RoofTypeClayTile, HPXML::ColorLight],
                   [HPXML::RoofTypeMetal, HPXML::ColorReflective],
-                  [HPXML::RoofTypeWoodShingles, HPXML::ColorDark]]
+                  [HPXML::RoofTypeWoodShingles, HPXML::ColorDark],
+                  [HPXML::RoofTypeShingles, HPXML::ColorMediumDark],
+                  [HPXML::RoofTypePlasticRubber, HPXML::ColorLight],
+                  [HPXML::RoofTypeEPS, HPXML::ColorMedium],
+                  [HPXML::RoofTypeConcrete, HPXML::ColorLight],
+                  [HPXML::RoofTypeCool, HPXML::ColorReflective]]
     int_finish_types = [[HPXML::InteriorFinishGypsumBoard, 0.5],
                         [HPXML::InteriorFinishPlaster, 0.5],
                         [HPXML::InteriorFinishWood, 0.5]]
@@ -1026,7 +1031,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
                       radiant_barrier: false,
                       interior_finish_type: int_finish_types[i % int_finish_types.size][0],
                       interior_finish_thickness: int_finish_types[i % int_finish_types.size][1],
-                      insulation_assembly_r_value: 2.3)
+                      insulation_assembly_r_value: roof_type[0] == HPXML::RoofTypeEPS ? 7.0 : 2.3)
     end
   elsif ['base-atticroof-flat.xml'].include? hpxml_file
     hpxml.roofs.clear
@@ -1165,9 +1170,13 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.rim_joists.clear
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
     siding_types = [[HPXML::SidingTypeAluminum, HPXML::ColorDark],
+                    [HPXML::SidingTypeAsbestos, HPXML::ColorMedium],
                     [HPXML::SidingTypeBrick, HPXML::ColorReflective],
+                    [HPXML::SidingTypeCompositeShingle, HPXML::ColorDark],
                     [HPXML::SidingTypeFiberCement, HPXML::ColorMediumDark],
+                    [HPXML::SidingTypeMasonite, HPXML::ColorLight],
                     [HPXML::SidingTypeStucco, HPXML::ColorMedium],
+                    [HPXML::SidingTypeSyntheticStucco, HPXML::ColorMediumDark],
                     [HPXML::SidingTypeVinyl, HPXML::ColorLight],
                     [HPXML::SidingTypeNone, HPXML::ColorMedium]]
     hpxml.rim_joists.clear
@@ -1513,9 +1522,13 @@ def set_hpxml_walls(hpxml_file, hpxml)
                   HPXML::WallTypeBrick => 7.9,
                   HPXML::WallTypeAdobe => 5.0 }
     siding_types = [[HPXML::SidingTypeAluminum, HPXML::ColorReflective],
+                    [HPXML::SidingTypeAsbestos, HPXML::ColorLight],
                     [HPXML::SidingTypeBrick, HPXML::ColorMediumDark],
+                    [HPXML::SidingTypeCompositeShingle, HPXML::ColorReflective],
                     [HPXML::SidingTypeFiberCement, HPXML::ColorMedium],
+                    [HPXML::SidingTypeMasonite, HPXML::ColorDark],
                     [HPXML::SidingTypeStucco, HPXML::ColorLight],
+                    [HPXML::SidingTypeSyntheticStucco, HPXML::ColorMedium],
                     [HPXML::SidingTypeVinyl, HPXML::ColorDark],
                     [HPXML::SidingTypeNone, HPXML::ColorMedium]]
     int_finish_types = [[HPXML::InteriorFinishGypsumBoard, 0.5],
