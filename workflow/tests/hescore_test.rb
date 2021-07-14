@@ -127,7 +127,6 @@ class HEScoreTest < Minitest::Unit::TestCase
         next if log_line.strip.empty?
         next if log_line.start_with? 'Info: '
         next if log_line.start_with? 'Executing command'
-        next if (log_line.start_with?('Heat ') || log_line.start_with?('Cool ')) && log_line.include?('=') # FIXME: Can remove this when https://github.com/NREL/OpenStudio-HPXML/pull/595 is pulled in
 
         next if log_line.include? 'Warning: Could not load nokogiri, no HPXML validation performed.'
 
