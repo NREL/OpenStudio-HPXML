@@ -3549,16 +3549,11 @@ class HPXMLFile
 
       exterior_adjacent_to = HPXML::LocationOutside
       if surface.outsideBoundaryCondition == 'Adiabatic' # can be adjacent to foundation space
-        adjacent_surface = get_adiabatic_adjacent_surface(model, surface)
-        if adjacent_surface.nil? # adjacent to a space that is not explicitly in the model
-          unless [HPXML::ResidentialTypeSFD].include?(args[:geometry_unit_type])
-            exterior_adjacent_to = interior_adjacent_to
-            if exterior_adjacent_to == HPXML::LocationLivingSpace # living adjacent to living
-              exterior_adjacent_to = HPXML::LocationOtherHousingUnit
-            end
+        unless [HPXML::ResidentialTypeSFD].include?(args[:geometry_unit_type]) # FIXME: Review why this is here
+          exterior_adjacent_to = interior_adjacent_to
+          if exterior_adjacent_to == HPXML::LocationLivingSpace # living adjacent to living
+            exterior_adjacent_to = HPXML::LocationOtherHousingUnit
           end
-        else # adjacent to a space that is explicitly in the model, e.g., corridor
-          exterior_adjacent_to = get_adjacent_to(adjacent_surface)
         end
       end
 
@@ -3596,29 +3591,6 @@ class HPXMLFile
     return 0
   end
 
-  def self.get_adiabatic_adjacent_surface(model, surface)
-    return if surface.outsideBoundaryCondition != 'Adiabatic'
-
-    adjacentSurfaceType = 'Wall'
-    if surface.surfaceType == 'RoofCeiling'
-      adjacentSurfaceType = 'Floor'
-    elsif surface.surfaceType == 'Floor'
-      adjacentSurfaceType = 'RoofCeiling'
-    end
-
-    model.getSurfaces.sort.each do |adjacent_surface|
-      next if surface == adjacent_surface
-      next if adjacent_surface.surfaceType != adjacentSurfaceType
-      next if adjacent_surface.outsideBoundaryCondition != 'Adiabatic'
-      next if Geometry.getSurfaceXValues([surface]).sort != Geometry.getSurfaceXValues([adjacent_surface]).sort
-      next if Geometry.getSurfaceYValues([surface]).sort != Geometry.getSurfaceYValues([adjacent_surface]).sort
-      next if Geometry.getSurfaceZValues([surface]).sort != Geometry.getSurfaceZValues([adjacent_surface]).sort
-
-      return adjacent_surface
-    end
-    return
-  end
-
   def self.set_walls(hpxml, runner, model, args)
     model.getSurfaces.sort.each do |surface|
       next if surface.surfaceType != 'Wall'
@@ -3631,14 +3603,9 @@ class HPXMLFile
       if surface.adjacentSurface.is_initialized
         exterior_adjacent_to = get_adjacent_to(surface.adjacentSurface.get)
       elsif surface.outsideBoundaryCondition == 'Adiabatic' # can be adjacent to living space, attic, corridor
-        adjacent_surface = get_adiabatic_adjacent_surface(model, surface)
-        if adjacent_surface.nil? # adjacent to a space that is not explicitly in the model
-          exterior_adjacent_to = interior_adjacent_to
-          if exterior_adjacent_to == HPXML::LocationLivingSpace # living adjacent to living
-            exterior_adjacent_to = HPXML::LocationOtherHousingUnit
-          end
-        else # adjacent to a space that is explicitly in the model, e.g., corridor
-          exterior_adjacent_to = get_adjacent_to(adjacent_surface)
+        exterior_adjacent_to = interior_adjacent_to
+        if exterior_adjacent_to == HPXML::LocationLivingSpace # living adjacent to living
+          exterior_adjacent_to = HPXML::LocationOtherHousingUnit
         end
       end
 
@@ -3710,16 +3677,11 @@ class HPXMLFile
 
       exterior_adjacent_to = HPXML::LocationGround
       if surface.outsideBoundaryCondition == 'Adiabatic' # can be adjacent to foundation space
-        adjacent_surface = get_adiabatic_adjacent_surface(model, surface)
-        if adjacent_surface.nil? # adjacent to a space that is not explicitly in the model
-          unless [HPXML::ResidentialTypeSFD].include?(args[:geometry_unit_type])
-            exterior_adjacent_to = interior_adjacent_to
-            if exterior_adjacent_to == HPXML::LocationLivingSpace # living adjacent to living
-              exterior_adjacent_to = HPXML::LocationOtherHousingUnit
-            end
+        unless [HPXML::ResidentialTypeSFD].include?(args[:geometry_unit_type])
+          exterior_adjacent_to = interior_adjacent_to
+          if exterior_adjacent_to == HPXML::LocationLivingSpace # living adjacent to living
+            exterior_adjacent_to = HPXML::LocationOtherHousingUnit
           end
-        else # adjacent to a space that is explicitly in the model, e.g., corridor
-          exterior_adjacent_to = get_adjacent_to(adjacent_surface)
         end
       end
 
@@ -3974,12 +3936,7 @@ class HPXMLFile
   def self.set_doors(hpxml, runner, model, args)
     model.getSurfaces.sort.each do |surface|
       interior_adjacent_to = get_adjacent_to(surface)
-
-      adjacent_surface = surface
-      if [HPXML::LocationOtherHousingUnit].include?(interior_adjacent_to)
-        adjacent_surface = get_adiabatic_adjacent_surface(model, surface)
-        next if adjacent_surface.nil?
-      end
+      next if interior_adjacent_to == HPXML::LocationOtherHousingUnit
 
       surface.subSurfaces.sort.each do |sub_surface|
         next if sub_surface.subSurfaceType != 'Door'
@@ -3987,7 +3944,7 @@ class HPXMLFile
         sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
 
         hpxml.doors.add(id: "#{valid_attr(sub_surface.name)}_#{sub_surface_facade}",
-                        wall_idref: valid_attr(adjacent_surface.name),
+                        wall_idref: valid_attr(surface.name),
                         area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round,
                         azimuth: args[:geometry_orientation],
                         r_value: args[:door_rvalue])
