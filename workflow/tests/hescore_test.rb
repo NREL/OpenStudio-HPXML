@@ -234,6 +234,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     htg_fuels = []
     hpxml.heating_systems.each do |heating_system|
       next unless heating_system.fraction_heat_load_served > 0
+
       htg_fuels << fuel_map[heating_system.heating_system_fuel]
       if [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler, HPXML::HVACTypeStove].include? heating_system.heating_system_type
         htg_fuels << fuel_map[HPXML::FuelTypeElectricity] # fan/pump
@@ -241,15 +242,18 @@ class HEScoreTest < Minitest::Unit::TestCase
     end
     hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump.fraction_heat_load_served > 0
+
       htg_fuels << fuel_map[HPXML::FuelTypeElectricity]
     end
     has_clg = false
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.fraction_cool_load_served > 0
+
       has_clg = true
     end
     hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump.fraction_cool_load_served > 0
+
       has_clg = true
     end
 
@@ -258,6 +262,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     hpxml.water_heating_systems.each do |water_heater|
       hw_fuels << fuel_map[water_heater.fuel_type]
       next unless [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater.water_heater_type
+
       hw_fuels << fuel_map[water_heater.related_hvac_system.heating_system_fuel]
     end
 
