@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <measure>
   <schema_version>3.0</schema_version>
-  <error>Unable to extract OpenStudio::Measure::OSMeasure object from /mnt/c/git/openstudio-hescore/rulesets/HEScoreRuleset/measure.rb. The script should contain a class that derives from OpenStudio::Measure::OSMeasure and should close with a line stating the class name followed by .new.registerWithApplication.</error>
   <name>he_score_measure</name>
   <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
   <version_id>6c57a42c-a6a0-49f5-bcc8-3a1055907905</version_id>
