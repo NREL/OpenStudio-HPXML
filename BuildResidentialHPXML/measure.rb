@@ -69,28 +69,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Value must be a divisor of 60.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_run_period_begin_month', false)
-    arg.setDisplayName('Simulation Control: Run Period Begin Month')
-    arg.setUnits('#')
-    arg.setDescription('This numeric field should contain the starting month number (1 = January, 2 = February, etc.) for the annual run period desired.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_run_period_begin_day_of_month', false)
-    arg.setDisplayName('Simulation Control: Run Period Begin Day of Month')
-    arg.setUnits('#')
-    arg.setDescription('This numeric field should contain the starting day of the starting month (must be valid for month) for the annual run period desired.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_run_period_end_month', false)
-    arg.setDisplayName('Simulation Control: Run Period End Month')
-    arg.setUnits('#')
-    arg.setDescription('This numeric field should contain the end month number (1 = January, 2 = February, etc.) for the annual run period desired.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_run_period_end_day_of_month', false)
-    arg.setDisplayName('Simulation Control: Run Period End Day of Month')
-    arg.setUnits('#')
-    arg.setDescription('This numeric field should contain the ending day of the ending month (must be valid for month) for the annual run period desired.')
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('simulation_control_run_period', false)
+    arg.setDisplayName('Simulation Control: Run Period')
+    arg.setDescription('Specifies the annual simulation run period. Enter a date like "Mar 15 - Sep 15".')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_run_period_calendar_year', false)
@@ -104,28 +85,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Whether to use daylight saving.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_daylight_saving_begin_month', false)
-    arg.setDisplayName('Simulation Control: Daylight Saving Begin Month')
-    arg.setUnits('#')
-    arg.setDescription('This numeric field should contain the starting month number (1 = January, 2 = February, etc.) for the annual daylight saving period desired.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_daylight_saving_begin_day_of_month', false)
-    arg.setDisplayName('Simulation Control: Daylight Saving Begin Day of Month')
-    arg.setUnits('#')
-    arg.setDescription('This numeric field should contain the starting day of the starting month (must be valid for month) for the daylight saving period desired.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_daylight_saving_end_month', false)
-    arg.setDisplayName('Simulation Control: Daylight Saving End Month')
-    arg.setUnits('#')
-    arg.setDescription('This numeric field should contain the end month number (1 = January, 2 = February, etc.) for the daylight saving period desired.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_daylight_saving_end_day_of_month', false)
-    arg.setDisplayName('Simulation Control: Daylight Saving End Day of Month')
-    arg.setUnits('#')
-    arg.setDescription('This numeric field should contain the ending day of the ending month (must be valid for month) for the daylight saving period desired.')
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('simulation_control_daylight_saving_period', false)
+    arg.setDisplayName('Simulation Control: Daylight Saving Period')
+    arg.setDescription('Specifies the daylight saving period. Enter a date like "Mar 15 - Dec 15".')
     args << arg
 
     schedules_type_choices = OpenStudio::StringVector.new
@@ -144,28 +106,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute (or relative) path of the csv file containing user-specified occupancy schedules.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('schedules_vacancy_begin_month', false)
-    arg.setDisplayName('Schedules: Vacancy Start Begin Month')
-    arg.setUnits('#')
-    arg.setDescription("This numeric field should contain the starting month number (1 = January, 2 = February, etc.) for the vacancy period desired. Only applies if the schedules type is 'stochastic'.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('schedules_vacancy_begin_day_of_month', false)
-    arg.setDisplayName('Schedules: Vacancy Begin Day of Month')
-    arg.setUnits('#')
-    arg.setDescription("This numeric field should contain the starting day of the starting month (must be valid for month) for the vacancy period desired. Only applies if the schedules type is 'stochastic'.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('schedules_vacancy_end_month', false)
-    arg.setDisplayName('Schedules: Vacancy Start End Month')
-    arg.setUnits('#')
-    arg.setDescription("This numeric field should contain the end month number (1 = January, 2 = February, etc.) for the vacancy period desired. Only applies if the schedules type is 'stochastic'.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('schedules_vacancy_end_day_of_month', false)
-    arg.setDisplayName('Schedules: Vacancy End Day of Month')
-    arg.setUnits('#')
-    arg.setDescription("This numeric field should contain the ending day of the ending month (must be valid for month) for the vacancy period desired. Only applies if the schedules type is 'stochastic'.")
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_vacancy_period', false)
+    arg.setDisplayName('Schedules: Vacancy Period')
+    arg.setDescription("Specifies the vacancy period. Only applies if the schedules type is 'stochastic'. Enter a date like \"Dec 15 - Jan 15\".")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('schedules_random_seed', false)
@@ -1301,52 +1244,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('76')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('season_heating_begin_month', false)
-    arg.setDisplayName('Heating Season: Begin Month')
-    arg.setUnits('#')
-    arg.setDescription('This numeric field should contain the starting month number (1 = January, 2 = February, etc.) for the heating season.')
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('season_heating_period', false)
+    arg.setDisplayName('Heating Season Period')
+    arg.setDescription('Specifies the heating season. Enter a date like "Nov 1 - Jun 30".')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('season_heating_begin_day_of_month', false)
-    arg.setDisplayName('Heating Season: Begin Day of Month')
-    arg.setUnits('#')
-    arg.setDescription('This numeric field should contain the starting day of the starting month (must be valid for month) for the heating season.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('season_heating_end_month', false)
-    arg.setDisplayName('Heating Season: End Month')
-    arg.setUnits('#')
-    arg.setDescription('This numeric field should contain the end month number (1 = January, 2 = February, etc.) for the heating season.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('season_heating_end_day_of_month', false)
-    arg.setDisplayName('Heating Season: End Day of Month')
-    arg.setUnits('#')
-    arg.setDescription('This numeric field should contain the ending day of the ending month (must be valid for month) for the heating season.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('season_cooling_begin_month', false)
-    arg.setDisplayName('Cooling Season: Begin Month')
-    arg.setUnits('#')
-    arg.setDescription('This numeric field should contain the starting month number (1 = January, 2 = February, etc.) for the cooling season.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('season_cooling_begin_day_of_month', false)
-    arg.setDisplayName('Cooling Season: Begin Day of Month')
-    arg.setUnits('#')
-    arg.setDescription('This numeric field should contain the starting day of the starting month (must be valid for month) for the cooling season.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('season_cooling_end_month', false)
-    arg.setDisplayName('Cooling Season: End Month')
-    arg.setUnits('#')
-    arg.setDescription('This numeric field should contain the end month number (1 = January, 2 = February, etc.) for the cooling season.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('season_cooling_end_day_of_month', false)
-    arg.setDisplayName('Cooling Season: End Day of Month')
-    arg.setUnits('#')
-    arg.setDescription('This numeric field should contain the ending day of the ending month (must be valid for month) for the cooling season.')
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('season_cooling_period', false)
+    arg.setDisplayName('Cooling Season Period')
+    arg.setDescription('Specifies the cooling season. Enter a date like "Jun 1 - Oct 31".')
     args << arg
 
     duct_leakage_units_choices = OpenStudio::StringVector.new
@@ -2217,32 +2122,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('holiday_lighting_period_begin_month', true)
-    arg.setDisplayName('Holiday Lighting: Period Begin Month')
-    arg.setUnits('month')
-    arg.setDescription('This numeric field should contain the starting month number (1 = January, 2 = February, etc.) for the holiday lighting period desired.')
-    arg.setDefaultValue(Constants.Auto)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('holiday_lighting_period_begin_day_of_month', true)
-    arg.setDisplayName('Holiday Lighting: Period Begin Day of Month')
-    arg.setUnits('day')
-    arg.setDescription('This numeric field should contain the starting day of the starting month (must be valid for month) for the holiday lighting period desired.')
-    arg.setDefaultValue(Constants.Auto)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('holiday_lighting_period_end_month', true)
-    arg.setDisplayName('Holiday Lighting: Period End Month')
-    arg.setUnits('month')
-    arg.setDescription('This numeric field should contain the end month number (1 = January, 2 = February, etc.) for the holiday lighting period desired.')
-    arg.setDefaultValue(Constants.Auto)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('holiday_lighting_period_end_day_of_month', true)
-    arg.setDisplayName('Holiday Lighting: Period End Day of Month')
-    arg.setUnits('day')
-    arg.setDescription('This numeric field should contain the ending day of the ending month (must be valid for month) for the holiday lighting period desired.')
-    arg.setDefaultValue(Constants.Auto)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('holiday_lighting_period', false)
+    arg.setDisplayName('Holiday Lighting: Period')
+    arg.setDescription('Specifies the holiday lighting period. Enter a date like "Nov 25 - Jan 5".')
     args << arg
 
     dehumidifier_type_choices = OpenStudio::StringVector.new
@@ -3107,25 +2989,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = [HPXML::ResidentialTypeSFD].include?(args[:geometry_unit_type]) && args[:heating_system_type].include?('Shared')
     errors << "geometry_unit_type=#{args[:geometry_unit_type]} and heating_system_type=#{args[:heating_system_type]}" if error
 
-    # heating season incomplete
-    error = [args[:season_heating_begin_month].is_initialized, args[:season_heating_begin_day_of_month].is_initialized, args[:season_heating_end_month].is_initialized, args[:season_heating_end_day_of_month].is_initialized].uniq.size == 2
-    errors << "season_heating_begin_month=#{args[:season_heating_begin_month].is_initialized} and season_heating_begin_day_of_month=#{args[:season_heating_begin_day_of_month].is_initialized} and season_heating_end_month=#{args[:season_heating_end_month].is_initialized} and seasons_heating_end_day_of_month=#{args[:season_heating_end_day_of_month].is_initialized}" if error
-
-    # cooling season incomplete
-    error = [args[:season_cooling_begin_month].is_initialized, args[:season_cooling_begin_day_of_month].is_initialized, args[:season_cooling_end_month].is_initialized, args[:season_cooling_end_day_of_month].is_initialized].uniq.size == 2
-    errors << "season_cooling_begin_month=#{args[:season_cooling_begin_month].is_initialized} and season_cooling_begin_day_of_month=#{args[:season_cooling_begin_day_of_month].is_initialized} and season_cooling_end_month=#{args[:season_cooling_end_month].is_initialized} and season_cooling_end_day_of_month=#{args[:season_cooling_end_day_of_month].is_initialized}" if error
-
-    # vacancy period incomplete
-    error = [args[:schedules_vacancy_begin_month].is_initialized, args[:schedules_vacancy_begin_day_of_month].is_initialized, args[:schedules_vacancy_end_month].is_initialized, args[:schedules_vacancy_end_day_of_month].is_initialized].uniq.size == 2
-    errors << "schedules_vacancy_begin_month=#{args[:schedules_vacancy_begin_month].is_initialized} and schedules_vacancy_begin_day_of_month=#{args[:schedules_vacancy_begin_day_of_month].is_initialized} and schedules_vacancy_end_month=#{args[:schedules_vacancy_end_month].is_initialized} and schedules_vacancy_end_day_of_month=#{args[:schedules_vacancy_end_day_of_month].is_initialized}" if error
-
-    # vacancy period invalid
-    if args[:schedules_vacancy_begin_month].is_initialized && args[:schedules_vacancy_begin_day_of_month].is_initialized && args[:schedules_vacancy_end_month].is_initialized && args[:schedules_vacancy_end_day_of_month].is_initialized
-      HPXML::check_dates('Vacancy Period', args[:schedules_vacancy_begin_month].get, args[:schedules_vacancy_begin_day_of_month].get, args[:schedules_vacancy_end_month].get, args[:schedules_vacancy_end_day_of_month].get).each do |error|
-        errors << error
-      end
-    end
-
     return warnings, errors
   end
 
@@ -3302,6 +3165,13 @@ class HPXMLFile
       args[:geometry_num_occupants] = Integer(args[:geometry_num_occupants])
     end
     args[:resources_path] = File.join(File.dirname(__FILE__), 'resources')
+    if args[:schedules_vacancy_period].is_initialized
+      begin_month, begin_day, end_month, end_day = parse_date_range(args[:schedules_vacancy_period].get)
+      args[:schedules_vacancy_begin_month] = begin_month
+      args[:schedules_vacancy_begin_day] = begin_day
+      args[:schedules_vacancy_end_month] = end_month
+      args[:schedules_vacancy_end_day] = end_day
+    end
     success = schedule_generator.create(args: args)
     return false if not success
 
@@ -3332,18 +3202,14 @@ class HPXMLFile
       hpxml.header.timestep = args[:simulation_control_timestep].get
     end
 
-    if args[:simulation_control_run_period_begin_month].is_initialized
-      hpxml.header.sim_begin_month = args[:simulation_control_run_period_begin_month].get
+    if args[:simulation_control_run_period].is_initialized
+      begin_month, begin_day, end_month, end_day = parse_date_range(args[:simulation_control_run_period].get)
+      hpxml.header.sim_begin_month = begin_month
+      hpxml.header.sim_begin_day = begin_day
+      hpxml.header.sim_end_month = end_month
+      hpxml.header.sim_end_day = end_day
     end
-    if args[:simulation_control_run_period_begin_day_of_month].is_initialized
-      hpxml.header.sim_begin_day = args[:simulation_control_run_period_begin_day_of_month].get
-    end
-    if args[:simulation_control_run_period_end_month].is_initialized
-      hpxml.header.sim_end_month = args[:simulation_control_run_period_end_month].get
-    end
-    if args[:simulation_control_run_period_end_day_of_month].is_initialized
-      hpxml.header.sim_end_day = args[:simulation_control_run_period_end_day_of_month].get
-    end
+
     if args[:simulation_control_run_period_calendar_year].is_initialized
       hpxml.header.sim_calendar_year = args[:simulation_control_run_period_calendar_year].get
     end
@@ -3351,17 +3217,12 @@ class HPXMLFile
     if args[:simulation_control_daylight_saving_enabled].is_initialized
       hpxml.header.dst_enabled = args[:simulation_control_daylight_saving_enabled].get
     end
-    if args[:simulation_control_daylight_saving_begin_month].is_initialized
-      hpxml.header.dst_begin_month = args[:simulation_control_daylight_saving_begin_month].get
-    end
-    if args[:simulation_control_daylight_saving_begin_day_of_month].is_initialized
-      hpxml.header.dst_begin_day = args[:simulation_control_daylight_saving_begin_day_of_month].get
-    end
-    if args[:simulation_control_daylight_saving_end_month].is_initialized
-      hpxml.header.dst_end_month = args[:simulation_control_daylight_saving_end_month].get
-    end
-    if args[:simulation_control_daylight_saving_end_day_of_month].is_initialized
-      hpxml.header.dst_end_day = args[:simulation_control_daylight_saving_end_day_of_month].get
+    if args[:simulation_control_daylight_saving_period].is_initialized
+      begin_month, begin_day, end_month, end_day = parse_date_range(args[:simulation_control_daylight_saving_period].get)
+      hpxml.header.dst_begin_month = begin_month
+      hpxml.header.dst_begin_day = begin_day
+      hpxml.header.dst_end_month = end_month
+      hpxml.header.dst_end_day = end_day
     end
 
     hpxml.header.building_id = 'MyBuilding'
@@ -4396,30 +4257,22 @@ class HPXMLFile
                             weekend_cooling_setpoints: weekend_cooling_setpoints,
                             ceiling_fan_cooling_setpoint_temp_offset: ceiling_fan_cooling_setpoint_temp_offset)
 
-    if args[:season_heating_begin_month].is_initialized
-      hpxml.hvac_controls[0].seasons_heating_begin_month = args[:season_heating_begin_month].get
-    end
-    if args[:season_heating_begin_day_of_month].is_initialized
-      hpxml.hvac_controls[0].seasons_heating_begin_day = args[:season_heating_begin_day_of_month].get
-    end
-    if args[:season_heating_end_month].is_initialized
-      hpxml.hvac_controls[0].seasons_heating_end_month = args[:season_heating_end_month].get
-    end
-    if args[:season_heating_end_day_of_month].is_initialized
-      hpxml.hvac_controls[0].seasons_heating_end_day = args[:season_heating_end_day_of_month].get
+    if args[:season_heating_period].is_initialized
+      begin_month, begin_day, end_month, end_day = parse_date_range(args[:season_heating_period].get)
+      puts 'heating', begin_month, begin_day, end_month, end_day
+      hpxml.hvac_controls[0].seasons_heating_begin_month = begin_month
+      hpxml.hvac_controls[0].seasons_heating_begin_day = begin_day
+      hpxml.hvac_controls[0].seasons_heating_end_month = end_month
+      hpxml.hvac_controls[0].seasons_heating_end_day = end_day
     end
 
-    if args[:season_cooling_begin_month].is_initialized
-      hpxml.hvac_controls[0].seasons_cooling_begin_month = args[:season_cooling_begin_month].get
-    end
-    if args[:season_cooling_begin_day_of_month].is_initialized
-      hpxml.hvac_controls[0].seasons_cooling_begin_day = args[:season_cooling_begin_day_of_month].get
-    end
-    if args[:season_cooling_end_month].is_initialized
-      hpxml.hvac_controls[0].seasons_cooling_end_month = args[:season_cooling_end_month].get
-    end
-    if args[:season_cooling_end_day_of_month].is_initialized
-      hpxml.hvac_controls[0].seasons_cooling_end_day = args[:season_cooling_end_day_of_month].get
+    if args[:season_cooling_period].is_initialized
+      begin_month, begin_day, end_month, end_day = parse_date_range(args[:season_cooling_period].get)
+      puts 'cooling', begin_month, begin_day, end_month, end_day
+      hpxml.hvac_controls[0].seasons_cooling_begin_month = begin_month
+      hpxml.hvac_controls[0].seasons_cooling_begin_day = begin_day
+      hpxml.hvac_controls[0].seasons_cooling_end_month = end_month
+      hpxml.hvac_controls[0].seasons_cooling_end_day = end_day
     end
   end
 
@@ -4939,20 +4792,12 @@ class HPXMLFile
       hpxml.lighting.holiday_kwh_per_day = args[:holiday_lighting_daily_kwh]
     end
 
-    if args[:holiday_lighting_period_begin_month] != Constants.Auto
-      hpxml.lighting.holiday_period_begin_month = args[:holiday_lighting_period_begin_month]
-    end
-
-    if args[:holiday_lighting_period_begin_day_of_month] != Constants.Auto
-      hpxml.lighting.holiday_period_begin_day = args[:holiday_lighting_period_begin_day_of_month]
-    end
-
-    if args[:holiday_lighting_period_end_month] != Constants.Auto
-      hpxml.lighting.holiday_period_end_month = args[:holiday_lighting_period_end_month]
-    end
-
-    if args[:holiday_lighting_period_end_day_of_month] != Constants.Auto
-      hpxml.lighting.holiday_period_end_day = args[:holiday_lighting_period_end_day_of_month]
+    if args[:holiday_lighting_period].is_initialized
+      begin_month, begin_day, end_month, end_day = parse_date_range(args[:holiday_lighting_period].get)
+      hpxml.lighting.holiday_period_begin_month = begin_month
+      hpxml.lighting.holiday_period_begin_day = begin_day
+      hpxml.lighting.holiday_period_end_month = end_month
+      hpxml.lighting.holiday_period_end_day = end_day
     end
   end
 
@@ -5501,6 +5346,31 @@ class HPXMLFile
     else
       fail 'Unexpected facade.'
     end
+  end
+
+  def self.parse_date_range(date_range)
+    begin_end_dates = date_range.split('-').map { |v| v.strip }
+    if begin_end_dates.size != 2
+      fail "Invalid date format specified for '#{date_range}'."
+    end
+
+    begin_values = begin_end_dates[0].split(' ').map { |v| v.strip }
+    end_values = begin_end_dates[1].split(' ').map { |v| v.strip }
+
+    if (begin_values.size != 2) || (end_values.size != 2)
+      fail "Invalid date format specified for '#{date_range}'."
+    end
+
+    require 'date'
+    begin_month = Date::ABBR_MONTHNAMES.index(begin_values[0].capitalize)
+    end_month = Date::ABBR_MONTHNAMES.index(end_values[0].capitalize)
+    begin_day = begin_values[1].to_i
+    end_day = end_values[1].to_i
+    if begin_month.nil? || end_month.nil? || begin_day == 0 || end_day == 0
+      fail "Invalid date format specified for '#{date_range}'."
+    end
+
+    return begin_month, begin_day, end_month, end_day
   end
 end
 
