@@ -3977,7 +3977,6 @@ class HPXMLFile
       adjacent_surface = surface
       if [HPXML::LocationOtherHousingUnit].include?(interior_adjacent_to)
         adjacent_surface = get_adiabatic_adjacent_surface(model, surface)
-        puts 'adjacent_surface', adjacent_surface.to_s
         next if adjacent_surface.nil?
       end
 
