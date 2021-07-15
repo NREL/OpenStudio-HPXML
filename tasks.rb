@@ -4243,8 +4243,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                       insulation_assembly_r_value: assembly_r)
     end
     hpxml.walls << last_wall
-  elsif ['base-enclosure-2stories.xml',
-         'base-bldgtype-single-family-attached-2stories.xml'].include? hpxml_file
+  elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     hpxml.walls[0].area *= 2.0
   elsif ['base-bldgtype-single-family-attached-2stories.xml'].include? hpxml_file
     hpxml.walls[0].area *= 2.0
