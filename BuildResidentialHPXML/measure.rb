@@ -3385,6 +3385,16 @@ class HPXMLFile
       hpxml.site.site_type = args[:site_type].get
     end
 
+    surroundings_hash = {'Left' => 'attached on one side',
+                        'Right' => 'attached on one side',
+                        'Middle' => 'attached on two sides',
+                        'None' => 'stand-alone'}
+
+    if args[:geometry_unit_type] == HPXML::ResidentialTypeSFA
+      hpxml.site.surroundings = 'attached on one side'
+      hpxml.site.surroundings = surroundings_hash[args[:geometry_horizontal_location].get]
+    end
+
     hpxml.site.orientation_of_front_of_home = Geometry.get_orientation_direction(args[:geometry_orientation])
     hpxml.site.shielding_of_home = shielding_of_home
   end
