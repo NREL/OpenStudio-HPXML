@@ -982,6 +982,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     cooling_efficiency_type_choices = OpenStudio::StringVector.new
     cooling_efficiency_type_choices << HPXML::UnitsSEER
     cooling_efficiency_type_choices << HPXML::UnitsEER
+    cooling_efficiency_type_choices << HPXML::UnitsCEER
 
     compressor_type_choices = OpenStudio::StringVector.new
     compressor_type_choices << HPXML::HVACCompressorTypeSingleStage
@@ -1035,13 +1036,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_cooling_efficiency_type', cooling_efficiency_type_choices, true)
     arg.setDisplayName('Cooling System: Efficiency Type')
-    arg.setDescription("The efficiency type of the cooling system. System types #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner} use #{HPXML::UnitsSEER}. System type #{HPXML::HVACTypeRoomAirConditioner} uses #{HPXML::UnitsEER}. Ignored for system type #{HPXML::HVACTypeEvaporativeCooler}.")
+    arg.setDescription("The efficiency type of the cooling system. System types #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner} use #{HPXML::UnitsSEER}. System type #{HPXML::HVACTypeRoomAirConditioner} uses #{HPXML::UnitsEER} or #{HPXML::UnitsCEER}. Ignored for system type #{HPXML::HVACTypeEvaporativeCooler}.")
     arg.setDefaultValue(HPXML::UnitsSEER)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_efficiency', true)
     arg.setDisplayName('Cooling System: Efficiency')
-    arg.setUnits("#{HPXML::UnitsSEER} or #{HPXML::UnitsEER}")
+    arg.setUnits("#{HPXML::UnitsSEER} or #{HPXML::UnitsEER} or #{HPXML::UnitsCEER}")
     arg.setDescription("The rated efficiency value of the cooling system. Ignored for #{HPXML::HVACTypeEvaporativeCooler}.")
     arg.setDefaultValue(13.0)
     args << arg
@@ -4031,6 +4032,8 @@ class HPXMLFile
       cooling_efficiency_seer = args[:cooling_system_cooling_efficiency]
     elsif args[:cooling_system_cooling_efficiency_type] == HPXML::UnitsEER
       cooling_efficiency_eer = args[:cooling_system_cooling_efficiency]
+    elsif args[:cooling_system_cooling_efficiency_type] == HPXML::UnitsCEER
+      cooling_efficiency_ceer = args[:cooling_system_cooling_efficiency]
     end
 
     if args[:cooling_system_airflow_defect_ratio].is_initialized
@@ -4054,6 +4057,7 @@ class HPXMLFile
                               cooling_shr: cooling_shr,
                               cooling_efficiency_seer: cooling_efficiency_seer,
                               cooling_efficiency_eer: cooling_efficiency_eer,
+                              cooling_efficiency_ceer: cooling_efficiency_ceer,
                               airflow_defect_ratio: airflow_defect_ratio,
                               charge_defect_ratio: charge_defect_ratio)
   end
