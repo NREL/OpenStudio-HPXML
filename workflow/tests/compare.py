@@ -179,8 +179,8 @@ class BaseCompare:
             return cols
 
         for file in sorted(files):
-            base_df = pd.read_csv(os.path.join(self.base_folder, file), index_col=0)
-            feature_df = pd.read_csv(os.path.join(self.feature_folder, file), index_col=0)
+            base_df = pd.read_csv(os.path.join(self.base_folder, file), index_col=0).dropna(axis=1)
+            feature_df = pd.read_csv(os.path.join(self.feature_folder, file), index_col=0).dropna(axis=1)
 
             cols = sorted(list(set(base_df.columns) & set(feature_df.columns)))
             cols = remove_columns(cols)
@@ -203,7 +203,7 @@ class BaseCompare:
                 subplot_titles=groups * len(cols),
                 row_titles=[
                     f'<b>{f}</b>' for f in cols],
-                vertical_spacing=0.0015)
+                vertical_spacing=0.0025)
 
             nrow = 0
             for col in cols:
@@ -214,8 +214,8 @@ class BaseCompare:
                     if ncol == 1 and nrow == 1:
                         showlegend = True
 
-                    x = base_df
-                    y = feature_df
+                    x = base_df.copy()
+                    y = feature_df.copy()
 
                     if group:
                         x = x.loc[x[display_columns[0]] == group, :]
