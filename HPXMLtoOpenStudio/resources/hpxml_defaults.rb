@@ -1725,15 +1725,15 @@ class HPXMLDefaults
           pool.pump_usage_multiplier_isdefaulted = true
         end
         if pool.pump_weekday_fractions.nil?
-          pool.pump_weekday_fractions = '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003'
+          pool.pump_weekday_fractions = Schedules.PoolPumpWeekdayFractions
           pool.pump_weekday_fractions_isdefaulted = true
         end
         if pool.pump_weekend_fractions.nil?
-          pool.pump_weekend_fractions = '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003'
+          pool.pump_weekend_fractions = Schedules.PoolPumpWeekendFractions
           pool.pump_weekend_fractions_isdefaulted = true
         end
         if pool.pump_monthly_multipliers.nil?
-          pool.pump_monthly_multipliers = '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
+          pool.pump_monthly_multipliers = Schedules.PoolPumpMonthlyMultipliers
           pool.pump_monthly_multipliers_isdefaulted = true
         end
       end
@@ -1752,15 +1752,15 @@ class HPXMLDefaults
         pool.heater_usage_multiplier_isdefaulted = true
       end
       if pool.heater_weekday_fractions.nil?
-        pool.heater_weekday_fractions = '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003'
+        pool.heater_weekday_fractions = Schedules.PoolHeaterWeekdayFractions
         pool.heater_weekday_fractions_isdefaulted = true
       end
       if pool.heater_weekend_fractions.nil?
-        pool.heater_weekend_fractions = '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003'
+        pool.heater_weekend_fractions = Schedules.PoolHeaterWeekendFractions
         pool.heater_weekend_fractions_isdefaulted = true
       end
       if pool.heater_monthly_multipliers.nil?
-        pool.heater_monthly_multipliers = '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
+        pool.heater_monthly_multipliers = Schedules.PoolHeaterMonthlyMultipliers
         pool.heater_monthly_multipliers_isdefaulted = true
       end
     end
@@ -1779,15 +1779,15 @@ class HPXMLDefaults
           hot_tub.pump_usage_multiplier_isdefaulted = true
         end
         if hot_tub.pump_weekday_fractions.nil?
-          hot_tub.pump_weekday_fractions = '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024'
+          hot_tub.pump_weekday_fractions = Schedules.HotTubPumpWeekdayFractions
           hot_tub.pump_weekday_fractions_isdefaulted = true
         end
         if hot_tub.pump_weekend_fractions.nil?
-          hot_tub.pump_weekend_fractions = '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024'
+          hot_tub.pump_weekend_fractions = Schedules.HotTubPumpWeekendFractions
           hot_tub.pump_weekend_fractions_isdefaulted = true
         end
         if hot_tub.pump_monthly_multipliers.nil?
-          hot_tub.pump_monthly_multipliers = '0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921'
+          hot_tub.pump_monthly_multipliers = Schedules.HotTubPumpMonthlyMultipliers
           hot_tub.pump_monthly_multipliers_isdefaulted = true
         end
       end
@@ -1806,15 +1806,15 @@ class HPXMLDefaults
         hot_tub.heater_usage_multiplier_isdefaulted = true
       end
       if hot_tub.heater_weekday_fractions.nil?
-        hot_tub.heater_weekday_fractions = '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024'
+        hot_tub.heater_weekday_fractions = Schedules.HotTubHeaterWeekdayFractions
         hot_tub.heater_weekday_fractions_isdefaulted = true
       end
       if hot_tub.heater_weekend_fractions.nil?
-        hot_tub.heater_weekend_fractions = '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024'
+        hot_tub.heater_weekend_fractions = Schedules.HotTubHeaterWeekendFractions
         hot_tub.heater_weekend_fractions_isdefaulted = true
       end
       if hot_tub.heater_monthly_multipliers.nil?
-        hot_tub.heater_monthly_multipliers = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
+        hot_tub.heater_monthly_multipliers = Schedules.HotTubHeaterMonthlyMultipliers
         hot_tub.heater_monthly_multipliers_isdefaulted = true
       end
     end

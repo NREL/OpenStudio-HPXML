@@ -11,7 +11,7 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <OccupancySchedulesCSVPath>HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv</OccupancySchedulesCSVPath>
+      <OccupancySchedulesFilePath>HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv</OccupancySchedulesFilePath>
     </extension>
   </SoftwareInfo>
   <Building>

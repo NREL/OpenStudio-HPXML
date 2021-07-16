@@ -658,11 +658,11 @@ def set_hpxml_header(hpxml_file, hpxml)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.header.timestep = nil
   elsif ['base-schedules-stochastic.xml'].include? hpxml_file
-    hpxml.header.schedules_path = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'
+    hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'
   elsif ['base-schedules-stochastic-vacancy.xml'].include? hpxml_file
-    hpxml.header.schedules_path = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
+    hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
   elsif ['base-schedules-smooth.xml'].include? hpxml_file
-    hpxml.header.schedules_path = 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
+    hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
     hpxml.header.transaction = 'modify'
   end
