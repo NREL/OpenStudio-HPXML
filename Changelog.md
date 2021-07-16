@@ -4,6 +4,7 @@ __New Features__
 - Updates to OpenStudio 3.2.1/EnergyPlus 9.5.0.
 - **Breaking change**: Replaces ClothesDryer `extension/IsVented` and `extension/VentedFlowRate` with `Vented` and `VentedFlowRate`.
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
+- Allows modeling detailed occupancy via a schedule CSV file; includes three samples: stochastic, stochastic w/ vacancy period, smooth.
 - Allows non-zero refrigerant charge defect ratios for ground source heat pumps.
 - Allows `HeatingSeason` & `CoolingSeason` to be specified for defining heating and cooling equipment availability.
 - Revises shared mechanical ventilation preconditioning control logic to operate less often.
