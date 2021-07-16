@@ -25,7 +25,7 @@ class HPXMLTest < MiniTest::Test
 
     xmls = []
     sample_files_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files'))
-    Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
+    Dir["#{sample_files_dir}/base-schedules*.xml"].sort.each do |xml|
       xmls << File.absolute_path(xml)
     end
 
@@ -672,7 +672,7 @@ class HPXMLTest < MiniTest::Test
       if hpxml.solar_thermal_systems.size > 0
         next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
       end
-      if hpxml_path.include?('base-schedules-stochastic.xml') || hpxml_path.include?('base-schedules-stochastic-vacant.xml') || hpxml_path.include?('base-schedules-user-specified.xml')
+      if hpxml_path.include?('base-schedules-stochastic.xml') || hpxml_path.include?('base-schedules-stochastic-vacancy.xml') || hpxml_path.include?('base-schedules-smooth.xml')
         next if err_line.include?('GetCurrentScheduleValue: Schedule=') && err_line.include?('is a Schedule:File')
       end
 
