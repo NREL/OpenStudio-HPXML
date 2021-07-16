@@ -1725,15 +1725,15 @@ class HPXMLDefaults
           pool.pump_usage_multiplier_isdefaulted = true
         end
         if pool.pump_weekday_fractions.nil?
-          pool.pump_weekday_fractions = Schedules.PoolPumpWeekdayFractions
+          pool.pump_weekday_fractions = Schedule.PoolPumpWeekdayFractions
           pool.pump_weekday_fractions_isdefaulted = true
         end
         if pool.pump_weekend_fractions.nil?
-          pool.pump_weekend_fractions = Schedules.PoolPumpWeekendFractions
+          pool.pump_weekend_fractions = Schedule.PoolPumpWeekendFractions
           pool.pump_weekend_fractions_isdefaulted = true
         end
         if pool.pump_monthly_multipliers.nil?
-          pool.pump_monthly_multipliers = Schedules.PoolPumpMonthlyMultipliers
+          pool.pump_monthly_multipliers = Schedule.PoolPumpMonthlyMultipliers
           pool.pump_monthly_multipliers_isdefaulted = true
         end
       end
@@ -1752,15 +1752,15 @@ class HPXMLDefaults
         pool.heater_usage_multiplier_isdefaulted = true
       end
       if pool.heater_weekday_fractions.nil?
-        pool.heater_weekday_fractions = Schedules.PoolHeaterWeekdayFractions
+        pool.heater_weekday_fractions = Schedule.PoolHeaterWeekdayFractions
         pool.heater_weekday_fractions_isdefaulted = true
       end
       if pool.heater_weekend_fractions.nil?
-        pool.heater_weekend_fractions = Schedules.PoolHeaterWeekendFractions
+        pool.heater_weekend_fractions = Schedule.PoolHeaterWeekendFractions
         pool.heater_weekend_fractions_isdefaulted = true
       end
       if pool.heater_monthly_multipliers.nil?
-        pool.heater_monthly_multipliers = Schedules.PoolHeaterMonthlyMultipliers
+        pool.heater_monthly_multipliers = Schedule.PoolHeaterMonthlyMultipliers
         pool.heater_monthly_multipliers_isdefaulted = true
       end
     end
@@ -1779,15 +1779,15 @@ class HPXMLDefaults
           hot_tub.pump_usage_multiplier_isdefaulted = true
         end
         if hot_tub.pump_weekday_fractions.nil?
-          hot_tub.pump_weekday_fractions = Schedules.HotTubPumpWeekdayFractions
+          hot_tub.pump_weekday_fractions = Schedule.HotTubPumpWeekdayFractions
           hot_tub.pump_weekday_fractions_isdefaulted = true
         end
         if hot_tub.pump_weekend_fractions.nil?
-          hot_tub.pump_weekend_fractions = Schedules.HotTubPumpWeekendFractions
+          hot_tub.pump_weekend_fractions = Schedule.HotTubPumpWeekendFractions
           hot_tub.pump_weekend_fractions_isdefaulted = true
         end
         if hot_tub.pump_monthly_multipliers.nil?
-          hot_tub.pump_monthly_multipliers = Schedules.HotTubPumpMonthlyMultipliers
+          hot_tub.pump_monthly_multipliers = Schedule.HotTubPumpMonthlyMultipliers
           hot_tub.pump_monthly_multipliers_isdefaulted = true
         end
       end
@@ -1806,15 +1806,15 @@ class HPXMLDefaults
         hot_tub.heater_usage_multiplier_isdefaulted = true
       end
       if hot_tub.heater_weekday_fractions.nil?
-        hot_tub.heater_weekday_fractions = Schedules.HotTubHeaterWeekdayFractions
+        hot_tub.heater_weekday_fractions = Schedule.HotTubHeaterWeekdayFractions
         hot_tub.heater_weekday_fractions_isdefaulted = true
       end
       if hot_tub.heater_weekend_fractions.nil?
-        hot_tub.heater_weekend_fractions = Schedules.HotTubHeaterWeekendFractions
+        hot_tub.heater_weekend_fractions = Schedule.HotTubHeaterWeekendFractions
         hot_tub.heater_weekend_fractions_isdefaulted = true
       end
       if hot_tub.heater_monthly_multipliers.nil?
-        hot_tub.heater_monthly_multipliers = Schedules.HotTubHeaterMonthlyMultipliers
+        hot_tub.heater_monthly_multipliers = Schedule.HotTubHeaterMonthlyMultipliers
         hot_tub.heater_monthly_multipliers_isdefaulted = true
       end
     end
