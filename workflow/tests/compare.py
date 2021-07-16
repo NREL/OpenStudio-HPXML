@@ -6,7 +6,6 @@ import plotly
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-
 class BaseCompare:
     def __init__(self, base_folder, feature_folder, export_folder):
         self.base_folder = base_folder
@@ -26,6 +25,9 @@ class BaseCompare:
         for file in sorted(files):
             base_df = pd.read_csv(os.path.join(self.base_folder, file), index_col=0)
             feature_df = pd.read_csv(os.path.join(self.feature_folder, file), index_col=0)
+            if file == 'results_output.csv':
+                base_df = base_df.select_dtypes(exclude=['string', 'bool'])
+                feature_df = feature_df.select_dtypes(exclude=['string', 'bool'])
 
             try:
                 df = feature_df - base_df
@@ -41,7 +43,7 @@ class BaseCompare:
                 group_df = base_df[aggregate_columns]
 
             # Write grouped & aggregated results dfs
-            if file != 'results_characteristics.csv':
+            if file == 'results_output.csv':
                 for col, enum_map in enum_maps.items():
                     if col in aggregate_columns:
                         group_df[col] = group_df[col].map(enum_map)
@@ -53,20 +55,20 @@ class BaseCompare:
                     base_df = group_df.merge(base_df, 'outer', left_index=True, right_index=True).groupby(aggregate_columns)
                     feature_df = group_df.merge(feature_df, 'outer', left_index=True, right_index=True).groupby(aggregate_columns)
                     if aggregate_function == 'sum':
-                        base_df = base_df.sum().stack()
-                        feature_df = feature_df.sum().stack()
+                        base_df = base_df.sum(min_count=1).stack(dropna=False)
+                        feature_df = feature_df.sum(min_count=1).stack(dropna=False)
                     elif aggregate_function == 'mean':
-                        base_df = base_df.mean().stack()
-                        feature_df = feature_df.mean().stack()
+                        base_df = base_df.mean(numeric_only=True).stack(dropna=False)
+                        feature_df = feature_df.mean(numeric_only=True).stack(dropna=False)
                 else:
                     if aggregate_function == 'sum':
-                        base_df = base_df.sum(numeric_only=True)
-                        feature_df = feature_df.sum(numeric_only=True)
+                        base_df = base_df.sum(min_count=1)
+                        feature_df = feature_df.sum(min_count=1)
                     elif aggregate_function == 'mean':
                         base_df = base_df.mean(numeric_only=True)
                         feature_df = feature_df.mean(numeric_only=True)
 
-        if not aggregate_columns:
+        if not aggregate_function:
             return
 
         # Write aggregate results df
@@ -74,10 +76,12 @@ class BaseCompare:
         deltas['base'] = base_df
         deltas['feature'] = feature_df
         deltas['diff'] = deltas['feature'] - deltas['base']
-        deltas['% diff'] = 100 * (deltas['diff'] / deltas['base'])
+        deltas_non_zero = deltas[deltas['base'] != 0].index
+        deltas.loc[deltas_non_zero, '% diff'] = 100 * (deltas.loc[deltas_non_zero, 'diff'] / deltas.loc[deltas_non_zero, 'base'])
         deltas = deltas.round(2)
         deltas.reset_index(level=aggregate_columns, inplace=True)
         deltas.index.name = 'enduse'
+        deltas.fillna('n/a', inplace=True)
         sims_df = pd.DataFrame({'base': sim_ct_base,
                                 'feature': sim_ct_feature,
                                 'diff': 'n/a',
@@ -175,10 +179,10 @@ class BaseCompare:
             return cols
 
         for file in sorted(files):
-            base_df = pd.read_csv(os.path.join(self.base_folder, file), index_col=0)
-            feature_df = pd.read_csv(os.path.join(self.feature_folder, file), index_col=0)
+            base_df = pd.read_csv(os.path.join(self.base_folder, file), index_col=0).dropna(axis=1)
+            feature_df = pd.read_csv(os.path.join(self.feature_folder, file), index_col=0).dropna(axis=1)
 
-            cols = sorted(list(set(base_df.columns) | set(feature_df.columns)))
+            cols = sorted(list(set(base_df.columns) & set(feature_df.columns)))
             cols = remove_columns(cols)
 
             groups = [None]
@@ -199,7 +203,7 @@ class BaseCompare:
                 subplot_titles=groups * len(cols),
                 row_titles=[
                     f'<b>{f}</b>' for f in cols],
-                vertical_spacing=0.0015)
+                vertical_spacing=0.0025)
 
             nrow = 0
             for col in cols:
@@ -210,8 +214,8 @@ class BaseCompare:
                     if ncol == 1 and nrow == 1:
                         showlegend = True
 
-                    x = base_df
-                    y = feature_df
+                    x = base_df.copy()
+                    y = feature_df.copy()
 
                     if group:
                         x = x.loc[x[display_columns[0]] == group, :]
@@ -250,7 +254,7 @@ class BaseCompare:
                                                              line=dict(width=1.5,
                                                                        color='DarkSlateGrey')),
                                                  mode='markers',
-                                                 text=base_df.index,
+                                                 text=x.index,
                                                  name='',
                                                  legendgroup=col,
                                                  showlegend=False),
