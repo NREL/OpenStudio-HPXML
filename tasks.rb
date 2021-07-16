@@ -443,6 +443,9 @@ def create_hpxmls
     'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
     'base-simcontrol-runperiod-1-month.xml' => 'base.xml',
     'base-simcontrol-timestep-10-mins.xml' => 'base.xml',
+    'base-schedules-stochastic.xml' => 'base.xml',
+    'base-schedules-stochastic-vacancy.xml' => 'base-schedules-stochastic.xml',
+    'base-schedules-smooth.xml' => 'base.xml',
   }
 
   puts "Generating #{hpxmls_files.size} HPXML files..."
@@ -654,6 +657,12 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.dst_end_day = 31
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.header.timestep = nil
+  elsif ['base-schedules-stochastic.xml'].include? hpxml_file
+    hpxml.header.schedules_path = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'
+  elsif ['base-schedules-stochastic-vacancy.xml'].include? hpxml_file
+    hpxml.header.schedules_path = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
+  elsif ['base-schedules-smooth.xml'].include? hpxml_file
+    hpxml.header.schedules_path = 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
     hpxml.header.transaction = 'modify'
   end
@@ -1166,6 +1175,15 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                          solar_absorptance: 0.7,
                          emittance: 0.92,
                          insulation_assembly_r_value: 23.0)
+  elsif ['base-bldgtype-single-family-attached.xml'].include? hpxml_file
+    hpxml.rim_joists[-1].area = 66
+    hpxml.rim_joists.add(id: 'RimJoistOther',
+                         exterior_adjacent_to: HPXML::LocationBasementConditioned,
+                         interior_adjacent_to: HPXML::LocationBasementConditioned,
+                         area: 28,
+                         solar_absorptance: 0.7,
+                         emittance: 0.92,
+                         insulation_assembly_r_value: 4.0)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.rim_joists.clear
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
@@ -1221,6 +1239,8 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                          solar_absorptance: 0.7,
                          emittance: 0.92,
                          insulation_assembly_r_value: 4.0)
+  elsif ['base-enclosure-garage.xml'].include? hpxml_file
+    hpxml.rim_joists[-1].area = 116
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     hpxml.rim_joists.add(id: 'RimJoist2ndStory',
                          exterior_adjacent_to: HPXML::LocationOutside,
@@ -2029,8 +2049,6 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls << hpxml.foundation_walls[-1].dup
     hpxml.foundation_walls[-1].id = 'TinyFoundationWall'
     hpxml.foundation_walls[-1].area = 0.05
-  elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
-    hpxml.foundation_walls[-1].area = 880
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.foundation_walls.each do |fwall|
       fwall.thickness = nil

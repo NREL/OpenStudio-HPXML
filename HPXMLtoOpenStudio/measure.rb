@@ -187,8 +187,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       epw_file = OpenStudio::EpwFile.new(epw_path)
       OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
       weather = WeatherProcess.new(model, runner)
-      File.open(cache_path, 'wb') do |file|
-        weather.dump_to_csv(file)
+      begin
+        File.open(cache_path, 'wb') do |file|
+          weather.dump_to_csv(file)
+        end
+      rescue SystemCallError
+        runner.registerWarning("#{cache_path} could not be written, skipping.")
       end
     end
 
@@ -215,6 +219,11 @@ class OSModel
     set_defaults_and_globals(runner, output_dir, epw_file, weather)
     Location.apply(model, runner, weather, epw_file, @hpxml)
     add_simulation_params(model)
+
+    @schedules_file = nil
+    unless @hpxml.header.schedules_path.nil?
+      @schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_path, col_names: Constants.ScheduleGeneratorColNames.keys)
+    end
 
     # Conditioned space/zone
 
@@ -259,7 +268,7 @@ class OSModel
 
     add_mels(runner, model, spaces)
     add_mfls(runner, model, spaces)
-    add_lighting(runner, model, weather, spaces)
+    add_lighting(runner, model, epw_file, spaces)
 
     # Pools & Hot Tubs
     add_pools_and_hot_tubs(runner, model, spaces)
@@ -277,6 +286,11 @@ class OSModel
     add_output_control_files(runner, model)
     # Uncomment to debug EMS
     # add_ems_debug_output(runner, model)
+
+    # Vacancy
+    unless @schedules_file.nil?
+      @schedules_file.set_vacancy
+    end
 
     if debug
       osm_output_path = File.join(output_dir, 'in.osm')
@@ -532,7 +546,7 @@ class OSModel
     num_occ = @hpxml.building_occupancy.number_of_residents
     return if num_occ <= 0
 
-    Geometry.apply_occupants(model, num_occ, @cfa, spaces[HPXML::LocationLivingSpace])
+    Geometry.apply_occupants(model, num_occ, @cfa, spaces[HPXML::LocationLivingSpace], @schedules_file)
   end
 
   def self.create_or_get_space(model, spaces, spacetype)
@@ -1582,7 +1596,7 @@ class OSModel
 
     # Hot water fixtures and appliances
     HotWaterAndAppliances.apply(model, runner, @hpxml, weather, spaces, hot_water_distribution,
-                                solar_thermal_system, @eri_version, @dhw_map)
+                                solar_thermal_system, @eri_version, @dhw_map, @schedules_file)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
       loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, 'WaterHeatingSystem', model, spaces)
@@ -1837,7 +1851,7 @@ class OSModel
     return if @hpxml.ceiling_fans.size == 0
 
     ceiling_fan = @hpxml.ceiling_fans[0]
-    HVAC.apply_ceiling_fans(model, runner, weather, ceiling_fan, spaces[HPXML::LocationLivingSpace])
+    HVAC.apply_ceiling_fans(model, runner, weather, ceiling_fan, spaces[HPXML::LocationLivingSpace], @schedules_file)
   end
 
   def self.add_dehumidifiers(runner, model, spaces)
@@ -1883,7 +1897,7 @@ class OSModel
         next
       end
 
-      MiscLoads.apply_plug(model, plug_load, obj_name, spaces[HPXML::LocationLivingSpace], @apply_ashrae140_assumptions)
+      MiscLoads.apply_plug(model, plug_load, obj_name, spaces[HPXML::LocationLivingSpace], @apply_ashrae140_assumptions, @schedules_file)
     end
   end
 
@@ -1902,28 +1916,28 @@ class OSModel
         next
       end
 
-      MiscLoads.apply_fuel(model, fuel_load, obj_name, spaces[HPXML::LocationLivingSpace])
+      MiscLoads.apply_fuel(model, fuel_load, obj_name, spaces[HPXML::LocationLivingSpace], @schedules_file)
     end
   end
 
-  def self.add_lighting(runner, model, weather, spaces)
-    Lighting.apply(runner, model, weather, spaces, @hpxml.lighting_groups,
-                   @hpxml.lighting, @eri_version)
+  def self.add_lighting(runner, model, epw_file, spaces)
+    Lighting.apply(runner, model, epw_file, spaces, @hpxml.lighting_groups,
+                   @hpxml.lighting, @eri_version, @schedules_file)
   end
 
   def self.add_pools_and_hot_tubs(runner, model, spaces)
     @hpxml.pools.each do |pool|
       next if pool.type == HPXML::TypeNone
 
-      MiscLoads.apply_pool_or_hot_tub_heater(model, pool, Constants.ObjectNameMiscPoolHeater, spaces[HPXML::LocationLivingSpace])
-      MiscLoads.apply_pool_or_hot_tub_pump(model, pool, Constants.ObjectNameMiscPoolPump, spaces[HPXML::LocationLivingSpace])
+      MiscLoads.apply_pool_or_hot_tub_heater(model, pool, Constants.ObjectNameMiscPoolHeater, spaces[HPXML::LocationLivingSpace], @schedules_file)
+      MiscLoads.apply_pool_or_hot_tub_pump(model, pool, Constants.ObjectNameMiscPoolPump, spaces[HPXML::LocationLivingSpace], @schedules_file)
     end
 
     @hpxml.hot_tubs.each do |hot_tub|
       next if hot_tub.type == HPXML::TypeNone
 
-      MiscLoads.apply_pool_or_hot_tub_heater(model, hot_tub, Constants.ObjectNameMiscHotTubHeater, spaces[HPXML::LocationLivingSpace])
-      MiscLoads.apply_pool_or_hot_tub_pump(model, hot_tub, Constants.ObjectNameMiscHotTubPump, spaces[HPXML::LocationLivingSpace])
+      MiscLoads.apply_pool_or_hot_tub_heater(model, hot_tub, Constants.ObjectNameMiscHotTubHeater, spaces[HPXML::LocationLivingSpace], @schedules_file)
+      MiscLoads.apply_pool_or_hot_tub_pump(model, hot_tub, Constants.ObjectNameMiscHotTubPump, spaces[HPXML::LocationLivingSpace], @schedules_file)
     end
   end
 
@@ -1961,7 +1975,7 @@ class OSModel
 
     Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds,
                   @ncfl_ag, duct_systems, @clg_ssn_sensor, @hvac_map, @eri_version,
-                  @frac_windows_operable, @apply_ashrae140_assumptions)
+                  @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file)
   end
 
   def self.create_ducts(runner, model, hvac_distribution, spaces)
