@@ -60,6 +60,7 @@ def create_osws
     'base-bldgtype-multifamily-shared-water-heater.osw' => 'base-bldgtype-multifamily.osw',
     # 'base-bldgtype-multifamily-shared-water-heater-recirc.osw' => 'base.osw', $ Not supporting shared recirculation for now
     'base-bldgtype-single-family-attached.osw' => 'base.osw',
+    'base-bldgtype-single-family-attached-2stories.osw' => 'base-bldgtype-single-family-attached.osw',
     'base-dhw-combi-tankless.osw' => 'base-dhw-indirect.osw',
     'base-dhw-combi-tankless-outside.osw' => 'base-dhw-combi-tankless.osw',
     # 'base-dhw-desuperheater.osw' => 'base.osw', # Not supporting desuperheater for now
@@ -937,6 +938,15 @@ def get_values(osw_file, step)
     step.setArgument('window_area_right', 0)
     step.setArgument('heating_system_heating_capacity', '24000.0')
     step.setArgument('plug_loads_other_annual_kwh', '1638.0')
+  elsif ['base-bldgtype-single-family-attached-2stories.osw'].include? osw_file
+    step.setArgument('geometry_num_floors_above_grade', 2)
+    step.setArgument('geometry_cfa', 2700.0)
+    step.setArgument('heating_system_heating_capacity', '48000.0')
+    step.setArgument('cooling_system_cooling_capacity', '36000.0')
+    step.setArgument('ducts_supply_surface_area', '112.5')
+    step.setArgument('ducts_return_surface_area', '37.5')
+    step.setArgument('ducts_number_of_return_registers', '3')
+    step.setArgument('plug_loads_other_annual_kwh', '2457.0')
   elsif ['base-bldgtype-multifamily.osw'].include? osw_file
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
     step.setArgument('geometry_cfa', 900.0)
@@ -2746,6 +2756,7 @@ def create_hpxmls
     'base-bldgtype-multifamily-shared-water-heater.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-water-heater-recirc.xml' => 'base-bldgtype-multifamily-shared-water-heater.xml',
     'base-bldgtype-single-family-attached.xml' => 'base.xml',
+    'base-bldgtype-single-family-attached-2stories.xml' => 'base-bldgtype-single-family-attached.xml',
     'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
     'base-dhw-combi-tankless-outside.xml' => 'base-dhw-combi-tankless.xml',
     'base-dhw-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
@@ -3303,6 +3314,11 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
     hpxml.building_construction.conditioned_floor_area += 1350
     hpxml.building_construction.conditioned_building_volume += 1350 * 8
+  elsif ['base-bldgtype-single-family-attached-2stories.xml'].include? hpxml_file
+    hpxml.building_construction.number_of_conditioned_floors += 1
+    hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
+    hpxml.building_construction.conditioned_floor_area += 900
+    hpxml.building_construction.conditioned_building_volume += 900 * 8
   elsif ['base-enclosure-2stories-garage.xml',
          'base-foundation-basement-garage.xml'].include? hpxml_file
     hpxml.building_construction.conditioned_floor_area -= 400 * 2
@@ -4123,6 +4139,9 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls << last_wall
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     hpxml.walls[0].area *= 2.0
+  elsif ['base-bldgtype-single-family-attached-2stories.xml'].include? hpxml_file
+    hpxml.walls[0].area *= 2.0
+    hpxml.walls[1].area *= 2.0
   elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
     hpxml.walls.clear
     hpxml.walls.add(id: 'Wall',
@@ -5249,11 +5268,11 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       wall_idref: 'WallAtticGable')
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     hpxml.windows[1].area = 12
-  elsif ['base-enclosure-2stories.xml'].include? hpxml_file
-    hpxml.windows[0].area = 216
-    hpxml.windows[1].area = 216
-    hpxml.windows[2].area = 144
-    hpxml.windows[3].area = 144
+  elsif ['base-enclosure-2stories.xml',
+         'base-bldgtype-single-family-attached-2stories.xml'].include? hpxml_file
+    hpxml.windows.each do |window|
+      window.area *= 2.0
+    end
   elsif ['base-enclosure-2stories-garage'].include? hpxml_file
     hpxml.windows[0].area = 168
     hpxml.windows[1].area = 216
@@ -5784,7 +5803,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_capacity = 24000
   elsif ['base-location-helena-mt.xml',
          'base-enclosure-2stories.xml',
-         'base-enclosure-2stories-garage.xml'].include? hpxml_file
+         'base-enclosure-2stories-garage.xml',
+         'base-bldgtype-single-family-attached-2stories.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_capacity = 48000
   elsif hpxml_file.include?('base-hvac-autosize') && (not hpxml.heating_systems.nil?) && (hpxml.heating_systems.size > 0)
     hpxml.heating_systems[0].heating_capacity = nil
@@ -5949,7 +5969,8 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_capacity = 12000
   elsif ['base-enclosure-2stories.xml',
-         'base-enclosure-2stories-garage.xml'].include? hpxml_file
+         'base-enclosure-2stories-garage.xml',
+         'base-bldgtype-single-family-attached-2stories.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_capacity = 36000
   elsif hpxml_file.include?('base-hvac-autosize') && (not hpxml.cooling_systems.nil?) && (hpxml.cooling_systems.size > 0)
     hpxml.cooling_systems[0].cooling_capacity = nil
@@ -6443,7 +6464,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                           duct_insulation_r_value: 0,
                                           duct_location: HPXML::LocationRoofDeck,
                                           duct_surface_area: 50)
-  elsif ['base-enclosure-2stories.xml'].include? hpxml_file
+  elsif ['base-enclosure-2stories.xml',
+         'base-bldgtype-single-family-attached-2stories.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[0].ducts[0].dup
     hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[0].ducts[1].dup
     hpxml.hvac_distributions[0].ducts[0].duct_surface_area *= 0.75

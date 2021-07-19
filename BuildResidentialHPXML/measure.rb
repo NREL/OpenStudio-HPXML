@@ -3384,7 +3384,7 @@ class HPXMLFile
       hpxml.roofs.add(id: valid_attr(surface.name),
                       interior_adjacent_to: get_adjacent_to(surface),
                       azimuth: azimuth,
-                      area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round(1),
+                      area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round(2),
                       roof_type: roof_type,
                       roof_color: roof_color,
                       pitch: args[:geometry_roof_pitch],
@@ -3435,7 +3435,7 @@ class HPXMLFile
       hpxml.rim_joists.add(id: valid_attr(surface.name),
                            exterior_adjacent_to: exterior_adjacent_to,
                            interior_adjacent_to: interior_adjacent_to,
-                           area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round(1),
+                           area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round(2),
                            siding: siding,
                            color: color,
                            insulation_assembly_r_value: insulation_assembly_r_value)
@@ -3466,9 +3466,7 @@ class HPXMLFile
       next if surface == adjacent_surface
       next if adjacent_surface.surfaceType != adjacentSurfaceType
       next if adjacent_surface.outsideBoundaryCondition != 'Adiabatic'
-      next if Geometry.getSurfaceXValues([surface]).sort != Geometry.getSurfaceXValues([adjacent_surface]).sort
-      next if Geometry.getSurfaceYValues([surface]).sort != Geometry.getSurfaceYValues([adjacent_surface]).sort
-      next if Geometry.getSurfaceZValues([surface]).sort != Geometry.getSurfaceZValues([adjacent_surface]).sort
+      next unless Geometry.has_same_vertices(surface, adjacent_surface)
 
       return adjacent_surface
     end
@@ -3535,7 +3533,7 @@ class HPXMLFile
                       siding: siding,
                       color: color,
                       solar_absorptance: solar_absorptance,
-                      area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round(1),
+                      area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round(2),
                       emittance: emittance)
 
       is_uncond_attic_roof_insulated = false
@@ -3606,7 +3604,7 @@ class HPXMLFile
                                  exterior_adjacent_to: exterior_adjacent_to,
                                  interior_adjacent_to: interior_adjacent_to,
                                  height: args[:geometry_foundation_height],
-                                 area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round(1),
+                                 area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round(2),
                                  thickness: thickness,
                                  depth_below_grade: args[:geometry_foundation_height] - args[:geometry_foundation_height_above_grade],
                                  insulation_assembly_r_value: insulation_assembly_r_value,
@@ -3652,7 +3650,7 @@ class HPXMLFile
       hpxml.frame_floors.add(id: valid_attr(surface.name),
                              exterior_adjacent_to: exterior_adjacent_to,
                              interior_adjacent_to: interior_adjacent_to,
-                             area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round(1),
+                             area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round(2),
                              other_space_above_or_below: other_space_above_or_below)
 
       if hpxml.frame_floors[-1].is_thermal_boundary
@@ -3714,7 +3712,7 @@ class HPXMLFile
 
       hpxml.slabs.add(id: valid_attr(surface.name),
                       interior_adjacent_to: interior_adjacent_to,
-                      area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round(1),
+                      area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round(2),
                       thickness: thickness,
                       exposed_perimeter: exposed_perimeter,
                       perimeter_insulation_depth: args[:slab_perimeter_depth],
@@ -3793,7 +3791,7 @@ class HPXMLFile
         end
 
         hpxml.windows.add(id: "#{valid_attr(sub_surface.name)}_#{sub_surface_facade}",
-                          area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round(1),
+                          area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round(2),
                           azimuth: azimuth,
                           ufactor: args[:window_ufactor],
                           shgc: args[:window_shgc],
@@ -3818,7 +3816,7 @@ class HPXMLFile
         sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
 
         hpxml.skylights.add(id: "#{valid_attr(sub_surface.name)}_#{sub_surface_facade}",
-                            area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round,
+                            area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round(2),
                             azimuth: UnitConversions.convert(sub_surface.azimuth, 'rad', 'deg').round,
                             ufactor: args[:skylight_ufactor],
                             shgc: args[:skylight_shgc],
@@ -3844,7 +3842,7 @@ class HPXMLFile
 
         hpxml.doors.add(id: "#{valid_attr(sub_surface.name)}_#{sub_surface_facade}",
                         wall_idref: valid_attr(adjacent_surface.name),
-                        area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round,
+                        area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round(2),
                         azimuth: args[:geometry_orientation],
                         r_value: args[:door_rvalue])
       end
