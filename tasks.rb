@@ -459,10 +459,6 @@ def create_osws
     'invalid_files/conditioned-attic-with-one-floor-above-grade.osw' => 'base.osw',
     'invalid_files/zero-number-of-bedrooms.osw' => 'base.osw',
     'invalid_files/single-family-detached-with-shared-system.osw' => 'base.osw',
-    'invalid_files/hvac-seasons-incomplete-heating-season.osw' => 'base.osw',
-    'invalid_files/hvac-seasons-incomplete-cooling-season.osw' => 'base.osw',
-    'invalid_files/schedules-vacancy-incomplete.osw' => 'base.osw',
-    'invalid_files/schedules-vacancy-invalid.osw' => 'base.osw'
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -768,10 +764,6 @@ def get_values(osw_file, step)
     step.setArgument('lighting_usage_multiplier_garage', 1.0)
     step.setArgument('holiday_lighting_present', false)
     step.setArgument('holiday_lighting_daily_kwh', Constants.Auto)
-    step.setArgument('holiday_lighting_period_begin_month', Constants.Auto)
-    step.setArgument('holiday_lighting_period_begin_day_of_month', Constants.Auto)
-    step.setArgument('holiday_lighting_period_end_month', Constants.Auto)
-    step.setArgument('holiday_lighting_period_end_day_of_month', Constants.Auto)
     step.setArgument('dehumidifier_type', 'none')
     step.setArgument('dehumidifier_efficiency_type', 'EnergyFactor')
     step.setArgument('dehumidifier_efficiency', 1.8)
@@ -1783,14 +1775,8 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_cooling_capacity', '0.0')
     step.setArgument('heat_pump_fraction_cool_load_served', 0)
   elsif ['base-hvac-seasons.osw'].include? osw_file
-    step.setArgument('season_heating_begin_month', 11)
-    step.setArgument('season_heating_begin_day_of_month', 1)
-    step.setArgument('season_heating_end_month', 6)
-    step.setArgument('season_heating_end_day_of_month', 30)
-    step.setArgument('season_cooling_begin_month', 6)
-    step.setArgument('season_cooling_begin_day_of_month', 1)
-    step.setArgument('season_cooling_end_month', 10)
-    step.setArgument('season_cooling_end_day_of_month', 31)
+    step.setArgument('season_heating_period', 'Nov 1 - Jun 30')
+    step.setArgument('season_cooling_period', 'Jun 1 - Oct 31')
   elsif ['base-hvac-install-quality-air-to-air-heat-pump-1-speed.osw'].include? osw_file
     step.setArgument('heat_pump_airflow_defect_ratio', -0.25)
     step.setArgument('heat_pump_charge_defect_ratio', -0.25)
@@ -1917,10 +1903,7 @@ def get_values(osw_file, step)
   elsif ['base-lighting-detailed.osw'].include? osw_file
     step.setArgument('holiday_lighting_present', true)
     step.setArgument('holiday_lighting_daily_kwh', '1.1')
-    step.setArgument('holiday_lighting_period_begin_month', '11')
-    step.setArgument('holiday_lighting_period_begin_day_of_month', '24')
-    step.setArgument('holiday_lighting_period_end_month', '1')
-    step.setArgument('holiday_lighting_period_end_day_of_month', '6')
+    step.setArgument('holiday_lighting_period', 'Nov 24 - Jan 6')
   end
 
   # Location
@@ -2176,17 +2159,11 @@ def get_values(osw_file, step)
     step.setArgument('simulation_control_run_period_calendar_year', 2008)
   elsif ['base-simcontrol-daylight-saving-custom.osw'].include? osw_file
     step.setArgument('simulation_control_daylight_saving_enabled', true)
-    step.setArgument('simulation_control_daylight_saving_begin_month', 3)
-    step.setArgument('simulation_control_daylight_saving_begin_day_of_month', 10)
-    step.setArgument('simulation_control_daylight_saving_end_month', 11)
-    step.setArgument('simulation_control_daylight_saving_end_day_of_month', 6)
+    step.setArgument('simulation_control_daylight_saving_period', 'Mar 10 - Nov 6')
   elsif ['base-simcontrol-daylight-saving-disabled.osw'].include? osw_file
     step.setArgument('simulation_control_daylight_saving_enabled', false)
   elsif ['base-simcontrol-runperiod-1-month.osw'].include? osw_file
-    step.setArgument('simulation_control_run_period_begin_month', 1)
-    step.setArgument('simulation_control_run_period_begin_day_of_month', 1)
-    step.setArgument('simulation_control_run_period_end_month', 1)
-    step.setArgument('simulation_control_run_period_end_day_of_month', 31)
+    step.setArgument('simulation_control_run_period', 'Jan 1 - Jan 31')
   elsif ['base-simcontrol-timestep-10-mins.osw'].include? osw_file
     step.setArgument('simulation_control_timestep', '10')
   end
@@ -2195,10 +2172,7 @@ def get_values(osw_file, step)
   if ['base-schedules-stochastic.osw'].include? osw_file
     step.setArgument('schedules_type', 'stochastic')
   elsif ['base-schedules-stochastic-vacant.osw'].include? osw_file
-    step.setArgument('schedules_vacancy_begin_month', 12)
-    step.setArgument('schedules_vacancy_begin_day_of_month', 1)
-    step.setArgument('schedules_vacancy_end_month', 1)
-    step.setArgument('schedules_vacancy_end_day_of_month', 31)
+    step.setArgument('schedules_vacancy_period', 'Dec 1 - Jan 31')
   elsif ['base-schedules-user-specified.osw'].include? osw_file
     step.setArgument('schedules_type', 'user-specified')
     step.setArgument('schedules_path', 'BuildResidentialHPXML/tests/schedules/user-specified.csv')
@@ -2580,20 +2554,6 @@ def get_values(osw_file, step)
     step.setArgument('geometry_num_bedrooms', 0)
   elsif ['invalid_files/single-family-detached-with-shared-system.osw'].include? osw_file
     step.setArgument('heating_system_type', "Shared #{HPXML::HVACTypeBoiler} w/ Baseboard")
-  elsif ['invalid_files/hvac-seasons-incomplete-heating-season.osw'].include? osw_file
-    step.setArgument('season_heating_begin_month', 11)
-    step.setArgument('season_heating_end_month', 6)
-  elsif ['invalid_files/hvac-seasons-incomplete-cooling-season.osw'].include? osw_file
-    step.setArgument('season_cooling_begin_day_of_month', 1)
-    step.setArgument('season_cooling_end_day_of_month', 31)
-  elsif ['invalid_files/schedules-vacancy-incomplete.osw'].include? osw_file
-    step.setArgument('schedules_vacancy_begin_month', 1)
-    step.setArgument('schedules_vacancy_end_month', 2)
-  elsif ['invalid_files/schedules-vacancy-invalid.osw'].include? osw_file
-    step.setArgument('schedules_vacancy_begin_month', 1)
-    step.setArgument('schedules_vacancy_begin_day_of_month', 1)
-    step.setArgument('schedules_vacancy_end_month', 4)
-    step.setArgument('schedules_vacancy_end_day_of_month', 31)
   end
   return step
 end
