@@ -1355,14 +1355,6 @@ class SchedulesFile
     return design_level
   end
 
-  # thermal equivalent of calc_design_level_from_daily_kwh
-  def calc_design_level_from_daily_therm(col_name:,
-                                         daily_therm:)
-    daily_kwh = UnitConversions.convert(daily_therm, 'therm', 'kWh')
-    design_level = calc_design_level_from_daily_kwh(col_name: col_name, daily_kwh: daily_kwh)
-    return design_level
-  end
-
   # similar to calc_design_level_from_daily_kwh but for water usage
   def calc_peak_flow_from_daily_gpm(col_name:, daily_water:)
     ann_equiv_full_load_hrs = annual_equivalent_full_load_hrs(col_name: col_name)
@@ -1372,15 +1364,6 @@ class SchedulesFile
     peak_flow /= 60 # convert to gallons per minute
     peak_flow = UnitConversions.convert(peak_flow, 'gal/min', 'm^3/s') # convert to m^3/s
     return peak_flow
-  end
-
-  # get daily gallons from the peak flow rate
-  def calc_daily_gpm_from_peak_flow(col_name:, peak_flow:)
-    ann_equiv_full_load_hrs = annual_equivalent_full_load_hrs(col_name: col_name)
-    num_days_in_year = Constants.NumDaysInYear(@model)
-    peak_flow = UnitConversions.convert(peak_flow, 'm^3/s', 'gal/min')
-    daily_gallons = (ann_equiv_full_load_hrs * 60 * peak_flow) / num_days_in_year
-    return daily_gallons
   end
 
   def validate_schedule(col_name:,

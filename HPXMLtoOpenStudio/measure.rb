@@ -223,7 +223,6 @@ class OSModel
     @schedules_file = nil
     unless @hpxml.header.occupancy_schedules_filepath.nil?
       @schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.occupancy_schedules_filepath, col_names: Constants.ScheduleGeneratorColNames.keys)
-      @schedules_file.set_vacancy
     end
 
     # Conditioned space/zone
@@ -287,6 +286,11 @@ class OSModel
     add_output_control_files(runner, model)
     # Uncomment to debug EMS
     # add_ems_debug_output(runner, model)
+
+    unless @hpxml.header.occupancy_schedules_filepath.nil?
+      # Do this at the end after schedule design levels are calculated
+      @schedules_file.set_vacancy
+    end
 
     if debug
       osm_output_path = File.join(output_dir, 'in.osm')
