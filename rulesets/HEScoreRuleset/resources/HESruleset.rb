@@ -113,7 +113,6 @@ class HEScoreRuleset
   end
 
   def self.set_climate(json, new_hpxml)
-    # FIXME: map zipcode to wmo to get this information
     zipcode = json['building_address']['zip_code']
 
     zipcode_city = nil
@@ -206,7 +205,7 @@ class HEScoreRuleset
 
   def self.set_enclosure_walls(json, new_hpxml)
     # Above-grade walls
-    json['building']['zone']['zone_wall'].each_with_index do |orig_wall, idx|  # FIXME: Need to check if this iterates through each item of the zone_wall
+    json['building']['zone']['zone_wall'].each_with_index do |orig_wall, idx|
       wall_area = nil
       if ['front', 'back'].include? orig_wall['side']
         wall_area = @ceil_height * @bldg_length_front * @ncfl_ag
@@ -237,7 +236,6 @@ class HEScoreRuleset
       fnd_area = orig_foundation['floor_area']
       next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? fnd_location
       
-      # FIXME: double-check the code below
       if [HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned].include? fnd_location
         fndwall_height = 8.0
       else
