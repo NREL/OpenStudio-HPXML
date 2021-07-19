@@ -84,7 +84,6 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
     # Parse the JSON file
     json_file = File.open(json_path)
     json = JSON.parse(json_file.read)
-    puts json  # FIXME: diagnostic puts. Remove it in the future
 
     # Look up EPW path from WMO
     epw_path = nil
