@@ -179,8 +179,15 @@ class BaseCompare:
             return cols
 
         for file in sorted(files):
-            base_df = pd.read_csv(os.path.join(self.base_folder, file), index_col=0).dropna(axis=1)
-            feature_df = pd.read_csv(os.path.join(self.feature_folder, file), index_col=0).dropna(axis=1)
+            base_df = pd.read_csv(os.path.join(self.base_folder, file), index_col=0)
+            feature_df = pd.read_csv(os.path.join(self.feature_folder, file), index_col=0)
+
+            for col in base_df.columns:
+                if base_df[col].isnull().all():
+                    base_df.drop(col, axis=1, inplace=True)
+            for col in feature_df.columns:
+                if feature_df[col].isnull().all():
+                    feature_df.drop(col, axis=1, inplace=True)
 
             cols = sorted(list(set(base_df.columns) & set(feature_df.columns)))
             cols = remove_columns(cols)
