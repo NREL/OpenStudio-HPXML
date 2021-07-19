@@ -1441,9 +1441,9 @@
       <sch:assert role='ERROR' test='count(h:RatedAnnualkWh) + count(h:extension/h:AdjustedAnnualkWh) &gt;= 0'>Expected 0 or more element(s) for xpath: RatedAnnualkWh | extension/AdjustedAnnualkWh</sch:assert>
       <sch:assert role='ERROR' test='count(h:PrimaryIndicator) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PrimaryIndicator</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:UsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/UsageMultiplier</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:WeekendScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleFractions) + count(/h:HPXML/h:SoftwareInfo/h:extension/h:OccupancySchedulesFilePath) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/OccupancySchedulesFilePath</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:WeekendScheduleFractions) + count(/h:HPXML/h:SoftwareInfo/h:extension/h:OccupancySchedulesFilePath) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/OccupancySchedulesFilePath</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleMultipliers) + count(/h:HPXML/h:SoftwareInfo/h:extension/h:OccupancySchedulesFilePath) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/OccupancySchedulesFilePath</sch:assert>
     </sch:rule>
   </sch:pattern>
 
