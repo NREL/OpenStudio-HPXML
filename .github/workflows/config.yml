@@ -75,7 +75,8 @@ jobs:
           pip install plotly
           pip install kaleido
           
-          python hpxml-measures/workflow/tests/compare.py
+          python hpxml-measures/workflow/tests/compare.py -a results
+          python hpxml-measures/workflow/tests/compare.py -a visualizes
 
       - name: Store comparisons
         uses: actions/upload-artifact@v2
