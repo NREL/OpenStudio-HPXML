@@ -1333,6 +1333,7 @@ def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fn
     # See https://github.com/NREL/OpenStudio-HEScore/issues/211
     ducts << [1.0 - sum_duct_hvac_frac, 1.0, HPXML::LocationLivingSpace]
   end
+
   c_duct = 0.0
   ducts.each do |hvac_frac, duct_frac, duct_location|
     if duct_location == HPXML::LocationLivingSpace
