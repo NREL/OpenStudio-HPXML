@@ -260,19 +260,21 @@ class HEScoreRuleset
 
   def self.set_enclosure_framefloors(json, new_hpxml)
     # Floors above foundation
-    json.foundations.each do |orig_foundation|
-      fnd_location = orig_foundation.to_location
-      orig_foundation.attached_frame_floors.each do |orig_frame_floor|
-        next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? fnd_location
+    json['building']['zone']['zone_floor'].each_with_index do |orig_foundation, idx|
+      fnd_location = {'uncond_basement' => HPXML::LocationBasementUnconditioned,
+                      'cond_basement' => HPXML::LocationBasementConditioned,
+                      'vented_crawl' => HPXML::LocationCrawlspaceVented,
+                      'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
+                      'slab_on_grade' => HPXML::LocationLivingSpace}[orig_foundation['foundation_type']]
+      next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? fnd_location
 
-        framefloor_r = get_floor_assembly_r(orig_frame_floor.insulation_cavity_r_value)
+      framefloor_r = get_floor_assembly_r(orig_frame_floor.insulation_cavity_r_value)
 
-        new_hpxml.frame_floors.add(id: orig_frame_floor.id,
-                                   exterior_adjacent_to: fnd_location,
-                                   interior_adjacent_to: HPXML::LocationLivingSpace,
-                                   area: orig_frame_floor.area,
-                                   insulation_assembly_r_value: framefloor_r)
-      end
+      new_hpxml.frame_floors.add(id: orig_frame_floor.id,
+                                  exterior_adjacent_to: fnd_location,
+                                  interior_adjacent_to: HPXML::LocationLivingSpace,
+                                  area: orig_frame_floor.area,
+                                  insulation_assembly_r_value: framefloor_r)
     end
 
     # Floors below attic
@@ -1048,53 +1050,6 @@ $wall_type_map = {
   'cb' => HPXML::WallTypeCMU,
   'sb' => HPXML::WallTypeStrawBale
 }
-
-def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
-  # Walls Wood Stud Assembly R-value
-  has_r_cont = !r_cont.nil?
-  if (not has_r_cont) && (not ove)
-    # Wood Frame
-    doe2walltype = 'wf'
-  elsif has_r_cont && (not ove)
-    # Wood Frame with Rigid Foam Sheathing
-    doe2walltype = 'ps'
-  elsif (not has_r_cont) && ove
-    # Wood Frame with Optimal Value Engineering
-    doe2walltype = 'ov'
-  end
-  doe2code = 'ew%s%02.0f%s' % [doe2walltype, r_cavity, $siding_map[siding]]
-  val = get_wall_effective_r_from_doe2code(doe2code)
-  return val if not val.nil?
-
-  fail "Could not get default wood stud wall assembly R-value for R-cavity '#{r_cavity}' and R-cont '#{r_cont}' and siding '#{siding}' and ove '#{ove}'"
-end
-
-def get_structural_block_wall_assembly_r(r_cont)
-  # Walls Structural Block Assembly R-value
-  doe2code = 'ewbr%02.0fnn' % (r_cont.nil? ? 0.0 : r_cont)
-  val = get_wall_effective_r_from_doe2code(doe2code)
-  return val if not val.nil?
-
-  fail "Could not get default structural block wall assembly R-value for R-cavity '#{r_cont}'"
-end
-
-def get_concrete_block_wall_assembly_r(r_cavity, siding)
-  # Walls Concrete Block Assembly R-value
-  doe2code = 'ewcb%02.0f%s' % [r_cavity, $siding_map[siding]]
-  val = get_wall_effective_r_from_doe2code(doe2code)
-  return val if not val.nil?
-
-  fail "Could not get default concrete block wall assembly R-value for R-cavity '#{r_cavity}' and siding '#{siding}'"
-end
-
-def get_straw_bale_wall_assembly_r(siding)
-  # Walls Straw Bale Assembly R-value
-  doe2code = 'ewsb00%s' % $siding_map[siding]
-  val = get_wall_effective_r_from_doe2code(doe2code)
-  return val if not val.nil?
-
-  fail "Could not get default straw bale assembly R-value for siding '#{siding}'"
-end
 
 def get_roof_effective_r_from_doe2code(doe2code)
   # For wood frame with radiant barrier roof, use wood frame roof effective R-value. Radiant barrier will be handled by the actual radiant barrier model in OS.
