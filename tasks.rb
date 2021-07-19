@@ -71,6 +71,7 @@ def create_hpxmls
     'invalid_files/enclosure-living-missing-ceiling-roof.xml' => 'base.xml',
     'invalid_files/enclosure-living-missing-exterior-wall.xml' => 'base.xml',
     'invalid_files/enclosure-living-missing-floor-slab.xml' => 'base-foundation-slab.xml',
+    'invalid_files/extra-occupancy-inputs.xml' => 'base-occupancy-simple.xml',
     'invalid_files/frac-sensible-fuel-load.xml' => 'base-misc-loads-large-uncommon.xml',
     'invalid_files/frac-sensible-plug-load.xml' => 'base-misc-loads-large-uncommon.xml',
     'invalid_files/frac-total-fuel-load.xml' => 'base-misc-loads-large-uncommon.xml',
@@ -662,7 +663,8 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'
   elsif ['base-occupancy-detailed-stochastic-vacancy.xml'].include? hpxml_file
     hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
-  elsif ['base-occupancy-detailed-smooth.xml'].include? hpxml_file
+  elsif ['base-occupancy-detailed-smooth.xml',
+         'invalid_files/extra-occupancy-inputs.xml'].include? hpxml_file
     hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
     hpxml.header.transaction = 'modify'
