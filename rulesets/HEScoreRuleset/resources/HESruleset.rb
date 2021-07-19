@@ -19,9 +19,9 @@ class HEScoreRuleset
     # Enclosure
     set_enclosure_air_infiltration(json, new_hpxml)
     set_enclosure_roofs(json, new_hpxml)
-    # set_enclosure_rim_joists(json, new_hpxml)
-    # set_enclosure_walls(json, new_hpxml)
-    # set_enclosure_foundation_walls(json, new_hpxml)
+    set_enclosure_rim_joists(json, new_hpxml)
+    set_enclosure_walls(json, new_hpxml)
+    set_enclosure_foundation_walls(json, new_hpxml)
     # set_enclosure_framefloors(json, new_hpxml)
     # set_enclosure_slabs(json, new_hpxml)
     # set_enclosure_windows(json, new_hpxml)
@@ -53,7 +53,7 @@ class HEScoreRuleset
     # # Prevent downstream errors in OS-HPXML
     # adjust_floor_areas(new_hpxml)
 
-    HPXMLDefaults.apply(new_hpxml, Constants.ERIVersions[-1], weather)
+    # HPXMLDefaults.apply(new_hpxml, Constants.ERIVersions[-1], weather)
 
     return new_hpxml
   end
@@ -168,8 +168,9 @@ class HEScoreRuleset
 
   def self.set_enclosure_roofs(json, new_hpxml)
     json['building']['zone']['zone_roof'].each do |orig_roof|
-      orig_attic = orig_roof['roof_type']
-      attic_location = orig_attic.to_location
+      attic_location = {'vented_attic' => HPXML::LocationAtticVented,
+                        'cond_attic' => HPXML::LocationLivingSpace,
+                        'cath_ceiling' => HPXML::LocationLivingSpace}[orig_roof['roof_type']]
       # Roof: Two surfaces per HES zone_roof
       roof_area = orig_roof['roof_area']
       roof_solar_abs = get_roof_solar_absorptance(orig_roof['roof_color'])
@@ -181,11 +182,11 @@ class HEScoreRuleset
         roof_azimuths = [@bldg_azimuth, @bldg_azimuth + 180]
       end
       has_radiant_barrier = false
-      if orig_roof['roof_assembly_code'].include? 'rb'
+      if orig_roof['roof_assembly_code'][2,2] == 'rb'
         has_radiant_barrier = true
       end
       roof_azimuths.each_with_index do |roof_azimuth, idx|
-        new_hpxml.roofs.add(id: "#{orig_roof.id}_#{idx}",
+        new_hpxml.roofs.add(id: "#{orig_roof['roof_name']}_#{idx}",
                             interior_adjacent_to: attic_location,
                             area: roof_area / 2.0,
                             azimuth: sanitize_azimuth(roof_azimuth),
@@ -205,36 +206,21 @@ class HEScoreRuleset
 
   def self.set_enclosure_walls(json, new_hpxml)
     # Above-grade walls
-    json.walls.each do |orig_wall|
+    json['building']['zone']['zone_wall'].each_with_index do |orig_wall, idx|  # FIXME: Need to check if this iterates through each item of the zone_wall
       wall_area = nil
-      if (@bldg_orient == orig_wall.orientation) || (@bldg_orient == reverse_orientation(orig_wall.orientation))
+      if ['front', 'back'].include? orig_wall['side']
         wall_area = @ceil_height * @bldg_length_front * @ncfl_ag
       else
         wall_area = @ceil_height * @bldg_length_side * @ncfl_ag
       end
-
-      if orig_wall.wall_type == HPXML::WallTypeWoodStud
-        wall_r = get_wood_stud_wall_assembly_r(orig_wall.insulation_cavity_r_value,
-                                               orig_wall.insulation_continuous_r_value,
-                                               orig_wall.siding,
-                                               orig_wall.optimum_value_engineering)
-      elsif orig_wall.wall_type == HPXML::WallTypeBrick
-        wall_r = get_structural_block_wall_assembly_r(orig_wall.insulation_continuous_r_value)
-      elsif orig_wall.wall_type == HPXML::WallTypeCMU
-        wall_r = get_concrete_block_wall_assembly_r(orig_wall.insulation_cavity_r_value,
-                                                    orig_wall.siding)
-      elsif orig_wall.wall_type == HPXML::WallTypeStrawBale
-        wall_r = get_straw_bale_wall_assembly_r(orig_wall.siding)
-      else
-        fail "Unexpected wall type '#{orig_wall.wall_type}'."
-      end
-
-      new_hpxml.walls.add(id: orig_wall.id,
+      wall_doe2code = orig_wall['wall_assembly_code']
+      wall_r = get_wall_effective_r_from_doe2code(wall_doe2code)
+      new_hpxml.walls.add(id: "wall_#{idx}_#{orig_wall['side']}",
                           exterior_adjacent_to: HPXML::LocationOutside,
                           interior_adjacent_to: HPXML::LocationLivingSpace,
-                          wall_type: orig_wall.wall_type,
+                          wall_type: $wall_type_map[orig_wall['wall_assembly_code'][2,2]],
                           area: wall_area,
-                          azimuth: orientation_to_azimuth(orig_wall.orientation),
+                          azimuth: sanitize_azimuth(wall_orientation_to_azimuth(orig_wall['side'])),
                           solar_absorptance: 0.75,
                           emittance: 0.9,
                           insulation_assembly_r_value: wall_r)
@@ -242,32 +228,35 @@ class HEScoreRuleset
   end
 
   def self.set_enclosure_foundation_walls(json, new_hpxml)
-    json.foundations.each do |orig_foundation|
-      fnd_location = orig_foundation.to_location
-      fnd_area = orig_foundation.area
+    json['building']['zone']['zone_floor'].each_with_index do |orig_foundation, idx|
+      fnd_location = {'uncond_basement' => HPXML::LocationBasementUnconditioned,
+                      'cond_basement' => HPXML::LocationBasementConditioned,
+                      'vented_crawl' => HPXML::LocationCrawlspaceVented,
+                      'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
+                      'slab_on_grade' => HPXML::LocationLivingSpace}[orig_foundation['foundation_type']]
+      fnd_area = orig_foundation['floor_area']
       next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? fnd_location
-
-      orig_foundation.attached_foundation_walls.each do |orig_foundation_wall|
-        if [HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned].include? fnd_location
-          fndwall_height = 8.0
-        else
-          fndwall_height = 2.5
-        end
-
-        new_hpxml.foundation_walls.add(id: orig_foundation_wall.id,
-                                       exterior_adjacent_to: HPXML::LocationGround,
-                                       interior_adjacent_to: fnd_location,
-                                       height: fndwall_height,
-                                       area: fndwall_height * get_foundation_perimeter(json, orig_foundation),
-                                       thickness: 10,
-                                       depth_below_grade: fndwall_height - 1.0,
-                                       insulation_interior_r_value: 0,
-                                       insulation_interior_distance_to_top: 0,
-                                       insulation_interior_distance_to_bottom: 0,
-                                       insulation_exterior_r_value: orig_foundation_wall.insulation_continuous_r_value,
-                                       insulation_exterior_distance_to_top: 0,
-                                       insulation_exterior_distance_to_bottom: fndwall_height)
+      
+      # FIXME: double-check the code below
+      if [HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned].include? fnd_location
+        fndwall_height = 8.0
+      else
+        fndwall_height = 2.5
       end
+
+      new_hpxml.foundation_walls.add(id: "#{orig_foundation['floor_name']}_foundation_wall_#{idx}",
+                                     exterior_adjacent_to: HPXML::LocationGround,
+                                     interior_adjacent_to: fnd_location,
+                                     height: fndwall_height,
+                                     area: fndwall_height * get_foundation_perimeter(json, orig_foundation),
+                                     thickness: 10,
+                                     depth_below_grade: fndwall_height - 1.0,
+                                     insulation_interior_r_value: 0,
+                                     insulation_interior_distance_to_top: 0,
+                                     insulation_interior_distance_to_bottom: 0,
+                                     insulation_exterior_r_value: Float(orig_foundation['foundation_insulation_level']),
+                                     insulation_exterior_distance_to_top: 0,
+                                     insulation_exterior_distance_to_bottom: fndwall_height)
     end
   end
 
@@ -915,16 +904,16 @@ class HEScoreRuleset
   end
 
   def self.get_foundation_perimeter(json, foundation)
-    n_foundations = json.foundations.size
+    n_foundations = json['building']['zone']['zone_floor'].size
     if n_foundations == 1
       return @bldg_perimeter
     elsif n_foundations == 2
-      fnd_area = foundation.area
+      fnd_area = foundation['floor_area']
       long_side = [@bldg_length_front, @bldg_length_side].max
       short_side = [@bldg_length_front, @bldg_length_side].min
       total_foundation_area = 0
-      json.foundations.each do |a_foundation|
-        total_foundation_area += a_foundation.area
+      json['building']['zone']['zone_floor'].each do |a_foundation|
+        total_foundation_area += a_foundation['floor_area']
       end
       fnd_frac = fnd_area / total_foundation_area
       return short_side + 2 * long_side * fnd_frac
@@ -1053,6 +1042,15 @@ $siding_map = {
   nil => 'nn'
 }
 
+$wall_type_map = {
+  'wf' => HPXML::WallTypeWoodStud,
+  'ps' => HPXML::WallTypeWoodStud,
+  'ov' => HPXML::WallTypeWoodStud,
+  'br' => HPXML::WallTypeBrick,
+  'cb' => HPXML::WallTypeCMU,
+  'sb' => HPXML::WallTypeStrawBale
+}
+
 def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
   # Walls Wood Stud Assembly R-value
   has_r_cont = !r_cont.nil?
@@ -1101,6 +1099,10 @@ def get_straw_bale_wall_assembly_r(siding)
 end
 
 def get_roof_effective_r_from_doe2code(doe2code)
+  # For wood frame with radiant barrier roof, use wood frame roof effective R-value. Radiant barrier will be handled by the actual radiant barrier model in OS.
+  if doe2code[2,2] == 'rb'
+    doe2code = doe2code.gsub('rb', 'wf')
+  end
   val = nil
   CSV.foreach(File.join(File.dirname(__FILE__), 'lu_roof_eff_rvalue.csv'), headers: true) do |row|
     next unless row['doe2code'] == doe2code
@@ -1375,6 +1377,13 @@ def orientation_to_azimuth(orientation)
            HPXML::OrientationWest => 270,
            HPXML::OrientationNorthwest => 315,
            HPXML::OrientationNorth => 0 }[orientation]
+end
+
+def wall_orientation_to_azimuth(orientation)
+  return { 'front' => @bldg_azimuth,
+           'right' => @bldg_azimuth + 90,
+           'back' => @bldg_azimuth + 180,
+           'left' => @bldg_azimuth + 270}[orientation]
 end
 
 def reverse_orientation(orientation)
