@@ -87,7 +87,16 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
 
     # Look up EPW path from WMO
     epw_path = nil
-    weather_wmo = '690150'  # FIXME: map json['building_address']['zip_code'] to wmo
+    zipcode = json['building_address']['zip_code']
+    weather_wmo = nil
+    CSV.foreach(File.join(File.dirname(__FILE__), 'resources', 'zipcodes_wx.csv'), headers: true) do |row|
+      next unless row['postal_code'] == zipcode[0..6]
+
+      weather_wmo = row['nearest_weather_station']
+    end
+    if weather_wmo.nil?
+      fail "Weather station WMO #{weather_wmo} could not be found in #{File.join(File.dirname(__FILE__), 'resources', 'zipcodes_wx.csv')}"
+    end
     weather_dir = File.join(File.dirname(__FILE__), '..', '..', 'weather')
     CSV.foreach(File.join(weather_dir, 'data.csv'), headers: true) do |row|
       next if row['wmo'] != weather_wmo
