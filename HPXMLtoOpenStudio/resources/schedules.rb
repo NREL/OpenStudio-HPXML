@@ -1307,6 +1307,8 @@ class SchedulesFile
     unless [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60].include? min_per_item
       fail "Invalid schedule min_per_item=#{min_per_item} for '#{col_name}'."
     end
+
+    return values
   end
 
   def export
