@@ -1293,7 +1293,7 @@ class SchedulesFile
       values = values.map { |v| Float(v) }
     rescue ArgumentError
       fail "There is at least one non-numeric value for '#{col_name}'."
-    end    
+    end
 
     if values.max > 1
       fail "The max value for '#{col_name}' is greater than 1."
