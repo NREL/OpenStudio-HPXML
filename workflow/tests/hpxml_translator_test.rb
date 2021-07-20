@@ -693,7 +693,7 @@ class HPXMLTest < MiniTest::Test
       if hpxml.solar_thermal_systems.size > 0
         next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
       end
-      if hpxml_path.include?('base-occupancy-detailed-stochastic.xml') || hpxml_path.include?('base-occupancy-detailed-stochastic-vacancy.xml') || hpxml_path.include?('base-occupancy-detailed-smooth.xml')
+      if hpxml_path.include?('base-occupancy-detailed-stochastic.xml') || hpxml_path.include?('base-occupancy-detailed-stochastic-vacancy.xml') || hpxml_path.include?('base-occupancy-detailed-stochastic-outage.xml') || hpxml_path.include?('base-occupancy-detailed-smooth.xml')
         next if err_line.include?('GetCurrentScheduleValue: Schedule=') && err_line.include?('is a Schedule:File')
       end
 

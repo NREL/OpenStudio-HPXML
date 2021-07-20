@@ -442,6 +442,7 @@ def create_hpxmls
     'base-occupancy-detailed-smooth.xml' => 'base.xml',
     'base-occupancy-detailed-stochastic.xml' => 'base.xml',
     'base-occupancy-detailed-stochastic-vacancy.xml' => 'base-occupancy-detailed-stochastic.xml',
+    'base-occupancy-detailed-stochastic-outage.xml' => 'base-occupancy-detailed-stochastic.xml',
     'base-occupancy-simple.xml' => 'base.xml',
     'base-simcontrol-calendar-year-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
@@ -663,6 +664,8 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'
   elsif ['base-occupancy-detailed-stochastic-vacancy.xml'].include? hpxml_file
     hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
+  elsif ['base-occupancy-detailed-stochastic-outage.xml'].include? hpxml_file
+    hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic-outage.csv'
   elsif ['base-occupancy-detailed-smooth.xml',
          'invalid_files/extra-occupancy-inputs.xml'].include? hpxml_file
     hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
