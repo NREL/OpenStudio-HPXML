@@ -1255,15 +1255,18 @@ class SchedulesFile
     @validated = true
     @runner = runner
     @model = model
-    dir = File.dirname(schedules_path)
-    file = File.basename(schedules_path)
-    @schedules_path = File.join(dir, "tmp_#{file}")
-    FileUtils.cp(schedules_path, @schedules_path)
+    @schedules_path = schedules_path
+
     import(col_names: col_names)
+
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
+    tmpfile = Tempfile.new('schedules')
+    tmpfile.write(File.open(@schedules_path).read)
+    @tmp_schedules_path = tmpfile.path.to_s
+
     set_vacancy
     set_outage
-    @external_file = get_external_file
+    get_external_file
   end
 
   def import(col_names:)
@@ -1281,6 +1284,10 @@ class SchedulesFile
 
   def schedules
     return @schedules
+  end
+
+  def tmp_schedules
+    return @tmp_schedules
   end
 
   def validated?
@@ -1400,13 +1407,12 @@ class SchedulesFile
   end
 
   def get_external_file
-    if File.exist? @schedules_path
-      external_file = OpenStudio::Model::ExternalFile::getExternalFile(@model, @schedules_path)
-      if external_file.is_initialized
-        external_file = external_file.get
+    if File.exist? @tmp_schedules_path
+      @external_file = OpenStudio::Model::ExternalFile::getExternalFile(@model, @tmp_schedules_path)
+      if @external_file.is_initialized
+        @external_file = @external_file.get
       end
     end
-    return external_file
   end
 
   def set_vacancy
@@ -1445,9 +1451,9 @@ class SchedulesFile
   end
 
   def export
-    return false if @schedules_path.nil?
+    return false if @tmp_schedules_path.nil?
 
-    CSV.open(@schedules_path, 'wb') do |csv|
+    CSV.open(@tmp_schedules_path, 'wb') do |csv|
       csv << @tmp_schedules.keys
       rows = @tmp_schedules.values.transpose
       rows.each do |row|
