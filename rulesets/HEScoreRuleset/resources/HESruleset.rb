@@ -22,10 +22,10 @@ class HEScoreRuleset
     set_enclosure_rim_joists(json, new_hpxml)
     set_enclosure_walls(json, new_hpxml)
     set_enclosure_foundation_walls(json, new_hpxml)
-    # set_enclosure_framefloors(json, new_hpxml)
-    # set_enclosure_slabs(json, new_hpxml)
-    # set_enclosure_windows(json, new_hpxml)
-    # set_enclosure_skylights(json, new_hpxml)
+    set_enclosure_framefloors(json, new_hpxml)
+    set_enclosure_slabs(json, new_hpxml)
+    set_enclosure_windows(json, new_hpxml)
+    set_enclosure_skylights(json, new_hpxml)
     # set_enclosure_doors(json, new_hpxml)
 
     # # Systems
@@ -173,8 +173,7 @@ class HEScoreRuleset
       # Roof: Two surfaces per HES zone_roof
       roof_area = orig_roof['roof_area']
       roof_solar_abs = get_roof_solar_absorptance(orig_roof['roof_color'])
-      roof_doe2code = orig_roof['roof_assembly_code']
-      roof_r = get_roof_effective_r_from_doe2code(roof_doe2code)
+      roof_r = get_roof_effective_r_from_doe2code(orig_roof['roof_assembly_code'])
       if @is_townhouse
         roof_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270]
       else
@@ -205,16 +204,15 @@ class HEScoreRuleset
 
   def self.set_enclosure_walls(json, new_hpxml)
     # Above-grade walls
-    json['building']['zone']['zone_wall'].each_with_index do |orig_wall, idx|
+    json['building']['zone']['zone_wall'].each do |orig_wall|
       wall_area = nil
       if ['front', 'back'].include? orig_wall['side']
         wall_area = @ceil_height * @bldg_length_front * @ncfl_ag
       else
         wall_area = @ceil_height * @bldg_length_side * @ncfl_ag
       end
-      wall_doe2code = orig_wall['wall_assembly_code']
-      wall_r = get_wall_effective_r_from_doe2code(wall_doe2code)
-      new_hpxml.walls.add(id: "wall_#{idx}_#{orig_wall['side']}",
+      wall_r = get_wall_effective_r_from_doe2code(orig_wall['wall_assembly_code'])
+      new_hpxml.walls.add(id: "#{orig_wall['side']}_wall",
                           exterior_adjacent_to: HPXML::LocationOutside,
                           interior_adjacent_to: HPXML::LocationLivingSpace,
                           wall_type: $wall_type_map[orig_wall['wall_assembly_code'][2,2]],
@@ -227,7 +225,7 @@ class HEScoreRuleset
   end
 
   def self.set_enclosure_foundation_walls(json, new_hpxml)
-    json['building']['zone']['zone_floor'].each_with_index do |orig_foundation, idx|
+    json['building']['zone']['zone_floor'].each do |orig_foundation|
       fnd_location = {'uncond_basement' => HPXML::LocationBasementUnconditioned,
                       'cond_basement' => HPXML::LocationBasementConditioned,
                       'vented_crawl' => HPXML::LocationCrawlspaceVented,
@@ -242,7 +240,7 @@ class HEScoreRuleset
         fndwall_height = 2.5
       end
 
-      new_hpxml.foundation_walls.add(id: "#{orig_foundation['floor_name']}_foundation_wall_#{idx}",
+      new_hpxml.foundation_walls.add(id: "#{orig_foundation['floor_name']}_foundation_wall",
                                      exterior_adjacent_to: HPXML::LocationGround,
                                      interior_adjacent_to: fnd_location,
                                      height: fndwall_height,
@@ -260,7 +258,7 @@ class HEScoreRuleset
 
   def self.set_enclosure_framefloors(json, new_hpxml)
     # Floors above foundation
-    json['building']['zone']['zone_floor'].each_with_index do |orig_foundation, idx|
+    json['building']['zone']['zone_floor'].each do |orig_foundation|
       fnd_location = {'uncond_basement' => HPXML::LocationBasementUnconditioned,
                       'cond_basement' => HPXML::LocationBasementConditioned,
                       'vented_crawl' => HPXML::LocationCrawlspaceVented,
@@ -268,38 +266,42 @@ class HEScoreRuleset
                       'slab_on_grade' => HPXML::LocationLivingSpace}[orig_foundation['foundation_type']]
       next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? fnd_location
 
-      framefloor_r = get_floor_assembly_r(orig_frame_floor.insulation_cavity_r_value)
+      framefloor_r = get_floor_effective_r_from_doe2code(orig_foundation['floor_assembly_code'])
 
-      new_hpxml.frame_floors.add(id: orig_frame_floor.id,
-                                  exterior_adjacent_to: fnd_location,
-                                  interior_adjacent_to: HPXML::LocationLivingSpace,
-                                  area: orig_frame_floor.area,
-                                  insulation_assembly_r_value: framefloor_r)
+      new_hpxml.frame_floors.add(id: "framefloor_adjacent_to_#{orig_foundation['foundation_type']}",
+                                 exterior_adjacent_to: fnd_location,
+                                 interior_adjacent_to: HPXML::LocationLivingSpace,
+                                 area: orig_foundation['floor_area'],
+                                 insulation_assembly_r_value: framefloor_r)
     end
 
     # Floors below attic
-    json.attics.each do |orig_attic|
-      attic_location = orig_attic.to_location
-      fail "Unvented attics shouldn't exist in HEScore." if attic_location == HPXML::LocationAtticUnvented
+    json['building']['zone']['zone_roof'].each do |orig_attic|
+      attic_location = {'vented_attic' => HPXML::LocationAtticVented,
+                        'cond_attic' => HPXML::LocationLivingSpace,
+                        'cath_ceiling' => HPXML::LocationLivingSpace}[orig_attic['roof_type']]
       next unless attic_location == HPXML::LocationAtticVented
 
-      orig_attic.attached_frame_floors.each do |orig_frame_floor|
-        framefloor_r = get_ceiling_assembly_r(orig_frame_floor.insulation_cavity_r_value)
+      framefloor_r = get_ceiling_effective_r_from_doe2code(orig_attic['ceiling_assembly_code'])
+      framefloor_area = orig_attic['roof_area'] * Math.tan(@roof_angle_rad)
 
-        new_hpxml.frame_floors.add(id: orig_frame_floor.id,
-                                   exterior_adjacent_to: attic_location,
-                                   interior_adjacent_to: HPXML::LocationLivingSpace,
-                                   area: orig_frame_floor.area,
-                                   insulation_assembly_r_value: framefloor_r)
-      end
+      new_hpxml.frame_floors.add(id: "framefloor_adjacent_to_#{orig_attic['roof_type']}",
+                                 exterior_adjacent_to: attic_location,
+                                 interior_adjacent_to: HPXML::LocationLivingSpace,
+                                 area: framefloor_area,  # FIXME: double-check
+                                 insulation_assembly_r_value: framefloor_r)
     end
   end
 
   def self.set_enclosure_slabs(json, new_hpxml)
-    json.foundations.each do |orig_foundation|
-      fnd_location = orig_foundation.to_location
-      fnd_type = orig_foundation.foundation_type
-      fnd_area = orig_foundation.area
+    json['building']['zone']['zone_floor'].each_with_index do |orig_foundation, idx|
+      fnd_location = {'uncond_basement' => HPXML::LocationBasementUnconditioned,
+                      'cond_basement' => HPXML::LocationBasementConditioned,
+                      'vented_crawl' => HPXML::LocationCrawlspaceVented,
+                      'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
+                      'slab_on_grade' => HPXML::LocationLivingSpace}[orig_foundation['foundation_type']]
+      fnd_type = orig_foundation['foundation_type']
+      fnd_area = orig_foundation['floor_area']
 
       # Slab
       slab_id = nil
@@ -307,24 +309,20 @@ class HEScoreRuleset
       slab_thickness = nil
       slab_depth_below_grade = nil
       slab_perimeter_insulation_r_value = nil
-      if fnd_type == HPXML::FoundationTypeSlab
-        orig_foundation.attached_slabs.each do |orig_slab|
-          slab_id = orig_slab.id
-          slab_area = orig_slab.area
-          slab_perimeter_insulation_r_value = orig_slab.perimeter_insulation_r_value
-          slab_depth_below_grade = 0
+      if fnd_type == 'slab_on_grade'
+        slab_id = "slab_on_grade_#{idx}"
+        slab_area = orig_foundation['floor_area']
+        slab_perimeter_insulation_r_value = orig_foundation['foundation_insulation_level']
+        slab_depth_below_grade = 0
+        slab_thickness = 4
+      elsif ['uncond_basement', 'cond_basement', 'vented_crawl', 'unvented_crawl'].include? fnd_type
+        slab_id = "#{fnd_type}_slab_#{idx}"
+        slab_area = orig_foundation['floor_area']
+        slab_perimeter_insulation_r_value = 0
+        if ['uncond_basement', 'cond_basement'].include? fnd_type
           slab_thickness = 4
-        end
-      elsif fnd_type.include?('Basement') || fnd_type.include?('Crawlspace')
-        orig_foundation.attached_frame_floors.each do |orig_frame_floor|
-          slab_id = "#{orig_foundation.id}_slab"
-          slab_area = orig_frame_floor.area
-          slab_perimeter_insulation_r_value = 0
-          if fnd_type.include?('Basement')
-            slab_thickness = 4
-          else
-            slab_thickness = 0
-          end
+        else
+          slab_thickness = 0
         end
       else
         fail "Unexpected foundation type: #{fnd_type}"
@@ -346,76 +344,77 @@ class HEScoreRuleset
   end
 
   def self.set_enclosure_windows(json, new_hpxml)
-    json.windows.each do |orig_window|
-      ufactor = orig_window.ufactor
-      shgc = orig_window.shgc
+    json['building']['zone']['zone_wall'].each do |orig_wall|
+      next unless orig_wall.key?('zone_window')
+
+      orig_window = orig_wall['zone_window']
+      ufactor = orig_window['window_u_value']
+      shgc = orig_window['window_shgc']
       if ufactor.nil?
-        window_frame_type = orig_window.frame_type
-        ufactor, shgc = get_window_ufactor_shgc(window_frame_type,
-                                                orig_window.aluminum_thermal_break,
-                                                orig_window.glass_layers,
-                                                orig_window.glass_type,
-                                                orig_window.gas_fill)
+        ufactor, shgc = get_window_skylight_ufactor_shgc_from_doe2code(orig_window['window_code'])
       end
 
       interior_shading_factor_summer, interior_shading_factor_winter = Constructions.get_default_interior_shading_factors()
       exterior_shading_factor_summer = 1.0
       exterior_shading_factor_winter = 1.0
-      if orig_window.exterior_shading_type == 'solar screens'
-        # Summer only, total shading factor reduced to 0.29
-        exterior_shading_factor_summer = 0.29 / interior_shading_factor_summer # Overall shading factor is interior multiplied by exterior
-      end
+      # FIXME: Can one specify solar screens in hescore json?
+      # if orig_window.exterior_shading_type == 'solar screens'
+      #   # Summer only, total shading factor reduced to 0.29
+      #   exterior_shading_factor_summer = 0.29 / interior_shading_factor_summer # Overall shading factor is interior multiplied by exterior
+      # end
 
       # Add one HPXML window per side of the house with only the overhangs from the roof.
-      new_hpxml.windows.add(id: orig_window.id,
-                            area: orig_window.area,
-                            azimuth: orientation_to_azimuth(orig_window.orientation),
+      new_hpxml.windows.add(id: "#{orig_wall['side']}_window",
+                            area: orig_window['window_area'],
+                            azimuth: sanitize_azimuth(wall_orientation_to_azimuth(orig_wall['side'])),
                             ufactor: ufactor,
                             shgc: shgc,
                             overhangs_depth: 1.0,
                             overhangs_distance_to_top_of_window: 0.0,
                             overhangs_distance_to_bottom_of_window: @ceil_height * @ncfl_ag,
-                            wall_idref: orig_window.wall_idref,
+                            wall_idref: "#{orig_wall['side']}_wall",
                             interior_shading_factor_summer: interior_shading_factor_summer,
                             interior_shading_factor_winter: interior_shading_factor_winter,
                             exterior_shading_factor_summer: exterior_shading_factor_summer,
                             exterior_shading_factor_winter: exterior_shading_factor_winter)
-    end
+    end 
   end
 
   def self.set_enclosure_skylights(json, new_hpxml)
-    json.skylights.each do |orig_skylight|
-      ufactor = orig_skylight.ufactor
-      shgc = orig_skylight.shgc
+    json['building']['zone']['zone_roof'].each do |orig_roof|
+      next unless orig_roof.key?('zone_skylight')
+
+      orig_skylight = orig_roof['zone_skylight']
+      ufactor = orig_skylight['skylight_u_value']
+      shgc = orig_skylight['skylight_shgc']
       if ufactor.nil?
-        skylight_frame_type = orig_skylight.frame_type
-        ufactor, shgc = get_skylight_ufactor_shgc(skylight_frame_type,
-                                                  orig_skylight.aluminum_thermal_break,
-                                                  orig_skylight.glass_layers,
-                                                  orig_skylight.glass_type,
-                                                  orig_skylight.gas_fill)
+        ufactor, shgc = get_window_skylight_ufactor_shgc_from_doe2code(orig_skylight['skylight_code'])
       end
 
       interior_shading_factor_summer = 1.0
       interior_shading_factor_winter = 1.0
       exterior_shading_factor_summer = 1.0
       exterior_shading_factor_winter = 1.0
-      if orig_skylight.exterior_shading_type == 'solar screens'
-        # Year-round, total shading factor reduced to 0.29
-        exterior_shading_factor_summer = 0.29
-        exterior_shading_factor_winter = 0.29
+      # FIXME: Can one specify solar screens in hescore json?
+      # if orig_skylight.exterior_shading_type == 'solar screens'
+      #   # Year-round, total shading factor reduced to 0.29
+      #   exterior_shading_factor_summer = 0.29
+      #   exterior_shading_factor_winter = 0.29
+      # end
+
+      if @is_townhouse
+        roof_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270]
+      else
+        roof_azimuths = [@bldg_azimuth, @bldg_azimuth + 180]
       end
-
-      new_hpxml.roofs.each do |new_roof|
-        next unless new_roof.id.start_with?(orig_skylight.roof_idref)
-
+      roof_azimuths.each_with_index do |roof_azimuth, idx|  # FIXME: double-check
         skylight_area = orig_skylight.area / 2.0
-        new_hpxml.skylights.add(id: "#{orig_skylight.id}_#{new_roof.id}",
+        new_hpxml.skylights.add(id: "#{orig_roof['roof_name']}_#{idx}_skylight",
                                 area: skylight_area,
-                                azimuth: new_roof.azimuth,
+                                azimuth: roof_azimuth,
                                 ufactor: ufactor,
                                 shgc: shgc,
-                                roof_idref: new_roof.id,
+                                roof_idref: "#{orig_roof['roof_name']}_#{idx}",
                                 interior_shading_factor_summer: interior_shading_factor_summer,
                                 interior_shading_factor_winter: interior_shading_factor_winter,
                                 exterior_shading_factor_summer: exterior_shading_factor_summer,
@@ -426,15 +425,16 @@ class HEScoreRuleset
 
   def self.set_enclosure_doors(json, new_hpxml)
     front_wall = nil
-    json.walls.each do |orig_wall|
-      next if orig_wall.orientation != @bldg_orient
+    json['building']['zone']['zone_wall'].each do |orig_wall|
+      wall_orientation = sanitize_azimuth(wall_orientation_to_azimuth(orig_wall['side']))
+      next if wall_orientation != @bldg_orient
 
       front_wall = orig_wall
     end
     fail 'Could not find front wall.' if front_wall.nil?
 
     new_hpxml.doors.add(id: 'Door',
-                        wall_idref: front_wall.id,
+                        wall_idref: 'front_wall',
                         area: 40,
                         azimuth: orientation_to_azimuth(@bldg_orient),
                         r_value: 1.0 / 0.51)
@@ -1066,65 +1066,52 @@ def get_roof_effective_r_from_doe2code(doe2code)
   return val
 end
 
-def get_ceiling_assembly_r(r_cavity)
-  # Ceiling Assembly R-value
-  val = { 0.0 => 2.2,              # ecwf00
-          3.0 => 5.0,              # ecwf03
-          6.0 => 7.6,              # ecwf06
-          9.0 => 10.0,             # ecwf09
-          11.0 => 10.9,            # ecwf11
-          19.0 => 19.2,            # ecwf19
-          21.0 => 21.3,            # ecwf21
-          25.0 => 25.6,            # ecwf25
-          30.0 => 30.3,            # ecwf30
-          38.0 => 38.5,            # ecwf38
-          44.0 => 43.5,            # ecwf44
-          49.0 => 50.0,            # ecwf49
-          60.0 => 58.8 }[r_cavity] # ecwf60
-  return val if not val.nil?
+def get_ceiling_effective_r_from_doe2code(doe2code)
+  val = nil
+  CSV.foreach(File.join(File.dirname(__FILE__), 'lu_ceiling_eff_rvalue.csv'), headers: true) do |row|
+    next unless row['doe2code'] == doe2code
 
-  fail "Could not get default ceiling assembly R-value for R-cavity '#{r_cavity}'"
+    val = Float(row['Eff-R-value'])
+    break
+  end
+  return val
 end
 
-def get_floor_assembly_r(r_cavity)
-  # Floor Assembly R-value
-  val = { 0.0 => 5.9,              # efwf00ca
-          11.0 => 15.6,            # efwf11ca
-          13.0 => 17.2,            # efwf13ca
-          15.0 => 18.5,            # efwf15ca
-          19.0 => 22.2,            # efwf19ca
-          21.0 => 23.8,            # efwf21ca
-          25.0 => 27.0,            # efwf25ca
-          30.0 => 31.3,            # efwf30ca
-          38.0 => 37.0 }[r_cavity] # efwf38ca
-  return val if not val.nil?
+def get_floor_effective_r_from_doe2code(doe2code)
+  val = nil
+  CSV.foreach(File.join(File.dirname(__FILE__), 'lu_floor_eff_rvalue.csv'), headers: true) do |row|
+    next unless row['doe2code'] == doe2code
 
-  fail "Could not get default floor assembly R-value for R-cavity '#{r_cavity}'"
+    val = Float(row['Eff-R-value'])
+    break
+  end
+  return val
 end
 
-def get_window_ufactor_shgc(frame_type, thermal_break, glass_layers, glass_type, gas_fill)
-  key = [frame_type, thermal_break, glass_layers, glass_type, gas_fill]
-  vals = { [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, nil, nil] => [1.27, 0.75], # scna
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, nil, nil] => [0.89, 0.64], # scnw
-           [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, HPXML::WindowGlazingTintedReflective, nil] => [1.27, 0.64], # stna
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, HPXML::WindowGlazingTintedReflective, nil] => [0.89, 0.54], # stnw
-           [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [0.81, 0.67], # dcaa
-           [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [0.60, 0.67], # dcab
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [0.51, 0.56], # dcaw
-           [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingTintedReflective, HPXML::WindowGasAir] => [0.81, 0.55], # dtaa
-           [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingTintedReflective, HPXML::WindowGasAir] => [0.60, 0.55], # dtab
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingTintedReflective, HPXML::WindowGasAir] => [0.51, 0.46], # dtaw
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingLowE, HPXML::WindowGasAir] => [0.42, 0.52], # dpeaw
-           [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingLowE, HPXML::WindowGasArgon] => [0.47, 0.62], # dpeaab
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingLowE, HPXML::WindowGasArgon] => [0.39, 0.52], # dpeaaw
-           [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingReflective, HPXML::WindowGasAir] => [0.67, 0.37], # dseaa
-           [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingReflective, HPXML::WindowGasAir] => [0.47, 0.37], # dseab
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingReflective, HPXML::WindowGasAir] => [0.39, 0.31], # dseaw
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingReflective, HPXML::WindowGasArgon] => [0.36, 0.31], # dseaaw
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersTriplePane, HPXML::WindowGlazingLowE, HPXML::WindowGasArgon] => [0.27, 0.31] }[key] # thmabw
-  return vals if not vals.nil?
+def get_window_skylight_ufactor_shgc_from_doe2code(doe2code)
+  window_ufactor_shgc = {
+    'scna' => [1.27, 0.75],
+    'scnw' => [0.89, 0.64],
+    'stna' => [1.27, 0.64],
+    'stnw' => [0.89, 0.54],
+    'dcaa' => [0.81, 0.67],
+    'dcab' => [0.60, 0.67],
+    'dcaw' => [0.51, 0.56],
+    'dtaa' => [0.81, 0.55],
+    'dtab' => [0.60, 0.55],
+    'dtaw' => [0.51, 0.46],
+    'dpeaw' => [0.42, 0.52],
+    'dpeaab' => [0.47, 0.62],
+    'dpeaaw' => [0.39, 0.52],
+    'dseaa' => [0.67, 0.37],
+    'dseab' => [0.47, 0.37],
+    'dseaw' => [0.39, 0.31],
+    'dseaaw' => [0.36, 0.31],
+    'thmabw' => [0.27, 0.31]
+  }[doe2code]
+  return window_ufactor_shgc if not window_ufactor_shgc.nil?
 
-  fail "Could not get default window U/SHGC for frame type '#{frame_type}' and glass layers '#{glass_layers}' and glass type '#{glass_type}' and gas fill '#{gas_fill}'"
+  fail "Could not get default window U/SHGC for window code '#{doe2code}'"
 end
 
 def get_skylight_ufactor_shgc(frame_type, thermal_break, glass_layers, glass_type, gas_fill)
