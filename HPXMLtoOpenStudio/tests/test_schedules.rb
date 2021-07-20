@@ -8,6 +8,19 @@ require_relative '../measure.rb'
 require_relative '../resources/util.rb'
 
 class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
+  def setup
+    @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
+    @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
+    @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
+    @tmp_output_path = File.join(@sample_files_path, 'tmp_output')
+    FileUtils.mkdir_p(@tmp_output_path)
+  end
+
+  def teardown
+    File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
+    FileUtils.rm_rf(@tmp_output_path)
+  end
+
   def sample_files_dir
     return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
@@ -21,6 +34,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     schedule_rulesets = 17
     schedule_fixed_intervals = 1
     schedule_files = 0
+
     assert_equal(schedule_constants, model.getScheduleConstants.size)
     assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
     assert_equal(schedule_fixed_intervals, model.getScheduleFixedIntervals.size)
@@ -37,11 +51,66 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     schedule_rulesets = 5
     schedule_fixed_intervals = 1
     schedule_files = 14
+
     assert_equal(schedule_constants, model.getScheduleConstants.size)
     assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
     assert_equal(schedule_fixed_intervals, model.getScheduleFixedIntervals.size)
     assert_equal(schedule_files, model.getScheduleFiles.size)
     assert_equal(model.getSchedules.size, schedule_constants + schedule_rulesets + schedule_fixed_intervals + schedule_files)
+
+    schedule_file_names = []
+    model.getScheduleFiles.each do |schedule_file|
+      schedule_file_names << "#{schedule_file.name}"
+    end
+    assert(schedule_file_names.include?('occupants'))
+    assert(schedule_file_names.include?('lighting_interior'))
+    assert(schedule_file_names.include?('lighting_exterior'))
+    assert(!schedule_file_names.include?('lighting_garage'))
+    assert(!schedule_file_names.include?('lighting_exterior_holiday'))
+    assert(schedule_file_names.include?('cooking_range'))
+    assert(schedule_file_names.include?('refrigerator'))
+    assert(!schedule_file_names.include?('extra_refrigerator'))
+    assert(!schedule_file_names.include?('freezer'))
+    assert(schedule_file_names.include?('dishwasher'))
+    assert(schedule_file_names.include?('dishwasher_power'))
+    assert(schedule_file_names.include?('clothes_washer'))
+    assert(schedule_file_names.include?('clothes_washer_power'))
+    assert(schedule_file_names.include?('clothes_dryer'))
+    assert(schedule_file_names.include?('clothes_dryer_exhaust'))
+    assert(schedule_file_names.include?('fixtures'))
+    assert(!schedule_file_names.include?('ceiling_fan'))
+    assert(schedule_file_names.include?('plug_loads_other'))
+    assert(schedule_file_names.include?('plug_loads_tv'))
+    assert(!schedule_file_names.include?('plug_loads_vehicle'))
+    assert(!schedule_file_names.include?('plug_loads_well_pump'))
+    assert(!schedule_file_names.include?('fuel_loads_grill'))
+    assert(!schedule_file_names.include?('fuel_loads_lighting'))
+    assert(!schedule_file_names.include?('fuel_loads_fireplace'))
+    assert(!schedule_file_names.include?('pool_pump'))
+    assert(!schedule_file_names.include?('pool_heater'))
+    assert(!schedule_file_names.include?('hot_tub_pump'))
+    assert(!schedule_file_names.include?('hot_tub_heater'))
+
+    # add a pool
+    hpxml.pools.add(id: 'Pool',
+                    type: HPXML::TypeUnknown,
+                    pump_type: HPXML::TypeUnknown,
+                    pump_kwh_per_year: 2700,
+                    heater_type: HPXML::HeaterTypeGas,
+                    heater_load_units: HPXML::UnitsThermPerYear,
+                    heater_load_value: 500)
+
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(args_hash)
+
+    schedule_file_names = []
+    model.getScheduleFiles.each do |schedule_file|
+      schedule_file_names << "#{schedule_file.name}"
+    end
+    assert(schedule_file_names.include?('pool_pump'))
+    assert(schedule_file_names.include?('pool_heater'))
   end
 
   def test_stochastic_vacancy_schedules
@@ -53,6 +122,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     schedule_rulesets = 5
     schedule_fixed_intervals = 1
     schedule_files = 14
+
     assert_equal(schedule_constants, model.getScheduleConstants.size)
     assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
     assert_equal(schedule_fixed_intervals, model.getScheduleFixedIntervals.size)
@@ -69,6 +139,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     schedule_rulesets = 5
     schedule_fixed_intervals = 1
     schedule_files = 14
+
     assert_equal(schedule_constants, model.getScheduleConstants.size)
     assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
     assert_equal(schedule_fixed_intervals, model.getScheduleFixedIntervals.size)
