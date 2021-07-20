@@ -1260,12 +1260,13 @@ class SchedulesFile
     import(col_names: col_names)
 
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
-    tmpfile = Tempfile.new('schedules')
-    tmpfile.write(File.open(@schedules_path).read)
-    @tmp_schedules_path = tmpfile.path.to_s
-
     set_vacancy
     set_outage
+
+    tmpfile = Tempfile.new('schedules')
+    @tmp_schedules_path = tmpfile.path.to_s
+    export
+
     get_external_file
   end
 
@@ -1280,6 +1281,20 @@ class SchedulesFile
       validate_schedule(col_name: col[0], values: values)
       @schedules[col[0]] = values
     end
+  end
+
+  def export
+    return false if @tmp_schedules_path.nil?
+
+    CSV.open(@tmp_schedules_path, 'wb') do |csv|
+      csv << @tmp_schedules.keys
+      rows = @tmp_schedules.values.transpose
+      rows.each do |row|
+        csv << row
+      end
+    end
+
+    return true
   end
 
   def schedules
@@ -1429,8 +1444,6 @@ class SchedulesFile
         @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules['vacancy'][i])
       end
     end
-
-    export
   end
 
   def set_outage
@@ -1446,21 +1459,5 @@ class SchedulesFile
         @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules['outage'][i])
       end
     end
-
-    export
-  end
-
-  def export
-    return false if @tmp_schedules_path.nil?
-
-    CSV.open(@tmp_schedules_path, 'wb') do |csv|
-      csv << @tmp_schedules.keys
-      rows = @tmp_schedules.values.transpose
-      rows.each do |row|
-        csv << row
-      end
-    end
-
-    return true
   end
 end
