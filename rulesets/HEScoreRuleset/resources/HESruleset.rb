@@ -26,7 +26,7 @@ class HEScoreRuleset
     set_enclosure_slabs(json, new_hpxml)
     set_enclosure_windows(json, new_hpxml)
     set_enclosure_skylights(json, new_hpxml)
-    # set_enclosure_doors(json, new_hpxml)
+    set_enclosure_doors(json, new_hpxml)
 
     # # Systems
     # set_systems_hvac(json, new_hpxml)
@@ -426,15 +426,14 @@ class HEScoreRuleset
   def self.set_enclosure_doors(json, new_hpxml)
     front_wall = nil
     json['building']['zone']['zone_wall'].each do |orig_wall|
-      wall_orientation = sanitize_azimuth(wall_orientation_to_azimuth(orig_wall['side']))
-      next if wall_orientation != @bldg_orient
+      next if orig_wall['side'] != 'front'
 
       front_wall = orig_wall
     end
     fail 'Could not find front wall.' if front_wall.nil?
 
     new_hpxml.doors.add(id: 'Door',
-                        wall_idref: 'front_wall',
+                        wall_idref: "#{front_wall['side']}_wall",
                         area: 40,
                         azimuth: orientation_to_azimuth(@bldg_orient),
                         r_value: 1.0 / 0.51)
