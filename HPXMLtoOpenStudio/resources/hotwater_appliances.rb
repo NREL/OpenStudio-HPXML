@@ -113,8 +113,9 @@ class HotWaterAndAppliances
       rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_or_freezer_energy(refrigerator, refrigerator.additional_properties.space.nil?)
 
       if not schedules_file.nil?
-        fridge_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: 'refrigerator', annual_kwh: rf_annual_kwh)
-        fridge_schedule = schedules_file.create_schedule_file(col_name: 'refrigerator')
+        fridge_col_name = refrigerator.primary_indicator ? 'refrigerator' : 'extra_refrigerator'
+        fridge_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: fridge_col_name, annual_kwh: rf_annual_kwh)
+        fridge_schedule = schedules_file.create_schedule_file(col_name: fridge_col_name)
       else
         fridge_weekday_sch = refrigerator.weekday_fractions
         fridge_weekend_sch = refrigerator.weekend_fractions

@@ -466,9 +466,6 @@ class Constants
       'clothes_washer_power' => true,
       'clothes_dryer' => true,
       'clothes_dryer_exhaust' => true,
-      'baths' => true,
-      'showers' => true,
-      'sinks' => true,
       'fixtures' => true,
       'ceiling_fan' => true,
       'plug_loads_other' => true,
@@ -482,7 +479,6 @@ class Constants
       'pool_heater' => false,
       'hot_tub_pump' => false,
       'hot_tub_heater' => false,
-      'sleep' => nil,
       'vacancy' => nil
     }
   end
