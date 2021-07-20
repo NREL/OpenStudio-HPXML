@@ -28,27 +28,27 @@ class HEScoreRuleset
     set_enclosure_skylights(json, new_hpxml)
     set_enclosure_doors(json, new_hpxml)
 
-    # # Systems
+    # Systems
     # set_systems_hvac(json, new_hpxml)
     set_systems_mechanical_ventilation(json, new_hpxml)
     set_systems_water_heater(json, new_hpxml)
     set_systems_water_heating_use(json, new_hpxml)
     set_systems_photovoltaics(json, new_hpxml)
 
-    # # Appliances
-    # set_appliances_clothes_washer(json, new_hpxml)
-    # set_appliances_clothes_dryer(json, new_hpxml)
-    # set_appliances_dishwasher(json, new_hpxml)
-    # set_appliances_refrigerator(json, new_hpxml)
-    # set_appliances_cooking_range_oven(json, new_hpxml)
+    # Appliances
+    set_appliances_clothes_washer(json, new_hpxml)
+    set_appliances_clothes_dryer(json, new_hpxml)
+    set_appliances_dishwasher(json, new_hpxml)
+    set_appliances_refrigerator(json, new_hpxml)
+    set_appliances_cooking_range_oven(json, new_hpxml)
 
-    # # Lighting
-    # set_lighting(json, new_hpxml)
-    # set_ceiling_fans(json, new_hpxml)
+    # Lighting
+    set_lighting(json, new_hpxml)
+    set_ceiling_fans(json, new_hpxml)
 
-    # # MiscLoads
-    # set_misc_plug_loads(json, new_hpxml)
-    # set_misc_television(json, new_hpxml)
+    # MiscLoads
+    set_misc_plug_loads(json, new_hpxml)
+    set_misc_television(json, new_hpxml)
 
     # # Prevent downstream errors in OS-HPXML
     # adjust_floor_areas(new_hpxml)
@@ -192,7 +192,7 @@ class HEScoreRuleset
                             emittance: 0.9,
                             pitch: Math.tan(@roof_angle_rad) * 12,
                             radiant_barrier: has_radiant_barrier,
-                            radiant_barrier_grade: 1,  # FIXME: json doesn't seem to provide radiant barrier grade
+                            radiant_barrier_grade: 1,
                             insulation_assembly_r_value: roof_r)
       end
     end
