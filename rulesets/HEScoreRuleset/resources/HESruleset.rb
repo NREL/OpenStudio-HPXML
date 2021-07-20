@@ -30,10 +30,10 @@ class HEScoreRuleset
 
     # # Systems
     # set_systems_hvac(json, new_hpxml)
-    # set_systems_mechanical_ventilation(json, new_hpxml)
-    # set_systems_water_heater(json, new_hpxml)
-    # set_systems_water_heating_use(json, new_hpxml)
-    # set_systems_photovoltaics(json, new_hpxml)
+    set_systems_mechanical_ventilation(json, new_hpxml)
+    set_systems_water_heater(json, new_hpxml)
+    set_systems_water_heating_use(json, new_hpxml)
+    set_systems_photovoltaics(json, new_hpxml)
 
     # # Appliances
     # set_appliances_clothes_washer(json, new_hpxml)
@@ -734,62 +734,74 @@ class HEScoreRuleset
   end
 
   def self.set_systems_water_heater(json, new_hpxml)
-    json.water_heating_systems.each do |orig_water_heater|
-      energy_factor = orig_water_heater.energy_factor
-      fuel_type = orig_water_heater.fuel_type
-      water_heater_type = orig_water_heater.water_heater_type
-      year_installed = orig_water_heater.year_installed
-      energy_star = (orig_water_heater.third_party_certification == HPXML::CertificationEnergyStar)
+    return unless json['building']['systems'].key? ('domestic_hot_water')
+    
+    orig_water_heater = json['building']['systems']['domestic_hot_water']
+    energy_factor = orig_water_heater['energy_factor']
+    fuel_type = {
+      'electric' => HPXML::FuelTypeElectricity,
+      'natural_gas' => HPXML::FuelTypeNaturalGas,
+      'lpg' => HPXML::FuelTypePropane,
+      'fuel_oil' => HPXML::FuelTypeOil}[orig_water_heater['fuel_primary']]
+    water_heater_type = {
+      'storage' => HPXML::WaterHeaterTypeStorage,
+      'indirect' => HPXML::WaterHeaterTypeCombiStorage,
+      'tankless' => HPXML::WaterHeaterTypeTankless,
+      'tankless_coil' => HPXML::WaterHeaterTypeCombiTankless,
+      'heat_pump' => HPXML::WaterHeaterTypeHeatPump}[orig_water_heater['type']]
+    year_installed = orig_water_heater['year']
+    # FIXME: can one specify third party certification in hescore json?
+    # energy_star = (orig_water_heater.third_party_certification == HPXML::CertificationEnergyStar)
 
-      if not energy_factor.nil?
-        # Do nothing, we already have the energy factor
-      elsif not orig_water_heater.uniform_energy_factor.nil?
+    if not energy_factor.nil?
+      if orig_water_heater['efficiency_method'] == 'uef'
         # Convert to EF
         # FUTURE: Remove this conversion and use UEF directly; requires FHR input/assumption for storage water heaters
-        energy_factor = Waterheater.calc_ef_from_uef(orig_water_heater)
-      elsif energy_star
-        energy_factor = lookup_water_heater_efficiency(year_installed,
-                                                       fuel_type,
-                                                       'energy_star')
-      elsif not year_installed.nil?
-        energy_factor = lookup_water_heater_efficiency(year_installed,
-                                                       fuel_type)
+        energy_factor = Waterheater.calc_ef_from_uef(orig_water_heater)  # FIXME: Cannot use this function!
       end
-
-      fail 'Water Heater Type must be provided' if water_heater_type.nil?
-      fail 'Electric water heaters must be heat pump water heaters to be Energy Star qualified' if energy_star && (fuel_type == HPXML::FuelTypeElectricity) && (water_heater_type != HPXML::WaterHeaterTypeHeatPump)
-
-      heating_capacity = nil
-      if water_heater_type == HPXML::WaterHeaterTypeStorage
-        heating_capacity = get_default_water_heater_capacity(fuel_type)
-      end
-      tank_volume = nil
-      if water_heater_type == HPXML::WaterHeaterTypeCombiStorage
-        tank_volume = get_default_water_heater_volume(HPXML::FuelTypeElectricity)
-      # Set default fuel_type to call function : get_default_water_heater_volume, not passing this input to EP-HPXML
-      elsif (water_heater_type != HPXML::WaterHeaterTypeTankless) && (water_heater_type != HPXML::WaterHeaterTypeCombiTankless)
-        tank_volume = get_default_water_heater_volume(fuel_type)
-      end
-
-      # Water heater location
-      if @has_cond_bsmnt
-        water_heater_location = HPXML::LocationBasementConditioned
-      elsif @has_uncond_bsmnt
-        water_heater_location = HPXML::LocationBasementUnconditioned
-      else
-        water_heater_location = HPXML::LocationLivingSpace
-      end
-
-      new_hpxml.water_heating_systems.add(id: orig_water_heater.id,
-                                          fuel_type: fuel_type,
-                                          water_heater_type: water_heater_type,
-                                          location: water_heater_location,
-                                          tank_volume: tank_volume,
-                                          fraction_dhw_load_served: 1.0,
-                                          heating_capacity: heating_capacity,
-                                          energy_factor: energy_factor,
-                                          related_hvac_idref: orig_water_heater.related_hvac_idref)
+      # Do nothing if efficiency method is 'user', we already have the energy factor
+    # elsif energy_star  # FIXME: can one specify third party certification in hescore json?
+    #   energy_factor = lookup_water_heater_efficiency(year_installed,
+    #                                                  fuel_type,
+    #                                                  'energy_star')
+    elsif not year_installed.nil?
+      energy_factor = lookup_water_heater_efficiency(year_installed,
+                                                     fuel_type)
     end
+
+    fail 'Water Heater Type must be provided' if water_heater_type.nil?
+    # fail 'Electric water heaters must be heat pump water heaters to be Energy Star qualified' if energy_star && (fuel_type == HPXML::FuelTypeElectricity) && (water_heater_type != HPXML::WaterHeaterTypeHeatPump)
+
+    heating_capacity = nil
+    if water_heater_type == HPXML::WaterHeaterTypeStorage
+      heating_capacity = get_default_water_heater_capacity(fuel_type)
+    end
+    tank_volume = nil
+    if water_heater_type == HPXML::WaterHeaterTypeCombiStorage
+      tank_volume = get_default_water_heater_volume(HPXML::FuelTypeElectricity)
+    # Set default fuel_type to call function : get_default_water_heater_volume, not passing this input to EP-HPXML
+    elsif (water_heater_type != HPXML::WaterHeaterTypeTankless) && (water_heater_type != HPXML::WaterHeaterTypeCombiTankless)
+      tank_volume = get_default_water_heater_volume(fuel_type)
+    end
+
+    # Water heater location
+    if @has_cond_bsmnt
+      water_heater_location = HPXML::LocationBasementConditioned
+    elsif @has_uncond_bsmnt
+      water_heater_location = HPXML::LocationBasementUnconditioned
+    else
+      water_heater_location = HPXML::LocationLivingSpace
+    end
+
+    new_hpxml.water_heating_systems.add(id: 'WaterHeater',
+                                        fuel_type: fuel_type,
+                                        water_heater_type: water_heater_type,
+                                        location: water_heater_location,
+                                        tank_volume: tank_volume,
+                                        fraction_dhw_load_served: 1.0,
+                                        heating_capacity: heating_capacity,
+                                        energy_factor: energy_factor,
+                                        related_hvac_idref: nil)  #orig_water_heater.related_hvac_idref)  # FIXME: Need to discuss it with Scott
   end
 
   def self.set_systems_water_heating_use(json, new_hpxml)
@@ -803,25 +815,26 @@ class HEScoreRuleset
   end
 
   def self.set_systems_photovoltaics(json, new_hpxml)
-    return if json.pv_systems.size == 0
+    return unless json['building']['systems'].key?('generation')
+    return unless json['building']['systems']['generation'].key?('solar_electric')
 
-    orig_pv_system = json.pv_systems[0]
+    orig_pv_system = json['building']['systems']['generation']['solar_electric']
 
-    max_power_output = orig_pv_system.max_power_output
+    max_power_output = orig_pv_system['system_capacity']
     if max_power_output.nil?
       # Estimate from year and # modules
-      module_power = PV.calc_module_power_from_year(orig_pv_system.year_modules_manufactured) # W/panel
-      max_power_output = orig_pv_system.number_of_panels * module_power
+      module_power = PV.calc_module_power_from_year(orig_pv_system['year']) # W/panel
+      max_power_output = orig_pv_system['num_panels'] * module_power
     end
 
     new_hpxml.pv_systems.add(id: 'PVSystem',
                              location: HPXML::LocationRoof,
                              module_type: HPXML::PVModuleTypeStandard,
                              tracking: HPXML::PVTrackingTypeFixed,
-                             array_azimuth: orientation_to_azimuth(orig_pv_system.array_orientation),
+                             array_azimuth: orientation_to_azimuth(orig_pv_system['array_azimuth']),
                              array_tilt: @roof_angle,
                              max_power_output: max_power_output,
-                             year_modules_manufactured: orig_pv_system.year_modules_manufactured)
+                             year_modules_manufactured: orig_pv_system['year'])
   end
 
   def self.set_appliances_clothes_washer(json, new_hpxml)
@@ -1309,14 +1322,14 @@ def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fn
 end
 
 def orientation_to_azimuth(orientation)
-  return { HPXML::OrientationNortheast => 45,
-           HPXML::OrientationEast => 90,
-           HPXML::OrientationSoutheast => 135,
-           HPXML::OrientationSouth => 180,
-           HPXML::OrientationSouthwest => 225,
-           HPXML::OrientationWest => 270,
-           HPXML::OrientationNorthwest => 315,
-           HPXML::OrientationNorth => 0 }[orientation]
+  return { 'north_east' => 45,
+           'east' => 90,
+           'south_east' => 135,
+           'south' => 180,
+           'south_west' => 225,
+           'west' => 270,
+           'north_west' => 315,
+           'north' => 0 }[orientation]
 end
 
 def wall_orientation_to_azimuth(orientation)
