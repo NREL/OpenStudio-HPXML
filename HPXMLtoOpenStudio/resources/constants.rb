@@ -479,7 +479,8 @@ class Constants
       'pool_heater' => false,
       'hot_tub_pump' => false,
       'hot_tub_heater' => false,
-      'vacancy' => nil
+      'vacancy' => nil,
+      'outage' => nil
     }
   end
 end

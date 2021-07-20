@@ -1246,8 +1246,8 @@ class Schedule
 end
 
 class SchedulesFile
-  def initialize(runner:,
-                 model:,
+  def initialize(runner: nil,
+                 model: nil,
                  schedules_path:,
                  col_names:,
                  **remainder)
@@ -1255,29 +1255,46 @@ class SchedulesFile
     @validated = true
     @runner = runner
     @model = model
-    @schedules_path = schedules_path
-    @external_file = get_external_file
+    dir = File.dirname(schedules_path)
+    file = File.basename(schedules_path)
+    @schedules_path = File.join(dir, "tmp_#{file}")
+    FileUtils.cp(schedules_path, @schedules_path)
     import(col_names: col_names)
+    @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
+    set_vacancy
+    set_outage
+    @external_file = get_external_file
   end
 
-  def validated?
-    return @validated
+  def import(col_names:)
+    @schedules = {}
+    columns = CSV.read(@schedules_path).transpose
+    columns.each do |col|
+      next if not col_names.include? col[0]
+
+      values = col[1..-1].reject { |v| v.nil? }
+      values = values.map { |v| v.to_f }
+      validate_schedule(col_name: col[0], values: values)
+      @schedules[col[0]] = values
+    end
   end
 
   def schedules
     return @schedules
   end
 
+  def validated?
+    return @validated
+  end
+
+  def external_file
+    return @external_file
+  end
+
   def get_col_index(col_name:)
     headers = CSV.open(@schedules_path, 'r') { |csv| csv.first }
     col_num = headers.index(col_name)
     return col_num
-  end
-
-  def get_col_name(col_index:)
-    headers = CSV.open(@schedules_path, 'r') { |csv| csv.first }
-    col_name = headers[col_index]
-    return col_name
   end
 
   def create_schedule_file(col_name:,
@@ -1310,8 +1327,6 @@ class SchedulesFile
 
   # the equivalent number of hours in the year, if the schedule was at full load (1.0)
   def annual_equivalent_full_load_hrs(col_name:)
-    # import(col_names: [col_name])
-
     num_hrs_in_year = Constants.NumHoursInYear(@model)
     schedule_length = @schedules[col_name].length
     min_per_item = 60.0 / (schedule_length / num_hrs_in_year)
@@ -1384,10 +1399,6 @@ class SchedulesFile
     end
   end
 
-  def external_file
-    return @external_file
-  end
-
   def get_external_file
     if File.exist? @schedules_path
       external_file = OpenStudio::Model::ExternalFile::getExternalFile(@model, @schedules_path)
@@ -1399,103 +1410,51 @@ class SchedulesFile
   end
 
   def set_vacancy
-    return unless @schedules.keys.include? 'vacancy'
-    return if @schedules['vacancy'].all? { |i| i == 0 }
+    return unless @tmp_schedules.keys.include? 'vacancy'
+    return if @tmp_schedules['vacancy'].all? { |i| i == 0 }
 
     col_names = Constants.ScheduleGeneratorColNames
 
-    @schedules[col_names.keys[0]].each_with_index do |ts, i|
+    @tmp_schedules[col_names.keys[0]].each_with_index do |ts, i|
       col_names.keys.each do |col_name|
+        next if col_names[col_name].nil?
         next unless col_names[col_name] # skip those unaffected by vacancy
 
-        @schedules[col_name][i] *= (1.0 - @schedules['vacancy'][i])
+        @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules['vacancy'][i])
       end
     end
 
-    update(col_names: col_names.keys)
+    export
   end
 
-  def set_outage(outage_start_date:,
-                 outage_end_date:)
-
-    minutes_per_step = 60
-    if @model.getSimulationControl.timestep.is_initialized
-      minutes_per_step = 60 / @model.getSimulationControl.timestep.get.numberOfTimestepsPerHour
-    end
+  def set_outage
+    return unless @tmp_schedules.keys.include? 'outage'
+    return if @tmp_schedules['outage'].all? { |i| i == 0 }
 
     col_names = Constants.ScheduleGeneratorColNames
 
-    sec_per_step = minutes_per_step * 60.0
-    col_names.each do |col_name, val|
-      next if col_name == 'occupants'
-      next if val.nil?
+    @tmp_schedules[col_names.keys[0]].each_with_index do |ts, i|
+      col_names.keys.each do |col_name|
+        next if col_names[col_name].nil?
 
-      ts = Time.new(outage_start_date.year, 'Jan', 1)
-      @schedules[col_name].each_with_index do |step, i|
-        if outage_start_date <= ts && ts < outage_end_date # in the outage period
-          @schedules[col_name][i] = 0.0
-        end
-        ts += sec_per_step
+        @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules['outage'][i])
       end
     end
 
-    update(col_names: col_names.keys)
-  end
-
-  def import(col_names:)
-    @schedules = {}
-    col_names += ['vacancy']
-    columns = CSV.read(@schedules_path).transpose
-    columns.each do |col|
-      next if not col_names.include? col[0]
-
-      values = col[1..-1].reject { |v| v.nil? }
-      values = values.map { |v| v.to_f }
-      validate_schedule(col_name: col[0], values: values)
-      @schedules[col[0]] = values
-    end
+    export
   end
 
   def export
     return false if @schedules_path.nil?
 
     CSV.open(@schedules_path, 'wb') do |csv|
-      csv << @schedules.keys
-      rows = @schedules.values.transpose
+      csv << @tmp_schedules.keys
+      rows = @tmp_schedules.values.transpose
       rows.each do |row|
         csv << row
       end
     end
 
     return true
-  end
-
-  def update(col_names:)
-    return false if @schedules_path.nil?
-
-    # need to update schedules csv in generated_files folder (alongside run folder) since this is what the simulation points to
-    begin
-      schedules_path = File.expand_path(File.join(File.dirname(@schedules_path), '../generated_files', File.basename(@schedules_path))) # called from cli
-      columns = CSV.read(schedules_path).transpose
-    rescue
-      schedules_path = File.expand_path(File.join(File.dirname(@schedules_path), '../../../files', File.basename(@schedules_path))) # testing
-      columns = CSV.read(schedules_path).transpose
-    end
-
-    col_names.each do |col_name|
-      col_num = get_col_index(col_name: col_name)
-      columns.each_with_index do |col, i|
-        next unless i == col_num
-
-        columns[i][1..-1] = @schedules[col_name]
-      end
-    end
-
-    rows = columns.transpose
-    CSV.open(schedules_path, 'wb') do |csv|
-      rows.each do |row|
-        csv << row
-      end
-    end
   end
 end

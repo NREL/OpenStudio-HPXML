@@ -287,11 +287,6 @@ class OSModel
     # Uncomment to debug EMS
     # add_ems_debug_output(runner, model)
 
-    unless @hpxml.header.occupancy_schedules_filepath.nil?
-      # Do this at the end after schedule design levels are calculated
-      @schedules_file.set_vacancy
-    end
-
     if debug
       osm_output_path = File.join(output_dir, 'in.osm')
       File.write(osm_output_path, model.to_s)
