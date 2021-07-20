@@ -1126,32 +1126,6 @@ def get_window_skylight_ufactor_shgc_from_doe2code(doe2code)
   fail "Could not get default window U/SHGC for window code '#{doe2code}'"
 end
 
-def get_skylight_ufactor_shgc(frame_type, thermal_break, glass_layers, glass_type, gas_fill)
-  # Skylight U-factor/SHGC
-  key = [frame_type, thermal_break, glass_layers, glass_type, gas_fill]
-  vals = { [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, nil, nil] => [1.98, 0.75], # scna
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, nil, nil] => [1.47, 0.64], # scnw
-           [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, HPXML::WindowGlazingTintedReflective, nil] => [1.98, 0.64], # stna
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, HPXML::WindowGlazingTintedReflective, nil] => [1.47, 0.54], # stnw
-           [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [1.30, 0.67], # dcaa
-           [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [1.10, 0.67], # dcab
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [0.84, 0.56], # dcaw
-           [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingTintedReflective, HPXML::WindowGasAir] => [1.30, 0.55], # dtaa
-           [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingTintedReflective, HPXML::WindowGasAir] => [1.10, 0.55], # dtab
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingTintedReflective, HPXML::WindowGasAir] => [0.84, 0.46], # dtaw
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingLowE, HPXML::WindowGasAir] => [0.74, 0.52], # dpeaw
-           [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingLowE, HPXML::WindowGasArgon] => [0.95, 0.62], # dpeaab
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingLowE, HPXML::WindowGasArgon] => [0.68, 0.52], # dpeaaw
-           [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingReflective, HPXML::WindowGasAir] => [1.17, 0.37], # dseaa
-           [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingReflective, HPXML::WindowGasAir] => [0.98, 0.37], # dseab
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingReflective, HPXML::WindowGasAir] => [0.71, 0.31], # dseaw
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingReflective, HPXML::WindowGasArgon] => [0.65, 0.31], # dseaaw
-           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersTriplePane, HPXML::WindowGlazingLowE, HPXML::WindowGasArgon] => [0.47, 0.31] }[key] # thmabw
-  return vals if not vals.nil?
-
-  fail "Could not get default skylight U/SHGC for frame type '#{frame_type}' and glass layers '#{glass_layers}' and glass type '#{glass_type}' and gas fill '#{gas_fill}'"
-end
-
 def get_roof_solar_absorptance(roof_color)
   val = { HPXML::ColorReflective => 0.35,
           HPXML::ColorLight => 0.55,
