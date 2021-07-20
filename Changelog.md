@@ -27,6 +27,7 @@ __New Features__
 - Introduces a small amount of infiltration for unvented spaces.
 - Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
 - Updates the reporting measure to register all outputs from the annual CSV with the OS runner (for use in, e.g., PAT).
+- Use constant Cutler curve coefficients in installation quality calculations instead of coil curve coefficients for two-speed, variable-speed systems and ground source heat pump.
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
