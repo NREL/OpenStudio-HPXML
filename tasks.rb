@@ -131,6 +131,12 @@ def create_hpxmls
     'invalid_files/multiple-shared-heating-systems.xml' => 'base-bldgtype-multifamily-shared-boiler-only-baseboard.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
+    'invalid_files/occupancy-detailed-wrong-columns.xml' => 'base.xml',
+    'invalid_files/occupancy-detailed-wrong-rows.xml' => 'base.xml',
+    'invalid_files/occupancy-detailed-wrong-filename.xml' => 'base.xml',
+    'invalid_files/occupancy-detailed-bad-values-greater-than-one.xml' => 'base.xml',
+    'invalid_files/occupancy-detailed-bad-values-negative.xml' => 'base.xml',
+    'invalid_files/occupancy-detailed-bad-values-non-numeric.xml' => 'base.xml',
     'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'invalid_files/refrigerator-location.xml' => 'base.xml',
     'invalid_files/refrigerators-multiple-primary.xml' => 'base.xml',
@@ -441,8 +447,8 @@ def create_hpxmls
     'base-pv.xml' => 'base.xml',
     'base-occupancy-detailed-smooth.xml' => 'base.xml',
     'base-occupancy-detailed-stochastic.xml' => 'base.xml',
-    'base-occupancy-detailed-stochastic-vacancy.xml' => 'base-occupancy-detailed-stochastic.xml',
-    'base-occupancy-detailed-stochastic-outage.xml' => 'base-occupancy-detailed-stochastic.xml',
+    'base-occupancy-detailed-stochastic-vacancy.xml' => 'base.xml',
+    'base-occupancy-detailed-stochastic-outage.xml' => 'base.xml',
     'base-occupancy-simple.xml' => 'base.xml',
     'base-simcontrol-calendar-year-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
@@ -671,6 +677,18 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
     hpxml.header.transaction = 'modify'
+  elsif ['invalid_files/occupancy-detailed-wrong-columns.xml'].include? hpxml_file
+    hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-columns.csv'
+  elsif ['invalid_files/occupancy-detailed-wrong-rows.xml'].include? hpxml_file
+    hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-rows.csv'
+  elsif ['invalid_files/occupancy-detailed-wrong-filename.xml'].include? hpxml_file
+    hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-filename.csv'
+  elsif ['invalid_files/occupancy-detailed-bad-values-greater-than-one.xml'].include? hpxml_file
+    hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-greater-than-one.csv'
+  elsif ['invalid_files/occupancy-detailed-bad-values-negative.xml'].include? hpxml_file
+    hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-negative.csv'
+  elsif ['invalid_files/occupancy-detailed-bad-values-non-numeric.xml'].include? hpxml_file
+    hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-non-numeric.csv'
   end
 end
 

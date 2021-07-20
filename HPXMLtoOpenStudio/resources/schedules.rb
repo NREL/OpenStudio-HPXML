@@ -1252,7 +1252,6 @@ class SchedulesFile
                  col_names:,
                  **remainder)
 
-    @validated = true
     @runner = runner
     @model = model
     @schedules_path = schedules_path
@@ -1274,12 +1273,39 @@ class SchedulesFile
     @schedules = {}
     columns = CSV.read(@schedules_path).transpose
     columns.each do |col|
-      next if not col_names.include? col[0]
+      unless col_names.include? col[0]
+        fail "Column '#{col[0]}' is invalid."
+      end
 
       values = col[1..-1].reject { |v| v.nil? }
-      values = values.map { |v| v.to_f }
-      validate_schedule(col_name: col[0], values: values)
+      values = validate_schedule(col_name: col[0], values: values)
       @schedules[col[0]] = values
+    end
+  end
+
+  def validate_schedule(col_name:,
+                        values:)
+
+    num_hrs_in_year = Constants.NumHoursInYear(@model)
+    schedule_length = values.length
+
+    begin
+      values = values.map { |v| Float(v) }
+    rescue ArgumentError
+      fail "There is at least one non-numeric value for '#{col_name}'."
+    end    
+
+    if values.max > 1
+      fail "The max value for '#{col_name}' is greater than 1."
+    end
+
+    if values.min < 0
+      fail "The min value for '#{col_name}' is negative."
+    end
+
+    min_per_item = 60.0 / (schedule_length / num_hrs_in_year)
+    unless [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60].include? min_per_item
+      fail "Invalid schedule min_per_item=#{min_per_item} for '#{col_name}'."
     end
   end
 
@@ -1303,10 +1329,6 @@ class SchedulesFile
 
   def tmp_schedules
     return @tmp_schedules
-  end
-
-  def validated?
-    return @validated
   end
 
   def external_file
@@ -1401,24 +1423,6 @@ class SchedulesFile
     peak_flow /= 60 # convert to gallons per minute
     peak_flow = UnitConversions.convert(peak_flow, 'gal/min', 'm^3/s') # convert to m^3/s
     return peak_flow
-  end
-
-  def validate_schedule(col_name:,
-                        values:)
-
-    num_hrs_in_year = Constants.NumHoursInYear(@model)
-    schedule_length = values.length
-
-    if values.max > 1
-      @runner.registerError("The max value of schedule '#{col_name}' is greater than 1.")
-      @validated = false
-    end
-
-    min_per_item = 60.0 / (schedule_length / num_hrs_in_year)
-    unless [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60].include? min_per_item
-      @runner.registerError("Calculated an invalid schedule min_per_item=#{min_per_item}.")
-      @validated = false
-    end
   end
 
   def get_external_file
