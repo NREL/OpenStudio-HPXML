@@ -99,6 +99,7 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
     if epw_path.nil?
       fail "Weather station WMO '#{weather_wmo}' could not be found in #{File.join(weather_dir, 'data.csv')}."
     end
+
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = epw_path
 
     cache_path = epw_path.gsub('.epw', '-cache.csv')
