@@ -1174,8 +1174,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_demand_flexibility', false)
-    arg.setDisplayName('Heat Pump: Demand Flexibility')
-    arg.setDescription('Use AirLoopHVACUnitaryHeatPumpAirToAir with VariableSpeed coils.')
+    arg.setDisplayName('Heat Pump: Demand Flexibility Grid Connected')
+    arg.setDescription('Whether equipment is grid connected.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_demand_flexibility_modulating', false)

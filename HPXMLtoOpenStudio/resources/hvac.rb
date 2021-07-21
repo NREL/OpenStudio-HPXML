@@ -237,7 +237,7 @@ class HVAC
     hp_ap = heat_pump.additional_properties
 
     grid_signal_schedules_file = nil
-    if hp_ap.demand_flexibility
+    if heat_pump.flex # grid connected
       schedules_path = File.join(File.dirname(__FILE__), 'data_grid_signal_schedules.csv')
       grid_signal_schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: schedules_path, col_names: Constants.GridSignalRegions)
     end
@@ -373,8 +373,10 @@ class HVAC
     chiller_coil.setFractionofEvaporatorPumpHeattoWater(0.1)
     chiller_coil.setCrankcaseHeaterCapacity(100.0)
     chiller_coil.setMaximumAmbientTemperatureforCrankcaseHeaterOperation(5.0)
-    grid_signal_schedule = grid_signal_schedules_file.create_schedule_file(col_name: model.getWeatherFile.stateProvinceRegion)
-    chiller_coil.setGridSignalSchedule(grid_signal_schedule)
+    unless grid_signal_schedules_file.nil?
+      grid_signal_schedule = grid_signal_schedules_file.create_schedule_file(col_name: model.getWeatherFile.stateProvinceRegion)
+      chiller_coil.setGridSignalSchedule(grid_signal_schedule)
+    end
     chiller_coil.setLowerBoundToApplyGridResponsiveControl(0.1)
     chiller_coil.setUpperBoundToApplyGridResponsiveControl(1000.0)
     chiller_coil.setMaxSpeedLevelDuringGridResponsiveControl(0)
@@ -3168,8 +3170,10 @@ class HVAC
               clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C'))
             end
             if cooling_system.modulating || cooling_system.ihp_grid_ac || cooling_system.ihp_ice_storage || cooling_system.ihp_pcm_storage
-              grid_signal_schedule = grid_signal_schedules_file.create_schedule_file(col_name: model.getWeatherFile.stateProvinceRegion)
-              clg_coil.setGridSignalSchedule(grid_signal_schedule)
+              unless grid_signal_schedules_file.nil?
+                grid_signal_schedule = grid_signal_schedules_file.create_schedule_file(col_name: model.getWeatherFile.stateProvinceRegion)
+                clg_coil.setGridSignalSchedule(grid_signal_schedule)
+              end
               clg_coil.setLowerBoundToApplyGridResponsiveControl(0.15)
               clg_coil.setUpperBoundToApplyGridResponsiveControl(1000.0)
               clg_coil.setMaxSpeedLevelDuringGridResponsiveControl(2)
@@ -3256,8 +3260,10 @@ class HVAC
               htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(htg_ap.crankcase_temp, 'F', 'C'))
             end
             if heating_system.dual_source
-              grid_signal_schedule = grid_signal_schedules_file.create_schedule_file(col_name: model.getWeatherFile.stateProvinceRegion)
-              htg_coil.setGridSignalSchedule(grid_signal_schedule)
+              unless grid_signal_schedules_file.nil?
+                grid_signal_schedule = grid_signal_schedules_file.create_schedule_file(col_name: model.getWeatherFile.stateProvinceRegion)
+                htg_coil.setGridSignalSchedule(grid_signal_schedule)
+              end
               htg_coil.setLowerBoundToApplyGridResponsiveControl(0.15)
               htg_coil.setUpperBoundToApplyGridResponsiveControl(1000.0)
               htg_coil.setMaxSpeedLevelDuringGridResponsiveControl(3)
@@ -4590,7 +4596,7 @@ class HVAC
 
     hvac_ap.demand_flexibility = false
     if hvac_system.is_a?(HPXML::HeatPump)
-      if hvac_system.flex || hvac_system.modulating || hvac_system.dual_source || hvac_system.ihp_grid_ac || hvac_system.ihp_ice_storage || hvac_system.ihp_pcm_storage
+      if hvac_system.modulating || hvac_system.dual_source || hvac_system.ihp_grid_ac || hvac_system.ihp_ice_storage || hvac_system.ihp_pcm_storage
         hvac_ap.demand_flexibility = true
       end
     end
