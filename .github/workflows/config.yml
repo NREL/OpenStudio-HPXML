@@ -11,7 +11,7 @@ jobs:
   run-tests:
     runs-on: ubuntu-latest
     container:
-      image: nrel/openstudio:3.2.0
+      image: nrel/openstudio:3.2.1
     steps:
       - uses: actions/checkout@v2
         with:
@@ -69,7 +69,14 @@ jobs:
           cp -r base_results/results*.csv workflow/tests/base_results
           mkdir workflow/tests/results
           cp -r results/results*.csv workflow/tests/results
-          ruby hpxml-measures/workflow/tests/compare.rb
+          
+          pip install numpy
+          pip install pandas
+          pip install plotly
+          pip install kaleido
+          
+          python hpxml-measures/workflow/tests/compare.py -a results
+          python hpxml-measures/workflow/tests/compare.py -a visualize
 
       - name: Store comparisons
         uses: actions/upload-artifact@v2
