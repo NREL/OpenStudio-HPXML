@@ -4064,27 +4064,27 @@ class HPXMLFile
     end
 
     if args[:heat_pump_demand_flexibility].is_initialized
-      flex = true
+      flex = args[:heat_pump_demand_flexibility].get
     end
 
     if args[:heat_pump_demand_flexibility_modulating].is_initialized
-      modulating = true
+      modulating = args[:heat_pump_demand_flexibility_modulating].get
     end
 
     if args[:heat_pump_demand_flexibility_dual_source].is_initialized
-      dual_source = true
+      dual_source = args[:heat_pump_demand_flexibility_dual_source].get
     end
 
     if args[:heat_pump_demand_flexibility_ihp_grid_ac].is_initialized
-      ihp_grid_ac = true
+      ihp_grid_ac = args[:heat_pump_demand_flexibility_ihp_grid_ac].get
     end
 
     if args[:heat_pump_demand_flexibility_ihp_ice_storage].is_initialized
-      ihp_ice_storage = true
+      ihp_ice_storage = args[:heat_pump_demand_flexibility_ihp_ice_storage].get
     end
 
     if args[:heat_pump_demand_flexibility_ihp_pcm_storage].is_initialized
-      ihp_pcm_storage = true
+      ihp_pcm_storage = args[:heat_pump_demand_flexibility_ihp_pcm_storage].get
     end
 
     hpxml.heat_pumps.add(id: 'HeatPump',
