@@ -341,7 +341,10 @@
                 <Value>10.0</Value>
               </AnnualHeatingEfficiency>
               <extension>
-                <DemandFlexibility/>
+                <DemandFlexibility>
+                  <GridConnected>false</GridConnected>
+                  <IHPGridAC>true</IHPGridAC>
+                </DemandFlexibility>
               </extension>
             </HeatPump>
           </HVACPlant>

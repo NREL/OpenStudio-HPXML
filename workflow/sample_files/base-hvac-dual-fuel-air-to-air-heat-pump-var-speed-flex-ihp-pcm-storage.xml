@@ -342,6 +342,7 @@
               </AnnualHeatingEfficiency>
               <extension>
                 <DemandFlexibility>
+                  <GridConnected>true</GridConnected>
                   <IHPPcmStorage>true</IHPPcmStorage>
                 </DemandFlexibility>
               </extension>

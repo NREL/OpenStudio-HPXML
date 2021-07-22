@@ -342,6 +342,7 @@
               </AnnualHeatingEfficiency>
               <extension>
                 <DemandFlexibility>
+                  <GridConnected>true</GridConnected>
                   <IHPGridAC>true</IHPGridAC>
                 </DemandFlexibility>
               </extension>

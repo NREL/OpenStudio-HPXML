@@ -342,6 +342,7 @@
               </AnnualHeatingEfficiency>
               <extension>
                 <DemandFlexibility>
+                  <GridConnected>true</GridConnected>
                   <DualSource>true</DualSource>
                 </DemandFlexibility>
               </extension>
