@@ -672,6 +672,9 @@ class HPXMLTest < MiniTest::Test
       if hpxml.solar_thermal_systems.size > 0
         next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
       end
+      if hpxml_path.include?('base-schedules-stochastic.xml') || hpxml_path.include?('base-schedules-stochastic-vacant.xml') || hpxml_path.include?('base-schedules-user-specified.xml')
+        next if err_line.include?('GetCurrentScheduleValue: Schedule=') && err_line.include?('is a Schedule:File')
+      end
 
       flunk "Unexpected warning found: #{err_line}"
     end
@@ -1194,7 +1197,9 @@ class HPXMLTest < MiniTest::Test
 
     # Lighting
     ltg_energy = results.select { |k, v| k.include? 'End Use: Electricity: Lighting' }.map { |k, v| v }.sum(0.0)
-    assert_equal(hpxml.lighting_groups.size > 0, ltg_energy > 0)
+    if hpxml.header.schedules_path.nil?
+      assert_equal(hpxml.lighting_groups.size > 0, ltg_energy > 0)
+    end
 
     # Get fuels
     htg_fuels = []

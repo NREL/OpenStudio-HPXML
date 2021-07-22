@@ -243,7 +243,7 @@ def to_integer(value, parent, element_name)
   end
 end
 
-def to_boolean(value, parent, element_name)
+def to_boolean(value, parent = nil, element_name = nil)
   if value.is_a? TrueClass
     return true
   elsif value.is_a? FalseClass
@@ -254,7 +254,9 @@ def to_boolean(value, parent, element_name)
     return false
   end
 
-  fail "Cannot convert '#{value}' to boolean for #{parent.name}/#{element_name}."
+  if (not parent.nil?) && (not element_name.nil?)
+    fail "Cannot convert '#{value}' to boolean for #{parent.name}/#{element_name}."
+  end
 end
 
 def to_float_or_nil(value, parent, element_name)

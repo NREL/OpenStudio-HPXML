@@ -445,7 +445,7 @@ class Geometry
     zValueArray = []
     surfaceArray.each do |surface|
       surface.vertices.each do |vertex|
-        zValueArray << UnitConversions.convert(vertex.z, 'm', 'ft')
+        zValueArray << UnitConversions.convert(vertex.z, 'm', 'ft').round(5)
       end
     end
     return zValueArray
@@ -510,16 +510,16 @@ class Geometry
     end
   end
 
-  def self.apply_occupants(model, num_occ, cfa, space)
+  def self.apply_occupants(model, num_occ, cfa, space, schedules_file)
     occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
-    weekday_sch = '1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000'
+    weekday_sch = Schedule.OccupantsWeekdayFractions
     weekday_sch_sum = weekday_sch.split(',').map(&:to_f).sum(0.0)
     if (weekday_sch_sum - hrs_per_day).abs > 0.1
       fail 'Occupancy schedule inconsistent with hrs_per_day.'
     end
 
-    weekend_sch = weekday_sch
-    monthly_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
+    weekend_sch = Schedule.OccupantsWeekendFractions
+    monthly_sch = Schedule.OccupantsMonthlyMultipliers
 
     # Error checking
     if (sens_frac < 0) || (sens_frac > 1)
@@ -545,7 +545,12 @@ class Geometry
     space_num_occ = num_occ * UnitConversions.convert(space.floorArea, 'm^2', 'ft^2') / cfa
 
     # Create schedule
-    people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, Constants.ScheduleTypeLimitsFraction)
+    if not schedules_file.nil?
+      people_sch = schedules_file.create_schedule_file(col_name: 'occupants')
+    else
+      people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, Constants.ScheduleTypeLimitsFraction)
+      people_sch = people_sch.schedule
+    end
 
     # Create schedule
     activity_sch = OpenStudio::Model::ScheduleConstant.new(model)
@@ -566,7 +571,7 @@ class Geometry
     occ_def.setCarbonDioxideGenerationRate(0)
     occ_def.setEnableASHRAE55ComfortWarnings(false)
     occ.setActivityLevelSchedule(activity_sch)
-    occ.setNumberofPeopleSchedule(people_sch.schedule)
+    occ.setNumberofPeopleSchedule(people_sch)
   end
 
   def self.get_occupancy_default_num(nbeds)

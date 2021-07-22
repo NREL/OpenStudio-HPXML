@@ -4,8 +4,9 @@ Introduction
 The OpenStudio-HPXML repository consists of a simple residential EnergyPlus-based workflow build on top of `OpenStudio measures <http://nrel.github.io/OpenStudio-user-documentation/getting_started/about_measures/>`_.
 The workflow operates using `HPXML building description files <https://hpxml.nrel.gov>`_.
 
-The two OpenStudio measures used by the workflow are:
+The three OpenStudio measures used by the workflow are:
 
+#. ``BuildResidentialHPXML``: A measure that translates a set of building unit argument values to an HPXML file.
 #. ``HPXMLtoOpenStudio``: A measure that translates an HPXML file to an OpenStudio model.
 #. ``SimulationOutputReport``: A reporting measure that generates a variety of annual/timeseries outputs for a residential HPXML-based model.
 

@@ -14,6 +14,7 @@ OpenStudio-HPXML documentation
    getting_started
    workflow_inputs
    workflow_outputs
+   build_residential_hpxml
 
 Indices and tables
 ==================
