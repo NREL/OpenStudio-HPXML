@@ -97,6 +97,7 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
     if weather_wmo.nil?
       fail "Weather station WMO #{weather_wmo} could not be found in #{File.join(File.dirname(__FILE__), 'resources', 'zipcodes_wx.csv')}"
     end
+
     weather_dir = File.join(File.dirname(__FILE__), '..', '..', 'weather')
     CSV.foreach(File.join(weather_dir, 'data.csv'), headers: true) do |row|
       next if row['wmo'] != weather_wmo

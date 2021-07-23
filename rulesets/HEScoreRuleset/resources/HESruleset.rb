@@ -4,11 +4,11 @@ class HEScoreRuleset
   def self.apply_ruleset(json, weather)
     # Create new HPXML object
     new_hpxml = HPXML.new
-    new_hpxml.header.xml_type = nil  # FIXME: does json contain this information?
+    new_hpxml.header.xml_type = nil # FIXME: does json contain this information?
     new_hpxml.header.xml_generated_by = 'OpenStudio-HEScore'
-    new_hpxml.header.transaction = 'create'  # FIXME: does json contain this information?
+    new_hpxml.header.transaction = 'create' # FIXME: does json contain this information?
     new_hpxml.header.building_id = json['building']['building_id']
-    new_hpxml.header.event_type = 'construction-period testing/daily test out'  # FIXME: does json contain this information?
+    new_hpxml.header.event_type = 'construction-period testing/daily test out' # FIXME: does json contain this information?
 
     # BuildingSummary
     set_summary(json, new_hpxml)
@@ -29,7 +29,7 @@ class HEScoreRuleset
     set_enclosure_doors(json, new_hpxml)
 
     # Systems
-    # set_systems_hvac(json, new_hpxml)
+    set_systems_hvac(json, new_hpxml)
     set_systems_mechanical_ventilation(json, new_hpxml)
     set_systems_water_heater(json, new_hpxml)
     set_systems_water_heating_use(json, new_hpxml)
@@ -50,10 +50,10 @@ class HEScoreRuleset
     set_misc_plug_loads(json, new_hpxml)
     set_misc_television(json, new_hpxml)
 
-    # # Prevent downstream errors in OS-HPXML
-    # adjust_floor_areas(new_hpxml)
+    # Prevent downstream errors in OS-HPXML
+    adjust_floor_areas(new_hpxml)
 
-    # HPXMLDefaults.apply(new_hpxml, Constants.ERIVersions[-1], weather)
+    HPXMLDefaults.apply(new_hpxml, Constants.ERIVersions[-1], weather)
 
     return new_hpxml
   end
@@ -61,7 +61,7 @@ class HEScoreRuleset
   def self.set_summary(json, new_hpxml)
     # Get HPXML values
     if json['building']['about']['town_house_walls']
-      @bldg_type = HPXML::ResidentialTypeSFA  # FIXME: double-check
+      @bldg_type = HPXML::ResidentialTypeSFA # FIXME: double-check
     else
       @bldg_type = HPXML::ResidentialTypeSFD
     end
@@ -76,8 +76,8 @@ class HEScoreRuleset
     @ducts = get_ducts_details(json)
     @cfa_basement = @fnd_areas[HPXML::LocationBasementConditioned]
     @cfa_basement = 0 if @cfa_basement.nil?
-    @ncfl_ag = json['building']['about']['num_floor_above_grade']  # FIXME: double-check
-    @ceil_height = json['building']['about']['floor_to_ceiling_height']  # ft
+    @ncfl_ag = json['building']['about']['num_floor_above_grade'] # FIXME: double-check
+    @ceil_height = json['building']['about']['floor_to_ceiling_height'] # ft
 
     # Calculate geometry
     @has_cond_bsmnt = @fnd_areas.key?(HPXML::LocationBasementConditioned)
@@ -167,9 +167,9 @@ class HEScoreRuleset
 
   def self.set_enclosure_roofs(json, new_hpxml)
     json['building']['zone']['zone_roof'].each do |orig_roof|
-      attic_location = {'vented_attic' => HPXML::LocationAtticVented,
-                        'cond_attic' => HPXML::LocationLivingSpace,
-                        'cath_ceiling' => HPXML::LocationLivingSpace}[orig_roof['roof_type']]
+      attic_location = { 'vented_attic' => HPXML::LocationAtticVented,
+                         'cond_attic' => HPXML::LocationLivingSpace,
+                         'cath_ceiling' => HPXML::LocationLivingSpace }[orig_roof['roof_type']]
       # Roof: Two surfaces per HES zone_roof
       roof_area = orig_roof['roof_area']
       roof_solar_abs = get_roof_solar_absorptance(orig_roof['roof_color'])
@@ -180,7 +180,7 @@ class HEScoreRuleset
         roof_azimuths = [@bldg_azimuth, @bldg_azimuth + 180]
       end
       has_radiant_barrier = false
-      if orig_roof['roof_assembly_code'][2,2] == 'rb'
+      if orig_roof['roof_assembly_code'][2, 2] == 'rb'
         has_radiant_barrier = true
       end
       roof_azimuths.each_with_index do |roof_azimuth, idx|
@@ -215,7 +215,7 @@ class HEScoreRuleset
       new_hpxml.walls.add(id: "#{orig_wall['side']}_wall",
                           exterior_adjacent_to: HPXML::LocationOutside,
                           interior_adjacent_to: HPXML::LocationLivingSpace,
-                          wall_type: $wall_type_map[orig_wall['wall_assembly_code'][2,2]],
+                          wall_type: $wall_type_map[orig_wall['wall_assembly_code'][2, 2]],
                           area: wall_area,
                           azimuth: sanitize_azimuth(wall_orientation_to_azimuth(orig_wall['side'])),
                           solar_absorptance: 0.75,
@@ -226,14 +226,14 @@ class HEScoreRuleset
 
   def self.set_enclosure_foundation_walls(json, new_hpxml)
     json['building']['zone']['zone_floor'].each do |orig_foundation|
-      fnd_location = {'uncond_basement' => HPXML::LocationBasementUnconditioned,
-                      'cond_basement' => HPXML::LocationBasementConditioned,
-                      'vented_crawl' => HPXML::LocationCrawlspaceVented,
-                      'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
-                      'slab_on_grade' => HPXML::LocationLivingSpace}[orig_foundation['foundation_type']]
+      fnd_location = { 'uncond_basement' => HPXML::LocationBasementUnconditioned,
+                       'cond_basement' => HPXML::LocationBasementConditioned,
+                       'vented_crawl' => HPXML::LocationCrawlspaceVented,
+                       'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
+                       'slab_on_grade' => HPXML::LocationLivingSpace }[orig_foundation['foundation_type']]
       fnd_area = orig_foundation['floor_area']
       next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? fnd_location
-      
+
       if [HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned].include? fnd_location
         fndwall_height = 8.0
       else
@@ -259,11 +259,11 @@ class HEScoreRuleset
   def self.set_enclosure_framefloors(json, new_hpxml)
     # Floors above foundation
     json['building']['zone']['zone_floor'].each do |orig_foundation|
-      fnd_location = {'uncond_basement' => HPXML::LocationBasementUnconditioned,
-                      'cond_basement' => HPXML::LocationBasementConditioned,
-                      'vented_crawl' => HPXML::LocationCrawlspaceVented,
-                      'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
-                      'slab_on_grade' => HPXML::LocationLivingSpace}[orig_foundation['foundation_type']]
+      fnd_location = { 'uncond_basement' => HPXML::LocationBasementUnconditioned,
+                       'cond_basement' => HPXML::LocationBasementConditioned,
+                       'vented_crawl' => HPXML::LocationCrawlspaceVented,
+                       'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
+                       'slab_on_grade' => HPXML::LocationLivingSpace }[orig_foundation['foundation_type']]
       next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? fnd_location
 
       framefloor_r = get_floor_effective_r_from_doe2code(orig_foundation['floor_assembly_code'])
@@ -277,9 +277,9 @@ class HEScoreRuleset
 
     # Floors below attic
     json['building']['zone']['zone_roof'].each do |orig_attic|
-      attic_location = {'vented_attic' => HPXML::LocationAtticVented,
-                        'cond_attic' => HPXML::LocationLivingSpace,
-                        'cath_ceiling' => HPXML::LocationLivingSpace}[orig_attic['roof_type']]
+      attic_location = { 'vented_attic' => HPXML::LocationAtticVented,
+                         'cond_attic' => HPXML::LocationLivingSpace,
+                         'cath_ceiling' => HPXML::LocationLivingSpace }[orig_attic['roof_type']]
       next unless attic_location == HPXML::LocationAtticVented
 
       framefloor_r = get_ceiling_effective_r_from_doe2code(orig_attic['ceiling_assembly_code'])
@@ -288,18 +288,18 @@ class HEScoreRuleset
       new_hpxml.frame_floors.add(id: "framefloor_adjacent_to_#{orig_attic['roof_type']}",
                                  exterior_adjacent_to: attic_location,
                                  interior_adjacent_to: HPXML::LocationLivingSpace,
-                                 area: framefloor_area,  # FIXME: double-check
+                                 area: framefloor_area, # FIXME: double-check
                                  insulation_assembly_r_value: framefloor_r)
     end
   end
 
   def self.set_enclosure_slabs(json, new_hpxml)
     json['building']['zone']['zone_floor'].each_with_index do |orig_foundation, idx|
-      fnd_location = {'uncond_basement' => HPXML::LocationBasementUnconditioned,
-                      'cond_basement' => HPXML::LocationBasementConditioned,
-                      'vented_crawl' => HPXML::LocationCrawlspaceVented,
-                      'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
-                      'slab_on_grade' => HPXML::LocationLivingSpace}[orig_foundation['foundation_type']]
+      fnd_location = { 'uncond_basement' => HPXML::LocationBasementUnconditioned,
+                       'cond_basement' => HPXML::LocationBasementConditioned,
+                       'vented_crawl' => HPXML::LocationCrawlspaceVented,
+                       'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
+                       'slab_on_grade' => HPXML::LocationLivingSpace }[orig_foundation['foundation_type']]
       fnd_type = orig_foundation['foundation_type']
       fnd_area = orig_foundation['floor_area']
 
@@ -353,7 +353,6 @@ class HEScoreRuleset
       if ufactor.nil?
         ufactor, shgc = get_window_skylight_ufactor_shgc_from_doe2code(orig_window['window_code'])
       end
-
       interior_shading_factor_summer, interior_shading_factor_winter = Constructions.get_default_interior_shading_factors()
       exterior_shading_factor_summer = 1.0
       exterior_shading_factor_winter = 1.0
@@ -377,12 +376,13 @@ class HEScoreRuleset
                             interior_shading_factor_winter: interior_shading_factor_winter,
                             exterior_shading_factor_summer: exterior_shading_factor_summer,
                             exterior_shading_factor_winter: exterior_shading_factor_winter)
-    end 
+    end
   end
 
   def self.set_enclosure_skylights(json, new_hpxml)
     json['building']['zone']['zone_roof'].each do |orig_roof|
       next unless orig_roof.key?('zone_skylight')
+      next unless orig_roof['zone_skylight']['skylight_area'] > 0
 
       orig_skylight = orig_roof['zone_skylight']
       ufactor = orig_skylight['skylight_u_value']
@@ -407,7 +407,7 @@ class HEScoreRuleset
       else
         roof_azimuths = [@bldg_azimuth, @bldg_azimuth + 180]
       end
-      roof_azimuths.each_with_index do |roof_azimuth, idx|  # FIXME: double-check
+      roof_azimuths.each_with_index do |roof_azimuth, idx| # FIXME: double-check
         skylight_area = orig_skylight.area / 2.0
         new_hpxml.skylights.add(id: "#{orig_roof['roof_name']}_#{idx}_skylight",
                                 area: skylight_area,
@@ -442,240 +442,277 @@ class HEScoreRuleset
   def self.set_systems_hvac(json, new_hpxml)
     additional_hydronic_ids = []
 
-    # HeatingSystem
-    json.heating_systems.each do |orig_heating|
-      distribution_system_idref = orig_heating.distribution_system_idref
-      heating_system_type = orig_heating.heating_system_type
-      heating_system_fuel = orig_heating.heating_system_fuel
-      heating_efficiency_afue = orig_heating.heating_efficiency_afue
-      heating_efficiency_percent = orig_heating.heating_efficiency_percent
-      year_installed = orig_heating.year_installed
-      energy_star = (orig_heating.third_party_certification == HPXML::CertificationEnergyStar)
-      fraction_heat_load_served = orig_heating.fraction_heat_load_served
+    json['building']['systems']['hvac'].each do |orig_hvac|
+      orig_heating = orig_hvac['heating']
+      orig_cooling = orig_hvac['cooling']
 
-      # Need to create hydronic distribution system?
-      if (heating_system_type == HPXML::HVACTypeBoiler) && distribution_system_idref.nil?
-        distribution_system_idref = orig_heating.id + '_dist'
-        additional_hydronic_ids << distribution_system_idref
+      # HeatingSystem
+      if ['central_furnace', 'wall_furnace', 'boiler', 'wood_stove'].include? orig_heating['type']
+        distribution_system_idref = 'AirDistribution' # FIXME: need to look at how HEScore PHP code is handling it
+        heating_system_type = hescore_to_hpxml_hvac_type(orig_heating['type'])
+        heating_system_fuel = hescore_to_hpxml_fuel(orig_heating['fuel_primary'])
+        if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeBoiler].include? heating_system_type
+          heating_efficiency_afue = orig_heating['efficiency']
+        elsif heating_system_type == HPXML::HVACTypeStove
+          heating_efficiency_percent = orig_heating['efficiency']
+        end
+        year_installed = orig_heating['year']
+        # FIXME: can one specify third party certification in hescore json?
+        # energy_star = (orig_heating.third_party_certification == HPXML::CertificationEnergyStar)
+        fraction_heat_load_served = orig_hvac['hvac_fraction']
+
+        # Need to create hydronic distribution system?
+        if heating_system_type == HPXML::HVACTypeBoiler
+          distribution_system_idref = orig_heating['type'] + '_dist'
+          additional_hydronic_ids << distribution_system_idref
+        end
+
+        if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace].include? heating_system_type
+          if not heating_efficiency_afue.nil?
+            # Do nothing, we already have the AFUE
+          elsif heating_system_fuel == HPXML::FuelTypeElectricity
+            heating_efficiency_afue = 0.98
+          # FIXME: can one specify third party certification in hescore json?
+          # elsif energy_star && (heating_system_type == 'central_furnace')
+          #   heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
+          #                                                    heating_system_type,
+          #                                                    heating_system_fuel,
+          #                                                    'AFUE',
+          #                                                    'energy_star',
+          #                                                    json.header.state_code)
+          elsif not year_installed.nil?
+            heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
+                                                             heating_system_type,
+                                                             heating_system_fuel,
+                                                             'AFUE')
+          end
+        elsif heating_system_type == HPXML::HVACTypeBoiler
+          if not heating_efficiency_afue.nil?
+            # Do nothing, we already have the AFUE
+          elsif heating_system_fuel == HPXML::FuelTypeElectricity
+            heating_efficiency_afue = 0.98
+          # FIXME: can one specify third party certification in hescore json?
+          # elsif energy_star
+          #   heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
+          #                                                    heating_system_type,
+          #                                                    heating_system_fuel,
+          #                                                    'AFUE',
+          #                                                    'energy_star')
+          elsif not year_installed.nil?
+            heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
+                                                             heating_system_type,
+                                                             heating_system_fuel,
+                                                             'AFUE')
+          end
+        elsif heating_system_type == HPXML::HVACTypeElectricResistance
+          if heating_efficiency_percent.nil?
+            heating_efficiency_percent = 0.98
+          end
+        elsif heating_system_type == HPXML::HVACTypeStove
+          if not heating_efficiency_percent.nil?
+            # Do nothing, we already have the heating efficiency percent
+          elsif heating_system_fuel == HPXML::FuelTypeWoodCord
+            heating_efficiency_percent = 0.60
+          elsif heating_system_fuel == HPXML::FuelTypeWoodPellets
+            heating_efficiency_percent = 0.78
+          end
+        end
+
+        new_hpxml.heating_systems.add(id: "#{orig_hvac['hvac_name']}_heating",
+                                      distribution_system_idref: distribution_system_idref,
+                                      heating_system_type: heating_system_type,
+                                      heating_system_fuel: heating_system_fuel,
+                                      heating_efficiency_afue: heating_efficiency_afue,
+                                      heating_efficiency_percent: heating_efficiency_percent,
+                                      fraction_heat_load_served: fraction_heat_load_served)
       end
 
-      if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace].include? heating_system_type
-        if not heating_efficiency_afue.nil?
-          # Do nothing, we already have the AFUE
-        elsif heating_system_fuel == HPXML::FuelTypeElectricity
-          heating_efficiency_afue = 0.98
-        elsif energy_star && (heating_system_type == HPXML::HVACTypeFurnace)
-          heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
-                                                           heating_system_type,
-                                                           heating_system_fuel,
-                                                           'AFUE',
-                                                           'energy_star',
-                                                           json.header.state_code)
-        elsif not year_installed.nil?
-          heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
-                                                           heating_system_type,
-                                                           heating_system_fuel,
-                                                           'AFUE')
+      # CoolingSystem
+      if ['packaged_dx', 'split_dx'].include? orig_cooling['type']
+        distribution_system_idref = 'AirDistribution' # FIXME: need to look at how HEScore PHP code is handling it
+        cooling_system_type = hescore_to_hpxml_hvac_type(orig_cooling['type'])
+        cooling_system_fuel = HPXML::FuelTypeElectricity
+        if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+          cooling_efficiency_seer = orig_cooling['efficiency']
+        elsif cooling_system_type == HPXML::HVACTypeRoomAirConditioner
+          cooling_efficiency_eer = orig_cooling['efficiency']
         end
+        year_installed = orig_cooling['year']
+        # FIXME: can one specify third party certification in hescore json?
+        # energy_star = (orig_cooling.third_party_certification == HPXML::CertificationEnergyStar)
+        fraction_cool_load_served = orig_hvac['hvac_fraction']
 
-      elsif heating_system_type == HPXML::HVACTypeBoiler
-        if not heating_efficiency_afue.nil?
-          # Do nothing, we already have the AFUE
-        elsif heating_system_fuel == HPXML::FuelTypeElectricity
-          heating_efficiency_afue = 0.98
-        elsif energy_star
-          heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
-                                                           heating_system_type,
-                                                           heating_system_fuel,
-                                                           'AFUE',
-                                                           'energy_star')
-        elsif not year_installed.nil?
-          heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
-                                                           heating_system_type,
-                                                           heating_system_fuel,
-                                                           'AFUE')
-        end
-
-      elsif heating_system_type == HPXML::HVACTypeElectricResistance
-        if heating_efficiency_percent.nil?
-          heating_efficiency_percent = 0.98
-        end
-
-      elsif heating_system_type == HPXML::HVACTypeStove
-        if not heating_efficiency_percent.nil?
-          # Do nothing, we already have the heating efficiency percent
-        elsif heating_system_fuel == HPXML::FuelTypeWoodCord
-          heating_efficiency_percent = 0.60
-        elsif heating_system_fuel == HPXML::FuelTypeWoodPellets
-          heating_efficiency_percent = 0.78
-        end
-      end
-
-      new_hpxml.heating_systems.add(id: orig_heating.id,
-                                    distribution_system_idref: distribution_system_idref,
-                                    heating_system_type: heating_system_type,
-                                    heating_system_fuel: heating_system_fuel,
-                                    heating_efficiency_afue: heating_efficiency_afue,
-                                    heating_efficiency_percent: heating_efficiency_percent,
-                                    fraction_heat_load_served: fraction_heat_load_served)
-    end
-
-    # CoolingSystem
-    json.cooling_systems.each do |orig_cooling|
-      distribution_system_idref = orig_cooling.distribution_system_idref
-      cooling_system_type = orig_cooling.cooling_system_type
-      cooling_system_fuel = HPXML::FuelTypeElectricity
-      cooling_efficiency_seer = orig_cooling.cooling_efficiency_seer
-      cooling_efficiency_eer = orig_cooling.cooling_efficiency_eer
-      year_installed = orig_cooling.year_installed
-      energy_star = (orig_cooling.third_party_certification == HPXML::CertificationEnergyStar)
-      fraction_cool_load_served = orig_cooling.fraction_cool_load_served
-
-      if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
-        if not cooling_efficiency_seer.nil?
+        if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+          if not cooling_efficiency_seer.nil?
           # Do nothing, we already have the SEER
-        elsif energy_star
-          cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
-                                                           cooling_system_type,
-                                                           cooling_system_fuel,
-                                                           'SEER',
-                                                           'energy_star')
-        elsif not year_installed.nil?
-          cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
-                                                           cooling_system_type,
-                                                           cooling_system_fuel,
-                                                           'SEER')
-        end
-
-      elsif cooling_system_type == HPXML::HVACTypeRoomAirConditioner
-        if not cooling_efficiency_eer.nil?
+          # FIXME: can one specify third party certification in hescore json?
+          # elsif energy_star
+          #   cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
+          #                                                   cooling_system_type,
+          #                                                   cooling_system_fuel,
+          #                                                   'SEER',
+          #                                                   'energy_star')
+          elsif not year_installed.nil?
+            cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
+                                                             cooling_system_type,
+                                                             cooling_system_fuel,
+                                                             'SEER')
+          end
+        elsif cooling_system_type == HPXML::HVACTypeRoomAirConditioner
+          if not cooling_efficiency_eer.nil?
           # Do nothing, we already have the EER
-        elsif energy_star
-          cooling_efficiency_eer = lookup_hvac_efficiency(year_installed,
-                                                          cooling_system_type,
-                                                          cooling_system_fuel,
-                                                          'EER',
-                                                          'energy_star')
-        elsif not year_installed.nil?
-          cooling_efficiency_eer = lookup_hvac_efficiency(year_installed,
-                                                          cooling_system_type,
-                                                          cooling_system_fuel,
-                                                          'EER')
+          # FIXME: can one specify third party certification in hescore json?
+          # elsif energy_star
+          #   cooling_efficiency_eer = lookup_hvac_efficiency(year_installed,
+          #                                                   cooling_system_type,
+          #                                                   cooling_system_fuel,
+          #                                                   'EER',
+          #                                                   'energy_star')
+          elsif not year_installed.nil?
+            cooling_efficiency_eer = lookup_hvac_efficiency(year_installed,
+                                                            cooling_system_type,
+                                                            cooling_system_fuel,
+                                                            'EER')
+          end
         end
+
+        new_hpxml.cooling_systems.add(id: "#{orig_hvac['hvac_name']}_cooling",
+                                      distribution_system_idref: distribution_system_idref,
+                                      cooling_system_type: cooling_system_type,
+                                      cooling_system_fuel: cooling_system_fuel,
+                                      fraction_cool_load_served: fraction_cool_load_served,
+                                      cooling_efficiency_seer: cooling_efficiency_seer,
+                                      cooling_efficiency_eer: cooling_efficiency_eer)
       end
 
-      new_hpxml.cooling_systems.add(id: orig_cooling.id,
-                                    distribution_system_idref: distribution_system_idref,
-                                    cooling_system_type: cooling_system_type,
-                                    cooling_system_fuel: cooling_system_fuel,
-                                    fraction_cool_load_served: fraction_cool_load_served,
-                                    cooling_efficiency_seer: cooling_efficiency_seer,
-                                    cooling_efficiency_eer: cooling_efficiency_eer)
-    end
+      # HeatPump
+      if (['heat_pump', 'gchp', 'mini_split'].include? orig_heating) || (['heat_pump', 'gchp', 'mini_split'].include? orig_cooling)
+        heat_pump_fuel = HPXML::FuelTypeElectricity
+        backup_heating_fuel = HPXML::FuelTypeElectricity
+        backup_heating_efficiency_percent = 1.0
+        if ['heat_pump', 'gchp', 'mini_split'].include? orig_cooling
+          heat_pump_type = hescore_to_hpxml_hvac_type(orig_cooling['type'])
+          if ['heat_pump', 'mini_split'].include? orig_cooling
+            cooling_efficiency_seer = orig_cooling['efficiency']
+          elsif orig_cooling == 'gchp'
+            cooling_efficiency_eer = orig_cooling['efficiency']
+          end
+          year_installed = orig_cooling['year']
+          # energy_star = (orig_cooling.third_party_certification == HPXML::CertificationEnergyStar)
+          fraction_cool_load_served = orig_hvac['hvac_fraction']
+        end
+        if ['heat_pump', 'gchp', 'mini_split'].include? orig_heating
+          heat_pump_type = hescore_to_hpxml_hvac_type(orig_heating['type'])
+          if ['heat_pump', 'mini_split'].include? orig_heating
+            heating_efficiency_hspf = orig_heating['efficiency']
+          elsif orig_heating == 'gchp'
+            heating_efficiency_cop = orig_heating['efficiency']
+          end
+          year_installed = orig_heating['year']
+          # energy_star = (orig_heating.third_party_certification == HPXML::CertificationEnergyStar)
+          fraction_heat_load_served = orig_hvac['hvac_fraction']
+        end
+        distribution_system_idref = 'AirDistribution' # FIXME: need to look at how HEScore PHP code is handling it
 
-    # HeatPump
-    json.heat_pumps.each do |orig_hp|
-      heat_pump_fuel = HPXML::FuelTypeElectricity
-      backup_heating_fuel = HPXML::FuelTypeElectricity
-      backup_heating_efficiency_percent = 1.0
-      heat_pump_type = orig_hp.heat_pump_type
-      cooling_efficiency_seer = orig_hp.cooling_efficiency_seer
-      cooling_efficiency_eer = orig_hp.cooling_efficiency_eer
-      heating_efficiency_hspf = orig_hp.heating_efficiency_hspf
-      heating_efficiency_cop = orig_hp.heating_efficiency_cop
-      distribution_system_idref = orig_hp.distribution_system_idref
-      year_installed = orig_hp.year_installed
-      energy_star = (orig_hp.third_party_certification == HPXML::CertificationEnergyStar)
-      fraction_cool_load_served = orig_hp.fraction_cool_load_served
-      fraction_heat_load_served = orig_hp.fraction_heat_load_served
-
-      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
-        if not cooling_efficiency_seer.nil?
+        if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
+          if not cooling_efficiency_seer.nil?
           # Do nothing, we have the SEER
-        elsif energy_star
-          cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
-                                                           heat_pump_type,
-                                                           heat_pump_fuel,
-                                                           'SEER',
-                                                           'energy_star')
-        elsif not year_installed.nil?
-          cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
-                                                           heat_pump_type,
-                                                           heat_pump_fuel,
-                                                           'SEER')
-        end
-        if not heating_efficiency_hspf.nil?
+          # FIXME: can one specify third party certification in hescore json?
+          # elsif energy_star
+          #   cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
+          #                                                   heat_pump_type,
+          #                                                   heat_pump_fuel,
+          #                                                   'SEER',
+          #                                                   'energy_star')
+          elsif not year_installed.nil?
+            cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
+                                                             heat_pump_type,
+                                                             heat_pump_fuel,
+                                                             'SEER')
+          end
+          if not heating_efficiency_hspf.nil?
           # Do nothing, we have the HSPF
-        elsif energy_star
-          heating_efficiency_hspf = lookup_hvac_efficiency(year_installed,
-                                                           heat_pump_type,
-                                                           heat_pump_fuel,
-                                                           'HSPF',
-                                                           'energy_star')
-        elsif not year_installed.nil?
-          heating_efficiency_hspf = lookup_hvac_efficiency(year_installed,
-                                                           heat_pump_type,
-                                                           heat_pump_fuel,
-                                                           'HSPF')
+          # FIXME: can one specify third party certification in hescore json?
+          # elsif energy_star
+          #   heating_efficiency_hspf = lookup_hvac_efficiency(year_installed,
+          #                                                   heat_pump_type,
+          #                                                   heat_pump_fuel,
+          #                                                   'HSPF',
+          #                                                   'energy_star')
+          elsif not year_installed.nil?
+            heating_efficiency_hspf = lookup_hvac_efficiency(year_installed,
+                                                             heat_pump_type,
+                                                             heat_pump_fuel,
+                                                             'HSPF')
+          end
         end
+
+        # If heat pump has no cooling/heating load served, assign arbitrary value for cooling/heating efficiency value
+        if (fraction_cool_load_served == 0) && cooling_efficiency_seer.nil? && cooling_efficiency_eer.nil?
+          if heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+            cooling_efficiency_eer = 16.6
+          else
+            cooling_efficiency_seer = 13.0
+          end
+        end
+        if (fraction_heat_load_served == 0) && heating_efficiency_hspf.nil? && heating_efficiency_cop.nil?
+          if heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+            heating_efficiency_cop = 3.6
+          else
+            heating_efficiency_hspf = 7.7
+          end
+        end
+
+        new_hpxml.heat_pumps.add(id: "#{orig_hvac['hvac_name']}_heatpump",
+                                 distribution_system_idref: distribution_system_idref,
+                                 heat_pump_type: heat_pump_type,
+                                 heat_pump_fuel: heat_pump_fuel,
+                                 backup_heating_fuel: backup_heating_fuel,
+                                 backup_heating_efficiency_percent: backup_heating_efficiency_percent,
+                                 fraction_heat_load_served: fraction_heat_load_served,
+                                 fraction_cool_load_served: fraction_cool_load_served,
+                                 cooling_efficiency_seer: cooling_efficiency_seer,
+                                 cooling_efficiency_eer: cooling_efficiency_eer,
+                                 heating_efficiency_hspf: heating_efficiency_hspf,
+                                 heating_efficiency_cop: heating_efficiency_cop)
       end
 
-      # If heat pump has no cooling/heating load served, assign arbitrary value for cooling/heating efficiency value
-      if (fraction_cool_load_served == 0) && cooling_efficiency_seer.nil? && cooling_efficiency_eer.nil?
-        if heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
-          cooling_efficiency_eer = 16.6
-        else
-          cooling_efficiency_seer = 13.0
-        end
-      end
-      if (fraction_heat_load_served == 0) && heating_efficiency_hspf.nil? && heating_efficiency_cop.nil?
-        if heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
-          heating_efficiency_cop = 3.6
-        else
-          heating_efficiency_hspf = 7.7
-        end
-      end
+      # HVACControl
+      control_type = HPXML::HVACControlTypeManual
+      htg_sp, htg_setback_sp, htg_setback_hrs_per_week, htg_setback_start_hr = HVAC.get_default_heating_setpoint(control_type)
+      clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr = HVAC.get_default_cooling_setpoint(control_type)
+      new_hpxml.hvac_controls.add(id: 'HVACControl',
+                                  control_type: control_type,
+                                  heating_setpoint_temp: htg_sp,
+                                  cooling_setpoint_temp: clg_sp)
 
-      new_hpxml.heat_pumps.add(id: orig_hp.id,
-                               distribution_system_idref: distribution_system_idref,
-                               heat_pump_type: heat_pump_type,
-                               heat_pump_fuel: heat_pump_fuel,
-                               backup_heating_fuel: backup_heating_fuel,
-                               backup_heating_efficiency_percent: backup_heating_efficiency_percent,
-                               fraction_heat_load_served: fraction_heat_load_served,
-                               fraction_cool_load_served: fraction_cool_load_served,
-                               cooling_efficiency_seer: cooling_efficiency_seer,
-                               cooling_efficiency_eer: cooling_efficiency_eer,
-                               heating_efficiency_hspf: heating_efficiency_hspf,
-                               heating_efficiency_cop: heating_efficiency_cop)
-    end
+      # HVACDistribution
+      next unless orig_hvac.key?('hvac_distribution')
 
-    # HVACControl
-    control_type = HPXML::HVACControlTypeManual
-    htg_sp, htg_setback_sp, htg_setback_hrs_per_week, htg_setback_start_hr = HVAC.get_default_heating_setpoint(control_type)
-    clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr = HVAC.get_default_cooling_setpoint(control_type)
-    new_hpxml.hvac_controls.add(id: 'HVACControl',
-                                control_type: control_type,
-                                heating_setpoint_temp: htg_sp,
-                                cooling_setpoint_temp: clg_sp)
-
-    # HVACDistribution
-    json.hvac_distributions.each do |orig_dist|
-      new_hpxml.hvac_distributions.add(id: orig_dist.id,
+      new_hpxml.hvac_distributions.add(id: 'AirDistribution',
                                        distribution_system_type: HPXML::HVACDistributionTypeAir,
                                        air_type: HPXML::AirTypeRegularVelocity)
 
-      hvac_fraction = get_hvac_fraction(json, orig_dist.id)
+      hvac_fraction = orig_hvac['hvac_fraction'] # get_hvac_fraction(json, orig_dist.id)  # FIXME: double-check
       new_hpxml.hvac_distributions[-1].conditioned_floor_area_served = hvac_fraction * @cfa
 
       frac_inside = 0.0
-      orig_dist.ducts.each do |orig_duct|
-        next unless orig_duct.duct_location == HPXML::LocationLivingSpace
+      sealed = []
+      orig_hvac['hvac_distribution'].each do |orig_duct|
+        duct_location = {
+          'cond_space' => HPXML::LocationLivingSpace,
+          'uncond_basement' => HPXML::LocationBasementUnconditioned,
+          'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
+          'vented_crawl' => HPXML::LocationCrawlspaceVented,
+          'uncond_attic' => HPXML::LocationAtticVented,
+        }[orig_duct['location']]
 
-        frac_inside += orig_duct.duct_fraction_area
+        next unless duct_location == HPXML::LocationLivingSpace
+
+        frac_inside += (Float(orig_duct['fraction']) / 100)
+        sealed << orig_duct['sealed']
       end
-
-      sealed = orig_dist.duct_system_sealed
+      sealed = sealed.all? { |d| d == true } # FIXME: double-check
       lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(@ncfl_ag, @cfa, sealed, frac_inside)
 
       # Supply duct leakage to the outside
@@ -690,42 +727,44 @@ class HEScoreRuleset
                                                                      duct_leakage_value: lto_r,
                                                                      duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
 
-      orig_dist.ducts.each do |orig_duct|
-        next if orig_duct.duct_location == HPXML::LocationLivingSpace
+      orig_hvac['hvac_distribution'].each do |orig_duct|
+        duct_location = {
+          'cond_space' => HPXML::LocationLivingSpace,
+          'uncond_basement' => HPXML::LocationBasementUnconditioned,
+          'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
+          'vented_crawl' => HPXML::LocationCrawlspaceVented,
+          'uncond_attic' => HPXML::LocationAtticVented,
+        }[orig_duct['location']]
 
-        if orig_duct.duct_location == HPXML::LocationAtticUnconditioned
-          orig_duct.duct_location = HPXML::LocationAtticVented
-        end
+        next if duct_location == HPXML::LocationLivingSpace
 
-        if orig_duct.duct_insulation_material == HPXML::DuctInsulationMaterialUnknown
+        if orig_duct['insulated']
           duct_rvalue = 6
-        elsif orig_duct.duct_insulation_material == HPXML::DuctInsulationMaterialNone
-          duct_rvalue = 0
         else
-          fail "Unexpected duct insulation material '#{orig_duct.duct_insulation_material}'."
+          duct_rvalue = 0
         end
 
-        supply_duct_surface_area = uncond_area_s * orig_duct.duct_fraction_area / (1.0 - frac_inside)
-        return_duct_surface_area = uncond_area_r * orig_duct.duct_fraction_area / (1.0 - frac_inside)
+        supply_duct_surface_area = uncond_area_s * orig_duct['fraction'] / (1.0 - frac_inside)
+        return_duct_surface_area = uncond_area_r * orig_duct['fraction'] / (1.0 - frac_inside)
 
         # Supply duct
         new_hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                                    duct_insulation_r_value: duct_rvalue,
-                                                   duct_location: orig_duct.duct_location,
+                                                   duct_location: duct_location,
                                                    duct_surface_area: supply_duct_surface_area)
 
         # Return duct
         new_hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeReturn,
                                                    duct_insulation_r_value: duct_rvalue,
-                                                   duct_location: orig_duct.duct_location,
+                                                   duct_location: duct_location,
                                                    duct_surface_area: return_duct_surface_area)
       end
-    end
 
-    additional_hydronic_ids.each do |hydronic_id|
-      new_hpxml.hvac_distributions.add(id: hydronic_id,
-                                       distribution_system_type: HPXML::HVACDistributionTypeHydronic,
-                                       hydronic_type: HPXML::HydronicTypeBaseboard)
+      additional_hydronic_ids.each do |hydronic_id|
+        new_hpxml.hvac_distributions.add(id: hydronic_id,
+                                         distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                         hydronic_type: HPXML::HydronicTypeBaseboard)
+      end
     end
   end
 
@@ -735,20 +774,17 @@ class HEScoreRuleset
 
   def self.set_systems_water_heater(json, new_hpxml)
     return unless json['building']['systems'].key? ('domestic_hot_water')
-    
+
     orig_water_heater = json['building']['systems']['domestic_hot_water']
     energy_factor = orig_water_heater['energy_factor']
-    fuel_type = {
-      'electric' => HPXML::FuelTypeElectricity,
-      'natural_gas' => HPXML::FuelTypeNaturalGas,
-      'lpg' => HPXML::FuelTypePropane,
-      'fuel_oil' => HPXML::FuelTypeOil}[orig_water_heater['fuel_primary']]
+    fuel_type = hescore_to_hpxml_fuel(orig_water_heater['fuel_primary'])
     water_heater_type = {
       'storage' => HPXML::WaterHeaterTypeStorage,
       'indirect' => HPXML::WaterHeaterTypeCombiStorage,
       'tankless' => HPXML::WaterHeaterTypeTankless,
       'tankless_coil' => HPXML::WaterHeaterTypeCombiTankless,
-      'heat_pump' => HPXML::WaterHeaterTypeHeatPump}[orig_water_heater['type']]
+      'heat_pump' => HPXML::WaterHeaterTypeHeatPump
+    }[orig_water_heater['type']]
     year_installed = orig_water_heater['year']
     # FIXME: can one specify third party certification in hescore json?
     # energy_star = (orig_water_heater.third_party_certification == HPXML::CertificationEnergyStar)
@@ -757,9 +793,9 @@ class HEScoreRuleset
       if orig_water_heater['efficiency_method'] == 'uef'
         # Convert to EF
         # FUTURE: Remove this conversion and use UEF directly; requires FHR input/assumption for storage water heaters
-        energy_factor = Waterheater.calc_ef_from_uef(orig_water_heater)  # FIXME: Cannot use this function!
+        energy_factor = Waterheater.calc_ef_from_uef(orig_water_heater) # FIXME: Cannot use this function!
       end
-      # Do nothing if efficiency method is 'user', we already have the energy factor
+    # Do nothing if efficiency method is 'user', we already have the energy factor
     # elsif energy_star  # FIXME: can one specify third party certification in hescore json?
     #   energy_factor = lookup_water_heater_efficiency(year_installed,
     #                                                  fuel_type,
@@ -770,6 +806,7 @@ class HEScoreRuleset
     end
 
     fail 'Water Heater Type must be provided' if water_heater_type.nil?
+
     # fail 'Electric water heaters must be heat pump water heaters to be Energy Star qualified' if energy_star && (fuel_type == HPXML::FuelTypeElectricity) && (water_heater_type != HPXML::WaterHeaterTypeHeatPump)
 
     heating_capacity = nil
@@ -801,7 +838,7 @@ class HEScoreRuleset
                                         fraction_dhw_load_served: 1.0,
                                         heating_capacity: heating_capacity,
                                         energy_factor: energy_factor,
-                                        related_hvac_idref: nil)  #orig_water_heater.related_hvac_idref)  # FIXME: Need to discuss it with Scott
+                                        related_hvac_idref: nil) # orig_water_heater.related_hvac_idref)  # FIXME: Need to discuss it with Scott
   end
 
   def self.set_systems_water_heating_use(json, new_hpxml)
@@ -1045,13 +1082,11 @@ def get_wall_effective_r_from_doe2code(doe2code)
   return val
 end
 
-$siding_map = {
-  HPXML::SidingTypeWood => 'wo',
-  HPXML::SidingTypeStucco => 'st',
-  HPXML::SidingTypeVinyl => 'vi',
-  HPXML::SidingTypeAluminum => 'al',
-  HPXML::SidingTypeBrick => 'br',
-  nil => 'nn'
+$fuel_type_map = {
+  'electric' => HPXML::FuelTypeElectricity,
+  'natural_gas' => HPXML::FuelTypeNaturalGas,
+  'lpg' => HPXML::FuelTypePropane,
+  'fuel_oil' => HPXML::FuelTypeOil
 }
 
 $wall_type_map = {
@@ -1063,9 +1098,20 @@ $wall_type_map = {
   'sb' => HPXML::WallTypeStrawBale
 }
 
+$hvac_system_type_map = {
+  'split_dx' => HPXML::HVACTypeCentralAirConditioner,
+  'packaged_dx' => HPXML::HVACTypeRoomAirConditioner,
+  'heat_pump' => HPXML::HVACTypeHeatPumpAirToAir,
+  'mini_split' => HPXML::HVACTypeHeatPumpMiniSplit,
+  'central_furnace' => HPXML::HVACTypeFurnace,
+  'wall_furnace' => HPXML::HVACTypeWallFurnace,
+  'boiler' => HPXML::HVACTypeBoiler,
+  'gchp' => HPXML::HVACTypeHeatPumpGroundToAir
+}
+
 def get_roof_effective_r_from_doe2code(doe2code)
   # For wood frame with radiant barrier roof, use wood frame roof effective R-value. Radiant barrier will be handled by the actual radiant barrier model in OS.
-  if doe2code[2,2] == 'rb'
+  if doe2code[2, 2] == 'rb'
     doe2code = doe2code.gsub('rb', 'wf')
   end
   val = nil
@@ -1310,7 +1356,7 @@ def wall_orientation_to_azimuth(orientation)
   return { 'front' => @bldg_azimuth,
            'right' => @bldg_azimuth + 90,
            'back' => @bldg_azimuth + 180,
-           'left' => @bldg_azimuth + 270}[orientation]
+           'left' => @bldg_azimuth + 270 }[orientation]
 end
 
 def reverse_orientation(orientation)
@@ -1340,11 +1386,16 @@ def sanitize_azimuth(azimuth)
   return azimuth
 end
 
+def hescore_to_hpxml_fuel(fuel_type)
+  return $fuel_type_map[fuel_type]
+end
+
+def hescore_to_hpxml_hvac_type(hvac_type)
+  return $hvac_system_type_map[hvac_type]
+end
+
 def hpxml_to_hescore_fuel(fuel_type)
-  return { HPXML::FuelTypeElectricity => 'electric',
-           HPXML::FuelTypeNaturalGas => 'natural_gas',
-           HPXML::FuelTypeOil => 'fuel_oil',
-           HPXML::FuelTypePropane => 'lpg' }[fuel_type]
+  return $fuel_type_map.invert[fuel_type]
 end
 
 def get_foundation_areas(json)
@@ -1360,7 +1411,7 @@ def get_ducts_details(json)
   # Returns a list of [hvac_frac, duct_frac, duct_location]
   ducts = []
   json['building']['systems']['hvac'].each do |orig_hvac|
-    hvac_frac = orig_hvac['hvac_fraction'] / 100  # get_hvac_fraction(json, orig_dist['name'])
+    hvac_frac = orig_hvac['hvac_fraction'] / 100 # get_hvac_fraction(json, orig_dist['name'])  FIXME: double-check
 
     orig_hvac['hvac_distribution'].each do |orig_duct|
       ducts << [hvac_frac, orig_duct['fraction'], orig_duct['location']]
