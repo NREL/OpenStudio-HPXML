@@ -408,7 +408,7 @@ class HEScoreRuleset
         roof_azimuths = [@bldg_azimuth, @bldg_azimuth + 180]
       end
       roof_azimuths.each_with_index do |roof_azimuth, idx| # FIXME: double-check
-        skylight_area = orig_skylight.area / 2.0
+        skylight_area = orig_skylight['skylight_area'] / 2.0
         new_hpxml.skylights.add(id: "#{orig_roof['roof_name']}_#{idx}_skylight",
                                 area: skylight_area,
                                 azimuth: roof_azimuth,
