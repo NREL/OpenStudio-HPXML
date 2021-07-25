@@ -356,11 +356,10 @@ class HEScoreRuleset
       interior_shading_factor_summer, interior_shading_factor_winter = Constructions.get_default_interior_shading_factors()
       exterior_shading_factor_summer = 1.0
       exterior_shading_factor_winter = 1.0
-      # FIXME: Can one specify solar screens in hescore json?
-      # if orig_window.exterior_shading_type == 'solar screens'
-      #   # Summer only, total shading factor reduced to 0.29
-      #   exterior_shading_factor_summer = 0.29 / interior_shading_factor_summer # Overall shading factor is interior multiplied by exterior
-      # end
+      if orig_window['solar_screen'] == true
+        # Summer only, total shading factor reduced to 0.29
+        exterior_shading_factor_summer = 0.29 / interior_shading_factor_summer # Overall shading factor is interior multiplied by exterior
+      end
 
       # Add one HPXML window per side of the house with only the overhangs from the roof.
       new_hpxml.windows.add(id: "#{orig_wall['side']}_window",
@@ -395,12 +394,11 @@ class HEScoreRuleset
       interior_shading_factor_winter = 1.0
       exterior_shading_factor_summer = 1.0
       exterior_shading_factor_winter = 1.0
-      # FIXME: Can one specify solar screens in hescore json?
-      # if orig_skylight.exterior_shading_type == 'solar screens'
-      #   # Year-round, total shading factor reduced to 0.29
-      #   exterior_shading_factor_summer = 0.29
-      #   exterior_shading_factor_winter = 0.29
-      # end
+      if orig_skylight['solar_screen'] == true
+        # Year-round, total shading factor reduced to 0.29
+        exterior_shading_factor_summer = 0.29
+        exterior_shading_factor_winter = 0.29
+      end
 
       if @is_townhouse
         roof_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270]
