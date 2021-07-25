@@ -134,8 +134,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationAtticUnconditioned]]
+    fnd_types = { 'slab_on_grade' => 1000.0 }
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(9.7, ach50, 0.01)
 
@@ -147,8 +147,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationAtticUnconditioned]]
+    fnd_types = { 'slab_on_grade' => 1000.0 }
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(11.8, ach50, 0.01)
 
@@ -160,8 +160,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 2000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationAtticUnconditioned]]
+    fnd_types = { 'slab_on_grade' => 2000.0 }
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(10.2, ach50, 0.01)
 
@@ -173,8 +173,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationAtticUnconditioned]]
+    fnd_types = { 'slab_on_grade' => 1000.0 }
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(7.6, ach50, 0.01)
 
@@ -186,8 +186,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 2013
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationAtticUnconditioned]]
+    fnd_types = { 'slab_on_grade' => 1000.0 }
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(5.3, ach50, 0.01)
 
@@ -199,8 +199,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '4C'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationAtticUnconditioned]]
+    fnd_types = { 'slab_on_grade' => 1000.0 }
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(13.1, ach50, 0.01)
 
@@ -212,8 +212,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationBasementConditioned => 1000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationAtticUnconditioned]]
+    fnd_types = { 'cond_basement' => 1000.0 }
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(11.2, ach50, 0.01)
 
@@ -225,8 +225,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationLivingSpace]]
+    fnd_types = { 'slab_on_grade' => 1000.0 }
+    ducts = [[1.0, 1.0, 'cond_space']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(8.0, ach50, 0.01)
 
@@ -238,8 +238,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessTight
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationAtticUnconditioned]]
+    fnd_types = { 'slab_on_grade' => 1000.0 }
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(7.3, ach50, 0.01)
 
@@ -251,14 +251,14 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 600.0,
-                  HPXML::LocationBasementConditioned => 400.0 }
-    ducts = [[0.75, 0.5, HPXML::LocationAtticUnconditioned],
-             [0.75, 0.25, HPXML::LocationLivingSpace],
-             [0.75, 0.25, HPXML::LocationCrawlspaceVented],
-             [0.25, 0.5, HPXML::LocationCrawlspaceUnvented],
-             [0.25, 0.3, HPXML::LocationAtticUnconditioned],
-             [0.25, 0.2, HPXML::LocationCrawlspaceVented]]
+    fnd_types = { 'slab_on_grade' => 600.0,
+                  'cond_basement' => 400.0 }
+    ducts = [[0.75, 0.5, 'uncond_attic'],
+             [0.75, 0.25, 'cond_space'],
+             [0.75, 0.25, 'vented_crawl'],
+             [0.25, 0.5, 'unvented_crawl'],
+             [0.25, 0.3, 'uncond_attic'],
+             [0.25, 0.2, 'vented_crawl']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(10.2, ach50, 0.01)
 
@@ -271,10 +271,10 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
+    fnd_types = { 'slab_on_grade' => 1000.0 }
     ducts = []
     ach50_ductless = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
-    ducts = [[1.0, 1.0, HPXML::LocationLivingSpace]]
+    ducts = [[1.0, 1.0, 'cond_space']]
     ach50_ducted = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_equal(ach50_ductless, ach50_ducted)
 
@@ -287,12 +287,12 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
-    ducts = [[0.5, 1.0, 'attic - unconditioned']] # 50% ducts in attic + 50% ductless
+    fnd_types = { 'slab_on_grade' => 1000.0 }
+    ducts = [[0.5, 1.0, 'uncond_attic']] # 50% ducts in attic + 50% ductless
     ach50_mixed = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
-    ducts = [[1.0, 1.0, 'living space']]
+    ducts = [[1.0, 1.0, 'cond_space']]
     ach50_cond = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
-    ducts = [[1.0, 1.0, 'attic - unconditioned']]
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50_uncond = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(ach50_mixed, (ach50_cond + ach50_uncond) / 2.0, 0.01)
   end
