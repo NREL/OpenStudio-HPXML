@@ -171,7 +171,7 @@ class HEScoreRuleset
                          'cond_attic' => HPXML::LocationLivingSpace,
                          'cath_ceiling' => HPXML::LocationLivingSpace }[orig_roof['roof_type']]
       # Roof: Two surfaces per HES zone_roof
-      roof_area = orig_roof['roof_area']
+      roof_area = orig_roof['roof_area'] / Math.cos(@roof_angle_rad)
       roof_solar_abs = get_roof_solar_absorptance(orig_roof['roof_color'])
       roof_r = get_roof_effective_r_from_doe2code(orig_roof['roof_assembly_code'])
       if @is_townhouse
@@ -182,6 +182,7 @@ class HEScoreRuleset
       has_radiant_barrier = false
       if orig_roof['roof_assembly_code'][2, 2] == 'rb'
         has_radiant_barrier = true
+        radiant_barrier_grade = 1
       end
       roof_azimuths.each_with_index do |roof_azimuth, idx|
         new_hpxml.roofs.add(id: "#{orig_roof['roof_name']}_#{idx}",
@@ -192,7 +193,7 @@ class HEScoreRuleset
                             emittance: 0.9,
                             pitch: Math.tan(@roof_angle_rad) * 12,
                             radiant_barrier: has_radiant_barrier,
-                            radiant_barrier_grade: 1,
+                            radiant_barrier_grade: radiant_barrier_grade,
                             insulation_assembly_r_value: roof_r)
       end
     end
@@ -283,12 +284,12 @@ class HEScoreRuleset
       next unless attic_location == HPXML::LocationAtticVented
 
       framefloor_r = get_ceiling_effective_r_from_doe2code(orig_attic['ceiling_assembly_code'])
-      framefloor_area = orig_attic['roof_area'] * Math.tan(@roof_angle_rad)
+      framefloor_area = orig_attic['roof_area']
 
       new_hpxml.frame_floors.add(id: "framefloor_adjacent_to_#{orig_attic['roof_type']}",
                                  exterior_adjacent_to: attic_location,
                                  interior_adjacent_to: HPXML::LocationLivingSpace,
-                                 area: framefloor_area, # FIXME: double-check
+                                 area: framefloor_area,
                                  insulation_assembly_r_value: framefloor_r)
     end
   end
@@ -732,14 +733,14 @@ class HEScoreRuleset
 
           next if duct_location == HPXML::LocationLivingSpace
 
-          if orig_duct['insulated']
+          if orig_duct['insulated'] == true
             duct_rvalue = 6
           else
             duct_rvalue = 0
           end
 
-          supply_duct_surface_area = uncond_area_s * orig_duct['fraction'] / (1.0 - frac_inside)
-          return_duct_surface_area = uncond_area_r * orig_duct['fraction'] / (1.0 - frac_inside)
+          supply_duct_surface_area = uncond_area_s * (orig_duct['fraction'] / 100) / (1.0 - frac_inside)
+          return_duct_surface_area = uncond_area_r * (orig_duct['fraction'] / 100) / (1.0 - frac_inside)
 
           # Supply duct
           new_hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
@@ -1356,9 +1357,9 @@ end
 
 def wall_orientation_to_azimuth(orientation)
   return { 'front' => @bldg_azimuth,
-           'right' => @bldg_azimuth + 90,
+           'left' => @bldg_azimuth + 90,
            'back' => @bldg_azimuth + 180,
-           'left' => @bldg_azimuth + 270 }[orientation]
+           'right' => @bldg_azimuth + 270 }[orientation]
 end
 
 def reverse_orientation(orientation)
