@@ -787,7 +787,7 @@ class HEScoreRuleset
       if orig_water_heater['efficiency_method'] == 'uef'
         # Convert to EF
         # FUTURE: Remove this conversion and use UEF directly; requires FHR input/assumption for storage water heaters
-        energy_factor = Waterheater.calc_ef_from_uef(orig_water_heater) # FIXME: Cannot use this function!
+        energy_factor = calc_ef_from_uef(water_heater_type, fuel_type, orig_water_heater['energy_factor'])
       end
     # Do nothing if efficiency method is 'user', we already have the energy factor
     # elsif energy_star  # FIXME: can one specify third party certification in hescore json?
@@ -1072,6 +1072,26 @@ def get_default_water_heater_capacity(fuel)
   return val if not val.nil?
 
   fail "Could not get default water heater capacity for fuel '#{fuel}'"
+end
+
+def calc_ef_from_uef(water_heater_type, fuel_type, uniform_energy_factor)
+  # Interpretation on Water Heater UEF
+  if fuel_type == HPXML::FuelTypeElectricity
+    if water_heater_type == HPXML::WaterHeaterTypeStorage
+      return [2.4029 * uniform_energy_factor - 1.2844, 0.96].min
+    elsif water_heater_type == HPXML::WaterHeaterTypeTankless
+      return uniform_energy_factor
+    elsif water_heater_type == HPXML::WaterHeaterTypeHeatPump
+      return 1.2101 * uniform_energy_factor - 0.6052
+    end
+  else # Fuel
+    if water_heater_type == HPXML::WaterHeaterTypeStorage
+      return 0.9066 * uniform_energy_factor + 0.0711
+    elsif water_heater_type == HPXML::WaterHeaterTypeTankless
+      return uniform_energy_factor
+    end
+  end
+  fail 'Unexpected water heater.'
 end
 
 def get_wall_effective_r_from_doe2code(doe2code)
