@@ -27,10 +27,10 @@ class HEScoreTest < Minitest::Unit::TestCase
 
     results = {}
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
-    xmldir = "#{parent_dir}/sample_files"
-    Parallel.map(Dir["#{xmldir}/*.xml"].sort, in_threads: Parallel.processor_count) do |xml|
+    jsondir = "#{parent_dir}/sample_files"
+    Parallel.map(Dir["#{jsondir}/*.json"].sort, in_threads: Parallel.processor_count) do |json|
       out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
-      results[File.basename(xml)] = run_and_check(xml, out_dir, false, zipfile)
+      results[File.basename(json)] = run_and_check(json, out_dir, false, zipfile)
     end
 
     _write_summary_results(results.sort_by { |k, v| k.downcase }.to_h, results_csv_path)
@@ -40,8 +40,8 @@ class HEScoreTest < Minitest::Unit::TestCase
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
-    xml = File.absolute_path(File.join(parent_dir, 'sample_files', 'Base_hpxml.xml'))
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" --skip-simulation -x #{xml}"
+    json = File.absolute_path(File.join(parent_dir, 'sample_files', 'Base_hpxml.json'))
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" --skip-simulation -j #{json}"
     start_time = Time.now
     success = system(command)
     assert_equal(true, success)
@@ -71,17 +71,20 @@ class HEScoreTest < Minitest::Unit::TestCase
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
-    xml = File.absolute_path(File.join(parent_dir, 'sample_files', 'Floors_1_hpxml.xml'))
+    json_path = File.absolute_path(File.join(parent_dir, 'sample_files', 'Floors_1_hpxml.json'))
 
     # Create derivative file
-    hpxml = XMLHelper.parse_file(xml)
-    bldg_const = XMLHelper.get_element(hpxml, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea')
-    bldg_const.inner_text = (Float(bldg_const.inner_text) - 5.0).to_s # ft2
-    xml.gsub!('.xml', '_floor_area_test.xml')
-    XMLHelper.write_file(hpxml, xml)
+    json_file = File.open(json_path)
+    json = JSON.parse(json_file.read)
+    bldg_const = json['building']['about']['conditioned_floor_area']  # XMLHelper.get_element(hpxml, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea')
+    json['building']['about']['conditioned_floor_area'] = bldg_const - 5.0 # ft2
+    json_path.gsub!('.json', '_floor_area_test.json')
+    File.open(json_path, 'w') do |f|
+      f.write(json.to_json)
+    end
 
     # Run derivative file
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml}"
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -j #{json_path}"
     success = system(command)
 
     # Check for success
@@ -89,19 +92,19 @@ class HEScoreTest < Minitest::Unit::TestCase
     assert(File.exist?(File.join(parent_dir, 'results', 'HEScoreDesign.xml')))
 
     # Cleanup
-    File.delete(xml)
+    File.delete(json_path)
   end
 
   private
 
-  def run_and_check(xml, parent_dir, expect_error, zipfile)
-    # Check input HPXML is valid
-    xml = File.absolute_path(xml)
-    hpxml = HPXML.new(hpxml_path: xml)
+  def run_and_check(json, parent_dir, expect_error, zipfile)
+    json_path = File.absolute_path(json)
+    json_file = File.open(json_path)
+    json = JSON.parse(json_file.read)
 
     # Run workflow
     cli_path = OpenStudio.getOpenStudioCLI
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} -o #{parent_dir} --debug"
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -j #{json_path} -o #{parent_dir} --debug"
     start_time = Time.now
     success = system(command)
     assert_equal(true, success)
@@ -119,7 +122,7 @@ class HEScoreTest < Minitest::Unit::TestCase
 
       # Check HPXMLs are valid
       schemas_dir = File.absolute_path(File.join(parent_dir, '..', '..', 'hpxml-measures', 'HPXMLtoOpenStudio', 'resources'))
-      _test_schema_validation(parent_dir, xml, schemas_dir)
+      # _test_schema_validation(parent_dir, json, schemas_dir)
       _test_schema_validation(parent_dir, hes_hpxml, schemas_dir)
 
       # Check run.log for messages
@@ -134,17 +137,17 @@ class HEScoreTest < Minitest::Unit::TestCase
         next if log_line.include?('Glazing U-factor') && log_line.include?('above maximum expected value. U-factor decreased')
 
         # Files w/o cooling systems
-        if hpxml.total_fraction_cool_load_served <= 0
+        if json['building']['systems']['hvac']['hvac_fraction'] <= 0  # hpxml.total_fraction_cool_load_served <= 0
           next if log_line.include?('No space cooling specified, the model will not include space cooling energy use.')
         end
 
         # Files w/o heating systems
-        if hpxml.total_fraction_heat_load_served <= 0
+        if json['building']['systems']['hvac']['hvac_fraction'] <= 0  # hpxml.total_fraction_heat_load_served <= 0
           next if log_line.include?('No space heating specified, the model will not include space heating energy use.')
         end
 
         # Files w/o windows
-        if hpxml.windows.map { |w| w.area }.sum(0.0) <= 1.0
+        if json['building']['zone']['zone_wall'].map{ |w| w['zone_window']['window_area'] }.sum(0.0) <= 1.0
           next if log_line.include?('No windows specified, the model will not include window heat transfer.')
         end
 
@@ -152,10 +155,10 @@ class HEScoreTest < Minitest::Unit::TestCase
       end
 
       # Add results.json to zip file for storage on CI
-      zipfile.addFile(OpenStudio::Path.new(results_json), OpenStudio::Path.new(File.basename(xml.gsub('.xml', '_results.json'))))
+      zipfile.addFile(OpenStudio::Path.new(results_json), OpenStudio::Path.new(File.basename(json_path.gsub('.json', '_results.json'))))
 
       results = _get_results(parent_dir)
-      _test_results(xml, hpxml, results)
+      _test_results(json_path, hpxml, results)
     end
 
     return results
@@ -217,7 +220,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     return results
   end
 
-  def _test_results(xml, hpxml, results)
+  def _test_results(json, hpxml, results)
     fuel_map = { HPXML::FuelTypeElectricity => 'electric',
                  HPXML::FuelTypeNaturalGas => 'natural_gas',
                  HPXML::FuelTypeOil => 'fuel_oil',
@@ -305,7 +308,7 @@ class HEScoreTest < Minitest::Unit::TestCase
 
       # Check heating end use by fuel reflects presence of system
       if end_use == 'heating'
-        if xml.include? 'sample_files/Location_CZ09_hpxml.xml'
+        if json.include? 'sample_files/Location_CZ09_hpxml.json'
           # skip test: hot climate so potentially no heating energy
         elsif htg_fuels.include? resource_type
           assert_operator(value, :>, 0)
@@ -366,8 +369,8 @@ class HEScoreTest < Minitest::Unit::TestCase
     require 'csv'
     CSV.open(results_csv_path, 'w') do |csv|
       csv << column_headers
-      results.sort.each do |xml, xml_results|
-        csv << [xml] + xml_results.values.map { |v| v.round(2) }
+      results.sort.each do |json, json_results|
+        csv << [json] + json_results.values.map { |v| v.round(2) }
       end
     end
 
