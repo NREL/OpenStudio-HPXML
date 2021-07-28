@@ -29,6 +29,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
     jsondir = "#{parent_dir}/sample_files"
     Parallel.map(Dir["#{jsondir}/*.json"].sort, in_threads: Parallel.processor_count) do |json|
+      next unless json 
       out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
       results[File.basename(json)] = run_and_check(json, out_dir, false, zipfile)
     end
@@ -158,7 +159,7 @@ class HEScoreTest < Minitest::Unit::TestCase
       zipfile.addFile(OpenStudio::Path.new(results_json), OpenStudio::Path.new(File.basename(json_path.gsub('.json', '_results.json'))))
 
       results = _get_results(parent_dir)
-      _test_results(json_path, hpxml, results)
+      _test_results(json_path, json, results)
     end
 
     return results
@@ -220,7 +221,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     return results
   end
 
-  def _test_results(json, hpxml, results)
+  def _test_results(json_path, json, results)
     fuel_map = { HPXML::FuelTypeElectricity => 'electric',
                  HPXML::FuelTypeNaturalGas => 'natural_gas',
                  HPXML::FuelTypeOil => 'fuel_oil',
@@ -229,47 +230,63 @@ class HEScoreTest < Minitest::Unit::TestCase
                  HPXML::FuelTypeWoodPellets => 'pellet_wood' }
 
     # Get HPXML values for Building Construction
-    cfa = hpxml.building_construction.conditioned_floor_area
-    nbr = hpxml.building_construction.number_of_bedrooms
+    cfa = json['building']['about']['conditioned_floor_area']  # hpxml.building_construction.conditioned_floor_area
+    nbr = json['building']['about']['number_bedrooms']  # hpxml.building_construction.number_of_bedrooms
 
     # Get HPXML values for HVAC
     htg_fuels = []
-    hpxml.heating_systems.each do |heating_system|
-      next unless heating_system.fraction_heat_load_served > 0
+    json['building']['systems']['hvac'].each do |hvac|
+      next if hvac['heating'].nil?
+      next if hvac['heating']['type'] == 'none'
+      next unless hvac['hvac_fraction'] > 0
 
-      htg_fuels << fuel_map[heating_system.heating_system_fuel]
-      if [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler, HPXML::HVACTypeStove].include? heating_system.heating_system_type
+      htg_fuels << fuel_map[hvac['heating']['fuel_primary']]
+      if [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler, HPXML::HVACTypeStove].include? hvac['heating']['type']
         htg_fuels << fuel_map[HPXML::FuelTypeElectricity] # fan/pump
       end
     end
-    hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump.fraction_heat_load_served > 0
+    json['building']['systems']['hvac'].each do |hvac|
+      next unless ['heat_pump', 'mini_split', 'gchp'].include? hvac['heating']
+      next unless hvac['hvac_fraction'] > 0
 
       htg_fuels << fuel_map[HPXML::FuelTypeElectricity]
     end
     has_clg = false
-    hpxml.cooling_systems.each do |cooling_system|
-      next unless cooling_system.fraction_cool_load_served > 0
+    json['building']['systems']['hvac'].each do |hvac|
+      next if hvac['cooling'].nil?
+      next if hvac['cooling']['type'] == 'none'
+      next unless hvac['hvac_fraction'] > 0
 
       has_clg = true
     end
-    hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump.fraction_cool_load_served > 0
+    json['building']['systems']['hvac'].each do |hvac|
+      next unless ['heat_pump', 'mini_split', 'gchp'].include? hvac['cooling']
+      next unless hvac['hvac_fraction'] > 0
 
       has_clg = true
     end
 
     # Get HPXML values for Water Heating
-    hw_fuels = []
-    hpxml.water_heating_systems.each do |water_heater|
-      hw_fuels << fuel_map[water_heater.fuel_type]
-      next unless [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater.water_heater_type
-
-      hw_fuels << fuel_map[water_heater.related_hvac_system.heating_system_fuel]
+    if json['building']['systems'].key? ('domestic_hot_water')
+      hw_fuels = []
+      water_heater = json['building']['systems']['domestic_hot_water']
+      hw_fuels << fuel_map[water_heater['fuel_primary']]
+      
+      if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater['type']
+        json['building']['systems']['hvac'].each do |hvac|  # FIXME: double-check
+          if hvac['heating']['type'] == 'boiler'
+            hw_fuels << fuel_map[hvac['heating']['fuel_primary']]
+          end
+        end
+      end
     end
 
     # Get HPXML values for PV
-    has_pv = (hpxml.pv_systems.size > 0)
+    if json['building']['systems'].key?('generation')
+      if json['building']['systems']['generation'].key?('solar_electric')
+        has_pv = true
+      end
+    end
 
     tested_end_uses = []
     results.each do |key, value|
