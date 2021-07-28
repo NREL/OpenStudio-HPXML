@@ -7,7 +7,7 @@ class HEScoreRuleset
     new_hpxml.header.xml_type = nil # FIXME: does json contain this information?
     new_hpxml.header.xml_generated_by = 'OpenStudio-HEScore'
     new_hpxml.header.transaction = 'create' # FIXME: does json contain this information?
-    new_hpxml.header.building_id = json['building']['building_id']
+    new_hpxml.header.building_id = 'bldg'  # FIXME: json['building']['building_id']?
     new_hpxml.header.event_type = 'construction-period testing/daily test out' # FIXME: does json contain this information?
 
     # BuildingSummary
@@ -139,6 +139,12 @@ class HEScoreRuleset
     new_hpxml.climate_and_risk_zones.weather_station_wmo = station_wmo
     new_hpxml.climate_and_risk_zones.weather_station_epw_filepath = epw_filename
 
+    if iecc_zone == '7AK'
+      iecc_zone = '7'
+    elsif iecc_zone == '8AK'
+      iecc_zone = '8'
+    end
+
     @iecc_zone = iecc_zone
   end
 
@@ -172,7 +178,7 @@ class HEScoreRuleset
                          'cath_ceiling' => HPXML::LocationLivingSpace }[orig_roof['roof_type']]
       # Roof: Two surfaces per HES zone_roof
       roof_area = orig_roof['roof_area'] / Math.cos(@roof_angle_rad)
-      roof_solar_abs = get_roof_solar_absorptance(orig_roof['roof_color'])
+      roof_solar_abs = get_roof_solar_absorptance($roof_color_map[orig_roof['roof_color']])
       roof_r = get_roof_effective_r_from_doe2code(orig_roof['roof_assembly_code'])
       if @is_townhouse
         roof_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270]
@@ -462,7 +468,7 @@ class HEScoreRuleset
 
         # Need to create hydronic distribution system?
         if heating_system_type == HPXML::HVACTypeBoiler
-          distribution_system_idref = orig_heating['type'] + '_dist'
+          distribution_system_idref = "#{orig_hvac['hvac_name']}_hydronic_dist"
           additional_hydronic_ids << distribution_system_idref
         end
 
@@ -1104,6 +1110,15 @@ def get_wall_effective_r_from_doe2code(doe2code)
   end
   return val
 end
+
+$roof_color_map = {
+  'white' => HPXML::ColorLight,
+  'light' => HPXML::ColorLight,
+  'medium' => HPXML::ColorMedium,
+  'medium_dark' => HPXML::ColorMediumDark,
+  'dark' => HPXML::ColorDark,
+  'cool_color' => HPXML::ColorReflective
+}
 
 $fuel_type_map = {
   'electric' => HPXML::FuelTypeElectricity,
