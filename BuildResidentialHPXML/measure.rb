@@ -1210,6 +1210,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('grid_signal_schedule', false)
+    arg.setDisplayName('Grid Signal Schedule for Demand Flexibility Measures')
+    arg.setDescription('Schedule can be 24 hour array or file location')
+    args << arg
+
     heating_system_type_2_choices = OpenStudio::StringVector.new
     heating_system_type_2_choices << 'none'
     heating_system_type_2_choices << HPXML::HVACTypeWallFurnace
@@ -4096,6 +4101,10 @@ class HPXMLFile
       ihp_pcm_storage = args[:heat_pump_demand_flexibility_ihp_pcm_storage].get
     end
 
+    if args[:grid_signal_schedule].is_initialized
+      grid_signal_schedule = args[:grid_signal_schedule].get
+    end
+
     hpxml.heat_pumps.add(id: 'HeatPump',
                          heat_pump_type: heat_pump_type,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
@@ -4118,6 +4127,7 @@ class HPXMLFile
                          airflow_defect_ratio: airflow_defect_ratio,
                          charge_defect_ratio: charge_defect_ratio,
                          flex: flex,
+                         grid_signal_schedule: grid_signal_schedule,
                          modulating: modulating,
                          dual_source: dual_source,
                          ihp_grid_ac: ihp_grid_ac,

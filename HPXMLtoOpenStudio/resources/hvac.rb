@@ -236,18 +236,26 @@ class HVAC
 
     hp_ap = heat_pump.additional_properties
 
-    grid_signal_schedules_file = nil
+    grid_signal_schedule = nil
     if heat_pump.flex # grid connected
-      schedules_path = File.join(File.dirname(__FILE__), 'data_grid_signal_schedules.csv')
-      grid_signal_schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: schedules_path, col_names: Constants.GridSignalRegions)
+      if heat_pump.grid_signal_schedule.include? '.csv' # schedule file path
+        schedules_path = File.join(File.dirname(__FILE__), heat_pump.grid_signal_schedule)
+        grid_signal_schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: schedules_path, col_names: Constants.GridSignalRegions)
+        grid_signal_schedule = grid_signal_schedules_file.create_schedule_file(col_name: model.getWeatherFile.stateProvinceRegion)
+      else # 24-hours schedule
+        num_days = Schedule.get_num_days_in_year(model)
+        grid_signal_schedule = heat_pump.grid_signal_schedule.split(',').map { |i| Float(i) }
+        grid_signal_schedule = [grid_signal_schedule] * num_days
+        grid_signal_schedule = HourlyByDaySchedule.new(model, 'Grid signal schedule', grid_signal_schedule, grid_signal_schedule, nil, false).schedule
+      end
     end
 
     # Cooling Coil
-    clg_coil = create_dx_cooling_coil(model, obj_name, heat_pump, grid_signal_schedules_file)
+    clg_coil = create_dx_cooling_coil(model, obj_name, heat_pump, grid_signal_schedule)
     hvac_map[heat_pump.id] << clg_coil
 
     # Heating Coil
-    htg_coil = create_dx_heating_coil(model, obj_name, heat_pump, grid_signal_schedules_file)
+    htg_coil = create_dx_heating_coil(model, obj_name, heat_pump, grid_signal_schedule)
     hvac_map[heat_pump.id] << htg_coil
 
     # Supplemental Heating Coil
@@ -294,7 +302,7 @@ class HVAC
 
         # Grid AC
         if heat_pump.ihp_grid_ac
-          grid_clg_coil = create_dx_cooling_coil(model, obj_name, heat_pump, grid_signal_schedules_file)
+          grid_clg_coil = create_dx_cooling_coil(model, obj_name, heat_pump, grid_signal_schedule)
           grid_clg_coil.setLowerBoundToApplyGridResponsiveControl(1000.0)
           grid_clg_coil.setMaxSpeedLevelDuringGridResponsiveControl(1)
           hvac_map[heat_pump.id] << grid_clg_coil
@@ -302,7 +310,7 @@ class HVAC
 
         # Storage
         if heat_pump.ihp_ice_storage || heat_pump.ihp_pcm_storage
-          chiller_coil = chiller_coil(model, obj_name, grid_signal_schedules_file)
+          chiller_coil = chiller_coil(model, obj_name, grid_signal_schedule)
           hvac_map[heat_pump.id] << chiller_coil
 
           supp_chiller_coil = supp_chiller_coil(model, obj_name)
@@ -365,7 +373,7 @@ class HVAC
     apply_installation_quality(model, heat_pump, heat_pump, air_loop_unitary, htg_coil, clg_coil, control_zone)
   end
 
-  def self.chiller_coil(model, obj_name, grid_signal_schedules_file)
+  def self.chiller_coil(model, obj_name, grid_signal_schedule)
     chiller_coil = OpenStudio::Model::CoilChillerAirSourceVariableSpeed.new(model)
     chiller_coil.setName(obj_name + ' chiller coil')
     chiller_coil.setRatedEvaporatorInletWaterTemperature(-1.1)
@@ -373,8 +381,7 @@ class HVAC
     chiller_coil.setFractionofEvaporatorPumpHeattoWater(0.1)
     chiller_coil.setCrankcaseHeaterCapacity(100.0)
     chiller_coil.setMaximumAmbientTemperatureforCrankcaseHeaterOperation(5.0)
-    unless grid_signal_schedules_file.nil?
-      grid_signal_schedule = grid_signal_schedules_file.create_schedule_file(col_name: model.getWeatherFile.stateProvinceRegion)
+    unless grid_signal_schedule.nil?
       chiller_coil.setGridSignalSchedule(grid_signal_schedule)
     end
     chiller_coil.setLowerBoundToApplyGridResponsiveControl(0.1)
@@ -3094,7 +3101,7 @@ class HVAC
     return curve
   end
 
-  def self.create_dx_cooling_coil(model, obj_name, cooling_system, grid_signal_schedules_file = nil)
+  def self.create_dx_cooling_coil(model, obj_name, cooling_system, grid_signal_schedule = nil)
     clg_ap = cooling_system.additional_properties
 
     if cooling_system.is_a? HPXML::CoolingSystem
@@ -3170,8 +3177,7 @@ class HVAC
               clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C'))
             end
             if cooling_system.modulating || cooling_system.ihp_grid_ac || cooling_system.ihp_ice_storage || cooling_system.ihp_pcm_storage
-              unless grid_signal_schedules_file.nil?
-                grid_signal_schedule = grid_signal_schedules_file.create_schedule_file(col_name: model.getWeatherFile.stateProvinceRegion)
+              unless grid_signal_schedule.nil?
                 clg_coil.setGridSignalSchedule(grid_signal_schedule)
               end
               clg_coil.setLowerBoundToApplyGridResponsiveControl(0.15)
@@ -3200,7 +3206,7 @@ class HVAC
     return clg_coil
   end
 
-  def self.create_dx_heating_coil(model, obj_name, heating_system, grid_signal_schedules_file = nil)
+  def self.create_dx_heating_coil(model, obj_name, heating_system, grid_signal_schedule = nil)
     htg_ap = heating_system.additional_properties
 
     if heating_system.is_a? HPXML::HeatingSystem
@@ -3260,8 +3266,7 @@ class HVAC
               htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(htg_ap.crankcase_temp, 'F', 'C'))
             end
             if heating_system.dual_source
-              unless grid_signal_schedules_file.nil?
-                grid_signal_schedule = grid_signal_schedules_file.create_schedule_file(col_name: model.getWeatherFile.stateProvinceRegion)
+              unless grid_signal_schedule.nil?
                 htg_coil.setGridSignalSchedule(grid_signal_schedule)
               end
               htg_coil.setLowerBoundToApplyGridResponsiveControl(0.15)
