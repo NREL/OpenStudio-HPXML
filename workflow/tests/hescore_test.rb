@@ -41,7 +41,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
-    json = File.absolute_path(File.join(parent_dir, 'sample_files', 'Base_hpxml.json'))
+    json = File.absolute_path(File.join(parent_dir, 'sample_files', 'Base.json'))
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" --skip-simulation -j #{json}"
     start_time = Time.now
     success = system(command)
