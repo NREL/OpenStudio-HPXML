@@ -138,14 +138,22 @@ class HEScoreTest < Minitest::Unit::TestCase
         next if log_line.include?('Glazing U-factor') && log_line.include?('above maximum expected value. U-factor decreased')
 
         # Files w/o cooling systems
-        if json['building']['systems']['hvac']['hvac_fraction'] <= 0  # hpxml.total_fraction_cool_load_served <= 0
-          next if log_line.include?('No space cooling specified, the model will not include space cooling energy use.')
+        no_spc_clg = false
+        json['building']['systems']['hvac'].each do |hvac|
+          if hvac['cooling'].empty? || hvac['cooling']['type'] == 'none'
+            no_spc_clg = true
+          end
         end
+        next if no_spc_clg && log_line.include?('No space cooling specified, the model will not include space cooling energy use.')
 
         # Files w/o heating systems
-        if json['building']['systems']['hvac']['hvac_fraction'] <= 0  # hpxml.total_fraction_heat_load_served <= 0
-          next if log_line.include?('No space heating specified, the model will not include space heating energy use.')
+        no_spc_htg = false
+        json['building']['systems']['hvac'].each do |hvac|
+          if hvac['heating'].empty? || hvac['heating']['type'] == 'none'
+            no_spc_htg = true
+          end
         end
+        next if no_spc_htg && log_line.include?('No space heating specified, the model will not include space heating energy use.')
 
         # Files w/o windows
         if json['building']['zone']['zone_wall'].map{ |w| w['zone_window']['window_area'] }.sum(0.0) <= 1.0
@@ -240,16 +248,16 @@ class HEScoreTest < Minitest::Unit::TestCase
       next if hvac['heating']['type'] == 'none'
       next unless hvac['hvac_fraction'] > 0
 
-      htg_fuels << fuel_map[hvac['heating']['fuel_primary']]
-      if [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler, HPXML::HVACTypeStove].include? hvac['heating']['type']
-        htg_fuels << fuel_map[HPXML::FuelTypeElectricity] # fan/pump
+      htg_fuels << hvac['heating']['fuel_primary']
+      if ['central_furnace', 'boiler', 'wood_stove'].include? hvac['heating']['type']
+        htg_fuels << 'electric' # fan/pump
       end
     end
     json['building']['systems']['hvac'].each do |hvac|
       next unless ['heat_pump', 'mini_split', 'gchp'].include? hvac['heating']
       next unless hvac['hvac_fraction'] > 0
 
-      htg_fuels << fuel_map[HPXML::FuelTypeElectricity]
+      htg_fuels << 'electric'
     end
     has_clg = false
     json['building']['systems']['hvac'].each do |hvac|
@@ -270,12 +278,12 @@ class HEScoreTest < Minitest::Unit::TestCase
     if json['building']['systems'].key? ('domestic_hot_water')
       hw_fuels = []
       water_heater = json['building']['systems']['domestic_hot_water']
-      hw_fuels << fuel_map[water_heater['fuel_primary']]
+      hw_fuels << water_heater['fuel_primary']
       
-      if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater['type']
+      if ['indirect', 'tankless_coil'].include? water_heater['type']
         json['building']['systems']['hvac'].each do |hvac|  # FIXME: double-check
           if hvac['heating']['type'] == 'boiler'
-            hw_fuels << fuel_map[hvac['heating']['fuel_primary']]
+            hw_fuels << hvac['heating']['fuel_primary']
           end
         end
       end
