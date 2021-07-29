@@ -298,7 +298,7 @@ class HEScoreRulesetTest < MiniTest::Test
 
   def test_foundation_area_lookup
     this_dir = File.dirname(__FILE__)
-    json_path = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Floor2_conditioned_basement_hpxml.json")
+    json_path = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Floor2_conditioned_basement.json")
 
     json_file = File.open(json_path)
     json = JSON.parse(json_file.read)

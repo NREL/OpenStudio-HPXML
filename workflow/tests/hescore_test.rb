@@ -72,7 +72,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
-    json_path = File.absolute_path(File.join(parent_dir, 'sample_files', 'Floors_1_hpxml.json'))
+    json_path = File.absolute_path(File.join(parent_dir, 'sample_files', 'Floors_1.json'))
 
     # Create derivative file
     json_file = File.open(json_path)
@@ -333,7 +333,7 @@ class HEScoreTest < Minitest::Unit::TestCase
 
       # Check heating end use by fuel reflects presence of system
       if end_use == 'heating'
-        if json.include? 'sample_files/Location_CZ09_hpxml.json'
+        if json.include? 'sample_files/Location_CZ09.json'
           # skip test: hot climate so potentially no heating energy
         elsif htg_fuels.include? resource_type
           assert_operator(value, :>, 0)
