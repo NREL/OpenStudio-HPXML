@@ -124,7 +124,7 @@ class HEScoreRuleset
     CSV.foreach(File.join(File.dirname(__FILE__), 'zipcodes_wx.csv'), headers: true) do |row|
       next unless row['postal_code'] == zipcode[0..6]
 
-      zipcode_city = row['city']
+      zipcode_city = row['city'].gsub(/\s/, '_')
       zipcode_state = row['state_zipcode']
       station_name = row['name']
       station_wmo = row['nearest_weather_station']

@@ -32,7 +32,7 @@ class HEScoreRulesetTest < MiniTest::Test
 
   def test_neighbors
     this_dir = File.dirname(__FILE__)
-    json = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Base_hpxml.json")
+    json = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Base.json")
 
     args_hash = {
       'json_path' => json,
