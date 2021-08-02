@@ -339,7 +339,7 @@ class HPXMLTest < MiniTest::Test
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for surface 'Roof'."],
                             'occupancy-detailed-bad-values-max-not-one.xml' => ["The max value for 'plug_loads_vehicle' must be 1."],
                             'occupancy-detailed-bad-values-negative.xml' => ["The min value for 'plug_loads_well_pump' is negative."],
-                            'occupancy-detailed-bad-values-non-numeric.xml' => ["There is at least one non-numeric value for 'fixtures'."],
+                            'occupancy-detailed-bad-values-non-numeric.xml' => ["There is at least one non-numeric value for 'hot_water_fixtures'."],
                             'occupancy-detailed-wrong-columns.xml' => ["Column 'lighting' is invalid."],
                             'occupancy-detailed-wrong-filename.xml' => ["Occupancy schedules filepath 'HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-filename.csv' does not exist."],
                             'occupancy-detailed-wrong-rows.xml' => ["Invalid minutes/item=60.00685009704304 for 'refrigerator' schedule. Must be one of: 1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60."],
@@ -365,8 +365,8 @@ class HPXMLTest < MiniTest::Test
                             'water-heater-location-other.xml' => ["Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem, id: \"WaterHeater\"]"] }
 
     # Test simulations
-    xmls = Dir["#{sample_files_dir}/invalid_files/occupancy*.xml"].sort
-    Parallel.map(xmls, in_threads: 1) do |xml|
+    xmls = Dir["#{sample_files_dir}/invalid_files/*.xml"].sort
+    Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
       _run_xml(File.absolute_path(xml), Parallel.worker_number, true, expected_error_msgs[File.basename(xml)])
     end
   end

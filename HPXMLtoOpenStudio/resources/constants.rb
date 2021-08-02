@@ -461,12 +461,9 @@ class Constants
       'extra_refrigerator' => false,
       'freezer' => false,
       'dishwasher' => true,
-      'dishwasher_power' => true,
       'clothes_washer' => true,
-      'clothes_washer_power' => true,
       'clothes_dryer' => true,
       'clothes_dryer_exhaust' => true,
-      'fixtures' => true,
       'ceiling_fan' => true,
       'plug_loads_other' => true,
       'plug_loads_tv' => true,
@@ -479,6 +476,9 @@ class Constants
       'pool_heater' => false,
       'hot_tub_pump' => false,
       'hot_tub_heater' => false,
+      'hot_water_dishwasher' => true,
+      'hot_water_clothes_washer' => true,
+      'hot_water_fixtures' => true,
       'vacancy' => nil,
       'outage' => nil
     }

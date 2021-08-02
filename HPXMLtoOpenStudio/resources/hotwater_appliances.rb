@@ -55,8 +55,8 @@ class HotWaterAndAppliances
       cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, clothes_washer.additional_properties.space.nil?)
 
       if not schedules_file.nil?
-        cw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: 'clothes_washer_power', daily_kwh: cw_annual_kwh / 365.0)
-        power_cw_schedule = schedules_file.create_schedule_file(col_name: 'clothes_washer_power')
+        cw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: 'clothes_washer', daily_kwh: cw_annual_kwh / 365.0)
+        power_cw_schedule = schedules_file.create_schedule_file(col_name: 'clothes_washer')
       else
         cw_schedule = HotWaterSchedule.new(model, Constants.ObjectNameClothesWasher, nbeds)
         cw_design_level_w = cw_schedule.calcDesignLevelFromDailykWh(cw_annual_kwh / 365.0)
@@ -95,8 +95,8 @@ class HotWaterAndAppliances
       dw_annual_kwh, dw_frac_sens, dw_frac_lat, dw_gpd = calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, dishwasher.additional_properties.space.nil?)
 
       if not schedules_file.nil?
-        dw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: 'dishwasher_power', daily_kwh: dw_annual_kwh / 365.0)
-        power_dw_schedule = schedules_file.create_schedule_file(col_name: 'dishwasher_power')
+        dw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: 'dishwasher', daily_kwh: dw_annual_kwh / 365.0)
+        power_dw_schedule = schedules_file.create_schedule_file(col_name: 'dishwasher')
       else
         dw_schedule = HotWaterSchedule.new(model, Constants.ObjectNameDishwasher, nbeds)
         dw_design_level_w = dw_schedule.calcDesignLevelFromDailykWh(dw_annual_kwh / 365.0)
@@ -224,8 +224,8 @@ class HotWaterAndAppliances
         w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, hot_water_distribution, fixtures_all_low_flow, fixtures_usage_multiplier)
 
         if not schedules_file.nil?
-          fx_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: 'fixtures', daily_water: fx_gpd)
-          dist_water_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: 'fixtures', daily_water: w_gpd)
+          fx_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: 'hot_water_fixtures', daily_water: fx_gpd)
+          dist_water_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: 'hot_water_fixtures', daily_water: w_gpd)
         else
           fx_peak_flow = schedule_obj.calcPeakFlowFromDailygpm(fx_gpd)
           dist_water_peak_flow = schedule_obj.calcPeakFlowFromDailygpm(w_gpd)
@@ -260,7 +260,7 @@ class HotWaterAndAppliances
         end
         if not gpd_frac.nil?
           if not schedules_file.nil?
-            cw_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: 'clothes_washer', daily_water: cw_gpd)
+            cw_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: 'hot_water_clothes_washer', daily_water: cw_gpd)
             water_cw_schedule = schedules_file.create_schedule_file(col_name: 'clothes_washer')
           else
             cw_peak_flow = cw_schedule.calcPeakFlowFromDailygpm(cw_gpd)
@@ -282,7 +282,7 @@ class HotWaterAndAppliances
       next unless not gpd_frac.nil?
 
       if not schedules_file.nil?
-        dw_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: 'dishwasher', daily_water: dw_gpd)
+        dw_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: 'hot_water_dishwasher', daily_water: dw_gpd)
         water_dw_schedule = schedules_file.create_schedule_file(col_name: 'dishwasher')
       else
         dw_peak_flow = dw_schedule.calcPeakFlowFromDailygpm(dw_gpd)

@@ -72,12 +72,9 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     assert(!schedule_file_names.include?('extra_refrigerator'))
     assert(!schedule_file_names.include?('freezer'))
     assert(schedule_file_names.include?('dishwasher'))
-    assert(schedule_file_names.include?('dishwasher_power'))
     assert(schedule_file_names.include?('clothes_washer'))
-    assert(schedule_file_names.include?('clothes_washer_power'))
     assert(schedule_file_names.include?('clothes_dryer'))
     assert(schedule_file_names.include?('clothes_dryer_exhaust'))
-    assert(schedule_file_names.include?('fixtures'))
     assert(!schedule_file_names.include?('ceiling_fan'))
     assert(schedule_file_names.include?('plug_loads_other'))
     assert(schedule_file_names.include?('plug_loads_tv'))
@@ -90,6 +87,9 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     assert(!schedule_file_names.include?('pool_heater'))
     assert(!schedule_file_names.include?('hot_tub_pump'))
     assert(!schedule_file_names.include?('hot_tub_heater'))
+    assert(schedule_file_names.include?('hot_water_clothes_washer'))
+    assert(schedule_file_names.include?('hot_water_dishwasher'))
+    assert(schedule_file_names.include?('hot_water_fixtures'))
 
     # add a pool
     hpxml.pools.add(id: 'Pool',
