@@ -1295,8 +1295,8 @@ class SchedulesFile
       fail "There is at least one non-numeric value for '#{col_name}'."
     end
 
-    if values.max > 1
-      fail "The max value for '#{col_name}' is greater than 1."
+    if (1.0 - values.max).abs > 0.01
+      fail "The max value for '#{col_name}' must be 1."
     end
 
     if values.min < 0
@@ -1304,8 +1304,9 @@ class SchedulesFile
     end
 
     min_per_item = 60.0 / (schedule_length / num_hrs_in_year)
-    unless [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60].include? min_per_item
-      fail "Invalid schedule min_per_item=#{min_per_item} for '#{col_name}'."
+    valid_nums = [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60]
+    unless valid_nums.include? min_per_item
+      fail "Invalid minutes/item=#{min_per_item} for '#{col_name}' schedule. Must be one of: #{valid_nums.join(', ')}."
     end
 
     return values

@@ -134,7 +134,7 @@ def create_hpxmls
     'invalid_files/occupancy-detailed-wrong-columns.xml' => 'base.xml',
     'invalid_files/occupancy-detailed-wrong-rows.xml' => 'base.xml',
     'invalid_files/occupancy-detailed-wrong-filename.xml' => 'base.xml',
-    'invalid_files/occupancy-detailed-bad-values-greater-than-one.xml' => 'base.xml',
+    'invalid_files/occupancy-detailed-bad-values-max-not-one.xml' => 'base.xml',
     'invalid_files/occupancy-detailed-bad-values-negative.xml' => 'base.xml',
     'invalid_files/occupancy-detailed-bad-values-non-numeric.xml' => 'base.xml',
     'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
@@ -683,8 +683,8 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-rows.csv'
   elsif ['invalid_files/occupancy-detailed-wrong-filename.xml'].include? hpxml_file
     hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-filename.csv'
-  elsif ['invalid_files/occupancy-detailed-bad-values-greater-than-one.xml'].include? hpxml_file
-    hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-greater-than-one.csv'
+  elsif ['invalid_files/occupancy-detailed-bad-values-max-not-one.xml'].include? hpxml_file
+    hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-max-not-one.csv'
   elsif ['invalid_files/occupancy-detailed-bad-values-negative.xml'].include? hpxml_file
     hpxml.header.occupancy_schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-negative.csv'
   elsif ['invalid_files/occupancy-detailed-bad-values-non-numeric.xml'].include? hpxml_file
