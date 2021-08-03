@@ -366,11 +366,17 @@ class MonthWeekdayWeekendSchedule
   end
 
   def calcDesignLevelFromDailykWh(daily_kwh)
-    return daily_kwh * @maxval * 1000 * @schadjust
+    design_level_kw = daily_kwh * @maxval * @schadjust
+    return UnitConversions.convert(design_level_kw, 'kW', 'W')
   end
 
   def calcDesignLevelFromDailyTherm(daily_therm)
     return calcDesignLevelFromDailykWh(UnitConversions.convert(daily_therm, 'therm', 'kWh'))
+  end
+
+  def calcPeakFlowFromDailygpm(daily_water)
+    water_gpm = daily_water * @maxval * @schadjust / 60.0
+    return UnitConversions.convert(water_gpm, 'gal/min', 'm^3/s')
   end
 
   def schedule
@@ -576,230 +582,6 @@ class MonthWeekdayWeekendSchedule
   end
 end
 
-class HotWaterSchedule
-  def initialize(model, obj_name, nbeds, days_shift = 0, dryer_exhaust_min_runtime = 0, create_sch_object = true)
-    @model = model
-    @sch_name = "#{obj_name} schedule"
-    @schedule = nil
-    if nbeds < 1
-      @nbeds = 1
-    elsif nbeds > 5
-      @nbeds = 5
-    else
-      @nbeds = nbeds
-    end
-    file_prefixes = { Constants.ObjectNameClothesWasher => 'ClothesWasher',
-                      Constants.ObjectNameClothesDryer => 'ClothesWasher',
-                      Constants.ObjectNameClothesDryerExhaust => 'ClothesWasher',
-                      Constants.ObjectNameDishwasher => 'Dishwasher',
-                      Constants.ObjectNameFixtures => 'Fixtures' }
-    @file_prefix = file_prefixes[obj_name]
-
-    timestep_minutes = (60 / @model.getTimestep.numberOfTimestepsPerHour).to_i
-    weeks = 1 # use a single week that repeats
-
-    @data = loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks, dryer_exhaust_min_runtime)
-    @totflow, @maxflow, @ontime = loadDrawProfileStatsFromFile()
-    if create_sch_object
-      @schedule = createSchedule(@data, timestep_minutes, weeks)
-    end
-  end
-
-  def data
-    return @data
-  end
-
-  def calcDesignLevelFromDailykWh(daily_kWh)
-    return UnitConversions.convert(daily_kWh * 365 * 60 / (365 * @totflow / @maxflow), 'kW', 'W')
-  end
-
-  def calcPeakFlowFromDailygpm(daily_water)
-    return UnitConversions.convert(@maxflow * daily_water / @totflow, 'gal/min', 'm^3/s')
-  end
-
-  def calcDailyGpmFromPeakFlow(peak_flow)
-    return UnitConversions.convert(@totflow * peak_flow / @maxflow, 'm^3/s', 'gal/min')
-  end
-
-  def calcDesignLevelFromDailyTherm(daily_therm)
-    return calcDesignLevelFromDailykWh(UnitConversions.convert(daily_therm, 'therm', 'kWh'))
-  end
-
-  def schedule
-    return @schedule
-  end
-
-  def totalFlow
-    return @totflow
-  end
-
-  private
-
-  def loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks, dryer_exhaust_min_runtime)
-    data = []
-    if @file_prefix.nil?
-      return data
-    end
-
-    # Get appropriate file
-    minute_draw_profile = File.join(File.dirname(__FILE__), "data_hot_water_#{@file_prefix.downcase}_schedule_#{@nbeds}bed.csv")
-    if not File.file?(minute_draw_profile)
-      fail "Unable to find file: #{minute_draw_profile}"
-    end
-
-    minutes_in_year = 8760 * 60
-    weeks_in_minutes = weeks * 7 * 24 * 60
-
-    # Read data into minute array
-    skippedheader = false
-    min_shift = 24 * 60 * (days_shift % 365) # For MF homes, shift each unit by an additional week
-    items = [0] * minutes_in_year
-    File.open(minute_draw_profile).each do |line|
-      linedata = line.strip.split(',')
-      if not skippedheader
-        skippedheader = true
-        next
-      end
-      shifted_minute = linedata[0].to_i - min_shift
-      if shifted_minute < 0
-        stored_minute = shifted_minute + minutes_in_year
-      else
-        stored_minute = shifted_minute
-      end
-      value = linedata[1].to_f
-      items[stored_minute.to_i] = value
-      if shifted_minute >= weeks_in_minutes
-        break # no need to process more data
-      end
-    end
-
-    if dryer_exhaust_min_runtime > 0
-      # Clothes dryer exhaust vent should operate whenever the dryer is operating,
-      # with a minimum runtime in minutes.
-      items.reverse.each_with_index do |val, i|
-        next unless val > 0
-
-        place = (items.length - 1) - i
-        last = place + dryer_exhaust_min_runtime
-        items.fill(1, place...last)
-      end
-    end
-
-    # Aggregate minute schedule up to the timestep level to reduce the size
-    # and speed of processing.
-    for tstep in 0..(minutes_in_year / timestep_minutes).to_i - 1
-      timestep_items = items[tstep * timestep_minutes, timestep_minutes]
-      avgitem = timestep_items.reduce(:+).to_f / timestep_items.size
-      data.push(avgitem)
-      if (tstep + 1) * timestep_minutes > weeks_in_minutes
-        break # no need to process more data
-      end
-    end
-
-    return data
-  end
-
-  def loadDrawProfileStatsFromFile()
-    totflow = 0 # daily gal/day
-    maxflow = 0
-    ontime = 0
-
-    column_header = @file_prefix
-
-    totflow_column_header = "#{column_header} Sum"
-    maxflow_column_header = "#{column_header} Max"
-    ontime_column_header = 'On-time Fraction'
-
-    draw_file = File.join(File.dirname(__FILE__), 'data_hot_water_max_flows.csv')
-
-    datafound = false
-    skippedheader = false
-    totflow_col_num = nil
-    maxflow_col_num = nil
-    ontime_col_num = nil
-    File.open(draw_file).each do |line|
-      linedata = line.strip.split(',')
-      if not skippedheader
-        skippedheader = true
-        # Which columns to read?
-        totflow_col_num = linedata.index(totflow_column_header)
-        maxflow_col_num = linedata.index(maxflow_column_header)
-        ontime_col_num = linedata.index(ontime_column_header)
-        next
-      end
-      next unless linedata[0].to_i == @nbeds
-
-      datafound = true
-      if not totflow_col_num.nil?
-        totflow = linedata[totflow_col_num].to_f
-      end
-      if not maxflow_col_num.nil?
-        maxflow = linedata[maxflow_col_num].to_f
-      end
-      if not ontime_col_num.nil?
-        ontime = linedata[ontime_col_num].to_f
-      end
-      break
-    end
-
-    if not datafound
-      fail "Unable to find data for bedrooms = #{@nbeds}."
-    end
-
-    return totflow, maxflow, ontime
-  end
-
-  def createSchedule(data, timestep_minutes, weeks)
-    data_size = data.size
-    if data_size == 0
-      return
-    end
-
-    assumed_year = @model.getYearDescription.assumedYear
-
-    last_day_of_year = Constants.NumDaysInYear(@model)
-
-    # Create ScheduleRuleset with repeating weeks
-
-    time = []
-    (timestep_minutes..24 * 60).step(timestep_minutes).to_a.each_with_index do |m, i|
-      time[i] = OpenStudio::Time.new(0, 0, m, 0)
-    end
-
-    schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
-
-    schedule_rules = []
-    for d in 1..7 * weeks # how many unique day schedules
-      next if d > last_day_of_year
-
-      rule = OpenStudio::Model::ScheduleRule.new(schedule)
-      rule.setName(@sch_name + " #{Schedule.allday_name} ruleset#{d}")
-      day_schedule = rule.daySchedule
-      day_schedule.setName(@sch_name + " #{Schedule.allday_name}#{d}")
-      previous_value = data[(d - 1) * 24 * 60 / timestep_minutes]
-      time.each_with_index do |m, i|
-        if i != time.length - 1
-          next if data[i + 1 + (d - 1) * 24 * 60 / timestep_minutes] == previous_value
-        end
-        day_schedule.addValue(m, previous_value)
-        previous_value = data[i + 1 + (d - 1) * 24 * 60 / timestep_minutes]
-      end
-      Schedule.set_weekday_rule(rule)
-      Schedule.set_weekend_rule(rule)
-      for w in 0..52 # max num of weeks
-        next if d + (w * 7 * weeks) > last_day_of_year
-
-        date_s = OpenStudio::Date::fromDayOfYear(d + (w * 7 * weeks), assumed_year)
-        rule.addSpecificDate(date_s)
-      end
-    end
-
-    schedule.setName(@sch_name)
-
-    return schedule
-  end
-end
-
 class Schedule
   def self.allday_name
     return 'allday'
@@ -946,11 +728,11 @@ class Schedule
   end
 
   def self.OccupantsWeekdayFractions
-    return '1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000'
+    return '0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.053, 0.025, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.018, 0.033, 0.054, 0.054, 0.054, 0.061, 0.061, 0.061'
   end
 
   def self.OccupantsWeekendFractions
-    return '1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000'
+    return '0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.053, 0.025, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.018, 0.033, 0.054, 0.054, 0.054, 0.061, 0.061, 0.061'
   end
 
   def self.OccupantsMonthlyMultipliers
@@ -994,6 +776,54 @@ class Schedule
     return '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097'
   end
 
+  def self.DishwasherWeekdayFractions
+    return '0.015, 0.007, 0.005, 0.003, 0.003, 0.010, 0.020, 0.031, 0.058, 0.065, 0.056, 0.048, 0.041, 0.046, 0.036, 0.038, 0.038, 0.049, 0.087, 0.111, 0.090, 0.067, 0.044, 0.031'
+  end
+
+  def self.DishwasherWeekendFractions
+    return '0.015, 0.007, 0.005, 0.003, 0.003, 0.010, 0.020, 0.031, 0.058, 0.065, 0.056, 0.048, 0.041, 0.046, 0.036, 0.038, 0.038, 0.049, 0.087, 0.111, 0.090, 0.067, 0.044, 0.031'
+  end
+
+  def self.DishwasherMonthlyMultipliers
+    return '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097'
+  end
+
+  def self.ClothesWasherWeekdayFractions
+    return '0.009, 0.007, 0.004, 0.004, 0.007, 0.011, 0.022, 0.049, 0.073, 0.086, 0.084, 0.075, 0.067, 0.060, 0.049, 0.052, 0.050, 0.049, 0.049, 0.049, 0.049, 0.047, 0.032, 0.017'
+  end
+
+  def self.ClothesWasherWeekendFractions
+    return '0.009, 0.007, 0.004, 0.004, 0.007, 0.011, 0.022, 0.049, 0.073, 0.086, 0.084, 0.075, 0.067, 0.060, 0.049, 0.052, 0.050, 0.049, 0.049, 0.049, 0.049, 0.047, 0.032, 0.017'
+  end
+
+  def self.ClothesWasherMonthlyMultipliers
+    return '1.011, 1.002, 1.022, 1.020, 1.022, 0.996, 0.999, 0.999, 0.996, 0.964, 0.959, 1.011'
+  end
+
+  def self.ClothesDryerWeekdayFractions
+    return '0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024'
+  end
+
+  def self.ClothesDryerWeekendFractions
+    return '0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024'
+  end
+
+  def self.ClothesDryerMonthlyMultipliers
+    return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
+  end
+
+  def self.FixturesWeekdayFractions
+    return '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.087, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.039, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
+  end
+
+  def self.FixturesWeekendFractions
+    return '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.087, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.039, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
+  end
+
+  def self.FixturesMonthlyMultipliers
+    return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
+  end
+
   def self.RefrigeratorWeekdayFractions
     return '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
   end
@@ -1031,11 +861,11 @@ class Schedule
   end
 
   def self.CeilingFanWeekdayFractions
-    return '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0'
+    return '0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057'
   end
 
   def self.CeilingFanWeekendFractions
-    return '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0'
+    return '0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057'
   end
 
   def self.CeilingFanMonthlyMultipliers(weather:)
@@ -1075,7 +905,7 @@ class Schedule
   end
 
   def self.PlugLoadsVehicleMonthlyMultipliers
-    return '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
+    return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   def self.PlugLoadsWellPumpWeekdayFractions

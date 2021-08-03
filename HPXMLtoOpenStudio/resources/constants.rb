@@ -463,7 +463,6 @@ class Constants
       'dishwasher' => true,
       'clothes_washer' => true,
       'clothes_dryer' => true,
-      'clothes_dryer_exhaust' => true,
       'ceiling_fan' => true,
       'plug_loads_other' => true,
       'plug_loads_tv' => true,

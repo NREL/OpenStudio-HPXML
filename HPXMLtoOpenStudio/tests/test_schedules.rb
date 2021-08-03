@@ -50,7 +50,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     schedule_constants = 11
     schedule_rulesets = 5
     schedule_fixed_intervals = 1
-    schedule_files = 14
+    schedule_files = 13
 
     assert_equal(schedule_constants, model.getScheduleConstants.size)
     assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
@@ -74,7 +74,6 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     assert(schedule_file_names.include?('dishwasher'))
     assert(schedule_file_names.include?('clothes_washer'))
     assert(schedule_file_names.include?('clothes_dryer'))
-    assert(schedule_file_names.include?('clothes_dryer_exhaust'))
     assert(!schedule_file_names.include?('ceiling_fan'))
     assert(schedule_file_names.include?('plug_loads_other'))
     assert(schedule_file_names.include?('plug_loads_tv'))
@@ -121,7 +120,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     schedule_constants = 11
     schedule_rulesets = 5
     schedule_fixed_intervals = 1
-    schedule_files = 14
+    schedule_files = 13
 
     assert_equal(schedule_constants, model.getScheduleConstants.size)
     assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
@@ -138,7 +137,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     schedule_constants = 11
     schedule_rulesets = 5
     schedule_fixed_intervals = 1
-    schedule_files = 14
+    schedule_files = 13
 
     assert_equal(schedule_constants, model.getScheduleConstants.size)
     assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
@@ -155,7 +154,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     schedule_constants = 11
     schedule_rulesets = 5
     schedule_fixed_intervals = 1
-    schedule_files = 14
+    schedule_files = 13
 
     assert_equal(schedule_constants, model.getScheduleConstants.size)
     assert_equal(schedule_rulesets, model.getScheduleRulesets.size)

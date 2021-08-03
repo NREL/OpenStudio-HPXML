@@ -1218,11 +1218,13 @@ class Airflow
       obj_name = "#{obj_type_name} #{index}"
 
       if not schedules_file.nil?
-        obj_sch = schedules_file.create_schedule_file(col_name: 'clothes_dryer_exhaust')
-        obj_sch_name = 'clothes_dryer_exhaust'
+        obj_sch = schedules_file.create_schedule_file(col_name: 'clothes_dryer')
+        obj_sch_name = 'clothes_dryer'
       else
-        days_shift = -1.0 / 24.0 # Shift by 1 hour relative to clothes washer
-        obj_sch = HotWaterSchedule.new(model, obj_type_name, @nbeds, days_shift, 24)
+        # Assume 11am-12pm every day per BA HSP
+        day_sch = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        month_sch = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        obj_sch = MonthWeekdayWeekendSchedule.new(model, "#{obj_name} schedule", day_sch, day_sch, month_sch, Constants.ScheduleTypeLimitsFraction)
         obj_sch = obj_sch.schedule
         obj_sch_name = obj_sch.name.to_s
       end

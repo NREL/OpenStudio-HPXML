@@ -40,7 +40,7 @@ class HPXMLDefaults
     apply_solar_thermal_systems(hpxml)
     apply_appliances(hpxml, nbeds, eri_version)
     apply_lighting(hpxml)
-    apply_ceiling_fans(hpxml, nbeds)
+    apply_ceiling_fans(hpxml, nbeds, weather)
     apply_pools_and_hot_tubs(hpxml, cfa, nbeds)
     apply_plug_loads(hpxml, cfa, nbeds)
     apply_fuel_loads(hpxml, cfa, nbeds)
@@ -198,6 +198,18 @@ class HPXMLDefaults
     if hpxml.building_occupancy.number_of_residents.nil?
       hpxml.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(nbeds)
       hpxml.building_occupancy.number_of_residents_isdefaulted = true
+    end
+    if hpxml.building_occupancy.weekday_fractions.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+      hpxml.building_occupancy.weekday_fractions = Schedule.OccupantsWeekdayFractions
+      hpxml.building_occupancy.weekday_fractions_isdefaulted = true
+    end
+    if hpxml.building_occupancy.weekend_fractions.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+      hpxml.building_occupancy.weekend_fractions = Schedule.OccupantsWeekendFractions
+      hpxml.building_occupancy.weekend_fractions_isdefaulted = true
+    end
+    if hpxml.building_occupancy.monthly_multipliers.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+      hpxml.building_occupancy.monthly_multipliers = Schedule.OccupantsMonthlyMultipliers
+      hpxml.building_occupancy.monthly_multipliers_isdefaulted = true
     end
   end
 
@@ -1323,6 +1335,18 @@ class HPXMLDefaults
       hpxml.water_heating.water_fixtures_usage_multiplier = 1.0
       hpxml.water_heating.water_fixtures_usage_multiplier_isdefaulted = true
     end
+    if hpxml.water_heating.water_fixtures_weekday_fractions.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+      hpxml.water_heating.water_fixtures_weekday_fractions = Schedule.FixturesWeekdayFractions
+      hpxml.water_heating.water_fixtures_weekday_fractions_isdefaulted = true
+    end
+    if hpxml.water_heating.water_fixtures_weekend_fractions.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+      hpxml.water_heating.water_fixtures_weekend_fractions = Schedule.FixturesWeekendFractions
+      hpxml.water_heating.water_fixtures_weekend_fractions_isdefaulted = true
+    end
+    if hpxml.water_heating.water_fixtures_monthly_multipliers.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+      hpxml.water_heating.water_fixtures_monthly_multipliers = Schedule.FixturesMonthlyMultipliers
+      hpxml.water_heating.water_fixtures_monthly_multipliers_isdefaulted = true
+    end
   end
 
   def self.apply_solar_thermal_systems(hpxml)
@@ -1421,6 +1445,18 @@ class HPXMLDefaults
         clothes_washer.usage_multiplier = 1.0
         clothes_washer.usage_multiplier_isdefaulted = true
       end
+      if clothes_washer.weekday_fractions.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+        clothes_washer.weekday_fractions = Schedule.ClothesWasherWeekdayFractions
+        clothes_washer.weekday_fractions_isdefaulted = true
+      end
+      if clothes_washer.weekend_fractions.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+        clothes_washer.weekend_fractions = Schedule.ClothesWasherWeekendFractions
+        clothes_washer.weekend_fractions_isdefaulted = true
+      end
+      if clothes_washer.monthly_multipliers.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+        clothes_washer.monthly_multipliers = Schedule.ClothesWasherMonthlyMultipliers
+        clothes_washer.monthly_multipliers_isdefaulted = true
+      end
     end
 
     # Default clothes dryer
@@ -1456,6 +1492,18 @@ class HPXMLDefaults
         clothes_dryer.vented_flow_rate = 100.0
         clothes_dryer.vented_flow_rate_isdefaulted = true
       end
+      if clothes_dryer.weekday_fractions.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+        clothes_dryer.weekday_fractions = Schedule.ClothesDryerWeekdayFractions
+        clothes_dryer.weekday_fractions_isdefaulted = true
+      end
+      if clothes_dryer.weekend_fractions.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+        clothes_dryer.weekend_fractions = Schedule.ClothesDryerWeekendFractions
+        clothes_dryer.weekend_fractions_isdefaulted = true
+      end
+      if clothes_dryer.monthly_multipliers.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+        clothes_dryer.monthly_multipliers = Schedule.ClothesDryerMonthlyMultipliers
+        clothes_dryer.monthly_multipliers_isdefaulted = true
+      end
     end
 
     # Default dishwasher
@@ -1487,6 +1535,18 @@ class HPXMLDefaults
       if dishwasher.usage_multiplier.nil?
         dishwasher.usage_multiplier = 1.0
         dishwasher.usage_multiplier_isdefaulted = true
+      end
+      if dishwasher.weekday_fractions.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+        dishwasher.weekday_fractions = Schedule.DishwasherWeekdayFractions
+        dishwasher.weekday_fractions_isdefaulted = true
+      end
+      if dishwasher.weekend_fractions.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+        dishwasher.weekend_fractions = Schedule.DishwasherWeekendFractions
+        dishwasher.weekend_fractions_isdefaulted = true
+      end
+      if dishwasher.monthly_multipliers.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+        dishwasher.monthly_multipliers = Schedule.DishwasherMonthlyMultipliers
+        dishwasher.monthly_multipliers_isdefaulted = true
       end
     end
 
@@ -1695,7 +1755,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_ceiling_fans(hpxml, nbeds)
+  def self.apply_ceiling_fans(hpxml, nbeds, weather)
     return if hpxml.ceiling_fans.size == 0
 
     ceiling_fan = hpxml.ceiling_fans[0]
@@ -1707,6 +1767,18 @@ class HPXMLDefaults
     if ceiling_fan.quantity.nil?
       ceiling_fan.quantity = HVAC.get_default_ceiling_fan_quantity(nbeds)
       ceiling_fan.quantity_isdefaulted = true
+    end
+    if ceiling_fan.weekday_fractions.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+      ceiling_fan.weekday_fractions = Schedule.CeilingFanWeekdayFractions
+      ceiling_fan.weekday_fractions_isdefaulted = true
+    end
+    if ceiling_fan.weekend_fractions.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+      ceiling_fan.weekend_fractions = Schedule.CeilingFanWeekendFractions
+      ceiling_fan.weekend_fractions_isdefaulted = true
+    end
+    if ceiling_fan.monthly_multipliers.nil? && hpxml.header.occupancy_schedules_filepath.nil?
+      ceiling_fan.monthly_multipliers = Schedule.CeilingFanMonthlyMultipliers(weather: weather)
+      ceiling_fan.monthly_multipliers_isdefaulted = true
     end
   end
 
