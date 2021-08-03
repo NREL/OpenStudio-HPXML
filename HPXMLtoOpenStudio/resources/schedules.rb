@@ -1103,7 +1103,7 @@ class SchedulesFile
     columns = CSV.read(@schedules_path).transpose
     columns.each do |col|
       unless col_names.include? col[0]
-        fail "Column '#{col[0]}' is invalid."
+        fail "Schedule column name '#{col[0]}' is invalid. [context: #{@schedules_path}]"
       end
 
       values = col[1..-1].reject { |v| v.nil? }
@@ -1121,21 +1121,21 @@ class SchedulesFile
     begin
       values = values.map { |v| Float(v) }
     rescue ArgumentError
-      fail "There is at least one non-numeric value for '#{col_name}'."
+      fail "Schedule value must be numeric for column '#{col_name}'. [context: #{@schedules_path}]"
     end
 
     if (1.0 - values.max).abs > 0.01
-      fail "The max value for '#{col_name}' must be 1."
+      fail "Schedule max value for column '#{col_name}' must be 1. [context: #{@schedules_path}]"
     end
 
     if values.min < 0
-      fail "The min value for '#{col_name}' is negative."
+      fail "Schedule min value for column '#{col_name}' must be non-negative. [context: #{@schedules_path}]"
     end
 
-    min_per_item = 60.0 / (schedule_length / num_hrs_in_year)
-    valid_nums = [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60]
-    unless valid_nums.include? min_per_item
-      fail "Invalid minutes/item=#{min_per_item} for '#{col_name}' schedule. Must be one of: #{valid_nums.join(', ')}."
+    valid_minutes_per_item = [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60]
+    valid_num_rows = valid_minutes_per_item.map { |min_per_item| (60.0 * num_hrs_in_year / min_per_item).to_i }
+    unless valid_num_rows.include? schedule_length
+      fail "Schedule has invalid number of rows (#{schedule_length}) for column '#{col_name}'. Must be one of: #{valid_num_rows.reverse.join(', ')}. [context: #{@schedules_path}]"
     end
 
     return values

@@ -71,7 +71,6 @@ def create_hpxmls
     'invalid_files/enclosure-living-missing-ceiling-roof.xml' => 'base.xml',
     'invalid_files/enclosure-living-missing-exterior-wall.xml' => 'base.xml',
     'invalid_files/enclosure-living-missing-floor-slab.xml' => 'base-foundation-slab.xml',
-    'invalid_files/extra-occupancy-inputs.xml' => 'base-schedules-simple.xml',
     'invalid_files/frac-sensible-fuel-load.xml' => 'base-misc-loads-large-uncommon.xml',
     'invalid_files/frac-sensible-plug-load.xml' => 'base-misc-loads-large-uncommon.xml',
     'invalid_files/frac-total-fuel-load.xml' => 'base-misc-loads-large-uncommon.xml',
@@ -131,18 +130,19 @@ def create_hpxmls
     'invalid_files/multiple-shared-heating-systems.xml' => 'base-bldgtype-multifamily-shared-boiler-only-baseboard.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
-    'invalid_files/occupancy-detailed-wrong-columns.xml' => 'base.xml',
-    'invalid_files/occupancy-detailed-wrong-rows.xml' => 'base.xml',
-    'invalid_files/occupancy-detailed-wrong-filename.xml' => 'base.xml',
-    'invalid_files/occupancy-detailed-bad-values-max-not-one.xml' => 'base.xml',
-    'invalid_files/occupancy-detailed-bad-values-negative.xml' => 'base.xml',
-    'invalid_files/occupancy-detailed-bad-values-non-numeric.xml' => 'base.xml',
     'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'invalid_files/refrigerator-location.xml' => 'base.xml',
     'invalid_files/refrigerators-multiple-primary.xml' => 'base.xml',
     'invalid_files/refrigerators-no-primary.xml' => 'base.xml',
     'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/repeated-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'invalid_files/schedule-detailed-bad-values-max-not-one.xml' => 'base.xml',
+    'invalid_files/schedule-detailed-bad-values-negative.xml' => 'base.xml',
+    'invalid_files/schedule-detailed-bad-values-non-numeric.xml' => 'base.xml',
+    'invalid_files/schedule-detailed-wrong-columns.xml' => 'base.xml',
+    'invalid_files/schedule-detailed-wrong-filename.xml' => 'base.xml',
+    'invalid_files/schedule-detailed-wrong-rows.xml' => 'base.xml',
+    'invalid_files/schedule-extra-inputs.xml' => 'base-schedules-simple.xml',
     'invalid_files/solar-fraction-one.xml' => 'base-dhw-solar-fraction.xml',
     'invalid_files/solar-thermal-system-with-combi-tankless.xml' => 'base-dhw-combi-tankless.xml',
     'invalid_files/solar-thermal-system-with-desuperheater.xml' => 'base-dhw-desuperheater.xml',
@@ -670,21 +670,21 @@ def set_hpxml_header(hpxml_file, hpxml)
   elsif ['base-schedules-detailed-stochastic-vacancy.xml'].include? hpxml_file
     hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
   elsif ['base-schedules-detailed-smooth.xml',
-         'invalid_files/extra-occupancy-inputs.xml'].include? hpxml_file
+         'invalid_files/schedule-extra-inputs.xml'].include? hpxml_file
     hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
     hpxml.header.transaction = 'modify'
-  elsif ['invalid_files/occupancy-detailed-wrong-columns.xml'].include? hpxml_file
+  elsif ['invalid_files/schedule-detailed-wrong-columns.xml'].include? hpxml_file
     hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-columns.csv'
-  elsif ['invalid_files/occupancy-detailed-wrong-rows.xml'].include? hpxml_file
+  elsif ['invalid_files/schedule-detailed-wrong-rows.xml'].include? hpxml_file
     hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-rows.csv'
-  elsif ['invalid_files/occupancy-detailed-wrong-filename.xml'].include? hpxml_file
+  elsif ['invalid_files/schedule-detailed-wrong-filename.xml'].include? hpxml_file
     hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-filename.csv'
-  elsif ['invalid_files/occupancy-detailed-bad-values-max-not-one.xml'].include? hpxml_file
+  elsif ['invalid_files/schedule-detailed-bad-values-max-not-one.xml'].include? hpxml_file
     hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-max-not-one.csv'
-  elsif ['invalid_files/occupancy-detailed-bad-values-negative.xml'].include? hpxml_file
+  elsif ['invalid_files/schedule-detailed-bad-values-negative.xml'].include? hpxml_file
     hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-negative.csv'
-  elsif ['invalid_files/occupancy-detailed-bad-values-non-numeric.xml'].include? hpxml_file
+  elsif ['invalid_files/schedule-detailed-bad-values-non-numeric.xml'].include? hpxml_file
     hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-non-numeric.csv'
   end
 end

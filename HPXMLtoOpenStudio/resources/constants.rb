@@ -34,14 +34,6 @@ class Constants
     return num_hours_in_year.to_f
   end
 
-  def self.PeakFlowRate
-    return 500 # gal/min
-  end
-
-  def self.PeakPower
-    return 100 # kWh
-  end
-
   # Strings --------------------
 
   def self.AirFilm

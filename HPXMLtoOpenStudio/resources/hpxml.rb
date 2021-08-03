@@ -815,7 +815,7 @@ class HPXML < Object
 
       if not @schedules_filepath.nil?
         unless File.exist? @schedules_filepath
-          errors << "Occupancy schedules filepath '#{@schedules_filepath}' does not exist."
+          errors << "Schedules file path '#{@schedules_filepath}' does not exist."
         end
       end
 
