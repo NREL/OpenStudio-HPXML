@@ -11,7 +11,7 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <OccupancySchedulesFilePath>HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-rows.csv</OccupancySchedulesFilePath>
+      <SchedulesFilePath>HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-rows.csv</SchedulesFilePath>
     </extension>
   </SoftwareInfo>
   <Building>

@@ -1090,7 +1090,6 @@ class SchedulesFile
 
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_vacancy
-    set_outage
 
     tmpfile = Tempfile.new('schedules')
     @tmp_schedules_path = tmpfile.path.to_s
@@ -1271,7 +1270,7 @@ class SchedulesFile
     return unless @tmp_schedules.keys.include? 'vacancy'
     return if @tmp_schedules['vacancy'].all? { |i| i == 0 }
 
-    col_names = Constants.ScheduleGeneratorColNames
+    col_names = Constants.ScheduleColNames
 
     @tmp_schedules[col_names.keys[0]].each_with_index do |ts, i|
       col_names.keys.each do |col_name|
@@ -1279,21 +1278,6 @@ class SchedulesFile
         next unless col_names[col_name] # skip those unaffected by vacancy
 
         @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules['vacancy'][i])
-      end
-    end
-  end
-
-  def set_outage
-    return unless @tmp_schedules.keys.include? 'outage'
-    return if @tmp_schedules['outage'].all? { |i| i == 0 }
-
-    col_names = Constants.ScheduleGeneratorColNames
-
-    @tmp_schedules[col_names.keys[0]].each_with_index do |ts, i|
-      col_names.keys.each do |col_name|
-        next if col_names[col_name].nil?
-
-        @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules['outage'][i])
       end
     end
   end

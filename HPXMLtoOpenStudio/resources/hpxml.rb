@@ -784,7 +784,7 @@ class HPXML < Object
              :sim_begin_month, :sim_begin_day, :sim_end_month, :sim_end_day, :sim_calendar_year,
              :dst_enabled, :dst_begin_month, :dst_begin_day, :dst_end_month, :dst_end_day,
              :use_max_load_for_heat_pumps, :allow_increased_fixed_capacities,
-             :apply_ashrae140_assumptions, :energystar_calculation_version, :occupancy_schedules_filepath]
+             :apply_ashrae140_assumptions, :energystar_calculation_version, :schedules_filepath]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -813,9 +813,9 @@ class HPXML < Object
 
       errors += HPXML::check_dates('Daylight Saving', @dst_begin_month, @dst_begin_day, @dst_end_month, @dst_end_day)
 
-      if not @occupancy_schedules_filepath.nil?
-        unless File.exist? @occupancy_schedules_filepath
-          errors << "Occupancy schedules filepath '#{@occupancy_schedules_filepath}' does not exist."
+      if not @schedules_filepath.nil?
+        unless File.exist? @schedules_filepath
+          errors << "Occupancy schedules filepath '#{@schedules_filepath}' does not exist."
         end
       end
 
@@ -878,9 +878,9 @@ class HPXML < Object
         XMLHelper.add_element(hvac_sizing_control, 'UseMaxLoadForHeatPumps', @use_max_load_for_heat_pumps, :boolean, @use_max_load_for_heat_pumps_isdefaulted) unless @use_max_load_for_heat_pumps.nil?
         XMLHelper.add_element(hvac_sizing_control, 'AllowIncreasedFixedCapacities', @allow_increased_fixed_capacities, :boolean, @allow_increased_fixed_capacities_isdefaulted) unless @allow_increased_fixed_capacities.nil?
       end
-      if not @occupancy_schedules_filepath.nil?
+      if not @schedules_filepath.nil?
         extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
-        XMLHelper.add_element(extension, 'OccupancySchedulesFilePath', @occupancy_schedules_filepath, :string) unless @occupancy_schedules_filepath.nil?
+        XMLHelper.add_element(extension, 'SchedulesFilePath', @schedules_filepath, :string) unless @schedules_filepath.nil?
       end
 
       building = XMLHelper.add_element(hpxml, 'Building')
@@ -923,7 +923,7 @@ class HPXML < Object
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
       @use_max_load_for_heat_pumps = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/UseMaxLoadForHeatPumps', :boolean)
       @allow_increased_fixed_capacities = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/AllowIncreasedFixedCapacities', :boolean)
-      @occupancy_schedules_filepath = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/OccupancySchedulesFilePath', :string)
+      @schedules_filepath = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SchedulesFilePath', :string)
       @building_id = HPXML::get_id(hpxml, 'Building/BuildingID')
       @event_type = XMLHelper.get_value(hpxml, 'Building/ProjectStatus/EventType', :string)
       @state_code = XMLHelper.get_value(hpxml, 'Building/Site/Address/StateCode', :string)

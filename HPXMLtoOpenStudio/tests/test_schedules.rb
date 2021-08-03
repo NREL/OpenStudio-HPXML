@@ -129,23 +129,6 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     assert_equal(model.getSchedules.size, schedule_constants + schedule_rulesets + schedule_fixed_intervals + schedule_files)
   end
 
-  def test_stochastic_outage_schedules
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-occupancy-detailed-stochastic-outage.xml'))
-    model, hpxml = _test_measure(args_hash)
-
-    schedule_constants = 11
-    schedule_rulesets = 5
-    schedule_fixed_intervals = 1
-    schedule_files = 13
-
-    assert_equal(schedule_constants, model.getScheduleConstants.size)
-    assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
-    assert_equal(schedule_fixed_intervals, model.getScheduleFixedIntervals.size)
-    assert_equal(schedule_files, model.getScheduleFiles.size)
-    assert_equal(model.getSchedules.size, schedule_constants + schedule_rulesets + schedule_fixed_intervals + schedule_files)
-  end
-
   def test_smooth_schedules
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-occupancy-detailed-smooth.xml'))

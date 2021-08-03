@@ -11,7 +11,7 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <OccupancySchedulesFilePath>HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-negative.csv</OccupancySchedulesFilePath>
+      <SchedulesFilePath>HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-negative.csv</SchedulesFilePath>
     </extension>
   </SoftwareInfo>
   <Building>

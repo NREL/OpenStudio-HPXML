@@ -221,8 +221,8 @@ class OSModel
     add_simulation_params(model)
 
     @schedules_file = nil
-    unless @hpxml.header.occupancy_schedules_filepath.nil?
-      @schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.occupancy_schedules_filepath, col_names: Constants.ScheduleGeneratorColNames.keys)
+    unless @hpxml.header.schedules_filepath.nil?
+      @schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_filepath, col_names: Constants.ScheduleColNames.keys)
     end
 
     # Conditioned space/zone

@@ -448,7 +448,7 @@ class Constants
     return 'Temperature'
   end
 
-  def self.ScheduleGeneratorColNames
+  def self.ScheduleColNames
     # col_name => affected_by_vacancy
     return {
       'occupants' => true,
@@ -479,7 +479,6 @@ class Constants
       'hot_water_clothes_washer' => true,
       'hot_water_fixtures' => true,
       'vacancy' => nil,
-      'outage' => nil
     }
   end
 end
