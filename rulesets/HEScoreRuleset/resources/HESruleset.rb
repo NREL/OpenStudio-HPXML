@@ -462,8 +462,7 @@ class HEScoreRuleset
           heating_efficiency_percent = orig_heating['efficiency']
         end
         year_installed = orig_heating['year']
-        # FIXME: can one specify third party certification in hescore json?
-        # energy_star = (orig_heating.third_party_certification == HPXML::CertificationEnergyStar)
+        energy_star = (orig_heating['efficiency_level'] == 'energy_star')
         fraction_heat_load_served = orig_hvac['hvac_fraction']
 
         if orig_heating['type'] == 'central_furnace'
@@ -481,14 +480,13 @@ class HEScoreRuleset
             # Do nothing, we already have the AFUE
           elsif heating_system_fuel == HPXML::FuelTypeElectricity
             heating_efficiency_afue = 0.98
-          # FIXME: can one specify third party certification in hescore json?
-          # elsif energy_star && (heating_system_type == 'central_furnace')
-          #   heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
-          #                                                    heating_system_type,
-          #                                                    heating_system_fuel,
-          #                                                    'AFUE',
-          #                                                    'energy_star',
-          #                                                    json.header.state_code)
+          elsif energy_star && (heating_system_type == 'central_furnace')
+            heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
+                                                             heating_system_type,
+                                                             heating_system_fuel,
+                                                             'AFUE',
+                                                             'energy_star',
+                                                             json['building_address']['state'])
           elsif not year_installed.nil?
             heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
                                                              heating_system_type,
@@ -500,13 +498,12 @@ class HEScoreRuleset
             # Do nothing, we already have the AFUE
           elsif heating_system_fuel == HPXML::FuelTypeElectricity
             heating_efficiency_afue = 0.98
-          # FIXME: can one specify third party certification in hescore json?
-          # elsif energy_star
-          #   heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
-          #                                                    heating_system_type,
-          #                                                    heating_system_fuel,
-          #                                                    'AFUE',
-          #                                                    'energy_star')
+          elsif energy_star
+            heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
+                                                             heating_system_type,
+                                                             heating_system_fuel,
+                                                             'AFUE',
+                                                             'energy_star')
           elsif not year_installed.nil?
             heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
                                                              heating_system_type,
@@ -548,20 +545,18 @@ class HEScoreRuleset
           cooling_efficiency_eer = orig_cooling['efficiency']
         end
         year_installed = orig_cooling['year']
-        # FIXME: can one specify third party certification in hescore json?
-        # energy_star = (orig_cooling.third_party_certification == HPXML::CertificationEnergyStar)
+        energy_star = (orig_cooling['efficiency_level'] == 'energy_star')
         fraction_cool_load_served = orig_hvac['hvac_fraction']
 
         if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
           if not cooling_efficiency_seer.nil?
-          # Do nothing, we already have the SEER
-          # FIXME: can one specify third party certification in hescore json?
-          # elsif energy_star
-          #   cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
-          #                                                   cooling_system_type,
-          #                                                   cooling_system_fuel,
-          #                                                   'SEER',
-          #                                                   'energy_star')
+            # Do nothing, we already have the SEER
+          elsif energy_star
+            cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
+                                                             cooling_system_type,
+                                                             cooling_system_fuel,
+                                                             'SEER',
+                                                             'energy_star')
           elsif not year_installed.nil?
             cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
                                                              cooling_system_type,
@@ -570,14 +565,13 @@ class HEScoreRuleset
           end
         elsif cooling_system_type == HPXML::HVACTypeRoomAirConditioner
           if not cooling_efficiency_eer.nil?
-          # Do nothing, we already have the EER
-          # FIXME: can one specify third party certification in hescore json?
-          # elsif energy_star
-          #   cooling_efficiency_eer = lookup_hvac_efficiency(year_installed,
-          #                                                   cooling_system_type,
-          #                                                   cooling_system_fuel,
-          #                                                   'EER',
-          #                                                   'energy_star')
+            # Do nothing, we already have the EER
+          elsif energy_star
+            cooling_efficiency_eer = lookup_hvac_efficiency(year_installed,
+                                                            cooling_system_type,
+                                                            cooling_system_fuel,
+                                                            'EER',
+                                                            'energy_star')
           elsif not year_installed.nil?
             cooling_efficiency_eer = lookup_hvac_efficiency(year_installed,
                                                             cooling_system_type,
@@ -611,7 +605,7 @@ class HEScoreRuleset
             cooling_efficiency_eer = orig_cooling['efficiency']
           end
           year_installed = orig_cooling['year']
-          # energy_star = (orig_cooling.third_party_certification == HPXML::CertificationEnergyStar)
+          cooling_energy_star = (orig_cooling['efficiency_level'] == 'energy_star')
           heatpump_fraction_cool_load_served = orig_hvac['hvac_fraction']
         end
         if ['heat_pump', 'gchp', 'mini_split'].include? orig_heating['type']
@@ -622,7 +616,7 @@ class HEScoreRuleset
             heating_efficiency_cop = orig_heating['efficiency']
           end
           year_installed = orig_heating['year']
-          # energy_star = (orig_heating.third_party_certification == HPXML::CertificationEnergyStar)
+          heating_energy_star = (orig_heating['efficiency_level'] == 'energy_star')
           heatpump_fraction_heat_load_served = orig_hvac['hvac_fraction']
         end
         
@@ -632,14 +626,13 @@ class HEScoreRuleset
 
         if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
           if not cooling_efficiency_seer.nil?
-          # Do nothing, we have the SEER
-          # FIXME: can one specify third party certification in hescore json?
-          # elsif energy_star
-          #   cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
-          #                                                   heat_pump_type,
-          #                                                   heat_pump_fuel,
-          #                                                   'SEER',
-          #                                                   'energy_star')
+            # Do nothing, we have the SEER
+          elsif cooling_energy_star
+            cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
+                                                            heat_pump_type,
+                                                            heat_pump_fuel,
+                                                            'SEER',
+                                                            'energy_star')
           elsif not year_installed.nil?
             cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
                                                              heat_pump_type,
@@ -647,14 +640,13 @@ class HEScoreRuleset
                                                              'SEER')
           end
           if not heating_efficiency_hspf.nil?
-          # Do nothing, we have the HSPF
-          # FIXME: can one specify third party certification in hescore json?
-          # elsif energy_star
-          #   heating_efficiency_hspf = lookup_hvac_efficiency(year_installed,
-          #                                                   heat_pump_type,
-          #                                                   heat_pump_fuel,
-          #                                                   'HSPF',
-          #                                                   'energy_star')
+            # Do nothing, we have the HSPF
+          elsif heating_energy_star
+            heating_efficiency_hspf = lookup_hvac_efficiency(year_installed,
+                                                            heat_pump_type,
+                                                            heat_pump_fuel,
+                                                            'HSPF',
+                                                            'energy_star')
           elsif not year_installed.nil?
             heating_efficiency_hspf = lookup_hvac_efficiency(year_installed,
                                                              heat_pump_type,
@@ -798,8 +790,7 @@ class HEScoreRuleset
                          'tankless_coil' => HPXML::WaterHeaterTypeCombiTankless,
                          'heat_pump' => HPXML::WaterHeaterTypeHeatPump}[orig_water_heater['type']]
     year_installed = orig_water_heater['year']
-    # FIXME: can one specify third party certification in hescore json?
-    # energy_star = (orig_water_heater.third_party_certification == HPXML::CertificationEnergyStar)
+    energy_star = (orig_water_heater['efficiency_level'] == 'energy_star')
 
     if not energy_factor.nil?
       if orig_water_heater['efficiency_method'] == 'uef'
@@ -807,11 +798,11 @@ class HEScoreRuleset
         # FUTURE: Remove this conversion and use UEF directly; requires FHR input/assumption for storage water heaters
         energy_factor = calc_ef_from_uef(water_heater_type, fuel_type, orig_water_heater['energy_factor'])
       end
-    # Do nothing if efficiency method is 'user', we already have the energy factor
-    # elsif energy_star  # FIXME: can one specify third party certification in hescore json?
-    #   energy_factor = lookup_water_heater_efficiency(year_installed,
-    #                                                  fuel_type,
-    #                                                  'energy_star')
+      # Do nothing if efficiency method is 'user', we already have the energy factor
+    elsif energy_star
+      energy_factor = lookup_water_heater_efficiency(year_installed,
+                                                     fuel_type,
+                                                     'energy_star')
     elsif not year_installed.nil?
       energy_factor = lookup_water_heater_efficiency(year_installed,
                                                      fuel_type)
@@ -819,7 +810,7 @@ class HEScoreRuleset
 
     fail 'Water Heater Type must be provided' if water_heater_type.nil?
 
-    # fail 'Electric water heaters must be heat pump water heaters to be Energy Star qualified' if energy_star && (fuel_type == HPXML::FuelTypeElectricity) && (water_heater_type != HPXML::WaterHeaterTypeHeatPump)
+    fail 'Electric water heaters must be heat pump water heaters to be Energy Star qualified' if energy_star && (fuel_type == HPXML::FuelTypeElectricity) && (water_heater_type != HPXML::WaterHeaterTypeHeatPump)
 
     heating_capacity = nil
     if water_heater_type == HPXML::WaterHeaterTypeStorage
