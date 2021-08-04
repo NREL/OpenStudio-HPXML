@@ -180,14 +180,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.air_infiltration_measurements[0].infiltration_volume = 25650
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_building_construction_values(hpxml_default, 25650, 9.5, false, 2)
+    _test_default_building_construction_values(hpxml_default, 21600, 8, false, 2)
 
     # Test defaults w/ infiltration volume
     hpxml.building_construction.conditioned_building_volume = nil
     hpxml.air_infiltration_measurements[0].infiltration_volume = 18000
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_building_construction_values(hpxml_default, 21600, 8, false, 2)
+    _test_default_building_construction_values(hpxml_default, 18000, 6.67, false, 2)
   end
 
   def test_infiltration
