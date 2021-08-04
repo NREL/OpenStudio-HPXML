@@ -32,8 +32,6 @@ require_relative 'resources/version'
 require_relative 'resources/waterheater'
 require_relative 'resources/weather'
 require_relative 'resources/xmlhelper'
-require_relative '../BuildResidentialHPXML/resources/constants'
-require_relative '../BuildResidentialHPXML/resources/schedules'
 
 # start the measure
 class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
@@ -288,11 +286,6 @@ class OSModel
     add_output_control_files(runner, model)
     # Uncomment to debug EMS
     # add_ems_debug_output(runner, model)
-
-    # Vacancy
-    unless @schedules_file.nil?
-      @schedules_file.set_vacancy
-    end
 
     if debug
       osm_output_path = File.join(output_dir, 'in.osm')

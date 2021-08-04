@@ -124,14 +124,13 @@ class HotWaterAndAppliances
         fridge_col_name = refrigerator.primary_indicator ? 'refrigerator' : 'extra_refrigerator'
         fridge_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: fridge_col_name, annual_kwh: rf_annual_kwh)
         fridge_schedule = schedules_file.create_schedule_file(col_name: fridge_col_name)
-        fridge_schedule = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameRefrigerator, fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, Constants.ScheduleTypeLimitsFraction)
-        fridge_design_level = fridge_schedule.calcDesignLevelFromDailykWh(rf_annual_kwh / 365.0)
-        fridge_schedule = fridge_schedule.schedule
-=======
+      else
+        fridge_weekday_sch = refrigerator.weekday_fractions
+        fridge_weekend_sch = refrigerator.weekend_fractions
+        fridge_monthly_sch = refrigerator.monthly_multipliers
         fridge_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameRefrigerator, fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, Constants.ScheduleTypeLimitsFraction)
         fridge_design_level = fridge_schedule_obj.calcDesignLevelFromDailykWh(rf_annual_kwh / 365.0)
         fridge_schedule = fridge_schedule_obj.schedule
->>>>>>> c92479db3e4688733ba520c1466118cdbb66847f
       end
 
       rf_space = refrigerator.additional_properties.space

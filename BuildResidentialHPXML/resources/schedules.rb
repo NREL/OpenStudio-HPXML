@@ -32,7 +32,7 @@ class ScheduleGenerator
     @mkc_ts_per_day = 96
     @mkc_ts_per_hour = @mkc_ts_per_day / 24
 
-    @model.getYearDescription.isLeapYear ? @total_days_in_year = 366 : @total_days_in_year = 365
+    @total_days_in_year = Integer(Constants.NumDaysInYear(@model))
 
     @sim_year = @model.getYearDescription.calendarYear.get
     @sim_start_day = DateTime.new(@sim_year, 1, 1)
@@ -184,22 +184,22 @@ class ScheduleGenerator
   end
 
   def create_average_dishwasher(args:)
-    create_timeseries_from_minutely(sch_name: 'dishwasher', obj_name: Constants.ObjectNameDishwasher, days_shift: 0, dryer_exhaust_min_runtime: 0, args: args)
-    create_timeseries_from_minutely(sch_name: 'dishwasher_power', obj_name: Constants.ObjectNameDishwasher, days_shift: 0, dryer_exhaust_min_runtime: 0, args: args)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'dishwasher', weekday_sch: Schedule.DishwasherWeekdayFractions, weekend_sch: Schedule.DishwasherWeekendFractions, monthly_sch: Schedule.DishwasherMonthlyMultipliers)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'dishwasher_power', weekday_sch: Schedule.DishwasherWeekdayFractions, weekend_sch: Schedule.DishwasherWeekendFractions, monthly_sch: Schedule.DishwasherMonthlyMultipliers)
   end
 
   def create_average_clothes_washer(args:)
-    create_timeseries_from_minutely(sch_name: 'clothes_washer', obj_name: Constants.ObjectNameClothesWasher, days_shift: 0, dryer_exhaust_min_runtime: 0, args: args)
-    create_timeseries_from_minutely(sch_name: 'clothes_washer_power', obj_name: Constants.ObjectNameClothesWasher, days_shift: 0, dryer_exhaust_min_runtime: 0, args: args)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_washer', weekday_sch: Schedule.ClothesWasherWeekdayFractions, weekend_sch: Schedule.ClothesWasherWeekendFractions, monthly_sch: Schedule.ClothesWasherMonthlyMultipliers)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_washer_power', weekday_sch: Schedule.ClothesWasherWeekdayFractions, weekend_sch: Schedule.ClothesWasherWeekendFractions, monthly_sch: Schedule.ClothesWasherMonthlyMultipliers)
   end
 
   def create_average_clothes_dryer(args:)
-    create_timeseries_from_minutely(sch_name: 'clothes_dryer', obj_name: Constants.ObjectNameClothesDryer, days_shift: -1.0 / 24.0, dryer_exhaust_min_runtime: 0, args: args)
-    create_timeseries_from_minutely(sch_name: 'clothes_dryer_exhaust', obj_name: Constants.ObjectNameClothesDryerExhaust, days_shift: -1.0 / 24.0, dryer_exhaust_min_runtime: 24, args: args)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_dryer', weekday_sch: Schedule.ClothesDryerWeekdayFractions, weekend_sch: Schedule.ClothesDryerWeekendFractions, monthly_sch: Schedule.ClothesDryerMonthlyMultipliers)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_dryer_exhaust', weekday_sch: Schedule.ClothesDryerWeekdayFractions, weekend_sch: Schedule.ClothesDryerWeekendFractions, monthly_sch: Schedule.ClothesDryerMonthlyMultipliers)
   end
 
   def create_average_fixtures(args:)
-    create_timeseries_from_minutely(sch_name: 'fixtures', obj_name: Constants.ObjectNameFixtures, days_shift: 0, dryer_exhaust_min_runtime: 0, args: args)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'fixtures', weekday_sch: Schedule.FixturesWeekdayFractions, weekend_sch: Schedule.FixturesWeekendFractions, monthly_sch: Schedule.FixturesMonthlyMultipliers)
   end
 
   def create_average_ceiling_fan
@@ -292,7 +292,7 @@ class ScheduleGenerator
   def create_timeseries_from_months(sch_name:,
                                     month_schs:)
 
-    num_days_in_months = Constants.NumDaysInMonths(@model.getYearDescription)
+    num_days_in_months = Constants.NumDaysInMonths(@model)
     sch = []
     for month in 0..11
       sch << month_schs[month] * num_days_in_months[month]
@@ -308,47 +308,6 @@ class ScheduleGenerator
       end
     end
     @schedules[sch_name] = normalize(@schedules[sch_name])
-  end
-
-  def create_timeseries_from_minutely(sch_name:,
-                                      obj_name:,
-                                      days_shift:,
-                                      dryer_exhaust_min_runtime:,
-                                      args:)
-
-    nbeds = args[:geometry_num_bedrooms]
-    create_sch_object = false
-    sch = HotWaterSchedule.new(@model, obj_name, nbeds, days_shift, dryer_exhaust_min_runtime, create_sch_object)
-
-    weeks = 1 # use a single week that repeats
-
-    year_description = @model.getYearDescription
-    last_day_of_year = 365
-    last_day_of_year += 1 if year_description.isLeapYear
-
-    time = []
-    (@minutes_per_step..24 * 60).step(@minutes_per_step).to_a.each_with_index do |m, i|
-      time[i] = OpenStudio::Time.new(0, 0, m, 0)
-    end
-
-    data = sch.data
-
-    unique_day_schedule = []
-    for d in 1..7 * weeks # how many unique day schedules
-      next if d > last_day_of_year
-
-      time.each_with_index do |m, i|
-        previous_value = data[i + (d - 1) * 24 * 60 / @minutes_per_step]
-        unique_day_schedule << previous_value
-      end
-    end
-
-    repeated_schedule = []
-    for w in 0..52 # max num of weeks
-      repeated_schedule += unique_day_schedule
-    end
-
-    @schedules[sch_name] = repeated_schedule[0...@total_days_in_year * @steps_in_day]
   end
 
   def create_stochastic_schedules(args:)
@@ -434,11 +393,9 @@ class ScheduleGenerator
     monthly_lighting_schedule = schedule_config['lighting']['monthly_multiplier']
     holiday_lighting_schedule = schedule_config['lighting']['holiday_sch']
 
-    sch_option_type = Constants.OptionTypeLightingScheduleCalculated
     sch = Lighting.get_schedule(@model, @epw_file)
     interior_lighting_schedule = []
-    year_description = @model.getYearDescription
-    num_days_in_months = Constants.NumDaysInMonths(year_description.isLeapYear)
+    num_days_in_months = Constants.NumDaysInMonths(@model)
     for month in 0..11
       interior_lighting_schedule << sch[month] * num_days_in_months[month]
     end

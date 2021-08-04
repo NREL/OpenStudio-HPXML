@@ -2,7 +2,7 @@
 
 def create_osws
   require 'json'
-  require_relative 'BuildResidentialHPXML/resources/constants'
+  require_relative 'HPXMLtoOpenStudio/resources/constants'
   require_relative 'HPXMLtoOpenStudio/resources/hpxml'
 
   this_dir = File.dirname(__FILE__)
@@ -266,7 +266,7 @@ def create_osws
     # 'base-hvac-undersized-allow-increased-fixed-capacities.osw' => 'base-hvac-undersized.osw',
     'base-hvac-wall-furnace-elec-only.osw' => 'base.osw',
     'base-lighting-ceiling-fans.osw' => 'base.osw',
-    'base-lighting-detailed.osw' => 'base.osw',
+    'base-lighting-holiday.osw' => 'base.osw',
     # 'base-lighting-none.osw' => 'base.osw', # No need to support no lighting
     'base-location-AMY-2012.osw' => 'base.osw',
     'base-location-baltimore-md.osw' => 'base-foundation-unvented-crawlspace.osw',
@@ -306,9 +306,10 @@ def create_osws
     'base-simcontrol-daylight-saving-disabled.osw' => 'base.osw',
     'base-simcontrol-runperiod-1-month.osw' => 'base.osw',
     'base-simcontrol-timestep-10-mins.osw' => 'base.osw',
-    'base-schedules-stochastic.osw' => 'base.osw',
-    'base-schedules-stochastic-vacant.osw' => 'base-schedules-stochastic.osw',
-    'base-schedules-user-specified.osw' => 'base.osw',
+    'base-schedules-simple.osw' => 'base.osw',
+    'base-schedules-detailed-stochastic.osw' => 'base.osw',
+    'base-schedules-detailed-stochastic-vacancy.osw' => 'base-schedules-detailed-stochastic.osw',
+    'base-schedules-detailed-smooth.osw' => 'base.osw',
 
     # Extra test files that don't correspond with sample files
     'extra-auto.osw' => 'base.osw',
@@ -326,7 +327,7 @@ def create_osws
     'extra-enclosure-garage-atticroof-conditioned.osw' => 'base-enclosure-garage.osw',
     'extra-enclosure-atticroof-conditioned-eaves-gable.osw' => 'base-foundation-slab.osw',
     'extra-enclosure-atticroof-conditioned-eaves-hip.osw' => 'extra-enclosure-atticroof-conditioned-eaves-gable.osw',
-    'extra-schedules-random-seed.osw' => 'base-schedules-stochastic.osw',
+    'extra-schedules-random-seed.osw' => 'base-schedules-detailed-stochastic.osw',
     'extra-zero-refrigerator-kwh.osw' => 'base.osw',
     'extra-zero-extra-refrigerator-kwh.osw' => 'base.osw',
     'extra-zero-freezer-kwh.osw' => 'base.osw',
@@ -1902,7 +1903,7 @@ def get_values(osw_file, step)
     step.setArgument('ceiling_fan_efficiency', '100.0')
     step.setArgument('ceiling_fan_quantity', '4')
     step.setArgument('ceiling_fan_cooling_setpoint_temp_offset', 0.5)
-  elsif ['base-lighting-detailed.osw'].include? osw_file
+  elsif ['base-lighting-holiday.osw'].include? osw_file
     step.setArgument('holiday_lighting_present', true)
     step.setArgument('holiday_lighting_daily_kwh', '1.1')
     step.setArgument('holiday_lighting_period', 'Nov 24 - Jan 6')
@@ -2171,13 +2172,13 @@ def get_values(osw_file, step)
   end
 
   # Schedules
-  if ['base-schedules-stochastic.osw'].include? osw_file
+  if ['base-schedules-detailed-stochastic.osw'].include? osw_file
     step.setArgument('schedules_type', 'stochastic')
-  elsif ['base-schedules-stochastic-vacant.osw'].include? osw_file
+  elsif ['base-schedules-detailed-stochastic-vacancy.osw'].include? osw_file
     step.setArgument('schedules_vacancy_period', 'Dec 1 - Jan 31')
-  elsif ['base-schedules-user-specified.osw'].include? osw_file
+  elsif ['base-schedules-detailed-smooth.osw'].include? osw_file
     step.setArgument('schedules_type', 'user-specified')
-    step.setArgument('schedules_path', 'BuildResidentialHPXML/tests/schedules/user-specified.csv')
+    step.setArgument('schedules_path', 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv')
   end
 
   # Extras
@@ -3016,9 +3017,6 @@ def create_hpxmls
     'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
     'base-simcontrol-runperiod-1-month.xml' => 'base.xml',
     'base-simcontrol-timestep-10-mins.xml' => 'base.xml',
-    'base-schedules-stochastic.xml' => 'base.xml',
-    'base-schedules-stochastic-vacant.xml' => 'base-schedules-stochastic.xml',
-    'base-schedules-user-specified.xml' => 'base.xml',
   }
 
   puts "Generating #{hpxmls_files.size} HPXML files..."

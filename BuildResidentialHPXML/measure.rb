@@ -7,7 +7,6 @@ require 'openstudio'
 require 'oga'
 require 'csv'
 
-require_relative 'resources/constants'
 require_relative 'resources/geometry'
 require_relative 'resources/schedules'
 
@@ -3229,7 +3228,7 @@ class HPXMLFile
     hpxml.header.building_id = 'MyBuilding'
     hpxml.header.state_code = epw_file.stateProvinceRegion
     hpxml.header.event_type = 'proposed workscope'
-    hpxml.header.schedules_path = args[:schedules_path]
+    hpxml.header.schedules_filepath = args[:schedules_path]
   end
 
   def self.set_site(hpxml, runner, args)
@@ -4132,7 +4131,7 @@ class HPXMLFile
         air_distribution_systems << heat_pump
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include?(heat_pump.heat_pump_type)
         if args[:heat_pump_is_ducted].is_initialized
-          air_distribution_systems << heat_pump if to_boolean(args[:heat_pump_is_ducted].get)
+          air_distribution_systems << heat_pump if args[:heat_pump_is_ducted].get
         end
       end
     end
@@ -5335,13 +5334,13 @@ class HPXMLFile
 
   def self.get_azimuth_from_facade(facade, args)
     if facade == Constants.FacadeFront
-      azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 0, args[:geometry_orientation], 0)
+      azimuth = Geometry.get_abs_azimuth(0, args[:geometry_orientation])
     elsif facade == Constants.FacadeBack
-      azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 180, args[:geometry_orientation], 0)
+      azimuth = Geometry.get_abs_azimuth(180, args[:geometry_orientation])
     elsif facade == Constants.FacadeLeft
-      azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 90, args[:geometry_orientation], 0)
+      azimuth = Geometry.get_abs_azimuth(90, args[:geometry_orientation])
     elsif facade == Constants.FacadeRight
-      azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 270, args[:geometry_orientation], 0)
+      azimuth = Geometry.get_abs_azimuth(270, args[:geometry_orientation])
     else
       fail 'Unexpected facade.'
     end
