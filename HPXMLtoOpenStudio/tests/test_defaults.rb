@@ -131,15 +131,21 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
     hpxml.building_occupancy.number_of_residents = 1
+    hpxml.building_occupancy.weekday_fractions = ConstantDaySchedule
+    hpxml.building_occupancy.weekend_fractions = ConstantDaySchedule
+    hpxml.building_occupancy.monthly_multipliers = ConstantMonthSchedule
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_occupancy_values(hpxml_default, 1)
+    _test_default_occupancy_values(hpxml_default, 1, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
 
     # Test defaults
     hpxml.building_occupancy.number_of_residents = nil
+    hpxml.building_occupancy.weekday_fractions = nil
+    hpxml.building_occupancy.weekend_fractions = nil
+    hpxml.building_occupancy.monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_occupancy_values(hpxml_default, 3)
+    _test_default_occupancy_values(hpxml_default, 3, Schedule.OccupantsWeekdayFractions, Schedule.OccupantsWeekendFractions, Schedule.OccupantsMonthlyMultipliers)
   end
 
   def test_building_construction
@@ -1572,15 +1578,21 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base.xml')
     hpxml.water_heating.water_fixtures_usage_multiplier = 2.0
+    hpxml.water_heating.water_fixtures_weekday_fractions = ConstantDaySchedule
+    hpxml.water_heating.water_fixtures_weekend_fractions = ConstantDaySchedule
+    hpxml.water_heating.water_fixtures_monthly_multipliers = ConstantMonthSchedule
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_water_fixture_values(hpxml_default, 2.0)
+    _test_default_water_fixture_values(hpxml_default, 2.0, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
 
     # Test defaults
     hpxml.water_heating.water_fixtures_usage_multiplier = nil
+    hpxml.water_heating.water_fixtures_weekday_fractions = nil
+    hpxml.water_heating.water_fixtures_weekend_fractions = nil
+    hpxml.water_heating.water_fixtures_monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_water_fixture_values(hpxml_default, 1.0)
+    _test_default_water_fixture_values(hpxml_default, 1.0, Schedule.FixturesWeekdayFractions, Schedule.FixturesWeekendFractions, Schedule.FixturesMonthlyMultipliers)
   end
 
   def test_solar_thermal_systems
@@ -1682,9 +1694,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.clothes_washers[0].is_shared_appliance = true
     hpxml.clothes_washers[0].usage_multiplier = 1.5
     hpxml.clothes_washers[0].water_heating_system_idref = hpxml.water_heating_systems[0].id
+    hpxml.clothes_washers[0].weekday_fractions = ConstantDaySchedule
+    hpxml.clothes_washers[0].weekend_fractions = ConstantDaySchedule
+    hpxml.clothes_washers[0].monthly_multipliers = ConstantMonthSchedule
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_clothes_washer_values(hpxml_default.clothes_washers[0], true, HPXML::LocationBasementConditioned, 1.21, 380.0, 0.12, 1.09, 27.0, 3.2, 6.0, 1.5)
+    _test_default_clothes_washer_values(hpxml_default.clothes_washers[0], true, HPXML::LocationBasementConditioned, 1.21, 380.0, 0.12, 1.09, 27.0, 3.2, 6.0, 1.5, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
 
     # Test defaults
     hpxml.clothes_washers[0].is_shared_appliance = nil
@@ -1697,9 +1712,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.clothes_washers[0].capacity = nil
     hpxml.clothes_washers[0].label_usage = nil
     hpxml.clothes_washers[0].usage_multiplier = nil
+    hpxml.clothes_washers[0].weekday_fractions = nil
+    hpxml.clothes_washers[0].weekend_fractions = nil
+    hpxml.clothes_washers[0].monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_clothes_washer_values(hpxml_default.clothes_washers[0], false, HPXML::LocationLivingSpace, 1.0, 400.0, 0.12, 1.09, 27.0, 3.0, 6.0, 1.0)
+    _test_default_clothes_washer_values(hpxml_default.clothes_washers[0], false, HPXML::LocationLivingSpace, 1.0, 400.0, 0.12, 1.09, 27.0, 3.0, 6.0, 1.0, Schedule.ClothesWasherWeekdayFractions, Schedule.ClothesWasherWeekendFractions, Schedule.ClothesWasherMonthlyMultipliers)
 
     # Test defaults before 301-2019 Addendum A
     hpxml = _create_hpxml('base.xml')
@@ -1714,9 +1732,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.clothes_washers[0].capacity = nil
     hpxml.clothes_washers[0].label_usage = nil
     hpxml.clothes_washers[0].usage_multiplier = nil
+    hpxml.clothes_washers[0].weekday_fractions = nil
+    hpxml.clothes_washers[0].weekend_fractions = nil
+    hpxml.clothes_washers[0].monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_clothes_washer_values(hpxml_default.clothes_washers[0], false, HPXML::LocationLivingSpace, 0.331, 704.0, 0.08, 0.58, 23.0, 2.874, 999, 1.0)
+    _test_default_clothes_washer_values(hpxml_default.clothes_washers[0], false, HPXML::LocationLivingSpace, 0.331, 704.0, 0.08, 0.58, 23.0, 2.874, 999, 1.0, Schedule.ClothesWasherWeekdayFractions, Schedule.ClothesWasherWeekendFractions, Schedule.ClothesWasherMonthlyMultipliers)
   end
 
   def test_clothes_dryers
@@ -1730,37 +1751,43 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.clothes_dryers[0].is_shared_appliance = true
     hpxml.clothes_dryers[0].combined_energy_factor = 3.33
     hpxml.clothes_dryers[0].usage_multiplier = 1.1
+    hpxml.clothes_dryers[0].weekday_fractions = ConstantDaySchedule
+    hpxml.clothes_dryers[0].weekend_fractions = ConstantDaySchedule
+    hpxml.clothes_dryers[0].monthly_multipliers = ConstantMonthSchedule
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_clothes_dryer_values(hpxml_default.clothes_dryers[0], true, HPXML::LocationBasementConditioned, 3.33, 1.1)
+    _test_default_clothes_dryer_values(hpxml_default.clothes_dryers[0], true, HPXML::LocationBasementConditioned, 3.33, 1.1, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
 
     # Test defaults w/ electric clothes dryer
     hpxml.clothes_dryers[0].location = nil
     hpxml.clothes_dryers[0].is_shared_appliance = nil
     hpxml.clothes_dryers[0].combined_energy_factor = nil
     hpxml.clothes_dryers[0].usage_multiplier = nil
+    hpxml.clothes_dryers[0].weekday_fractions = nil
+    hpxml.clothes_dryers[0].weekend_fractions = nil
+    hpxml.clothes_dryers[0].monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_clothes_dryer_values(hpxml_default.clothes_dryers[0], false, HPXML::LocationLivingSpace, 3.01, 1.0)
+    _test_default_clothes_dryer_values(hpxml_default.clothes_dryers[0], false, HPXML::LocationLivingSpace, 3.01, 1.0, Schedule.ClothesDryerWeekdayFractions, Schedule.ClothesDryerWeekendFractions, Schedule.ClothesDryerMonthlyMultipliers)
 
     # Test defaults w/ gas clothes dryer
     hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeNaturalGas
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_clothes_dryer_values(hpxml_default.clothes_dryers[0], false, HPXML::LocationLivingSpace, 3.01, 1.0)
+    _test_default_clothes_dryer_values(hpxml_default.clothes_dryers[0], false, HPXML::LocationLivingSpace, 3.01, 1.0, Schedule.ClothesDryerWeekdayFractions, Schedule.ClothesDryerWeekendFractions, Schedule.ClothesDryerMonthlyMultipliers)
 
     # Test defaults w/ electric clothes dryer before 301-2019 Addendum A
     hpxml.header.eri_calculation_version = '2019'
     hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeElectricity
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_clothes_dryer_values(hpxml_default.clothes_dryers[0], false, HPXML::LocationLivingSpace, 2.62, 1.0)
+    _test_default_clothes_dryer_values(hpxml_default.clothes_dryers[0], false, HPXML::LocationLivingSpace, 2.62, 1.0, Schedule.ClothesDryerWeekdayFractions, Schedule.ClothesDryerWeekendFractions, Schedule.ClothesDryerMonthlyMultipliers)
 
     # Test defaults w/ gas clothes dryer before 301-2019 Addendum A
     hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeNaturalGas
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_clothes_dryer_values(hpxml_default.clothes_dryers[0], false, HPXML::LocationLivingSpace, 2.32, 1.0)
+    _test_default_clothes_dryer_values(hpxml_default.clothes_dryers[0], false, HPXML::LocationLivingSpace, 2.32, 1.0, Schedule.ClothesDryerWeekdayFractions, Schedule.ClothesDryerWeekendFractions, Schedule.ClothesDryerMonthlyMultipliers)
   end
 
   def test_clothes_dryer_exhaust
@@ -1800,9 +1827,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.dishwashers[0].is_shared_appliance = true
     hpxml.dishwashers[0].usage_multiplier = 1.3
     hpxml.dishwashers[0].water_heating_system_idref = hpxml.water_heating_systems[0].id
+    hpxml.dishwashers[0].weekday_fractions = ConstantDaySchedule
+    hpxml.dishwashers[0].weekend_fractions = ConstantDaySchedule
+    hpxml.dishwashers[0].monthly_multipliers = ConstantMonthSchedule
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_dishwasher_values(hpxml_default.dishwashers[0], true, HPXML::LocationBasementConditioned, 307.0, 0.12, 1.09, 22.32, 4.0, 12, 1.3)
+    _test_default_dishwasher_values(hpxml_default.dishwashers[0], true, HPXML::LocationBasementConditioned, 307.0, 0.12, 1.09, 22.32, 4.0, 12, 1.3, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
 
     # Test defaults
     hpxml.dishwashers[0].is_shared_appliance = nil
@@ -1814,15 +1844,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.dishwashers[0].label_usage = nil
     hpxml.dishwashers[0].place_setting_capacity = nil
     hpxml.dishwashers[0].usage_multiplier = nil
+    hpxml.dishwashers[0].weekday_fractions = nil
+    hpxml.dishwashers[0].weekend_fractions = nil
+    hpxml.dishwashers[0].monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_dishwasher_values(hpxml_default.dishwashers[0], false, HPXML::LocationLivingSpace, 467.0, 0.12, 1.09, 33.12, 4.0, 12, 1.0)
+    _test_default_dishwasher_values(hpxml_default.dishwashers[0], false, HPXML::LocationLivingSpace, 467.0, 0.12, 1.09, 33.12, 4.0, 12, 1.0, Schedule.DishwasherWeekdayFractions, Schedule.DishwasherWeekendFractions, Schedule.DishwasherMonthlyMultipliers)
 
     # Test defaults before 301-2019 Addendum A
     hpxml.header.eri_calculation_version = '2019'
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_dishwasher_values(hpxml_default.dishwashers[0], false, HPXML::LocationLivingSpace, 467.0, 999, 999, 999, 999, 12, 1.0)
+    _test_default_dishwasher_values(hpxml_default.dishwashers[0], false, HPXML::LocationLivingSpace, 467.0, 999, 999, 999, 999, 12, 1.0, Schedule.DishwasherWeekdayFractions, Schedule.DishwasherWeekendFractions, Schedule.DishwasherMonthlyMultipliers)
   end
 
   def test_refrigerators
@@ -1846,20 +1879,20 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.refrigerators[0].monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 691.0, 1.0, '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
+    _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 691.0, 1.0, Schedule.RefrigeratorWeekdayFractions, Schedule.RefrigeratorWeekendFractions, Schedule.RefrigeratorMonthlyMultipliers)
 
     # Test defaults w/ refrigerator in 5-bedroom house
     hpxml.building_construction.number_of_bedrooms = 5
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 727.0, 1.0, '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
+    _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 727.0, 1.0, Schedule.RefrigeratorWeekdayFractions, Schedule.RefrigeratorWeekendFractions, Schedule.RefrigeratorMonthlyMultipliers)
 
     # Test defaults before 301-2019 Addendum A
     hpxml.header.eri_calculation_version = '2019'
     hpxml.building_construction.number_of_bedrooms = 3
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 691.0, 1.0, '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
+    _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 691.0, 1.0, Schedule.RefrigeratorWeekdayFractions, Schedule.RefrigeratorWeekendFractions, Schedule.RefrigeratorMonthlyMultipliers)
   end
 
   def test_extra_refrigerators
@@ -1888,7 +1921,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_extra_refrigerators_values(hpxml_default, HPXML::LocationBasementConditioned, 244.0, 1.0, '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
+    _test_default_extra_refrigerators_values(hpxml_default, HPXML::LocationBasementConditioned, 244.0, 1.0, Schedule.ExtraRefrigeratorWeekdayFractions, Schedule.ExtraRefrigeratorWeekendFractions, Schedule.ExtraRefrigeratorMonthlyMultipliers)
   end
 
   def test_freezers
@@ -1917,7 +1950,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_freezers_values(hpxml_default, HPXML::LocationBasementConditioned, 320.0, 1.0, '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
+    _test_default_freezers_values(hpxml_default, HPXML::LocationBasementConditioned, 320.0, 1.0, Schedule.FreezerWeekdayFractions, Schedule.FreezerWeekendFractions, Schedule.FreezerMonthlyMultipliers)
   end
 
   def test_cooking_ranges
@@ -1942,13 +1975,13 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooking_ranges[0].monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_cooking_range_values(hpxml_default.cooking_ranges[0], HPXML::LocationLivingSpace, false, 1.0, '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011', '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011', '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097')
+    _test_default_cooking_range_values(hpxml_default.cooking_ranges[0], HPXML::LocationLivingSpace, false, 1.0, Schedule.CookingRangeWeekdayFractions, Schedule.CookingRangeWeekendFractions, Schedule.CookingRangeMonthlyMultipliers)
 
     # Test defaults before 301-2019 Addendum A
     hpxml.header.eri_calculation_version = '2019'
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_cooking_range_values(hpxml_default.cooking_ranges[0], HPXML::LocationLivingSpace, false, 1.0, '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011', '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011', '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097')
+    _test_default_cooking_range_values(hpxml_default.cooking_ranges[0], HPXML::LocationLivingSpace, false, 1.0, Schedule.CookingRangeWeekdayFractions, Schedule.CookingRangeWeekendFractions, Schedule.CookingRangeMonthlyMultipliers)
   end
 
   def test_ovens
@@ -2032,9 +2065,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_lighting_values(hpxml_default, 1.0, 1.0, 1.0,
-                                  { ext_wk_sch: '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063',
-                                    ext_wknd_sch: '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059',
-                                    ext_month_mult: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248' })
+                                  { ext_wk_sch: Schedule.LightingExteriorWeekdayFractions,
+                                    ext_wknd_sch: Schedule.LightingExteriorWeekendFractions,
+                                    ext_month_mult: Schedule.LightingExteriorMonthlyMultipliers })
 
     # Test defaults w/ garage
     hpxml = _create_hpxml('base-enclosure-garage.xml')
@@ -2044,12 +2077,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_lighting_values(hpxml_default, 1.0, 1.0, 1.0,
-                                  { ext_wk_sch: '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063',
-                                    ext_wknd_sch: '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059',
-                                    ext_month_mult: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248',
-                                    grg_wk_sch: '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063',
-                                    grg_wknd_sch: '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059',
-                                    grg_month_mult: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248' })
+                                  { ext_wk_sch: Schedule.LightingExteriorWeekdayFractions,
+                                    ext_wknd_sch: Schedule.LightingExteriorWeekendFractions,
+                                    ext_month_mult: Schedule.LightingExteriorMonthlyMultipliers,
+                                    grg_wk_sch: Schedule.LightingExteriorWeekdayFractions,
+                                    grg_wknd_sch: Schedule.LightingExteriorWeekendFractions,
+                                    grg_month_mult: Schedule.LightingExteriorMonthlyMultipliers })
   end
 
   def test_ceiling_fans
@@ -2057,18 +2090,24 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = _create_hpxml('base-lighting-ceiling-fans.xml')
     hpxml.ceiling_fans[0].quantity = 2
     hpxml.ceiling_fans[0].efficiency = 100
+    hpxml.ceiling_fans[0].weekday_fractions = ConstantDaySchedule
+    hpxml.ceiling_fans[0].weekend_fractions = ConstantDaySchedule
+    hpxml.ceiling_fans[0].monthly_multipliers = ConstantMonthSchedule
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_ceiling_fan_values(hpxml_default.ceiling_fans[0], 2, 100)
+    _test_default_ceiling_fan_values(hpxml_default.ceiling_fans[0], 2, 100, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
 
     # Test defaults
     hpxml.ceiling_fans.each do |ceiling_fan|
       ceiling_fan.quantity = nil
       ceiling_fan.efficiency = nil
+      ceiling_fan.weekday_fractions = nil
+      ceiling_fan.weekend_fractions = nil
+      ceiling_fan.monthly_multipliers = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_ceiling_fan_values(hpxml_default.ceiling_fans[0], 4, 70.4)
+    _test_default_ceiling_fan_values(hpxml_default.ceiling_fans[0], 4, 70.4, Schedule.CeilingFanWeekdayFractions, Schedule.CeilingFanWeekendFractions, '0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0')
   end
 
   def test_pools
@@ -2106,8 +2145,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     pool.pump_monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_pool_heater_values(hpxml_default.pools[0], HPXML::UnitsThermPerYear, 236, 1.0, '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003', '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
-    _test_default_pool_pump_values(hpxml_default.pools[0], 2496, 1.0, '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003', '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
+    _test_default_pool_heater_values(hpxml_default.pools[0], HPXML::UnitsThermPerYear, 236, 1.0, Schedule.PoolHeaterWeekdayFractions, Schedule.PoolHeaterWeekendFractions, Schedule.PoolHeaterMonthlyMultipliers)
+    _test_default_pool_pump_values(hpxml_default.pools[0], 2496, 1.0, Schedule.PoolPumpWeekdayFractions, Schedule.PoolPumpWeekendFractions, Schedule.PoolPumpMonthlyMultipliers)
 
     # Test defaults 2
     hpxml = _create_hpxml('base-misc-loads-large-uncommon2.xml')
@@ -2126,7 +2165,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_pool_heater_values(hpxml_default.pools[0], nil, nil, nil, nil, nil, nil)
-    _test_default_pool_pump_values(hpxml_default.pools[0], 2496, 1.0, '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003', '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
+    _test_default_pool_pump_values(hpxml_default.pools[0], 2496, 1.0, Schedule.PoolPumpWeekdayFractions, Schedule.PoolPumpWeekendFractions, Schedule.PoolPumpMonthlyMultipliers)
   end
 
   def test_hot_tubs
@@ -2164,8 +2203,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hot_tub.pump_monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hot_tub_heater_values(hpxml_default.hot_tubs[0], HPXML::UnitsKwhPerYear, 1125, 1.0, '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024', '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
-    _test_default_hot_tub_pump_values(hpxml_default.hot_tubs[0], 1111, 1.0, '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024', '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024', '0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921')
+    _test_default_hot_tub_heater_values(hpxml_default.hot_tubs[0], HPXML::UnitsKwhPerYear, 1125, 1.0, Schedule.HotTubHeaterWeekdayFractions, Schedule.HotTubHeaterWeekendFractions, Schedule.HotTubHeaterMonthlyMultipliers)
+    _test_default_hot_tub_pump_values(hpxml_default.hot_tubs[0], 1111, 1.0, Schedule.HotTubPumpWeekdayFractions, Schedule.HotTubPumpWeekendFractions, Schedule.HotTubPumpMonthlyMultipliers)
 
     # Test defaults 2
     hpxml = _create_hpxml('base-misc-loads-large-uncommon2.xml')
@@ -2183,8 +2222,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hot_tub.pump_monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hot_tub_heater_values(hpxml_default.hot_tubs[0], HPXML::UnitsKwhPerYear, 225, 1.0, '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024', '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
-    _test_default_hot_tub_pump_values(hpxml_default.hot_tubs[0], 1111, 1.0, '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024', '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024', '0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921')
+    _test_default_hot_tub_heater_values(hpxml_default.hot_tubs[0], HPXML::UnitsKwhPerYear, 225, 1.0, Schedule.HotTubHeaterWeekdayFractions, Schedule.HotTubHeaterWeekendFractions, Schedule.HotTubHeaterMonthlyMultipliers)
+    _test_default_hot_tub_pump_values(hpxml_default.hot_tubs[0], 1111, 1.0, Schedule.HotTubPumpWeekdayFractions, Schedule.HotTubPumpWeekendFractions, Schedule.HotTubPumpMonthlyMultipliers)
   end
 
   def test_plug_loads
@@ -2241,10 +2280,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeTelevision, 620, 1.0, 0.0, 1.0, '0.037, 0.018, 0.009, 0.007, 0.011, 0.018, 0.029, 0.040, 0.049, 0.058, 0.065, 0.072, 0.076, 0.086, 0.091, 0.102, 0.127, 0.156, 0.210, 0.294, 0.363, 0.344, 0.208, 0.090', '0.044, 0.022, 0.012, 0.008, 0.011, 0.014, 0.024, 0.043, 0.071, 0.094, 0.112, 0.123, 0.132, 0.156, 0.178, 0.196, 0.206, 0.213, 0.251, 0.330, 0.388, 0.358, 0.226, 0.103', '1.137, 1.129, 0.961, 0.969, 0.961, 0.993, 0.996, 0.96, 0.993, 0.867, 0.86, 1.137')
-    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeOther, 2457, 0.855, 0.045, 1.0, '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036', '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036', '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
-    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeElectricVehicleCharging, 1667, 0.0, 0.0, 1.0, '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042', '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042', '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
-    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeWellPump, 441, 0.0, 0.0, 1.0, '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065', '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeTelevision, 620, 1.0, 0.0, 1.0, Schedule.PlugLoadsTVWeekdayFractions, Schedule.PlugLoadsTVWeekendFractions, Schedule.PlugLoadsTVMonthlyMultipliers)
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeOther, 2457, 0.855, 0.045, 1.0, Schedule.PlugLoadsOtherWeekdayFractions, Schedule.PlugLoadsOtherWeekendFractions, Schedule.PlugLoadsOtherMonthlyMultipliers)
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeElectricVehicleCharging, 1667, 0.0, 0.0, 1.0, Schedule.PlugLoadsVehicleWeekdayFractions, Schedule.PlugLoadsVehicleWeekendFractions, Schedule.PlugLoadsVehicleMonthlyMultipliers)
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeWellPump, 441, 0.0, 0.0, 1.0, Schedule.PlugLoadsWellPumpWeekdayFractions, Schedule.PlugLoadsWellPumpWeekendFractions, Schedule.PlugLoadsWellPumpMonthlyMultipliers)
   end
 
   def test_fuel_loads
@@ -2292,9 +2331,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeGrill, 33, 0.0, 0.0, 1.0, '0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007', '0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007', '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097')
-    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeLighting, 20, 0.0, 0.0, 1.0, '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065', '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
-    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeFireplace, 67, 0.5, 0.1, 1.0, '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065', '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
+    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeGrill, 33, 0.0, 0.0, 1.0, Schedule.FuelLoadsGrillWeekdayFractions, Schedule.FuelLoadsGrillWeekendFractions, Schedule.FuelLoadsGrillMonthlyMultipliers)
+    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeLighting, 20, 0.0, 0.0, 1.0, Schedule.FuelLoadsLightingWeekdayFractions, Schedule.FuelLoadsLightingWeekendFractions, Schedule.FuelLoadsLightingMonthlyMultipliers)
+    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeFireplace, 67, 0.5, 0.1, 1.0, Schedule.FuelLoadsFireplaceWeekdayFractions, Schedule.FuelLoadsFireplaceWeekendFractions, Schedule.FuelLoadsFireplaceMonthlyMultipliers)
   end
 
   def test_hvac_lookup
@@ -2450,8 +2489,23 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_occupancy_values(hpxml, num_occupants)
+  def _test_default_occupancy_values(hpxml, num_occupants, weekday_sch, weekend_sch, monthly_mults)
     assert_equal(num_occupants, hpxml.building_occupancy.number_of_residents)
+    if weekday_sch.nil?
+      assert_nil(hpxml.building_occupancy.weekday_fractions)
+    else
+      assert_equal(weekday_sch, hpxml.building_occupancy.weekday_fractions)
+    end
+    if weekend_sch.nil?
+      assert_nil(hpxml.building_occupancy.weekend_fractions)
+    else
+      assert_equal(weekend_sch, hpxml.building_occupancy.weekend_fractions)
+    end
+    if monthly_mults.nil?
+      assert_nil(hpxml.building_occupancy.monthly_multipliers)
+    else
+      assert_equal(monthly_mults, hpxml.building_occupancy.monthly_multipliers)
+    end
   end
 
   def _test_default_building_construction_values(hpxml, building_volume, average_ceiling_height, has_flue_or_chimney, n_bathrooms)
@@ -2956,8 +3010,23 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_in_epsilon(pump_power, hot_water_distribution.shared_recirculation_pump_power, 0.01)
   end
 
-  def _test_default_water_fixture_values(hpxml, usage_multiplier)
+  def _test_default_water_fixture_values(hpxml, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
     assert_equal(usage_multiplier, hpxml.water_heating.water_fixtures_usage_multiplier)
+    if weekday_sch.nil?
+      assert_nil(hpxml.water_heating.water_fixtures_weekday_fractions)
+    else
+      assert_equal(weekday_sch, hpxml.water_heating.water_fixtures_weekday_fractions)
+    end
+    if weekend_sch.nil?
+      assert_nil(hpxml.water_heating.water_fixtures_weekend_fractions)
+    else
+      assert_equal(weekend_sch, hpxml.water_heating.water_fixtures_weekend_fractions)
+    end
+    if monthly_mults.nil?
+      assert_nil(hpxml.water_heating.water_fixtures_monthly_multipliers)
+    else
+      assert_equal(monthly_mults, hpxml.water_heating.water_fixtures_monthly_multipliers)
+    end
   end
 
   def _test_default_solar_thermal_values(solar_thermal_system, storage_volume, azimuth)
@@ -2983,7 +3052,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_clothes_washer_values(clothes_washer, is_shared, location, imef, rated_annual_kwh, label_electric_rate, label_gas_rate, label_annual_gas_cost, capacity, label_usage, usage_multiplier)
+  def _test_default_clothes_washer_values(clothes_washer, is_shared, location, imef, rated_annual_kwh, label_electric_rate,
+                                          label_gas_rate, label_annual_gas_cost, capacity, label_usage, usage_multiplier,
+                                          weekday_sch, weekend_sch, monthly_mults)
     assert_equal(is_shared, clothes_washer.is_shared_appliance)
     assert_equal(location, clothes_washer.location)
     assert_equal(imef, clothes_washer.integrated_modified_energy_factor)
@@ -2994,13 +3065,44 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(capacity, clothes_washer.capacity)
     assert_equal(label_usage, clothes_washer.label_usage)
     assert_equal(usage_multiplier, clothes_washer.usage_multiplier)
+    if weekday_sch.nil?
+      assert_nil(clothes_washer.weekday_fractions)
+    else
+      assert_equal(weekday_sch, clothes_washer.weekday_fractions)
+    end
+    if weekend_sch.nil?
+      assert_nil(clothes_washer.weekend_fractions)
+    else
+      assert_equal(weekend_sch, clothes_washer.weekend_fractions)
+    end
+    if monthly_mults.nil?
+      assert_nil(clothes_washer.monthly_multipliers)
+    else
+      assert_equal(monthly_mults, clothes_washer.monthly_multipliers)
+    end
   end
 
-  def _test_default_clothes_dryer_values(clothes_dryer, is_shared, location, cef, usage_multiplier)
+  def _test_default_clothes_dryer_values(clothes_dryer, is_shared, location, cef, usage_multiplier,
+                                         weekday_sch, weekend_sch, monthly_mults)
     assert_equal(is_shared, clothes_dryer.is_shared_appliance)
     assert_equal(location, clothes_dryer.location)
     assert_equal(cef, clothes_dryer.combined_energy_factor)
     assert_equal(usage_multiplier, clothes_dryer.usage_multiplier)
+    if weekday_sch.nil?
+      assert_nil(clothes_dryer.weekday_fractions)
+    else
+      assert_equal(weekday_sch, clothes_dryer.weekday_fractions)
+    end
+    if weekend_sch.nil?
+      assert_nil(clothes_dryer.weekend_fractions)
+    else
+      assert_equal(weekend_sch, clothes_dryer.weekend_fractions)
+    end
+    if monthly_mults.nil?
+      assert_nil(clothes_dryer.monthly_multipliers)
+    else
+      assert_equal(monthly_mults, clothes_dryer.monthly_multipliers)
+    end
   end
 
   def _test_default_clothes_dryer_exhaust_values(clothes_dryer, is_vented, vented_flow_rate)
@@ -3012,7 +3114,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_dishwasher_values(dishwasher, is_shared, location, rated_annual_kwh, label_electric_rate, label_gas_rate, label_annual_gas_cost, label_usage, place_setting_capacity, usage_multiplier)
+  def _test_default_dishwasher_values(dishwasher, is_shared, location, rated_annual_kwh, label_electric_rate, label_gas_rate, label_annual_gas_cost, label_usage, place_setting_capacity, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
     assert_equal(is_shared, dishwasher.is_shared_appliance)
     assert_equal(location, dishwasher.location)
     assert_equal(rated_annual_kwh, dishwasher.rated_annual_kwh)
@@ -3022,6 +3124,21 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(label_usage, dishwasher.label_usage)
     assert_equal(place_setting_capacity, dishwasher.place_setting_capacity)
     assert_equal(usage_multiplier, dishwasher.usage_multiplier)
+    if weekday_sch.nil?
+      assert_nil(dishwasher.weekday_fractions)
+    else
+      assert_equal(weekday_sch, dishwasher.weekday_fractions)
+    end
+    if weekend_sch.nil?
+      assert_nil(dishwasher.weekend_fractions)
+    else
+      assert_equal(weekend_sch, dishwasher.weekend_fractions)
+    end
+    if monthly_mults.nil?
+      assert_nil(dishwasher.monthly_multipliers)
+    else
+      assert_equal(monthly_mults, dishwasher.monthly_multipliers)
+    end
   end
 
   def _test_default_refrigerator_values(hpxml, location, rated_annual_kwh, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
@@ -3193,9 +3310,24 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_ceiling_fan_values(ceiling_fan, quantity, efficiency)
+  def _test_default_ceiling_fan_values(ceiling_fan, quantity, efficiency, weekday_sch, weekend_sch, monthly_mults)
     assert_equal(quantity, ceiling_fan.quantity)
     assert_in_epsilon(efficiency, ceiling_fan.efficiency, 0.01)
+    if weekday_sch.nil?
+      assert_nil(ceiling_fan.weekday_fractions)
+    else
+      assert_equal(weekday_sch, ceiling_fan.weekday_fractions)
+    end
+    if weekend_sch.nil?
+      assert_nil(ceiling_fan.weekend_fractions)
+    else
+      assert_equal(weekend_sch, ceiling_fan.weekend_fractions)
+    end
+    if monthly_mults.nil?
+      assert_nil(ceiling_fan.monthly_multipliers)
+    else
+      assert_equal(monthly_mults, ceiling_fan.monthly_multipliers)
+    end
   end
 
   def _test_default_pool_heater_values(pool, load_units, load_value, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
