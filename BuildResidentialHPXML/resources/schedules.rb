@@ -32,7 +32,7 @@ class ScheduleGenerator
     @mkc_ts_per_day = 96
     @mkc_ts_per_hour = @mkc_ts_per_day / 24
 
-    @model.getYearDescription.isLeapYear ? @total_days_in_year = 366 : @total_days_in_year = 365
+    @total_days_in_year = Integer(Constants.NumDaysInYear(@model))
 
     @sim_year = @model.getYearDescription.calendarYear.get
     @sim_start_day = DateTime.new(@sim_year, 1, 1)
@@ -164,7 +164,7 @@ class ScheduleGenerator
   end
 
   def create_average_lighting_exterior_holiday
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'lighting_exterior_holiday', weekday_sch: Schedule.LightingExteriorHolidayWeekdayFractions, weekend_sch: Schedule.LightingExteriorHolidayWeekendFractions, monthly_sch: Schedule.LightingExteriorHolidayMonthlyMultipliers, begin_month: 11, begin_day_of_month: 24, end_month: 1, end_day_of_month: 6)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'lighting_exterior_holiday', weekday_sch: Schedule.LightingExteriorHolidayWeekdayFractions, weekend_sch: Schedule.LightingExteriorHolidayWeekendFractions, monthly_sch: Schedule.LightingExteriorHolidayMonthlyMultipliers, begin_month: 11, begin_day: 24, end_month: 1, end_day: 6)
   end
 
   def create_average_cooking_range
@@ -184,22 +184,22 @@ class ScheduleGenerator
   end
 
   def create_average_dishwasher(args:)
-    create_timeseries_from_minutely(sch_name: 'dishwasher', obj_name: Constants.ObjectNameDishwasher, days_shift: 0, dryer_exhaust_min_runtime: 0, args: args)
-    create_timeseries_from_minutely(sch_name: 'dishwasher_power', obj_name: Constants.ObjectNameDishwasher, days_shift: 0, dryer_exhaust_min_runtime: 0, args: args)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'dishwasher', weekday_sch: Schedule.DishwasherWeekdayFractions, weekend_sch: Schedule.DishwasherWeekendFractions, monthly_sch: Schedule.DishwasherMonthlyMultipliers)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'dishwasher_power', weekday_sch: Schedule.DishwasherWeekdayFractions, weekend_sch: Schedule.DishwasherWeekendFractions, monthly_sch: Schedule.DishwasherMonthlyMultipliers)
   end
 
   def create_average_clothes_washer(args:)
-    create_timeseries_from_minutely(sch_name: 'clothes_washer', obj_name: Constants.ObjectNameClothesWasher, days_shift: 0, dryer_exhaust_min_runtime: 0, args: args)
-    create_timeseries_from_minutely(sch_name: 'clothes_washer_power', obj_name: Constants.ObjectNameClothesWasher, days_shift: 0, dryer_exhaust_min_runtime: 0, args: args)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_washer', weekday_sch: Schedule.ClothesWasherWeekdayFractions, weekend_sch: Schedule.ClothesWasherWeekendFractions, monthly_sch: Schedule.ClothesWasherMonthlyMultipliers)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_washer_power', weekday_sch: Schedule.ClothesWasherWeekdayFractions, weekend_sch: Schedule.ClothesWasherWeekendFractions, monthly_sch: Schedule.ClothesWasherMonthlyMultipliers)
   end
 
   def create_average_clothes_dryer(args:)
-    create_timeseries_from_minutely(sch_name: 'clothes_dryer', obj_name: Constants.ObjectNameClothesDryer, days_shift: -1.0 / 24.0, dryer_exhaust_min_runtime: 0, args: args)
-    create_timeseries_from_minutely(sch_name: 'clothes_dryer_exhaust', obj_name: Constants.ObjectNameClothesDryerExhaust, days_shift: -1.0 / 24.0, dryer_exhaust_min_runtime: 24, args: args)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_dryer', weekday_sch: Schedule.ClothesDryerWeekdayFractions, weekend_sch: Schedule.ClothesDryerWeekendFractions, monthly_sch: Schedule.ClothesDryerMonthlyMultipliers)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_dryer_exhaust', weekday_sch: Schedule.ClothesDryerWeekdayFractions, weekend_sch: Schedule.ClothesDryerWeekendFractions, monthly_sch: Schedule.ClothesDryerMonthlyMultipliers)
   end
 
   def create_average_fixtures(args:)
-    create_timeseries_from_minutely(sch_name: 'fixtures', obj_name: Constants.ObjectNameFixtures, days_shift: 0, dryer_exhaust_min_runtime: 0, args: args)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'fixtures', weekday_sch: Schedule.FixturesWeekdayFractions, weekend_sch: Schedule.FixturesWeekendFractions, monthly_sch: Schedule.FixturesMonthlyMultipliers)
   end
 
   def create_average_ceiling_fan
@@ -255,20 +255,20 @@ class ScheduleGenerator
                                                      weekend_sch:,
                                                      monthly_sch:,
                                                      begin_month: nil,
-                                                     begin_day_of_month: nil,
+                                                     begin_day: nil,
                                                      end_month: nil,
-                                                     end_day_of_month: nil)
+                                                     end_day: nil)
 
     daily_sch = { 'weekday_sch' => weekday_sch.split(',').map { |i| i.to_f },
                   'weekend_sch' => weekend_sch.split(',').map { |i| i.to_f },
                   'monthly_multiplier' => monthly_sch.split(',').map { |i| i.to_f } }
 
-    if begin_month.nil? && begin_day_of_month.nil? && end_month.nil? && end_day_of_month.nil?
+    if begin_month.nil? && begin_day.nil? && end_month.nil? && end_day.nil?
       begin_day = @sim_start_day
       end_day = DateTime.new(@sim_year, 12, 31)
     else
-      begin_day = DateTime.new(@sim_year, begin_month, begin_day_of_month)
-      end_day = DateTime.new(@sim_year, end_month, end_day_of_month)
+      begin_day = DateTime.new(@sim_year, begin_month, begin_day)
+      end_day = DateTime.new(@sim_year, end_month, end_day)
     end
 
     @total_days_in_year.times do |day|
@@ -292,7 +292,7 @@ class ScheduleGenerator
   def create_timeseries_from_months(sch_name:,
                                     month_schs:)
 
-    num_days_in_months = Constants.NumDaysInMonths(@model.getYearDescription)
+    num_days_in_months = Constants.NumDaysInMonths(@model)
     sch = []
     for month in 0..11
       sch << month_schs[month] * num_days_in_months[month]
@@ -308,47 +308,6 @@ class ScheduleGenerator
       end
     end
     @schedules[sch_name] = normalize(@schedules[sch_name])
-  end
-
-  def create_timeseries_from_minutely(sch_name:,
-                                      obj_name:,
-                                      days_shift:,
-                                      dryer_exhaust_min_runtime:,
-                                      args:)
-
-    nbeds = args[:geometry_num_bedrooms]
-    create_sch_object = false
-    sch = HotWaterSchedule.new(@model, obj_name, nbeds, days_shift, dryer_exhaust_min_runtime, create_sch_object)
-
-    weeks = 1 # use a single week that repeats
-
-    year_description = @model.getYearDescription
-    last_day_of_year = 365
-    last_day_of_year += 1 if year_description.isLeapYear
-
-    time = []
-    (@minutes_per_step..24 * 60).step(@minutes_per_step).to_a.each_with_index do |m, i|
-      time[i] = OpenStudio::Time.new(0, 0, m, 0)
-    end
-
-    data = sch.data
-
-    unique_day_schedule = []
-    for d in 1..7 * weeks # how many unique day schedules
-      next if d > last_day_of_year
-
-      time.each_with_index do |m, i|
-        previous_value = data[i + (d - 1) * 24 * 60 / @minutes_per_step]
-        unique_day_schedule << previous_value
-      end
-    end
-
-    repeated_schedule = []
-    for w in 0..52 # max num of weeks
-      repeated_schedule += unique_day_schedule
-    end
-
-    @schedules[sch_name] = repeated_schedule[0...@total_days_in_year * @steps_in_day]
   end
 
   def create_stochastic_schedules(args:)
@@ -434,11 +393,9 @@ class ScheduleGenerator
     monthly_lighting_schedule = schedule_config['lighting']['monthly_multiplier']
     holiday_lighting_schedule = schedule_config['lighting']['holiday_sch']
 
-    sch_option_type = Constants.OptionTypeLightingScheduleCalculated
     sch = Lighting.get_schedule(@model, @epw_file)
     interior_lighting_schedule = []
-    year_description = @model.getYearDescription
-    num_days_in_months = Constants.NumDaysInMonths(year_description.isLeapYear)
+    num_days_in_months = Constants.NumDaysInMonths(@model)
     for month in 0..11
       interior_lighting_schedule << sch[month] * num_days_in_months[month]
     end
@@ -798,68 +755,79 @@ class ScheduleGenerator
     sink_activity_sch = sink_activity_sch.rotate(-4 * 60 + random_offset) # 4 am shifting
     sink_activity_sch = apply_monthly_offsets(array: sink_activity_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
     sink_activity_sch = aggregate_array(sink_activity_sch, @minutes_per_step)
-    @schedules['sinks'] = sink_activity_sch.map { |flow| flow / Constants.PeakFlowRate }
+    sink_peak_flow = sink_activity_sch.max
+    @schedules['sinks'] = sink_activity_sch.map { |flow| flow / sink_peak_flow }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     dw_activity_sch = dw_activity_sch.rotate(random_offset)
     dw_activity_sch = apply_monthly_offsets(array: dw_activity_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
     dw_activity_sch = aggregate_array(dw_activity_sch, @minutes_per_step)
-    @schedules['dishwasher'] = dw_activity_sch.map { |flow| flow / Constants.PeakFlowRate }
+    dw_peak_flow = dw_activity_sch.max
+    @schedules['dishwasher'] = dw_activity_sch.map { |flow| flow / dw_peak_flow }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     cw_activity_sch = cw_activity_sch.rotate(random_offset)
     cw_activity_sch = apply_monthly_offsets(array: cw_activity_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
     cw_activity_sch = aggregate_array(cw_activity_sch, @minutes_per_step)
-    @schedules['clothes_washer'] = cw_activity_sch.map { |flow| flow / Constants.PeakFlowRate }
+    cw_peak_flow = cw_activity_sch.max
+    @schedules['clothes_washer'] = cw_activity_sch.map { |flow| flow / cw_peak_flow }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     shower_activity_sch = shower_activity_sch.rotate(random_offset)
     shower_activity_sch = apply_monthly_offsets(array: shower_activity_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
     shower_activity_sch = aggregate_array(shower_activity_sch, @minutes_per_step)
-    @schedules['showers'] = shower_activity_sch.map { |flow| flow / Constants.PeakFlowRate }
+    shower_peak_flow = shower_activity_sch.max
+    @schedules['showers'] = shower_activity_sch.map { |flow| flow / shower_peak_flow }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     bath_activity_sch = bath_activity_sch.rotate(random_offset)
     bath_activity_sch = apply_monthly_offsets(array: bath_activity_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
     bath_activity_sch = aggregate_array(bath_activity_sch, @minutes_per_step)
-    @schedules['baths'] = bath_activity_sch.map { |flow| flow / Constants.PeakFlowRate }
+    bath_peak_flow = bath_activity_sch.max
+    @schedules['baths'] = bath_activity_sch.map { |flow| flow / bath_peak_flow }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     cooking_power_sch = cooking_power_sch.rotate(random_offset)
     cooking_power_sch = apply_monthly_offsets(array: cooking_power_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
     cooking_power_sch = aggregate_array(cooking_power_sch, @minutes_per_step)
-    @schedules['cooking_range'] = cooking_power_sch.map { |power| power / Constants.PeakPower }
+    cooking_peak_power = cooking_power_sch.max
+    @schedules['cooking_range'] = cooking_power_sch.map { |power| power / cooking_peak_power }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     cw_power_sch = cw_power_sch.rotate(random_offset)
     cw_power_sch = apply_monthly_offsets(array: cw_power_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
     cw_power_sch = aggregate_array(cw_power_sch, @minutes_per_step)
-    @schedules['clothes_washer_power'] = cw_power_sch.map { |power| power / Constants.PeakPower }
+    cw_peak_power = cw_power_sch.max
+    @schedules['clothes_washer_power'] = cw_power_sch.map { |power| power / cw_peak_power }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     cd_power_sch = cd_power_sch.rotate(random_offset)
     cd_power_sch = apply_monthly_offsets(array: cd_power_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
     cd_power_sch = aggregate_array(cd_power_sch, @minutes_per_step)
-    @schedules['clothes_dryer'] = cd_power_sch.map { |power| power / Constants.PeakPower }
+    cd_peak_power = cd_power_sch.max
+    @schedules['clothes_dryer'] = cd_power_sch.map { |power| power / cd_peak_power }
     @schedules['clothes_dryer_exhaust'] = @schedules['clothes_dryer']
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     dw_power_sch = dw_power_sch.rotate(random_offset)
     dw_power_sch = apply_monthly_offsets(array: dw_power_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
     dw_power_sch = aggregate_array(dw_power_sch, @minutes_per_step)
-    @schedules['dishwasher_power'] = dw_power_sch.map { |power| power / Constants.PeakPower }
+    dw_peak_power = dw_power_sch.max
+    @schedules['dishwasher_power'] = dw_power_sch.map { |power| power / dw_peak_power }
 
     @schedules['occupants'] = away_schedule.map { |i| 1.0 - i }
 
     @schedules['fixtures'] = [@schedules['showers'], @schedules['sinks'], @schedules['baths']].transpose.map { |flow| flow.reduce(:+) }
+    fixtures_peak_flow = @schedules['fixtures'].max
+    @schedules['fixtures'] = @schedules['fixtures'].map { |flow| flow / fixtures_peak_flow }
 
     return true
   end
 
   def set_vacancy(args:)
-    if args[:schedules_vacancy_begin_month].is_initialized && args[:schedules_vacancy_begin_day_of_month].is_initialized && args[:schedules_vacancy_end_month].is_initialized && args[:schedules_vacancy_end_day_of_month].is_initialized
-      start_day_num = Schedule.get_day_num_from_month_day(@model, args[:schedules_vacancy_begin_month].get, args[:schedules_vacancy_begin_day_of_month].get)
-      end_day_num = Schedule.get_day_num_from_month_day(@model, args[:schedules_vacancy_end_month].get, args[:schedules_vacancy_end_day_of_month].get)
+    if (not args[:schedules_vacancy_begin_month].nil?) && (not args[:schedules_vacancy_begin_day].nil?) && (not args[:schedules_vacancy_end_month].nil?) && (not args[:schedules_vacancy_end_day].nil?)
+      start_day_num = Schedule.get_day_num_from_month_day(@model, args[:schedules_vacancy_begin_month], args[:schedules_vacancy_begin_day])
+      end_day_num = Schedule.get_day_num_from_month_day(@model, args[:schedules_vacancy_end_month], args[:schedules_vacancy_end_day])
       num_steps_per_day = @model.getSimulationControl.timestep.get.numberOfTimestepsPerHour * 24
 
       vacancy = Array.new(@schedules['vacancy'].length, 0)

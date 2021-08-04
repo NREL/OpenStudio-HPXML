@@ -1,13 +1,8 @@
 # frozen_string_literal: true
 
 class Geometry
-  def self.get_abs_azimuth(azimuth_type, relative_azimuth, building_orientation, offset = 180.0)
-    azimuth = nil
-    if azimuth_type == Constants.CoordRelative
-      azimuth = relative_azimuth + building_orientation + offset
-    elsif azimuth_type == Constants.CoordAbsolute
-      azimuth = relative_azimuth + offset
-    end
+  def self.get_abs_azimuth(relative_azimuth, building_orientation)
+    azimuth = relative_azimuth + building_orientation
 
     # Ensure azimuth is >=0 and <=360
     while azimuth < 0.0
@@ -712,9 +707,10 @@ class Geometry
   end
 
   def self.has_same_vertices(surface1, surface2)
-    if getSurfaceXValues([surface1]) == getSurfaceXValues([surface2]) &&
-       getSurfaceYValues([surface1]) == getSurfaceYValues([surface2]) &&
-       getSurfaceZValues([surface1]) == getSurfaceZValues([surface2])
+    if getSurfaceXValues([surface1]).sort == getSurfaceXValues([surface2]).sort &&
+       getSurfaceYValues([surface1]).sort == getSurfaceYValues([surface2]).sort &&
+       getSurfaceZValues([surface1]).sort == getSurfaceZValues([surface2]).sort &&
+       surface1.space.get.zOrigin.round(5) == surface2.space.get.zOrigin.round(5)
       return true
     end
 
