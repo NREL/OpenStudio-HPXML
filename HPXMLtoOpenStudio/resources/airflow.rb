@@ -3,7 +3,7 @@
 class Airflow
   def self.apply(model, runner, weather, spaces, hpxml, cfa, nbeds,
                  ncfl_ag, duct_systems, clg_ssn_sensor, hvac_map, eri_version,
-                 frac_windows_operable, apply_ashrae140_assumptions)
+                 frac_windows_operable, apply_ashrae140_assumptions, schedules_file)
 
     # Global variables
 
@@ -109,7 +109,7 @@ class Airflow
     apply_natural_ventilation_and_whole_house_fan(model, weather, hpxml.site, vent_fans_whf, open_window_area, clg_ssn_sensor)
     apply_infiltration_and_ventilation_fans(model, weather, hpxml.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                             hpxml.building_construction.has_flue_or_chimney, hpxml.air_infiltration_measurements,
-                                            vented_attic, vented_crawl, hvac_map, clg_ssn_sensor)
+                                            vented_attic, vented_crawl, hvac_map, clg_ssn_sensor, schedules_file)
   end
 
   def self.get_default_fraction_of_windows_operable()
@@ -1211,17 +1211,28 @@ class Airflow
     return obj_sch_sensors
   end
 
-  def self.apply_dryer_exhaust(model, vented_dryers)
+  def self.apply_dryer_exhaust(model, vented_dryers, schedules_file)
     obj_sch_sensors = {}
     obj_type_name = Constants.ObjectNameClothesDryerExhaust
     vented_dryers.each_with_index do |vented_dryer, index|
       obj_name = "#{obj_type_name} #{index}"
-      days_shift = -1.0 / 24.0 # Shift by 1 hour relative to clothes washer
-      obj_sch = HotWaterSchedule.new(model, obj_type_name, @nbeds, days_shift, 24)
-      Schedule.set_schedule_type_limits(model, obj_sch.schedule, Constants.ScheduleTypeLimitsFraction)
+
+      if not schedules_file.nil?
+        obj_sch = schedules_file.create_schedule_file(col_name: 'clothes_dryer')
+        obj_sch_name = 'clothes_dryer'
+      else
+        # Assume 11am-12pm every day per BA HSP
+        day_sch = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        month_sch = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        obj_sch = MonthWeekdayWeekendSchedule.new(model, "#{obj_name} schedule", day_sch, day_sch, month_sch, Constants.ScheduleTypeLimitsFraction)
+        obj_sch = obj_sch.schedule
+        obj_sch_name = obj_sch.name.to_s
+      end
+
+      Schedule.set_schedule_type_limits(model, obj_sch, Constants.ScheduleTypeLimitsFraction)
       obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       obj_sch_sensor.setName("#{obj_name} sch s")
-      obj_sch_sensor.setKeyName(obj_sch.schedule.name.to_s)
+      obj_sch_sensor.setKeyName(obj_sch_name)
       obj_sch_sensors[vented_dryer.id] = obj_sch_sensor
     end
 
@@ -1660,7 +1671,7 @@ class Airflow
   end
 
   def self.apply_infiltration_and_ventilation_fans(model, weather, site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
-                                                   has_flue_chimney, air_infils, vented_attic, vented_crawl, hvac_map, clg_ssn_sensor)
+                                                   has_flue_chimney, air_infils, vented_attic, vented_crawl, hvac_map, clg_ssn_sensor, schedules_file)
     # Get living space infiltration
     living_ach50 = nil
     living_const_ach = nil
@@ -1694,7 +1705,7 @@ class Airflow
     bath_sch_sensors_map = apply_local_ventilation(model, vent_fans_bath, Constants.ObjectNameMechanicalVentilationBathFan)
 
     # Clothes dryer exhaust
-    dryer_exhaust_sch_sensors_map = apply_dryer_exhaust(model, vented_dryers)
+    dryer_exhaust_sch_sensors_map = apply_dryer_exhaust(model, vented_dryers, schedules_file)
 
     # Get mechanical ventilation
     apply_infiltration_and_mechanical_ventilation(model, site, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, vented_dryers,
