@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>build_residential_schedule_file</name>
+  <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
+  <version_id>2b5a7920-6000-4530-b00b-9a265186173e</version_id>
+  <version_modified>20210804T233423Z</version_modified>
+  <xml_checksum>03F02484</xml_checksum>
+  <class_name>BuildResidentialScheduleFile</class_name>
+  <display_name>Schedule File Builder</display_name>
+  <description>Builds a residential schedule file.</description>
+  <modeler_description></modeler_description>
+  <arguments />
+  <outputs />
+  <provenances />
+  <tags>
+    <tag>Whole Building.Whole Building Schedules</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.2.0</identifier>
+        <min_compatible>3.2.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>D92C2931</checksum>
+    </file>
+    <file>
+      <filename>build_residential_schedule_file_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D588590C</checksum>
+    </file>
+  </files>
+</measure>
