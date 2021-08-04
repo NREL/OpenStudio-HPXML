@@ -3398,7 +3398,6 @@ class HPXMLFile
                         'None' => 'stand-alone'}
 
     if args[:geometry_unit_type] == HPXML::ResidentialTypeSFA
-      hpxml.site.surroundings = 'attached on one side'
       hpxml.site.surroundings = surroundings_hash[args[:geometry_horizontal_location].get]
     end
 
