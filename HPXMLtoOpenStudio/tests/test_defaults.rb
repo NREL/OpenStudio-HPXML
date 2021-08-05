@@ -174,12 +174,26 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_building_construction_values(hpxml_default, 27000, 10, false, 2)
 
-    # Test defaults w/ average ceiling height
+    # Test defaults w/ conditioned building volume
     hpxml.building_construction.conditioned_building_volume = 20000
     hpxml.building_construction.average_ceiling_height = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_building_construction_values(hpxml_default, 20000, 7.4, false, 2)
+
+    # Test defaults w/ infiltration volume
+    hpxml.building_construction.conditioned_building_volume = nil
+    hpxml.air_infiltration_measurements[0].infiltration_volume = 25650
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_building_construction_values(hpxml_default, 21600, 8, false, 2)
+
+    # Test defaults w/ infiltration volume
+    hpxml.building_construction.conditioned_building_volume = nil
+    hpxml.air_infiltration_measurements[0].infiltration_volume = 18000
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_building_construction_values(hpxml_default, 18000, 6.67, false, 2)
   end
 
   def test_infiltration

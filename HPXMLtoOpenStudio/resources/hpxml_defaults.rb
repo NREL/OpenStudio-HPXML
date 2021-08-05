@@ -13,12 +13,26 @@ class HPXMLDefaults
     ncfl_ag = hpxml.building_construction.number_of_conditioned_floors_above_grade
     has_uncond_bsmnt = hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
 
+    infil_volume = nil
+    infil_measurements = []
+    hpxml.air_infiltration_measurements.each do |measurement|
+      is_ach = ((measurement.unit_of_measure == HPXML::UnitsACH) && !measurement.house_pressure.nil?)
+      is_cfm = ((measurement.unit_of_measure == HPXML::UnitsCFM) && !measurement.house_pressure.nil?)
+      is_nach = (measurement.unit_of_measure == HPXML::UnitsACHNatural)
+      next unless (is_ach || is_cfm || is_nach)
+
+      infil_measurements << measurement
+      next if measurement.infiltration_volume.nil?
+
+      infil_volume = measurement.infiltration_volume
+    end
+
     apply_header(hpxml, epw_file)
     apply_site(hpxml)
     apply_neighbor_buildings(hpxml)
     apply_building_occupancy(hpxml, nbeds)
-    apply_building_construction(hpxml, cfa, nbeds)
-    apply_infiltration(hpxml)
+    apply_building_construction(hpxml, cfa, nbeds, infil_volume)
+    apply_infiltration(hpxml, infil_volume, infil_measurements)
     apply_attics(hpxml)
     apply_foundations(hpxml)
     apply_roofs(hpxml)
@@ -213,9 +227,13 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_building_construction(hpxml, cfa, nbeds)
+  def self.apply_building_construction(hpxml, cfa, nbeds, infil_volume)
     if hpxml.building_construction.conditioned_building_volume.nil? && hpxml.building_construction.average_ceiling_height.nil?
-      hpxml.building_construction.average_ceiling_height = 8.0
+      if not infil_volume.nil?
+        hpxml.building_construction.average_ceiling_height = [infil_volume / cfa, 8.0].min
+      else
+        hpxml.building_construction.average_ceiling_height = 8.0
+      end
       hpxml.building_construction.average_ceiling_height_isdefaulted = true
       hpxml.building_construction.conditioned_building_volume = cfa * hpxml.building_construction.average_ceiling_height
       hpxml.building_construction.conditioned_building_volume_isdefaulted = true
@@ -262,29 +280,14 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_infiltration(hpxml)
-    measurements = []
-    infil_volume = nil
-    hpxml.air_infiltration_measurements.each do |measurement|
-      is_ach = ((measurement.unit_of_measure == HPXML::UnitsACH) && !measurement.house_pressure.nil?)
-      is_cfm = ((measurement.unit_of_measure == HPXML::UnitsCFM) && !measurement.house_pressure.nil?)
-      is_nach = (measurement.unit_of_measure == HPXML::UnitsACHNatural)
-      next unless (is_ach || is_cfm || is_nach)
-
-      measurements << measurement
-      next if measurement.infiltration_volume.nil?
-
-      infil_volume = measurement.infiltration_volume
-    end
+  def self.apply_infiltration(hpxml, infil_volume, infil_measurements)
     if infil_volume.nil?
       infil_volume = hpxml.building_construction.conditioned_building_volume
-      measurements.each do |measurement|
+      infil_measurements.each do |measurement|
         measurement.infiltration_volume = infil_volume
         measurement.infiltration_volume_isdefaulted = true
       end
     end
-
-    return infil_volume
   end
 
   def self.apply_attics(hpxml)
