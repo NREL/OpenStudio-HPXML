@@ -459,3 +459,47 @@ class String
     return true
   end
 end
+
+def get_argument_values(runner, arguments, user_arguments)
+  args = {}
+  arguments.each do |argument|
+    if argument.required
+      case argument.type
+      when 'Choice'.to_OSArgumentType
+        args[argument.name] = runner.getStringArgumentValue(argument.name, user_arguments)
+      when 'Boolean'.to_OSArgumentType
+        args[argument.name] = runner.getBoolArgumentValue(argument.name, user_arguments)
+      when 'Double'.to_OSArgumentType
+        args[argument.name] = runner.getDoubleArgumentValue(argument.name, user_arguments)
+      when 'Integer'.to_OSArgumentType
+        args[argument.name] = runner.getIntegerArgumentValue(argument.name, user_arguments)
+      when 'String'.to_OSArgumentType
+        args[argument.name] = runner.getStringArgumentValue(argument.name, user_arguments)
+      end
+    else
+      case argument.type
+      when 'Choice'.to_OSArgumentType
+        args[argument.name] = runner.getOptionalStringArgumentValue(argument.name, user_arguments)
+      when 'Boolean'.to_OSArgumentType
+        # TODO: Update this if https://github.com/NREL/OpenStudio/issues/4390 is addressed
+        args[argument.name] = runner.getOptionalStringArgumentValue(argument.name, user_arguments)
+        if args[argument.name].is_initialized
+          if args[argument.name].get.downcase == 'true'
+            args[argument.name] = OpenStudio::OptionalBool.new(true)
+          elsif args[argument.name].get.downcase == 'false'
+            args[argument.name] = OpenStudio::OptionalBool.new(false)
+          else
+            fail 'Unexpected value'
+          end
+        end
+      when 'Double'.to_OSArgumentType
+        args[argument.name] = runner.getOptionalDoubleArgumentValue(argument.name, user_arguments)
+      when 'Integer'.to_OSArgumentType
+        args[argument.name] = runner.getOptionalIntegerArgumentValue(argument.name, user_arguments)
+      when 'String'.to_OSArgumentType
+        args[argument.name] = runner.getOptionalStringArgumentValue(argument.name, user_arguments)
+      end
+    end
+  end
+  return args
+end
