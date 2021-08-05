@@ -104,7 +104,7 @@ class ScheduleGenerator
     get_simulation_parameters
     initialize_schedules
 
-    success = create_average_schedules(args: args)
+    success = create_average_schedules
     return false if not success
 
     success = create_stochastic_schedules(args: args)
@@ -116,7 +116,7 @@ class ScheduleGenerator
     return true
   end
 
-  def create_average_schedules(args:)
+  def create_average_schedules
     create_average_occupants
     create_average_cooking_range
     create_average_plug_loads_other
@@ -127,10 +127,10 @@ class ScheduleGenerator
     create_average_lighting_exterior
     create_average_lighting_garage
     create_average_lighting_exterior_holiday
-    create_average_clothes_washer(args: args)
-    create_average_clothes_dryer(args: args)
-    create_average_dishwasher(args: args)
-    create_average_fixtures(args: args)
+    create_average_clothes_washer
+    create_average_clothes_dryer
+    create_average_dishwasher
+    create_average_fixtures
     create_average_ceiling_fan
     create_average_refrigerator
     create_average_extra_refrigerator
@@ -181,22 +181,22 @@ class ScheduleGenerator
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'freezer', weekday_sch: Schedule.FreezerWeekdayFractions, weekend_sch: Schedule.FreezerWeekendFractions, monthly_sch: Schedule.FreezerMonthlyMultipliers)
   end
 
-  def create_average_dishwasher(args:)
+  def create_average_dishwasher
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'dishwasher', weekday_sch: Schedule.DishwasherWeekdayFractions, weekend_sch: Schedule.DishwasherWeekendFractions, monthly_sch: Schedule.DishwasherMonthlyMultipliers)
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'dishwasher_power', weekday_sch: Schedule.DishwasherWeekdayFractions, weekend_sch: Schedule.DishwasherWeekendFractions, monthly_sch: Schedule.DishwasherMonthlyMultipliers)
   end
 
-  def create_average_clothes_washer(args:)
+  def create_average_clothes_washer
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_washer', weekday_sch: Schedule.ClothesWasherWeekdayFractions, weekend_sch: Schedule.ClothesWasherWeekendFractions, monthly_sch: Schedule.ClothesWasherMonthlyMultipliers)
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_washer_power', weekday_sch: Schedule.ClothesWasherWeekdayFractions, weekend_sch: Schedule.ClothesWasherWeekendFractions, monthly_sch: Schedule.ClothesWasherMonthlyMultipliers)
   end
 
-  def create_average_clothes_dryer(args:)
+  def create_average_clothes_dryer
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_dryer', weekday_sch: Schedule.ClothesDryerWeekdayFractions, weekend_sch: Schedule.ClothesDryerWeekendFractions, monthly_sch: Schedule.ClothesDryerMonthlyMultipliers)
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_dryer_exhaust', weekday_sch: Schedule.ClothesDryerWeekdayFractions, weekend_sch: Schedule.ClothesDryerWeekendFractions, monthly_sch: Schedule.ClothesDryerMonthlyMultipliers)
   end
 
-  def create_average_fixtures(args:)
+  def create_average_fixtures
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'fixtures', weekday_sch: Schedule.FixturesWeekdayFractions, weekend_sch: Schedule.FixturesWeekendFractions, monthly_sch: Schedule.FixturesMonthlyMultipliers)
   end
 
