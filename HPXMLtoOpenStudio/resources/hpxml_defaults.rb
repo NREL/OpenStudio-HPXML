@@ -47,7 +47,7 @@ class HPXMLDefaults
     apply_hvac(hpxml, weather, convert_shared_systems)
     apply_hvac_control(hpxml)
     apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
-    apply_ventilation_fans(hpxml)
+    apply_ventilation_fans(hpxml, infil_volume, infil_measurements, weather, cfa, nbeds)
     apply_water_heaters(hpxml, nbeds, eri_version)
     apply_hot_water_distribution(hpxml, cfa, ncfl, has_uncond_bsmnt)
     apply_water_fixtures(hpxml)
@@ -1165,7 +1165,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_ventilation_fans(hpxml)
+  def self.apply_ventilation_fans(hpxml, infil_volume, infil_measurements, weather, cfa, nbeds)
     # Default mech vent systems
     hpxml.ventilation_fans.each do |vent_fan|
       next unless vent_fan.used_for_whole_building_ventilation
@@ -1178,9 +1178,17 @@ class HPXMLDefaults
         vent_fan.hours_in_operation = (vent_fan.fan_type == HPXML::MechVentTypeCFIS) ? 8.0 : 24.0
         vent_fan.hours_in_operation_isdefaulted = true
       end
+      if vent_fan.rated_flow_rate.nil? && vent_fan.tested_flow_rate.nil? && vent_fan.calculated_flow_rate.nil? && vent_fan.delivered_ventilation.nil?
+        if hpxml.ventilation_fans.select { |vf| vf.used_for_whole_building_ventilation }.size > 1
+          fail 'Defaulting flow rates for multiple mechanical ventilation systems is currently not supported.'
+        end
+
+        vent_fan.rated_flow_rate = Airflow.get_default_mech_vent_flow_rate(hpxml, vent_fan, infil_measurements, weather, infil_volume, 1.0, cfa, nbeds).round(1)
+        vent_fan.rated_flow_rate_isdefaulted = true
+      end
       if vent_fan.fan_power.nil?
-        flow_rate = [vent_fan.rated_flow_rate.to_f, vent_fan.tested_flow_rate.to_f].max
-        vent_fan.fan_power = flow_rate * Airflow.get_default_mech_vent_fan_power(vent_fan)
+        vent_fan.fan_power = (vent_fan.flow_rate * Airflow.get_default_mech_vent_fan_power(vent_fan)).round(1)
+        vent_fan.fan_power_isdefaulted = true
       end
     end
 
@@ -1192,7 +1200,7 @@ class HPXMLDefaults
         vent_fan.quantity = 1
         vent_fan.quantity_isdefaulted = true
       end
-      if vent_fan.rated_flow_rate.nil?
+      if vent_fan.rated_flow_rate.nil? && vent_fan.tested_flow_rate.nil? && vent_fan.calculated_flow_rate.nil? && vent_fan.delivered_ventilation.nil?
         vent_fan.rated_flow_rate = 100.0 # cfm, per BA HSP
         vent_fan.rated_flow_rate_isdefaulted = true
       end
@@ -1201,7 +1209,7 @@ class HPXMLDefaults
         vent_fan.hours_in_operation_isdefaulted = true
       end
       if vent_fan.fan_power.nil?
-        vent_fan.fan_power = 0.3 * vent_fan.rated_flow_rate # W, per BA HSP
+        vent_fan.fan_power = 0.3 * vent_fan.flow_rate # W, per BA HSP
         vent_fan.fan_power_isdefaulted = true
       end
       if vent_fan.start_hour.nil?
@@ -1218,7 +1226,7 @@ class HPXMLDefaults
         vent_fan.quantity = hpxml.building_construction.number_of_bathrooms
         vent_fan.quantity_isdefaulted = true
       end
-      if vent_fan.rated_flow_rate.nil?
+      if vent_fan.rated_flow_rate.nil? && vent_fan.tested_flow_rate.nil? && vent_fan.calculated_flow_rate.nil? && vent_fan.delivered_ventilation.nil?
         vent_fan.rated_flow_rate = 50.0 # cfm, per BA HSP
         vent_fan.rated_flow_rate_isdefaulted = true
       end
@@ -1227,12 +1235,26 @@ class HPXMLDefaults
         vent_fan.hours_in_operation_isdefaulted = true
       end
       if vent_fan.fan_power.nil?
-        vent_fan.fan_power = 0.3 * vent_fan.rated_flow_rate # W, per BA HSP
+        vent_fan.fan_power = 0.3 * vent_fan.flow_rate # W, per BA HSP
         vent_fan.fan_power_isdefaulted = true
       end
       if vent_fan.start_hour.nil?
         vent_fan.start_hour = 7 # 7 am, per BA HSP
         vent_fan.start_hour_isdefaulted = true
+      end
+    end
+
+    # Default whole house fan
+    hpxml.ventilation_fans.each do |vent_fan|
+      next unless vent_fan.used_for_seasonal_cooling_load_reduction
+
+      if vent_fan.rated_flow_rate.nil? && vent_fan.tested_flow_rate.nil? && vent_fan.calculated_flow_rate.nil? && vent_fan.delivered_ventilation.nil?
+        vent_fan.rated_flow_rate = cfa * 2.0
+        vent_fan.rated_flow_rate_isdefaulted = true
+      end
+      if vent_fan.fan_power.nil?
+        vent_fan.fan_power = 0.1 * vent_fan.flow_rate # W
+        vent_fan.fan_power_isdefaulted = true
       end
     end
   end

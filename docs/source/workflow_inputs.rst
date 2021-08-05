@@ -1420,20 +1420,21 @@ HPXML Whole Ventilation Fan
 Each mechanical ventilation system that provides ventilation to the whole dwelling unit is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 If not entered, the simulation will not include mechanical ventilation.
 
-  =======================================  ========  =======  ===========  ========  =========  =========================================
-  Element                                  Type      Units    Constraints  Required  Default    Notes
-  =======================================  ========  =======  ===========  ========  =========  =========================================
-  ``SystemIdentifier``                     id                              Yes                  Unique identifier
-  ``UsedForWholeBuildingVentilation``      boolean            true         Yes                  Must be set to true
-  ``IsSharedSystem``                       boolean            See [#]_     No        false      Whether it serves multiple dwelling units
-  ``FanType``                              string             See [#]_     Yes                  Type of ventilation system
-  ``TestedFlowRate`` or ``RatedFlowRate``  double    cfm      >= 0         Yes                  Flow rate [#]_
-  ``HoursInOperation``                     double    hrs/day  0 - 24       No        See [#]_   Hours per day of operation
-  ``FanPower``                             double    W        >= 0         No        See [#]_   Fan power
-  =======================================  ========  =======  ===========  ========  =========  =========================================
+  =============================================================================================  ========  =======  ===========  ========  =========  =========================================
+  Element                                                                                        Type      Units    Constraints  Required  Default    Notes
+  =============================================================================================  ========  =======  ===========  ========  =========  =========================================
+  ``SystemIdentifier``                                                                           id                              Yes                  Unique identifier
+  ``UsedForWholeBuildingVentilation``                                                            boolean            true         Yes                  Must be set to true
+  ``IsSharedSystem``                                                                             boolean            See [#]_     No        false      Whether it serves multiple dwelling units
+  ``FanType``                                                                                    string             See [#]_     Yes                  Type of ventilation system
+  ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double    cfm      >= 0         No        See [#]_   Flow rate [#]_
+  ``HoursInOperation``                                                                           double    hrs/day  0 - 24       No        See [#]_   Hours per day of operation
+  ``FanPower``                                                                                   double    W        >= 0         No        See [#]_   Fan power
+  =============================================================================================  ========  =======  ===========  ========  =========  =========================================
 
   .. [#] For central fan integrated supply systems, IsSharedSystem must be false.
   .. [#] FanType choices are "energy recovery ventilator", "heat recovery ventilator", "exhaust only", "supply only", "balanced", or "central fan integrated supply".
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_, including adjustments for A) infiltration credit, B) balanced vs imbalanced systems, and C) adiabatic surfaces for SFA/MF buildings.
   .. [#] For a central fan integrated supply system, the flow rate should equal the amount of outdoor air provided to the distribution system.
   .. [#] If HoursInOperation not provided, defaults to 24 (i.e., running continuously) for all system types other than central fan integrated supply (CFIS), and 8.0 (i.e., running intermittently) for CFIS systems.
   .. [#] If FanPower not provided, defaults based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
@@ -1505,7 +1506,7 @@ If the specified system is a shared system (i.e., serving multiple dwelling unit
 
   .. [#] 1-FractionRecirculation is assumed to be the fraction of supply air that is provided from outside.
          The value must be 0 for exhaust only systems.
-  .. [#] InUnitFlowRate must also be < TestedFlowRate (or RatedFlowRate).
+  .. [#] InUnitFlowRate must also be < (RatedFlowRate or TestedFlowRate or CalculatedFlowRate or DeliveredVentilation).
   .. [#] PreHeating not allowed for exhaust only systems.
   .. [#] PreCooling not allowed for exhaust only systems.
 
@@ -1539,24 +1540,24 @@ HPXML Local Ventilation Fan
 Each kitchen range fan or bathroom fan that provides local ventilation is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 If not entered, the simulation will not include kitchen/bathroom fans.
 
-  ===========================  =======  =======  ===========  ========  ========  =============================
-  Element                      Type     Units    Constraints  Required  Default   Notes
-  ===========================  =======  =======  ===========  ========  ========  =============================
-  ``SystemIdentifier``         id                             Yes                 Unique identifier
-  ``UsedForLocalVentilation``  boolean           true         Yes                 Must be set to true
-  ``Quantity``                 integer           >= 0         No        See [#]_  Number of identical fans
-  ``RatedFlowRate``            double   cfm      >= 0         No        See [#]_  Flow rate
-  ``HoursInOperation``         double   hrs/day  0 - 24       No        See [#]_  Hours per day of operation
-  ``FanLocation``              string            See [#]_     Yes                 Location of the fan
-  ``FanPower``                 double   W        >= 0         No        See [#]_  Fan power
-  ``extension/StartHour``      integer           0 - 23       No        See [#]_  Daily start hour of operation
-  ===========================  =======  =======  ===========  ========  ========  =============================
+  =============================================================================================  =======  =======  ===========  ========  ========  =============================
+  Element                                                                                        Type     Units    Constraints  Required  Default   Notes
+  =============================================================================================  =======  =======  ===========  ========  ========  =============================
+  ``SystemIdentifier``                                                                           id                             Yes                 Unique identifier
+  ``UsedForLocalVentilation``                                                                    boolean           true         Yes                 Must be set to true
+  ``Quantity``                                                                                   integer           >= 0         No        See [#]_  Number of identical fans
+  ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double   cfm      >= 0         No        See [#]_  Flow rate [#]_
+  ``HoursInOperation``                                                                           double   hrs/day  0 - 24       No        See [#]_  Hours per day of operation
+  ``FanLocation``                                                                                string            See [#]_     Yes                 Location of the fan
+  ``FanPower``                                                                                   double   W        >= 0         No        See [#]_  Fan power
+  ``extension/StartHour``                                                                        integer           0 - 23       No        See [#]_  Daily start hour of operation
+  =============================================================================================  =======  =======  ===========  ========  ========  =============================
 
   .. [#] If Quantity not provided, defaults to 1 for kitchen fans and NumberofBathrooms for bath fans based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
-  .. [#] If RatedFlowRate not provided, defaults to 100 cfm for kitchen fans and 50 cfm for bath fans based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+  .. [#] If flow rate not provided, defaults to 100 cfm for kitchen fans and 50 cfm for bath fans based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If HoursInOperation not provided, defaults to 1 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] FanLocation choices are "kitchen" or "bath".
-  .. [#] If FanPower not provided, defaults to 0.3 W/cfm * RatedFlowRate based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+  .. [#] If FanPower not provided, defaults to 0.3 W/cfm based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If StartHour not provided, defaults to 18 for kitchen fans and 7 for bath fans  based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
 HPXML Whole House Fan
@@ -1565,14 +1566,16 @@ HPXML Whole House Fan
 Each whole house fan that provides cooling load reduction is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 If not entered, the simulation will not include whole house fans.
 
-  =======================================  =======  =======  ===========  ========  ========  ==========================
-  Element                                  Type     Units    Constraints  Required  Default   Notes
-  =======================================  =======  =======  ===========  ========  ========  ==========================
-  ``SystemIdentifier``                     id                             Yes                 Unique identifier
-  ``UsedForSeasonalCoolingLoadReduction``  boolean           true         Yes                 Must be set to true
-  ``RatedFlowRate``                        double   cfm      >= 0         Yes                 Flow rate
-  ``FanPower``                             double   W        >= 0         Yes                 Fan power
-  =======================================  =======  =======  ===========  ========  ========  ==========================
+  =============================================================================================  =======  =======  ===========  ========  ======================  ==========================
+  Element                                                                                        Type     Units    Constraints  Required  Default                 Notes
+  =============================================================================================  =======  =======  ===========  ========  ======================  ==========================
+  ``SystemIdentifier``                                                                           id                             Yes                               Unique identifier
+  ``UsedForSeasonalCoolingLoadReduction``                                                        boolean           true         Yes                               Must be set to true
+  ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double   cfm      >= 0         No        ConditionedFloorArea*2  Flow rate [#]_
+  ``FanPower``                                                                                   double   W        >= 0         No        See [#]_                Fan power
+  =============================================================================================  =======  =======  ===========  ========  ======================  ==========================
+
+  .. [#] If FanPower not provided, defaults to 0.1 W/cfm.
 
 .. note::
 
