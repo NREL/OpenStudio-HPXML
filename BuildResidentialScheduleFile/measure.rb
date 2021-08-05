@@ -5,6 +5,8 @@
 
 require 'openstudio'
 
+require_relative 'resources/schedules'
+
 # start the measure
 class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   # human readable name
@@ -32,13 +34,13 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args << arg
 
     schedules_type_choices = OpenStudio::StringVector.new
-    schedules_type_choices << 'default'
+    schedules_type_choices << 'smooth'
     schedules_type_choices << 'stochastic'
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('schedules_type', schedules_type_choices, true)
     arg.setDisplayName('Schedules: Type')
-    arg.setDescription("The type of occupant-related schedules to use. Schedules corresponding to 'default' are average (e.g., Building America). Schedules corresponding to 'stochastic' are generated using time-inhomogeneous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data.")
-    arg.setDefaultValue('default')
+    arg.setDescription("The type of occupant-related schedules to use. Schedules corresponding to 'smooth' are average (e.g., Building America). Schedules corresponding to 'stochastic' are generated using time-inhomogeneous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data.")
+    arg.setDefaultValue('smooth')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_vacancy_period', false)
@@ -83,13 +85,13 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     end
     epw_file = OpenStudio::EpwFile.new(epw_path)
 
-    success = create_schedules(runner, model, epw_file, args)
+    success = create_schedules(runner, hpxml, model, epw_file, args)
     return false if not success
 
     return true
   end
 
-  def create_schedules(runner, model, epw_file, args)
+  def create_schedules(runner, hpxml, model, epw_file, args)
     info_msgs = []
 
     # set the calendar year
@@ -111,13 +113,17 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     end
     info_msgs << "NumberOfTimestepsPerHour=#{timestep.numberOfTimestepsPerHour}"
 
+    # get the state
+    state = 'CO' # FIXME: get from hpxml?
+
     # get the seed
     random_seed = args[:schedules_random_seed].get if args[:schedules_random_seed].is_initialized
 
     # instantiate the generator
-    schedule_generator = ScheduleGenerator.new(runner: runner, model: model, epw_file: epw_file, random_seed: random_seed)
+    schedule_generator = ScheduleGenerator.new(runner: runner, model: model, epw_file: epw_file, state: state, random_seed: random_seed)
 
     # create the schedule
+    args[:geometry_num_occupants] = Constants.Auto # FIXME: get from hpxml?
     if args[:geometry_num_occupants] == Constants.Auto
       args[:geometry_num_occupants] = Geometry.get_occupancy_default_num(args[:geometry_num_bedrooms])
     else
