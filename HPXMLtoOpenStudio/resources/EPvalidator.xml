@@ -1042,10 +1042,10 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForWholeBuildingVentilation="true" and h:IsSharedSystem="true"]'>
       <sch:assert role='ERROR' test='count(h:FractionRecirculation) = 1'>Expected 1 element(s) for xpath: FractionRecirculation</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:InUnitFlowRate) = 1'>Expected 1 element(s) for xpath: extension/InUnitFlowRate</sch:assert>
-      <sch:assert role='ERROR' test='number(h:extension/h:InUnitFlowRate) &lt; number(h:RatedFlowRate) or not(h:extension/h:InUnitFlowRate) or not(h:RatedFlowRate)'>Expected extension/InUnitFlowRate to be less than RatedFlowRate</sch:assert>
-      <sch:assert role='ERROR' test='number(h:extension/h:InUnitFlowRate) &lt; number(h:CalculatedFlowRate) or not(h:extension/h:InUnitFlowRate) or not(h:CalculatedFlowRate)'>Expected extension/InUnitFlowRate to be less than CalculatedFlowRate</sch:assert>
-      <sch:assert role='ERROR' test='number(h:extension/h:InUnitFlowRate) &lt; number(h:TestedFlowRate) or not(h:extension/h:InUnitFlowRate) or not(h:TestedFlowRate)'>Expected extension/InUnitFlowRate to be less than TestedFlowRate</sch:assert>
-      <sch:assert role='ERROR' test='number(h:extension/h:InUnitFlowRate) &lt; number(h:DeliveredVentilation) or not(h:extension/h:InUnitFlowRate) or not(h:DeliveredVentilation)'>Expected extension/InUnitFlowRate to be less than DeliveredVentilation</sch:assert>
+      <sch:assert role='ERROR' test='number(h:RatedFlowRate) &gt; number(h:extension/h:InUnitFlowRate) or not(h:RatedFlowRate) or not(h:extension/h:InUnitFlowRate)'>Expected RatedFlowRate to be greater than extension/InUnitFlowRate</sch:assert>
+      <sch:assert role='ERROR' test='number(h:CalculatedFlowRate) &gt; number(h:extension/h:InUnitFlowRate) or not(h:CalculatedFlowRate) or not(h:extension/h:InUnitFlowRate)'>Expected CalculatedFlowRate to be greater than extension/InUnitFlowRate</sch:assert>
+      <sch:assert role='ERROR' test='number(h:TestedFlowRate) &gt; number(h:extension/h:InUnitFlowRate) or not(h:TestedFlowRate) or not(h:extension/h:InUnitFlowRate)'>Expected TestedFlowRate to be greater than extension/InUnitFlowRate</sch:assert>
+      <sch:assert role='ERROR' test='number(h:DeliveredVentilation) &gt; number(h:extension/h:InUnitFlowRate) or not(h:DeliveredVentilation) or not(h:extension/h:InUnitFlowRate)'>Expected DeliveredVentilation to be greater than extension/InUnitFlowRate</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:PreHeating) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/PreHeating</sch:assert> <!-- See [MechanicalVentilationType=SharedWithPreHeating] -->
       <sch:assert role='ERROR' test='count(h:extension/h:PreCooling) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/PreCooling</sch:assert> <!-- See [MechanicalVentilationType=SharedWithPreCooling] -->
     </sch:rule>
