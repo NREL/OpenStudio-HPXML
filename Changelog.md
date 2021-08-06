@@ -19,7 +19,7 @@ __New Features__
   - CEER (Combined Energy Efficiency Ratio) instead of EER for room ACs.
   - `UsageBin` instead of `FirstHourRating` (for water heaters w/ UEF metric).
 - Allows more defaulting (optional inputs):
-  - Mechanical ventilation fan airflow rate per ASHRAE 62.2-2019.
+  - Mechanical ventilation airflow rate per ASHRAE 62.2-2019.
   - HVAC/DHW system efficiency (by age).
   - Mechanical ventilation fan power (by type).
   - Color (solar absorptance) for walls, roofs, and rim joists.
