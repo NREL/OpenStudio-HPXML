@@ -1682,9 +1682,10 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_demand_flexibility_modulating', true)
     step.setArgument('grid_signal_schedule', '0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0')
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-var-speed-flex-dual-source.osw'].include? osw_file
+    step.removeArgument('heat_pump_backup_heating_switchover_temp')
     step.setArgument('heat_pump_demand_flexibility', true)
     step.setArgument('heat_pump_demand_flexibility_dual_source', true)
-    step.setArgument('grid_signal_schedule', '0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0')
+    step.setArgument('grid_signal_schedule', '0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0')
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-var-speed-flex-ihp-grid-ac.osw'].include? osw_file
     step.setArgument('heat_pump_demand_flexibility', true)
     step.setArgument('heat_pump_demand_flexibility_ihp_grid_ac', true)
@@ -6253,7 +6254,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-var-speed-flex-dual-source.xml'].include? hpxml_file
     hpxml.heat_pumps[0].flex = true
     hpxml.heat_pumps[0].dual_source = true
-    hpxml.heat_pumps[0].grid_signal_schedule = '0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0'
+    hpxml.heat_pumps[0].grid_signal_schedule = '0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0'
+    hpxml.heat_pumps[0].backup_heating_switchover_temp = nil
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-var-speed-flex-ihp-grid-ac.xml'].include? hpxml_file
     hpxml.heat_pumps[0].flex = true
     hpxml.heat_pumps[0].ihp_grid_ac = true

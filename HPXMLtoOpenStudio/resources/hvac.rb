@@ -3265,13 +3265,13 @@ class HVAC
             if not htg_ap.crankcase_temp.nil?
               htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(htg_ap.crankcase_temp, 'F', 'C'))
             end
-            if heating_system.dual_source
+            if heating_system.dual_source && heating_system.flex
               unless grid_signal_schedule.nil?
                 htg_coil.setGridSignalSchedule(grid_signal_schedule)
               end
-              htg_coil.setLowerBoundToApplyGridResponsiveControl(0.15)
-              htg_coil.setUpperBoundToApplyGridResponsiveControl(1000.0)
-              htg_coil.setMaxSpeedLevelDuringGridResponsiveControl(3)
+              htg_coil.setLowerBoundToApplyGridResponsiveControl(0.5)
+              htg_coil.setUpperBoundToApplyGridResponsiveControl(2)
+              htg_coil.setMaxSpeedLevelDuringGridResponsiveControl(0)
             end
           end
           speed = OpenStudio::Model::CoilHeatingDXVariableSpeedSpeedData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve)
