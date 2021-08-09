@@ -3698,7 +3698,8 @@ class HPXML < Object
              :fan_power, :fan_power_defaulted, :quantity, :fan_location, :distribution_system_idref, :start_hour,
              :is_shared_system, :in_unit_flow_rate, :fraction_recirculation,
              :preheating_fuel, :preheating_efficiency_cop, :preheating_fraction_load_served, :precooling_fuel,
-             :precooling_efficiency_cop, :precooling_fraction_load_served]
+             :precooling_efficiency_cop, :precooling_fraction_load_served, :calculated_flow_rate,
+             :delivered_ventilation]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -3717,13 +3718,16 @@ class HPXML < Object
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for ventilation fan '#{@id}'."
     end
 
+    def flow_rate
+      [@tested_flow_rate, @delivered_ventilation, @calculated_flow_rate, @rated_flow_rate].each do |fr|
+        return fr unless fr.nil?
+      end
+      return
+    end
+
     def total_unit_flow_rate
       if not @is_shared_system
-        if not @tested_flow_rate.nil?
-          return @tested_flow_rate
-        else
-          return @rated_flow_rate
-        end
+        return flow_rate
       else
         return @in_unit_flow_rate
       end
@@ -3762,13 +3766,9 @@ class HPXML < Object
       return 1.0 unless @is_shared_system
       return if @in_unit_flow_rate.nil?
 
-      if not @tested_flow_rate.nil?
-        ratio = @in_unit_flow_rate / @tested_flow_rate
-      elsif not @rated_flow_rate.nil?
-        ratio = @in_unit_flow_rate / @rated_flow_rate
+      if not flow_rate.nil?
+        ratio = @in_unit_flow_rate / flow_rate
       end
-      return if ratio.nil?
-
       return ratio
     end
 
@@ -3837,8 +3837,10 @@ class HPXML < Object
       XMLHelper.add_element(ventilation_fan, 'Quantity', @quantity, :integer, @quantity_isdefaulted) unless @quantity.nil?
       XMLHelper.add_element(ventilation_fan, 'FanType', @fan_type, :string) unless @fan_type.nil?
       XMLHelper.add_element(ventilation_fan, 'RatedFlowRate', @rated_flow_rate, :float, @rated_flow_rate_isdefaulted) unless @rated_flow_rate.nil?
-      XMLHelper.add_element(ventilation_fan, 'TestedFlowRate', @tested_flow_rate, :float) unless @tested_flow_rate.nil?
+      XMLHelper.add_element(ventilation_fan, 'CalculatedFlowRate', @calculated_flow_rate, :float, @calculated_flow_rate_isdefaulted) unless @calculated_flow_rate.nil?
+      XMLHelper.add_element(ventilation_fan, 'TestedFlowRate', @tested_flow_rate, :float, @tested_flow_rate_isdefaulted) unless @tested_flow_rate.nil?
       XMLHelper.add_element(ventilation_fan, 'HoursInOperation', @hours_in_operation, :float, @hours_in_operation_isdefaulted) unless @hours_in_operation.nil?
+      XMLHelper.add_element(ventilation_fan, 'DeliveredVentilation', @delivered_ventilation, :float, @delivered_ventilation_isdefaulted) unless @delivered_ventilation.nil?
       XMLHelper.add_element(ventilation_fan, 'FanLocation', @fan_location, :string) unless @fan_location.nil?
       XMLHelper.add_element(ventilation_fan, 'UsedForLocalVentilation', @used_for_local_ventilation, :boolean) unless @used_for_local_ventilation.nil?
       XMLHelper.add_element(ventilation_fan, 'UsedForWholeBuildingVentilation', @used_for_whole_building_ventilation, :boolean) unless @used_for_whole_building_ventilation.nil?
@@ -3883,8 +3885,10 @@ class HPXML < Object
       @quantity = XMLHelper.get_value(ventilation_fan, 'Quantity', :integer)
       @fan_type = XMLHelper.get_value(ventilation_fan, 'FanType', :string)
       @rated_flow_rate = XMLHelper.get_value(ventilation_fan, 'RatedFlowRate', :float)
+      @calculated_flow_rate = XMLHelper.get_value(ventilation_fan, 'CalculatedFlowRate', :float)
       @tested_flow_rate = XMLHelper.get_value(ventilation_fan, 'TestedFlowRate', :float)
       @hours_in_operation = XMLHelper.get_value(ventilation_fan, 'HoursInOperation', :float)
+      @delivered_ventilation = XMLHelper.get_value(ventilation_fan, 'DeliveredVentilation', :float)
       @fan_location = XMLHelper.get_value(ventilation_fan, 'FanLocation', :string)
       @used_for_local_ventilation = XMLHelper.get_value(ventilation_fan, 'UsedForLocalVentilation', :boolean)
       @used_for_whole_building_ventilation = XMLHelper.get_value(ventilation_fan, 'UsedForWholeBuildingVentilation', :boolean)

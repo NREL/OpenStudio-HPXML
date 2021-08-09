@@ -194,6 +194,50 @@ class HPXMLTest < MiniTest::Test
     File.delete(osw_path_test)
   end
 
+  def test_template2_osw
+    # Check that simulation works using template.osw
+    require 'json'
+
+    os_cli = OpenStudio.getOpenStudioCLI
+    osw_path = File.join(File.dirname(__FILE__), '..', 'template2.osw')
+
+    # Create derivative OSW for testing
+    osw_path_test = osw_path.gsub('.osw', '_test.osw')
+    FileUtils.cp(osw_path, osw_path_test)
+
+    # Turn on debug mode
+    json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
+    json[:steps][1][:arguments][:debug] = true
+
+    if Dir.exist? File.join(File.dirname(__FILE__), '..', '..', 'project')
+      # CI checks out the repo as "project", so update dir name
+      json[:steps][1][:measure_dir_name] = 'project'
+    end
+
+    File.open(osw_path_test, 'w') do |f|
+      f.write(JSON.pretty_generate(json))
+    end
+
+    command = "#{os_cli} run -w #{osw_path_test}"
+    system(command, err: File::NULL)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(osw_path_test), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+
+    # Check for debug files
+    osm_path = File.join(File.dirname(osw_path_test), 'run', 'in.osm')
+    assert(File.exist? osm_path)
+    hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
+    assert(File.exist? hpxml_defaults_path)
+
+    # Cleanup
+    File.delete(osw_path_test)
+    File.delete(File.join(File.dirname(__FILE__), '..', 'sample_files', 'test.xml'))
+  end
+
   def test_weather_cache
     cache_orig = File.join(@this_dir, '..', '..', 'weather', 'USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv')
     cache_bak = cache_orig + '.bak'
@@ -291,7 +335,7 @@ class HPXMLTest < MiniTest::Test
                             'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
                             'invalid-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem_bad' not found for water heating system 'WaterHeater'."],
                             'invalid-schema-version.xml' => ['HPXML version 3.0 is required.'],
-                            'invalid-shared-vent-in-unit-flowrate.xml' => ['Expected extension/InUnitFlowRate to be less than RatedFlowRate [context: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"], id: "SharedSupplyFan"]'],
+                            'invalid-shared-vent-in-unit-flowrate.xml' => ['Expected RatedFlowRate to be greater than extension/InUnitFlowRate [context: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"], id: "SharedSupplyFan"]'],
                             'invalid-timestep.xml' => ['Timestep (45) must be one of: 60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1.'],
                             'invalid-runperiod.xml' => ['Run Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-window-height.xml' => ['Expected DistanceToBottomOfWindow to be greater than DistanceToTopOfWindow [context: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs, id: "WindowEast"]'],

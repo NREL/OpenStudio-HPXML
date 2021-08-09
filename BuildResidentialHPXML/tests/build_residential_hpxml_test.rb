@@ -305,12 +305,17 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         heat_pump.backup_heating_efficiency_afue = nil
       end
       hpxml.ventilation_fans.each do |ventilation_fan|
-        next unless ventilation_fan.used_for_whole_building_ventilation
-        next if ventilation_fan.tested_flow_rate.nil?
-
-        # These are treated the same in the model, so allow tested/rated comparison
-        ventilation_fan.rated_flow_rate = ventilation_fan.tested_flow_rate
-        ventilation_fan.tested_flow_rate = nil
+        # These are all treated the same in the model
+        if not ventilation_fan.tested_flow_rate.nil?
+          ventilation_fan.rated_flow_rate = ventilation_fan.tested_flow_rate
+          ventilation_fan.tested_flow_rate = nil
+        elsif not ventilation_fan.calculated_flow_rate.nil?
+          ventilation_fan.rated_flow_rate = ventilation_fan.calculated_flow_rate
+          ventilation_fan.calculated_flow_rate = nil
+        elsif not ventilation_fan.delivered_ventilation.nil?
+          ventilation_fan.rated_flow_rate = ventilation_fan.delivered_ventilation
+          ventilation_fan.delivered_ventilation = nil
+        end
       end
       hpxml.hvac_controls.each do |hvac_control|
         hvac_control.control_type = nil # Not used by model
