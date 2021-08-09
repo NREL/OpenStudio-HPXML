@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>2e3ea478-229d-4ecd-b856-bf023842874f</version_id>
-  <version_modified>20210809T202047Z</version_modified>
+  <version_id>e53b5f63-cbd4-4b7d-9836-f719912f15d6</version_id>
+  <version_modified>20210809T204726Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -95,6 +95,14 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>USA_CO_Denver.Intl.AP.725650_TMY3.epw</default_value>
+    </argument>
+    <argument>
+      <name>site_state_code</name>
+      <display_name>Site: State Code</display_name>
+      <description>The house location. May be different than the EPW state.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>site_type</name>
@@ -7388,6 +7396,12 @@
       <checksum>E752F51D</checksum>
     </file>
     <file>
+      <filename>base-lighting-holiday.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1BDCBBFB</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.0</identifier>
@@ -7396,13 +7410,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>89D7065A</checksum>
-    </file>
-    <file>
-      <filename>base-lighting-holiday.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1BDCBBFB</checksum>
+      <checksum>D768C168</checksum>
     </file>
   </files>
 </measure>

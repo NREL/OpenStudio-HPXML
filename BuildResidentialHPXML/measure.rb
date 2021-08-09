@@ -94,6 +94,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('USA_CO_Denver.Intl.AP.725650_TMY3.epw')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('site_state_code', false)
+    arg.setDisplayName('Site: State Code')
+    arg.setDescription('The house location. May be different than the EPW state.')
+    args << arg
+
     site_type_choices = OpenStudio::StringVector.new
     site_type_choices << HPXML::SiteTypeSuburban
     site_type_choices << HPXML::SiteTypeUrban
@@ -3132,6 +3137,9 @@ class HPXMLFile
 
     hpxml.header.building_id = 'MyBuilding'
     hpxml.header.state_code = epw_file.stateProvinceRegion
+    if args[:site_state_code].is_initialized
+      hpxml.header.state_code = args[:site_state_code].get
+    end
     hpxml.header.event_type = 'proposed workscope'
   end
 
