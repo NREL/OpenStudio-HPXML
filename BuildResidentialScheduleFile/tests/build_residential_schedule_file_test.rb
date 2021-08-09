@@ -14,6 +14,9 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
     @tmp_output_path = File.join(@sample_files_path, 'tmp_output')
     FileUtils.mkdir_p(@tmp_output_path)
+
+    @args_hash = {}
+    @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
   end
 
   def teardown
@@ -21,17 +24,14 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     FileUtils.rm_rf(@tmp_output_path)
   end
 
-  def sample_files_dir
-    return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
-  end
-
   def test_smooth
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
-    args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'smooth.csv'))
-    model, hpxml = _test_measure(args_hash)
+    hpxml = _create_hpxml('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
 
-    schedules_file = SchedulesFile.new(model: model, schedules_path: args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'smooth.csv'))
+    model, hpxml = _test_measure()
+
+    schedules_file = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
 
     assert_in_epsilon(6020, schedules_file.annual_equivalent_full_load_hrs(col_name: 'occupants', schedules: schedules_file.tmp_schedules), 0.1)
     assert_in_epsilon(3321, schedules_file.annual_equivalent_full_load_hrs(col_name: 'lighting_interior', schedules: schedules_file.tmp_schedules), 0.1)
@@ -64,13 +64,14 @@ class BuildResidentialScheduleFileTest < Minitest::Test
   end
 
   def test_smooth_vacancy
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
-    args_hash['schedules_vacancy_period'] = 'Dec 1 - Jan 31'
-    args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'smooth-vacancy.csv'))
-    model, hpxml = _test_measure(args_hash)
+    hpxml = _create_hpxml('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
 
-    schedules_file = SchedulesFile.new(model: model, schedules_path: args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    @args_hash['schedules_vacancy_period'] = 'Dec 1 - Jan 31'
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'smooth-vacancy.csv'))
+    model, hpxml = _test_measure()
+
+    schedules_file = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
 
     assert_in_epsilon(4997, schedules_file.annual_equivalent_full_load_hrs(col_name: 'occupants', schedules: schedules_file.tmp_schedules), 0.1)
     assert_in_epsilon(2763, schedules_file.annual_equivalent_full_load_hrs(col_name: 'lighting_interior', schedules: schedules_file.tmp_schedules), 0.1)
@@ -103,13 +104,14 @@ class BuildResidentialScheduleFileTest < Minitest::Test
   end
 
   def test_stochastic
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
-    args_hash['schedules_type'] = 'stochastic'
-    args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic.csv'))
-    model, hpxml = _test_measure(args_hash)
+    hpxml = _create_hpxml('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
 
-    schedules_file = SchedulesFile.new(model: model, schedules_path: args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    @args_hash['schedules_type'] = 'stochastic'
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic.csv'))
+    model, hpxml = _test_measure()
+
+    schedules_file = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
 
     assert_in_epsilon(6689, schedules_file.annual_equivalent_full_load_hrs(col_name: 'occupants', schedules: schedules_file.tmp_schedules), 0.1)
     assert_in_epsilon(2086, schedules_file.annual_equivalent_full_load_hrs(col_name: 'lighting_interior', schedules: schedules_file.tmp_schedules), 0.1)
@@ -142,14 +144,15 @@ class BuildResidentialScheduleFileTest < Minitest::Test
   end
 
   def test_stochastic_vacancy
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
-    args_hash['schedules_type'] = 'stochastic'
-    args_hash['schedules_vacancy_period'] = 'Dec 1 - Jan 31'
-    args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic-vacancy.csv'))
-    model, hpxml = _test_measure(args_hash)
+    hpxml = _create_hpxml('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
 
-    schedules_file = SchedulesFile.new(model: model, schedules_path: args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    @args_hash['schedules_type'] = 'stochastic'
+    @args_hash['schedules_vacancy_period'] = 'Dec 1 - Jan 31'
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic-vacancy.csv'))
+    model, hpxml = _test_measure()
+
+    schedules_file = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
 
     assert_in_epsilon(5548, schedules_file.annual_equivalent_full_load_hrs(col_name: 'occupants', schedules: schedules_file.tmp_schedules), 0.1)
     assert_in_epsilon(1675, schedules_file.annual_equivalent_full_load_hrs(col_name: 'lighting_interior', schedules: schedules_file.tmp_schedules), 0.1)
@@ -182,14 +185,15 @@ class BuildResidentialScheduleFileTest < Minitest::Test
   end
 
   def test_random_seed
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
-    args_hash['schedules_type'] = 'stochastic'
-    args_hash['schedules_random_seed'] = 1
-    args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic.csv'))
-    model, hpxml = _test_measure(args_hash)
+    hpxml = _create_hpxml('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
 
-    schedules_file = SchedulesFile.new(model: model, schedules_path: args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    @args_hash['schedules_type'] = 'stochastic'
+    @args_hash['schedules_random_seed'] = 1
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic.csv'))
+    model, hpxml = _test_measure()
+
+    schedules_file = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
 
     assert_in_epsilon(6689, schedules_file.annual_equivalent_full_load_hrs(col_name: 'occupants', schedules: schedules_file.tmp_schedules), 0.1)
     assert_in_epsilon(2086, schedules_file.annual_equivalent_full_load_hrs(col_name: 'lighting_interior', schedules: schedules_file.tmp_schedules), 0.1)
@@ -220,10 +224,10 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(1009, schedules_file.annual_equivalent_full_load_hrs(col_name: 'hot_water_fixtures', schedules: schedules_file.tmp_schedules), 0.1)
     assert(!schedules_file.schedules.keys.include?('vacancy'))
 
-    args_hash['schedules_random_seed'] = 2
-    model, hpxml = _test_measure(args_hash)
+    @args_hash['schedules_random_seed'] = 2
+    model, hpxml = _test_measure()
 
-    schedules_file = SchedulesFile.new(model: model, schedules_path: args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    schedules_file = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
 
     assert_in_epsilon(6072, schedules_file.annual_equivalent_full_load_hrs(col_name: 'occupants', schedules: schedules_file.tmp_schedules), 0.1)
     assert_in_epsilon(1765, schedules_file.annual_equivalent_full_load_hrs(col_name: 'lighting_interior', schedules: schedules_file.tmp_schedules), 0.1)
@@ -255,7 +259,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!schedules_file.schedules.keys.include?('vacancy'))
   end
 
-  def _test_measure(args_hash)
+  def _test_measure()
     # create an instance of the measure
     measure = BuildResidentialScheduleFile.new
 
@@ -263,15 +267,14 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model = OpenStudio::Model::Model.new
 
     # get arguments
-    args_hash['output_dir'] = 'tests'
     arguments = measure.arguments(model)
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
 
     # populate argument with specified hash value if specified
     arguments.each do |arg|
       temp_arg_var = arg.clone
-      if args_hash.has_key?(arg.name)
-        assert(temp_arg_var.setValue(args_hash[arg.name]))
+      if @args_hash.has_key?(arg.name)
+        assert(temp_arg_var.setValue(@args_hash[arg.name]))
       end
       argument_map[arg.name] = temp_arg_var
     end
@@ -286,8 +289,12 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)
 
-    hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
+    hpxml = HPXML.new(hpxml_path: @tmp_hpxml_path)
 
     return model, hpxml
+  end
+
+  def _create_hpxml(hpxml_name)
+    return HPXML.new(hpxml_path: File.join(@sample_files_path, hpxml_name))
   end
 end
