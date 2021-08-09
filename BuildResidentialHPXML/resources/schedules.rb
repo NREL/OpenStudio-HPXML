@@ -798,7 +798,7 @@ class ScheduleGenerator
       end_day_num = Schedule.get_day_num_from_month_day(@model, args[:schedules_vacancy_end_month], args[:schedules_vacancy_end_day])
       num_steps_per_day = @model.getSimulationControl.timestep.get.numberOfTimestepsPerHour * 24
 
-      vacancy = Array.new(@schedules['vacancy'].length, 0)
+      vacancy = Array.new(@schedules['occupants'].length, 0)
       if end_day_num >= start_day_num
         vacancy.fill(1.0, (start_day_num - 1) * num_steps_per_day, (end_day_num - start_day_num + 1) * num_steps_per_day) # Fill between start/end days
       else # Wrap around year

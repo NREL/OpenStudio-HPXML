@@ -205,9 +205,8 @@ class HPXMLTest < MiniTest::Test
     osw_path_test = osw_path.gsub('.osw', '_test.osw')
     FileUtils.cp(osw_path, osw_path_test)
 
-    # Turn on debug mode, stochastic schedules
+    # Turn on debug mode
     json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
-    json[:steps][0][:arguments][:schedules_type] = 'stochastic'
     json[:steps][1][:arguments][:debug] = true
 
     if Dir.exist? File.join(File.dirname(__FILE__), '..', '..', 'project')
