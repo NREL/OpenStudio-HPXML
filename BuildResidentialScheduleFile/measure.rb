@@ -139,7 +139,8 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     info_msgs << "NumberOfTimestepsPerHour=#{timestep.numberOfTimestepsPerHour}"
 
     # get generator inputs
-    state = 'CO' # FIXME: get from hpxml
+    state = epw_file.stateProvinceRegion
+    state = hpxml.header.state_code unless hpxml.header.state_code.nil?
     random_seed = args[:schedules_random_seed].get if args[:schedules_random_seed].is_initialized
     if hpxml.building_occupancy.number_of_residents.nil?
       args[:geometry_num_occupants] = hpxml.building_occupancy.number_of_residents
