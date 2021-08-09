@@ -84,8 +84,9 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args = get_argument_values(runner, arguments(model), user_arguments)
     args = Hash[args.collect { |k, v| [k.to_sym, v] }]
 
-    unless (Pathname.new args[:hpxml_path]).absolute?
-      hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), args[:hpxml_path]))
+    hpxml_path = args[:hpxml_path]
+    unless (Pathname.new hpxml_path).absolute?
+      hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
     end
     unless File.exist?(hpxml_path) && hpxml_path.downcase.end_with?('.xml')
       fail "'#{hpxml_path}' does not exist or is not an .xml file."
