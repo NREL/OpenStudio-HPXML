@@ -84,8 +84,14 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args = get_argument_values(runner, arguments(model), user_arguments)
     args = Hash[args.collect { |k, v| [k.to_sym, v] }]
 
-    # Retrieve the hpxml
-    hpxml = HPXML.new(hpxml_path: args[:hpxml_path])
+    unless (Pathname.new args[:hpxml_path]).absolute?
+      hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), args[:hpxml_path]))
+    end
+    unless File.exist?(hpxml_path) && hpxml_path.downcase.end_with?('.xml')
+      fail "'#{hpxml_path}' does not exist or is not an .xml file."
+    end
+
+    hpxml = HPXML.new(hpxml_path: hpxml_path)
 
     # Create EpwFile object
     epw_path = hpxml.climate_and_risk_zones.weather_station_epw_filepath
@@ -100,6 +106,11 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     success = create_schedules(runner, hpxml, model, epw_file, args)
     return false if not success
+
+    hpxml.header.schedules_filepath = args[:output_csv_path]
+    hpxml_doc = hpxml.to_oga()
+    XMLHelper.write_file(hpxml_doc, hpxml_path)
+    runner.registerInfo("Wrote file: #{hpxml_path}")
 
     return true
   end
