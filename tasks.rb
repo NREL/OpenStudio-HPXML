@@ -4175,7 +4175,6 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeExhaust,
-                               tested_flow_rate: 110,
                                used_for_whole_building_ventilation: true)
     hpxml.ventilation_fans.add(id: 'KitchenRangeFan',
                                fan_location: HPXML::LocationKitchen,
@@ -4183,6 +4182,8 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
     hpxml.ventilation_fans.add(id: 'BathFans',
                                fan_location: HPXML::LocationBath,
                                used_for_local_ventilation: true)
+    hpxml.ventilation_fans.add(id: 'WholeHouseFan',
+                               used_for_seasonal_cooling_load_reduction: true)
   elsif ['base-bldgtype-multifamily-shared-mechvent.xml'].include? hpxml_file
     # Shared supply + in-unit exhaust (roughly balanced)
     hpxml.ventilation_fans.add(id: 'SharedSupplyFan',
@@ -4215,7 +4216,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                fan_type: HPXML::MechVentTypeSupply,
                                is_shared_system: true,
                                in_unit_flow_rate: 100,
-                               rated_flow_rate: 1000,
+                               calculated_flow_rate: 1000,
                                hours_in_operation: 24,
                                fan_power: 300,
                                used_for_whole_building_ventilation: true,
@@ -4230,7 +4231,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                fan_type: HPXML::MechVentTypeERV,
                                is_shared_system: true,
                                in_unit_flow_rate: 50,
-                               rated_flow_rate: 500,
+                               delivered_ventilation: 500,
                                hours_in_operation: 24,
                                total_recovery_efficiency: 0.48,
                                sensible_recovery_efficiency: 0.72,
@@ -4263,7 +4264,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                fan_type: HPXML::MechVentTypeBalanced,
                                is_shared_system: true,
                                in_unit_flow_rate: 30,
-                               rated_flow_rate: 300,
+                               tested_flow_rate: 300,
                                hours_in_operation: 24,
                                fan_power: 150,
                                used_for_whole_building_ventilation: true,
