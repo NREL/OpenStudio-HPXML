@@ -3176,17 +3176,14 @@ class HVAC
             if not clg_ap.crankcase_temp.nil?
               clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C'))
             end
-            if cooling_system.modulating || cooling_system.ihp_grid_ac || cooling_system.ihp_ice_storage || cooling_system.ihp_pcm_storage
+            if (cooling_system.modulating || cooling_system.ihp_grid_ac || cooling_system.ihp_ice_storage || cooling_system.ihp_pcm_storage) & cooling_system.flex
               unless grid_signal_schedule.nil?
                 clg_coil.setGridSignalSchedule(grid_signal_schedule)
               end
-              clg_coil.setLowerBoundToApplyGridResponsiveControl(0.15)
-              clg_coil.setUpperBoundToApplyGridResponsiveControl(1000.0)
-              clg_coil.setMaxSpeedLevelDuringGridResponsiveControl(2)
+              clg_coil.setLowerBoundToApplyGridResponsiveControl(0.5)
+              clg_coil.setUpperBoundToApplyGridResponsiveControl(2)
+              clg_coil.setMaxSpeedLevelDuringGridResponsiveControl(cooling_system.max_flex_speed)
               clg_coil.setLoadControlDuringGridResponsiveControl('Sensible')
-              if cooling_system.ihp_ice_storage || cooling_system.ihp_pcm_storage
-                clg_coil.setMaxSpeedLevelDuringGridResponsiveControl(0)
-              end
             end
           end
           speed = OpenStudio::Model::CoilCoolingDXVariableSpeedSpeedData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve)
@@ -3271,7 +3268,7 @@ class HVAC
               end
               htg_coil.setLowerBoundToApplyGridResponsiveControl(0.5)
               htg_coil.setUpperBoundToApplyGridResponsiveControl(2)
-              htg_coil.setMaxSpeedLevelDuringGridResponsiveControl(0)
+              htg_coil.setMaxSpeedLevelDuringGridResponsiveControl(heating_system.max_flex_speed)
             end
           end
           speed = OpenStudio::Model::CoilHeatingDXVariableSpeedSpeedData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve)
