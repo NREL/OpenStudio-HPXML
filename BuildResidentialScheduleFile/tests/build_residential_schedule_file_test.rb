@@ -25,14 +25,32 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
 
-  def test_measure
+  def test_smooth
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
-    args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'schedules.csv'))
+    args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'smooth.csv'))
     model, hpxml = _test_measure(args_hash)
 
-    headers = CSV.open(args_hash['output_csv_path'], 'r') { |csv| csv.first }
-    # TODO
+    schedules_file = SchedulesFile.new(model: model, schedules_path: args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+  end
+
+  def test_stochastic
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
+    args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic.csv'))
+    model, hpxml = _test_measure(args_hash)
+
+    schedules_file = SchedulesFile.new(model: model, schedules_path: args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+  end
+
+  def test_vacancy
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
+    args_hash['schedules_vacancy_period'] = 'Dec 1 - Jan 31'
+    args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic-vacancy.csv'))
+    model, hpxml = _test_measure(args_hash)
+
+    schedules_file = SchedulesFile.new(model: model, schedules_path: args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
   end
 
   def _test_measure(args_hash)
