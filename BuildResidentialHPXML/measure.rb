@@ -122,9 +122,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('USA_CO_Denver.Intl.AP.725650_TMY3.epw')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('fips_code', false)
-    arg.setDisplayName('County FIPS Code')
-    arg.setDescription('County FIPS Code - used to calculate Home Energy Scores from ResStock-generated files')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('zip_code', false)
+    arg.setDisplayName('Zip Code')
+    arg.setDescription('Zip code - used for informational purposes only')
     args << arg
 
     site_type_choices = OpenStudio::StringVector.new
@@ -137,9 +137,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The type of site.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('vintage', false)
-    arg.setDisplayName('Building Construction: Vintage')
-    arg.setDescription('The building vintage, used for informational purposes only')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('year_built', false)
+    arg.setDisplayName('Building Construction: Year Built')
+    arg.setDescription('The year the building was built')
     args << arg
 
     unit_type_choices = OpenStudio::StringVector.new
@@ -3237,8 +3237,8 @@ class HPXMLFile
 
     hpxml.header.building_id = 'MyBuilding'
     hpxml.header.state_code = epw_file.stateProvinceRegion
-    if args[:fips_code].is_initialized
-      hpxml.header.fips_code = args[:fips_code]
+    if args[:zip_code].is_initialized
+      hpxml.header.zip_code = args[:zip_code]
     end
     hpxml.header.event_type = 'proposed workscope'
     hpxml.header.schedules_filepath = args[:schedules_path]
@@ -3320,10 +3320,7 @@ class HPXMLFile
     hpxml.building_construction.conditioned_building_volume = conditioned_building_volume
     hpxml.building_construction.average_ceiling_height = args[:geometry_wall_height]
     hpxml.building_construction.residential_facility_type = args[:geometry_unit_type]
-    if args[:vintage].is_initialized
-      args[:vintage] = args[:vintage].get
-      hpxml.building_construction.year_built = args[:vintage].gsub(/[^0-9]/, '') # strip non-numeric
-    end
+    hpxml.building_construction.year_built = args[:year_built]
     if args[:geometry_has_flue_or_chimney] != Constants.Auto
       has_flue_or_chimney = args[:geometry_has_flue_or_chimney]
       hpxml.building_construction.has_flue_or_chimney = has_flue_or_chimney
