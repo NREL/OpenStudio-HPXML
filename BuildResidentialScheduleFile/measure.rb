@@ -54,7 +54,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_vacancy_period', false)
     arg.setDisplayName('Schedules: Vacancy Period')
-    arg.setDescription("Specifies the vacancy period. Only applies if the schedules type is 'stochastic'. Enter a date like \"Dec 15 - Jan 15\".")
+    arg.setDescription('Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15".')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('schedules_random_seed', false)
