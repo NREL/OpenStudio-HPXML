@@ -49,51 +49,15 @@ class ScheduleGenerator
     return seed
   end
 
-  def self.col_names
-    # col_name => affected_by_vacancy
-    return {
-      'occupants' => true,
-      'lighting_interior' => true,
-      'lighting_exterior' => true,
-      'lighting_garage' => true,
-      'lighting_exterior_holiday' => true,
-      'cooking_range' => true,
-      'refrigerator' => false,
-      'extra_refrigerator' => false,
-      'freezer' => false,
-      'dishwasher' => true,
-      'dishwasher_power' => true,
-      'clothes_washer' => true,
-      'clothes_washer_power' => true,
-      'clothes_dryer' => true,
-      'clothes_dryer_exhaust' => true,
-      'baths' => true,
-      'showers' => true,
-      'sinks' => true,
-      'fixtures' => true,
-      'ceiling_fan' => true,
-      'plug_loads_other' => true,
-      'plug_loads_tv' => true,
-      'plug_loads_vehicle' => true,
-      'plug_loads_well_pump' => true,
-      'fuel_loads_grill' => true,
-      'fuel_loads_lighting' => true,
-      'fuel_loads_fireplace' => true,
-      'pool_pump' => false,
-      'pool_heater' => false,
-      'hot_tub_pump' => false,
-      'hot_tub_heater' => false,
-      'sleep' => nil,
-      'vacancy' => nil
-    }
-  end
-
   def initialize_schedules
     @schedules = {}
 
-    ScheduleGenerator.col_names.keys.each do |col_name|
+    Constants.ScheduleColNames.keys.each do |col_name|
+      next if col_name == 'vacancy'
+
       @schedules[col_name] = Array.new(@total_days_in_year * @steps_in_day, 0.0)
     end
+    @schedules['sleep'] = Array.new(@total_days_in_year * @steps_in_day, 0.0)
 
     return @schedules
   end
@@ -114,6 +78,12 @@ class ScheduleGenerator
 
     success = set_vacancy(args: args)
     return false if not success
+
+    # Remove columns
+    @schedules.delete('sleep')
+    @schedules.delete('sinks')
+    @schedules.delete('showers')
+    @schedules.delete('baths')
 
     return true
   end
@@ -184,22 +154,21 @@ class ScheduleGenerator
   end
 
   def create_average_dishwasher(args:)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'hot_water_dishwasher', weekday_sch: Schedule.DishwasherWeekdayFractions, weekend_sch: Schedule.DishwasherWeekendFractions, monthly_sch: Schedule.DishwasherMonthlyMultipliers)
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'dishwasher', weekday_sch: Schedule.DishwasherWeekdayFractions, weekend_sch: Schedule.DishwasherWeekendFractions, monthly_sch: Schedule.DishwasherMonthlyMultipliers)
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'dishwasher_power', weekday_sch: Schedule.DishwasherWeekdayFractions, weekend_sch: Schedule.DishwasherWeekendFractions, monthly_sch: Schedule.DishwasherMonthlyMultipliers)
   end
 
   def create_average_clothes_washer(args:)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'hot_water_clothes_washer', weekday_sch: Schedule.ClothesWasherWeekdayFractions, weekend_sch: Schedule.ClothesWasherWeekendFractions, monthly_sch: Schedule.ClothesWasherMonthlyMultipliers)
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_washer', weekday_sch: Schedule.ClothesWasherWeekdayFractions, weekend_sch: Schedule.ClothesWasherWeekendFractions, monthly_sch: Schedule.ClothesWasherMonthlyMultipliers)
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_washer_power', weekday_sch: Schedule.ClothesWasherWeekdayFractions, weekend_sch: Schedule.ClothesWasherWeekendFractions, monthly_sch: Schedule.ClothesWasherMonthlyMultipliers)
   end
 
   def create_average_clothes_dryer(args:)
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_dryer', weekday_sch: Schedule.ClothesDryerWeekdayFractions, weekend_sch: Schedule.ClothesDryerWeekendFractions, monthly_sch: Schedule.ClothesDryerMonthlyMultipliers)
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_dryer_exhaust', weekday_sch: Schedule.ClothesDryerWeekdayFractions, weekend_sch: Schedule.ClothesDryerWeekendFractions, monthly_sch: Schedule.ClothesDryerMonthlyMultipliers)
   end
 
   def create_average_fixtures(args:)
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'fixtures', weekday_sch: Schedule.FixturesWeekdayFractions, weekend_sch: Schedule.FixturesWeekendFractions, monthly_sch: Schedule.FixturesMonthlyMultipliers)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'hot_water_fixtures', weekday_sch: Schedule.FixturesWeekdayFractions, weekend_sch: Schedule.FixturesWeekendFractions, monthly_sch: Schedule.FixturesMonthlyMultipliers)
   end
 
   def create_average_ceiling_fan
@@ -591,9 +560,9 @@ class ScheduleGenerator
     #    (it's typically composed of multiple water draw events)
     # 4. For each event, sample the event duration
     # 5. Fill in the dishwasher/clothes washer time slot using those water draw events
-    dw_flow_rate_mean = schedule_config['dishwasher']['flow_rate_mean']
-    dw_flow_rate_std = schedule_config['dishwasher']['flow_rate_std']
-    dw_minutes_between_event_gap = schedule_config['dishwasher']['minutes_between_event_gap']
+    dw_flow_rate_mean = schedule_config['hot_water_dishwasher']['flow_rate_mean']
+    dw_flow_rate_std = schedule_config['hot_water_dishwasher']['flow_rate_std']
+    dw_minutes_between_event_gap = schedule_config['hot_water_dishwasher']['minutes_between_event_gap']
     dw_activity_sch = [0] * mins_in_year
     m = 0
     dw_flow_rate = gaussian_rand(prng, dw_flow_rate_mean, dw_flow_rate_std, 0)
@@ -605,11 +574,11 @@ class ScheduleGenerator
       dish_state = sum_across_occupants(all_simulated_values, 4, step, max_clip = 1)
       step_jump = 1
       if dish_state > 0
-        cluster_size = sample_activity_cluster_size(prng, cluster_size_prob_map, 'dishwasher')
+        cluster_size = sample_activity_cluster_size(prng, cluster_size_prob_map, 'hot_water_dishwasher')
         start_minute = step * 15
         m = 0
         cluster_size.times do
-          duration = sample_event_duration(prng, event_duration_prob_map, 'dishwasher')
+          duration = sample_event_duration(prng, event_duration_prob_map, 'hot_water_dishwasher')
           int_duration = duration.ceil
           flow_rate = dw_flow_rate * duration / int_duration
           int_duration.times do
@@ -630,11 +599,11 @@ class ScheduleGenerator
       step += step_jump
     end
 
-    cw_flow_rate_mean = schedule_config['clothes_washer']['flow_rate_mean']
-    cw_flow_rate_std = schedule_config['clothes_washer']['flow_rate_std']
-    cw_minutes_between_event_gap = schedule_config['clothes_washer']['minutes_between_event_gap']
+    cw_flow_rate_mean = schedule_config['hot_water_clothes_washer']['flow_rate_mean']
+    cw_flow_rate_std = schedule_config['hot_water_clothes_washer']['flow_rate_std']
+    cw_minutes_between_event_gap = schedule_config['hot_water_clothes_washer']['minutes_between_event_gap']
     cw_activity_sch = [0] * mins_in_year # this is the clothes_washer water draw schedule
-    cw_load_size_probability = schedule_config['clothes_washer']['load_size_probability']
+    cw_load_size_probability = schedule_config['hot_water_clothes_washer']['load_size_probability']
     m = 0
     cw_flow_rate = gaussian_rand(prng, cw_flow_rate_mean, cw_flow_rate_std, 0)
     # States are: 'sleeping','shower','laundry','cooking', 'dishwashing', 'absent', 'nothingAtHome'
@@ -648,9 +617,9 @@ class ScheduleGenerator
         start_minute = step * 15
         m = 0
         num_loads.times do
-          cluster_size = sample_activity_cluster_size(prng, cluster_size_prob_map, 'clothes_washer')
+          cluster_size = sample_activity_cluster_size(prng, cluster_size_prob_map, 'hot_water_clothes_washer')
           cluster_size.times do
-            duration = sample_event_duration(prng, event_duration_prob_map, 'clothes_washer')
+            duration = sample_event_duration(prng, event_duration_prob_map, 'hot_water_clothes_washer')
             int_duration = duration.ceil
             flow_rate = cw_flow_rate * duration.to_f / int_duration
             int_duration.times do
@@ -690,7 +659,7 @@ class ScheduleGenerator
         duration_15min, avg_power = sample_appliance_duration_power(prng, appliance_power_dist_map, 'dishwasher')
 
         month = (start_time + step * 15 * 60).month
-        duration_min = (duration_15min * 15 * schedule_config['dishwasher']['monthly_multiplier'][month - 1]).to_i
+        duration_min = (duration_15min * 15 * schedule_config['hot_water_dishwasher']['monthly_multiplier'][month - 1]).to_i
 
         duration = [duration_min, mins_in_year - step * 15].min
         dw_power_sch.fill(avg_power, step * 15, duration)
@@ -716,7 +685,7 @@ class ScheduleGenerator
 
         month = (start_time + step * 15 * 60).month
         cd_duration_min = (cd_duration_15min * 15 * schedule_config['clothes_dryer']['monthly_multiplier'][month - 1]).to_i
-        cw_duration_min = (cw_duration_15min * 15 * schedule_config['clothes_washer']['monthly_multiplier'][month - 1]).to_i
+        cw_duration_min = (cw_duration_15min * 15 * schedule_config['hot_water_clothes_washer']['monthly_multiplier'][month - 1]).to_i
 
         cw_duration = [cw_duration_min, mins_in_year - step * 15].min
         cw_power_sch.fill(cw_avg_power, step * 15, cw_duration)
@@ -763,14 +732,14 @@ class ScheduleGenerator
     dw_activity_sch = apply_monthly_offsets(array: dw_activity_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
     dw_activity_sch = aggregate_array(dw_activity_sch, @minutes_per_step)
     dw_peak_flow = dw_activity_sch.max
-    @schedules['dishwasher'] = dw_activity_sch.map { |flow| flow / dw_peak_flow }
+    @schedules['hot_water_dishwasher'] = dw_activity_sch.map { |flow| flow / dw_peak_flow }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     cw_activity_sch = cw_activity_sch.rotate(random_offset)
     cw_activity_sch = apply_monthly_offsets(array: cw_activity_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
     cw_activity_sch = aggregate_array(cw_activity_sch, @minutes_per_step)
     cw_peak_flow = cw_activity_sch.max
-    @schedules['clothes_washer'] = cw_activity_sch.map { |flow| flow / cw_peak_flow }
+    @schedules['hot_water_clothes_washer'] = cw_activity_sch.map { |flow| flow / cw_peak_flow }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     shower_activity_sch = shower_activity_sch.rotate(random_offset)
@@ -798,7 +767,7 @@ class ScheduleGenerator
     cw_power_sch = apply_monthly_offsets(array: cw_power_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
     cw_power_sch = aggregate_array(cw_power_sch, @minutes_per_step)
     cw_peak_power = cw_power_sch.max
-    @schedules['clothes_washer_power'] = cw_power_sch.map { |power| power / cw_peak_power }
+    @schedules['clothes_washer'] = cw_power_sch.map { |power| power / cw_peak_power }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     cd_power_sch = cd_power_sch.rotate(random_offset)
@@ -806,20 +775,19 @@ class ScheduleGenerator
     cd_power_sch = aggregate_array(cd_power_sch, @minutes_per_step)
     cd_peak_power = cd_power_sch.max
     @schedules['clothes_dryer'] = cd_power_sch.map { |power| power / cd_peak_power }
-    @schedules['clothes_dryer_exhaust'] = @schedules['clothes_dryer']
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     dw_power_sch = dw_power_sch.rotate(random_offset)
     dw_power_sch = apply_monthly_offsets(array: dw_power_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
     dw_power_sch = aggregate_array(dw_power_sch, @minutes_per_step)
     dw_peak_power = dw_power_sch.max
-    @schedules['dishwasher_power'] = dw_power_sch.map { |power| power / dw_peak_power }
+    @schedules['dishwasher'] = dw_power_sch.map { |power| power / dw_peak_power }
 
     @schedules['occupants'] = away_schedule.map { |i| 1.0 - i }
 
-    @schedules['fixtures'] = [@schedules['showers'], @schedules['sinks'], @schedules['baths']].transpose.map { |flow| flow.reduce(:+) }
-    fixtures_peak_flow = @schedules['fixtures'].max
-    @schedules['fixtures'] = @schedules['fixtures'].map { |flow| flow / fixtures_peak_flow }
+    @schedules['hot_water_fixtures'] = [@schedules['showers'], @schedules['sinks'], @schedules['baths']].transpose.map { |flow| flow.reduce(:+) }
+    fixtures_peak_flow = @schedules['hot_water_fixtures'].max
+    @schedules['hot_water_fixtures'] = @schedules['hot_water_fixtures'].map { |flow| flow / fixtures_peak_flow }
 
     return true
   end
@@ -830,7 +798,7 @@ class ScheduleGenerator
       end_day_num = Schedule.get_day_num_from_month_day(@model, args[:schedules_vacancy_end_month], args[:schedules_vacancy_end_day])
       num_steps_per_day = @model.getSimulationControl.timestep.get.numberOfTimestepsPerHour * 24
 
-      vacancy = Array.new(@schedules['vacancy'].length, 0)
+      vacancy = Array.new(@schedules['occupants'].length, 0)
       if end_day_num >= start_day_num
         vacancy.fill(1.0, (start_day_num - 1) * num_steps_per_day, (end_day_num - start_day_num + 1) * num_steps_per_day) # Fill between start/end days
       else # Wrap around year
@@ -891,8 +859,8 @@ class ScheduleGenerator
     activity_names = ['clothes_washer', 'dishwasher', 'clothes_dryer', 'cooking']
     power_dist_map = {}
     activity_names.each do |activity|
-      duration_file = resources_path + "/schedules_#{activity}_power_duration_dist.csv"
-      consumption_file = resources_path + "/schedules_#{activity}_power_consumption_dist.csv"
+      duration_file = resources_path + "/schedules_#{activity}_duration_dist.csv"
+      consumption_file = resources_path + "/schedules_#{activity}_consumption_dist.csv"
       duration_vals = CSV.read(duration_file)
       consumption_vals = CSV.read(consumption_file)
       duration_vals = duration_vals.map { |a| a.map { |i| i.to_i } }
@@ -922,7 +890,7 @@ class ScheduleGenerator
   end
 
   def read_activity_cluster_size_probs(resources_path:)
-    activity_names = ['clothes_washer', 'dishwasher', 'shower']
+    activity_names = ['hot_water_clothes_washer', 'hot_water_dishwasher', 'shower']
     cluster_size_prob_map = {}
     activity_names.each do |activity|
       cluster_size_file = resources_path + "/schedules_#{activity}_cluster_size_probability.csv"
@@ -934,7 +902,7 @@ class ScheduleGenerator
   end
 
   def read_event_duration_probs(resources_path:)
-    activity_names = ['clothes_washer', 'dishwasher', 'shower']
+    activity_names = ['hot_water_clothes_washer', 'hot_water_dishwasher', 'shower']
     event_duration_probabilites_map = {}
     activity_names.each do |activity|
       duration_file = resources_path + "/schedules_#{activity}_event_duration_probability.csv"

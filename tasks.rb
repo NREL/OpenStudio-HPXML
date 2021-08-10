@@ -681,7 +681,7 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_heating_capacity_2', Constants.Auto)
     step.setArgument('heating_system_fraction_heat_load_served_2', 0.25)
     step.setArgument('mech_vent_fan_type', 'none')
-    step.setArgument('mech_vent_flow_rate', 110)
+    step.setArgument('mech_vent_flow_rate', '110')
     step.setArgument('mech_vent_hours_in_operation', '24')
     step.setArgument('mech_vent_recovery_efficiency_type', 'Unadjusted')
     step.setArgument('mech_vent_total_recovery_efficiency', 0.48)
@@ -698,8 +698,8 @@ def get_values(osw_file, step)
     step.setArgument('kitchen_fans_quantity', '0')
     step.setArgument('bathroom_fans_quantity', '0')
     step.setArgument('whole_house_fan_present', false)
-    step.setArgument('whole_house_fan_flow_rate', 4500)
-    step.setArgument('whole_house_fan_power', 300)
+    step.setArgument('whole_house_fan_flow_rate', '4500')
+    step.setArgument('whole_house_fan_power', '300')
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeStorage)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeElectricity)
     step.setArgument('water_heater_location', HPXML::LocationLivingSpace)
@@ -986,7 +986,7 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-bldgtype-multifamily-shared-mechvent.osw'].include? osw_file
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeSupply)
-    step.setArgument('mech_vent_flow_rate', 800)
+    step.setArgument('mech_vent_flow_rate', '800')
     step.setArgument('mech_vent_fan_power', '240')
     step.setArgument('mech_vent_num_units_served', 10)
     step.setArgument('shared_mech_vent_frac_recirculation', 0.5)
@@ -1954,12 +1954,12 @@ def get_values(osw_file, step)
     step.setArgument('bathroom_fans_start_hour', '7')
   elsif ['base-mechvent-cfis.osw'].include? osw_file
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeCFIS)
-    step.setArgument('mech_vent_flow_rate', 330)
+    step.setArgument('mech_vent_flow_rate', '330')
     step.setArgument('mech_vent_hours_in_operation', '8')
     step.setArgument('mech_vent_fan_power', '300')
   elsif ['base-mechvent-cfis-evap-cooler-only-ducted.osw'].include? osw_file
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeCFIS)
-    step.setArgument('mech_vent_flow_rate', 330)
+    step.setArgument('mech_vent_flow_rate', '330')
     step.setArgument('mech_vent_hours_in_operation', '8')
     step.setArgument('mech_vent_fan_power', '300')
   elsif ['base-mechvent-erv.osw'].include? osw_file
@@ -2060,6 +2060,12 @@ def get_values(osw_file, step)
     step.setArgument('plug_loads_other_annual_kwh', Constants.Auto)
     step.setArgument('plug_loads_other_frac_sensible', Constants.Auto)
     step.setArgument('plug_loads_other_frac_latent', Constants.Auto)
+    step.setArgument('mech_vent_flow_rate', Constants.Auto)
+    step.setArgument('kitchen_fans_flow_rate', Constants.Auto)
+    step.setArgument('bathroom_fans_flow_rate', Constants.Auto)
+    step.setArgument('whole_house_fan_present', true)
+    step.setArgument('whole_house_fan_flow_rate', Constants.Auto)
+    step.setArgument('whole_house_fan_power', Constants.Auto)
   elsif ['base-misc-loads-large-uncommon.osw'].include? osw_file
     step.setArgument('extra_refrigerator_location', Constants.Auto)
     step.setArgument('extra_refrigerator_rated_annual_kwh', '700.0')
@@ -6749,7 +6755,6 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeExhaust,
-                               tested_flow_rate: 110,
                                used_for_whole_building_ventilation: true)
     hpxml.ventilation_fans.add(id: 'KitchenRangeFan',
                                fan_location: HPXML::LocationKitchen,
@@ -6757,6 +6762,8 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
     hpxml.ventilation_fans.add(id: 'BathFans',
                                fan_location: HPXML::LocationBath,
                                used_for_local_ventilation: true)
+    hpxml.ventilation_fans.add(id: 'WholeHouseFan',
+                               used_for_seasonal_cooling_load_reduction: true)
   elsif ['base-bldgtype-multifamily-shared-mechvent.xml'].include? hpxml_file
     # Shared supply + in-unit exhaust (roughly balanced)
     hpxml.ventilation_fans.add(id: 'SharedSupplyFan',
@@ -6789,7 +6796,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                fan_type: HPXML::MechVentTypeSupply,
                                is_shared_system: true,
                                in_unit_flow_rate: 100,
-                               rated_flow_rate: 1000,
+                               calculated_flow_rate: 1000,
                                hours_in_operation: 24,
                                fan_power: 300,
                                used_for_whole_building_ventilation: true,
@@ -6804,7 +6811,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                fan_type: HPXML::MechVentTypeERV,
                                is_shared_system: true,
                                in_unit_flow_rate: 50,
-                               rated_flow_rate: 500,
+                               delivered_ventilation: 500,
                                hours_in_operation: 24,
                                total_recovery_efficiency: 0.48,
                                sensible_recovery_efficiency: 0.72,
@@ -6837,7 +6844,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                fan_type: HPXML::MechVentTypeBalanced,
                                is_shared_system: true,
                                in_unit_flow_rate: 30,
-                               rated_flow_rate: 300,
+                               tested_flow_rate: 300,
                                hours_in_operation: 24,
                                fan_power: 150,
                                used_for_whole_building_ventilation: true,

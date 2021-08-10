@@ -1008,7 +1008,7 @@
       <sch:assert role='ERROR' test='count(h:IsSharedSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: IsSharedSystem</sch:assert> <!-- See [MechanicalVentilationType=Shared] -->
       <sch:assert role='ERROR' test='count(h:FanType) = 1'>Expected 1 element(s) for xpath: FanType</sch:assert> <!-- See [MechanicalVentilationType=HRV] or [MechanicalVentilationType=ERV] or [MechanicalVentilationType=CFIS] -->
       <sch:assert role='ERROR' test='h:FanType[text()="energy recovery ventilator" or text()="heat recovery ventilator" or text()="exhaust only" or text()="supply only" or text()="balanced" or text()="central fan integrated supply"] or not(h:FanType)'>Expected FanType to be 'energy recovery ventilator' or 'heat recovery ventilator' or 'exhaust only' or 'supply only' or 'balanced' or 'central fan integrated supply'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:TestedFlowRate) + count(h:RatedFlowRate) &gt;= 1'>Expected 1 or more element(s) for xpath: TestedFlowRate | RatedFlowRate</sch:assert>
+      <sch:assert role='ERROR' test='count(h:RatedFlowRate) + count(h:CalculatedFlowRate) + count(h:TestedFlowRate) + count(h:DeliveredVentilation) &gt;= 0'>Expected 0 or more element(s) for xpath: RatedFlowRate | CalculatedFlowRate | TestedFlowRate | DeliveredVentilation</sch:assert>
       <sch:assert role='ERROR' test='count(h:HoursInOperation) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HoursInOperation</sch:assert>
       <sch:assert role='ERROR' test='count(h:FanPower) &lt;= 1'>Expected 0 or 1 element(s) for xpath: FanPower</sch:assert>
     </sch:rule>
@@ -1042,8 +1042,10 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForWholeBuildingVentilation="true" and h:IsSharedSystem="true"]'>
       <sch:assert role='ERROR' test='count(h:FractionRecirculation) = 1'>Expected 1 element(s) for xpath: FractionRecirculation</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:InUnitFlowRate) = 1'>Expected 1 element(s) for xpath: extension/InUnitFlowRate</sch:assert>
-      <sch:assert role='ERROR' test='number(h:extension/h:InUnitFlowRate) &lt; number(h:TestedFlowRate) or not(h:extension/h:InUnitFlowRate) or not(h:TestedFlowRate)'>Expected extension/InUnitFlowRate to be less than TestedFlowRate</sch:assert>
-      <sch:assert role='ERROR' test='number(h:extension/h:InUnitFlowRate) &lt; number(h:RatedFlowRate) or not(h:extension/h:InUnitFlowRate) or not(h:RatedFlowRate)'>Expected extension/InUnitFlowRate to be less than RatedFlowRate</sch:assert>
+      <sch:assert role='ERROR' test='number(h:RatedFlowRate) &gt; number(h:extension/h:InUnitFlowRate) or not(h:RatedFlowRate) or not(h:extension/h:InUnitFlowRate)'>Expected RatedFlowRate to be greater than extension/InUnitFlowRate</sch:assert>
+      <sch:assert role='ERROR' test='number(h:CalculatedFlowRate) &gt; number(h:extension/h:InUnitFlowRate) or not(h:CalculatedFlowRate) or not(h:extension/h:InUnitFlowRate)'>Expected CalculatedFlowRate to be greater than extension/InUnitFlowRate</sch:assert>
+      <sch:assert role='ERROR' test='number(h:TestedFlowRate) &gt; number(h:extension/h:InUnitFlowRate) or not(h:TestedFlowRate) or not(h:extension/h:InUnitFlowRate)'>Expected TestedFlowRate to be greater than extension/InUnitFlowRate</sch:assert>
+      <sch:assert role='ERROR' test='number(h:DeliveredVentilation) &gt; number(h:extension/h:InUnitFlowRate) or not(h:DeliveredVentilation) or not(h:extension/h:InUnitFlowRate)'>Expected DeliveredVentilation to be greater than extension/InUnitFlowRate</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:PreHeating) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/PreHeating</sch:assert> <!-- See [MechanicalVentilationType=SharedWithPreHeating] -->
       <sch:assert role='ERROR' test='count(h:extension/h:PreCooling) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/PreCooling</sch:assert> <!-- See [MechanicalVentilationType=SharedWithPreCooling] -->
     </sch:rule>
@@ -1080,7 +1082,7 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForLocalVentilation="true"]'>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: SystemIdentifier</sch:assert>
       <sch:assert role='ERROR' test='count(h:Quantity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Quantity</sch:assert>
-      <sch:assert role='ERROR' test='count(h:RatedFlowRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RatedFlowRate</sch:assert>
+      <sch:assert role='ERROR' test='count(h:RatedFlowRate) + count(h:CalculatedFlowRate) + count(h:TestedFlowRate) + count(h:DeliveredVentilation) &gt;= 0'>Expected 0 or more element(s) for xpath: RatedFlowRate | CalculatedFlowRate | TestedFlowRate | DeliveredVentilation</sch:assert>
       <sch:assert role='ERROR' test='count(h:HoursInOperation) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HoursInOperation</sch:assert>
       <sch:assert role='ERROR' test='count(h:FanLocation) = 1'>Expected 1 element(s) for xpath: FanLocation</sch:assert>
       <sch:assert role='ERROR' test='h:FanLocation[text()="kitchen" or text()="bath"] or not(h:FanLocation)'>Expected FanLocation to be 'kitchen' or 'bath'</sch:assert>
@@ -1095,8 +1097,8 @@
     <sch:title>[WholeHouseFan]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForSeasonalCoolingLoadReduction="true"]'>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: SystemIdentifier</sch:assert>
-      <sch:assert role='ERROR' test='count(h:RatedFlowRate) = 1'>Expected 1 element(s) for xpath: RatedFlowRate</sch:assert>
-      <sch:assert role='ERROR' test='count(h:FanPower) = 1'>Expected 1 element(s) for xpath: FanPower</sch:assert>
+      <sch:assert role='ERROR' test='count(h:RatedFlowRate) + count(h:CalculatedFlowRate) + count(h:TestedFlowRate) + count(h:DeliveredVentilation) &gt;= 0'>Expected 0 or more element(s) for xpath: RatedFlowRate | CalculatedFlowRate | TestedFlowRate | DeliveredVentilation</sch:assert>
+      <sch:assert role='ERROR' test='count(h:FanPower) &lt;= 1'>Expected 0 or 1 element(s) for xpath: FanPower</sch:assert>
     </sch:rule>
   </sch:pattern>
 
