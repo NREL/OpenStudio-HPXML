@@ -309,10 +309,10 @@ class HEScoreRulesetTest < MiniTest::Test
     bldg_length_front = HEScoreRuleset.instance_variable_get(:@bldg_length_front)
 
     slab_foundation = json['building']['zone']['zone_floor'][0]
-    slab_area = slab_foundation['floor_area']
+    slab_area = slab_foundation['floor_area'].to_f
     assert_in_epsilon(slab_area, 600.0, 0.01)
     basement_foundation = json['building']['zone']['zone_floor'][1]
-    basement_area = basement_foundation['floor_area']
+    basement_area = basement_foundation['floor_area'].to_f
     assert_in_epsilon(basement_area, 400.0, 0.01)
 
     slab_perimeter = HEScoreRuleset.get_foundation_perimeter(json, slab_foundation)

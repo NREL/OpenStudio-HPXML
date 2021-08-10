@@ -1002,7 +1002,7 @@ class HEScoreRuleset
     if n_foundations == 1
       return @bldg_perimeter
     elsif n_foundations == 2
-      fnd_area = foundation['floor_area']
+      fnd_area = foundation['floor_area'].to_f
       long_side = [@bldg_length_front, @bldg_length_side].max
       short_side = [@bldg_length_front, @bldg_length_side].min
       total_foundation_area = 0
