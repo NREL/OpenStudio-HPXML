@@ -59,9 +59,9 @@ class HEScoreRuleset
   end
 
   def self.set_summary(json, new_hpxml)
-    # Get HPXML values
+    # Get JSON values
     if json['building']['about']['town_house_walls']
-      @bldg_type = HPXML::ResidentialTypeSFA # FIXME: double-check
+      @bldg_type = HPXML::ResidentialTypeSFA
     else
       @bldg_type = HPXML::ResidentialTypeSFD
     end
@@ -76,8 +76,10 @@ class HEScoreRuleset
     @ducts = get_ducts_details(json)
     @cfa_basement = @fnd_areas[HPXML::LocationBasementConditioned]
     @cfa_basement = 0 if @cfa_basement.nil?
-    @ncfl_ag = json['building']['about']['num_floor_above_grade'] # FIXME: double-check
+    @ncfl_ag = json['building']['about']['num_floor_above_grade']
     @ceil_height = json['building']['about']['floor_to_ceiling_height'] # ft
+    @has_same_wall_const = json['building']['zone']['wall_construction_same']
+    @has_same_window_const = json['building']['zone']['window_construction_same']
 
     # Calculate geometry
     @has_cond_bsmnt = @fnd_areas.key?(HPXML::LocationBasementConditioned)
@@ -211,18 +213,27 @@ class HEScoreRuleset
 
   def self.set_enclosure_walls(json, new_hpxml)
     # Above-grade walls
+    front_wall_assembly_code = nil
     json['building']['zone']['zone_wall'].each do |orig_wall|
       wall_area = nil
       if ['front', 'back'].include? orig_wall['side']
         wall_area = @ceil_height * @bldg_length_front * @ncfl_ag
+        if orig_wall['side'] == 'front'
+          front_wall_assembly_code = orig_wall['wall_assembly_code']
+        end
       else
         wall_area = @ceil_height * @bldg_length_side * @ncfl_ag
       end
-      wall_r = get_wall_effective_r_from_doe2code(orig_wall['wall_assembly_code'])
+      if @has_same_wall_const
+        wall_assembly_code = front_wall_assembly_code
+      else
+        wall_assembly_code = orig_wall['wall_assembly_code']
+      end
+      wall_r = get_wall_effective_r_from_doe2code(wall_assembly_code)
       new_hpxml.walls.add(id: "#{orig_wall['side']}_wall",
                           exterior_adjacent_to: HPXML::LocationOutside,
                           interior_adjacent_to: HPXML::LocationLivingSpace,
-                          wall_type: $wall_type_map[orig_wall['wall_assembly_code'][2, 2]],
+                          wall_type: $wall_type_map[wall_assembly_code[2, 2]],
                           area: wall_area,
                           azimuth: sanitize_azimuth(wall_orientation_to_azimuth(orig_wall['side'])),
                           solar_absorptance: 0.75,
@@ -351,14 +362,23 @@ class HEScoreRuleset
   end
 
   def self.set_enclosure_windows(json, new_hpxml)
+    front_window_code = nil
     json['building']['zone']['zone_wall'].each do |orig_wall|
       next unless orig_wall.key?('zone_window')
 
       orig_window = orig_wall['zone_window']
       ufactor = orig_window['window_u_value']
       shgc = orig_window['window_shgc']
+      if orig_wall['side'] == 'front'
+        front_window_code = orig_window['window_code']
+      end
+      if @has_same_window_const
+        window_code = front_window_code
+      else
+        window_code = orig_window['window_code']
+      end
       if ufactor.nil?
-        ufactor, shgc = get_window_skylight_ufactor_shgc_from_doe2code(orig_window['window_code'])
+        ufactor, shgc = get_window_skylight_ufactor_shgc_from_doe2code(window_code)
       end
       interior_shading_factor_summer, interior_shading_factor_winter = Constructions.get_default_interior_shading_factors()
       exterior_shading_factor_summer = 1.0
@@ -452,7 +472,7 @@ class HEScoreRuleset
       orig_cooling = orig_hvac['cooling']
 
       # HeatingSystem
-      if ['central_furnace', 'wall_furnace', 'boiler', 'wood_stove', 'baseboard'].include? orig_heating['type']
+      if (not orig_heating.nil?) && (['central_furnace', 'wall_furnace', 'boiler', 'wood_stove', 'baseboard'].include? orig_heating['type'])
         heating_system_type = hescore_to_hpxml_hvac_type(orig_heating['type'])
         heating_system_fuel = hescore_to_hpxml_fuel(orig_heating['fuel_primary'])
         distribution_system_idref = nil
@@ -534,7 +554,7 @@ class HEScoreRuleset
       end
 
       # CoolingSystem
-      if ['packaged_dx', 'split_dx', 'dec'].include? orig_cooling['type']
+      if (not orig_cooling.nil?) && (['packaged_dx', 'split_dx', 'dec'].include? orig_cooling['type'])
         cooling_system_type = hescore_to_hpxml_hvac_type(orig_cooling['type'])
         cooling_system_fuel = HPXML::FuelTypeElectricity
         distribution_system_idref = nil
@@ -592,12 +612,13 @@ class HEScoreRuleset
       # HeatPump
       heatpump_fraction_cool_load_served = 0
       heatpump_fraction_heat_load_served = 0
-      if (['heat_pump', 'gchp', 'mini_split'].include? orig_heating['type']) || (['heat_pump', 'gchp', 'mini_split'].include? orig_cooling['type'])
+      if ((not orig_heating.nil?) && (['heat_pump', 'gchp', 'mini_split'].include? orig_heating['type'])) || 
+         ((not orig_cooling.nil?) && (['heat_pump', 'gchp', 'mini_split'].include? orig_cooling['type']))
         heat_pump_fuel = HPXML::FuelTypeElectricity
         backup_heating_fuel = HPXML::FuelTypeElectricity
         backup_heating_efficiency_percent = 1.0
         distribution_system_idref = nil
-        if ['heat_pump', 'gchp', 'mini_split'].include? orig_cooling['type']
+        if ((not orig_cooling.nil?) && (['heat_pump', 'gchp', 'mini_split'].include? orig_cooling['type']))
           heat_pump_type = hescore_to_hpxml_hvac_type(orig_cooling['type'])
           if ['heat_pump', 'mini_split'].include? orig_cooling['type']
             cooling_efficiency_seer = orig_cooling['efficiency']
@@ -608,7 +629,7 @@ class HEScoreRuleset
           cooling_energy_star = (orig_cooling['efficiency_level'] == 'energy_star')
           heatpump_fraction_cool_load_served = orig_hvac['hvac_fraction']
         end
-        if ['heat_pump', 'gchp', 'mini_split'].include? orig_heating['type']
+        if ((not orig_heating.nil?) && (['heat_pump', 'gchp', 'mini_split'].include? orig_heating['type']))
           heat_pump_type = hescore_to_hpxml_hvac_type(orig_heating['type'])
           if ['heat_pump', 'mini_split'].include? orig_heating['type']
             heating_efficiency_hspf = orig_heating['efficiency']
@@ -620,7 +641,8 @@ class HEScoreRuleset
           heatpump_fraction_heat_load_served = orig_hvac['hvac_fraction']
         end
         
-        if (['heat_pump', 'gchp'].include? orig_cooling['type']) || (['heat_pump', 'gchp'].include? orig_heating['type'])
+        if ((not orig_cooling.nil?) && (['heat_pump', 'gchp'].include? orig_cooling['type'])) ||
+           ((not orig_heating.nil?) && (['heat_pump', 'gchp'].include? orig_heating['type']))
           distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution"  # FIXME: need to look at how HEScore PHP code is handling it
         end
 
@@ -686,17 +708,16 @@ class HEScoreRuleset
       end
 
       # HVACDistribution
-      if orig_hvac.key?('hvac_distribution') && (not orig_hvac['hvac_distribution'].empty?)
-        new_hpxml.hvac_distributions.add(id: "#{orig_hvac['hvac_name']}_air_distribution",
-                                         distribution_system_type: HPXML::HVACDistributionTypeAir,
-                                         air_type: HPXML::AirTypeRegularVelocity)
-
-        hvac_fraction = orig_hvac['hvac_fraction'] # get_hvac_fraction(json, orig_dist.id)  # FIXME: double-check
-        new_hpxml.hvac_distributions[-1].conditioned_floor_area_served = hvac_fraction * @cfa
-
+      if orig_hvac.key?('hvac_distribution') &&
+         ((not orig_cooling.nil?) && (['heat_pump', 'gchp', 'split_dx'].include? orig_cooling['type'])) ||
+         ((not orig_heating.nil?) && (['heat_pump', 'gchp', 'central_furnace'].include? orig_heating['type']))
+        tot_frac = 0.0
         frac_inside = 0.0
         sealed = []
         orig_hvac['hvac_distribution'].each do |orig_duct|
+          next if orig_duct['fraction'] == 0
+
+          tot_frac += orig_duct['fraction']
           sealed << orig_duct['sealed']
 
           duct_location = {'cond_space' => HPXML::LocationLivingSpace,
@@ -707,52 +728,64 @@ class HEScoreRuleset
 
           next unless duct_location == HPXML::LocationLivingSpace
 
-          frac_inside += (Float(orig_duct['fraction']) / 100)
+          frac_inside += Float(orig_duct['fraction'])
         end
-        sealed = sealed.all? { |d| d == true } # FIXME: double-check
-        lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(@ncfl_ag, @cfa, sealed, frac_inside)
 
-        # Supply duct leakage to the outside
-        new_hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                                       duct_leakage_units: HPXML::UnitsPercent,
-                                                                       duct_leakage_value: lto_s,
-                                                                       duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+        if tot_frac > 0
+          new_hpxml.hvac_distributions.add(id: "#{orig_hvac['hvac_name']}_air_distribution",
+                                           distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                           air_type: HPXML::AirTypeRegularVelocity)
 
-        # Return duct leakage to the outside
-        new_hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                                       duct_leakage_units: HPXML::UnitsPercent,
-                                                                       duct_leakage_value: lto_r,
-                                                                       duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+          hvac_fraction = orig_hvac['hvac_fraction'] # get_hvac_fraction(json, orig_dist.id)  # FIXME: double-check
+          new_hpxml.hvac_distributions[-1].conditioned_floor_area_served = hvac_fraction * @cfa
+          
+          sealed = sealed.all? { |d| d == true } # FIXME: double-check
+          lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(@ncfl_ag, @cfa, sealed, frac_inside)
 
-        orig_hvac['hvac_distribution'].each do |orig_duct|
-          duct_location = {'cond_space' => HPXML::LocationLivingSpace,
-                           'uncond_basement' => HPXML::LocationBasementUnconditioned,
-                           'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
-                           'vented_crawl' => HPXML::LocationCrawlspaceVented,
-                           'uncond_attic' => HPXML::LocationAtticVented}[orig_duct['location']]
+          # Supply duct leakage to the outside
+          new_hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                                        duct_leakage_units: HPXML::UnitsPercent,
+                                                                        duct_leakage_value: lto_s,
+                                                                        duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
 
-          next if duct_location == HPXML::LocationLivingSpace
+          # Return duct leakage to the outside
+          new_hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                                        duct_leakage_units: HPXML::UnitsPercent,
+                                                                        duct_leakage_value: lto_r,
+                                                                        duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
 
-          if orig_duct['insulated'] == true
-            duct_rvalue = 6
-          else
-            duct_rvalue = 0
+          orig_hvac['hvac_distribution'].each do |orig_duct|
+            next if orig_duct['fraction'] == 0
+
+            duct_location = {'cond_space' => HPXML::LocationLivingSpace,
+                            'uncond_basement' => HPXML::LocationBasementUnconditioned,
+                            'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
+                            'vented_crawl' => HPXML::LocationCrawlspaceVented,
+                            'uncond_attic' => HPXML::LocationAtticVented}[orig_duct['location']]
+
+            next if duct_location == HPXML::LocationLivingSpace
+
+            if orig_duct['insulated'] == true
+              duct_rvalue = 6
+            else
+              duct_rvalue = 0
+            end
+
+            supply_duct_surface_area = uncond_area_s * Float(orig_duct['fraction']) / (1.0 - frac_inside)
+            return_duct_surface_area = uncond_area_r * Float(orig_duct['fraction']) / (1.0 - frac_inside)
+
+            # Supply duct
+            new_hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
+                                                      duct_insulation_r_value: duct_rvalue,
+                                                      duct_location: duct_location,
+                                                      duct_surface_area: supply_duct_surface_area)
+
+            # Return duct
+            new_hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeReturn,
+                                                      duct_insulation_r_value: duct_rvalue,
+                                                      duct_location: duct_location,
+                                                      duct_surface_area: return_duct_surface_area)
           end
-
-          supply_duct_surface_area = uncond_area_s * (Float(orig_duct['fraction']) / 100) / (1.0 - frac_inside)
-          return_duct_surface_area = uncond_area_r * (Float(orig_duct['fraction']) / 100) / (1.0 - frac_inside)
-
-          # Supply duct
-          new_hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
-                                                     duct_insulation_r_value: duct_rvalue,
-                                                     duct_location: duct_location,
-                                                     duct_surface_area: supply_duct_surface_area)
-
-          # Return duct
-          new_hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeReturn,
-                                                    duct_insulation_r_value: duct_rvalue,
-                                                    duct_location: duct_location,
-                                                    duct_surface_area: return_duct_surface_area)
         end
       end
     end
@@ -1459,9 +1492,11 @@ def get_ducts_details(json)
   json['building']['systems']['hvac'].each do |orig_hvac|
     next unless orig_hvac.key?('hvac_distribution')
 
-    hvac_frac = orig_hvac['hvac_fraction'] / 100 # get_hvac_fraction(json, orig_dist['name'])  FIXME: double-check
+    hvac_frac = orig_hvac['hvac_fraction']  # FIXME: double-check
 
     orig_hvac['hvac_distribution'].each do |orig_duct|
+      next if orig_duct['fraction'].to_f == 0
+
       ducts << [hvac_frac, orig_duct['fraction'], orig_duct['location']]
     end
   end

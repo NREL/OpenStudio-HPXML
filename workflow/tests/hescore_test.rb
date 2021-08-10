@@ -140,7 +140,7 @@ class HEScoreTest < Minitest::Unit::TestCase
         # Files w/o cooling systems
         no_spc_clg = false
         json['building']['systems']['hvac'].each do |hvac|
-          if hvac['cooling'].empty? || hvac['cooling']['type'] == 'none'
+          if hvac['cooling'].nil? || hvac['cooling']['type'] == 'none'
             no_spc_clg = true
           end
         end
@@ -149,7 +149,7 @@ class HEScoreTest < Minitest::Unit::TestCase
         # Files w/o heating systems
         no_spc_htg = false
         json['building']['systems']['hvac'].each do |hvac|
-          if hvac['heating'].empty? || hvac['heating']['type'] == 'none'
+          if hvac['heating'].nil? || hvac['heating']['type'] == 'none'
             no_spc_htg = true
           end
         end
