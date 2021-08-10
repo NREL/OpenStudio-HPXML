@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>253341ce-2a17-464a-8a64-aaef3d4f0a43</version_id>
-  <version_modified>20210809T212005Z</version_modified>
+  <version_id>74fed1bf-d2a8-4236-abb2-60ab95266f57</version_id>
+  <version_modified>20210810T204103Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -41,7 +41,7 @@
     <argument>
       <name>schedules_vacancy_period</name>
       <display_name>Schedules: Vacancy Period</display_name>
-      <description>Specifies the vacancy period. Only applies if the schedules type is 'stochastic'. Enter a date like "Dec 15 - Jan 15".</description>
+      <description>Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15".</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -873,7 +873,7 @@
       <filename>build_residential_schedule_file_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>91EBAB36</checksum>
+      <checksum>7DCA50E2</checksum>
     </file>
     <file>
       <version>
@@ -884,7 +884,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>7E8F5769</checksum>
+      <checksum>8839B5FA</checksum>
     </file>
   </files>
 </measure>
