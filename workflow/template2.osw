@@ -332,6 +332,14 @@
     {
       "arguments": {
         "hpxml_path": "../workflow/sample_files/test.xml",
+        "schedules_type": "smooth",
+        "output_csv_path": "../smooth.csv"
+      },
+      "measure_dir_name": "BuildResidentialScheduleFile"
+    },
+    {
+      "arguments": {
+        "hpxml_path": "../workflow/sample_files/test.xml",
         "output_dir": "../workflow/run",
         "debug": false,
         "add_component_loads": false,
