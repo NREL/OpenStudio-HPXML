@@ -9,13 +9,11 @@ class ScheduleGenerator
                  model:,
                  epw_file:,
                  state:,
-                 building_id: nil,
                  random_seed: nil)
     @runner = runner
     @model = model
     @epw_file = epw_file
     @state = state
-    @building_id = building_id
     @random_seed = random_seed
   end
 
@@ -806,8 +804,6 @@ class ScheduleGenerator
         vacancy.fill(1.0, 0, end_day_num * num_steps_per_day) # Fill between start of year and end day
       end
       @schedules['vacancy'] = vacancy
-    else
-      @runner.registerInfo('No vacancy period set.')
     end
     return true
   end
