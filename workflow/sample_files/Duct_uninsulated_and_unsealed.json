@@ -92,7 +92,7 @@
                             "name": "duct1",
                             "location": "uncond_attic",
                             "fraction": 1,
-                            "insulated": true,
+                            "insulated": false,
                             "sealed": false
                         },
                         {
