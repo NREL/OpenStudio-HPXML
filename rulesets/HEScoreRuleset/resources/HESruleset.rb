@@ -647,7 +647,7 @@ class HEScoreRuleset
         
         if ((not orig_cooling.nil?) && (['heat_pump', 'gchp', 'mini_split'].include? orig_cooling['type'])) ||
            ((not orig_heating.nil?) && (['heat_pump', 'gchp', 'mini_split'].include? orig_heating['type']))
-          distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution"  # FIXME: need to look at how HEScore PHP code is handling it
+          distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution"
         end
 
         if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
@@ -713,8 +713,8 @@ class HEScoreRuleset
 
       # HVACDistribution
       if orig_hvac.key?('hvac_distribution') &&
-         ((not orig_cooling.nil?) && (['heat_pump', 'gchp', 'split_dx'].include? orig_cooling['type'])) ||
-         ((not orig_heating.nil?) && (['heat_pump', 'gchp', 'central_furnace'].include? orig_heating['type']))
+         ((not orig_cooling.nil?) && (['heat_pump', 'gchp', 'split_dx', 'mini_split'].include? orig_cooling['type'])) ||
+         ((not orig_heating.nil?) && (['heat_pump', 'gchp', 'central_furnace', 'mini_split'].include? orig_heating['type']))
         tot_frac = 0.0
         frac_inside = 0.0
         sealed = []
