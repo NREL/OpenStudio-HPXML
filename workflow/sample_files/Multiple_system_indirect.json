@@ -75,7 +75,7 @@
             "hvac": [
                 {
                     "hvac_name": "hvac1",
-                    "hvac_fraction": 0.3,
+                    "hvac_fraction": 0.7,
                     "heating": {
                         "fuel_primary": "natural_gas",
                         "type": "boiler",
@@ -107,7 +107,7 @@
                 },
                 {
                     "hvac_name": "hvac2",
-                    "hvac_fraction": 0.7,
+                    "hvac_fraction": 0.3,
                     "heating": {
                         "fuel_primary": "natural_gas",
                         "type": "wall_furnace",
