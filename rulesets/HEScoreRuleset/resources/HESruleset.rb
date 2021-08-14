@@ -877,7 +877,7 @@ class HEScoreRuleset
     related_hvac_idref = nil
     if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater_type  # FIXME: double-check
       json['building']['systems']['hvac'].each do |hvac|
-        if hvac['heating']['type'] == 'boiler'
+        if hvac['heating']['type'] == 'boiler' && related_hvac_idref.nil?
           related_hvac_idref = "#{hvac['hvac_name']}_heating"
         end
       end
