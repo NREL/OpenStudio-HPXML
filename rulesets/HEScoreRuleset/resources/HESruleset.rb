@@ -656,11 +656,11 @@ class HEScoreRuleset
         # Specify distribution system idref for mini-split if a distribution system exists
         if ((not orig_cooling.nil?) && (['mini_split'].include? orig_cooling['type'])) &&
            ((not orig_heating.nil?) && (['central_furnace'].include? orig_heating['type']))
-         distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution"
+          distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution"
         end
         if ((not orig_cooling.nil?) && (['split_dx'].include? orig_cooling['type'])) &&
            ((not orig_heating.nil?) && (['mini_split'].include? orig_heating['type']))
-         distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution"
+          distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution"
         end
 
         if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
@@ -1535,12 +1535,20 @@ def get_ducts_details(json)
   ducts = []
   json['building']['systems']['hvac'].each do |orig_hvac|
     next unless orig_hvac.key?('hvac_distribution')
+    
+    is_valid_duct = false
     if orig_hvac.key?('heating')
-      next unless ['central_furnace', 'heat_pump', 'gchp'].include? orig_hvac['heating']['type']
+      if ['central_furnace', 'heat_pump', 'gchp'].include? orig_hvac['heating']['type']
+        is_valid_duct = true
+      end
     end
     if orig_hvac.key?('cooling')
-      next unless ['split_dx', 'heat_pump', 'gchp'].include? orig_hvac['cooling']['type']
+      if ['split_dx', 'heat_pump', 'gchp'].include? orig_hvac['cooling']['type']
+        is_valid_duct = true
+      end
     end
+
+    next unless is_valid_duct
 
     hvac_frac = orig_hvac['hvac_fraction']  # FIXME: double-check
 
