@@ -74,7 +74,7 @@ class HEScoreRuleset
     @is_townhouse = (@bldg_type == HPXML::ResidentialTypeSFA)
     @fnd_areas = get_foundation_areas(json)
     @ducts = get_ducts_details(json)
-    @cfa_basement = @fnd_areas[HPXML::LocationBasementConditioned]
+    @cfa_basement = @fnd_areas['cond_basement']
     @cfa_basement = 0 if @cfa_basement.nil?
     @ncfl_ag = json['building']['about']['num_floor_above_grade']
     @ceil_height = json['building']['about']['floor_to_ceiling_height'] # ft
@@ -82,8 +82,8 @@ class HEScoreRuleset
     @has_same_window_const = json['building']['zone']['window_construction_same']
 
     # Calculate geometry
-    @has_cond_bsmnt = @fnd_areas.key?(HPXML::LocationBasementConditioned)
-    @has_uncond_bsmnt = @fnd_areas.key?(HPXML::LocationBasementUnconditioned)
+    @has_cond_bsmnt = @fnd_areas.key?('cond_basement')
+    @has_uncond_bsmnt = @fnd_areas.key?('uncond_basement')
     @ncfl = @ncfl_ag + (@has_cond_bsmnt ? 1 : 0)
     @nfl = @ncfl + (@has_uncond_bsmnt ? 1 : 0)
     @bldg_footprint = (@cfa - @cfa_basement) / @ncfl_ag # ft^2
@@ -179,7 +179,11 @@ class HEScoreRuleset
                          'cond_attic' => HPXML::LocationLivingSpace,
                          'cath_ceiling' => HPXML::LocationLivingSpace }[orig_roof['roof_type']]
       # Roof: Two surfaces per HES zone_roof
-      roof_area = orig_roof['roof_area'] / Math.cos(@roof_angle_rad)
+      if orig_roof['roof_type'] == 'vented_attic'
+        roof_area = orig_roof['roof_area'] / Math.cos(@roof_angle_rad)
+      else
+        roof_area = orig_roof['roof_area']
+      end
       roof_solar_abs = get_roof_solar_absorptance($roof_color_map[orig_roof['roof_color']])
       roof_r = get_roof_effective_r_from_doe2code(orig_roof['roof_assembly_code'])
       if @is_townhouse
@@ -378,7 +382,7 @@ class HEScoreRuleset
         window_code = orig_window['window_code']
       end
       if ufactor.nil?
-        ufactor, shgc = get_window_skylight_ufactor_shgc_from_doe2code(window_code)
+        ufactor, shgc = get_window_ufactor_shgc_from_doe2code(window_code)
       end
       interior_shading_factor_summer, interior_shading_factor_winter = Constructions.get_default_interior_shading_factors()
       exterior_shading_factor_summer = 1.0
@@ -414,7 +418,7 @@ class HEScoreRuleset
       ufactor = orig_skylight['skylight_u_value']
       shgc = orig_skylight['skylight_shgc']
       if ufactor.nil?
-        ufactor, shgc = get_window_skylight_ufactor_shgc_from_doe2code(orig_skylight['skylight_code'])
+        ufactor, shgc = get_skylight_ufactor_shgc_from_doe2code(orig_skylight['skylight_code'])
       end
 
       interior_shading_factor_summer = 1.0
@@ -641,8 +645,8 @@ class HEScoreRuleset
           heatpump_fraction_heat_load_served = orig_hvac['hvac_fraction']
         end
         
-        if ((not orig_cooling.nil?) && (['heat_pump', 'gchp'].include? orig_cooling['type'])) ||
-           ((not orig_heating.nil?) && (['heat_pump', 'gchp'].include? orig_heating['type']))
+        if ((not orig_cooling.nil?) && (['heat_pump', 'gchp', 'mini_split'].include? orig_cooling['type'])) ||
+           ((not orig_heating.nil?) && (['heat_pump', 'gchp', 'mini_split'].include? orig_heating['type']))
           distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution"  # FIXME: need to look at how HEScore PHP code is handling it
         end
 
@@ -651,10 +655,10 @@ class HEScoreRuleset
             # Do nothing, we have the SEER
           elsif cooling_energy_star
             cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
-                                                            heat_pump_type,
-                                                            heat_pump_fuel,
-                                                            'SEER',
-                                                            'energy_star')
+                                                             heat_pump_type,
+                                                             heat_pump_fuel,
+                                                             'SEER',
+                                                             'energy_star')
           elsif not year_installed.nil?
             cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
                                                              heat_pump_type,
@@ -1148,7 +1152,7 @@ def get_wall_effective_r_from_doe2code(doe2code)
 end
 
 $roof_color_map = {
-  'white' => HPXML::ColorLight,
+  'white' => HPXML::ColorReflective,
   'light' => HPXML::ColorLight,
   'medium' => HPXML::ColorMedium,
   'medium_dark' => HPXML::ColorMediumDark,
@@ -1225,7 +1229,7 @@ def get_floor_effective_r_from_doe2code(doe2code)
   return val
 end
 
-def get_window_skylight_ufactor_shgc_from_doe2code(doe2code)
+def get_window_ufactor_shgc_from_doe2code(doe2code)
   window_ufactor_shgc = {
     'scna' => [1.27, 0.75],
     'scnw' => [0.89, 0.64],
@@ -1249,6 +1253,32 @@ def get_window_skylight_ufactor_shgc_from_doe2code(doe2code)
   return window_ufactor_shgc if not window_ufactor_shgc.nil?
 
   fail "Could not get default window U/SHGC for window code '#{doe2code}'"
+end
+
+def get_skylight_ufactor_shgc_from_doe2code(doe2code)
+  skylight_ufactor_shgc = {
+    'scna' => [1.98, 0.75],
+    'scnw' => [1.47, 0.64],
+    'stna' => [1.98, 0.64],
+    'stnw' => [1.47, 0.54],
+    'dcaa' => [1.30, 0.67],
+    'dcab' => [1.10, 0.67],
+    'dcaw' => [0.84, 0.56],
+    'dtaa' => [1.30, 0.55],
+    'dtab' => [1.10, 0.55],
+    'dtaw' => [0.84, 0.46],
+    'dpeaw' => [0.74, 0.52],
+    'dpeaab' => [0.95, 0.62],
+    'dpeaaw' => [0.68, 0.52],
+    'dseaa' => [1.17, 0.37],
+    'dseab' => [0.98, 0.37],
+    'dseaw' => [0.71, 0.31],
+    'dseaaw' => [0.65, 0.31],
+    'thmabw' => [0.47, 0.31]
+  }[doe2code]
+  return skylight_ufactor_shgc if not skylight_ufactor_shgc.nil?
+
+  fail "Could not get default skylight U/SHGC for skylight code '#{doe2code}'"
 end
 
 def get_roof_solar_absorptance(roof_color)
