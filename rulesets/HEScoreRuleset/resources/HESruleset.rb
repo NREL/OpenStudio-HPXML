@@ -163,7 +163,6 @@ class HEScoreRuleset
       if not cfm50.nil?
         ach50 = cfm50 * 60.0 / @cvolume
       else
-        puts @ncfl_ag, @cfa, @ceil_height, @cvolume, desc, @year_built, @iecc_zone, @fnd_areas, @ducts
         ach50 = calc_ach50(@ncfl_ag, @cfa, @ceil_height, @cvolume, desc, @year_built, @iecc_zone, @fnd_areas, @ducts)
       end
 
