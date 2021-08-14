@@ -184,7 +184,11 @@ class HEScoreRuleset
       else
         roof_area = orig_roof['roof_area']
       end
-      roof_solar_abs = get_roof_solar_absorptance($roof_color_map[orig_roof['roof_color']])
+      if orig_roof['roof_color'] == 'cool_color'
+        roof_solar_abs = orig_roof['roof_absorptance']
+      else
+        roof_solar_abs = get_roof_solar_absorptance($roof_color_map[orig_roof['roof_color']])
+      end
       roof_r = get_roof_effective_r_from_doe2code(orig_roof['roof_assembly_code'])
       if @is_townhouse
         roof_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270]
