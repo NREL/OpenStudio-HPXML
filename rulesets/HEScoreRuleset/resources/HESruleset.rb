@@ -915,7 +915,7 @@ class HEScoreRuleset
 
     orig_pv_system = json['building']['systems']['generation']['solar_electric']
 
-    max_power_output = orig_pv_system['system_capacity']
+    max_power_output = orig_pv_system['system_capacity'] * 1000  # DC Watts
     if max_power_output.nil?
       # Estimate from year and # modules
       module_power = PV.calc_module_power_from_year(orig_pv_system['year']) # W/panel
