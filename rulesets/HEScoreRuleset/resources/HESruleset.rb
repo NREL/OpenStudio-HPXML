@@ -163,6 +163,7 @@ class HEScoreRuleset
       if not cfm50.nil?
         ach50 = cfm50 * 60.0 / @cvolume
       else
+        puts @ncfl_ag, @cfa, @ceil_height, @cvolume, desc, @year_built, @iecc_zone, @fnd_areas, @ducts
         ach50 = calc_ach50(@ncfl_ag, @cfa, @ceil_height, @cvolume, desc, @year_built, @iecc_zone, @fnd_areas, @ducts)
       end
 
@@ -489,7 +490,7 @@ class HEScoreRuleset
         energy_star = (orig_heating['efficiency_level'] == 'energy_star')
         fraction_heat_load_served = orig_hvac['hvac_fraction']
 
-        if orig_heating['type'] == 'central_furnace'
+        if heating_system_type == HPXML::HVACTypeFurnace
           distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution"  # FIXME: need to look at how HEScore PHP code is handling it
         end
 
@@ -1530,6 +1531,12 @@ def get_ducts_details(json)
   ducts = []
   json['building']['systems']['hvac'].each do |orig_hvac|
     next unless orig_hvac.key?('hvac_distribution')
+    if orig_hvac.key?('heating')
+      next unless ['central_furnace', 'heat_pump', 'gchp'].include? orig_hvac['heating']['type']
+    end
+    if orig_hvac.key?('cooling')
+      next unless ['split_dx', 'heat_pump', 'gchp'].include? orig_hvac['cooling']['type']
+    end
 
     hvac_frac = orig_hvac['hvac_fraction']  # FIXME: double-check
 
