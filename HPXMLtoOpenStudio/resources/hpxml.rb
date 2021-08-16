@@ -5876,27 +5876,27 @@ class HPXML < Object
     cost_mult = 0.0
     if cost_mult_type == 'Fixed'
       cost_mult += 1.0
-    elsif cost_mult_type == 'Wall Area, Above-Grade, Conditioned'
+    elsif cost_mult_type == 'Wall Area Above-Grade Conditioned'
       hpxml.walls.each do |wall|
         next unless wall.is_thermal_boundary
 
         cost_mult += wall.area
       end
-    elsif cost_mult_type == 'Wall Area, Above-Grade, Exterior'
+    elsif cost_mult_type == 'Wall Area Above-Grade Exterior'
       hpxml.walls.each do |wall|
         next unless wall.is_exterior
 
         cost_mult += wall.area
       end
-    elsif cost_mult_type == 'Wall Area, Below-Grade'
+    elsif cost_mult_type == 'Wall Area Below-Grade'
       hpxml.foundation_walls.each do |foundation_wall|
         next unless foundation_wall.is_exterior
 
         cost_mult += foundation_wall.area
       end
-    elsif cost_mult_type == 'Floor Area, Conditioned'
+    elsif cost_mult_type == 'Floor Area Conditioned'
       cost_mult += hpxml.building_construction.conditioned_floor_area
-    elsif cost_mult_type == 'Floor Area, Attic'
+    elsif cost_mult_type == 'Floor Area Attic'
       hpxml.frame_floors.each do |frame_floor|
         next unless frame_floor.is_thermal_boundary
         next unless frame_floor.is_interior
@@ -5905,7 +5905,7 @@ class HPXML < Object
 
         cost_mult += frame_floor.area
       end
-    elsif cost_mult_type == 'Floor Area, Lighting'
+    elsif cost_mult_type == 'Floor Area Lighting'
       if hpxml.lighting.interior_usage_multiplier != 0
         cost_mult += hpxml.building_construction.conditioned_floor_area
       end
@@ -5935,7 +5935,7 @@ class HPXML < Object
           cost_mult += duct.duct_surface_area
         end
       end
-    elsif cost_mult_type == 'Size, Heating System'
+    elsif cost_mult_type == 'Size Heating System'
       hpxml.heating_systems.each do |heating_system|
         next if heating_system.id != 'HeatingSystem'
 
@@ -5945,17 +5945,17 @@ class HPXML < Object
       hpxml.heat_pumps.each do |heat_pump|
         cost_mult += UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr')
       end
-    elsif cost_mult_type == 'Size, Secondary Heating System'
+    elsif cost_mult_type == 'Size Secondary Heating System'
       hpxml.heating_systems.each do |heating_system|
         next if heating_system.id != 'SecondHeatingSystem'
 
         cost_mult += UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr')
       end
-    elsif cost_mult_type == 'Size, Heat Pump Backup'
+    elsif cost_mult_type == 'Size Heat Pump Backup'
       hpxml.heat_pumps.each do |heat_pump|
         cost_mult += UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'kbtu/hr')
       end
-    elsif cost_mult_type == 'Size, Cooling System'
+    elsif cost_mult_type == 'Size Cooling System'
       hpxml.cooling_systems.each do |cooling_system|
         cost_mult += UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr')
       end
@@ -5963,13 +5963,13 @@ class HPXML < Object
       hpxml.heat_pumps.each do |heat_pump|
         cost_mult += UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr')
       end
-    elsif cost_mult_type == 'Size, Water Heater'
+    elsif cost_mult_type == 'Size Water Heater'
       hpxml.water_heating_systems.each do |water_heating_system|
         next if water_heating_system.tank_volume.nil?
 
         cost_mult += water_heating_system.tank_volume
       end
-    elsif cost_mult_type == 'Flow Rate, Mechanical Ventilation'
+    elsif cost_mult_type == 'Flow Rate Mechanical Ventilation'
       hpxml.ventilation_fans.each do |ventilation_fan|
         next unless ventilation_fan.used_for_whole_building_ventilation
 
@@ -5977,13 +5977,13 @@ class HPXML < Object
           cost_mult += ventilation_fan.rated_flow_rate
         end
       end
-    elsif cost_mult_type == 'Slab Perimeter, Exposed, Conditioned'
+    elsif cost_mult_type == 'Slab Perimeter Exposed Conditioned'
       hpxml.slabs.each do |slab|
         next unless slab.is_exterior_thermal_boundary
 
         cost_mult += slab.exposed_perimeter
       end
-    elsif cost_mult_type == 'Rim Joist Area, Above-Grade, Exterior'
+    elsif cost_mult_type == 'Rim Joist Area Above-Grade Exterior'
       hpxml.rim_joists.each do |rim_joist|
         cost_mult += rim_joist.area
       end
