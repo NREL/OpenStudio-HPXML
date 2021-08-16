@@ -148,7 +148,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       args[:geometry_num_occupants] = hpxml.building_occupancy.number_of_residents
     end
     if args[:schedules_vacancy_period].is_initialized
-      begin_month, begin_day, end_month, end_day = parse_date_range(args[:schedules_vacancy_period].get)
+      begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:schedules_vacancy_period].get)
       args[:schedules_vacancy_begin_month] = begin_month
       args[:schedules_vacancy_begin_day] = begin_day
       args[:schedules_vacancy_end_month] = end_month
@@ -175,31 +175,6 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     runner.registerInfo("Created #{args[:schedules_type]} schedule with #{info_msgs.join(', ')}")
 
     return true
-  end
-
-  def parse_date_range(date_range)
-    begin_end_dates = date_range.split('-').map { |v| v.strip }
-    if begin_end_dates.size != 2
-      fail "Invalid date format specified for '#{date_range}'."
-    end
-
-    begin_values = begin_end_dates[0].split(' ').map { |v| v.strip }
-    end_values = begin_end_dates[1].split(' ').map { |v| v.strip }
-
-    if (begin_values.size != 2) || (end_values.size != 2)
-      fail "Invalid date format specified for '#{date_range}'."
-    end
-
-    require 'date'
-    begin_month = Date::ABBR_MONTHNAMES.index(begin_values[0].capitalize)
-    end_month = Date::ABBR_MONTHNAMES.index(end_values[0].capitalize)
-    begin_day = begin_values[1].to_i
-    end_day = end_values[1].to_i
-    if begin_month.nil? || end_month.nil? || begin_day == 0 || end_day == 0
-      fail "Invalid date format specified for '#{date_range}'."
-    end
-
-    return begin_month, begin_day, end_month, end_day
   end
 end
 
