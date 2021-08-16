@@ -607,6 +607,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end
     end
 
+    # Cost Multipliers
+    @cost_multipliers.each do |cost_mult_type, cost_mult|
+      # FIXME: to report system sizes, we need to pass in.xml into HPXML::get_cost_multiplier
+      cost_mult.annual_output = HPXML::get_cost_multiplier(@hpxml, cost_mult_type)
+    end
+
     # Space Heating (by System)
     dfhp_loads = get_dfhp_loads(outputs) # Calculate dual-fuel heat pump load
     outputs[:hpxml_heat_sys_ids].each do |sys_id|
@@ -979,6 +985,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     results_out << [line_break]
     @hot_water_uses.each do |hot_water_type, hot_water|
       results_out << ["#{hot_water.name} (#{hot_water.annual_units})", hot_water.annual_output.round(0)]
+    end
+    results_out << [line_break]
+    @cost_multipliers.each do |key, cost_mult|
+      results_out << ["#{cost_mult.name} (#{cost_mult.annual_units})", cost_mult.annual_output.round(2)]
     end
 
     if output_format == 'csv'
@@ -2244,6 +2254,47 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       hot_water.name = "Hot Water: #{hot_water_type}"
       hot_water.annual_units = 'gal'
       hot_water.timeseries_units = 'gal'
+    end
+
+    # Cost Multipliers
+    @cost_multipliers = {}
+    @cost_multipliers[BS::Fixed] = BaseOutput.new
+    @cost_multipliers[BS::WallAreaAboveGradeConditioned] = BaseOutput.new
+    @cost_multipliers[BS::WallAreaAboveGradeExterior] = BaseOutput.new
+    @cost_multipliers[BS::WallAreaBelowGrade] = BaseOutput.new
+    @cost_multipliers[BS::FloorAreaConditioned] = BaseOutput.new
+    @cost_multipliers[BS::FloorAreaAttic] = BaseOutput.new
+    @cost_multipliers[BS::FloorAreaLighting] = BaseOutput.new
+    @cost_multipliers[BS::RoofArea] = BaseOutput.new
+    @cost_multipliers[BS::WindowArea] = BaseOutput.new
+    @cost_multipliers[BS::DoorArea] = BaseOutput.new
+    @cost_multipliers[BS::DuctUnconditionedSurfaceArea] = BaseOutput.new
+    @cost_multipliers[BS::SizeHeatingSystem] = BaseOutput.new
+    @cost_multipliers[BS::SizeSecondaryHeatingSystem] = BaseOutput.new
+    @cost_multipliers[BS::SizeHeatPumpBackup] = BaseOutput.new
+    @cost_multipliers[BS::SizeCoolingSystem] = BaseOutput.new
+    @cost_multipliers[BS::SizeWaterHeater] = BaseOutput.new
+    @cost_multipliers[BS::FlowRateMechanicalVentilation] = BaseOutput.new
+    @cost_multipliers[BS::SlabPerimeterExposedConditioned] = BaseOutput.new
+    @cost_multipliers[BS::RimJoistAreaAboveGradeExterior] = BaseOutput.new
+
+    @cost_multipliers.each do |cost_mult_type, cost_mult|
+      cost_mult.name = "Building Summary: #{cost_mult_type}"
+      if cost_mult_type.include?('Area')
+        cost_mult.annual_units = 'ft^2'
+      elsif cost_mult_type.include?('Perimeter')
+        cost_mult.annual_units = 'ft'
+      elsif cost_mult_type.include?('Size')
+        if cost_mult_type.include?('Heating') || cost_mult_type.include?('Cooling') || cost_mult_type.include?('Heat Pump')
+          cost_mult.annual_units = 'kBtu/h'
+        else
+          cost_mult.annual_units = 'gal'
+        end
+      elsif cost_mult_type.include?('Flow')
+        cost_mult.annual_units = 'cfm'
+      else
+        cost_mult.annual_units = '1'
+      end
     end
 
     # Peak Fuels
