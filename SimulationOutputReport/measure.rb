@@ -383,8 +383,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @model.setSqlFile(@sqlFile)
 
     hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
+    hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: building_id)
+    @hpxml_defaults_path = HPXML.new(hpxml_path: hpxml_defaults_path)
     HVAC.apply_shared_systems(@hpxml) # Needed for ERI shared HVAC systems
     get_object_maps()
     @eri_design = @hpxml.header.eri_design
@@ -609,8 +611,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Cost Multipliers
     @cost_multipliers.each do |cost_mult_type, cost_mult|
-      # FIXME: to report system sizes, we need to pass in.xml into HPXML::get_cost_multiplier
-      cost_mult.annual_output = HPXML::get_cost_multiplier(@hpxml, cost_mult_type)
+      cost_mult.annual_output = HPXML::get_cost_multiplier(@hpxml_defaults_path, cost_mult_type)
     end
 
     # Space Heating (by System)
