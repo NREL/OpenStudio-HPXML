@@ -317,8 +317,8 @@ class OSModel
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
     # Write updated HPXML object (w/ defaults) to file for inspection
-    hpxml_defaults_path = File.join(output_dir, 'in.xml')
-    XMLHelper.write_file(@hpxml.to_oga, hpxml_defaults_path)
+    @hpxml_defaults_path = File.join(output_dir, 'in.xml')
+    XMLHelper.write_file(@hpxml.to_oga, @hpxml_defaults_path)
 
     # Now that we've written in.xml, ensure that no capacities/airflows
     # are zero in order to prevent potential E+ errors.
@@ -2065,6 +2065,7 @@ class OSModel
     # Store some data for use in reporting measure
     additionalProperties = model.getBuilding.additionalProperties
     additionalProperties.setFeature('hpxml_path', hpxml_path)
+    additionalProperties.setFeature('hpxml_defaults_path', @hpxml_defaults_path)
     additionalProperties.setFeature('building_id', building_id.to_s)
     additionalProperties.setFeature('hvac_map', map_to_string(@hvac_map))
     additionalProperties.setFeature('dhw_map', map_to_string(@dhw_map))
