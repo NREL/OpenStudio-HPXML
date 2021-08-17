@@ -734,7 +734,7 @@ class HEScoreRuleset
         orig_hvac['hvac_distribution'].each do |orig_duct|
           next if orig_duct['fraction'] == 0
 
-          tot_frac += orig_duct['fraction']
+          tot_frac += orig_duct['fraction'].to_f / 100
           sealed << orig_duct['sealed']
 
           duct_location = {'cond_space' => HPXML::LocationLivingSpace,
@@ -745,7 +745,7 @@ class HEScoreRuleset
 
           next unless duct_location == HPXML::LocationLivingSpace
 
-          frac_inside += Float(orig_duct['fraction'])
+          frac_inside += Float(orig_duct['fraction'].to_f / 100)
         end
 
         if tot_frac > 0
@@ -788,8 +788,8 @@ class HEScoreRuleset
               duct_rvalue = 0
             end
 
-            supply_duct_surface_area = uncond_area_s * Float(orig_duct['fraction']) / (1.0 - frac_inside)
-            return_duct_surface_area = uncond_area_r * Float(orig_duct['fraction']) / (1.0 - frac_inside)
+            supply_duct_surface_area = uncond_area_s * Float(orig_duct['fraction'].to_f / 100) / (1.0 - frac_inside)
+            return_duct_surface_area = uncond_area_r * Float(orig_duct['fraction'].to_f / 100) / (1.0 - frac_inside)
 
             # Supply duct
             new_hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
@@ -1555,7 +1555,7 @@ def get_ducts_details(json)
     orig_hvac['hvac_distribution'].each do |orig_duct|
       next if orig_duct['fraction'].to_f == 0
 
-      ducts << [hvac_frac, orig_duct['fraction'], orig_duct['location']]
+      ducts << [hvac_frac, (orig_duct['fraction'].to_f / 100), orig_duct['location']]
     end
   end
   return ducts
