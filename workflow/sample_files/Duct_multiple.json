@@ -92,21 +92,21 @@
                         {
                             "name": "duct1",
                             "location": "uncond_attic",
-                            "fraction": 0.5,
+                            "fraction": 50,
                             "insulated": true,
                             "sealed": false
                         },
                         {
                             "name": "duct2",
                             "location": "uncond_basement",
-                            "fraction": 0.3,
+                            "fraction": 30,
                             "insulated": true,
                             "sealed": false
                         },
                         {
                             "name": "duct3",
                             "location": "cond_space",
-                            "fraction": 0.2,
+                            "fraction": 20,
                             "insulated": true,
                             "sealed": false
                         }
