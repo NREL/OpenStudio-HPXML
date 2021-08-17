@@ -336,6 +336,7 @@ def create_osws
     'extra-bldgtype-single-family-attached-atticroof-flat.osw' => 'base-bldgtype-single-family-attached.osw',
     'extra-gas-pool-heater-with-zero-kwh.osw' => 'base.osw',
     'extra-gas-hot-tub-heater-with-zero-kwh.osw' => 'base.osw',
+    'extra-no-rim-joists.osw' => 'base.osw',
 
     'extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-gable.osw' => 'extra-bldgtype-single-family-attached-slab.osw',
     'extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-hip.osw' => 'extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-gable.osw',
@@ -2293,6 +2294,9 @@ def get_values(osw_file, step)
     step.setArgument('hot_tub_present', true)
     step.setArgument('hot_tub_heater_type', HPXML::HeaterTypeGas)
     step.setArgument('hot_tub_heater_annual_kwh', 0)
+  elsif ['extra-no-rim-joists.osw'].include? osw_file
+    step.removeArgument('geometry_rim_joist_height')
+    step.removeArgument('rim_joist_assembly_r')
 
   elsif ['extra-bldgtype-single-family-attached-atticroof-conditioned-eaves-gable.osw'].include? osw_file
     step.setArgument('geometry_num_floors_above_grade', 2)

@@ -3112,6 +3112,8 @@ class HPXMLFile
 
     if args[:geometry_rim_joist_height].is_initialized
       args[:geometry_rim_joist_height] = args[:geometry_rim_joist_height].get / 12.0
+    else
+      args[:geometry_rim_joist_height] = 0.0
     end
 
     if args[:geometry_foundation_type] == HPXML::FoundationTypeSlab
