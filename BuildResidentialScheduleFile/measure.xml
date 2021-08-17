@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>097b7d63-4d03-49aa-87e8-ee49a6d38cf7</version_id>
-  <version_modified>20210816T150005Z</version_modified>
+  <version_id>84861b8f-b557-472f-a03a-6e2060e157c4</version_id>
+  <version_modified>20210817T162044Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
