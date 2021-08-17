@@ -1330,7 +1330,9 @@ def get_values(osw_file, step)
   if ['base-foundation-ambient.osw'].include? osw_file
     step.setArgument('geometry_cfa', 1350.0)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeAmbient)
+    step.removeArgument('geometry_rim_joist_height')
     step.setArgument('floor_over_foundation_assembly_r', 18.7)
+    step.removeArgument('rim_joist_assembly_r')
     step.setArgument('ducts_number_of_return_registers', '1')
     step.setArgument('plug_loads_other_annual_kwh', '1228.5')
   elsif ['base-foundation-conditioned-basement-slab-insulation.osw'].include? osw_file
@@ -2481,6 +2483,8 @@ def get_values(osw_file, step)
     step.setArgument('foundation_wall_insulation_distance_to_bottom', Constants.Auto)
   elsif ['invalid_files/single-family-attached-ambient.osw'].include? osw_file
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeAmbient)
+    step.removeArgument('geometry_rim_joist_height')
+    step.removeArgument('rim_joist_assembly_r')
   elsif ['invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw'].include? osw_file
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeSlab)
     step.setArgument('geometry_foundation_height_above_grade', 0.0)
@@ -2518,14 +2522,17 @@ def get_values(osw_file, step)
     step.setArgument('geometry_foundation_height', 3.0)
     step.setArgument('floor_over_foundation_assembly_r', 10)
     step.setArgument('foundation_wall_insulation_distance_to_bottom', '0.0')
+    step.setArgument('foundation_wall_assembly_r', 10)
   elsif ['invalid_files/unvented-crawlspace-with-wall-and-ceiling-insulation.osw'].include? osw_file
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceUnvented)
     step.setArgument('geometry_foundation_height', 3.0)
     step.setArgument('floor_over_foundation_assembly_r', 10)
     step.setArgument('foundation_wall_insulation_distance_to_bottom', '0.0')
+    step.setArgument('foundation_wall_assembly_r', 10)
   elsif ['invalid_files/unconditioned-basement-with-wall-and-ceiling-insulation.osw'].include? osw_file
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeBasementUnconditioned)
     step.setArgument('floor_over_foundation_assembly_r', 10)
+    step.setArgument('foundation_wall_assembly_r', 10)
   elsif ['invalid_files/vented-attic-with-floor-and-roof-insulation.osw'].include? osw_file
     step.setArgument('geometry_attic_type', HPXML::AtticTypeVented)
     step.setArgument('roof_assembly_r', 10)

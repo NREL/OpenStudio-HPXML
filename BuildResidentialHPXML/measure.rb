@@ -2913,15 +2913,48 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     # single-family attached and num units, horizontal location not specified
     error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFA) && (!args[:geometry_building_num_units].is_initialized || !args[:geometry_horizontal_location].is_initialized)
-    errors << "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_building_num_units=#{args[:geometry_building_num_units].is_initialized} and geometry_horizontal_location=#{args[:geometry_horizontal_location].is_initialized}" if error
+    if error
+      error = "geometry_unit_type=#{args[:geometry_unit_type]}"
+      if !args[:geometry_building_num_units].is_initialized
+        error += ' and geometry_building_num_units=not provided'
+      end
+      if !args[:geometry_horizontal_location].is_initialized
+        error += ' and geometry_horizontal_location=not provided'
+      end
+      errors << error
+    end
 
     # apartment unit and num units, level, horizontal location not specified
     error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && (!args[:geometry_building_num_units].is_initialized || !args[:geometry_level].is_initialized || !args[:geometry_horizontal_location].is_initialized)
-    errors << "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_building_num_units=#{args[:geometry_building_num_units].is_initialized} and geometry_level=#{args[:geometry_level].is_initialized} and geometry_horizontal_location=#{args[:geometry_horizontal_location].is_initialized}" if error
+    if error
+      error = "geometry_unit_type=#{args[:geometry_unit_type]}"
+      if !args[:geometry_building_num_units].is_initialized
+        error += ' and geometry_building_num_units=not provided'
+      end
+      if !args[:geometry_level].is_initialized
+        error += ' and geometry_level=not provided'
+      end
+      if !args[:geometry_horizontal_location].is_initialized
+        error += ' and geometry_horizontal_location=not provided'
+      end
+      errors << error
+    end
 
     # crawlspace or unconditioned basement with foundation wall and ceiling insulation
-    warning = [HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeBasementUnconditioned].include?(args[:geometry_foundation_type]) && ((args[:foundation_wall_insulation_r] > 0) || (args[:foundation_wall_assembly_r].is_initialized && (args[:foundation_wall_assembly_r].get > 0))) && (args[:floor_over_foundation_assembly_r] > 2.1)
-    warnings << "geometry_foundation_type=#{args[:geometry_foundation_type]} and foundation_wall_insulation_r=#{args[:foundation_wall_insulation_r]} and foundation_wall_assembly_r=#{args[:foundation_wall_assembly_r].is_initialized} and floor_over_foundation_assembly_r=#{args[:floor_over_foundation_assembly_r]}" if warning
+    warning = [HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeBasementUnconditioned].include?(args[:geometry_foundation_type]) && ((args[:foundation_wall_insulation_r] > 0) || args[:foundation_wall_assembly_r].is_initialized) && (args[:floor_over_foundation_assembly_r] > 2.1)
+    if warning
+      warning = "geometry_foundation_type=#{args[:geometry_foundation_type]}"
+      if args[:foundation_wall_insulation_r] > 0
+        warning += " and foundation_wall_insulation_r=#{args[:foundation_wall_insulation_r]}"
+      end
+      if args[:foundation_wall_assembly_r].is_initialized
+        warning += " and foundation_wall_assembly_r=#{args[:foundation_wall_assembly_r].get}"
+      end
+      if args[:floor_over_foundation_assembly_r] > 2.1
+        warning += " and floor_over_foundation_assembly_r=#{args[:floor_over_foundation_assembly_r]}"
+      end
+      warnings << warning
+    end
 
     # vented/unvented attic with floor and roof insulation
     warning = [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include?(args[:geometry_attic_type]) && (args[:geometry_roof_type] != 'flat') && (args[:ceiling_assembly_r] > 2.1) && (args[:roof_assembly_r] > 2.3)
@@ -2987,11 +3020,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     # rim joist height but no rim joist assembly r
     error = args[:geometry_rim_joist_height].is_initialized && !args[:rim_joist_assembly_r].is_initialized
-    errors << "geometry_rim_joist_height=#{args[:geometry_rim_joist_height].get} and rim_joist_assembly_r=#{args[:rim_joist_assembly_r].is_initialized}" if error
+    errors << "geometry_rim_joist_height=#{args[:geometry_rim_joist_height].get} and rim_joist_assembly_r=not provided" if error
 
     # rim joist assembly r but no rim joist height
     error = args[:rim_joist_assembly_r].is_initialized && !args[:geometry_rim_joist_height].is_initialized
-    errors << "rim_joist_assembly_r=#{args[:rim_joist_assembly_r].get} and geometry_rim_joist_height=#{args[:geometry_rim_joist_height].is_initialized}" if error
+    errors << "rim_joist_assembly_r=#{args[:rim_joist_assembly_r].get} and geometry_rim_joist_height=not provided" if error
 
     return warnings, errors
   end
