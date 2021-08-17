@@ -39,9 +39,6 @@
                     }
                 },
                 {
-                    "side": "right"
-                },
-                {
                     "side": "left",
                     "zone_window": {
                         "window_area": 30

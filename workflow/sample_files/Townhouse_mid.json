@@ -37,12 +37,6 @@
                     "zone_window": {
                         "window_area": 50
                     }
-                },
-                {
-                    "side": "right"
-                },
-                {
-                    "side": "left"
                 }
             ],
             "wall_construction_same": true,
