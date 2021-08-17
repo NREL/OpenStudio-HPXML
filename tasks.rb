@@ -460,6 +460,8 @@ def create_osws
     'invalid_files/conditioned-attic-with-one-floor-above-grade.osw' => 'base.osw',
     'invalid_files/zero-number-of-bedrooms.osw' => 'base.osw',
     'invalid_files/single-family-detached-with-shared-system.osw' => 'base.osw',
+    'invalid_files/rim-joist-height-but-no-assembly-r.osw' => 'base.osw',
+    'invalid_files/rim-joist-assembly-r-but-no-height.osw' => 'base.osw',
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -1327,7 +1329,6 @@ def get_values(osw_file, step)
   if ['base-foundation-ambient.osw'].include? osw_file
     step.setArgument('geometry_cfa', 1350.0)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeAmbient)
-    step.setArgument('geometry_rim_joist_height', 0)
     step.setArgument('floor_over_foundation_assembly_r', 18.7)
     step.setArgument('ducts_number_of_return_registers', '1')
     step.setArgument('plug_loads_other_annual_kwh', '1228.5')
@@ -2476,7 +2477,6 @@ def get_values(osw_file, step)
     step.setArgument('foundation_wall_insulation_distance_to_bottom', Constants.Auto)
   elsif ['invalid_files/single-family-attached-ambient.osw'].include? osw_file
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeAmbient)
-    step.setArgument('geometry_rim_joist_height', 0)
   elsif ['invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw'].include? osw_file
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeSlab)
     step.setArgument('geometry_foundation_height_above_grade', 0.0)
@@ -2564,6 +2564,10 @@ def get_values(osw_file, step)
     step.setArgument('geometry_num_bedrooms', 0)
   elsif ['invalid_files/single-family-detached-with-shared-system.osw'].include? osw_file
     step.setArgument('heating_system_type', "Shared #{HPXML::HVACTypeBoiler} w/ Baseboard")
+  elsif ['invalid_files/rim-joist-height-but-no-assembly-r.osw'].include? osw_file
+    step.removeArgument('rim_joist_assembly_r')
+  elsif ['invalid_files/rim-joist-assembly-r-but-no-height.osw'].include? osw_file
+    step.removeArgument('geometry_rim_joist_height')
   end
   return step
 end

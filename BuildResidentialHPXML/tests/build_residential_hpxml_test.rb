@@ -113,7 +113,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'multipliers-without-other-plug-loads.osw' => 'plug_loads_other_annual_kwh=0.0 and plug_loads_other_usage_multiplier=1.0',
       'multipliers-without-well-pump-plug-loads.osw' => 'plug_loads_well_pump_annual_kwh=0.0 and plug_loads_well_pump_usage_multiplier=1.0',
       'multipliers-without-vehicle-plug-loads.osw' => 'plug_loads_vehicle_annual_kwh=0.0 and plug_loads_vehicle_usage_multiplier=1.0',
-      'multipliers-without-fuel-loads.osw' => 'fuel_loads_grill_present=false and fuel_loads_grill_usage_multiplier=1.0 and fuel_loads_lighting_present=false and fuel_loads_lighting_usage_multiplier=1.0 and fuel_loads_fireplace_present=false and fuel_loads_fireplace_usage_multiplier=1.0'
+      'multipliers-without-fuel-loads.osw' => 'fuel_loads_grill_present=false and fuel_loads_grill_usage_multiplier=1.0 and fuel_loads_lighting_present=false and fuel_loads_lighting_usage_multiplier=1.0 and fuel_loads_fireplace_present=false and fuel_loads_fireplace_usage_multiplier=1.0',
     }
 
     expected_error_msgs = {
@@ -134,6 +134,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'conditioned-attic-with-one-floor-above-grade.osw' => 'geometry_num_floors_above_grade=1 and geometry_attic_type=ConditionedAttic',
       'zero-number-of-bedrooms.osw' => 'geometry_num_bedrooms=0',
       'single-family-detached-with-shared-system.osw' => 'geometry_unit_type=single-family detached and heating_system_type=Shared Boiler w/ Baseboard',
+      'rim-joist-height-but-no-assembly-r.osw' => 'geometry_rim_joist_height=9.25 and rim_joist_assembly_r=false',
+      'rim-joist-assembly-r-but-no-height.osw' => 'rim_joist_assembly_r=23.0 and geometry_rim_joist_height=false',
     }
 
     measures = {}
