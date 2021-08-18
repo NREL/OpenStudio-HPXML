@@ -227,7 +227,7 @@
             </FrameType>
             <GlassLayers>double-pane</GlassLayers>
             <GlassType>low-e</GlassType>
-            <GasFill>argon</GasFill>
+            <GasFill>air</GasFill>
             <ExteriorShading>
               <SystemIdentifier id="front_window_shade"/>
               <Type>none</Type>
