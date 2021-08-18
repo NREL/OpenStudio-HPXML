@@ -40,7 +40,7 @@ class Lighting
       if not lighting.interior_weekday_fractions.nil?
         interior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameInteriorLighting + ' schedule', lighting.interior_weekday_fractions, lighting.interior_weekend_fractions, lighting.interior_monthly_multipliers, Constants.ScheduleTypeLimitsFraction)
       else
-        lighting_sch = get_schedule(model, epw_file)
+        lighting_sch = get_schedule(epw_file)
         # Create schedule
         interior_sch = HourlyByMonthSchedule.new(model, 'lighting schedule', lighting_sch, lighting_sch, Constants.ScheduleTypeLimitsFraction)
       end
