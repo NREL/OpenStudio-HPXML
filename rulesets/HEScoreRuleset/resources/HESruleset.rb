@@ -68,16 +68,16 @@ class HEScoreRuleset
     @bldg_orient = json['building']['about']['orientation']
     @bldg_azimuth = orientation_to_azimuth(@bldg_orient)
 
-    @year_built = json['building']['about']['year_built']
-    @nbeds = json['building']['about']['number_bedrooms']
-    @cfa = json['building']['about']['conditioned_floor_area'] # ft^2
+    @year_built = json['building']['about']['year_built'].to_i
+    @nbeds = json['building']['about']['number_bedrooms'].to_f
+    @cfa = json['building']['about']['conditioned_floor_area'].to_f # ft^2
     @is_townhouse = (@bldg_type == HPXML::ResidentialTypeSFA)
     @fnd_areas = get_foundation_areas(json)
     @ducts = get_ducts_details(json)
     @cfa_basement = @fnd_areas['cond_basement']
     @cfa_basement = 0 if @cfa_basement.nil?
-    @ncfl_ag = json['building']['about']['num_floor_above_grade']
-    @ceil_height = json['building']['about']['floor_to_ceiling_height'] # ft
+    @ncfl_ag = json['building']['about']['num_floor_above_grade'].to_f
+    @ceil_height = json['building']['about']['floor_to_ceiling_height'].to_f # ft
     @has_same_wall_const = json['building']['zone']['wall_construction_same']
     @has_same_window_const = json['building']['zone']['window_construction_same']
 
