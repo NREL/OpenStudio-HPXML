@@ -9,29 +9,27 @@ class ScheduleGenerator
                  model:,
                  epw_file:,
                  state:,
-                 random_seed: nil)
+                 random_seed: nil,
+                 minutes_per_step:,
+                 steps_in_day:,
+                 mkc_ts_per_day:,
+                 mkc_ts_per_hour:,
+                 total_days_in_year:,
+                 sim_year:,
+                 sim_start_day:,
+                 **remainder)
     @runner = runner
     @model = model
     @epw_file = epw_file
     @state = state
     @random_seed = random_seed
-  end
-
-  def get_simulation_parameters
-    @minutes_per_step = 60
-    if @model.getSimulationControl.timestep.is_initialized
-      @minutes_per_step = 60 / @model.getSimulationControl.timestep.get.numberOfTimestepsPerHour
-    end
-
-    @steps_in_day = 24 * 60 / @minutes_per_step
-
-    @mkc_ts_per_day = 96
-    @mkc_ts_per_hour = @mkc_ts_per_day / 24
-
-    @total_days_in_year = Integer(Constants.NumDaysInYear(@model))
-
-    @sim_year = @model.getYearDescription.calendarYear.get
-    @sim_start_day = DateTime.new(@sim_year, 1, 1)
+    @minutes_per_step = minutes_per_step
+    @steps_in_day = steps_in_day
+    @mkc_ts_per_day = mkc_ts_per_day
+    @mkc_ts_per_hour = mkc_ts_per_hour
+    @total_days_in_year = total_days_in_year
+    @sim_year = sim_year
+    @sim_start_day = sim_start_day
   end
 
   def get_random_seed
@@ -63,7 +61,6 @@ class ScheduleGenerator
   end
 
   def create(args:)
-    get_simulation_parameters
     initialize_schedules
 
     success = create_average_schedules
@@ -794,14 +791,13 @@ class ScheduleGenerator
     if (not args[:schedules_vacancy_begin_month].nil?) && (not args[:schedules_vacancy_begin_day].nil?) && (not args[:schedules_vacancy_end_month].nil?) && (not args[:schedules_vacancy_end_day].nil?)
       start_day_num = Schedule.get_day_num_from_month_day(@model, args[:schedules_vacancy_begin_month], args[:schedules_vacancy_begin_day])
       end_day_num = Schedule.get_day_num_from_month_day(@model, args[:schedules_vacancy_end_month], args[:schedules_vacancy_end_day])
-      num_steps_per_day = @model.getSimulationControl.timestep.get.numberOfTimestepsPerHour * 24
 
       vacancy = Array.new(@schedules['occupants'].length, 0)
       if end_day_num >= start_day_num
-        vacancy.fill(1.0, (start_day_num - 1) * num_steps_per_day, (end_day_num - start_day_num + 1) * num_steps_per_day) # Fill between start/end days
+        vacancy.fill(1.0, (start_day_num - 1) * args[:steps_in_day], (end_day_num - start_day_num + 1) * args[:steps_in_day]) # Fill between start/end days
       else # Wrap around year
-        vacancy.fill(1.0, (start_day_num - 1) * num_steps_per_day) # Fill between start day and end of year
-        vacancy.fill(1.0, 0, end_day_num * num_steps_per_day) # Fill between start of year and end day
+        vacancy.fill(1.0, (start_day_num - 1) * args[:steps_in_day]) # Fill between start day and end of year
+        vacancy.fill(1.0, 0, end_day_num * args[:steps_in_day]) # Fill between start of year and end day
       end
       @schedules['vacancy'] = vacancy
     end

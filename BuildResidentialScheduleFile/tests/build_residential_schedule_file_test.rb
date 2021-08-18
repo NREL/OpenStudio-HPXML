@@ -33,8 +33,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     info_msgs = result.info.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('CalendarYear=2007') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('NumberOfTimestepsPerHour=1') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
@@ -82,8 +82,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     info_msgs = result.info.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('CalendarYear=2007') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('NumberOfTimestepsPerHour=1') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
@@ -134,8 +134,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     info_msgs = result.info.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('CalendarYear=2007') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('NumberOfTimestepsPerHour=1') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
@@ -184,8 +184,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     info_msgs = result.info.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('CalendarYear=2007') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('NumberOfTimestepsPerHour=1') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
@@ -237,8 +237,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     info_msgs = result.info.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('CalendarYear=2007') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('NumberOfTimestepsPerHour=1') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('State=MD') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('RandomSeed=1') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
@@ -280,8 +280,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     info_msgs = result.info.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('CalendarYear=2007') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('NumberOfTimestepsPerHour=1') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('State=MD') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('RandomSeed=2') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
@@ -329,8 +329,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     info_msgs = result.info.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('CalendarYear=2012') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('NumberOfTimestepsPerHour=1') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2012') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
@@ -379,8 +379,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     info_msgs = result.info.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('CalendarYear=2007') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('NumberOfTimestepsPerHour=6') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=10') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })

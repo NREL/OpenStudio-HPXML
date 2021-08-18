@@ -30,7 +30,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
   # human readable description of modeling approach
   def modeler_description
-    return ''
+    return 'Exports a CSV of schedules to the specified file path, and inserts the CSV schedule file path into the HPXML file (or overwrites it if one already exists).'
   end
 
   # define the arguments that the user will input
@@ -94,7 +94,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     hpxml = HPXML.new(hpxml_path: hpxml_path)
 
-    # Create EpwFile object
+    # create EpwFile object
     epw_path = hpxml.climate_and_risk_zones.weather_station_epw_filepath
     if not File.exist? epw_path
       epw_path = File.join(File.expand_path(File.join(File.dirname(__FILE__), '..', 'weather')), epw_path) # a filename was entered for weather_station_epw_filepath
@@ -105,6 +105,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     end
     epw_file = OpenStudio::EpwFile.new(epw_path)
 
+    # create the schedules
     success = create_schedules(runner, hpxml, model, epw_file, args)
     return false if not success
 
@@ -126,44 +127,11 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   def create_schedules(runner, hpxml, model, epw_file, args)
     info_msgs = []
 
-    # set the calendar year
-    year_description = model.getYearDescription
-    year_description.setCalendarYear(2007) # default to TMY
-    unless hpxml.header.sim_calendar_year.nil?
-      year_description.setCalendarYear(hpxml.header.sim_calendar_year)
-    end
-    if epw_file.startDateActualYear.is_initialized # AMY
-      year_description.setCalendarYear(epw_file.startDateActualYear.get)
-    end
+    get_simulation_parameters(hpxml, model, epw_file, args)
+    get_generator_inputs(hpxml, epw_file, args)
 
-    # set the timestep
-    timestep = model.getTimestep
-    timestep.setNumberOfTimestepsPerHour(1)
-    unless hpxml.header.timestep.nil?
-      timestep.setNumberOfTimestepsPerHour(60 / hpxml.header.timestep)
-    end
-
-    # get generator inputs
-    state = 'CO'
-    state = epw_file.stateProvinceRegion unless epw_file.stateProvinceRegion.empty?
-    state = hpxml.header.state_code unless hpxml.header.state_code.nil?
-    random_seed = args[:schedules_random_seed].get if args[:schedules_random_seed].is_initialized
-    if hpxml.building_occupancy.number_of_residents.nil?
-      args[:geometry_num_occupants] = Geometry.get_occupancy_default_num(hpxml.building_construction.number_of_bedrooms)
-    else
-      args[:geometry_num_occupants] = hpxml.building_occupancy.number_of_residents
-    end
-    if args[:schedules_vacancy_period].is_initialized
-      begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:schedules_vacancy_period].get)
-      args[:schedules_vacancy_begin_month] = begin_month
-      args[:schedules_vacancy_begin_day] = begin_day
-      args[:schedules_vacancy_end_month] = end_month
-      args[:schedules_vacancy_end_day] = end_day
-    end
     args[:resources_path] = File.join(File.dirname(__FILE__), 'resources')
-
-    # generate the schedule
-    schedule_generator = ScheduleGenerator.new(runner: runner, model: model, epw_file: epw_file, state: state, random_seed: random_seed)
+    schedule_generator = ScheduleGenerator.new(runner: runner, model: model, epw_file: epw_file, **args)
 
     success = schedule_generator.create(args: args)
     return false if not success
@@ -171,16 +139,59 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     success = schedule_generator.export(schedules_path: File.expand_path(args[:output_csv_path]))
     return false if not success
 
-    info_msgs << "CalendarYear=#{year_description.calendarYear}"
-    info_msgs << "NumberOfTimestepsPerHour=#{timestep.numberOfTimestepsPerHour}"
-    info_msgs << "State=#{state}"
-    info_msgs << "RandomSeed=#{random_seed}" if args[:schedules_random_seed].is_initialized
+    info_msgs << "SimYear=#{args[:sim_year]}"
+    info_msgs << "MinutesPerStep=#{args[:minutes_per_step]}"
+    info_msgs << "State=#{args[:state]}"
+    info_msgs << "RandomSeed=#{args[:random_seed]}" if args[:schedules_random_seed].is_initialized
     info_msgs << "GeometryNumOccupants=#{args[:geometry_num_occupants]}"
     info_msgs << "VacancyPeriod=#{args[:schedules_vacancy_period].get}" if args[:schedules_vacancy_period].is_initialized
 
     runner.registerInfo("Created #{args[:schedules_type]} schedule with #{info_msgs.join(', ')}")
 
     return true
+  end
+
+  def get_simulation_parameters(hpxml, model, epw_file, args)
+    args[:minutes_per_step] = 60
+    if !hpxml.header.timestep.nil?
+      args[:minutes_per_step] = hpxml.header.timestep
+    end
+    args[:steps_in_day] = 24 * 60 / args[:minutes_per_step]
+    args[:mkc_ts_per_day] = 96
+    args[:mkc_ts_per_hour] = args[:mkc_ts_per_day] / 24
+    args[:total_days_in_year] = Integer(Constants.NumDaysInYear(model))
+
+    calendar_year = 2007 # default to TMY
+    if !hpxml.header.sim_calendar_year.nil?
+      calendar_year = hpxml.header.sim_calendar_year
+    end
+    if epw_file.startDateActualYear.is_initialized # AMY
+      calendar_year = epw_file.startDateActualYear.get
+    end
+    args[:sim_year] = calendar_year
+    args[:sim_start_day] = DateTime.new(args[:sim_year], 1, 1)
+  end
+
+  def get_generator_inputs(hpxml, epw_file, args)
+    args[:state] = 'CO'
+    args[:state] = epw_file.stateProvinceRegion unless epw_file.stateProvinceRegion.empty?
+    args[:state] = hpxml.header.state_code unless hpxml.header.state_code.nil?
+
+    args[:random_seed] = args[:schedules_random_seed].get if args[:schedules_random_seed].is_initialized
+
+    if hpxml.building_occupancy.number_of_residents.nil?
+      args[:geometry_num_occupants] = Geometry.get_occupancy_default_num(hpxml.building_construction.number_of_bedrooms)
+    else
+      args[:geometry_num_occupants] = hpxml.building_occupancy.number_of_residents
+    end
+
+    if args[:schedules_vacancy_period].is_initialized
+      begin_month, begin_day, end_month, end_day = Schedule.parse_date_range(args[:schedules_vacancy_period].get)
+      args[:schedules_vacancy_begin_month] = begin_month
+      args[:schedules_vacancy_begin_day] = begin_day
+      args[:schedules_vacancy_end_month] = end_month
+      args[:schedules_vacancy_end_day] = end_day
+    end
   end
 end
 

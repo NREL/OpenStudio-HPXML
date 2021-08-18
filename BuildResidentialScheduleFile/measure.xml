@@ -3,13 +3,13 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>e7369e03-16e9-47b2-8413-f8530d1ec312</version_id>
-  <version_modified>20210818T012537Z</version_modified>
+  <version_id>48710255-b102-41cf-849b-256c540fb7b7</version_id>
+  <version_modified>20210818T185453Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
   <description>Builds a residential schedule file.</description>
-  <modeler_description></modeler_description>
+  <modeler_description>Exports a CSV of schedules to the specified file path, and inserts the CSV schedule file path into the HPXML file (or overwrites it if one already exists).</modeler_description>
   <arguments>
     <argument>
       <name>hpxml_path</name>
@@ -867,7 +867,13 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EC3C962A</checksum>
+      <checksum>6C8D2821</checksum>
+    </file>
+    <file>
+      <filename>build_residential_schedule_file_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>41F35485</checksum>
     </file>
     <file>
       <version>
@@ -878,13 +884,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>61AB33F6</checksum>
-    </file>
-    <file>
-      <filename>build_residential_schedule_file_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>96569EFD</checksum>
+      <checksum>1DDC6B96</checksum>
     </file>
   </files>
 </measure>
