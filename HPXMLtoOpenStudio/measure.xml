@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>f5ccf2be-60e6-407b-bc11-4276ecfae9bd</version_id>
-  <version_modified>20210817T162047Z</version_modified>
+  <version_id>9708647a-bd59-48db-993e-0f41b1522212</version_id>
+  <version_modified>20210818T010350Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -380,12 +380,6 @@
       <checksum>3152D64E</checksum>
     </file>
     <file>
-      <filename>lighting.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1CA800F0</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.2.0</identifier>
@@ -407,12 +401,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>A96126CA</checksum>
-    </file>
-    <file>
-      <filename>test_airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F79EE8B1</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -439,16 +427,22 @@
       <checksum>59E0D489</checksum>
     </file>
     <file>
+      <filename>test_airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>04418058</checksum>
+    </file>
+    <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FD3E7703</checksum>
+      <checksum>CE244F45</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F3F94CE7</checksum>
+      <checksum>2D5FE96B</checksum>
     </file>
     <file>
       <filename>meta_measure.rb</filename>
@@ -461,6 +455,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>4E328564</checksum>
+    </file>
+    <file>
+      <filename>lighting.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>596F6F77</checksum>
     </file>
   </files>
 </measure>

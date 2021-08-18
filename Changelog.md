@@ -38,6 +38,7 @@ __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
 - Improves HVAC fan power for central forced air systems.
 - Negative `DistanceToTopOfInsulation` values are now disallowed.
+- Fixes workflow errors if a `VentilationFan` has zero airflow rate or zero hours of operation.
 
 ## OpenStudio-HPXML v1.2.0
 

@@ -119,7 +119,7 @@ class ScheduleGenerator
   end
 
   def create_average_lighting_interior
-    lighting_sch = Lighting.get_schedule(@model, @epw_file)
+    lighting_sch = Lighting.get_schedule(@epw_file)
     create_timeseries_from_months(sch_name: 'lighting_interior', month_schs: lighting_sch)
   end
 
@@ -360,7 +360,7 @@ class ScheduleGenerator
     monthly_lighting_schedule = schedule_config['lighting']['monthly_multiplier']
     holiday_lighting_schedule = schedule_config['lighting']['holiday_sch']
 
-    sch = Lighting.get_schedule(@model, @epw_file)
+    sch = Lighting.get_schedule(@epw_file)
     interior_lighting_schedule = []
     num_days_in_months = Constants.NumDaysInMonths(@model)
     for month in 0..11

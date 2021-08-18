@@ -227,7 +227,7 @@ class Lighting
     return int_kwh, ext_kwh, grg_kwh
   end
 
-  def self.get_schedule(model, epw_file)
+  def self.get_schedule(epw_file)
     # Sunrise and sunset hours
     sunrise_hour = []
     sunset_hour = []
