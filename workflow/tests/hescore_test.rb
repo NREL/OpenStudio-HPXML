@@ -156,7 +156,7 @@ class HEScoreTest < Minitest::Unit::TestCase
         next if no_spc_htg && log_line.include?('No space heating specified, the model will not include space heating energy use.')
 
         # Files w/o windows
-        if json['building']['zone']['zone_wall'].map{ |w| w['zone_window']['window_area'] }.sum(0.0) <= 1.0
+        if json['building']['zone']['zone_wall'].map{ |w| w.key?('zone_window') ? w['zone_window']['window_area'] : 0 }.sum(0.0) <= 1.0
           next if log_line.include?('No windows specified, the model will not include window heat transfer.')
         end
 
