@@ -32,6 +32,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
+    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
@@ -39,6 +40,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
+    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
 
@@ -81,6 +83,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
+    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
@@ -88,6 +91,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod=Dec 1 - Jan 31') })
+    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
 
@@ -133,6 +137,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
+    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
@@ -140,6 +145,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
+    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
 
@@ -183,6 +189,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
+    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
@@ -190,6 +197,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod=Dec 1 - Jan 31') })
+    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
 
@@ -236,6 +244,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
+    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
@@ -243,6 +252,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('RandomSeed=1') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
+    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
 
@@ -279,6 +289,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
+    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('stochastic schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
@@ -286,6 +297,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('RandomSeed=2') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
+    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
 
@@ -328,6 +340,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
+    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2012') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
@@ -335,6 +348,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod=Jan 1 - Dec 31') })
+    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
 
@@ -378,6 +392,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     model, hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
+    warn_msgs = result.warnings.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=10') })
@@ -385,6 +400,57 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
+    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
+
+    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+
+    assert_in_epsilon(6020, sf.annual_equivalent_full_load_hrs(col_name: 'occupants', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(3321, sf.annual_equivalent_full_load_hrs(col_name: 'lighting_interior', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(2763, sf.annual_equivalent_full_load_hrs(col_name: 'lighting_exterior', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(2763, sf.annual_equivalent_full_load_hrs(col_name: 'lighting_garage', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(150, sf.annual_equivalent_full_load_hrs(col_name: 'lighting_exterior_holiday', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(2224, sf.annual_equivalent_full_load_hrs(col_name: 'cooking_range', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(6673, sf.annual_equivalent_full_load_hrs(col_name: 'refrigerator', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(6673, sf.annual_equivalent_full_load_hrs(col_name: 'extra_refrigerator', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(6673, sf.annual_equivalent_full_load_hrs(col_name: 'freezer', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(2994, sf.annual_equivalent_full_load_hrs(col_name: 'dishwasher', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(4158, sf.annual_equivalent_full_load_hrs(col_name: 'clothes_washer', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(4503, sf.annual_equivalent_full_load_hrs(col_name: 'clothes_dryer', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(6020, sf.annual_equivalent_full_load_hrs(col_name: 'ceiling_fan', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(5468, sf.annual_equivalent_full_load_hrs(col_name: 'plug_loads_other', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(2288, sf.annual_equivalent_full_load_hrs(col_name: 'plug_loads_tv', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(8760, sf.annual_equivalent_full_load_hrs(col_name: 'plug_loads_vehicle', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(3671, sf.annual_equivalent_full_load_hrs(col_name: 'plug_loads_well_pump', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(2074, sf.annual_equivalent_full_load_hrs(col_name: 'fuel_loads_grill', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(3671, sf.annual_equivalent_full_load_hrs(col_name: 'fuel_loads_lighting', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(3671, sf.annual_equivalent_full_load_hrs(col_name: 'fuel_loads_fireplace', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(2471, sf.annual_equivalent_full_load_hrs(col_name: 'pool_pump', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(2471, sf.annual_equivalent_full_load_hrs(col_name: 'pool_heater', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(2502, sf.annual_equivalent_full_load_hrs(col_name: 'hot_tub_pump', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(2650, sf.annual_equivalent_full_load_hrs(col_name: 'hot_tub_heater', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(2994, sf.annual_equivalent_full_load_hrs(col_name: 'hot_water_dishwasher', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(4158, sf.annual_equivalent_full_load_hrs(col_name: 'hot_water_clothes_washer', schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(4204, sf.annual_equivalent_full_load_hrs(col_name: 'hot_water_fixtures', schedules: sf.tmp_schedules), 0.1)
+    assert(!sf.schedules.keys.include?('vacancy'))
+  end
+
+  def test_overwrite_schedules_filepath
+    hpxml = _create_hpxml('base-schedules-detailed-smooth.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic.csv'))
+    model, hpxml, result = _test_measure()
+
+    info_msgs = result.info.map { |x| x.logMessage }
+    warn_msgs = result.warnings.map { |x| x.logMessage }
+    assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
+    assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
+    assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
+    assert(warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
 

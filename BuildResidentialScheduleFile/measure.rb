@@ -113,10 +113,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     doc = XMLHelper.parse_file(hpxml_path)
     extension = XMLHelper.create_elements_as_needed(XMLHelper.get_element(doc, '/HPXML'), ['SoftwareInfo', 'extension'])
     schedules_filepath = XMLHelper.get_value(extension, 'SchedulesFilePath', :string)
-    if !schedules_filepath.nil?
+    if !schedules_filepath.nil? && (schedules_filepath != args[:output_csv_path])
+      runner.registerWarning("Overwriting existing SchedulesFilePath element: #{schedules_filepath}")
       XMLHelper.delete_element(extension, 'SchedulesFilePath')
+    else
+      XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)
     end
-    XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)
     XMLHelper.write_file(doc, hpxml_path)
     runner.registerInfo("Wrote file: #{hpxml_path}")
 
