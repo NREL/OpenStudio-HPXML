@@ -1264,20 +1264,23 @@ class Airflow
       if not schedules_file.nil?
         obj_sch = schedules_file.create_schedule_file(col_name: 'clothes_dryer')
         obj_sch_name = 'clothes_dryer'
+        full_load_hrs = schedules_file.annual_equivalent_full_load_hrs(col_name: 'clothes_dryer')
       else
-        # Assume 11am-12pm every day per BA HSP
-        day_sch = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        month_sch = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        obj_sch = MonthWeekdayWeekendSchedule.new(model, "#{obj_name} schedule", day_sch, day_sch, month_sch, Constants.ScheduleTypeLimitsFraction)
+        cd_weekday_sch = vented_dryer.weekday_fractions
+        cd_weekend_sch = vented_dryer.weekend_fractions
+        cd_monthly_sch = vented_dryer.monthly_multipliers
+        obj_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesDryer, cd_weekday_sch, cd_weekend_sch, cd_monthly_sch, Constants.ScheduleTypeLimitsFraction)
         obj_sch = obj_sch.schedule
         obj_sch_name = obj_sch.name.to_s
+        full_load_hrs = Schedule.annual_equivalent_full_load_hrs(model.yearDescription.get.assumedYear, obj_sch)
       end
+      # Assume standard dryer exhaust runs 1 hr/day per BA HSP
+      cfm_mult = Constants.NumDaysInYear(model) * vented_dryer.usage_multiplier / full_load_hrs
 
-      Schedule.set_schedule_type_limits(model, obj_sch, Constants.ScheduleTypeLimitsFraction)
       obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       obj_sch_sensor.setName("#{obj_name} sch s")
       obj_sch_sensor.setKeyName(obj_sch_name)
-      obj_sch_sensors[vented_dryer.id] = obj_sch_sensor
+      obj_sch_sensors[vented_dryer.id] = [obj_sch_sensor, cfm_mult]
     end
 
     return obj_sch_sensors
@@ -1489,7 +1492,7 @@ class Airflow
 
     infil_program.addLine('Set Qdryer = 0')
     vented_dryers.each do |vented_dryer|
-      infil_program.addLine("Set Qdryer = Qdryer + #{UnitConversions.convert(vented_dryer.vented_flow_rate, 'cfm', 'm^3/s').round(4)} * #{dryer_exhaust_sch_sensors_map[vented_dryer.id].name}")
+      infil_program.addLine("Set Qdryer = Qdryer + #{UnitConversions.convert(vented_dryer.vented_flow_rate * dryer_exhaust_sch_sensors_map[vented_dryer.id][1], 'cfm', 'm^3/s').round(5)} * #{dryer_exhaust_sch_sensors_map[vented_dryer.id][0].name}")
     end
 
     infil_program.addLine("Set QWHV_sup = #{UnitConversions.convert(sup_cfm_tot, 'cfm', 'm^3/s').round(4)}")
