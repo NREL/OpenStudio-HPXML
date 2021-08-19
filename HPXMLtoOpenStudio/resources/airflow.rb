@@ -1274,8 +1274,8 @@ class Airflow
         obj_sch_name = obj_sch.name.to_s
         full_load_hrs = Schedule.annual_equivalent_full_load_hrs(model.yearDescription.get.assumedYear, obj_sch)
       end
-      # Assume dryer exhaust runs 1 hr/day per BA HSP
-      cfm_mult = Constants.NumDaysInYear(model) / full_load_hrs
+      # Assume standard dryer exhaust runs 1 hr/day per BA HSP
+      cfm_mult = Constants.NumDaysInYear(model) * vented_dryer.usage_multiplier / full_load_hrs
 
       obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       obj_sch_sensor.setName("#{obj_name} sch s")
