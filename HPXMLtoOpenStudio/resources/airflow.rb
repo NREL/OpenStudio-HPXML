@@ -9,6 +9,7 @@ class Airflow
 
     @runner = runner
     @spaces = spaces
+    @year = hpxml.header.sim_calendar_year
     @infil_volume = hpxml.air_infiltration_measurements.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
     @infil_height = hpxml.inferred_infiltration_height(@infil_volume)
     @living_space = spaces[HPXML::LocationLivingSpace]
@@ -1272,10 +1273,10 @@ class Airflow
         obj_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesDryer, cd_weekday_sch, cd_weekend_sch, cd_monthly_sch, Constants.ScheduleTypeLimitsFraction)
         obj_sch = obj_sch.schedule
         obj_sch_name = obj_sch.name.to_s
-        full_load_hrs = Schedule.annual_equivalent_full_load_hrs(model.yearDescription.get.assumedYear, obj_sch)
+        full_load_hrs = Schedule.annual_equivalent_full_load_hrs(@year, obj_sch)
       end
       # Assume standard dryer exhaust runs 1 hr/day per BA HSP
-      cfm_mult = Constants.NumDaysInYear(model) * vented_dryer.usage_multiplier / full_load_hrs
+      cfm_mult = Constants.NumDaysInYear(@year) * vented_dryer.usage_multiplier / full_load_hrs
 
       obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       obj_sch_sensor.setName("#{obj_name} sch s")
