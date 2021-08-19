@@ -106,7 +106,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     epw_file = OpenStudio::EpwFile.new(epw_path)
 
     # create the schedules
-    success = create_schedules(runner, hpxml, model, epw_file, args)
+    success = create_schedules(runner, hpxml, epw_file, args)
     return false if not success
 
     # modify the hpxml with the schedules path
@@ -124,14 +124,14 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     return true
   end
 
-  def create_schedules(runner, hpxml, model, epw_file, args)
+  def create_schedules(runner, hpxml, epw_file, args)
     info_msgs = []
 
-    get_simulation_parameters(hpxml, model, epw_file, args)
+    get_simulation_parameters(hpxml, epw_file, args)
     get_generator_inputs(hpxml, epw_file, args)
 
     args[:resources_path] = File.join(File.dirname(__FILE__), 'resources')
-    schedule_generator = ScheduleGenerator.new(runner: runner, model: model, epw_file: epw_file, **args)
+    schedule_generator = ScheduleGenerator.new(runner: runner, epw_file: epw_file, **args)
 
     success = schedule_generator.create(args: args)
     return false if not success
@@ -151,7 +151,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     return true
   end
 
-  def get_simulation_parameters(hpxml, model, epw_file, args)
+  def get_simulation_parameters(hpxml, epw_file, args)
     args[:minutes_per_step] = 60
     if !hpxml.header.timestep.nil?
       args[:minutes_per_step] = hpxml.header.timestep
@@ -159,7 +159,6 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args[:steps_in_day] = 24 * 60 / args[:minutes_per_step]
     args[:mkc_ts_per_day] = 96
     args[:mkc_ts_per_hour] = args[:mkc_ts_per_day] / 24
-    args[:total_days_in_year] = Integer(Constants.NumDaysInYear(model))
 
     calendar_year = 2007 # default to TMY
     if !hpxml.header.sim_calendar_year.nil?
@@ -170,6 +169,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     end
     args[:sim_year] = calendar_year
     args[:sim_start_day] = DateTime.new(args[:sim_year], 1, 1)
+    args[:total_days_in_year] = Constants.NumDaysInYear(calendar_year)
   end
 
   def get_generator_inputs(hpxml, epw_file, args)

@@ -267,7 +267,7 @@ class Lighting
     stdDevCons2 = 2.36567663279954
 
     monthly_kwh_per_day = []
-    days_m = Constants.NumDaysInMonths(nil) # Intentionally excluding leap year designation
+    days_m = Constants.NumDaysInMonths(1999) # Intentionally excluding leap year designation
     wtd_avg_monthly_kwh_per_day = 0
     for monthNum in 1..12
       month = monthNum - 1

@@ -6,7 +6,6 @@ require 'matrix'
 
 class ScheduleGenerator
   def initialize(runner:,
-                 model:,
                  epw_file:,
                  state:,
                  random_seed: nil,
@@ -19,7 +18,6 @@ class ScheduleGenerator
                  sim_start_day:,
                  **remainder)
     @runner = runner
-    @model = model
     @epw_file = epw_file
     @state = state
     @random_seed = random_seed
@@ -256,7 +254,7 @@ class ScheduleGenerator
   def create_timeseries_from_months(sch_name:,
                                     month_schs:)
 
-    num_days_in_months = Constants.NumDaysInMonths(@model)
+    num_days_in_months = Constants.NumDaysInMonths(@sim_year)
     sch = []
     for month in 0..11
       sch << month_schs[month] * num_days_in_months[month]
@@ -359,7 +357,7 @@ class ScheduleGenerator
 
     sch = Lighting.get_schedule(@epw_file)
     interior_lighting_schedule = []
-    num_days_in_months = Constants.NumDaysInMonths(@model)
+    num_days_in_months = Constants.NumDaysInMonths(@sim_year)
     for month in 0..11
       interior_lighting_schedule << sch[month] * num_days_in_months[month]
     end
@@ -367,7 +365,7 @@ class ScheduleGenerator
     m = interior_lighting_schedule.max
     interior_lighting_schedule = interior_lighting_schedule.map { |s| s / m }
 
-    holiday_lighting_schedule = get_holiday_lighting_sch(@model, @runner, holiday_lighting_schedule)
+    holiday_lighting_schedule = get_holiday_lighting_sch(holiday_lighting_schedule)
 
     away_schedule = []
     idle_schedule = []
@@ -789,8 +787,8 @@ class ScheduleGenerator
 
   def set_vacancy(args:)
     if (not args[:schedules_vacancy_begin_month].nil?) && (not args[:schedules_vacancy_begin_day].nil?) && (not args[:schedules_vacancy_end_month].nil?) && (not args[:schedules_vacancy_end_day].nil?)
-      start_day_num = Schedule.get_day_num_from_month_day(@model, args[:schedules_vacancy_begin_month], args[:schedules_vacancy_begin_day])
-      end_day_num = Schedule.get_day_num_from_month_day(@model, args[:schedules_vacancy_end_month], args[:schedules_vacancy_end_day])
+      start_day_num = Schedule.get_day_num_from_month_day(@sim_year, args[:schedules_vacancy_begin_month], args[:schedules_vacancy_begin_day])
+      end_day_num = Schedule.get_day_num_from_month_day(@sim_year, args[:schedules_vacancy_end_month], args[:schedules_vacancy_end_day])
 
       vacancy = Array.new(@schedules['occupants'].length, 0)
       if end_day_num >= start_day_num
@@ -1029,7 +1027,7 @@ class ScheduleGenerator
     return weights.size - 1 # If the prob weight don't sum to n, return last index
   end
 
-  def get_holiday_lighting_sch(model, runner, holiday_sch)
+  def get_holiday_lighting_sch(holiday_sch)
     holiday_start_day = 332 # November 27
     holiday_end_day = 6 # Jan 6
     sch = [0] * 24 * @total_days_in_year
