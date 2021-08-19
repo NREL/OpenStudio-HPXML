@@ -23,7 +23,13 @@
             "zone_wall": [
                 {
                     "side": "front",
-                    "wall_assembly_code": "ewwf13vi"
+                    "wall_assembly_code": "ewwf13vi",
+                    "zone_window": {
+                        "window_area": 1,
+                        "window_method": "code",
+                        "window_code": "dcaw",
+                        "solar_screen": false
+                    }
                 },
                 {
                     "side": "back"
