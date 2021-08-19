@@ -111,8 +111,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     # modify the hpxml with the schedules path
     doc = XMLHelper.parse_file(hpxml_path)
-    software_info = XMLHelper.get_element(doc, '/HPXML/SoftwareInfo')
-    extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
+    extension = XMLHelper.create_elements_as_needed(XMLHelper.get_element(doc, '/HPXML'), ['SoftwareInfo', 'extension'])
     schedules_filepath = XMLHelper.get_value(extension, 'SchedulesFilePath', :string)
     if !schedules_filepath.nil?
       XMLHelper.delete_element(extension, 'SchedulesFilePath')
