@@ -40,7 +40,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, year: 2007, schedules_path: @args_hash['output_csv_path'])
 
     assert_in_epsilon(6020, sf.annual_equivalent_full_load_hrs(col_name: 'occupants', schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(3321, sf.annual_equivalent_full_load_hrs(col_name: 'lighting_interior', schedules: sf.tmp_schedules), 0.1)
@@ -89,7 +89,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod=Dec 1 - Jan 31') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, year: 2007, schedules_path: @args_hash['output_csv_path'])
 
     vacancy_hrs = 31.0 * 2.0 * 24.0
     occupied_ratio = (1.0 - vacancy_hrs / 8760.0)
@@ -141,7 +141,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, year: 2007, schedules_path: @args_hash['output_csv_path'])
 
     assert_in_epsilon(6689, sf.annual_equivalent_full_load_hrs(col_name: 'occupants', schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(2086, sf.annual_equivalent_full_load_hrs(col_name: 'lighting_interior', schedules: sf.tmp_schedules), 0.1)
@@ -191,7 +191,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod=Dec 1 - Jan 31') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, year: 2007, schedules_path: @args_hash['output_csv_path'])
 
     vacancy_hrs = 31.0 * 2.0 * 24.0
     occupied_ratio = (1.0 - vacancy_hrs / 8760.0)
@@ -244,7 +244,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, year: 2007, schedules_path: @args_hash['output_csv_path'])
 
     assert_in_epsilon(6689, sf.annual_equivalent_full_load_hrs(col_name: 'occupants', schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(2086, sf.annual_equivalent_full_load_hrs(col_name: 'lighting_interior', schedules: sf.tmp_schedules), 0.1)
@@ -287,7 +287,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, year: 2007, schedules_path: @args_hash['output_csv_path'])
 
     assert_in_epsilon(6072, sf.annual_equivalent_full_load_hrs(col_name: 'occupants', schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(1765, sf.annual_equivalent_full_load_hrs(col_name: 'lighting_interior', schedules: sf.tmp_schedules), 0.1)
@@ -336,7 +336,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod=Jan 1 - Dec 31') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, year: 2012, schedules_path: @args_hash['output_csv_path'])
 
     vacancy_hrs = 366.0 * 24.0
 
@@ -386,7 +386,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, year: 2007, schedules_path: @args_hash['output_csv_path'])
 
     assert_in_epsilon(6020, sf.annual_equivalent_full_load_hrs(col_name: 'occupants', schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(3321, sf.annual_equivalent_full_load_hrs(col_name: 'lighting_interior', schedules: sf.tmp_schedules), 0.1)

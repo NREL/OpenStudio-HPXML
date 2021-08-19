@@ -222,7 +222,8 @@ class OSModel
 
     @schedules_file = nil
     unless @hpxml.header.schedules_filepath.nil?
-      @schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_filepath, col_names: Constants.ScheduleColNames.keys)
+      @schedules_file = SchedulesFile.new(runner: runner, model: model, year: hpxml.header.sim_calendar_year,
+                                          schedules_path: @hpxml.header.schedules_filepath)
     end
 
     # Conditioned space/zone

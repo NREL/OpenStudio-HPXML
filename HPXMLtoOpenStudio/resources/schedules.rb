@@ -1098,16 +1098,16 @@ end
 class SchedulesFile
   def initialize(runner: nil,
                  model: nil,
+                 year: nil,
                  schedules_path:,
-                 col_names:,
                  **remainder)
 
     @runner = runner
     @model = model
-    @year = model.getYearDescription.assumedYear
+    @year = year
     @schedules_path = schedules_path
 
-    import(col_names: col_names)
+    import(col_names: Constants.ScheduleColNames.keys)
 
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_vacancy
