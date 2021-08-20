@@ -29,7 +29,8 @@ class HEScoreTest < Minitest::Unit::TestCase
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
     jsondir = "#{parent_dir}/sample_files"
     Parallel.map(Dir["#{jsondir}/*.json"].sort, in_threads: Parallel.processor_count) do |json|
-      next unless json 
+      next unless json
+
       out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
       results[File.basename(json)] = run_and_check(json, out_dir, false, zipfile)
     end
@@ -77,7 +78,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     # Create derivative file
     json_file = File.open(json_path)
     json = JSON.parse(json_file.read)
-    bldg_const = json['building']['about']['conditioned_floor_area']  # XMLHelper.get_element(hpxml, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea')
+    bldg_const = json['building']['about']['conditioned_floor_area'] # XMLHelper.get_element(hpxml, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea')
     json['building']['about']['conditioned_floor_area'] = bldg_const - 5.0 # ft2
     json_path.gsub!('.json', '_floor_area_test.json')
     File.open(json_path, 'w') do |f|
@@ -156,7 +157,7 @@ class HEScoreTest < Minitest::Unit::TestCase
         next if no_spc_htg && log_line.include?('No space heating specified, the model will not include space heating energy use.')
 
         # Files w/o windows
-        if json['building']['zone']['zone_wall'].map{ |w| w.key?('zone_window') ? w['zone_window']['window_area'] : 0 }.sum(0.0) <= 1.0
+        if json['building']['zone']['zone_wall'].map { |w| w.key?('zone_window') ? w['zone_window']['window_area'] : 0 }.sum(0.0) <= 1.0
           next if log_line.include?('No windows specified, the model will not include window heat transfer.')
         end
 
@@ -238,8 +239,8 @@ class HEScoreTest < Minitest::Unit::TestCase
                  HPXML::FuelTypeWoodPellets => 'pellet_wood' }
 
     # Get HPXML values for Building Construction
-    cfa = json['building']['about']['conditioned_floor_area']  # hpxml.building_construction.conditioned_floor_area
-    nbr = json['building']['about']['number_bedrooms']  # hpxml.building_construction.number_of_bedrooms
+    cfa = json['building']['about']['conditioned_floor_area'] # hpxml.building_construction.conditioned_floor_area
+    nbr = json['building']['about']['number_bedrooms'] # hpxml.building_construction.number_of_bedrooms
 
     # Get HPXML values for HVAC
     htg_fuels = []
@@ -279,9 +280,9 @@ class HEScoreTest < Minitest::Unit::TestCase
       hw_fuels = []
       water_heater = json['building']['systems']['domestic_hot_water']
       hw_fuels << water_heater['fuel_primary']
-      
+
       if ['indirect', 'tankless_coil'].include? water_heater['type']
-        json['building']['systems']['hvac'].each do |hvac|  # FIXME: double-check
+        json['building']['systems']['hvac'].each do |hvac| # FIXME: double-check
           if hvac['heating']['type'] == 'boiler'
             hw_fuels << hvac['heating']['fuel_primary']
           end

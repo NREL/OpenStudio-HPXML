@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>he_score_measure</name>
   <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
-  <version_id>0ec825a2-abae-4e2f-aa91-936e50dadc2a</version_id>
-  <version_modified>20210723T221028Z</version_modified>
+  <version_id>3ba61a78-2cd7-43d0-82a8-4b62128adbd2</version_id>
+  <version_modified>20210820T182521Z</version_modified>
   <xml_checksum>2AF3A68E</xml_checksum>
   <class_name>HEScoreMeasure</class_name>
   <display_name>Apply Home Energy Score Ruleset</display_name>
@@ -16,16 +16,24 @@
       <display_name>JSON File Path</display_name>
       <description>Absolute (or relative) path of the JSON file.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>hpxml_output_path</name>
       <display_name>HPXML Output File Path</display_name>
       <description>Absolute (or relative) path of the output HPXML file.</description>
       <type>String</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
   </arguments>
   <outputs />
@@ -87,29 +95,6 @@
       <checksum>DB516BAF</checksum>
     </file>
     <file>
-      <filename>test_hescore_ruleset.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>ADA93431</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.7.0</identifier>
-        <min_compatible>2.7.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>768EBAC6</checksum>
-    </file>
-    <file>
-      <filename>HESruleset.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>29FB0670</checksum>
-    </file>
-    <file>
       <filename>lu_ceiling_eff_rvalue.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -126,6 +111,35 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>1154F211</checksum>
+    </file>
+    <file>
+      <filename>test_hescore_ruleset.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>98CA735C</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.7.0</identifier>
+        <min_compatible>2.7.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>7BC1BCC6</checksum>
+    </file>
+    <file>
+      <filename>HESruleset.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B3CE5948</checksum>
+    </file>
+    <file>
+      <filename>HESruleset.rb.bak</filename>
+      <filetype>bak</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B3CE5948</checksum>
     </file>
   </files>
 </measure>
