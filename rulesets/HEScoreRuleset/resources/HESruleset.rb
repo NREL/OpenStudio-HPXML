@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class HEScoreRuleset
-  def self.apply_ruleset(json, weather)
+  def self.apply_ruleset(json, weather, zipcode_row)
     # Create new HPXML object
     new_hpxml = HPXML.new
     new_hpxml.header.xml_type = nil # FIXME: does json contain this information?
@@ -14,7 +14,7 @@ class HEScoreRuleset
     set_summary(json, new_hpxml)
 
     # ClimateAndRiskZones
-    set_climate(json, new_hpxml)
+    set_climate(json, new_hpxml, zipcode_row)
 
     # Enclosure
     set_enclosure_air_infiltration(json, new_hpxml)
@@ -114,33 +114,19 @@ class HEScoreRuleset
     new_hpxml.building_construction.has_flue_or_chimney = false
   end
 
-  def self.set_climate(json, new_hpxml)
-    zipcode = json['building_address']['zip_code']
-
-    zipcode_city = nil
-    zipcode_state = nil
-    station_name = nil
-    station_wmo = nil
-    epw_filename = nil
-    iecc_zone = nil
-    CSV.foreach(File.join(File.dirname(__FILE__), 'zipcodes_wx.csv'), headers: true) do |row|
-      next unless row['postal_code'] == zipcode[0..6]
-
-      zipcode_city = row['city'].gsub(/\s/, '_')
-      zipcode_state = row['state_zipcode']
-      station_name = row['name']
-      station_wmo = row['nearest_weather_station']
-      epw_filename = row['weather_filename']
-      iecc_zone = row['iecc_cz']
-      break
-    end
-    fail "Could not lookup weather station for zipcode #{zipcode}." if epw_filename.nil?
+  def self.set_climate(json, new_hpxml, zipcode_row)
+    zipcode_city = zipcode_row['city'].gsub(/\s/, '_')
+    zipcode_state = zipcode_row['state_zipcode']
+    station_name = zipcode_row['name']
+    station_wmo = zipcode_row['nearest_weather_station']
+    epw_filename = zipcode_row['weather_filename']
 
     new_hpxml.climate_and_risk_zones.weather_station_id = "#{zipcode_city}_#{zipcode_state}"
     new_hpxml.climate_and_risk_zones.weather_station_name = station_name
     new_hpxml.climate_and_risk_zones.weather_station_wmo = station_wmo
     new_hpxml.climate_and_risk_zones.weather_station_epw_filepath = epw_filename
 
+    iecc_zone = zipcode_row['iecc_cz']
     if iecc_zone == '7AK'
       iecc_zone = '7'
     elsif iecc_zone == '8AK'

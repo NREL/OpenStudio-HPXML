@@ -85,19 +85,22 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
     json_file = File.open(json_path)
     json = JSON.parse(json_file.read)
 
+    # Look up zipcode info
+    zipcode_row = nil
+    zipcode = json['building_address']['zip_code'][0..6]
+    CSV.foreach(File.join(File.dirname(__FILE__), 'resources', 'zipcodes_wx.csv'), headers: true) do |row|
+      next unless row['postal_code'] == zipcode
+
+      zipcode_row = row
+      break
+    end
+    if zipcode_row.nil?
+      fail "Zip code #{zipcode} could not be found in #{File.join(File.dirname(__FILE__), 'resources', 'zipcodes_wx.csv')}"
+    end
+
     # Look up EPW path from WMO
     epw_path = nil
-    zipcode = json['building_address']['zip_code']
-    weather_wmo = nil
-    CSV.foreach(File.join(File.dirname(__FILE__), 'resources', 'zipcodes_wx.csv'), headers: true) do |row|
-      next unless row['postal_code'] == zipcode[0..6]
-
-      weather_wmo = row['nearest_weather_station']
-    end
-    if weather_wmo.nil?
-      fail "Weather station WMO #{weather_wmo} could not be found in #{File.join(File.dirname(__FILE__), 'resources', 'zipcodes_wx.csv')}"
-    end
-
+    weather_wmo = zipcode_row['nearest_weather_station']
     weather_dir = File.join(File.dirname(__FILE__), '..', '..', 'weather')
     CSV.foreach(File.join(weather_dir, 'data.csv'), headers: true) do |row|
       next if row['wmo'] != weather_wmo
@@ -123,7 +126,7 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
     weather = WeatherProcess.new(nil, nil, cache_path)
 
     begin
-      new_hpxml = HEScoreRuleset.apply_ruleset(json, weather)
+      new_hpxml = HEScoreRuleset.apply_ruleset(json, weather, zipcode_row)
     rescue Exception => e
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
       return false
