@@ -373,6 +373,7 @@ class HEScoreRuleset
     front_window_code = nil
     json['building']['zone']['zone_wall'].each do |orig_wall|
       next unless orig_wall.key?('zone_window')
+      next if orig_wall['side'] == 'front' && orig_wall['zone_window']['window_area'] == 1 # LBL intentionally has the front window area set to 1 as an HPXML file with no windows does not pass validation.
 
       orig_window = orig_wall['zone_window']
       ufactor = orig_window['window_u_value']
