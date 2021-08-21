@@ -3404,7 +3404,8 @@ class HPXMLFile
                  'rim_joists' => { 'surfaces' => hpxml.rim_joists, 'ids' => [] }, }
 
     foundation_locations = [HPXML::LocationBasementConditioned, HPXML::LocationBasementUnconditioned,
-                            HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented]
+                            HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented,
+                            HPXML::FoundationTypeAmbient]
 
     surf_ids.each do |surf_type, surf_hash|
       surf_hash['surfaces'].each do |surface|
