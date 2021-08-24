@@ -110,8 +110,7 @@
                 "category": "unit",
                 "type": "heat_pump",
                 "fuel_primary": "electric",
-                "efficiency_method": "energy_star",
-                "energy_factor": 0.8
+                "efficiency_level": "energy_star"
             }
         }
     }

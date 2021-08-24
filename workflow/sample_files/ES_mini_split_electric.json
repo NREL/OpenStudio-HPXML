@@ -79,11 +79,11 @@
                     "heating": {
                         "fuel_primary": "electric",
                         "type": "mini_split",
-                        "efficiency_method": "energy_star"
+                        "efficiency_level": "energy_star"
                     },
                     "cooling": {
                         "type": "mini_split",
-                        "efficiency_method": "energy_star"
+                        "efficiency_level": "energy_star"
                     },
                     "hvac_distribution": [
                         {

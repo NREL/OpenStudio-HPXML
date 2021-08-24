@@ -79,7 +79,7 @@
                     "heating": {
                         "fuel_primary": "natural_gas",
                         "type": "boiler",
-                        "efficiency_method": "energy_star"
+                        "efficiency_level": "energy_star"
                     },
                     "cooling": {
                         "type": "split_dx",

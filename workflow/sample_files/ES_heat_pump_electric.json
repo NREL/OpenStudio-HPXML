@@ -79,11 +79,11 @@
                     "heating": {
                         "fuel_primary": "electric",
                         "type": "heat_pump",
-                        "efficiency_method": "energy_star"
+                        "efficiency_level": "energy_star"
                     },
                     "cooling": {
                         "type": "heat_pump",
-                        "efficiency_method": "energy_star"
+                        "efficiency_level": "energy_star"
                     },
                     "hvac_distribution": [
                         {

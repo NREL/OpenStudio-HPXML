@@ -84,7 +84,7 @@
                     },
                     "cooling": {
                         "type": "packaged_dx",
-                        "efficiency_method": "energy_star"
+                        "efficiency_level": "energy_star"
                     },
                     "hvac_distribution": [
                         {

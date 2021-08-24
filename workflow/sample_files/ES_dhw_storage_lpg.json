@@ -110,8 +110,7 @@
                 "category": "unit",
                 "type": "storage",
                 "fuel_primary": "lpg",
-                "efficiency_method": "energy_star",
-                "energy_factor": 0.6
+                "efficiency_level": "energy_star"
             }
         }
     }

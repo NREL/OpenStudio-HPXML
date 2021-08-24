@@ -79,7 +79,7 @@
                     "heating": {
                         "fuel_primary": "fuel_oil",
                         "type": "central_furnace",
-                        "efficiency_method": "energy_star"
+                        "efficiency_level": "energy_star"
                     },
                     "cooling": {
                         "type": "split_dx",
