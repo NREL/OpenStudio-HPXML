@@ -724,6 +724,23 @@ class HPXMLTest < MiniTest::Test
       flunk "Unexpected warning found: #{err_line}"
     end
 
+    # Check for unused objects/schedules/constructions
+    num_unused_objects = 0
+    num_unused_schedules = 0
+    num_unused_constructions = 0
+    File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
+      if err_line.include? 'unused objects in input'
+        num_unused_objects = Integer(err_line.split(' ')[3])
+      elsif err_line.include? 'unused schedules in input'
+        num_unused_schedules = Integer(err_line.split(' ')[3])
+      elsif err_line.include? 'unused constructions in input'
+        num_unused_constructions = Integer(err_line.split(' ')[6])
+      end
+    end
+    assert_equal(0, num_unused_objects)
+    assert_equal(0, num_unused_schedules)
+    assert_equal(0, num_unused_constructions)
+
     # Timestep
     timestep = hpxml.header.timestep
     if timestep.nil?
