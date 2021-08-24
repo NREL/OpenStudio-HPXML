@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>he_score_measure</name>
   <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
-  <version_id>3ba61a78-2cd7-43d0-82a8-4b62128adbd2</version_id>
-  <version_modified>20210820T182521Z</version_modified>
+  <version_id>e4fb0711-54d4-49c8-8c7e-0c9675fb2bdc</version_id>
+  <version_modified>20210824T201602Z</version_modified>
   <xml_checksum>2AF3A68E</xml_checksum>
   <class_name>HEScoreMeasure</class_name>
   <display_name>Apply Home Energy Score Ruleset</display_name>
@@ -16,24 +16,16 @@
       <display_name>JSON File Path</display_name>
       <description>Absolute (or relative) path of the JSON file.</description>
       <type>String</type>
-      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value></default_value>
-      <min_value></min_value>
-      <max_value></max_value>
     </argument>
     <argument>
       <name>hpxml_output_path</name>
       <display_name>HPXML Output File Path</display_name>
       <description>Absolute (or relative) path of the output HPXML file.</description>
       <type>String</type>
-      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value></default_value>
-      <min_value></min_value>
-      <max_value></max_value>
     </argument>
   </arguments>
   <outputs />
@@ -133,13 +125,7 @@
       <filename>HESruleset.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B3CE5948</checksum>
-    </file>
-    <file>
-      <filename>HESruleset.rb.bak</filename>
-      <filetype>bak</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B3CE5948</checksum>
+      <checksum>06FF7F67</checksum>
     </file>
   </files>
 </measure>
