@@ -399,8 +399,9 @@ class OSModel
       # Create new construction in case of shared construction.
       layered_const_adj = OpenStudio::Model::Construction.new(model)
       layered_const_adj.setName(cond_bsmnt_surface.construction.get.name.get + ' Reversed Bsmnt')
-      adj_surface.setConstruction(layered_const_adj)
       layered_const_adj.setLayers(cond_bsmnt_surface.construction.get.to_LayeredConstruction.get.layers.reverse())
+      adj_surface.construction.get.remove
+      adj_surface.setConstruction(layered_const_adj)
     end
   end
 

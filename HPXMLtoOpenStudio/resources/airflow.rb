@@ -43,13 +43,7 @@ class Airflow
     @tout_sensor.setName("#{Constants.ObjectNameAirflow} tt s")
     @tout_sensor.setKeyName(@living_zone.name.to_s)
 
-    # Adiabatic construction for duct plenum
-
-    adiabatic_mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'Rough', 176.1)
-    adiabatic_mat.setName('Adiabatic')
-    @adiabatic_const = OpenStudio::Model::Construction.new(model)
-    @adiabatic_const.setName('AdiabaticConst')
-    @adiabatic_const.insertLayer(0, adiabatic_mat)
+    @adiabatic_const = nil
 
     # Ventilation fans
     vent_fans_mech = []
@@ -466,6 +460,15 @@ class Airflow
     ra_space.setThermalZone(ra_duct_zone)
 
     ra_space.surfaces.each do |surface|
+      if @adiabatic_const.nil?
+        adiabatic_mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'Rough', 176.1)
+        adiabatic_mat.setName('Adiabatic')
+
+        @adiabatic_const = OpenStudio::Model::Construction.new(model)
+        @adiabatic_const.setName('AdiabaticConst')
+        @adiabatic_const.insertLayer(0, adiabatic_mat)
+      end
+
       surface.setConstruction(@adiabatic_const)
       surface.setOutsideBoundaryCondition('Adiabatic')
       surface.setSunExposure('NoSun')

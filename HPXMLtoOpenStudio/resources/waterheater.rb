@@ -819,10 +819,12 @@ class Waterheater
     tank.setTankHeight(h_tank)
     tank.setMaximumTemperatureLimit(90)
     tank.setHeaterPriorityControl('MasterSlave')
+    tank.heater1SetpointTemperatureSchedule.remove
     tank.setHeater1SetpointTemperatureSchedule(hpwh_top_element_sp) # Overwritten later by EMS
     tank.setHeater1Capacity(UnitConversions.convert(e_cap, 'kW', 'W'))
     tank.setHeater1Height(h_UE)
     tank.setHeater1DeadbandTemperatureDifference(18.5)
+    tank.heater2SetpointTemperatureSchedule.remove
     tank.setHeater2SetpointTemperatureSchedule(hpwh_bottom_element_sp)
     tank.setHeater2Capacity(UnitConversions.convert(e_cap, 'kW', 'W'))
     tank.setHeater2Height(h_LE)
@@ -834,6 +836,7 @@ class Waterheater
     tank.setOnCycleParasiticFuelConsumptionRate(parasitics)
     tank.setOnCycleParasiticFuelType(EPlus::FuelTypeElectricity)
     tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(u_tank)
+    tank.ambientTemperatureSchedule.get.remove
     tank.setAmbientTemperatureSchedule(hpwh_tamb)
     tank.setNumberofNodes(6)
     tank.setAdditionalDestratificationConductivity(0)
