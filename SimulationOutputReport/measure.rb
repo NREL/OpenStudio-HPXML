@@ -112,7 +112,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   def outputs
     outs = OpenStudio::Measure::OSOutputVector.new
 
-    setup_outputs
+    setup_outputs(nil)
 
     all_outputs = []
     all_outputs << @fuels
@@ -158,8 +158,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # get the last model and sql file
     @model = runner.lastOpenStudioModel.get
+    hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
+    building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
+    @hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: building_id)
 
-    setup_outputs
+    setup_outputs(@hpxml)
 
     # Get a few things from the model
     get_object_maps()
@@ -176,13 +179,18 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Add meters to increase precision of outputs relative to, e.g., ABUPS report
     meters = []
-    meters << 'ElectricityProduced:Facility' # Used for error checking
+    if @end_uses.select { |key, end_use| (key[1] == EUT::Generator || key[1] == EUT::PV) && end_use.in_model }.size > 0
+      meters << 'ElectricityProduced:Facility' # Used for error checking
+    end
     @fuels.each do |fuel_type, fuel|
+      next unless fuel.in_model
+
       fuel.meters.each do |meter|
         meters << meter
       end
     end
     @end_uses.each do |key, end_use|
+      next unless end_use.in_model
       next if end_use.meters.nil?
 
       end_use.meters.each do |meter|
@@ -287,6 +295,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     if include_timeseries_fuel_consumptions
       @fuels.each do |fuel_type, fuel|
+        next unless fuel.in_model
+
         fuel.meters.each do |meter|
           result << OpenStudio::IdfObject.load("Output:Meter,#{meter},#{timeseries_frequency};").get
         end
@@ -295,6 +305,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     if include_timeseries_end_use_consumptions
       @end_uses.each do |key, end_use|
+        next unless end_use.in_model
         next if end_use.meters.nil?
 
         end_use.meters.each do |meter|
@@ -385,11 +396,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: building_id)
-    HVAC.apply_shared_systems(@hpxml) # Needed for ERI shared HVAC systems
     get_object_maps()
     @eri_design = @hpxml.header.eri_design
 
-    setup_outputs
+    setup_outputs(@hpxml)
 
     # Set paths
     if not @eri_design.nil?
@@ -1990,11 +2000,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       @meters = meters
       @timeseries_output_by_system = {}
     end
-    attr_accessor(:meters, :timeseries_output_by_system)
+    attr_accessor(:meters, :timeseries_output_by_system, :in_model)
   end
 
   class EndUse < BaseOutput
-    def initialize(meters: nil, variables: nil)
+    def initialize(meters: nil, variables: nil, in_model: true)
       super()
       @meters = meters
       @variables = variables
@@ -2003,8 +2013,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       if not variables.nil?
         @variable_names = get_all_variable_keys(variables)
       end
+      @in_model = in_model
     end
-    attr_accessor(:meters, :variables, :annual_output_by_system, :timeseries_output_by_system, :variable_names)
+    attr_accessor(:meters, :variables, :annual_output_by_system, :timeseries_output_by_system, :variable_names, :in_model)
   end
 
   class HotWater < BaseOutput
@@ -2089,13 +2100,218 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     attr_accessor(:variable, :variable_units)
   end
 
-  def setup_outputs
+  def setup_outputs(hpxml)
     def get_timeseries_units_from_fuel_type(fuel_type)
       if fuel_type == FT::Elec
         return 'kWh'
       end
 
       return 'kBtu'
+    end
+
+    hpxml = HPXML.new if hpxml.nil?
+
+    # End Uses
+
+    # NOTE: Some end uses are obtained from meters, others are rolled up from
+    # output variables so that we can have more control.
+    @end_uses = {}
+    @end_uses[[FT::Elec, EUT::Heating]] = EndUse.new(variables: OutputVars.SpaceHeating(EPlus::FuelTypeElectricity),
+                                                     in_model: hpxml.heating_systems.select { |o| o.heating_system_fuel == HPXML::FuelTypeElectricity }.size + hpxml.heat_pumps.select { |o| [o.heat_pump_fuel, o.backup_heating_fuel].include? HPXML::FuelTypeElectricity }.size > 0)
+    @end_uses[[FT::Elec, EUT::HeatingFanPump]] = EndUse.new(in_model: hpxml.heating_systems.size > 0)
+    @end_uses[[FT::Elec, EUT::Cooling]] = EndUse.new(variables: OutputVars.SpaceCoolingElectricity,
+                                                     in_model: hpxml.cooling_systems.select { |o| o.cooling_system_fuel == HPXML::FuelTypeElectricity }.size + hpxml.heat_pumps.select { |o| [o.heat_pump_fuel, o.backup_heating_fuel].include? HPXML::FuelTypeElectricity }.size > 0)
+    @end_uses[[FT::Elec, EUT::CoolingFanPump]] = EndUse.new(in_model: hpxml.cooling_systems.size > 0)
+    @end_uses[[FT::Elec, EUT::HotWater]] = EndUse.new(variables: OutputVars.WaterHeating(EPlus::FuelTypeElectricity),
+                                                      in_model: hpxml.water_heating_systems.select { |o| o.fuel_type == HPXML::FuelTypeElectricity }.size > 0)
+    @end_uses[[FT::Elec, EUT::HotWaterRecircPump]] = EndUse.new(variables: OutputVars.WaterHeatingElectricityRecircPump,
+                                                                in_model: hpxml.hot_water_distributions.select { |o| (not o.recirculation_control_type.nil?) || (not o.shared_recirculation_control_type.nil?) }.size > 0)
+    @end_uses[[FT::Elec, EUT::HotWaterSolarThermalPump]] = EndUse.new(variables: OutputVars.WaterHeatingElectricitySolarThermalPump,
+                                                                      in_model: hpxml.solar_thermal_systems.select { |o| not o.collector_area.nil? }.size > 0)
+    @end_uses[[FT::Elec, EUT::LightsInterior]] = EndUse.new(meters: ["#{Constants.ObjectNameInteriorLighting}:InteriorLights:#{EPlus::FuelTypeElectricity}"],
+                                                            in_model: (hpxml.lighting_groups.size > 0) && (hpxml.lighting.interior_usage_multiplier > 0))
+    @end_uses[[FT::Elec, EUT::LightsGarage]] = EndUse.new(meters: ["#{Constants.ObjectNameGarageLighting}:InteriorLights:#{EPlus::FuelTypeElectricity}"],
+                                                          in_model: (hpxml.lighting_groups.size > 0) && (hpxml.lighting.garage_usage_multiplier > 0) && (hpxml.slabs.select { |o| o.interior_adjacent_to == HPXML::LocationGarage }.size > 0))
+    @end_uses[[FT::Elec, EUT::LightsExterior]] = EndUse.new(meters: ["ExteriorLights:#{EPlus::FuelTypeElectricity}"],
+                                                            in_model: (hpxml.lighting_groups.size > 0) && (hpxml.lighting.exterior_usage_multiplier > 0))
+    @end_uses[[FT::Elec, EUT::MechVent]] = EndUse.new(meters: ["#{Constants.ObjectNameMechanicalVentilation}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                      in_model: hpxml.ventilation_fans.select { |o| o.used_for_whole_building_ventilation || o.used_for_local_ventilation }.size > 0)
+    @end_uses[[FT::Elec, EUT::MechVentPreheat]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypeElectricity),
+                                                             in_model: hpxml.ventilation_fans.select { |o| o.used_for_whole_building_ventilation && o.preheating_fuel == HPXML::FuelTypeElectricity }.size > 0)
+    @end_uses[[FT::Elec, EUT::MechVentPrecool]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypeElectricity),
+                                                             in_model: hpxml.ventilation_fans.select { |o| o.used_for_whole_building_ventilation && o.precooling_fuel == HPXML::FuelTypeElectricity }.size > 0)
+    @end_uses[[FT::Elec, EUT::WholeHouseFan]] = EndUse.new(meters: ["#{Constants.ObjectNameWholeHouseFan}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                           in_model: hpxml.ventilation_fans.select { |o| o.used_for_seasonal_cooling_load_reduction }.size > 0)
+    @end_uses[[FT::Elec, EUT::Refrigerator]] = EndUse.new(meters: ["#{Constants.ObjectNameRefrigerator}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                          in_model: hpxml.refrigerators.select { |o| o.usage_multiplier > 0 }.size > 0)
+    if @eri_design.nil? # Skip end uses not used by ERI
+      @end_uses[[FT::Elec, EUT::Freezer]] = EndUse.new(meters: ["#{Constants.ObjectNameFreezer}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                       in_model: hpxml.freezers.select { |o| o.usage_multiplier > 0 }.size > 0)
+    end
+    @end_uses[[FT::Elec, EUT::Dehumidifier]] = EndUse.new(variables: OutputVars.DehumidifierElectricity,
+                                                          in_model: hpxml.dehumidifiers.size > 0)
+    @end_uses[[FT::Elec, EUT::Dishwasher]] = EndUse.new(meters: ["#{Constants.ObjectNameDishwasher}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                        in_model: hpxml.dishwashers.select { |o| o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::Elec, EUT::ClothesWasher]] = EndUse.new(meters: ["#{Constants.ObjectNameClothesWasher}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                           in_model: hpxml.clothes_washers.select { |o| o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::Elec, EUT::ClothesDryer]] = EndUse.new(meters: ["#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                          in_model: hpxml.clothes_dryers.select { |o| o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::Elec, EUT::RangeOven]] = EndUse.new(meters: ["#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                       in_model: hpxml.cooking_ranges.select { |o| o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::Elec, EUT::CeilingFan]] = EndUse.new(meters: ["#{Constants.ObjectNameCeilingFan}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                        in_model: hpxml.ceiling_fans.select { |o| o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::Elec, EUT::Television]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscTelevision}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                        in_model: hpxml.plug_loads.select { |o| o.plug_load_type == HPXML::PlugLoadTypeTelevision && o.kWh_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::Elec, EUT::PlugLoads]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscPlugLoads}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                       in_model: hpxml.plug_loads.select { |o| o.plug_load_type == HPXML::PlugLoadTypeOther && o.kWh_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+    if @eri_design.nil? # Skip end uses not used by ERI
+      @end_uses[[FT::Elec, EUT::Vehicle]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscElectricVehicleCharging}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                       in_model: hpxml.plug_loads.select { |o| o.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging && o.kWh_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::Elec, EUT::WellPump]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscWellPump}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                        in_model: hpxml.plug_loads.select { |o| o.plug_load_type == HPXML::PlugLoadTypeWellPump && o.kWh_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::Elec, EUT::PoolHeater]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscPoolHeater}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                          in_model: hpxml.pools.select { |o| (o.heater_type == HPXML::HeaterTypeElectricResistance || o.heater_type == HPXML::HeaterTypeHeatPump) && o.heater_usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::Elec, EUT::PoolPump]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscPoolPump}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                        in_model: hpxml.pools.select { |o| o.pump_type != HPXML::TypeNone && o.pump_usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::Elec, EUT::HotTubHeater]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscHotTubHeater}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                            in_model: hpxml.hot_tubs.select { |o| (o.heater_type == HPXML::HeaterTypeElectricResistance || o.heater_type == HPXML::HeaterTypeHeatPump) && o.heater_usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::Elec, EUT::HotTubPump]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscHotTubPump}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
+                                                          in_model: hpxml.hot_tubs.select { |o| o.pump_type != HPXML::TypeNone && o.pump_usage_multiplier > 0 }.size > 0)
+    end
+    @end_uses[[FT::Elec, EUT::PV]] = EndUse.new(meters: ['Photovoltaic:ElectricityProduced', 'PowerConversion:ElectricityProduced'],
+                                                in_model: hpxml.pv_systems.size > 0)
+    @end_uses[[FT::Elec, EUT::Generator]] = EndUse.new(meters: ['Cogeneration:ElectricityProduced'],
+                                                       in_model: hpxml.generators.size > 0)
+    @end_uses[[FT::Gas, EUT::Heating]] = EndUse.new(variables: OutputVars.SpaceHeating(EPlus::FuelTypeNaturalGas),
+                                                    in_model: hpxml.heating_systems.select { |o| o.heating_system_fuel == HPXML::FuelTypeNaturalGas }.size + hpxml.heat_pumps.select { |o| [o.heat_pump_fuel, o.backup_heating_fuel].include? HPXML::FuelTypeNaturalGas }.size > 0)
+    @end_uses[[FT::Gas, EUT::HotWater]] = EndUse.new(variables: OutputVars.WaterHeating(EPlus::FuelTypeNaturalGas),
+                                                     in_model: hpxml.water_heating_systems.select { |o| o.fuel_type == HPXML::FuelTypeNaturalGas }.size > 0)
+    @end_uses[[FT::Gas, EUT::ClothesDryer]] = EndUse.new(meters: ["#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}"],
+                                                         in_model: hpxml.clothes_dryers.select { |o| o.fuel_type == HPXML::FuelTypeNaturalGas && o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::Gas, EUT::RangeOven]] = EndUse.new(meters: ["#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}"],
+                                                      in_model: hpxml.cooking_ranges.select { |o| o.fuel_type == HPXML::FuelTypeNaturalGas && o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::Gas, EUT::MechVentPreheat]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypeNaturalGas),
+                                                            in_model: hpxml.ventilation_fans.select { |o| o.used_for_whole_building_ventilation && o.preheating_fuel == HPXML::FuelTypeNaturalGas }.size > 0)
+    if @eri_design.nil? # Skip end uses not used by ERI
+      @end_uses[[FT::Gas, EUT::PoolHeater]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscPoolHeater}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}"],
+                                                         in_model: hpxml.pools.select { |o| o.heater_type == HPXML::HeaterTypeGas && o.heater_usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::Gas, EUT::HotTubHeater]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscHotTubHeater}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}"],
+                                                           in_model: hpxml.hot_tubs.select { |o| o.heater_type == HPXML::HeaterTypeGas && o.heater_usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::Gas, EUT::Grill]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}"],
+                                                    in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeGrill && o.fuel_type == HPXML::FuelTypeNaturalGas && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::Gas, EUT::Lighting]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}"],
+                                                       in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeLighting && o.fuel_type == HPXML::FuelTypeNaturalGas && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::Gas, EUT::Fireplace]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}"],
+                                                        in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeFireplace && o.fuel_type == HPXML::FuelTypeNaturalGas && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+    end
+    @end_uses[[FT::Gas, EUT::Generator]] = EndUse.new(meters: ["Cogeneration:#{EPlus::FuelTypeNaturalGas}"],
+                                                      in_model: hpxml.generators.select { |o| o.fuel_type == HPXML::FuelTypeNaturalGas }.size > 0)
+    @end_uses[[FT::Oil, EUT::Heating]] = EndUse.new(variables: OutputVars.SpaceHeating(EPlus::FuelTypeOil),
+                                                    in_model: hpxml.heating_systems.select { |o| o.heating_system_fuel == HPXML::FuelTypeOil }.size + hpxml.heat_pumps.select { |o| [o.heat_pump_fuel, o.backup_heating_fuel].include? HPXML::FuelTypeOil }.size > 0)
+    @end_uses[[FT::Oil, EUT::HotWater]] = EndUse.new(variables: OutputVars.WaterHeating(EPlus::FuelTypeOil),
+                                                     in_model: hpxml.water_heating_systems.select { |o| o.fuel_type == HPXML::FuelTypeOil }.size > 0)
+    @end_uses[[FT::Oil, EUT::ClothesDryer]] = EndUse.new(meters: ["#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeOil}"],
+                                                         in_model: hpxml.clothes_dryers.select { |o| o.fuel_type == HPXML::FuelTypeOil && o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::Oil, EUT::RangeOven]] = EndUse.new(meters: ["#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{EPlus::FuelTypeOil}"],
+                                                      in_model: hpxml.cooking_ranges.select { |o| o.fuel_type == HPXML::FuelTypeOil && o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::Oil, EUT::MechVentPreheat]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypeOil),
+                                                            in_model: hpxml.ventilation_fans.select { |o| o.used_for_whole_building_ventilation && o.preheating_fuel == HPXML::FuelTypeOil }.size > 0)
+    if @eri_design.nil? # Skip end uses not used by ERI
+      @end_uses[[FT::Oil, EUT::Grill]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{EPlus::FuelTypeOil}"],
+                                                    in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeGrill && o.fuel_type == HPXML::FuelTypeOil && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::Oil, EUT::Lighting]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypeOil}"],
+                                                       in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeLighting && o.fuel_type == HPXML::FuelTypeOil && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::Oil, EUT::Fireplace]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypeOil}"],
+                                                        in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeFireplace && o.fuel_type == HPXML::FuelTypeOil && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+    end
+    @end_uses[[FT::Oil, EUT::Generator]] = EndUse.new(meters: ["Cogeneration:#{EPlus::FuelTypeOil}"],
+                                                      in_model: hpxml.generators.select { |o| o.fuel_type == HPXML::FuelTypeOil }.size > 0)
+    @end_uses[[FT::Propane, EUT::Heating]] = EndUse.new(variables: OutputVars.SpaceHeating(EPlus::FuelTypePropane),
+                                                        in_model: hpxml.heating_systems.select { |o| o.heating_system_fuel == HPXML::FuelTypePropane }.size + hpxml.heat_pumps.select { |o| [o.heat_pump_fuel, o.backup_heating_fuel].include? HPXML::FuelTypePropane }.size > 0)
+    @end_uses[[FT::Propane, EUT::HotWater]] = EndUse.new(variables: OutputVars.WaterHeating(EPlus::FuelTypePropane),
+                                                         in_model: hpxml.water_heating_systems.select { |o| o.fuel_type == HPXML::FuelTypePropane }.size > 0)
+    @end_uses[[FT::Propane, EUT::ClothesDryer]] = EndUse.new(meters: ["#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypePropane}"],
+                                                             in_model: hpxml.clothes_dryers.select { |o| o.fuel_type == HPXML::FuelTypePropane && o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::Propane, EUT::RangeOven]] = EndUse.new(meters: ["#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{EPlus::FuelTypePropane}"],
+                                                          in_model: hpxml.cooking_ranges.select { |o| o.fuel_type == HPXML::FuelTypePropane && o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::Propane, EUT::MechVentPreheat]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypePropane),
+                                                                in_model: hpxml.ventilation_fans.select { |o| o.used_for_whole_building_ventilation && o.preheating_fuel == HPXML::FuelTypePropane }.size > 0)
+    if @eri_design.nil? # Skip end uses not used by ERI
+      @end_uses[[FT::Propane, EUT::Grill]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{EPlus::FuelTypePropane}"],
+                                                        in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeGrill && o.fuel_type == HPXML::FuelTypePropane && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::Propane, EUT::Lighting]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypePropane}"],
+                                                           in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeLighting && o.fuel_type == HPXML::FuelTypePropane && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::Propane, EUT::Fireplace]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypePropane}"],
+                                                            in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeFireplace && o.fuel_type == HPXML::FuelTypePropane && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+    end
+    @end_uses[[FT::Propane, EUT::Generator]] = EndUse.new(meters: ["Cogeneration:#{EPlus::FuelTypePropane}"],
+                                                          in_model: hpxml.generators.select { |o| o.fuel_type == HPXML::FuelTypePropane }.size > 0)
+    @end_uses[[FT::WoodCord, EUT::Heating]] = EndUse.new(variables: OutputVars.SpaceHeating(EPlus::FuelTypeWoodCord),
+                                                         in_model: hpxml.heating_systems.select { |o| o.heating_system_fuel == HPXML::FuelTypeWoodCord }.size + hpxml.heat_pumps.select { |o| [o.heat_pump_fuel, o.backup_heating_fuel].include? HPXML::FuelTypeWoodCord }.size > 0)
+    @end_uses[[FT::WoodCord, EUT::HotWater]] = EndUse.new(variables: OutputVars.WaterHeating(EPlus::FuelTypeWoodCord),
+                                                          in_model: hpxml.water_heating_systems.select { |o| o.fuel_type == HPXML::FuelTypeWoodCord }.size > 0)
+    @end_uses[[FT::WoodCord, EUT::ClothesDryer]] = EndUse.new(meters: ["#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeWoodCord}"],
+                                                              in_model: hpxml.clothes_dryers.select { |o| o.fuel_type == HPXML::FuelTypeWoodCord && o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::WoodCord, EUT::RangeOven]] = EndUse.new(meters: ["#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{EPlus::FuelTypeWoodCord}"],
+                                                           in_model: hpxml.cooking_ranges.select { |o| o.fuel_type == HPXML::FuelTypeWoodCord && o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::WoodCord, EUT::MechVentPreheat]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypeWoodCord),
+                                                                 in_model: hpxml.ventilation_fans.select { |o| o.used_for_whole_building_ventilation && o.preheating_fuel == HPXML::FuelTypeWoodCord }.size > 0)
+    if @eri_design.nil? # Skip end uses not used by ERI
+      @end_uses[[FT::WoodCord, EUT::Grill]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{EPlus::FuelTypeWoodCord}"],
+                                                         in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeGrill && o.fuel_type == HPXML::FuelTypeWoodCord && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::WoodCord, EUT::Lighting]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypeWoodCord}"],
+                                                            in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeLighting && o.fuel_type == HPXML::FuelTypeWoodCord && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::WoodCord, EUT::Fireplace]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypeWoodCord}"],
+                                                             in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeFireplace && o.fuel_type == HPXML::FuelTypeWoodCord && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+    end
+    @end_uses[[FT::WoodCord, EUT::Generator]] = EndUse.new(meters: ["Cogeneration:#{EPlus::FuelTypeWoodCord}"],
+                                                           in_model: hpxml.generators.select { |o| o.fuel_type == HPXML::FuelTypeWoodCord }.size > 0)
+    @end_uses[[FT::WoodPellets, EUT::Heating]] = EndUse.new(variables: OutputVars.SpaceHeating(EPlus::FuelTypeWoodPellets),
+                                                            in_model: hpxml.heating_systems.select { |o| o.heating_system_fuel == HPXML::FuelTypeWoodPellets }.size + hpxml.heat_pumps.select { |o| [o.heat_pump_fuel, o.backup_heating_fuel].include? HPXML::FuelTypeWoodPellets }.size > 0)
+    @end_uses[[FT::WoodPellets, EUT::HotWater]] = EndUse.new(variables: OutputVars.WaterHeating(EPlus::FuelTypeWoodPellets),
+                                                             in_model: hpxml.water_heating_systems.select { |o| o.fuel_type == HPXML::FuelTypeWoodPellets }.size > 0)
+    @end_uses[[FT::WoodPellets, EUT::ClothesDryer]] = EndUse.new(meters: ["#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeWoodPellets}"],
+                                                                 in_model: hpxml.clothes_dryers.select { |o| o.fuel_type == HPXML::FuelTypeWoodPellets && o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::WoodPellets, EUT::RangeOven]] = EndUse.new(meters: ["#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{EPlus::FuelTypeWoodPellets}"],
+                                                              in_model: hpxml.cooking_ranges.select { |o| o.fuel_type == HPXML::FuelTypeWoodPellets && o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::WoodPellets, EUT::MechVentPreheat]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypeWoodPellets),
+                                                                    in_model: hpxml.ventilation_fans.select { |o| o.used_for_whole_building_ventilation && o.preheating_fuel == HPXML::FuelTypeWoodPellets }.size > 0)
+    if @eri_design.nil? # Skip end uses not used by ERI
+      @end_uses[[FT::WoodPellets, EUT::Grill]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{EPlus::FuelTypeWoodPellets}"],
+                                                            in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeGrill && o.fuel_type == HPXML::FuelTypeWoodPellets && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::WoodPellets, EUT::Lighting]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypeWoodPellets}"],
+                                                               in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeLighting && o.fuel_type == HPXML::FuelTypeWoodPellets && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::WoodPellets, EUT::Fireplace]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypeWoodPellets}"],
+                                                                in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeFireplace && o.fuel_type == HPXML::FuelTypeWoodPellets && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+    end
+    @end_uses[[FT::WoodPellets, EUT::Generator]] = EndUse.new(meters: ["Cogeneration:#{EPlus::FuelTypeWoodPellets}"],
+                                                              in_model: hpxml.generators.select { |o| o.fuel_type == HPXML::FuelTypeWoodPellets }.size > 0)
+    @end_uses[[FT::Coal, EUT::Heating]] = EndUse.new(variables: OutputVars.SpaceHeating(EPlus::FuelTypeCoal),
+                                                     in_model: hpxml.heating_systems.select { |o| o.heating_system_fuel == HPXML::FuelTypeCoal }.size + hpxml.heat_pumps.select { |o| [o.heat_pump_fuel, o.backup_heating_fuel].include? HPXML::FuelTypeCoal }.size > 0)
+    @end_uses[[FT::Coal, EUT::HotWater]] = EndUse.new(variables: OutputVars.WaterHeating(EPlus::FuelTypeCoal),
+                                                      in_model: hpxml.water_heating_systems.select { |o| o.fuel_type == HPXML::FuelTypeCoal }.size > 0)
+    @end_uses[[FT::Coal, EUT::ClothesDryer]] = EndUse.new(meters: ["#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeCoal}"],
+                                                          in_model: hpxml.clothes_dryers.select { |o| o.fuel_type == HPXML::FuelTypeCoal && o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::Coal, EUT::RangeOven]] = EndUse.new(meters: ["#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{EPlus::FuelTypeCoal}"],
+                                                       in_model: hpxml.cooking_ranges.select { |o| o.fuel_type == HPXML::FuelTypeCoal && o.usage_multiplier > 0 }.size > 0)
+    @end_uses[[FT::Coal, EUT::MechVentPreheat]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypeCoal),
+                                                             in_model: hpxml.ventilation_fans.select { |o| o.used_for_whole_building_ventilation && o.preheating_fuel == HPXML::FuelTypeCoal }.size > 0)
+    if @eri_design.nil? # Skip end uses not used by ERI
+      @end_uses[[FT::Coal, EUT::Grill]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{EPlus::FuelTypeCoal}"],
+                                                     in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeGrill && o.fuel_type == HPXML::FuelTypeCoal && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::Coal, EUT::Lighting]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypeCoal}"],
+                                                        in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeLighting && o.fuel_type == HPXML::FuelTypeCoal && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+      @end_uses[[FT::Coal, EUT::Fireplace]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypeCoal}"],
+                                                         in_model: hpxml.fuel_loads.select { |o| o.fuel_load_type == HPXML::FuelLoadTypeFireplace && o.fuel_type == HPXML::FuelTypeCoal && o.therm_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
+    end
+    @end_uses[[FT::Coal, EUT::Generator]] = EndUse.new(meters: ["Cogeneration:#{EPlus::FuelTypeCoal}"],
+                                                       in_model: hpxml.generators.select { |o| o.fuel_type == HPXML::FuelTypeCoal }.size > 0)
+
+    @end_uses.each do |key, end_use|
+      fuel_type, end_use_type = key
+      end_use.name = "End Use: #{fuel_type}: #{end_use_type}"
+      end_use.annual_units = 'MBtu'
+      end_use.timeseries_units = get_timeseries_units_from_fuel_type(fuel_type)
     end
 
     # Fuels
@@ -2113,123 +2329,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       fuel.name = "Fuel Use: #{fuel_type}: Total"
       fuel.annual_units = 'MBtu'
       fuel.timeseries_units = get_timeseries_units_from_fuel_type(fuel_type)
-    end
-
-    # End Uses
-
-    # NOTE: Some end uses are obtained from meters, others are rolled up from
-    # output variables so that we can have more control.
-    @end_uses = {}
-    @end_uses[[FT::Elec, EUT::Heating]] = EndUse.new(variables: OutputVars.SpaceHeating(EPlus::FuelTypeElectricity))
-    @end_uses[[FT::Elec, EUT::HeatingFanPump]] = EndUse.new()
-    @end_uses[[FT::Elec, EUT::Cooling]] = EndUse.new(variables: OutputVars.SpaceCoolingElectricity)
-    @end_uses[[FT::Elec, EUT::CoolingFanPump]] = EndUse.new()
-    @end_uses[[FT::Elec, EUT::HotWater]] = EndUse.new(variables: OutputVars.WaterHeating(EPlus::FuelTypeElectricity))
-    @end_uses[[FT::Elec, EUT::HotWaterRecircPump]] = EndUse.new(variables: OutputVars.WaterHeatingElectricityRecircPump)
-    @end_uses[[FT::Elec, EUT::HotWaterSolarThermalPump]] = EndUse.new(variables: OutputVars.WaterHeatingElectricitySolarThermalPump)
-    @end_uses[[FT::Elec, EUT::LightsInterior]] = EndUse.new(meters: ["#{Constants.ObjectNameInteriorLighting}:InteriorLights:#{EPlus::FuelTypeElectricity}"])
-    @end_uses[[FT::Elec, EUT::LightsGarage]] = EndUse.new(meters: ["#{Constants.ObjectNameGarageLighting}:InteriorLights:#{EPlus::FuelTypeElectricity}"])
-    @end_uses[[FT::Elec, EUT::LightsExterior]] = EndUse.new(meters: ["ExteriorLights:#{EPlus::FuelTypeElectricity}"])
-    @end_uses[[FT::Elec, EUT::MechVent]] = EndUse.new(meters: ["#{Constants.ObjectNameMechanicalVentilation}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-    @end_uses[[FT::Elec, EUT::MechVentPreheat]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypeElectricity))
-    @end_uses[[FT::Elec, EUT::MechVentPrecool]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypeElectricity))
-    @end_uses[[FT::Elec, EUT::WholeHouseFan]] = EndUse.new(meters: ["#{Constants.ObjectNameWholeHouseFan}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-    @end_uses[[FT::Elec, EUT::Refrigerator]] = EndUse.new(meters: ["#{Constants.ObjectNameRefrigerator}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-    if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Elec, EUT::Freezer]] = EndUse.new(meters: ["#{Constants.ObjectNameFreezer}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-    end
-    @end_uses[[FT::Elec, EUT::Dehumidifier]] = EndUse.new(variables: OutputVars.DehumidifierElectricity)
-    @end_uses[[FT::Elec, EUT::Dishwasher]] = EndUse.new(meters: ["#{Constants.ObjectNameDishwasher}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-    @end_uses[[FT::Elec, EUT::ClothesWasher]] = EndUse.new(meters: ["#{Constants.ObjectNameClothesWasher}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-    @end_uses[[FT::Elec, EUT::ClothesDryer]] = EndUse.new(meters: ["#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-    @end_uses[[FT::Elec, EUT::RangeOven]] = EndUse.new(meters: ["#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-    @end_uses[[FT::Elec, EUT::CeilingFan]] = EndUse.new(meters: ["#{Constants.ObjectNameCeilingFan}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-    @end_uses[[FT::Elec, EUT::Television]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscTelevision}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-    @end_uses[[FT::Elec, EUT::PlugLoads]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscPlugLoads}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-    if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Elec, EUT::Vehicle]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscElectricVehicleCharging}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-      @end_uses[[FT::Elec, EUT::WellPump]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscWellPump}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-      @end_uses[[FT::Elec, EUT::PoolHeater]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscPoolHeater}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-      @end_uses[[FT::Elec, EUT::PoolPump]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscPoolPump}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-      @end_uses[[FT::Elec, EUT::HotTubHeater]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscHotTubHeater}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-      @end_uses[[FT::Elec, EUT::HotTubPump]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscHotTubPump}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"])
-    end
-    @end_uses[[FT::Elec, EUT::PV]] = EndUse.new(meters: ['Photovoltaic:ElectricityProduced', 'PowerConversion:ElectricityProduced'])
-    @end_uses[[FT::Elec, EUT::Generator]] = EndUse.new(meters: ['Cogeneration:ElectricityProduced'])
-    @end_uses[[FT::Gas, EUT::Heating]] = EndUse.new(variables: OutputVars.SpaceHeating(EPlus::FuelTypeNaturalGas))
-    @end_uses[[FT::Gas, EUT::HotWater]] = EndUse.new(variables: OutputVars.WaterHeating(EPlus::FuelTypeNaturalGas))
-    @end_uses[[FT::Gas, EUT::ClothesDryer]] = EndUse.new(meters: ["#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}"])
-    @end_uses[[FT::Gas, EUT::RangeOven]] = EndUse.new(meters: ["#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}"])
-    @end_uses[[FT::Gas, EUT::MechVentPreheat]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypeNaturalGas))
-    if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Gas, EUT::PoolHeater]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscPoolHeater}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}"])
-      @end_uses[[FT::Gas, EUT::HotTubHeater]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscHotTubHeater}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}"])
-      @end_uses[[FT::Gas, EUT::Grill]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}"])
-      @end_uses[[FT::Gas, EUT::Lighting]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}"])
-      @end_uses[[FT::Gas, EUT::Fireplace]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypeNaturalGas}"])
-    end
-    @end_uses[[FT::Gas, EUT::Generator]] = EndUse.new(meters: ["Cogeneration:#{EPlus::FuelTypeNaturalGas}"])
-    @end_uses[[FT::Oil, EUT::Heating]] = EndUse.new(variables: OutputVars.SpaceHeating(EPlus::FuelTypeOil))
-    @end_uses[[FT::Oil, EUT::HotWater]] = EndUse.new(variables: OutputVars.WaterHeating(EPlus::FuelTypeOil))
-    @end_uses[[FT::Oil, EUT::ClothesDryer]] = EndUse.new(meters: ["#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeOil}"])
-    @end_uses[[FT::Oil, EUT::RangeOven]] = EndUse.new(meters: ["#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{EPlus::FuelTypeOil}"])
-    @end_uses[[FT::Oil, EUT::MechVentPreheat]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypeOil))
-    if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Oil, EUT::Grill]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{EPlus::FuelTypeOil}"])
-      @end_uses[[FT::Oil, EUT::Lighting]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypeOil}"])
-      @end_uses[[FT::Oil, EUT::Fireplace]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypeOil}"])
-    end
-    @end_uses[[FT::Oil, EUT::Generator]] = EndUse.new(meters: ["Cogeneration:#{EPlus::FuelTypeOil}"])
-    @end_uses[[FT::Propane, EUT::Heating]] = EndUse.new(variables: OutputVars.SpaceHeating(EPlus::FuelTypePropane))
-    @end_uses[[FT::Propane, EUT::HotWater]] = EndUse.new(variables: OutputVars.WaterHeating(EPlus::FuelTypePropane))
-    @end_uses[[FT::Propane, EUT::ClothesDryer]] = EndUse.new(meters: ["#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypePropane}"])
-    @end_uses[[FT::Propane, EUT::RangeOven]] = EndUse.new(meters: ["#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{EPlus::FuelTypePropane}"])
-    @end_uses[[FT::Propane, EUT::MechVentPreheat]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypePropane))
-    if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Propane, EUT::Grill]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{EPlus::FuelTypePropane}"])
-      @end_uses[[FT::Propane, EUT::Lighting]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypePropane}"])
-      @end_uses[[FT::Propane, EUT::Fireplace]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypePropane}"])
-    end
-    @end_uses[[FT::Propane, EUT::Generator]] = EndUse.new(meters: ["Cogeneration:#{EPlus::FuelTypePropane}"])
-    @end_uses[[FT::WoodCord, EUT::Heating]] = EndUse.new(variables: OutputVars.SpaceHeating(EPlus::FuelTypeWoodCord))
-    @end_uses[[FT::WoodCord, EUT::HotWater]] = EndUse.new(variables: OutputVars.WaterHeating(EPlus::FuelTypeWoodCord))
-    @end_uses[[FT::WoodCord, EUT::ClothesDryer]] = EndUse.new(meters: ["#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeWoodCord}"])
-    @end_uses[[FT::WoodCord, EUT::RangeOven]] = EndUse.new(meters: ["#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{EPlus::FuelTypeWoodCord}"])
-    @end_uses[[FT::WoodCord, EUT::MechVentPreheat]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypeWoodCord))
-    if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::WoodCord, EUT::Grill]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{EPlus::FuelTypeWoodCord}"])
-      @end_uses[[FT::WoodCord, EUT::Lighting]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypeWoodCord}"])
-      @end_uses[[FT::WoodCord, EUT::Fireplace]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypeWoodCord}"])
-    end
-    @end_uses[[FT::WoodCord, EUT::Generator]] = EndUse.new(meters: ["Cogeneration:#{EPlus::FuelTypeWoodCord}"])
-    @end_uses[[FT::WoodPellets, EUT::Heating]] = EndUse.new(variables: OutputVars.SpaceHeating(EPlus::FuelTypeWoodPellets))
-    @end_uses[[FT::WoodPellets, EUT::HotWater]] = EndUse.new(variables: OutputVars.WaterHeating(EPlus::FuelTypeWoodPellets))
-    @end_uses[[FT::WoodPellets, EUT::ClothesDryer]] = EndUse.new(meters: ["#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeWoodPellets}"])
-    @end_uses[[FT::WoodPellets, EUT::RangeOven]] = EndUse.new(meters: ["#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{EPlus::FuelTypeWoodPellets}"])
-    @end_uses[[FT::WoodPellets, EUT::MechVentPreheat]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypeWoodPellets))
-    if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::WoodPellets, EUT::Grill]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{EPlus::FuelTypeWoodPellets}"])
-      @end_uses[[FT::WoodPellets, EUT::Lighting]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypeWoodPellets}"])
-      @end_uses[[FT::WoodPellets, EUT::Fireplace]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypeWoodPellets}"])
-    end
-    @end_uses[[FT::WoodPellets, EUT::Generator]] = EndUse.new(meters: ["Cogeneration:#{EPlus::FuelTypeWoodPellets}"])
-    @end_uses[[FT::Coal, EUT::Heating]] = EndUse.new(variables: OutputVars.SpaceHeating(EPlus::FuelTypeCoal))
-    @end_uses[[FT::Coal, EUT::HotWater]] = EndUse.new(variables: OutputVars.WaterHeating(EPlus::FuelTypeCoal))
-    @end_uses[[FT::Coal, EUT::ClothesDryer]] = EndUse.new(meters: ["#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{EPlus::FuelTypeCoal}"])
-    @end_uses[[FT::Coal, EUT::RangeOven]] = EndUse.new(meters: ["#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{EPlus::FuelTypeCoal}"])
-    @end_uses[[FT::Coal, EUT::MechVentPreheat]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypeCoal))
-    if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Coal, EUT::Grill]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{EPlus::FuelTypeCoal}"])
-      @end_uses[[FT::Coal, EUT::Lighting]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{EPlus::FuelTypeCoal}"])
-      @end_uses[[FT::Coal, EUT::Fireplace]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{EPlus::FuelTypeCoal}"])
-    end
-    @end_uses[[FT::Coal, EUT::Generator]] = EndUse.new(meters: ["Cogeneration:#{EPlus::FuelTypeCoal}"])
-
-    @end_uses.each do |key, end_use|
-      fuel_type, end_use_type = key
-      end_use.name = "End Use: #{fuel_type}: #{end_use_type}"
-      end_use.annual_units = 'MBtu'
-      end_use.timeseries_units = get_timeseries_units_from_fuel_type(fuel_type)
+      fuel.in_model = (@end_uses.select { |key, end_use| key[0] == fuel_type && end_use.in_model }.size > 0)
     end
 
     # Hot Water Uses

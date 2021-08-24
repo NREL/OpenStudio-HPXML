@@ -33,6 +33,7 @@ __New Features__
 - Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
 - Updates the reporting measure to register all outputs from the annual CSV with the OS runner (for use in, e.g., PAT).
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
+- Reduces EnergyPlus warnings related to unused objects or invalid output meters/variables.
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.

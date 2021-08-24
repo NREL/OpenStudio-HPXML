@@ -2,7 +2,7 @@
 
 class HPXMLDefaults
   # Note: Each HPXML object (e.g., HPXML::Wall) has an additional_properties
-  # child object where # custom information can be attached to the object without
+  # child object where custom information can be attached to the object without
   # being written to the HPXML file. This is useful to associate additional values
   # with the HPXML objects that will ultimately get passed around.
 

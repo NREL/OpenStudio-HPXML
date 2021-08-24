@@ -216,7 +216,7 @@ class OSModel
     # Init
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
-    set_defaults_and_globals(runner, output_dir, epw_file, weather)
+    hpxml_defaults_path = set_defaults_and_globals(runner, output_dir, epw_file, weather)
     Location.apply(model, runner, weather, epw_file, @hpxml)
     add_simulation_params(model)
 
@@ -278,7 +278,7 @@ class OSModel
     add_airflow(runner, model, weather, spaces)
     add_photovoltaics(runner, model)
     add_generators(runner, model)
-    add_additional_properties(runner, model, hpxml_path, building_id)
+    add_additional_properties(runner, model, hpxml_defaults_path, building_id)
 
     # Output
 
@@ -323,6 +323,7 @@ class OSModel
     # Now that we've written in.xml, ensure that no capacities/airflows
     # are zero in order to prevent potential E+ errors.
     HVAC.ensure_nonzero_sizing_values(@hpxml)
+    return hpxml_defaults_path
   end
 
   def self.add_simulation_params(model)
@@ -2062,10 +2063,10 @@ class OSModel
     end
   end
 
-  def self.add_additional_properties(runner, model, hpxml_path, building_id)
+  def self.add_additional_properties(runner, model, hpxml_defaults_path, building_id)
     # Store some data for use in reporting measure
     additionalProperties = model.getBuilding.additionalProperties
-    additionalProperties.setFeature('hpxml_path', hpxml_path)
+    additionalProperties.setFeature('hpxml_path', hpxml_defaults_path)
     additionalProperties.setFeature('building_id', building_id.to_s)
     additionalProperties.setFeature('hvac_map', map_to_string(@hvac_map))
     additionalProperties.setFeature('dhw_map', map_to_string(@dhw_map))
