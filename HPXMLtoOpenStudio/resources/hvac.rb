@@ -952,37 +952,42 @@ class HVAC
     end
   end
 
-  def self.apply_ceiling_fans(model, runner, weather, ceiling_fan, living_space)
+  def self.apply_ceiling_fans(model, runner, weather, ceiling_fan, living_space, schedules_file)
     obj_name = Constants.ObjectNameCeilingFan
-    monthly_sch = get_default_ceiling_fan_months(weather)
-    medium_cfm = 3000.0
-    weekday_sch = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
-    weekend_sch = weekday_sch
-    hrs_per_day = weekday_sch.sum(0.0)
+    medium_cfm = 3000.0 # From ANSI 301-2019
+    hrs_per_day = 10.5 # From ANSI 301-2019
     cfm_per_w = ceiling_fan.efficiency
     quantity = ceiling_fan.quantity
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, 'Wh', 'kWh')
-    annual_kwh *= monthly_sch.sum(0.0) / 12.0
+    annual_kwh *= ceiling_fan.monthly_multipliers.split(',').map(&:to_f).sum(0.0) / 12.0
 
-    ceiling_fan_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', weekday_sch, weekend_sch, monthly_sch, Constants.ScheduleTypeLimitsFraction)
-
-    space_design_level = ceiling_fan_sch.calcDesignLevelFromDailykWh(annual_kwh / 365.0)
+    if not schedules_file.nil?
+      ceiling_fan_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: 'ceiling_fan', annual_kwh: annual_kwh)
+      ceiling_fan_sch = schedules_file.create_schedule_file(col_name: 'ceiling_fan')
+    else
+      weekday_sch = ceiling_fan.weekday_fractions
+      weekend_sch = ceiling_fan.weekend_fractions
+      monthly_sch = ceiling_fan.monthly_multipliers
+      ceiling_fan_sch_obj = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', weekday_sch, weekend_sch, monthly_sch, Constants.ScheduleTypeLimitsFraction)
+      ceiling_fan_design_level = ceiling_fan_sch_obj.calcDesignLevelFromDailykWh(annual_kwh / 365.0)
+      ceiling_fan_sch = ceiling_fan_sch_obj.schedule
+    end
 
     equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
     equip_def.setName(obj_name)
     equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
     equip.setName(equip_def.name.to_s)
     equip.setSpace(living_space)
-    equip_def.setDesignLevel(space_design_level)
+    equip_def.setDesignLevel(ceiling_fan_design_level)
     equip_def.setFractionRadiant(0.558)
     equip_def.setFractionLatent(0)
     equip_def.setFractionLost(0)
     equip.setEndUseSubcategory(obj_name)
-    equip.setSchedule(ceiling_fan_sch.schedule)
+    equip.setSchedule(ceiling_fan_sch)
   end
 
   def self.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, heating_days, cooling_days)
-    num_days = Schedule.get_num_days_in_year(model)
+    num_days = Constants.NumDaysInYear(model)
 
     if hvac_control.weekday_heating_setpoints.nil? || hvac_control.weekend_heating_setpoints.nil?
       # Base heating setpoint
@@ -1680,20 +1685,28 @@ class HVAC
     # Note: fan_cfms should include all unique airflow rates (both heating and cooling, at all speeds)
     fan = OpenStudio::Model::FanSystemModel.new(model)
     fan.setSpeedControlMethod('Discrete')
-    fan.setDesignPowerSizingMethod('TotalEfficiencyAndPressure')
+    fan.setDesignPowerSizingMethod('PowerPerFlow')
+    fan.setElectricPowerPerUnitFlowRate([fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.00001].max)
     fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
-    set_fan_power(fan, fan_watts_per_cfm)
     fan.setName(obj_name + ' supply fan')
     fan.setEndUseSubcategory('supply fan')
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirStreamFraction(1.0)
     max_fan_cfm = Float(fan_cfms.max) # Convert to float to prevent integer division below
     fan.setDesignMaximumAirFlowRate(UnitConversions.convert(max_fan_cfm, 'cfm', 'm^3/s'))
+
+    # For each fan speed, we preserve the W/cfm instead of using the fan power law. This
+    # ensures that, e.g., a standalone furnace has the same fan power as a furnace attached
+    # to a central air conditioner. For multi-speed systems or systems with different
+    # heating and cooling airflow rates, this essentially means that the W/cfm is treated
+    # as an average value over the range of airflow rates, as opposed to the value at maximum
+    # airflow rate.
     fan_cfms.sort.each do |fan_cfm|
       fan_ratio = fan_cfm / max_fan_cfm
-      power_fraction = fan_ratio**3 # fan power curve
+      power_fraction = fan_ratio
       fan.addSpeed(fan_ratio.round(5), power_fraction.round(5))
     end
+
     return fan
   end
 
@@ -3115,18 +3128,6 @@ class HVAC
     else
       hvac_ap.fan_power_rated = 0.14 # W/cfm
     end
-  end
-
-  def self.set_fan_power(fan, fan_watts_per_cfm)
-    if fan_watts_per_cfm > 0
-      fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
-      pressure_rise = fan_eff * fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s') # Pa
-    else
-      fan_eff = 1
-      pressure_rise = 0.000001
-    end
-    fan.setFanTotalEfficiency(fan_eff)
-    fan.setDesignPressureRise(pressure_rise)
   end
 
   def self.calc_pump_rated_flow_rate(pump_eff, pump_w, pump_head_pa)
