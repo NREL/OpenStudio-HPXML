@@ -158,9 +158,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # get the last model and sql file
     @model = runner.lastOpenStudioModel.get
-    hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
+    hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
-    @hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: building_id)
+    @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
     setup_outputs(@hpxml)
 
@@ -393,9 +393,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
     @model.setSqlFile(@sqlFile)
 
-    hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
+    hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
-    @hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: building_id)
+    @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
     get_object_maps()
     @eri_design = @hpxml.header.eri_design
 
@@ -404,6 +404,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Set paths
     if not @eri_design.nil?
       # ERI run, store files in a particular location
+      hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
       output_dir = File.dirname(hpxml_path)
       hpxml_name = File.basename(hpxml_path).gsub('.xml', '')
       annual_output_path = File.join(output_dir, "#{hpxml_name}.#{output_format}")
@@ -2135,13 +2136,13 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @end_uses[[FT::Elec, EUT::LightsExterior]] = EndUse.new(meters: ["ExteriorLights:#{EPlus::FuelTypeElectricity}"],
                                                             in_model: (hpxml.lighting_groups.size > 0) && (hpxml.lighting.exterior_usage_multiplier > 0))
     @end_uses[[FT::Elec, EUT::MechVent]] = EndUse.new(meters: ["#{Constants.ObjectNameMechanicalVentilation}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
-                                                      in_model: hpxml.ventilation_fans.select { |o| o.used_for_whole_building_ventilation || o.used_for_local_ventilation }.size > 0)
+                                                      in_model: hpxml.ventilation_fans.select { |o| (o.used_for_whole_building_ventilation || o.used_for_local_ventilation) && o.hours_in_operation > 0 && o.flow_rate > 0 && o.fan_power > 0 }.size > 0)
     @end_uses[[FT::Elec, EUT::MechVentPreheat]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypeElectricity),
                                                              in_model: hpxml.ventilation_fans.select { |o| o.used_for_whole_building_ventilation && o.preheating_fuel == HPXML::FuelTypeElectricity }.size > 0)
     @end_uses[[FT::Elec, EUT::MechVentPrecool]] = EndUse.new(variables: OutputVars.MechVentPreconditioning(EPlus::FuelTypeElectricity),
                                                              in_model: hpxml.ventilation_fans.select { |o| o.used_for_whole_building_ventilation && o.precooling_fuel == HPXML::FuelTypeElectricity }.size > 0)
     @end_uses[[FT::Elec, EUT::WholeHouseFan]] = EndUse.new(meters: ["#{Constants.ObjectNameWholeHouseFan}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
-                                                           in_model: hpxml.ventilation_fans.select { |o| o.used_for_seasonal_cooling_load_reduction }.size > 0)
+                                                           in_model: hpxml.ventilation_fans.select { |o| o.used_for_seasonal_cooling_load_reduction && o.quantity > 0 && o.hours_in_operation > 0 && o.flow_rate > 0 && o.fan_power > 0 }.size > 0)
     @end_uses[[FT::Elec, EUT::Refrigerator]] = EndUse.new(meters: ["#{Constants.ObjectNameRefrigerator}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
                                                           in_model: hpxml.refrigerators.select { |o| o.usage_multiplier > 0 }.size > 0)
     if @eri_design.nil? # Skip end uses not used by ERI
@@ -2159,7 +2160,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @end_uses[[FT::Elec, EUT::RangeOven]] = EndUse.new(meters: ["#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
                                                        in_model: hpxml.cooking_ranges.select { |o| o.usage_multiplier > 0 }.size > 0)
     @end_uses[[FT::Elec, EUT::CeilingFan]] = EndUse.new(meters: ["#{Constants.ObjectNameCeilingFan}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
-                                                        in_model: hpxml.ceiling_fans.select { |o| o.usage_multiplier > 0 }.size > 0)
+                                                        in_model: hpxml.ceiling_fans.select { |o| o.quantity > 0 }.size > 0)
     @end_uses[[FT::Elec, EUT::Television]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscTelevision}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],
                                                         in_model: hpxml.plug_loads.select { |o| o.plug_load_type == HPXML::PlugLoadTypeTelevision && o.kWh_per_year > 0 && o.usage_multiplier > 0 }.size > 0)
     @end_uses[[FT::Elec, EUT::PlugLoads]] = EndUse.new(meters: ["#{Constants.ObjectNameMiscPlugLoads}:InteriorEquipment:#{EPlus::FuelTypeElectricity}"],

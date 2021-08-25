@@ -278,7 +278,7 @@ class OSModel
     add_airflow(runner, model, weather, spaces)
     add_photovoltaics(runner, model)
     add_generators(runner, model)
-    add_additional_properties(runner, model, hpxml_defaults_path, building_id)
+    add_additional_properties(runner, model, hpxml_path, hpxml_defaults_path, building_id)
 
     # Output
 
@@ -2063,10 +2063,11 @@ class OSModel
     end
   end
 
-  def self.add_additional_properties(runner, model, hpxml_defaults_path, building_id)
+  def self.add_additional_properties(runner, model, hpxml_path, hpxml_defaults_path, building_id)
     # Store some data for use in reporting measure
     additionalProperties = model.getBuilding.additionalProperties
-    additionalProperties.setFeature('hpxml_path', hpxml_defaults_path)
+    additionalProperties.setFeature('hpxml_path', hpxml_path)
+    additionalProperties.setFeature('hpxml_defaults_path', hpxml_defaults_path)
     additionalProperties.setFeature('building_id', building_id.to_s)
     additionalProperties.setFeature('hvac_map', map_to_string(@hvac_map))
     additionalProperties.setFeature('dhw_map', map_to_string(@dhw_map))
