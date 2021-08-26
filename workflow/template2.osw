@@ -6,9 +6,10 @@
   "steps": [
     {
       "arguments": {
-        "hpxml_path": "../workflow/base-schedules-detailed-smooth_test.xml",
+        "hpxml_path": "../workflow/sample_files/base-schedules-detailed-smooth.xml",
         "schedules_type": "smooth",
-        "output_csv_path": "../smooth.csv"
+        "output_csv_path": "../smooth.csv",
+        "hpxml_output_path": "../workflow/base-schedules-detailed-smooth_test.xml"
       },
       "measure_dir_name": "BuildResidentialScheduleFile"
     },

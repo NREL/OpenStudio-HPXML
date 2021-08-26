@@ -400,7 +400,7 @@ class OSModel
       layered_const_adj = OpenStudio::Model::Construction.new(model)
       layered_const_adj.setName(cond_bsmnt_surface.construction.get.name.get + ' Reversed Bsmnt')
       layered_const_adj.setLayers(cond_bsmnt_surface.construction.get.to_LayeredConstruction.get.layers.reverse())
-      adj_surface.construction.get.remove
+      adj_surface.construction.get.remove if adj_surface.construction.get.directUseCount == 1
       adj_surface.setConstruction(layered_const_adj)
     end
   end

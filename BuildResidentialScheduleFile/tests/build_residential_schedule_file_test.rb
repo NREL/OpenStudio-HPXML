@@ -17,6 +17,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     @args_hash = {}
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    @args_hash['hpxml_output_path'] = @args_hash['hpxml_path']
   end
 
   def teardown

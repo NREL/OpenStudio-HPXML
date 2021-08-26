@@ -68,6 +68,11 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute (or relative) path of the csv file containing user-specified occupancy schedules.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_output_path', true)
+    arg.setDisplayName('HPXML Output File Path')
+    arg.setDescription('Absolute/relative output path of the HPXML file. This HPXML file will include the output CSV path.')
+    args << arg
+
     return args
   end
 
@@ -119,8 +124,17 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     else
       XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)
     end
-    XMLHelper.write_file(doc, hpxml_path)
-    runner.registerInfo("Wrote file: #{hpxml_path}")
+
+    # write out the modified hpxml
+    hpxml_output_path = args[:hpxml_output_path]
+    unless (Pathname.new hpxml_output_path).absolute?
+      hpxml_output_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_output_path))
+    end
+
+    if (hpxml_path != hpxml_output_path) || (schedules_filepath != args[:output_csv_path])
+      XMLHelper.write_file(doc, hpxml_output_path)
+      runner.registerInfo("Wrote file: #{hpxml_output_path}")
+    end
 
     return true
   end

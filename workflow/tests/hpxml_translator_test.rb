@@ -200,15 +200,10 @@ class HPXMLTest < MiniTest::Test
 
     os_cli = OpenStudio.getOpenStudioCLI
     osw_path = File.join(File.dirname(__FILE__), '..', 'template2.osw')
-    xml_path = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base-schedules-detailed-smooth.xml')
 
     # Create derivative OSW for testing
     osw_path_test = osw_path.gsub('.osw', '_test.osw')
     FileUtils.cp(osw_path, osw_path_test)
-
-    # Create derivative XML for testing
-    xml_path_test = File.join(File.dirname(__FILE__), '..', 'base-schedules-detailed-smooth_test.xml')
-    FileUtils.cp(xml_path, xml_path_test)
 
     # Turn on debug mode
     json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
@@ -240,6 +235,7 @@ class HPXMLTest < MiniTest::Test
 
     # Cleanup
     File.delete(osw_path_test)
+    xml_path_test = File.join(File.dirname(__FILE__), '..', 'base-schedules-detailed-smooth_test.xml')
     File.delete(xml_path_test)
   end
 
