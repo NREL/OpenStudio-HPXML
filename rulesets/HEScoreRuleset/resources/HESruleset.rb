@@ -186,8 +186,8 @@ class HEScoreRuleset
         has_radiant_barrier = true
         radiant_barrier_grade = 1
       end
-      roof_azimuths.each_with_index do |roof_azimuth, idx|
-        new_hpxml.roofs.add(id: "#{orig_roof['roof_name']}_#{idx}",
+      roof_azimuths.each_with_index do |roof_azimuth, i|
+        new_hpxml.roofs.add(id: "#{orig_roof['roof_name']}_#{i}",
                             interior_adjacent_to: attic_location,
                             area: roof_area / 2.0,
                             azimuth: sanitize_azimuth(roof_azimuth),
@@ -270,7 +270,7 @@ class HEScoreRuleset
 
   def self.set_enclosure_framefloors(json, new_hpxml)
     # Floors above foundation
-    json['building']['zone']['zone_floor'].each do |orig_foundation|
+    json['building']['zone']['zone_floor'].each_with_index do |orig_foundation, i|
       fnd_location = { 'uncond_basement' => HPXML::LocationBasementUnconditioned,
                        'cond_basement' => HPXML::LocationBasementConditioned,
                        'vented_crawl' => HPXML::LocationCrawlspaceVented,
@@ -280,7 +280,7 @@ class HEScoreRuleset
 
       framefloor_r = get_floor_effective_r_from_doe2code(orig_foundation['floor_assembly_code'])
 
-      new_hpxml.frame_floors.add(id: "framefloor_adjacent_to_#{orig_foundation['floor_name']}",
+      new_hpxml.frame_floors.add(id: "#{orig_foundation['floor_name']}_floor_#{i}",
                                  exterior_adjacent_to: fnd_location,
                                  interior_adjacent_to: HPXML::LocationLivingSpace,
                                  area: orig_foundation['floor_area'],
@@ -288,7 +288,7 @@ class HEScoreRuleset
     end
 
     # Floors below attic
-    json['building']['zone']['zone_roof'].each do |orig_attic|
+    json['building']['zone']['zone_roof'].each_with_index do |orig_attic, i|
       attic_location = { 'vented_attic' => HPXML::LocationAtticVented,
                          'cond_attic' => HPXML::LocationLivingSpace,
                          'cath_ceiling' => HPXML::LocationLivingSpace }[orig_attic['roof_type']]
@@ -297,7 +297,7 @@ class HEScoreRuleset
       framefloor_r = get_ceiling_effective_r_from_doe2code(orig_attic['ceiling_assembly_code'])
       framefloor_area = orig_attic['roof_area']
 
-      new_hpxml.frame_floors.add(id: "framefloor_adjacent_to_#{orig_attic['roof_name']}",
+      new_hpxml.frame_floors.add(id: "#{orig_attic['roof_name']}_floor_#{i}",
                                  exterior_adjacent_to: attic_location,
                                  interior_adjacent_to: HPXML::LocationLivingSpace,
                                  area: framefloor_area,
@@ -306,7 +306,7 @@ class HEScoreRuleset
   end
 
   def self.set_enclosure_slabs(json, new_hpxml)
-    json['building']['zone']['zone_floor'].each_with_index do |orig_foundation, idx|
+    json['building']['zone']['zone_floor'].each_with_index do |orig_foundation, i|
       fnd_location = { 'uncond_basement' => HPXML::LocationBasementUnconditioned,
                        'cond_basement' => HPXML::LocationBasementConditioned,
                        'vented_crawl' => HPXML::LocationCrawlspaceVented,
@@ -322,13 +322,13 @@ class HEScoreRuleset
       slab_depth_below_grade = nil
       slab_perimeter_insulation_r_value = nil
       if fnd_type == 'slab_on_grade'
-        slab_id = "slab_on_grade_#{idx}"
+        slab_id = "#{orig_foundation['floor_name']}_slab_#{i}"
         slab_area = orig_foundation['floor_area']
         slab_perimeter_insulation_r_value = orig_foundation['foundation_insulation_level']
         slab_depth_below_grade = 0
         slab_thickness = 4
       elsif ['uncond_basement', 'cond_basement', 'vented_crawl', 'unvented_crawl'].include? fnd_type
-        slab_id = "#{fnd_type}_slab_#{idx}"
+        slab_id = "#{orig_foundation['floor_name']}_slab_#{i}"
         slab_area = orig_foundation['floor_area']
         slab_perimeter_insulation_r_value = 0
         if ['uncond_basement', 'cond_basement'].include? fnd_type
@@ -427,14 +427,14 @@ class HEScoreRuleset
       else
         roof_azimuths = [@bldg_azimuth, @bldg_azimuth + 180]
       end
-      roof_azimuths.each_with_index do |roof_azimuth, idx| # FIXME: double-check
+      roof_azimuths.each_with_index do |roof_azimuth, i|
         skylight_area = orig_skylight['skylight_area'] / 2.0
-        new_hpxml.skylights.add(id: "#{orig_roof['roof_name']}_#{idx}_skylight",
+        new_hpxml.skylights.add(id: "#{orig_roof['roof_name']}_#{i}_skylight",
                                 area: skylight_area,
                                 azimuth: roof_azimuth,
                                 ufactor: ufactor,
                                 shgc: shgc,
-                                roof_idref: "#{orig_roof['roof_name']}_#{idx}",
+                                roof_idref: "#{orig_roof['roof_name']}_#{i}",
                                 interior_shading_factor_summer: interior_shading_factor_summer,
                                 interior_shading_factor_winter: interior_shading_factor_winter,
                                 exterior_shading_factor_summer: exterior_shading_factor_summer,
@@ -539,7 +539,7 @@ class HEScoreRuleset
           end
         end
 
-        new_hpxml.heating_systems.add(id: "#{orig_hvac['hvac_name']}_heating",
+        new_hpxml.heating_systems.add(id: "#{orig_hvac['hvac_name']}_heat",
                                       distribution_system_idref: distribution_system_idref,
                                       heating_system_type: heating_system_type,
                                       heating_system_fuel: heating_system_fuel,
@@ -595,7 +595,7 @@ class HEScoreRuleset
           end
         end
 
-        new_hpxml.cooling_systems.add(id: "#{orig_hvac['hvac_name']}_cooling",
+        new_hpxml.cooling_systems.add(id: "#{orig_hvac['hvac_name']}_cool",
                                       distribution_system_idref: distribution_system_idref,
                                       cooling_system_type: cooling_system_type,
                                       cooling_system_fuel: cooling_system_fuel,
