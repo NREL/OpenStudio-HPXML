@@ -30,7 +30,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
   # human readable description of modeling approach
   def modeler_description
-    return 'Exports a CSV of schedules to the specified file path, and inserts the CSV schedule file path into the HPXML file (or overwrites it if one already exists).'
+    return "Generates a CSV of schedules at the specified file path, and inserts the CSV schedule file path into the output HPXML file (or overwrites it if one already exists). Schedules corresponding to 'smooth' are average (e.g., Building America). Schedules corresponding to 'stochastic' are generated using time-inhomogeneous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data."
   end
 
   # define the arguments that the user will input
@@ -48,7 +48,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('schedules_type', schedules_type_choices, true)
     arg.setDisplayName('Schedules: Type')
-    arg.setDescription("The type of occupant-related schedules to use. Schedules corresponding to 'smooth' are average (e.g., Building America). Schedules corresponding to 'stochastic' are generated using time-inhomogeneous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data.")
+    arg.setDescription('The type of occupant-related schedules to use.')
     arg.setDefaultValue('smooth')
     args << arg
 
@@ -118,12 +118,11 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     doc = XMLHelper.parse_file(hpxml_path)
     extension = XMLHelper.create_elements_as_needed(XMLHelper.get_element(doc, '/HPXML'), ['SoftwareInfo', 'extension'])
     schedules_filepath = XMLHelper.get_value(extension, 'SchedulesFilePath', :string)
-    if !schedules_filepath.nil? && (schedules_filepath != args[:output_csv_path])
+    if !schedules_filepath.nil?
       runner.registerWarning("Overwriting existing SchedulesFilePath element: #{schedules_filepath}")
       XMLHelper.delete_element(extension, 'SchedulesFilePath')
-    else
-      XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)
     end
+    XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)
 
     # write out the modified hpxml
     hpxml_output_path = args[:hpxml_output_path]

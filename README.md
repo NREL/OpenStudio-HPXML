@@ -22,7 +22,7 @@ Since [OpenStudio measures](http://nrel.github.io/OpenStudio-user-documentation/
 ## Measures
 
 This repository contains three OpenStudio measures:
-- `BuildResidentialScheduleFile`: A measure that exports a CSV of smooth or stochastic schedules.
+- `BuildResidentialScheduleFile`: A measure that generates a CSV of detailed schedules (e.g., stochastic occupancy) for use in the simulation.
 - `HPXMLtoOpenStudio`: A measure that translates an HPXML file to an OpenStudio model.
 - `SimulationOutputReport`: A reporting measure that generates a variety of annual/timeseries CSV or JSON outputs for a residential HPXML-based model.
 
