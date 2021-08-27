@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # FIXME: Solar thermal hot water load (solar fraction vs detailed vs none)
+# FIXME: Small change to timeseries -- End Use: Electricity: Hot Water
 # FIXME: Handling of DFHPs
-# FIXME: Handling of ERI Reference Home loads
 
 # see the URL below for information on how to write OpenStudio measures
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
@@ -587,7 +587,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         apply_multiplier_to_output(@loads[LT::HotWaterDelivered], @loads[LT::HotWaterSolarThermal], dhw_id, 1.0 / (1.0 - solar_system.solar_fraction))
       end
     end
-
+    
     # Calculate aggregated values from per-system values as needed
     (@end_uses.values + @loads.values + @hot_water_uses.values).each do |obj|
       if obj.annual_output.nil?
@@ -838,8 +838,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       elsif type.downcase.include? 'cooling'
         return cool_sys_ids
       end
-
-      fail "Unhandled type: '#{type}'."
+      return nil
     end
 
     def get_eec_value_numerator(unit)
@@ -854,9 +853,19 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Retrieve info from HPXML object
     # FUTURE: Move this code to the ERI workflow
-    heat_sys_ids = cool_sys_ids = dhw_sys_ids = vent_preheat_sys_ids = vent_precool_sys_ids = []
-    eec_heats = eec_cools = eec_dhws = eec_vent_preheats = eec_vent_precools = {}
-    heat_fuels = dhw_fuels = vent_preheat_fuels = {}
+    heat_sys_ids = []
+    cool_sys_ids = []
+    dhw_sys_ids = []
+    vent_preheat_sys_ids = []
+    vent_precool_sys_ids = []
+    eec_heats = {}
+    eec_cools = {}
+    eec_dhws = {}
+    eec_vent_preheats = {}
+    eec_vent_precools = {}
+    heat_fuels = {}
+    dhw_fuels = {}
+    vent_preheat_fuels = {}
     @hpxml.heating_systems.each do |htg_system|
       next unless htg_system.fraction_heat_load_served > 0
 
@@ -943,6 +952,18 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       eec_vent_precools[sys_id] = get_eec_value_numerator('COP') / vent_fan.precooling_efficiency_cop
     end
 
+    # Calculate ERI Reference Loads
+    (@hpxml.heating_systems + @hpxml.heat_pumps).each do |htg_system|
+      next unless heat_sys_ids.include? htg_system.id
+      
+      @loads[LT::Heating].annual_output_by_system[htg_system.id] = htg_system.fraction_heat_load_served * @loads[LT::Heating].annual_output
+    end
+    (@hpxml.cooling_systems + @hpxml.heat_pumps).each do |clg_system|
+      next unless cool_sys_ids.include? clg_system.id
+      
+      @loads[LT::Cooling].annual_output_by_system[clg_system.id] = clg_system.fraction_cool_load_served * @loads[LT::Cooling].annual_output
+    end
+
     # Sys IDS
     results_out << ['hpxml_heat_sys_ids', heat_sys_ids.to_s]
     results_out << ['hpxml_cool_sys_ids', cool_sys_ids.to_s]
@@ -976,22 +997,24 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @end_uses.each do |key, end_use|
       fuel_type, end_use_type = key
       key_name = sanitize_string("enduse#{fuel_type}#{end_use_type}")
-      if not end_use.annual_output_by_system.empty?
-        sys_ids = get_sys_ids(end_use_type, heat_sys_ids, cool_sys_ids, dhw_sys_ids, vent_preheat_sys_ids, vent_precool_sys_ids)
-        results_out << [key_name, ordered_values(end_use.annual_output_by_system, sys_ids).to_s]
-      else
+      sys_ids = get_sys_ids(end_use_type, heat_sys_ids, cool_sys_ids, dhw_sys_ids, vent_preheat_sys_ids, vent_precool_sys_ids)
+      if sys_ids.nil?
         results_out << [key_name, end_use.annual_output.to_s]
+      elsif end_use.annual_output_by_system.empty?
+        results_out << [key_name, [end_use.annual_output.to_f]]
+      else
+        results_out << [key_name, ordered_values(end_use.annual_output_by_system, sys_ids).to_s]
       end
     end
     results_out << [line_break]
 
     # Loads by System
     @loads.each do |load_type, load|
+      next unless [LT::Heating, LT::Cooling, LT::HotWaterDelivered].include? load_type
+
       key_name = sanitize_string("load#{load_type}")
-      if not load.annual_output_by_system.empty?
-        sys_ids = get_sys_ids(load_type, heat_sys_ids, cool_sys_ids, dhw_sys_ids, vent_preheat_sys_ids, vent_precool_sys_ids)
-        results_out << [key_name, ordered_values(load.annual_output_by_system, sys_ids).to_s]
-      end
+      sys_ids = get_sys_ids(load_type, heat_sys_ids, cool_sys_ids, dhw_sys_ids, vent_preheat_sys_ids, vent_precool_sys_ids)
+      results_out << [key_name, ordered_values(load.annual_output_by_system, sys_ids).to_s]
     end
     results_out << [line_break]
 
