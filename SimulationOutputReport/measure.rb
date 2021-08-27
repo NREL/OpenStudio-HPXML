@@ -289,6 +289,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   def run(runner, user_arguments)
     super(runner, user_arguments)
 
+    t = Time.now
     model = runner.lastOpenStudioModel
     if model.empty?
       runner.registerError('Cannot find OpenStudio model.')
@@ -391,6 +392,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                                     include_timeseries_airflows,
                                     include_timeseries_weather)
 
+    puts "#{Time.now - t}s"
     return true
   end
 
@@ -1226,11 +1228,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
             varkey = object.name.to_s.upcase
           end
           @object_variables_by_key[key] = [] if @object_variables_by_key[key].nil?
+          next if @object_variables_by_key[key].include? [sys_id, varkey, output_var]
+          
           @object_variables_by_key[key] << [sys_id, varkey, output_var]
         end
       end
-
-      @object_variables_by_key[object] = sys_id
     end
   end
 
