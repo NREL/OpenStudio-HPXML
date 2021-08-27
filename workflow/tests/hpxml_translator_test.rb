@@ -235,7 +235,7 @@ class HPXMLTest < MiniTest::Test
 
     # Cleanup
     File.delete(osw_path_test)
-    xml_path_test = File.join(File.dirname(__FILE__), '..', 'base-schedules-detailed-smooth_test.xml')
+    xml_path_test = File.join(File.dirname(__FILE__), '..', 'base-stochastic-schedules.xml')
     File.delete(xml_path_test)
   end
 
