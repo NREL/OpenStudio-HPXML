@@ -289,7 +289,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   def run(runner, user_arguments)
     super(runner, user_arguments)
 
-    t = Time.now
     model = runner.lastOpenStudioModel
     if model.empty?
       runner.registerError('Cannot find OpenStudio model.')
@@ -364,7 +363,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                           include_timeseries_zone_temperatures,
                           include_timeseries_airflows,
                           include_timeseries_weather)
-
     @sqlFile.close()
 
     # Ensure sql file is immediately freed; otherwise we can get
@@ -392,7 +390,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                                     include_timeseries_airflows,
                                     include_timeseries_weather)
 
-    puts "#{Time.now - t}s"
     return true
   end
 
@@ -1118,7 +1115,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   def get_report_meter_data_annual(meter_names, unit_conv = UnitConversions.convert(1.0, 'J', 'MBtu'))
     return 0.0 if meter_names.empty?
 
-    vars = "'" + meter_names.join("','") + "'"
+    vars = "'" + meter_names.uniq.join("','") + "'"
     query = "SELECT SUM(VariableValue*#{unit_conv}) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex IN (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName IN (#{vars}) AND ReportingFrequency='Run Period' AND VariableUnits='J')"
     value = @sqlFile.execAndReturnFirstDouble(query)
     fail "Query error: #{query}" unless value.is_initialized
@@ -1129,8 +1126,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   def get_report_variable_data_annual(key_values, variables, unit_conv = UnitConversions.convert(1.0, 'J', 'MBtu'), is_negative: false)
     return 0.0 if variables.empty?
 
-    keys = "'" + key_values.join("','") + "'"
-    vars = "'" + variables.join("','") + "'"
+    keys = "'" + key_values.uniq.join("','") + "'"
+    vars = "'" + variables.uniq.join("','") + "'"
     neg = is_negative ? ' * -1' : ''
     query = "SELECT SUM(VariableValue*#{unit_conv})#{neg} FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE KeyValue IN (#{keys}) AND VariableName IN (#{vars}) AND ReportingFrequency='Run Period')"
     value = @sqlFile.execAndReturnFirstDouble(query)
@@ -1142,7 +1139,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timeseries_frequency)
     return [0.0] * @timestamps.size if meter_names.empty?
 
-    vars = "'" + meter_names.join("','") + "'"
+    vars = "'" + meter_names.uniq.join("','") + "'"
     query = "SELECT SUM(VariableValue*#{unit_conv}+#{unit_adder}) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex IN (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName IN (#{vars}) AND ReportingFrequency='#{reporting_frequency_map[timeseries_frequency]}' AND VariableUnits='J') GROUP BY TimeIndex ORDER BY TimeIndex"
     values = @sqlFile.execAndReturnVectorOfDouble(query)
     fail "Query error: #{query}" unless values.is_initialized
@@ -1155,8 +1152,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   def get_report_variable_data_timeseries(key_values, variables, unit_conv, unit_adder, timeseries_frequency, disable_ems_shift = false, is_negative: false)
     return [0.0] * @timestamps.size if variables.empty?
 
-    keys = "'" + key_values.join("','") + "'"
-    vars = "'" + variables.join("','") + "'"
+    keys = "'" + key_values.uniq.join("','") + "'"
+    vars = "'" + variables.uniq.join("','") + "'"
     neg = is_negative ? ' * -1' : ''
     query = "SELECT SUM(VariableValue*#{unit_conv}+#{unit_adder})#{neg} FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE KeyValue IN (#{keys}) AND VariableName IN (#{vars}) AND ReportingFrequency='#{reporting_frequency_map[timeseries_frequency]}') GROUP BY TimeIndex ORDER BY TimeIndex"
     values = @sqlFile.execAndReturnVectorOfDouble(query)
@@ -1178,7 +1175,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_tabular_data_value(report_name, report_for_string, table_name, row_names, col_name, units)
-    rows = "'" + row_names.join("','") + "'"
+    rows = "'" + row_names.uniq.join("','") + "'"
     query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='#{report_name}' AND ReportForString='#{report_for_string}' AND TableName='#{table_name}' AND RowName IN (#{rows}) AND ColumnName='#{col_name}' AND Units='#{units}'"
     result = @sqlFile.execAndReturnFirstDouble(query)
     return result.get
@@ -1213,6 +1210,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @model.getModelObjects.each do |object|
       next if object.to_AdditionalProperties.is_initialized
 
+      vars_by_key = get_object_output_variables_by_key(@model, object)
+      next if vars_by_key.size == 0
+
       sys_id = object.additionalProperties.getFeatureAsString('HPXML_ID')
       if sys_id.is_initialized
         sys_id = sys_id.get
@@ -1220,7 +1220,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         sys_id = nil
       end
 
-      get_object_output_variables_by_key(@model, object).each do |key, output_vars|
+      vars_by_key.each do |key, output_vars|
         output_vars.each do |output_var|
           if object.to_EnergyManagementSystemOutputVariable.is_initialized
             varkey = 'EMS'
@@ -1229,7 +1229,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
           end
           @object_variables_by_key[key] = [] if @object_variables_by_key[key].nil?
           next if @object_variables_by_key[key].include? [sys_id, varkey, output_var]
-          
+
           @object_variables_by_key[key] << [sys_id, varkey, output_var]
         end
       end
