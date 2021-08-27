@@ -32,6 +32,7 @@ __New Features__
 - Revises shared mechanical ventilation preconditioning control logic to operate less often.
 - Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
 - Updates the reporting measure to register all outputs from the annual CSV with the OS runner (for use in, e.g., PAT).
+- Removes timeseries CSV output columns that are all zeroes to reduce file size.
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
 
 __Bugfixes__
