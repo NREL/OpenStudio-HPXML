@@ -80,7 +80,7 @@
                         {
                             "name": "duct1",
                             "location": "uncond_attic",
-                            "fraction": 100,
+                            "fraction": 1,
                             "insulated": true,
                             "sealed": true
                         },

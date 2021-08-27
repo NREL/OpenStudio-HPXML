@@ -640,15 +640,6 @@ class HEScoreRuleset
            ((not orig_heating.nil?) && (['heat_pump', 'gchp'].include? orig_heating['type']))
           distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution"
         end
-        # Specify distribution system idref for mini-split if a distribution system exists
-        if ((not orig_cooling.nil?) && (['mini_split'].include? orig_cooling['type'])) &&
-           ((not orig_heating.nil?) && (['central_furnace'].include? orig_heating['type']))
-          distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution"
-        end
-        if ((not orig_cooling.nil?) && (['split_dx'].include? orig_cooling['type'])) &&
-           ((not orig_heating.nil?) && (['mini_split'].include? orig_heating['type']))
-          distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution"
-        end
 
         if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
           if not cooling_efficiency_seer.nil?
