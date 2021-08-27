@@ -298,7 +298,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('RandomSeed=2') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
-    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
+    assert(warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, year: 2007, schedules_path: @args_hash['output_csv_path'])
 
