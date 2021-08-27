@@ -6,16 +6,16 @@
   "steps": [
     {
       "arguments": {
-        "hpxml_path": "../workflow/sample_files/base-schedules-detailed-smooth.xml",
-        "schedules_type": "smooth",
-        "output_csv_path": "../smooth.csv",
-        "hpxml_output_path": "../workflow/base-schedules-detailed-smooth_test.xml"
+        "hpxml_path": "../workflow/sample_files/base.xml",
+        "schedules_type": "stochastic",
+        "output_csv_path": "../stochastic.csv",
+        "hpxml_output_path": "../workflow/base-with-stochastic-schedules.xml"
       },
       "measure_dir_name": "BuildResidentialScheduleFile"
     },
     {
       "arguments": {
-        "hpxml_path": "../workflow/base-schedules-detailed-smooth_test.xml",
+        "hpxml_path": "../workflow/base-with-stochastic-schedules.xml",
         "output_dir": "../workflow/run",
         "debug": false,
         "add_component_loads": false,

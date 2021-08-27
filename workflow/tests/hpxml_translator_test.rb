@@ -194,12 +194,12 @@ class HPXMLTest < MiniTest::Test
     File.delete(osw_path_test)
   end
 
-  def test_template2_osw
+  def test_template_osw_with_schedule
     # Check that simulation works using template.osw
     require 'json'
 
     os_cli = OpenStudio.getOpenStudioCLI
-    osw_path = File.join(File.dirname(__FILE__), '..', 'template2.osw')
+    osw_path = File.join(File.dirname(__FILE__), '..', 'template-stochastic-schedules.osw')
 
     # Create derivative OSW for testing
     osw_path_test = osw_path.gsub('.osw', '_test.osw')
