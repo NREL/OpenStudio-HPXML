@@ -746,14 +746,12 @@ class HPXMLTest < MiniTest::Test
     File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
       if err_line.include? 'Output:Meter: invalid Key Name'
         num_invalid_output_meters += 1
-        puts err_line
       elsif err_line.include?('Key=') && err_line.include?('VarName=')
         num_invalid_output_variables += 1
-        # puts err_line
       end
     end
     assert_equal(0, num_invalid_output_meters)
-    # FIXME: assert_equal(0, num_invalid_output_variables)
+    assert_equal(0, num_invalid_output_variables)
 
     # Timestep
     timestep = hpxml.header.timestep

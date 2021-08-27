@@ -144,6 +144,10 @@ class Constants
     return "#{water_heater_name} dhw energy"
   end
 
+  def self.ObjectNameCombiSpaceHeatingEnergyAdjustment(water_heater_name)
+    return "#{water_heater_name} heating energy adj"
+  end
+
   def self.ObjectNameComponentLoadsProgram
     return 'component loads program'
   end
@@ -268,8 +272,12 @@ class Constants
     return 'mech vent'
   end
 
-  def self.ObjectNameMechanicalVentilationPreconditioning
-    return 'mech vent preconditioning'
+  def self.ObjectNameMechanicalVentilationPrecooling
+    return 'mech vent precooling'
+  end
+
+  def self.ObjectNameMechanicalVentilationPreheating
+    return 'mech vent preheating'
   end
 
   def self.ObjectNameMechanicalVentilationHouseFan
