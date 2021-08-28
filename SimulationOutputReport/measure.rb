@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # FIXME: Solar thermal hot water load (solar fraction vs detailed vs none)
-# FIXME: Small change to timeseries -- End Use: Electricity: Hot Water
 # FIXME: Handling of DFHPs
 
 # see the URL below for information on how to write OpenStudio measures
@@ -1174,6 +1173,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
   def get_report_variable_data_timeseries(key_values, variables, unit_conv, unit_adder, timeseries_frequency, disable_ems_shift = false, is_negative: false)
     return [0.0] * @timestamps.size if variables.empty?
+    
+    if key_values.uniq.size > 1 && key_values.include?('EMS') && !disable_ems_shift
+      # Split into EMS and non-EMS queries so that the EMS values shift occurs for just the EMS query
+      # Remove this code if we ever figure out a better way to handle when EMS output should shift
+      values = get_report_variable_data_timeseries(['EMS'], variables, unit_conv, unit_adder, timeseries_frequency, disable_ems_shift, is_negative: is_negative)
+      sum_values = values.zip(get_report_variable_data_timeseries(key_values.select{ |k| k != 'EMS' }, variables, unit_conv, unit_adder, timeseries_frequency, disable_ems_shift, is_negative: is_negative)).map { |x, y| x + y }
+      return sum_values
+    end
 
     keys = "'" + key_values.uniq.join("','") + "'"
     vars = "'" + variables.uniq.join("','") + "'"
@@ -1187,6 +1194,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     return values if disable_ems_shift
 
+    # Remove this code if we ever figure out a better way to handle when EMS output should shift
     if (key_values.size == 1) && (key_values[0] == 'EMS') && (@timestamps.size > 0)
       if (timeseries_frequency.downcase == 'timestep' || (timeseries_frequency.downcase == 'hourly' && @model.getTimestep.numberOfTimestepsPerHour == 1))
         # Shift all values by 1 timestep due to EMS reporting lag
