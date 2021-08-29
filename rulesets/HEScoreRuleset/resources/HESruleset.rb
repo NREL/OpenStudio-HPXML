@@ -357,20 +357,34 @@ class HEScoreRuleset
 
   def self.set_enclosure_windows(json, new_hpxml)
     front_window_code = nil
+    front_window_u_value = nil
+    front_window_shgc = nil
+    front_window_method = nil
     json['building']['zone']['zone_wall'].each do |orig_wall|
       next unless orig_wall.key?('zone_window')
       next if orig_wall['side'] == 'front' && orig_wall['zone_window']['window_area'] == 1 # LBL intentionally has the front window area set to 1 as an HPXML file with no windows does not pass validation.
 
       orig_window = orig_wall['zone_window']
-      ufactor = orig_window['window_u_value']
-      shgc = orig_window['window_shgc']
       if orig_wall['side'] == 'front'
         front_window_code = orig_window['window_code']
+        front_window_u_value = orig_window['window_u_value']
+        front_window_shgc = orig_window['window_shgc']
+        front_window_method = orig_window['window_method']
       end
       if @has_same_window_const
-        window_code = front_window_code
+        if front_window_method == 'code'
+          window_code = front_window_code
+        elsif front_window_method == 'custom'
+          ufactor = front_window_u_value
+          shgc = front_window_shgc
+        end
       else
-        window_code = orig_window['window_code']
+        if orig_window['window_method'] == 'code'
+          window_code = orig_window['window_code']
+        elsif orig_window['window_method'] == 'custom'
+          ufactor = orig_window['window_u_value']
+          shgc = orig_window['window_shgc']
+        end
       end
       if ufactor.nil?
         ufactor, shgc = get_window_ufactor_shgc_from_doe2code(window_code)
@@ -382,10 +396,15 @@ class HEScoreRuleset
         # Summer only, total shading factor reduced to 0.29
         exterior_shading_factor_summer = 0.29 / interior_shading_factor_summer # Overall shading factor is interior multiplied by exterior
       end
+      if orig_window['window_area'] == 0
+        window_area = 1
+      else
+        window_area = orig_window['window_area']
+      end
 
       # Add one HPXML window per side of the house with only the overhangs from the roof.
       new_hpxml.windows.add(id: "#{orig_wall['side']}_window",
-                            area: orig_window['window_area'],
+                            area: window_area,
                             azimuth: sanitize_azimuth(wall_orientation_to_azimuth(orig_wall['side'])),
                             ufactor: ufactor,
                             shgc: shgc,
@@ -431,7 +450,7 @@ class HEScoreRuleset
         skylight_area = orig_skylight['skylight_area'] / 2.0
         new_hpxml.skylights.add(id: "#{orig_roof['roof_name']}_#{i}_skylight",
                                 area: skylight_area,
-                                azimuth: roof_azimuth,
+                                azimuth: sanitize_azimuth(roof_azimuth),
                                 ufactor: ufactor,
                                 shgc: shgc,
                                 roof_idref: "#{orig_roof['roof_name']}_#{i}",
