@@ -239,12 +239,12 @@ class HPXMLTest < MiniTest::Test
     File.delete(xml_path_test)
   end
 
-  def test_template2_osw
+  def test_template_osw_with_build_hpxml_and_schedule
     # Check that simulation works using template2.osw
     require 'json'
 
     os_cli = OpenStudio.getOpenStudioCLI
-    osw_path = File.join(File.dirname(__FILE__), '..', 'template2.osw')
+    osw_path = File.join(File.dirname(__FILE__), '..', 'template-build-hpxml-and-stocastic-schedules.osw')
 
     # Create derivative OSW for testing
     osw_path_test = osw_path.gsub('.osw', '_test.osw')
@@ -280,7 +280,10 @@ class HPXMLTest < MiniTest::Test
 
     # Cleanup
     File.delete(osw_path_test)
-    File.delete(File.join(File.dirname(__FILE__), '..', 'sample_files', 'test.xml'))
+    xml_path_test = File.join(File.dirname(__FILE__), '..', 'built.xml')
+    File.delete(xml_path_test)
+    xml_path_test = File.join(File.dirname(__FILE__), '..', 'built-stochastic-schedules.xml')
+    File.delete(xml_path_test)
   end
 
   def test_weather_cache
