@@ -1256,34 +1256,38 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @model.getModelObjects.each do |object|
       next if object.to_AdditionalProperties.is_initialized
 
-      vars_by_key = get_object_output_variables_by_key(@model, object)
-      next if vars_by_key.size == 0
+      [EUT, HWT, LT, ULT, ILT].each do |class_name|
+        vars_by_key = get_object_output_variables_by_key(@model, object, class_name)
+        next if vars_by_key.size == 0
 
-      sys_id = object.additionalProperties.getFeatureAsString('HPXML_ID')
-      if sys_id.is_initialized
-        sys_id = sys_id.get
-      else
-        sys_id = nil
-      end
+        sys_id = object.additionalProperties.getFeatureAsString('HPXML_ID')
+        if sys_id.is_initialized
+          sys_id = sys_id.get
+        else
+          sys_id = nil
+        end
 
-      vars_by_key.each do |key, output_vars|
-        output_vars.each do |output_var|
-          if object.to_EnergyManagementSystemOutputVariable.is_initialized
-            varkey = 'EMS'
-          else
-            varkey = object.name.to_s.upcase
+        vars_by_key.each do |key, output_vars|
+          output_vars.each do |output_var|
+            if object.to_EnergyManagementSystemOutputVariable.is_initialized
+              varkey = 'EMS'
+            else
+              varkey = object.name.to_s.upcase
+            end
+            hash_key = [class_name, key]
+            @object_variables_by_key[hash_key] = [] if @object_variables_by_key[hash_key].nil?
+            next if @object_variables_by_key[hash_key].include? [sys_id, varkey, output_var]
+
+            @object_variables_by_key[hash_key] << [sys_id, varkey, output_var]
           end
-          @object_variables_by_key[key] = [] if @object_variables_by_key[key].nil?
-          next if @object_variables_by_key[key].include? [sys_id, varkey, output_var]
-
-          @object_variables_by_key[key] << [sys_id, varkey, output_var]
         end
       end
     end
   end
 
-  def get_object_variables(key)
-    vars = @object_variables_by_key[key]
+  def get_object_variables(class_name, key)
+    hash_key = [class_name, key]
+    vars = @object_variables_by_key[hash_key]
     vars = [] if vars.nil?
     return vars
   end
@@ -1413,112 +1417,112 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     create_all_object_variables_by_key()
 
     @end_uses = {}
-    @end_uses[[FT::Elec, EUT::Heating]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::Heating]))
-    @end_uses[[FT::Elec, EUT::HeatingFanPump]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::HeatingFanPump]))
-    @end_uses[[FT::Elec, EUT::Cooling]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::Cooling]))
-    @end_uses[[FT::Elec, EUT::CoolingFanPump]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::CoolingFanPump]))
-    @end_uses[[FT::Elec, EUT::HotWater]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::HotWater]))
-    @end_uses[[FT::Elec, EUT::HotWaterRecircPump]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::HotWaterRecircPump]))
-    @end_uses[[FT::Elec, EUT::HotWaterSolarThermalPump]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::HotWaterSolarThermalPump]))
-    @end_uses[[FT::Elec, EUT::LightsInterior]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::LightsInterior]))
-    @end_uses[[FT::Elec, EUT::LightsGarage]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::LightsGarage]))
-    @end_uses[[FT::Elec, EUT::LightsExterior]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::LightsExterior]))
-    @end_uses[[FT::Elec, EUT::MechVent]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::MechVent]))
-    @end_uses[[FT::Elec, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::MechVentPreheat]))
-    @end_uses[[FT::Elec, EUT::MechVentPrecool]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::MechVentPrecool]))
-    @end_uses[[FT::Elec, EUT::WholeHouseFan]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::WholeHouseFan]))
-    @end_uses[[FT::Elec, EUT::Refrigerator]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::Refrigerator]))
+    @end_uses[[FT::Elec, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Heating]))
+    @end_uses[[FT::Elec, EUT::HeatingFanPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HeatingFanPump]))
+    @end_uses[[FT::Elec, EUT::Cooling]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Cooling]))
+    @end_uses[[FT::Elec, EUT::CoolingFanPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::CoolingFanPump]))
+    @end_uses[[FT::Elec, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HotWater]))
+    @end_uses[[FT::Elec, EUT::HotWaterRecircPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HotWaterRecircPump]))
+    @end_uses[[FT::Elec, EUT::HotWaterSolarThermalPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HotWaterSolarThermalPump]))
+    @end_uses[[FT::Elec, EUT::LightsInterior]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::LightsInterior]))
+    @end_uses[[FT::Elec, EUT::LightsGarage]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::LightsGarage]))
+    @end_uses[[FT::Elec, EUT::LightsExterior]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::LightsExterior]))
+    @end_uses[[FT::Elec, EUT::MechVent]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::MechVent]))
+    @end_uses[[FT::Elec, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::MechVentPreheat]))
+    @end_uses[[FT::Elec, EUT::MechVentPrecool]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::MechVentPrecool]))
+    @end_uses[[FT::Elec, EUT::WholeHouseFan]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::WholeHouseFan]))
+    @end_uses[[FT::Elec, EUT::Refrigerator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Refrigerator]))
     if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Elec, EUT::Freezer]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::Freezer]))
+      @end_uses[[FT::Elec, EUT::Freezer]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Freezer]))
     end
-    @end_uses[[FT::Elec, EUT::Dehumidifier]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::Dehumidifier]))
-    @end_uses[[FT::Elec, EUT::Dishwasher]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::Dishwasher]))
-    @end_uses[[FT::Elec, EUT::ClothesWasher]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::ClothesWasher]))
-    @end_uses[[FT::Elec, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::ClothesDryer]))
-    @end_uses[[FT::Elec, EUT::RangeOven]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::RangeOven]))
-    @end_uses[[FT::Elec, EUT::CeilingFan]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::CeilingFan]))
-    @end_uses[[FT::Elec, EUT::Television]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::Television]))
-    @end_uses[[FT::Elec, EUT::PlugLoads]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::PlugLoads]))
+    @end_uses[[FT::Elec, EUT::Dehumidifier]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Dehumidifier]))
+    @end_uses[[FT::Elec, EUT::Dishwasher]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Dishwasher]))
+    @end_uses[[FT::Elec, EUT::ClothesWasher]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::ClothesWasher]))
+    @end_uses[[FT::Elec, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::ClothesDryer]))
+    @end_uses[[FT::Elec, EUT::RangeOven]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::RangeOven]))
+    @end_uses[[FT::Elec, EUT::CeilingFan]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::CeilingFan]))
+    @end_uses[[FT::Elec, EUT::Television]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Television]))
+    @end_uses[[FT::Elec, EUT::PlugLoads]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PlugLoads]))
     if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Elec, EUT::Vehicle]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::Vehicle]))
-      @end_uses[[FT::Elec, EUT::WellPump]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::WellPump]))
-      @end_uses[[FT::Elec, EUT::PoolHeater]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::PoolHeater]))
-      @end_uses[[FT::Elec, EUT::PoolPump]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::PoolPump]))
-      @end_uses[[FT::Elec, EUT::HotTubHeater]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::HotTubHeater]))
-      @end_uses[[FT::Elec, EUT::HotTubPump]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::HotTubPump]))
+      @end_uses[[FT::Elec, EUT::Vehicle]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Vehicle]))
+      @end_uses[[FT::Elec, EUT::WellPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::WellPump]))
+      @end_uses[[FT::Elec, EUT::PoolHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PoolHeater]))
+      @end_uses[[FT::Elec, EUT::PoolPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PoolPump]))
+      @end_uses[[FT::Elec, EUT::HotTubHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HotTubHeater]))
+      @end_uses[[FT::Elec, EUT::HotTubPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HotTubPump]))
     end
-    @end_uses[[FT::Elec, EUT::PV]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::PV]),
+    @end_uses[[FT::Elec, EUT::PV]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PV]),
                                                 is_negative: true)
-    @end_uses[[FT::Elec, EUT::Generator]] = EndUse.new(variables: get_object_variables([FT::Elec, EUT::Generator]),
+    @end_uses[[FT::Elec, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Generator]),
                                                        is_negative: true)
-    @end_uses[[FT::Gas, EUT::Heating]] = EndUse.new(variables: get_object_variables([FT::Gas, EUT::Heating]))
-    @end_uses[[FT::Gas, EUT::HotWater]] = EndUse.new(variables: get_object_variables([FT::Gas, EUT::HotWater]))
-    @end_uses[[FT::Gas, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables([FT::Gas, EUT::ClothesDryer]))
-    @end_uses[[FT::Gas, EUT::RangeOven]] = EndUse.new(variables: get_object_variables([FT::Gas, EUT::RangeOven]))
-    @end_uses[[FT::Gas, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables([FT::Gas, EUT::MechVentPreheat]))
+    @end_uses[[FT::Gas, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Heating]))
+    @end_uses[[FT::Gas, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::HotWater]))
+    @end_uses[[FT::Gas, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::ClothesDryer]))
+    @end_uses[[FT::Gas, EUT::RangeOven]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::RangeOven]))
+    @end_uses[[FT::Gas, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::MechVentPreheat]))
     if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Gas, EUT::PoolHeater]] = EndUse.new(variables: get_object_variables([FT::Gas, EUT::PoolHeater]))
-      @end_uses[[FT::Gas, EUT::HotTubHeater]] = EndUse.new(variables: get_object_variables([FT::Gas, EUT::HotTubHeater]))
-      @end_uses[[FT::Gas, EUT::Grill]] = EndUse.new(variables: get_object_variables([FT::Gas, EUT::Grill]))
-      @end_uses[[FT::Gas, EUT::Lighting]] = EndUse.new(variables: get_object_variables([FT::Gas, EUT::Lighting]))
-      @end_uses[[FT::Gas, EUT::Fireplace]] = EndUse.new(variables: get_object_variables([FT::Gas, EUT::Fireplace]))
+      @end_uses[[FT::Gas, EUT::PoolHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::PoolHeater]))
+      @end_uses[[FT::Gas, EUT::HotTubHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::HotTubHeater]))
+      @end_uses[[FT::Gas, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Grill]))
+      @end_uses[[FT::Gas, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Lighting]))
+      @end_uses[[FT::Gas, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Fireplace]))
     end
-    @end_uses[[FT::Gas, EUT::Generator]] = EndUse.new(variables: get_object_variables([FT::Gas, EUT::Generator]))
-    @end_uses[[FT::Oil, EUT::Heating]] = EndUse.new(variables: get_object_variables([FT::Oil, EUT::Heating]))
-    @end_uses[[FT::Oil, EUT::HotWater]] = EndUse.new(variables: get_object_variables([FT::Oil, EUT::HotWater]))
-    @end_uses[[FT::Oil, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables([FT::Oil, EUT::ClothesDryer]))
-    @end_uses[[FT::Oil, EUT::RangeOven]] = EndUse.new(variables: get_object_variables([FT::Oil, EUT::RangeOven]))
-    @end_uses[[FT::Oil, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables([FT::Oil, EUT::MechVentPreheat]))
+    @end_uses[[FT::Gas, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Generator]))
+    @end_uses[[FT::Oil, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::Heating]))
+    @end_uses[[FT::Oil, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::HotWater]))
+    @end_uses[[FT::Oil, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::ClothesDryer]))
+    @end_uses[[FT::Oil, EUT::RangeOven]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::RangeOven]))
+    @end_uses[[FT::Oil, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::MechVentPreheat]))
     if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Oil, EUT::Grill]] = EndUse.new(variables: get_object_variables([FT::Oil, EUT::Grill]))
-      @end_uses[[FT::Oil, EUT::Lighting]] = EndUse.new(variables: get_object_variables([FT::Oil, EUT::Lighting]))
-      @end_uses[[FT::Oil, EUT::Fireplace]] = EndUse.new(variables: get_object_variables([FT::Oil, EUT::Fireplace]))
+      @end_uses[[FT::Oil, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::Grill]))
+      @end_uses[[FT::Oil, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::Lighting]))
+      @end_uses[[FT::Oil, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::Fireplace]))
     end
-    @end_uses[[FT::Oil, EUT::Generator]] = EndUse.new(variables: get_object_variables([FT::Oil, EUT::Generator]))
-    @end_uses[[FT::Propane, EUT::Heating]] = EndUse.new(variables: get_object_variables([FT::Propane, EUT::Heating]))
-    @end_uses[[FT::Propane, EUT::HotWater]] = EndUse.new(variables: get_object_variables([FT::Propane, EUT::HotWater]))
-    @end_uses[[FT::Propane, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables([FT::Propane, EUT::ClothesDryer]))
-    @end_uses[[FT::Propane, EUT::RangeOven]] = EndUse.new(variables: get_object_variables([FT::Propane, EUT::RangeOven]))
-    @end_uses[[FT::Propane, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables([FT::Propane, EUT::MechVentPreheat]))
+    @end_uses[[FT::Oil, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Oil, EUT::Generator]))
+    @end_uses[[FT::Propane, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::Heating]))
+    @end_uses[[FT::Propane, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::HotWater]))
+    @end_uses[[FT::Propane, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::ClothesDryer]))
+    @end_uses[[FT::Propane, EUT::RangeOven]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::RangeOven]))
+    @end_uses[[FT::Propane, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::MechVentPreheat]))
     if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Propane, EUT::Grill]] = EndUse.new(variables: get_object_variables([FT::Propane, EUT::Grill]))
-      @end_uses[[FT::Propane, EUT::Lighting]] = EndUse.new(variables: get_object_variables([FT::Propane, EUT::Lighting]))
-      @end_uses[[FT::Propane, EUT::Fireplace]] = EndUse.new(variables: get_object_variables([FT::Propane, EUT::Fireplace]))
+      @end_uses[[FT::Propane, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::Grill]))
+      @end_uses[[FT::Propane, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::Lighting]))
+      @end_uses[[FT::Propane, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::Fireplace]))
     end
-    @end_uses[[FT::Propane, EUT::Generator]] = EndUse.new(variables: get_object_variables([FT::Propane, EUT::Generator]))
-    @end_uses[[FT::WoodCord, EUT::Heating]] = EndUse.new(variables: get_object_variables([FT::WoodCord, EUT::Heating]))
-    @end_uses[[FT::WoodCord, EUT::HotWater]] = EndUse.new(variables: get_object_variables([FT::WoodCord, EUT::HotWater]))
-    @end_uses[[FT::WoodCord, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables([FT::WoodCord, EUT::ClothesDryer]))
-    @end_uses[[FT::WoodCord, EUT::RangeOven]] = EndUse.new(variables: get_object_variables([FT::WoodCord, EUT::RangeOven]))
-    @end_uses[[FT::WoodCord, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables([FT::WoodCord, EUT::MechVentPreheat]))
+    @end_uses[[FT::Propane, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Propane, EUT::Generator]))
+    @end_uses[[FT::WoodCord, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::Heating]))
+    @end_uses[[FT::WoodCord, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::HotWater]))
+    @end_uses[[FT::WoodCord, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::ClothesDryer]))
+    @end_uses[[FT::WoodCord, EUT::RangeOven]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::RangeOven]))
+    @end_uses[[FT::WoodCord, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::MechVentPreheat]))
     if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::WoodCord, EUT::Grill]] = EndUse.new(variables: get_object_variables([FT::WoodCord, EUT::Grill]))
-      @end_uses[[FT::WoodCord, EUT::Lighting]] = EndUse.new(variables: get_object_variables([FT::WoodCord, EUT::Lighting]))
-      @end_uses[[FT::WoodCord, EUT::Fireplace]] = EndUse.new(variables: get_object_variables([FT::WoodCord, EUT::Fireplace]))
+      @end_uses[[FT::WoodCord, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::Grill]))
+      @end_uses[[FT::WoodCord, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::Lighting]))
+      @end_uses[[FT::WoodCord, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::Fireplace]))
     end
-    @end_uses[[FT::WoodCord, EUT::Generator]] = EndUse.new(variables: get_object_variables([FT::WoodCord, EUT::Generator]))
-    @end_uses[[FT::WoodPellets, EUT::Heating]] = EndUse.new(variables: get_object_variables([FT::WoodPellets, EUT::Heating]))
-    @end_uses[[FT::WoodPellets, EUT::HotWater]] = EndUse.new(variables: get_object_variables([FT::WoodPellets, EUT::HotWater]))
-    @end_uses[[FT::WoodPellets, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables([FT::WoodPellets, EUT::ClothesDryer]))
-    @end_uses[[FT::WoodPellets, EUT::RangeOven]] = EndUse.new(variables: get_object_variables([FT::WoodPellets, EUT::RangeOven]))
-    @end_uses[[FT::WoodPellets, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables([FT::WoodPellets, EUT::MechVentPreheat]))
+    @end_uses[[FT::WoodCord, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodCord, EUT::Generator]))
+    @end_uses[[FT::WoodPellets, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::Heating]))
+    @end_uses[[FT::WoodPellets, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::HotWater]))
+    @end_uses[[FT::WoodPellets, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::ClothesDryer]))
+    @end_uses[[FT::WoodPellets, EUT::RangeOven]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::RangeOven]))
+    @end_uses[[FT::WoodPellets, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::MechVentPreheat]))
     if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::WoodPellets, EUT::Grill]] = EndUse.new(variables: get_object_variables([FT::WoodPellets, EUT::Grill]))
-      @end_uses[[FT::WoodPellets, EUT::Lighting]] = EndUse.new(variables: get_object_variables([FT::WoodPellets, EUT::Lighting]))
-      @end_uses[[FT::WoodPellets, EUT::Fireplace]] = EndUse.new(variables: get_object_variables([FT::WoodPellets, EUT::Fireplace]))
+      @end_uses[[FT::WoodPellets, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::Grill]))
+      @end_uses[[FT::WoodPellets, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::Lighting]))
+      @end_uses[[FT::WoodPellets, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::Fireplace]))
     end
-    @end_uses[[FT::WoodPellets, EUT::Generator]] = EndUse.new(variables: get_object_variables([FT::WoodPellets, EUT::Generator]))
-    @end_uses[[FT::Coal, EUT::Heating]] = EndUse.new(variables: get_object_variables([FT::Coal, EUT::Heating]))
-    @end_uses[[FT::Coal, EUT::HotWater]] = EndUse.new(variables: get_object_variables([FT::Coal, EUT::HotWater]))
-    @end_uses[[FT::Coal, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables([FT::Coal, EUT::ClothesDryer]))
-    @end_uses[[FT::Coal, EUT::RangeOven]] = EndUse.new(variables: get_object_variables([FT::Coal, EUT::RangeOven]))
-    @end_uses[[FT::Coal, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables([FT::Coal, EUT::MechVentPreheat]))
+    @end_uses[[FT::WoodPellets, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::WoodPellets, EUT::Generator]))
+    @end_uses[[FT::Coal, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::Heating]))
+    @end_uses[[FT::Coal, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::HotWater]))
+    @end_uses[[FT::Coal, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::ClothesDryer]))
+    @end_uses[[FT::Coal, EUT::RangeOven]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::RangeOven]))
+    @end_uses[[FT::Coal, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::MechVentPreheat]))
     if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Coal, EUT::Grill]] = EndUse.new(variables: get_object_variables([FT::Coal, EUT::Grill]))
-      @end_uses[[FT::Coal, EUT::Lighting]] = EndUse.new(variables: get_object_variables([FT::Coal, EUT::Lighting]))
-      @end_uses[[FT::Coal, EUT::Fireplace]] = EndUse.new(variables: get_object_variables([FT::Coal, EUT::Fireplace]))
+      @end_uses[[FT::Coal, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::Grill]))
+      @end_uses[[FT::Coal, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::Lighting]))
+      @end_uses[[FT::Coal, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::Fireplace]))
     end
-    @end_uses[[FT::Coal, EUT::Generator]] = EndUse.new(variables: get_object_variables([FT::Coal, EUT::Generator]))
+    @end_uses[[FT::Coal, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Coal, EUT::Generator]))
 
     @end_uses.each do |key, end_use|
       fuel_type, end_use_type = key
@@ -1549,10 +1553,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Hot Water Uses
     @hot_water_uses = {}
-    @hot_water_uses[HWT::ClothesWasher] = HotWater.new(variables: get_object_variables(HWT::ClothesWasher))
-    @hot_water_uses[HWT::Dishwasher] = HotWater.new(variables: get_object_variables(HWT::Dishwasher))
-    @hot_water_uses[HWT::Fixtures] = HotWater.new(variables: get_object_variables(HWT::Fixtures))
-    @hot_water_uses[HWT::DistributionWaste] = HotWater.new(variables: get_object_variables(HWT::DistributionWaste))
+    @hot_water_uses[HWT::ClothesWasher] = HotWater.new(variables: get_object_variables(HWT, HWT::ClothesWasher))
+    @hot_water_uses[HWT::Dishwasher] = HotWater.new(variables: get_object_variables(HWT, HWT::Dishwasher))
+    @hot_water_uses[HWT::Fixtures] = HotWater.new(variables: get_object_variables(HWT, HWT::Fixtures))
+    @hot_water_uses[HWT::DistributionWaste] = HotWater.new(variables: get_object_variables(HWT, HWT::DistributionWaste))
 
     @hot_water_uses.each do |hot_water_type, hot_water|
       hot_water.name = "Hot Water: #{hot_water_type}"
@@ -1576,11 +1580,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @loads = {}
     @loads[LT::Heating] = Load.new(ems_variable: 'loads_htg_tot')
     @loads[LT::Cooling] = Load.new(ems_variable: 'loads_clg_tot')
-    @loads[LT::HotWaterDelivered] = Load.new(variables: get_object_variables(LT::HotWaterDelivered))
-    @loads[LT::HotWaterTankLosses] = Load.new(variables: get_object_variables(LT::HotWaterTankLosses),
+    @loads[LT::HotWaterDelivered] = Load.new(variables: get_object_variables(LT, LT::HotWaterDelivered))
+    @loads[LT::HotWaterTankLosses] = Load.new(variables: get_object_variables(LT, LT::HotWaterTankLosses),
                                               is_negative: true)
-    @loads[LT::HotWaterDesuperheater] = Load.new(variables: get_object_variables(LT::HotWaterDesuperheater))
-    @loads[LT::HotWaterSolarThermal] = Load.new(variables: get_object_variables(LT::HotWaterSolarThermal),
+    @loads[LT::HotWaterDesuperheater] = Load.new(variables: get_object_variables(LT, LT::HotWaterDesuperheater))
+    @loads[LT::HotWaterSolarThermal] = Load.new(variables: get_object_variables(LT, LT::HotWaterSolarThermal),
                                                 is_negative: true)
 
     @loads.each do |load_type, load|
@@ -1636,8 +1640,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Unmet Loads (unexpected load that should have been met by HVAC)
     @unmet_loads = {}
-    @unmet_loads[ULT::Heating] = UnmetLoad.new(variables: get_object_variables(ULT::Heating))
-    @unmet_loads[ULT::Cooling] = UnmetLoad.new(variables: get_object_variables(ULT::Cooling))
+    @unmet_loads[ULT::Heating] = UnmetLoad.new(variables: get_object_variables(ULT, ULT::Heating))
+    @unmet_loads[ULT::Cooling] = UnmetLoad.new(variables: get_object_variables(ULT, ULT::Cooling))
 
     @unmet_loads.each do |load_type, unmet_load|
       unmet_load.name = "Unmet Load: #{load_type}"
@@ -1647,8 +1651,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Ideal System Loads (expected load that is not met by HVAC)
     @ideal_system_loads = {}
-    @ideal_system_loads[ILT::Heating] = UnmetLoad.new(variables: get_object_variables(ULT::Heating))
-    @ideal_system_loads[ILT::Cooling] = UnmetLoad.new(variables: get_object_variables(ULT::Heating))
+    @ideal_system_loads[ILT::Heating] = UnmetLoad.new(variables: get_object_variables(ILT, ILT::Heating))
+    @ideal_system_loads[ILT::Cooling] = UnmetLoad.new(variables: get_object_variables(ILT, ILT::Cooling))
 
     @ideal_system_loads.each do |load_type, ideal_load|
       ideal_load.name = "Ideal System Load: #{load_type}"
@@ -1704,7 +1708,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     }
   end
 
-  def get_object_output_variables_by_key(model, object)
+  def get_object_output_variables_by_key(model, object, class_name)
     to_ft = { EPlus::FuelTypeElectricity => FT::Elec,
               EPlus::FuelTypeNaturalGas => FT::Gas,
               EPlus::FuelTypeOil => FT::Oil,
@@ -1716,190 +1720,217 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # For a given object, returns the output variables to be requested and associates
     # them with the appropriate keys (e.g., [FT::Elec, EUT::Heating]).
 
-    # Heating objects
+    if class_name == EUT
 
-    if object.to_BoilerHotWater.is_initialized
-      fuel = object.to_BoilerHotWater.get.fuelType
-      return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
+      # End uses
 
-    elsif object.to_CoilHeatingDXSingleSpeed.is_initialized || object.to_CoilHeatingDXMultiSpeed.is_initialized
-      return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Defrost #{EPlus::FuelTypeElectricity} Energy"] }
+      if object.to_CoilHeatingDXSingleSpeed.is_initialized || object.to_CoilHeatingDXMultiSpeed.is_initialized
+        return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Defrost #{EPlus::FuelTypeElectricity} Energy"] }
 
-    elsif object.to_CoilHeatingElectric.is_initialized
-      return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
+      elsif object.to_CoilHeatingElectric.is_initialized
+        return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
 
-    elsif object.to_CoilHeatingGas.is_initialized
-      fuel = object.to_CoilHeatingGas.get.fuelType
-      return { [to_ft[fuel], EUT::Heating] => ["Heating Coil #{fuel} Energy"] }
+      elsif object.to_CoilHeatingGas.is_initialized
+        fuel = object.to_CoilHeatingGas.get.fuelType
+        return { [to_ft[fuel], EUT::Heating] => ["Heating Coil #{fuel} Energy"] }
 
-    elsif object.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized
-      return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
+      elsif object.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized
+        return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
 
-    elsif object.to_ZoneHVACBaseboardConvectiveElectric.is_initialized
-      return { [FT::Elec, EUT::Heating] => ["Baseboard #{EPlus::FuelTypeElectricity} Energy"] }
+      elsif object.to_ZoneHVACBaseboardConvectiveElectric.is_initialized
+        return { [FT::Elec, EUT::Heating] => ["Baseboard #{EPlus::FuelTypeElectricity} Energy"] }
 
-    # Cooling objects
+      elsif object.to_BoilerHotWater.is_initialized
+        fuel = object.to_BoilerHotWater.get.fuelType
+        return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
 
-    elsif object.to_CoilCoolingDXSingleSpeed.is_initialized || object.to_CoilCoolingDXMultiSpeed.is_initialized
-      vars = { [FT::Elec, EUT::Cooling] => ["Cooling Coil #{EPlus::FuelTypeElectricity} Energy"] }
-      parent = model.getAirLoopHVACUnitarySystems.select { |u| u.coolingCoil.is_initialized && u.coolingCoil.get.handle.to_s == object.handle.to_s }
-      if (not parent.empty?) && parent[0].heatingCoil.is_initialized
-        htg_coil = parent[0].heatingCoil.get
-      end
-      if parent.empty?
-        parent = model.getZoneHVACPackagedTerminalAirConditioners.select { |u| u.coolingCoil.handle.to_s == object.handle.to_s }
-        if not parent.empty?
-          htg_coil = parent[0].heatingCoil
+      elsif object.to_CoilCoolingDXSingleSpeed.is_initialized || object.to_CoilCoolingDXMultiSpeed.is_initialized
+        vars = { [FT::Elec, EUT::Cooling] => ["Cooling Coil #{EPlus::FuelTypeElectricity} Energy"] }
+        parent = model.getAirLoopHVACUnitarySystems.select { |u| u.coolingCoil.is_initialized && u.coolingCoil.get.handle.to_s == object.handle.to_s }
+        if (not parent.empty?) && parent[0].heatingCoil.is_initialized
+          htg_coil = parent[0].heatingCoil.get
         end
-      end
-      if parent.empty?
-        fail 'Could not find parent object.'
-      end
+        if parent.empty?
+          parent = model.getZoneHVACPackagedTerminalAirConditioners.select { |u| u.coolingCoil.handle.to_s == object.handle.to_s }
+          if not parent.empty?
+            htg_coil = parent[0].heatingCoil
+          end
+        end
+        if parent.empty?
+          fail 'Could not find parent object.'
+        end
 
-      if htg_coil.nil? || (not (htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized || htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized))
-        # Crankcase variable only available if no DX heating coil on parent
-        vars[[FT::Elec, EUT::Cooling]] << "Cooling Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy"
-      end
-      return vars
+        if htg_coil.nil? || (not (htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized || htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized))
+          # Crankcase variable only available if no DX heating coil on parent
+          vars[[FT::Elec, EUT::Cooling]] << "Cooling Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy"
+        end
+        return vars
 
-    elsif object.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized
-      return { [FT::Elec, EUT::Cooling] => ["Cooling Coil #{EPlus::FuelTypeElectricity} Energy"] }
+      elsif object.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized
+        return { [FT::Elec, EUT::Cooling] => ["Cooling Coil #{EPlus::FuelTypeElectricity} Energy"] }
 
-    elsif object.to_EvaporativeCoolerDirectResearchSpecial.is_initialized
-      return { [FT::Elec, EUT::Cooling] => ["Evaporative Cooler #{EPlus::FuelTypeElectricity} Energy"] }
+      elsif object.to_EvaporativeCoolerDirectResearchSpecial.is_initialized
+        return { [FT::Elec, EUT::Cooling] => ["Evaporative Cooler #{EPlus::FuelTypeElectricity} Energy"] }
 
-    # Hot water objects
+      elsif object.to_CoilWaterHeatingAirToWaterHeatPumpWrapped.is_initialized
+        return { [FT::Elec, EUT::HotWater] => ["Cooling Coil Water Heating #{EPlus::FuelTypeElectricity} Energy"] }
 
-    elsif object.to_CoilWaterHeatingAirToWaterHeatPumpWrapped.is_initialized
-      return { [FT::Elec, EUT::HotWater] => ["Cooling Coil Water Heating #{EPlus::FuelTypeElectricity} Energy"] }
+      elsif object.to_FanSystemModel.is_initialized
+        if object.name.to_s.start_with? Constants.ObjectNameWaterHeater
+          return { [FT::Elec, EUT::HotWater] => ["Fan #{EPlus::FuelTypeElectricity} Energy"] }
+        end
 
-    elsif object.to_CoilWaterHeatingDesuperheater.is_initialized
-      return { LT::HotWaterDesuperheater => ['Water Heater Heating Energy'] }
+      elsif object.to_PumpConstantSpeed.is_initialized
+        if object.name.to_s.start_with? Constants.ObjectNameSolarHotWater
+          return { [FT::Elec, EUT::HotWaterSolarThermalPump] => ["Pump #{EPlus::FuelTypeElectricity} Energy"] }
+        end
 
-    elsif object.to_FanSystemModel.is_initialized
-      if object.name.to_s.start_with? Constants.ObjectNameWaterHeater
-        return { [FT::Elec, EUT::HotWater] => ["Fan #{EPlus::FuelTypeElectricity} Energy"] }
-      end
+      elsif object.to_WaterHeaterMixed.is_initialized
+        fuel = object.to_WaterHeaterMixed.get.heaterFuelType
+        return { [to_ft[fuel], EUT::HotWater] => ["Water Heater #{fuel} Energy", "Water Heater Off Cycle Parasitic #{EPlus::FuelTypeElectricity} Energy", "Water Heater On Cycle Parasitic #{EPlus::FuelTypeElectricity} Energy"] }
 
-    elsif object.to_PumpConstantSpeed.is_initialized
-      if object.name.to_s.start_with? Constants.ObjectNameSolarHotWater
-        return { [FT::Elec, EUT::HotWaterSolarThermalPump] => ["Pump #{EPlus::FuelTypeElectricity} Energy"] }
-      end
+      elsif object.to_WaterHeaterStratified.is_initialized
+        fuel = object.to_WaterHeaterStratified.get.heaterFuelType
+        return { [to_ft[fuel], EUT::HotWater] => ["Water Heater #{fuel} Energy", "Water Heater Off Cycle Parasitic #{EPlus::FuelTypeElectricity} Energy", "Water Heater On Cycle Parasitic #{EPlus::FuelTypeElectricity} Energy"] }
 
-    elsif object.to_WaterHeaterMixed.is_initialized
-      fuel = object.to_WaterHeaterMixed.get.heaterFuelType
-      return { [to_ft[fuel], EUT::HotWater] => ["Water Heater #{fuel} Energy", "Water Heater Off Cycle Parasitic #{EPlus::FuelTypeElectricity} Energy", "Water Heater On Cycle Parasitic #{EPlus::FuelTypeElectricity} Energy"],
-               LT::HotWaterSolarThermal => ['Water Heater Use Side Heat Transfer Energy'],
-               LT::HotWaterTankLosses => ['Water Heater Heat Loss Energy'] }
+      elsif object.to_ExteriorLights.is_initialized
+        return { [FT::Elec, EUT::LightsExterior] => ["Exterior Lights #{EPlus::FuelTypeElectricity} Energy"] }
 
-    elsif object.to_WaterHeaterStratified.is_initialized
-      fuel = object.to_WaterHeaterStratified.get.heaterFuelType
-      return { [to_ft[fuel], EUT::HotWater] => ["Water Heater #{fuel} Energy", "Water Heater Off Cycle Parasitic #{EPlus::FuelTypeElectricity} Energy", "Water Heater On Cycle Parasitic #{EPlus::FuelTypeElectricity} Energy"],
-               LT::HotWaterSolarThermal => ['Water Heater Use Side Heat Transfer Energy'],
-               LT::HotWaterTankLosses => ['Water Heater Heat Loss Energy'] }
+      elsif object.to_Lights.is_initialized
+        end_use = { Constants.ObjectNameInteriorLighting => EUT::LightsInterior,
+                    Constants.ObjectNameGarageLighting => EUT::LightsGarage }[object.to_Lights.get.endUseSubcategory]
+        return { [FT::Elec, end_use] => ["Lights #{EPlus::FuelTypeElectricity} Energy"] }
 
-    elsif object.to_WaterUseConnections.is_initialized
-      return { LT::HotWaterDelivered => ['Water Use Connections Plant Hot Water Energy'] }
+      elsif object.to_ElectricLoadCenterInverterPVWatts.is_initialized
+        return { [FT::Elec, EUT::PV] => ["Inverter AC Output #{EPlus::FuelTypeElectricity} Energy"] }
 
-    elsif object.to_WaterUseEquipment.is_initialized
-      hot_water_use = { Constants.ObjectNameFixtures => HWT::Fixtures,
-                        Constants.ObjectNameDistributionWaste => HWT::DistributionWaste,
-                        Constants.ObjectNameClothesWasher => HWT::ClothesWasher,
-                        Constants.ObjectNameDishwasher => HWT::Dishwasher }[object.to_WaterUseEquipment.get.waterUseEquipmentDefinition.endUseSubcategory]
-      return { hot_water_use => ['Water Use Equipment Hot Water Volume'] }
+      elsif object.to_GeneratorMicroTurbine.is_initialized
+        fuel = object.to_GeneratorMicroTurbine.get.fuelType
+        return { [FT::Elec, EUT::Generator] => ["Generator Produced AC #{EPlus::FuelTypeElectricity} Energy"],
+                 [to_ft[fuel], EUT::Generator] => ["Generator #{fuel} HHV Basis Energy"] }
 
-    # Lighting objects
+      elsif object.to_ElectricEquipment.is_initialized
+        end_use = { Constants.ObjectNameHotWaterRecircPump => EUT::HotWaterRecircPump,
+                    Constants.ObjectNameClothesWasher => EUT::ClothesWasher,
+                    Constants.ObjectNameClothesDryer => EUT::ClothesDryer,
+                    Constants.ObjectNameDishwasher => EUT::Dishwasher,
+                    Constants.ObjectNameRefrigerator => EUT::Refrigerator,
+                    Constants.ObjectNameFreezer => EUT::Freezer,
+                    Constants.ObjectNameCookingRange => EUT::RangeOven,
+                    Constants.ObjectNameCeilingFan => EUT::CeilingFan,
+                    Constants.ObjectNameWholeHouseFan => EUT::WholeHouseFan,
+                    Constants.ObjectNameMechanicalVentilation => EUT::MechVent,
+                    Constants.ObjectNameMiscPlugLoads => EUT::PlugLoads,
+                    Constants.ObjectNameMiscTelevision => EUT::Television,
+                    Constants.ObjectNameMiscPoolHeater => EUT::PoolHeater,
+                    Constants.ObjectNameMiscPoolPump => EUT::PoolPump,
+                    Constants.ObjectNameMiscHotTubHeater => EUT::HotTubHeater,
+                    Constants.ObjectNameMiscHotTubPump => EUT::HotTubPump,
+                    Constants.ObjectNameMiscElectricVehicleCharging => EUT::Vehicle,
+                    Constants.ObjectNameMiscWellPump => EUT::WellPump }[object.to_ElectricEquipment.get.endUseSubcategory]
+        if not end_use.nil?
+          return { [FT::Elec, end_use] => ["Electric Equipment #{EPlus::FuelTypeElectricity} Energy"] }
+        end
 
-    elsif object.to_ExteriorLights.is_initialized
-      return { [FT::Elec, EUT::LightsExterior] => ["Exterior Lights #{EPlus::FuelTypeElectricity} Energy"] }
+      elsif object.to_OtherEquipment.is_initialized
+        fuel = object.to_OtherEquipment.get.fuelType
+        end_use = { Constants.ObjectNameClothesDryer => EUT::ClothesDryer,
+                    Constants.ObjectNameCookingRange => EUT::RangeOven,
+                    Constants.ObjectNameMiscGrill => EUT::Grill,
+                    Constants.ObjectNameMiscLighting => EUT::Lighting,
+                    Constants.ObjectNameMiscFireplace => EUT::Fireplace,
+                    Constants.ObjectNameMiscPoolHeater => EUT::PoolHeater,
+                    Constants.ObjectNameMiscHotTubHeater => EUT::HotTubHeater,
+                    Constants.ObjectNameMechanicalVentilationPreheating => EUT::MechVentPreheat,
+                    Constants.ObjectNameMechanicalVentilationPrecooling => EUT::MechVentPreheat }[object.to_OtherEquipment.get.endUseSubcategory]
+        if not end_use.nil?
+          return { [to_ft[fuel], end_use] => ["Other Equipment #{fuel} Energy"] }
+        end
 
-    elsif object.to_Lights.is_initialized
-      end_use = { Constants.ObjectNameInteriorLighting => EUT::LightsInterior,
-                  Constants.ObjectNameGarageLighting => EUT::LightsGarage }[object.to_Lights.get.endUseSubcategory]
-      return { [FT::Elec, end_use] => ["Lights #{EPlus::FuelTypeElectricity} Energy"] }
+      elsif object.to_ZoneHVACDehumidifierDX.is_initialized
+        return { [FT::Elec, EUT::Dehumidifier] => ["Zone Dehumidifier #{EPlus::FuelTypeElectricity} Energy"] }
 
-    # Generation objects
+      elsif object.to_EnergyManagementSystemOutputVariable.is_initialized
+        if object.name.to_s.end_with? Constants.ObjectNameFanPumpDisaggregatePrimaryHeat
+          return { [FT::Elec, EUT::HeatingFanPump] => [object.name.to_s] }
+        elsif object.name.to_s.end_with? Constants.ObjectNameFanPumpDisaggregateBackupHeat
+          return { [FT::Elec, EUT::HeatingFanPump] => [object.name.to_s] }
+        elsif object.name.to_s.end_with? Constants.ObjectNameFanPumpDisaggregateCool
+          return { [FT::Elec, EUT::CoolingFanPump] => [object.name.to_s] }
+        elsif object.name.to_s.include? Constants.ObjectNameWaterHeaterAdjustment(nil)
+          fuel = object.additionalProperties.getFeatureAsString('FuelType').get
+          return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }
+        elsif object.name.to_s.include? Constants.ObjectNameCombiWaterHeatingEnergy(nil)
+          fuel = object.additionalProperties.getFeatureAsString('FuelType').get
+          return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }
+        elsif object.name.to_s.include? Constants.ObjectNameCombiSpaceHeatingEnergyAdjustment(nil)
+          fuel = object.additionalProperties.getFeatureAsString('FuelType').get
+          return { [to_ft[fuel], EUT::Heating] => [object.name.to_s] }
+        else
+          return { ems: [object.name.to_s] }
+        end
 
-    elsif object.to_ElectricLoadCenterInverterPVWatts.is_initialized
-      return { [FT::Elec, EUT::PV] => ["Inverter AC Output #{EPlus::FuelTypeElectricity} Energy"] }
-
-    elsif object.to_GeneratorMicroTurbine.is_initialized
-      fuel = object.to_GeneratorMicroTurbine.get.fuelType
-      return { [FT::Elec, EUT::Generator] => ["Generator Produced AC #{EPlus::FuelTypeElectricity} Energy"],
-               [to_ft[fuel], EUT::Generator] => ["Generator #{fuel} HHV Basis Energy"] }
-
-    # Misc objects
-
-    elsif object.to_ElectricEquipment.is_initialized
-      end_use = { Constants.ObjectNameHotWaterRecircPump => EUT::HotWaterRecircPump,
-                  Constants.ObjectNameClothesWasher => EUT::ClothesWasher,
-                  Constants.ObjectNameClothesDryer => EUT::ClothesDryer,
-                  Constants.ObjectNameDishwasher => EUT::Dishwasher,
-                  Constants.ObjectNameRefrigerator => EUT::Refrigerator,
-                  Constants.ObjectNameFreezer => EUT::Freezer,
-                  Constants.ObjectNameCookingRange => EUT::RangeOven,
-                  Constants.ObjectNameCeilingFan => EUT::CeilingFan,
-                  Constants.ObjectNameWholeHouseFan => EUT::WholeHouseFan,
-                  Constants.ObjectNameMechanicalVentilation => EUT::MechVent,
-                  Constants.ObjectNameMiscPlugLoads => EUT::PlugLoads,
-                  Constants.ObjectNameMiscTelevision => EUT::Television,
-                  Constants.ObjectNameMiscPoolHeater => EUT::PoolHeater,
-                  Constants.ObjectNameMiscPoolPump => EUT::PoolPump,
-                  Constants.ObjectNameMiscHotTubHeater => EUT::HotTubHeater,
-                  Constants.ObjectNameMiscHotTubPump => EUT::HotTubPump,
-                  Constants.ObjectNameMiscElectricVehicleCharging => EUT::Vehicle,
-                  Constants.ObjectNameMiscWellPump => EUT::WellPump }[object.to_ElectricEquipment.get.endUseSubcategory]
-      if not end_use.nil?
-        return { [FT::Elec, end_use] => ["Electric Equipment #{EPlus::FuelTypeElectricity} Energy"] }
-      end
-
-    elsif object.to_OtherEquipment.is_initialized
-      fuel = object.to_OtherEquipment.get.fuelType
-      end_use = { Constants.ObjectNameClothesDryer => EUT::ClothesDryer,
-                  Constants.ObjectNameCookingRange => EUT::RangeOven,
-                  Constants.ObjectNameMiscGrill => EUT::Grill,
-                  Constants.ObjectNameMiscLighting => EUT::Lighting,
-                  Constants.ObjectNameMiscFireplace => EUT::Fireplace,
-                  Constants.ObjectNameMiscPoolHeater => EUT::PoolHeater,
-                  Constants.ObjectNameMiscHotTubHeater => EUT::HotTubHeater,
-                  Constants.ObjectNameMechanicalVentilationPreheating => EUT::MechVentPreheat,
-                  Constants.ObjectNameMechanicalVentilationPrecooling => EUT::MechVentPreheat }[object.to_OtherEquipment.get.endUseSubcategory]
-      if not end_use.nil?
-        return { [to_ft[fuel], end_use] => ["Other Equipment #{fuel} Energy"] }
-      end
-
-    elsif object.to_ZoneHVACDehumidifierDX.is_initialized
-      return { [FT::Elec, EUT::Dehumidifier] => ["Zone Dehumidifier #{EPlus::FuelTypeElectricity} Energy"] }
-
-    elsif object.to_ZoneHVACIdealLoadsAirSystem.is_initialized
-      if object.name.to_s == Constants.ObjectNameIdealAirSystemResidual
-        return { ULT::Heating => ['Zone Ideal Loads Zone Sensible Heating Energy'],
-                 ULT::Cooling => ['Zone Ideal Loads Zone Sensible Cooling Energy'] }
-      elsif object.name.to_s == Constants.ObjectNameIdealAirSystem
-        return { ILT::Heating => ['Zone Ideal Loads Zone Sensible Heating Energy'],
-                 ILT::Cooling => ['Zone Ideal Loads Zone Sensible Cooling Energy'] }
       end
 
-    # EMS outputs
+    elsif class_name == HWT
 
-    elsif object.to_EnergyManagementSystemOutputVariable.is_initialized
-      if object.name.to_s.end_with? Constants.ObjectNameFanPumpDisaggregatePrimaryHeat
-        return { [FT::Elec, EUT::HeatingFanPump] => [object.name.to_s] }
-      elsif object.name.to_s.end_with? Constants.ObjectNameFanPumpDisaggregateBackupHeat
-        return { [FT::Elec, EUT::HeatingFanPump] => [object.name.to_s] }
-      elsif object.name.to_s.end_with? Constants.ObjectNameFanPumpDisaggregateCool
-        return { [FT::Elec, EUT::CoolingFanPump] => [object.name.to_s] }
-      elsif object.name.to_s.include? Constants.ObjectNameWaterHeaterAdjustment(nil)
-        fuel = object.additionalProperties.getFeatureAsString('FuelType').get
-        return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }
-      elsif object.name.to_s.include? Constants.ObjectNameCombiWaterHeatingEnergy(nil)
-        fuel = object.additionalProperties.getFeatureAsString('FuelType').get
-        return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }
-      elsif object.name.to_s.include? Constants.ObjectNameCombiSpaceHeatingEnergyAdjustment(nil)
-        fuel = object.additionalProperties.getFeatureAsString('FuelType').get
-        return { [to_ft[fuel], EUT::Heating] => [object.name.to_s] }
-      else
-        return { ems: [object.name.to_s] }
+      # Hot Water Use
+
+      if object.to_WaterUseEquipment.is_initialized
+        hot_water_use = { Constants.ObjectNameFixtures => HWT::Fixtures,
+                          Constants.ObjectNameDistributionWaste => HWT::DistributionWaste,
+                          Constants.ObjectNameClothesWasher => HWT::ClothesWasher,
+                          Constants.ObjectNameDishwasher => HWT::Dishwasher }[object.to_WaterUseEquipment.get.waterUseEquipmentDefinition.endUseSubcategory]
+        return { hot_water_use => ['Water Use Equipment Hot Water Volume'] }
+
+      end
+
+    elsif class_name == LT
+
+      # Load
+
+      if object.to_WaterHeaterMixed.is_initialized
+        fuel = object.to_WaterHeaterMixed.get.heaterFuelType
+        return { [to_ft[fuel], EUT::HotWater] => ["Water Heater #{fuel} Energy", "Water Heater Off Cycle Parasitic #{EPlus::FuelTypeElectricity} Energy", "Water Heater On Cycle Parasitic #{EPlus::FuelTypeElectricity} Energy"],
+                 LT::HotWaterSolarThermal => ['Water Heater Use Side Heat Transfer Energy'],
+                 LT::HotWaterTankLosses => ['Water Heater Heat Loss Energy'] }
+
+      elsif object.to_WaterHeaterStratified.is_initialized
+        fuel = object.to_WaterHeaterStratified.get.heaterFuelType
+        return { [to_ft[fuel], EUT::HotWater] => ["Water Heater #{fuel} Energy", "Water Heater Off Cycle Parasitic #{EPlus::FuelTypeElectricity} Energy", "Water Heater On Cycle Parasitic #{EPlus::FuelTypeElectricity} Energy"],
+                 LT::HotWaterSolarThermal => ['Water Heater Use Side Heat Transfer Energy'],
+                 LT::HotWaterTankLosses => ['Water Heater Heat Loss Energy'] }
+
+      elsif object.to_WaterUseConnections.is_initialized
+        return { LT::HotWaterDelivered => ['Water Use Connections Plant Hot Water Energy'] }
+
+      elsif object.to_CoilWaterHeatingDesuperheater.is_initialized
+        return { LT::HotWaterDesuperheater => ['Water Heater Heating Energy'] }
+
+      end
+
+    elsif class_name == ULT
+
+      # Unmet Load
+
+      if object.to_ZoneHVACIdealLoadsAirSystem.is_initialized
+        if object.name.to_s == Constants.ObjectNameIdealAirSystemResidual
+          return { ULT::Heating => ['Zone Ideal Loads Zone Sensible Heating Energy'],
+                   ULT::Cooling => ['Zone Ideal Loads Zone Sensible Cooling Energy'] }
+        end
+
+      end
+
+    elsif class_name == ILT
+
+      # Ideal Load
+
+      if object.to_ZoneHVACIdealLoadsAirSystem.is_initialized
+        if object.name.to_s == Constants.ObjectNameIdealAirSystem
+          return { ILT::Heating => ['Zone Ideal Loads Zone Sensible Heating Energy'],
+                   ILT::Cooling => ['Zone Ideal Loads Zone Sensible Cooling Energy'] }
+        end
+
       end
 
     end

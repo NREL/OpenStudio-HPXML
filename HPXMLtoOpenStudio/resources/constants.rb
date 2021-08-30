@@ -248,7 +248,7 @@ class Constants
   end
 
   def self.ObjectNameIdealAirSystem
-    return 'ideal'
+    return 'ideal air system'
   end
 
   def self.ObjectNameIdealAirSystemResidual
