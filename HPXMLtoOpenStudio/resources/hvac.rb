@@ -3697,9 +3697,9 @@ class HVAC
                                        HPXML::LocationGarage]
 
     primary_duct_location = nil
-    primary_duct_location_hierarchy.each do |space_type|
-      if hpxml.has_location(space_type)
-        primary_duct_location = space_type
+    primary_duct_location_hierarchy.each do |location|
+      if hpxml.has_location(location)
+        primary_duct_location = location
         break
       end
     end

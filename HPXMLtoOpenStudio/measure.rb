@@ -544,11 +544,11 @@ class OSModel
     Geometry.apply_occupants(model, @hpxml, num_occ, @cfa, spaces[HPXML::LocationLivingSpace], @schedules_file)
   end
 
-  def self.create_or_get_space(model, spaces, spacetype)
-    if spaces[spacetype].nil?
-      Geometry.create_space_and_zone(model, spaces, spacetype)
+  def self.create_or_get_space(model, spaces, location)
+    if spaces[location].nil?
+      Geometry.create_space_and_zone(model, spaces, location)
     end
-    return spaces[spacetype]
+    return spaces[location]
   end
 
   def self.add_roofs(runner, model, spaces)

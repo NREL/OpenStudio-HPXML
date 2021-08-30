@@ -513,10 +513,10 @@ class HPXML < Object
     end
 
     # Get surfaces bounding infiltration volume
-    spaces_within_infil_volume.each do |space_type|
+    spaces_within_infil_volume.each do |location|
       (@roofs + @rim_joists + @walls + @foundation_walls + @frame_floors + @slabs).each do |surface|
         is_adiabatic_surface = (surface.interior_adjacent_to == surface.exterior_adjacent_to)
-        next unless [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? space_type
+        next unless [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? location
 
         if not is_adiabatic_surface
           # Exclude surfaces between two different spaces that are both within infiltration volume

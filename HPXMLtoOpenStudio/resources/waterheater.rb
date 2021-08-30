@@ -1422,9 +1422,9 @@ class Waterheater
                             HPXML::LocationBasementUnconditioned,
                             HPXML::LocationLivingSpace]
     end
-    location_hierarchy.each do |space_type|
-      if hpxml.has_location(space_type)
-        return space_type
+    location_hierarchy.each do |location|
+      if hpxml.has_location(location)
+        return location
       end
     end
   end

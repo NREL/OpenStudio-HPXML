@@ -989,9 +989,9 @@ class HotWaterAndAppliances
                                              HPXML::LocationLivingSpace]
 
     extra_refrigerator_location = nil
-    extra_refrigerator_location_hierarchy.each do |space_type|
-      if hpxml.has_location(space_type)
-        extra_refrigerator_location = space_type
+    extra_refrigerator_location_hierarchy.each do |location|
+      if hpxml.has_location(location)
+        extra_refrigerator_location = location
         break
       end
     end
