@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# FIXME: Solar thermal hot water load (solar fraction vs detailed vs none)
 # FIXME: Handling of DFHPs
 
 # see the URL below for information on how to write OpenStudio measures
@@ -472,7 +471,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
           vars = load.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
 
           load.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars, is_negative: load.is_negative)
-
           if include_timeseries_total_loads && (load_type == LT::HotWaterDelivered)
             load.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', load.timeseries_units), 0, timeseries_frequency, is_negative: load.is_negative)
           end
@@ -578,20 +576,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end
     end
 
-    # Apply solar fraction to load for simple solar water heating systems
-    @hpxml.solar_thermal_systems.each do |solar_system|
-      next if solar_system.solar_fraction.nil?
-
-      if not solar_system.water_heating_system.nil?
-        dhw_ids = [solar_system.water_heating_system.id]
-      else # Apply to all water heating systems
-        dhw_ids = @hpxml.water_heating_systems.map { |dhw| dhw.id }
-      end
-      dhw_ids.each do |dhw_id|
-        apply_multiplier_to_output(@loads[LT::HotWaterDelivered], @loads[LT::HotWaterSolarThermal], dhw_id, 1.0 / (1.0 - solar_system.solar_fraction))
-      end
-    end
-
     # Calculate aggregated values from per-system values as needed
     (@end_uses.values + @loads.values + @hot_water_uses.values).each do |obj|
       if obj.annual_output.nil?
@@ -606,6 +590,20 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       obj.timeseries_output = obj.timeseries_output_by_system.values[0]
       obj.timeseries_output_by_system.values[1..-1].each do |values|
         obj.timeseries_output = obj.timeseries_output.zip(values).map { |x, y| x + y }
+      end
+    end
+
+    # Apply solar fraction to load for simple solar water heating systems
+    @hpxml.solar_thermal_systems.each do |solar_system|
+      next if solar_system.solar_fraction.nil?
+
+      if not solar_system.water_heating_system.nil?
+        dhw_ids = [solar_system.water_heating_system.id]
+      else # Apply to all water heating systems
+        dhw_ids = @hpxml.water_heating_systems.map { |dhw| dhw.id }
+      end
+      dhw_ids.each do |dhw_id|
+        apply_multiplier_to_output(@loads[LT::HotWaterDelivered], @loads[LT::HotWaterSolarThermal], dhw_id, 1.0 / (1.0 - solar_system.solar_fraction))
       end
     end
 
@@ -1890,16 +1888,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       # Load
 
       if object.to_WaterHeaterMixed.is_initialized
-        fuel = object.to_WaterHeaterMixed.get.heaterFuelType
-        return { [to_ft[fuel], EUT::HotWater] => ["Water Heater #{fuel} Energy", "Water Heater Off Cycle Parasitic #{EPlus::FuelTypeElectricity} Energy", "Water Heater On Cycle Parasitic #{EPlus::FuelTypeElectricity} Energy"],
-                 LT::HotWaterSolarThermal => ['Water Heater Use Side Heat Transfer Energy'],
-                 LT::HotWaterTankLosses => ['Water Heater Heat Loss Energy'] }
+        return { LT::HotWaterTankLosses => ['Water Heater Heat Loss Energy'] }
 
       elsif object.to_WaterHeaterStratified.is_initialized
-        fuel = object.to_WaterHeaterStratified.get.heaterFuelType
-        return { [to_ft[fuel], EUT::HotWater] => ["Water Heater #{fuel} Energy", "Water Heater Off Cycle Parasitic #{EPlus::FuelTypeElectricity} Energy", "Water Heater On Cycle Parasitic #{EPlus::FuelTypeElectricity} Energy"],
-                 LT::HotWaterSolarThermal => ['Water Heater Use Side Heat Transfer Energy'],
-                 LT::HotWaterTankLosses => ['Water Heater Heat Loss Energy'] }
+        if object.name.to_s.start_with? Constants.ObjectNameSolarHotWater
+          return { LT::HotWaterSolarThermal => ['Water Heater Use Side Heat Transfer Energy'] }
+        else
+          return { LT::HotWaterTankLosses => ['Water Heater Heat Loss Energy'] }
+        end
 
       elsif object.to_WaterUseConnections.is_initialized
         return { LT::HotWaterDelivered => ['Water Use Connections Plant Hot Water Energy'] }
