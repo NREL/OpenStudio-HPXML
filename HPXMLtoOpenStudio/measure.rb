@@ -222,7 +222,8 @@ class OSModel
 
     @schedules_file = nil
     unless @hpxml.header.schedules_filepath.nil?
-      @schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_filepath, col_names: Constants.ScheduleColNames.keys)
+      @schedules_file = SchedulesFile.new(runner: runner, model: model, year: hpxml.header.sim_calendar_year,
+                                          schedules_path: @hpxml.header.schedules_filepath)
     end
 
     # Conditioned space/zone
@@ -230,7 +231,7 @@ class OSModel
     spaces = {}
     create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
     set_foundation_and_walls_top()
-    set_heating_and_cooling_seasons(model)
+    set_heating_and_cooling_seasons()
     add_setpoints(runner, model, weather, spaces)
 
     # Geometry/Envelope
@@ -1831,7 +1832,7 @@ class OSModel
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     has_ceiling_fan = (@hpxml.ceiling_fans.size > 0)
 
-    HVAC.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, @heating_days, @cooling_days)
+    HVAC.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, @heating_days, @cooling_days, @hpxml.header.sim_calendar_year)
   end
 
   def self.add_ceiling_fans(runner, model, weather, spaces)
@@ -2770,7 +2771,7 @@ class OSModel
     @walls_top = @foundation_top + 8.0 * @ncfl_ag
   end
 
-  def self.set_heating_and_cooling_seasons(model)
+  def self.set_heating_and_cooling_seasons()
     return if @hpxml.hvac_controls.size == 0
 
     hvac_control = @hpxml.hvac_controls[0]
@@ -2784,8 +2785,8 @@ class OSModel
     clg_end_month = hvac_control.seasons_cooling_end_month
     clg_end_day = hvac_control.seasons_cooling_end_day
 
-    @heating_days = Schedule.get_daily_season(model, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
-    @cooling_days = Schedule.get_daily_season(model, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
+    @heating_days = Schedule.get_daily_season(@hpxml.header.sim_calendar_year, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
+    @cooling_days = Schedule.get_daily_season(@hpxml.header.sim_calendar_year, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
   end
 end
 

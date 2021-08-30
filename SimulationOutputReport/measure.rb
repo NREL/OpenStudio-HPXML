@@ -586,7 +586,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         apply_multiplier_to_output(@loads[LT::HotWaterDelivered], @loads[LT::HotWaterSolarThermal], dhw_id, 1.0 / (1.0 - solar_system.solar_fraction))
       end
     end
-    
+
     # Calculate aggregated values from per-system values as needed
     (@end_uses.values + @loads.values + @hot_water_uses.values).each do |obj|
       if obj.annual_output.nil?
@@ -837,7 +837,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       elsif type.downcase.include? 'cooling'
         return cool_sys_ids
       end
-      return nil
+
+      return
     end
 
     def get_eec_value_numerator(unit)
@@ -954,12 +955,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Calculate ERI Reference Loads
     (@hpxml.heating_systems + @hpxml.heat_pumps).each do |htg_system|
       next unless heat_sys_ids.include? htg_system.id
-      
+
       @loads[LT::Heating].annual_output_by_system[htg_system.id] = htg_system.fraction_heat_load_served * @loads[LT::Heating].annual_output
     end
     (@hpxml.cooling_systems + @hpxml.heat_pumps).each do |clg_system|
       next unless cool_sys_ids.include? clg_system.id
-      
+
       @loads[LT::Cooling].annual_output_by_system[clg_system.id] = clg_system.fraction_cool_load_served * @loads[LT::Cooling].annual_output
     end
 
@@ -1173,12 +1174,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
   def get_report_variable_data_timeseries(key_values, variables, unit_conv, unit_adder, timeseries_frequency, disable_ems_shift = false, is_negative: false)
     return [0.0] * @timestamps.size if variables.empty?
-    
+
     if key_values.uniq.size > 1 && key_values.include?('EMS') && !disable_ems_shift
       # Split into EMS and non-EMS queries so that the EMS values shift occurs for just the EMS query
       # Remove this code if we ever figure out a better way to handle when EMS output should shift
       values = get_report_variable_data_timeseries(['EMS'], variables, unit_conv, unit_adder, timeseries_frequency, disable_ems_shift, is_negative: is_negative)
-      sum_values = values.zip(get_report_variable_data_timeseries(key_values.select{ |k| k != 'EMS' }, variables, unit_conv, unit_adder, timeseries_frequency, disable_ems_shift, is_negative: is_negative)).map { |x, y| x + y }
+      sum_values = values.zip(get_report_variable_data_timeseries(key_values.select { |k| k != 'EMS' }, variables, unit_conv, unit_adder, timeseries_frequency, disable_ems_shift, is_negative: is_negative)).map { |x, y| x + y }
       return sum_values
     end
 
