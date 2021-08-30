@@ -849,6 +849,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end
     end
 
+    def get_ids(ids, seed_id_map)
+      return ids.map { |id| seed_id_map[id].nil? ? id : seed_id_map[id] }
+    end
+
     results_out = []
 
     # Retrieve info from HPXML object
@@ -866,10 +870,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     heat_fuels = {}
     dhw_fuels = {}
     vent_preheat_fuels = {}
+    seed_id_map = {}
     @hpxml.heating_systems.each do |htg_system|
       next unless htg_system.fraction_heat_load_served > 0
 
       heat_sys_ids << htg_system.id
+      seed_id_map[htg_system.id] = htg_system.seed_id
       heat_fuels[htg_system.id] = htg_system.heating_system_fuel
       if not htg_system.heating_efficiency_afue.nil?
         eec_heats[htg_system.id] = get_eec_value_numerator('AFUE') / htg_system.heating_efficiency_afue
@@ -881,6 +887,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       next unless clg_system.fraction_cool_load_served > 0
 
       cool_sys_ids << clg_system.id
+      seed_id_map[clg_system.id] = clg_system.seed_id
       if not clg_system.cooling_efficiency_seer.nil?
         eec_cools[clg_system.id] = get_eec_value_numerator('SEER') / clg_system.cooling_efficiency_seer
       elsif not clg_system.cooling_efficiency_eer.nil?
@@ -895,6 +902,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @hpxml.heat_pumps.each do |heat_pump|
       if heat_pump.fraction_heat_load_served > 0
         heat_sys_ids << heat_pump.id
+        seed_id_map[heat_pump.id] = heat_pump.seed_id
         heat_fuels[heat_pump.id] = heat_pump.heat_pump_fuel
         if not heat_pump.heating_efficiency_hspf.nil?
           eec_heats[heat_pump.id] = get_eec_value_numerator('HSPF') / heat_pump.heating_efficiency_hspf
@@ -905,6 +913,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       next unless heat_pump.fraction_cool_load_served > 0
 
       cool_sys_ids << heat_pump.id
+      seed_id_map[heat_pump.id] = heat_pump.seed_id
       if not heat_pump.cooling_efficiency_seer.nil?
         eec_cools[heat_pump.id] = get_eec_value_numerator('SEER') / heat_pump.cooling_efficiency_seer
       elsif not heat_pump.cooling_efficiency_eer.nil?
@@ -965,9 +974,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     # Sys IDS
-    results_out << ['hpxml_heat_sys_ids', heat_sys_ids.to_s]
-    results_out << ['hpxml_cool_sys_ids', cool_sys_ids.to_s]
-    results_out << ['hpxml_dhw_sys_ids', dhw_sys_ids.to_s]
+    results_out << ['hpxml_heat_sys_ids', get_ids(heat_sys_ids, seed_id_map).to_s]
+    results_out << ['hpxml_cool_sys_ids', get_ids(cool_sys_ids, seed_id_map).to_s]
+    results_out << ['hpxml_dhw_sys_ids', get_ids(dhw_sys_ids, seed_id_map).to_s]
     results_out << ['hpxml_vent_preheat_sys_ids', vent_preheat_sys_ids.to_s]
     results_out << ['hpxml_vent_precool_sys_ids', vent_precool_sys_ids.to_s]
     results_out << [line_break]
