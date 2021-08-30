@@ -1888,13 +1888,19 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       # Load
 
       if object.to_WaterHeaterMixed.is_initialized
-        return { LT::HotWaterTankLosses => ['Water Heater Heat Loss Energy'] }
+        capacity = object.to_WaterHeaterMixed.get.heaterMaximumCapacity.get
+        if capacity > 0 # Active water heater only (e.g., exclude desuperheater and solar hot water storage tanks)
+          return { LT::HotWaterTankLosses => ['Water Heater Heat Loss Energy'] }
+        end
 
       elsif object.to_WaterHeaterStratified.is_initialized
         if object.name.to_s.start_with? Constants.ObjectNameSolarHotWater
           return { LT::HotWaterSolarThermal => ['Water Heater Use Side Heat Transfer Energy'] }
         else
-          return { LT::HotWaterTankLosses => ['Water Heater Heat Loss Energy'] }
+          capacity = object.to_WaterHeaterStratified.get.heater1Capacity.get
+          if capacity > 0 # Active water heater only (e.g., exclude desuperheater and solar hot water storage tanks)
+            return { LT::HotWaterTankLosses => ['Water Heater Heat Loss Energy'] }
+          end
         end
 
       elsif object.to_WaterUseConnections.is_initialized
