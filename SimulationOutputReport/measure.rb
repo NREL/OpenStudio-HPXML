@@ -204,11 +204,16 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     # End Use/Hot Water Use/Unmet Load/Ideal Load outputs
-    (@end_uses.values + @hot_water_uses.values + @unmet_loads.values + @ideal_system_loads.values).each do |use|
-      use.variables.each do |sys_id, varkey, var|
-        result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},runperiod;").get
-        if include_timeseries_end_use_consumptions
-          result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},#{timeseries_frequency};").get
+    { @end_uses.values => include_timeseries_end_use_consumptions,
+      @hot_water_uses.values => include_timeseries_hot_water_uses,
+      @unmet_loads.values => include_timeseries_unmet_loads,
+      @ideal_system_loads.values => false }.each do |uses, include_timeries|
+      uses.each do |use|
+        use.variables.each do |sys_id, varkey, var|
+          result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},runperiod;").get
+          if include_timeries
+            result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},#{timeseries_frequency};").get
+          end
         end
       end
     end
