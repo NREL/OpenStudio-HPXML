@@ -3,9 +3,9 @@
   <schema_version>3.0</schema_version>
   <name>hpxml_output_report</name>
   <uid>9561a0d7-60ad-48c5-8337-2461df044d80</uid>
-  <version_id>e846e18e-162f-4e31-ab00-1b6c193877e2</version_id>
-  <version_modified>20210831T021243Z</version_modified>
-  <xml_checksum>2C38F48B</xml_checksum>
+  <version_id>b68c1db4-bf9c-436b-8faa-f1a451fab5c6</version_id>
+  <version_modified>20210831T154503Z</version_modified>
+  <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>HPXMLOutputReport</class_name>
   <display_name>HPXML Output Report</display_name>
   <description>Reports HPXML outputs for residential HPXML-based models</description>
@@ -34,16 +34,32 @@
   <outputs />
   <provenances />
   <tags>
-    <tag>Whole Building.Space Types</tag>
+    <tag>Reporting.QAQC</tag>
   </tags>
   <attributes>
     <attribute>
       <name>Measure Type</name>
-      <value>ModelMeasure</value>
+      <value>ReportingMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>OpenStudio Application</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Parametric Analysis Tool</value>
       <datatype>string</datatype>
     </attribute>
   </attributes>
   <files>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>AD87491B</checksum>
+    </file>
     <file>
       <version>
         <software_program>OpenStudio</software_program>
@@ -53,25 +69,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>0D593B70</checksum>
+      <checksum>38E8665C</checksum>
     </file>
     <file>
       <filename>hpxml_output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>47EBCBA4</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>AD87491B</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>95EF1C43</checksum>
+      <checksum>7E825C35</checksum>
     </file>
   </files>
 </measure>

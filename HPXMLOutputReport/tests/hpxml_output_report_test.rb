@@ -30,13 +30,51 @@ class HPXMLOutputReportTest < MiniTest::Test
     'Building Summary: Rim Joist Area Above-Grade Exterior (ft^2)',
   ]
 
-  def test_hpxml_output
+  def test_hpxml_output_csv
     args_hash = {}
     hpxml_csv = _test_measure(args_hash)
     assert(File.exist?(hpxml_csv))
     expected_rows = Rows
     actual_rows = File.readlines(hpxml_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
     assert_equal(expected_rows.sort, actual_rows.sort)
+  end
+
+  def test_hpxml_output_json
+    # TODO
+  end
+
+  def test_base_xml
+    args_hash = {}
+    hpxml_csv = _test_measure(args_hash)
+    assert(File.exist?(hpxml_csv))
+
+    expected_multipliers = {
+      'Building Summary: Fixed (1)' => 1.0,
+      'Building Summary: Wall Area Above-Grade Conditioned (ft^2)' => 1200.0,
+      'Building Summary: Wall Area Above-Grade Exterior (ft^2)' => 1490.0,
+      'Building Summary: Wall Area Below-Grade (ft^2)' => 1200.0,
+      'Building Summary: Floor Area Conditioned (ft^2)' => 2700.0,
+      'Building Summary: Floor Area Attic (ft^2)' => 1350.0,
+      'Building Summary: Floor Area Lighting (ft^2)' => 2700.0,
+      'Building Summary: Roof Area (ft^2)' => 1509.3,
+      'Building Summary: Window Area (ft^2)' => 360.0,
+      'Building Summary: Door Area (ft^2)' => 40.0,
+      'Building Summary: Duct Unconditioned Surface Area (ft^2)' => 200.0,
+      'Building Summary: Size Heating System (kBtu/h)' => 36.0,
+      'Building Summary: Size Secondary Heating System (kBtu/h)' => 0.0,
+      'Building Summary: Size Heat Pump Backup (kBtu/h)' => 0.0,
+      'Building Summary: Size Cooling System (kBtu/h)' => 24.0,
+      'Building Summary: Size Water Heater (gal)' => 40.0,
+      'Building Summary: Flow Rate Mechanical Ventilation (cfm)' => 0.0,
+      'Building Summary: Slab Perimeter Exposed Conditioned (ft)' => 150.0,
+      'Building Summary: Rim Joist Area Above-Grade Exterior (ft^2)' => 116.0
+    }
+
+    actual_rows = File.readlines(hpxml_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
+    actual_values = File.readlines(hpxml_csv).map { |x| x.split(',')[1].strip }.select { |x| !x.empty? }.map { |x| Float(x) }
+    actual_multipliers = Hash[actual_rows.zip(actual_values)]
+
+    assert_equal(expected_multipliers, actual_multipliers)
   end
 
   def _test_measure(args_hash)
