@@ -42,21 +42,21 @@ class HPXMLOutputReport < OpenStudio::Measure::ModelMeasure
   # define what happens when the measure is run
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
-puts "HERE0"
+    puts 'HERE0'
     model = runner.lastOpenStudioModel
     if model.empty?
       runner.registerError('Cannot find OpenStudio model.')
       return false
     end
     @model = model.get
-puts "HERE1"
+    puts 'HERE1'
     # use the built-in error checking
     if !runner.validateUserArguments(arguments(model), user_arguments)
       return false
     end
 
     output_format = runner.getStringArgumentValue('output_format', user_arguments)
-puts "HERE2"
+    puts 'HERE2'
     sqlFile = runner.lastEnergyPlusSqlFile
     if sqlFile.empty?
       runner.registerError('Cannot find EnergyPlus sql file.')
@@ -68,14 +68,14 @@ puts "HERE2"
       return false
     end
     @model.setSqlFile(@sqlFile)
-puts "HERE3"
+    puts 'HERE3'
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     @hpxml_defaults_path = HPXML.new(hpxml_path: hpxml_defaults_path)
 
     # Set paths
     output_dir = File.dirname(@sqlFile.path.to_s)
     annual_output_path = File.join(output_dir, "hpxml_output.#{output_format}")
-puts "HERE4"
+    puts 'HERE4'
     @sqlFile.close()
 
     # Ensure sql file is immediately freed; otherwise we can get
@@ -103,7 +103,7 @@ puts "HERE4"
     @cost_multipliers[BS::FlowRateMechanicalVentilation] = BaseOutput.new
     @cost_multipliers[BS::SlabPerimeterExposedConditioned] = BaseOutput.new
     @cost_multipliers[BS::RimJoistAreaAboveGradeExterior] = BaseOutput.new
-puts "HERE5"
+    puts 'HERE5'
     @cost_multipliers.each do |cost_mult_type, cost_mult|
       cost_mult.name = "Building Summary: #{cost_mult_type}"
       if cost_mult_type.include?('Area')
@@ -133,7 +133,7 @@ puts "HERE5"
     @cost_multipliers.each do |key, cost_mult|
       results_out << ["#{cost_mult.name} (#{cost_mult.annual_units})", cost_mult.annual_output.round(2)]
     end
-puts "HERE6"
+    puts 'HERE6'
     if output_format == 'csv'
       CSV.open(annual_output_path, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
     elsif output_format == 'json'
@@ -150,7 +150,7 @@ puts "HERE6"
       File.open(annual_output_path, 'w') { |json| json.write(JSON.pretty_generate(h)) }
     end
     runner.registerInfo("Wrote annual output results to #{annual_output_path}.")
-puts "HERE7"
+    puts 'HERE7'
     return true
   end
 end
