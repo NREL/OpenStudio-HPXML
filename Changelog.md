@@ -5,6 +5,7 @@ __New Features__
 - **Breaking change**: Replaces ClothesDryer `extension/IsVented` and `extension/VentedFlowRate` with `Vented` and `VentedFlowRate`.
 - Expanded capabilities for scheduling:
   - Allows modeling detailed occupancy via a schedule CSV file.
+  - Introduces a measure for automatically generating detailed smooth/stochastic schedule CSV files.
   - Expands simplified weekday/weekend/monthly schedule inputs to additional building features.
   - Allows `HeatingSeason` & `CoolingSeason` to be specified for defining heating and cooling equipment availability.
 - Allows non-zero refrigerant charge defect ratios for ground source heat pumps.
