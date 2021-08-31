@@ -5,6 +5,7 @@ __New Features__
 - **Breaking change**: Replaces ClothesDryer `extension/IsVented` and `extension/VentedFlowRate` with `Vented` and `VentedFlowRate`.
 - Expanded capabilities for scheduling:
   - Allows modeling detailed occupancy via a schedule CSV file.
+  - Introduces a measure for automatically generating detailed smooth/stochastic schedule CSV files.
   - Expands simplified weekday/weekend/monthly schedule inputs to additional building features.
   - Allows `HeatingSeason` & `CoolingSeason` to be specified for defining heating and cooling equipment availability.
 - Allows non-zero refrigerant charge defect ratios for ground source heat pumps.
@@ -32,12 +33,15 @@ __New Features__
 - Revises shared mechanical ventilation preconditioning control logic to operate less often.
 - Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
 - Updates the reporting measure to register all outputs from the annual CSV with the OS runner (for use in, e.g., PAT).
+- Removes timeseries CSV output columns that are all zeroes to reduce file size and processing time.
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
 - Improves HVAC fan power for central forced air systems.
+- Fixes mechanical ventilation compartmentalization area calculation for SFA/MF homes with surfaces with InteriorAdjacentTo==ExteriorAdjacentTo.
 - Negative `DistanceToTopOfInsulation` values are now disallowed.
+- Fixes workflow errors if a `VentilationFan` has zero airflow rate or zero hours of operation.
 
 ## OpenStudio-HPXML v1.2.0
 
