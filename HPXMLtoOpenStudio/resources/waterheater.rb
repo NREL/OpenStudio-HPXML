@@ -634,6 +634,7 @@ class Waterheater
     storage_tank.setOffCycleParasiticFuelConsumptionRate(0)
     storage_tank.setUseSideDesignFlowRate(UnitConversions.convert(solar_thermal_system.storage_volume, 'gal', 'm^3') / 60.1) # Sized to ensure that E+ never autosizes the design flow rate to be larger than the tank volume getting drawn out in a hour (60 minutes)
     storage_tank.additionalProperties.setFeature('HPXML_ID', solar_thermal_system.water_heating_system.id)
+    storage_tank.additionalProperties.setFeature('WaterHeaterType', 'SolarThermalStorageTank') # Property used by reporting measure
 
     plant_loop.addDemandBranchForComponent(storage_tank)
     dhw_loop.addSupplyBranchForComponent(storage_tank)
@@ -852,6 +853,7 @@ class Waterheater
     tank.setSourceSideFlowControlMode('')
     tank.setSourceSideInletHeight(0)
     tank.setSourceSideOutletHeight(0)
+    tank.additionalProperties.setFeature('WaterHeaterType', 'WaterHeater') # Property used by reporting measure
 
     return tank
   end
@@ -1628,6 +1630,13 @@ class Waterheater
       new_heater.setHeaterControlType('Cycle')
     end
     new_heater.setDeadbandTemperatureDifference(deadband(tank_type))
+
+    # Property used by reporting measure
+    if is_dsh_storage
+      new_heater.additionalProperties.setFeature('WaterHeaterType', 'DesuperheaterStorageTank')
+    else
+      new_heater.additionalProperties.setFeature('WaterHeaterType', 'WaterHeater')
+    end
 
     # Capacity, storage tank to be 0
     new_heater.setHeaterMaximumCapacity(UnitConversions.convert(cap, 'kBtu/hr', 'W'))
