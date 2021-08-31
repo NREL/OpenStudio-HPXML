@@ -5912,6 +5912,8 @@ if ARGV[0].to_sym == :create_release_zips
            'HPXMLtoOpenStudio/resources/*.*',
            'SimulationOutputReport/measure.*',
            'SimulationOutputReport/resources/*.*',
+           'HPXMLOutputReport/measure.*',
+           'HPXMLOutputReport/resources/*.*',
            'weather/*.*',
            'workflow/*.*',
            'workflow/sample_files/*.xml',
