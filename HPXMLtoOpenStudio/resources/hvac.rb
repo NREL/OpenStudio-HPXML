@@ -3180,8 +3180,8 @@ class HVAC
               unless grid_signal_schedule.nil?
                 clg_coil.setGridSignalSchedule(grid_signal_schedule)
               end
-              clg_coil.setLowerBoundToApplyGridResponsiveControl(0.5)
-              clg_coil.setUpperBoundToApplyGridResponsiveControl(2)
+              clg_coil.setLowerBoundToApplyGridResponsiveControl(1)
+              clg_coil.setUpperBoundToApplyGridResponsiveControl(1)
               clg_coil.setMaxSpeedLevelDuringGridResponsiveControl(cooling_system.max_flex_speed)
               clg_coil.setLoadControlDuringGridResponsiveControl('Sensible')
             end
@@ -3266,8 +3266,8 @@ class HVAC
               unless grid_signal_schedule.nil?
                 htg_coil.setGridSignalSchedule(grid_signal_schedule)
               end
-              htg_coil.setLowerBoundToApplyGridResponsiveControl(0.5)
-              htg_coil.setUpperBoundToApplyGridResponsiveControl(2)
+              htg_coil.setLowerBoundToApplyGridResponsiveControl(1)
+              htg_coil.setUpperBoundToApplyGridResponsiveControl(1)
               htg_coil.setMaxSpeedLevelDuringGridResponsiveControl(heating_system.max_flex_speed)
             end
           end
