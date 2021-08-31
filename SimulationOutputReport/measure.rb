@@ -808,6 +808,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @loads[LT::HotWaterTankLosses].annual_output = get_report_variable_data_annual(solar_keys, ['Water Heater Heat Loss Energy'], not_key: true)
     @loads[LT::HotWaterTankLosses].annual_output *= -1.0 if @loads[LT::HotWaterTankLosses].annual_output < 0
 
+    # Apply solar fraction to load for simple solar water heating systems
+    outputs[:hpxml_dhw_sys_ids].each do |sys_id|
+      solar_fraction = get_dhw_solar_fraction(sys_id)
+      if solar_fraction > 0
+        apply_multiplier_to_output(@loads[LT::HotWaterDelivered], @loads[LT::HotWaterSolarThermal], sys_id, 1.0 / (1.0 - solar_fraction))
+      end
+    end
+
     # Calculate aggregated values from per-system values as needed
     (@end_uses.values + @loads.values).each do |obj|
       if obj.annual_output.nil?
@@ -822,14 +830,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       obj.timeseries_output = obj.timeseries_output_by_system.values[0]
       obj.timeseries_output_by_system.values[1..-1].each do |values|
         obj.timeseries_output = obj.timeseries_output.zip(values).map { |x, y| x + y }
-      end
-    end
-
-    # Apply solar fraction to load for simple solar water heating systems
-    outputs[:hpxml_dhw_sys_ids].each do |sys_id|
-      solar_fraction = get_dhw_solar_fraction(sys_id)
-      if solar_fraction > 0
-        apply_multiplier_to_output(@loads[LT::HotWaterDelivered], @loads[LT::HotWaterSolarThermal], sys_id, 1.0 / (1.0 - solar_fraction))
       end
     end
 
