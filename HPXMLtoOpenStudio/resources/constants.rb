@@ -143,8 +143,8 @@ class Constants
     return "#{water_heater_name} dhw energy"
   end
 
-  def self.ObjectNameCombiSpaceHeatingEnergyAdjustment(water_heater_name)
-    return "#{water_heater_name} heating energy adj"
+  def self.ObjectNameCombiSpaceHeatingEnergy(water_heater_name)
+    return "#{water_heater_name} htg energy"
   end
 
   def self.ObjectNameComponentLoadsProgram

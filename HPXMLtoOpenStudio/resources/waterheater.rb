@@ -160,7 +160,7 @@ class Waterheater
   def self.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system)
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     boiler, boiler_plant_loop = get_combi_boiler_and_plant_loop(model, water_heating_system.related_hvac_idref)
-    boiler.additionalProperties.setFeature('HPXML_ID', water_heating_system.id)
+    boiler.additionalProperties.setFeature('BoilerType', 'CombiBoiler')
 
     obj_name_combi = Constants.ObjectNameWaterHeater
     convlim = model.getConvergenceLimits
@@ -1331,18 +1331,21 @@ class Waterheater
     ec_adj_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     ec_adj_program.setName("#{heater.name} EC_adj")
     if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
-      ec_adj_program.addLine("Set wh_e_cons = #{ec_adj_oncyc_sensor.name} + #{ec_adj_offcyc_sensor.name}")
+      ec_adj_program.addLine("Set dhw_e_cons = #{ec_adj_oncyc_sensor.name} + #{ec_adj_offcyc_sensor.name}")
+      ec_adj_program.addLine('Set htg_e_cons = dhw_e_cons')
       ec_adj_program.addLine("If #{ec_adj_sensor_boiler_heating.name} > 0")
-      ec_adj_program.addLine("  Set wh_e_cons = wh_e_cons + (@Abs #{ec_adj_sensor_hx.name}) / #{ec_adj_sensor_boiler_heating.name} * #{ec_adj_sensor_boiler.name}")
+      ec_adj_program.addLine("  Set dhw_frac = (@Abs #{ec_adj_sensor_hx.name}) / #{ec_adj_sensor_boiler_heating.name}")
+      ec_adj_program.addLine("  Set dhw_e_cons = dhw_e_cons + dhw_frac * #{ec_adj_sensor_boiler.name}")
+      ec_adj_program.addLine("  Set htg_e_cons = htg_e_cons + (1.0 - dhw_frac) * #{ec_adj_sensor_boiler.name}")
       ec_adj_program.addLine('EndIf')
-      ec_adj_program.addLine('Set boiler_hw_energy = wh_e_cons * 3600 * SystemTimeStep')
-      ec_adj_program.addLine('Set boiler_heat_energy = -boiler_hw_energy')
+      ec_adj_program.addLine('Set boiler_dhw_energy = dhw_e_cons * 3600 * SystemTimeStep')
+      ec_adj_program.addLine('Set boiler_htg_energy = htg_e_cons * 3600 * SystemTimeStep')
     elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
-      ec_adj_program.addLine("Set wh_e_cons = #{ec_adj_sensor.name} + #{ec_adj_oncyc_sensor.name} + #{ec_adj_offcyc_sensor.name} + #{ec_adj_hp_sensor.name} + #{ec_adj_fan_sensor.name}")
+      ec_adj_program.addLine("Set dhw_e_cons = #{ec_adj_sensor.name} + #{ec_adj_oncyc_sensor.name} + #{ec_adj_offcyc_sensor.name} + #{ec_adj_hp_sensor.name} + #{ec_adj_fan_sensor.name}")
     else
-      ec_adj_program.addLine("Set wh_e_cons = #{ec_adj_sensor.name} + #{ec_adj_oncyc_sensor.name} + #{ec_adj_offcyc_sensor.name}")
+      ec_adj_program.addLine("Set dhw_e_cons = #{ec_adj_sensor.name} + #{ec_adj_oncyc_sensor.name} + #{ec_adj_offcyc_sensor.name}")
     end
-    ec_adj_program.addLine("Set #{ec_adj_actuator.name} = #{adjustment} * wh_e_cons")
+    ec_adj_program.addLine("Set #{ec_adj_actuator.name} = #{adjustment} * dhw_e_cons")
 
     # Program Calling Manager
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
@@ -1368,28 +1371,29 @@ class Waterheater
       # EMS Output Variables for combi dhw energy reporting (before EC_adj is applied)
 
       # Increase DHW energy use:
-      boiler_hw_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'boiler_hw_energy')
-      boiler_hw_output_var.setName("#{Constants.ObjectNameCombiWaterHeatingEnergy(heater.name)} outvar")
-      boiler_hw_output_var.setTypeOfDataInVariable('Summed')
-      boiler_hw_output_var.setUpdateFrequency('SystemTimestep')
-      boiler_hw_output_var.setEMSProgramOrSubroutineName(ec_adj_program)
-      boiler_hw_output_var.setUnits('J')
-      boiler_hw_output_var.additionalProperties.setFeature('FuelType', EPlus.fuel_type(fuel_type))
+      boiler_dhw_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'boiler_dhw_energy')
+      boiler_dhw_output_var.setName("#{Constants.ObjectNameCombiWaterHeatingEnergy(heater.name)} outvar")
+      boiler_dhw_output_var.setTypeOfDataInVariable('Summed')
+      boiler_dhw_output_var.setUpdateFrequency('SystemTimestep')
+      boiler_dhw_output_var.setEMSProgramOrSubroutineName(ec_adj_program)
+      boiler_dhw_output_var.setUnits('J')
+      boiler_dhw_output_var.additionalProperties.setFeature('FuelType', EPlus.fuel_type(fuel_type))
 
       # Decrease space heating energy use:
-      boiler_heat_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'boiler_heat_energy')
-      boiler_heat_output_var.setName("#{Constants.ObjectNameCombiSpaceHeatingEnergyAdjustment(heater.name)} outvar")
-      boiler_heat_output_var.setTypeOfDataInVariable('Summed')
-      boiler_heat_output_var.setUpdateFrequency('SystemTimestep')
-      boiler_heat_output_var.setEMSProgramOrSubroutineName(ec_adj_program)
-      boiler_heat_output_var.setUnits('J')
-      boiler_heat_output_var.additionalProperties.setFeature('FuelType', EPlus.fuel_type(fuel_type))
+      boiler_htg_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'boiler_htg_energy')
+      boiler_htg_output_var.setName("#{Constants.ObjectNameCombiSpaceHeatingEnergy(heater.name)} outvar")
+      boiler_htg_output_var.setTypeOfDataInVariable('Summed')
+      boiler_htg_output_var.setUpdateFrequency('SystemTimestep')
+      boiler_htg_output_var.setEMSProgramOrSubroutineName(ec_adj_program)
+      boiler_htg_output_var.setUnits('J')
+      boiler_htg_output_var.additionalProperties.setFeature('FuelType', EPlus.fuel_type(fuel_type))
+      boiler_htg_output_var.additionalProperties.setFeature('HPXML_ID', water_heating_system.related_hvac_system.id)
     else
-      boiler_hw_output_var = nil
-      boiler_heat_output_var = nil
+      boiler_dhw_output_var = nil
+      boiler_htg_output_var = nil
     end
 
-    return ec_adj_output_var, boiler_hw_output_var, boiler_heat_output_var
+    return ec_adj_output_var, boiler_dhw_output_var
   end
 
   def self.get_default_hot_water_temperature(eri_version)

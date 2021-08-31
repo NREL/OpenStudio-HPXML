@@ -1734,8 +1734,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         return { [FT::Elec, EUT::Heating] => ["Baseboard #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_BoilerHotWater.is_initialized
-        fuel = object.to_BoilerHotWater.get.fuelType
-        return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
+        boiler_type = object.additionalProperties.getFeatureAsString('BoilerType')
+        if boiler_type == 'Boiler' # Exclude combi boiler, whose heating & dhw energy is handled separately via EMS
+          fuel = object.to_BoilerHotWater.get.fuelType
+          return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
+        end
 
       elsif object.to_CoilCoolingDXSingleSpeed.is_initialized || object.to_CoilCoolingDXMultiSpeed.is_initialized
         vars = { [FT::Elec, EUT::Cooling] => ["Cooling Coil #{EPlus::FuelTypeElectricity} Energy"] }
@@ -1856,7 +1859,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         elsif object.name.to_s.include? Constants.ObjectNameCombiWaterHeatingEnergy(nil)
           fuel = object.additionalProperties.getFeatureAsString('FuelType').get
           return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }
-        elsif object.name.to_s.include? Constants.ObjectNameCombiSpaceHeatingEnergyAdjustment(nil)
+        elsif object.name.to_s.include? Constants.ObjectNameCombiSpaceHeatingEnergy(nil)
           fuel = object.additionalProperties.getFeatureAsString('FuelType').get
           return { [to_ft[fuel], EUT::Heating] => [object.name.to_s] }
         else

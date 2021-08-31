@@ -2786,6 +2786,15 @@ class HPXML < Object
       return
     end
 
+    def related_water_heating_system
+      @hpxml_object.water_heating_systems.each do |water_heating_system|
+        next unless water_heating_system.related_hvac_idref == @id
+
+        return water_heating_system
+      end
+      return
+    end
+
     def delete
       @hpxml_object.heating_systems.delete(self)
       @hpxml_object.water_heating_systems.each do |water_heating_system|
