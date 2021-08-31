@@ -825,8 +825,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     def ordered_values(hash, sys_ids)
       vals = []
       sys_ids.each do |sys_id|
-        vals << hash[sys_id]
-        fail 'Could not look up data.' if vals[-1].nil?
+        if not hash[sys_id].nil?
+          vals << hash[sys_id]
+        else
+          vals << 0.0
+        end
       end
       return vals
     end
@@ -955,16 +958,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       next unless vent_fan.used_for_whole_building_ventilation
 
       if not vent_fan.preheating_fuel.nil?
-        sys_id = "#{vent_fan.id}_preheat"
-        vent_preheat_sys_ids << sys_id
-        vent_preheat_fuels[sys_id] = vent_fan.preheating_fuel
-        eec_vent_preheats[sys_id] = get_eec_value_numerator('COP') / vent_fan.preheating_efficiency_cop
+        vent_preheat_sys_ids << vent_fan.id
+        vent_preheat_fuels[vent_fan.id] = vent_fan.preheating_fuel
+        eec_vent_preheats[vent_fan.id] = get_eec_value_numerator('COP') / vent_fan.preheating_efficiency_cop
       end
       next unless not vent_fan.precooling_fuel.nil?
 
-      sys_id = "#{vent_fan.id}_precool"
-      vent_precool_sys_ids << sys_id
-      eec_vent_precools[sys_id] = get_eec_value_numerator('COP') / vent_fan.precooling_efficiency_cop
+      vent_precool_sys_ids << vent_fan.id
+      eec_vent_precools[vent_fan.id] = get_eec_value_numerator('COP') / vent_fan.precooling_efficiency_cop
     end
 
     # Calculate ERI Reference Loads
@@ -1015,8 +1016,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       sys_ids = get_sys_ids(end_use_type, heat_sys_ids, cool_sys_ids, dhw_sys_ids, vent_preheat_sys_ids, vent_precool_sys_ids)
       if sys_ids.nil?
         results_out << [key_name, end_use.annual_output.to_s]
-      elsif end_use.annual_output_by_system.empty?
-        results_out << [key_name, [end_use.annual_output.to_f]]
       else
         results_out << [key_name, ordered_values(end_use.annual_output_by_system, sys_ids).to_s]
       end
