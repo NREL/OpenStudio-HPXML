@@ -383,10 +383,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @model.setSqlFile(@sqlFile)
 
     hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
-    hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: building_id)
-    @hpxml_defaults_path = HPXML.new(hpxml_path: hpxml_defaults_path)
     HVAC.apply_shared_systems(@hpxml) # Needed for ERI shared HVAC systems
     get_object_maps()
     @eri_design = @hpxml.header.eri_design
@@ -607,11 +605,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       if include_timeseries_hot_water_uses
         hot_water.timeseries_output = get_report_variable_data_timeseries(keys, [hot_water.variable], UnitConversions.convert(1.0, 'm^3', hot_water.timeseries_units), 0, timeseries_frequency)
       end
-    end
-
-    # Cost Multipliers
-    @cost_multipliers.each do |cost_mult_type, cost_mult|
-      cost_mult.annual_output = HPXML::get_cost_multiplier(@hpxml_defaults_path, cost_mult_type)
     end
 
     # Space Heating (by System)
@@ -985,9 +978,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       results_out << ["#{hot_water.name} (#{hot_water.annual_units})", hot_water.annual_output.round(0)]
     end
     results_out << [line_break]
-    @cost_multipliers.each do |key, cost_mult|
-      results_out << ["#{cost_mult.name} (#{cost_mult.annual_units})", cost_mult.annual_output.round(2)]
-    end
 
     if output_format == 'csv'
       CSV.open(annual_output_path, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
@@ -2255,47 +2245,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       hot_water.name = "Hot Water: #{hot_water_type}"
       hot_water.annual_units = 'gal'
       hot_water.timeseries_units = 'gal'
-    end
-
-    # Cost Multipliers
-    @cost_multipliers = {}
-    @cost_multipliers[BS::Fixed] = BaseOutput.new
-    @cost_multipliers[BS::WallAreaAboveGradeConditioned] = BaseOutput.new
-    @cost_multipliers[BS::WallAreaAboveGradeExterior] = BaseOutput.new
-    @cost_multipliers[BS::WallAreaBelowGrade] = BaseOutput.new
-    @cost_multipliers[BS::FloorAreaConditioned] = BaseOutput.new
-    @cost_multipliers[BS::FloorAreaAttic] = BaseOutput.new
-    @cost_multipliers[BS::FloorAreaLighting] = BaseOutput.new
-    @cost_multipliers[BS::RoofArea] = BaseOutput.new
-    @cost_multipliers[BS::WindowArea] = BaseOutput.new
-    @cost_multipliers[BS::DoorArea] = BaseOutput.new
-    @cost_multipliers[BS::DuctUnconditionedSurfaceArea] = BaseOutput.new
-    @cost_multipliers[BS::SizeHeatingSystem] = BaseOutput.new
-    @cost_multipliers[BS::SizeSecondaryHeatingSystem] = BaseOutput.new
-    @cost_multipliers[BS::SizeHeatPumpBackup] = BaseOutput.new
-    @cost_multipliers[BS::SizeCoolingSystem] = BaseOutput.new
-    @cost_multipliers[BS::SizeWaterHeater] = BaseOutput.new
-    @cost_multipliers[BS::FlowRateMechanicalVentilation] = BaseOutput.new
-    @cost_multipliers[BS::SlabPerimeterExposedConditioned] = BaseOutput.new
-    @cost_multipliers[BS::RimJoistAreaAboveGradeExterior] = BaseOutput.new
-
-    @cost_multipliers.each do |cost_mult_type, cost_mult|
-      cost_mult.name = "Building Summary: #{cost_mult_type}"
-      if cost_mult_type.include?('Area')
-        cost_mult.annual_units = 'ft^2'
-      elsif cost_mult_type.include?('Perimeter')
-        cost_mult.annual_units = 'ft'
-      elsif cost_mult_type.include?('Size')
-        if cost_mult_type.include?('Heating') || cost_mult_type.include?('Cooling') || cost_mult_type.include?('Heat Pump')
-          cost_mult.annual_units = 'kBtu/h'
-        else
-          cost_mult.annual_units = 'gal'
-        end
-      elsif cost_mult_type.include?('Flow')
-        cost_mult.annual_units = 'cfm'
-      else
-        cost_mult.annual_units = '1'
-      end
     end
 
     # Peak Fuels
