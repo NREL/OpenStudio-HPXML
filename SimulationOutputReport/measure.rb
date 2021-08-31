@@ -1734,7 +1734,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         return { [FT::Elec, EUT::Heating] => ["Baseboard #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_BoilerHotWater.is_initialized
-        boiler_type = object.additionalProperties.getFeatureAsString('BoilerType')
+        boiler_type = object.additionalProperties.getFeatureAsString('BoilerType').get
         if boiler_type == 'Boiler' # Exclude combi boiler, whose heating & dhw energy is handled separately via EMS
           fuel = object.to_BoilerHotWater.get.fuelType
           return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
