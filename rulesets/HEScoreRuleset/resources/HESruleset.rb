@@ -363,6 +363,7 @@ class HEScoreRuleset
     json['building']['zone']['zone_wall'].each do |orig_wall|
       next unless orig_wall.key?('zone_window')
       next if orig_wall['side'] == 'front' && orig_wall['zone_window']['window_area'] == 1 # LBL intentionally has the front window area set to 1 as an HPXML file with no windows does not pass validation.
+      next if orig_wall['zone-window']['window_area'] == 0
 
       orig_window = orig_wall['zone_window']
       if orig_wall['side'] == 'front'
@@ -396,15 +397,10 @@ class HEScoreRuleset
         # Summer only, total shading factor reduced to 0.29
         exterior_shading_factor_summer = 0.29 / interior_shading_factor_summer # Overall shading factor is interior multiplied by exterior
       end
-      if orig_window['window_area'] == 0
-        window_area = 1
-      else
-        window_area = orig_window['window_area']
-      end
 
       # Add one HPXML window per side of the house with only the overhangs from the roof.
       new_hpxml.windows.add(id: "#{orig_wall['side']}_window",
-                            area: window_area,
+                            area: orig_window['window_area'],
                             azimuth: sanitize_azimuth(wall_orientation_to_azimuth(orig_wall['side'])),
                             ufactor: ufactor,
                             shgc: shgc,
