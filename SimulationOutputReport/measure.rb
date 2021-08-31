@@ -576,6 +576,23 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end
     end
 
+    # Apply solar fraction to load for simple solar water heating systems
+    @hpxml.solar_thermal_systems.each do |solar_system|
+      next if solar_system.solar_fraction.nil?
+
+      @loads[LT::HotWaterSolarThermal].annual_output = 0.0 if @loads[LT::HotWaterSolarThermal].annual_output.nil?
+      @loads[LT::HotWaterSolarThermal].timeseries_output = [0.0] * @timestamps.size if @loads[LT::HotWaterSolarThermal].timeseries_output.nil?
+
+      if not solar_system.water_heating_system.nil?
+        dhw_ids = [solar_system.water_heating_system.id]
+      else # Apply to all water heating systems
+        dhw_ids = @hpxml.water_heating_systems.map { |dhw| dhw.id }
+      end
+      dhw_ids.each do |dhw_id|
+        apply_multiplier_to_output(@loads[LT::HotWaterDelivered], @loads[LT::HotWaterSolarThermal], dhw_id, 1.0 / (1.0 - solar_system.solar_fraction))
+      end
+    end
+
     # Calculate aggregated values from per-system values as needed
     (@end_uses.values + @loads.values + @hot_water_uses.values).each do |obj|
       if obj.annual_output.nil?
@@ -590,20 +607,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       obj.timeseries_output = obj.timeseries_output_by_system.values[0]
       obj.timeseries_output_by_system.values[1..-1].each do |values|
         obj.timeseries_output = obj.timeseries_output.zip(values).map { |x, y| x + y }
-      end
-    end
-
-    # Apply solar fraction to load for simple solar water heating systems
-    @hpxml.solar_thermal_systems.each do |solar_system|
-      next if solar_system.solar_fraction.nil?
-
-      if not solar_system.water_heating_system.nil?
-        dhw_ids = [solar_system.water_heating_system.id]
-      else # Apply to all water heating systems
-        dhw_ids = @hpxml.water_heating_systems.map { |dhw| dhw.id }
-      end
-      dhw_ids.each do |dhw_id|
-        apply_multiplier_to_output(@loads[LT::HotWaterDelivered], @loads[LT::HotWaterSolarThermal], dhw_id, 1.0 / (1.0 - solar_system.solar_fraction))
       end
     end
 
@@ -1229,22 +1232,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Annual
     orig_value = obj.annual_output_by_system[sys_id]
     obj.annual_output_by_system[sys_id] = orig_value * mult
-    if not sync_obj.annual_output.nil?
-      sync_obj.annual_output += (orig_value * mult - orig_value)
-    elsif not sync_obj.annual_output_by_system[sys_id].nil?
-      sync_obj.annual_output_by_system[sys_id] += (orig_value * mult - orig_value)
-    end
+    sync_obj.annual_output += (orig_value * mult - orig_value)
 
     # Timeseries
     if not obj.timeseries_output_by_system.empty?
       orig_values = obj.timeseries_output_by_system[sys_id]
       obj.timeseries_output_by_system[sys_id] = obj.timeseries_output_by_system[sys_id].map { |x| x * mult }
       diffs = obj.timeseries_output_by_system[sys_id].zip(orig_values).map { |x, y| x - y }
-      if not sync_obj.timeseries_output.nil?
-        sync_obj.timeseries_output = sync_obj.timeseries_output.zip(diffs).map { |x, y| x + y }
-      elsif not sync_obj.timeseries_output_by_system[sys_id].nil?
-        sync_obj.timeseries_output_by_system[sys_id] = sync_obj.timeseries_output_by_system[sys_id].zip(diffs).map { |x, y| x + y }
-      end
+      sync_obj.timeseries_output = sync_obj.timeseries_output.zip(diffs).map { |x, y| x + y }
     end
   end
 
