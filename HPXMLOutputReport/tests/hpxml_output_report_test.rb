@@ -30,17 +30,13 @@ class HPXMLOutputReportTest < MiniTest::Test
     'Building Summary: Rim Joist Area Above-Grade Exterior (ft^2)',
   ]
 
-  def test_hpxml_output_csv
+  def test_hpxml_output
     args_hash = {}
     hpxml_csv = _test_measure(args_hash)
     assert(File.exist?(hpxml_csv))
     expected_rows = Rows
     actual_rows = File.readlines(hpxml_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
     assert_equal(expected_rows.sort, actual_rows.sort)
-  end
-
-  def test_hpxml_output_json
-    # TODO
   end
 
   def test_base_xml
@@ -80,7 +76,7 @@ class HPXMLOutputReportTest < MiniTest::Test
   def _test_measure(args_hash)
     # Run measure via OSW
     require 'json'
-    template_osw = File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'template-hpxml-output.osw')
+    template_osw = File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'template.osw')
     workflow = OpenStudio::WorkflowJSON.new(template_osw)
     json = JSON.parse(workflow.to_s)
 
