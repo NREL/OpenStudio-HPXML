@@ -1835,7 +1835,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                     Constants.ObjectNameMiscPoolHeater => EUT::PoolHeater,
                     Constants.ObjectNameMiscHotTubHeater => EUT::HotTubHeater,
                     Constants.ObjectNameMechanicalVentilationPreheating => EUT::MechVentPreheat,
-                    Constants.ObjectNameMechanicalVentilationPrecooling => EUT::MechVentPreheat }[object.to_OtherEquipment.get.endUseSubcategory]
+                    Constants.ObjectNameMechanicalVentilationPrecooling => EUT::MechVentPrecool }[object.to_OtherEquipment.get.endUseSubcategory]
         if not end_use.nil?
           return { [to_ft[fuel], end_use] => ["Other Equipment #{fuel} Energy"] }
         end
