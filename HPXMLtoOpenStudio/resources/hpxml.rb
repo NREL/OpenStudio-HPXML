@@ -287,6 +287,10 @@ class HPXML < Object
   WallTypeWoodStud = 'WoodStud'
   WaterFixtureTypeFaucet = 'faucet'
   WaterFixtureTypeShowerhead = 'shower head'
+  WaterHeaterSetpointTypeConstant = 'constant'
+  WaterHeaterSetpointTypeScheduled = 'schedule'
+  WaterHeaterTankModelTypeMixed = 'mixed'
+  WaterHeaterTankModelTypeStratified = 'stratified'
   WaterHeaterTypeCombiStorage = 'space-heating boiler with storage tank'
   WaterHeaterTypeCombiTankless = 'space-heating boiler with tankless coil'
   WaterHeaterTypeHeatPump = 'heat pump water heater'
@@ -3937,7 +3941,7 @@ class HPXML < Object
              :tank_volume, :fraction_dhw_load_served, :heating_capacity, :energy_factor, :usage_bin,
              :uniform_energy_factor, :first_hour_rating, :recovery_efficiency, :uses_desuperheater, :jacket_r_value,
              :related_hvac_idref, :third_party_certification, :standby_loss, :temperature, :is_shared_system,
-             :number_of_units_served]
+             :number_of_units_served, :setpoint_type, :tank_model_type]
     attr_accessor(*ATTRS)
 
     def related_hvac_system
@@ -4001,6 +4005,11 @@ class HPXML < Object
         related_hvac_idref_el = XMLHelper.add_element(water_heating_system, 'RelatedHVACSystem')
         XMLHelper.add_attribute(related_hvac_idref_el, 'idref', @related_hvac_idref)
       end
+      if (not @setpoint_type.nil?) || (not @tank_model_type.nil?)
+        extension = XMLHelper.create_elements_as_needed(water_heating_system, ['extension'])
+        XMLHelper.add_element(extension, 'SetpointType', @setpoint_type, :string) unless @setpoint_type.nil?
+        XMLHelper.add_element(extension, 'TankModelType', @tank_model_type, :string) unless @tank_model_type.nil?
+      end
     end
 
     def from_oga(water_heating_system)
@@ -4028,6 +4037,8 @@ class HPXML < Object
       @temperature = XMLHelper.get_value(water_heating_system, 'HotWaterTemperature', :float)
       @uses_desuperheater = XMLHelper.get_value(water_heating_system, 'UsesDesuperheater', :boolean)
       @related_hvac_idref = HPXML::get_idref(XMLHelper.get_element(water_heating_system, 'RelatedHVACSystem'))
+      @setpoint_type = XMLHelper.get_value(water_heating_system, 'extension/SetpointType', :string)
+      @tank_model_type = XMLHelper.get_value(water_heating_system, 'extension/TankModelType', :string)
     end
   end
 
