@@ -5,6 +5,7 @@ import pandas as pd
 import plotly
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import plotly.express as px
 
 class BaseCompare:
     def __init__(self, base_folder, feature_folder, export_folder, export_file):
@@ -12,6 +13,18 @@ class BaseCompare:
         self.feature_folder = feature_folder
         self.export_folder = export_folder
         self.export_file = export_file
+
+    @staticmethod
+    def intersect_rows(df1, df2):
+          return df1[df1.index.isin(df2.index)]
+
+    @staticmethod
+    def union_columns(df1, df2):
+          cols = sorted(list(set(df1.columns) | set(df2.columns)))
+          for col in cols:
+              if not col in df1.columns:
+                  df1[col] = np.nan
+          return df1[cols]
 
     def results(self, aggregate_column=None, aggregate_function=None, excludes=[], enum_maps={}):
         aggregate_columns = []
@@ -26,6 +39,10 @@ class BaseCompare:
         for file in sorted(files):
             base_df = pd.read_csv(os.path.join(self.base_folder, file), index_col=0)
             feature_df = pd.read_csv(os.path.join(self.feature_folder, file), index_col=0)
+
+            base_df = self.intersect_rows(base_df, feature_df)
+            feature_df = self.intersect_rows(feature_df, base_df)
+
             if file == 'results_output.csv':
                 base_df = base_df.select_dtypes(exclude=['string', 'bool'])
                 feature_df = feature_df.select_dtypes(exclude=['string', 'bool'])
@@ -33,6 +50,8 @@ class BaseCompare:
             try:
                 df = feature_df - base_df
             except BaseException:
+                base_df = self.union_columns(base_df, feature_df)
+                feature_df = self.union_columns(feature_df, base_df)
                 df = feature_df != base_df
                 df = df.astype(int)
 
@@ -103,7 +122,9 @@ class BaseCompare:
                 self.export_folder,
                 self.export_file))
 
-    def visualize(self, aggregate_column=None, aggregate_function=None, display_column=None, excludes=[], enum_maps={}):
+    def visualize(self, aggregate_column=None, aggregate_function=None, display_column=None, excludes=[], enum_maps={}, cols_to_ignore=[]):
+        colors = px.colors.qualitative.Dark24
+
         aggregate_columns = []
         if aggregate_column:
             aggregate_columns.append(aggregate_column)
@@ -161,28 +182,17 @@ class BaseCompare:
                 if all(v == 0 for v in base_df[col].values) and all(v == 0 for v in feature_df[col].values):
                     cols.remove(col)
             for col in cols[:]:
-                if '.include_' in col:
-                    cols.remove(col)
-                if '.timeseries_' in col:
-                    cols.remove(col)
-                if '.output_format' in col:
-                    cols.remove(col)
-                if 'completed_status' in col:
-                    cols.remove(col)
-                if '.applicable' in col:
-                    cols.remove(col)
-                if 'upgrade_name' in col:
-                    cols.remove(col)
-                if 'upgrade_cost_' in col:
-                    cols.remove(col)
+                for col_to_ignore in cols_to_ignore:
+                    if col_to_ignore in col:
+                        cols.remove(col)
             return cols
 
         for file in sorted(files):
             base_df = pd.read_csv(os.path.join(self.base_folder, file), index_col=0)
             feature_df = pd.read_csv(os.path.join(self.feature_folder, file), index_col=0)
 
-            base_df = base_df[base_df.index.isin(feature_df.index)]
-            feature_df = feature_df[feature_df.index.isin(base_df.index)]
+            base_df = self.intersect_rows(base_df, feature_df)
+            feature_df = self.intersect_rows(feature_df, base_df)
 
             for col in base_df.columns:
                 if base_df[col].isnull().all():
@@ -196,8 +206,8 @@ class BaseCompare:
 
             groups = [None]
             if display_columns:
-                base_df = base_characteristics_df.join(base_df)
-                feature_df = feature_characteristics_df.join(feature_df)
+                base_df = base_characteristics_df.join(base_df, how='right')
+                feature_df = feature_characteristics_df.join(feature_df, how='right')
 
                 for col, enum_map in enum_maps.items():
                     if col in display_columns:
@@ -258,9 +268,13 @@ class BaseCompare:
                                                      showlegend=False),
                                           row=nrow, col=ncol)
                     else:
+                        color = [colors[0] for i in y[col]]
+                        if 'color_index' in y.columns.values:
+                            color = [colors[i] for i in y['color_index']]
                         fig.add_trace(go.Scatter(x=x[col],
                                                  y=y[col],
                                                  marker=dict(size=12,
+                                                             color=color,
                                                              line=dict(width=1.5,
                                                                        color='DarkSlateGrey')),
                                                  mode='markers',
@@ -309,6 +323,7 @@ if __name__ == '__main__':
     parser.add_argument('-x', '--export_file', help='The path of the export file.')
     parser.add_argument('-a', '--actions', action='append', choices=actions, help='The method to call.')
     args = parser.parse_args()
+    print(args)
 
     if not os.path.exists(args.export_folder):
         os.makedirs(args.export_folder)
