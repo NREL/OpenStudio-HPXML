@@ -194,6 +194,51 @@ class HPXMLTest < MiniTest::Test
     File.delete(osw_path_test)
   end
 
+  def test_template_osw_with_schedule
+    # Check that simulation works using template.osw
+    require 'json'
+
+    os_cli = OpenStudio.getOpenStudioCLI
+    osw_path = File.join(File.dirname(__FILE__), '..', 'template-stochastic-schedules.osw')
+
+    # Create derivative OSW for testing
+    osw_path_test = osw_path.gsub('.osw', '_test.osw')
+    FileUtils.cp(osw_path, osw_path_test)
+
+    # Turn on debug mode
+    json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
+    json[:steps][1][:arguments][:debug] = true
+
+    if Dir.exist? File.join(File.dirname(__FILE__), '..', '..', 'project')
+      # CI checks out the repo as "project", so update dir name
+      json[:steps][1][:measure_dir_name] = 'project'
+    end
+
+    File.open(osw_path_test, 'w') do |f|
+      f.write(JSON.pretty_generate(json))
+    end
+
+    command = "#{os_cli} run -w #{osw_path_test}"
+    system(command, err: File::NULL)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(osw_path_test), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+
+    # Check for debug files
+    osm_path = File.join(File.dirname(osw_path_test), 'run', 'in.osm')
+    assert(File.exist? osm_path)
+    hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
+    assert(File.exist? hpxml_defaults_path)
+
+    # Cleanup
+    File.delete(osw_path_test)
+    xml_path_test = File.join(File.dirname(__FILE__), '..', 'base-stochastic-schedules.xml')
+    File.delete(xml_path_test)
+  end
+
   def test_weather_cache
     cache_orig = File.join(@this_dir, '..', '..', 'weather', 'USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv')
     cache_bak = cache_orig + '.bak'
@@ -291,7 +336,7 @@ class HPXMLTest < MiniTest::Test
                             'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
                             'invalid-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem_bad' not found for water heating system 'WaterHeater'."],
                             'invalid-schema-version.xml' => ['HPXML version 3.0 is required.'],
-                            'invalid-shared-vent-in-unit-flowrate.xml' => ['Expected extension/InUnitFlowRate to be less than RatedFlowRate [context: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"], id: "SharedSupplyFan"]'],
+                            'invalid-shared-vent-in-unit-flowrate.xml' => ['Expected RatedFlowRate to be greater than extension/InUnitFlowRate [context: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"], id: "SharedSupplyFan"]'],
                             'invalid-timestep.xml' => ['Timestep (45) must be one of: 60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1.'],
                             'invalid-runperiod.xml' => ['Run Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-window-height.xml' => ['Expected DistanceToBottomOfWindow to be greater than DistanceToTopOfWindow [context: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs, id: "WindowEast"]'],
@@ -322,6 +367,51 @@ class HPXMLTest < MiniTest::Test
                             'refrigerators-no-primary.xml' => ['Could not find a primary refrigerator.'],
                             'repeated-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem' is attached to multiple water heating systems."],
                             'repeated-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem' is attached to multiple water heating systems."],
+                            'schedule-detailed-bad-values-max-not-one.xml' => ["Schedule max value for column 'plug_loads_vehicle' must be 1. [context: HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-max-not-one.csv]"],
+                            'schedule-detailed-bad-values-negative.xml' => ["Schedule min value for column 'plug_loads_well_pump' must be non-negative. [context: HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-negative.csv]"],
+                            'schedule-detailed-bad-values-non-numeric.xml' => ["Schedule value must be numeric for column 'hot_water_fixtures'. [context: HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-non-numeric.csv]"],
+                            'schedule-detailed-wrong-columns.xml' => ["Schedule column name 'lighting' is invalid. [context: HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-columns.csv]"],
+                            'schedule-detailed-wrong-filename.xml' => ["Schedules file path 'HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-filename.csv' does not exist."],
+                            'schedule-detailed-wrong-rows.xml' => ["Schedule has invalid number of rows (8759) for column 'refrigerator'. Must be one of: 8760, 17520, 26280, 35040, 43800, 52560, 87600, 105120, 131400, 175200, 262800, 525600. [context: HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-rows.csv]"],
+                            'schedule-extra-inputs.xml' => ['Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy]',
+                                                            'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture"]',
+                                                            'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture2"]',
+                                                            'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture"]',
+                                                            'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture2"]',
+                                                            'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture"]',
+                                                            'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture2"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher, id: "ClothesWasher"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher, id: "ClothesWasher"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher, id: "ClothesWasher"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer, id: "ClothesDryer"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer, id: "ClothesDryer"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer, id: "ClothesDryer"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher, id: "Dishwasher"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher, id: "Dishwasher"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher, id: "Dishwasher"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Refrigerator, id: "Refrigerator"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Refrigerator, id: "Refrigerator"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Refrigerator, id: "Refrigerator"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/CookingRange, id: "Range"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/CookingRange, id: "Range"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/CookingRange, id: "Range"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/InteriorWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/InteriorWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/InteriorMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/GarageWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/GarageWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/GarageMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/ExteriorWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/ExteriorWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/ExteriorMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoadMisc"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoadMisc2"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoadMisc"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoadMisc2"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoadMisc"]',
+                                                            'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoadMisc2"]'],
                             'solar-fraction-one.xml' => ['Expected SolarFraction to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem, id: "SolarThermalSystem"]'],
                             'solar-thermal-system-with-combi-tankless.xml' => ["Water heating system 'WaterHeater' connected to solar thermal system 'SolarThermalSystem' cannot be a space-heating boiler."],
                             'solar-thermal-system-with-desuperheater.xml' => ["Water heating system 'WaterHeater' connected to solar thermal system 'SolarThermalSystem' cannot be attached to a desuperheater."],
@@ -609,17 +699,14 @@ class HPXMLTest < MiniTest::Test
       # General
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
       next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
-      next if err_line.include? 'Output:Meter: invalid Key Name'
       next if err_line.include? 'Entered Zone Volumes differ from calculated zone volume'
       next if err_line.include?('CalculateZoneVolume') && err_line.include?('not fully enclosed')
       next if err_line.include?('GetInputViewFactors') && err_line.include?('not enough values')
       next if err_line.include? 'Pump nominal power or motor efficiency is set to 0'
       next if err_line.include? 'volume flow rate per watt of rated total cooling capacity is out of range'
       next if err_line.include? 'volume flow rate per watt of rated total heating capacity is out of range'
-      next if err_line.include? 'The following Report Variables were requested but not generated'
       next if err_line.include? 'Timestep: Requested number'
       next if err_line.include? 'The Standard Ratings is calculated for'
-      next if err_line.include?('CheckUsedConstructions') && err_line.include?('nominally unused constructions')
       next if err_line.include?('WetBulb not converged after') && err_line.include?('iterations(PsyTwbFnTdbWPb)')
       next if err_line.include? 'Inside surface heat balance did not converge with Max Temp Difference'
       next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
@@ -672,9 +759,42 @@ class HPXMLTest < MiniTest::Test
       if hpxml.solar_thermal_systems.size > 0
         next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
       end
+      if hpxml_path.include?('base-schedules-detailed')
+        next if err_line.include?('GetCurrentScheduleValue: Schedule=') && err_line.include?('is a Schedule:File')
+      end
 
       flunk "Unexpected warning found: #{err_line}"
     end
+
+    # Check for unused objects/schedules/constructions warnings
+    num_unused_objects = 0
+    num_unused_schedules = 0
+    num_unused_constructions = 0
+    File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
+      if err_line.include? 'unused objects in input'
+        num_unused_objects = Integer(err_line.split(' ')[3])
+      elsif err_line.include? 'unused schedules in input'
+        num_unused_schedules = Integer(err_line.split(' ')[3])
+      elsif err_line.include? 'unused constructions in input'
+        num_unused_constructions = Integer(err_line.split(' ')[6])
+      end
+    end
+    assert_equal(0, num_unused_objects)
+    assert_equal(0, num_unused_schedules)
+    assert_equal(0, num_unused_constructions)
+
+    # Check for Output:Meter and Output:Variable warnings
+    num_invalid_output_meters = 0
+    num_invalid_output_variables = 0
+    File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
+      if err_line.include? 'Output:Meter: invalid Key Name'
+        num_invalid_output_meters += 1
+      elsif err_line.include?('Key=') && err_line.include?('VarName=')
+        num_invalid_output_variables += 1
+      end
+    end
+    assert_equal(0, num_invalid_output_meters)
+    assert_equal(0, num_invalid_output_variables)
 
     # Timestep
     timestep = hpxml.header.timestep

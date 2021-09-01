@@ -136,6 +136,13 @@ def create_hpxmls
     'invalid_files/refrigerators-no-primary.xml' => 'base.xml',
     'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/repeated-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'invalid_files/schedule-detailed-bad-values-max-not-one.xml' => 'base.xml',
+    'invalid_files/schedule-detailed-bad-values-negative.xml' => 'base.xml',
+    'invalid_files/schedule-detailed-bad-values-non-numeric.xml' => 'base.xml',
+    'invalid_files/schedule-detailed-wrong-columns.xml' => 'base.xml',
+    'invalid_files/schedule-detailed-wrong-filename.xml' => 'base.xml',
+    'invalid_files/schedule-detailed-wrong-rows.xml' => 'base.xml',
+    'invalid_files/schedule-extra-inputs.xml' => 'base-schedules-simple.xml',
     'invalid_files/solar-fraction-one.xml' => 'base-dhw-solar-fraction.xml',
     'invalid_files/solar-thermal-system-with-combi-tankless.xml' => 'base-dhw-combi-tankless.xml',
     'invalid_files/solar-thermal-system-with-desuperheater.xml' => 'base-dhw-desuperheater.xml',
@@ -403,7 +410,7 @@ def create_hpxmls
     'base-hvac-undersized-allow-increased-fixed-capacities.xml' => 'base-hvac-undersized.xml',
     'base-hvac-wall-furnace-elec-only.xml' => 'base.xml',
     'base-lighting-ceiling-fans.xml' => 'base.xml',
-    'base-lighting-detailed.xml' => 'base.xml',
+    'base-lighting-holiday.xml' => 'base.xml',
     'base-lighting-none.xml' => 'base.xml',
     'base-location-AMY-2012.xml' => 'base.xml',
     'base-location-baltimore-md.xml' => 'base-foundation-unvented-crawlspace.xml',
@@ -430,7 +437,7 @@ def create_hpxmls
     'base-mechvent-whole-house-fan.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-generators.xml' => 'base.xml',
-    'base-misc-loads-large-uncommon.xml' => 'base.xml',
+    'base-misc-loads-large-uncommon.xml' => 'base-schedules-simple.xml',
     'base-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-misc-loads-none.xml' => 'base.xml',
     'base-misc-neighbor-shading.xml' => 'base.xml',
@@ -438,6 +445,10 @@ def create_hpxmls
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
+    'base-schedules-detailed-smooth.xml' => 'base.xml',
+    'base-schedules-detailed-stochastic.xml' => 'base.xml',
+    'base-schedules-detailed-stochastic-vacancy.xml' => 'base.xml',
+    'base-schedules-simple.xml' => 'base.xml',
     'base-simcontrol-calendar-year-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
@@ -654,8 +665,27 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.dst_end_day = 31
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.header.timestep = nil
+  elsif ['base-schedules-detailed-stochastic.xml'].include? hpxml_file
+    hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'
+  elsif ['base-schedules-detailed-stochastic-vacancy.xml'].include? hpxml_file
+    hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
+  elsif ['base-schedules-detailed-smooth.xml',
+         'invalid_files/schedule-extra-inputs.xml'].include? hpxml_file
+    hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
     hpxml.header.transaction = 'modify'
+  elsif ['invalid_files/schedule-detailed-wrong-columns.xml'].include? hpxml_file
+    hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-columns.csv'
+  elsif ['invalid_files/schedule-detailed-wrong-rows.xml'].include? hpxml_file
+    hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-rows.csv'
+  elsif ['invalid_files/schedule-detailed-wrong-filename.xml'].include? hpxml_file
+    hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-filename.csv'
+  elsif ['invalid_files/schedule-detailed-bad-values-max-not-one.xml'].include? hpxml_file
+    hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-max-not-one.csv'
+  elsif ['invalid_files/schedule-detailed-bad-values-negative.xml'].include? hpxml_file
+    hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-negative.csv'
+  elsif ['invalid_files/schedule-detailed-bad-values-non-numeric.xml'].include? hpxml_file
+    hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-non-numeric.csv'
   end
 end
 
@@ -776,6 +806,10 @@ def set_hpxml_building_occupancy(hpxml_file, hpxml)
     hpxml.building_occupancy.number_of_residents = 0
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.building_occupancy.number_of_residents = nil
+  elsif ['base-schedules-simple.xml'].include? hpxml_file
+    hpxml.building_occupancy.weekday_fractions = '0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.053, 0.025, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.018, 0.033, 0.054, 0.054, 0.054, 0.061, 0.061, 0.061'
+    hpxml.building_occupancy.weekend_fractions = '0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.053, 0.025, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.018, 0.033, 0.054, 0.054, 0.054, 0.061, 0.061, 0.061'
+    hpxml.building_occupancy.monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   else
     hpxml.building_occupancy.number_of_residents = hpxml.building_construction.number_of_bedrooms
   end
@@ -1166,6 +1200,15 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                          solar_absorptance: 0.7,
                          emittance: 0.92,
                          insulation_assembly_r_value: 23.0)
+  elsif ['base-bldgtype-single-family-attached.xml'].include? hpxml_file
+    hpxml.rim_joists[-1].area = 66
+    hpxml.rim_joists.add(id: 'RimJoistOther',
+                         exterior_adjacent_to: HPXML::LocationBasementConditioned,
+                         interior_adjacent_to: HPXML::LocationBasementConditioned,
+                         area: 28,
+                         solar_absorptance: 0.7,
+                         emittance: 0.92,
+                         insulation_assembly_r_value: 4.0)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.rim_joists.clear
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
@@ -1221,6 +1264,8 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                          solar_absorptance: 0.7,
                          emittance: 0.92,
                          insulation_assembly_r_value: 4.0)
+  elsif ['base-enclosure-garage.xml'].include? hpxml_file
+    hpxml.rim_joists[-1].area = 116
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     hpxml.rim_joists.add(id: 'RimJoist2ndStory',
                          exterior_adjacent_to: HPXML::LocationOutside,
@@ -2029,8 +2074,6 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls << hpxml.foundation_walls[-1].dup
     hpxml.foundation_walls[-1].id = 'TinyFoundationWall'
     hpxml.foundation_walls[-1].area = 0.05
-  elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
-    hpxml.foundation_walls[-1].area = 880
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.foundation_walls.each do |fwall|
       fwall.thickness = nil
@@ -4132,7 +4175,6 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeExhaust,
-                               tested_flow_rate: 110,
                                used_for_whole_building_ventilation: true)
     hpxml.ventilation_fans.add(id: 'KitchenRangeFan',
                                fan_location: HPXML::LocationKitchen,
@@ -4140,6 +4182,8 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
     hpxml.ventilation_fans.add(id: 'BathFans',
                                fan_location: HPXML::LocationBath,
                                used_for_local_ventilation: true)
+    hpxml.ventilation_fans.add(id: 'WholeHouseFan',
+                               used_for_seasonal_cooling_load_reduction: true)
   elsif ['base-bldgtype-multifamily-shared-mechvent.xml'].include? hpxml_file
     # Shared supply + in-unit exhaust (roughly balanced)
     hpxml.ventilation_fans.add(id: 'SharedSupplyFan',
@@ -4172,7 +4216,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                fan_type: HPXML::MechVentTypeSupply,
                                is_shared_system: true,
                                in_unit_flow_rate: 100,
-                               rated_flow_rate: 1000,
+                               calculated_flow_rate: 1000,
                                hours_in_operation: 24,
                                fan_power: 300,
                                used_for_whole_building_ventilation: true,
@@ -4187,7 +4231,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                fan_type: HPXML::MechVentTypeERV,
                                is_shared_system: true,
                                in_unit_flow_rate: 50,
-                               rated_flow_rate: 500,
+                               delivered_ventilation: 500,
                                hours_in_operation: 24,
                                total_recovery_efficiency: 0.48,
                                sensible_recovery_efficiency: 0.72,
@@ -4220,7 +4264,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                fan_type: HPXML::MechVentTypeBalanced,
                                is_shared_system: true,
                                in_unit_flow_rate: 30,
-                               rated_flow_rate: 300,
+                               tested_flow_rate: 300,
                                hours_in_operation: 24,
                                fan_power: 150,
                                used_for_whole_building_ventilation: true,
@@ -4314,6 +4358,21 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                fan_power: 37.5,
                                used_for_whole_building_ventilation: true,
                                distribution_system_idref: 'HVACDistribution2')
+    # Test ventilation system w/ zero airflow and hours
+    hpxml.ventilation_fans.add(id: 'HRV_NoAirflow',
+                               fan_type: HPXML::MechVentTypeHRV,
+                               tested_flow_rate: 0,
+                               hours_in_operation: 24,
+                               sensible_recovery_efficiency: 0.72,
+                               fan_power: 7.5,
+                               used_for_whole_building_ventilation: true)
+    hpxml.ventilation_fans.add(id: 'HRV_NoHours',
+                               fan_type: HPXML::MechVentTypeHRV,
+                               tested_flow_rate: 15,
+                               hours_in_operation: 0,
+                               sensible_recovery_efficiency: 0.72,
+                               fan_power: 7.5,
+                               used_for_whole_building_ventilation: true)
   end
 end
 
@@ -4651,6 +4710,10 @@ def set_hpxml_water_fixtures(hpxml_file, hpxml)
     hpxml.water_fixtures.clear
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.water_heating.water_fixtures_usage_multiplier = 0.9
+  elsif ['base-schedules-simple.xml'].include? hpxml_file
+    hpxml.water_heating.water_fixtures_weekday_fractions = '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.087, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.039, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
+    hpxml.water_heating.water_fixtures_weekend_fractions = '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.087, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.039, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
+    hpxml.water_heating.water_fixtures_monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 end
 
@@ -4846,6 +4909,10 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
     hpxml.clothes_washers[0].label_usage = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_washers[0].usage_multiplier = 0.9
+  elsif ['base-schedules-simple.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].weekday_fractions = '0.009, 0.007, 0.004, 0.004, 0.007, 0.011, 0.022, 0.049, 0.073, 0.086, 0.084, 0.075, 0.067, 0.060, 0.049, 0.052, 0.050, 0.049, 0.049, 0.049, 0.049, 0.047, 0.032, 0.017'
+    hpxml.clothes_washers[0].weekend_fractions = '0.009, 0.007, 0.004, 0.004, 0.007, 0.011, 0.022, 0.049, 0.073, 0.086, 0.084, 0.075, 0.067, 0.060, 0.049, 0.052, 0.050, 0.049, 0.049, 0.049, 0.049, 0.047, 0.032, 0.017'
+    hpxml.clothes_washers[0].monthly_multipliers = '1.011, 1.002, 1.022, 1.020, 1.022, 0.996, 0.999, 0.999, 0.996, 0.964, 0.959, 1.011'
   elsif ['base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
     hpxml.clothes_washers[0].is_shared_appliance = true
     hpxml.clothes_washers[0].id = 'SharedClothesWasher'
@@ -4926,6 +4993,10 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers[0].is_shared_appliance = true
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].usage_multiplier = 0.9
+  elsif ['base-schedules-simple.xml'].include? hpxml_file
+    hpxml.clothes_dryers[0].weekday_fractions = '0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024'
+    hpxml.clothes_dryers[0].weekend_fractions = '0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024'
+    hpxml.clothes_dryers[0].monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 end
 
@@ -4974,6 +5045,10 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].location = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.dishwashers[0].usage_multiplier = 0.9
+  elsif ['base-schedules-simple.xml'].include? hpxml_file
+    hpxml.dishwashers[0].weekday_fractions = '0.015, 0.007, 0.005, 0.003, 0.003, 0.010, 0.020, 0.031, 0.058, 0.065, 0.056, 0.048, 0.041, 0.046, 0.036, 0.038, 0.038, 0.049, 0.087, 0.111, 0.090, 0.067, 0.044, 0.031'
+    hpxml.dishwashers[0].weekend_fractions = '0.015, 0.007, 0.005, 0.003, 0.003, 0.010, 0.020, 0.031, 0.058, 0.065, 0.056, 0.048, 0.041, 0.046, 0.036, 0.038, 0.038, 0.049, 0.087, 0.111, 0.090, 0.067, 0.044, 0.031'
+    hpxml.dishwashers[0].monthly_multipliers = '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097'
   elsif ['base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
     hpxml.dishwashers[0].is_shared_appliance = true
     hpxml.dishwashers[0].id = 'SharedDishwasher'
@@ -5021,10 +5096,11 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
     hpxml.refrigerators[0].adjusted_annual_kwh = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.refrigerators[0].usage_multiplier = 0.9
-  elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
+  elsif ['base-schedules-simple.xml'].include? hpxml_file
     hpxml.refrigerators[0].weekday_fractions = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
     hpxml.refrigerators[0].weekend_fractions = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
     hpxml.refrigerators[0].monthly_multipliers = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
+  elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
     hpxml.refrigerators.add(id: 'ExtraRefrigerator',
                             rated_annual_kwh: 700,
                             primary_indicator: false,
@@ -5147,7 +5223,7 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
     hpxml.cooking_ranges[0].location = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].usage_multiplier = 0.9
-  elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
+  elsif ['base-schedules-simple.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].weekday_fractions = '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011'
     hpxml.cooking_ranges[0].weekend_fractions = '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011'
     hpxml.cooking_ranges[0].monthly_multipliers = '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097'
@@ -5218,7 +5294,10 @@ def set_hpxml_ceiling_fans(hpxml_file, hpxml)
   if ['base-lighting-ceiling-fans.xml'].include? hpxml_file
     hpxml.ceiling_fans.add(id: 'CeilingFan',
                            efficiency: 100,
-                           quantity: 4)
+                           quantity: 4,
+                           weekday_fractions: '0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057',
+                           weekend_fractions: '0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057',
+                           monthly_multipliers: '0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0')
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.ceiling_fans.add(id: 'CeilingFan',
                            efficiency: nil,
@@ -5282,7 +5361,7 @@ def set_hpxml_hot_tubs(hpxml_file, hpxml)
 end
 
 def set_hpxml_lighting_schedule(hpxml_file, hpxml)
-  if ['base-lighting-detailed.xml'].include? hpxml_file
+  if ['base-schedules-simple.xml'].include? hpxml_file
     hpxml.lighting.interior_weekday_fractions = '0.124, 0.074, 0.050, 0.050, 0.053, 0.140, 0.330, 0.420, 0.430, 0.424, 0.411, 0.394, 0.382, 0.378, 0.378, 0.379, 0.386, 0.412, 0.484, 0.619, 0.783, 0.880, 0.597, 0.249'
     hpxml.lighting.interior_weekend_fractions = '0.124, 0.074, 0.050, 0.050, 0.053, 0.140, 0.330, 0.420, 0.430, 0.424, 0.411, 0.394, 0.382, 0.378, 0.378, 0.379, 0.386, 0.412, 0.484, 0.619, 0.783, 0.880, 0.597, 0.249'
     hpxml.lighting.interior_monthly_multipliers = '1.075, 1.064951905, 1.0375, 1.0, 0.9625, 0.935048095, 0.925, 0.935048095, 0.9625, 1.0, 1.0375, 1.064951905'
@@ -5292,6 +5371,7 @@ def set_hpxml_lighting_schedule(hpxml_file, hpxml)
     hpxml.lighting.garage_weekday_fractions = '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063'
     hpxml.lighting.garage_weekend_fractions = '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059'
     hpxml.lighting.garage_monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+  elsif ['base-lighting-holiday.xml'].include? hpxml_file
     hpxml.lighting.holiday_exists = true
     hpxml.lighting.holiday_kwh_per_day = 1.1
     hpxml.lighting.holiday_period_begin_month = 11
@@ -5336,13 +5416,14 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
       hpxml.plug_loads.add(id: 'PlugLoadMisc',
                            plug_load_type: HPXML::PlugLoadTypeOther,
                            kWh_per_year: 0)
-    elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
+    elsif ['base-schedules-simple.xml'].include? hpxml_file
       hpxml.plug_loads[0].weekday_fractions = '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036'
       hpxml.plug_loads[0].weekend_fractions = '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036'
       hpxml.plug_loads[0].monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
       hpxml.plug_loads[1].weekday_fractions = '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.05, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07'
       hpxml.plug_loads[1].weekend_fractions = '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.05, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07'
       hpxml.plug_loads[1].monthly_multipliers = '1.137, 1.129, 0.961, 0.969, 0.961, 0.993, 0.996, 0.96, 0.993, 0.867, 0.86, 1.137'
+    elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
       hpxml.plug_loads.add(id: 'PlugLoadMisc3',
                            plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging,
                            kWh_per_year: 1500,
@@ -5825,6 +5906,8 @@ if ARGV[0].to_sym == :create_release_zips
 
   files = ['Changelog.md',
            'LICENSE.md',
+           'BuildResidentialScheduleFile/measure.*',
+           'BuildResidentialScheduleFile/resources/*.*',
            'HPXMLtoOpenStudio/measure.*',
            'HPXMLtoOpenStudio/resources/*.*',
            'SimulationOutputReport/measure.*',
