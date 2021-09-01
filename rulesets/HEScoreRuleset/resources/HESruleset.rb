@@ -1532,6 +1532,20 @@ def get_ducts_details(json)
   json['building']['systems']['hvac'].each do |orig_hvac|
     next unless orig_hvac.key?('hvac_distribution')
 
+    is_valid_duct = false
+    if orig_hvac.key?('heating')
+      if ['central_furnace', 'heat_pump', 'gchp', 'mini_split'].include? orig_hvac['heating']['type']
+        is_valid_duct = true
+      end
+    end
+    if orig_hvac.key?('cooling')
+      if ['split_dx', 'heat_pump', 'gchp', 'mini_split'].include? orig_hvac['cooling']['type']
+        is_valid_duct = true
+      end
+    end
+
+    next unless is_valid_duct
+
     hvac_frac = orig_hvac['hvac_fraction'] # FIXME: double-check
 
     orig_hvac['hvac_distribution'].each do |orig_duct|
