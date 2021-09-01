@@ -1602,29 +1602,35 @@ class Waterheater
       tank_type = water_heating_system.water_heater_type
       cap = water_heating_system.heating_capacity / 1000.0
     end
-    new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
-    new_heater.setName(name)
-    new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
-    new_heater.setHeaterFuelType(EPlus.fuel_type(fuel)) unless fuel.nil?
-    configure_setpoint_schedule(new_heater, t_set_c, model)
-    new_heater.setMaximumTemperatureLimit(99.0)
-    if [HPXML::WaterHeaterTypeTankless, HPXML::WaterHeaterTypeCombiTankless].include? tank_type
-      new_heater.setHeaterControlType('Modulate')
-    else
-      new_heater.setHeaterControlType('Cycle')
+    if water_heating_system.tank_model_type == HPXML::WaterHeaterTankModelTypeMixed
+      new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
+      new_heater.setName(name)
+      new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
+      new_heater.setHeaterFuelType(EPlus.fuel_type(fuel)) unless fuel.nil?
+      configure_setpoint_schedule(new_heater, t_set_c, model)
+      new_heater.setMaximumTemperatureLimit(99.0)
+      if [HPXML::WaterHeaterTypeTankless, HPXML::WaterHeaterTypeCombiTankless].include? tank_type
+        new_heater.setHeaterControlType('Modulate')
+      else
+        new_heater.setHeaterControlType('Cycle')
+      end
+      new_heater.setDeadbandTemperatureDifference(deadband(tank_type))
+
+      # Capacity, storage tank to be 0
+      new_heater.setHeaterMaximumCapacity(UnitConversions.convert(cap, 'kBtu/hr', 'W'))
+      new_heater.setHeaterMinimumCapacity(0.0)
+      new_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
+      set_wh_parasitic_parameters(oncycle_p, water_heating_system, new_heater, is_dsh_storage)
+      set_wh_ambient(loc_space, loc_schedule, model, new_heater)
+
+      ua_w_k = UnitConversions.convert(ua, 'Btu/(hr*F)', 'W/K')
+      new_heater.setOnCycleLossCoefficienttoAmbientTemperature(ua_w_k)
+      new_heater.setOffCycleLossCoefficienttoAmbientTemperature(ua_w_k)
+    elsif water_heating_system.tank_model_type == HPXML::WaterHeaterTankModelTypeStratified
+      # FIXME
+      new_heater = OpenStudio::Model::WaterHeaterStratified.new(model)
+      new_heater.setName(name)
     end
-    new_heater.setDeadbandTemperatureDifference(deadband(tank_type))
-
-    # Capacity, storage tank to be 0
-    new_heater.setHeaterMaximumCapacity(UnitConversions.convert(cap, 'kBtu/hr', 'W'))
-    new_heater.setHeaterMinimumCapacity(0.0)
-    new_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
-    set_wh_parasitic_parameters(oncycle_p, water_heating_system, new_heater, is_dsh_storage)
-    set_wh_ambient(loc_space, loc_schedule, model, new_heater)
-
-    ua_w_k = UnitConversions.convert(ua, 'Btu/(hr*F)', 'W/K')
-    new_heater.setOnCycleLossCoefficienttoAmbientTemperature(ua_w_k)
-    new_heater.setOffCycleLossCoefficienttoAmbientTemperature(ua_w_k)
 
     return new_heater
   end

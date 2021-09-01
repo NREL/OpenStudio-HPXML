@@ -1299,6 +1299,14 @@ class HPXMLDefaults
           water_heating_system.recovery_efficiency = Waterheater.get_default_recovery_efficiency(water_heating_system)
           water_heating_system.recovery_efficiency_isdefaulted = true
         end
+        if water_heating_system.setpoint_type.nil?
+          water_heating_system.setpoint_type = HPXML::WaterHeaterSetpointTypeConstant
+          water_heating_system.setpoint_type_isdefaulted = true
+        end
+        if water_heating_system.tank_model_type.nil?
+          water_heating_system.tank_model_type = HPXML::WaterHeaterTankModelTypeMixed
+          water_heating_system.tank_model_type = true
+        end
       end
       if water_heating_system.location.nil?
         water_heating_system.location = Waterheater.get_default_location(hpxml, hpxml.climate_and_risk_zones.iecc_zone)
