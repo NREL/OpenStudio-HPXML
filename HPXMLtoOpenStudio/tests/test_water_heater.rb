@@ -1119,6 +1119,26 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
   end
 
+  def test_tank_scheduled
+    # TODO
+  end
+  
+  def test_tank_stratified
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-model-type-stratified.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    water_heating_system = hpxml.water_heating_systems[0]
+    
+    # Expected value
+    # TODO
+    
+    # Check water heater
+    assert_equal(1, model.getWaterHeaterStratifieds.size)
+    # TODO
+  end
+
   def _test_measure(args_hash)
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new
