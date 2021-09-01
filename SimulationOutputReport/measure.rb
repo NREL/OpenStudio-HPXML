@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# FIXME: Handling of DFHPs
-
 # see the URL below for information on how to write OpenStudio measures
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
@@ -285,6 +283,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end
     end
 
+    # Dual-fuel heat pump loads
+    if not @object_variables_by_key[[LT, LT::Heating]].nil?
+      @object_variables_by_key[[LT, LT::Heating]].each do |vals|
+        sys_id, key, var = vals
+        result << OpenStudio::IdfObject.load("Output:Variable,#{key},#{var},runperiod;").get
+      end
+    end
+
     return result
   end
 
@@ -366,13 +372,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                           include_timeseries_zone_temperatures,
                           include_timeseries_airflows,
                           include_timeseries_weather)
-    @sqlFile.close()
-
-    # Ensure sql file is immediately freed; otherwise we can get
-    # errors on Windows when trying to delete this file.
-    GC.start()
 
     if not check_for_errors(runner, outputs)
+      teardown()
       return false
     end
 
@@ -393,7 +395,16 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                                     include_timeseries_airflows,
                                     include_timeseries_weather)
 
+    teardown()
     return true
+  end
+
+  def teardown
+    @sqlFile.close()
+
+    # Ensure sql file is immediately freed; otherwise we can get
+    # errors on Windows when trying to delete this file.
+    GC.start()
   end
 
   def get_timestamps(timeseries_frequency)
@@ -553,9 +564,13 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         [EUT::Heating, EUT::HeatingFanPump].each do |end_use_type|
           end_use = @end_uses[[fuel_type, end_use_type]]
           next if end_use.nil?
-          next if end_use.annual_output_by_system[htg_system.id].nil?
 
-          apply_multiplier_to_output(end_use, fuel, htg_system.id, 1.0 / dse)
+          if not end_use.annual_output_by_system[htg_system.id].nil?
+            apply_multiplier_to_output(end_use, fuel, htg_system.id, 1.0 / dse)
+          end
+          if not end_use.annual_output_by_system[htg_system.id + '_DFHPBackup'].nil?
+            apply_multiplier_to_output(end_use, fuel, htg_system.id + '_DFHPBackup', 1.0 / dse)
+          end
         end
       end
     end
@@ -970,6 +985,41 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       @loads[LT::Cooling].annual_output_by_system[clg_system.id] = clg_system.fraction_cool_load_served * @loads[LT::Cooling].annual_output
     end
 
+    # Handle dual-fuel heat pumps
+    @hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.is_dual_fuel
+
+      # Create separate dual fuel heat pump backup system
+      dfhp_backup_id = heat_pump.id + '_DFHPBackup'
+      htg_ids << dfhp_backup_id
+      seed_id_map[dfhp_backup_id] = heat_pump.seed_id + '_DFHPBackup'
+      htg_fuels[dfhp_backup_id] = heat_pump.backup_heating_fuel
+      if not heat_pump.backup_heating_efficiency_afue.nil?
+        htg_eecs[dfhp_backup_id] = get_eec_value_numerator('AFUE') / heat_pump.backup_heating_efficiency_afue
+      elsif not heat_pump.backup_heating_efficiency_percent.nil?
+        htg_eecs[dfhp_backup_id] = get_eec_value_numerator('Percent') / heat_pump.backup_heating_efficiency_percent
+      end
+
+      next unless [Constants.CalcTypeERIReferenceHome, Constants.CalcTypeERIIndexAdjustmentReferenceHome].include? @eri_design
+
+      # Apportion heating load for the two systems
+      primary_load, backup_load = nil
+      @object_variables_by_key[[LT, LT::Heating]].each do |vals|
+        sys_id, key_name, var_name = vals
+        if sys_id == heat_pump.id
+          primary_load = get_report_variable_data_annual([key_name], [var_name])
+        elsif sys_id == dfhp_backup_id
+          backup_load = get_report_variable_data_annual([key_name], [var_name])
+        end
+      end
+      fail 'Could not obtain DFHP loads.' if primary_load.nil? || backup_load.nil?
+
+      total_load = @loads[LT::Heating].annual_output_by_system[heat_pump.id]
+      backup_ratio = backup_load / (primary_load + backup_load)
+      @loads[LT::Heating].annual_output_by_system[dfhp_backup_id] = total_load * backup_ratio
+      @loads[LT::Heating].annual_output_by_system[heat_pump.id] = total_load * (1.0 - backup_ratio)
+    end
+
     # Sys IDS
     results_out << ['hpxml_heat_sys_ids', get_ids(htg_ids, seed_id_map).to_s]
     results_out << ['hpxml_cool_sys_ids', get_ids(clg_ids, seed_id_map).to_s]
@@ -1015,6 +1065,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Loads by System
     @loads.each do |load_type, load|
       next unless [LT::Heating, LT::Cooling, LT::HotWaterDelivered].include? load_type
+      next if ([LT::Heating, LT::Cooling].include? load_type) &&
+              (not [Constants.CalcTypeERIReferenceHome, Constants.CalcTypeERIIndexAdjustmentReferenceHome].include? @eri_design)
 
       key_name = sanitize_string("load#{load_type}")
       sys_ids = get_sys_ids_of_interest(load_type, htg_ids, clg_ids, dhw_ids, vent_prehtg_ids, vent_preclg_ids)
@@ -1898,6 +1950,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
       elsif object.to_CoilWaterHeatingDesuperheater.is_initialized
         return { LT::HotWaterDesuperheater => ['Water Heater Heating Energy'] }
+
+      elsif object.to_CoilHeatingDXSingleSpeed.is_initialized || object.to_CoilHeatingDXMultiSpeed.is_initialized || object.to_CoilHeatingGas.is_initialized
+        # Needed to apportion heating loads for dual-fuel heat pumps
+        return { LT::Heating => ['Heating Coil Heating Energy'] }
 
       end
 
