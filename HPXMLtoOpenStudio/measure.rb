@@ -1938,8 +1938,17 @@ class OSModel
       hvac_distribution.hvac_systems.each do |hvac_system|
         next if airloop_map[hvac_system.id].nil?
 
-        duct_systems[air_ducts] = airloop_map[hvac_system.id]
-        added_ducts = true
+        object = airloop_map[hvac_system.id]
+        if duct_systems[air_ducts].nil?
+          duct_systems[air_ducts] = object
+          added_ducts = true
+        elsif duct_systems[air_ducts] != object
+          # Multiple air loops associated with this duct system, treat
+          # as separate duct systems.
+          air_ducts2 = create_ducts(runner, model, hvac_distribution, spaces)
+          duct_systems[air_ducts2] = object
+          added_ducts = true
+        end
       end
       if not added_ducts
         fail 'Unexpected error adding ducts to model.'
