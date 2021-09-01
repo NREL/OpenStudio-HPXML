@@ -245,6 +245,8 @@ def create_hpxmls
     'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar-fraction.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-oil.xml' => 'base.xml',
+    'base-dhw-tank-setpoint-type-scheduled.xml' => 'base.xml',
+    'base-dhw-tank-model-type-stratified.xml' => 'base.xml',
     'base-dhw-tank-wood.xml' => 'base.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
     'base-dhw-tankless-electric-uef.xml' => 'base.xml',
@@ -4558,6 +4560,10 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     if hpxml_file == 'base-dhw-combi-tankless-outside.xml'
       hpxml.water_heating_systems[0].location = HPXML::LocationOtherExterior
     end
+  elsif ['base-dhw-tank-setpoint-type-scheduled.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].setpoint_type = HPXML::WaterHeaterSetpointTypeScheduled
+  elsif ['base-dhw-tank-model-type-stratified.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
