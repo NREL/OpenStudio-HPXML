@@ -627,7 +627,6 @@ class HEScoreRuleset
         heat_pump_fuel = HPXML::FuelTypeElectricity
         backup_heating_fuel = HPXML::FuelTypeElectricity
         backup_heating_efficiency_percent = 1.0
-        distribution_system_idref = nil
         if ((not orig_cooling.nil?) && (['heat_pump', 'gchp', 'mini_split'].include? orig_cooling['type']))
           heat_pump_type = hescore_to_hpxml_hvac_type(orig_cooling['type'])
           if ['heat_pump', 'mini_split'].include? orig_cooling['type']
@@ -651,9 +650,13 @@ class HEScoreRuleset
           heatpump_fraction_heat_load_served = orig_hvac['hvac_fraction']
         end
 
-        if ((not orig_cooling.nil?) && (['heat_pump', 'gchp'].include? orig_cooling['type'])) ||
-           ((not orig_heating.nil?) && (['heat_pump', 'gchp'].include? orig_heating['type']))
-          distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution"
+        distribution_system_idref = nil
+        @ducts.each do |hvac_frac, duct_frac, duct_location|
+          if hvac_frac == 1 && duct_location == 'cond_space'
+            # do nothing
+          else
+            distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution"
+          end
         end
 
         if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
@@ -719,8 +722,8 @@ class HEScoreRuleset
 
       # HVACDistribution
       next unless orig_hvac.key?('hvac_distribution') &&
-                  ((not orig_cooling.nil?) && (['heat_pump', 'gchp', 'split_dx'].include? orig_cooling['type'])) ||
-                  ((not orig_heating.nil?) && (['heat_pump', 'gchp', 'central_furnace'].include? orig_heating['type']))
+                  ((not orig_cooling.nil?) && (['heat_pump', 'gchp', 'split_dx', 'mini_split'].include? orig_cooling['type'])) ||
+                  ((not orig_heating.nil?) && (['heat_pump', 'gchp', 'central_furnace', 'mini_split'].include? orig_heating['type']))
 
       tot_frac = 0.0
       frac_inside = 0.0
@@ -1528,20 +1531,6 @@ def get_ducts_details(json)
   ducts = []
   json['building']['systems']['hvac'].each do |orig_hvac|
     next unless orig_hvac.key?('hvac_distribution')
-
-    is_valid_duct = false
-    if orig_hvac.key?('heating')
-      if ['central_furnace', 'heat_pump', 'gchp'].include? orig_hvac['heating']['type']
-        is_valid_duct = true
-      end
-    end
-    if orig_hvac.key?('cooling')
-      if ['split_dx', 'heat_pump', 'gchp'].include? orig_hvac['cooling']['type']
-        is_valid_duct = true
-      end
-    end
-
-    next unless is_valid_duct
 
     hvac_frac = orig_hvac['hvac_fraction'] # FIXME: double-check
 
