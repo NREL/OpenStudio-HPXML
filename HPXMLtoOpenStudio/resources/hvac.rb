@@ -4597,10 +4597,8 @@ class HVAC
     hvac_ap = hvac_system.additional_properties
 
     hvac_ap.demand_flexibility = false
-    if hvac_system.is_a?(HPXML::HeatPump)
-      if hvac_system.modulating || hvac_system.dual_source || hvac_system.ihp_grid_ac || hvac_system.ihp_ice_storage || hvac_system.ihp_pcm_storage
-        hvac_ap.demand_flexibility = true
-      end
+    if hvac_system.modulating || hvac_system.dual_source || hvac_system.ihp_grid_ac || hvac_system.ihp_ice_storage || hvac_system.ihp_pcm_storage
+      hvac_ap.demand_flexibility = true
     end
   end
 end
