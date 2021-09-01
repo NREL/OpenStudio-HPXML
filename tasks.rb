@@ -5906,6 +5906,8 @@ if ARGV[0].to_sym == :create_release_zips
 
   files = ['Changelog.md',
            'LICENSE.md',
+           'BuildResidentialScheduleFile/measure.*',
+           'BuildResidentialScheduleFile/resources/*.*',
            'HPXMLtoOpenStudio/measure.*',
            'HPXMLtoOpenStudio/resources/*.*',
            'SimulationOutputReport/measure.*',
