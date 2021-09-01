@@ -699,14 +699,12 @@ class HPXMLTest < MiniTest::Test
       # General
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
       next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
-      next if err_line.include? 'Output:Meter: invalid Key Name'
       next if err_line.include? 'Entered Zone Volumes differ from calculated zone volume'
       next if err_line.include?('CalculateZoneVolume') && err_line.include?('not fully enclosed')
       next if err_line.include?('GetInputViewFactors') && err_line.include?('not enough values')
       next if err_line.include? 'Pump nominal power or motor efficiency is set to 0'
       next if err_line.include? 'volume flow rate per watt of rated total cooling capacity is out of range'
       next if err_line.include? 'volume flow rate per watt of rated total heating capacity is out of range'
-      next if err_line.include? 'The following Report Variables were requested but not generated'
       next if err_line.include? 'Timestep: Requested number'
       next if err_line.include? 'The Standard Ratings is calculated for'
       next if err_line.include?('WetBulb not converged after') && err_line.include?('iterations(PsyTwbFnTdbWPb)')
