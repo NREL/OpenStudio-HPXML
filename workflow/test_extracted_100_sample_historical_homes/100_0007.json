@@ -1,0 +1,124 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "central_furnace",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.95
+                    },
+                    "cooling": {
+                        "type": "none"
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "cond_space",
+                            "fraction": 0.85,
+                            "insulated": false,
+                            "sealed": false
+                        },
+                        {
+                            "name": "duct2",
+                            "location": "cond_space",
+                            "fraction": 0.15,
+                            "insulated": true,
+                            "sealed": true
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "electric",
+                "energy_factor": 0.95
+            }
+        },
+        "about": {
+            "assessment_date": "2019-04-17",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "east",
+            "year_built": 1924,
+            "number_bedrooms": 3,
+            "num_floor_above_grade": 2,
+            "floor_to_ceiling_height": 7,
+            "conditioned_floor_area": 1840,
+            "blower_door_test": false,
+            "air_sealing_present": false
+        },
+        "zone": {
+            "wall_construction_same": true,
+            "window_construction_same": true,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "dark",
+                    "roof_type": "cath_ceiling",
+                    "roof_area": 552
+                },
+                {
+                    "roof_name": "roof2",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "dark",
+                    "roof_type": "vented_attic",
+                    "roof_area": 488,
+                    "ceiling_assembly_code": "ecwf19"
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 776,
+                    "foundation_type": "cond_basement",
+                    "foundation_insulation_level": 11,
+                    "floor_assembly_code": "efwf11ca"
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf07wo",
+                    "zone_window": {
+                        "window_area": 60.0,
+                        "window_method": "code",
+                        "window_code": "dcaw"
+                    }
+                },
+                {
+                    "side": "back",
+                    "zone_window": {
+                        "window_area": 45.0
+                    }
+                },
+                {
+                    "side": "right",
+                    "zone_window": {
+                        "window_area": 40.0
+                    }
+                },
+                {
+                    "side": "left",
+                    "zone_window": {
+                        "window_area": 35.0
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "8527 N Drummond Ave",
+        "city": "Portland",
+        "state": "OR",
+        "zip_code": "97217",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 275161"
+    }
+}

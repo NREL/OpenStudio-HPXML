@@ -1,0 +1,111 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "boiler",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.9
+                    },
+                    "cooling": {
+                        "type": "packaged_dx",
+                        "efficiency_method": "shipment_weighted",
+                        "year": 2017
+                    },
+                    "hvac_distribution": []
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "shipment_weighted",
+                "fuel_primary": "natural_gas",
+                "year": 2014
+            }
+        },
+        "about": {
+            "assessment_date": "2019-11-15",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "north",
+            "year_built": 1880,
+            "number_bedrooms": 6,
+            "num_floor_above_grade": 3,
+            "floor_to_ceiling_height": 8,
+            "conditioned_floor_area": 2537,
+            "blower_door_test": false,
+            "air_sealing_present": false
+        },
+        "zone": {
+            "wall_construction_same": true,
+            "window_construction_same": true,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium_dark",
+                    "roof_type": "vented_attic",
+                    "roof_area": 372,
+                    "ceiling_assembly_code": "ecwf25"
+                },
+                {
+                    "roof_name": "roof2",
+                    "roof_assembly_code": "rfwf13co",
+                    "roof_color": "medium_dark",
+                    "roof_type": "cath_ceiling",
+                    "roof_area": 628
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 1000,
+                    "foundation_type": "unvented_crawl",
+                    "foundation_insulation_level": 0,
+                    "floor_assembly_code": "efwf00ca"
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf07wo",
+                    "zone_window": {
+                        "window_area": 108.0,
+                        "window_method": "code",
+                        "window_code": "scnw"
+                    }
+                },
+                {
+                    "side": "back",
+                    "zone_window": {
+                        "window_area": 16.0
+                    }
+                },
+                {
+                    "side": "right",
+                    "zone_window": {
+                        "window_area": 177.0
+                    }
+                },
+                {
+                    "side": "left",
+                    "zone_window": {
+                        "window_area": 137.0
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "112 Jackson St",
+        "city": "Marquette",
+        "state": "MI",
+        "zip_code": "49855",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 298609"
+    }
+}

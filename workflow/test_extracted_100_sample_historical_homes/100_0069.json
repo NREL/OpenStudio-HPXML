@@ -1,0 +1,112 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "heat_pump",
+                        "fuel_primary": "electric",
+                        "efficiency_method": "user",
+                        "efficiency": 8.5
+                    },
+                    "cooling": {
+                        "type": "heat_pump",
+                        "efficiency_method": "user",
+                        "efficiency": 14.5
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "uncond_attic",
+                            "fraction": 1.0,
+                            "insulated": true,
+                            "sealed": true
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "electric",
+                "energy_factor": 0.93
+            }
+        },
+        "about": {
+            "assessment_date": "2017-12-29",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "south_west",
+            "year_built": 2017,
+            "number_bedrooms": 4,
+            "num_floor_above_grade": 1,
+            "floor_to_ceiling_height": 9,
+            "conditioned_floor_area": 1859,
+            "blower_door_test": true,
+            "envelope_leakage": 800
+        },
+        "zone": {
+            "wall_construction_same": true,
+            "window_construction_same": true,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfrb00co",
+                    "roof_color": "medium_dark",
+                    "roof_type": "vented_attic",
+                    "roof_area": 1859,
+                    "ceiling_assembly_code": "ecwf38"
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 1859,
+                    "foundation_type": "slab_on_grade",
+                    "foundation_insulation_level": 0
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewps15br",
+                    "zone_window": {
+                        "window_area": 43.0,
+                        "window_method": "custom",
+                        "window_u_value": 0.32,
+                        "window_shgc": 0.21
+                    }
+                },
+                {
+                    "side": "back",
+                    "zone_window": {
+                        "window_area": 129.0
+                    }
+                },
+                {
+                    "side": "right",
+                    "zone_window": {
+                        "window_area": 22.0
+                    }
+                },
+                {
+                    "side": "left",
+                    "zone_window": {
+                        "window_area": 60.0
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "814 Allie Renea Ln",
+        "city": "Seagoville",
+        "state": "TX",
+        "zip_code": "75159",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 184609"
+    }
+}

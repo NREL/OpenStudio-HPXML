@@ -1,0 +1,125 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "heat_pump",
+                        "fuel_primary": "electric",
+                        "efficiency_method": "user",
+                        "efficiency": 7.0
+                    },
+                    "cooling": {
+                        "type": "heat_pump",
+                        "efficiency_method": "user",
+                        "efficiency": 11.8
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "uncond_attic",
+                            "fraction": 0.5,
+                            "insulated": true,
+                            "sealed": false
+                        },
+                        {
+                            "name": "duct2",
+                            "location": "cond_space",
+                            "fraction": 0.5,
+                            "insulated": true,
+                            "sealed": false
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "natural_gas",
+                "energy_factor": 0.55
+            }
+        },
+        "about": {
+            "assessment_date": "2016-11-14",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "west",
+            "year_built": 2012,
+            "number_bedrooms": 3,
+            "num_floor_above_grade": 2,
+            "floor_to_ceiling_height": 9,
+            "conditioned_floor_area": 1976,
+            "blower_door_test": false,
+            "air_sealing_present": false
+        },
+        "zone": {
+            "wall_construction_same": true,
+            "window_construction_same": true,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00lc",
+                    "roof_color": "medium_dark",
+                    "roof_type": "vented_attic",
+                    "roof_area": 1260,
+                    "ceiling_assembly_code": "ecwf25"
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 717,
+                    "foundation_type": "slab_on_grade",
+                    "foundation_insulation_level": 0
+                },
+                {
+                    "floor_name": "floor2",
+                    "floor_area": 543,
+                    "foundation_type": "vented_crawl",
+                    "foundation_insulation_level": 11,
+                    "floor_assembly_code": "efwf00ca"
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf13st",
+                    "zone_window": {
+                        "window_area": 65.0,
+                        "window_method": "code",
+                        "window_code": "dcaa"
+                    }
+                },
+                {
+                    "side": "back",
+                    "zone_window": {
+                        "window_area": 102.0
+                    }
+                },
+                {
+                    "side": "right",
+                    "zone_window": {
+                        "window_area": 15.0
+                    }
+                },
+                {
+                    "side": "left",
+                    "zone_window": {
+                        "window_area": 146.0
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "3580 South Ranger Trail",
+        "city": "Gilbert",
+        "state": "AZ",
+        "zip_code": "85297",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 133692"
+    }
+}

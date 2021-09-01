@@ -1,0 +1,132 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "central_furnace",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.8
+                    },
+                    "cooling": {
+                        "type": "split_dx",
+                        "efficiency_method": "user",
+                        "efficiency": 10.0
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "cond_space",
+                            "fraction": 1.0,
+                            "insulated": false,
+                            "sealed": false
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "natural_gas",
+                "energy_factor": 0.61
+            }
+        },
+        "about": {
+            "assessment_date": "2019-04-02",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "west",
+            "year_built": 1950,
+            "number_bedrooms": 3,
+            "num_floor_above_grade": 2,
+            "floor_to_ceiling_height": 8,
+            "conditioned_floor_area": 1458,
+            "blower_door_test": true,
+            "envelope_leakage": 2256
+        },
+        "zone": {
+            "wall_construction_same": false,
+            "window_construction_same": false,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium",
+                    "roof_type": "vented_attic",
+                    "roof_area": 583,
+                    "ceiling_assembly_code": "ecwf03"
+                },
+                {
+                    "roof_name": "roof2",
+                    "roof_assembly_code": "rfwf11co",
+                    "roof_color": "medium",
+                    "roof_type": "cath_ceiling",
+                    "roof_area": 421
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 972,
+                    "foundation_type": "uncond_basement",
+                    "foundation_insulation_level": 0,
+                    "floor_assembly_code": "efwf00ca"
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewps15vi",
+                    "zone_window": {
+                        "window_area": 61.81,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                },
+                {
+                    "side": "back",
+                    "wall_assembly_code": "ewps15vi",
+                    "zone_window": {
+                        "window_area": 61.81,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                },
+                {
+                    "side": "right",
+                    "wall_assembly_code": "ewps15vi",
+                    "zone_window": {
+                        "window_area": 61.81,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                },
+                {
+                    "side": "left",
+                    "wall_assembly_code": "ewps15vi",
+                    "zone_window": {
+                        "window_area": 61.81,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "W342 N4912 W Lindy Lane",
+        "city": "Nashotah",
+        "state": "WI",
+        "zip_code": "53058",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 273088"
+    }
+}

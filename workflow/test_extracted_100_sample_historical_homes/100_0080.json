@@ -1,0 +1,125 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "central_furnace",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.9
+                    },
+                    "cooling": {
+                        "type": "split_dx",
+                        "efficiency_method": "user",
+                        "efficiency": 10.0
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "cond_space",
+                            "fraction": 1.0,
+                            "insulated": false,
+                            "sealed": false
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "natural_gas",
+                "energy_factor": 0.56
+            }
+        },
+        "about": {
+            "assessment_date": "2017-10-12",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "east",
+            "year_built": 2002,
+            "number_bedrooms": 3,
+            "num_floor_above_grade": 1,
+            "floor_to_ceiling_height": 8,
+            "conditioned_floor_area": 2800,
+            "blower_door_test": true,
+            "envelope_leakage": 950
+        },
+        "zone": {
+            "wall_construction_same": false,
+            "window_construction_same": false,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium",
+                    "roof_type": "vented_attic",
+                    "roof_area": 1400,
+                    "ceiling_assembly_code": "ecwf30"
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 1400,
+                    "foundation_type": "uncond_basement",
+                    "foundation_insulation_level": 0,
+                    "floor_assembly_code": "efwf00ca"
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf19wo",
+                    "zone_window": {
+                        "window_area": 40.0,
+                        "window_method": "custom",
+                        "window_u_value": 0.37,
+                        "window_shgc": 0.52
+                    }
+                },
+                {
+                    "side": "back",
+                    "wall_assembly_code": "ewwf19wo",
+                    "zone_window": {
+                        "window_area": 80.0,
+                        "window_method": "custom",
+                        "window_u_value": 0.37,
+                        "window_shgc": 0.52
+                    }
+                },
+                {
+                    "side": "right",
+                    "wall_assembly_code": "ewwf19wo",
+                    "zone_window": {
+                        "window_area": 11.2,
+                        "window_method": "custom",
+                        "window_u_value": 0.37,
+                        "window_shgc": 0.52
+                    }
+                },
+                {
+                    "side": "left",
+                    "wall_assembly_code": "ewwf19wo",
+                    "zone_window": {
+                        "window_area": 44.8,
+                        "window_method": "custom",
+                        "window_u_value": 0.37,
+                        "window_shgc": 0.52
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "4389 Cedar Ln.",
+        "city": "Rhinelander",
+        "state": "WI",
+        "zip_code": "54501",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 173436"
+    }
+}

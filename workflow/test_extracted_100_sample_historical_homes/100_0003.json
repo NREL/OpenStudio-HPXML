@@ -1,0 +1,113 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "baseboard",
+                        "fuel_primary": "electric"
+                    },
+                    "cooling": {
+                        "type": "none"
+                    },
+                    "hvac_distribution": []
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "uef",
+                "fuel_primary": "electric",
+                "energy_factor": 0.92
+            }
+        },
+        "about": {
+            "assessment_date": "2019-09-04",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "east",
+            "year_built": 1929,
+            "number_bedrooms": 2,
+            "num_floor_above_grade": 1,
+            "floor_to_ceiling_height": 8,
+            "conditioned_floor_area": 1254,
+            "blower_door_test": false,
+            "air_sealing_present": false
+        },
+        "zone": {
+            "wall_construction_same": true,
+            "window_construction_same": false,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "dark",
+                    "roof_type": "vented_attic",
+                    "roof_area": 1254,
+                    "ceiling_assembly_code": "ecwf38"
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 799,
+                    "foundation_type": "uncond_basement",
+                    "foundation_insulation_level": 0,
+                    "floor_assembly_code": "efwf00ca"
+                },
+                {
+                    "floor_name": "floor2",
+                    "floor_area": 455,
+                    "foundation_type": "vented_crawl",
+                    "foundation_insulation_level": 0,
+                    "floor_assembly_code": "efwf00ca"
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf00wo",
+                    "zone_window": {
+                        "window_area": 60.0,
+                        "window_method": "code",
+                        "window_code": "scnw"
+                    }
+                },
+                {
+                    "side": "back",
+                    "zone_window": {
+                        "window_area": 9.0,
+                        "window_method": "code",
+                        "window_code": "dcaw"
+                    }
+                },
+                {
+                    "side": "right",
+                    "zone_window": {
+                        "window_area": 40.0,
+                        "window_method": "code",
+                        "window_code": "scnw"
+                    }
+                },
+                {
+                    "side": "left",
+                    "zone_window": {
+                        "window_area": 33.0,
+                        "window_method": "code",
+                        "window_code": "dcaw"
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "1215 NE 70th Ave",
+        "city": "Portland",
+        "state": "OR",
+        "zip_code": "97213",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 291068"
+    }
+}

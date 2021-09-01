@@ -1,0 +1,132 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "central_furnace",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.91
+                    },
+                    "cooling": {
+                        "type": "split_dx",
+                        "efficiency_method": "user",
+                        "efficiency": 10.0
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "cond_space",
+                            "fraction": 1.0,
+                            "insulated": false,
+                            "sealed": true
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "natural_gas",
+                "energy_factor": 0.56
+            }
+        },
+        "about": {
+            "assessment_date": "2018-01-24",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "north",
+            "year_built": 1925,
+            "number_bedrooms": 4,
+            "num_floor_above_grade": 2,
+            "floor_to_ceiling_height": 7,
+            "conditioned_floor_area": 1600,
+            "blower_door_test": true,
+            "envelope_leakage": 3200
+        },
+        "zone": {
+            "wall_construction_same": false,
+            "window_construction_same": false,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium",
+                    "roof_type": "vented_attic",
+                    "roof_area": 770,
+                    "ceiling_assembly_code": "ecwf00"
+                },
+                {
+                    "roof_name": "roof2",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium",
+                    "roof_type": "cath_ceiling",
+                    "roof_area": 300
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 889,
+                    "foundation_type": "uncond_basement",
+                    "foundation_insulation_level": 0,
+                    "floor_assembly_code": "efwf00ca"
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf00vi",
+                    "zone_window": {
+                        "window_area": 116.111,
+                        "window_method": "custom",
+                        "window_u_value": 0.37,
+                        "window_shgc": 0.52
+                    }
+                },
+                {
+                    "side": "back",
+                    "wall_assembly_code": "ewwf00vi",
+                    "zone_window": {
+                        "window_area": 87.0833,
+                        "window_method": "custom",
+                        "window_u_value": 0.37,
+                        "window_shgc": 0.52
+                    }
+                },
+                {
+                    "side": "right",
+                    "wall_assembly_code": "ewwf00vi",
+                    "zone_window": {
+                        "window_area": 55.4167,
+                        "window_method": "custom",
+                        "window_u_value": 0.37,
+                        "window_shgc": 0.52
+                    }
+                },
+                {
+                    "side": "left",
+                    "wall_assembly_code": "ewwf00vi",
+                    "zone_window": {
+                        "window_area": 55.4167,
+                        "window_method": "custom",
+                        "window_u_value": 0.37,
+                        "window_shgc": 0.52
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "3611 Wright Ave",
+        "city": "Racine",
+        "state": "WI",
+        "zip_code": "53405",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 188850"
+    }
+}

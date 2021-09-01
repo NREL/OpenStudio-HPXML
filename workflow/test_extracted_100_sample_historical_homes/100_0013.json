@@ -1,0 +1,129 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "central_furnace",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.88
+                    },
+                    "cooling": {
+                        "type": "none"
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "vented_crawl",
+                            "fraction": 1.0,
+                            "insulated": true,
+                            "sealed": false
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "natural_gas",
+                "energy_factor": 0.55
+            },
+            "generation": {
+                "solar_electric": {
+                    "capacity_known": true,
+                    "year": 2007,
+                    "array_azimuth": "south",
+                    "system_capacity": 2.5
+                }
+            }
+        },
+        "about": {
+            "assessment_date": "2018-03-21",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "west",
+            "year_built": 1959,
+            "number_bedrooms": 4,
+            "num_floor_above_grade": 2,
+            "floor_to_ceiling_height": 8,
+            "conditioned_floor_area": 2779,
+            "blower_door_test": false,
+            "air_sealing_present": false
+        },
+        "zone": {
+            "wall_construction_same": true,
+            "window_construction_same": true,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "dark",
+                    "roof_type": "vented_attic",
+                    "roof_area": 2449,
+                    "ceiling_assembly_code": "ecwf09",
+                    "zone_skylight": {
+                        "skylight_area": 16.0,
+                        "skylight_method": "code",
+                        "skylight_code": "dcaa"
+                    }
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 1678,
+                    "foundation_type": "vented_crawl",
+                    "foundation_insulation_level": 0,
+                    "floor_assembly_code": "efwf19ca"
+                },
+                {
+                    "floor_name": "floor2",
+                    "floor_area": 331,
+                    "foundation_type": "slab_on_grade",
+                    "foundation_insulation_level": 0
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf07wo",
+                    "zone_window": {
+                        "window_area": 98.0,
+                        "window_method": "code",
+                        "window_code": "dcaw"
+                    }
+                },
+                {
+                    "side": "back",
+                    "zone_window": {
+                        "window_area": 50.25
+                    }
+                },
+                {
+                    "side": "right",
+                    "zone_window": {
+                        "window_area": 177.5
+                    }
+                },
+                {
+                    "side": "left",
+                    "zone_window": {
+                        "window_area": 142.75
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "200 Via Lerida",
+        "city": "Larkspur",
+        "state": "CA",
+        "zip_code": "94904",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 198038"
+    }
+}

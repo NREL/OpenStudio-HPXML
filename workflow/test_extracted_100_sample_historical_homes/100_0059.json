@@ -1,0 +1,139 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "boiler",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.78
+                    },
+                    "cooling": {
+                        "type": "split_dx",
+                        "efficiency_method": "user",
+                        "efficiency": 12.2
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "uncond_attic",
+                            "fraction": 0.82,
+                            "insulated": true,
+                            "sealed": true
+                        },
+                        {
+                            "name": "duct2",
+                            "location": "cond_space",
+                            "fraction": 0.18,
+                            "insulated": true,
+                            "sealed": true
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "natural_gas",
+                "energy_factor": 0.58
+            }
+        },
+        "about": {
+            "assessment_date": "2018-07-18",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "east",
+            "year_built": 1952,
+            "number_bedrooms": 3,
+            "num_floor_above_grade": 2,
+            "floor_to_ceiling_height": 8,
+            "conditioned_floor_area": 1856,
+            "blower_door_test": false,
+            "air_sealing_present": false
+        },
+        "zone": {
+            "wall_construction_same": false,
+            "window_construction_same": false,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium",
+                    "roof_type": "vented_attic",
+                    "roof_area": 675,
+                    "ceiling_assembly_code": "ecwf49"
+                },
+                {
+                    "roof_name": "roof2",
+                    "roof_assembly_code": "rfwf27co",
+                    "roof_color": "medium",
+                    "roof_type": "cath_ceiling",
+                    "roof_area": 317
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 928,
+                    "foundation_type": "uncond_basement",
+                    "foundation_insulation_level": 0,
+                    "floor_assembly_code": "efwf00ca"
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf11br",
+                    "zone_window": {
+                        "window_area": 136.0,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                },
+                {
+                    "side": "back",
+                    "wall_assembly_code": "ewwf11br",
+                    "zone_window": {
+                        "window_area": 81.6,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                },
+                {
+                    "side": "right",
+                    "wall_assembly_code": "ewwf11br",
+                    "zone_window": {
+                        "window_area": 59.16,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                },
+                {
+                    "side": "left",
+                    "wall_assembly_code": "ewwf11br",
+                    "zone_window": {
+                        "window_area": 73.95,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "4405 N. Stowell Ave.",
+        "city": "Milwaukee",
+        "state": "WI",
+        "zip_code": "53211",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 212976"
+    }
+}

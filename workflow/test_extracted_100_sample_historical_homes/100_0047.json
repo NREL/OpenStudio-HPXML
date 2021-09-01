@@ -1,0 +1,147 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 0.5,
+                    "heating": {
+                        "type": "central_furnace",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.95
+                    },
+                    "cooling": {
+                        "type": "split_dx",
+                        "efficiency_method": "user",
+                        "efficiency": 12.0
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "uncond_basement",
+                            "fraction": 1.0,
+                            "insulated": false,
+                            "sealed": false
+                        }
+                    ]
+                },
+                {
+                    "hvac_name": "hvac2",
+                    "hvac_fraction": 0.5,
+                    "heating": {
+                        "type": "central_furnace",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.8
+                    },
+                    "cooling": {
+                        "type": "split_dx",
+                        "efficiency_method": "user",
+                        "efficiency": 12.0
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "uncond_attic",
+                            "fraction": 1.0,
+                            "insulated": true,
+                            "sealed": false
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "natural_gas",
+                "energy_factor": 0.6
+            }
+        },
+        "about": {
+            "assessment_date": "2018-09-24",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "north",
+            "year_built": 1967,
+            "number_bedrooms": 5,
+            "num_floor_above_grade": 2,
+            "floor_to_ceiling_height": 8,
+            "conditioned_floor_area": 2536,
+            "blower_door_test": false,
+            "air_sealing_present": false
+        },
+        "zone": {
+            "wall_construction_same": true,
+            "window_construction_same": true,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium_dark",
+                    "roof_type": "vented_attic",
+                    "roof_area": 1960,
+                    "ceiling_assembly_code": "ecwf11",
+                    "zone_skylight": {
+                        "skylight_area": 12.0,
+                        "skylight_method": "code",
+                        "skylight_code": "dcaw"
+                    }
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 1000,
+                    "foundation_type": "uncond_basement",
+                    "foundation_insulation_level": 0,
+                    "floor_assembly_code": "efwf00ca"
+                },
+                {
+                    "floor_name": "floor2",
+                    "floor_area": 960,
+                    "foundation_type": "slab_on_grade",
+                    "foundation_insulation_level": 0
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf07vi",
+                    "zone_window": {
+                        "window_area": 116.0,
+                        "window_method": "code",
+                        "window_code": "dcaw"
+                    }
+                },
+                {
+                    "side": "back",
+                    "zone_window": {
+                        "window_area": 189.0
+                    }
+                },
+                {
+                    "side": "right",
+                    "zone_window": {
+                        "window_area": 0.0
+                    }
+                },
+                {
+                    "side": "left",
+                    "zone_window": {
+                        "window_area": 64.0
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "25 Brisbane Hill Dr",
+        "city": "Colts Neck",
+        "state": "NJ",
+        "zip_code": "07722",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 222153"
+    }
+}

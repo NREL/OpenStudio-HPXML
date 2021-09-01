@@ -1,0 +1,114 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 0.5,
+                    "heating": {
+                        "type": "wall_furnace",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.71
+                    },
+                    "cooling": {
+                        "type": "none"
+                    },
+                    "hvac_distribution": []
+                },
+                {
+                    "hvac_name": "hvac2",
+                    "hvac_fraction": 0.5,
+                    "heating": {
+                        "type": "baseboard",
+                        "fuel_primary": "electric"
+                    },
+                    "cooling": {
+                        "type": "none"
+                    },
+                    "hvac_distribution": []
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "natural_gas",
+                "energy_factor": 0.58
+            }
+        },
+        "about": {
+            "assessment_date": "2019-09-12",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "west",
+            "year_built": 1925,
+            "number_bedrooms": 2,
+            "num_floor_above_grade": 1,
+            "floor_to_ceiling_height": 8,
+            "conditioned_floor_area": 648,
+            "blower_door_test": false,
+            "air_sealing_present": false
+        },
+        "zone": {
+            "wall_construction_same": true,
+            "window_construction_same": true,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium_dark",
+                    "roof_type": "vented_attic",
+                    "roof_area": 648,
+                    "ceiling_assembly_code": "ecwf00"
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 648,
+                    "foundation_type": "vented_crawl",
+                    "foundation_insulation_level": 0,
+                    "floor_assembly_code": "efwf00ca"
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf00wo",
+                    "zone_window": {
+                        "window_area": 60.0,
+                        "window_method": "code",
+                        "window_code": "scnw"
+                    }
+                },
+                {
+                    "side": "back",
+                    "zone_window": {
+                        "window_area": 21.0
+                    }
+                },
+                {
+                    "side": "right",
+                    "zone_window": {
+                        "window_area": 68.0
+                    }
+                },
+                {
+                    "side": "left",
+                    "zone_window": {
+                        "window_area": 25.0
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "2828 SE 26th Ave",
+        "city": "Portland",
+        "state": "OR",
+        "zip_code": "97202",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 292045"
+    }
+}

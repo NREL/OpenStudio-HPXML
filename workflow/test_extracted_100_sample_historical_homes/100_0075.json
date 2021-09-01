@@ -1,0 +1,132 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "central_furnace",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.9
+                    },
+                    "cooling": {
+                        "type": "split_dx",
+                        "efficiency_method": "user",
+                        "efficiency": 14.0
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "cond_space",
+                            "fraction": 1.0,
+                            "insulated": true,
+                            "sealed": true
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "natural_gas",
+                "energy_factor": 0.56
+            }
+        },
+        "about": {
+            "assessment_date": "2017-12-18",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "south",
+            "year_built": 2006,
+            "number_bedrooms": 4,
+            "num_floor_above_grade": 1,
+            "floor_to_ceiling_height": 8,
+            "conditioned_floor_area": 2400,
+            "blower_door_test": true,
+            "envelope_leakage": 880
+        },
+        "zone": {
+            "wall_construction_same": false,
+            "window_construction_same": false,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium",
+                    "roof_type": "vented_attic",
+                    "roof_area": 780,
+                    "ceiling_assembly_code": "ecwf11"
+                },
+                {
+                    "roof_name": "roof2",
+                    "roof_assembly_code": "rfwf11co",
+                    "roof_color": "medium",
+                    "roof_type": "cath_ceiling",
+                    "roof_area": 480
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 1288,
+                    "foundation_type": "cond_basement",
+                    "foundation_insulation_level": 11,
+                    "floor_assembly_code": "efwf00ca"
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf13wo",
+                    "zone_window": {
+                        "window_area": 51.2,
+                        "window_method": "custom",
+                        "window_u_value": 0.37,
+                        "window_shgc": 0.52
+                    }
+                },
+                {
+                    "side": "back",
+                    "wall_assembly_code": "ewwf13wo",
+                    "zone_window": {
+                        "window_area": 51.2,
+                        "window_method": "custom",
+                        "window_u_value": 0.37,
+                        "window_shgc": 0.52
+                    }
+                },
+                {
+                    "side": "right",
+                    "wall_assembly_code": "ewwf13wo",
+                    "zone_window": {
+                        "window_area": 12.0,
+                        "window_method": "custom",
+                        "window_u_value": 0.37,
+                        "window_shgc": 0.52
+                    }
+                },
+                {
+                    "side": "left",
+                    "wall_assembly_code": "ewwf13wo",
+                    "zone_window": {
+                        "window_area": 12.0,
+                        "window_method": "custom",
+                        "window_u_value": 0.37,
+                        "window_shgc": 0.52
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "8400 Half Moon Rd",
+        "city": "Iron River",
+        "state": "WI",
+        "zip_code": "54847",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 182922"
+    }
+}

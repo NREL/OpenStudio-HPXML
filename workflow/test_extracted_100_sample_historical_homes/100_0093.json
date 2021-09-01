@@ -1,0 +1,111 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 0.5,
+                    "heating": {
+                        "type": "baseboard",
+                        "fuel_primary": "electric"
+                    },
+                    "cooling": {
+                        "type": "none"
+                    },
+                    "hvac_distribution": []
+                },
+                {
+                    "hvac_name": "hvac2",
+                    "hvac_fraction": 0.5,
+                    "heating": {
+                        "type": "wood_stove",
+                        "fuel_primary": "cord_wood"
+                    },
+                    "cooling": {
+                        "type": "none"
+                    },
+                    "hvac_distribution": []
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "shipment_weighted",
+                "fuel_primary": "electric",
+                "year": 1984
+            }
+        },
+        "about": {
+            "assessment_date": "2017-11-20",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "south_east",
+            "year_built": 1984,
+            "number_bedrooms": 3,
+            "num_floor_above_grade": 2,
+            "floor_to_ceiling_height": 9,
+            "conditioned_floor_area": 1808,
+            "blower_door_test": false,
+            "air_sealing_present": false
+        },
+        "zone": {
+            "wall_construction_same": true,
+            "window_construction_same": true,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf21co",
+                    "roof_color": "medium_dark",
+                    "roof_type": "cath_ceiling",
+                    "roof_area": 904
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 904,
+                    "foundation_type": "unvented_crawl",
+                    "foundation_insulation_level": 19,
+                    "floor_assembly_code": "efwf00ca"
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf11wo",
+                    "zone_window": {
+                        "window_area": 74.0,
+                        "window_method": "code",
+                        "window_code": "dcaw"
+                    }
+                },
+                {
+                    "side": "back",
+                    "zone_window": {
+                        "window_area": 69.0
+                    }
+                },
+                {
+                    "side": "right",
+                    "zone_window": {
+                        "window_area": 40.0
+                    }
+                },
+                {
+                    "side": "left",
+                    "zone_window": {
+                        "window_area": 47.0
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "121 Slate River Drive",
+        "city": "Crested Butte",
+        "state": "CO",
+        "zip_code": "81224",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 182552"
+    }
+}

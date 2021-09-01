@@ -1,0 +1,139 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "central_furnace",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.75
+                    },
+                    "cooling": {
+                        "type": "split_dx",
+                        "efficiency_method": "user",
+                        "efficiency": 9.0
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "cond_space",
+                            "fraction": 1.0,
+                            "insulated": false,
+                            "sealed": false
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "natural_gas",
+                "energy_factor": 0.55
+            }
+        },
+        "about": {
+            "assessment_date": "2018-07-13",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "north",
+            "year_built": 2001,
+            "number_bedrooms": 3,
+            "num_floor_above_grade": 1,
+            "floor_to_ceiling_height": 8,
+            "conditioned_floor_area": 2704,
+            "blower_door_test": true,
+            "envelope_leakage": 1200
+        },
+        "zone": {
+            "wall_construction_same": false,
+            "window_construction_same": false,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium",
+                    "roof_type": "vented_attic",
+                    "roof_area": 825,
+                    "ceiling_assembly_code": "ecwf21",
+                    "zone_skylight": {
+                        "skylight_area": 30.0,
+                        "skylight_method": "custom",
+                        "skylight_u_value": 0.673185,
+                        "skylight_shgc": 0.56
+                    }
+                },
+                {
+                    "roof_name": "roof2",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium",
+                    "roof_type": "vented_attic",
+                    "roof_area": 527,
+                    "ceiling_assembly_code": "ecwf11"
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 1352,
+                    "foundation_type": "cond_basement",
+                    "foundation_insulation_level": 11,
+                    "floor_assembly_code": "efwf00ca"
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf13wo",
+                    "zone_window": {
+                        "window_area": 13.76,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                },
+                {
+                    "side": "back",
+                    "wall_assembly_code": "ewwf13wo",
+                    "zone_window": {
+                        "window_area": 110.08,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                },
+                {
+                    "side": "right",
+                    "wall_assembly_code": "ewwf13wo",
+                    "zone_window": {
+                        "window_area": 72.8,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                },
+                {
+                    "side": "left",
+                    "wall_assembly_code": "ewwf13wo",
+                    "zone_window": {
+                        "window_area": 15.6,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "2657 Paddington Road",
+        "city": "Fort Collins",
+        "state": "CO",
+        "zip_code": "80525",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 212494"
+    }
+}

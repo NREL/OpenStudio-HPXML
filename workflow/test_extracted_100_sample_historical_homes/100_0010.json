@@ -1,0 +1,127 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "central_furnace",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.88
+                    },
+                    "cooling": {
+                        "type": "none"
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "cond_space",
+                            "fraction": 0.5,
+                            "insulated": true,
+                            "sealed": true
+                        },
+                        {
+                            "name": "duct2",
+                            "location": "vented_crawl",
+                            "fraction": 0.5,
+                            "insulated": true,
+                            "sealed": true
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "natural_gas",
+                "energy_factor": 0.62
+            }
+        },
+        "about": {
+            "assessment_date": "2017-06-15",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "west",
+            "year_built": 1924,
+            "number_bedrooms": 2,
+            "num_floor_above_grade": 2,
+            "floor_to_ceiling_height": 9,
+            "conditioned_floor_area": 1139,
+            "blower_door_test": false,
+            "air_sealing_present": false
+        },
+        "zone": {
+            "wall_construction_same": false,
+            "window_construction_same": true,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "dark",
+                    "roof_type": "vented_attic",
+                    "roof_area": 459,
+                    "ceiling_assembly_code": "ecwf11"
+                },
+                {
+                    "roof_name": "roof2",
+                    "roof_assembly_code": "rfwf19co",
+                    "roof_color": "dark",
+                    "roof_type": "cath_ceiling",
+                    "roof_area": 340
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 799,
+                    "foundation_type": "vented_crawl",
+                    "foundation_insulation_level": 0,
+                    "floor_assembly_code": "efwf13ca"
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf13st",
+                    "zone_window": {
+                        "window_area": 72.0,
+                        "window_method": "code",
+                        "window_code": "dcaa"
+                    }
+                },
+                {
+                    "side": "back",
+                    "wall_assembly_code": "ewwf13al",
+                    "zone_window": {
+                        "window_area": 99.5
+                    }
+                },
+                {
+                    "side": "right",
+                    "wall_assembly_code": "ewwf13al",
+                    "zone_window": {
+                        "window_area": 83.0
+                    }
+                },
+                {
+                    "side": "left",
+                    "wall_assembly_code": "ewwf13st",
+                    "zone_window": {
+                        "window_area": 16.0
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "1627 Tenth Street",
+        "city": "Berkeley",
+        "state": "CA",
+        "zip_code": "94710",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 158759"
+    }
+}

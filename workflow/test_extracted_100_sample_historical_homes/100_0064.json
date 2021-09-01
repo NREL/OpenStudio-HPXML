@@ -1,0 +1,174 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 0.8,
+                    "heating": {
+                        "type": "central_furnace",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.92
+                    },
+                    "cooling": {
+                        "type": "split_dx",
+                        "efficiency_method": "user",
+                        "efficiency": 10.0
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "cond_space",
+                            "fraction": 1.0,
+                            "insulated": false,
+                            "sealed": false
+                        }
+                    ]
+                },
+                {
+                    "hvac_name": "hvac2",
+                    "hvac_fraction": 0.2,
+                    "heating": {
+                        "type": "baseboard",
+                        "fuel_primary": "electric"
+                    },
+                    "cooling": {
+                        "type": "split_dx",
+                        "efficiency_method": "user",
+                        "efficiency": 10.0
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "uncond_attic",
+                            "fraction": 0.82,
+                            "insulated": true,
+                            "sealed": false
+                        },
+                        {
+                            "name": "duct2",
+                            "location": "cond_space",
+                            "fraction": 0.18,
+                            "insulated": true,
+                            "sealed": false
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "natural_gas",
+                "energy_factor": 0.56
+            }
+        },
+        "about": {
+            "assessment_date": "2018-01-25",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "north",
+            "year_built": 1973,
+            "number_bedrooms": 4,
+            "num_floor_above_grade": 3,
+            "floor_to_ceiling_height": 8,
+            "conditioned_floor_area": 3854,
+            "blower_door_test": true,
+            "envelope_leakage": 3003
+        },
+        "zone": {
+            "wall_construction_same": false,
+            "window_construction_same": false,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium",
+                    "roof_type": "vented_attic",
+                    "roof_area": 792,
+                    "ceiling_assembly_code": "ecwf30",
+                    "zone_skylight": {
+                        "skylight_area": 18.0,
+                        "skylight_method": "custom",
+                        "skylight_u_value": 0.673185,
+                        "skylight_shgc": 0.56
+                    }
+                },
+                {
+                    "roof_name": "roof2",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium",
+                    "roof_type": "vented_attic",
+                    "roof_area": 617,
+                    "ceiling_assembly_code": "ecwf11"
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 1387,
+                    "foundation_type": "uncond_basement",
+                    "foundation_insulation_level": 0,
+                    "floor_assembly_code": "efwf00ca"
+                },
+                {
+                    "floor_name": "floor2",
+                    "floor_area": 154,
+                    "foundation_type": "slab_on_grade",
+                    "foundation_insulation_level": 5
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf11br",
+                    "zone_window": {
+                        "window_area": 221.9,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                },
+                {
+                    "side": "back",
+                    "wall_assembly_code": "ewwf11br",
+                    "zone_window": {
+                        "window_area": 166.43,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                },
+                {
+                    "side": "right",
+                    "wall_assembly_code": "ewwf11br",
+                    "zone_window": {
+                        "window_area": 40.54,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                },
+                {
+                    "side": "left",
+                    "wall_assembly_code": "ewwf11br",
+                    "zone_window": {
+                        "window_area": 64.86,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "7205 Donna Dr",
+        "city": "Middleton",
+        "state": "WI",
+        "zip_code": "53562",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 189051"
+    }
+}

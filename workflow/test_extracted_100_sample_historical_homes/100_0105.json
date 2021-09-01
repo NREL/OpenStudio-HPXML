@@ -1,0 +1,132 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "central_furnace",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.78
+                    },
+                    "cooling": {
+                        "type": "split_dx",
+                        "efficiency_method": "user",
+                        "efficiency": 13.0
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "uncond_attic",
+                            "fraction": 1.0,
+                            "insulated": true,
+                            "sealed": false
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "natural_gas",
+                "energy_factor": 0.58
+            }
+        },
+        "about": {
+            "assessment_date": "2019-01-21",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "south",
+            "year_built": 1998,
+            "number_bedrooms": 4,
+            "num_floor_above_grade": 1,
+            "floor_to_ceiling_height": 11,
+            "conditioned_floor_area": 1984,
+            "blower_door_test": true,
+            "envelope_leakage": 1829
+        },
+        "zone": {
+            "wall_construction_same": false,
+            "window_construction_same": false,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium",
+                    "roof_type": "vented_attic",
+                    "roof_area": 1885,
+                    "ceiling_assembly_code": "ecwf19"
+                },
+                {
+                    "roof_name": "roof2",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium",
+                    "roof_type": "vented_attic",
+                    "roof_area": 99,
+                    "ceiling_assembly_code": "ecwf03"
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 1984,
+                    "foundation_type": "slab_on_grade",
+                    "foundation_insulation_level": 0
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf13st",
+                    "zone_window": {
+                        "window_area": 169.728,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                },
+                {
+                    "side": "back",
+                    "wall_assembly_code": "ewwf13st",
+                    "zone_window": {
+                        "window_area": 84.8641,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                },
+                {
+                    "side": "right",
+                    "wall_assembly_code": "ewwf13st",
+                    "zone_window": {
+                        "window_area": 42.4321,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                },
+                {
+                    "side": "left",
+                    "wall_assembly_code": "ewwf13st",
+                    "zone_window": {
+                        "window_area": 84.8641,
+                        "window_method": "custom",
+                        "window_u_value": 0.44,
+                        "window_shgc": 0.56
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "11504 E. Decatur St.",
+        "city": "Mesa",
+        "state": "AZ",
+        "zip_code": "85207",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 234674"
+    }
+}

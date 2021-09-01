@@ -1,0 +1,133 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "central_furnace",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.8
+                    },
+                    "cooling": {
+                        "type": "split_dx",
+                        "efficiency_method": "user",
+                        "efficiency": 13.0
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "cond_space",
+                            "fraction": 0.9,
+                            "insulated": false,
+                            "sealed": false
+                        },
+                        {
+                            "name": "duct2",
+                            "location": "unvented_crawl",
+                            "fraction": 0.1,
+                            "insulated": false,
+                            "sealed": false
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "natural_gas",
+                "energy_factor": 0.62
+            }
+        },
+        "about": {
+            "assessment_date": "2019-12-31",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "west",
+            "year_built": 1925,
+            "number_bedrooms": 2,
+            "num_floor_above_grade": 2,
+            "floor_to_ceiling_height": 7,
+            "conditioned_floor_area": 1863,
+            "blower_door_test": false,
+            "air_sealing_present": false
+        },
+        "zone": {
+            "wall_construction_same": true,
+            "window_construction_same": true,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "dark",
+                    "roof_type": "vented_attic",
+                    "roof_area": 520,
+                    "ceiling_assembly_code": "ecwf09"
+                },
+                {
+                    "roof_name": "roof2",
+                    "roof_assembly_code": "rfwf19co",
+                    "roof_color": "dark",
+                    "roof_type": "cath_ceiling",
+                    "roof_area": 163
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 557,
+                    "foundation_type": "cond_basement",
+                    "foundation_insulation_level": 11,
+                    "floor_assembly_code": "efwf00ca"
+                },
+                {
+                    "floor_name": "floor2",
+                    "floor_area": 126,
+                    "foundation_type": "unvented_crawl",
+                    "foundation_insulation_level": 0,
+                    "floor_assembly_code": "efwf00ca"
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewbr00nn",
+                    "zone_window": {
+                        "window_area": 85.0,
+                        "window_method": "code",
+                        "window_code": "dcaw"
+                    }
+                },
+                {
+                    "side": "back",
+                    "zone_window": {
+                        "window_area": 62.0
+                    }
+                },
+                {
+                    "side": "right",
+                    "zone_window": {
+                        "window_area": 85.0
+                    }
+                },
+                {
+                    "side": "left",
+                    "zone_window": {
+                        "window_area": 60.0
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "2390 Ivanhoe St",
+        "city": "Denver",
+        "state": "CO",
+        "zip_code": "80207",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 302975"
+    }
+}

@@ -1,0 +1,102 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "boiler",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.85
+                    },
+                    "cooling": {
+                        "type": "none"
+                    },
+                    "hvac_distribution": []
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "natural_gas",
+                "energy_factor": 0.55
+            }
+        },
+        "about": {
+            "assessment_date": "2020-03-12",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "north",
+            "year_built": 1963,
+            "number_bedrooms": 3,
+            "num_floor_above_grade": 1,
+            "floor_to_ceiling_height": 8,
+            "conditioned_floor_area": 1382,
+            "blower_door_test": true,
+            "envelope_leakage": 1983
+        },
+        "zone": {
+            "wall_construction_same": true,
+            "window_construction_same": true,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium_dark",
+                    "roof_type": "vented_attic",
+                    "roof_area": 1382,
+                    "ceiling_assembly_code": "ecwf11"
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 1382,
+                    "foundation_type": "uncond_basement",
+                    "foundation_insulation_level": 0,
+                    "floor_assembly_code": "efwf00ca"
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf00wo",
+                    "zone_window": {
+                        "window_area": 116.0,
+                        "window_method": "code",
+                        "window_code": "dpeaw"
+                    }
+                },
+                {
+                    "side": "back",
+                    "zone_window": {
+                        "window_area": 43.0
+                    }
+                },
+                {
+                    "side": "right",
+                    "zone_window": {
+                        "window_area": 69.0
+                    }
+                },
+                {
+                    "side": "left",
+                    "zone_window": {
+                        "window_area": 18.0
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "Northbrick Ln ,71,",
+        "city": "Wethersfield",
+        "state": "CT",
+        "zip_code": "06109",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 310123"
+    }
+}

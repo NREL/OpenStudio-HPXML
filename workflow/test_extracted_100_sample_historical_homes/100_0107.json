@@ -1,0 +1,113 @@
+{
+    "building": {
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1.0,
+                    "heating": {
+                        "type": "central_furnace",
+                        "fuel_primary": "natural_gas",
+                        "efficiency_method": "user",
+                        "efficiency": 0.8
+                    },
+                    "cooling": {
+                        "type": "split_dx",
+                        "efficiency_method": "user",
+                        "efficiency": 13.0
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "cond_space",
+                            "fraction": 1.0,
+                            "insulated": false,
+                            "sealed": true
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "efficiency_method": "user",
+                "fuel_primary": "natural_gas",
+                "energy_factor": 0.575
+            }
+        },
+        "about": {
+            "assessment_date": "2017-01-06",
+            "comments": "",
+            "shape": "rectangle",
+            "orientation": "south",
+            "year_built": 2010,
+            "number_bedrooms": 4,
+            "num_floor_above_grade": 2,
+            "floor_to_ceiling_height": 8,
+            "conditioned_floor_area": 2000,
+            "blower_door_test": false,
+            "air_sealing_present": true
+        },
+        "zone": {
+            "wall_construction_same": true,
+            "window_construction_same": true,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_assembly_code": "rfwf00co",
+                    "roof_color": "medium",
+                    "roof_type": "vented_attic",
+                    "roof_area": 1000,
+                    "ceiling_assembly_code": "ecwf19"
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 1000,
+                    "foundation_type": "vented_crawl",
+                    "foundation_insulation_level": 0,
+                    "floor_assembly_code": "efwf19ca"
+                }
+            ],
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf13vi",
+                    "zone_window": {
+                        "window_area": 88.0,
+                        "window_method": "custom",
+                        "window_u_value": 0.65,
+                        "window_shgc": 0.4
+                    }
+                },
+                {
+                    "side": "back",
+                    "zone_window": {
+                        "window_area": 88.0
+                    }
+                },
+                {
+                    "side": "right",
+                    "zone_window": {
+                        "window_area": 52.0
+                    }
+                },
+                {
+                    "side": "left",
+                    "zone_window": {
+                        "window_area": 52.0
+                    }
+                }
+            ]
+        }
+    },
+    "building_address": {
+        "address": "2015 - 2015 - Gas - In",
+        "city": "Miami",
+        "state": "FL",
+        "zip_code": "33116",
+        "assessment_type": "test",
+        "external_building_id": "Original building ID: 139431"
+    }
+}
