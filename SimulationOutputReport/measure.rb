@@ -834,17 +834,17 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       return vals
     end
 
-    def get_sys_ids(type, heat_sys_ids, cool_sys_ids, dhw_sys_ids, vent_preheat_sys_ids, vent_precool_sys_ids)
+    def get_sys_ids_of_interest(type, htg_ids, clg_ids, dhw_ids, vent_prehtg_ids, vent_preclg_ids)
       if type.downcase.include? 'hot water'
-        return dhw_sys_ids
+        return dhw_ids
       elsif type.downcase.include? 'mech vent preheating'
-        return vent_preheat_sys_ids
+        return vent_prehtg_ids
       elsif type.downcase.include? 'mech vent precooling'
-        return vent_precool_sys_ids
+        return vent_preclg_ids
       elsif type.downcase.include? 'heating'
-        return heat_sys_ids
+        return htg_ids
       elsif type.downcase.include? 'cooling'
-        return cool_sys_ids
+        return clg_ids
       end
 
       return
@@ -866,71 +866,61 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Retrieve info from HPXML object
     # FUTURE: Move this code to the ERI workflow
-    heat_sys_ids = []
-    cool_sys_ids = []
-    dhw_sys_ids = []
-    vent_preheat_sys_ids = []
-    vent_precool_sys_ids = []
-    eec_heats = {}
-    eec_cools = {}
-    eec_dhws = {}
-    eec_vent_preheats = {}
-    eec_vent_precools = {}
-    heat_fuels = {}
-    dhw_fuels = {}
-    vent_preheat_fuels = {}
+    htg_ids, clg_ids, dhw_ids, vent_prehtg_ids, vent_preclg_ids = [], [], [], [], []
+    htg_eecs, clg_eecs, dhw_eecs, vent_prehtg_eecs, vent_preclg_eecs = {}, {}, {}, {}, {}
+    htg_fuels, dhw_fuels, vent_prehtg_fuels = {}, {}, {}
     seed_id_map = {}
     @hpxml.heating_systems.each do |htg_system|
       next unless htg_system.fraction_heat_load_served > 0
 
-      heat_sys_ids << htg_system.id
+      htg_ids << htg_system.id
       seed_id_map[htg_system.id] = htg_system.seed_id
-      heat_fuels[htg_system.id] = htg_system.heating_system_fuel
+      htg_fuels[htg_system.id] = htg_system.heating_system_fuel
       if not htg_system.heating_efficiency_afue.nil?
-        eec_heats[htg_system.id] = get_eec_value_numerator('AFUE') / htg_system.heating_efficiency_afue
+        htg_eecs[htg_system.id] = get_eec_value_numerator('AFUE') / htg_system.heating_efficiency_afue
       elsif not htg_system.heating_efficiency_percent.nil?
-        eec_heats[htg_system.id] = get_eec_value_numerator('Percent') / htg_system.heating_efficiency_percent
+        htg_eecs[htg_system.id] = get_eec_value_numerator('Percent') / htg_system.heating_efficiency_percent
       end
     end
     @hpxml.cooling_systems.each do |clg_system|
       next unless clg_system.fraction_cool_load_served > 0
 
-      cool_sys_ids << clg_system.id
+      clg_ids << clg_system.id
       seed_id_map[clg_system.id] = clg_system.seed_id
       if not clg_system.cooling_efficiency_seer.nil?
-        eec_cools[clg_system.id] = get_eec_value_numerator('SEER') / clg_system.cooling_efficiency_seer
+        clg_eecs[clg_system.id] = get_eec_value_numerator('SEER') / clg_system.cooling_efficiency_seer
       elsif not clg_system.cooling_efficiency_eer.nil?
-        eec_cools[clg_system.id] = get_eec_value_numerator('EER') / clg_system.cooling_efficiency_eer
+        clg_eecs[clg_system.id] = get_eec_value_numerator('EER') / clg_system.cooling_efficiency_eer
       elsif not clg_system.cooling_efficiency_ceer.nil?
-        eec_cools[clg_system.id] = get_eec_value_numerator('CEER') / clg_system.cooling_efficiency_ceer
+        clg_eecs[clg_system.id] = get_eec_value_numerator('CEER') / clg_system.cooling_efficiency_ceer
       end
       if clg_system.cooling_system_type == HPXML::HVACTypeEvaporativeCooler
-        eec_cools[clg_system.id] = get_eec_value_numerator('SEER') / 15.0 # Arbitrary
+        clg_eecs[clg_system.id] = get_eec_value_numerator('SEER') / 15.0 # Arbitrary
       end
     end
     @hpxml.heat_pumps.each do |heat_pump|
       if heat_pump.fraction_heat_load_served > 0
-        heat_sys_ids << heat_pump.id
+        htg_ids << heat_pump.id
         seed_id_map[heat_pump.id] = heat_pump.seed_id
-        heat_fuels[heat_pump.id] = heat_pump.heat_pump_fuel
+        htg_fuels[heat_pump.id] = heat_pump.heat_pump_fuel
         if not heat_pump.heating_efficiency_hspf.nil?
-          eec_heats[heat_pump.id] = get_eec_value_numerator('HSPF') / heat_pump.heating_efficiency_hspf
+          htg_eecs[heat_pump.id] = get_eec_value_numerator('HSPF') / heat_pump.heating_efficiency_hspf
         elsif not heat_pump.heating_efficiency_cop.nil?
-          eec_heats[heat_pump.id] = get_eec_value_numerator('COP') / heat_pump.heating_efficiency_cop
+          htg_eecs[heat_pump.id] = get_eec_value_numerator('COP') / heat_pump.heating_efficiency_cop
         end
       end
       next unless heat_pump.fraction_cool_load_served > 0
 
-      cool_sys_ids << heat_pump.id
+      clg_ids << heat_pump.id
       seed_id_map[heat_pump.id] = heat_pump.seed_id
       if not heat_pump.cooling_efficiency_seer.nil?
-        eec_cools[heat_pump.id] = get_eec_value_numerator('SEER') / heat_pump.cooling_efficiency_seer
+        clg_eecs[heat_pump.id] = get_eec_value_numerator('SEER') / heat_pump.cooling_efficiency_seer
       elsif not heat_pump.cooling_efficiency_eer.nil?
-        eec_cools[heat_pump.id] = get_eec_value_numerator('EER') / heat_pump.cooling_efficiency_eer
+        clg_eecs[heat_pump.id] = get_eec_value_numerator('EER') / heat_pump.cooling_efficiency_eer
       end
     end
     @hpxml.water_heating_systems.each do |dhw_system|
-      dhw_sys_ids << dhw_system.id
+      dhw_ids << dhw_system.id
       ef_or_uef = nil
       ef_or_uef = dhw_system.energy_factor unless dhw_system.energy_factor.nil?
       ef_or_uef = dhw_system.uniform_energy_factor unless dhw_system.uniform_energy_factor.nil?
@@ -946,7 +936,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       value_adj = 1.0
       value_adj = dhw_system.performance_adjustment if dhw_system.water_heater_type == HPXML::WaterHeaterTypeTankless
       if (not ef_or_uef.nil?) && (not value_adj.nil?)
-        eec_dhws[dhw_system.id] = get_eec_value_numerator('EF') / (Float(ef_or_uef) * Float(value_adj))
+        dhw_eecs[dhw_system.id] = get_eec_value_numerator('EF') / (Float(ef_or_uef) * Float(value_adj))
       end
       if [HPXML::WaterHeaterTypeCombiTankless, HPXML::WaterHeaterTypeCombiStorage].include? dhw_system.water_heater_type
         dhw_fuels[dhw_system.id] = dhw_system.related_hvac_system.heating_system_fuel
@@ -958,48 +948,48 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       next unless vent_fan.used_for_whole_building_ventilation
 
       if not vent_fan.preheating_fuel.nil?
-        vent_preheat_sys_ids << vent_fan.id
-        vent_preheat_fuels[vent_fan.id] = vent_fan.preheating_fuel
-        eec_vent_preheats[vent_fan.id] = get_eec_value_numerator('COP') / vent_fan.preheating_efficiency_cop
+        vent_prehtg_ids << vent_fan.id
+        vent_prehtg_fuels[vent_fan.id] = vent_fan.preheating_fuel
+        vent_prehtg_eecs[vent_fan.id] = get_eec_value_numerator('COP') / vent_fan.preheating_efficiency_cop
       end
       next unless not vent_fan.precooling_fuel.nil?
 
-      vent_precool_sys_ids << vent_fan.id
-      eec_vent_precools[vent_fan.id] = get_eec_value_numerator('COP') / vent_fan.precooling_efficiency_cop
+      vent_preclg_ids << vent_fan.id
+      vent_preclg_eecs[vent_fan.id] = get_eec_value_numerator('COP') / vent_fan.precooling_efficiency_cop
     end
 
     # Calculate ERI Reference Loads
     (@hpxml.heating_systems + @hpxml.heat_pumps).each do |htg_system|
-      next unless heat_sys_ids.include? htg_system.id
+      next unless htg_ids.include? htg_system.id
 
       @loads[LT::Heating].annual_output_by_system[htg_system.id] = htg_system.fraction_heat_load_served * @loads[LT::Heating].annual_output
     end
     (@hpxml.cooling_systems + @hpxml.heat_pumps).each do |clg_system|
-      next unless cool_sys_ids.include? clg_system.id
+      next unless clg_ids.include? clg_system.id
 
       @loads[LT::Cooling].annual_output_by_system[clg_system.id] = clg_system.fraction_cool_load_served * @loads[LT::Cooling].annual_output
     end
 
     # Sys IDS
-    results_out << ['hpxml_heat_sys_ids', get_ids(heat_sys_ids, seed_id_map).to_s]
-    results_out << ['hpxml_cool_sys_ids', get_ids(cool_sys_ids, seed_id_map).to_s]
-    results_out << ['hpxml_dhw_sys_ids', get_ids(dhw_sys_ids, seed_id_map).to_s]
-    results_out << ['hpxml_vent_preheat_sys_ids', vent_preheat_sys_ids.to_s]
-    results_out << ['hpxml_vent_precool_sys_ids', vent_precool_sys_ids.to_s]
+    results_out << ['hpxml_heat_sys_ids', get_ids(htg_ids, seed_id_map).to_s]
+    results_out << ['hpxml_cool_sys_ids', get_ids(clg_ids, seed_id_map).to_s]
+    results_out << ['hpxml_dhw_sys_ids', get_ids(dhw_ids, seed_id_map).to_s]
+    results_out << ['hpxml_vent_preheat_sys_ids', vent_prehtg_ids.to_s]
+    results_out << ['hpxml_vent_precool_sys_ids', vent_preclg_ids.to_s]
     results_out << [line_break]
 
     # EECs
-    results_out << ['hpxml_eec_heats', ordered_values(eec_heats, heat_sys_ids).to_s]
-    results_out << ['hpxml_eec_cools', ordered_values(eec_cools, cool_sys_ids).to_s]
-    results_out << ['hpxml_eec_dhws', ordered_values(eec_dhws, dhw_sys_ids).to_s]
-    results_out << ['hpxml_eec_vent_preheats', ordered_values(eec_vent_preheats, vent_preheat_sys_ids).to_s]
-    results_out << ['hpxml_eec_vent_precools', ordered_values(eec_vent_precools, vent_precool_sys_ids).to_s]
+    results_out << ['hpxml_eec_heats', ordered_values(htg_eecs, htg_ids).to_s]
+    results_out << ['hpxml_eec_cools', ordered_values(clg_eecs, clg_ids).to_s]
+    results_out << ['hpxml_eec_dhws', ordered_values(dhw_eecs, dhw_ids).to_s]
+    results_out << ['hpxml_eec_vent_preheats', ordered_values(vent_prehtg_eecs, vent_prehtg_ids).to_s]
+    results_out << ['hpxml_eec_vent_precools', ordered_values(vent_preclg_eecs, vent_preclg_ids).to_s]
     results_out << [line_break]
 
     # Fuel types
-    results_out << ['hpxml_heat_fuels', ordered_values(heat_fuels, heat_sys_ids).to_s]
-    results_out << ['hpxml_dwh_fuels', ordered_values(dhw_fuels, dhw_sys_ids).to_s]
-    results_out << ['hpxml_vent_preheat_fuels', ordered_values(vent_preheat_fuels, vent_preheat_sys_ids).to_s]
+    results_out << ['hpxml_heat_fuels', ordered_values(htg_fuels, htg_ids).to_s]
+    results_out << ['hpxml_dwh_fuels', ordered_values(dhw_fuels, dhw_ids).to_s]
+    results_out << ['hpxml_vent_preheat_fuels', ordered_values(vent_prehtg_fuels, vent_prehtg_ids).to_s]
     results_out << [line_break]
 
     # Fuel uses
@@ -1013,7 +1003,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @end_uses.each do |key, end_use|
       fuel_type, end_use_type = key
       key_name = sanitize_string("enduse#{fuel_type}#{end_use_type}")
-      sys_ids = get_sys_ids(end_use_type, heat_sys_ids, cool_sys_ids, dhw_sys_ids, vent_preheat_sys_ids, vent_precool_sys_ids)
+      sys_ids = get_sys_ids_of_interest(end_use_type, htg_ids, clg_ids, dhw_ids, vent_prehtg_ids, vent_preclg_ids)
       if sys_ids.nil?
         results_out << [key_name, end_use.annual_output.to_s]
       else
@@ -1027,7 +1017,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       next unless [LT::Heating, LT::Cooling, LT::HotWaterDelivered].include? load_type
 
       key_name = sanitize_string("load#{load_type}")
-      sys_ids = get_sys_ids(load_type, heat_sys_ids, cool_sys_ids, dhw_sys_ids, vent_preheat_sys_ids, vent_precool_sys_ids)
+      sys_ids = get_sys_ids_of_interest(load_type, htg_ids, clg_ids, dhw_ids, vent_prehtg_ids, vent_preclg_ids)
       results_out << [key_name, ordered_values(load.annual_output_by_system, sys_ids).to_s]
     end
     results_out << [line_break]
@@ -1733,8 +1723,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         return { [FT::Elec, EUT::Heating] => ["Baseboard #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_BoilerHotWater.is_initialized
-        boiler_type = object.additionalProperties.getFeatureAsString('BoilerType').get
-        if boiler_type == 'Boiler' # Exclude combi boiler, whose heating & dhw energy is handled separately via EMS
+        is_combi_boiler = false
+        if object.additionalProperties.getFeatureAsBoolean('IsCombiBoiler').is_initialized
+          is_combi_boiler = object.additionalProperties.getFeatureAsBoolean('IsCombiBoiler').get
+        end
+        if not is_combi_boiler # Exclude combi boiler, whose heating & dhw energy is handled separately via EMS
           fuel = object.to_BoilerHotWater.get.fuelType
           return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
         end
@@ -1885,10 +1878,18 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       # Load
 
       if object.to_WaterHeaterMixed.is_initialized || object.to_WaterHeaterStratified.is_initialized
-        water_heater_type = object.additionalProperties.getFeatureAsString('WaterHeaterType').get
-        if water_heater_type == 'SolarThermalStorageTank'
+        if object.to_WaterHeaterMixed.is_initialized
+          capacity = object.to_WaterHeaterMixed.get.heaterMaximumCapacity.get
+        else
+          capacity = object.to_WaterHeaterStratified.get.heater1Capacity.get
+        end
+        is_combi_boiler = false
+        if object.additionalProperties.getFeatureAsBoolean('IsCombiBoiler').is_initialized
+          is_combi_boiler = object.additionalProperties.getFeatureAsBoolean('IsCombiBoiler').get
+        end
+        if capacity == 0 && object.name.to_s.include?(Constants.ObjectNameSolarHotWater)
           return { LT::HotWaterSolarThermal => ['Water Heater Use Side Heat Transfer Energy'] }
-        elsif water_heater_type == 'WaterHeater' # Active water heater only (e.g., exclude desuperheater tank)
+        elsif capacity > 0 || is_combi_boiler # Active water heater only (e.g., exclude desuperheater and solar thermal storage tanks)
           return { LT::HotWaterTankLosses => ['Water Heater Heat Loss Energy'] }
         end
 

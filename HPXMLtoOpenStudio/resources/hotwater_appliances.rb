@@ -2,7 +2,7 @@
 
 class HotWaterAndAppliances
   def self.apply(model, runner, hpxml, weather, spaces, hot_water_distribution,
-                 solar_thermal_system, eri_version, schedules_file)
+                 solar_thermal_system, eri_version, schedules_file, plantloop_map)
 
     cfa = hpxml.building_construction.conditioned_floor_area
     nbeds = hpxml.building_construction.number_of_bedrooms
@@ -29,28 +29,26 @@ class HotWaterAndAppliances
     end
 
     # Create WaterUseConnections object for each water heater (plant loop)
-    water_use_connections = {}
-    model.getPlantLoops.each do |plant_loop|
-      sys_id = plant_loop.additionalProperties.getFeatureAsString('HPXML_ID')
-      next unless sys_id.is_initialized
-
-      sys_id = sys_id.get
-      water_use_connections[sys_id] = OpenStudio::Model::WaterUseConnections.new(model)
-      water_use_connections[sys_id].additionalProperties.setFeature('HPXML_ID', sys_id)
-      plant_loop.addDemandBranchForComponent(water_use_connections[sys_id])
-    end
-
     # Get water heater setpoint schedule for each water heater (plant loop)
+    water_use_connections = {}
     setpoint_scheds = {}
-    (model.getWaterHeaterMixeds + model.getWaterHeaterHeatPumpWrappedCondensers).each do |dhw|
-      sys_id = dhw.additionalProperties.getFeatureAsString('HPXML_ID')
-      next unless sys_id.is_initialized
+    hpxml.water_heating_systems.each do |water_heating_system|
+      plant_loop = plantloop_map[water_heating_system.id]
+      wuc = OpenStudio::Model::WaterUseConnections.new(model)
+      wuc.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
+      plant_loop.addDemandBranchForComponent(wuc)
+      water_use_connections[water_heating_system.id] = wuc
 
-      sys_id = sys_id.get
-      if dhw.is_a? OpenStudio::Model::WaterHeaterMixed
-        setpoint_scheds[sys_id] = dhw.setpointTemperatureSchedule.get
-      elsif dhw.is_a? OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser
-        setpoint_scheds[sys_id] = dhw.compressorSetpointTemperatureSchedule
+      plant_loop.components.each do |c|
+        if c.to_WaterHeaterMixed.is_initialized
+          setpoint_scheds[water_heating_system.id] = c.to_WaterHeaterMixed.get.setpointTemperatureSchedule.get
+        elsif c.to_WaterHeaterStratified.is_initialized
+          model.getWaterHeaterHeatPumpWrappedCondensers.each do |hpwhc|
+            next unless hpwhc.tank.handle.to_s == c.handle.to_s
+
+            setpoint_scheds[water_heating_system.id] = hpwhc.compressorSetpointTemperatureSchedule
+          end
+        end
       end
     end
 
@@ -262,7 +260,7 @@ class HotWaterAndAppliances
           end
           dist_pump = add_electric_equipment(model, Constants.ObjectNameHotWaterRecircPump, living_space, dist_pump_design_level * gpd_frac, 0.0, 0.0, fixtures_schedule)
           if not dist_pump.nil?
-            dist_pump.additionalProperties.setFeature('HPXML_ID', water_heating_system.id)
+            dist_pump.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
           end
         end
       end

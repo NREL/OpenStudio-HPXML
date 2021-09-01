@@ -2,7 +2,7 @@
 
 class Airflow
   def self.apply(model, runner, weather, spaces, hpxml, cfa, nbeds,
-                 ncfl_ag, duct_systems, clg_ssn_sensor, eri_version,
+                 ncfl_ag, duct_systems, airloop_map, clg_ssn_sensor, eri_version,
                  frac_windows_operable, apply_ashrae140_assumptions, schedules_file)
 
     # Global variables
@@ -71,7 +71,7 @@ class Airflow
     vented_dryers = hpxml.clothes_dryers.select { |cd| cd.is_vented && cd.vented_flow_rate.to_f > 0 && [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include?(cd.location) }
 
     # Initialization
-    initialize_cfis(model, vent_fans_mech)
+    initialize_cfis(model, vent_fans_mech, airloop_map)
     model.getAirLoopHVACs.each do |air_loop|
       initialize_fan_objects(model, air_loop)
     end
@@ -508,7 +508,7 @@ class Airflow
     return actuator
   end
 
-  def self.initialize_cfis(model, vent_fans_mech)
+  def self.initialize_cfis(model, vent_fans_mech, airloop_map)
     # Get AirLoop associated with CFIS
     @cfis_airloop = {}
     @cfis_t_sum_open_var = {}
@@ -520,17 +520,10 @@ class Airflow
     vent_fans_mech.each do |vent_mech|
       next unless (vent_mech.fan_type == HPXML::MechVentTypeCFIS)
 
-      cfis_sys_ids = vent_mech.distribution_system.hvac_systems.map { |system| system.id }
-      # Get AirLoopHVACs associated with these HVAC systems
-      model.getAirLoopHVACs.each do |air_loop|
-        sys_id = air_loop.additionalProperties.getFeatureAsString('HPXML_ID')
-        next unless sys_id.is_initialized && cfis_sys_ids.include?(sys_id.get)
+      vent_mech.distribution_system.hvac_systems.map { |system| system.id }.each do |cfis_id|
+        next if airloop_map[cfis_id].nil?
 
-        next if (not @cfis_airloop[vent_mech.id].nil?) && (@cfis_airloop[vent_mech.id] == air_loop) # already assigned
-
-        fail 'Two airloops found for CFIS.' unless @cfis_airloop[vent_mech.id].nil?
-
-        @cfis_airloop[vent_mech.id] = air_loop
+        @cfis_airloop[vent_mech.id] = airloop_map[cfis_id]
       end
 
       @cfis_t_sum_open_var[vent_mech.id] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(' ', '_')}_cfis_t_sum_open_#{index}") # Sums the time during an hour the CFIS damper has been open
@@ -1586,7 +1579,7 @@ class Airflow
     vent_mech_preheat.each_with_index do |f_preheat, i|
       infil_program.addLine("If (OASupInTemp < HtgStp) && (#{clg_ssn_sensor.name} < 1)")
       htg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent preheating energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: f_preheat.preheating_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreheating)
-      htg_energy_actuator.actuatedComponent.get.additionalProperties.setFeature('HPXML_ID', f_preheat.id)
+      htg_energy_actuator.actuatedComponent.get.additionalProperties.setFeature('HPXML_ID', f_preheat.id) # Used by reporting measure
       infil_program.addLine("  Set Qpreheat = #{UnitConversions.convert(f_preheat.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)}")
       if [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? f_preheat.fan_type
         vent_mech_erv_hrv_tot = [f_preheat]
@@ -1611,7 +1604,7 @@ class Airflow
     vent_mech_precool.each_with_index do |f_precool, i|
       infil_program.addLine("If (OASupInTemp > ClgStp) && (#{clg_ssn_sensor.name} > 0)")
       clg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent precooling energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: f_precool.precooling_fuel, end_use: Constants.ObjectNameMechanicalVentilationPrecooling)
-      clg_energy_actuator.actuatedComponent.get.additionalProperties.setFeature('HPXML_ID', f_precool.id)
+      clg_energy_actuator.actuatedComponent.get.additionalProperties.setFeature('HPXML_ID', f_precool.id) # Used by reporting measure
       infil_program.addLine("  Set Qprecool = #{UnitConversions.convert(f_precool.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)}")
       if [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? f_precool.fan_type
         vent_mech_erv_hrv_tot = [f_precool]

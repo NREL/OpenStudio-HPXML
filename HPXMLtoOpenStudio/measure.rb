@@ -253,10 +253,11 @@ class OSModel
 
     # HVAC
 
+    airloop_map = {} # Map of HPXML System ID -> AirLoopHVAC (or ZoneHVACFourPipeFanCoil)
     add_ideal_system(runner, model, spaces, epw_path)
-    add_cooling_system(runner, model, spaces)
-    add_heating_system(runner, model, spaces)
-    add_heat_pump(runner, model, weather, spaces)
+    add_cooling_system(runner, model, spaces, airloop_map)
+    add_heating_system(runner, model, spaces, airloop_map)
+    add_heat_pump(runner, model, weather, spaces, airloop_map)
     add_dehumidifiers(runner, model, spaces)
     add_residual_ideal_system(runner, model, spaces)
     add_ceiling_fans(runner, model, weather, spaces)
@@ -276,7 +277,7 @@ class OSModel
 
     # Other
 
-    add_airflow(runner, model, weather, spaces)
+    add_airflow(runner, model, weather, spaces, airloop_map)
     add_photovoltaics(runner, model)
     add_generators(runner, model)
     add_additional_properties(runner, model, hpxml_path, building_id)
@@ -1555,50 +1556,41 @@ class OSModel
 
     # Water Heater
     has_uncond_bsmnt = @hpxml.has_location(HPXML::LocationBasementUnconditioned)
+    plantloop_map = {}
     @hpxml.water_heating_systems.each do |water_heating_system|
       loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
 
       ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, @cfa, @ncfl, water_heating_system, hot_water_distribution)
 
+      sys_id = water_heating_system.id
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
-
-        Waterheater.apply_tank(model, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system)
-
+        plantloop_map[sys_id] = Waterheater.apply_tank(model, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system)
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
-
-        Waterheater.apply_tankless(model, loc_space, loc_schedule, water_heating_system, ec_adj, @nbeds, solar_thermal_system)
-
+        plantloop_map[sys_id] = Waterheater.apply_tankless(model, loc_space, loc_schedule, water_heating_system, ec_adj, @nbeds, solar_thermal_system)
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
-
         living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
-
-        Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone)
-
+        plantloop_map[sys_id] = Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone)
       elsif [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
-
-        Waterheater.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system)
-
+        plantloop_map[sys_id] = Waterheater.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system)
       else
-
         fail "Unhandled water heater (#{water_heating_system.water_heater_type})."
-
       end
     end
 
     # Hot water fixtures and appliances
     HotWaterAndAppliances.apply(model, runner, @hpxml, weather, spaces, hot_water_distribution,
-                                solar_thermal_system, @eri_version, @schedules_file)
+                                solar_thermal_system, @eri_version, @schedules_file, plantloop_map)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
       loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, 'WaterHeatingSystem', model, spaces)
-      Waterheater.apply_solar_thermal(model, loc_space, loc_schedule, solar_thermal_system)
+      Waterheater.apply_solar_thermal(model, loc_space, loc_schedule, solar_thermal_system, plantloop_map)
     end
 
     # Add combi-system EMS program with water use equipment information
-    Waterheater.apply_combi_system_EMS(model, @hpxml.water_heating_systems)
+    Waterheater.apply_combi_system_EMS(model, @hpxml.water_heating_systems, plantloop_map)
   end
 
-  def self.add_cooling_system(runner, model, spaces)
+  def self.add_cooling_system(runner, model, spaces, airloop_map)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     HVAC.get_hpxml_hvac_systems(@hpxml).each do |hvac_system|
@@ -1622,11 +1614,12 @@ class OSModel
         sequential_heat_load_fracs = [0]
       end
 
+      sys_id = cooling_system.id
       if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
 
-        HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
-                                                   sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                                   living_zone)
+        airloop_map[sys_id] = HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
+                                                                         sequential_cool_load_fracs, sequential_heat_load_fracs,
+                                                                         living_zone)
 
       elsif [HPXML::HVACTypeRoomAirConditioner].include? cooling_system.cooling_system_type
 
@@ -1635,18 +1628,18 @@ class OSModel
 
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
 
-        HVAC.apply_evaporative_cooler(model, runner, cooling_system,
-                                      sequential_cool_load_fracs, living_zone)
+        airloop_map[sys_id] = HVAC.apply_evaporative_cooler(model, runner, cooling_system,
+                                                            sequential_cool_load_fracs, living_zone)
 
       elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
 
-        HVAC.apply_mini_split_air_conditioner(model, runner, cooling_system,
-                                              sequential_cool_load_fracs, living_zone)
+        airloop_map[sys_id] = HVAC.apply_mini_split_air_conditioner(model, runner, cooling_system,
+                                                                    sequential_cool_load_fracs, living_zone)
       end
     end
   end
 
-  def self.add_heating_system(runner, model, spaces)
+  def self.add_heating_system(runner, model, spaces, airloop_map)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     HVAC.get_hpxml_hvac_systems(@hpxml).each do |hvac_system|
@@ -1666,16 +1659,17 @@ class OSModel
       sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heating_system.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
       @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
 
+      sys_id = heating_system.id
       if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
 
-        HVAC.apply_central_air_conditioner_furnace(model, runner, nil, heating_system,
-                                                   [0], sequential_heat_load_fracs,
-                                                   living_zone)
+        airloop_map[sys_id] = HVAC.apply_central_air_conditioner_furnace(model, runner, nil, heating_system,
+                                                                         [0], sequential_heat_load_fracs,
+                                                                         living_zone)
 
       elsif [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
-        HVAC.apply_boiler(model, runner, heating_system,
-                          sequential_heat_load_fracs, living_zone)
+        airloop_map[sys_id] = HVAC.apply_boiler(model, runner, heating_system,
+                                                sequential_heat_load_fracs, living_zone)
 
       elsif [HPXML::HVACTypeElectricResistance].include? heating_system.heating_system_type
 
@@ -1695,7 +1689,7 @@ class OSModel
     end
   end
 
-  def self.add_heat_pump(runner, model, weather, spaces)
+  def self.add_heat_pump(runner, model, weather, spaces, airloop_map)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     HVAC.get_hpxml_hvac_systems(@hpxml).each do |hvac_system|
@@ -1714,29 +1708,30 @@ class OSModel
       sequential_cool_load_fracs = HVAC.calc_sequential_load_fractions(heat_pump.fraction_cool_load_served, @remaining_cool_load_frac, @cooling_days)
       @remaining_cool_load_frac -= heat_pump.fraction_cool_load_served
 
+      sys_id = heat_pump.id
       if [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
 
-        HVAC.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
-                                               sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                               living_zone)
+        airloop_map[sys_id] = HVAC.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
+                                                                     sequential_heat_load_fracs, sequential_cool_load_fracs,
+                                                                     living_zone)
 
       elsif [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
 
-        HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
-                                                sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                                living_zone)
+        airloop_map[sys_id] = HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
+                                                                      sequential_heat_load_fracs, sequential_cool_load_fracs,
+                                                                      living_zone)
 
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
 
-        HVAC.apply_mini_split_heat_pump(model, runner, heat_pump,
-                                        sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                        living_zone)
+        airloop_map[sys_id] = HVAC.apply_mini_split_heat_pump(model, runner, heat_pump,
+                                                              sequential_heat_load_fracs, sequential_cool_load_fracs,
+                                                              living_zone)
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
 
-        HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
-                                           sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                           living_zone)
+        airloop_map[sys_id] = HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
+                                                                 sequential_heat_load_fracs, sequential_cool_load_fracs,
+                                                                 living_zone)
 
       end
     end
@@ -1929,7 +1924,7 @@ class OSModel
     end
   end
 
-  def self.add_airflow(runner, model, weather, spaces)
+  def self.add_airflow(runner, model, weather, spaces, airloop_map)
     # Ducts
     duct_systems = {}
     @hpxml.hvac_distributions.each do |hvac_distribution|
@@ -1941,21 +1936,10 @@ class OSModel
       # Connect AirLoopHVACs to ducts
       added_ducts = false
       hvac_distribution.hvac_systems.each do |hvac_system|
-        (model.getAirLoopHVACs + model.getZoneHVACFourPipeFanCoils).each do |object|
-          sys_id = object.additionalProperties.getFeatureAsString('HPXML_ID')
-          next unless sys_id.is_initialized && sys_id.get == hvac_system.id
+        next if airloop_map[hvac_system.id].nil?
 
-          if duct_systems[air_ducts].nil?
-            duct_systems[air_ducts] = object
-            added_ducts = true
-          elsif duct_systems[air_ducts] != object
-            # Multiple air loops associated with this duct system, treat
-            # as separate duct systems.
-            air_ducts2 = create_ducts(runner, model, hvac_distribution, spaces)
-            duct_systems[air_ducts2] = object
-            added_ducts = true
-          end
-        end
+        duct_systems[air_ducts] = airloop_map[hvac_system.id]
+        added_ducts = true
       end
       if not added_ducts
         fail 'Unexpected error adding ducts to model.'
@@ -1963,7 +1947,7 @@ class OSModel
     end
 
     Airflow.apply(model, runner, weather, spaces, @hpxml, @cfa, @nbeds,
-                  @ncfl_ag, duct_systems, @clg_ssn_sensor, @eri_version,
+                  @ncfl_ag, duct_systems, airloop_map, @clg_ssn_sensor, @eri_version,
                   @frac_windows_operable, @apply_ashrae140_assumptions, @schedules_file)
   end
 
