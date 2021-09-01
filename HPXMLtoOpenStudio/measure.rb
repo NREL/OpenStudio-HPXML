@@ -258,7 +258,7 @@ class OSModel
     add_heating_system(runner, model, spaces)
     add_heat_pump(runner, model, weather, spaces)
     add_dehumidifiers(runner, model, spaces)
-    # add_residual_ideal_system(runner, model, spaces) # FIXME
+    add_residual_ideal_system(runner, model, spaces)
     add_ceiling_fans(runner, model, weather, spaces)
 
     # Hot Water
@@ -1825,6 +1825,9 @@ class OSModel
     else
       sequential_heat_load_frac = 0.0 # no heating system, don't add ideal air for heating either
     end
+
+    sequential_heat_load_frac = 0.00001 # FIXME
+    sequential_cool_load_frac = 0.00001 # FIXME
 
     if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
       # Note: Residual ideal air system is configured to run year-round; it should not depend

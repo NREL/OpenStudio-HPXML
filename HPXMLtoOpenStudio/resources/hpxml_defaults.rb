@@ -970,6 +970,7 @@ class HPXMLDefaults
     # Detailed HVAC performance
     hpxml.cooling_systems.each do |cooling_system|
       clg_ap = cooling_system.additional_properties
+      HVAC.set_demand_flexibility(cooling_system)
       if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
         # Note: We use HP cooling curve so that a central AC behaves the same.
         HVAC.set_num_speeds(cooling_system)
@@ -1009,6 +1010,7 @@ class HPXMLDefaults
     end
     hpxml.heating_systems.each do |heating_system|
       htg_ap = heating_system.additional_properties
+      HVAC.set_demand_flexibility(heating_system)
       next unless [HPXML::HVACTypeStove,
                    HPXML::HVACTypePortableHeater,
                    HPXML::HVACTypeFixedHeater,
