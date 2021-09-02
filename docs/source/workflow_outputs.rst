@@ -162,6 +162,8 @@ Annual building loads are listed below.
    Load: Hot Water: Solar Thermal (MBtu) Load served by the solar thermal system.
    ===================================== ==================================================================
 
+Note that heating and cooling loads represent the delivered energy by the HVAC system; if the HVAC system is significantly undersized, there will be unmet load not reflected by these values.
+
 Annual Unmet Hours
 ~~~~~~~~~~~~~~~~~~
 
