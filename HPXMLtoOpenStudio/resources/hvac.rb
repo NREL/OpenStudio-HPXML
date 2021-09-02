@@ -262,7 +262,6 @@ class HVAC
     if not hp_ap.demand_flexibility
       # Unitary System
       air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, hp_ap.supp_max_temp)
-      hvac_map[heat_pump.id] << air_loop_unitary
 
       # Unitary System Performance
       if num_speeds > 1
@@ -341,7 +340,6 @@ class HVAC
 
       # Unitary System
       air_loop_unitary = create_air_loop_unitary_hp(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, hp_ap.supp_max_temp, grid_clg_coil, chiller_coil, supp_chiller_coil, storage)
-      hvac_map[heat_pump.id] << air_loop_unitary
     end
 
     # Air Loop
