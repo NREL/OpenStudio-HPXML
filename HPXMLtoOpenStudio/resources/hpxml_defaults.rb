@@ -1305,7 +1305,7 @@ class HPXMLDefaults
         end
         if water_heating_system.tank_model_type.nil?
           water_heating_system.tank_model_type = HPXML::WaterHeaterTankModelTypeMixed
-          water_heating_system.tank_model_type = true
+          water_heating_system.tank_model_type_isdefaulted = true
         end
       end
       if water_heating_system.location.nil?

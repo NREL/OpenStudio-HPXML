@@ -223,7 +223,7 @@ class OSModel
     @schedules_file = nil
     unless @hpxml.header.schedules_filepath.nil?
       @schedules_file = SchedulesFile.new(runner: runner, model: model, year: hpxml.header.sim_calendar_year,
-                                          schedules_path: @hpxml.header.schedules_filepath)
+                                          schedules_path: @hpxml.header.schedules_filepath, col_names: Constants.ScheduleColNames.keys)
     end
 
     # Conditioned space/zone
@@ -1564,7 +1564,7 @@ class OSModel
 
       sys_id = water_heating_system.id
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
-        plantloop_map[sys_id] = Waterheater.apply_tank(model, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system)
+        plantloop_map[sys_id] = Waterheater.apply_tank(model, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, @hpxml.header.sim_calendar_year)
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
         plantloop_map[sys_id] = Waterheater.apply_tankless(model, loc_space, loc_schedule, water_heating_system, ec_adj, @nbeds, solar_thermal_system)
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump

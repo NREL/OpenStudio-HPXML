@@ -399,7 +399,8 @@
             <EnergyFactor>0.95</EnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
             <extension>
-              <SetpointType>schedule</SetpointType>
+              <SetpointType>scheduled</SetpointType>
+              <SetpointScheduleFilepath>HPXMLtoOpenStudio/resources/schedule_files/hourly_setpoint_schedule.csv</SetpointScheduleFilepath>
             </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>

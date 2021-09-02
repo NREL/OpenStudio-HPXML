@@ -4562,6 +4562,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     end
   elsif ['base-dhw-tank-setpoint-type-scheduled.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].setpoint_type = HPXML::WaterHeaterSetpointTypeScheduled
+    hpxml.water_heating_systems[0].setpoint_schedule_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/hourly_setpoint_schedule.csv'
   elsif ['base-dhw-tank-model-type-stratified.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file

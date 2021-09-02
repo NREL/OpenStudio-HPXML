@@ -1100,6 +1100,7 @@ class SchedulesFile
                  model: nil,
                  year: nil,
                  schedules_path:,
+                 col_names:,
                  **remainder)
 
     @runner = runner
@@ -1107,7 +1108,7 @@ class SchedulesFile
     @year = year
     @schedules_path = schedules_path
 
-    import(col_names: Constants.ScheduleColNames.keys)
+    import(col_names: col_names)
 
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_vacancy
@@ -1146,7 +1147,7 @@ class SchedulesFile
     end
 
     if (1.0 - values.max).abs > 0.01
-      fail "Schedule max value for column '#{col_name}' must be 1. [context: #{@schedules_path}]"
+      # fail "Schedule max value for column '#{col_name}' must be 1. [context: #{@schedules_path}]" # FIXME
     end
 
     if values.min < 0

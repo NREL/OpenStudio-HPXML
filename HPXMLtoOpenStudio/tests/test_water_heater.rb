@@ -1120,7 +1120,22 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
   end
 
   def test_tank_scheduled
-    # TODO
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-setpoint-type-scheduled.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    water_heating_system = hpxml.water_heating_systems[0]
+
+    # Expected value
+
+    # Check water heater
+    assert_equal(1, model.getWaterHeaterMixeds.size)
+    wh = model.getWaterHeaterMixeds[0]
+
+    # Check schedule
+    assert_equal(1, model.getScheduleFiles.size)
+    sch = model.getScheduleFiles[0]
   end
 
   def test_tank_stratified
