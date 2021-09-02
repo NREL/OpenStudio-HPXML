@@ -356,7 +356,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -377,7 +376,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => true,
                   'include_timeseries_total_loads' => true,
                   'include_timeseries_component_loads' => true,
-                  'include_timeseries_unmet_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true }
@@ -397,7 +395,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -419,7 +416,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -441,7 +437,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => true,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -463,7 +458,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => true,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -486,7 +480,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => true,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -500,28 +493,6 @@ class SimulationOutputReportTest < MiniTest::Test
     _check_for_nonzero_timeseries_value(timeseries_csv, ['Component Load: Heating: Internal Gains', 'Component Load: Cooling: Internal Gains'])
   end
 
-  def test_timeseries_hourly_unmet_loads
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-hvac-undersized.xml',
-                  'timeseries_frequency' => 'hourly',
-                  'include_timeseries_fuel_consumptions' => false,
-                  'include_timeseries_end_use_consumptions' => false,
-                  'include_timeseries_hot_water_uses' => false,
-                  'include_timeseries_total_loads' => false,
-                  'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => true,
-                  'include_timeseries_zone_temperatures' => false,
-                  'include_timeseries_airflows' => false,
-                  'include_timeseries_weather' => false }
-    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
-    assert(File.exist?(annual_csv))
-    assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsUnmetLoads
-    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
-    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsUnmetLoads)
-  end
-
   def test_timeseries_hourly_zone_temperatures
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
@@ -530,7 +501,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -552,7 +522,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -581,7 +550,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => false }
@@ -603,7 +571,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => false }
@@ -627,7 +594,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => false }
@@ -649,7 +615,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => false }
@@ -671,7 +636,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => false }
@@ -693,7 +657,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => true }
@@ -715,7 +678,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => true,
                   'include_timeseries_total_loads' => true,
                   'include_timeseries_component_loads' => true,
-                  'include_timeseries_unmet_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true }
@@ -737,7 +699,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => true,
                   'include_timeseries_total_loads' => true,
                   'include_timeseries_component_loads' => true,
-                  'include_timeseries_unmet_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true }
@@ -759,7 +720,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => true,
                   'include_timeseries_total_loads' => true,
                   'include_timeseries_component_loads' => true,
-                  'include_timeseries_unmet_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true }
@@ -781,7 +741,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -799,7 +758,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -817,7 +775,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -835,7 +792,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -853,7 +809,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -871,7 +826,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -889,7 +843,6 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false,
-                  'include_timeseries_unmet_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false }
@@ -921,7 +874,6 @@ class SimulationOutputReportTest < MiniTest::Test
                     'include_timeseries_hot_water_uses' => true,
                     'include_timeseries_total_loads' => true,
                     'include_timeseries_component_loads' => true,
-                    'include_timeseries_unmet_loads' => true,
                     'include_timeseries_zone_temperatures' => true,
                     'include_timeseries_airflows' => true,
                     'include_timeseries_weather' => true }

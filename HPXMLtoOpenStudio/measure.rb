@@ -259,7 +259,6 @@ class OSModel
     add_heating_system(runner, model, spaces, airloop_map)
     add_heat_pump(runner, model, weather, spaces, airloop_map)
     add_dehumidifiers(runner, model, spaces)
-    add_residual_ideal_system(runner, model, spaces)
     add_ceiling_fans(runner, model, weather, spaces)
 
     # Hot Water
@@ -1787,35 +1786,6 @@ class OSModel
 
     if (sequential_heat_load_fracs.sum > 0.0) || (sequential_cool_load_fracs.sum > 0.0)
       HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                 living_zone)
-    end
-  end
-
-  def self.add_residual_ideal_system(runner, model, spaces)
-    # Adds a residual ideal air system to meet loads not met by all preceding HVAC systems (i.e., because
-    # the HVAC systems are undersized to meet the load). This allows us to correctly calculate total
-    # heating/cooling loads without having to run an additional EnergyPlus simulation solely for that purpose,
-    # as well as allows us to report the unmet load (i.e., the energy transferred by this ideal air system).
-
-    living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
-    obj_name = Constants.ObjectNameIdealAirSystemResidual
-
-    if @remaining_cool_load_frac < 1.0
-      sequential_cool_load_frac = 1.0
-    else
-      sequential_cool_load_frac = 0.0 # no cooling system, don't add ideal air for cooling either
-    end
-
-    if @remaining_heat_load_frac < 1.0
-      sequential_heat_load_frac = 1.0
-    else
-      sequential_heat_load_frac = 0.0 # no heating system, don't add ideal air for heating either
-    end
-
-    if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
-      # Note: Residual ideal air system is configured to run year-round; it should not depend
-      # on the HVAC system availability.
-      HVAC.apply_ideal_air_loads(model, runner, obj_name, [sequential_cool_load_frac], [sequential_heat_load_frac],
                                  living_zone)
     end
   end
