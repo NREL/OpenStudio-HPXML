@@ -193,7 +193,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       include_timeseries_end_use_consumptions = true
     end
 
-    # End Use/Hot Water Use/Unmet Load/Ideal Load outputs
+    # End Use/Hot Water Use/Ideal Load outputs
     { @end_uses.values => include_timeseries_end_use_consumptions,
       @hot_water_uses.values => include_timeseries_hot_water_uses,
       @ideal_system_loads.values => false }.each do |uses, include_timeries|
