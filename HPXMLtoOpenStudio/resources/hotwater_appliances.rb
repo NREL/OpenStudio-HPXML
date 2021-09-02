@@ -43,6 +43,8 @@ class HotWaterAndAppliances
           # Get water heater setpoint schedule
           if dhw_object.is_a? OpenStudio::Model::WaterHeaterMixed
             setpoint_scheds[sys_id] = dhw_object.setpointTemperatureSchedule.get
+          elsif dhw_object.is_a? OpenStudio::Model::WaterHeaterStratified
+            setpoint_scheds[sys_id] = dhw_object.heater1SetpointTemperatureSchedule
           elsif dhw_object.is_a? OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser
             setpoint_scheds[sys_id] = dhw_object.compressorSetpointTemperatureSchedule
           end
