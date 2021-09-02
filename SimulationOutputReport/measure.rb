@@ -1797,6 +1797,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
           end
         end
         if parent.empty?
+          parent = model.getAirLoopHVACUnitaryHeatPumpAirToAirs.select { |u| u.coolingCoil.handle.to_s == object.handle.to_s }
+          if not parent.empty?
+            htg_coil = parent[0].heatingCoil
+          end
+        end
+        if parent.empty?
           fail 'Could not find parent object.'
         end
 
