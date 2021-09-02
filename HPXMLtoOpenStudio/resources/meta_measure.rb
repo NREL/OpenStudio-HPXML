@@ -163,7 +163,29 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
   return { success: true, runner: runner, sim_time: sim_time }
 end
 
-def apply_measures(measures_dir, measures, runner, model, show_measure_calls = true, measure_type = 'OpenStudio::Measure::ModelMeasure')
+def apply_measures(measures_dir, measures, runner, model, show_measure_calls = true, measure_type = 'OpenStudio::Measure::ModelMeasure', osw_out = nil)
+  if not osw_out.nil?
+    # Create a workflow based on the measures we're going to call. Convenient for debugging.
+    workflowJSON = OpenStudio::WorkflowJSON.new
+    workflowJSON.setOswPath(File.expand_path("../#{osw_out}"))
+    workflowJSON.addMeasurePath('measures')
+    workflowJSON.addMeasurePath('resources/hpxml-measures')
+    steps = OpenStudio::WorkflowStepVector.new
+    measures.each do |measure_subdir, args_array|
+      args_array.each do |args|
+        step = OpenStudio::MeasureStep.new(measure_subdir)
+        args.each do |k, v|
+          next if v.nil?
+
+          step.setArgument(k, "#{v}")
+        end
+        steps.push(step)
+      end
+    end
+    workflowJSON.setWorkflowSteps(steps)
+    workflowJSON.save
+  end
+
   # Call each measure in the specified order
   measures.keys.each do |measure_subdir|
     # Gather measure arguments and call measure
@@ -308,6 +330,19 @@ def get_argument_map(model, measure, provided_args, lookup_file, measure_name, r
   return argument_map
 end
 
+def get_value_from_workflow_step_value(step_value)
+  variant_type = step_value.variantType
+  if variant_type == 'Boolean'.to_VariantType
+    return step_value.valueAsBoolean
+  elsif variant_type == 'Double'.to_VariantType
+    return step_value.valueAsDouble
+  elsif variant_type == 'Integer'.to_VariantType
+    return step_value.valueAsInteger
+  elsif variant_type == 'String'.to_VariantType
+    return step_value.valueAsString
+  end
+end
+
 def run_measure(model, measure, argument_map, runner)
   begin
     # run the measure
@@ -330,6 +365,11 @@ def run_measure(model, measure, argument_map, runner)
     end
     if result_child.finalCondition.is_initialized
       runner.registerFinalCondition(result_child.finalCondition.get.logMessage)
+    end
+
+    # re-register runner child registered values on the parent runner
+    result_child.stepValues.each do |step_value|
+      runner.registerValue(step_value.name, get_value_from_workflow_step_value(step_value))
     end
 
     # log messages

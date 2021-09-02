@@ -70,7 +70,7 @@ class HPXMLOutputReport < OpenStudio::Measure::ReportingMeasure
     model.setSqlFile(sqlFile)
 
     hpxml_defaults_path = model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
-    hpxml_defaults_path = HPXML.new(hpxml_path: hpxml_defaults_path)
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
 
     # Set paths
     output_dir = File.dirname(sqlFile.path.to_s)
@@ -95,14 +95,50 @@ class HPXMLOutputReport < OpenStudio::Measure::ReportingMeasure
     cost_multipliers[BS::WindowArea] = BaseOutput.new
     cost_multipliers[BS::DoorArea] = BaseOutput.new
     cost_multipliers[BS::DuctUnconditionedSurfaceArea] = BaseOutput.new
-    cost_multipliers[BS::SizeHeatingSystem] = BaseOutput.new
-    cost_multipliers[BS::SizeSecondaryHeatingSystem] = BaseOutput.new
-    cost_multipliers[BS::SizeHeatPumpBackup] = BaseOutput.new
-    cost_multipliers[BS::SizeCoolingSystem] = BaseOutput.new
     cost_multipliers[BS::SizeWaterHeater] = BaseOutput.new
     cost_multipliers[BS::FlowRateMechanicalVentilation] = BaseOutput.new
     cost_multipliers[BS::SlabPerimeterExposedConditioned] = BaseOutput.new
     cost_multipliers[BS::RimJoistAreaAboveGradeExterior] = BaseOutput.new
+
+    hpxml.heating_systems.each do |heating_system|
+      cost_multipliers["#{BS::SizeHeatingSystem}: #{heating_system.id}"] = BaseOutput.new
+    end
+
+    hpxml.cooling_systems.each do |cooling_system|
+      cost_multipliers["#{BS::SizeCoolingSystem}: #{cooling_system.id}"] = BaseOutput.new
+    end
+
+    hpxml.heat_pumps.each do |heat_pump|
+      cost_multipliers["#{BS::SizeHeatingSystem}: #{heat_pump.id}"] = BaseOutput.new
+      cost_multipliers["#{BS::SizeCoolingSystem}: #{heat_pump.id}"] = BaseOutput.new
+      cost_multipliers["#{BS::SizeHeatPumpBackup}: #{heat_pump.id}"] = BaseOutput.new
+    end
+
+    # Cost Multipliers
+    cost_multipliers.each do |cost_mult_type, cost_mult|
+      cost_mult.output = get_cost_multiplier(hpxml, cost_mult_type)
+    end
+
+    # hpxml.heating_systems.each do |heating_system|
+    # next if !heating_system.primary_system
+
+    # cost_multipliers["#{BS::SizeHeatingSystem}: Primary"] = cost_multipliers["#{BS::SizeHeatingSystem}: #{heating_system.id}"]
+    # end
+
+    # hpxml.cooling_systems.each do |cooling_system|
+    # next if !cooling_system.primary_system
+
+    # cost_multipliers["#{BS::SizeCoolingSystem}: Primary"] = cost_multipliers["#{BS::SizeCoolingSystem}: #{cooling_system.id}"]
+    # end
+
+    # hpxml.heat_pumps.each do |heat_pump|
+    # if heat_pump.primary_heating_system
+    # cost_multipliers["#{BS::SizeHeatingSystem}: Primary"] = cost_multipliers["#{BS::SizeHeatingSystem}: #{heat_pump.id}"]
+    # end
+    # if heat_pump.primary_cooling_system
+    # cost_multipliers["#{BS::SizeCoolingSystem}: Primary"] = cost_multipliers["#{BS::SizeCoolingSystem}: #{heat_pump.id}"]
+    # end
+    # end
 
     cost_multipliers.each do |cost_mult_type, cost_mult|
       cost_mult.name = "Building Summary: #{cost_mult_type}"
@@ -118,17 +154,15 @@ class HPXMLOutputReport < OpenStudio::Measure::ReportingMeasure
         end
       elsif cost_mult_type.include?('Flow')
         cost_mult.units = 'cfm'
-      else
+      elsif cost_mult_type == 'Fixed'
         cost_mult.units = '1'
+      else
+        fail "Unable to assign units to: #{cost_mult_type}"
       end
     end
 
-    # Cost Multipliers
+    # Report results
     cost_multipliers.each do |cost_mult_type, cost_mult|
-      cost_mult.output = get_cost_multiplier(hpxml_defaults_path, cost_mult_type)
-
-      # Report results
-      next if cost_mult_type.empty?
       next if cost_mult_type.include?('Fixed')
 
       cost_mult_type_str = OpenStudio::toUnderscoreCase(cost_mult_type)
@@ -237,33 +271,35 @@ class HPXMLOutputReport < OpenStudio::Measure::ReportingMeasure
           cost_mult += duct.duct_surface_area
         end
       end
-    elsif cost_mult_type == 'Size Heating System'
+    elsif cost_mult_type.include? 'Size Heating System'
       hpxml.heating_systems.each do |heating_system|
-        next if heating_system.id != 'HeatingSystem'
+        next if heating_system.id != cost_mult_type.split(': ')[1]
 
         cost_mult += UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr')
       end
 
       hpxml.heat_pumps.each do |heat_pump|
+        next if heat_pump.id != cost_mult_type.split(': ')[1]
+
         cost_mult += UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr')
       end
-    elsif cost_mult_type == 'Size Secondary Heating System'
-      hpxml.heating_systems.each do |heating_system|
-        next if heating_system.id != 'SecondHeatingSystem'
-
-        cost_mult += UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr')
-      end
-    elsif cost_mult_type == 'Size Heat Pump Backup'
-      hpxml.heat_pumps.each do |heat_pump|
-        cost_mult += UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'kbtu/hr')
-      end
-    elsif cost_mult_type == 'Size Cooling System'
+    elsif cost_mult_type.include? 'Size Cooling System'
       hpxml.cooling_systems.each do |cooling_system|
+        next if cooling_system.id != cost_mult_type.split(': ')[1]
+
         cost_mult += UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr')
       end
 
       hpxml.heat_pumps.each do |heat_pump|
+        next if heat_pump.id != cost_mult_type.split(': ')[1]
+
         cost_mult += UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr')
+      end
+    elsif cost_mult_type.include? 'Size Heat Pump Backup'
+      hpxml.heat_pumps.each do |heat_pump|
+        next if heat_pump.id != cost_mult_type.split(': ')[1]
+
+        cost_mult += UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'kbtu/hr')
       end
     elsif cost_mult_type == 'Size Water Heater'
       hpxml.water_heating_systems.each do |water_heating_system|

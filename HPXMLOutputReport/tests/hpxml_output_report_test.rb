@@ -20,23 +20,33 @@ class HPXMLOutputReportTest < MiniTest::Test
     'Building Summary: Window Area (ft^2)',
     'Building Summary: Door Area (ft^2)',
     'Building Summary: Duct Unconditioned Surface Area (ft^2)',
-    'Building Summary: Size Heating System (kBtu/h)',
-    'Building Summary: Size Secondary Heating System (kBtu/h)',
-    'Building Summary: Size Heat Pump Backup (kBtu/h)',
-    'Building Summary: Size Cooling System (kBtu/h)',
+    'Building Summary: Size Heating System: HeatingSystem (kBtu/h)',
+    'Building Summary: Size Cooling System: CoolingSystem (kBtu/h)',
     'Building Summary: Size Water Heater (gal)',
     'Building Summary: Flow Rate Mechanical Ventilation (cfm)',
     'Building Summary: Slab Perimeter Exposed Conditioned (ft)',
     'Building Summary: Rim Joist Area Above-Grade Exterior (ft^2)',
   ]
 
-  def test_hpxml_output
+  def test_base_hpxml_output
     args_hash = {}
     hpxml_csv = _test_measure(args_hash)
     assert(File.exist?(hpxml_csv))
     expected_rows = Rows
     actual_rows = File.readlines(hpxml_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
     assert_equal(expected_rows.sort, actual_rows.sort)
+  end
+
+  def test_base_hpxml_output_with_primary_systems
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-hvac-multiple2.xml' }
+    hpxml_csv = _test_measure(args_hash)
+    assert(File.exist?(hpxml_csv))
+    actual_rows = File.readlines(hpxml_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
+    puts actual_rows
+    assert_includes(actual_rows.sort, 'Building Summary: Size Heating System: Primary (kBtu/h)')
+    # assert_includes(actual_rows.sort, 'Building Summary: Size Heating System: Secondary (kBtu/h)')
+    assert_includes(actual_rows.sort, 'Building Summary: Size Cooling System: Primary (kBtu/h)')
+    # assert_includes(actual_rows.sort, 'Building Summary: Size Cooling System: Secondary (kBtu/h)')
   end
 
   def test_base_xml
@@ -56,10 +66,8 @@ class HPXMLOutputReportTest < MiniTest::Test
       'Building Summary: Window Area (ft^2)' => 360.0,
       'Building Summary: Door Area (ft^2)' => 40.0,
       'Building Summary: Duct Unconditioned Surface Area (ft^2)' => 200.0,
-      'Building Summary: Size Heating System (kBtu/h)' => 36.0,
-      'Building Summary: Size Secondary Heating System (kBtu/h)' => 0.0,
-      'Building Summary: Size Heat Pump Backup (kBtu/h)' => 0.0,
-      'Building Summary: Size Cooling System (kBtu/h)' => 24.0,
+      'Building Summary: Size Heating System: HeatingSystem (kBtu/h)' => 36.0,
+      'Building Summary: Size Cooling System: CoolingSystem (kBtu/h)' => 24.0,
       'Building Summary: Size Water Heater (gal)' => 40.0,
       'Building Summary: Flow Rate Mechanical Ventilation (cfm)' => 0.0,
       'Building Summary: Slab Perimeter Exposed Conditioned (ft)' => 150.0,
