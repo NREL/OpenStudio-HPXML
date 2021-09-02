@@ -1337,7 +1337,7 @@ class Waterheater
     if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
       # EMS Output Variables for combi dhw energy reporting (before EC_adj is applied)
 
-      # Increase DHW energy use:
+      # DHW energy use:
       boiler_dhw_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'boiler_dhw_energy')
       boiler_dhw_output_var.setName("#{Constants.ObjectNameCombiWaterHeatingEnergy(heater.name)} outvar")
       boiler_dhw_output_var.setTypeOfDataInVariable('Summed')
@@ -1347,7 +1347,7 @@ class Waterheater
       boiler_dhw_output_var.additionalProperties.setFeature('FuelType', EPlus.fuel_type(fuel_type)) # Used by reporting measure
       boiler_dhw_output_var.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
 
-      # Decrease space heating energy use:
+      # Space heating energy use:
       boiler_htg_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'boiler_htg_energy')
       boiler_htg_output_var.setName("#{Constants.ObjectNameCombiSpaceHeatingEnergy(heater.name)} outvar")
       boiler_htg_output_var.setTypeOfDataInVariable('Summed')
