@@ -487,6 +487,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Unmet Hours
     @unmet_hours.each do |key, unmet_hour|
+      if (key == UHT::Heating && @hpxml.total_fraction_heat_load_served <= 0) ||
+         (key == UHT::Cooling && @hpxml.total_fraction_cool_load_served <= 0)
+        next # Don't report unmet hours if there is no heating/cooling system
+      end
+
       unmet_hour.annual_output = get_tabular_data_value('SystemSummary', 'Entire Facility', 'Time Setpoint Not Met', ['LIVING SPACE'], unmet_hour.col_name, unmet_hour.annual_units)
     end
 
