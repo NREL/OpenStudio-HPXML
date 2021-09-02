@@ -1374,11 +1374,11 @@ class HPXMLTest < MiniTest::Test
     unmet_hours_htg = results.select { |k, v| k.include? 'Unmet Hours: Heating' }.map { |k, v| v }.sum(0.0)
     unmet_hours_clg = results.select { |k, v| k.include? 'Unmet Hours: Cooling' }.map { |k, v| v }.sum(0.0)
     if hpxml_path.include? 'base-hvac-undersized.xml'
-      assert_operator(unmet_htg_load, :>, 1000)
-      assert_operator(unmet_clg_load, :>, 1000)
+      assert_operator(unmet_hours_htg, :>, 1000)
+      assert_operator(unmet_hours_clg, :>, 1000)
     else
-      assert_operator(unmet_htg_load, :<, 100)
-      assert_operator(unmet_clg_load, :<, 100)
+      assert_operator(unmet_hours_htg, :<, 100)
+      assert_operator(unmet_hours_clg, :<, 100)
     end
 
     sqlFile.close
