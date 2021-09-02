@@ -1591,7 +1591,7 @@ class Waterheater
 
       setpoint_schedule_file = nil
       unless water_heating_system.setpoint_schedule_filepath.nil?
-        setpoint_schedule_file = SchedulesFile.new(model: model, year: year, schedules_path: water_heating_system.setpoint_schedule_filepath, col_names: ['water_heater_setpoint'])
+        setpoint_schedule_file = SchedulesFile.new(model: model, year: year, schedules_path: water_heating_system.setpoint_schedule_filepath, col_names: ['water_heater_setpoint'], schedule_max_val: 150)
       end
     end
 

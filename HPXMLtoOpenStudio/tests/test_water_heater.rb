@@ -1119,7 +1119,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
   end
 
-  def test_tank_heat_pump_scheduled
+  def test_tank_heat_pump_setpoint_scheduled
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-heat-pump-setpoint-type-scheduled.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -1157,7 +1157,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     # sch = model.getScheduleFiles[0]
   end
 
-  def test_tank_scheduled
+  def test_tank_mixed_setpoint_scheduled
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-setpoint-type-scheduled.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -1176,7 +1176,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     sch = model.getScheduleFiles[0]
   end
 
-  def test_tank_stratified
+  def test_tank_stratified_setpoint_constant
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-model-type-stratified.xml'))
     model, hpxml = _test_measure(args_hash)

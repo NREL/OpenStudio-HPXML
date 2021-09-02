@@ -1101,12 +1101,14 @@ class SchedulesFile
                  year: nil,
                  schedules_path:,
                  col_names:,
+                 schedule_max_val: 1,
                  **remainder)
 
     @runner = runner
     @model = model
     @year = year
     @schedules_path = schedules_path
+    @schedule_max_val = schedule_max_val
 
     import(col_names: col_names)
 
@@ -1146,8 +1148,8 @@ class SchedulesFile
       fail "Schedule value must be numeric for column '#{col_name}'. [context: #{@schedules_path}]"
     end
 
-    if (1.0 - values.max).abs > 0.01
-      # fail "Schedule max value for column '#{col_name}' must be 1. [context: #{@schedules_path}]" # FIXME
+    if (@schedule_max_val - values.max).abs > 0.01
+      fail "Schedule max value for column '#{col_name}' must be #{@schedule_max_val}. [context: #{@schedules_path}]"
     end
 
     if values.min < 0

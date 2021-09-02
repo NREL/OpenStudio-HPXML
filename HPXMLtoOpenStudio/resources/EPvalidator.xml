@@ -1116,8 +1116,6 @@
       <sch:assert role='ERROR' test='count(h:FractionDHWLoadServed) = 1'>Expected 1 element(s) for xpath: FractionDHWLoadServed</sch:assert>
       <sch:assert role='ERROR' test='count(h:HotWaterTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HotWaterTemperature</sch:assert>
       <sch:assert role='ERROR' test='count(h:UsesDesuperheater) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UsesDesuperheater</sch:assert> <!-- See [Desuperheater] -->
-      <sch:assert role='ERROR' test='count(h:extension/h:SetpointType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/SetpointType</sch:assert>
-      <sch:assert role='ERROR' test='h:extension/h:SetpointType[text()="constant" or text()="scheduled"] or not(h:extension/h:SetpointType)'>Expected SetpointType to be 'constant' or 'scheduled'</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -1144,8 +1142,10 @@
       <sch:assert role='ERROR' test='number(h:EnergyFactor) &lt; 1 or not(h:EnergyFactor)'>Expected EnergyFactor to be less than 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:RecoveryEfficiency) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RecoveryEfficiency</sch:assert>
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
-      <sch:assert role='ERROR' test='count(h:/extension/h:TankModelType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/TankModelType</sch:assert>
-      <sch:assert role='ERROR' test='h:extension/h:TankModelType[text()="mixed" or text()="stratified"] or not(h:extension/h:TankModelType)'>Expected TankModelType to be 'mixed' or 'stratified'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:SetpointType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/SetpointType</sch:assert>
+      <sch:assert role='ERROR' test='h:extension/h:SetpointType[text()="constant" or text()="scheduled"] or not(h:extension/h:SetpointType)'>Expected extension/SetpointType to be 'constant' or 'scheduled'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:TankModelType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/TankModelType</sch:assert>
+      <sch:assert role='ERROR' test='h:extension/h:TankModelType[text()="mixed" or text()="stratified"] or not(h:extension/h:TankModelType)'>Expected extension/TankModelType to be 'mixed' or 'stratified'</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -1171,6 +1171,8 @@
       <sch:assert role='ERROR' test='number(h:UniformEnergyFactor) &gt; 1 or not(h:UniformEnergyFactor)'>Expected UniformEnergyFactor to be greater than 1</sch:assert>
       <sch:assert role='ERROR' test='number(h:EnergyFactor) &gt; 1 or not(h:EnergyFactor)'>Expected EnergyFactor to be greater than 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:SetpointType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/SetpointType</sch:assert>
+      <sch:assert role='ERROR' test='h:extension/h:SetpointType[text()="constant" or text()="scheduled"] or not(h:extension/h:SetpointType)'>Expected extension/SetpointType to be 'constant' or 'scheduled'</sch:assert>
     </sch:rule>
   </sch:pattern>
 
