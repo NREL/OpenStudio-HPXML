@@ -1741,7 +1741,6 @@ class OSModel
     # 1. the sum of fractions load served is less than 1, or
     # 2. there are non-year-round HVAC seasons, or
     # 3. we're using an ideal air system for e.g. ASHRAE 140 loads calculation.
-    # The energy transferred by this ideal air system is not counted towards unmet loads.
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     obj_name = Constants.ObjectNameIdealAirSystem
 
