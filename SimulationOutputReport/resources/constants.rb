@@ -89,8 +89,8 @@ class CLT
   InternalGains = 'Internal Gains'
 end
 
-class ULT
-  # Unmet Load Types
+class UHT
+  # Unmet Hours Types
   Heating = 'Heating'
   Cooling = 'Cooling'
 end
