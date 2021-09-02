@@ -1119,6 +1119,44 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
   end
 
+  def test_tank_heat_pump_scheduled
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-heat-pump-setpoint-type-scheduled.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    water_heating_system = hpxml.water_heating_systems[0]
+
+    # Expected value
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
+    fuel = EPlus.fuel_type(water_heating_system.fuel_type)
+    u =  0.925
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') - 9
+    ther_eff = 1.0
+    cop = 2.820
+    tank_height = 1.598
+
+    # Check water heater
+    assert_equal(1, model.getWaterHeaterHeatPumpWrappedCondensers.size)
+    assert_equal(1, model.getWaterHeaterStratifieds.size)
+    hpwh = model.getWaterHeaterHeatPumpWrappedCondensers[0]
+    wh = hpwh.tank.to_WaterHeaterStratified.get
+    coil = hpwh.dXCoil.to_CoilWaterHeatingAirToWaterHeatPumpWrapped.get
+    assert_equal(fuel, wh.heaterFuelType)
+    assert_equal('Schedule', wh.ambientTemperatureIndicator)
+    assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
+    assert_in_epsilon(tank_height, wh.tankHeight.get, 0.001)
+    assert_in_epsilon(4500.0, wh.heater1Capacity.get, 0.001)
+    assert_in_epsilon(4500.0, wh.heater2Capacity, 0.001)
+    assert_in_epsilon(u, wh.uniformSkinLossCoefficientperUnitAreatoAmbientTemperature.get, 0.001)
+    assert_in_epsilon(t_set, wh.heater1SetpointTemperatureSchedule.to_ScheduleConstant.get.value, 0.001)
+    assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency, 0.001)
+
+    # Check schedule
+    # assert_equal(1, model.getScheduleFiles.size)
+    # sch = model.getScheduleFiles[0]
+  end
+
   def test_tank_scheduled
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-setpoint-type-scheduled.xml'))

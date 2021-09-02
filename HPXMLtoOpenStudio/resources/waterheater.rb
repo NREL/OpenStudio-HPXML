@@ -68,7 +68,7 @@ class Waterheater
     return loop
   end
 
-  def self.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone)
+  def self.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone, year)
     obj_name_hpwh = Constants.ObjectNameWaterHeater
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
@@ -1586,41 +1586,16 @@ class Waterheater
       fuel = water_heating_system.fuel_type
       tank_type = water_heating_system.water_heater_type
       cap = water_heating_system.heating_capacity / 1000.0
-    end
+      tank_model_type = water_heating_system.tank_model_type
+      setpoint_type = water_heating_system.setpoint_type
 
-    tank_model_type = water_heating_system.tank_model_type
-    setpoint_type = water_heating_system.setpoint_type
-
-    setpoint_schedule_file = nil
-    unless water_heating_system.setpoint_schedule_filepath.nil?
-      setpoint_schedule_file = SchedulesFile.new(model: model, year: year, schedules_path: water_heating_system.setpoint_schedule_filepath, col_names: ['water_heater_setpoint'])
-    end
-
-    if tank_model_type == HPXML::WaterHeaterTankModelTypeMixed
-      new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
-      new_heater.setName(name)
-      new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
-      new_heater.setHeaterFuelType(EPlus.fuel_type(fuel)) unless fuel.nil?
-      configure_mixed_tank_setpoint_schedule(new_heater, setpoint_type, setpoint_schedule_file, t_set_c, model)
-      new_heater.setMaximumTemperatureLimit(99.0)
-      if [HPXML::WaterHeaterTypeTankless, HPXML::WaterHeaterTypeCombiTankless].include? tank_type
-        new_heater.setHeaterControlType('Modulate')
-      else
-        new_heater.setHeaterControlType('Cycle')
+      setpoint_schedule_file = nil
+      unless water_heating_system.setpoint_schedule_filepath.nil?
+        setpoint_schedule_file = SchedulesFile.new(model: model, year: year, schedules_path: water_heating_system.setpoint_schedule_filepath, col_names: ['water_heater_setpoint'])
       end
-      new_heater.setDeadbandTemperatureDifference(deadband(tank_type))
+    end
 
-      # Capacity, storage tank to be 0
-      new_heater.setHeaterMaximumCapacity(UnitConversions.convert(cap, 'kBtu/hr', 'W'))
-      new_heater.setHeaterMinimumCapacity(0.0)
-      new_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
-      set_wh_parasitic_parameters(oncycle_p, water_heating_system, new_heater, is_dsh_storage)
-      set_wh_ambient(loc_space, loc_schedule, model, new_heater)
-
-      ua_w_k = UnitConversions.convert(ua, 'Btu/(hr*F)', 'W/K')
-      new_heater.setOnCycleLossCoefficienttoAmbientTemperature(ua_w_k)
-      new_heater.setOffCycleLossCoefficienttoAmbientTemperature(ua_w_k)
-    elsif tank_model_type == HPXML::WaterHeaterTankModelTypeStratified
+    if tank_model_type == HPXML::WaterHeaterTankModelTypeStratified
       h_tank = 1.2192 # 4 feet in m, using the relationship currently assumed in BEopt
       # height of upper and lower element based on TRNSYS assumptions for an ERWH
       h_UE = 0.733333333 * h_tank # node 4
@@ -1668,6 +1643,30 @@ class Waterheater
       new_heater.setSourceSideFlowControlMode('')
       new_heater.setSourceSideInletHeight(0)
       new_heater.setSourceSideOutletHeight(0)
+    else # mixed tank or tankless
+      new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
+      new_heater.setName(name)
+      new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
+      new_heater.setHeaterFuelType(EPlus.fuel_type(fuel)) unless fuel.nil?
+      configure_mixed_tank_setpoint_schedule(new_heater, setpoint_type, setpoint_schedule_file, t_set_c, model)
+      new_heater.setMaximumTemperatureLimit(99.0)
+      if [HPXML::WaterHeaterTypeTankless, HPXML::WaterHeaterTypeCombiTankless].include? tank_type
+        new_heater.setHeaterControlType('Modulate')
+      else
+        new_heater.setHeaterControlType('Cycle')
+      end
+      new_heater.setDeadbandTemperatureDifference(deadband(tank_type))
+
+      # Capacity, storage tank to be 0
+      new_heater.setHeaterMaximumCapacity(UnitConversions.convert(cap, 'kBtu/hr', 'W'))
+      new_heater.setHeaterMinimumCapacity(0.0)
+      new_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
+      set_wh_parasitic_parameters(oncycle_p, water_heating_system, new_heater, is_dsh_storage)
+      set_wh_ambient(loc_space, loc_schedule, model, new_heater)
+
+      ua_w_k = UnitConversions.convert(ua, 'Btu/(hr*F)', 'W/K')
+      new_heater.setOnCycleLossCoefficienttoAmbientTemperature(ua_w_k)
+      new_heater.setOffCycleLossCoefficienttoAmbientTemperature(ua_w_k)
     end
 
     if not water_heating_system.nil?
@@ -1750,12 +1749,12 @@ class Waterheater
   end
 
   def self.configure_mixed_tank_setpoint_schedule(new_heater, set_type, set_sch_file, set_temp_c, model)
-    if set_type == HPXML::WaterHeaterSetpointTypeConstant
+    if set_type == HPXML::WaterHeaterSetpointTypeScheduled
+      new_schedule = set_sch_file.create_schedule_file(col_name: 'water_heater_setpoint')
+    else # constant
       new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
       new_schedule.setName('WH Setpoint Temp')
       new_schedule.setValue(set_temp_c)
-    elsif set_type == HPXML::WaterHeaterSetpointTypeScheduled
-      new_schedule = set_sch_file.create_schedule_file(col_name: 'water_heater_setpoint')
     end
     if new_heater.setpointTemperatureSchedule.is_initialized
       new_heater.setpointTemperatureSchedule.get.remove
@@ -1764,17 +1763,17 @@ class Waterheater
   end
 
   def self.configure_stratified_tank_setpoint_schedules(new_heater, set_type, set_sch_file, set_temp_c, model)
-    if set_type == HPXML::WaterHeaterSetpointTypeConstant
+    if set_type == HPXML::WaterHeaterSetpointTypeScheduled
+      new_schedule = set_sch_file.create_schedule_file(col_name: 'water_heater_setpoint')
+    else # constant
       new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
       new_schedule.setName('WH Setpoint Temp')
       new_schedule.setValue(set_temp_c)
-      new_heater.heater1SetpointTemperatureSchedule.remove
-      new_heater.heater2SetpointTemperatureSchedule.remove
-      new_heater.setHeater1SetpointTemperatureSchedule(new_schedule)
-      new_heater.setHeater2SetpointTemperatureSchedule(new_schedule)
-    elsif set_type == HPXML::WaterHeaterSetpointTypeScheduled
-      # TODO
     end
+    new_heater.heater1SetpointTemperatureSchedule.remove
+    new_heater.heater2SetpointTemperatureSchedule.remove
+    new_heater.setHeater1SetpointTemperatureSchedule(new_schedule)
+    new_heater.setHeater2SetpointTemperatureSchedule(new_schedule)
   end
 
   def self.get_set_temp_c(t_set, wh_type)

@@ -1569,7 +1569,7 @@ class OSModel
         plantloop_map[sys_id] = Waterheater.apply_tankless(model, loc_space, loc_schedule, water_heating_system, ec_adj, @nbeds, solar_thermal_system)
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
         living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
-        plantloop_map[sys_id] = Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone)
+        plantloop_map[sys_id] = Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone, @hpxml.header.sim_calendar_year)
       elsif [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
         plantloop_map[sys_id] = Waterheater.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system)
       else
