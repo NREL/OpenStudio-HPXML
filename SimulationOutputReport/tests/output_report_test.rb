@@ -111,8 +111,8 @@ class SimulationOutputReportTest < MiniTest::Test
     'Load: Hot Water: Tank Losses (MBtu)',
     'Load: Hot Water: Desuperheater (MBtu)',
     'Load: Hot Water: Solar Thermal (MBtu)',
-    'Unmet Load: Heating (MBtu)',
-    'Unmet Load: Cooling (MBtu)',
+    'Unmet Hours: Heating (hr)',
+    'Unmet Hours: Cooling (hr)',
     'Peak Electricity: Winter Total (W)',
     'Peak Electricity: Summer Total (W)',
     'Peak Load: Heating (kBtu)',
@@ -218,11 +218,6 @@ class SimulationOutputReportTest < MiniTest::Test
     'Component Load: Heating: Slabs',
     'Component Load: Heating: Walls',
     'Component Load: Heating: Windows',
-  ]
-
-  BaseHPXMLTimeseriesColsUnmetLoads = [
-    'Unmet Load: Heating',
-    'Unmet Load: Cooling',
   ]
 
   BaseHPXMLTimeseriesColsZoneTemps = [
@@ -341,7 +336,6 @@ class SimulationOutputReportTest < MiniTest::Test
             BaseHPXMLTimeseriesColsEndUses +
             BaseHPXMLTimeseriesColsWaterUses +
             BaseHPXMLTimeseriesColsTotalLoads +
-            BaseHPXMLTimeseriesColsUnmetLoads +
             BaseHPXMLTimeseriesColsZoneTemps +
             BaseHPXMLTimeseriesColsAirflows +
             BaseHPXMLTimeseriesColsWeather)
