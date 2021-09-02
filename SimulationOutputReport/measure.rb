@@ -1803,6 +1803,18 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
           end
         end
         if parent.empty?
+          parent = model.getCoilSystemIntegratedHeatPumpAirSources.select { |u| u.spaceCoolingCoil.handle.to_s == object.handle.to_s }
+          if not parent.empty?
+            htg_coil = parent[0].spaceHeatingCoil
+          end
+        end
+        if parent.empty?
+          parent = model.getCoilSystemIntegratedHeatPumpAirSources.select { |u| u.gridResponseCoolingCoil.is_initialized && u.gridResponseCoolingCoil.get.handle.to_s == object.handle.to_s }
+          if not parent.empty?
+            htg_coil = parent[0].spaceHeatingCoil
+          end
+        end
+        if parent.empty?
           fail 'Could not find parent object.'
         end
 

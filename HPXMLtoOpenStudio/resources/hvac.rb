@@ -283,13 +283,11 @@ class HVAC
           grid_clg_coil = create_dx_cooling_coil(model, obj_name, heat_pump, grid_signal_schedule)
           grid_clg_coil.setLowerBoundToApplyGridResponsiveControl(1000.0)
           grid_clg_coil.setMaxSpeedLevelDuringGridResponsiveControl(1)
-          hvac_map[heat_pump.id] << grid_clg_coil
         end
 
         # Storage
         if heat_pump.ihp_ice_storage || heat_pump.ihp_pcm_storage
           chiller_coil = chiller_coil(model, obj_name, grid_signal_schedule)
-          hvac_map[heat_pump.id] << chiller_coil
 
           supp_chiller_coil = supp_chiller_coil(model, obj_name)
           if heat_pump.ihp_ice_storage
@@ -299,11 +297,9 @@ class HVAC
           end
 
           storage = thermal_storage(model, heat_pump.ihp_ice_storage, heat_pump.ihp_pcm_storage, obj_name)
-          hvac_map[heat_pump.id] << storage
 
           chw_loop = OpenStudio::Model::PlantLoop.new(model)
           pri_chw_pump = OpenStudio::Model::HeaderedPumpsConstantSpeed.new(model)
-          hvac_map[heat_pump.id] << pri_chw_pump
 
           pri_chw_pump.addToNode(chw_loop.supplyInletNode)
           chw_loop.addDemandBranchForComponent(supp_chiller_coil)
