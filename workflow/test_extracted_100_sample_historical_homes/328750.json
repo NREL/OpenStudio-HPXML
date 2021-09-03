@@ -1,0 +1,140 @@
+{
+  "building_address": {
+    "address": "2344 Knollwood Dr",
+    "city": "Cameron Park",
+    "state": "CA",
+    "zip_code": "95682",
+    "assessment_type": "test",
+    "external_building_id": "21120"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2019-03-13",
+      "shape": "rectangle",
+      "year_built": 1983,
+      "number_bedrooms": 3,
+      "num_floor_above_grade": 1,
+      "floor_to_ceiling_height": 8,
+      "conditioned_floor_area": 1796,
+      "orientation": "south_west",
+      "blower_door_test": false,
+      "air_sealing_present": false
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 1796.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "medium_dark",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf21",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 1796.0,
+          "foundation_type": "slab_on_grade",
+          "foundation_insulation_level": 0
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewwf00wo",
+          "zone_window": {
+            "window_area": 67.0,
+            "window_method": "code",
+            "window_code": "dcaa",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewwf00wo",
+          "zone_window": {
+            "window_area": 46.0,
+            "window_method": "code",
+            "window_code": "dcaa",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewwf00wo",
+          "zone_window": {
+            "window_area": 123.0,
+            "window_method": "code",
+            "window_code": "dcaa",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewwf00wo",
+          "zone_window": {
+            "window_area": 42.0,
+            "window_method": "code",
+            "window_code": "dcaa",
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 0.85,
+          "heating": {
+            "fuel_primary": "electric",
+            "type": "heat_pump",
+            "efficiency_method": "user",
+            "efficiency": 6.5
+          },
+          "cooling": {
+            "type": "heat_pump",
+            "efficiency_method": "user",
+            "efficiency": 9.0
+          },
+          "hvac_distribution": [
+            {
+              "name": "duct1",
+              "location": "uncond_attic",
+              "fraction": 1.0,
+              "insulated": false,
+              "sealed": false
+            }
+          ]
+        },
+        {
+          "hvac_name": "hvac2",
+          "hvac_fraction": 0.15,
+          "heating": {
+            "fuel_primary": "natural_gas",
+            "type": "wall_furnace",
+            "efficiency_method": "user",
+            "efficiency": 0.65
+          },
+          "cooling": {
+            "type": "none"
+          },
+          "hvac_distribution": []
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "lpg",
+        "efficiency_method": "user",
+        "energy_factor": 0.55
+      }
+    }
+  }
+}
