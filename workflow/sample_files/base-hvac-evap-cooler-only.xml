@@ -313,6 +313,7 @@
       <Systems>
         <HVAC>
           <HVACPlant>
+            <PrimarySystems/>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <CoolingSystemType>evaporative cooler</CoolingSystemType>

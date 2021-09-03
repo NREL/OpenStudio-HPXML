@@ -313,6 +313,7 @@
       <Systems>
         <HVAC>
           <HVACPlant>
+            <PrimarySystems/>
             <HeatPump>
               <SystemIdentifier id='HeatPump'/>
               <DistributionSystem idref='HVACDistribution'/>

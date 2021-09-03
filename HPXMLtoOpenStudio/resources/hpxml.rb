@@ -52,7 +52,7 @@ class HPXML < Object
   HPXML_ATTRS = [:header, :site, :neighbor_buildings, :building_occupancy, :building_construction,
                  :climate_and_risk_zones, :air_infiltration_measurements, :attics, :foundations,
                  :roofs, :rim_joists, :walls, :foundation_walls, :frame_floors, :slabs, :windows,
-                 :skylights, :doors, :heating_systems, :cooling_systems, :heat_pumps, :hvac_plant,
+                 :skylights, :doors, :heating_systems, :cooling_systems, :heat_pumps, :primary_systems, :hvac_plant,
                  :hvac_controls, :hvac_distributions, :ventilation_fans, :water_heating_systems,
                  :hot_water_distributions, :water_fixtures, :water_heating, :solar_thermal_systems,
                  :pv_systems, :generators, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
@@ -642,6 +642,7 @@ class HPXML < Object
     @heating_systems = HeatingSystems.new(self, hpxml)
     @cooling_systems = CoolingSystems.new(self, hpxml)
     @heat_pumps = HeatPumps.new(self, hpxml)
+    @primary_systems = PrimarySystems.new(self, hpxml)
     @hvac_plant = HVACPlant.new(self, hpxml)
     @hvac_controls = HVACControls.new(self, hpxml)
     @hvac_distributions = HVACDistributions.new(self, hpxml)
@@ -2737,6 +2738,30 @@ class HPXML < Object
     end
   end
 
+  class PrimarySystems < BaseArrayElement
+    def from_oga(hpxml)
+      return if hpxml.nil?
+
+      @hpxml_object.heating_systems.each do |heating_system|
+        next if !heating_system.primary_system
+
+        self << heating_system
+      end
+
+      @hpxml_object.cooling_systems.each do |cooling_system|
+        next if !cooling_system.primary_system
+
+        self << cooling_system
+      end
+
+      @hpxml_object.heat_pumps.each do |heat_pump|
+        next if !heat_pump.primary_heating_system && !heat_pump.primary_cooling_system
+
+        self << heat_pump
+      end
+    end
+  end
+
   class HeatingSystems < BaseArrayElement
     def add(**kwargs)
       self << HeatingSystem.new(@hpxml_object, **kwargs)
@@ -2814,6 +2839,7 @@ class HPXML < Object
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
+      primary_systems = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant', 'PrimarySystems'])
       heating_system = XMLHelper.add_element(hvac_plant, 'HeatingSystem')
       sys_id = XMLHelper.add_element(heating_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -2860,7 +2886,6 @@ class HPXML < Object
       XMLHelper.add_extension(heating_system, 'HeatingAirflowCFM', @heating_airflow_cfm, :float, @heating_airflow_cfm_isdefaulted) unless @heating_airflow_cfm.nil?
       XMLHelper.add_extension(heating_system, 'SeedId', @seed_id, :string) unless @seed_id.nil?
       if @primary_system
-        primary_systems = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant', 'PrimarySystems'])
         primary_heating_system = XMLHelper.add_element(primary_systems, 'PrimaryHeatingSystem')
         XMLHelper.add_attribute(primary_heating_system, 'idref', @id)
       end
@@ -2971,6 +2996,7 @@ class HPXML < Object
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
+      primary_systems = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant', 'PrimarySystems'])
       cooling_system = XMLHelper.add_element(hvac_plant, 'CoolingSystem')
       sys_id = XMLHelper.add_element(cooling_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -3025,7 +3051,6 @@ class HPXML < Object
       XMLHelper.add_extension(cooling_system, 'FanCoilWatts', @fan_coil_watts, :float) unless @fan_coil_watts.nil?
       XMLHelper.add_extension(cooling_system, 'SeedId', @seed_id, :string) unless @seed_id.nil?
       if @primary_system
-        primary_systems = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant', 'PrimarySystems'])
         primary_cooling_system = XMLHelper.add_element(primary_systems, 'PrimaryCoolingSystem')
         XMLHelper.add_attribute(primary_cooling_system, 'idref', @id)
       end
@@ -3148,6 +3173,7 @@ class HPXML < Object
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
+      primary_systems = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant', 'PrimarySystems'])
       heat_pump = XMLHelper.add_element(hvac_plant, 'HeatPump')
       sys_id = XMLHelper.add_element(heat_pump, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -3221,12 +3247,10 @@ class HPXML < Object
       XMLHelper.add_extension(heat_pump, 'SharedLoopMotorEfficiency', @shared_loop_motor_efficiency, :float) unless @shared_loop_motor_efficiency.nil?
       XMLHelper.add_extension(heat_pump, 'SeedId', @seed_id, :string) unless @seed_id.nil?
       if @primary_heating_system
-        primary_systems = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant', 'PrimarySystems'])
         primary_heating_system = XMLHelper.add_element(primary_systems, 'PrimaryHeatingSystem')
         XMLHelper.add_attribute(primary_heating_system, 'idref', @id)
       end
       if @primary_cooling_system
-        primary_systems = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant', 'PrimarySystems'])
         primary_cooling_system = XMLHelper.add_element(primary_systems, 'PrimaryCoolingSystem')
         XMLHelper.add_attribute(primary_cooling_system, 'idref', @id)
       end
@@ -5699,6 +5723,8 @@ class HPXML < Object
     # Check for globally unique SystemIdentifier IDs and empty IDs
     sys_ids = {}
     self.class::HPXML_ATTRS.each do |attribute|
+      next if attribute == :primary_systems
+
       hpxml_obj = send(attribute)
       next unless hpxml_obj.is_a? HPXML::BaseArrayElement
 

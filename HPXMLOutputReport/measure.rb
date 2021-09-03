@@ -120,7 +120,7 @@ class HPXMLOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     # Primary and Secondary
-    if (hpxml.heating_systems.size > 1) || (hpxml.cooling_systems.size > 1) || (hpxml.heat_pumps.size > 1)
+    if hpxml.primary_systems.size > 0
       assign_primary_and_secondary(hpxml, cost_multipliers)
     end
 

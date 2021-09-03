@@ -313,6 +313,10 @@
       <Systems>
         <HVAC>
           <HVACPlant>
+            <PrimarySystems>
+              <PrimaryHeatingSystem idref='HeatingSystem2'/>
+              <PrimaryCoolingSystem idref='CoolingSystem2'/>
+            </PrimarySystems>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
@@ -341,10 +345,6 @@
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
             </HeatingSystem>
-            <PrimarySystems>
-              <PrimaryHeatingSystem idref='HeatingSystem2'/>
-              <PrimaryCoolingSystem idref='CoolingSystem2'/>
-            </PrimarySystems>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem3'/>
               <DistributionSystem idref='HVACDistribution3'/>
