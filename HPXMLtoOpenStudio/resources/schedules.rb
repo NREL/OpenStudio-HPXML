@@ -1148,8 +1148,8 @@ class SchedulesFile
       fail "Schedule value must be numeric for column '#{col_name}'. [context: #{@schedules_path}]"
     end
 
-    if (@schedule_max_val - values.max).abs > 0.01
-      fail "Schedule max value for column '#{col_name}' must be #{@schedule_max_val}. [context: #{@schedules_path}]"
+    if values.max > @schedule_max_val
+      fail "Schedule max value for column '#{col_name}' must be less than or equal to #{@schedule_max_val}. [context: #{@schedules_path}]"
     end
 
     if values.min < 0

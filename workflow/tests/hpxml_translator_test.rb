@@ -367,7 +367,7 @@ class HPXMLTest < MiniTest::Test
                             'refrigerators-no-primary.xml' => ['Could not find a primary refrigerator.'],
                             'repeated-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem' is attached to multiple water heating systems."],
                             'repeated-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem' is attached to multiple water heating systems."],
-                            'schedule-detailed-bad-values-max-not-one.xml' => ["Schedule max value for column 'plug_loads_vehicle' must be 1. [context: HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-max-not-one.csv]"],
+                            'schedule-detailed-bad-values-max-not-one.xml' => ["Schedule max value for column 'plug_loads_vehicle' must be less than or equal to 1. [context: HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-max-not-one.csv]"],
                             'schedule-detailed-bad-values-negative.xml' => ["Schedule min value for column 'plug_loads_well_pump' must be non-negative. [context: HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-negative.csv]"],
                             'schedule-detailed-bad-values-non-numeric.xml' => ["Schedule value must be numeric for column 'hot_water_fixtures'. [context: HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-non-numeric.csv]"],
                             'schedule-detailed-wrong-columns.xml' => ["Schedule column name 'lighting' is invalid. [context: HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-columns.csv]"],
@@ -759,8 +759,11 @@ class HPXMLTest < MiniTest::Test
       if hpxml.solar_thermal_systems.size > 0
         next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
       end
-      if hpxml_path.include?('base-schedules-detailed')
+      if hpxml_path.include?('base-schedules-detailed') || hpxml_path.include?('setpoint-type-scheduled')
         next if err_line.include?('GetCurrentScheduleValue: Schedule=') && err_line.include?('is a Schedule:File')
+      end
+      if hpxml_path.include?('base-dhw-tank-model-type-stratified') # FIXME
+        next if err_line.include?('Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings')
       end
 
       flunk "Unexpected warning found: #{err_line}"
