@@ -82,7 +82,7 @@ class HPXMLOutputReport < OpenStudio::Measure::ReportingMeasure
     # errors on Windows when trying to delete this file.
     GC.start()
 
-    # Cost Multipliers
+    # Initialize
     cost_multipliers = {}
     cost_multipliers[BS::Fixed] = BaseOutput.new
     cost_multipliers[BS::WallAreaAboveGradeConditioned] = BaseOutput.new
@@ -114,32 +114,17 @@ class HPXMLOutputReport < OpenStudio::Measure::ReportingMeasure
       cost_multipliers["#{BS::SizeHeatPumpBackup}: #{heat_pump.id}"] = BaseOutput.new
     end
 
-    # Cost Multipliers
+    # Cost multipliers
     cost_multipliers.each do |cost_mult_type, cost_mult|
       cost_mult.output = get_cost_multiplier(hpxml, cost_mult_type)
     end
 
-    # hpxml.heating_systems.each do |heating_system|
-    # next if !heating_system.primary_system
+    # Primary and Secondary
+    if (hpxml.heating_systems.size > 1) || (hpxml.cooling_systems.size > 1) || (hpxml.heat_pumps.size > 1)
+      assign_primary_and_secondary(hpxml, cost_multipliers)
+    end
 
-    # cost_multipliers["#{BS::SizeHeatingSystem}: Primary"] = cost_multipliers["#{BS::SizeHeatingSystem}: #{heating_system.id}"]
-    # end
-
-    # hpxml.cooling_systems.each do |cooling_system|
-    # next if !cooling_system.primary_system
-
-    # cost_multipliers["#{BS::SizeCoolingSystem}: Primary"] = cost_multipliers["#{BS::SizeCoolingSystem}: #{cooling_system.id}"]
-    # end
-
-    # hpxml.heat_pumps.each do |heat_pump|
-    # if heat_pump.primary_heating_system
-    # cost_multipliers["#{BS::SizeHeatingSystem}: Primary"] = cost_multipliers["#{BS::SizeHeatingSystem}: #{heat_pump.id}"]
-    # end
-    # if heat_pump.primary_cooling_system
-    # cost_multipliers["#{BS::SizeCoolingSystem}: Primary"] = cost_multipliers["#{BS::SizeCoolingSystem}: #{heat_pump.id}"]
-    # end
-    # end
-
+    # Units
     cost_multipliers.each do |cost_mult_type, cost_mult|
       cost_mult.name = "Building Summary: #{cost_mult_type}"
       if cost_mult_type.include?('Area')
@@ -327,6 +312,89 @@ class HPXMLOutputReport < OpenStudio::Measure::ReportingMeasure
       end
     end
     return cost_mult
+  end
+
+  def assign_primary_and_secondary(hpxml, cost_multipliers)
+    hpxml.heating_systems.each do |heating_system|
+      next if !heating_system.primary_system
+
+      cost_mult = BaseOutput.new
+      cost_mult.output = cost_multipliers["#{BS::SizeHeatingSystem}: #{heating_system.id}"].output
+      cost_multipliers["#{BS::SizeHeatingSystem}: Primary"] = cost_mult
+
+      hpxml.heating_systems.each do |heating_system2|
+        next if heating_system == heating_system2
+
+        if not cost_multipliers.keys.include?("#{BS::SizeHeatingSystem}: Secondary")
+          cost_mult = BaseOutput.new
+          cost_mult.output = 0
+          cost_multipliers["#{BS::SizeHeatingSystem}: Secondary"] = cost_mult
+        end
+
+        cost_mult = cost_multipliers["#{BS::SizeHeatingSystem}: Secondary"]
+        cost_mult.output += cost_multipliers["#{BS::SizeHeatingSystem}: #{heating_system2.id}"].output
+      end
+    end
+
+    hpxml.cooling_systems.each do |cooling_system|
+      next if !cooling_system.primary_system
+
+      cost_mult = BaseOutput.new
+      cost_mult.output = cost_multipliers["#{BS::SizeCoolingSystem}: #{cooling_system.id}"].output
+      cost_multipliers["#{BS::SizeCoolingSystem}: Primary"] = cost_mult
+
+      hpxml.cooling_systems.each do |cooling_system2|
+        next if cooling_system == cooling_system2
+
+        if not cost_multipliers.keys.include?("#{BS::SizeCoolingSystem}: Secondary")
+          cost_mult = BaseOutput.new
+          cost_mult.output = 0
+          cost_multipliers["#{BS::SizeCoolingSystem}: Secondary"] = cost_mult
+        end
+
+        cost_mult = cost_multipliers["#{BS::SizeCoolingSystem}: Secondary"]
+        cost_mult.output += cost_multipliers["#{BS::SizeCoolingSystem}: #{cooling_system2.id}"].output
+      end
+    end
+
+    hpxml.heat_pumps.each do |heat_pump|
+      if heat_pump.primary_heating_system
+        cost_mult = BaseOutput.new
+        cost_mult.output = cost_multipliers["#{BS::SizeHeatingSystem}: #{heat_pump.id}"].output
+        cost_multipliers["#{BS::SizeHeatingSystem}: Primary"] = cost_mult
+
+        hpxml.heat_pumps.each do |heat_pump2|
+          next if heat_pump == heat_pump2
+
+          if not cost_multipliers.keys.include?("#{BS::SizeHeatingSystem}: Secondary")
+            cost_mult = BaseOutput.new
+            cost_mult.output = 0
+            cost_multipliers["#{BS::SizeHeatingSystem}: Secondary"] = cost_mult
+          end
+
+          cost_mult = cost_multipliers["#{BS::SizeHeatingSystem}: Secondary"]
+          cost_mult.output += cost_multipliers["#{BS::SizeHeatingSystem}: #{heat_pump2.id}"].output
+        end
+      end
+      next unless heat_pump.primary_cooling_system
+
+      cost_mult = BaseOutput.new
+      cost_mult.output = cost_multipliers["#{BS::SizeCoolingSystem}: #{heat_pump.id}"].output
+      cost_multipliers["#{BS::SizeCoolingSystem}: Primary"] = cost_mult
+
+      hpxml.heat_pumps.each do |heat_pump2|
+        next if heat_pump == heat_pump2
+
+        if not cost_multipliers.keys.include?("#{BS::SizeCoolingSystem}: Secondary")
+          cost_mult = BaseOutput.new
+          cost_mult.output = 0
+          cost_multipliers["#{BS::SizeCoolingSystem}: Secondary"] = cost_mult
+        end
+
+        cost_mult = cost_multipliers["#{BS::SizeCoolingSystem}: Secondary"]
+        cost_mult.output += cost_multipliers["#{BS::SizeCoolingSystem}: #{heat_pump2.id}"].output
+      end
+    end
   end
 end
 
