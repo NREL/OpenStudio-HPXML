@@ -127,7 +127,7 @@ class HEScoreRuleset
     new_hpxml.climate_and_risk_zones.weather_station_epw_filepath = epw_filename
 
     iecc_zone = zipcode_row['iecc_cz']
-    if iecc_zone == '7AK'
+    if ['7AK', '7A', '7B'].include? iecc_zone
       iecc_zone = '7'
     elsif iecc_zone == '8AK'
       iecc_zone = '8'
@@ -1362,6 +1362,7 @@ def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fn
   end
 
   # Climate zone
+  puts iecc_cz
   c_iecc = nil
   if (iecc_cz == '1A') || (iecc_cz == '2A')
     c_iecc = 0.4727
