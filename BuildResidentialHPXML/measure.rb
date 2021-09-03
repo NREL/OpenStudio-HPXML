@@ -183,7 +183,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(2.0)
     args << arg
 
-    # FIXME: This was labeled as unit-specific, but isn't it really building-specific (for, e.g., a unit in a MF building with interior corridor)?
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_unit_orientation', true)
     arg.setDisplayName('Geometry: Unit Orientation')
     arg.setUnits('degrees')
