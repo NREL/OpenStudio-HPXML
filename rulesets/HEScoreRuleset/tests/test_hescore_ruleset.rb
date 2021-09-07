@@ -31,6 +31,27 @@ class HEScoreRulesetTest < MiniTest::Test
     end
   end
 
+  def test_historic_files
+    this_dir = File.dirname(__FILE__)
+
+    args_hash = {}
+
+    Dir["#{this_dir}/../../../workflow/historic_files/*.xml"].sort.each do |xml|
+      #puts "Testing #{File.absolute_path(xml)}..."
+
+      args_hash['hpxml_path'] = File.absolute_path(xml)
+      args_hash['hpxml_output_path'] = File.absolute_path(xml).gsub('.xml', '.xml.out')
+
+      _test_schema_validation(this_dir, xml)
+      _test_measure(args_hash)
+      _test_schema_validation(this_dir, xml.gsub('.xml', '.xml.out'))
+      _test_assembly_effective_rvalues(args_hash)
+      _test_conditioned_building_volume(args_hash)
+
+      FileUtils.rm_f(args_hash['hpxml_output_path']) # Cleanup
+    end
+  end
+
   def test_neighbors
     this_dir = File.dirname(__FILE__)
     xml = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Base_hpxml.xml")

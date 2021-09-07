@@ -17,7 +17,7 @@ class HEScoreTest < MiniTest::Test
     FileUtils.mkdir_p @results_dir
   end
 
-  def test_simulations
+  def test_sample_files
     skip
     results_zip_path = File.join(@results_dir, 'results_jsons.zip')
     File.delete(results_zip_path) if File.exist? results_zip_path
@@ -37,19 +37,18 @@ class HEScoreTest < MiniTest::Test
     _write_summary_results(results.sort_by { |k, v| k.downcase }.to_h, results_csv_path)
   end
 
-  def test_regression
-    results_zip_path = File.join(@results_dir, 'results_regression_jsons.zip')
+  def test_historic_files
+    results_zip_path = File.join(@results_dir, 'results_historic_jsons.zip')
     File.delete(results_zip_path) if File.exist? results_zip_path
-    results_csv_path = File.join(@results_dir, 'results_regression.csv')
+    results_csv_path = File.join(@results_dir, 'results_historic.csv')
     File.delete(results_csv_path) if File.exist? results_csv_path
 
     zipfile = OpenStudio::ZipFile.new(OpenStudio::Path.new(results_zip_path), false)
 
     results = {}
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
-    xmldir = "#{parent_dir}/regression_test_files"
+    xmldir = "#{parent_dir}/historic_files"
     Parallel.map(Dir["#{xmldir}/*.xml"].sort, in_threads: Parallel.processor_count) do |xml|
-      puts "XML: #{xml}"
       out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
       results[File.basename(xml)] = run_and_check(xml, out_dir, false, zipfile)
     end
@@ -121,20 +120,15 @@ class HEScoreTest < MiniTest::Test
   def run_and_check(xml, parent_dir, expect_error, zipfile)
     # Check input HPXML is valid
     xml = File.absolute_path(xml)
-    puts "XML2: #{xml}"
     hpxml = HPXML.new(hpxml_path: xml)
-    puts "HPXML: #{hpxml}"
 
     # Run workflow
     cli_path = OpenStudio.getOpenStudioCLI
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} -o #{parent_dir} --debug"
     start_time = Time.now
-    puts "COMMAND: #{command}"
     success = system(command)
-    puts "SUCCESS: #{success}"
     assert_equal(true, success)
     runtime = Time.now - start_time
-    puts "RUNTIME: #{runtime}"
 
     results_json = File.join(parent_dir, 'results', 'results.json')
     results = nil
