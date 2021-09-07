@@ -652,7 +652,7 @@ class HEScoreRuleset
 
         distribution_system_idref = nil
         @ducts.each do |hvac_frac, duct_frac, duct_location|
-          if hvac_frac == 1 && duct_location == 'cond_space'
+          if duct_location == 'cond_space'
             # do nothing
           else
             distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution"
@@ -1362,7 +1362,6 @@ def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fn
   end
 
   # Climate zone
-  puts iecc_cz
   c_iecc = nil
   if (iecc_cz == '1A') || (iecc_cz == '2A')
     c_iecc = 0.4727
