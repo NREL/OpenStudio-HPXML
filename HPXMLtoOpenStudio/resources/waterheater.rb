@@ -97,11 +97,12 @@ class Waterheater
     hpwh_bottom_element_sp.setName("#{obj_name_hpwh} BottomElementSetpoint")
     hpwh_bottom_element_sp.setValue(-60)
 
-    if water_heater_system.setpoint_type == HPXML::WaterHeaterSetpointTypeConstant
+    sp_type = water_heating_system.setpoint_type
+    if sp_type == HPXML::WaterHeaterSetpointTypeConstant
       hpwh_top_element_sp = OpenStudio::Model::ScheduleConstant.new(model)
       hpwh_top_element_sp.setName("#{obj_name_hpwh} TopElementSetpoint")
       hpwh_top_element_sp.setValue((tset_C - 9.0001).round(4))
-    elsif water_heater_system.setpoint_type == HPXML::WaterHeaterSetpointTypeScheduled
+    elsif sp_type
       setpoint_schedule_file = nil
       unless water_heating_system.setpoint_schedule_filepath.nil?
         setpoint_schedule_file = SchedulesFile.new(model: model, year: year, schedules_path: water_heating_system.setpoint_schedule_filepath, col_names: ['water_heater_setpoint'], schedule_max_val: 150)
@@ -126,7 +127,7 @@ class Waterheater
     fan = setup_hpwh_fan(model, water_heating_system, obj_name_hpwh, airflow_rate)
 
     # WaterHeater:HeatPump:WrappedCondenser
-    hpwh = setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, tset_C, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp)
+    hpwh = setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, tset_C, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, sp_type)
 
     # Amb temp & RH sensors, temp sensor shared across programs
     amb_temp_sensor, amb_rh_sensors = get_loc_temp_rh_sensors(model, obj_name_hpwh, loc_schedule, loc_space, living_zone)
@@ -658,15 +659,21 @@ class Waterheater
 
   private
 
-  def self.setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, tset_C, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp)
+  def self.setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, tset_C, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, sp_type)
     h_condtop = (1.0 - (5.5 / 12.0)) * h_tank # in the 6th node of the tank (counting from top)
     h_condbot = 0.01 # bottom node
     h_hpctrl_up = (1.0 - (2.5 / 12.0)) * h_tank # in the 3rd node of the tank
     h_hpctrl_low = (1.0 - (8.5 / 12.0)) * h_tank # in the 9th node of the tank
 
-    hp_setpoint = OpenStudio::Model::ScheduleConstant.new(model)
-    hp_setpoint.setName("#{obj_name_hpwh} WaterHeaterHPSchedule")
-    hp_setpoint.setValue(tset_C)
+    if sp_type == HPXML::WaterHeaterSetpointTypeConstant
+      hp_setpoint = OpenStudio::Model::ScheduleConstant.new(model)
+      hp_setpoint.setName("#{obj_name_hpwh} WaterHeaterHPSchedule")
+      hp_setpoint.setValue(tset_C)
+    elsif sp_type == HPXML::WaterHeaterSetpointTypeScheduled
+      hp_setpoint = OpenStudio::Model::ScheduleConstant.new(model)
+      hp_setpoint.setName("#{obj_name_hpwh} hp control")
+      hp_setpoint.setValue(51.67)
+    end
 
     hpwh = OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser.new(model, coil, tank, fan, hp_setpoint, model.alwaysOnDiscreteSchedule)
     hpwh.setName("#{obj_name_hpwh} hpwh")

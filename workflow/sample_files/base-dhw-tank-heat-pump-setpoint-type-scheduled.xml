@@ -399,7 +399,7 @@
             <HotWaterTemperature>125.0</HotWaterTemperature>
             <extension>
               <SetpointType>scheduled</SetpointType>
-              <SetpointScheduleFilepath>HPXMLtoOpenStudio/resources/schedule_files/hourly_setpoint_schedule.csv</SetpointScheduleFilepath>
+              <SetpointScheduleFilepath>HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_setpoint_schedule.csv</SetpointScheduleFilepath>
             </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>

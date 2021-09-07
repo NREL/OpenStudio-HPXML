@@ -399,7 +399,7 @@
             <HotWaterTemperature>125.0</HotWaterTemperature>
             <extension>
               <OperatingModeType>scheduled</OperatingModeType>
-              <OperatingModeScheduleFilepath>HPXMLtoOpenStudio/resources/schedule_files/hourly_operating_mode_schedule.csv</OperatingModeScheduleFilepath>
+              <OperatingModeScheduleFilepath>HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_operating_mode_schedule.csv</OperatingModeScheduleFilepath>
             </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>
