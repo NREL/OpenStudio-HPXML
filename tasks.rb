@@ -245,6 +245,7 @@ def create_hpxmls
     'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar-fraction.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-setpoint-type-scheduled.xml' => 'base-dhw-tank-heat-pump.xml',
+    'base-dhw-tank-heat-pump-operating-mode-type-scheduled.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-oil.xml' => 'base.xml',
     'base-dhw-tank-setpoint-type-scheduled.xml' => 'base.xml',
     'base-dhw-tank-model-type-stratified.xml' => 'base.xml',
@@ -4564,6 +4565,9 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
   elsif ['base-dhw-tank-heat-pump-setpoint-type-scheduled.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].setpoint_type = HPXML::WaterHeaterSetpointTypeScheduled
     hpxml.water_heating_systems[0].setpoint_schedule_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/hourly_setpoint_schedule.csv'
+  elsif ['base-dhw-tank-heat-pump-operating-mode-type-scheduled.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].operating_mode_type = HPXML::WaterHeaterOperatingModeTypeScheduled
+    hpxml.water_heating_systems[0].operating_mode_schedule_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/hourly_operating_mode_schedule.csv'
   elsif ['base-dhw-tank-setpoint-type-scheduled.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].setpoint_type = HPXML::WaterHeaterSetpointTypeScheduled
     hpxml.water_heating_systems[0].setpoint_schedule_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/hourly_setpoint_schedule.csv'
