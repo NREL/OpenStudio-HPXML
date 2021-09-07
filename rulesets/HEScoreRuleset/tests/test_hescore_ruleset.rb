@@ -37,7 +37,7 @@ class HEScoreRulesetTest < MiniTest::Test
     args_hash = {}
 
     Dir["#{this_dir}/../../../workflow/historic_files/*.xml"].sort.each do |xml|
-      #puts "Testing #{File.absolute_path(xml)}..."
+      puts "Testing #{File.absolute_path(xml)}..."
 
       args_hash['hpxml_path'] = File.absolute_path(xml)
       args_hash['hpxml_output_path'] = File.absolute_path(xml).gsub('.xml', '.xml.out')

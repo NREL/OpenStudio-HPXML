@@ -18,7 +18,6 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_sample_files
-    skip
     results_zip_path = File.join(@results_dir, 'results_jsons.zip')
     File.delete(results_zip_path) if File.exist? results_zip_path
     results_csv_path = File.join(@results_dir, 'results.csv')
@@ -57,7 +56,6 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_skip_simulation
-    skip
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
@@ -77,7 +75,6 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_invalid_simulation
-    skip
     cli_path = OpenStudio.getOpenStudioCLI
     xml = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..', 'hpxml-measures', 'workflow', 'sample_files', 'base.xml'))
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml}"
@@ -87,7 +84,6 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_floor_areas
-    skip
     # Run modified HES HPXML w/ sum of conditioned floor areas' > CFA.
     # This file would normally generate errors in OS-HPXML, but the ruleset
     # now handles it. Check for successful run.
