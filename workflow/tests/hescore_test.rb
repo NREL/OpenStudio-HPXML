@@ -10,11 +10,11 @@ require_relative '../../hpxml-measures/HPXMLtoOpenStudio/measure'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/xmlhelper'
 require_relative '../hescore_lib'
 
-class HEScoreTest < Minitest::Unit::TestCase
-  def before_setup
+class HEScoreTest < MiniTest::Test
+  def setup
     # Prepare results dir for CI storage
     @results_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', 'test_results'))
-    Dir.mkdir(@results_dir) unless File.exist? @results_dir
+    FileUtils.mkdir_p @results_dir
   end
 
   def test_simulations

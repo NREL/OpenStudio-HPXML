@@ -245,8 +245,6 @@
               </Layer>
             </Insulation>
           </FoundationWall>
-        </FoundationWalls>
-        <FoundationWalls>
           <FoundationWall>
             <SystemIdentifier id="floor2_foundation_wall"/>
             <Insulation>
