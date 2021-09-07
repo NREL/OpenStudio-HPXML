@@ -287,6 +287,10 @@ class HPXML < Object
   WallTypeWoodStud = 'WoodStud'
   WaterFixtureTypeFaucet = 'faucet'
   WaterFixtureTypeShowerhead = 'shower head'
+  WaterHeaterOperatingModeTypeConstant = 'constant'
+  WaterHeaterOperatingModeTypeScheduled = 'scheduled'
+  WaterHeaterOperatingModeStandard = 'standard'
+  WaterHeaterOperatingModeHeatPumpOnly = 'heat pump only'
   WaterHeaterSetpointTypeConstant = 'constant'
   WaterHeaterSetpointTypeScheduled = 'scheduled'
   WaterHeaterTankModelTypeMixed = 'mixed'
@@ -3961,7 +3965,8 @@ class HPXML < Object
              :tank_volume, :fraction_dhw_load_served, :heating_capacity, :energy_factor, :usage_bin,
              :uniform_energy_factor, :first_hour_rating, :recovery_efficiency, :uses_desuperheater, :jacket_r_value,
              :related_hvac_idref, :third_party_certification, :standby_loss, :temperature, :is_shared_system,
-             :number_of_units_served, :tank_model_type, :setpoint_type, :setpoint_schedule_filepath]
+             :number_of_units_served, :tank_model_type, :setpoint_type, :setpoint_schedule_filepath,
+             :operating_mode_type, :operating_mode, :operating_mode_schedule_filepath]
     attr_accessor(*ATTRS)
 
     def related_hvac_system
@@ -4025,11 +4030,14 @@ class HPXML < Object
         related_hvac_idref_el = XMLHelper.add_element(water_heating_system, 'RelatedHVACSystem')
         XMLHelper.add_attribute(related_hvac_idref_el, 'idref', @related_hvac_idref)
       end
-      if (not @setpoint_type.nil?) || (not @tank_model_type.nil?)
+      if (not @setpoint_type.nil?) || (not @tank_model_type.nil?) || (not @operating_mode_type.nil?) || (not @operating_mode.nil?)
         extension = XMLHelper.create_elements_as_needed(water_heating_system, ['extension'])
         XMLHelper.add_element(extension, 'TankModelType', @tank_model_type, :string) unless @tank_model_type.nil?
         XMLHelper.add_element(extension, 'SetpointType', @setpoint_type, :string) unless @setpoint_type.nil?
         XMLHelper.add_element(extension, 'SetpointScheduleFilepath', @setpoint_schedule_filepath, :string) unless @setpoint_schedule_filepath.nil?
+        XMLHelper.add_element(extension, 'OperatingModeType', @operating_mode_type, :string) unless @operating_mode_type.nil?
+        XMLHelper.add_element(extension, 'OperatingMode', @operating_mode, :string) unless @operating_mode.nil?
+        XMLHelper.add_element(extension, 'OperatingModeScheduleFilepath', @operating_mode_schedule_filepath, :string) unless @operating_mode_schedule_filepath.nil?
       end
     end
 
@@ -4061,6 +4069,9 @@ class HPXML < Object
       @tank_model_type = XMLHelper.get_value(water_heating_system, 'extension/TankModelType', :string)
       @setpoint_type = XMLHelper.get_value(water_heating_system, 'extension/SetpointType', :string)
       @setpoint_schedule_filepath = XMLHelper.get_value(water_heating_system, 'extension/SetpointScheduleFilepath', :string)
+      @operating_mode_type = XMLHelper.get_value(water_heating_system, 'extension/OperatingModeType', :string)
+      @operating_mode = XMLHelper.get_value(water_heating_system, 'extension/OperatingMode', :string)
+      @operating_mode_schedule_filepath = XMLHelper.get_value(water_heating_system, 'extension/OperatingModeScheduleFilepath', :string)
     end
   end
 

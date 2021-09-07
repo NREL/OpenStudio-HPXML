@@ -97,9 +97,17 @@ class Waterheater
     hpwh_bottom_element_sp.setName("#{obj_name_hpwh} BottomElementSetpoint")
     hpwh_bottom_element_sp.setValue(-60)
 
-    hpwh_top_element_sp = OpenStudio::Model::ScheduleConstant.new(model)
-    hpwh_top_element_sp.setName("#{obj_name_hpwh} TopElementSetpoint")
-    hpwh_top_element_sp.setValue((tset_C - 9.0001).round(4))
+    if water_heater_system.setpoint_type == HPXML::WaterHeaterSetpointTypeConstant
+      hpwh_top_element_sp = OpenStudio::Model::ScheduleConstant.new(model)
+      hpwh_top_element_sp.setName("#{obj_name_hpwh} TopElementSetpoint")
+      hpwh_top_element_sp.setValue((tset_C - 9.0001).round(4))
+    elsif water_heater_system.setpoint_type == HPXML::WaterHeaterSetpointTypeScheduled
+      setpoint_schedule_file = nil
+      unless water_heating_system.setpoint_schedule_filepath.nil?
+        setpoint_schedule_file = SchedulesFile.new(model: model, year: year, schedules_path: water_heating_system.setpoint_schedule_filepath, col_names: ['water_heater_setpoint'], schedule_max_val: 150)
+      end
+      hpwh_top_element_sp = setpoint_schedule_file.create_schedule_file(col_name: 'water_heater_setpoint')
+    end
 
     airflow_rate = 181.0 # cfm
     min_temp = 42.0 # F

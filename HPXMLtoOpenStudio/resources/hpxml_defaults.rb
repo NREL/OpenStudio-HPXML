@@ -1313,6 +1313,14 @@ class HPXMLDefaults
           water_heating_system.setpoint_type = HPXML::WaterHeaterSetpointTypeConstant
           water_heating_system.setpoint_type_isdefaulted = true
         end
+        if water_heating_system.operating_mode_type.nil?
+          water_heating_system.operating_mode_type = HPXML::WaterHeaterOperatingModeTypeConstant
+          water_heating_system.operating_mode_type_isdefaulted = true
+        end
+        if water_heating_system.operating_mode.nil?
+          water_heating_system.operating_mode = HPXML::WaterHeaterOperatingModeStandard
+          water_heating_system.operating_mode_isdefaulted = true
+        end
       end
       if water_heating_system.location.nil?
         water_heating_system.location = Waterheater.get_default_location(hpxml, hpxml.climate_and_risk_zones.iecc_zone)

@@ -1144,6 +1144,7 @@
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:SetpointType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/SetpointType</sch:assert>
       <sch:assert role='ERROR' test='h:extension/h:SetpointType[text()="constant" or text()="scheduled"] or not(h:extension/h:SetpointType)'>Expected extension/SetpointType to be 'constant' or 'scheduled'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:SetpointType[text()="scheduled"]) + count(h:extension/h:SetpointScheduleFilepath) = 0 or count(h:extension/h:SetpointType[text()="scheduled"]) + count(h:extension/h:SetpointScheduleFilepath) = 2'>Expected 0 or 2 element(s) for xpath: extension/SetpointType[text()="scheduled"] | extension/SetpointScheduleFilepath</sch:assert> <!-- integer -->
       <sch:assert role='ERROR' test='count(h:extension/h:TankModelType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/TankModelType</sch:assert>
       <sch:assert role='ERROR' test='h:extension/h:TankModelType[text()="mixed" or text()="stratified"] or not(h:extension/h:TankModelType)'>Expected extension/TankModelType to be 'mixed' or 'stratified'</sch:assert>
     </sch:rule>
@@ -1173,6 +1174,13 @@
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:SetpointType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/SetpointType</sch:assert>
       <sch:assert role='ERROR' test='h:extension/h:SetpointType[text()="constant" or text()="scheduled"] or not(h:extension/h:SetpointType)'>Expected extension/SetpointType to be 'constant' or 'scheduled'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:SetpointType[text()="scheduled"]) + count(h:extension/h:SetpointScheduleFilepath) = 0 or count(h:extension/h:SetpointType[text()="scheduled"]) + count(h:extension/h:SetpointScheduleFilepath) = 2'>Expected 0 or 2 element(s) for xpath: extension/SetpointType[text()="scheduled"] | extension/SetpointScheduleFilepath</sch:assert> <!-- integer -->
+      <sch:assert role='ERROR' test='count(h:extension/h:OperatingModeType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/OperatingModeType</sch:assert>
+      <sch:assert role='ERROR' test='h:extension/h:OperatingModeType[text()="constant" or text()="scheduled"] or not(h:extension/h:OperatingModeType)'>Expected extension/OperatingModeType to be 'constant' or 'scheduled'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:OperatingModeType[text()="constant"]) + count(h:extension/h:OperatingMode) = 0 or count(h:extension/h:OperatingModeType[text()="constant"]) + count(h:extension/h:OperatingMode) = 2'>Expected 0 or 2 element(s) for xpath: extension/OperatingModeType[text()="constant"] | extension/OperatingMode</sch:assert> <!-- integer -->
+      <sch:assert role='ERROR' test='count(h:extension/h:OperatingModeType[text()="scheduled"]) + count(h:extension/h:OperatingModeScheduleFilepath) = 0 or count(h:extension/h:OperatingModeType[text()="scheduled"]) + count(h:extension/h:OperatingModeScheduleFilepath) = 2'>Expected 0 or 2 element(s) for xpath: extension/OperatingModeType[text()="scheduled"] | extension/OperatingModeScheduleFilepath</sch:assert> <!-- integer -->      
+      <sch:assert role='ERROR' test='count(h:extension/h:OperatingMode) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/OperatingMode</sch:assert>
+      <sch:assert role='ERROR' test='h:extension/h:OperatingMode[text()="standard" or text()="heat pump only"] or not(h:extension/h:OperatingMode)'>Expected extension/OperatingMode to be 'standard' or 'heat pump only'</sch:assert>
     </sch:rule>
   </sch:pattern>
 
