@@ -18,6 +18,7 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_simulations
+    skip
     results_zip_path = File.join(@results_dir, 'results_jsons.zip')
     File.delete(results_zip_path) if File.exist? results_zip_path
     results_csv_path = File.join(@results_dir, 'results.csv')
@@ -37,9 +38,9 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_regression
-    results_zip_path = File.join(@results_dir, 'regression_results_jsons.zip')
+    results_zip_path = File.join(@results_dir, 'results_regression_jsons.zip')
     File.delete(results_zip_path) if File.exist? results_zip_path
-    results_csv_path = File.join(@results_dir, 'regression_results.csv')
+    results_csv_path = File.join(@results_dir, 'results_regression.csv')
     File.delete(results_csv_path) if File.exist? results_csv_path
 
     zipfile = OpenStudio::ZipFile.new(OpenStudio::Path.new(results_zip_path), false)
@@ -48,6 +49,7 @@ class HEScoreTest < MiniTest::Test
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
     xmldir = "#{parent_dir}/regression_test_files"
     Parallel.map(Dir["#{xmldir}/*.xml"].sort, in_threads: Parallel.processor_count) do |xml|
+      puts "XML: #{xml}"
       out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
       results[File.basename(xml)] = run_and_check(xml, out_dir, false, zipfile)
     end
@@ -56,6 +58,7 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_skip_simulation
+    skip
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
@@ -75,6 +78,7 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_invalid_simulation
+    skip
     cli_path = OpenStudio.getOpenStudioCLI
     xml = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..', 'hpxml-measures', 'workflow', 'sample_files', 'base.xml'))
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml}"
@@ -84,6 +88,7 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_floor_areas
+    skip
     # Run modified HES HPXML w/ sum of conditioned floor areas' > CFA.
     # This file would normally generate errors in OS-HPXML, but the ruleset
     # now handles it. Check for successful run.
@@ -116,15 +121,20 @@ class HEScoreTest < MiniTest::Test
   def run_and_check(xml, parent_dir, expect_error, zipfile)
     # Check input HPXML is valid
     xml = File.absolute_path(xml)
+    puts "XML2: #{xml}"
     hpxml = HPXML.new(hpxml_path: xml)
+    puts "HPXML: #{hpxml}"
 
     # Run workflow
     cli_path = OpenStudio.getOpenStudioCLI
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} -o #{parent_dir} --debug"
     start_time = Time.now
+    puts "COMMAND: #{command}"
     success = system(command)
+    puts "SUCCESS: #{success}"
     assert_equal(true, success)
     runtime = Time.now - start_time
+    puts "RUNTIME: #{runtime}"
 
     results_json = File.join(parent_dir, 'results', 'results.json')
     results = nil
