@@ -1401,7 +1401,7 @@ class HPXMLTest < MiniTest::Test
     CSV.open(csv_out, 'w') do |csv|
       csv << column_headers
       results.sort.each do |xml, xml_results|
-        csv_row = [xml.gsub('.xml','_different_name.xml')]
+        csv_row = [xml]
         output_keys.each do |key|
           if xml_results[key].nil?
             csv_row << 0
@@ -1429,7 +1429,7 @@ class HPXMLTest < MiniTest::Test
     CSV.open(csv_out, 'w') do |csv|
       csv << ['HPXML'] + output_keys
       all_sizing_results.sort.each do |xml, xml_results|
-        csv_row = [xml.gsub('.xml','_different_name.xml')]
+        csv_row = [xml]
         output_keys.each do |key|
           csv_row << xml_results[key]
         end
@@ -1451,7 +1451,7 @@ class HPXMLTest < MiniTest::Test
         next unless xml.include? 'C.xml'
 
         htg_load = xml_results['Load: Heating (MBtu)'].round(2)
-        csv << [File.basename(xml).gsub('.xml','_different_name.xml'), htg_load, 'N/A']
+        csv << [File.basename(xml), htg_load, 'N/A']
         test_name = File.basename(xml, File.extname(xml))
         htg_loads[test_name] = htg_load
       end
@@ -1459,7 +1459,7 @@ class HPXMLTest < MiniTest::Test
         next unless xml.include? 'L.xml'
 
         clg_load = xml_results['Load: Cooling (MBtu)'].round(2)
-        csv << [File.basename(xml).gsub('.xml','_different_name.xml'), 'N/A', clg_load]
+        csv << [File.basename(xml), 'N/A', clg_load]
         test_name = File.basename(xml, File.extname(xml))
         clg_loads[test_name] = clg_load
       end
