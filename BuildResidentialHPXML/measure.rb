@@ -3238,11 +3238,11 @@ class HPXMLFile
                           'Middle' => HPXML::SurroundingsTwoSides,
                           'None' => HPXML::SurroundingsStandAlone }
 
-    if args[:geometry_unit_type] == HPXML::ResidentialTypeSFA
-      hpxml.site.surroundings = surroundings_hash[args[:geometry_horizontal_location].get]
+    if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include?(args[:geometry_unit_type])
+      hpxml.site.surroundings = surroundings_hash[args[:geometry_unit_horizontal_location].get]
     end
 
-    hpxml.site.azimuth_of_front_of_home = args[:geometry_orientation]
+    hpxml.site.azimuth_of_front_of_home = args[:geometry_unit_orientation]
     hpxml.site.shielding_of_home = shielding_of_home
   end
 

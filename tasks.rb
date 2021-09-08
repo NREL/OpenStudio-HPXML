@@ -3272,7 +3272,7 @@ def set_hpxml_site(hpxml_file, hpxml)
     hpxml.site.site_type = nil
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
     hpxml.site.site_type = 'mountain'
-  elsif ['base-bldgtype-single-family-attached.xml'].include? hpxml_file
+  elsif ['base-bldgtype-single-family-attached.xml', 'base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.site.surroundings = HPXML::SurroundingsOneSide
   end
 end
