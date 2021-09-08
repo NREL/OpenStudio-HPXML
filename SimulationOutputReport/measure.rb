@@ -768,7 +768,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @hot_water_uses.each do |hot_water_type, hot_water|
       results_out << ["#{hot_water.name} (#{hot_water.annual_units})", hot_water.annual_output.to_f.round(0)]
     end
-    results_out << [line_break]
 
     if output_format == 'csv'
       CSV.open(annual_output_path, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
