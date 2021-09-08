@@ -17,18 +17,17 @@ class HEScoreTest < MiniTest::Test
     FileUtils.mkdir_p @results_dir
   end
 
-  def test_sample_files
-    results_zip_path = File.join(@results_dir, 'results_jsons.zip')
+  def test_regression_files
+    results_zip_path = File.join(@results_dir, 'results_regression_jsons.zip')
     File.delete(results_zip_path) if File.exist? results_zip_path
-    results_csv_path = File.join(@results_dir, 'results.csv')
+    results_csv_path = File.join(@results_dir, 'results_regression.csv')
     File.delete(results_csv_path) if File.exist? results_csv_path
 
     zipfile = OpenStudio::ZipFile.new(OpenStudio::Path.new(results_zip_path), false)
 
     results = {}
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
-    xmldir = "#{parent_dir}/sample_files"
-    Parallel.map(Dir["#{xmldir}/*.xml"].sort, in_threads: Parallel.processor_count) do |xml|
+    Parallel.map(Dir["#{parent_dir}/regression_files/*.xml"].sort, in_threads: Parallel.processor_count) do |xml|
       out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
       results[File.basename(xml)] = run_and_check(xml, out_dir, false, zipfile)
     end
@@ -46,8 +45,7 @@ class HEScoreTest < MiniTest::Test
 
     results = {}
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
-    xmldir = "#{parent_dir}/historic_files"
-    Parallel.map(Dir["#{xmldir}/*.xml"].sort, in_threads: Parallel.processor_count) do |xml|
+    Parallel.map(Dir["#{parent_dir}/historic_files/*.xml"].sort, in_threads: Parallel.processor_count) do |xml|
       out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
       results[File.basename(xml)] = run_and_check(xml, out_dir, false, zipfile)
     end
@@ -59,7 +57,7 @@ class HEScoreTest < MiniTest::Test
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
-    xml = File.absolute_path(File.join(parent_dir, 'sample_files', 'Base_hpxml.xml'))
+    xml = File.absolute_path(File.join(parent_dir, 'regression_files', 'Base_hpxml.xml'))
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" --skip-simulation -x #{xml}"
     start_time = Time.now
     success = system(command)
@@ -76,7 +74,7 @@ class HEScoreTest < MiniTest::Test
 
   def test_invalid_simulation
     cli_path = OpenStudio.getOpenStudioCLI
-    xml = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..', 'hpxml-measures', 'workflow', 'sample_files', 'base.xml'))
+    xml = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..', 'hpxml-measures', 'workflow', 'regression_files', 'base.xml'))
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml}"
     start_time = Time.now
     success = system(command)
@@ -90,7 +88,7 @@ class HEScoreTest < MiniTest::Test
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
-    xml = File.absolute_path(File.join(parent_dir, 'sample_files', 'Floors_1_hpxml.xml'))
+    xml = File.absolute_path(File.join(parent_dir, 'regression_files', 'Floors_1_hpxml.xml'))
 
     # Create derivative file
     hpxml = XMLHelper.parse_file(xml)
@@ -324,7 +322,7 @@ class HEScoreTest < MiniTest::Test
 
       # Check heating end use by fuel reflects presence of system
       if end_use == 'heating'
-        if xml.include? 'sample_files/Location_CZ09_hpxml.xml'
+        if xml.include? 'regression_files/Location_CZ09_hpxml.xml'
           # skip test: hot climate so potentially no heating energy
         elsif htg_fuels.include? resource_type
           assert_operator(value, :>, 0)

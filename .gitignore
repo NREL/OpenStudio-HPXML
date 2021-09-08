@@ -1,4 +1,5 @@
-/workflow/sample_files/*.out
+/workflow/regression_files/*.out
+/workflow/historic_files/*.out
 /workflow/results
 /workflow/HEScoreDesign
 /workflow/test_results
@@ -1898,6 +1899,5 @@
 /weather/USA_WY_Worland.Muni.AP.726665_TMY3-cache.csv
 /weather/USA_WY_Worland.Muni.AP.726665_TMY3.epw
 /workflow/run*
-/workflow/sample_files_orig
 .DS_Store
 .vscode/.ropeproject

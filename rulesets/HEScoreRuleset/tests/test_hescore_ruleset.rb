@@ -10,12 +10,12 @@ require_relative '../measure.rb'
 require 'fileutils'
 
 class HEScoreRulesetTest < MiniTest::Test
-  def test_sample_files
+  def test_regression_files
     this_dir = File.dirname(__FILE__)
 
     args_hash = {}
 
-    Dir["#{this_dir}/../../../workflow/sample_files/*.xml"].sort.each do |xml|
+    Dir["#{this_dir}/../../../workflow/regression_files/*.xml"].sort.each do |xml|
       puts "Testing #{File.absolute_path(xml)}..."
 
       args_hash['hpxml_path'] = File.absolute_path(xml)
@@ -54,7 +54,7 @@ class HEScoreRulesetTest < MiniTest::Test
 
   def test_neighbors
     this_dir = File.dirname(__FILE__)
-    xml = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Base_hpxml.xml")
+    xml = File.absolute_path("#{this_dir}/../../../workflow/regression_files/Base_hpxml.xml")
 
     args_hash = {
       'hpxml_path' => xml,
@@ -320,7 +320,7 @@ class HEScoreRulesetTest < MiniTest::Test
 
   def test_foundation_area_lookup
     this_dir = File.dirname(__FILE__)
-    xml = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Floor2_conditioned_basement_hpxml.xml")
+    xml = File.absolute_path("#{this_dir}/../../../workflow/regression_files/Floor2_conditioned_basement_hpxml.xml")
 
     orig_hpxml = HPXML.new(hpxml_path: xml)
     new_hpxml = HPXML.new()
