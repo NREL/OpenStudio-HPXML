@@ -313,7 +313,6 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <PrimarySystems/>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
@@ -868,7 +867,6 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <PrimarySystems/>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem_2'/>
               <DistributionSystem idref='HVACDistribution'/>
@@ -1423,7 +1421,6 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <PrimarySystems/>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem_3'/>
               <DistributionSystem idref='HVACDistribution'/>

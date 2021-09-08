@@ -223,7 +223,6 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <PrimarySystems/>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
               <YearInstalled>2009</YearInstalled>

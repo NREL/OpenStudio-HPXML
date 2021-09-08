@@ -205,7 +205,6 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <PrimarySystems/>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>

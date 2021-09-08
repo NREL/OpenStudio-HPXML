@@ -198,7 +198,6 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <PrimarySystems/>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>

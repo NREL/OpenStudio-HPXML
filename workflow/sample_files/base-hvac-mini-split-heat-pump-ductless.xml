@@ -313,7 +313,6 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <PrimarySystems/>
             <HeatPump>
               <SystemIdentifier id='HeatPump'/>
               <HeatPumpType>mini-split</HeatPumpType>
