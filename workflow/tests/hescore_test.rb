@@ -81,7 +81,7 @@ class HEScoreTest < Minitest::Unit::TestCase
   def test_invalid_simulation
     cli_path = OpenStudio.getOpenStudioCLI
     xml = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..', 'hpxml-measures', 'workflow', 'sample_files', 'base.xml'))
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml}"
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -j #{xml}"
     start_time = Time.now
     success = system(command)
     assert_equal(false, success)
