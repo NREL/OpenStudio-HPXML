@@ -42,6 +42,8 @@ class HPXMLOutputReportTest < MiniTest::Test
     hpxml_csv = _test_measure(args_hash)
     assert(File.exist?(hpxml_csv))
     actual_rows = File.readlines(hpxml_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
+    assert_includes(actual_rows.sort, 'Building Summary: Size Heating System: HeatingSystem2 (kBtu/h)')
+    assert_includes(actual_rows.sort, 'Building Summary: Size Cooling System: CoolingSystem2 (kBtu/h)')
     assert_includes(actual_rows.sort, 'Building Summary: Size Heating System: Primary (kBtu/h)')
     assert_includes(actual_rows.sort, 'Building Summary: Size Heating System: Secondary (kBtu/h)')
     assert_includes(actual_rows.sort, 'Building Summary: Size Cooling System: Primary (kBtu/h)')

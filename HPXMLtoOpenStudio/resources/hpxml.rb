@@ -52,7 +52,7 @@ class HPXML < Object
   HPXML_ATTRS = [:header, :site, :neighbor_buildings, :building_occupancy, :building_construction,
                  :climate_and_risk_zones, :air_infiltration_measurements, :attics, :foundations,
                  :roofs, :rim_joists, :walls, :foundation_walls, :frame_floors, :slabs, :windows,
-                 :skylights, :doors, :heating_systems, :cooling_systems, :heat_pumps, :primary_systems, :hvac_plant,
+                 :skylights, :doors, :heating_systems, :cooling_systems, :heat_pumps, :hvac_plant,
                  :hvac_controls, :hvac_distributions, :ventilation_fans, :water_heating_systems,
                  :hot_water_distributions, :water_fixtures, :water_heating, :solar_thermal_systems,
                  :pv_systems, :generators, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
@@ -441,6 +441,10 @@ class HPXML < Object
     return window_area_operable / window_area_total
   end
 
+  def primary_hvac_systems()
+    return hvac_systems.select { |h| h.primary_system }
+  end
+
   def total_fraction_cool_load_served()
     return @cooling_systems.total_fraction_cool_load_served + @heat_pumps.total_fraction_cool_load_served
   end
@@ -642,7 +646,6 @@ class HPXML < Object
     @heating_systems = HeatingSystems.new(self, hpxml)
     @cooling_systems = CoolingSystems.new(self, hpxml)
     @heat_pumps = HeatPumps.new(self, hpxml)
-    @primary_systems = PrimarySystems.new(self, hpxml)
     @hvac_plant = HVACPlant.new(self, hpxml)
     @hvac_controls = HVACControls.new(self, hpxml)
     @hvac_distributions = HVACDistributions.new(self, hpxml)
@@ -2738,30 +2741,6 @@ class HPXML < Object
     end
   end
 
-  class PrimarySystems < BaseArrayElement
-    def from_oga(hpxml)
-      return if hpxml.nil?
-
-      @hpxml_object.heating_systems.each do |heating_system|
-        next if !heating_system.primary_system
-
-        self << heating_system
-      end
-
-      @hpxml_object.cooling_systems.each do |cooling_system|
-        next if !cooling_system.primary_system
-
-        self << cooling_system
-      end
-
-      @hpxml_object.heat_pumps.each do |heat_pump|
-        next if !heat_pump.primary_heating_system && !heat_pump.primary_cooling_system
-
-        self << heat_pump
-      end
-    end
-  end
-
   class HeatingSystems < BaseArrayElement
     def add(**kwargs)
       self << HeatingSystem.new(@hpxml_object, **kwargs)
@@ -2839,7 +2818,7 @@ class HPXML < Object
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
-      primary_systems = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant', 'PrimarySystems'])
+      primary_systems = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant', 'PrimarySystems']) unless @hpxml_object.primary_hvac_systems.empty?
       heating_system = XMLHelper.add_element(hvac_plant, 'HeatingSystem')
       sys_id = XMLHelper.add_element(heating_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -2996,7 +2975,7 @@ class HPXML < Object
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
-      primary_systems = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant', 'PrimarySystems'])
+      primary_systems = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant', 'PrimarySystems']) unless @hpxml_object.primary_hvac_systems.empty?
       cooling_system = XMLHelper.add_element(hvac_plant, 'CoolingSystem')
       sys_id = XMLHelper.add_element(cooling_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -3154,6 +3133,12 @@ class HPXML < Object
       return true
     end
 
+    def primary_system
+      return true if @primary_heating_system || @primary_cooling_system
+
+      return false
+    end
+
     def delete
       @hpxml_object.heat_pumps.delete(self)
       @hpxml_object.water_heating_systems.each do |water_heating_system|
@@ -3173,7 +3158,7 @@ class HPXML < Object
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
-      primary_systems = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant', 'PrimarySystems'])
+      primary_systems = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant', 'PrimarySystems']) unless @hpxml_object.primary_hvac_systems.empty?
       heat_pump = XMLHelper.add_element(hvac_plant, 'HeatPump')
       sys_id = XMLHelper.add_element(heat_pump, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -5723,8 +5708,6 @@ class HPXML < Object
     # Check for globally unique SystemIdentifier IDs and empty IDs
     sys_ids = {}
     self.class::HPXML_ATTRS.each do |attribute|
-      next if attribute == :primary_systems
-
       hpxml_obj = send(attribute)
       next unless hpxml_obj.is_a? HPXML::BaseArrayElement
 

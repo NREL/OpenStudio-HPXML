@@ -120,7 +120,7 @@ class HPXMLOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     # Primary and Secondary
-    if hpxml.primary_systems.size > 0
+    if hpxml.primary_hvac_systems.size > 0
       assign_primary_and_secondary(hpxml, cost_multipliers)
     end
 
@@ -358,41 +358,23 @@ class HPXMLOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     hpxml.heat_pumps.each do |heat_pump|
-      if heat_pump.primary_heating_system
-        cost_mult = BaseOutput.new
-        cost_mult.output = cost_multipliers["#{BS::SizeHeatingSystem}: #{heat_pump.id}"].output
-        cost_multipliers["#{BS::SizeHeatingSystem}: Primary"] = cost_mult
-
-        hpxml.heat_pumps.each do |heat_pump2|
-          next if heat_pump == heat_pump2
-
-          if not cost_multipliers.keys.include?("#{BS::SizeHeatingSystem}: Secondary")
-            cost_mult = BaseOutput.new
-            cost_mult.output = 0
-            cost_multipliers["#{BS::SizeHeatingSystem}: Secondary"] = cost_mult
-          end
-
-          cost_mult = cost_multipliers["#{BS::SizeHeatingSystem}: Secondary"]
-          cost_mult.output += cost_multipliers["#{BS::SizeHeatingSystem}: #{heat_pump2.id}"].output
-        end
-      end
-      next unless heat_pump.primary_cooling_system
+      next if !heat_pump.primary_system
 
       cost_mult = BaseOutput.new
-      cost_mult.output = cost_multipliers["#{BS::SizeCoolingSystem}: #{heat_pump.id}"].output
-      cost_multipliers["#{BS::SizeCoolingSystem}: Primary"] = cost_mult
+      cost_mult.output = cost_multipliers["#{BS::SizeHeatingSystem}: #{heat_pump.id}"].output
+      cost_multipliers["#{BS::SizeHeatingSystem}: Primary"] = cost_mult
 
       hpxml.heat_pumps.each do |heat_pump2|
         next if heat_pump == heat_pump2
 
-        if not cost_multipliers.keys.include?("#{BS::SizeCoolingSystem}: Secondary")
+        if not cost_multipliers.keys.include?("#{BS::SizeHeatingSystem}: Secondary")
           cost_mult = BaseOutput.new
           cost_mult.output = 0
-          cost_multipliers["#{BS::SizeCoolingSystem}: Secondary"] = cost_mult
+          cost_multipliers["#{BS::SizeHeatingSystem}: Secondary"] = cost_mult
         end
 
-        cost_mult = cost_multipliers["#{BS::SizeCoolingSystem}: Secondary"]
-        cost_mult.output += cost_multipliers["#{BS::SizeCoolingSystem}: #{heat_pump2.id}"].output
+        cost_mult = cost_multipliers["#{BS::SizeHeatingSystem}: Secondary"]
+        cost_mult.output += cost_multipliers["#{BS::SizeHeatingSystem}: #{heat_pump2.id}"].output
       end
     end
   end
