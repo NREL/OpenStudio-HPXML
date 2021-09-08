@@ -1,22 +1,22 @@
 {
   "building_address": {
-    "address": "121 Slate River Drive",
-    "city": "Crested Butte",
-    "state": "CO",
-    "zip_code": "81224",
+    "address": "1215 NE 70th Ave",
+    "city": "Portland",
+    "state": "OR",
+    "zip_code": "97213",
     "assessment_type": "test",
-    "external_building_id": "50962"
+    "external_building_id": "1911"
   },
   "building": {
     "about": {
-      "assessment_date": "2017-11-20",
+      "assessment_date": "2019-09-04",
       "shape": "rectangle",
-      "year_built": 1984,
-      "number_bedrooms": 3,
-      "num_floor_above_grade": 2,
-      "floor_to_ceiling_height": 9,
-      "conditioned_floor_area": 1808,
-      "orientation": "south_east",
+      "year_built": 1929,
+      "number_bedrooms": 2,
+      "num_floor_above_grade": 1,
+      "floor_to_ceiling_height": 8,
+      "conditioned_floor_area": 1254,
+      "orientation": "east",
       "blower_door_test": false,
       "air_sealing_present": false
     },
@@ -24,10 +24,11 @@
       "zone_roof": [
         {
           "roof_name": "roof1",
-          "roof_area": 904.0,
-          "roof_assembly_code": "rfwf21co",
-          "roof_color": "medium_dark",
-          "roof_type": "cath_ceiling",
+          "roof_area": 1254.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "dark",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf38",
           "zone_skylight": {
             "skylight_area": 0
           }
@@ -36,9 +37,16 @@
       "zone_floor": [
         {
           "floor_name": "floor1",
-          "floor_area": 904.0,
-          "foundation_type": "unvented_crawl",
-          "foundation_insulation_level": 19,
+          "floor_area": 799.0,
+          "foundation_type": "uncond_basement",
+          "foundation_insulation_level": 0,
+          "floor_assembly_code": "efwf00ca"
+        },
+        {
+          "floor_name": "floor2",
+          "floor_area": 455.0,
+          "foundation_type": "vented_crawl",
+          "foundation_insulation_level": 0,
           "floor_assembly_code": "efwf00ca"
         }
       ],
@@ -47,19 +55,19 @@
       "zone_wall": [
         {
           "side": "front",
-          "wall_assembly_code": "ewwf11wo",
+          "wall_assembly_code": "ewwf00wo",
           "zone_window": {
-            "window_area": 74.0,
+            "window_area": 60.0,
             "window_method": "code",
-            "window_code": "dcaw",
+            "window_code": "scnw",
             "solar_screen": false
           }
         },
         {
           "side": "left",
-          "wall_assembly_code": "ewwf11wo",
+          "wall_assembly_code": "ewwf00wo",
           "zone_window": {
-            "window_area": 47.0,
+            "window_area": 33.0,
             "window_method": "code",
             "window_code": "dcaw",
             "solar_screen": false
@@ -67,9 +75,9 @@
         },
         {
           "side": "back",
-          "wall_assembly_code": "ewwf11wo",
+          "wall_assembly_code": "ewwf00wo",
           "zone_window": {
-            "window_area": 69.0,
+            "window_area": 9.0,
             "window_method": "code",
             "window_code": "dcaw",
             "solar_screen": false
@@ -77,11 +85,11 @@
         },
         {
           "side": "right",
-          "wall_assembly_code": "ewwf11wo",
+          "wall_assembly_code": "ewwf00wo",
           "zone_window": {
             "window_area": 40.0,
             "window_method": "code",
-            "window_code": "dcaw",
+            "window_code": "scnw",
             "solar_screen": false
           }
         }
@@ -91,22 +99,10 @@
       "hvac": [
         {
           "hvac_name": "hvac1",
-          "hvac_fraction": 0.5,
+          "hvac_fraction": 1.0,
           "heating": {
             "fuel_primary": "electric",
             "type": "baseboard"
-          },
-          "cooling": {
-            "type": "none"
-          },
-          "hvac_distribution": []
-        },
-        {
-          "hvac_name": "hvac2",
-          "hvac_fraction": 0.5,
-          "heating": {
-            "fuel_primary": "cord_wood",
-            "type": "wood_stove"
           },
           "cooling": {
             "type": "none"
@@ -118,8 +114,8 @@
         "category": "unit",
         "type": "storage",
         "fuel_primary": "electric",
-        "efficiency_method": "shipment_weighted",
-        "year": 1984
+        "efficiency_method": "uef",
+        "energy_factor": 0.92
       }
     }
   }

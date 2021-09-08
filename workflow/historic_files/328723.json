@@ -1,21 +1,21 @@
 {
   "building_address": {
-    "address": "420 SE 12th Ave",
-    "city": "POMPANO BEACH",
-    "state": "FL",
-    "zip_code": "33060",
+    "address": "110 N Maple St",
+    "city": "North Freedom",
+    "state": "WI",
+    "zip_code": "53951",
     "assessment_type": "test",
-    "external_building_id": "60604"
+    "external_building_id": "57700"
   },
   "building": {
     "about": {
-      "assessment_date": "2017-06-19",
+      "assessment_date": "2017-08-08",
       "shape": "rectangle",
-      "year_built": 1973,
-      "number_bedrooms": 2,
+      "year_built": 1900,
+      "number_bedrooms": 3,
       "num_floor_above_grade": 2,
       "floor_to_ceiling_height": 8,
-      "conditioned_floor_area": 1910,
+      "conditioned_floor_area": 1292,
       "orientation": "west",
       "blower_door_test": false,
       "air_sealing_present": false
@@ -24,11 +24,11 @@
       "zone_roof": [
         {
           "roof_name": "roof1",
-          "roof_area": 1009.0,
+          "roof_area": 646.0,
           "roof_assembly_code": "rfwf00co",
-          "roof_color": "medium_dark",
+          "roof_color": "medium",
           "roof_type": "vented_attic",
-          "ceiling_assembly_code": "ecwf00",
+          "ceiling_assembly_code": "ecwf19",
           "zone_skylight": {
             "skylight_area": 0
           }
@@ -37,9 +37,17 @@
       "zone_floor": [
         {
           "floor_name": "floor1",
-          "floor_area": 1009.0,
-          "foundation_type": "slab_on_grade",
-          "foundation_insulation_level": 0
+          "floor_area": 452.0,
+          "foundation_type": "unvented_crawl",
+          "foundation_insulation_level": 0,
+          "floor_assembly_code": "efwf00ca"
+        },
+        {
+          "floor_name": "floor2",
+          "floor_area": 194.0,
+          "foundation_type": "uncond_basement",
+          "foundation_insulation_level": 11,
+          "floor_assembly_code": "efwf00ca"
         }
       ],
       "wall_construction_same": false,
@@ -47,41 +55,45 @@
       "zone_wall": [
         {
           "side": "front",
-          "wall_assembly_code": "ewcb00st",
+          "wall_assembly_code": "ewwf15vi",
           "zone_window": {
-            "window_area": 29.0,
-            "window_method": "code",
-            "window_code": "scna",
+            "window_area": 102.0,
+            "window_method": "custom",
+            "window_u_value": 0.7,
+            "window_shgc": 0.64,
             "solar_screen": false
           }
         },
         {
           "side": "left",
-          "wall_assembly_code": "ewcb00st",
+          "wall_assembly_code": "ewwf15vi",
           "zone_window": {
-            "window_area": 29.0,
-            "window_method": "code",
-            "window_code": "scna",
+            "window_area": 47.6,
+            "window_method": "custom",
+            "window_u_value": 0.7,
+            "window_shgc": 0.64,
             "solar_screen": false
           }
         },
         {
           "side": "back",
-          "wall_assembly_code": "ewcb00st",
+          "wall_assembly_code": "ewwf15vi",
           "zone_window": {
-            "window_area": 194.0,
-            "window_method": "code",
-            "window_code": "scna",
+            "window_area": 51.0,
+            "window_method": "custom",
+            "window_u_value": 0.7,
+            "window_shgc": 0.64,
             "solar_screen": false
           }
         },
         {
           "side": "right",
-          "wall_assembly_code": "ewcb00st",
+          "wall_assembly_code": "ewwf15vi",
           "zone_window": {
-            "window_area": 29.0,
-            "window_method": "code",
-            "window_code": "scna",
+            "window_area": 71.4,
+            "window_method": "custom",
+            "window_u_value": 0.7,
+            "window_shgc": 0.64,
             "solar_screen": false
           }
         }
@@ -91,42 +103,22 @@
       "hvac": [
         {
           "hvac_name": "hvac1",
-          "hvac_fraction": 0.5,
+          "hvac_fraction": 1.0,
           "heating": {
-            "fuel_primary": "electric",
-            "type": "central_furnace"
+            "fuel_primary": "natural_gas",
+            "type": "central_furnace",
+            "efficiency_method": "user",
+            "efficiency": 0.78
           },
           "cooling": {
             "type": "split_dx",
             "efficiency_method": "user",
-            "efficiency": 9.0
+            "efficiency": 10.0
           },
           "hvac_distribution": [
             {
               "name": "duct1",
               "location": "cond_space",
-              "fraction": 1.0,
-              "insulated": false,
-              "sealed": false
-            }
-          ]
-        },
-        {
-          "hvac_name": "hvac2",
-          "hvac_fraction": 0.5,
-          "heating": {
-            "fuel_primary": "electric",
-            "type": "central_furnace"
-          },
-          "cooling": {
-            "type": "split_dx",
-            "efficiency_method": "user",
-            "efficiency": 9.0
-          },
-          "hvac_distribution": [
-            {
-              "name": "duct1",
-              "location": "uncond_attic",
               "fraction": 1.0,
               "insulated": false,
               "sealed": false
@@ -139,7 +131,7 @@
         "type": "storage",
         "fuel_primary": "electric",
         "efficiency_method": "user",
-        "energy_factor": 0.87
+        "energy_factor": 0.88
       }
     }
   }
