@@ -109,14 +109,14 @@
               "name": "duct1",
               "location": "cond_space",
               "fraction": 0.65,
-              "insulated": false,
+              "insulated": true,
               "sealed": true
             },
             {
               "name": "duct2",
               "location": "uncond_attic",
               "fraction": 0.35000000000000003,
-              "insulated": false,
+              "insulated": true,
               "sealed": true
             }
           ]

@@ -104,7 +104,7 @@
               "name": "duct1",
               "location": "unvented_crawl",
               "fraction": 1.0,
-              "insulated": false,
+              "insulated": true,
               "sealed": false
             }
           ]

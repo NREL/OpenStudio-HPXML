@@ -109,14 +109,14 @@
               "name": "duct1",
               "location": "vented_crawl",
               "fraction": 0.95,
-              "insulated": false,
+              "insulated": true,
               "sealed": true
             },
             {
               "name": "duct2",
               "location": "uncond_attic",
               "fraction": 0.05,
-              "insulated": false,
+              "insulated": true,
               "sealed": true
             }
           ]

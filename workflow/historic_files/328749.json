@@ -122,7 +122,7 @@
               "name": "duct1",
               "location": "vented_crawl",
               "fraction": 1.0,
-              "insulated": false,
+              "insulated": true,
               "sealed": true
             }
           ]
