@@ -10,25 +10,24 @@ require_relative '../../hpxml-measures/HPXMLtoOpenStudio/measure'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/xmlhelper'
 require_relative '../hescore_lib'
 
-class HEScoreTest < Minitest::Unit::TestCase
-  def before_setup
+class HEScoreTest < MiniTest::Test
+  def setup
     # Prepare results dir for CI storage
     @results_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', 'test_results'))
-    Dir.mkdir(@results_dir) unless File.exist? @results_dir
+    FileUtils.mkdir_p @results_dir
   end
 
-  def test_simulations
-    results_zip_path = File.join(@results_dir, 'results_jsons.zip')
+  def test_regression_files
+    results_zip_path = File.join(@results_dir, 'results_regression_jsons.zip')
     File.delete(results_zip_path) if File.exist? results_zip_path
-    results_csv_path = File.join(@results_dir, 'results.csv')
+    results_csv_path = File.join(@results_dir, 'results_regression.csv')
     File.delete(results_csv_path) if File.exist? results_csv_path
 
     zipfile = OpenStudio::ZipFile.new(OpenStudio::Path.new(results_zip_path), false)
 
     results = {}
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
-    jsondir = "#{parent_dir}/sample_files"
-    Parallel.map(Dir["#{jsondir}/*.json"].sort, in_threads: Parallel.processor_count) do |json|
+    Parallel.map(Dir["#{parent_dir}/regression_files/*.json"].sort, in_threads: Parallel.processor_count) do |json|
       next unless json
 
       out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
@@ -38,18 +37,17 @@ class HEScoreTest < Minitest::Unit::TestCase
     _write_summary_results(results.sort_by { |k, v| k.downcase }.to_h, results_csv_path)
   end
 
-  def test_historical_homes
-    results_zip_path = File.join(@results_dir, 'results_historical_homes_jsons.zip')
+  def test_historic_files
+    results_zip_path = File.join(@results_dir, 'results_historic_jsons.zip')
     File.delete(results_zip_path) if File.exist? results_zip_path
-    results_csv_path = File.join(@results_dir, 'results_historical_homes.csv')
+    results_csv_path = File.join(@results_dir, 'results_historic.csv')
     File.delete(results_csv_path) if File.exist? results_csv_path
 
     zipfile = OpenStudio::ZipFile.new(OpenStudio::Path.new(results_zip_path), false)
 
     results = {}
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
-    jsondir = "#{parent_dir}/test_extracted_100_sample_historical_homes"
-    Parallel.map(Dir["#{jsondir}/*.json"].sort, in_threads: Parallel.processor_count) do |json|
+    Parallel.map(Dir["#{parent_dir}/historic_files/*.json"].sort, in_threads: Parallel.processor_count) do |json|
       next unless json
 
       out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
@@ -63,7 +61,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
-    json = File.absolute_path(File.join(parent_dir, 'sample_files', 'Base.json'))
+    json = File.absolute_path(File.join(parent_dir, 'regression_files', 'Base.json'))
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" --skip-simulation -j #{json}"
     start_time = Time.now
     success = system(command)
@@ -79,9 +77,11 @@ class HEScoreTest < Minitest::Unit::TestCase
   end
 
   def test_invalid_simulation
+    parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
+
     cli_path = OpenStudio.getOpenStudioCLI
-    xml = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..', 'hpxml-measures', 'workflow', 'sample_files', 'base.xml'))
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -j #{xml}"
+    json = File.absolute_path(File.join(parent_dir, 'regression_files', 'Missing.json'))
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -j #{json}"
     start_time = Time.now
     success = system(command)
     assert_equal(false, success)
@@ -94,7 +94,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
-    json_path = File.absolute_path(File.join(parent_dir, 'sample_files', 'Floors_1.json'))
+    json_path = File.absolute_path(File.join(parent_dir, 'regression_files', 'Floors_1.json'))
 
     # Create derivative file
     json_file = File.open(json_path)
@@ -355,7 +355,7 @@ class HEScoreTest < Minitest::Unit::TestCase
 
       # Check heating end use by fuel reflects presence of system
       if end_use == 'heating'
-        if json.include? 'sample_files/Location_CZ09.json'
+        if json.include? 'regression_files/Location_CZ09.json'
           # skip test: hot climate so potentially no heating energy
         elsif htg_fuels.include? resource_type
           assert_operator(value, :>, 0)

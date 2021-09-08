@@ -10,12 +10,32 @@ require_relative '../measure.rb'
 require 'fileutils'
 
 class HEScoreRulesetTest < MiniTest::Test
-  def test_sample_files
+  def test_regression_files
     this_dir = File.dirname(__FILE__)
 
     args_hash = {}
 
-    Dir["#{this_dir}/../../../workflow/sample_files/*.json"].sort.each do |json|
+    Dir["#{this_dir}/../../../workflow/regression_files/*.json"].sort.each do |json|
+      puts "Testing #{File.absolute_path(json)}..."
+
+      args_hash['json_path'] = File.absolute_path(json)
+      args_hash['hpxml_output_path'] = File.absolute_path(json).gsub('.json', '.xml.out')
+
+      _test_measure(args_hash)
+      _test_schema_validation(this_dir, json.gsub('.json', '.xml.out'))
+      _test_assembly_effective_rvalues(args_hash)
+      _test_conditioned_building_volume(args_hash)
+
+      FileUtils.rm_f(args_hash['hpxml_output_path']) # Cleanup
+    end
+  end
+
+  def test_historic_files
+    this_dir = File.dirname(__FILE__)
+
+    args_hash = {}
+
+    Dir["#{this_dir}/../../../workflow/historic_files/*.json"].sort.each do |json|
       puts "Testing #{File.absolute_path(json)}..."
 
       args_hash['json_path'] = File.absolute_path(json)
@@ -32,7 +52,7 @@ class HEScoreRulesetTest < MiniTest::Test
 
   def test_neighbors
     this_dir = File.dirname(__FILE__)
-    json = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Base.json")
+    json = File.absolute_path("#{this_dir}/../../../workflow/regression_files/Base.json")
 
     args_hash = {
       'json_path' => json,
@@ -298,7 +318,7 @@ class HEScoreRulesetTest < MiniTest::Test
 
   def test_foundation_area_lookup
     this_dir = File.dirname(__FILE__)
-    json_path = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Floor2_conditioned_basement.json")
+    json_path = File.absolute_path("#{this_dir}/../../../workflow/regression_files/Floor2_conditioned_basement.json")
 
     json_file = File.open(json_path)
     json = JSON.parse(json_file.read)
