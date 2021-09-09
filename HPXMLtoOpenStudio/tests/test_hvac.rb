@@ -776,7 +776,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
     # Fan
     fan = unitary_system.supplyFan.get.to_FanSystemModel.get
-    assert_in_epsilon(fan_watts_cfm, fan.designPressureRise / fan.fanTotalEfficiency * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+    assert_in_epsilon(fan_watts_cfm, fan.electricPowerPerUnitFlowRate * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
 
     # Check installation quality EMS
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
@@ -833,8 +833,8 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
     # Fan
     fan = unitary_system.supplyFan.get.to_FanSystemModel.get
-    assert_in_epsilon(fan_watts_cfm, fan.designPressureRise / fan.fanTotalEfficiency * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
-    assert_in_epsilon(fan_watts_cfm2, fan.designPressureRise / fan.fanTotalEfficiency * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+    assert_in_epsilon(fan_watts_cfm, fan.electricPowerPerUnitFlowRate * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+    assert_in_epsilon(fan_watts_cfm2, fan.electricPowerPerUnitFlowRate * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
 
     # Check installation quality EMS
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
@@ -881,7 +881,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
     # Fan
     fan = unitary_system.supplyFan.get.to_FanSystemModel.get
-    assert_in_epsilon(fan_watts_cfm, fan.designPressureRise / fan.fanTotalEfficiency * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+    assert_in_epsilon(fan_watts_cfm, fan.electricPowerPerUnitFlowRate * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
   end
 
   def test_install_quality_ground_to_air_heat_pump_ratio
@@ -914,7 +914,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
     # Fan
     fan = unitary_system.supplyFan.get.to_FanSystemModel.get
-    assert_in_epsilon(fan_watts_cfm, fan.designPressureRise / fan.fanTotalEfficiency * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+    assert_in_epsilon(fan_watts_cfm, fan.electricPowerPerUnitFlowRate * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
 
     # Check installation quality EMS
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
@@ -967,8 +967,8 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     year = model.getYearDescription.assumedYear
 
     # Check heating season
-    start_day_num = Schedule.get_day_num_from_month_day(model, seasons_heating_begin_month, seasons_heating_begin_day)
-    end_day_num = Schedule.get_day_num_from_month_day(model, seasons_heating_end_month, seasons_heating_end_day)
+    start_day_num = Schedule.get_day_num_from_month_day(year, seasons_heating_begin_month, seasons_heating_begin_day)
+    end_day_num = Schedule.get_day_num_from_month_day(year, seasons_heating_end_month, seasons_heating_end_day)
     start_date = OpenStudio::Date::fromDayOfYear(start_day_num, year)
     end_date = OpenStudio::Date::fromDayOfYear(end_day_num, year)
     heating_days = zone.sequentialHeatingFractionSchedule(zone.airLoopHVACTerminals[0]).get.to_ScheduleRuleset.get
@@ -985,8 +985,8 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert_includes(end_dates, end_date)
 
     # Check cooling season
-    start_day_num = Schedule.get_day_num_from_month_day(model, seasons_cooling_begin_month, seasons_cooling_begin_day)
-    end_day_num = Schedule.get_day_num_from_month_day(model, seasons_cooling_end_month, seasons_cooling_end_day)
+    start_day_num = Schedule.get_day_num_from_month_day(year, seasons_cooling_begin_month, seasons_cooling_begin_day)
+    end_day_num = Schedule.get_day_num_from_month_day(year, seasons_cooling_end_month, seasons_cooling_end_day)
     start_date = OpenStudio::Date::fromDayOfYear(start_day_num, year)
     end_date = OpenStudio::Date::fromDayOfYear(end_day_num, year)
     cooling_days = zone.sequentialCoolingFractionSchedule(zone.airLoopHVACTerminals[0]).get.to_ScheduleRuleset.get
@@ -1062,7 +1062,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
     # Fan
     fan = unitary_system.supplyFan.get.to_FanSystemModel.get
-    assert_in_epsilon(fan_watts_cfm, fan.designPressureRise / fan.fanTotalEfficiency * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+    assert_in_epsilon(fan_watts_cfm, fan.electricPowerPerUnitFlowRate * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
 
     # Check installation quality EMS
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality")
