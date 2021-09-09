@@ -1251,8 +1251,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     expected_supply_locations = ['attic - unvented', 'outside', 'attic - unvented', 'outside'] * hpxml_default.hvac_distributions.size
     expected_return_locations = ['attic - unvented', 'outside', 'attic - unvented', 'outside'] * hpxml_default.hvac_distributions.size
-    expected_supply_areas = [54.68, 18.23] * hpxml_default.hvac_distributions.size # Fixme: recalculate with base-hvac-multiple.xml with ptac/pthp
-    expected_return_areas = [13.5, 13.5] * hpxml_default.hvac_distributions.size
+    expected_supply_areas = [49.61, 16.54] * hpxml_default.hvac_distributions.size
+    expected_return_areas = [12.25, 12.25] * hpxml_default.hvac_distributions.size
     expected_supply_fracs = [0.75, 0.25] * hpxml_default.hvac_distributions.size
     expected_return_fracs = [0.5, 0.5] * hpxml_default.hvac_distributions.size
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors

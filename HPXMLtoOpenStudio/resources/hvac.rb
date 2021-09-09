@@ -59,11 +59,9 @@ class HVAC
         supp_max_temp = htg_ap.supp_max_temp
         # Heating Coil
         htg_coil = create_dx_heating_coil(model, obj_name, heating_system)
-        hvac_map[heating_system.id] << htg_coil
 
         # Supplemental Heating Coil
         htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system)
-        hvac_map[heating_system.id] << htg_supp_coil
       else
         # Heating Coil
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
