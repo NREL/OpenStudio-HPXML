@@ -59,9 +59,9 @@ class HVACSizing
       ducts_heat_load = calculate_load_ducts_heating(bldg_design_loads, weather, hvac)
       ducts_cool_load_sens, ducts_cool_load_lat = calculate_load_ducts_cooling(bldg_design_loads, weather, hvac)
 
-      total_ducts_heat_load += ducts_heat_load
-      total_ducts_cool_load_sens += ducts_cool_load_sens
-      total_ducts_cool_load_lat += ducts_cool_load_lat
+      total_ducts_heat_load += ducts_heat_load.to_f
+      total_ducts_cool_load_sens += ducts_cool_load_sens.to_f
+      total_ducts_cool_load_lat += ducts_cool_load_lat.to_f
     end
     apply_load_ducts(bldg_design_loads, total_ducts_heat_load, total_ducts_cool_load_sens, total_ducts_cool_load_lat)
 
