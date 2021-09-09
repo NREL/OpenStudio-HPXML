@@ -49,10 +49,10 @@ class XMLHelper
   # Deletes the child element with element_name. Returns the deleted element.
   def self.delete_element(parent, element_name)
     element = nil
-    begin
+    while !parent.at_xpath(element_name).nil?
       last_element = element
       element = parent.at_xpath(element_name).remove
-    end while !parent.at_xpath(element_name).nil?
+    end
     return last_element
   end
 
@@ -174,7 +174,7 @@ class XMLHelper
   end
 
   def self.write_file(doc, out_path)
-    doc_s = doc.to_xml
+    doc_s = doc.to_xml.delete("\r")
 
     # Manually apply pretty-printing (indentation and newlines)
     # Can remove if https://gitlab.com/yorickpeterse/oga/-/issues/75 is implemented
@@ -204,6 +204,8 @@ class XMLHelper
       end
     end
     indents.reverse_each do |pos, level|
+      next if doc_s[pos - 1] == ' '
+
       doc_s.insert(pos, "\n#{'  ' * level}")
     end
     # Retain REXML-styling

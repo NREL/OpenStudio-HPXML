@@ -1,15 +1,41 @@
 ## OpenStudio-HPXML v1.3.0 (Pending)
 
 __New Features__
-- Updates to OpenStudio 3.2.0/EnergyPlus 9.5.0.
-- Introduces a small amount of infiltration for unvented spaces.
+- Updates to OpenStudio 3.2.1/EnergyPlus 9.5.0.
 - **Breaking change**: Replaces ClothesDryer `extension/IsVented` and `extension/VentedFlowRate` with `Vented` and `VentedFlowRate`.
-- Allows additional fuel types for generators.
-- Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
+- Expanded capabilities for scheduling:
+  - Allows modeling detailed occupancy via a schedule CSV file.
+  - Introduces a measure for automatically generating detailed smooth/stochastic schedule CSV files.
+  - Expands simplified weekday/weekend/monthly schedule inputs to additional building features.
+  - Allows `HeatingSeason` & `CoolingSeason` to be specified for defining heating and cooling equipment availability.
 - Allows non-zero refrigerant charge defect ratios for ground source heat pumps.
-- Allows `HeatingSeason` & `CoolingSeason` to be specified for defining heating and cooling equipment availability.
-- Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
+- Expands choices allowed for `Siding` (Wall/RimJoist) and `RoofType` (Roof) elements.
+- Allows "none" for wall/rim joist siding.
+- Allows interior finish inputs (e.g., 0.5" drywall) for walls, ceilings, and roofs.
+- Allows additional fuel types for generators.
+- Adds alternative inputs:
+  - `Ducts/FractionDuctArea` instead of `Ducts/DuctSurfaceArea`.
+  - `Length` instead of `Area` for foundation walls.
+  - `Orientation` instead of `Azimuth` for all applicable surfaces, PV systems, and solar thermal systems.
+  - CEER (Combined Energy Efficiency Ratio) instead of EER for room ACs.
+  - `UsageBin` instead of `FirstHourRating` (for water heaters w/ UEF metric).
+- Allows more defaulting (optional inputs):
+  - Mechanical ventilation airflow rate per ASHRAE 62.2-2019.
+  - HVAC/DHW system efficiency (by age).
+  - Mechanical ventilation fan power (by type).
+  - Color (solar absorptance) for walls, roofs, and rim joists.
+  - Foundation wall distance to top/bottom of insulation.
+  - Door azimuth.
+  - Radiant barrier grade.
+  - Whole house fan airflow rate and fan power.
+- Switches to the EnergyPlus Fan:SystemModel object for all HVAC systems.
+- Introduces a small amount of infiltration for unvented spaces.
 - Revises shared mechanical ventilation preconditioning control logic to operate less often.
+- Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
+- Updates the reporting measure to register all outputs from the annual CSV with the OS runner (for use in, e.g., PAT).
+- Removes timeseries CSV output columns that are all zeroes to reduce file size and processing time.
+- Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
+- Eliminates EnergyPlus warnings related to unused objects or invalid output meters/variables.
 - Allows defaulting of HVAC/DHW system efficiency (by age).
 - Allows defaulting of mechanical ventilation fan power (by type).
 - Allows CEER (Combined Energy Efficiency Ratio) efficiency unit for room AC.
@@ -17,6 +43,10 @@ __New Features__
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
+- Improves HVAC fan power for central forced air systems.
+- Fixes mechanical ventilation compartmentalization area calculation for SFA/MF homes with surfaces with InteriorAdjacentTo==ExteriorAdjacentTo.
+- Negative `DistanceToTopOfInsulation` values are now disallowed.
+- Fixes workflow errors if a `VentilationFan` has zero airflow rate or zero hours of operation.
 
 ## OpenStudio-HPXML v1.2.0
 
