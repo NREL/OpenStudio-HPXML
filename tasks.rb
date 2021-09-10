@@ -918,6 +918,7 @@ def get_values(osw_file, step)
   elsif ['base-atticroof-radiant-barrier.osw'].include? osw_file
     step.setArgument('roof_radiant_barrier', true)
     step.setArgument('roof_radiant_barrier_grade', '2')
+    step.setArgument('ceiling_assembly_r', 8.7)
   elsif ['base-atticroof-unvented-insulated-roof.osw'].include? osw_file
     step.setArgument('ceiling_assembly_r', 2.1)
     step.setArgument('roof_assembly_r', 25.8)
