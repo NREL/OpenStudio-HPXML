@@ -104,7 +104,7 @@
           "hvac_distribution": [
             {
               "name": "duct1",
-              "location": "uncond_attic",
+              "location": "cond_space",
               "fraction": 1.0,
               "insulated": true,
               "sealed": false
@@ -126,7 +126,7 @@
           "hvac_distribution": [
             {
               "name": "duct1",
-              "location": "cond_space",
+              "location": "uncond_attic",
               "fraction": 1.0,
               "insulated": true,
               "sealed": false

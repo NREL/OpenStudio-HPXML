@@ -120,15 +120,15 @@
           "cooling": {
             "type": "split_dx",
             "efficiency_method": "user",
-            "efficiency": 12.0
+            "efficiency": 13.0
           },
           "hvac_distribution": [
             {
               "name": "duct1",
-              "location": "uncond_attic",
+              "location": "uncond_basement",
               "fraction": 1.0,
-              "insulated": true,
-              "sealed": false
+              "insulated": false,
+              "sealed": true
             }
           ]
         },
@@ -144,15 +144,15 @@
           "cooling": {
             "type": "split_dx",
             "efficiency_method": "user",
-            "efficiency": 13.0
+            "efficiency": 12.0
           },
           "hvac_distribution": [
             {
               "name": "duct1",
-              "location": "uncond_basement",
+              "location": "uncond_attic",
               "fraction": 1.0,
-              "insulated": false,
-              "sealed": true
+              "insulated": true,
+              "sealed": false
             }
           ]
         }

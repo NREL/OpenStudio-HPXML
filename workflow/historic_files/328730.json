@@ -106,7 +106,7 @@
           "cooling": {
             "type": "packaged_dx",
             "efficiency_method": "user",
-            "efficiency": 9.7
+            "efficiency": 8.5
           },
           "hvac_distribution": [
             {
@@ -130,7 +130,7 @@
           "cooling": {
             "type": "packaged_dx",
             "efficiency_method": "user",
-            "efficiency": 8.5
+            "efficiency": 9.7
           },
           "hvac_distribution": [
             {

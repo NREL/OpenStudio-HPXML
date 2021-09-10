@@ -94,8 +94,10 @@
           "hvac_name": "hvac1",
           "hvac_fraction": 0.5,
           "heating": {
-            "fuel_primary": "electric",
-            "type": "baseboard"
+            "fuel_primary": "natural_gas",
+            "type": "wall_furnace",
+            "efficiency_method": "user",
+            "efficiency": 0.71
           },
           "cooling": {
             "type": "none"
@@ -106,10 +108,8 @@
           "hvac_name": "hvac2",
           "hvac_fraction": 0.5,
           "heating": {
-            "fuel_primary": "natural_gas",
-            "type": "wall_furnace",
-            "efficiency_method": "user",
-            "efficiency": 0.71
+            "fuel_primary": "electric",
+            "type": "baseboard"
           },
           "cooling": {
             "type": "none"
