@@ -194,6 +194,51 @@ class HPXMLTest < MiniTest::Test
     File.delete(osw_path_test)
   end
 
+  def test_template_osw_with_schedule
+    # Check that simulation works using template.osw
+    require 'json'
+
+    os_cli = OpenStudio.getOpenStudioCLI
+    osw_path = File.join(File.dirname(__FILE__), '..', 'template-stochastic-schedules.osw')
+
+    # Create derivative OSW for testing
+    osw_path_test = osw_path.gsub('.osw', '_test.osw')
+    FileUtils.cp(osw_path, osw_path_test)
+
+    # Turn on debug mode
+    json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
+    json[:steps][1][:arguments][:debug] = true
+
+    if Dir.exist? File.join(File.dirname(__FILE__), '..', '..', 'project')
+      # CI checks out the repo as "project", so update dir name
+      json[:steps][1][:measure_dir_name] = 'project'
+    end
+
+    File.open(osw_path_test, 'w') do |f|
+      f.write(JSON.pretty_generate(json))
+    end
+
+    command = "#{os_cli} run -w #{osw_path_test}"
+    system(command, err: File::NULL)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(osw_path_test), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+
+    # Check for debug files
+    osm_path = File.join(File.dirname(osw_path_test), 'run', 'in.osm')
+    assert(File.exist? osm_path)
+    hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
+    assert(File.exist? hpxml_defaults_path)
+
+    # Cleanup
+    File.delete(osw_path_test)
+    xml_path_test = File.join(File.dirname(__FILE__), '..', 'base-stochastic-schedules.xml')
+    File.delete(xml_path_test)
+  end
+
   def test_weather_cache
     cache_orig = File.join(@this_dir, '..', '..', 'weather', 'USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv')
     cache_bak = cache_orig + '.bak'
@@ -499,8 +544,8 @@ class HPXMLTest < MiniTest::Test
     if not xml.include? 'ASHRAE_Standard_140'
       sum_component_htg_loads = results.select { |k, v| k.start_with? 'Component Load: Heating:' }.map { |k, v| v }.sum(0.0)
       sum_component_clg_loads = results.select { |k, v| k.start_with? 'Component Load: Cooling:' }.map { |k, v| v }.sum(0.0)
-      residual_htg_load = results['Load: Heating (MBtu)'] - sum_component_htg_loads
-      residual_clg_load = results['Load: Cooling (MBtu)'] - sum_component_clg_loads
+      residual_htg_load = results['Load: Heating: Delivered (MBtu)'] - sum_component_htg_loads
+      residual_clg_load = results['Load: Cooling: Delivered (MBtu)'] - sum_component_clg_loads
       assert_operator(residual_htg_load.abs, :<, 0.5)
       assert_operator(residual_clg_load.abs, :<, 0.5)
     end
@@ -654,17 +699,14 @@ class HPXMLTest < MiniTest::Test
       # General
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
       next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
-      next if err_line.include? 'Output:Meter: invalid Key Name'
       next if err_line.include? 'Entered Zone Volumes differ from calculated zone volume'
       next if err_line.include?('CalculateZoneVolume') && err_line.include?('not fully enclosed')
       next if err_line.include?('GetInputViewFactors') && err_line.include?('not enough values')
       next if err_line.include? 'Pump nominal power or motor efficiency is set to 0'
       next if err_line.include? 'volume flow rate per watt of rated total cooling capacity is out of range'
       next if err_line.include? 'volume flow rate per watt of rated total heating capacity is out of range'
-      next if err_line.include? 'The following Report Variables were requested but not generated'
       next if err_line.include? 'Timestep: Requested number'
       next if err_line.include? 'The Standard Ratings is calculated for'
-      next if err_line.include?('CheckUsedConstructions') && err_line.include?('nominally unused constructions')
       next if err_line.include?('WetBulb not converged after') && err_line.include?('iterations(PsyTwbFnTdbWPb)')
       next if err_line.include? 'Inside surface heat balance did not converge with Max Temp Difference'
       next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
@@ -724,7 +766,7 @@ class HPXMLTest < MiniTest::Test
       flunk "Unexpected warning found: #{err_line}"
     end
 
-    # Check for unused objects/schedules/constructions
+    # Check for unused objects/schedules/constructions warnings
     num_unused_objects = 0
     num_unused_schedules = 0
     num_unused_constructions = 0
@@ -740,6 +782,19 @@ class HPXMLTest < MiniTest::Test
     assert_equal(0, num_unused_objects)
     assert_equal(0, num_unused_schedules)
     assert_equal(0, num_unused_constructions)
+
+    # Check for Output:Meter and Output:Variable warnings
+    num_invalid_output_meters = 0
+    num_invalid_output_variables = 0
+    File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
+      if err_line.include? 'Output:Meter: invalid Key Name'
+        num_invalid_output_meters += 1
+      elsif err_line.include?('Key=') && err_line.include?('VarName=')
+        num_invalid_output_variables += 1
+      end
+    end
+    assert_equal(0, num_invalid_output_meters)
+    assert_equal(0, num_invalid_output_variables)
 
     # Timestep
     timestep = hpxml.header.timestep
@@ -1315,15 +1370,15 @@ class HPXMLTest < MiniTest::Test
       end
     end
 
-    # Check unmet loads
-    unmet_htg_load = results.select { |k, v| k.include? 'Unmet Load: Heating' }.map { |k, v| v }.sum(0.0)
-    unmet_clg_load = results.select { |k, v| k.include? 'Unmet Load: Cooling' }.map { |k, v| v }.sum(0.0)
+    # Check unmet hours
+    unmet_hours_htg = results.select { |k, v| k.include? 'Unmet Hours: Heating' }.map { |k, v| v }.sum(0.0)
+    unmet_hours_clg = results.select { |k, v| k.include? 'Unmet Hours: Cooling' }.map { |k, v| v }.sum(0.0)
     if hpxml_path.include? 'base-hvac-undersized.xml'
-      assert_operator(unmet_htg_load, :>, 0.5)
-      assert_operator(unmet_clg_load, :>, 0.5)
+      assert_operator(unmet_hours_htg, :>, 1000)
+      assert_operator(unmet_hours_clg, :>, 1000)
     else
-      assert_operator(unmet_htg_load, :<, 0.5)
-      assert_operator(unmet_clg_load, :<, 0.5)
+      assert_operator(unmet_hours_htg, :<, 100)
+      assert_operator(unmet_hours_clg, :<, 100)
     end
 
     sqlFile.close
@@ -1395,7 +1450,7 @@ class HPXMLTest < MiniTest::Test
       all_results.sort.each do |xml, xml_results|
         next unless xml.include? 'C.xml'
 
-        htg_load = xml_results['Load: Heating (MBtu)'].round(2)
+        htg_load = xml_results['Load: Heating: Delivered (MBtu)'].round(2)
         csv << [File.basename(xml), htg_load, 'N/A']
         test_name = File.basename(xml, File.extname(xml))
         htg_loads[test_name] = htg_load
@@ -1403,7 +1458,7 @@ class HPXMLTest < MiniTest::Test
       all_results.sort.each do |xml, xml_results|
         next unless xml.include? 'L.xml'
 
-        clg_load = xml_results['Load: Cooling (MBtu)'].round(2)
+        clg_load = xml_results['Load: Cooling: Delivered (MBtu)'].round(2)
         csv << [File.basename(xml), 'N/A', clg_load]
         test_name = File.basename(xml, File.extname(xml))
         clg_loads[test_name] = clg_load
