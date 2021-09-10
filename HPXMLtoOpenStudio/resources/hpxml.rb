@@ -3232,7 +3232,8 @@ class HPXML < Object
       XMLHelper.add_extension(heat_pump, 'SharedLoopMotorEfficiency', @shared_loop_motor_efficiency, :float) unless @shared_loop_motor_efficiency.nil?
       XMLHelper.add_extension(heat_pump, 'SeedId', @seed_id, :string) unless @seed_id.nil?
       if @primary_heating_system
-        primary_heating_system = XMLHelper.add_element(primary_systems, 'PrimaryHeatingSystem')
+        primary_heating_system = Oga::XML::Element.new(name: 'PrimaryHeatingSystem')
+        primary_systems.children.insert(0, primary_heating_system)
         XMLHelper.add_attribute(primary_heating_system, 'idref', @id)
       end
       if @primary_cooling_system
