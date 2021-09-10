@@ -33,6 +33,7 @@ __New Features__
 - Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
 - Updates the reporting measure to register all outputs from the annual CSV with the OS runner (for use in, e.g., PAT).
 - Use constant Cutler curve coefficients in installation quality calculations instead of coil curve coefficients for two-speed, variable-speed systems and ground source heat pump.
+- Fix a bug in setting ground source heat pump rated airflow.
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
 
 __Bugfixes__

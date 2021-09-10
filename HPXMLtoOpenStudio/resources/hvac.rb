@@ -1140,8 +1140,9 @@ class HVAC
       hp_ap.cool_cap_ft_spec = [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
       hp_ap.cool_eir_ft_spec = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
       # Single stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
-      hp_ap.cool_cap_fflow_spec = [[0.718664047, 0.41797409, -0.136638137]]
-      hp_ap.cool_eir_fflow_spec = [[1.143487507, -0.13943972, -0.004047787]]
+      cap_fflow_spec, eir_fflow_spec = get_airflow_fault_cooling_coeff()
+      hp_ap.cool_cap_fflow_spec = [cap_fflow_spec]
+      hp_ap.cool_eir_fflow_spec = [eir_fflow_spec]
       hp_ap.cool_eers = [calc_eer_cooling_1speed(heat_pump.cooling_efficiency_seer, hp_ap.cool_c_d, hp_ap.fan_power_rated, hp_ap.cool_eir_ft_spec)]
     elsif hp_ap.num_speeds == 2
       # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler at al
@@ -1199,8 +1200,9 @@ class HVAC
       hp_ap.heat_capacity_ratios = [1.0]
       hp_ap.heat_fan_speed_ratios = [1.0]
       hp_ap.heat_eir_ft_spec = [[0.718398423, 0.003498178, 0.000142202, -0.005724331, 0.00014085, -0.000215321]]
-      hp_ap.heat_cap_fflow_spec = [[0.694045465, 0.474207981, -0.168253446]]
-      hp_ap.heat_eir_fflow_spec = [[2.185418751, -1.942827919, 0.757409168]]
+      cap_fflow_spec, eir_fflow_spec = get_airflow_fault_heating_coeff()
+      hp_ap.heat_cap_fflow_spec = [cap_fflow_spec]
+      hp_ap.heat_eir_fflow_spec = [eir_fflow_spec]
       if heat_pump.heating_capacity_17F.nil?
         hp_ap.heat_cap_ft_spec = [[0.566333415, -0.000744164, -0.0000103, 0.009414634, 0.0000506, -0.00000675]]
       else
