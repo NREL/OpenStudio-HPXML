@@ -652,6 +652,9 @@ class HEScoreRuleset
 
         distribution_system_idref = nil
         orig_hvac['hvac_distribution'].each do |orig_duct|
+          next unless orig_duct.key?('fraction')
+          next if orig_duct['fraction'] == 0
+
           duct_location = orig_duct['location']
           if duct_location == 'cond_space'
             # do nothing
