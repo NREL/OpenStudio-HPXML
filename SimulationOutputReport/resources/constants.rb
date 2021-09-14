@@ -60,8 +60,8 @@ end
 
 class LT
   # Load Types
-  Heating = 'Heating'
-  Cooling = 'Cooling'
+  Heating = 'Heating: Delivered'
+  Cooling = 'Cooling: Delivered'
   HotWaterDelivered = 'Hot Water: Delivered'
   HotWaterTankLosses = 'Hot Water: Tank Losses'
   HotWaterDesuperheater = 'Hot Water: Desuperheater'
@@ -87,6 +87,24 @@ class CLT
   WholeHouseFan = 'Whole House Fan'
   Ducts = 'Ducts'
   InternalGains = 'Internal Gains'
+end
+
+class UHT
+  # Unmet Hours Types
+  Heating = 'Heating'
+  Cooling = 'Cooling'
+end
+
+class ILT
+  # Ideal Load Types
+  Heating = 'Heating'
+  Cooling = 'Cooling'
+end
+
+class PLT
+  # Peak Load Types
+  Heating = 'Heating: Delivered'
+  Cooling = 'Cooling: Delivered'
 end
 
 class PFT
