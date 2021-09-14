@@ -3386,9 +3386,9 @@ class HPXMLFile
 
     surf_ids.each do |surf_type, surf_hash|
       surf_hash['surfaces'].each do |surface|
-        next if (not foundation_locations.include? surface.interior_adjacent_to) &&
-                (not foundation_locations.include? surface.exterior_adjacent_to) &&
-                (surf_type != 'slabs')
+        next unless (foundation_locations.include? surface.interior_adjacent_to) ||
+                    (foundation_locations.include? surface.exterior_adjacent_to) ||
+                    (surf_type == 'slabs' && surface.interior_adjacent_to == HPXML::LocationLivingSpace)
 
         surf_hash['ids'] << surface.id
       end
