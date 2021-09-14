@@ -759,7 +759,7 @@ If electric resistance heating is specified, additional information is entered i
   ==================================================  ======  =====  ===========  ========  =======  ==========
   Element                                             Type    Units  Constraints  Required  Default  Notes
   ==================================================  ======  =====  ===========  ========  =======  ==========
-  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        No        1.0      Efficiency
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0.9 - 1      No        1.0      Efficiency
   ==================================================  ======  =====  ===========  ========  =======  ==========
 
 Furnace
@@ -767,14 +767,14 @@ Furnace
 
 If a furnace is specified, additional information is entered in ``HeatingSystem``.
 
-  ====================================================================  =================  =========  ===============  ========  ========  ================================================
-  Element                                                               Type               Units      Constraints      Required  Default   Notes
-  ====================================================================  =================  =========  ===============  ========  ========  ================================================
-  ``DistributionSystem``                                                idref              See [#]_                    Yes                 ID of attached distribution system
-  ``AnnualHeatingEfficiency[Units="AFUE"]/Value`` or ``YearInstalled``  double or integer  frac or #  0 - 1 or > 1600  Yes       See [#]_  Rated efficiency or Year installed
-  ``extension/FanPowerWattsPerCFM``                                     double             W/cfm      >= 0             No        See [#]_  Fan efficiency at maximum airflow rate [#]_
-  ``extension/AirflowDefectRatio``                                      double             frac       > -1             No        0.0       Deviation between design/installed airflows [#]_
-  ====================================================================  =================  =========  ===============  ========  ========  ================================================
+  ====================================================================  =================  =========  =================  ========  ========  ================================================
+  Element                                                               Type               Units      Constraints        Required  Default   Notes
+  ====================================================================  =================  =========  =================  ========  ========  ================================================
+  ``DistributionSystem``                                                idref              See [#]_                      Yes                 ID of attached distribution system
+  ``AnnualHeatingEfficiency[Units="AFUE"]/Value`` or ``YearInstalled``  double or integer  frac or #  0.6 - 1 or > 1600  Yes       See [#]_  Rated efficiency or Year installed
+  ``extension/FanPowerWattsPerCFM``                                     double             W/cfm      >= 0               No        See [#]_  Fan efficiency at maximum airflow rate [#]_
+  ``extension/AirflowDefectRatio``                                      double             frac       > -1               No        0.0       Deviation between design/installed airflows [#]_
+  ====================================================================  =================  =========  =================  ========  ========  ================================================
 
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity" or "gravity") or DSE.
   .. [#] If AnnualHeatingEfficiency[Units="AFUE"]/Value not provided, defaults to 0.98 if FuelType is "electricity", else AFUE from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
@@ -788,12 +788,12 @@ Wall/Floor Furnace
 
 If a wall furnace or floor furnace is specified, additional information is entered in ``HeatingSystem``.
 
-  ====================================================================  =================  =========  ===============  ========  ========  ==================================
-  Element                                                               Type               Units      Constraints      Required  Default   Notes
-  ====================================================================  =================  =========  ===============  ========  ========  ==================================
-  ``AnnualHeatingEfficiency[Units="AFUE"]/Value`` or ``YearInstalled``  double or integer  frac or #  0 - 1 or > 1600  Yes       See [#]_  Rated efficiency or Year installed
-  ``extension/FanPowerWatts``                                           double             W          >= 0             No        0         Fan power
-  ====================================================================  =================  =========  ===============  ========  ========  ==================================
+  ====================================================================  =================  =========  =================  ========  ========  ==================================
+  Element                                                               Type               Units      Constraints        Required  Default   Notes
+  ====================================================================  =================  =========  =================  ========  ========  ==================================
+  ``AnnualHeatingEfficiency[Units="AFUE"]/Value`` or ``YearInstalled``  double or integer  frac or #  0.6 - 1 or > 1600  Yes       See [#]_  Rated efficiency or Year installed
+  ``extension/FanPowerWatts``                                           double             W          >= 0               No        0         Fan power
+  ====================================================================  =================  =========  =================  ========  ========  ==================================
 
   .. [#] If AnnualHeatingEfficiency[Units="AFUE"]/Value not provided, defaults to 0.98 if FuelType is "electricity", else AFUE from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
 
@@ -804,13 +804,13 @@ Boiler
 
 If a boiler is specified, additional information is entered in ``HeatingSystem``.
 
-  ====================================================================  =================  =========  ===============  ========  ========  =========================================
-  Element                                                               Type               Units      Constraints      Required  Default   Notes
-  ====================================================================  =================  =========  ===============  ========  ========  =========================================
-  ``IsSharedSystem``                                                    boolean                       No               false               Whether it serves multiple dwelling units
-  ``DistributionSystem``                                                idref              See [#]_   Yes                                  ID of attached distribution system
-  ``AnnualHeatingEfficiency[Units="AFUE"]/Value`` or ``YearInstalled``  double or integer  frac or #  0 - 1 or > 1600  Yes       See [#]_  Rated efficiency or Year installed
-  ====================================================================  =================  =========  ===============  ========  ========  =========================================
+  ====================================================================  =================  =========  =================  ========  ========  =========================================
+  Element                                                               Type               Units      Constraints        Required  Default   Notes
+  ====================================================================  =================  =========  =================  ========  ========  =========================================
+  ``IsSharedSystem``                                                    boolean                       No                 false               Whether it serves multiple dwelling units
+  ``DistributionSystem``                                                idref              See [#]_   Yes                                    ID of attached distribution system
+  ``AnnualHeatingEfficiency[Units="AFUE"]/Value`` or ``YearInstalled``  double or integer  frac or #  0.6 - 1 or > 1600  Yes       See [#]_  Rated efficiency or Year installed
+  ====================================================================  =================  =========  =================  ========  ========  =========================================
 
   .. [#] For in-unit boilers, HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or DSE.
          For shared boilers, HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or AirDistribution (type: "fan coil").
@@ -857,7 +857,7 @@ If a stove is specified, additional information is entered in ``HeatingSystem``.
   ==================================================  ======  =====  ===========  ========  =========  ===================
   Element                                             Type    Units  Constraints  Required  Default    Notes
   ==================================================  ======  =====  ===========  ========  =========  ===================
-  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        No        See [#]_   Efficiency
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0.6 - 1      No        See [#]_   Efficiency
   ``extension/FanPowerWatts``                         double  W      >= 0         No        40         Fan power
   ==================================================  ======  =====  ===========  ========  =========  ===================
 
@@ -871,7 +871,7 @@ If a portable heater or fixed heater is specified, additional information is ent
   ==================================================  ======  =====  ===========  ========  =========  ===================
   Element                                             Type    Units  Constraints  Required  Default    Notes
   ==================================================  ======  =====  ===========  ========  =========  ===================
-  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        No        See [#]_   Efficiency
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0.6 - 1      No        See [#]_   Efficiency
   ``extension/FanPowerWatts``                         double  W      >= 0         No        0          Fan power
   ==================================================  ======  =====  ===========  ========  =========  ===================
 
@@ -920,7 +920,7 @@ If a central air conditioner is specified, additional information is entered in 
   Element                                                               Type               Units        Constraints      Required  Default    Notes
   ====================================================================  =================  ===========  ===============  ========  =========  ================================================
   ``DistributionSystem``                                                idref              See [#]_     Yes                                   ID of attached distribution system
-  ``AnnualCoolingEfficiency[Units="SEER"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600    Yes       See [#]_   Rated efficiency or Year installed
+  ``AnnualCoolingEfficiency[Units="SEER"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  >= 8 or > 1600   Yes       See [#]_   Rated efficiency or Year installed
   ``CoolingCapacity``                                                   double             Btu/hr       >= 0             No        autosized  Cooling output capacity
   ``SensibleHeatFraction``                                              double             frac         0 - 1            No                   Sensible heat fraction
   ``CompressorType``                                                    string                          See [#]_         No        See [#]_   Type of compressor
@@ -949,7 +949,7 @@ If a room air conditioner is specified, additional information is entered in ``C
   ===================================================================================  =================  ===========  ===============  ========  =========  ==================================
   Element                                                                              Type               Units        Constraints      Required  Default    Notes
   ===================================================================================  =================  ===========  ===============  ========  =========  ==================================
-  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600    Yes       See [#]_   Rated efficiency or Year installed
+  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  >= 8 or > 1600   Yes       See [#]_   Rated efficiency or Year installed
   ``CoolingCapacity``                                                                  double             Btu/hr       >= 0             No        autosized  Cooling output capacity
   ``SensibleHeatFraction``                                                             double             frac         0 - 1            No                   Sensible heat fraction
   ===================================================================================  =================  ===========  ===============  ========  =========  ==================================
@@ -979,7 +979,7 @@ If a mini-split is specified, additional information is entered in ``CoolingSyst
   Element                                          Type      Units   Constraints  Required  Default    Notes
   ===============================================  ========  ======  ===========  ========  =========  ===============================================
   ``DistributionSystem``                           idref             See [#]_     No                   ID of attached distribution system
-  ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  > 0          Yes                  Rated cooling efficiency
+  ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  >= 8         Yes                  Rated cooling efficiency
   ``CoolingCapacity``                              double    Btu/hr  >= 0         No        autosized  Cooling output capacity
   ``SensibleHeatFraction``                         double    frac    0 - 1        No                   Sensible heat fraction
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan efficiency at maximum airflow rate
@@ -1071,7 +1071,7 @@ If a backup system fuel is provided, additional information is entered in ``Heat
   ========================================================================  ========  ======  ===========  ========  =========  ==========================================
   Element                                                                   Type      Units   Constraints  Required  Default    Notes
   ========================================================================  ========  ======  ===========  ========  =========  ==========================================
-  ``BackupAnnualHeatingEfficiency[Units="Percent" or Units="AFUE"]/Value``  double    frac    0 - 1        Yes                  Backup heating efficiency
+  ``BackupAnnualHeatingEfficiency[Units="Percent" or Units="AFUE"]/Value``  double    frac    0.6 - 1      Yes                  Backup heating efficiency
   ``BackupHeatingCapacity``                                                 double    Btu/hr  >= 0         No        autosized  Backup heating output capacity
   ``BackupHeatingSwitchoverTemperature``                                    double    F                    No        <none>     Backup heating switchover temperature [#]_
   ========================================================================  ========  ======  ===========  ========  =========  ==========================================
@@ -1095,8 +1095,8 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   ``CoolingSensibleHeatFraction``                                       double             frac         0 - 1            No                   Sensible heat fraction
   ``FractionHeatLoadServed``                                            double             frac         0 - 1 [#]_       Yes                  Fraction of heating load served
   ``FractionCoolLoadServed``                                            double             frac         0 - 1 [#]_       Yes                  Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="SEER"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600    Yes       See [#]_   Rated cooling efficiency or Year installed
-  ``AnnualHeatingEfficiency[Units="HSPF"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600    Yes       See [#]_   Rated heating efficiency or Year installed
+  ``AnnualCoolingEfficiency[Units="SEER"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  >= 8 or > 1600   Yes       See [#]_   Rated cooling efficiency or Year installed
+  ``AnnualHeatingEfficiency[Units="HSPF"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  >= 6 or > 1600   Yes       See [#]_   Rated heating efficiency or Year installed
   ``extension/FanPowerWattsPerCFM``                                     double             W/cfm        >= 0             No        See [#]_   Fan efficiency at maximum airflow rate
   ``extension/AirflowDefectRatio``                                      double             frac         > -1             No        0.0        Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                       double             frac         > -1             No        0.0        Deviation between design/installed charges [#]_
@@ -1131,8 +1131,8 @@ If a mini-split heat pump is specified, additional information is entered in ``H
   ``CoolingSensibleHeatFraction``                  double    frac    0 - 1        No                   Sensible heat fraction
   ``FractionHeatLoadServed``                       double    frac    0 - 1 [#]_   Yes                  Fraction of heating load served
   ``FractionCoolLoadServed``                       double    frac    0 - 1 [#]_   Yes                  Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  > 0          Yes                  Rated cooling efficiency
-  ``AnnualHeatingEfficiency[Units="HSPF"]/Value``  double    Btu/Wh  > 0          Yes                  Rated heating efficiency
+  ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  >= 8         Yes                  Rated cooling efficiency
+  ``AnnualHeatingEfficiency[Units="HSPF"]/Value``  double    Btu/Wh  >= 6         Yes                  Rated heating efficiency
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan efficiency at maximum airflow rate
   ``extension/AirflowDefectRatio``                 double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                  double    frac    > -1         No        0.0        Deviation between design/installed charges [#]_
@@ -1164,8 +1164,8 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   ``CoolingSensibleHeatFraction``                  double    frac    0 - 1        No                   Sensible heat fraction
   ``FractionHeatLoadServed``                       double    frac    0 - 1 [#]_   Yes                  Fraction of heating load served
   ``FractionCoolLoadServed``                       double    frac    0 - 1 [#]_   Yes                  Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="EER"]/Value``   double    Btu/Wh  > 0          Yes                  Rated cooling efficiency
-  ``AnnualHeatingEfficiency[Units="COP"]/Value``   double    W/W     > 0          Yes                  Rated heating efficiency
+  ``AnnualCoolingEfficiency[Units="EER"]/Value``   double    Btu/Wh  >= 8         Yes                  Rated cooling efficiency
+  ``AnnualHeatingEfficiency[Units="COP"]/Value``   double    W/W     >= 2         Yes                  Rated heating efficiency
   ``NumberofUnitsServed``                          integer           > 0          See [#]_             Number of dwelling units served
   ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0         No        See [#]_   Pump power [#]_
   ``extension/SharedLoopWatts``                    double    W       >= 0         See [#]_             Shared pump power [#]_
@@ -1620,17 +1620,17 @@ Conventional Storage
 
 If a conventional storage water heater is specified, additional information is entered in ``WaterHeatingSystem``.
 
-  ================================================================  =================  =============  ===============  ========  ========  ====================================================
-  Element                                                           Type               Units          Constraints      Required  Default   Notes
-  ================================================================  =================  =============  ===============  ========  ========  ====================================================
-  ``FuelType``                                                      string                            See [#]_         Yes                 Fuel type
-  ``TankVolume``                                                    double             gal            > 0              No        See [#]_  Tank volume
-  ``HeatingCapacity``                                               double             Btuh           > 0              No        See [#]_  Heating capacity
-  ``UniformEnergyFactor`` or ``EnergyFactor`` or ``YearInstalled``  double or integer  frac or #      < 1 or > 1600    Yes       See [#]_  EnergyGuide label rated efficiency or Year installed
-  ``UsageBin`` or ``FirstHourRating``                               string or double   str or gal/hr  See [#]_ or > 0  No        See [#]_  EnergyGuide label usage bin/first hour rating
-  ``RecoveryEfficiency``                                            double             frac           0 - 1            No        See [#]_  Recovery efficiency
-  ``WaterHeaterInsulation/Jacket/JacketRValue``                     double             F-ft2-hr/Btu   >= 0             No        0         R-value of additional tank insulation wrap
-  ================================================================  =================  =============  ===============  ========  ========  ====================================================
+  ================================================================  =================  =============  ==================  ========  ========  ====================================================
+  Element                                                           Type               Units          Constraints         Required  Default   Notes
+  ================================================================  =================  =============  ==================  ========  ========  ====================================================
+  ``FuelType``                                                      string                            See [#]_            Yes                 Fuel type
+  ``TankVolume``                                                    double             gal            > 0                 No        See [#]_  Tank volume
+  ``HeatingCapacity``                                               double             Btuh           > 0                 No        See [#]_  Heating capacity
+  ``UniformEnergyFactor`` or ``EnergyFactor`` or ``YearInstalled``  double or integer  frac or #      0.45 - 1 or > 1600  Yes       See [#]_  EnergyGuide label rated efficiency or Year installed
+  ``UsageBin`` or ``FirstHourRating``                               string or double   str or gal/hr  See [#]_ or > 0     No        See [#]_  EnergyGuide label usage bin/first hour rating
+  ``RecoveryEfficiency``                                            double             frac           0 - 1               No        See [#]_  Recovery efficiency
+  ``WaterHeaterInsulation/Jacket/JacketRValue``                     double             F-ft2-hr/Btu   >= 0                No        0         R-value of additional tank insulation wrap
+  ================================================================  =================  =============  ==================  ========  ========  ====================================================
   
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
   .. [#] If TankVolume not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
@@ -1656,7 +1656,7 @@ If an instantaneous tankless water heater is specified, additional information i
   ===========================================  =======  ============  ===========  ============  ========  ==========================================================
   ``FuelType``                                 string                 See [#]_     Yes                     Fuel type
   ``PerformanceAdjustment``                    double   frac                       No            See [#]_  Multiplier on efficiency, typically to account for cycling
-  ``UniformEnergyFactor`` or ``EnergyFactor``  double   frac          < 1          Yes                     EnergyGuide label rated efficiency
+  ``UniformEnergyFactor`` or ``EnergyFactor``  double   frac          0.45 - 1     Yes                     EnergyGuide label rated efficiency
   ===========================================  =======  ============  ===========  ============  ========  ==========================================================
   
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
