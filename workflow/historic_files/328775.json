@@ -47,7 +47,7 @@
       "zone_wall": [
         {
           "side": "front",
-          "wall_assembly_code": "ewwf21wo",
+          "wall_assembly_code": "ewps21wo",
           "zone_window": {
             "window_area": 56.0,
             "window_method": "custom",
@@ -58,7 +58,7 @@
         },
         {
           "side": "left",
-          "wall_assembly_code": "ewwf21wo",
+          "wall_assembly_code": "ewps21wo",
           "zone_window": {
             "window_area": 35.2,
             "window_method": "custom",
@@ -69,7 +69,7 @@
         },
         {
           "side": "back",
-          "wall_assembly_code": "ewwf21wo",
+          "wall_assembly_code": "ewps21wo",
           "zone_window": {
             "window_area": 17.6,
             "window_method": "custom",
@@ -80,7 +80,7 @@
         },
         {
           "side": "right",
-          "wall_assembly_code": "ewwf21wo",
+          "wall_assembly_code": "ewps21wo",
           "zone_window": {
             "window_area": 35.2,
             "window_method": "custom",

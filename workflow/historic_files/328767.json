@@ -124,7 +124,7 @@
         "type": "storage",
         "fuel_primary": "natural_gas",
         "efficiency_method": "user",
-        "energy_factor": 0.57
+        "energy_factor": 0.575
       }
     }
   }

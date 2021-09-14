@@ -47,7 +47,7 @@
       "zone_wall": [
         {
           "side": "front",
-          "wall_assembly_code": "ewcb03nn",
+          "wall_assembly_code": "ewcb06nn",
           "zone_window": {
             "window_area": 38.0,
             "window_method": "code",
@@ -57,7 +57,7 @@
         },
         {
           "side": "left",
-          "wall_assembly_code": "ewcb03nn",
+          "wall_assembly_code": "ewcb06nn",
           "zone_window": {
             "window_area": 15.0,
             "window_method": "code",
@@ -67,7 +67,7 @@
         },
         {
           "side": "back",
-          "wall_assembly_code": "ewcb03nn",
+          "wall_assembly_code": "ewcb06nn",
           "zone_window": {
             "window_area": 76.0,
             "window_method": "code",
@@ -77,7 +77,7 @@
         },
         {
           "side": "right",
-          "wall_assembly_code": "ewcb03nn",
+          "wall_assembly_code": "ewcb06nn",
           "zone_window": {
             "window_area": 32.0,
             "window_method": "code",
