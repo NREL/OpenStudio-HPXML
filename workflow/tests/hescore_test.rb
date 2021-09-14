@@ -31,7 +31,9 @@ class HEScoreTest < MiniTest::Test
       next unless json
 
       out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
-      results[File.basename(json)] = run_and_check(json, out_dir, false, zipfile)
+      # FIXME: Temporarily changing names in the results CSV to match master branch
+      # FIXME: Revert gsub change below before PR merge
+      results[File.basename(json.gsub('.json', '_hpxml.xml'))] = run_and_check(json, out_dir, false, zipfile)
     end
 
     _write_summary_results(results.sort_by { |k, v| k.downcase }.to_h, results_csv_path)
@@ -51,7 +53,9 @@ class HEScoreTest < MiniTest::Test
       next unless json
 
       out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
-      results[File.basename(json)] = run_and_check(json, out_dir, false, zipfile)
+      # FIXME: Temporarily changing names in the results CSV to match master branch
+      # FIXME: Revert gsub change below before PR merge
+      results[File.basename(json.gsub('.json', '_hpxml.xml'))] = run_and_check(json, out_dir, false, zipfile)
     end
 
     _write_summary_results(results.sort_by { |k, v| k.downcase }.to_h, results_csv_path)
