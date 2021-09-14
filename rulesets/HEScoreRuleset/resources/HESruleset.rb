@@ -651,7 +651,8 @@ class HEScoreRuleset
         end
 
         distribution_system_idref = nil
-        @ducts.each do |hvac_frac, duct_frac, duct_location|
+        orig_hvac['hvac_distribution'].each do |orig_duct|
+          duct_location = orig_duct['location']
           if duct_location == 'cond_space'
             # do nothing
           else
