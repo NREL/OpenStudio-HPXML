@@ -147,7 +147,6 @@
             <SystemIdentifier id='WallAtticGable'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <AtticWallType>gable</AtticWallType>
             <WallType>
               <WoodStud/>
             </WallType>
@@ -702,7 +701,6 @@
             <SystemIdentifier id='WallAtticGable_2'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <AtticWallType>gable</AtticWallType>
             <WallType>
               <WoodStud/>
             </WallType>
@@ -1257,7 +1255,6 @@
             <SystemIdentifier id='WallAtticGable_3'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <AtticWallType>gable</AtticWallType>
             <WallType>
               <WoodStud/>
             </WallType>

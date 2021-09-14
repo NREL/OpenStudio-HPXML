@@ -3950,8 +3950,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     azimuth: 90,
                     solar_absorptance: 0.6,
                     emittance: 0.9,
-                    insulation_assembly_r_value: 2.15,
-                    attic_wall_type: HPXML::AtticWallTypeGable)
+                    insulation_assembly_r_value: 2.15)
     hpxml.walls.add(id: 'WallAtticGableWest',
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationAtticVented,
@@ -3961,8 +3960,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     azimuth: 270,
                     solar_absorptance: 0.6,
                     emittance: 0.9,
-                    insulation_assembly_r_value: 2.15,
-                    attic_wall_type: HPXML::AtticWallTypeGable)
+                    insulation_assembly_r_value: 2.15)
   elsif ['ASHRAE_Standard_140/L120AC.xml',
          'ASHRAE_Standard_140/L120AL.xml'].include? hpxml_file
     for i in 0..hpxml.walls.size - 3
@@ -3997,8 +3995,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     area: 290,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
-                    insulation_assembly_r_value: 4.0,
-                    attic_wall_type: HPXML::AtticWallTypeGable)
+                    insulation_assembly_r_value: 4.0)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.walls.clear
     hpxml.walls.add(id: 'Wall',
@@ -4049,8 +4046,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     area: 169,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
-                    insulation_assembly_r_value: 4.0,
-                    attic_wall_type: HPXML::AtticWallTypeGable)
+                    insulation_assembly_r_value: 4.0)
     hpxml.walls.add(id: 'WallAtticOther',
                     exterior_adjacent_to: HPXML::LocationAtticUnvented,
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
@@ -4096,8 +4092,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     area: 50,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
-                    insulation_assembly_r_value: 4.0,
-                    attic_wall_type: HPXML::AtticWallTypeGable)
+                    insulation_assembly_r_value: 4.0)
   elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
     hpxml.walls[1].delete
     hpxml.walls.add(id: 'WallOtherHeatedSpace',
@@ -4223,8 +4218,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     area: 113,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
-                    insulation_assembly_r_value: 4,
-                    attic_wall_type: HPXML::AtticWallTypeGable)
+                    insulation_assembly_r_value: 4)
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     hpxml.walls.clear
     hpxml.walls.add(id: 'Wall',
@@ -4263,8 +4257,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     area: 113,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
-                    insulation_assembly_r_value: 4,
-                    attic_wall_type: HPXML::AtticWallTypeGable)
+                    insulation_assembly_r_value: 4)
   elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
     hpxml.walls[1].insulation_assembly_r_value = 23
   elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'].include? hpxml_file

@@ -269,6 +269,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         wall.emittance = nil
         wall.color = nil
         wall.interior_finish_type = nil
+        wall.attic_wall_type = nil
         next if wall.exterior_adjacent_to != HPXML::LocationOutside
         next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? wall.interior_adjacent_to
 

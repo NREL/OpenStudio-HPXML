@@ -209,7 +209,6 @@
             <SystemIdentifier id='WallAtticGableUncond'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <AtticWallType>gable</AtticWallType>
             <WallType>
               <WoodStud/>
             </WallType>
