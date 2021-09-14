@@ -4,11 +4,11 @@ class HEScoreRuleset
   def self.apply_ruleset(json, weather, zipcode_row)
     # Create new HPXML object
     new_hpxml = HPXML.new
-    new_hpxml.header.xml_type = nil # FIXME: does json contain this information?
+    new_hpxml.header.xml_type = nil
     new_hpxml.header.xml_generated_by = 'OpenStudio-HEScore'
-    new_hpxml.header.transaction = 'create' # FIXME: does json contain this information?
-    new_hpxml.header.building_id = 'bldg' # FIXME: json['building']['building_id']?
-    new_hpxml.header.event_type = 'construction-period testing/daily test out' # FIXME: does json contain this information?
+    new_hpxml.header.transaction = 'create'
+    new_hpxml.header.building_id = 'bldg'
+    new_hpxml.header.event_type = 'construction-period testing/daily test out'
 
     # BuildingSummary
     set_summary(json, new_hpxml)
@@ -496,7 +496,7 @@ class HEScoreRuleset
         fraction_heat_load_served = orig_hvac['hvac_fraction']
 
         if heating_system_type == HPXML::HVACTypeFurnace
-          distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution" # FIXME: need to look at how HEScore PHP code is handling it
+          distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
         end
 
         # Need to create hydronic distribution system?
@@ -569,7 +569,7 @@ class HEScoreRuleset
         cooling_system_fuel = HPXML::FuelTypeElectricity
         distribution_system_idref = nil
         if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
-          distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution" # FIXME: need to look at how HEScore PHP code is handling it
+          distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
           cooling_efficiency_seer = orig_cooling['efficiency']
         elsif cooling_system_type == HPXML::HVACTypeRoomAirConditioner
           cooling_efficiency_eer = orig_cooling['efficiency']
@@ -656,7 +656,7 @@ class HEScoreRuleset
           if duct_location == 'cond_space'
             # do nothing
           else
-            distribution_system_idref = "#{orig_hvac['hvac_name']}_air_distribution"
+            distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
           end
         end
 
@@ -748,14 +748,14 @@ class HEScoreRuleset
 
       next unless tot_frac > 0
 
-      new_hpxml.hvac_distributions.add(id: "#{orig_hvac['hvac_name']}_air_distribution",
+      new_hpxml.hvac_distributions.add(id: "#{orig_hvac['hvac_name']}_air_dist",
                                        distribution_system_type: HPXML::HVACDistributionTypeAir,
                                        air_type: HPXML::AirTypeRegularVelocity)
 
-      hvac_fraction = orig_hvac['hvac_fraction'] # get_hvac_fraction(json, orig_dist.id)  # FIXME: double-check
+      hvac_fraction = orig_hvac['hvac_fraction']
       new_hpxml.hvac_distributions[-1].conditioned_floor_area_served = hvac_fraction * @cfa
 
-      sealed = sealed.all? { |d| d == true } # FIXME: double-check
+      sealed = sealed.all? { |d| d == true }
       lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(@ncfl_ag, @cfa, sealed, frac_inside)
 
       # Supply duct leakage to the outside
@@ -872,7 +872,7 @@ class HEScoreRuleset
     end
 
     related_hvac_idref = nil
-    if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater_type # FIXME: double-check
+    if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater_type
       json['building']['systems']['hvac'].each do |hvac|
         if hvac['heating']['type'] == 'boiler' && related_hvac_idref.nil?
           related_hvac_idref = "#{hvac['hvac_name']}_heat"
@@ -1547,7 +1547,7 @@ def get_ducts_details(json)
 
     next unless is_valid_duct
 
-    hvac_frac = orig_hvac['hvac_fraction'] # FIXME: double-check
+    hvac_frac = orig_hvac['hvac_fraction']
 
     orig_hvac['hvac_distribution'].each do |orig_duct|
       next if orig_duct['fraction'].to_f == 0
