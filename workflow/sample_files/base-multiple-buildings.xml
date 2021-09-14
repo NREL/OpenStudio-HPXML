@@ -28,7 +28,6 @@
       <BuildingSummary>
         <Site>
           <SiteType>suburban</SiteType>
-          <AzimuthOfFrontOfHome>180</AzimuthOfFrontOfHome>
           <FuelTypesAvailable>
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
@@ -584,7 +583,6 @@
       <BuildingSummary>
         <Site>
           <SiteType>suburban</SiteType>
-          <AzimuthOfFrontOfHome>180</AzimuthOfFrontOfHome>
           <FuelTypesAvailable>
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
@@ -1140,7 +1138,6 @@
       <BuildingSummary>
         <Site>
           <SiteType>suburban</SiteType>
-          <AzimuthOfFrontOfHome>180</AzimuthOfFrontOfHome>
           <FuelTypesAvailable>
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>

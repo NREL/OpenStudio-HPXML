@@ -3265,15 +3265,12 @@ def set_hpxml_site(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.site.fuels = [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas]
     hpxml.site.site_type = HPXML::SiteTypeSuburban
-    hpxml.site.azimuth_of_front_of_home = 180.0
   elsif ['base-misc-shielding-of-home.xml'].include? hpxml_file
     hpxml.site.shielding_of_home = HPXML::ShieldingWellShielded
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.site.site_type = nil
   elsif ['invalid_files/invalid-input-parameters.xml'].include? hpxml_file
     hpxml.site.site_type = 'mountain'
-  elsif ['base-bldgtype-single-family-attached.xml', 'base-bldgtype-multifamily.xml'].include? hpxml_file
-    hpxml.site.surroundings = HPXML::SurroundingsOneSide
   end
 end
 
