@@ -103,7 +103,7 @@ class HEScoreTest < MiniTest::Test
     # Create derivative file
     json_file = File.open(json_path)
     json = JSON.parse(json_file.read)
-    bldg_const = json['building']['about']['conditioned_floor_area'] # XMLHelper.get_element(hpxml, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea')
+    bldg_const = json['building']['about']['conditioned_floor_area']
     json['building']['about']['conditioned_floor_area'] = bldg_const - 5.0 # ft2
     json_path.gsub!('.json', '_floor_area_test.json')
     File.open(json_path, 'w') do |f|
@@ -149,7 +149,6 @@ class HEScoreTest < MiniTest::Test
 
       # Check HPXMLs are valid
       schemas_dir = File.absolute_path(File.join(parent_dir, '..', '..', 'hpxml-measures', 'HPXMLtoOpenStudio', 'resources'))
-      # _test_schema_validation(parent_dir, json, schemas_dir)
       _test_schema_validation(parent_dir, hes_hpxml, schemas_dir)
 
       # Check run.log for messages
@@ -256,16 +255,9 @@ class HEScoreTest < MiniTest::Test
   end
 
   def _test_results(json_path, json, results)
-    fuel_map = { HPXML::FuelTypeElectricity => 'electric',
-                 HPXML::FuelTypeNaturalGas => 'natural_gas',
-                 HPXML::FuelTypeOil => 'fuel_oil',
-                 HPXML::FuelTypePropane => 'lpg',
-                 HPXML::FuelTypeWoodCord => 'cord_wood',
-                 HPXML::FuelTypeWoodPellets => 'pellet_wood' }
-
     # Get HPXML values for Building Construction
-    cfa = json['building']['about']['conditioned_floor_area'] # hpxml.building_construction.conditioned_floor_area
-    nbr = json['building']['about']['number_bedrooms'] # hpxml.building_construction.number_of_bedrooms
+    cfa = json['building']['about']['conditioned_floor_area']
+    nbr = json['building']['about']['number_bedrooms']
 
     # Get HPXML values for HVAC
     htg_fuels = []
@@ -307,7 +299,7 @@ class HEScoreTest < MiniTest::Test
       hw_fuels << water_heater['fuel_primary']
 
       if ['indirect', 'tankless_coil'].include? water_heater['type']
-        json['building']['systems']['hvac'].each do |hvac| # FIXME: double-check
+        json['building']['systems']['hvac'].each do |hvac|
           if hvac['heating']['type'] == 'boiler'
             hw_fuels << hvac['heating']['fuel_primary']
           end
