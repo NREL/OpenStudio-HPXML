@@ -88,11 +88,19 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
     # Look up zipcode info
     zipcode_row = nil
     zipcode = json['building_address']['zip_code']
+    zip_distance = 99999
     CSV.foreach(File.join(File.dirname(__FILE__), 'resources', 'zipcodes_wx.csv'), headers: true) do |row|
-      next unless row['postal_code'] == zipcode
+      zip3_of_interest = zipcode[0, 3]
+      next unless row['postal_code'].start_with?(zip3_of_interest)
 
-      zipcode_row = row
-      break
+      distance = (Integer(row['postal_code']) - Integer(zipcode)).abs()
+      if distance < zip_distance
+        zip_distance = distance
+        zipcode_row = row
+      end
+      if distance == 0
+        break  # Exact match
+      end
     end
     if zipcode_row.nil?
       fail "Zip code #{zipcode} could not be found in #{File.join(File.dirname(__FILE__), 'resources', 'zipcodes_wx.csv')}"
