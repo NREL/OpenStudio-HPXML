@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxml_output_report</name>
   <uid>9561a0d7-60ad-48c5-8337-2461df044d80</uid>
-  <version_id>c78abede-ea09-4fd9-b9d1-c31beb03e182</version_id>
-  <version_modified>20210914T165514Z</version_modified>
+  <version_id>07c2493a-0d3f-4902-b681-3d3e09e9abbe</version_id>
+  <version_modified>20210916T162642Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>HPXMLOutputReport</class_name>
   <display_name>HPXML Output Report</display_name>
@@ -55,12 +55,6 @@
   </attributes>
   <files>
     <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4D193867</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.2.0</identifier>
@@ -69,13 +63,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>D38B7B13</checksum>
+      <checksum>55E780F9</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1B718CFA</checksum>
     </file>
     <file>
       <filename>hpxml_output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>B024D065</checksum>
+      <checksum>6D4FB210</checksum>
     </file>
   </files>
 </measure>

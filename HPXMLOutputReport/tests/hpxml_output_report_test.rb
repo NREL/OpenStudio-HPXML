@@ -9,23 +9,23 @@ require_relative '../measure.rb'
 
 class HPXMLOutputReportTest < MiniTest::Test
   Rows = [
-    'Surface Area: Wall Above-Grade Conditioned (ft^2)',
-    'Surface Area: Wall Above-Grade Exterior (ft^2)',
-    'Surface Area: Wall Below-Grade (ft^2)',
-    'Surface Area: Floor Conditioned (ft^2)',
-    'Surface Area: Floor Attic (ft^2)',
-    'Surface Area: Floor Lighting (ft^2)',
-    'Surface Area: Roof (ft^2)',
-    'Surface Area: Window (ft^2)',
-    'Surface Area: Door (ft^2)',
-    'Surface Area: Duct Unconditioned (ft^2)',
-    'Surface Area: Rim Joist Above-Grade Exterior (ft^2)',
-    'Size: Heating System (kBtu/h)',
-    'Size: Cooling System (kBtu/h)',
-    'Size: Heat Pump Backup (kBtu/h)',
-    'Size: Water Heater (gal)',
-    'Other: Flow Rate Mechanical Ventilation (cfm)',
-    'Other: Slab Perimeter Exposed Conditioned (ft)',
+    'Enclosure: Wall Area Thermal Boundary (ft^2)',
+    'Enclosure: Wall Area Exterior (ft^2)',
+    'Enclosure: Foundation Wall Area Exterior (ft^2)',
+    'Enclosure: Floor Area Conditioned (ft^2)',
+    'Enclosure: Floor Area Lighting (ft^2)',
+    'Enclosure: Ceiling Area Thermal Boundary (ft^2)',
+    'Enclosure: Roof Area (ft^2)',
+    'Enclosure: Window Area (ft^2)',
+    'Enclosure: Door Area (ft^2)',
+    'Enclosure: Duct Area Unconditioned (ft^2)',
+    'Enclosure: Rim Joist Area (ft^2)',
+    'Enclosure: Slab Exposed Perimeter Thermal Boundary (ft)',
+    'Systems: Heating Capacity (kBtu/h)',
+    'Systems: Cooling Capacity (kBtu/h)',
+    'Systems: Heat Pump Backup Capacity (kBtu/h)',
+    'Systems: Water Heater Tank Volume (gal)',
+    'Systems: Mechanical Ventilation Flow Rate (cfm)',
   ]
 
   def test_base_results_hpxml
@@ -42,14 +42,14 @@ class HPXMLOutputReportTest < MiniTest::Test
     hpxml_csv = _test_measure(args_hash)
     assert(File.exist?(hpxml_csv))
     actual_rows = File.readlines(hpxml_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
-    assert_includes(actual_rows.sort, 'Size: Heating System (kBtu/h)')
-    assert_includes(actual_rows.sort, 'Size: Cooling System (kBtu/h)')
-    assert_includes(actual_rows.sort, 'Size: Heating System: Primary (kBtu/h)')
-    assert_includes(actual_rows.sort, 'Size: Heating System: Secondary (kBtu/h)')
-    assert_includes(actual_rows.sort, 'Size: Cooling System: Primary (kBtu/h)')
-    assert_includes(actual_rows.sort, 'Size: Cooling System: Secondary (kBtu/h)')
-    assert(!actual_rows.sort.include?('Size: Heat Pump Backup: Primary (kBtu/h)')) # there is no primary heat pump
-    assert_includes(actual_rows.sort, 'Size: Heat Pump Backup: Secondary (kBtu/h)') # all heat pumps are secondary
+    assert_includes(actual_rows.sort, 'Systems: Heating Capacity (kBtu/h)')
+    assert_includes(actual_rows.sort, 'Systems: Cooling Capacity (kBtu/h)')
+    assert_includes(actual_rows.sort, 'Primary Systems: Cooling Capacity (kBtu/h)')
+    assert_includes(actual_rows.sort, 'Primary Systems: Heating Capacity (kBtu/h)')
+    assert_includes(actual_rows.sort, 'Primary Systems: Heat Pump Backup Capacity (kBtu/h)')
+    assert_includes(actual_rows.sort, 'Secondary Systems: Cooling Capacity (kBtu/h)')
+    assert_includes(actual_rows.sort, 'Secondary Systems: Heating Capacity (kBtu/h)')
+    assert_includes(actual_rows.sort, 'Secondary Systems: Heat Pump Backup Capacity (kBtu/h)')
   end
 
   def test_furnace_and_central_air_conditioner_xml
@@ -58,23 +58,23 @@ class HPXMLOutputReportTest < MiniTest::Test
     assert(File.exist?(hpxml_csv))
 
     expected_multipliers = {
-      'Surface Area: Wall Above-Grade Conditioned (ft^2)' => 1200.0,
-      'Surface Area: Wall Above-Grade Exterior (ft^2)' => 1490.0,
-      'Surface Area: Wall Below-Grade (ft^2)' => 1200.0,
-      'Surface Area: Floor Conditioned (ft^2)' => 2700.0,
-      'Surface Area: Floor Attic (ft^2)' => 1350.0,
-      'Surface Area: Floor Lighting (ft^2)' => 2700.0,
-      'Surface Area: Roof (ft^2)' => 1509.3,
-      'Surface Area: Window (ft^2)' => 360.0,
-      'Surface Area: Door (ft^2)' => 40.0,
-      'Surface Area: Duct Unconditioned (ft^2)' => 200.0,
-      'Surface Area: Rim Joist Above-Grade Exterior (ft^2)' => 116.0,
-      'Size: Heating System (kBtu/h)' => 36.0,
-      'Size: Cooling System (kBtu/h)' => 24.0,
-      'Size: Heat Pump Backup (kBtu/h)' => 0.0,
-      'Size: Water Heater (gal)' => 40.0,
-      'Other: Flow Rate Mechanical Ventilation (cfm)' => 0.0,
-      'Other: Slab Perimeter Exposed Conditioned (ft)' => 150.0
+      'Enclosure: Wall Area Thermal Boundary (ft^2)' => 1200.0,
+      'Enclosure: Wall Area Exterior (ft^2)' => 1490.0,
+      'Enclosure: Foundation Wall Area Exterior (ft^2)' => 1200.0,
+      'Enclosure: Floor Area Conditioned (ft^2)' => 2700.0,
+      'Enclosure: Floor Area Lighting (ft^2)' => 2700.0,
+      'Enclosure: Ceiling Area Thermal Boundary (ft^2)' => 1350.0,
+      'Enclosure: Roof Area (ft^2)' => 1509.3,
+      'Enclosure: Window Area (ft^2)' => 360.0,
+      'Enclosure: Door Area (ft^2)' => 40.0,
+      'Enclosure: Duct Area Unconditioned (ft^2)' => 200.0,
+      'Enclosure: Rim Joist Area (ft^2)' => 116.0,
+      'Enclosure: Slab Exposed Perimeter Thermal Boundary (ft)' => 150.0,
+      'Systems: Heating Capacity (kBtu/h)' => 36.0,
+      'Systems: Cooling Capacity (kBtu/h)' => 24.0,
+      'Systems: Heat Pump Backup Capacity (kBtu/h)' => 0.0,
+      'Systems: Water Heater Tank Volume (gal)' => 40.0,
+      'Systems: Mechanical Ventilation Flow Rate (cfm)' => 0.0,
     }
 
     actual_multipliers = {}
@@ -94,23 +94,23 @@ class HPXMLOutputReportTest < MiniTest::Test
     assert(File.exist?(hpxml_csv))
 
     expected_multipliers = {
-      'Surface Area: Wall Above-Grade Conditioned (ft^2)' => 1200.0,
-      'Surface Area: Wall Above-Grade Exterior (ft^2)' => 1490.0,
-      'Surface Area: Wall Below-Grade (ft^2)' => 1200.0,
-      'Surface Area: Floor Conditioned (ft^2)' => 2700.0,
-      'Surface Area: Floor Attic (ft^2)' => 1350.0,
-      'Surface Area: Floor Lighting (ft^2)' => 2700.0,
-      'Surface Area: Roof (ft^2)' => 1509.3,
-      'Surface Area: Window (ft^2)' => 360.0,
-      'Surface Area: Door (ft^2)' => 40.0,
-      'Surface Area: Duct Unconditioned (ft^2)' => 200.0,
-      'Surface Area: Rim Joist Above-Grade Exterior (ft^2)' => 116.0,
-      'Size: Heating System (kBtu/h)' => 36.0,
-      'Size: Cooling System (kBtu/h)' => 36.0,
-      'Size: Heat Pump Backup (kBtu/h)' => 36.0,
-      'Size: Water Heater (gal)' => 40.0,
-      'Other: Flow Rate Mechanical Ventilation (cfm)' => 0.0,
-      'Other: Slab Perimeter Exposed Conditioned (ft)' => 150.0
+      'Enclosure: Wall Area Thermal Boundary (ft^2)' => 1200.0,
+      'Enclosure: Wall Area Exterior (ft^2)' => 1490.0,
+      'Enclosure: Foundation Wall Area Exterior (ft^2)' => 1200.0,
+      'Enclosure: Floor Area Conditioned (ft^2)' => 2700.0,
+      'Enclosure: Floor Area Lighting (ft^2)' => 2700.0,
+      'Enclosure: Ceiling Area Thermal Boundary (ft^2)' => 1350.0,
+      'Enclosure: Roof Area (ft^2)' => 1509.3,
+      'Enclosure: Window Area (ft^2)' => 360.0,
+      'Enclosure: Door Area (ft^2)' => 40.0,
+      'Enclosure: Duct Area Unconditioned (ft^2)' => 200.0,
+      'Enclosure: Rim Joist Area (ft^2)' => 116.0,
+      'Enclosure: Slab Exposed Perimeter Thermal Boundary (ft)' => 150.0,
+      'Systems: Heating Capacity (kBtu/h)' => 36.0,
+      'Systems: Cooling Capacity (kBtu/h)' => 36.0,
+      'Systems: Heat Pump Backup Capacity (kBtu/h)' => 36.0,
+      'Systems: Water Heater Tank Volume (gal)' => 40.0,
+      'Systems: Mechanical Ventilation Flow Rate (cfm)' => 0.0,
     }
 
     actual_multipliers = {}
