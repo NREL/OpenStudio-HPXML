@@ -99,7 +99,7 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
         zipcode_row = row
       end
       if distance == 0
-        break  # Exact match
+        break # Exact match
       end
     end
     if zipcode_row.nil?
