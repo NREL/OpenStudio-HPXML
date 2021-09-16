@@ -3388,7 +3388,8 @@ class HPXMLFile
         next unless (foundation_locations.include? surface.interior_adjacent_to) ||
                     (foundation_locations.include? surface.exterior_adjacent_to) ||
                     (surf_type == 'slabs' && surface.interior_adjacent_to == HPXML::LocationLivingSpace)
-                    (surf_type == 'frame_floors' && surface.exterior_adjacent_to == HPXML::LocationOutside)
+
+        (surf_type == 'frame_floors' && surface.exterior_adjacent_to == HPXML::LocationOutside)
 
         surf_hash['ids'] << surface.id
       end
