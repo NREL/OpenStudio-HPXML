@@ -68,8 +68,8 @@ class HEScoreRuleset
     @bldg_orient = json['building']['about']['orientation']
     @bldg_azimuth = orientation_to_azimuth(@bldg_orient)
 
-    @year_built = json['building']['about']['year_built'].to_i
-    @nbeds = json['building']['about']['number_bedrooms'].to_f
+    @year_built = Integer(json['building']['about']['year_built'])
+    @nbeds = Float(json['building']['about']['number_bedrooms'])
     @cfa = json['building']['about']['conditioned_floor_area'].to_f # ft^2
     @is_townhouse = (@bldg_type == HPXML::ResidentialTypeSFA)
     @fnd_areas = get_foundation_areas(json)
@@ -127,9 +127,9 @@ class HEScoreRuleset
     new_hpxml.climate_and_risk_zones.weather_station_epw_filepath = epw_filename
 
     iecc_zone = zipcode_row['iecc_cz']
-    if ['7AK', '7A', '7B'].include? iecc_zone
+    if iecc_zone.include? '7'
       iecc_zone = '7'
-    elsif iecc_zone == '8AK'
+    elsif iecc_zone.include? '8'
       iecc_zone = '8'
     end
 
@@ -207,19 +207,17 @@ class HEScoreRuleset
 
   def self.set_enclosure_walls(json, new_hpxml)
     # Above-grade walls
-    front_wall_assembly_code = nil
     json['building']['zone']['zone_wall'].each do |orig_wall|
       wall_area = nil
       if ['front', 'back'].include? orig_wall['side']
         wall_area = @ceil_height * @bldg_length_front * @ncfl_ag
-        if orig_wall['side'] == 'front'
-          front_wall_assembly_code = orig_wall['wall_assembly_code']
-        end
       else
         wall_area = @ceil_height * @bldg_length_side * @ncfl_ag
       end
+      wall_assembly_code = nil
       if @has_same_wall_const
-        wall_assembly_code = front_wall_assembly_code
+        front_wall = json['building']['zone']['zone_wall'].find{|wall| wall['side'] == 'front'}
+        wall_assembly_code = front_wall['wall_assembly_code']
       else
         wall_assembly_code = orig_wall['wall_assembly_code']
       end
@@ -356,28 +354,20 @@ class HEScoreRuleset
   end
 
   def self.set_enclosure_windows(json, new_hpxml)
-    front_window_code = nil
-    front_window_u_value = nil
-    front_window_shgc = nil
-    front_window_method = nil
     json['building']['zone']['zone_wall'].each do |orig_wall|
       next unless orig_wall.key?('zone_window')
       next if orig_wall['side'] == 'front' && orig_wall['zone_window']['window_area'] == 1 # LBL intentionally has the front window area set to 1 as an HPXML file with no windows does not pass validation.
       next if orig_wall['zone_window']['window_area'] == 0
 
       orig_window = orig_wall['zone_window']
-      if orig_wall['side'] == 'front'
-        front_window_code = orig_window['window_code']
-        front_window_u_value = orig_window['window_u_value']
-        front_window_shgc = orig_window['window_shgc']
-        front_window_method = orig_window['window_method']
-      end
       if @has_same_window_const
-        if front_window_method == 'code'
-          window_code = front_window_code
-        elsif front_window_method == 'custom'
-          ufactor = front_window_u_value
-          shgc = front_window_shgc
+        front_wall = json['building']['zone']['zone_wall'].find{|wall| wall['side'] == 'front'}
+        front_window = front_wall['zone_window']
+        if front_window['window_method'] == 'code'
+          window_code = front_window['window_code']
+        elsif front_window['window_method'] == 'custom'
+          ufactor = front_window['window_u_value']
+          shgc = front_window['window_shgc']
         end
       else
         if orig_window['window_method'] == 'code'
