@@ -3945,12 +3945,14 @@ class HPXMLFile
       end
     end
 
-    if args[:cooling_system_cooling_efficiency_type] == HPXML::UnitsSEER
-      cooling_efficiency_seer = args[:cooling_system_cooling_efficiency]
-    elsif args[:cooling_system_cooling_efficiency_type] == HPXML::UnitsEER
-      cooling_efficiency_eer = args[:cooling_system_cooling_efficiency]
-    elsif args[:cooling_system_cooling_efficiency_type] == HPXML::UnitsCEER
-      cooling_efficiency_ceer = args[:cooling_system_cooling_efficiency]
+    if cooling_system_type != HPXML::HVACTypeEvaporativeCooler
+      if args[:cooling_system_cooling_efficiency_type] == HPXML::UnitsSEER
+        cooling_efficiency_seer = args[:cooling_system_cooling_efficiency]
+      elsif args[:cooling_system_cooling_efficiency_type] == HPXML::UnitsEER
+        cooling_efficiency_eer = args[:cooling_system_cooling_efficiency]
+      elsif args[:cooling_system_cooling_efficiency_type] == HPXML::UnitsCEER
+        cooling_efficiency_ceer = args[:cooling_system_cooling_efficiency]
+      end
     end
 
     if args[:cooling_system_airflow_defect_ratio].is_initialized
