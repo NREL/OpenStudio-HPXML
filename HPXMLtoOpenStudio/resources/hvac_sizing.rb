@@ -2218,14 +2218,14 @@ class HVACSizing
     '''
     uncond_area = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     ducts.each do |duct|
-      next if HPXML::conditioned_locations.include? duct.Location
+      next if (HPXML::conditioned_locations - [HPXML::LocationOtherHousingUnit]).include? duct.Location
 
       uncond_area[duct.Side] += duct.Area
     end
 
     value = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     ducts.each do |duct|
-      next if HPXML::conditioned_locations.include? duct.Location
+      next if (HPXML::conditioned_locations - [HPXML::LocationOtherHousingUnit]).include? duct.Location
 
       if uncond_area[duct.Side] > 0
         value[duct.Side] += values[duct.Side][duct.Location] * duct.Area / uncond_area[duct.Side]
@@ -2244,7 +2244,7 @@ class HVACSizing
 
     areas = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     ducts.each do |duct|
-      next if HPXML::conditioned_locations.include? duct.Location
+      next if (HPXML::conditioned_locations - [HPXML::LocationOtherHousingUnit]).include? duct.Location
 
       areas[duct.Side] += duct.Area
     end
@@ -2259,7 +2259,7 @@ class HVACSizing
 
     cfms = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     ducts.each do |duct|
-      next if HPXML::conditioned_locations.include? duct.Location
+      next if (HPXML::conditioned_locations - [HPXML::LocationOtherHousingUnit]).include? duct.Location
 
       if duct.LeakageFrac.to_f > 0
         cfms[duct.Side] += duct.LeakageFrac * system_cfm
@@ -2278,7 +2278,7 @@ class HVACSizing
 
     u_factors = { HPXML::DuctTypeSupply => {}, HPXML::DuctTypeReturn => {} }
     ducts.each do |duct|
-      next if HPXML::conditioned_locations.include? duct.Location
+      next if (HPXML::conditioned_locations - [HPXML::LocationOtherHousingUnit]).include? duct.Location
 
       u_factors[duct.Side][duct.Location] = 1.0 / duct.Rvalue
     end
@@ -2492,7 +2492,7 @@ class HVACSizing
       total_uncond_supply_area = hpxml_hvac.distribution_system.total_unconditioned_duct_areas[HPXML::DuctTypeSupply]
       total_uncond_return_area = hpxml_hvac.distribution_system.total_unconditioned_duct_areas[HPXML::DuctTypeReturn]
       hpxml_hvac.distribution_system.ducts.each do |duct|
-        next if HPXML::conditioned_locations.include? duct.duct_location
+        next if (HPXML::conditioned_locations - [HPXML::LocationOtherHousingUnit]).include? duct.duct_location
 
         d = DuctInfo.new
         d.Side = duct.duct_type
