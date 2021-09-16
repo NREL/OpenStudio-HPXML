@@ -2,6 +2,8 @@
 
 __New Features__
 - Updates to OpenStudio 3.2.1/EnergyPlus 9.5.0.
+- **Breaking change**: Replaces "Unmet Load" outputs with "Unmet Hours".
+- **Breaking change**: Renames "Load: Heating" and "Peak Load: Heating" (and Cooling) outputs to include "Delivered".
 - **Breaking change**: Replaces ClothesDryer `extension/IsVented` and `extension/VentedFlowRate` with `Vented` and `VentedFlowRate`.
 - Expanded capabilities for scheduling:
   - Allows modeling detailed occupancy via a schedule CSV file.
@@ -31,6 +33,7 @@ __New Features__
 - Switches to the EnergyPlus Fan:SystemModel object for all HVAC systems.
 - Introduces a small amount of infiltration for unvented spaces.
 - Revises shared mechanical ventilation preconditioning control logic to operate less often.
+- Adds more efficiency range warning checks for heating, cooling, and hot water systems.
 - Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
 - Updates the reporting measure to register all outputs from the annual CSV with the OS runner (for use in, e.g., PAT).
 - Removes timeseries CSV output columns that are all zeroes to reduce file size and processing time.

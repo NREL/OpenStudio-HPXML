@@ -2152,6 +2152,8 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            area: 1350,
                            interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                            insulation_assembly_r_value: 39.3)
+  elsif ['base-atticroof-radiant-barrier.xml'].include? hpxml_file
+    hpxml.frame_floors[0].insulation_assembly_r_value = 8.7
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.frame_floors.clear
     hpxml.frame_floors.add(id: 'FloorAboveOther',
@@ -3440,6 +3442,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].cooling_capacity = 24000 * 6
     hpxml.cooling_systems[0].compressor_type = nil
     hpxml.cooling_systems[0].cooling_efficiency_kw_per_ton = 0.9
+    hpxml.cooling_systems[0].cooling_efficiency_seer = nil
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].shared_loop_watts = 600
   elsif ['base-bldgtype-multifamily-shared-cooling-tower-only-water-loop-heat-pump.xml',
