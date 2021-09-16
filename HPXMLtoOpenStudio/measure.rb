@@ -1947,7 +1947,7 @@ class OSModel
     total_unconditioned_duct_area = { HPXML::DuctTypeSupply => 0.0,
                                       HPXML::DuctTypeReturn => 0.0 }
     hvac_distribution.ducts.each do |ducts|
-      next if HPXML::conditioned_locations.include? ducts.duct_location
+      next if (HPXML::conditioned_locations - [HPXML::LocationOtherHousingUnit]).include? ducts.duct_location
       next if ducts.duct_type.nil?
 
       # Calculate total duct area in unconditioned spaces
@@ -1956,7 +1956,7 @@ class OSModel
 
     # Create duct objects
     hvac_distribution.ducts.each do |ducts|
-      next if HPXML::conditioned_locations.include? ducts.duct_location
+      next if (HPXML::conditioned_locations - [HPXML::LocationOtherHousingUnit]).include? ducts.duct_location
       next if ducts.duct_type.nil?
       next if total_unconditioned_duct_area[ducts.duct_type] <= 0
 
@@ -2659,12 +2659,18 @@ class OSModel
   # Should be called when the object's energy use is sensitive to ambient temperature
   # (e.g., water heaters and ducts).
   def self.get_space_or_schedule_from_location(location, object_name, model, spaces)
-    return if [HPXML::LocationOtherExterior, HPXML::LocationOutside, HPXML::LocationRoofDeck].include? location
+    return if [HPXML::LocationOtherExterior,
+               HPXML::LocationOutside,
+               HPXML::LocationRoofDeck].include? location
 
     sch = nil
     space = nil
-    if [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherMultifamilyBufferSpace,
-        HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab].include? location
+    if [HPXML::LocationOtherHeatedSpace,
+        HPXML::LocationOtherHousingUnit,
+        HPXML::LocationOtherMultifamilyBufferSpace,
+        HPXML::LocationOtherNonFreezingSpace,
+        HPXML::LocationExteriorWall,
+        HPXML::LocationUnderSlab].include? location
       # if located in spaces where we don't model a thermal zone, create and return temperature schedule
       sch = get_space_temperature_schedule(model, location, spaces)
     else

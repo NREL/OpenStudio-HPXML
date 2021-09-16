@@ -500,7 +500,7 @@ class HPXML < Object
     exterior_area = 0.0 # Same as above excluding surfaces attached to garage or other housing units
 
     # Determine which spaces are within infiltration volume
-    spaces_within_infil_volume = HPXML::conditioned_locations
+    spaces_within_infil_volume = HPXML::conditioned_locations - [HPXML::LocationOtherHousingUnit]
     @attics.each do |attic|
       next unless [AtticTypeUnvented].include? attic.attic_type
       next unless attic.within_infiltration_volume
@@ -508,7 +508,8 @@ class HPXML < Object
       spaces_within_infil_volume << attic.to_location
     end
     @foundations.each do |foundation|
-      next unless [FoundationTypeBasementUnconditioned, FoundationTypeCrawlspaceUnvented].include? foundation.foundation_type
+      next unless [FoundationTypeBasementUnconditioned,
+                   FoundationTypeCrawlspaceUnvented].include? foundation.foundation_type
       next unless foundation.within_infiltration_volume
 
       spaces_within_infil_volume << foundation.to_location
@@ -518,7 +519,8 @@ class HPXML < Object
     spaces_within_infil_volume.each do |location|
       (@roofs + @rim_joists + @walls + @foundation_walls + @frame_floors + @slabs).each do |surface|
         is_adiabatic_surface = (surface.interior_adjacent_to == surface.exterior_adjacent_to)
-        next unless [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? location
+        next unless [surface.interior_adjacent_to,
+                     surface.exterior_adjacent_to].include? location
 
         if not is_adiabatic_surface
           # Exclude surfaces between two different spaces that are both within infiltration volume
@@ -527,8 +529,11 @@ class HPXML < Object
 
         # Update Compartmentalization Boundary areas
         total_area += surface.area
-        next unless (not [LocationGarage, LocationOtherHousingUnit, LocationOtherHeatedSpace,
-                          LocationOtherMultifamilyBufferSpace, LocationOtherNonFreezingSpace].include? surface.exterior_adjacent_to) &&
+        next unless (not [LocationGarage,
+                          LocationOtherHousingUnit,
+                          LocationOtherHeatedSpace,
+                          LocationOtherMultifamilyBufferSpace,
+                          LocationOtherNonFreezingSpace].include? surface.exterior_adjacent_to) &&
                     (not is_adiabatic_surface)
 
         exterior_area += surface.area

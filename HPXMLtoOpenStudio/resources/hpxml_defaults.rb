@@ -245,7 +245,6 @@ class HPXMLDefaults
       hpxml.building_construction.average_ceiling_height = hpxml.building_construction.conditioned_building_volume / cfa
       hpxml.building_construction.average_ceiling_height_isdefaulted = true
     end
-    puts hpxml.building_construction.average_ceiling_height
 
     if hpxml.building_construction.number_of_bathrooms.nil?
       hpxml.building_construction.number_of_bathrooms = Float(Waterheater.get_default_num_bathrooms(nbeds)).to_i
