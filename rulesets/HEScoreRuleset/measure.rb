@@ -93,7 +93,7 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
       zip3_of_interest = zipcode[0, 3]
       next unless row['postal_code'].start_with?(zip3_of_interest)
 
-      distance = (Integer(row['postal_code']) - Integer(zipcode)).abs()
+      distance = (Integer(row['postal_code'].sub(/^0*/, '')) - Integer(zipcode.sub(/^0*/, ''))).abs()
       if distance < zip_distance
         zip_distance = distance
         zipcode_row = row
