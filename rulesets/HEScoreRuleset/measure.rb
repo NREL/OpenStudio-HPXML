@@ -87,7 +87,7 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
 
     # Look up zipcode info
     zipcode_row = nil
-    zipcode = json['building_address']['zip_code'][0..6]
+    zipcode = json['building_address']['zip_code']
     CSV.foreach(File.join(File.dirname(__FILE__), 'resources', 'zipcodes_wx.csv'), headers: true) do |row|
       next unless row['postal_code'] == zipcode
 
