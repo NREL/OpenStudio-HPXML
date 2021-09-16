@@ -6,7 +6,7 @@
 require_relative 'resources/constants.rb'
 
 # start the measure
-class HPXMLOutputReport < OpenStudio::Measure::ReportingMeasure
+class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
   # human readable name
   def name
     # Measure name should be the title case of the class name.
@@ -350,4 +350,4 @@ class HPXMLOutputReport < OpenStudio::Measure::ReportingMeasure
 end
 
 # register the measure to be used by the application
-HPXMLOutputReport.new.registerWithApplication
+ReportHPXMLOutput.new.registerWithApplication

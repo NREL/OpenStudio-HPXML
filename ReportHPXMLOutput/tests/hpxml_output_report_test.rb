@@ -7,7 +7,7 @@ require 'fileutils'
 require 'csv'
 require_relative '../measure.rb'
 
-class HPXMLOutputReportTest < MiniTest::Test
+class ReportHPXMLOutputTest < MiniTest::Test
   Rows = [
     'Enclosure: Wall Area Thermal Boundary (ft^2)',
     'Enclosure: Wall Area Exterior (ft^2)',
