@@ -306,6 +306,7 @@ class OSModel
     # Set globals
     @cfa = @hpxml.building_construction.conditioned_floor_area
     @gfa = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationGarage }.map { |s| s.area }.sum(0.0)
+    @ubfa = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationBasementUnconditioned }.map { |s| s.area }.sum(0.0)
     @ncfl = @hpxml.building_construction.number_of_conditioned_floors
     @ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade
     @nbeds = @hpxml.building_construction.number_of_bedrooms
@@ -1294,7 +1295,7 @@ class OSModel
       mass_lb_per_sqft = 8.0
       density_lb_per_cuft = 40.0
       mat = BaseMaterial.Wood
-      Constructions.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft, mat, @cfa,
+      Constructions.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft, mat, @cfa, @ubfa, @gfa,
                                     basement_frac_of_cfa, @cond_below_grade_surfaces, spaces[HPXML::LocationLivingSpace])
     end
   end

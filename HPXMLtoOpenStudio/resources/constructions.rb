@@ -908,7 +908,7 @@ class Constructions
   end
 
   def self.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft, mat, cfa,
-                           basement_frac_of_cfa, cond_base_surfaces, living_space)
+                           ubfa, gfa, basement_frac_of_cfa, cond_base_surfaces, living_space)
 
     # Add user-specified furniture mass
     model.getSpaces.each do |space|
@@ -917,12 +917,18 @@ class Constructions
       furnSolarAbsorptance = 0.6
       furnSpecHeat = mat.cp
       furnDensity = density_lb_per_cuft
-      if (space == living_space) || Geometry.is_unconditioned_basement(space)
+      if space == living_space
         furnAreaFraction = 1.0
         furnMass = mass_lb_per_sqft
+        floor_area = cfa
+      elsif Geometry.is_unconditioned_basement(space)
+        furnAreaFraction = 1.0
+        furnMass = mass_lb_per_sqft
+        floor_area = ubfa
       elsif Geometry.is_garage(space)
         furnAreaFraction = 0.1
         furnMass = 2.0
+        floor_area = gfa
       end
 
       next if furnAreaFraction.nil?
@@ -948,8 +954,8 @@ class Constructions
       imdefs = []
       if space == living_space
         # if living space, judge if includes conditioned basement, create furniture independently
-        living_surface_area = furnAreaFraction * cfa * (1 - basement_frac_of_cfa)
-        base_surface_area = furnAreaFraction * cfa * basement_frac_of_cfa
+        living_surface_area = furnAreaFraction * floor_area * (1 - basement_frac_of_cfa)
+        base_surface_area = furnAreaFraction * floor_area * basement_frac_of_cfa
         # living furniture mass
         if living_surface_area > 0
           living_obj_name = mass_obj_name_space + ' above grade'
@@ -964,7 +970,7 @@ class Constructions
           imdefs << imdef
         end
       else
-        surface_area = furnAreaFraction * space.floorArea
+        surface_area = furnAreaFraction * floor_area
         imdef = create_os_int_mass_and_def(model, mass_obj_name_space, space, surface_area)
         imdefs << imdef
       end
