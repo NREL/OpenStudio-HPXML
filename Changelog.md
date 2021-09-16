@@ -39,12 +39,7 @@ __New Features__
 - Removes timeseries CSV output columns that are all zeroes to reduce file size and processing time.
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
 - Eliminates EnergyPlus warnings related to unused objects or invalid output meters/variables.
-- Allows defaulting of HVAC/DHW system efficiency (by age).
-- Allows defaulting of mechanical ventilation fan power (by type).
-- Allows CEER (Combined Energy Efficiency Ratio) efficiency unit for room AC.
-- Allows "none" for wall/rim joist siding.
-- Updates the reporting measure to register all outputs from the annual CSV with the OS runner (for use in, e.g., PAT).
-- Switches to the EnergyPlus Fan:SystemModel object for all HVAC systems.
+- Allows CEER (Combined Energy Efficiency Ratio) efficiency unit.
 - Allows modeling PTAC and PTHP hvac systems. 
 
 __Bugfixes__
