@@ -216,7 +216,7 @@ class HEScoreRuleset
       end
       wall_assembly_code = nil
       if @has_same_wall_const
-        front_wall = json['building']['zone']['zone_wall'].find{|wall| wall['side'] == 'front'}
+        front_wall = json['building']['zone']['zone_wall'].find { |wall| wall['side'] == 'front' }
         wall_assembly_code = front_wall['wall_assembly_code']
       else
         wall_assembly_code = orig_wall['wall_assembly_code']
@@ -361,7 +361,7 @@ class HEScoreRuleset
 
       orig_window = orig_wall['zone_window']
       if @has_same_window_const
-        front_wall = json['building']['zone']['zone_wall'].find{|wall| wall['side'] == 'front'}
+        front_wall = json['building']['zone']['zone_wall'].find { |wall| wall['side'] == 'front' }
         front_window = front_wall['zone_window']
         if front_window['window_method'] == 'code'
           window_code = front_window['window_code']
