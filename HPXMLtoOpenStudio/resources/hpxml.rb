@@ -100,6 +100,7 @@ class HPXML < Object
   FoundationTypeAmbient = 'Ambient'
   FoundationTypeBasementConditioned = 'ConditionedBasement'
   FoundationTypeBasementUnconditioned = 'UnconditionedBasement'
+  FoundationTypeCrawlspaceConditioned = 'ConditionedCrawlspace'
   FoundationTypeCrawlspaceUnvented = 'UnventedCrawlspace'
   FoundationTypeCrawlspaceVented = 'VentedCrawlspace'
   FoundationTypeSlab = 'SlabOnGrade'
@@ -175,6 +176,7 @@ class HPXML < Object
   LocationBasementConditioned = 'basement - conditioned'
   LocationBasementUnconditioned = 'basement - unconditioned'
   LocationBath = 'bath'
+  LocationCrawlspaceConditioned = 'crawlspace - conditioned'
   LocationCrawlspaceUnvented = 'crawlspace - unvented'
   LocationCrawlspaceVented = 'crawlspace - vented'
   LocationExterior = 'exterior'
@@ -498,7 +500,7 @@ class HPXML < Object
     exterior_area = 0.0 # Same as above excluding surfaces attached to garage or other housing units
 
     # Determine which spaces are within infiltration volume
-    spaces_within_infil_volume = [LocationLivingSpace, LocationBasementConditioned]
+    spaces_within_infil_volume = HPXML::conditioned_locations
     @attics.each do |attic|
       next unless [AtticTypeUnvented].include? attic.attic_type
       next unless attic.within_infiltration_volume
@@ -540,30 +542,40 @@ class HPXML < Object
     # Infiltration height: vertical distance between lowest and highest above-grade points within the pressure boundary.
     # Height is inferred from available HPXML properties.
     # The WithinInfiltrationVolume properties are intentionally ignored for now.
-    # FUTURE: Move into AirInfiltrationMeasurement class?
     cfa = @building_construction.conditioned_floor_area
+
     ncfl_ag = @building_construction.number_of_conditioned_floors_above_grade
     if has_walkout_basement()
       infil_height = ncfl_ag * infil_volume / cfa
     else
-      # Calculate maximum above-grade height of conditioned basement walls
-      max_cond_bsmt_wall_height_ag = 0.0
+      # FIXME: Double-check this
+      if has_location(HPXML::LocationCrawlspaceConditioned)
+        conditioned_crawl_area = @slabs.select { |s| s.interior_adjacent_to == HPXML::LocationCrawlspaceConditioned }.map { |s| s.area }.sum
+        conditioned_crawl_height = @foundation_walls.select { |w| w.interior_adjacent_to == HPXML::LocationCrawlspaceConditioned }.map { |w| w.height }.max
+        conditioned_crawl_volume = conditioned_crawl_area * conditioned_crawl_height
+        infil_volume -= conditioned_crawl_volume
+      end
+
+      # Calculate maximum above-grade height of conditioned foundation walls
+      max_cond_fnd_wall_height_ag = 0.0
       @foundation_walls.each do |foundation_wall|
-        next unless foundation_wall.is_exterior && (foundation_wall.interior_adjacent_to == LocationBasementConditioned)
+        next unless foundation_wall.is_exterior && HPXML::conditioned_below_grade_locations.include?(foundation_wall.interior_adjacent_to)
 
         height_ag = foundation_wall.height - foundation_wall.depth_below_grade
-        next unless height_ag > max_cond_bsmt_wall_height_ag
+        next unless height_ag > max_cond_fnd_wall_height_ag
 
-        max_cond_bsmt_wall_height_ag = height_ag
+        max_cond_fnd_wall_height_ag = height_ag
       end
+
       # Add assumed rim joist height
-      cond_bsmt_rim_joist_height = 0
+      cond_fnd_rim_joist_height = 0
       @rim_joists.each do |rim_joist|
-        next unless rim_joist.is_exterior && (rim_joist.interior_adjacent_to == LocationBasementConditioned)
+        next unless rim_joist.is_exterior && HPXML::conditioned_below_grade_locations.include?(rim_joist.interior_adjacent_to)
 
-        cond_bsmt_rim_joist_height = UnitConversions.convert(9, 'in', 'ft')
+        cond_fnd_rim_joist_height = UnitConversions.convert(9, 'in', 'ft')
       end
-      infil_height = ncfl_ag * infil_volume / cfa + max_cond_bsmt_wall_height_ag + cond_bsmt_rim_joist_height
+
+      infil_height = ncfl_ag * infil_volume / cfa + max_cond_fnd_wall_height_ag + cond_fnd_rim_joist_height
     end
     return infil_height
   end
@@ -1405,6 +1417,8 @@ class HPXML < Object
         return LocationCrawlspaceUnvented
       elsif @foundation_type == FoundationTypeCrawlspaceVented
         return LocationCrawlspaceVented
+      elsif @foundation_type == FoundationTypeCrawlspaceConditioned
+        return LocationCrawlspaceConditioned
       elsif @foundation_type == FoundationTypeSlab
         return LocationLivingSpace
       else
@@ -1464,6 +1478,9 @@ class HPXML < Object
         elsif @foundation_type == FoundationTypeCrawlspaceUnvented
           crawlspace = XMLHelper.add_element(foundation_type_el, 'Crawlspace')
           XMLHelper.add_element(crawlspace, 'Vented', false, :boolean)
+        elsif @foundation_type == FoundationTypeCrawlspaceConditioned
+          crawlspace = XMLHelper.add_element(foundation_type_el, 'Crawlspace')
+          XMLHelper.add_element(crawlspace, 'Conditioned', true, :boolean)
         else
           fail "Unhandled foundation type '#{@foundation_type}'."
         end
@@ -1485,6 +1502,8 @@ class HPXML < Object
         @foundation_type = FoundationTypeCrawlspaceUnvented
       elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='true']")
         @foundation_type = FoundationTypeCrawlspaceVented
+      elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Conditioned='true']")
+        @foundation_type = FoundationTypeCrawlspaceConditioned
       elsif XMLHelper.has_element(foundation, 'FoundationType/Ambient')
         @foundation_type = FoundationTypeAmbient
       end
@@ -3454,7 +3473,7 @@ class HPXML < Object
       areas = { HPXML::DuctTypeSupply => 0,
                 HPXML::DuctTypeReturn => 0 }
       @ducts.each do |duct|
-        next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.duct_location
+        next if HPXML::conditioned_locations.include? duct.duct_location
         next if duct.duct_type.nil?
 
         areas[duct.duct_type] += duct.duct_surface_area
@@ -5786,7 +5805,19 @@ class HPXML < Object
   def self.conditioned_locations
     return [HPXML::LocationLivingSpace,
             HPXML::LocationBasementConditioned,
+            HPXML::LocationCrawlspaceConditioned,
             HPXML::LocationOtherHousingUnit]
+  end
+
+  def self.conditioned_finished_locations
+    return [HPXML::LocationLivingSpace,
+            HPXML::LocationBasementConditioned,
+            HPXML::LocationOtherHousingUnit]
+  end
+
+  def self.conditioned_below_grade_locations
+    return [HPXML::LocationBasementConditioned,
+            HPXML::LocationCrawlspaceConditioned]
   end
 
   def self.is_conditioned(surface)

@@ -283,8 +283,11 @@ def create_hpxmls
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-ambient.xml' => 'base.xml',
+    'base-foundation-basement-garage.xml' => 'base.xml',
+    'base-foundation-complex.xml' => 'base.xml',
     'base-foundation-conditioned-basement-slab-insulation.xml' => 'base.xml',
     'base-foundation-conditioned-basement-wall-interior-insulation.xml' => 'base.xml',
+    'base-foundation-conditioned-crawlspace.xml' => 'base.xml',
     'base-foundation-slab.xml' => 'base.xml',
     'base-foundation-unconditioned-basement.xml' => 'base.xml',
     'base-foundation-unconditioned-basement-assembly-r.xml' => 'base-foundation-unconditioned-basement.xml',
@@ -293,8 +296,6 @@ def create_hpxmls
     'base-foundation-unvented-crawlspace.xml' => 'base.xml',
     'base-foundation-vented-crawlspace.xml' => 'base.xml',
     'base-foundation-walkout-basement.xml' => 'base.xml',
-    'base-foundation-complex.xml' => 'base.xml',
-    'base-foundation-basement-garage.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-1-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -764,6 +765,12 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_conditioned_floors -= 1
     hpxml.building_construction.conditioned_floor_area -= 1350
     hpxml.building_construction.conditioned_building_volume -= 1350 * 8
+  elsif ['base-foundation-conditioned-crawlspace.xml'].include? hpxml_file
+    # Counts towards Conditioned building volume but not conditioned floor
+    # area or number of conditioned floors.
+    hpxml.building_construction.number_of_conditioned_floors -= 1
+    hpxml.building_construction.conditioned_floor_area -= 1350
+    hpxml.building_construction.conditioned_building_volume -= 1350 * 4
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors += 1
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
@@ -977,6 +984,10 @@ def set_hpxml_foundations(hpxml_file, hpxml)
     hpxml.foundations.add(id: 'UnventedCrawlspace',
                           foundation_type: HPXML::FoundationTypeCrawlspaceUnvented,
                           within_infiltration_volume: false)
+  elsif ['base-foundation-conditioned-crawlspace.xml'].include? hpxml_file
+    hpxml.foundations.clear
+    hpxml.foundations.add(id: 'ConditionedCrawlspace',
+                          foundation_type: HPXML::FoundationTypeCrawlspaceConditioned)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.foundations.clear
     hpxml.foundations.add(id: 'UnconditionedBasement',
@@ -1248,6 +1259,10 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
     for i in 0..hpxml.rim_joists.size - 1
       hpxml.rim_joists[i].interior_adjacent_to = HPXML::LocationCrawlspaceUnvented
+    end
+  elsif ['base-foundation-conditioned-crawlspace.xml'].include? hpxml_file
+    for i in 0..hpxml.rim_joists.size - 1
+      hpxml.rim_joists[i].interior_adjacent_to = HPXML::LocationCrawlspaceConditioned
     end
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
     for i in 0..hpxml.rim_joists.size - 1
@@ -1901,9 +1916,12 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
   elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
     hpxml.foundation_walls[0].depth_below_grade = 4
   elsif ['base-foundation-unvented-crawlspace.xml',
-         'base-foundation-vented-crawlspace.xml'].include? hpxml_file
+         'base-foundation-vented-crawlspace.xml',
+         'base-foundation-conditioned-crawlspace.xml'].include? hpxml_file
     if ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
       hpxml.foundation_walls[0].interior_adjacent_to = HPXML::LocationCrawlspaceUnvented
+    elsif ['base-foundation-conditioned-crawlspace.xml'].include? hpxml_file
+      hpxml.foundation_walls[0].interior_adjacent_to = HPXML::LocationCrawlspaceConditioned
     else
       hpxml.foundation_walls[0].interior_adjacent_to = HPXML::LocationCrawlspaceVented
     end
@@ -2372,9 +2390,12 @@ def set_hpxml_slabs(hpxml_file, hpxml)
     hpxml.slabs[0].carpet_fraction = 1
     hpxml.slabs[0].carpet_r_value = 2.5
   elsif ['base-foundation-unvented-crawlspace.xml',
-         'base-foundation-vented-crawlspace.xml'].include? hpxml_file
+         'base-foundation-vented-crawlspace.xml',
+         'base-foundation-conditioned-crawlspace.xml'].include? hpxml_file
     if ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
       hpxml.slabs[0].interior_adjacent_to = HPXML::LocationCrawlspaceUnvented
+    elsif ['base-foundation-conditioned-crawlspace.xml'].include? hpxml_file
+      hpxml.slabs[0].interior_adjacent_to = HPXML::LocationCrawlspaceConditioned
     else
       hpxml.slabs[0].interior_adjacent_to = HPXML::LocationCrawlspaceVented
     end
@@ -3895,6 +3916,11 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationCrawlspaceUnvented
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationCrawlspaceUnvented
+  elsif ['base-foundation-conditioned-crawlspace.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 0.0
+    hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 0.0
+    hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationCrawlspaceConditioned
+    hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationCrawlspaceConditioned
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationCrawlspaceVented
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationCrawlspaceVented
@@ -4565,6 +4591,8 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationCrawlspaceUnvented
+  elsif ['base-foundation-conditioned-crawlspace.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].location = HPXML::LocationCrawlspaceConditioned
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationCrawlspaceVented
   elsif ['base-foundation-slab.xml'].include? hpxml_file

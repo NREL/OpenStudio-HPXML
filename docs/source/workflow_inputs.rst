@@ -272,12 +272,12 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   Element                                                    Type      Units      Constraints                        Required  Default   Notes
   =========================================================  ========  =========  =================================  ========  ========  =======================================================================
   ``ResidentialFacilityType``                                string               See [#]_                           Yes                 Type of dwelling unit
-  ``NumberofConditionedFloors``                              double               > 0                                Yes                 Number of conditioned floors (including a basement)
+  ``NumberofConditionedFloors``                              double               > 0                                Yes                 Number of conditioned floors (including a conditioned basement; excluding a conditioned crawlspace)
   ``NumberofConditionedFloorsAboveGrade``                    double               > 0, <= NumberofConditionedFloors  Yes                 Number of conditioned floors above grade (including a walkout basement)
   ``NumberofBedrooms``                                       integer              > 0                                Yes                 Number of bedrooms
   ``NumberofBathrooms``                                      integer              > 0                                No        See [#]_  Number of bathrooms
-  ``ConditionedFloorArea``                                   double    ft2        > 0                                Yes                 Floor area within conditioned space boundary
-  ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``  double    ft3 or ft  > 0                                No        See [#]_  Volume/ceiling height within conditioned space boundary
+  ``ConditionedFloorArea``                                   double    ft2        > 0                                Yes                 Floor area within conditioned space boundary (excluding conditioned crawlspace floor area)
+  ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``  double    ft3 or ft  > 0                                No        See [#]_  Volume/ceiling height within conditioned space boundary (including a conditioned basement/crawlspace)
   ``extension/HasFlueOrChimney``                             boolean                                                 No        See [#]_  Presence of flue or chimney for infiltration model
   =========================================================  ========  =========  =================================  ========  ========  =======================================================================
 
@@ -446,9 +446,9 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
   ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                    Yes                    Assembly R-value [#]_
   ======================================  =================  ================  =====================  ========  ===========  ==============================
 
-  .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+  .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
+  .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] If neither Azimuth nor Orientation provided, modeled as four surfaces of equal area facing every direction.
@@ -487,9 +487,9 @@ Each wall that has no contact with the ground and bounds a space type is entered
   ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                    Yes                         Assembly R-value [#]_
   ======================================  =================  ================  =====================  =============  ===========  ====================================
 
-  .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+  .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
+  .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] WallType child element choices are ``WoodStud``, ``DoubleWoodStud``, ``ConcreteMasonryUnit``, ``StructurallyInsulatedPanel``, ``InsulatedConcreteForms``, ``SteelFrame``, ``SolidConcrete``, ``StructuralBrick``, ``StrawBale``, ``Stone``, ``LogWall``, or ``Adobe``.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
@@ -534,9 +534,9 @@ Other walls (e.g., wood framed walls) that are connected to a below-grade space 
   ``Insulation/AssemblyEffectiveRValue``                          double             F-ft2-hr/Btu      > 0                  See [#]_             Assembly R-value [#]_
   ==============================================================  =================  ================  ===================  =========  ========  ====================================
 
-  .. [#] ExteriorAdjacentTo choices are "ground", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+  .. [#] ExteriorAdjacentTo choices are "ground", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] InteriorAdjacentTo choices are "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
+  .. [#] InteriorAdjacentTo choices are "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] Interior foundation walls (e.g., between basement and crawlspace) should **not** use "ground" even if the foundation wall has some contact with the ground due to the difference in below-grade depths of the two adjacent spaces.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
@@ -581,9 +581,9 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
   ``Insulation/AssemblyEffectiveRValue``  double    F-ft2-hr/Btu  > 0          Yes                 Assembly R-value [#]_
   ======================================  ========  ============  ===========  ========  ========  ============================
 
-  .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+  .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
+  .. [#] InteriorAdjacentTo choices are "living space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is living space and the surface is a ceiling, otherwise "none".
@@ -624,7 +624,7 @@ Each space type that borders the ground (i.e., basements, crawlspaces, garages, 
   ``extension/CarpetRValue``                   double    F-ft2-hr/Btu  >= 0         No         See [#]_  Carpet R-value
   ===========================================  ========  ============  ===========  =========  ========  ====================================================
 
-  .. [#] InteriorAdjacentTo choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", or "garage".
+  .. [#] InteriorAdjacentTo choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If Thickness not provided, defaults to 0 when adjacent to crawlspace and 4 inches for all other cases.
   .. [#] For a crawlspace with a dirt floor, enter a thickness of zero.
@@ -1368,9 +1368,9 @@ Additional information is entered in each ``Ducts``.
   ===============================================  =======  ============  ================  ========  =========  ======================================
 
   .. [#] DuctInsulationRValue should not include air films (i.e., use 0 for an uninsulated duct).
-  .. [#] DuctLocation choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - unvented", "crawlspace - vented", "attic - unvented", "attic - vented", "garage", "outside", "exterior wall", "under slab", "roof deck", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+  .. [#] DuctLocation choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "attic - unvented", "attic - vented", "garage", "outside", "exterior wall", "under slab", "roof deck", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] If DuctLocation not provided, defaults to the first present space type: "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "attic - vented", "attic - unvented", "garage", or "living space".
+  .. [#] If DuctLocation not provided, defaults to the first present space type: "basement - conditioned", "basement - unconditioned", "crawlspace - conditioned", "crawlspace - vented", "crawlspace - unvented", "attic - vented", "attic - unvented", "garage", or "living space".
          If NumberofConditionedFloorsAboveGrade > 1, secondary ducts will be located in "living space".
   .. [#] The sum of all ``[DuctType="supply"]/FractionDuctArea`` and ``[DuctType="return"]/FractionDuctArea`` must each equal to 1.
   .. [#] Either FractionDuctArea or DuctSurfaceArea (or both) are required if DuctLocation is provided.
@@ -1603,7 +1603,7 @@ If not entered, the simulation will not include water heating.
   =========================  =======  =======  ===========  ========  ========  ================================================================
 
   .. [#] WaterHeaterType choices are "storage water heater", "instantaneous water heater", "heat pump water heater", "space-heating boiler with storage tank", or "space-heating boiler with tankless coil".
-  .. [#] Location choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+  .. [#] Location choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If Location not provided, defaults to the first present space type:
   
@@ -2617,13 +2617,14 @@ The various locations used in an HPXML file are defined as follows:
   ==============================  =======================================================  =======================================  =============
   outside                         Ambient environment                                      Weather data                             Any
   ground                                                                                   EnergyPlus calculation                   Any
-  living space                    Above-grade conditioned floor area                       EnergyPlus calculation                   Any
+  living space                    Above-grade conditioned space maintained at setpoint     EnergyPlus calculation                   Any
   attic - vented                                                                           EnergyPlus calculation                   Any
   attic - unvented                                                                         EnergyPlus calculation                   Any
-  basement - conditioned          Below-grade conditioned floor area                       EnergyPlus calculation                   Any
+  basement - conditioned          Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                   Any
   basement - unconditioned                                                                 EnergyPlus calculation                   Any
   crawlspace - vented                                                                      EnergyPlus calculation                   Any
   crawlspace - unvented                                                                    EnergyPlus calculation                   Any
+  crawlspace - conditioned        Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                   Any
   garage                          Single-family garage (not shared parking)                EnergyPlus calculation                   Any
   other housing unit              E.g., conditioned adjacent unit or conditioned corridor  Same as living space                     SFA/MF only
   other heated space              E.g., shared laundry/equipment space                     Avg of living space/outside; min of 68F  SFA/MF only

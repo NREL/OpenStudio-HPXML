@@ -10,6 +10,7 @@ __New Features__
   - Introduces a measure for automatically generating detailed smooth/stochastic schedule CSV files.
   - Expands simplified weekday/weekend/monthly schedule inputs to additional building features.
   - Allows `HeatingSeason` & `CoolingSeason` to be specified for defining heating and cooling equipment availability.
+- Allows conditioned crawlspaces (`crawlspace - conditioned`) to be specified.
 - Allows non-zero refrigerant charge defect ratios for ground source heat pumps.
 - Expands choices allowed for `Siding` (Wall/RimJoist) and `RoofType` (Roof) elements.
 - Allows "none" for wall/rim joist siding.
