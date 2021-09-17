@@ -356,7 +356,6 @@ class HEScoreRuleset
   def self.set_enclosure_windows(json, new_hpxml)
     json['building']['zone']['zone_wall'].each do |orig_wall|
       next unless orig_wall.key?('zone_window')
-      next if orig_wall['side'] == 'front' && orig_wall['zone_window']['window_area'] == 1 # LBL intentionally has the front window area set to 1 as an HPXML file with no windows does not pass validation.
       next if orig_wall['zone_window']['window_area'] == 0
 
       orig_window = orig_wall['zone_window']
@@ -470,9 +469,18 @@ class HEScoreRuleset
     json['building']['systems']['hvac'].each do |orig_hvac|
       orig_heating = orig_hvac['heating']
       orig_cooling = orig_hvac['cooling']
+      hp_types = ['heat_pump', 'gchp', 'mini_split']
+      has_heating_system = false
+      if (not orig_heating.nil?) || (orig_heating['type'] != 'none')
+        has_heating_system = true
+      end
+      has_cooling_system = false
+      if (not orig_cooling.nil?) || (orig_cooling['type'] != 'none')
+        has_cooling_system = true
+      end
 
       # HeatingSystem
-      if (not orig_heating.nil?) && (['central_furnace', 'wall_furnace', 'boiler', 'wood_stove', 'baseboard'].include? orig_heating['type'])
+      if has_heating_system && (not hp_types.include? orig_heating['type'])
         heating_system_type = hescore_to_hpxml_hvac_type(orig_heating['type'])
         heating_system_fuel = hescore_to_hpxml_fuel(orig_heating['fuel_primary'])
         distribution_system_idref = nil
@@ -554,7 +562,7 @@ class HEScoreRuleset
       end
 
       # CoolingSystem
-      if (not orig_cooling.nil?) && (['packaged_dx', 'split_dx', 'dec'].include? orig_cooling['type'])
+      if has_cooling_system && (not hp_types.include? orig_cooling['type'])
         cooling_system_type = hescore_to_hpxml_hvac_type(orig_cooling['type'])
         cooling_system_fuel = HPXML::FuelTypeElectricity
         distribution_system_idref = nil
@@ -612,12 +620,12 @@ class HEScoreRuleset
       # HeatPump
       heatpump_fraction_cool_load_served = 0
       heatpump_fraction_heat_load_served = 0
-      if ((not orig_heating.nil?) && (['heat_pump', 'gchp', 'mini_split'].include? orig_heating['type'])) ||
-         ((not orig_cooling.nil?) && (['heat_pump', 'gchp', 'mini_split'].include? orig_cooling['type']))
+      if (has_heating_system && (hp_types.include? orig_heating['type'])) ||
+         (has_cooling_system && (hp_types.include? orig_cooling['type']))
         heat_pump_fuel = HPXML::FuelTypeElectricity
         backup_heating_fuel = HPXML::FuelTypeElectricity
         backup_heating_efficiency_percent = 1.0
-        if ((not orig_cooling.nil?) && (['heat_pump', 'gchp', 'mini_split'].include? orig_cooling['type']))
+        if has_cooling_system && (hp_types.include? orig_cooling['type'])
           heat_pump_type = hescore_to_hpxml_hvac_type(orig_cooling['type'])
           if ['heat_pump', 'mini_split'].include? orig_cooling['type']
             cooling_efficiency_seer = orig_cooling['efficiency']
@@ -628,7 +636,7 @@ class HEScoreRuleset
           cooling_energy_star = (orig_cooling['efficiency_level'] == 'energy_star')
           heatpump_fraction_cool_load_served = orig_hvac['hvac_fraction']
         end
-        if ((not orig_heating.nil?) && (['heat_pump', 'gchp', 'mini_split'].include? orig_heating['type']))
+        if has_heating_system && (hp_types.include? orig_heating['type'])
           heat_pump_type = hescore_to_hpxml_hvac_type(orig_heating['type'])
           if ['heat_pump', 'mini_split'].include? orig_heating['type']
             heating_efficiency_hspf = orig_heating['efficiency']
