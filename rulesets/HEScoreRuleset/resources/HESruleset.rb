@@ -470,13 +470,13 @@ class HEScoreRuleset
       orig_heating = orig_hvac['heating']
       orig_cooling = orig_hvac['cooling']
       hp_types = ['heat_pump', 'gchp', 'mini_split']
-      has_heating_system = false
-      if (not orig_heating.nil?) || (orig_heating['type'] != 'none')
-        has_heating_system = true
+      has_heating_system = true
+      if orig_heating.nil? || (orig_heating['type'] == 'none')
+        has_heating_system = false
       end
-      has_cooling_system = false
-      if (not orig_cooling.nil?) || (orig_cooling['type'] != 'none')
-        has_cooling_system = true
+      has_cooling_system = true
+      if orig_cooling.nil? || (orig_cooling['type'] == 'none')
+        has_cooling_system = false
       end
 
       # HeatingSystem
@@ -653,12 +653,7 @@ class HEScoreRuleset
           next unless orig_duct.key?('fraction')
           next if orig_duct['fraction'] == 0
 
-          duct_location = orig_duct['location']
-          if duct_location == 'cond_space'
-            # do nothing
-          else
-            distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
-          end
+          distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
         end
 
         if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
@@ -724,8 +719,8 @@ class HEScoreRuleset
 
       # HVACDistribution
       next unless orig_hvac.key?('hvac_distribution') &&
-                  ((not orig_cooling.nil?) && (['heat_pump', 'gchp', 'split_dx', 'mini_split'].include? orig_cooling['type'])) ||
-                  ((not orig_heating.nil?) && (['heat_pump', 'gchp', 'central_furnace', 'mini_split'].include? orig_heating['type']))
+                  (has_cooling_system && (['heat_pump', 'gchp', 'split_dx', 'mini_split'].include? orig_cooling['type'])) ||
+                  (has_heating_system && (['heat_pump', 'gchp', 'central_furnace', 'mini_split'].include? orig_heating['type']))
 
       tot_frac = 0.0
       frac_inside = 0.0
