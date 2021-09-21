@@ -3187,7 +3187,7 @@ class HPXML < Object
              :fan_watts_per_cfm, :is_shared_system, :number_of_units_served, :shared_loop_watts,
              :shared_loop_motor_efficiency, :airflow_defect_ratio, :charge_defect_ratio,
              :heating_airflow_cfm, :cooling_airflow_cfm, :location, :primary_heating_system, :primary_cooling_system,
-             :flex, :modulating, :dual_source, :ihp_grid_ac, :ihp_ice_storage, :ihp_pcm_storage, 
+             :flex, :modulating, :dual_source, :ihp_grid_ac, :ihp_ice_storage, :ihp_pcm_storage,
              :cooling_grid_signal_schedule, :heating_grid_signal_schedule, :max_flex_speed]
     attr_accessor(*ATTRS)
 
