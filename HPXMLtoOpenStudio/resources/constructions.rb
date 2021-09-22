@@ -1023,7 +1023,7 @@ class Constructions
 
   def self.get_default_window_skylight_ufactor_shgc(window_or_skylight, type)
     if [HPXML::WindowFrameTypeAluminum,
-        HPXML::WindowFrameMetal].include? window_or_skylight.frame_type
+        HPXML::WindowFrameTypeMetal].include? window_or_skylight.frame_type
       is_metal_frame = true
     elsif [HPXML::WindowFrameTypeWood,
            HPXML::WindowFrameTypeVinyl,
@@ -1056,10 +1056,10 @@ class Constructions
 
     if window_or_skylight.glass_layers == HPXML::WindowLayersSinglePane
       gas_fill = nil
-    elsif [HPXML::WindowGasAir].include? window_or_skylight.gas_type
+    elsif [HPXML::WindowGasAir].include? window_or_skylight.gas_fill
       gas_fill = 'air'
     elsif [HPXML::WindowGasArgon,
-           HPXML::WindowGasOther].include? window_or_skylight.gas_type
+           HPXML::WindowGasOther].include? window_or_skylight.gas_fill
       gas_fill = 'gas'
     else
       fail "Unexpected #{type.downcase} gas type."
@@ -1110,7 +1110,7 @@ class Constructions
     end
     return vals if not vals.nil?
 
-    fail "Could not lookup UFactor and SHGC for #{type.downcase} #{window_or_skylight.id}."
+    fail "Could not lookup UFactor and SHGC for #{type.downcase} '#{window_or_skylight.id}'."
   end
 
   private

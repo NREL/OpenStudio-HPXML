@@ -172,6 +172,9 @@
       <sch:assert role='ERROR' test='number(h:Azimuth) &gt;= 0 or not(h:Azimuth)'>Expected Azimuth to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:Azimuth) &lt; 360 or not(h:Azimuth)'>Expected Azimuth to be less than 360</sch:assert>
       <sch:assert role='ERROR' test='h:Orientation[text()="north" or text()="northwest" or text()="west" or text()="southwest" or text()="south" or text()="southeast" or text()="east" or text()="northeast"] or not(h:Orientation)'>Expected Orientation to be 'north' or 'northwest' or 'west' or 'southwest' or 'south' or 'southeast' or 'east' or 'northeast'</sch:assert>
+      <sch:assert role='ERROR' test='h:GlassLayers[text()="single-pane" or text()="double-pane" or text()="triple-pane" or text()="multi-layered" or text()="other"] or not(h:GlassLayers)'>Expected GlassLayers to be 'single-pane' or 'double-pane' or 'triple-pane' or 'multi-layered' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='h:GlassType[text()="low-e" or text()="tinted" or text()="reflective" or text()="tinted/reflective" or text()="other"] or not(h:GlassType)'>Expected GlassType to be 'low-e' or 'tinted' or 'reflective' or 'tinted/reflective' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='h:GasFill[text()="air" or text()="argon" or text()="other"] or not(h:GasFill)'>Expected GasFill to be 'air' or 'argon' or 'other'</sch:assert>
       <sch:assert role='ERROR' test='number(h:UFactor) &gt; 0 or not(h:UFactor)'>Expected UFactor to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:SHGC) &gt; 0 or not(h:SHGC)'>Expected SHGC to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:SHGC) &lt; 1 or not(h:SHGC)'>Expected SHGC to be less than 1</sch:assert>
@@ -203,6 +206,9 @@
       <sch:assert role='ERROR' test='number(h:Area) &gt; 0 or not(h:Area)'>Expected Area to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:Azimuth) &gt;= 0 or not(h:Azimuth)'>Expected Azimuth to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:Azimuth) &lt; 360 or not(h:Azimuth)'>Expected Azimuth to be less than 360</sch:assert>
+      <sch:assert role='ERROR' test='h:GlassLayers[text()="single-pane" or text()="double-pane" or text()="triple-pane" or text()="multi-layered" or text()="other"] or not(h:GlassLayers)'>Expected GlassLayers to be 'single-pane' or 'double-pane' or 'triple-pane' or 'multi-layered' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='h:GlassType[text()="low-e" or text()="tinted" or text()="reflective" or text()="tinted/reflective" or text()="other"] or not(h:GlassType)'>Expected GlassType to be 'low-e' or 'tinted' or 'reflective' or 'tinted/reflective' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='h:GasFill[text()="air" or text()="argon" or text()="other"] or not(h:GasFill)'>Expected GasFill to be 'air' or 'argon' or 'other'</sch:assert>
       <sch:assert role='ERROR' test='number(h:UFactor) &gt; 0 or not(h:UFactor)'>Expected UFactor to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:SHGC) &gt; 0 or not(h:SHGC)'>Expected SHGC to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:SHGC) &lt; 1 or not(h:SHGC)'>Expected SHGC to be less than 1</sch:assert>
