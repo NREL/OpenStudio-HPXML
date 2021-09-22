@@ -650,8 +650,8 @@ Each window or glass door area is entered as an ``/HPXML/Building/BuildingDetail
   ``SystemIdentifier``                          id                                                        Yes                  Unique identifier
   ``Area``                                      double             ft2               > 0                  Yes                  Total area
   ``Azimuth`` or ``Orientation``                integer or string  deg or direction  0 - 359 or See [#]_  Yes                  Direction (clockwise from North)
-  ``UFactor`` and/or ``GlassLayers``            double or string   Btu/F-ft2-hr      > 0 or See [#]_      Yes                  Full-assembly NFRC U-factor or glass layers description
-  ``SHGC`` and/or ``GlassLayers``               double or string                     0 - 1                Yes                  Full-assembly NFRC solar heat gain coefficient or glass layers description
+  ``UFactor`` and/or ``GlassLayers``            double or string   Btu/F-ft2-hr      > 0 or See [#]_      Yes                  Full-assembly NFRC U-factor (including any storm window) or glass layers description
+  ``SHGC`` and/or ``GlassLayers``               double or string                     0 - 1                Yes                  Full-assembly NFRC solar heat gain coefficient (including any storm window) or glass layers description
   ``ExteriorShading/SummerShadingCoefficient``  double             frac              0 - 1                No        1.00       Exterior summer shading coefficient (1=transparent, 0=opaque)
   ``ExteriorShading/WinterShadingCoefficient``  double             frac              0 - 1                No        1.00       Exterior winter shading coefficient (1=transparent, 0=opaque)
   ``InteriorShading/SummerShadingCoefficient``  double             frac              0 - 1                No        0.70 [#]_  Interior summer shading coefficient (1=transparent, 0=opaque)
@@ -813,7 +813,7 @@ Each opaque door is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Do
   ``AttachedToWall``                            idref                            See [#]_             Yes                  ID of attached wall
   ``Area``                                      double             ft2           > 0                  Yes                  Total area
   ``Azimuth`` or ``Orientation``                integer or string  deg           0 - 359 or See [#]_  No        See [#]_   Direction (clockwise from North)
-  ``RValue``                                    double             F-ft2-hr/Btu  > 0                  Yes                  R-value
+  ``RValue``                                    double             F-ft2-hr/Btu  > 0                  Yes                  R-value (including any storm door)
   ============================================  =================  ============  ===================  ========  =========  ==============================
 
   .. [#] AttachedToWall must reference a ``Wall`` or ``FoundationWall``.
