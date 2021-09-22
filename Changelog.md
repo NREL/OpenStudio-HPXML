@@ -39,7 +39,6 @@ __New Features__
 - Removes timeseries CSV output columns that are all zeroes to reduce file size and processing time.
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
 - Eliminates EnergyPlus warnings related to unused objects or invalid output meters/variables.
-- Allows CEER (Combined Energy Efficiency Ratio) efficiency unit.
 - Allows modeling PTAC and PTHP hvac systems. 
 
 __Bugfixes__

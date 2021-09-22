@@ -1618,15 +1618,10 @@ class OSModel
           HPXML::HVACTypeRoomAirConditioner,
           HPXML::HVACTypeMiniSplitAirConditioner,
           HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
-        if cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
-          HVAC.apply_central_air_source_hvac_systems(model, runner, cooling_system, heating_system,
-                                                     sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                                     living_zone)
-        else
-          airloop_map[sys_id] = HVAC.apply_central_air_source_hvac_systems(model, runner, cooling_system, heating_system,
+
+          airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, runner, cooling_system, heating_system,
                                                                            sequential_cool_load_fracs, sequential_heat_load_fracs,
                                                                            living_zone)
-        end
 
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
 
@@ -1652,7 +1647,7 @@ class OSModel
         next # Already processed combined AC+furnace
       end
       if (heating_system.heating_system_type == HPXML::HVACTypePTACHeating) && (not cooling_system.nil?)
-        next # Processed with PTAC cooling in add_cooling_system
+        next # Fixme: Processed with PTAC cooling in add_cooling_system, currently it'll never be here because ptac heating is always modeled standalone if without distribution system. Leave it here for ducted ptac in the future.
       end
 
       # Calculate heating sequential load fractions

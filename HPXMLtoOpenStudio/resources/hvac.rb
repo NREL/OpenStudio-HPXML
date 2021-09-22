@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class HVAC
-  def self.apply_central_air_source_hvac_systems(model, runner, cooling_system, heating_system,
+  def self.apply_air_source_hvac_systems(model, runner, cooling_system, heating_system,
                                                  sequential_cool_load_fracs, sequential_heat_load_fracs,
                                                  control_zone)
     is_heatpump = false
