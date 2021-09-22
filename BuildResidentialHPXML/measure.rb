@@ -3072,7 +3072,6 @@ class HPXMLFile
     set_building_construction(hpxml, runner, args)
     set_climate_and_risk_zones(hpxml, runner, args, epw_file)
     set_air_infiltration_measurements(hpxml, runner, args)
-
     set_roofs(hpxml, runner, model, args)
     set_rim_joists(hpxml, runner, model, args)
     set_walls(hpxml, runner, model, args)
@@ -3084,7 +3083,6 @@ class HPXMLFile
     set_windows(hpxml, runner, model, args)
     set_skylights(hpxml, runner, model, args)
     set_doors(hpxml, runner, model, args)
-
     set_heating_systems(hpxml, runner, args)
     set_cooling_systems(hpxml, runner, args)
     set_heat_pumps(hpxml, runner, args)
@@ -3387,9 +3385,8 @@ class HPXMLFile
       surf_hash['surfaces'].each do |surface|
         next unless (foundation_locations.include? surface.interior_adjacent_to) ||
                     (foundation_locations.include? surface.exterior_adjacent_to) ||
-                    (surf_type == 'slabs' && surface.interior_adjacent_to == HPXML::LocationLivingSpace)
-
-        (surf_type == 'frame_floors' && surface.exterior_adjacent_to == HPXML::LocationOutside)
+                    (surf_type == 'slabs' && surface.interior_adjacent_to == HPXML::LocationLivingSpace) ||
+                    (surf_type == 'frame_floors' && surface.exterior_adjacent_to == HPXML::LocationOutside)
 
         surf_hash['ids'] << surface.id
       end
