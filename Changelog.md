@@ -14,6 +14,7 @@ __New Features__
 - Expands choices allowed for `Siding` (Wall/RimJoist) and `RoofType` (Roof) elements.
 - Allows "none" for wall/rim joist siding.
 - Allows interior finish inputs (e.g., 0.5" drywall) for walls, ceilings, and roofs.
+- Adds a new results_hpxml.csv output file to summarize HPXML values (e.g., surface areas, HVAC capacities).
 - Allows additional fuel types for generators.
 - Adds alternative inputs:
   - `Ducts/FractionDuctArea` instead of `Ducts/DuctSurfaceArea`.

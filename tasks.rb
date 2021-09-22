@@ -3122,7 +3122,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_system_fuel: HPXML::FuelTypeNaturalGas,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.92,
-                              fraction_heat_load_served: 0.091)
+                              fraction_heat_load_served: 0.091,
+                              primary_system: true)
     hpxml.heating_systems.add(id: 'HeatingSystem4',
                               distribution_system_idref: 'HVACDistribution3',
                               heating_system_type: HPXML::HVACTypeBoiler,
@@ -3395,7 +3396,8 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
                               cooling_capacity: 9600,
                               fraction_cool_load_served: 0.1667,
                               cooling_efficiency_eer: 8.5,
-                              cooling_shr: 0.65)
+                              cooling_shr: 0.65,
+                              primary_system: true)
     hpxml.cooling_systems.add(id: 'CoolingSystemPTAC',
                               cooling_system_type: HPXML::HVACTypePTAC,
                               cooling_system_fuel: HPXML::FuelTypeElectricity,
@@ -5956,8 +5958,10 @@ if ARGV[0].to_sym == :create_release_zips
            'BuildResidentialScheduleFile/resources/*.*',
            'HPXMLtoOpenStudio/measure.*',
            'HPXMLtoOpenStudio/resources/*.*',
-           'SimulationOutputReport/measure.*',
-           'SimulationOutputReport/resources/*.*',
+           'ReportSimulationOutput/measure.*',
+           'ReportSimulationOutput/resources/*.*',
+           'ReportHPXMLOutput/measure.*',
+           'ReportHPXMLOutput/resources/*.*',
            'weather/*.*',
            'workflow/*.*',
            'workflow/sample_files/*.xml',
