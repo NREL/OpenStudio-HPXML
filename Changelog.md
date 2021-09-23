@@ -17,6 +17,7 @@ __New Features__
 - Adds a new results_hpxml.csv output file to summarize HPXML values (e.g., surface areas, HVAC capacities).
 - Allows additional fuel types for generators.
 - Adds alternative inputs:
+  - Window/skylight physical properties (`GlassLayers`, `FrameType`, etc.) instead of `UFactor` & `SHGC`.
   - `Ducts/FractionDuctArea` instead of `Ducts/DuctSurfaceArea`.
   - `Length` instead of `Area` for foundation walls.
   - `Orientation` instead of `Azimuth` for all applicable surfaces, PV systems, and solar thermal systems.

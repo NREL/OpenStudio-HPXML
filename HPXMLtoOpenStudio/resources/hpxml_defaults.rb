@@ -611,6 +611,37 @@ class HPXMLDefaults
         window.fraction_operable = Airflow.get_default_fraction_of_windows_operable()
         window.fraction_operable_isdefaulted = true
       end
+      next unless window.ufactor.nil? || window.shgc.nil?
+
+      # Frame/Glass provided instead, fill in more defaults as needed
+      if window.thermal_break.nil? && [HPXML::WindowFrameTypeAluminum, HPXML::WindowFrameTypeMetal].include?(window.frame_type)
+        if window.glass_layers == HPXML::WindowLayersSinglePane
+          window.thermal_break = false
+          window.thermal_break_isdefaulted = true
+        elsif window.glass_layers == HPXML::WindowLayersDoublePane
+          window.thermal_break = true
+          window.thermal_break_isdefaulted = true
+        end
+      end
+      if window.gas_fill.nil?
+        if window.glass_layers == HPXML::WindowLayersDoublePane
+          window.gas_fill = HPXML::WindowGasAir
+          window.gas_fill_isdefaulted = true
+        elsif window.glass_layers == HPXML::WindowLayersTriplePane
+          window.gas_fill = HPXML::WindowGasArgon
+          window.gas_fill_isdefaulted = true
+        end
+      end
+      # Now lookup U/SHGC based on properties
+      ufactor, shgc = Constructions.get_default_window_skylight_ufactor_shgc(window, 'window')
+      if window.ufactor.nil?
+        window.ufactor = ufactor
+        window.ufactor_isdefaulted = true
+      end
+      if window.shgc.nil?
+        window.shgc = shgc
+        window.shgc_isdefaulted = true
+      end
     end
   end
 
@@ -639,6 +670,37 @@ class HPXMLDefaults
       if skylight.exterior_shading_factor_winter.nil?
         skylight.exterior_shading_factor_winter = 1.0
         skylight.exterior_shading_factor_winter_isdefaulted = true
+      end
+      next unless skylight.ufactor.nil? || skylight.shgc.nil?
+
+      # Frame/Glass provided instead, fill in more defaults as needed
+      if skylight.thermal_break.nil? && [HPXML::WindowFrameTypeAluminum, HPXML::WindowFrameTypeMetal].include?(skylight.frame_type)
+        if skylight.glass_layers == HPXML::WindowLayersSinglePane
+          skylight.thermal_break = false
+          skylight.thermal_break_isdefaulted = true
+        elsif skylight.glass_layers == HPXML::WindowLayersDoublePane
+          skylight.thermal_break = true
+          skylight.thermal_break_isdefaulted = true
+        end
+      end
+      if skylight.gas_fill.nil?
+        if skylight.glass_layers == HPXML::WindowLayersDoublePane
+          skylight.gas_fill = HPXML::WindowGasAir
+          skylight.gas_fill_isdefaulted = true
+        elsif skylight.glass_layers == HPXML::WindowLayersTriplePane
+          skylight.gas_fill = HPXML::WindowGasArgon
+          skylight.gas_fill_isdefaulted = true
+        end
+      end
+      # Now lookup U/SHGC based on properties
+      ufactor, shgc = Constructions.get_default_window_skylight_ufactor_shgc(skylight, 'skylight')
+      if skylight.ufactor.nil?
+        skylight.ufactor = ufactor
+        skylight.ufactor_isdefaulted = true
+      end
+      if skylight.shgc.nil?
+        skylight.shgc = shgc
+        skylight.shgc_isdefaulted = true
       end
     end
   end
