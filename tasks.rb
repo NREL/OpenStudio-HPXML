@@ -131,6 +131,7 @@ def create_hpxmls
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
     'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
+    'invalid_files/ptac-unattached-cooling-system.xml' => 'base-hvac-ptac-electric-resistance.xml',
     'invalid_files/refrigerator-location.xml' => 'base.xml',
     'invalid_files/refrigerators-multiple-primary.xml' => 'base.xml',
     'invalid_files/refrigerators-no-primary.xml' => 'base.xml',
@@ -3352,7 +3353,8 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
   elsif ['base-hvac-mini-split-air-conditioner-only-ductless.xml'].include? hpxml_file
     hpxml.cooling_systems[0].distribution_system_idref = nil
   elsif ['base-hvac-furnace-gas-room-ac.xml',
-         'base-hvac-room-ac-only.xml'].include? hpxml_file
+         'base-hvac-room-ac-only.xml',
+         'invalid_files/ptac-unattached-cooling-system.xml'].include? hpxml_file
     hpxml.cooling_systems[0].distribution_system_idref = nil
     hpxml.cooling_systems[0].cooling_system_type = HPXML::HVACTypeRoomAirConditioner
     hpxml.cooling_systems[0].cooling_efficiency_seer = nil

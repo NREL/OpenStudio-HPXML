@@ -374,6 +374,7 @@ class HPXMLTest < MiniTest::Test
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for surface 'Wall'."],
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for surface 'Roof'."],
                             'orphaned-hvac-distribution.xml' => ["Distribution system 'HVACDistribution' found but no HVAC system attached to it."],
+                            'ptac-unattached-cooling-system.xml' => ['Expected 1 or more element(s) for xpath: ../CoolingSystem/CoolingSystemType[text()="packaged terminal air conditioner"'],
                             'refrigerator-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'refrigerators-multiple-primary.xml' => ['More than one refrigerator designated as the primary.'],
                             'refrigerators-no-primary.xml' => ['Could not find a primary refrigerator.'],
