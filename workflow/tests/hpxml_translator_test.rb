@@ -437,9 +437,7 @@ class HPXMLTest < MiniTest::Test
                             'unattached-shared-dishwasher-water-heater.xml' => ["Attached water heating system 'foobar' not found for dishwasher"],
                             'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
                             'water-heater-location.xml' => ['A location is specified as "crawlspace - vented" but no surfaces were found adjacent to this space type.'],
-                            'water-heater-location-other.xml' => ["Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem, id: \"WaterHeater\"]"],
-                            'ptac-unattached-cooling-system.xml' => ["Attached cooling system 'CoolingPTAC' not found for HVAC system 'HeatingPTAC'."],
-                            'furnace-attached-to-cooling-system.xml' => ['Heating system type: Furnace should not be attached to a cooling system. Only PTAC allowed.'] }
+                            'water-heater-location-other.xml' => ["Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem, id: \"WaterHeater\"]"] }
 
     # Test simulations
     xmls = Dir["#{sample_files_dir}/invalid_files/*.xml"].sort
