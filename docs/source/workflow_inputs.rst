@@ -1259,9 +1259,12 @@ To define simple thermostat setpoints, additional information is entered in ``HV
   =============================  ========  =======  ===========  ========  =========  ============================
   Element                        Type      Units    Constraints  Required  Default    Notes
   =============================  ========  =======  ===========  ========  =========  ============================
-  ``SetpointTempHeatingSeason``  double    F                     Yes                  Heating setpoint temperature
-  ``SetpointTempCoolingSeason``  double    F                     Yes                  Cooling setpoint temperature
+  ``SetpointTempHeatingSeason``  double    F                     See [#]_             Heating setpoint temperature
+  ``SetpointTempCoolingSeason``  double    F                     See [#]_             Cooling setpoint temperature
   =============================  ========  =======  ===========  ========  =========  ============================
+
+  .. SetpointTempHeatingSeason only required if there is heating equipment (i.e., sum of all ``FractionHeatLoadServed`` is greater than 0).
+  .. SetpointTempCoolingSeason only required if there is cooling equipment (i.e., sum of all ``FractionCoolLoadServed`` is greater than 0).
 
 If there is a heating temperature setback, additional information is entered in ``HVACControl``.
 
@@ -1291,11 +1294,16 @@ To define detailed thermostat setpoints, additional information is entered in ``
   ===============================================  =====  =======  ===========  ========  =========  ============================================
   Element                                          Type   Units    Constraints  Required  Default    Notes
   ===============================================  =====  =======  ===========  ========  =========  ============================================
-  ``extension/WeekdaySetpointTempsHeatingSeason``  array  F                     Yes                  24 comma-separated weekday heating setpoints
-  ``extension/WeekendSetpointTempsHeatingSeason``  array  F                     Yes                  24 comma-separated weekend heating setpoints
-  ``extension/WeekdaySetpointTempsCoolingSeason``  array  F                     Yes                  24 comma-separated weekday cooling setpoints
-  ``extension/WeekendSetpointTempsCoolingSeason``  array  F                     Yes                  24 comma-separated weekend cooling setpoints
+  ``extension/WeekdaySetpointTempsHeatingSeason``  array  F                     See [#]_             24 comma-separated weekday heating setpoints
+  ``extension/WeekendSetpointTempsHeatingSeason``  array  F                     See [#]_             24 comma-separated weekend heating setpoints
+  ``extension/WeekdaySetpointTempsCoolingSeason``  array  F                     See [#]_             24 comma-separated weekday cooling setpoints
+  ``extension/WeekendSetpointTempsCoolingSeason``  array  F                     See [#]_             24 comma-separated weekend cooling setpoints
   ===============================================  =====  =======  ===========  ========  =========  ============================================
+
+  .. WeekdaySetpointTempsHeatingSeason only required if there is heating equipment (i.e., sum of all ``FractionHeatLoadServed`` is greater than 0).
+  .. WeekendSetpointTempsHeatingSeason only required if there is heating equipment (i.e., sum of all ``FractionHeatLoadServed`` is greater than 0).
+  .. WeekdaySetpointTempsCoolingSeason only required if there is cooling equipment (i.e., sum of all ``FractionCoolLoadServed`` is greater than 0).
+  .. WeekendSetpointTempsCoolingSeason only required if there is cooling equipment (i.e., sum of all ``FractionCoolLoadServed`` is greater than 0).
 
 HPXML HVAC Distribution
 ***********************
