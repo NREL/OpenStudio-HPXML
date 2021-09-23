@@ -931,7 +931,7 @@
 
   <sch:pattern>
     <sch:title>[HVACControl=Heating]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl[sum(h:FractionHeatLoadServed) > 0]'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl[sum(//h:FractionHeatLoadServed) > 0]'>
       <sch:assert role='ERROR' test='count(h:SetpointTempHeatingSeason) + count(h:extension/h:WeekdaySetpointTempsHeatingSeason) = 1'>Expected 1 element(s) for xpath: SetpointTempHeatingSeason | extension/WeekdaySetpointTempsHeatingSeason</sch:assert>
       <sch:assert role='ERROR' test='count(h:SetpointTempHeatingSeason) + count(h:extension/h:WeekendSetpointTempsHeatingSeason) = 1'>Expected 1 element(s) for xpath: SetpointTempHeatingSeason | extension/WeekendSetpointTempsHeatingSeason</sch:assert>
       <sch:assert role='ERROR' test='count(h:SetbackTempHeatingSeason) + count(h:extension/h:WeekdaySetpointTempsHeatingSeason) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SetbackTempHeatingSeason | extension/WeekdaySetpointTempsHeatingSeason</sch:assert> <!-- See [HVACControl=HeatingSetback] -->
@@ -962,7 +962,7 @@
 
   <sch:pattern>
     <sch:title>[HVACControl=Cooling]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl[sum(h:FractionCoolLoadServed) > 0]'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl[sum(//h:FractionCoolLoadServed) > 0]'>
       <sch:assert role='ERROR' test='count(h:SetpointTempCoolingSeason) + count(h:extension/h:WeekdaySetpointTempsCoolingSeason) = 1'>Expected 1 element(s) for xpath: SetpointTempCoolingSeason | extension/WeekdaySetpointTempsCoolingSeason</sch:assert>
       <sch:assert role='ERROR' test='count(h:SetpointTempCoolingSeason) + count(h:extension/h:WeekendSetpointTempsCoolingSeason) = 1'>Expected 1 element(s) for xpath: SetpointTempCoolingSeason | extension/WeekendSetpointTempsCoolingSeason</sch:assert>
       <sch:assert role='ERROR' test='count(h:SetupTempCoolingSeason) + count(h:extension/h:WeekdaySetpointTempsCoolingSeason) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SetupTempCoolingSeason | extension/WeekdaySetpointTempsCoolingSeason</sch:assert> <!-- See [HVACControl=CoolingSetup] -->

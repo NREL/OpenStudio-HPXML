@@ -3765,7 +3765,7 @@ def set_hpxml_hvac_control(hpxml_file, hpxml)
       hpxml.hvac_controls[0].weekend_cooling_setpoints = nil
       hpxml.hvac_controls[0].ceiling_fan_cooling_setpoint_temp_offset = nil
     end
-    if hpxml.total_fraction_cool_load_served == 0 && !hpxml.header.apply_ashrae140_assumptions
+    if hpxml.total_fraction_heat_load_served == 0 && !hpxml.header.apply_ashrae140_assumptions
       hpxml.hvac_controls[0].heating_setpoint_temp = nil
       hpxml.hvac_controls[0].seasons_heating_begin_month = nil
       hpxml.hvac_controls[0].seasons_heating_begin_day = nil
