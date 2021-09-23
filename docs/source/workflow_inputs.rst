@@ -677,13 +677,13 @@ If UFactor and SHGC are not provided and GlassLayers is not "glass block", addit
   Element                       Type      Units   Constraints              Required  Default   Notes
   ============================  ========  ======  =======================  ========  ========  ========================================================
   ``FrameType``                 element           See [#]_                 Yes                 Type of frame
-  ``FrameType/ThermalBreak``    boolean           See [#]_                 No        false     Whether the aluminum/metal frame has a thermal break
+  ``FrameType/*/ThermalBreak``  boolean           See [#]_                 No        false     Whether the Aluminum or Metal frame has a thermal break
   ``GlassType``                 string            See [#]_                 No        <none>    Type of glass
   ``GasFill``                   string            See [#]_                 No        See [#]_  Type of gas inside double/triple-pane windows
   ============================  ========  ======  =======================  ========  ========  ========================================================
   
   .. [#] FrameType child element choices are ``Aluminum``, ``Fiberglass``, ``Metal``, ``Vinyl``, or ``Wood``.
-  .. [#] FrameType/ThermalBreak is only valid if FrameType is ``Aluminum`` or ``Metal``.
+  .. [#] FrameType/*/ThermalBreak is only valid if FrameType is ``Aluminum`` or ``Metal``.
   .. [#] GlassType choices are "clear", "low-e", "tinted", "tinted/reflective", or "reflective".
          Do not specify this element if the window has clear glass.
   .. [#] GasFill choices are "air", "argon", "krypton", "xenon", "nitrogen", or "other".
@@ -761,13 +761,13 @@ If UFactor and SHGC are not provided and GlassLayers is not "glass block", addit
   Element                       Type      Units   Constraints              Required  Default   Notes
   ============================  ========  ======  =======================  ========  ========  ========================================================
   ``FrameType``                 element           See [#]_                 Yes                 Type of frame
-  ``FrameType/ThermalBreak``    boolean           See [#]_                 No        false     Whether the aluminum/metal frame has a thermal break
+  ``FrameType/*/ThermalBreak``  boolean           See [#]_                 No        false     Whether the Aluminum or Metal frame has a thermal break
   ``GlassType``                 string            See [#]_                 No        <none>    Type of glass
   ``GasFill``                   string            See [#]_                 No        See [#]_  Type of gas inside double/triple-pane skylights
   ============================  ========  ======  =======================  ========  ========  ========================================================
   
   .. [#] FrameType child element choices are ``Aluminum``, ``Fiberglass``, ``Metal``, ``Vinyl``, or ``Wood``.
-  .. [#] FrameType/ThermalBreak is only valid if FrameType is ``Aluminum`` or ``Metal``.
+  .. [#] FrameType/*/ThermalBreak is only valid if FrameType is ``Aluminum`` or ``Metal``.
   .. [#] GlassType choices are "clear", "low-e", "tinted", "tinted/reflective", or "reflective".
          Do not specify this element if the skylight has clear glass.
   .. [#] GasFill choices are "air", "argon", "krypton", "xenon", "nitrogen", or "other".
