@@ -114,10 +114,10 @@ def create_hpxmls
     'invalid_files/invalid-runperiod.xml' => 'base.xml',
     'invalid_files/invalid-schema-version.xml' => 'base.xml',
     'invalid_files/invalid-shared-vent-in-unit-flowrate.xml' => 'base-bldgtype-multifamily-shared-mechvent.xml',
-    'invalid_files/invalid-skylights-properties.xml' => 'base-enclosure-skylights-properties.xml',
+    'invalid_files/invalid-skylights-physical-properties.xml' => 'base-enclosure-skylights-physical-properties.xml',
     'invalid_files/invalid-timestep.xml' => 'base.xml',
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
-    'invalid_files/invalid-windows-properties.xml' => 'base-enclosure-windows-properties.xml',
+    'invalid_files/invalid-windows-physical-properties.xml' => 'base-enclosure-windows-physical-properties.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
     'invalid_files/missing-duct-area.xml' => 'base-hvac-multiple.xml',
     'invalid_files/missing-duct-location.xml' => 'base-hvac-multiple.xml',
@@ -276,13 +276,13 @@ def create_hpxmls
     'base-enclosure-overhangs.xml' => 'base.xml',
     'base-enclosure-rooftypes.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
-    'base-enclosure-skylights-properties.xml' => 'base-enclosure-skylights.xml',
+    'base-enclosure-skylights-physical-properties.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-skylights-shading.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-split-level.xml' => 'base-foundation-slab.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml', # Surfaces should collapse via HPXML.collapse_enclosure_surfaces()
     'base-enclosure-split-surfaces2.xml' => 'base-enclosure-skylights.xml', # Surfaces should NOT collapse via HPXML.collapse_enclosure_surfaces()
     'base-enclosure-walltypes.xml' => 'base.xml',
-    'base-enclosure-windows-properties.xml' => 'base.xml',
+    'base-enclosure-windows-physical-properties.xml' => 'base.xml',
     'base-enclosure-windows-shading.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
@@ -2688,7 +2688,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[3].exterior_shading_factor_winter = 1.0
     hpxml.windows[3].interior_shading_factor_summer = 0.0
     hpxml.windows[3].interior_shading_factor_winter = 1.0
-  elsif ['base-enclosure-windows-properties.xml'].include? hpxml_file
+  elsif ['base-enclosure-windows-physical-properties.xml'].include? hpxml_file
     hpxml.windows[0].ufactor = nil
     hpxml.windows[0].shgc = nil
     hpxml.windows[0].glass_layers = HPXML::WindowLayersSinglePane
@@ -2712,7 +2712,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[3].glass_layers = HPXML::WindowLayersGlassBlock
   elsif ['base-enclosure-windows-none.xml'].include? hpxml_file
     hpxml.windows.clear
-  elsif ['invalid_files/invalid-windows-properties.xml'].include? hpxml_file
+  elsif ['invalid_files/invalid-windows-physical-properties.xml'].include? hpxml_file
     hpxml.windows[1].thermal_break = false
   elsif ['invalid_files/net-area-negative-wall.xml'].include? hpxml_file
     hpxml.windows[0].area = 1000
@@ -2913,7 +2913,7 @@ def set_hpxml_skylights(hpxml_file, hpxml)
     hpxml.skylights[1].exterior_shading_factor_winter = 0.0
     hpxml.skylights[1].interior_shading_factor_summer = 0.5
     hpxml.skylights[1].interior_shading_factor_winter = 1.0
-  elsif ['base-enclosure-skylights-properties.xml'].include? hpxml_file
+  elsif ['base-enclosure-skylights-physical-properties.xml'].include? hpxml_file
     hpxml.skylights[0].ufactor = nil
     hpxml.skylights[0].shgc = nil
     hpxml.skylights[0].glass_layers = HPXML::WindowLayersSinglePane
@@ -2926,7 +2926,7 @@ def set_hpxml_skylights(hpxml_file, hpxml)
     hpxml.skylights[1].thermal_break = true
     hpxml.skylights[1].glass_type = HPXML::WindowGlassTypeLowE
     hpxml.skylights[1].gas_fill = HPXML::WindowGasKrypton
-  elsif ['invalid_files/invalid-skylights-properties.xml'].include? hpxml_file
+  elsif ['invalid_files/invalid-skylights-physical-properties.xml'].include? hpxml_file
     hpxml.skylights[1].thermal_break = false
   elsif ['invalid_files/net-area-negative-roof.xml'].include? hpxml_file
     hpxml.skylights[0].area = 4000
