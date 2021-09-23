@@ -3701,17 +3701,19 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
 end
 
 def set_hpxml_hvac_control(hpxml_file, hpxml)
-  if ['ASHRAE_Standard_140/L100AC.xml',
-      'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
+  hpxml.hvac_controls.clear
+  if hpxml_file.include? 'ASHRAE_Standard_140'
     hpxml.hvac_controls.add(id: 'HVACControl',
                             heating_setpoint_temp: 68,
                             cooling_setpoint_temp: 78)
-  elsif ['base.xml'].include? hpxml_file
+  else
     hpxml.hvac_controls.add(id: 'HVACControl',
                             control_type: HPXML::HVACControlTypeManual,
                             heating_setpoint_temp: 68,
                             cooling_setpoint_temp: 78)
-  elsif ['base-hvac-seasons.xml'].include? hpxml_file
+  end
+
+  if ['base-hvac-seasons.xml'].include? hpxml_file
     hpxml.hvac_controls[0].seasons_heating_begin_month = 11
     hpxml.hvac_controls[0].seasons_heating_begin_day = 1
     hpxml.hvac_controls[0].seasons_heating_end_month = 6
