@@ -662,7 +662,7 @@ Each window or glass door area is entered as an ``/HPXML/Building/BuildingDetail
   ============================================  =================  ================  ===================  ========  =========  =============================================================
 
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north".
-  .. [#] GlassLayers choices are "single-pane", "double-pane", or "triple-pane".
+  .. [#] GlassLayers choices are "single-pane", "double-pane", "triple-pane", or "glass block".
   .. [#] InteriorShading/SummerShadingCoefficient default value indicates 30% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
   .. [#] InteriorShading/WinterShadingCoefficient default value indicates 15% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
   .. [#] FractionOperable reflects whether the windows are operable (can be opened), not how they are used by the occupants.
@@ -671,7 +671,7 @@ Each window or glass door area is entered as an ``/HPXML/Building/BuildingDetail
          The total open window area for natural ventilation is calculated using A) the operable fraction, B) the assumption that 50% of the area of operable windows can be open, and C) the assumption that 20% of that openable area is actually opened by occupants whenever outdoor conditions are favorable for cooling.
   .. [#] AttachedToWall must reference a ``Wall`` or ``FoundationWall``.
 
-If the GlassLayers description is specified instead of UFactor/SHGC, additional information is entered in ``Window``.
+If UFactor and SHGC are not provided and GlassLayers is not "glass block", additional information is entered in ``Window``.
 
   ============================  ========  ======  =======================  ========  ========  ========================================================
   Element                       Type      Units   Constraints              Required  Default   Notes
@@ -684,35 +684,36 @@ If the GlassLayers description is specified instead of UFactor/SHGC, additional 
   
   .. [#] FrameType child element choices are ``Aluminum``, ``Fiberglass``, ``Metal``, ``Vinyl``, or ``Wood``.
   .. [#] FrameType/ThermalBreak is only valid if FrameType is ``Aluminum`` or ``Metal``.
-  .. [#] GlassType choices are "low-e", "tinted", "tinted/reflective", or "reflective".
+  .. [#] GlassType choices are "clear", "low-e", "tinted", "tinted/reflective", or "reflective".
          Do not specify this element if the window has clear glass.
-  .. [#] GasFill choices are "air", "argon", or "other".
+  .. [#] GasFill choices are "air", "argon", "krypton", "xenon", "nitrogen", or "other".
   .. [#] If GasFill not provided, defaults to "air" for double-pane windows and "argon" for triple-pane windows.
 
-If the GlassLayers description is specified instead of UFactor/SHGC, UFactor and SHGC are defaulted using values from `DOE's Home Energy Score <https://www.energy.gov/eere/buildings/articles/home-energy-score>`_:
+If UFactor and SHGC are not provided, they are defaulted as follows:
   
-  ===========  =======================  ============  =========================  ============  =======  ====
-  GlassLayers  FrameType                ThermalBreak  GlassType                  GasFill       UFactor  SHGC
-  ===========  =======================  ============  =========================  ============  =======  ====
-  single-pane  Aluminum, Metal          false         clear                      --            1.27     0.75
-  single-pane  Fiberglass, Vinyl, Wood  --            clear                      --            0.89     0.64
-  single-pane  Aluminum, Metal          false         tinted, tinted/reflective  --            1.27     0.64
-  single-pane  Fiberglass, Vinyl, Wood  --            tinted, tinted/reflective  --            0.89     0.54
-  double-pane  Aluminum, Metal          false         clear                      air           0.81     0.67
-  double-pane  Aluminum, Metal          true          clear                      air           0.60     0.67
-  double-pane  Fiberglass, Vinyl, Wood  --            clear                      air           0.51     0.56
-  double-pane  Aluminum, Metal          false         tinted, tinted/reflective  air           0.81     0.55
-  double-pane  Aluminum, Metal          true          tinted, tinted/reflective  air           0.60     0.55
-  double-pane  Fiberglass, Vinyl, Wood  --            tinted, tinted/reflective  air           0.51     0.46
-  double-pane  Fiberglass, Vinyl, Wood  --            low-e                      air           0.42     0.52
-  double-pane  Aluminum, Metal          true          low-e                      argon, other  0.47     0.62
-  double-pane  Fiberglass, Vinyl, Wood  --            low-e                      argon, other  0.39     0.52
-  double-pane  Aluminum, Metal          false         reflective                 air           0.67     0.37
-  double-pane  Aluminum, Metal          true          reflective                 air           0.47     0.37
-  double-pane  Fiberglass, Vinyl, Wood  --            reflective                 air           0.39     0.31
-  double-pane  Fiberglass, Vinyl, Wood  --            reflective                 argon, other  0.36     0.31
-  triple-pane  Fiberglass, Vinyl, Wood  --            low-e                      argon, other  0.27     0.31
-  ===========  =======================  ============  =========================  ============  =======  ====
+  ===========  =======================  ============  =========================  =============  =======  ====
+  GlassLayers  FrameType                ThermalBreak  GlassType                  GasFill        UFactor  SHGC
+  ===========  =======================  ============  =========================  =============  =======  ====
+  single-pane  Aluminum, Metal          false         clear                      --             1.27     0.75
+  single-pane  Fiberglass, Vinyl, Wood  --            clear                      --             0.89     0.64
+  single-pane  Aluminum, Metal          false         tinted, tinted/reflective  --             1.27     0.64
+  single-pane  Fiberglass, Vinyl, Wood  --            tinted, tinted/reflective  --             0.89     0.54
+  double-pane  Aluminum, Metal          false         clear                      air            0.81     0.67
+  double-pane  Aluminum, Metal          true          clear                      air            0.60     0.67
+  double-pane  Fiberglass, Vinyl, Wood  --            clear                      air            0.51     0.56
+  double-pane  Aluminum, Metal          false         tinted, tinted/reflective  air            0.81     0.55
+  double-pane  Aluminum, Metal          true          tinted, tinted/reflective  air            0.60     0.55
+  double-pane  Fiberglass, Vinyl, Wood  --            tinted, tinted/reflective  air            0.51     0.46
+  double-pane  Fiberglass, Vinyl, Wood  --            low-e                      air            0.42     0.52
+  double-pane  Aluminum, Metal          true          low-e                      <any but air>  0.47     0.62
+  double-pane  Fiberglass, Vinyl, Wood  --            low-e                      <any but air>  0.39     0.52
+  double-pane  Aluminum, Metal          false         reflective                 air            0.67     0.37
+  double-pane  Aluminum, Metal          true          reflective                 air            0.47     0.37
+  double-pane  Fiberglass, Vinyl, Wood  --            reflective                 air            0.39     0.31
+  double-pane  Fiberglass, Vinyl, Wood  --            reflective                 <any but air>  0.36     0.31
+  triple-pane  Fiberglass, Vinyl, Wood  --            low-e                      <any but air>  0.27     0.31
+  glass block  --                       --            --                         --             0.60     0.60
+  ===========  =======================  ============  =========================  =============  =======  ====
 
 .. warning::
 
@@ -754,7 +755,7 @@ Each skylight is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Skyli
   .. [#] GlassLayers choices are "single-pane", "double-pane", or "triple-pane".
   .. [#] AttachedToRoof must reference a ``Roof``.
 
-If the GlassLayers description is specified instead of UFactor/SHGC, additional information is entered in ``Skylight``.
+If UFactor and SHGC are not provided and GlassLayers is not "glass block", additional information is entered in ``Skylight``.
 
   ============================  ========  ======  =======================  ========  ========  ========================================================
   Element                       Type      Units   Constraints              Required  Default   Notes
@@ -767,35 +768,36 @@ If the GlassLayers description is specified instead of UFactor/SHGC, additional 
   
   .. [#] FrameType child element choices are ``Aluminum``, ``Fiberglass``, ``Metal``, ``Vinyl``, or ``Wood``.
   .. [#] FrameType/ThermalBreak is only valid if FrameType is ``Aluminum`` or ``Metal``.
-  .. [#] GlassType choices are "low-e", "tinted", "tinted/reflective", or "reflective".
+  .. [#] GlassType choices are "clear", "low-e", "tinted", "tinted/reflective", or "reflective".
          Do not specify this element if the skylight has clear glass.
-  .. [#] GasFill choices are "air", "argon", or "other".
+  .. [#] GasFill choices are "air", "argon", "krypton", "xenon", "nitrogen", or "other".
   .. [#] If GasFill not provided, defaults to "air" for double-pane skylights and "argon" for triple-pane skylights.
 
-If the GlassLayers description is specified instead of UFactor/SHGC, UFactor and SHGC are defaulted using values from `DOE's Home Energy Score <https://www.energy.gov/eere/buildings/articles/home-energy-score>`_:
+If UFactor and SHGC are not provided, they are defaulted as follows:
   
-  ===========  =======================  ============  =========================  ============  =======  ====
-  GlassLayers  FrameType                ThermalBreak  GlassType                  GasFill       UFactor  SHGC
-  ===========  =======================  ============  =========================  ============  =======  ====
-  single-pane  Aluminum, Metal          false         clear                      --            1.98     0.75
-  single-pane  Fiberglass, Vinyl, Wood  --            clear                      --            1.47     0.64
-  single-pane  Aluminum, Metal          false         tinted, tinted/reflective  --            1.98     0.64
-  single-pane  Fiberglass, Vinyl, Wood  --            tinted, tinted/reflective  --            1.47     0.54
-  double-pane  Aluminum, Metal          false         clear                      air           1.30     0.67
-  double-pane  Aluminum, Metal          true          clear                      air           1.10     0.67
-  double-pane  Fiberglass, Vinyl, Wood  --            clear                      air           0.84     0.56
-  double-pane  Aluminum, Metal          false         tinted, tinted/reflective  air           1.30     0.55
-  double-pane  Aluminum, Metal          true          tinted, tinted/reflective  air           1.10     0.55
-  double-pane  Fiberglass, Vinyl, Wood  --            tinted, tinted/reflective  air           0.84     0.46
-  double-pane  Fiberglass, Vinyl, Wood  --            low-e                      air           0.74     0.52
-  double-pane  Aluminum, Metal          true          low-e                      argon, other  0.95     0.62
-  double-pane  Fiberglass, Vinyl, Wood  --            low-e                      argon, other  0.68     0.52
-  double-pane  Aluminum, Metal          false         reflective                 air           1.17     0.37
-  double-pane  Aluminum, Metal          true          reflective                 air           0.98     0.37
-  double-pane  Fiberglass, Vinyl, Wood  --            reflective                 air           0.71     0.31
-  double-pane  Fiberglass, Vinyl, Wood  --            reflective                 argon, other  0.65     0.31
-  triple-pane  Fiberglass, Vinyl, Wood  --            low-e                      argon, other  0.47     0.31
-  ===========  =======================  ============  =========================  ============  =======  ====
+  ===========  =======================  ============  =========================  =============  =======  ====
+  GlassLayers  FrameType                ThermalBreak  GlassType                  GasFill        UFactor  SHGC
+  ===========  =======================  ============  =========================  =============  =======  ====
+  single-pane  Aluminum, Metal          false         clear                      --             1.98     0.75
+  single-pane  Fiberglass, Vinyl, Wood  --            clear                      --             1.47     0.64
+  single-pane  Aluminum, Metal          false         tinted, tinted/reflective  --             1.98     0.64
+  single-pane  Fiberglass, Vinyl, Wood  --            tinted, tinted/reflective  --             1.47     0.54
+  double-pane  Aluminum, Metal          false         clear                      air            1.30     0.67
+  double-pane  Aluminum, Metal          true          clear                      air            1.10     0.67
+  double-pane  Fiberglass, Vinyl, Wood  --            clear                      air            0.84     0.56
+  double-pane  Aluminum, Metal          false         tinted, tinted/reflective  air            1.30     0.55
+  double-pane  Aluminum, Metal          true          tinted, tinted/reflective  air            1.10     0.55
+  double-pane  Fiberglass, Vinyl, Wood  --            tinted, tinted/reflective  air            0.84     0.46
+  double-pane  Fiberglass, Vinyl, Wood  --            low-e                      air            0.74     0.52
+  double-pane  Aluminum, Metal          true          low-e                      <any but air>  0.95     0.62
+  double-pane  Fiberglass, Vinyl, Wood  --            low-e                      <any but air>  0.68     0.52
+  double-pane  Aluminum, Metal          false         reflective                 air            1.17     0.37
+  double-pane  Aluminum, Metal          true          reflective                 air            0.98     0.37
+  double-pane  Fiberglass, Vinyl, Wood  --            reflective                 air            0.71     0.31
+  double-pane  Fiberglass, Vinyl, Wood  --            reflective                 <any but air>  0.65     0.31
+  triple-pane  Fiberglass, Vinyl, Wood  --            low-e                      <any but air>  0.47     0.31
+  glass block  --                       --            --                         --             0.60     0.60
+  ===========  =======================  ============  =========================  =============  =======  ====
 
 .. warning::
 

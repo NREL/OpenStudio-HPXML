@@ -2709,10 +2709,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[2].gas_fill = HPXML::WindowGasAir
     hpxml.windows[3].ufactor = nil
     hpxml.windows[3].shgc = nil
-    hpxml.windows[3].glass_layers = HPXML::WindowLayersTriplePane
-    hpxml.windows[3].frame_type = HPXML::WindowFrameTypeFiberglass
-    hpxml.windows[3].glass_type = HPXML::WindowGlassTypeLowE
-    hpxml.windows[3].gas_fill = HPXML::WindowGasOther
+    hpxml.windows[3].glass_layers = HPXML::WindowLayersGlassBlock
   elsif ['base-enclosure-windows-none.xml'].include? hpxml_file
     hpxml.windows.clear
   elsif ['invalid_files/invalid-windows-properties.xml'].include? hpxml_file
@@ -2928,7 +2925,7 @@ def set_hpxml_skylights(hpxml_file, hpxml)
     hpxml.skylights[1].frame_type = HPXML::WindowFrameTypeMetal
     hpxml.skylights[1].thermal_break = true
     hpxml.skylights[1].glass_type = HPXML::WindowGlassTypeLowE
-    hpxml.skylights[1].gas_fill = HPXML::WindowGasArgon
+    hpxml.skylights[1].gas_fill = HPXML::WindowGasKrypton
   elsif ['invalid_files/invalid-skylights-properties.xml'].include? hpxml_file
     hpxml.skylights[1].thermal_break = false
   elsif ['invalid_files/net-area-negative-roof.xml'].include? hpxml_file
