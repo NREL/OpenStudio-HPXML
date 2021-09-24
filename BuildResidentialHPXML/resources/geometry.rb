@@ -132,7 +132,7 @@ class Geometry
                                          model:,
                                          geometry_unit_cfa:,
                                          geometry_wall_height:,
-                                         geometry_num_floors_above_grade:,
+                                         geometry_unit_num_floors_above_grade:,
                                          geometry_unit_aspect_ratio:,
                                          geometry_garage_width:,
                                          geometry_garage_depth:,
@@ -147,7 +147,7 @@ class Geometry
                                          **remainder)
     cfa = geometry_unit_cfa
     wall_height = geometry_wall_height
-    num_floors = geometry_num_floors_above_grade
+    num_floors = geometry_unit_num_floors_above_grade
     aspect_ratio = geometry_unit_aspect_ratio
     garage_width = geometry_garage_width
     garage_depth = geometry_garage_depth
@@ -1645,9 +1645,8 @@ class Geometry
                                          geometry_unit_cfa:,
                                          geometry_wall_height:,
                                          geometry_building_num_units:,
-                                         geometry_num_floors_above_grade:,
+                                         geometry_unit_num_floors_above_grade:,
                                          geometry_unit_aspect_ratio:,
-                                         geometry_unit_horizontal_location:,
                                          geometry_corridor_position:,
                                          geometry_foundation_type:,
                                          geometry_foundation_height:,
@@ -1655,14 +1654,16 @@ class Geometry
                                          geometry_attic_type:,
                                          geometry_roof_type:,
                                          geometry_roof_pitch:,
+                                         geometry_unit_left_wall_is_adiabatic:,
+                                         geometry_unit_right_wall_is_adiabatic:,
+                                         geometry_unit_back_wall_is_adiabatic:,
                                          **remainder)
 
     cfa = geometry_unit_cfa
     wall_height = geometry_wall_height
     num_units = geometry_building_num_units.get
-    num_floors = geometry_num_floors_above_grade
+    num_floors = geometry_unit_num_floors_above_grade
     aspect_ratio = geometry_unit_aspect_ratio
-    horizontal_location = geometry_unit_horizontal_location.get
     corridor_position = geometry_corridor_position
     foundation_type = geometry_foundation_type
     foundation_height = geometry_foundation_height
@@ -1673,6 +1674,18 @@ class Geometry
     end
     roof_type = geometry_roof_type
     roof_pitch = geometry_roof_pitch
+    left_wall = geometry_unit_left_wall_is_adiabatic
+    right_wall = geometry_unit_right_wall_is_adiabatic
+    back_wall = geometry_unit_back_wall_is_adiabatic # TODO: use this for corridor?
+
+    horizontal_location = 'None'
+    if left_wall && right_wall
+      horizontal_location = 'Middle'
+    elsif left_wall
+      horizontal_location = 'Right'
+    elsif right_wall
+      horizontal_location = 'Left'
+    end
 
     has_rear_units = false
     if corridor_position == 'Double Exterior'
@@ -2080,10 +2093,8 @@ class Geometry
                               geometry_unit_cfa:,
                               geometry_wall_height:,
                               geometry_building_num_units:,
-                              geometry_num_floors_above_grade:,
+                              geometry_unit_num_floors_above_grade:,
                               geometry_unit_aspect_ratio:,
-                              geometry_unit_level:,
-                              geometry_unit_horizontal_location:,
                               geometry_corridor_position:,
                               geometry_corridor_width:,
                               geometry_inset_width:,
@@ -2093,15 +2104,17 @@ class Geometry
                               geometry_foundation_type:,
                               geometry_foundation_height:,
                               geometry_rim_joist_height:,
+                              geometry_attic_type:,
+                              geometry_unit_left_wall_is_adiabatic:,
+                              geometry_unit_right_wall_is_adiabatic:,
+                              geometry_unit_back_wall_is_adiabatic:,
                               **remainder)
 
     cfa = geometry_unit_cfa
     wall_height = geometry_wall_height
     num_units = geometry_building_num_units.get
-    num_floors = geometry_num_floors_above_grade
+    num_floors = geometry_unit_num_floors_above_grade
     aspect_ratio = geometry_unit_aspect_ratio
-    level = geometry_unit_level.get
-    horz_location = geometry_unit_horizontal_location.get
     corridor_position = geometry_corridor_position
     corridor_width = geometry_corridor_width
     inset_width = geometry_inset_width
@@ -2111,6 +2124,27 @@ class Geometry
     foundation_type = geometry_foundation_type
     foundation_height = geometry_foundation_height
     rim_joist_height = geometry_rim_joist_height
+    attic_type = geometry_attic_type
+    left_wall = geometry_unit_left_wall_is_adiabatic
+    right_wall = geometry_unit_right_wall_is_adiabatic
+    back_wall = geometry_unit_back_wall_is_adiabatic # TODO: use this for corridor?
+
+    if attic_type == 'Adiabatic' && foundation_type == 'Adiabatic'
+      level = 'Middle'
+    elsif attic_type == 'Adiabatic'
+      level = 'Bottom'
+    elsif foundation_type == 'Adiabatic'
+      level = 'Top'
+    end
+
+    horz_location = 'None'
+    if left_wall && right_wall
+      horz_location = 'Middle'
+    elsif left_wall
+      horz_location = 'Right'
+    elsif right_wall
+      horz_location = 'Left'
+    end
 
     if level != 'Bottom'
       foundation_type = HPXML::LocationOtherHousingUnit
@@ -2120,7 +2154,6 @@ class Geometry
 
     num_units_per_floor = num_units / num_floors
     num_units_per_floor_actual = num_units_per_floor
-    above_ground_floors = num_floors
 
     if (num_floors > 1) && (level != 'Bottom') && (foundation_height > 0.0)
       runner.registerWarning('Unit is not on the bottom floor, setting foundation height to 0.')
