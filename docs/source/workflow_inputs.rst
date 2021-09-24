@@ -1375,7 +1375,7 @@ If there is a heating temperature setback, additional information is entered in 
   ``extension/SetbackStartHourHeating``  integer             0 - 23       No        23 (11pm)  Daily setback start hour
   =====================================  ========  ========  ===========  ========  =========  =========================================
 
-  .. TotalSetbackHoursperWeekHeating is converted to hrs/day and modeled as a temperature setback every day starting at SetbackStartHourHeating.
+  .. [#] TotalSetbackHoursperWeekHeating is converted to hrs/day and modeled as a temperature setback every day starting at SetbackStartHourHeating.
 
 If there is a cooling temperature setup, additional information is entered in ``HVACControl``.
 
@@ -1383,11 +1383,11 @@ If there is a cooling temperature setup, additional information is entered in ``
   Element                                Type      Units     Constraints  Required  Default    Notes
   =====================================  ========  ========  ===========  ========  =========  =========================================
   ``SetupTempCoolingSeason``             double    F                      Yes                  Cooling setup temperature
-  ``TotalSetupHoursperWeekCooling``      integer   hrs/week  > 0          Yes                  Hours/week of cooling temperature setup
+  ``TotalSetupHoursperWeekCooling``      integer   hrs/week  > 0          Yes                  Hours/week of cooling temperature setup [#]_
   ``extension/SetupStartHourCooling``    integer             0 - 23       No        9 (9am)    Daily setup start hour
   =====================================  ========  ========  ===========  ========  =========  =========================================
 
-  .. TotalSetupHoursperWeekCooling is converted to hrs/day and modeled as a temperature setup every day starting at SetupStartHourCooling.
+  .. [#] TotalSetupHoursperWeekCooling is converted to hrs/day and modeled as a temperature setup every day starting at SetupStartHourCooling.
 
 Detailed Inputs
 ~~~~~~~~~~~~~~~
@@ -2441,7 +2441,7 @@ If not entered, the simulation will not include a ceiling fan.
   ``Quantity``                               integer           > 0          No        See [#]_  Number of similar ceiling fans
   ``extension/WeekdayScheduleFractions``     array                          No        See [#]_  24 comma-separated weekday fractions
   ``extension/WeekendScheduleFractions``     array                          No                  24 comma-separated weekend fractions
-  ``extension/MonthlyScheduleMultipliers``   array                          No                  12 comma-separated monthly multipliers
+  ``extension/MonthlyScheduleMultipliers``   array                          No        See [#]_  12 comma-separated monthly multipliers
   =========================================  =======  =======  ===========  ========  ========  ==============================
 
   .. [#] If Efficiency not provided, defaults to 3000 / 42.6 based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
