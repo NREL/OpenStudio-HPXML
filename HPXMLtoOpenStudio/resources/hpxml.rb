@@ -1600,6 +1600,14 @@ class HPXML < Object
         @vented_crawlspace_sla = XMLHelper.get_value(foundation, "VentilationRate[UnitofMeasure='#{UnitsSLA}']/Value", :float)
       end
       @within_infiltration_volume = XMLHelper.get_value(foundation, 'WithinInfiltrationVolume', :boolean)
+      @attached_to_rim_joist_idrefs = []
+      XMLHelper.get_elements(foundation, 'AttachedToRimJoist').each do |rim_joist|
+        @attached_to_rim_joist_idrefs << HPXML::get_idref(rim_joist)
+      end
+      @attached_to_wall_idrefs = []
+      XMLHelper.get_elements(foundation, 'AttachedToWall').each do |wall|
+        @attached_to_wall_idrefs << HPXML::get_idref(wall)
+      end
       @attached_to_slab_idrefs = []
       XMLHelper.get_elements(foundation, 'AttachedToSlab').each do |slab|
         @attached_to_slab_idrefs << HPXML::get_idref(slab)
@@ -1817,6 +1825,9 @@ class HPXML < Object
 
     def delete
       @hpxml_object.rim_joists.delete(self)
+      @hpxml_object.foundations.each do |foundation|
+        foundation.attached_to_rim_joist_idrefs.delete(@id) unless foundation.attached_to_rim_joist_idrefs.nil?
+      end
     end
 
     def check_for_errors
@@ -1960,6 +1971,12 @@ class HPXML < Object
       end
       doors.reverse_each do |door|
         door.delete
+      end
+      @hpxml_object.attics.each do |attic|
+        attic.attached_to_wall_idrefs.delete(@id) unless attic.attached_to_wall_idrefs.nil?
+      end
+      @hpxml_object.foundations.each do |foundation|
+        foundation.attached_to_wall_idrefs.delete(@id) unless foundation.attached_to_wall_idrefs.nil?
       end
     end
 
@@ -2293,6 +2310,9 @@ class HPXML < Object
       end
       @hpxml_object.foundations.each do |foundation|
         foundation.attached_to_frame_floor_idrefs.delete(@id) unless foundation.attached_to_frame_floor_idrefs.nil?
+      end
+      @hpxml_object.attics.each do |attic|
+        attic.attached_to_frame_floor_idrefs.delete(@id) unless attic.attached_to_frame_floor_idrefs.nil?
       end
     end
 
