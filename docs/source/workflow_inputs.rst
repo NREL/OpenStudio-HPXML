@@ -683,7 +683,7 @@ If UFactor and SHGC are not provided and GlassLayers is not "glass block", addit
   ============================  ========  ======  =======================  ========  ========  ========================================================
   
   .. [#] FrameType child element choices are ``Aluminum``, ``Fiberglass``, ``Metal``, ``Vinyl``, or ``Wood``.
-  .. [#] FrameType/*/ThermalBreak is only valid if FrameType is ``Aluminum`` or ``Metal``.
+  .. [#] ThermalBreak is only valid if FrameType is ``Aluminum`` or ``Metal``.
   .. [#] GlassType choices are "clear", "low-e", "tinted", "tinted/reflective", or "reflective".
          Do not specify this element if the window has clear glass.
   .. [#] GasFill choices are "air", "argon", "krypton", "xenon", "nitrogen", or "other".
@@ -767,7 +767,7 @@ If UFactor and SHGC are not provided and GlassLayers is not "glass block", addit
   ============================  ========  ======  =======================  ========  ========  ========================================================
   
   .. [#] FrameType child element choices are ``Aluminum``, ``Fiberglass``, ``Metal``, ``Vinyl``, or ``Wood``.
-  .. [#] FrameType/*/ThermalBreak is only valid if FrameType is ``Aluminum`` or ``Metal``.
+  .. [#] ThermalBreak is only valid if FrameType is ``Aluminum`` or ``Metal``.
   .. [#] GlassType choices are "clear", "low-e", "tinted", "tinted/reflective", or "reflective".
          Do not specify this element if the skylight has clear glass.
   .. [#] GasFill choices are "air", "argon", "krypton", "xenon", "nitrogen", or "other".
@@ -1327,11 +1327,12 @@ If any HVAC systems are specified, a single thermostat is entered as a ``/HPXML/
   =======================================================  ========  =====  ===========  ========  =========  ========================================
   ``SystemIdentifier``                                     id                            Yes                  Unique identifier
   ``HeatingSeason``                                        element                       No        See [#]_   Heating season        
-  ``CoolingSeason``                                        element                       No                   Cooling season
+  ``CoolingSeason``                                        element                       No        See [#]_   Cooling season
   ``extension/CeilingFanSetpointTempCoolingSeasonOffset``  double    F      >= 0         No        0          Cooling setpoint temperature offset [#]_
   =======================================================  ========  =====  ===========  ========  =========  ========================================
 
-  .. [#] If HeatingSeason or CoolingSeason not provided, defaults to year-round.
+  .. [#] If HeatingSeason not provided, defaults to year-round.
+  .. [#] If CoolingSeason not provided, defaults to year-round.
   .. [#] CeilingFanSetpointTempCoolingSeasonOffset should only be used if there are sufficient ceiling fans present to warrant a reduced cooling setpoint.
 
 If a heating and/or cooling season is defined, additional information is entered in ``HVACControl/HeatingSeason`` and/or ``HVACControl/CoolingSeason``.
@@ -1357,9 +1358,12 @@ To define simple thermostat setpoints, additional information is entered in ``HV
   =============================  ========  =======  ===========  ========  =========  ============================
   Element                        Type      Units    Constraints  Required  Default    Notes
   =============================  ========  =======  ===========  ========  =========  ============================
-  ``SetpointTempHeatingSeason``  double    F                     Yes                  Heating setpoint temperature
-  ``SetpointTempCoolingSeason``  double    F                     Yes                  Cooling setpoint temperature
+  ``SetpointTempHeatingSeason``  double    F                     See [#]_             Heating setpoint temperature
+  ``SetpointTempCoolingSeason``  double    F                     See [#]_             Cooling setpoint temperature
   =============================  ========  =======  ===========  ========  =========  ============================
+
+  .. [#] SetpointTempHeatingSeason only required if there is heating equipment (i.e., sum of all ``FractionHeatLoadServed`` is greater than 0).
+  .. [#] SetpointTempCoolingSeason only required if there is cooling equipment (i.e., sum of all ``FractionCoolLoadServed`` is greater than 0).
 
 If there is a heating temperature setback, additional information is entered in ``HVACControl``.
 
@@ -1367,9 +1371,11 @@ If there is a heating temperature setback, additional information is entered in 
   Element                                Type      Units     Constraints  Required  Default    Notes
   =====================================  ========  ========  ===========  ========  =========  =========================================
   ``SetbackTempHeatingSeason``           double    F                      Yes                  Heating setback temperature
-  ``TotalSetbackHoursperWeekHeating``    integer   hrs/week  > 0          Yes                  Hours/week of heating temperature setback
+  ``TotalSetbackHoursperWeekHeating``    integer   hrs/week  > 0          Yes                  Hours/week of heating temperature setback [#]_
   ``extension/SetbackStartHourHeating``  integer             0 - 23       No        23 (11pm)  Daily setback start hour
   =====================================  ========  ========  ===========  ========  =========  =========================================
+
+  .. [#] TotalSetbackHoursperWeekHeating is converted to hrs/day and modeled as a temperature setback every day starting at SetbackStartHourHeating.
 
 If there is a cooling temperature setup, additional information is entered in ``HVACControl``.
 
@@ -1377,9 +1383,11 @@ If there is a cooling temperature setup, additional information is entered in ``
   Element                                Type      Units     Constraints  Required  Default    Notes
   =====================================  ========  ========  ===========  ========  =========  =========================================
   ``SetupTempCoolingSeason``             double    F                      Yes                  Cooling setup temperature
-  ``TotalSetupHoursperWeekCooling``      integer   hrs/week  > 0          Yes                  Hours/week of cooling temperature setup
+  ``TotalSetupHoursperWeekCooling``      integer   hrs/week  > 0          Yes                  Hours/week of cooling temperature setup [#]_
   ``extension/SetupStartHourCooling``    integer             0 - 23       No        9 (9am)    Daily setup start hour
   =====================================  ========  ========  ===========  ========  =========  =========================================
+
+  .. [#] TotalSetupHoursperWeekCooling is converted to hrs/day and modeled as a temperature setup every day starting at SetupStartHourCooling.
 
 Detailed Inputs
 ~~~~~~~~~~~~~~~
@@ -1389,11 +1397,16 @@ To define detailed thermostat setpoints, additional information is entered in ``
   ===============================================  =====  =======  ===========  ========  =========  ============================================
   Element                                          Type   Units    Constraints  Required  Default    Notes
   ===============================================  =====  =======  ===========  ========  =========  ============================================
-  ``extension/WeekdaySetpointTempsHeatingSeason``  array  F                     Yes                  24 comma-separated weekday heating setpoints
-  ``extension/WeekendSetpointTempsHeatingSeason``  array  F                     Yes                  24 comma-separated weekend heating setpoints
-  ``extension/WeekdaySetpointTempsCoolingSeason``  array  F                     Yes                  24 comma-separated weekday cooling setpoints
-  ``extension/WeekendSetpointTempsCoolingSeason``  array  F                     Yes                  24 comma-separated weekend cooling setpoints
+  ``extension/WeekdaySetpointTempsHeatingSeason``  array  F                     See [#]_             24 comma-separated weekday heating setpoints
+  ``extension/WeekendSetpointTempsHeatingSeason``  array  F                     See [#]_             24 comma-separated weekend heating setpoints
+  ``extension/WeekdaySetpointTempsCoolingSeason``  array  F                     See [#]_             24 comma-separated weekday cooling setpoints
+  ``extension/WeekendSetpointTempsCoolingSeason``  array  F                     See [#]_             24 comma-separated weekend cooling setpoints
   ===============================================  =====  =======  ===========  ========  =========  ============================================
+
+  .. [#] WeekdaySetpointTempsHeatingSeason only required if there is heating equipment (i.e., sum of all ``FractionHeatLoadServed`` is greater than 0).
+  .. [#] WeekendSetpointTempsHeatingSeason only required if there is heating equipment (i.e., sum of all ``FractionHeatLoadServed`` is greater than 0).
+  .. [#] WeekdaySetpointTempsCoolingSeason only required if there is cooling equipment (i.e., sum of all ``FractionCoolLoadServed`` is greater than 0).
+  .. [#] WeekendSetpointTempsCoolingSeason only required if there is cooling equipment (i.e., sum of all ``FractionCoolLoadServed`` is greater than 0).
 
 HPXML HVAC Distribution
 ***********************
@@ -2428,7 +2441,7 @@ If not entered, the simulation will not include a ceiling fan.
   ``Quantity``                               integer           > 0          No        See [#]_  Number of similar ceiling fans
   ``extension/WeekdayScheduleFractions``     array                          No        See [#]_  24 comma-separated weekday fractions
   ``extension/WeekendScheduleFractions``     array                          No                  24 comma-separated weekend fractions
-  ``extension/MonthlyScheduleMultipliers``   array                          No                  12 comma-separated monthly multipliers
+  ``extension/MonthlyScheduleMultipliers``   array                          No        See [#]_  12 comma-separated monthly multipliers
   =========================================  =======  =======  ===========  ========  ========  ==============================
 
   .. [#] If Efficiency not provided, defaults to 3000 / 42.6 based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.

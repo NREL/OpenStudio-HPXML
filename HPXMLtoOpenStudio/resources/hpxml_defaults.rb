@@ -1111,21 +1111,32 @@ class HPXMLDefaults
 
   def self.apply_hvac_control(hpxml)
     hpxml.hvac_controls.each do |hvac_control|
-      if not hvac_control.heating_setback_temp.nil?
-        if hvac_control.heating_setback_start_hour.nil?
-          hvac_control.heating_setback_start_hour = 23 # 11 pm
-          hvac_control.heating_setback_start_hour_isdefaulted = true
-        end
+      if hvac_control.heating_setpoint_temp.nil? && hvac_control.weekday_heating_setpoints.nil?
+        # No heating setpoints; set a default heating setpoint for, e.g., natural ventilation
+        htg_sp, htg_setback_sp, htg_setback_hrs_per_week, htg_setback_start_hr = HVAC.get_default_heating_setpoint(HPXML::HVACControlTypeManual)
+        hvac_control.heating_setpoint_temp = htg_sp
+        hvac_control.heating_setpoint_temp_isdefaulted = true
       end
 
-      if not hvac_control.cooling_setup_temp.nil?
-        if hvac_control.cooling_setup_start_hour.nil?
-          hvac_control.cooling_setup_start_hour = 9 # 9 am
-          hvac_control.cooling_setup_start_hour_isdefaulted = true
-        end
+      if hvac_control.cooling_setpoint_temp.nil? && hvac_control.weekday_cooling_setpoints.nil?
+        # No cooling setpoints; set a default cooling setpoint for, e.g., natural ventilation
+        clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr = HVAC.get_default_cooling_setpoint(HPXML::HVACControlTypeManual)
+        hvac_control.cooling_setpoint_temp = clg_sp
+        hvac_control.cooling_setpoint_temp_isdefaulted = true
       end
 
-      if hvac_control.seasons_heating_begin_month.nil? || hvac_control.seasons_heating_begin_day.nil? || hvac_control.seasons_heating_end_month.nil? || hvac_control.seasons_heating_end_day.nil?
+      if hvac_control.heating_setback_start_hour.nil? && (not hvac_control.heating_setback_temp.nil?)
+        hvac_control.heating_setback_start_hour = 23 # 11 pm
+        hvac_control.heating_setback_start_hour_isdefaulted = true
+      end
+
+      if hvac_control.cooling_setup_start_hour.nil? && (not hvac_control.cooling_setup_temp.nil?)
+        hvac_control.cooling_setup_start_hour = 9 # 9 am
+        hvac_control.cooling_setup_start_hour_isdefaulted = true
+      end
+
+      if hvac_control.seasons_heating_begin_month.nil? || hvac_control.seasons_heating_begin_day.nil? ||
+         hvac_control.seasons_heating_end_month.nil? || hvac_control.seasons_heating_end_day.nil?
         hvac_control.seasons_heating_begin_month = 1
         hvac_control.seasons_heating_begin_day = 1
         hvac_control.seasons_heating_end_month = 12
@@ -1136,7 +1147,8 @@ class HPXMLDefaults
         hvac_control.seasons_heating_end_day_isdefaulted = true
       end
 
-      next unless hvac_control.seasons_cooling_begin_month.nil? || hvac_control.seasons_cooling_begin_day.nil? || hvac_control.seasons_cooling_end_month.nil? || hvac_control.seasons_cooling_end_day.nil?
+      next unless hvac_control.seasons_cooling_begin_month.nil? || hvac_control.seasons_cooling_begin_day.nil? ||
+                  hvac_control.seasons_cooling_end_month.nil? || hvac_control.seasons_cooling_end_day.nil?
 
       hvac_control.seasons_cooling_begin_month = 1
       hvac_control.seasons_cooling_begin_day = 1

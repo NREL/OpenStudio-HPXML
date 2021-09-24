@@ -3701,17 +3701,19 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
 end
 
 def set_hpxml_hvac_control(hpxml_file, hpxml)
-  if ['ASHRAE_Standard_140/L100AC.xml',
-      'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
+  hpxml.hvac_controls.clear
+  if hpxml_file.include? 'ASHRAE_Standard_140'
     hpxml.hvac_controls.add(id: 'HVACControl',
                             heating_setpoint_temp: 68,
                             cooling_setpoint_temp: 78)
-  elsif ['base.xml'].include? hpxml_file
+  else
     hpxml.hvac_controls.add(id: 'HVACControl',
                             control_type: HPXML::HVACControlTypeManual,
                             heating_setpoint_temp: 68,
                             cooling_setpoint_temp: 78)
-  elsif ['base-hvac-seasons.xml'].include? hpxml_file
+  end
+
+  if ['base-hvac-seasons.xml'].include? hpxml_file
     hpxml.hvac_controls[0].seasons_heating_begin_month = 11
     hpxml.hvac_controls[0].seasons_heating_begin_day = 1
     hpxml.hvac_controls[0].seasons_heating_end_month = 6
@@ -3752,6 +3754,28 @@ def set_hpxml_hvac_control(hpxml_file, hpxml)
     hpxml.hvac_controls[0].seasons_cooling_begin_day = 1
     hpxml.hvac_controls[0].seasons_cooling_end_month = 9
     hpxml.hvac_controls[0].seasons_cooling_end_day = 30
+  end
+
+  if hpxml.hvac_controls.size == 1
+    if hpxml.total_fraction_cool_load_served == 0 && !hpxml.header.apply_ashrae140_assumptions
+      hpxml.hvac_controls[0].cooling_setpoint_temp = nil
+      hpxml.hvac_controls[0].seasons_cooling_begin_month = nil
+      hpxml.hvac_controls[0].seasons_cooling_begin_day = nil
+      hpxml.hvac_controls[0].seasons_cooling_end_month = nil
+      hpxml.hvac_controls[0].seasons_cooling_end_day = nil
+      hpxml.hvac_controls[0].weekday_cooling_setpoints = nil
+      hpxml.hvac_controls[0].weekend_cooling_setpoints = nil
+      hpxml.hvac_controls[0].ceiling_fan_cooling_setpoint_temp_offset = nil
+    end
+    if hpxml.total_fraction_heat_load_served == 0 && !hpxml.header.apply_ashrae140_assumptions
+      hpxml.hvac_controls[0].heating_setpoint_temp = nil
+      hpxml.hvac_controls[0].seasons_heating_begin_month = nil
+      hpxml.hvac_controls[0].seasons_heating_begin_day = nil
+      hpxml.hvac_controls[0].seasons_heating_end_month = nil
+      hpxml.hvac_controls[0].seasons_heating_end_day = nil
+      hpxml.hvac_controls[0].weekday_heating_setpoints = nil
+      hpxml.hvac_controls[0].weekend_heating_setpoints = nil
+    end
   end
 end
 
