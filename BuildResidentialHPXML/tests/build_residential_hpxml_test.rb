@@ -19,11 +19,11 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     ]
 
     test_base = true
-    test_extra = true
+    test_extra = false
 
     osws = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/base*.osw"].sort.each do |osw|
+      Dir["#{test_dir}/base-bldgtype-single-family-attached.osw"].sort.each do |osw|
         osws << File.absolute_path(osw) if test_base
       end
       Dir["#{test_dir}/extra*.osw"].sort.each do |osw|
