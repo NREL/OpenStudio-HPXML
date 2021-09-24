@@ -1111,17 +1111,15 @@ class HPXMLDefaults
 
   def self.apply_hvac_control(hpxml)
     hpxml.hvac_controls.each do |hvac_control|
-      if hvac_control.heating_setpoint_temp.nil?
-        # This can only occur if there's no heating equipment; we will set
-        # a default heating setpoint for, e.g., natural ventilation.
+      if hvac_control.heating_setpoint_temp.nil? && hvac_control.weekday_heating_setpoints.nil?
+        # No heating setpoints; set a default heating setpoint for, e.g., natural ventilation
         htg_sp, htg_setback_sp, htg_setback_hrs_per_week, htg_setback_start_hr = HVAC.get_default_heating_setpoint(HPXML::HVACControlTypeManual)
         hvac_control.heating_setpoint_temp = htg_sp
         hvac_control.heating_setpoint_temp_isdefaulted = true
       end
 
-      if hvac_control.cooling_setpoint_temp.nil?
-        # This can only occur if there's no cooling equipment; we will set
-        # a default cooling setpoint for, e.g., natural ventilation.
+      if hvac_control.cooling_setpoint_temp.nil? && hvac_control.weekday_cooling_setpoints.nil?
+        # No cooling setpoints; set a default cooling setpoint for, e.g., natural ventilation
         clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr = HVAC.get_default_cooling_setpoint(HPXML::HVACControlTypeManual)
         hvac_control.cooling_setpoint_temp = clg_sp
         hvac_control.cooling_setpoint_temp_isdefaulted = true
