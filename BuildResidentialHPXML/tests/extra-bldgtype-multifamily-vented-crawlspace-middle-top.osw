@@ -114,7 +114,7 @@
         "geometry_unit_level": "Top",
         "geometry_unit_num_bathrooms": "2",
         "geometry_unit_num_bedrooms": 3,
-        "geometry_unit_num_floors_above_grade": 3,
+        "geometry_unit_num_floors_above_grade": 1,
         "geometry_unit_num_occupants": "3",
         "geometry_unit_orientation": 180.0,
         "geometry_unit_right_wall_is_adiabatic": true,
