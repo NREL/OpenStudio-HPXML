@@ -2137,7 +2137,7 @@ class Geometry
     x = Math.sqrt(footprint / aspect_ratio)
     y = footprint / x
 
-    story_hash = { 'Bottom' => 0, 'Middle' => 1, 'Top' => 2 }
+    story_hash = { 'Bottom' => 0, 'Middle' => 1, 'Top' => 2 } # FIXME: Top's value
     z = wall_height * story_hash[level]
 
     foundation_corr_polygon = nil
@@ -2218,7 +2218,7 @@ class Geometry
     adb_level = level_hash[level]
 
     # Check levels
-    if level == 'Bottom'
+    if level == 'Bottom' # FIXME: what should this be?
       adb_level = []
     end
     if (has_rear_units == true)
