@@ -81,6 +81,7 @@
                 <Vented>false</Vented>
               </Attic>
             </AtticType>
+            <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToWall idref='Wall3'/>
             <AttachedToWall idref='Wall4'/>
@@ -301,7 +302,7 @@
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>900.0</Area>
             <Thickness>4.0</Thickness>
-            <ExposedPerimeter>86.0</ExposedPerimeter>
+            <ExposedPerimeter>85.7</ExposedPerimeter>
             <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
             <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
             <PerimeterInsulation>
@@ -325,7 +326,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>
-            <Area>35.4</Area>
+            <Area>35.0</Area>
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -339,7 +340,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>35.4</Area>
+            <Area>35.0</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -371,6 +372,7 @@
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall1'/>
             <Area>40.0</Area>
+            <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
           </Door>
         </Doors>

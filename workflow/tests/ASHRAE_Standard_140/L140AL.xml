@@ -73,7 +73,7 @@
           <Roof>
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
-            <Area>811.1</Area>
+            <Area>811.0</Area>
             <Azimuth>0</Azimuth>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.6</SolarAbsorptance>
@@ -88,7 +88,7 @@
           <Roof>
             <SystemIdentifier id='Roof2'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
-            <Area>811.1</Area>
+            <Area>811.0</Area>
             <Azimuth>180</Azimuth>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.6</SolarAbsorptance>
@@ -194,7 +194,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>60.75</Area>
+            <Area>61.0</Area>
             <Azimuth>90</Azimuth>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
@@ -212,7 +212,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>60.75</Area>
+            <Area>61.0</Area>
             <Azimuth>270</Azimuth>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
@@ -252,14 +252,14 @@
         <Doors>
           <Door>
             <SystemIdentifier id='Door1'/>
-            <AttachedToWall idref='Wall1'/>
+            <AttachedToWall idref='Wall3'/>
             <Area>20.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>3.04</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door2'/>
-            <AttachedToWall idref='Wall1'/>
+            <AttachedToWall idref='Wall3'/>
             <Area>20.0</Area>
             <Azimuth>0</Azimuth>
             <RValue>3.04</RValue>

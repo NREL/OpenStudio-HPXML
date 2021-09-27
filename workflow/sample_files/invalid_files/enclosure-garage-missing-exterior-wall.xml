@@ -81,6 +81,7 @@
                 <Vented>false</Vented>
               </Attic>
             </AtticType>
+            <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToWall idref='Wall4'/>
             <AttachedToFrameFloor idref='FrameFloor1'/>
@@ -104,7 +105,7 @@
           <Roof>
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>2180.3</Area>
+            <Area>2181.0</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -361,6 +362,7 @@
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall1'/>
             <Area>40.0</Area>
+            <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>

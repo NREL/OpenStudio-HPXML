@@ -81,6 +81,7 @@
                 <Vented>false</Vented>
               </Attic>
             </AtticType>
+            <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToRoof idref='Roof2'/>
             <AttachedToRoof idref='Roof3'/>
@@ -295,7 +296,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>290.0</Area>
+            <Area>226.0</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -443,6 +444,7 @@
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall1'/>
             <Area>40.0</Area>
+            <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
           </Door>
         </Doors>

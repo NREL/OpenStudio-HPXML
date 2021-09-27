@@ -118,12 +118,15 @@
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>900.0</Area>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+            </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
             <extension>
-              <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
+              <OtherSpaceAboveOrBelow>above</OtherSpaceAboveOrBelow>
             </extension>
           </FrameFloor>
           <FrameFloor>
@@ -131,15 +134,12 @@
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>900.0</Area>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-            </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='FrameFloor2Insulation'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
             <extension>
-              <OtherSpaceAboveOrBelow>above</OtherSpaceAboveOrBelow>
+              <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
             </extension>
           </FrameFloor>
         </FrameFloors>
@@ -312,7 +312,7 @@
             <VentilationFan>
               <SystemIdentifier id='VentilationFan2'/>
               <FanType>exhaust only</FanType>
-              <TestedFlowRate>72.0</TestedFlowRate>
+              <RatedFlowRate>72.0</RatedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <FanPower>26.0</FanPower>

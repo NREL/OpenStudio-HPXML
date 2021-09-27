@@ -81,6 +81,7 @@
                 <Vented>false</Vented>
               </Attic>
             </AtticType>
+            <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToRoof idref='Roof1_2'/>
             <AttachedToRoof idref='Roof1_3'/>
@@ -157,7 +158,7 @@
           <Roof>
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.7</Area>
+            <Area>167.77777777777777</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -171,7 +172,7 @@
           <Roof>
             <SystemIdentifier id='Roof1_2'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.7</Area>
+            <Area>167.77777777777777</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -185,7 +186,7 @@
           <Roof>
             <SystemIdentifier id='Roof1_3'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.7</Area>
+            <Area>167.77777777777777</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -199,7 +200,7 @@
           <Roof>
             <SystemIdentifier id='Roof1_4'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.7</Area>
+            <Area>167.77777777777777</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -213,7 +214,7 @@
           <Roof>
             <SystemIdentifier id='Roof1_5'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.7</Area>
+            <Area>167.77777777777777</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -227,7 +228,7 @@
           <Roof>
             <SystemIdentifier id='Roof1_6'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.7</Area>
+            <Area>167.77777777777777</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -241,7 +242,7 @@
           <Roof>
             <SystemIdentifier id='Roof1_7'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.7</Area>
+            <Area>167.77777777777777</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -255,7 +256,7 @@
           <Roof>
             <SystemIdentifier id='Roof1_8'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.7</Area>
+            <Area>167.77777777777777</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -269,7 +270,7 @@
           <Roof>
             <SystemIdentifier id='Roof1_9'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.7</Area>
+            <Area>167.77777777777777</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -455,7 +456,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>32.22222222222222</Area>
+            <Area>25.11111111111111</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -624,7 +625,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>32.22222222222222</Area>
+            <Area>25.11111111111111</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -641,7 +642,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>32.22222222222222</Area>
+            <Area>25.11111111111111</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -658,7 +659,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>32.22222222222222</Area>
+            <Area>25.11111111111111</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -675,7 +676,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>32.22222222222222</Area>
+            <Area>25.11111111111111</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -692,7 +693,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>32.22222222222222</Area>
+            <Area>25.11111111111111</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -709,7 +710,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>32.22222222222222</Area>
+            <Area>25.11111111111111</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -726,7 +727,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>32.22222222222222</Area>
+            <Area>25.11111111111111</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -743,7 +744,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>32.22222222222222</Area>
+            <Area>25.11111111111111</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -2004,8 +2005,8 @@
             <SystemIdentifier id='Skylight2'/>
             <Area>1.6666666666666667</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.35</UFactor>
-            <SHGC>0.47</SHGC>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Skylight2InteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
@@ -2121,8 +2122,8 @@
             <SystemIdentifier id='Skylight2_2'/>
             <Area>1.6666666666666667</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.37</UFactor>
-            <SHGC>0.47</SHGC>
+            <UFactor>0.35000000000000003</UFactor>
+            <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Skylight2_2InteriorShading'/>
               <SummerShadingCoefficient>0.96</SummerShadingCoefficient>
@@ -2134,8 +2135,8 @@
             <SystemIdentifier id='Skylight2_3'/>
             <Area>1.6666666666666667</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.38</UFactor>
-            <SHGC>0.47</SHGC>
+            <UFactor>0.36</UFactor>
+            <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Skylight2_3InteriorShading'/>
               <SummerShadingCoefficient>0.94</SummerShadingCoefficient>
@@ -2147,8 +2148,8 @@
             <SystemIdentifier id='Skylight2_4'/>
             <Area>1.6666666666666667</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.38999999999999996</UFactor>
-            <SHGC>0.47</SHGC>
+            <UFactor>0.37</UFactor>
+            <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Skylight2_4InteriorShading'/>
               <SummerShadingCoefficient>0.92</SummerShadingCoefficient>
@@ -2160,8 +2161,8 @@
             <SystemIdentifier id='Skylight2_5'/>
             <Area>1.6666666666666667</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.39999999999999997</UFactor>
-            <SHGC>0.47</SHGC>
+            <UFactor>0.38</UFactor>
+            <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Skylight2_5InteriorShading'/>
               <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
@@ -2173,8 +2174,8 @@
             <SystemIdentifier id='Skylight2_6'/>
             <Area>1.6666666666666667</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.41</UFactor>
-            <SHGC>0.47</SHGC>
+            <UFactor>0.39</UFactor>
+            <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Skylight2_6InteriorShading'/>
               <SummerShadingCoefficient>0.88</SummerShadingCoefficient>
@@ -2186,8 +2187,8 @@
             <SystemIdentifier id='Skylight2_7'/>
             <Area>1.6666666666666667</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.42</UFactor>
-            <SHGC>0.47</SHGC>
+            <UFactor>0.4</UFactor>
+            <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Skylight2_7InteriorShading'/>
               <SummerShadingCoefficient>0.86</SummerShadingCoefficient>
@@ -2199,8 +2200,8 @@
             <SystemIdentifier id='Skylight2_8'/>
             <Area>1.6666666666666667</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.43</UFactor>
-            <SHGC>0.47</SHGC>
+            <UFactor>0.41000000000000003</UFactor>
+            <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Skylight2_8InteriorShading'/>
               <SummerShadingCoefficient>0.84</SummerShadingCoefficient>
@@ -2212,8 +2213,8 @@
             <SystemIdentifier id='Skylight2_9'/>
             <Area>1.6666666666666667</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.43999999999999995</UFactor>
-            <SHGC>0.47</SHGC>
+            <UFactor>0.42000000000000004</UFactor>
+            <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Skylight2_9InteriorShading'/>
               <SummerShadingCoefficient>0.8200000000000001</SummerShadingCoefficient>
@@ -2225,8 +2226,8 @@
             <SystemIdentifier id='Skylight2_9_tiny'/>
             <Area>0.05</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.43999999999999995</UFactor>
-            <SHGC>0.47</SHGC>
+            <UFactor>0.42000000000000004</UFactor>
+            <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Skylight2_9_tinyInteriorShading'/>
               <SummerShadingCoefficient>0.8200000000000001</SummerShadingCoefficient>
@@ -2240,60 +2241,70 @@
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall1'/>
             <Area>4.444444444444445</Area>
+            <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door1_2'/>
             <AttachedToWall idref='Wall1_2'/>
             <Area>4.444444444444445</Area>
+            <Azimuth>180</Azimuth>
             <RValue>4.42</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door1_3'/>
             <AttachedToWall idref='Wall1_3'/>
             <Area>4.444444444444445</Area>
+            <Azimuth>180</Azimuth>
             <RValue>4.430000000000001</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door1_4'/>
             <AttachedToWall idref='Wall1_4'/>
             <Area>4.444444444444445</Area>
+            <Azimuth>180</Azimuth>
             <RValue>4.44</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door1_5'/>
             <AttachedToWall idref='Wall1_5'/>
             <Area>4.444444444444445</Area>
+            <Azimuth>180</Azimuth>
             <RValue>4.45</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door1_6'/>
             <AttachedToWall idref='Wall1_6'/>
             <Area>4.444444444444445</Area>
+            <Azimuth>180</Azimuth>
             <RValue>4.46</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door1_7'/>
             <AttachedToWall idref='Wall1_7'/>
             <Area>4.444444444444445</Area>
+            <Azimuth>180</Azimuth>
             <RValue>4.470000000000001</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door1_8'/>
             <AttachedToWall idref='Wall1_8'/>
             <Area>4.444444444444445</Area>
+            <Azimuth>180</Azimuth>
             <RValue>4.48</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door1_9'/>
             <AttachedToWall idref='Wall1_9'/>
             <Area>4.444444444444445</Area>
+            <Azimuth>180</Azimuth>
             <RValue>4.49</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door1_9_tiny'/>
             <AttachedToWall idref='Wall1_9'/>
             <Area>0.05</Area>
+            <Azimuth>180</Azimuth>
             <RValue>4.49</RValue>
           </Door>
         </Doors>

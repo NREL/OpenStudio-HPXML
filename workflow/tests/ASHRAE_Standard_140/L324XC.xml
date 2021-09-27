@@ -73,7 +73,7 @@
           <Roof>
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
-            <Area>811.1</Area>
+            <Area>811.0</Area>
             <Azimuth>0</Azimuth>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.6</SolarAbsorptance>
@@ -88,7 +88,7 @@
           <Roof>
             <SystemIdentifier id='Roof2'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
-            <Area>811.1</Area>
+            <Area>811.0</Area>
             <Azimuth>180</Azimuth>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.6</SolarAbsorptance>
@@ -106,7 +106,7 @@
             <SystemIdentifier id='RimJoist1'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>42.75</Area>
+            <Area>43.0</Area>
             <Azimuth>0</Azimuth>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
@@ -120,7 +120,7 @@
             <SystemIdentifier id='RimJoist2'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>20.25</Area>
+            <Area>20.0</Area>
             <Azimuth>90</Azimuth>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
@@ -134,7 +134,7 @@
             <SystemIdentifier id='RimJoist3'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>42.75</Area>
+            <Area>43.0</Area>
             <Azimuth>180</Azimuth>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
@@ -148,7 +148,7 @@
             <SystemIdentifier id='RimJoist4'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>20.25</Area>
+            <Area>20.0</Area>
             <Azimuth>270</Azimuth>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
@@ -252,7 +252,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>60.75</Area>
+            <Area>61.0</Area>
             <Azimuth>90</Azimuth>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
@@ -270,7 +270,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>60.75</Area>
+            <Area>61.0</Area>
             <Azimuth>270</Azimuth>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
@@ -287,7 +287,7 @@
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>7.25</Height>
-            <Area>413.25</Area>
+            <Area>413.0</Area>
             <Azimuth>0</Azimuth>
             <Thickness>6.0</Thickness>
             <DepthBelowGrade>6.583</DepthBelowGrade>
@@ -320,7 +320,7 @@
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>7.25</Height>
-            <Area>195.75</Area>
+            <Area>196.0</Area>
             <Azimuth>90</Azimuth>
             <Thickness>6.0</Thickness>
             <DepthBelowGrade>6.583</DepthBelowGrade>
@@ -353,7 +353,7 @@
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>7.25</Height>
-            <Area>413.25</Area>
+            <Area>413.0</Area>
             <Azimuth>180</Azimuth>
             <Thickness>6.0</Thickness>
             <DepthBelowGrade>6.583</DepthBelowGrade>
@@ -386,7 +386,7 @@
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>7.25</Height>
-            <Area>195.75</Area>
+            <Area>196.0</Area>
             <Azimuth>270</Azimuth>
             <Thickness>6.0</Thickness>
             <DepthBelowGrade>6.583</DepthBelowGrade>
@@ -519,14 +519,14 @@
         <Doors>
           <Door>
             <SystemIdentifier id='Door1'/>
-            <AttachedToWall idref='Wall1'/>
+            <AttachedToWall idref='Wall3'/>
             <Area>20.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>3.04</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door2'/>
-            <AttachedToWall idref='Wall1'/>
+            <AttachedToWall idref='Wall3'/>
             <Area>20.0</Area>
             <Azimuth>0</Azimuth>
             <RValue>3.04</RValue>

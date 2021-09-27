@@ -174,8 +174,8 @@ def create_hpxmls
     'base-atticroof-conditioned.xml' => 'base.xml',
     'base-atticroof-flat.xml' => 'base.xml',
     'base-atticroof-radiant-barrier.xml' => 'base-location-dallas-tx.xml',
-    'base-atticroof-vented.xml' => 'base.xml',
     'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
+    'base-atticroof-vented.xml' => 'base.xml',
     'base-bldgtype-multifamily.xml' => 'base.xml',
     'base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-adjacent-to-other-heated-space.xml' => 'base-bldgtype-multifamily.xml',
@@ -201,8 +201,8 @@ def create_hpxmls
     'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-laundry-room.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-mechvent.xml' => 'base-bldgtype-multifamily.xml',
-    'base-bldgtype-multifamily-shared-mechvent-preconditioning.xml' => 'base-bldgtype-multifamily-shared-mechvent.xml',
     'base-bldgtype-multifamily-shared-mechvent-multiple.xml' => 'base-bldgtype-multifamily.xml',
+    'base-bldgtype-multifamily-shared-mechvent-preconditioning.xml' => 'base-bldgtype-multifamily-shared-mechvent.xml',
     'base-bldgtype-multifamily-shared-pv.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-water-heater.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-shared-water-heater-recirc.xml' => 'base-bldgtype-multifamily-shared-water-heater.xml',
@@ -210,17 +210,21 @@ def create_hpxmls
     'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
     'base-dhw-combi-tankless-outside.xml' => 'base-dhw-combi-tankless.xml',
     'base-dhw-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'base-dhw-desuperheater-2-speed.xml' => 'base-hvac-central-ac-only-2-speed.xml',
+    'base-dhw-desuperheater-gshp.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-dhw-desuperheater-hpwh.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-desuperheater-tankless.xml' => 'base-hvac-central-ac-only-1-speed.xml',
-    'base-dhw-desuperheater-2-speed.xml' => 'base-hvac-central-ac-only-2-speed.xml',
     'base-dhw-desuperheater-var-speed.xml' => 'base-hvac-central-ac-only-var-speed.xml',
-    'base-dhw-desuperheater-gshp.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-dhw-dwhr.xml' => 'base.xml',
     'base-dhw-indirect.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-dhw-indirect-dse.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-outside.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-standbyloss.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-with-solar-fraction.xml' => 'base-dhw-indirect.xml',
+    'base-dhw-jacket-electric.xml' => 'base.xml',
+    'base-dhw-jacket-gas.xml' => 'base-dhw-tank-gas.xml',
+    'base-dhw-jacket-hpwh.xml' => 'base-dhw-tank-heat-pump.xml',
+    'base-dhw-jacket-indirect.xml' => 'base-dhw-indirect.xml',
     'base-dhw-low-flow-fixtures.xml' => 'base.xml',
     'base-dhw-multiple.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-dhw-none.xml' => 'base.xml',
@@ -249,17 +253,13 @@ def create_hpxmls
     'base-dhw-tank-oil.xml' => 'base.xml',
     'base-dhw-tank-wood.xml' => 'base.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
-    'base-dhw-tankless-electric-uef.xml' => 'base.xml',
     'base-dhw-tankless-electric-outside.xml' => 'base-dhw-tankless-electric.xml',
+    'base-dhw-tankless-electric-uef.xml' => 'base.xml',
     'base-dhw-tankless-gas.xml' => 'base.xml',
     'base-dhw-tankless-gas-uef.xml' => 'base.xml',
     'base-dhw-tankless-gas-with-solar.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-gas-with-solar-fraction.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-propane.xml' => 'base.xml',
-    'base-dhw-jacket-electric.xml' => 'base.xml',
-    'base-dhw-jacket-gas.xml' => 'base-dhw-tank-gas.xml',
-    'base-dhw-jacket-indirect.xml' => 'base-dhw-indirect.xml',
-    'base-dhw-jacket-hpwh.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-enclosure-2stories.xml' => 'base.xml',
     'base-enclosure-2stories-garage.xml' => 'base-enclosure-2stories.xml',
     'base-enclosure-beds-1.xml' => 'base.xml',
@@ -282,23 +282,23 @@ def create_hpxmls
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml', # Surfaces should collapse via HPXML.collapse_enclosure_surfaces()
     'base-enclosure-split-surfaces2.xml' => 'base-enclosure-skylights.xml', # Surfaces should NOT collapse via HPXML.collapse_enclosure_surfaces()
     'base-enclosure-walltypes.xml' => 'base.xml',
+    'base-enclosure-windows-none.xml' => 'base.xml',
     'base-enclosure-windows-physical-properties.xml' => 'base.xml',
     'base-enclosure-windows-shading.xml' => 'base.xml',
-    'base-enclosure-windows-none.xml' => 'base.xml',
-    'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-ambient.xml' => 'base.xml',
+    'base-foundation-basement-garage.xml' => 'base.xml',
+    'base-foundation-complex.xml' => 'base.xml',
     'base-foundation-conditioned-basement-slab-insulation.xml' => 'base.xml',
     'base-foundation-conditioned-basement-wall-interior-insulation.xml' => 'base.xml',
+    'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-slab.xml' => 'base.xml',
     'base-foundation-unconditioned-basement.xml' => 'base.xml',
-    'base-foundation-unconditioned-basement-assembly-r.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-unconditioned-basement-above-grade.xml' => 'base-foundation-unconditioned-basement.xml',
+    'base-foundation-unconditioned-basement-assembly-r.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-unconditioned-basement-wall-insulation.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-unvented-crawlspace.xml' => 'base.xml',
     'base-foundation-vented-crawlspace.xml' => 'base.xml',
     'base-foundation-walkout-basement.xml' => 'base.xml',
-    'base-foundation-complex.xml' => 'base.xml',
-    'base-foundation-basement-garage.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-1-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -382,7 +382,6 @@ def create_hpxmls
     'base-hvac-ground-to-air-heat-pump.xml' => 'base.xml',
     'base-hvac-ground-to-air-heat-pump-cooling-only.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-hvac-ground-to-air-heat-pump-heating-only.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
-    'base-hvac-seasons.xml' => 'base.xml',
     'base-hvac-install-quality-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-install-quality-air-to-air-heat-pump-2-speed.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
     'base-hvac-install-quality-air-to-air-heat-pump-var-speed.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
@@ -407,6 +406,7 @@ def create_hpxmls
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-room-ac-only-ceer.xml' => 'base-hvac-room-ac-only.xml',
+    'base-hvac-seasons.xml' => 'base.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
     'base-hvac-stove-oil-only.xml' => 'base.xml',
     'base-hvac-stove-wood-pellets-only.xml' => 'base.xml',
@@ -710,11 +710,11 @@ end
 
 def set_hpxml_neighbor_buildings(hpxml_file, hpxml)
   if ['base-misc-neighbor-shading.xml'].include? hpxml_file
-    hpxml.neighbor_buildings.add(azimuth: 0,
-                                 distance: 10)
     hpxml.neighbor_buildings.add(azimuth: 180,
                                  distance: 15,
                                  height: 12)
+    hpxml.neighbor_buildings.add(azimuth: 0,
+                                 distance: 10)
   elsif ['invalid_files/invalid-neighbor-shading-azimuth.xml'].include? hpxml_file
     hpxml.neighbor_buildings[0].azimuth = 145
   end
@@ -891,12 +891,12 @@ def set_hpxml_air_infiltration_measurements(hpxml_file, hpxml)
   if ['ASHRAE_Standard_140/L100AC.xml',
       'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
     hpxml.air_infiltration_measurements.clear
-    hpxml.air_infiltration_measurements.add(id: "AirInfiltrationMeasurement#{hpxml.air_infiltration_measurements.size+1}",
+    hpxml.air_infiltration_measurements.add(id: "AirInfiltrationMeasurement#{hpxml.air_infiltration_measurements.size + 1}",
                                             unit_of_measure: HPXML::UnitsACHNatural,
                                             air_leakage: 0.67)
   elsif ['base-enclosure-infil-natural-ach.xml'].include? hpxml_file
     hpxml.air_infiltration_measurements.clear
-    hpxml.air_infiltration_measurements.add(id: "AirInfiltrationMeasurement#{hpxml.air_infiltration_measurements.size+1}",
+    hpxml.air_infiltration_measurements.add(id: "AirInfiltrationMeasurement#{hpxml.air_infiltration_measurements.size + 1}",
                                             unit_of_measure: HPXML::UnitsACHNatural,
                                             air_leakage: 0.2)
   elsif ['ASHRAE_Standard_140/L322XC.xml'].include? hpxml_file
@@ -907,13 +907,13 @@ def set_hpxml_air_infiltration_measurements(hpxml_file, hpxml)
          'ASHRAE_Standard_140/L200AL.xml'].include? hpxml_file
     hpxml.air_infiltration_measurements[0].air_leakage = 1.5
   elsif ['base.xml'].include? hpxml_file
-    hpxml.air_infiltration_measurements.add(id: "AirInfiltrationMeasurement#{hpxml.air_infiltration_measurements.size+1}",
+    hpxml.air_infiltration_measurements.add(id: "AirInfiltrationMeasurement#{hpxml.air_infiltration_measurements.size + 1}",
                                             house_pressure: 50,
                                             unit_of_measure: HPXML::UnitsACH,
                                             air_leakage: 3.0)
   elsif ['base-enclosure-infil-cfm50.xml'].include? hpxml_file
     hpxml.air_infiltration_measurements.clear
-    hpxml.air_infiltration_measurements.add(id: "AirInfiltrationMeasurement#{hpxml.air_infiltration_measurements.size+1}",
+    hpxml.air_infiltration_measurements.add(id: "AirInfiltrationMeasurement#{hpxml.air_infiltration_measurements.size + 1}",
                                             house_pressure: 50,
                                             unit_of_measure: HPXML::UnitsCFM,
                                             air_leakage: 3.0 / 60.0 * infil_volume)
@@ -938,28 +938,29 @@ end
 def set_hpxml_attics(hpxml_file, hpxml)
   if ['ASHRAE_Standard_140/L100AC.xml',
       'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
-    hpxml.attics.add(id: "Attic#{hpxml.attics.size+1}",
+    hpxml.attics.add(id: "Attic#{hpxml.attics.size + 1}",
                      attic_type: HPXML::AtticTypeVented,
                      vented_attic_ach: 2.4)
   elsif ['base.xml'].include? hpxml_file
-    hpxml.attics.add(id: "Attic#{hpxml.attics.size+1}",
+    hpxml.attics.add(id: "Attic#{hpxml.attics.size + 1}",
+                     within_infiltration_volume: false,
                      attic_type: HPXML::AtticTypeUnvented)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.attics.clear
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
     hpxml.attics.clear
-    hpxml.attics.add(id: "Attic#{hpxml.attics.size+1}",
+    hpxml.attics.add(id: "Attic#{hpxml.attics.size + 1}",
                      attic_type: HPXML::AtticTypeCathedral)
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    hpxml.attics.add(id: "Attic#{hpxml.attics.size+1}",
+    hpxml.attics.add(id: "Attic#{hpxml.attics.size + 1}",
                      attic_type: HPXML::AtticTypeConditioned)
   elsif ['base-atticroof-flat.xml'].include? hpxml_file
     hpxml.attics.clear
-    hpxml.attics.add(id: "Attic#{hpxml.attics.size+1}",
+    hpxml.attics.add(id: "Attic#{hpxml.attics.size + 1}",
                      attic_type: HPXML::AtticTypeFlatRoof)
   elsif ['base-atticroof-vented.xml'].include? hpxml_file
     hpxml.attics.clear
-    hpxml.attics.add(id: "Attic#{hpxml.attics.size+1}",
+    hpxml.attics.add(id: "Attic#{hpxml.attics.size + 1}",
                      attic_type: HPXML::AtticTypeVented,
                      vented_attic_sla: 0.003)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
@@ -969,33 +970,35 @@ end
 
 def set_hpxml_foundations(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size+1}",
+    hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size + 1}",
                           foundation_type: HPXML::FoundationTypeBasementConditioned)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.foundations.clear
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
     hpxml.foundations.clear
-    hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size+1}",
+    hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size + 1}",
                           foundation_type: HPXML::FoundationTypeCrawlspaceVented,
                           vented_crawlspace_sla: 0.00667)
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
     hpxml.foundations.clear
-    hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size+1}",
-                          foundation_type: HPXML::FoundationTypeCrawlspaceUnvented)
+    hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size + 1}",
+                          foundation_type: HPXML::FoundationTypeCrawlspaceUnvented,
+                          within_infiltration_volume: false)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.foundations.clear
-    hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size+1}",
+    hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size + 1}",
                           foundation_type: HPXML::FoundationTypeBasementUnconditioned)
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
-    hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size+1}",
-                          foundation_type: HPXML::FoundationTypeCrawlspaceUnvented)
+    hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size + 1}",
+                          foundation_type: HPXML::FoundationTypeCrawlspaceUnvented,
+                          within_infiltration_volume: false)
   elsif ['base-foundation-ambient.xml'].include? hpxml_file
     hpxml.foundations.clear
-    hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size+1}",
+    hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size + 1}",
                           foundation_type: HPXML::FoundationTypeAmbient)
   elsif ['base-foundation-slab.xml'].include? hpxml_file
     hpxml.foundations.clear
-    hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size+1}",
+    hpxml.foundations.add(id: "Foundation#{hpxml.foundations.size + 1}",
                           foundation_type: HPXML::FoundationTypeSlab)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.foundations.clear
@@ -1005,9 +1008,9 @@ end
 def set_hpxml_roofs(hpxml_file, hpxml)
   if ['ASHRAE_Standard_140/L100AC.xml',
       'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
-    hpxml.roofs.add(id: "Roof#{hpxml.roofs.size+1}",
+    hpxml.roofs.add(id: "Roof#{hpxml.roofs.size + 1}",
                     interior_adjacent_to: HPXML::LocationAtticVented,
-                    area: 811.1,
+                    area: 811.0,
                     azimuth: 0,
                     roof_type: HPXML::RoofTypeAsphaltShingles,
                     solar_absorptance: 0.6,
@@ -1015,9 +1018,9 @@ def set_hpxml_roofs(hpxml_file, hpxml)
                     pitch: 4,
                     radiant_barrier: false,
                     insulation_assembly_r_value: 1.99)
-    hpxml.roofs.add(id: "Roof#{hpxml.roofs.size+1}",
+    hpxml.roofs.add(id: "Roof#{hpxml.roofs.size + 1}",
                     interior_adjacent_to: HPXML::LocationAtticVented,
-                    area: 811.1,
+                    area: 811.0,
                     azimuth: 180,
                     roof_type: HPXML::RoofTypeAsphaltShingles,
                     solar_absorptance: 0.6,
@@ -1031,9 +1034,9 @@ def set_hpxml_roofs(hpxml_file, hpxml)
       hpxml.roofs[i].solar_absorptance = 0.2
     end
   elsif ['base.xml'].include? hpxml_file
-    hpxml.roofs.add(id: "Roof#{hpxml.roofs.size+1}",
+    hpxml.roofs.add(id: "Roof#{hpxml.roofs.size + 1}",
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
-                    area: 1509.3,
+                    area: 1510,
                     roof_type: HPXML::RoofTypeAsphaltShingles,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -1058,7 +1061,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
                         [HPXML::InteriorFinishWood, 0.5]]
     hpxml.roofs.clear
     roof_types.each_with_index do |roof_type, i|
-      hpxml.roofs.add(id: "Roof#{hpxml.roofs.size+1}",
+      hpxml.roofs.add(id: "Roof#{hpxml.roofs.size + 1}",
                       interior_adjacent_to: HPXML::LocationAtticUnvented,
                       area: 1509.3 / roof_types.size,
                       roof_type: roof_type[0],
@@ -1072,7 +1075,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     end
   elsif ['base-atticroof-flat.xml'].include? hpxml_file
     hpxml.roofs.clear
-    hpxml.roofs.add(id: "Roof#{hpxml.roofs.size+1}",
+    hpxml.roofs.add(id: "Roof#{hpxml.roofs.size + 1}",
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     area: 1350,
                     roof_type: HPXML::RoofTypeAsphaltShingles,
@@ -1084,7 +1087,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
                     insulation_assembly_r_value: 25.8)
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     hpxml.roofs.clear
-    hpxml.roofs.add(id: "Roof#{hpxml.roofs.size+1}",
+    hpxml.roofs.add(id: "Roof#{hpxml.roofs.size + 1}",
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     area: 1006,
                     roof_type: HPXML::RoofTypeAsphaltShingles,
@@ -1094,7 +1097,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
                     radiant_barrier: false,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 25.8)
-    hpxml.roofs.add(id: "Roof#{hpxml.roofs.size+1}",
+    hpxml.roofs.add(id: "Roof#{hpxml.roofs.size + 1}",
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
                     area: 504,
                     roof_type: HPXML::RoofTypeAsphaltShingles,
@@ -1127,7 +1130,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
       end
     end
     hpxml.roofs << hpxml.roofs[-1].dup
-    hpxml.roofs[-1].id += "_tiny"
+    hpxml.roofs[-1].id += '_tiny'
     hpxml.roofs[-1].area = 0.05
   elsif ['base-atticroof-radiant-barrier.xml'].include? hpxml_file
     hpxml.roofs[0].radiant_barrier = true
@@ -1154,6 +1157,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs.each do |roof|
       next unless [HPXML::LocationAtticVented,
                    HPXML::LocationAtticUnvented].include? roof.interior_adjacent_to
+
       hpxml.attics[0].attached_to_roof_idrefs << roof.id
     end
   end
@@ -1161,38 +1165,38 @@ end
 
 def set_hpxml_rim_joists(hpxml_file, hpxml)
   if ['ASHRAE_Standard_140/L322XC.xml'].include? hpxml_file
-    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size+1}",
+    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size + 1}",
                          exterior_adjacent_to: HPXML::LocationOutside,
                          interior_adjacent_to: HPXML::LocationBasementConditioned,
                          siding: HPXML::SidingTypeWood,
-                         area: 42.75,
+                         area: 43.0,
                          azimuth: 0,
                          solar_absorptance: 0.6,
                          emittance: 0.9,
                          insulation_assembly_r_value: 5.01)
-    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size+1}",
+    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size + 1}",
                          exterior_adjacent_to: HPXML::LocationOutside,
                          interior_adjacent_to: HPXML::LocationBasementConditioned,
                          siding: HPXML::SidingTypeWood,
-                         area: 20.25,
+                         area: 20.0,
                          azimuth: 90,
                          solar_absorptance: 0.6,
                          emittance: 0.9,
                          insulation_assembly_r_value: 5.01)
-    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size+1}",
+    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size + 1}",
                          exterior_adjacent_to: HPXML::LocationOutside,
                          interior_adjacent_to: HPXML::LocationBasementConditioned,
                          siding: HPXML::SidingTypeWood,
-                         area: 42.75,
+                         area: 43.0,
                          azimuth: 180,
                          solar_absorptance: 0.6,
                          emittance: 0.9,
                          insulation_assembly_r_value: 5.01)
-    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size+1}",
+    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size + 1}",
                          exterior_adjacent_to: HPXML::LocationOutside,
                          interior_adjacent_to: HPXML::LocationBasementConditioned,
                          siding: HPXML::SidingTypeWood,
-                         area: 20.25,
+                         area: 20.0,
                          azimuth: 270,
                          solar_absorptance: 0.6,
                          emittance: 0.9,
@@ -1204,7 +1208,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
   elsif ['base.xml'].include? hpxml_file
     # TODO: Other geometry values (e.g., building volume) assume
     # no rim joists.
-    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size+1}",
+    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size + 1}",
                          exterior_adjacent_to: HPXML::LocationOutside,
                          interior_adjacent_to: HPXML::LocationBasementConditioned,
                          siding: HPXML::SidingTypeWood,
@@ -1214,7 +1218,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                          insulation_assembly_r_value: 23.0)
   elsif ['base-bldgtype-single-family-attached.xml'].include? hpxml_file
     hpxml.rim_joists[-1].area = 66
-    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size+1}",
+    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size + 1}",
                          exterior_adjacent_to: HPXML::LocationBasementConditioned,
                          interior_adjacent_to: HPXML::LocationBasementConditioned,
                          area: 28,
@@ -1236,7 +1240,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                     [HPXML::SidingTypeNone, HPXML::ColorMedium]]
     hpxml.rim_joists.clear
     siding_types.each_with_index do |siding_type, i|
-      hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size+1}",
+      hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOutside,
                            interior_adjacent_to: HPXML::LocationBasementConditioned,
                            siding: siding_type[0],
@@ -1268,7 +1272,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
     hpxml.rim_joists[0].exterior_adjacent_to = HPXML::LocationCrawlspaceUnvented
     hpxml.rim_joists[0].siding = nil
-    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size+1}",
+    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size + 1}",
                          exterior_adjacent_to: HPXML::LocationOutside,
                          interior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                          siding: HPXML::SidingTypeWood,
@@ -1279,7 +1283,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     hpxml.rim_joists[-1].area = 116
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
-    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size+1}",
+    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size + 1}",
                          exterior_adjacent_to: HPXML::LocationOutside,
                          interior_adjacent_to: HPXML::LocationLivingSpace,
                          siding: HPXML::SidingTypeWood,
@@ -1300,10 +1304,10 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
       end
     end
     hpxml.rim_joists << hpxml.rim_joists[-1].dup
-    hpxml.rim_joists[-1].id += "_tiny"
+    hpxml.rim_joists[-1].id += '_tiny'
     hpxml.rim_joists[-1].area = 0.05
   elsif ['invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
-    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size+1}",
+    hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size + 1}",
                          exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                          interior_adjacent_to: HPXML::LocationLivingSpace,
                          area: 116,
@@ -1335,7 +1339,7 @@ end
 def set_hpxml_walls(hpxml_file, hpxml)
   if ['ASHRAE_Standard_140/L100AC.xml',
       'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1347,7 +1351,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     interior_finish_thickness: 0.5,
                     insulation_assembly_r_value: 11.76)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1359,7 +1363,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     interior_finish_thickness: 0.5,
                     insulation_assembly_r_value: 11.76)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1371,7 +1375,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     interior_finish_thickness: 0.5,
                     insulation_assembly_r_value: 11.76)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1383,22 +1387,22 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     interior_finish_thickness: 0.5,
                     insulation_assembly_r_value: 11.76)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationAtticVented,
                     wall_type: HPXML::WallTypeWoodStud,
                     siding: HPXML::SidingTypeWood,
-                    area: 60.75,
+                    area: 61.0,
                     azimuth: 90,
                     solar_absorptance: 0.6,
                     emittance: 0.9,
                     insulation_assembly_r_value: 2.15)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationAtticVented,
                     wall_type: HPXML::WallTypeWoodStud,
                     siding: HPXML::SidingTypeWood,
-                    area: 60.75,
+                    area: 61.0,
                     azimuth: 270,
                     solar_absorptance: 0.6,
                     emittance: 0.9,
@@ -1419,7 +1423,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
       hpxml.walls[i].solar_absorptance = 0.2
     end
   elsif ['base.xml'].include? hpxml_file
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1429,18 +1433,18 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 23.0)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
                     wall_type: HPXML::WallTypeWoodStud,
                     siding: HPXML::SidingTypeWood,
-                    area: 290,
+                    area: 226,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 4.0)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.walls.clear
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1450,7 +1454,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 23.0)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1461,7 +1465,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     insulation_assembly_r_value: 4.0)
   elsif ['base-bldgtype-single-family-attached.xml'].include? hpxml_file
     hpxml.walls.clear
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1471,7 +1475,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 23.0)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1480,7 +1484,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 4.0)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1489,7 +1493,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 4.0)
-    hpxml.walls.add(id:"Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationAtticUnvented,
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1507,7 +1511,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls[1].interior_finish_type = HPXML::InteriorFinishGypsumBoard
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     hpxml.walls.delete_at(1)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationAtticUnvented,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1516,7 +1520,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 23.0)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1526,7 +1530,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 22.3)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1537,7 +1541,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     insulation_assembly_r_value: 4.0)
   elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
     hpxml.walls[1].delete
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1546,7 +1550,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 23.0)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1555,7 +1559,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 23.0)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1564,7 +1568,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 23.0)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1604,7 +1608,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
     last_wall = hpxml.walls[-1]
     hpxml.walls.clear
     walls_map.each_with_index do |(wall_type, assembly_r), i|
-      hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+      hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                       exterior_adjacent_to: HPXML::LocationOutside,
                       interior_adjacent_to: HPXML::LocationLivingSpace,
                       wall_type: wall_type,
@@ -1622,7 +1626,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls[0].area *= 2.0
   elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
     hpxml.walls.clear
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1632,7 +1636,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 23)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationGarage,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1641,7 +1645,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 23)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationGarage,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1650,7 +1654,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 4)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1661,7 +1665,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     insulation_assembly_r_value: 4)
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     hpxml.walls.clear
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1671,7 +1675,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 23)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationGarage,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1680,7 +1684,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 23)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationGarage,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1689,7 +1693,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 4)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1725,14 +1729,14 @@ def set_hpxml_walls(hpxml_file, hpxml)
       end
     end
     hpxml.walls << hpxml.walls[-1].dup
-    hpxml.walls[-1].id += "_tiny"
+    hpxml.walls[-1].id += '_tiny'
     hpxml.walls[-1].area = 0.05
   elsif ['invalid_files/enclosure-living-missing-exterior-wall.xml'].include? hpxml_file
     hpxml.walls[0].delete
   elsif ['invalid_files/enclosure-garage-missing-exterior-wall.xml'].include? hpxml_file
     hpxml.walls[-2].delete
   elsif ['invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1753,7 +1757,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
       wall.interior_finish_thickness = nil
     end
   elsif ['base-foundation-basement-garage.xml'].include? hpxml_file
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationGarage,
                     interior_adjacent_to: HPXML::LocationBasementConditioned,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1762,7 +1766,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 23)
-    hpxml.walls.add(id: "Wall#{hpxml.walls.size+1}",
+    hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationGarage,
                     wall_type: HPXML::WallTypeWoodStud,
@@ -1783,6 +1787,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls.each do |wall|
       next unless [HPXML::LocationAtticVented,
                    HPXML::LocationAtticUnvented].include? wall.interior_adjacent_to
+
       hpxml.attics[0].attached_to_wall_idrefs << wall.id
     end
   end
@@ -1793,10 +1798,11 @@ def set_hpxml_walls(hpxml_file, hpxml)
                    HPXML::LocationCrawlspaceUnvented,
                    HPXML::LocationBasementConditioned,
                    HPXML::LocationBasementUnconditioned].include? wall.interior_adjacent_to
+
       hpxml.foundations[0].attached_to_wall_idrefs << wall.id
     end
   end
-  
+
   hpxml.walls.each do |wall|
     if [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(wall.interior_adjacent_to) && [HPXML::LocationOutside].include?(wall.exterior_adjacent_to)
       wall.attic_wall_type = HPXML::AtticWallTypeGable
@@ -1808,11 +1814,11 @@ end
 
 def set_hpxml_foundation_walls(hpxml_file, hpxml)
   if ['ASHRAE_Standard_140/L322XC.xml'].include? hpxml_file
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationGround,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 7.25,
-                               area: 413.25,
+                               area: 413.0,
                                azimuth: 0,
                                thickness: 6,
                                depth_below_grade: 6.583,
@@ -1823,11 +1829,11 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_r_value: 0,
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 0)
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationGround,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 7.25,
-                               area: 195.75,
+                               area: 196.0,
                                azimuth: 90,
                                thickness: 6,
                                depth_below_grade: 6.583,
@@ -1838,11 +1844,11 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_r_value: 0,
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 0)
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationGround,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 7.25,
-                               area: 413.25,
+                               area: 413.0,
                                azimuth: 180,
                                thickness: 6,
                                depth_below_grade: 6.583,
@@ -1853,11 +1859,11 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_r_value: 0,
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 0)
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationGround,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 7.25,
-                               area: 195.75,
+                               area: 196.0,
                                azimuth: 270,
                                thickness: 6,
                                depth_below_grade: 6.583,
@@ -1877,7 +1883,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
       hpxml.foundation_walls[i].interior_finish_thickness = 0.5
     end
   elsif ['base.xml'].include? hpxml_file
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationGround,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 8,
@@ -1895,7 +1901,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls.clear
   elsif ['base-bldgtype-single-family-attached.xml'].include? hpxml_file
     hpxml.foundation_walls.clear
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationGround,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 8,
@@ -1909,7 +1915,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 8,
                                insulation_exterior_r_value: 8.9)
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationBasementConditioned,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 8,
@@ -1961,7 +1967,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls[0].interior_finish_type = HPXML::InteriorFinishNone
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
     hpxml.foundation_walls[0].area = 600
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                                interior_adjacent_to: HPXML::LocationBasementUnconditioned,
                                height: 8,
@@ -1974,7 +1980,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 0,
                                insulation_exterior_r_value: 0)
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationGround,
                                interior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                                height: 4,
@@ -1992,7 +1998,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls.clear
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
     hpxml.foundation_walls.clear
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationGround,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 8,
@@ -2006,7 +2012,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 8,
                                insulation_exterior_r_value: 8.9)
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationGround,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 4,
@@ -2020,7 +2026,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 4,
                                insulation_exterior_r_value: 8.9)
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationGround,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 2,
@@ -2036,7 +2042,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_r_value: 8.9)
   elsif ['base-foundation-complex.xml'].include? hpxml_file
     hpxml.foundation_walls.clear
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationGround,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 8,
@@ -2050,7 +2056,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 0,
                                insulation_exterior_r_value: 0.0)
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationGround,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 8,
@@ -2064,7 +2070,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 8,
                                insulation_exterior_r_value: 8.9)
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationGround,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 4,
@@ -2078,7 +2084,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 0,
                                insulation_exterior_r_value: 0.0)
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationGround,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 4,
@@ -2092,7 +2098,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 4,
                                insulation_exterior_r_value: 8.9)
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationGround,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 4,
@@ -2119,7 +2125,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
       end
     end
     hpxml.foundation_walls << hpxml.foundation_walls[-1].dup
-    hpxml.foundation_walls[-1].id += "_tiny"
+    hpxml.foundation_walls[-1].id += '_tiny'
     hpxml.foundation_walls[-1].area = 0.05
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.foundation_walls.each do |fwall|
@@ -2134,7 +2140,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
       fwall.area = nil
     end
   elsif ['invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
-    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size+1}",
+    hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                                interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 8,
@@ -2169,14 +2175,14 @@ end
 def set_hpxml_frame_floors(hpxml_file, hpxml)
   if ['ASHRAE_Standard_140/L100AC.xml',
       'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationAtticVented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1539,
                            interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                            interior_finish_thickness: 0.5,
                            insulation_assembly_r_value: 18.45)
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOutside,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1539,
@@ -2193,7 +2199,7 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
          'ASHRAE_Standard_140/L324XC.xml'].include? hpxml_file
     hpxml.frame_floors.delete_at(1)
   elsif ['base.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationAtticUnvented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1350,
@@ -2203,19 +2209,19 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
     hpxml.frame_floors[0].insulation_assembly_r_value = 8.7
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.frame_floors.clear
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
-                           exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
-                           interior_adjacent_to: HPXML::LocationLivingSpace,
-                           area: 900,
-                           insulation_assembly_r_value: 2.1,
-                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
                            interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                            insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceAbove)
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
+                           exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
+                           area: 900,
+                           insulation_assembly_r_value: 2.1,
+                           other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
   elsif ['base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'].include? hpxml_file
     hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHousingUnit
     hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherHousingUnit
@@ -2244,19 +2250,19 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     hpxml.frame_floors[0].area = 450
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationAtticUnvented,
                            interior_adjacent_to: HPXML::LocationGarage,
                            area: 600,
                            insulation_assembly_r_value: 2.1)
   elsif ['base-foundation-ambient.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOutside,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1350,
                            insulation_assembly_r_value: 18.7)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationBasementUnconditioned,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1350,
@@ -2264,32 +2270,32 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
     hpxml.frame_floors[1].insulation_assembly_r_value = 2.1
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1350,
                            insulation_assembly_r_value: 18.7)
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationCrawlspaceVented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1350,
                            insulation_assembly_r_value: 18.7)
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
     hpxml.frame_floors[1].area = 675
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 675,
                            insulation_assembly_r_value: 18.7)
   elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationGarage,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 400,
                            insulation_assembly_r_value: 39.3)
   elsif ['base-foundation-basement-garage.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationGarage,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 400,
@@ -2299,21 +2305,21 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
   elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
     hpxml.frame_floors[0].delete
     hpxml.frame_floors.each_with_index do |ff, i|
-      ff.id = "FrameFloor#{i+1}"
+      ff.id = "FrameFloor#{i + 1}"
     end
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 550,
                            insulation_assembly_r_value: 18.7,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 200,
                            insulation_assembly_r_value: 18.7,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 150,
@@ -2332,10 +2338,10 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
       end
     end
     hpxml.frame_floors << hpxml.frame_floors[-1].dup
-    hpxml.frame_floors[-1].id += "_tiny"
+    hpxml.frame_floors[-1].id += '_tiny'
     hpxml.frame_floors[-1].area = 0.05
   elsif ['invalid_files/base-enclosure-conditioned-basement-slab-insulation.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationBasementConditioned,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1350,
@@ -2351,13 +2357,13 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
     hpxml.frame_floors[1].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
     hpxml.frame_floors[1].other_space_above_or_below = HPXML::FrameFloorOtherSpaceAbove
   elsif ['invalid_files/invalid-facility-type-surfaces.xml'].include? hpxml_file
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
                            insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
-    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size+1}",
+    hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 900,
@@ -2374,6 +2380,7 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                    HPXML::LocationBasementConditioned,
                    HPXML::LocationBasementUnconditioned,
                    HPXML::LocationOutside].include? frame_floor.exterior_adjacent_to
+
       hpxml.foundations[0].attached_to_frame_floor_idrefs << frame_floor.id
     end
   end
@@ -2382,6 +2389,7 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
     hpxml.frame_floors.each do |frame_floor|
       next unless [HPXML::LocationAtticVented,
                    HPXML::LocationAtticUnvented].include? frame_floor.exterior_adjacent_to
+
       hpxml.attics[0].attached_to_frame_floor_idrefs << frame_floor.id
     end
   end
@@ -2389,7 +2397,7 @@ end
 
 def set_hpxml_slabs(hpxml_file, hpxml)
   if ['ASHRAE_Standard_140/L302XC.xml'].include? hpxml_file
-    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size+1}",
+    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     area: 1539,
                     thickness: 4,
@@ -2406,7 +2414,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
     hpxml.slabs[0].perimeter_insulation_depth = 2.5
     hpxml.slabs[0].perimeter_insulation_r_value = 5.4
   elsif ['ASHRAE_Standard_140/L322XC.xml'].include? hpxml_file
-    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size+1}",
+    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
                     interior_adjacent_to: HPXML::LocationBasementConditioned,
                     area: 1539,
                     thickness: 4,
@@ -2419,7 +2427,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                     carpet_fraction: 0,
                     carpet_r_value: 0)
   elsif ['base.xml'].include? hpxml_file
-    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size+1}",
+    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
                     interior_adjacent_to: HPXML::LocationBasementConditioned,
                     area: 1350,
                     thickness: 4,
@@ -2434,7 +2442,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
     hpxml.slabs.clear
   elsif ['base-bldgtype-single-family-attached.xml'].include? hpxml_file
     hpxml.slabs[0].area = 900
-    hpxml.slabs[0].exposed_perimeter = 86
+    hpxml.slabs[0].exposed_perimeter = 85.7
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.slabs[0].interior_adjacent_to = HPXML::LocationBasementUnconditioned
   elsif ['base-foundation-conditioned-basement-slab-insulation.xml'].include? hpxml_file
@@ -2460,7 +2468,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
     hpxml.slabs[0].area = 675
     hpxml.slabs[0].exposed_perimeter = 75
-    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size+1}",
+    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
                     interior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                     area: 675,
                     thickness: 0,
@@ -2477,7 +2485,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
          'base-foundation-basement-garage.xml'].include? hpxml_file
     hpxml.slabs[0].area -= 400
     hpxml.slabs[0].exposed_perimeter -= 40
-    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size+1}",
+    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
                     interior_adjacent_to: HPXML::LocationGarage,
                     area: 400,
                     thickness: 4,
@@ -2491,7 +2499,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                     carpet_r_value: 0)
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     hpxml.slabs[0].exposed_perimeter -= 30
-    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size+1}",
+    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
                     interior_adjacent_to: HPXML::LocationGarage,
                     area: 600,
                     thickness: 4,
@@ -2505,7 +2513,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                     carpet_r_value: 0)
   elsif ['base-foundation-complex.xml'].include? hpxml_file
     hpxml.slabs.clear
-    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size+1}",
+    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
                     interior_adjacent_to: HPXML::LocationBasementConditioned,
                     area: 675,
                     thickness: 4,
@@ -2516,7 +2524,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                     under_slab_insulation_r_value: 0,
                     carpet_fraction: 0,
                     carpet_r_value: 0)
-    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size+1}",
+    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
                     interior_adjacent_to: HPXML::LocationBasementConditioned,
                     area: 405,
                     thickness: 4,
@@ -2527,7 +2535,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                     under_slab_insulation_r_value: 0,
                     carpet_fraction: 0,
                     carpet_r_value: 0)
-    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size+1}",
+    hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
                     interior_adjacent_to: HPXML::LocationBasementConditioned,
                     area: 270,
                     thickness: 4,
@@ -2553,7 +2561,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
       end
     end
     hpxml.slabs << hpxml.slabs[-1].dup
-    hpxml.slabs[-1].id += "_tiny"
+    hpxml.slabs[-1].id += '_tiny'
     hpxml.slabs[-1].area = 0.05
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.slabs.each do |slab|
@@ -2567,7 +2575,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
   elsif ['invalid_files/enclosure-garage-missing-slab.xml'].include? hpxml_file
     hpxml.slabs[1].delete
   end
-  
+
   if hpxml.foundations.size == 1
     hpxml.foundations[0].attached_to_slab_idrefs = []
     hpxml.slabs.each do |slab|
@@ -2576,6 +2584,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                    HPXML::LocationBasementConditioned,
                    HPXML::LocationBasementUnconditioned,
                    HPXML::LocationLivingSpace].include? slab.interior_adjacent_to
+
       hpxml.foundations[0].attached_to_slab_idrefs << slab.id
     end
   end
@@ -2584,13 +2593,13 @@ end
 def set_hpxml_windows(hpxml_file, hpxml)
   if ['ASHRAE_Standard_140/L100AC.xml',
       'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
-    windows = [ [0, 90, 'Wall1'],
-                [90, 45, 'Wall2'],
-                [180, 90, 'Wall3'],
-                [270, 45, 'Wall4'] ]
+    windows = [[0, 90, 'Wall1'],
+               [90, 45, 'Wall2'],
+               [180, 90, 'Wall3'],
+               [270, 45, 'Wall4']]
     windows.each do |window_values|
       azimuth, area, wall = window_values
-      hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+      hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                         area: area,
                         azimuth: azimuth,
                         ufactor: 1.039,
@@ -2612,7 +2621,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
   elsif ['ASHRAE_Standard_140/L150AC.xml',
          'ASHRAE_Standard_140/L150AL.xml'].include? hpxml_file
     hpxml.windows.clear
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 270,
                       azimuth: 180,
                       ufactor: 1.039,
@@ -2629,11 +2638,11 @@ def set_hpxml_windows(hpxml_file, hpxml)
   elsif ['ASHRAE_Standard_140/L160AC.xml',
          'ASHRAE_Standard_140/L160AL.xml'].include? hpxml_file
     hpxml.windows.clear
-    windows = [ [90, 135, 'Wall2'],
-                [270, 135, 'Wall4'] ]
+    windows = [[90, 135, 'Wall2'],
+               [270, 135, 'Wall4']]
     windows.each do |window_values|
       azimuth, area, wall = window_values
-      hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+      hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                         area: area,
                         azimuth: azimuth,
                         ufactor: 1.039,
@@ -2644,7 +2653,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                         interior_shading_factor_winter: 1)
     end
   elsif ['base.xml'].include? hpxml_file
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 108,
                       azimuth: 0,
                       ufactor: 0.33,
@@ -2653,7 +2662,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall1')
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 72,
                       azimuth: 90,
                       ufactor: 0.33,
@@ -2662,7 +2671,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall1')
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 108,
                       azimuth: 180,
                       ufactor: 0.33,
@@ -2671,7 +2680,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall1')
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 72,
                       azimuth: 270,
                       ufactor: 0.33,
@@ -2691,7 +2700,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[3].orientation = HPXML::OrientationWest
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.windows.clear
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 35.0,
                       azimuth: 0,
                       ufactor: 0.33,
@@ -2700,7 +2709,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall1')
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 35.0,
                       azimuth: 180,
                       ufactor: 0.33,
@@ -2709,7 +2718,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall1')
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 53.0,
                       azimuth: 270,
                       ufactor: 0.33,
@@ -2720,8 +2729,8 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       wall_idref: 'Wall1')
   elsif ['base-bldgtype-single-family-attached.xml'].include? hpxml_file
     hpxml.windows.clear
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
-                      area: 35.4,
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
+                      area: 35.0,
                       azimuth: 0,
                       ufactor: 0.33,
                       shgc: 0.45,
@@ -2729,8 +2738,8 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall1')
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
-                      area: 35.4,
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
+                      area: 35.0,
                       azimuth: 180,
                       ufactor: 0.33,
                       shgc: 0.45,
@@ -2738,7 +2747,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall1')
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 53.0,
                       azimuth: 270,
                       ufactor: 0.33,
@@ -2806,14 +2815,14 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[1].area = 108
     hpxml.windows[2].area = 108
     hpxml.windows[3].area = 108
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 12,
                       azimuth: 90,
                       ufactor: 0.33,
                       shgc: 0.45,
                       fraction_operable: 0.0,
                       wall_idref: 'Wall2')
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 62,
                       azimuth: 270,
                       ufactor: 0.3,
@@ -2825,14 +2834,14 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[1].area = 108
     hpxml.windows[2].area = 108
     hpxml.windows[3].area = 108
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 12,
                       azimuth: 90,
                       ufactor: 0.33,
                       shgc: 0.45,
                       fraction_operable: 0.0,
                       wall_idref: 'Wall2')
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 12,
                       azimuth: 270,
                       ufactor: 0.33,
@@ -2852,28 +2861,28 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[2].area = 216
     hpxml.windows[3].area = 96
   elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 20,
                       azimuth: 0,
                       ufactor: 0.33,
                       shgc: 0.45,
                       fraction_operable: 0.0,
                       wall_idref: 'FoundationWall1')
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 10,
                       azimuth: 90,
                       ufactor: 0.33,
                       shgc: 0.45,
                       fraction_operable: 0.0,
                       wall_idref: 'FoundationWall1')
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 20,
                       azimuth: 180,
                       ufactor: 0.33,
                       shgc: 0.45,
                       fraction_operable: 0.0,
                       wall_idref: 'FoundationWall1')
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 10,
                       azimuth: 270,
                       ufactor: 0.33,
@@ -2910,10 +2919,10 @@ def set_hpxml_windows(hpxml_file, hpxml)
       end
     end
     hpxml.windows << hpxml.windows[-1].dup
-    hpxml.windows[-1].id += "_tiny"
+    hpxml.windows[-1].id += '_tiny'
     hpxml.windows[-1].area = 0.05
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 20,
                       azimuth: 0,
                       ufactor: 0.33,
@@ -2924,28 +2933,28 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[2].overhangs_distance_to_bottom_of_window = hpxml.windows[2].overhangs_distance_to_top_of_window
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
     hpxml.windows.clear
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 108 / 8,
                       azimuth: 0,
                       ufactor: 0.33,
                       shgc: 0.45,
                       fraction_operable: 0.67,
                       wall_idref: 'Wall1')
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 72 / 8,
                       azimuth: 90,
                       ufactor: 0.33,
                       shgc: 0.45,
                       fraction_operable: 0.67,
                       wall_idref: 'Wall2')
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 108 / 8,
                       azimuth: 180,
                       ufactor: 0.33,
                       shgc: 0.45,
                       fraction_operable: 0.67,
                       wall_idref: 'Wall3')
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 72 / 8,
                       azimuth: 270,
                       ufactor: 0.33,
@@ -2959,7 +2968,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
       window.fraction_operable = nil
     end
   elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
-    hpxml.windows.add(id: "Window#{hpxml.windows.size+1}",
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 50,
                       azimuth: 270,
                       ufactor: 0.33,
@@ -2973,7 +2982,7 @@ end
 
 def set_hpxml_skylights(hpxml_file, hpxml)
   if ['base-enclosure-skylights.xml'].include? hpxml_file
-    hpxml.skylights.add(id: "Skylight#{hpxml.skylights.size+1}",
+    hpxml.skylights.add(id: "Skylight#{hpxml.skylights.size + 1}",
                         area: 15,
                         azimuth: 0,
                         ufactor: 0.33,
@@ -2981,11 +2990,11 @@ def set_hpxml_skylights(hpxml_file, hpxml)
                         interior_shading_factor_summer: 1.0,
                         interior_shading_factor_winter: 1.0,
                         roof_idref: 'Roof1')
-    hpxml.skylights.add(id: "Skylight#{hpxml.skylights.size+1}",
+    hpxml.skylights.add(id: "Skylight#{hpxml.skylights.size + 1}",
                         area: 15,
                         azimuth: 180,
-                        ufactor: 0.35,
-                        shgc: 0.47,
+                        ufactor: 0.33,
+                        shgc: 0.45,
                         interior_shading_factor_summer: 1.0,
                         interior_shading_factor_winter: 1.0,
                         roof_idref: 'Roof1')
@@ -3035,7 +3044,7 @@ def set_hpxml_skylights(hpxml_file, hpxml)
       end
     end
     hpxml.skylights << hpxml.skylights[-1].dup
-    hpxml.skylights[-1].id += "_tiny"
+    hpxml.skylights[-1].id += '_tiny'
     hpxml.skylights[-1].area = 0.05
   end
 end
@@ -3043,64 +3052,65 @@ end
 def set_hpxml_doors(hpxml_file, hpxml)
   if ['ASHRAE_Standard_140/L100AC.xml',
       'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
-    doors = [ [180, 20, 'WallSouth'],
-              [0, 20, 'WallNorth'] ]
+    doors = [[180, 20, 'WallSouth'],
+             [0, 20, 'WallNorth']]
     doors.each do |door_values|
       azimuth, area, wall = door_values
-      hpxml.doors.add(id: "Door#{hpxml.doors.size+1}",
-                      wall_idref: 'Wall1',
+      hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
+                      wall_idref: 'Wall3',
                       area: area,
                       azimuth: azimuth,
                       r_value: 3.04)
     end
   elsif ['base.xml'].include? hpxml_file
-    hpxml.doors.add(id: "Door#{hpxml.doors.size+1}",
+    hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: 'Wall1',
                     area: 40,
+                    azimuth: 180,
                     r_value: 4.4)
   elsif ['base-enclosure-orientations.xml'].include? hpxml_file
-    hpxml.doors.add(id: "Door#{hpxml.doors.size+1}",
+    hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: 'Wall1',
                     area: 20,
                     orientation: HPXML::OrientationNorth,
                     r_value: 4.4)
-    hpxml.doors.add(id: "Door#{hpxml.doors.size+1}",
+    hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: 'Wall1',
                     area: 20,
                     orientation: HPXML::OrientationSouth,
                     r_value: 4.4)
   elsif ['base-bldgtype-multifamily.xml'].include? hpxml_file
     hpxml.doors.clear
-    hpxml.doors.add(id: "Door#{hpxml.doors.size+1}",
+    hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: 'Wall1',
                     area: 20,
                     azimuth: 180,
                     r_value: 4.4)
   elsif ['base-enclosure-garage.xml',
          'base-enclosure-2stories-garage.xml'].include? hpxml_file
-    hpxml.doors.add(id: "Door#{hpxml.doors.size+1}",
+    hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: 'Wall2',
                     area: 70,
                     azimuth: 180,
                     r_value: 4.4)
   elsif ['base-foundation-basement-garage.xml'].include? hpxml_file
-    hpxml.doors.add(id: "Door#{hpxml.doors.size+1}",
+    hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: 'Wall2',
                     area: 70,
                     azimuth: 180,
                     r_value: 4.4)
-    hpxml.doors.add(id: "Door#{hpxml.doors.size+1}",
+    hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: 'Wall3',
                     area: 4,
                     azimuth: 0,
                     r_value: 4.4)
   elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
-    hpxml.doors.add(id: "Door#{hpxml.doors.size+1}",
+    hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: 'Wall2',
                     area: 20,
                     azimuth: 0,
                     r_value: 4.4)
-    hpxml.doors.add(id: "Door#{hpxml.doors.size+1}",
+    hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: 'Wall3',
                     area: 20,
                     azimuth: 0,
@@ -3109,7 +3119,7 @@ def set_hpxml_doors(hpxml_file, hpxml)
          'base-bldgtype-multifamily-adjacent-to-other-heated-space.xml',
          'base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml',
          'base-bldgtype-multifamily-adjacent-to-non-freezing-space.xml'].include? hpxml_file
-    hpxml.doors.add(id: "Door#{hpxml.doors.size+1}",
+    hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: 'Wall2',
                     area: 20,
                     azimuth: 0,
@@ -3131,16 +3141,16 @@ def set_hpxml_doors(hpxml_file, hpxml)
       end
     end
     hpxml.doors << hpxml.doors[-1].dup
-    hpxml.doors[-1].id += "_tiny"
+    hpxml.doors[-1].id += '_tiny'
     hpxml.doors[-1].area = 0.05
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
     hpxml.doors.clear
-    hpxml.doors.add(id: "Door#{hpxml.doors.size+1}",
+    hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: 'Wall9',
                     area: 20,
                     azimuth: 0,
                     r_value: 4.4)
-    hpxml.doors.add(id: "Door#{hpxml.doors.size+1}",
+    hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: 'Wall10',
                     area: 20,
                     azimuth: 180,
@@ -3154,7 +3164,7 @@ end
 
 def set_hpxml_heating_systems(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size+1}",
+    hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size + 1}",
                               distribution_system_idref: 'HVACDistribution1',
                               heating_system_type: HPXML::HVACTypeFurnace,
                               heating_system_fuel: HPXML::FuelTypeNaturalGas,
@@ -3217,28 +3227,28 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWoodCord
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.heating_systems.clear
-    hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size+1}",
+    hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size + 1}",
                               distribution_system_idref: 'HVACDistribution1',
                               heating_system_type: HPXML::HVACTypeFurnace,
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 1,
                               fraction_heat_load_served: 0.1)
-    hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size+1}",
+    hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size + 1}",
                               distribution_system_idref: 'HVACDistribution2',
                               heating_system_type: HPXML::HVACTypeFurnace,
                               heating_system_fuel: HPXML::FuelTypeNaturalGas,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.92,
                               fraction_heat_load_served: 0.1)
-    hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size+1}",
+    hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size + 1}",
                               distribution_system_idref: 'HVACDistribution3',
                               heating_system_type: HPXML::HVACTypeBoiler,
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 1,
                               fraction_heat_load_served: 0.1)
-    hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size+1}",
+    hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size + 1}",
                               distribution_system_idref: 'HVACDistribution4',
                               heating_system_type: HPXML::HVACTypeBoiler,
                               heating_system_fuel: HPXML::FuelTypeNaturalGas,
@@ -3246,20 +3256,20 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_efficiency_afue: 0.92,
                               fraction_heat_load_served: 0.1,
                               electric_auxiliary_energy: 200)
-    hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size+1}",
+    hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size + 1}",
                               heating_system_type: HPXML::HVACTypeElectricResistance,
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_percent: 1,
                               fraction_heat_load_served: 0.1)
-    hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size+1}",
+    hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size + 1}",
                               heating_system_type: HPXML::HVACTypeStove,
                               heating_system_fuel: HPXML::FuelTypeOil,
                               heating_capacity: 6400,
                               heating_efficiency_percent: 0.8,
                               fraction_heat_load_served: 0.1,
                               fan_watts: 40.0)
-    hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size+1}",
+    hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size + 1}",
                               heating_system_type: HPXML::HVACTypeWallFurnace,
                               heating_system_fuel: HPXML::FuelTypePropane,
                               heating_capacity: 6400,
@@ -3403,7 +3413,7 @@ end
 
 def set_hpxml_cooling_systems(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.cooling_systems.add(id: "CoolingSystem#{hpxml.cooling_systems.size+1}",
+    hpxml.cooling_systems.add(id: "CoolingSystem#{hpxml.cooling_systems.size + 1}",
                               distribution_system_idref: 'HVACDistribution1',
                               cooling_system_type: HPXML::HVACTypeCentralAirConditioner,
                               cooling_system_fuel: HPXML::FuelTypeElectricity,
@@ -3490,7 +3500,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].distribution_system_idref = 'HVACDistribution2'
     hpxml.cooling_systems[0].fraction_cool_load_served = 0.2
     hpxml.cooling_systems[0].cooling_capacity *= 0.2
-    hpxml.cooling_systems.add(id: "CoolingSystem#{hpxml.cooling_systems.size+1}",
+    hpxml.cooling_systems.add(id: "CoolingSystem#{hpxml.cooling_systems.size + 1}",
                               cooling_system_type: HPXML::HVACTypeRoomAirConditioner,
                               cooling_system_fuel: HPXML::FuelTypeElectricity,
                               cooling_capacity: 9600,
@@ -3567,7 +3577,7 @@ end
 def set_hpxml_heat_pumps(hpxml_file, hpxml)
   if ['base-hvac-air-to-air-heat-pump-1-speed.xml',
       'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'].include? hpxml_file
-    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size+1}",
+    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
                          distribution_system_idref: 'HVACDistribution1',
                          heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
@@ -3587,7 +3597,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
       hpxml.heat_pumps[0].fraction_cool_load_served = 0
     end
   elsif ['base-hvac-air-to-air-heat-pump-2-speed.xml'].include? hpxml_file
-    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size+1}",
+    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
                          distribution_system_idref: 'HVACDistribution1',
                          heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
@@ -3604,7 +3614,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          cooling_shr: 0.73,
                          compressor_type: HPXML::HVACCompressorTypeTwoStage)
   elsif ['base-hvac-air-to-air-heat-pump-var-speed.xml'].include? hpxml_file
-    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size+1}",
+    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
                          distribution_system_idref: 'HVACDistribution1',
                          heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
@@ -3622,7 +3632,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          compressor_type: HPXML::HVACCompressorTypeVariableSpeed)
   elsif ['base-hvac-ground-to-air-heat-pump.xml',
          'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml'].include? hpxml_file
-    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size+1}",
+    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
                          distribution_system_idref: 'HVACDistribution1',
                          heat_pump_type: HPXML::HVACTypeHeatPumpGroundToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
@@ -3649,7 +3659,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
     end
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
-    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size+1}",
+    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
                          distribution_system_idref: 'HVACDistribution1',
                          heat_pump_type: HPXML::HVACTypeHeatPumpMiniSplit,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
@@ -3690,7 +3700,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
     hpxml.heat_pumps[0].heating_capacity = nil
     hpxml.heat_pumps[0].heating_capacity_17F = 25000
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
-    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size+1}",
+    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
                          distribution_system_idref: 'HVACDistribution5',
                          heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
@@ -3706,7 +3716,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_capacity_17F: 4800 * 0.630, # Based on OAT slope of default curves
                          cooling_shr: 0.73,
                          compressor_type: HPXML::HVACCompressorTypeSingleStage)
-    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size+1}",
+    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
                          distribution_system_idref: 'HVACDistribution6',
                          heat_pump_type: HPXML::HVACTypeHeatPumpGroundToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
@@ -3722,7 +3732,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          cooling_shr: 0.73,
                          pump_watts_per_ton: 30.0)
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
-    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size+1}",
+    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
                          heat_pump_type: HPXML::HVACTypeHeatPumpMiniSplit,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
                          heating_capacity: 4800,
@@ -3739,7 +3749,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
   elsif ['base-bldgtype-multifamily-shared-boiler-only-water-loop-heat-pump.xml',
          'base-bldgtype-multifamily-shared-chiller-only-water-loop-heat-pump.xml',
          'base-bldgtype-multifamily-shared-boiler-chiller-water-loop-heat-pump.xml'].include? hpxml_file
-    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size+1}",
+    hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
                          distribution_system_idref: 'HVACDistribution2',
                          heat_pump_type: HPXML::HVACTypeHeatPumpWaterLoopToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity)
@@ -3786,26 +3796,28 @@ end
 def set_hpxml_primary_systems(hpxml_file, hpxml)
   hpxml.hvac_systems.each do |hvac_system|
     if hvac_system.is_a? HPXML::HeatPump
-      hvac_system.primary_heating_system = true
-      hvac_system.primary_cooling_system = true
+      hvac_system.primary_heating_system = false
+      hvac_system.primary_cooling_system = false
     else
-      hvac_system.primary_system = true
+      hvac_system.primary_system = false
     end
   end
-  sorted_heating_system = (hpxml.heating_systems + hpxml.heat_pumps).sort_by{ |h| h.fraction_heat_load_served.to_f }
-  if sorted_heating_system.size > 0
-    if sorted_heating_system[0].is_a? HPXML::HeatPump
-      sorted_heating_system[0].primary_heating_system = true
+
+  sorted_heating_system = (hpxml.heating_systems + hpxml.heat_pumps).sort_by { |h| h.fraction_heat_load_served.to_f }
+  if sorted_heating_system.size > 0 && sorted_heating_system[-1].fraction_heat_load_served.to_f > 0
+    if sorted_heating_system[-1].is_a? HPXML::HeatPump
+      sorted_heating_system[-1].primary_heating_system = true
     else
-      sorted_heating_system[0].primary_system = true
+      sorted_heating_system[-1].primary_system = true
     end
   end
-  sorted_cooling_system = (hpxml.cooling_systems + hpxml.heat_pumps).sort_by{ |h| h.fraction_cool_load_served.to_f }
-  if sorted_cooling_system.size > 0
-    if sorted_cooling_system[0].is_a? HPXML::HeatPump
-      sorted_cooling_system[0].primary_cooling_system = true
+
+  sorted_cooling_system = (hpxml.cooling_systems + hpxml.heat_pumps).sort_by { |h| h.fraction_cool_load_served.to_f }
+  if sorted_cooling_system.size > 0 && sorted_cooling_system[-1].fraction_cool_load_served.to_f > 0
+    if sorted_cooling_system[-1].is_a? HPXML::HeatPump
+      sorted_cooling_system[-1].primary_cooling_system = true
     else
-      sorted_cooling_system[0].primary_system = true
+      sorted_cooling_system[-1].primary_system = true
     end
   end
 end
@@ -3813,11 +3825,11 @@ end
 def set_hpxml_hvac_control(hpxml_file, hpxml)
   hpxml.hvac_controls.clear
   if hpxml_file.include? 'ASHRAE_Standard_140'
-    hpxml.hvac_controls.add(id: "HVACControl#{hpxml.hvac_controls.size+1}",
+    hpxml.hvac_controls.add(id: "HVACControl#{hpxml.hvac_controls.size + 1}",
                             heating_setpoint_temp: 68,
                             cooling_setpoint_temp: 78)
   else
-    hpxml.hvac_controls.add(id: "HVACControl#{hpxml.hvac_controls.size+1}",
+    hpxml.hvac_controls.add(id: "HVACControl#{hpxml.hvac_controls.size + 1}",
                             control_type: HPXML::HVACControlTypeManual,
                             heating_setpoint_temp: 68,
                             cooling_setpoint_temp: 78)
@@ -3891,7 +3903,7 @@ end
 
 def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size+1}",
+    hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
                                  distribution_system_type: HPXML::HVACDistributionTypeAir,
                                  air_type: HPXML::AirTypeRegularVelocity)
     hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
@@ -3943,7 +3955,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].hydronic_type = HPXML::HydronicTypeBaseboard
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear
     hpxml.hvac_distributions[0].ducts.clear
-    hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size+1}",
+    hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
                                  distribution_system_type: HPXML::HVACDistributionTypeAir,
                                  air_type: HPXML::AirTypeRegularVelocity)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
@@ -3978,7 +3990,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions.clear
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.hvac_distributions.clear
-    hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size+1}",
+    hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
                                  distribution_system_type: HPXML::HVACDistributionTypeAir,
                                  air_type: HPXML::AirTypeRegularVelocity)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
@@ -4007,10 +4019,10 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                           duct_surface_area: 25)
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id = "HVACDistribution#{hpxml.hvac_distributions.size}"
-    hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size+1}",
+    hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
                                  distribution_system_type: HPXML::HVACDistributionTypeHydronic,
                                  hydronic_type: HPXML::HydronicTypeBaseboard)
-    hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size+1}",
+    hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
                                  distribution_system_type: HPXML::HVACDistributionTypeHydronic,
                                  hydronic_type: HPXML::HydronicTypeBaseboard)
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
@@ -4147,7 +4159,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     elsif hpxml_file.include? 'water-loop-heat-pump'
       hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronic
       hpxml.hvac_distributions[0].hydronic_type = HPXML::HydronicTypeWaterLoop
-      hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size+1}",
+      hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
                                    distribution_system_type: HPXML::HVACDistributionTypeAir,
                                    air_type: HPXML::AirTypeRegularVelocity)
     end
@@ -4168,7 +4180,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                            duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
                                            duct_surface_area: 20)
   elsif ['invalid_files/hvac-invalid-distribution-system-type.xml'].include? hpxml_file
-    hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size+1}",
+    hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
                                  distribution_system_type: HPXML::HVACDistributionTypeHydronic,
                                  hydronic_type: HPXML::HydronicTypeBaseboard)
   elsif ['invalid_files/hvac-distribution-return-duct-leakage-missing.xml'].include? hpxml_file
@@ -4256,9 +4268,9 @@ end
 
 def set_hpxml_ventilation_fans(hpxml_file, hpxml)
   if ['base-mechvent-balanced.xml'].include? hpxml_file
-    hpxml.ventilation_fans.add(id:"VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeBalanced,
-                               tested_flow_rate: 110,
+                               rated_flow_rate: 110,
                                hours_in_operation: 24,
                                fan_power: 60,
                                used_for_whole_building_ventilation: true)
@@ -4267,9 +4279,9 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
          'base-mechvent-cfis.xml',
          'base-mechvent-cfis-dse.xml',
          'base-mechvent-cfis-evap-cooler-only-ducted.xml'].include? hpxml_file
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeCFIS,
-                               tested_flow_rate: 330,
+                               rated_flow_rate: 330,
                                hours_in_operation: 8,
                                fan_power: 300,
                                used_for_whole_building_ventilation: true,
@@ -4278,67 +4290,67 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
       hpxml.ventilation_fans[0].distribution_system_idref = 'foobar'
     end
   elsif ['base-mechvent-erv.xml'].include? hpxml_file
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeERV,
-                               tested_flow_rate: 110,
+                               rated_flow_rate: 110,
                                hours_in_operation: 24,
                                total_recovery_efficiency: 0.48,
                                sensible_recovery_efficiency: 0.72,
                                fan_power: 60,
                                used_for_whole_building_ventilation: true)
   elsif ['base-mechvent-erv-atre-asre.xml'].include? hpxml_file
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeERV,
-                               tested_flow_rate: 110,
+                               rated_flow_rate: 110,
                                hours_in_operation: 24,
                                total_recovery_efficiency_adjusted: 0.526,
                                sensible_recovery_efficiency_adjusted: 0.79,
                                fan_power: 60,
                                used_for_whole_building_ventilation: true)
   elsif ['base-mechvent-exhaust.xml'].include? hpxml_file
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeExhaust,
-                               tested_flow_rate: 110,
+                               rated_flow_rate: 110,
                                hours_in_operation: 24,
                                fan_power: 30,
                                used_for_whole_building_ventilation: true)
   elsif ['base-mechvent-exhaust-rated-flow-rate.xml'].include? hpxml_file
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeExhaust,
                                rated_flow_rate: 110,
                                hours_in_operation: 24,
                                fan_power: 30,
                                used_for_whole_building_ventilation: true)
   elsif ['base-mechvent-hrv.xml'].include? hpxml_file
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeHRV,
-                               tested_flow_rate: 110,
+                               rated_flow_rate: 110,
                                hours_in_operation: 24,
                                sensible_recovery_efficiency: 0.72,
                                fan_power: 60,
                                used_for_whole_building_ventilation: true)
   elsif ['base-mechvent-hrv-asre.xml'].include? hpxml_file
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeHRV,
-                               tested_flow_rate: 110,
+                               rated_flow_rate: 110,
                                hours_in_operation: 24,
                                sensible_recovery_efficiency_adjusted: 0.790,
                                fan_power: 60,
                                used_for_whole_building_ventilation: true)
   elsif ['base-mechvent-supply.xml'].include? hpxml_file
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeSupply,
-                               tested_flow_rate: 110,
+                               rated_flow_rate: 110,
                                hours_in_operation: 24,
                                fan_power: 30,
                                used_for_whole_building_ventilation: true)
   elsif ['base-mechvent-whole-house-fan.xml'].include? hpxml_file
-    hpxml.ventilation_fans.add(id: 'WholeHouseFan',
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                rated_flow_rate: 4500,
                                fan_power: 300,
                                used_for_seasonal_cooling_load_reduction: true)
   elsif ['base-mechvent-bath-kitchen-fans.xml'].include? hpxml_file
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                quantity: 1,
                                fan_location: HPXML::LocationKitchen,
                                rated_flow_rate: 100,
@@ -4346,7 +4358,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                hours_in_operation: 1.5,
                                start_hour: 18,
                                used_for_local_ventilation: true)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_location: HPXML::LocationBath,
                                quantity: 2,
                                rated_flow_rate: 50,
@@ -4355,20 +4367,20 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                start_hour: 7,
                                used_for_local_ventilation: true)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeExhaust,
                                used_for_whole_building_ventilation: true)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_location: HPXML::LocationKitchen,
                                used_for_local_ventilation: true)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_location: HPXML::LocationBath,
                                used_for_local_ventilation: true)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                used_for_seasonal_cooling_load_reduction: true)
   elsif ['base-bldgtype-multifamily-shared-mechvent.xml'].include? hpxml_file
     # Shared supply + in-unit exhaust (roughly balanced)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeSupply,
                                is_shared_system: true,
                                in_unit_flow_rate: 80,
@@ -4377,9 +4389,9 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                fan_power: 240,
                                used_for_whole_building_ventilation: true,
                                fraction_recirculation: 0.5)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeExhaust,
-                               tested_flow_rate: 72,
+                               rated_flow_rate: 72,
                                hours_in_operation: 24,
                                fan_power: 26,
                                used_for_whole_building_ventilation: true)
@@ -4394,7 +4406,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
     hpxml.ventilation_fans[0].precooling_efficiency_cop = 4.0
     hpxml.ventilation_fans[0].precooling_fraction_load_served = 0.8
   elsif ['base-bldgtype-multifamily-shared-mechvent-multiple.xml'].include? hpxml_file
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeSupply,
                                is_shared_system: true,
                                in_unit_flow_rate: 100,
@@ -4409,7 +4421,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                precooling_fuel: HPXML::FuelTypeElectricity,
                                precooling_efficiency_cop: 4.0,
                                precooling_fraction_load_served: 0.8)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeERV,
                                is_shared_system: true,
                                in_unit_flow_rate: 50,
@@ -4426,7 +4438,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                precooling_fuel: HPXML::FuelTypeElectricity,
                                precooling_efficiency_cop: 3.5,
                                precooling_fraction_load_served: 1.0)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeHRV,
                                is_shared_system: true,
                                in_unit_flow_rate: 50,
@@ -4442,7 +4454,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                precooling_efficiency_cop: 4.5,
                                preheating_fraction_load_served: 1.0,
                                precooling_fraction_load_served: 1.0)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeBalanced,
                                is_shared_system: true,
                                in_unit_flow_rate: 30,
@@ -4457,7 +4469,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                precooling_efficiency_cop: 4.0,
                                preheating_fraction_load_served: 0.9,
                                precooling_fraction_load_served: 1.0)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeExhaust,
                                is_shared_system: true,
                                in_unit_flow_rate: 70,
@@ -4466,13 +4478,13 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                fan_power: 300,
                                used_for_whole_building_ventilation: true,
                                fraction_recirculation: 0.0)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeExhaust,
                                tested_flow_rate: 50,
                                hours_in_operation: 14,
                                fan_power: 10,
                                used_for_whole_building_ventilation: true)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeCFIS,
                                tested_flow_rate: 160,
                                hours_in_operation: 8,
@@ -4480,29 +4492,29 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                used_for_whole_building_ventilation: true,
                                distribution_system_idref: 'HVACDistribution1')
   elsif ['base-mechvent-multiple.xml'].include? hpxml_file
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                rated_flow_rate: 2000,
                                fan_power: 150,
                                used_for_seasonal_cooling_load_reduction: true)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeSupply,
                                tested_flow_rate: 27.5,
                                hours_in_operation: 24,
                                fan_power: 7.5,
                                used_for_whole_building_ventilation: true)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeExhaust,
                                tested_flow_rate: 12.5,
                                hours_in_operation: 14,
                                fan_power: 2.5,
                                used_for_whole_building_ventilation: true)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeBalanced,
                                tested_flow_rate: 27.5,
                                hours_in_operation: 24,
                                fan_power: 15,
                                used_for_whole_building_ventilation: true)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeERV,
                                tested_flow_rate: 12.5,
                                hours_in_operation: 24,
@@ -4510,7 +4522,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                sensible_recovery_efficiency: 0.72,
                                fan_power: 6.25,
                                used_for_whole_building_ventilation: true)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeHRV,
                                tested_flow_rate: 15,
                                hours_in_operation: 24,
@@ -4526,14 +4538,14 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
       hpxml.ventilation_fans[-1].start_hour = vent_fan.start_hour - 1 unless vent_fan.start_hour.nil?
       hpxml.ventilation_fans[-1].hours_in_operation = vent_fan.hours_in_operation - 1 unless vent_fan.hours_in_operation.nil?
     end
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeCFIS,
                                tested_flow_rate: 40,
                                hours_in_operation: 8,
                                fan_power: 37.5,
                                used_for_whole_building_ventilation: true,
                                distribution_system_idref: 'HVACDistribution1')
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeCFIS,
                                tested_flow_rate: 42.5,
                                hours_in_operation: 8,
@@ -4541,14 +4553,14 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                used_for_whole_building_ventilation: true,
                                distribution_system_idref: 'HVACDistribution2')
     # Test ventilation system w/ zero airflow and hours
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeHRV,
                                tested_flow_rate: 0,
                                hours_in_operation: 24,
                                sensible_recovery_efficiency: 0.72,
                                fan_power: 7.5,
                                used_for_whole_building_ventilation: true)
-    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size+1}",
+    hpxml.ventilation_fans.add(id: "VentilationFan#{hpxml.ventilation_fans.size + 1}",
                                fan_type: HPXML::MechVentTypeHRV,
                                tested_flow_rate: 15,
                                hours_in_operation: 0,
@@ -4560,7 +4572,7 @@ end
 
 def set_hpxml_water_heating_systems(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size+1}",
+    hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size + 1}",
                                     fuel_type: HPXML::FuelTypeElectricity,
                                     water_heater_type: HPXML::WaterHeaterTypeStorage,
                                     location: HPXML::LocationLivingSpace,
@@ -4571,7 +4583,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
   elsif ['base-dhw-multiple.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].fraction_dhw_load_served = 0.2
-    hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size+1}",
+    hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size + 1}",
                                     fuel_type: HPXML::FuelTypeNaturalGas,
                                     water_heater_type: HPXML::WaterHeaterTypeStorage,
                                     location: HPXML::LocationLivingSpace,
@@ -4581,7 +4593,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     energy_factor: 0.59,
                                     recovery_efficiency: 0.76,
                                     temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
-    hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size+1}",
+    hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size + 1}",
                                     fuel_type: HPXML::FuelTypeElectricity,
                                     water_heater_type: HPXML::WaterHeaterTypeHeatPump,
                                     location: HPXML::LocationLivingSpace,
@@ -4589,21 +4601,21 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     fraction_dhw_load_served: 0.2,
                                     energy_factor: 2.3,
                                     temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
-    hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size+1}",
+    hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size + 1}",
                                     fuel_type: HPXML::FuelTypeElectricity,
                                     water_heater_type: HPXML::WaterHeaterTypeTankless,
                                     location: HPXML::LocationLivingSpace,
                                     fraction_dhw_load_served: 0.2,
                                     energy_factor: 0.99,
                                     temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
-    hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size+1}",
+    hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size + 1}",
                                     fuel_type: HPXML::FuelTypeNaturalGas,
                                     water_heater_type: HPXML::WaterHeaterTypeTankless,
                                     location: HPXML::LocationLivingSpace,
                                     fraction_dhw_load_served: 0.1,
                                     energy_factor: 0.82,
                                     temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
-    hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size+1}",
+    hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size + 1}",
                                     water_heater_type: HPXML::WaterHeaterTypeCombiStorage,
                                     location: HPXML::LocationLivingSpace,
                                     tank_volume: 50,
@@ -4798,7 +4810,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
   elsif ['base-bldgtype-multifamily-shared-water-heater.xml',
          'base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
     hpxml.water_heating_systems.clear
-    hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size+1}",
+    hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size + 1}",
                                     is_shared_system: true,
                                     number_of_units_served: 6,
                                     fuel_type: HPXML::FuelTypeNaturalGas,
@@ -4823,7 +4835,7 @@ end
 
 def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.hot_water_distributions.add(id: "HotWaterDistribution#{hpxml.hot_water_distributions.size+1}",
+    hpxml.hot_water_distributions.add(id: "HotWaterDistribution#{hpxml.hot_water_distributions.size + 1}",
                                       system_type: HPXML::DHWDistTypeStandard,
                                       standard_piping_length: 50, # Chosen to test a negative EC_adj
                                       pipe_r_value: 0.0)
@@ -4864,7 +4876,7 @@ def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
     hpxml.hot_water_distributions[0].recirculation_branch_piping_length = 50
     hpxml.hot_water_distributions[0].recirculation_pump_power = 50
   elsif ['base-bldgtype-multifamily-shared-water-heater.xml'].include? hpxml_file
-    hpxml.hot_water_distributions[0].id = "HotWaterDistribution#{hpxml.hot_water_distributions.size+1}"
+    hpxml.hot_water_distributions[0].id = 'HotWaterDistribution1'
   elsif ['base-bldgtype-multifamily-shared-water-heater-recirc.xml'].include? hpxml_file
     hpxml.hot_water_distributions[0].has_shared_recirculation = true
     hpxml.hot_water_distributions[0].shared_recirculation_number_of_units_served = 6
@@ -4880,10 +4892,10 @@ end
 
 def set_hpxml_water_fixtures(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.water_fixtures.add(id: "WaterFixture#{hpxml.water_fixtures.size+1}",
+    hpxml.water_fixtures.add(id: "WaterFixture#{hpxml.water_fixtures.size + 1}",
                              water_fixture_type: HPXML::WaterFixtureTypeShowerhead,
                              low_flow: true)
-    hpxml.water_fixtures.add(id: "WaterFixture#{hpxml.water_fixtures.size+1}",
+    hpxml.water_fixtures.add(id: "WaterFixture#{hpxml.water_fixtures.size + 1}",
                              water_fixture_type: HPXML::WaterFixtureTypeFaucet,
                              low_flow: false)
   elsif ['base-dhw-low-flow-fixtures.xml'].include? hpxml_file
@@ -4904,12 +4916,12 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
       'base-dhw-indirect-with-solar-fraction.xml',
       'base-dhw-tank-heat-pump-with-solar-fraction.xml',
       'base-dhw-tankless-gas-with-solar-fraction.xml'].include? hpxml_file
-    hpxml.solar_thermal_systems.add(id: "SolarThermalSystem#{hpxml.solar_thermal_systems.size+1}",
+    hpxml.solar_thermal_systems.add(id: "SolarThermalSystem#{hpxml.solar_thermal_systems.size + 1}",
                                     system_type: 'hot water',
                                     water_heating_system_idref: 'WaterHeatingSystem1',
                                     solar_fraction: 0.65)
   elsif ['base-dhw-multiple.xml'].include? hpxml_file
-    hpxml.solar_thermal_systems.add(id: "SolarThermalSystem#{hpxml.solar_thermal_systems.size+1}",
+    hpxml.solar_thermal_systems.add(id: "SolarThermalSystem#{hpxml.solar_thermal_systems.size + 1}",
                                     system_type: 'hot water',
                                     water_heating_system_idref: nil, # Apply to all water heaters
                                     solar_fraction: 0.65)
@@ -4922,7 +4934,7 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
          'invalid_files/solar-thermal-system-with-combi-tankless.xml',
          'invalid_files/solar-thermal-system-with-desuperheater.xml',
          'invalid_files/solar-thermal-system-with-dhw-indirect.xml'].include? hpxml_file
-    hpxml.solar_thermal_systems.add(id: "SolarThermalSystem#{hpxml.solar_thermal_systems.size+1}",
+    hpxml.solar_thermal_systems.add(id: "SolarThermalSystem#{hpxml.solar_thermal_systems.size + 1}",
                                     system_type: 'hot water',
                                     collector_area: 40,
                                     collector_type: HPXML::SolarThermalTypeSingleGlazing,
@@ -4943,7 +4955,7 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
       hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeIndirect
     end
   elsif ['base-dhw-solar-direct-evacuated-tube.xml'].include? hpxml_file
-    hpxml.solar_thermal_systems.add(id: "SolarThermalSystem#{hpxml.solar_thermal_systems.size+1}",
+    hpxml.solar_thermal_systems.add(id: "SolarThermalSystem#{hpxml.solar_thermal_systems.size + 1}",
                                     system_type: 'hot water',
                                     collector_area: 40,
                                     collector_type: HPXML::SolarThermalTypeEvacuatedTube,
@@ -4959,7 +4971,7 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
       hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeIndirect
     end
   elsif ['base-dhw-solar-direct-ics.xml'].include? hpxml_file
-    hpxml.solar_thermal_systems.add(id: "SolarThermalSystem#{hpxml.solar_thermal_systems.size+1}",
+    hpxml.solar_thermal_systems.add(id: "SolarThermalSystem#{hpxml.solar_thermal_systems.size + 1}",
                                     system_type: 'hot water',
                                     collector_area: 40,
                                     collector_loop_type: HPXML::SolarThermalLoopTypeDirect,
@@ -5046,7 +5058,7 @@ end
 
 def set_hpxml_clothes_washer(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.clothes_washers.add(id: "ClothesWasher#{hpxml.clothes_washers.size+1}",
+    hpxml.clothes_washers.add(id: "ClothesWasher#{hpxml.clothes_washers.size + 1}",
                               location: HPXML::LocationLivingSpace,
                               integrated_modified_energy_factor: 1.21,
                               rated_annual_kwh: 380,
@@ -5097,7 +5109,7 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
     hpxml.clothes_washers[0].monthly_multipliers = '1.011, 1.002, 1.022, 1.020, 1.022, 0.996, 0.999, 0.999, 0.996, 0.964, 0.959, 1.011'
   elsif ['base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
     hpxml.clothes_washers[0].is_shared_appliance = true
-    hpxml.clothes_washers[0].id = "ClothesWasher#{hpxml.clothes_washers.size+1}"
+    hpxml.clothes_washers[0].id = "ClothesWasher#{hpxml.clothes_washers.size + 1}"
     hpxml.clothes_washers[0].location = HPXML::LocationOtherHeatedSpace
     hpxml.clothes_washers[0].water_heating_system_idref = 'WaterHeatingSystem1'
   elsif ['invalid_files/unattached-shared-clothes-washer-water-heater.xml'].include? hpxml_file
@@ -5109,7 +5121,7 @@ end
 
 def set_hpxml_clothes_dryer(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.clothes_dryers.add(id: "ClothesDryer#{hpxml.clothes_dryers.size+1}",
+    hpxml.clothes_dryers.add(id: "ClothesDryer#{hpxml.clothes_dryers.size + 1}",
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
                              combined_energy_factor: 3.73,
@@ -5131,7 +5143,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     cef = hpxml.clothes_dryers[-1].combined_energy_factor
     hpxml.clothes_dryers.clear
-    hpxml.clothes_dryers.add(id: "ClothesDryer#{hpxml.clothes_dryers.size+1}",
+    hpxml.clothes_dryers.add(id: "ClothesDryer#{hpxml.clothes_dryers.size + 1}",
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
                              energy_factor: HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(cef).round(2),
@@ -5142,7 +5154,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
          'base-appliances-oil.xml',
          'base-appliances-wood.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear
-    hpxml.clothes_dryers.add(id: "ClothesDryer#{hpxml.clothes_dryers.size+1}",
+    hpxml.clothes_dryers.add(id: "ClothesDryer#{hpxml.clothes_dryers.size + 1}",
                              location: HPXML::LocationLivingSpace,
                              combined_energy_factor: 3.30)
     if hpxml_file == 'base-appliances-coal.xml'
@@ -5170,7 +5182,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers[0].is_vented = nil
     hpxml.clothes_dryers[0].vented_flow_rate = nil
   elsif ['base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
-    hpxml.clothes_dryers[0].id = "ClothesDryer#{hpxml.clothes_dryers.size+1}"
+    hpxml.clothes_dryers[0].id = "ClothesDryer#{hpxml.clothes_dryers.size + 1}"
     hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
     hpxml.clothes_dryers[0].is_shared_appliance = true
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
@@ -5184,7 +5196,7 @@ end
 
 def set_hpxml_dishwasher(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.dishwashers.add(id: "Dishwasher#{hpxml.dishwashers.size+1}",
+    hpxml.dishwashers.add(id: "Dishwasher#{hpxml.dishwashers.size + 1}",
                           location: HPXML::LocationLivingSpace,
                           rated_annual_kwh: 307,
                           label_electric_rate: 0.12,
@@ -5246,12 +5258,10 @@ end
 
 def set_hpxml_refrigerator(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.refrigerators.add(id: "Refrigerator#{hpxml.refrigerators.size+1}",
+    hpxml.refrigerators.add(id: "Refrigerator#{hpxml.refrigerators.size + 1}",
                             location: HPXML::LocationLivingSpace,
                             rated_annual_kwh: 650,
                             primary_indicator: true)
-  elsif ['base-appliances-modified.xml'].include? hpxml_file
-    hpxml.refrigerators[0].adjusted_annual_kwh = 600
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.refrigerators.clear
   elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
@@ -5275,7 +5285,6 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
     hpxml.refrigerators[0].primary_indicator = nil
     hpxml.refrigerators[0].location = nil
     hpxml.refrigerators[0].rated_annual_kwh = nil
-    hpxml.refrigerators[0].adjusted_annual_kwh = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.refrigerators[0].usage_multiplier = 0.9
   elsif ['base-schedules-simple.xml'].include? hpxml_file
@@ -5283,26 +5292,26 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
     hpxml.refrigerators[0].weekend_fractions = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
     hpxml.refrigerators[0].monthly_multipliers = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
   elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
-    hpxml.refrigerators.add(id: "Refrigerator#{hpxml.refrigerators.size+1}",
+    hpxml.refrigerators.add(id: "Refrigerator#{hpxml.refrigerators.size + 1}",
                             rated_annual_kwh: 700,
                             primary_indicator: false,
                             weekday_fractions: '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041',
                             weekend_fractions: '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041',
                             monthly_multipliers: '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
-    hpxml.refrigerators.add(id: "Refrigerator#{hpxml.refrigerators.size+1}",
+    hpxml.refrigerators.add(id: "Refrigerator#{hpxml.refrigerators.size + 1}",
                             rated_annual_kwh: 800,
                             primary_indicator: false,
                             weekday_fractions: '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041',
                             weekend_fractions: '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041',
                             monthly_multipliers: '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
   elsif ['invalid_files/refrigerators-multiple-primary.xml'].include? hpxml_file
-    hpxml.refrigerators.add(id: "Refrigerator#{hpxml.refrigerators.size+1}",
+    hpxml.refrigerators.add(id: "Refrigerator#{hpxml.refrigerators.size + 1}",
                             location: HPXML::LocationLivingSpace,
                             rated_annual_kwh: 650,
                             primary_indicator: true)
   elsif ['invalid_files/refrigerators-no-primary.xml'].include? hpxml_file
     hpxml.refrigerators[0].primary_indicator = false
-    hpxml.refrigerators.add(id: "Refrigerator#{hpxml.refrigerators.size+1}",
+    hpxml.refrigerators.add(id: "Refrigerator#{hpxml.refrigerators.size + 1}",
                             location: HPXML::LocationLivingSpace,
                             rated_annual_kwh: 650,
                             primary_indicator: false)
@@ -5312,13 +5321,13 @@ end
 def set_hpxml_freezer(hpxml_file, hpxml)
   if ['base-misc-loads-large-uncommon.xml',
       'base-misc-usage-multiplier.xml'].include? hpxml_file
-    hpxml.freezers.add(id: "Freezer#{hpxml.freezers.size+1}",
+    hpxml.freezers.add(id: "Freezer#{hpxml.freezers.size + 1}",
                        location: HPXML::LocationLivingSpace,
                        rated_annual_kwh: 300,
                        weekday_fractions: '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041',
                        weekend_fractions: '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041',
                        monthly_multipliers: '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
-    hpxml.freezers.add(id: "Freezer#{hpxml.freezers.size+1}",
+    hpxml.freezers.add(id: "Freezer#{hpxml.freezers.size + 1}",
                        location: HPXML::LocationLivingSpace,
                        rated_annual_kwh: 400,
                        weekday_fractions: '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041',
@@ -5334,7 +5343,7 @@ end
 
 def set_hpxml_dehumidifier(hpxml_file, hpxml)
   if ['base-appliances-dehumidifier.xml'].include? hpxml_file
-    hpxml.dehumidifiers.add(id: "Dehumidifier#{hpxml.dehumidifiers.size+1}",
+    hpxml.dehumidifiers.add(id: "Dehumidifier#{hpxml.dehumidifiers.size + 1}",
                             type: HPXML::DehumidifierTypePortable,
                             capacity: 40,
                             energy_factor: 1.8,
@@ -5348,7 +5357,7 @@ def set_hpxml_dehumidifier(hpxml_file, hpxml)
     hpxml.dehumidifiers[0].type = HPXML::DehumidifierTypeWholeHome
   elsif ['base-appliances-dehumidifier-multiple.xml'].include? hpxml_file
     hpxml.dehumidifiers[0].fraction_served = 0.5
-    hpxml.dehumidifiers.add(id: "Dehumidifier#{hpxml.dehumidifiers.size+1}",
+    hpxml.dehumidifiers.add(id: "Dehumidifier#{hpxml.dehumidifiers.size + 1}",
                             type: HPXML::DehumidifierTypePortable,
                             capacity: 30,
                             energy_factor: 1.6,
@@ -5364,7 +5373,7 @@ end
 
 def set_hpxml_cooking_range(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.cooking_ranges.add(id: "CookingRange#{hpxml.cooking_ranges.size+1}",
+    hpxml.cooking_ranges.add(id: "CookingRange#{hpxml.cooking_ranges.size + 1}",
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
                              is_induction: false)
@@ -5414,7 +5423,7 @@ end
 
 def set_hpxml_oven(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.ovens.add(id: "Oven#{hpxml.ovens.size+1}",
+    hpxml.ovens.add(id: "Oven#{hpxml.ovens.size + 1}",
                     is_convection: false)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.ovens.clear
@@ -5425,39 +5434,39 @@ end
 
 def set_hpxml_lighting(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size+1}",
+    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
                               location: HPXML::LocationInterior,
                               fraction_of_units_in_location: 0.4,
                               lighting_type: HPXML::LightingTypeCFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size+1}",
+    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
                               location: HPXML::LocationExterior,
                               fraction_of_units_in_location: 0.4,
                               lighting_type: HPXML::LightingTypeCFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size+1}",
+    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
                               location: HPXML::LocationGarage,
                               fraction_of_units_in_location: 0.4,
                               lighting_type: HPXML::LightingTypeCFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size+1}",
+    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
                               location: HPXML::LocationInterior,
                               fraction_of_units_in_location: 0.1,
                               lighting_type: HPXML::LightingTypeLFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size+1}",
+    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
                               location: HPXML::LocationExterior,
                               fraction_of_units_in_location: 0.1,
                               lighting_type: HPXML::LightingTypeLFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size+1}",
+    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
                               location: HPXML::LocationGarage,
                               fraction_of_units_in_location: 0.1,
                               lighting_type: HPXML::LightingTypeLFL)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size+1}",
+    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
                               location: HPXML::LocationInterior,
                               fraction_of_units_in_location: 0.25,
                               lighting_type: HPXML::LightingTypeLED)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size+1}",
+    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
                               location: HPXML::LocationExterior,
                               fraction_of_units_in_location: 0.25,
                               lighting_type: HPXML::LightingTypeLED)
-    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size+1}",
+    hpxml.lighting_groups.add(id: "LightingGroup#{hpxml.lighting_groups.size + 1}",
                               location: HPXML::LocationGarage,
                               fraction_of_units_in_location: 0.25,
                               lighting_type: HPXML::LightingTypeLED)
@@ -5474,14 +5483,14 @@ end
 
 def set_hpxml_ceiling_fans(hpxml_file, hpxml)
   if ['base-lighting-ceiling-fans.xml'].include? hpxml_file
-    hpxml.ceiling_fans.add(id: "CeilingFan#{hpxml.ceiling_fans.size+1}",
+    hpxml.ceiling_fans.add(id: "CeilingFan#{hpxml.ceiling_fans.size + 1}",
                            efficiency: 100,
                            quantity: 4,
                            weekday_fractions: '0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057',
                            weekend_fractions: '0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057',
                            monthly_multipliers: '0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0')
   elsif ['base-misc-defaults.xml'].include? hpxml_file
-    hpxml.ceiling_fans.add(id: "CeilingFan#{hpxml.ceiling_fans.size+1}",
+    hpxml.ceiling_fans.add(id: "CeilingFan#{hpxml.ceiling_fans.size + 1}",
                            efficiency: nil,
                            quantity: nil)
   end
@@ -5490,7 +5499,7 @@ end
 def set_hpxml_pools(hpxml_file, hpxml)
   if ['base-misc-loads-large-uncommon.xml',
       'base-misc-usage-multiplier.xml'].include? hpxml_file
-    hpxml.pools.add(id: "Pool#{hpxml.pools.size+1}",
+    hpxml.pools.add(id: "Pool#{hpxml.pools.size + 1}",
                     type: HPXML::TypeUnknown,
                     pump_type: HPXML::TypeUnknown,
                     pump_kwh_per_year: 2700,
@@ -5517,7 +5526,7 @@ end
 def set_hpxml_hot_tubs(hpxml_file, hpxml)
   if ['base-misc-loads-large-uncommon.xml',
       'base-misc-usage-multiplier.xml'].include? hpxml_file
-    hpxml.hot_tubs.add(id: "HotTub#{hpxml.hot_tubs.size+1}",
+    hpxml.hot_tubs.add(id: "HotTub#{hpxml.hot_tubs.size + 1}",
                        type: HPXML::TypeUnknown,
                        pump_type: HPXML::TypeUnknown,
                        pump_kwh_per_year: 1000,
@@ -5568,7 +5577,7 @@ end
 def set_hpxml_plug_loads(hpxml_file, hpxml)
   if ['ASHRAE_Standard_140/L100AC.xml',
       'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
-    hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size+1}",
+    hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
                          plug_load_type: HPXML::PlugLoadTypeOther,
                          kWh_per_year: 7302,
                          frac_sensible: 0.822,
@@ -5578,9 +5587,9 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
     hpxml.plug_loads[0].kWh_per_year = 0
   elsif not hpxml_file.include?('ASHRAE_Standard_140')
     if ['base.xml'].include? hpxml_file
-      hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size+1}",
+      hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
                            plug_load_type: HPXML::PlugLoadTypeTelevision)
-      hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size+1}",
+      hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
                            plug_load_type: HPXML::PlugLoadTypeOther)
     elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
       hpxml.plug_loads.each do |plug_load|
@@ -5595,7 +5604,7 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
       end
     elsif ['base-misc-loads-none.xml'].include? hpxml_file
       hpxml.plug_loads.clear
-      hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size+1}",
+      hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
                            plug_load_type: HPXML::PlugLoadTypeOther,
                            kWh_per_year: 0)
     elsif ['base-schedules-simple.xml'].include? hpxml_file
@@ -5606,13 +5615,13 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
       hpxml.plug_loads[1].weekend_fractions = '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036'
       hpxml.plug_loads[1].monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
     elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
-      hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size+1}",
+      hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
                            plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging,
                            kWh_per_year: 1500,
                            weekday_fractions: '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042',
                            weekend_fractions: '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042',
                            monthly_multipliers: '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
-      hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size+1}",
+      hpxml.plug_loads.add(id: "PlugLoad#{hpxml.plug_loads.size + 1}",
                            plug_load_type: HPXML::PlugLoadTypeWellPump,
                            kWh_per_year: 475,
                            weekday_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',
@@ -5649,21 +5658,21 @@ end
 def set_hpxml_fuel_loads(hpxml_file, hpxml)
   if ['base-misc-loads-large-uncommon.xml',
       'base-misc-usage-multiplier.xml'].include? hpxml_file
-    hpxml.fuel_loads.add(id: "FuelLoad#{hpxml.fuel_loads.size+1}",
+    hpxml.fuel_loads.add(id: "FuelLoad#{hpxml.fuel_loads.size + 1}",
                          fuel_load_type: HPXML::FuelLoadTypeGrill,
                          fuel_type: HPXML::FuelTypePropane,
                          therm_per_year: 25,
                          weekday_fractions: '0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007',
                          weekend_fractions: '0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007',
                          monthly_multipliers: '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097')
-    hpxml.fuel_loads.add(id: "FuelLoad#{hpxml.fuel_loads.size+1}",
+    hpxml.fuel_loads.add(id: "FuelLoad#{hpxml.fuel_loads.size + 1}",
                          fuel_load_type: HPXML::FuelLoadTypeLighting,
                          fuel_type: HPXML::FuelTypeNaturalGas,
                          therm_per_year: 28,
                          weekday_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',
                          weekend_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',
                          monthly_multipliers: '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
-    hpxml.fuel_loads.add(id: "FuelLoad#{hpxml.fuel_loads.size+1}",
+    hpxml.fuel_loads.add(id: "FuelLoad#{hpxml.fuel_loads.size + 1}",
                          fuel_load_type: HPXML::FuelLoadTypeFireplace,
                          fuel_type: HPXML::FuelTypeWoodCord,
                          frac_sensible: 0.5,
@@ -5906,7 +5915,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
       end
       assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected id attribute for #{element_name}", :string)
       XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-      XMLHelper.add_attribute(assertion, 'test', "count(h:#{element_name}[@id]) = 1 or not (h:#{element_name})")
+      XMLHelper.add_attribute(assertion, 'test', "count(h:#{element_name}[@id]) = count(h:#{element_name})")
     elsif idref_names.include? element_name
       rule = rules[context_xpath]
       if rule.nil?
@@ -5917,7 +5926,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
       end
       assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected idref attribute for #{element_name}", :string)
       XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-      XMLHelper.add_attribute(assertion, 'test', "count(h:#{element_name}[@idref]) = 1 or not(h:#{element_name})")
+      XMLHelper.add_attribute(assertion, 'test', "count(h:#{element_name}[@idref]) = count(h:#{element_name})")
     end
   end
 
