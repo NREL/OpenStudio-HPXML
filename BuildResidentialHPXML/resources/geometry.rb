@@ -1647,7 +1647,6 @@ class Geometry
                                          geometry_building_num_units:,
                                          geometry_unit_num_floors_above_grade:,
                                          geometry_unit_aspect_ratio:,
-                                         geometry_corridor_position:,
                                          geometry_foundation_type:,
                                          geometry_foundation_height:,
                                          geometry_rim_joist_height:,
@@ -1664,7 +1663,6 @@ class Geometry
     num_units = geometry_building_num_units.get
     num_floors = geometry_unit_num_floors_above_grade
     aspect_ratio = geometry_unit_aspect_ratio
-    corridor_position = geometry_corridor_position
     foundation_type = geometry_foundation_type
     foundation_height = geometry_foundation_height
     rim_joist_height = geometry_rim_joist_height
@@ -2253,7 +2251,7 @@ class Geometry
       end
     end
 
-    if (corridor_position == 'Double-Loaded Interior')
+    if (corridor_position == 'Interior')
       interior_corridor_width = corridor_width / 2 # Only half the corridor is attached to a unit
       # corridors
       if corridor_width > 0
@@ -2281,7 +2279,7 @@ class Geometry
         corridor_space.setThermalZone(corridor_zone)
       end
 
-    elsif (corridor_position == 'Double Exterior') || (corridor_position == 'Single Exterior (Front)')
+    elsif (corridor_position == 'Exterior')
       interior_corridor_width = 0
       # front access
       nw_point = OpenStudio::Point3d.new(0, -y, wall_height + rim_joist_height)
@@ -2301,7 +2299,7 @@ class Geometry
 
       # foundation corridor
       foundation_corridor_space = nil
-      if (corridor_width > 0) && (corridor_position == 'Double-Loaded Interior')
+      if (corridor_width > 0) && (corridor_position == 'Interior')
         foundation_corridor_space = OpenStudio::Model::Space::fromFloorPrint(foundation_corr_polygon, foundation_height, model)
         foundation_corridor_space = foundation_corridor_space.get
         m = initialize_transformation_matrix(OpenStudio::Matrix.new(4, 4, 0))
