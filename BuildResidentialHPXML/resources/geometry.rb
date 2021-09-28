@@ -1688,10 +1688,9 @@ class Geometry
     end
 
     has_rear_units = false
-    if corridor_position == 'Double Exterior'
+    if back_wall
       has_rear_units = true
     end
-    offset = 0
 
     num_units_actual = num_units
     num_floors_actual = num_floors
@@ -1754,7 +1753,8 @@ class Geometry
     # Map unit location to adiabatic surfaces (#if `key` unit then make `value(s)` adiabatic)
     horz_hash = { 'Left' => ['right'], 'Right' => ['left'], 'Middle' => ['left', 'right'], 'None' => [] }
     adb_facade = horz_hash[horizontal_location]
-    if (has_rear_units == true)
+
+    if has_rear_units
       adb_facade += ['back']
     end
 
@@ -1903,14 +1903,10 @@ class Geometry
     OpenStudio::Model.matchSurfaces(spaces)
 
     if [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include?(attic_type) && (roof_type != 'flat')
-      if offset == 0
-        attic_spaces.each do |attic_space|
-          attic_space.remove
-        end
-        attic_space = get_attic_space(model, x, y, wall_height, num_floors, num_units, roof_pitch, roof_type, rim_joist_height, has_rear_units)
-      else
-        attic_space = make_one_space_from_multiple_spaces(model, attic_spaces)
+      attic_spaces.each do |attic_space|
+        attic_space.remove
       end
+      attic_space = get_attic_space(model, x, y, wall_height, num_floors, num_units, roof_pitch, roof_type, rim_joist_height, has_rear_units)
 
       # set these to the attic zone
       if (attic_type == HPXML::AtticTypeVented) || (attic_type == HPXML::AtticTypeUnvented)

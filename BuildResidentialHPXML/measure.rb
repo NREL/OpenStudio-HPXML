@@ -269,15 +269,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     corridor_position_choices = OpenStudio::StringVector.new
-    corridor_position_choices << 'Double-Loaded Interior'
-    corridor_position_choices << 'Single Exterior (Front)'
-    corridor_position_choices << 'Double Exterior'
+    corridor_position_choices << 'Interior'
+    corridor_position_choices << 'Exterior'
     corridor_position_choices << 'None'
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_corridor_position', corridor_position_choices, true)
     arg.setDisplayName('Geometry: Corridor Position')
     arg.setDescription("The position of the corridor. Only applies to #{HPXML::ResidentialTypeSFA} and #{HPXML::ResidentialTypeApartment}s. Exterior corridors are shaded, but not enclosed. Interior corridors are enclosed and conditioned.")
-    arg.setDefaultValue('Double-Loaded Interior')
+    arg.setDefaultValue('Inside')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_corridor_width', true)
@@ -3159,11 +3158,6 @@ class HPXMLFile
       success = Geometry.create_single_family_attached(runner: runner, model: model, **args)
     elsif args[:geometry_unit_type] == HPXML::ResidentialTypeApartment
       args[:geometry_roof_type] = 'flat'
-      # FIXME: I think ideally we'd change geometry_corridor_position to have choices of None, Front, Back, Left, Right
-      if !args[:geometry_unit_back_wall_is_adiabatic] && ['Double-Loaded Interior', 'Double Exterior'].include?(args[:geometry_corridor_position])
-        args[:geometry_unit_back_wall_is_adiabatic] = true if args[:geometry_corridor_position] == 'Double Exterior'
-        args[:geometry_corridor_position] = 'Single Exterior (Front)'
-      end
       success = Geometry.create_multifamily(runner: runner, model: model, **args)
     end
     return false if not success
