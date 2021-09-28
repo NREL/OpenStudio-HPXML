@@ -1145,12 +1145,12 @@ class HPXMLTest < MiniTest::Test
         hpxml_value = 1.0 / (1.0 / hpxml_value - Material.AirFilmVertical.rvalue)
         hpxml_value = 1.0 / (1.0 / hpxml_value - Material.AirFilmVertical.rvalue)
       end
+      if subsurface.is_a? HPXML::Skylight
+        hpxml_value /= 1.2 # Convert from NFRC 20-degree slope to vertical position
+      end
       hpxml_value = [hpxml_value, UnitConversions.convert(7.0, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')].min # FUTURE: Remove when U-factor restriction is lifted in EnergyPlus
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='#{col_name}' AND Units='W/m2-K'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
-      if subsurface.is_a? HPXML::Skylight
-        sql_value *= 1.2 # Convert back from vertical position to NFRC 20-degree slope
-      end
       assert_in_epsilon(hpxml_value, sql_value, 0.02)
 
       next unless subsurface.is_exterior
