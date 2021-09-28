@@ -92,6 +92,7 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
     CSV.foreach(File.join(File.dirname(__FILE__), 'resources', 'zipcodes_wx.csv'), headers: true) do |row|
       zip3_of_interest = zipcode[0, 3]
       next unless row['postal_code'].start_with?(zip3_of_interest)
+
       distance = (Integer(Float(row['postal_code'])) - Integer(Float(zipcode))).abs()
       if distance < zip_distance
         zip_distance = distance

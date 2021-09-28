@@ -1123,7 +1123,7 @@ def get_default_water_heater_capacity(fuel)
   fail "Could not get default water heater capacity for fuel '#{fuel}'"
 end
 
-def calc_ef_from_uef(water_heater_type, fuel_type, uniform_energy_factor)  # FIXME: We will be removing references to this method in PR #279
+def calc_ef_from_uef(water_heater_type, fuel_type, uniform_energy_factor) # FIXME: We will be removing references to this method in PR #279
   # Interpretation on Water Heater UEF
   if fuel_type == HPXML::FuelTypeElectricity
     if water_heater_type == HPXML::WaterHeaterTypeStorage
