@@ -1,0 +1,129 @@
+{
+  "building_address": {
+    "address": "150 Roaring Fork Drive",
+    "city": "Aspen",
+    "state": "CO",
+    "zip_code": "81611",
+    "assessment_type": "test",
+    "external_building_id": "58933"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2017-07-19",
+      "shape": "rectangle",
+      "year_built": 1982,
+      "number_bedrooms": 4,
+      "num_floor_above_grade": 3,
+      "floor_to_ceiling_height": 9,
+      "conditioned_floor_area": 3469,
+      "orientation": "north",
+      "blower_door_test": true,
+      "envelope_leakage": 4134
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 1012.0,
+          "roof_assembly_code": "rfwf27co",
+          "roof_color": "medium",
+          "roof_type": "cath_ceiling",
+          "zone_skylight": {
+            "skylight_area": 12.0,
+            "skylight_method": "custom",
+            "skylight_u_value": 0.830502,
+            "skylight_shgc": 0.75,
+            "solar_screen": false
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 730.0,
+          "foundation_type": "cond_basement",
+          "foundation_insulation_level": 19,
+          "floor_assembly_code": "efwf00ca"
+        },
+        {
+          "floor_name": "floor2",
+          "floor_area": 183.0,
+          "foundation_type": "unvented_crawl",
+          "foundation_insulation_level": 11,
+          "floor_assembly_code": "efwf00ca"
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewwf19st",
+          "zone_window": {
+            "window_area": 48.0,
+            "window_method": "custom",
+            "window_u_value": 0.44,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewwf19st",
+          "zone_window": {
+            "window_area": 20.0,
+            "window_method": "custom",
+            "window_u_value": 0.44000000000000006,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewwf19st",
+          "zone_window": {
+            "window_area": 285.0,
+            "window_method": "custom",
+            "window_u_value": 0.44,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewwf19st",
+          "zone_window": {
+            "window_area": 6.0,
+            "window_method": "custom",
+            "window_u_value": 0.44,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "electric",
+            "type": "baseboard"
+          },
+          "cooling": {
+            "type": "dec"
+          },
+          "hvac_distribution": []
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "natural_gas",
+        "efficiency_method": "user",
+        "energy_factor": 0.55
+      }
+    }
+  }
+}

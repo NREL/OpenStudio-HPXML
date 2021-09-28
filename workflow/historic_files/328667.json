@@ -1,0 +1,135 @@
+{
+  "building_address": {
+    "address": "8527 N Drummond Ave",
+    "city": "Portland",
+    "state": "OR",
+    "zip_code": "97217",
+    "assessment_type": "test",
+    "external_building_id": "18603"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2019-04-17",
+      "shape": "rectangle",
+      "year_built": 1924,
+      "number_bedrooms": 3,
+      "num_floor_above_grade": 2,
+      "floor_to_ceiling_height": 7,
+      "conditioned_floor_area": 1840,
+      "orientation": "east",
+      "blower_door_test": false,
+      "air_sealing_present": false
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 552.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "dark",
+          "roof_type": "cath_ceiling",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        },
+        {
+          "roof_name": "roof2",
+          "roof_area": 488.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "dark",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf19",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 776.0,
+          "foundation_type": "cond_basement",
+          "foundation_insulation_level": 11,
+          "floor_assembly_code": "efwf11ca"
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewwf07wo",
+          "zone_window": {
+            "window_area": 60.0,
+            "window_method": "code",
+            "window_code": "dcaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewwf07wo",
+          "zone_window": {
+            "window_area": 35.0,
+            "window_method": "code",
+            "window_code": "dcaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewwf07wo",
+          "zone_window": {
+            "window_area": 45.0,
+            "window_method": "code",
+            "window_code": "dcaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewwf07wo",
+          "zone_window": {
+            "window_area": 40.0,
+            "window_method": "code",
+            "window_code": "dcaw",
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "natural_gas",
+            "type": "central_furnace",
+            "efficiency_method": "user",
+            "efficiency": 0.95
+          },
+          "cooling": {
+            "type": "none"
+          },
+          "hvac_distribution": [
+            {
+              "name": "duct1",
+              "location": "cond_space",
+              "fraction": 1.0,
+              "insulated": true,
+              "sealed": false
+            }
+          ]
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "electric",
+        "efficiency_method": "user",
+        "energy_factor": 0.95
+      }
+    }
+  }
+}

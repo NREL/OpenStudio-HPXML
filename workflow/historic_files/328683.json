@@ -1,0 +1,124 @@
+{
+  "building_address": {
+    "address": "6475 Lake Shore Dr",
+    "city": "San Diego",
+    "state": "CA",
+    "zip_code": "92119",
+    "assessment_type": "test",
+    "external_building_id": "20527"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2019-03-22",
+      "shape": "rectangle",
+      "year_built": 1966,
+      "number_bedrooms": 4,
+      "num_floor_above_grade": 1,
+      "floor_to_ceiling_height": 8,
+      "conditioned_floor_area": 2020,
+      "orientation": "north_west",
+      "blower_door_test": false,
+      "air_sealing_present": false
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 2020.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "medium",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf11",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 2020.0,
+          "foundation_type": "slab_on_grade",
+          "foundation_insulation_level": 0
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewwf11st",
+          "zone_window": {
+            "window_area": 120.0,
+            "window_method": "code",
+            "window_code": "dcaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewwf11st",
+          "zone_window": {
+            "window_area": 51.0,
+            "window_method": "code",
+            "window_code": "dcaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewwf11st",
+          "zone_window": {
+            "window_area": 117.0,
+            "window_method": "code",
+            "window_code": "scna",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewwf11st",
+          "zone_window": {
+            "window_area": 108.0,
+            "window_method": "code",
+            "window_code": "scna",
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "natural_gas",
+            "type": "central_furnace",
+            "efficiency_method": "shipment_weighted",
+            "year": 1970
+          },
+          "cooling": {
+            "type": "none"
+          },
+          "hvac_distribution": [
+            {
+              "name": "duct1",
+              "location": "uncond_attic",
+              "fraction": 1.0,
+              "insulated": true,
+              "sealed": false
+            }
+          ]
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "natural_gas",
+        "efficiency_method": "user",
+        "energy_factor": 0.55
+      }
+    }
+  }
+}
