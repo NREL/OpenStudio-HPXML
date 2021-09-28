@@ -1,5 +1,5 @@
 HPXML,electric: heating [kWh],natural_gas: heating [kBtu],lpg: heating [kBtu],fuel_oil: heating [kBtu],cord_wood: heating [kBtu],pellet_wood: heating [kBtu],electric: cooling [kWh],electric: hot_water [kWh],natural_gas: hot_water [kBtu],lpg: hot_water [kBtu],fuel_oil: hot_water [kBtu],electric: large_appliance [kWh],electric: small_appliance [kWh],electric: lighting [kWh],electric: generation [kWh],hot_water: hot_water [gallons],unmet_load: heating [MBtu],unmet_load: cooling [MBtu]
-328661.json,9951.09,0.0,0.0,0.0,0.0,0.0,0.0,2644.3,0.0,0.0,0.0,1488.69,2099.37,1620.72,0.0,15028.62,0.0,0.0
+328661.json,9909.24,0.0,0.0,0.0,0.0,0.0,0.0,2717.59,0.0,0.0,0.0,1488.69,2099.37,1620.72,0.0,15027.11,0.0,0.0
 328662.json,2711.45,0.0,0.0,0.0,0.0,0.0,313.61,962.93,0.0,0.0,0.0,1658.37,2289.16,1697.22,0.0,18929.19,0.0,0.0
 328663.json,430.95,65650.32,0.0,0.0,0.0,0.0,842.95,0.0,19219.73,0.0,0.0,1658.37,2885.47,2254.77,0.0,18391.57,0.0,0.01
 328664.json,654.28,89883.7,0.0,0.0,0.0,0.0,0.0,0.0,20939.34,0.0,0.0,1828.17,4754.13,3901.12,0.0,21962.4,0.0,0.0
