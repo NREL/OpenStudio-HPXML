@@ -31,7 +31,7 @@ def get_output_hpxml_path(resultsdir, rundir)
   return File.join(resultsdir, File.basename(rundir) + '.xml')
 end
 
-def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulation)
+def run_design(basedir, rundir, design, resultsdir, json, debug, skip_simulation)
   measures_dir = File.join(basedir, '..')
   output_hpxml_path = get_output_hpxml_path(resultsdir, rundir)
 
@@ -40,7 +40,7 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
   # Add HEScore measure to workflow
   measure_subdir = 'rulesets/HEScoreRuleset'
   args = {}
-  args['hpxml_path'] = hpxml
+  args['json_path'] = json
   args['hpxml_output_path'] = output_hpxml_path
   update_args_hash(measures, measure_subdir, args)
 
@@ -178,10 +178,10 @@ end
 
 options = {}
 OptionParser.new do |opts|
-  opts.banner = "Usage: #{File.basename(__FILE__)} -x building.xml\n e.g., #{File.basename(__FILE__)} -x regression_files/Base_hpxml.xml\n"
+  opts.banner = "Usage: #{File.basename(__FILE__)} -j building.xml\n e.g., #{File.basename(__FILE__)} -j regression_files/Base.json\n"
 
-  opts.on('-x', '--xml <FILE>', 'HPXML file') do |t|
-    options[:hpxml] = t
+  opts.on('-j', '--json <FILE>', 'JSON file') do |t|
+    options[:json] = t
   end
 
   opts.on('-o', '--output-dir <DIR>', 'Output directory') do |t|
@@ -212,15 +212,15 @@ if options[:epws]
   download_epws
 end
 
-if not options[:hpxml]
-  fail "HPXML argument is required. Call #{File.basename(__FILE__)} -h for usage."
+if not options[:json]
+  fail "JSON argument is required. Call #{File.basename(__FILE__)} -h for usage."
 end
 
-unless (Pathname.new options[:hpxml]).absolute?
-  options[:hpxml] = File.expand_path(options[:hpxml])
+unless (Pathname.new options[:json]).absolute?
+  options[:json] = File.expand_path(options[:json])
 end
-unless File.exist?(options[:hpxml]) && options[:hpxml].downcase.end_with?('.xml')
-  fail "'#{options[:hpxml]}' does not exist or is not an .xml file."
+unless File.exist?(options[:json]) && options[:json].downcase.end_with?('.json')
+  fail "'#{options[:json]}' does not exist or is not an .json file."
 end
 
 # Check for correct versions of OS
@@ -241,11 +241,11 @@ rm_path(resultsdir)
 Dir.mkdir(resultsdir)
 
 # Run design
-puts "HPXML: #{options[:hpxml]}"
+puts "JSON: #{options[:json]}"
 design = 'HEScoreDesign'
 rundir = get_rundir(options[:output_dir], design)
 
-success = run_design(basedir, rundir, design, resultsdir, options[:hpxml], options[:debug], options[:skip_simulation])
+success = run_design(basedir, rundir, design, resultsdir, options[:json], options[:debug], options[:skip_simulation])
 
 if not success
   exit! 1

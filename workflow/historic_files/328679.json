@@ -1,0 +1,136 @@
+{
+  "building_address": {
+    "address": "514 El Dorado Street",
+    "city": "Vallejo",
+    "state": "CA",
+    "zip_code": "94590",
+    "assessment_type": "test",
+    "external_building_id": "25678"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2019-01-03",
+      "shape": "rectangle",
+      "year_built": 1904,
+      "number_bedrooms": 3,
+      "num_floor_above_grade": 2,
+      "floor_to_ceiling_height": 8,
+      "conditioned_floor_area": 1412,
+      "orientation": "south",
+      "blower_door_test": true,
+      "envelope_leakage": 7820
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 764.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "medium",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf25",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 706.0,
+          "foundation_type": "vented_crawl",
+          "foundation_insulation_level": 0,
+          "floor_assembly_code": "efwf00ca"
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewwf00vi",
+          "zone_window": {
+            "window_area": 58.0,
+            "window_method": "custom",
+            "window_u_value": 0.7,
+            "window_shgc": 0.6399999999999999,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewwf00vi",
+          "zone_window": {
+            "window_area": 6.0,
+            "window_method": "custom",
+            "window_u_value": 0.6999999999999998,
+            "window_shgc": 0.64,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewwf00vi",
+          "zone_window": {
+            "window_area": 43.0,
+            "window_method": "custom",
+            "window_u_value": 0.7,
+            "window_shgc": 0.64,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewwf00vi",
+          "zone_window": {
+            "window_area": 24.0,
+            "window_method": "custom",
+            "window_u_value": 0.6999999999999998,
+            "window_shgc": 0.64,
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "natural_gas",
+            "type": "central_furnace",
+            "efficiency_method": "user",
+            "efficiency": 0.7
+          },
+          "cooling": {
+            "type": "none"
+          },
+          "hvac_distribution": [
+            {
+              "name": "duct1",
+              "location": "vented_crawl",
+              "fraction": 0.82,
+              "insulated": true,
+              "sealed": false
+            },
+            {
+              "name": "duct2",
+              "location": "cond_space",
+              "fraction": 0.18,
+              "insulated": true,
+              "sealed": false
+            }
+          ]
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "natural_gas",
+        "efficiency_method": "user",
+        "energy_factor": 0.55
+      }
+    }
+  }
+}

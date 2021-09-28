@@ -1,0 +1,130 @@
+{
+  "building_address": {
+    "address": "814 Allie Renea Ln",
+    "city": "Seagoville",
+    "state": "TX",
+    "zip_code": "75159",
+    "assessment_type": "test",
+    "external_building_id": "48140"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2017-12-29",
+      "shape": "rectangle",
+      "year_built": 2017,
+      "number_bedrooms": 4,
+      "num_floor_above_grade": 1,
+      "floor_to_ceiling_height": 9,
+      "conditioned_floor_area": 1859,
+      "orientation": "south_west",
+      "blower_door_test": true,
+      "envelope_leakage": 800
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 1859.0,
+          "roof_assembly_code": "rfrb00co",
+          "roof_color": "medium_dark",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf38",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 1859.0,
+          "foundation_type": "slab_on_grade",
+          "foundation_insulation_level": 0
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewps15br",
+          "zone_window": {
+            "window_area": 43.0,
+            "window_method": "custom",
+            "window_u_value": 0.32,
+            "window_shgc": 0.21,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewps15br",
+          "zone_window": {
+            "window_area": 60.0,
+            "window_method": "custom",
+            "window_u_value": 0.32,
+            "window_shgc": 0.21,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewps15br",
+          "zone_window": {
+            "window_area": 129.0,
+            "window_method": "custom",
+            "window_u_value": 0.32,
+            "window_shgc": 0.21,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewps15br",
+          "zone_window": {
+            "window_area": 22.0,
+            "window_method": "custom",
+            "window_u_value": 0.32,
+            "window_shgc": 0.21,
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "electric",
+            "type": "heat_pump",
+            "efficiency_method": "user",
+            "efficiency": 8.5
+          },
+          "cooling": {
+            "type": "heat_pump",
+            "efficiency_method": "user",
+            "efficiency": 14.5
+          },
+          "hvac_distribution": [
+            {
+              "name": "duct1",
+              "location": "uncond_attic",
+              "fraction": 1.0,
+              "insulated": true,
+              "sealed": true
+            }
+          ]
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "electric",
+        "efficiency_method": "user",
+        "energy_factor": 0.93
+      }
+    }
+  }
+}

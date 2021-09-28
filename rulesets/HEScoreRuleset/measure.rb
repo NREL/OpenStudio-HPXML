@@ -3,6 +3,7 @@
 require 'pathname'
 require 'csv'
 require 'oga'
+require 'json'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/airflow'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/constants'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/constructions'
@@ -47,9 +48,9 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
   def arguments(model)
     args = OpenStudio::Measure::OSArgumentVector.new
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_path', true)
-    arg.setDisplayName('HPXML File Path')
-    arg.setDescription('Absolute (or relative) path of the HPXML file.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('json_path', true)
+    arg.setDisplayName('JSON File Path')
+    arg.setDescription('Absolute (or relative) path of the JSON file.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_output_path', false)
@@ -70,22 +71,45 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
     end
 
     # assign the user inputs to variables
-    hpxml_path = runner.getStringArgumentValue('hpxml_path', user_arguments)
+    json_path = runner.getStringArgumentValue('json_path', user_arguments)
     hpxml_output_path = runner.getOptionalStringArgumentValue('hpxml_output_path', user_arguments)
 
-    unless (Pathname.new hpxml_path).absolute?
-      hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
+    unless (Pathname.new json_path).absolute?
+      json_path = File.expand_path(File.join(File.dirname(__FILE__), json_path))
     end
-    unless File.exist?(hpxml_path) && hpxml_path.downcase.end_with?('.xml')
-      runner.registerError("'#{hpxml_path}' does not exist or is not an .xml file.")
+    unless File.exist?(json_path) && json_path.downcase.end_with?('.json')
+      runner.registerError("'#{json_path}' does not exist or is not an .json file.")
       return false
     end
 
-    hpxml = HPXML.new(hpxml_path: hpxml_path, collapse_enclosure: false)
+    # Parse the JSON file
+    json_file = File.open(json_path)
+    json = JSON.parse(json_file.read)
+
+    # Look up zipcode info
+    zipcode_row = nil
+    zipcode = json['building_address']['zip_code']
+    zip_distance = 99999
+    CSV.foreach(File.join(File.dirname(__FILE__), 'resources', 'zipcodes_wx.csv'), headers: true) do |row|
+      zip3_of_interest = zipcode[0, 3]
+      next unless row['postal_code'].start_with?(zip3_of_interest)
+
+      distance = (Integer(Float(row['postal_code'])) - Integer(Float(zipcode))).abs()
+      if distance < zip_distance
+        zip_distance = distance
+        zipcode_row = row
+      end
+      if distance == 0
+        break # Exact match
+      end
+    end
+    if zipcode_row.nil?
+      fail "Zip code #{zipcode} could not be found in #{File.join(File.dirname(__FILE__), 'resources', 'zipcodes_wx.csv')}"
+    end
 
     # Look up EPW path from WMO
     epw_path = nil
-    weather_wmo = hpxml.climate_and_risk_zones.weather_station_wmo
+    weather_wmo = zipcode_row['nearest_weather_station']
     weather_dir = File.join(File.dirname(__FILE__), '..', '..', 'weather')
     CSV.foreach(File.join(weather_dir, 'data.csv'), headers: true) do |row|
       next if row['wmo'] != weather_wmo
@@ -101,8 +125,6 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
       fail "Weather station WMO '#{weather_wmo}' could not be found in #{File.join(weather_dir, 'data.csv')}."
     end
 
-    hpxml.climate_and_risk_zones.weather_station_epw_filepath = epw_path
-
     cache_path = epw_path.gsub('.epw', '-cache.csv')
     if not File.exist?(cache_path)
       runner.registerError("'#{cache_path}' could not be found.")
@@ -113,7 +135,7 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
     weather = WeatherProcess.new(nil, nil, cache_path)
 
     begin
-      new_hpxml = HEScoreRuleset.apply_ruleset(hpxml, weather)
+      new_hpxml = HEScoreRuleset.apply_ruleset(json, weather, zipcode_row)
     rescue Exception => e
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
       return false

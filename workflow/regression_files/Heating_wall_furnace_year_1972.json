@@ -1,0 +1,118 @@
+{
+    "building_address": {
+        "address": "Regression run 9.119",
+        "city": "St Louis",
+        "state": "MO",
+        "zip_code": "63101",
+        "assessment_type": "construction-period testing\/daily test out"
+    },
+    "building": {
+        "about": {
+            "assessment_date": "2021-06-07",
+            "shape": "rectangle",
+            "year_built": 1970,
+            "number_bedrooms": 4,
+            "num_floor_above_grade": 2,
+            "floor_to_ceiling_height": 8,
+            "conditioned_floor_area": 2000,
+            "orientation": "north",
+            "blower_door_test": false,
+            "air_sealing_present": false
+        },
+        "zone": {
+            "zone_wall": [
+                {
+                    "side": "front",
+                    "wall_assembly_code": "ewwf13vi",
+                    "zone_window": {
+                        "window_area": 60,
+                        "window_method": "code",
+                        "window_code": "dcaw",
+                        "solar_screen": false
+                    }
+                },
+                {
+                    "side": "back",
+                    "zone_window": {
+                        "window_area": 50
+                    }
+                },
+                {
+                    "side": "right",
+                    "zone_window": {
+                        "window_area": 40
+                    }
+                },
+                {
+                    "side": "left",
+                    "zone_window": {
+                        "window_area": 30
+                    }
+                }
+            ],
+            "wall_construction_same": true,
+            "window_construction_same": true,
+            "zone_roof": [
+                {
+                    "roof_name": "roof1",
+                    "roof_area": 1000,
+                    "roof_type": "vented_attic",
+                    "roof_color": "medium",
+                    "roof_assembly_code": "rfwf00co",
+                    "ceiling_assembly_code": "ecwf19"
+                }
+            ],
+            "zone_floor": [
+                {
+                    "floor_name": "floor1",
+                    "floor_area": 1000,
+                    "foundation_type": "slab_on_grade",
+                    "foundation_insulation_level": 0
+                }
+            ]
+        },
+        "systems": {
+            "hvac": [
+                {
+                    "hvac_name": "hvac1",
+                    "hvac_fraction": 1,
+                    "heating": {
+                        "fuel_primary": "natural_gas",
+                        "type": "wall_furnace",
+                        "efficiency_method": "shipment_weighted",
+                        "year": 1972
+                    },
+                    "cooling": {
+                        "type": "split_dx",
+                        "efficiency_method": "user",
+                        "efficiency": 13
+                    },
+                    "hvac_distribution": [
+                        {
+                            "name": "duct1",
+                            "location": "uncond_attic",
+                            "fraction": 1,
+                            "insulated": true,
+                            "sealed": true
+                        },
+                        {
+                            "name": "duct2",
+                            "fraction": 0
+                        },
+                        {
+                            "name": "duct3",
+                            "fraction": 0
+                        }
+                    ]
+                }
+            ],
+            "domestic_hot_water": {
+                "category": "unit",
+                "type": "storage",
+                "fuel_primary": "natural_gas",
+                "efficiency_method": "user",
+                "energy_factor": 0.6
+            }
+        }
+    }
+}

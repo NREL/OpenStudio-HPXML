@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>he_score_measure</name>
   <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
-  <version_id>6d24435b-93c0-4f02-ac63-bca72e3487f1</version_id>
-  <version_modified>20210908T001526Z</version_modified>
+  <version_id>fcf752f9-22d5-4abd-afb0-c1e717535d03</version_id>
+  <version_modified>20210928T142349Z</version_modified>
   <xml_checksum>2AF3A68E</xml_checksum>
   <class_name>HEScoreMeasure</class_name>
   <display_name>Apply Home Energy Score Ruleset</display_name>
@@ -12,28 +12,20 @@
   <modeler_description>TODO</modeler_description>
   <arguments>
     <argument>
-      <name>hpxml_path</name>
-      <display_name>HPXML File Path</display_name>
-      <description>Absolute (or relative) path of the HPXML file.</description>
+      <name>json_path</name>
+      <display_name>JSON File Path</display_name>
+      <description>Absolute (or relative) path of the JSON file.</description>
       <type>String</type>
-      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value></default_value>
-      <min_value></min_value>
-      <max_value></max_value>
     </argument>
     <argument>
       <name>hpxml_output_path</name>
       <display_name>HPXML Output File Path</display_name>
       <description>Absolute (or relative) path of the output HPXML file.</description>
       <type>String</type>
-      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value></default_value>
-      <min_value></min_value>
-      <max_value></max_value>
     </argument>
   </arguments>
   <outputs />
@@ -95,6 +87,36 @@
       <checksum>DB516BAF</checksum>
     </file>
     <file>
+      <filename>lu_ceiling_eff_rvalue.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>49109C7F</checksum>
+    </file>
+    <file>
+      <filename>lu_floor_eff_rvalue.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>686AC884</checksum>
+    </file>
+    <file>
+      <filename>zipcodes_wx.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1154F211</checksum>
+    </file>
+    <file>
+      <filename>test_hescore_ruleset.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>28846C8F</checksum>
+    </file>
+    <file>
+      <filename>HESruleset.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E3885F82</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.7.0</identifier>
@@ -103,19 +125,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>339156C3</checksum>
-    </file>
-    <file>
-      <filename>HESruleset.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8B3AFE42</checksum>
-    </file>
-    <file>
-      <filename>test_hescore_ruleset.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F7C39BEA</checksum>
+      <checksum>65DA55F5</checksum>
     </file>
   </files>
 </measure>
