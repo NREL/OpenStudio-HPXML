@@ -485,15 +485,15 @@ class HEScoreRuleset
         heating_system_fuel = hescore_to_hpxml_fuel(orig_heating['fuel_primary'])
         distribution_system_idref = nil
         if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeBoiler].include? heating_system_type
-          if heating_system_type == HPXML::HVACTypeFurnace
-            distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
-          elsif heating_system_type == HPXML::HVACTypeBoiler
-            distribution_system_idref = "#{orig_hvac['hvac_name']}_hydronic_dist"
-            additional_hydronic_ids << distribution_system_idref
-          end
           heating_efficiency_afue = orig_heating['efficiency']
         elsif heating_system_type == HPXML::HVACTypeStove
           heating_efficiency_percent = orig_heating['efficiency']
+        end
+        if is_ducted_heating_system(orig_hvac)
+          distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
+        elsif heating_system_type == HPXML::HVACTypeBoiler
+          distribution_system_idref = "#{orig_hvac['hvac_name']}_hydronic_dist"
+          additional_hydronic_ids << distribution_system_idref
         end
         year_installed = orig_heating['year']
         energy_star = (orig_heating['efficiency_level'] == 'energy_star')
@@ -563,10 +563,12 @@ class HEScoreRuleset
         cooling_system_fuel = HPXML::FuelTypeElectricity
         distribution_system_idref = nil
         if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
-          distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
           cooling_efficiency_seer = orig_cooling['efficiency']
         elsif cooling_system_type == HPXML::HVACTypeRoomAirConditioner
           cooling_efficiency_eer = orig_cooling['efficiency']
+        end
+        if is_ducted_cooling_system(orig_hvac)
+          distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
         end
         year_installed = orig_cooling['year']
         energy_star = (orig_cooling['efficiency_level'] == 'energy_star')
@@ -625,13 +627,12 @@ class HEScoreRuleset
         if has_cooling_system && (hp_types.include? orig_cooling['type'])
           heat_pump_type = hescore_to_hpxml_hvac_type(orig_cooling['type'])
           if ['heat_pump', 'mini_split'].include? orig_cooling['type']
-            if orig_cooling['type'] == 'heat_pump'
-              distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
-            end
             cooling_efficiency_seer = orig_cooling['efficiency']
           elsif orig_cooling['type'] == 'gchp'
-            distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
             cooling_efficiency_eer = orig_cooling['efficiency']
+          end
+          if is_ducted_cooling_system(orig_hvac)
+            distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
           end
           year_installed = orig_cooling['year']
           cooling_energy_star = (orig_cooling['efficiency_level'] == 'energy_star')
@@ -640,13 +641,12 @@ class HEScoreRuleset
         if has_heating_system && (hp_types.include? orig_heating['type'])
           heat_pump_type = hescore_to_hpxml_hvac_type(orig_heating['type'])
           if ['heat_pump', 'mini_split'].include? orig_heating['type']
-            if orig_heating['type'] == 'heat_pump'
-              distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
-            end
             heating_efficiency_hspf = orig_heating['efficiency']
           elsif orig_heating['type'] == 'gchp'
-            distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
             heating_efficiency_cop = orig_heating['efficiency']
+          end
+          if is_ducted_heating_system(orig_hvac)
+            distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
           end
           year_installed = orig_heating['year']
           heating_energy_star = (orig_heating['efficiency_level'] == 'energy_star')
@@ -715,7 +715,7 @@ class HEScoreRuleset
       end
 
       # HVACDistribution
-      next unless is_ducted_system(orig_hvac)
+      next unless is_ducted_heating_system(orig_hvac) || is_ducted_cooling_system(orig_hvac)
 
       tot_frac = 0.0
       frac_inside = 0.0
@@ -1524,7 +1524,7 @@ def get_ducts_details(json)
   ducts = []
   json['building']['systems']['hvac'].each do |orig_hvac|
     next unless orig_hvac.key?('hvac_distribution')
-    next unless is_ducted_system(orig_hvac)
+    next unless is_ducted_heating_system(orig_hvac) || is_ducted_cooling_system(orig_hvac)
 
     hvac_frac = orig_hvac['hvac_fraction']
 
@@ -1537,11 +1537,18 @@ def get_ducts_details(json)
   return ducts
 end
 
-def is_ducted_system(hvac)
+def is_ducted_heating_system(hvac)
   # Reference: https://docs.google.com/spreadsheets/d/1FQdZx33M-Rvdy0aL3HVJkOWaokw_GMdT7B2ACcGN7To/edit#gid=503341331
   if hvac.key?('heating') && (['central_furnace', 'heat_pump', 'gchp'].include? hvac['heating']['type'])
     return true
-  elsif hvac.key?('cooling') && (['split_dx', 'heat_pump', 'gchp'].include? hvac['cooling']['type'])
+  else
+    return false
+  end
+end
+
+def is_ducted_cooling_system(hvac)
+  # Reference: https://docs.google.com/spreadsheets/d/1FQdZx33M-Rvdy0aL3HVJkOWaokw_GMdT7B2ACcGN7To/edit#gid=503341331
+  if hvac.key?('cooling') && (['split_dx', 'heat_pump', 'gchp'].include? hvac['cooling']['type'])
     return true
   else
     return false
