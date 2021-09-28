@@ -820,7 +820,6 @@ class HEScoreRuleset
     return unless json['building']['systems'].key? ('domestic_hot_water')
 
     orig_water_heater = json['building']['systems']['domestic_hot_water']
-    energy_factor = orig_water_heater['energy_factor']
     fuel_type = hescore_to_hpxml_fuel(orig_water_heater['fuel_primary'])
     water_heater_type = { 'storage' => HPXML::WaterHeaterTypeStorage,
                           'indirect' => HPXML::WaterHeaterTypeCombiStorage,
@@ -830,20 +829,18 @@ class HEScoreRuleset
     year_installed = orig_water_heater['year']
     energy_star = (orig_water_heater['efficiency_level'] == 'energy_star')
 
-    if not energy_factor.nil?
-      if orig_water_heater['efficiency_method'] == 'uef'
-        # Convert to EF
-        # FUTURE: Remove this conversion and use UEF directly; requires FHR input/assumption for storage water heaters
-        energy_factor = calc_ef_from_uef(water_heater_type, fuel_type, orig_water_heater['energy_factor'])
-      end
-      # Do nothing if efficiency method is 'user', we already have the energy factor
+    if orig_water_heater['efficiency_method'] == 'user'
+      energy_factor = orig_water_heater['energy_factor']
+    elsif orig_water_heater['efficiency_method'] == 'uef'
+      uniform_energy_factor = orig_water_heater['energy_factor']
+      first_hour_rating = 60.0 # Maps to "medium" bin
+    elsif orig_water_heater['efficiency_method'] == 'shipment_weighted'
+      energy_factor = lookup_water_heater_efficiency(year_installed,
+                                                     fuel_type)
     elsif energy_star
       energy_factor = lookup_water_heater_efficiency(year_installed,
                                                      fuel_type,
                                                      'energy_star')
-    elsif not year_installed.nil?
-      energy_factor = lookup_water_heater_efficiency(year_installed,
-                                                     fuel_type)
     end
 
     fail 'Water Heater Type must be provided' if water_heater_type.nil?
@@ -857,7 +854,6 @@ class HEScoreRuleset
     tank_volume = nil
     if water_heater_type == HPXML::WaterHeaterTypeCombiStorage
       tank_volume = get_default_water_heater_volume(HPXML::FuelTypeElectricity)
-    # Set default fuel_type to call function : get_default_water_heater_volume, not passing this input to EP-HPXML
     elsif (water_heater_type != HPXML::WaterHeaterTypeTankless) && (water_heater_type != HPXML::WaterHeaterTypeCombiTankless)
       tank_volume = get_default_water_heater_volume(fuel_type)
     end
@@ -889,6 +885,8 @@ class HEScoreRuleset
                                         fraction_dhw_load_served: 1.0,
                                         heating_capacity: heating_capacity,
                                         energy_factor: energy_factor,
+                                        uniform_energy_factor: uniform_energy_factor,
+                                        first_hour_rating: first_hour_rating,
                                         related_hvac_idref: related_hvac_idref)
   end
 
@@ -1121,26 +1119,6 @@ def get_default_water_heater_capacity(fuel)
   return val if not val.nil?
 
   fail "Could not get default water heater capacity for fuel '#{fuel}'"
-end
-
-def calc_ef_from_uef(water_heater_type, fuel_type, uniform_energy_factor) # FIXME: We will be removing references to this method in PR #279
-  # Interpretation on Water Heater UEF
-  if fuel_type == HPXML::FuelTypeElectricity
-    if water_heater_type == HPXML::WaterHeaterTypeStorage
-      return [2.4029 * uniform_energy_factor - 1.2844, 0.96].min
-    elsif water_heater_type == HPXML::WaterHeaterTypeTankless
-      return uniform_energy_factor
-    elsif water_heater_type == HPXML::WaterHeaterTypeHeatPump
-      return 1.2101 * uniform_energy_factor - 0.6052
-    end
-  else # Fuel
-    if water_heater_type == HPXML::WaterHeaterTypeStorage
-      return 0.9066 * uniform_energy_factor + 0.0711
-    elsif water_heater_type == HPXML::WaterHeaterTypeTankless
-      return uniform_energy_factor
-    end
-  end
-  fail 'Unexpected water heater.'
 end
 
 def get_wall_effective_r_from_doe2code(doe2code)
