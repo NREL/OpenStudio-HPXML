@@ -835,14 +835,12 @@ class HEScoreRuleset
       uniform_energy_factor = orig_water_heater['energy_factor']
       first_hour_rating = 60.0 # Maps to "medium" bin
     elsif orig_water_heater['efficiency_method'] == 'shipment_weighted'
-      if energy_star
-        energy_factor = lookup_water_heater_efficiency(year_installed,
-                                                       fuel_type,
-                                                       'energy_star')
-      elsif not year_installed.nil?
-        energy_factor = lookup_water_heater_efficiency(year_installed,
-                                                       fuel_type)
-      end
+      energy_factor = lookup_water_heater_efficiency(year_installed,
+                                                     fuel_type)
+    elsif energy_star
+      energy_factor = lookup_water_heater_efficiency(year_installed,
+                                                     fuel_type,
+                                                     'energy_star')
     end
 
     fail 'Water Heater Type must be provided' if water_heater_type.nil?
