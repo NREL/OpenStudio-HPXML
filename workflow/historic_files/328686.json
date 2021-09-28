@@ -1,0 +1,114 @@
+{
+  "building_address": {
+    "address": "9125 Oak Fern Drive",
+    "city": "Orlando",
+    "state": "FL",
+    "zip_code": "32832",
+    "assessment_type": "test",
+    "external_building_id": "40791"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2018-03-29",
+      "shape": "town_house",
+      "town_house_walls": "back_front",
+      "year_built": 2006,
+      "number_bedrooms": 2,
+      "num_floor_above_grade": 2,
+      "floor_to_ceiling_height": 9,
+      "conditioned_floor_area": 1254,
+      "orientation": "west",
+      "blower_door_test": false,
+      "air_sealing_present": false
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 627.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "dark",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf21",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 627.0,
+          "foundation_type": "slab_on_grade",
+          "foundation_insulation_level": 0
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewwf13st",
+          "zone_window": {
+            "window_area": 70.0,
+            "window_method": "code",
+            "window_code": "scna",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewcb03st",
+          "zone_window": {
+            "window_area": 58.0,
+            "window_method": "code",
+            "window_code": "scna",
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "electric",
+            "type": "heat_pump",
+            "efficiency_method": "user",
+            "efficiency": 6.5
+          },
+          "cooling": {
+            "type": "heat_pump",
+            "efficiency_method": "user",
+            "efficiency": 9.7
+          },
+          "hvac_distribution": [
+            {
+              "name": "duct1",
+              "location": "uncond_attic",
+              "fraction": 0.6,
+              "insulated": true,
+              "sealed": true
+            },
+            {
+              "name": "duct2",
+              "location": "cond_space",
+              "fraction": 0.4,
+              "insulated": true,
+              "sealed": true
+            }
+          ]
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "electric",
+        "efficiency_method": "user",
+        "energy_factor": 0.87
+      }
+    }
+  }
+}

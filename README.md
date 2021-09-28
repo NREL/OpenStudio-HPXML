@@ -14,8 +14,8 @@ An OpenStudio/EnergyPlus simulation workflow that operates on a HPXML file produ
 
 ## Running
 
-Run the HEScore simulation on a provided sample HPXML file:  
-```openstudio workflow/run_simulation.rb -x workflow/sample_files/Base_hpxml.xml```  
+Run the HEScore simulation on a provided HPXML file:  
+```openstudio workflow/run_simulation.rb -j workflow/regression_files/Base.json```  
 
 Run `openstudio workflow/run_simulation.rb -h` to see all available commands/arguments.
 

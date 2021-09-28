@@ -1,0 +1,141 @@
+{
+  "building_address": {
+    "address": "11504 E. Decatur St.",
+    "city": "Mesa",
+    "state": "AZ",
+    "zip_code": "85207",
+    "assessment_type": "test",
+    "external_building_id": "24579"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2019-01-21",
+      "shape": "rectangle",
+      "year_built": 1998,
+      "number_bedrooms": 4,
+      "num_floor_above_grade": 1,
+      "floor_to_ceiling_height": 11,
+      "conditioned_floor_area": 1984,
+      "orientation": "south",
+      "blower_door_test": true,
+      "envelope_leakage": 1829
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 1885.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "medium",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf19",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        },
+        {
+          "roof_name": "roof2",
+          "roof_area": 99.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "medium",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf03",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 1984.0,
+          "foundation_type": "slab_on_grade",
+          "foundation_insulation_level": 0
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewwf13st",
+          "zone_window": {
+            "window_area": 169.728,
+            "window_method": "custom",
+            "window_u_value": 0.44000000000000006,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewwf13st",
+          "zone_window": {
+            "window_area": 84.8641,
+            "window_method": "custom",
+            "window_u_value": 0.44000000000000006,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewwf13st",
+          "zone_window": {
+            "window_area": 84.8641,
+            "window_method": "custom",
+            "window_u_value": 0.44000000000000006,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewwf13st",
+          "zone_window": {
+            "window_area": 42.4321,
+            "window_method": "custom",
+            "window_u_value": 0.43999999999999995,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "natural_gas",
+            "type": "central_furnace",
+            "efficiency_method": "user",
+            "efficiency": 0.78
+          },
+          "cooling": {
+            "type": "split_dx",
+            "efficiency_method": "user",
+            "efficiency": 13.0
+          },
+          "hvac_distribution": [
+            {
+              "name": "duct1",
+              "location": "uncond_attic",
+              "fraction": 1.0,
+              "insulated": true,
+              "sealed": false
+            }
+          ]
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "natural_gas",
+        "efficiency_method": "user",
+        "energy_factor": 0.58
+      }
+    }
+  }
+}

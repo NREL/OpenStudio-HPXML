@@ -1,0 +1,148 @@
+{
+  "building_address": {
+    "address": "13049 W Avalon Dr",
+    "city": "Avondale",
+    "state": "AZ",
+    "zip_code": "85392",
+    "assessment_type": "test",
+    "external_building_id": "27451"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2018-12-01",
+      "shape": "rectangle",
+      "year_built": 2002,
+      "number_bedrooms": 4,
+      "num_floor_above_grade": 1,
+      "floor_to_ceiling_height": 8,
+      "conditioned_floor_area": 1860,
+      "orientation": "north",
+      "blower_door_test": true,
+      "envelope_leakage": 1266
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 1767.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "medium",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf19",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        },
+        {
+          "roof_name": "roof2",
+          "roof_area": 93.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "medium",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf00",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 1360.0,
+          "foundation_type": "slab_on_grade",
+          "foundation_insulation_level": 0
+        },
+        {
+          "floor_name": "floor2",
+          "floor_area": 500.0,
+          "foundation_type": "unvented_crawl",
+          "foundation_insulation_level": 0,
+          "floor_assembly_code": "efwf11ca"
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewwf11st",
+          "zone_window": {
+            "window_area": 79.6794,
+            "window_method": "custom",
+            "window_u_value": 0.44,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewwf11st",
+          "zone_window": {
+            "window_area": 44.8196,
+            "window_method": "custom",
+            "window_u_value": 0.44,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewwf11st",
+          "zone_window": {
+            "window_area": 99.5992,
+            "window_method": "custom",
+            "window_u_value": 0.44,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewwf11st",
+          "zone_window": {
+            "window_area": 14.9399,
+            "window_method": "custom",
+            "window_u_value": 0.44,
+            "window_shgc": 0.5599999999999999,
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "natural_gas",
+            "type": "central_furnace",
+            "efficiency_method": "user",
+            "efficiency": 0.72
+          },
+          "cooling": {
+            "type": "split_dx",
+            "efficiency_method": "user",
+            "efficiency": 10.0
+          },
+          "hvac_distribution": [
+            {
+              "name": "duct1",
+              "location": "uncond_attic",
+              "fraction": 1.0,
+              "insulated": true,
+              "sealed": true
+            }
+          ]
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "natural_gas",
+        "efficiency_method": "user",
+        "energy_factor": 0.58
+      }
+    }
+  }
+}

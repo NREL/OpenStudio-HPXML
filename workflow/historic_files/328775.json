@@ -1,0 +1,120 @@
+{
+  "building_address": {
+    "address": "5 Model Home Ln.",
+    "city": "Fairbanks",
+    "state": "AK",
+    "zip_code": "99710",
+    "assessment_type": "test",
+    "external_building_id": "61397"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2017-06-06",
+      "shape": "rectangle",
+      "year_built": 2017,
+      "number_bedrooms": 3,
+      "num_floor_above_grade": 1,
+      "floor_to_ceiling_height": 8,
+      "conditioned_floor_area": 1512,
+      "orientation": "south",
+      "blower_door_test": false,
+      "air_sealing_present": false
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 1512.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "medium",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf60",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 1512.0,
+          "foundation_type": "slab_on_grade",
+          "foundation_insulation_level": 0
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewps21wo",
+          "zone_window": {
+            "window_area": 56.0,
+            "window_method": "custom",
+            "window_u_value": 0.52,
+            "window_shgc": 0.41126200000000007,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewps21wo",
+          "zone_window": {
+            "window_area": 35.2,
+            "window_method": "custom",
+            "window_u_value": 0.52,
+            "window_shgc": 0.411262,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewps21wo",
+          "zone_window": {
+            "window_area": 17.6,
+            "window_method": "custom",
+            "window_u_value": 0.52,
+            "window_shgc": 0.411262,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewps21wo",
+          "zone_window": {
+            "window_area": 35.2,
+            "window_method": "custom",
+            "window_u_value": 0.52,
+            "window_shgc": 0.411262,
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "fuel_oil",
+            "type": "boiler",
+            "efficiency_method": "user",
+            "efficiency": 0.87
+          },
+          "cooling": {
+            "type": "none"
+          },
+          "hvac_distribution": []
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "electric",
+        "efficiency_method": "user",
+        "energy_factor": 0.95
+      }
+    }
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "building_address": {
+    "address": "W342 N4912 W Lindy Lane",
+    "city": "Nashotah",
+    "state": "WI",
+    "zip_code": "53058",
+    "assessment_type": "test",
+    "external_building_id": "19866"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2019-04-02",
+      "shape": "rectangle",
+      "year_built": 1950,
+      "number_bedrooms": 3,
+      "num_floor_above_grade": 2,
+      "floor_to_ceiling_height": 8,
+      "conditioned_floor_area": 1458,
+      "orientation": "west",
+      "blower_door_test": true,
+      "envelope_leakage": 2256
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 583.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "medium",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf03",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        },
+        {
+          "roof_name": "roof2",
+          "roof_area": 421.0,
+          "roof_assembly_code": "rfwf11co",
+          "roof_color": "medium",
+          "roof_type": "cath_ceiling",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 972.0,
+          "foundation_type": "uncond_basement",
+          "foundation_insulation_level": 0,
+          "floor_assembly_code": "efwf00ca"
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewps15vi",
+          "zone_window": {
+            "window_area": 61.81,
+            "window_method": "custom",
+            "window_u_value": 0.44,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewps15vi",
+          "zone_window": {
+            "window_area": 61.81,
+            "window_method": "custom",
+            "window_u_value": 0.44,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewps15vi",
+          "zone_window": {
+            "window_area": 61.81,
+            "window_method": "custom",
+            "window_u_value": 0.44,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewps15vi",
+          "zone_window": {
+            "window_area": 61.81,
+            "window_method": "custom",
+            "window_u_value": 0.44,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "natural_gas",
+            "type": "central_furnace",
+            "efficiency_method": "user",
+            "efficiency": 0.8
+          },
+          "cooling": {
+            "type": "split_dx",
+            "efficiency_method": "user",
+            "efficiency": 10.0
+          },
+          "hvac_distribution": [
+            {
+              "name": "duct1",
+              "location": "cond_space",
+              "fraction": 1.0,
+              "insulated": false,
+              "sealed": false
+            }
+          ]
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "natural_gas",
+        "efficiency_method": "user",
+        "energy_factor": 0.61
+      }
+    }
+  }
+}

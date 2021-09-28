@@ -1,0 +1,133 @@
+{
+  "building_address": {
+    "address": "26 Kilmer Dr",
+    "city": "Manalapan Township",
+    "state": "NJ",
+    "zip_code": "07726",
+    "assessment_type": "test",
+    "external_building_id": "11449"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2019-08-23",
+      "shape": "rectangle",
+      "year_built": 1967,
+      "number_bedrooms": 3,
+      "num_floor_above_grade": 2,
+      "floor_to_ceiling_height": 8,
+      "conditioned_floor_area": 2317,
+      "orientation": "south_west",
+      "blower_door_test": false,
+      "air_sealing_present": false
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 1381.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "medium",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf21",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 1381.0,
+          "foundation_type": "slab_on_grade",
+          "foundation_insulation_level": 0
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewwf07vi",
+          "zone_window": {
+            "window_area": 72.0,
+            "window_method": "code",
+            "window_code": "dseaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewwf07vi",
+          "zone_window": {
+            "window_area": 24.0,
+            "window_method": "code",
+            "window_code": "dseaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewwf07vi",
+          "zone_window": {
+            "window_area": 64.0,
+            "window_method": "code",
+            "window_code": "dseaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewwf07vi",
+          "zone_window": {
+            "window_area": 12.0,
+            "window_method": "code",
+            "window_code": "dseaw",
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "natural_gas",
+            "type": "central_furnace",
+            "efficiency_method": "user",
+            "efficiency": 0.95
+          },
+          "cooling": {
+            "type": "split_dx",
+            "efficiency_method": "user",
+            "efficiency": 14.0
+          },
+          "hvac_distribution": [
+            {
+              "name": "duct1",
+              "location": "uncond_attic",
+              "fraction": 0.5,
+              "insulated": true,
+              "sealed": false
+            },
+            {
+              "name": "duct2",
+              "location": "cond_space",
+              "fraction": 0.5,
+              "insulated": false,
+              "sealed": false
+            }
+          ]
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "natural_gas",
+        "efficiency_method": "user",
+        "energy_factor": 0.57
+      }
+    }
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "building_address": {
+    "address": "2026 S Zuni St",
+    "city": "Denver",
+    "state": "CO",
+    "zip_code": "80223",
+    "assessment_type": "test",
+    "external_building_id": "7310"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2019-12-23",
+      "shape": "rectangle",
+      "year_built": 1996,
+      "number_bedrooms": 3,
+      "num_floor_above_grade": 2,
+      "floor_to_ceiling_height": 9,
+      "conditioned_floor_area": 1337,
+      "orientation": "west",
+      "blower_door_test": false,
+      "air_sealing_present": false
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 900.0,
+          "roof_assembly_code": "rfwf19co",
+          "roof_color": "medium_dark",
+          "roof_type": "cath_ceiling",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 463.0,
+          "foundation_type": "unvented_crawl",
+          "foundation_insulation_level": 0,
+          "floor_assembly_code": "efwf19ca"
+        },
+        {
+          "floor_name": "floor2",
+          "floor_area": 437.0,
+          "foundation_type": "slab_on_grade",
+          "foundation_insulation_level": 0
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewwf19al",
+          "zone_window": {
+            "window_area": 20.0,
+            "window_method": "code",
+            "window_code": "dseaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewwf19al",
+          "zone_window": {
+            "window_area": 18.0,
+            "window_method": "code",
+            "window_code": "dcaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewwf19al",
+          "zone_window": {
+            "window_area": 40.0,
+            "window_method": "code",
+            "window_code": "dseaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewwf19al",
+          "zone_window": {
+            "window_area": 10.0,
+            "window_method": "code",
+            "window_code": "dseaw",
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 0.52,
+          "heating": {
+            "fuel_primary": "natural_gas",
+            "type": "central_furnace",
+            "efficiency_method": "user",
+            "efficiency": 0.9
+          },
+          "cooling": {
+            "type": "split_dx",
+            "efficiency_method": "user",
+            "efficiency": 13.0
+          },
+          "hvac_distribution": [
+            {
+              "name": "duct1",
+              "location": "cond_space",
+              "fraction": 1.0,
+              "insulated": false,
+              "sealed": false
+            }
+          ]
+        },
+        {
+          "hvac_name": "hvac2",
+          "hvac_fraction": 0.48,
+          "heating": {
+            "fuel_primary": "electric",
+            "type": "mini_split",
+            "efficiency_method": "user",
+            "efficiency": 8.5
+          },
+          "cooling": {
+            "type": "mini_split",
+            "efficiency_method": "user",
+            "efficiency": 16.0
+          },
+          "hvac_distribution": []
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "electric",
+        "efficiency_method": "user",
+        "energy_factor": 0.92
+      }
+    }
+  }
+}
