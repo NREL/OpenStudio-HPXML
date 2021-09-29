@@ -113,11 +113,16 @@
       <sch:assert role='ERROR' test='count(h:MiscLoads/h:FuelLoad[h:FuelLoadType[text()="grill"]]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MiscLoads/FuelLoad[FuelLoadType[text()="grill"]]</sch:assert> <!-- See [FuelLoad] -->
       <sch:assert role='ERROR' test='count(h:MiscLoads/h:FuelLoad[h:FuelLoadType[text()="lighting"]]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MiscLoads/FuelLoad[FuelLoadType[text()="lighting"]]</sch:assert> <!-- See [FuelLoad] -->
       <sch:assert role='ERROR' test='count(h:MiscLoads/h:FuelLoad[h:FuelLoadType[text()="fireplace"]]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MiscLoads/FuelLoad[FuelLoadType[text()="fireplace"]]</sch:assert> <!-- See [FuelLoad] -->
+      <!-- Sum Checks -->
+      <sch:assert role='ERROR' test='sum(//h:FractionHeatLoadServed) &lt;= 1.01'>Expected sum(FractionHeatLoadServed) to be less than or equal to 1</sch:assert>
+      <sch:assert role='ERROR' test='sum(//h:FractionCoolLoadServed) &lt;= 1.01'>Expected sum(FractionCoolLoadServed) to be less than or equal to 1</sch:assert>
+      <sch:assert role='ERROR' test='sum(//h:FractionDehumidificationLoadServed) &lt;= 1.01'>Expected sum(FractionDehumidificationLoadServed) to be less than or equal to 1</sch:assert>
+      <sch:assert role='ERROR' test='(sum(//h:FractionDHWLoadServed) &lt;= 1.01 and sum(//h:FractionDHWLoadServed) &gt;= 0.99) or count(//h:FractionDHWLoadServed) = 0'>Expected sum(FractionDHWLoadServed) to be 1</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='count(h:Enclosure/h:Windows/h:Window) = 0'>No windows specified, the model will not include window heat transfer.</sch:report>
-      <sch:report role='WARN' test='sum(h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem/h:FractionHeatLoadServed) + sum(h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:FractionHeatLoadServed) = 0'>No space heating specified, the model will not include space heating energy use.</sch:report>
-      <sch:report role='WARN' test='sum(h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem/h:FractionCoolLoadServed) + sum(h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:FractionCoolLoadServed) = 0'>No space cooling specified, the model will not include space cooling energy use.</sch:report>
-      <sch:report role='WARN' test='sum(h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:FractionDHWLoadServed) = 0'>No water heating specified, the model will not include water heating energy use.</sch:report>
+      <sch:report role='WARN' test='sum(//h:FractionHeatLoadServed) + sum(//h:FractionHeatLoadServed) = 0'>No space heating specified, the model will not include space heating energy use.</sch:report>
+      <sch:report role='WARN' test='sum(//h:FractionCoolLoadServed) + sum(//h:FractionCoolLoadServed) = 0'>No space cooling specified, the model will not include space cooling energy use.</sch:report>
+      <sch:report role='WARN' test='sum(//h:FractionDHWLoadServed) = 0'>No water heating specified, the model will not include water heating energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:ClothesWasher) = 0'>No clothes washer specified, the model will not include clothes washer energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:ClothesDryer) = 0'>No clothes dryer specified, the model will not include clothes dryer energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:Dishwasher) = 0'>No dishwasher specified, the model will not include dishwasher energy use.</sch:report>
@@ -480,7 +485,7 @@
       <sch:assert role='ERROR' test='count(h:RValue) = 1'>Expected 1 element(s) for xpath: RValue</sch:assert>
     </sch:rule>
   </sch:pattern>
-
+  
   <sch:pattern>
     <sch:title>[HeatingSystem]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem'>
@@ -1006,6 +1011,9 @@
       <sch:assert role='ERROR' test='count(h:AirDistributionType) = 1'>Expected 1 element(s) for xpath: AirDistributionType</sch:assert>
       <sch:assert role='ERROR' test='h:AirDistributionType[text()="regular velocity" or text()="gravity" or text()="fan coil"] or not(h:AirDistributionType)'>Expected AirDistributionType to be 'regular velocity' or 'gravity' or 'fan coil'</sch:assert> <!-- See [AirDistributionType=RegularVelocityOrGravity] or [AirDistributionType=FanCoil] -->
       <sch:assert role='ERROR' test='count(h:Ducts) &gt;= 0'>Expected 0 or more element(s) for xpath: Ducts</sch:assert> <!-- See [HVACDuct] -->
+      <!-- Sum Checks -->
+      <sch:assert role='ERROR' test='(sum(h:Ducts[h:DuctType="supply"]/h:FractionDuctArea) &gt;= 0.99 and sum(h:Ducts[h:DuctType="supply"]/h:FractionDuctArea) &lt;= 1.01) or count(h:Ducts[h:DuctType="supply"]/h:FractionDuctArea) = 0'>Expected sum(Ducts/FractionDuctArea) for DuctType="supply" to be 1</sch:assert>
+      <sch:assert role='ERROR' test='(sum(h:Ducts[h:DuctType="return"]/h:FractionDuctArea) &gt;= 0.99 and sum(h:Ducts[h:DuctType="return"]/h:FractionDuctArea) &lt;= 1.01) or count(h:Ducts[h:DuctType="return"]/h:FractionDuctArea) = 0'>Expected sum(Ducts/FractionDuctArea) for DuctType="return" to be 1</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='sum(h:DuctLeakageMeasurement/h:DuctLeakage[h:Units="CFM25" and h:TotalOrToOutside="to outside"]/h:Value) &gt; 0.04 * number(../../../../../h:BuildingSummary/h:BuildingConstruction/h:ConditionedFloorArea) and sum(h:Ducts[h:DuctLocation[text()!="living space" and text()!="basement - conditioned"]]/h:FractionDuctArea) = 0 and sum(h:Ducts[h:DuctLocation[text()!="living space" and text()!="basement - conditioned"]]/h:DuctSurfaceArea) = 0 and count(h:Ducts[h:FractionDuctArea | h:DuctSurfaceArea]) &gt; 0'>Ducts are entirely within conditioned space but there is moderate leakage to the outside. Leakage to the outside is typically zero or near-zero in these situations, consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.</sch:report>
       <sch:report role='WARN' test='sum(h:DuctLeakageMeasurement/h:DuctLeakage[h:Units="Percent" and h:TotalOrToOutside="to outside"]/h:Value) &gt; 0.05 and sum(h:Ducts[h:DuctLocation[text()!="living space" and text()!="basement - conditioned"]]/h:FractionDuctArea) = 0 and sum(h:Ducts[h:DuctLocation[text()!="living space" and text()!="basement - conditioned"]]/h:DuctSurfaceArea) = 0 and count(h:Ducts[h:FractionDuctArea | h:DuctSurfaceArea]) &gt; 0'>Ducts are entirely within conditioned space but there is moderate leakage to the outside. Leakage to the outside is typically zero or near-zero in these situations, consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.</sch:report>
@@ -1615,15 +1623,15 @@
   <sch:pattern>
     <sch:title>[Lighting]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Lighting'>
-      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:LightEmittingDiode] and h:Location[text()="interior"]]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[LightEmittingDiode] and Location[text()="interior"]]</sch:assert> <!-- See [LightingGroup] -->
-      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:LightEmittingDiode] and h:Location[text()="exterior"]]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[LightEmittingDiode] and Location[text()="exterior"]]</sch:assert> <!-- See [LightingGroup] -->
-      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:LightEmittingDiode] and h:Location[text()="garage"]]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[LightEmittingDiode] and Location[text()="garage"]]</sch:assert> <!-- See [LightingGroup] -->
-      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:CompactFluorescent] and h:Location[text()="interior"]]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[CompactFluorescent] and Location[text()="interior"]]</sch:assert> <!-- See [LightingGroup] -->
-      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:CompactFluorescent] and h:Location[text()="exterior"]]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[CompactFluorescent] and Location[text()="exterior"]]</sch:assert> <!-- See [LightingGroup] -->
-      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:CompactFluorescent] and h:Location[text()="garage"]]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[CompactFluorescent] and Location[text()="garage"]]</sch:assert> <!-- See [LightingGroup] -->
-      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:FluorescentTube] and h:Location[text()="interior"]]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[FluorescentTube] and Location[text()="interior"]]</sch:assert> <!-- See [LightingGroup] -->
-      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:FluorescentTube] and h:Location[text()="exterior"]]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[FluorescentTube] and Location[text()="exterior"]]</sch:assert> <!-- See [LightingGroup] -->
-      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:FluorescentTube] and h:Location[text()="garage"]]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[FluorescentTube] and Location[text()="garage"]]</sch:assert> <!-- See [LightingGroup] -->
+      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:LightEmittingDiode] and h:Location="interior"]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[LightEmittingDiode] and Location[text()="interior"]]</sch:assert> <!-- See [LightingGroup] -->
+      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:LightEmittingDiode] and h:Location="exterior"]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[LightEmittingDiode] and Location[text()="exterior"]]</sch:assert> <!-- See [LightingGroup] -->
+      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:LightEmittingDiode] and h:Location="garage"]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[LightEmittingDiode] and Location[text()="garage"]]</sch:assert> <!-- See [LightingGroup] -->
+      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:CompactFluorescent] and h:Location="interior"]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[CompactFluorescent] and Location[text()="interior"]]</sch:assert> <!-- See [LightingGroup] -->
+      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:CompactFluorescent] and h:Location="exterior"]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[CompactFluorescent] and Location[text()="exterior"]]</sch:assert> <!-- See [LightingGroup] -->
+      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:CompactFluorescent] and h:Location="garage"]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[CompactFluorescent] and Location[text()="garage"]]</sch:assert> <!-- See [LightingGroup] -->
+      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:FluorescentTube] and h:Location="interior"]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[FluorescentTube] and Location[text()="interior"]]</sch:assert> <!-- See [LightingGroup] -->
+      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:FluorescentTube] and h:Location="exterior"]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[FluorescentTube] and Location[text()="exterior"]]</sch:assert> <!-- See [LightingGroup] -->
+      <sch:assert role='ERROR' test='count(h:LightingGroup[h:LightingType[h:FluorescentTube] and h:Location="garage"]) = 1'>Expected 1 element(s) for xpath: LightingGroup[LightingType[FluorescentTube] and Location[text()="garage"]]</sch:assert> <!-- See [LightingGroup] -->
       <sch:assert role='ERROR' test='count(h:extension/h:InteriorUsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/InteriorUsageMultiplier</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:GarageUsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/GarageUsageMultiplier</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:ExteriorUsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ExteriorUsageMultiplier</sch:assert>
@@ -1637,6 +1645,10 @@
       <sch:assert role='ERROR' test='count(h:extension/h:ExteriorWeekendScheduleFractions) + count(/h:HPXML/h:SoftwareInfo/h:extension/h:SchedulesFilePath) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ExteriorWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:ExteriorMonthlyScheduleMultipliers) + count(/h:HPXML/h:SoftwareInfo/h:extension/h:SchedulesFilePath) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ExteriorMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:ExteriorHolidayLighting) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ExteriorHolidayLighting</sch:assert> <!-- See [ExteriorHolidayLighting] -->
+      <!-- Sum Checks -->
+      <sch:assert role='ERROR' test='sum(h:LightingGroup[h:Location="interior"]/h:FractionofUnitsInLocation) &lt;= 1.01'>Expected sum(LightingGroup/FractionofUnitsInLocation) for Location="interior" to be less than or equal to 1</sch:assert>
+      <sch:assert role='ERROR' test='sum(h:LightingGroup[h:Location="exterior"]/h:FractionofUnitsInLocation) &lt;= 1.01'>Expected sum(LightingGroup/FractionofUnitsInLocation) for Location="exterior" to be less than or equal to 1</sch:assert>
+      <sch:assert role='ERROR' test='sum(h:LightingGroup[h:Location="garage"]/h:FractionofUnitsInLocation) &lt;= 1.01'>Expected sum(LightingGroup/FractionofUnitsInLocation) for Location="garage" to be less than or equal to 1</sch:assert>
     </sch:rule>
   </sch:pattern>
 
