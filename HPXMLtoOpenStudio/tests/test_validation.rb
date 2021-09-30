@@ -242,13 +242,12 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
   def _get_element_name_for_assertion_test(assertion)
     # From the assertion, get the element name to be added or deleted for the assertion test.
-    if assertion.inner_text.start_with?('Expected') && assertion.inner_text.include?('to be')
-      test_attr = assertion.get('test')
+    test_attr = assertion.get('test')
+    if assertion.inner_text.start_with?('Expected') && assertion.inner_text.include?('to be') && test_attr.include?('not')
       element_name = test_attr[/not\((.*?)\)/m, 1].gsub('h:', '') # pull text between "not(" and ")" (i.e. "foo" from "not(h:foo)")
 
       return element_name
     else
-      test_attr = assertion.get('test')
       element_name = test_attr[/(?<=\().*(?=\))/].gsub('h:', '').partition(') + count').first # pull text between the first opening and the last closing parenthesis. (i.e. "foo" from "count(foo) + count(bar)...")
       _balance_brackets(element_name)
 
