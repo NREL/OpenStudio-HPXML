@@ -985,19 +985,19 @@ class Waterheater
     plant_loop_hw = nil
     model.getBoilerHotWaters.each do |bhw|
       sys_id = bhw.additionalProperties.getFeatureAsString('HPXML_ID')
-      if sys_id.is_initialized && sys_id.get == heating_source_id
-        plant_loop = bhw.plantLoop.get
-        plant_loop_hw = plant_loop.clone(model).to_PlantLoop.get
-        #pump power is zero, fixme: is this expected? what about no heating scenarios when only water heating boiler is running but no power consumption is calculated?
-        plant_loop_hw.supplyComponents.each do |comp|
-          if comp.to_BoilerHotWater.is_initialized
-            boiler_hw = comp.to_BoilerHotWater.get
-          end
-          next unless comp.to_PumpVariableSpeed.is_initialized
+      next unless sys_id.is_initialized && sys_id.get == heating_source_id
 
-          pump_hw = comp.to_PumpVariableSpeed.get
-          pump_hw.setRatedPowerConsumption(0.0)
+      plant_loop = bhw.plantLoop.get
+      plant_loop_hw = plant_loop.clone(model).to_PlantLoop.get
+      # pump power is zero, fixme: is this expected? what about no heating scenarios when only water heating boiler is running but no power consumption is calculated?
+      plant_loop_hw.supplyComponents.each do |comp|
+        if comp.to_BoilerHotWater.is_initialized
+          boiler_hw = comp.to_BoilerHotWater.get
         end
+        next unless comp.to_PumpVariableSpeed.is_initialized
+
+        pump_hw = comp.to_PumpVariableSpeed.get
+        pump_hw.setRatedPowerConsumption(0.0)
       end
     end
     return boiler_hw, plant_loop_hw
@@ -1269,12 +1269,6 @@ class Waterheater
 
     # Sensors
     if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
-      ec_adj_sensor_hx = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Fluid Heat Exchanger Heat Transfer Energy')
-      ec_adj_sensor_hx.setName("#{combi_hx.name} energy")
-      ec_adj_sensor_hx.setKeyName(combi_hx.name.to_s)
-      ec_adj_sensor_boiler_heating = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Boiler Heating Energy')
-      ec_adj_sensor_boiler_heating.setName("#{combi_boiler.name} heating energy")
-      ec_adj_sensor_boiler_heating.setKeyName(combi_boiler.name.to_s)
       ec_adj_sensor_boiler = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Boiler #{EPlus.fuel_type(fuel_type)} Rate")
       ec_adj_sensor_boiler.setName("#{combi_boiler.name} energy")
       ec_adj_sensor_boiler.setKeyName(combi_boiler.name.to_s)
@@ -1308,14 +1302,9 @@ class Waterheater
     ec_adj_program.setName("#{heater.name} EC_adj")
     if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
       ec_adj_program.addLine("Set dhw_e_cons = #{ec_adj_oncyc_sensor.name} + #{ec_adj_offcyc_sensor.name}")
-      ec_adj_program.addLine('Set htg_e_cons = dhw_e_cons')
-      ec_adj_program.addLine("If #{ec_adj_sensor_boiler_heating.name} > 0")
-      ec_adj_program.addLine("  Set dhw_frac = (@Abs #{ec_adj_sensor_hx.name}) / #{ec_adj_sensor_boiler_heating.name}")
-      ec_adj_program.addLine("  Set dhw_e_cons = dhw_e_cons + dhw_frac * #{ec_adj_sensor_boiler.name}")
-      ec_adj_program.addLine("  Set htg_e_cons = htg_e_cons + (1.0 - dhw_frac) * #{ec_adj_sensor_boiler.name}")
+      ec_adj_program.addLine("If #{ec_adj_sensor_boiler.name} > 0")
+      ec_adj_program.addLine("  Set dhw_e_cons = dhw_e_cons + #{ec_adj_sensor_boiler.name}")
       ec_adj_program.addLine('EndIf')
-      ec_adj_program.addLine('Set boiler_dhw_energy = dhw_e_cons * 3600 * SystemTimeStep')
-      ec_adj_program.addLine('Set boiler_htg_energy = htg_e_cons * 3600 * SystemTimeStep')
     elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
       ec_adj_program.addLine("Set dhw_e_cons = #{ec_adj_sensor.name} + #{ec_adj_oncyc_sensor.name} + #{ec_adj_offcyc_sensor.name} + #{ec_adj_hp_sensor.name} + #{ec_adj_fan_sensor.name}")
     else
@@ -1343,30 +1332,6 @@ class Waterheater
     ec_adj_output_var.setUnits('J')
     ec_adj_output_var.additionalProperties.setFeature('FuelType', EPlus.fuel_type(fuel_type)) # Used by reporting measure
     ec_adj_output_var.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
-
-    if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
-      # EMS Output Variables for combi dhw energy reporting (before EC_adj is applied)
-
-      # DHW energy use:
-      boiler_dhw_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'boiler_dhw_energy')
-      boiler_dhw_output_var.setName("#{Constants.ObjectNameCombiWaterHeatingEnergy(heater.name)} outvar")
-      boiler_dhw_output_var.setTypeOfDataInVariable('Summed')
-      boiler_dhw_output_var.setUpdateFrequency('SystemTimestep')
-      boiler_dhw_output_var.setEMSProgramOrSubroutineName(ec_adj_program)
-      boiler_dhw_output_var.setUnits('J')
-      boiler_dhw_output_var.additionalProperties.setFeature('FuelType', EPlus.fuel_type(fuel_type)) # Used by reporting measure
-      boiler_dhw_output_var.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
-
-      # Space heating energy use:
-      boiler_htg_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'boiler_htg_energy')
-      boiler_htg_output_var.setName("#{Constants.ObjectNameCombiSpaceHeatingEnergy(heater.name)} outvar")
-      boiler_htg_output_var.setTypeOfDataInVariable('Summed')
-      boiler_htg_output_var.setUpdateFrequency('SystemTimestep')
-      boiler_htg_output_var.setEMSProgramOrSubroutineName(ec_adj_program)
-      boiler_htg_output_var.setUnits('J')
-      boiler_htg_output_var.additionalProperties.setFeature('FuelType', EPlus.fuel_type(fuel_type)) # Used by reporting measure
-      boiler_htg_output_var.additionalProperties.setFeature('HPXML_ID', water_heating_system.related_hvac_system.id) # Used by reporting measure
-    end
   end
 
   def self.get_default_hot_water_temperature(eri_version)
