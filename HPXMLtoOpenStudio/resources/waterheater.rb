@@ -981,16 +981,26 @@ class Waterheater
 
   def self.get_combi_boiler_and_plant_loop(model, heating_source_id)
     # Search for the right boiler OS object
-    boiler = nil
-    plant_loop = nil
+    boiler_hw = nil
+    plant_loop_hw = nil
     model.getBoilerHotWaters.each do |bhw|
       sys_id = bhw.additionalProperties.getFeatureAsString('HPXML_ID')
       if sys_id.is_initialized && sys_id.get == heating_source_id
-        boiler = bhw
-        plant_loop = boiler.plantLoop.get
+        plant_loop = bhw.plantLoop.get
+        plant_loop_hw = plant_loop.clone(model).to_PlantLoop.get
+        #pump power is zero, fixme: is this expected? what about no heating scenarios when only water heating boiler is running but no power consumption is calculated?
+        plant_loop_hw.supplyComponents.each do |comp|
+          if comp.to_BoilerHotWater.is_initialized
+            boiler_hw = comp.to_BoilerHotWater.get
+          end
+          next unless comp.to_PumpVariableSpeed.is_initialized
+
+          pump_hw = comp.to_PumpVariableSpeed.get
+          pump_hw.setRatedPowerConsumption(0.0)
+        end
       end
     end
-    return boiler, plant_loop
+    return boiler_hw, plant_loop_hw
   end
 
   def self.get_desuperheatercoil(water_heating_system, model)
