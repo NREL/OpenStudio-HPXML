@@ -1,0 +1,128 @@
+{
+  "building_address": {
+    "address": "8113 W. Tripoli Ave",
+    "city": "Homelake",
+    "state": "CO",
+    "zip_code": "81135",
+    "assessment_type": "test",
+    "external_building_id": "59389"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2017-07-12",
+      "shape": "town_house",
+      "town_house_walls": "back_right_front",
+      "year_built": 1974,
+      "number_bedrooms": 3,
+      "num_floor_above_grade": 2,
+      "floor_to_ceiling_height": 8,
+      "conditioned_floor_area": 950,
+      "orientation": "north",
+      "blower_door_test": true,
+      "envelope_leakage": 1454
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 975.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "medium",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf49",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 500.0,
+          "foundation_type": "unvented_crawl",
+          "foundation_insulation_level": 0,
+          "floor_assembly_code": "efwf00ca"
+        },
+        {
+          "floor_name": "floor2",
+          "floor_area": 475.0,
+          "foundation_type": "uncond_basement",
+          "foundation_insulation_level": 0,
+          "floor_assembly_code": "efwf00ca"
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewwf00vi",
+          "zone_window": {
+            "window_area": 42.5,
+            "window_method": "custom",
+            "window_u_value": 0.44,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewwf00vi",
+          "zone_window": {
+            "window_area": 42.5,
+            "window_method": "custom",
+            "window_u_value": 0.44,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewwf00vi",
+          "zone_window": {
+            "window_area": 32.3,
+            "window_method": "custom",
+            "window_u_value": 0.44,
+            "window_shgc": 0.56,
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "natural_gas",
+            "type": "central_furnace",
+            "efficiency_method": "user",
+            "efficiency": 0.76
+          },
+          "cooling": {
+            "type": "split_dx",
+            "efficiency_method": "user",
+            "efficiency": 9.4
+          },
+          "hvac_distribution": [
+            {
+              "name": "duct1",
+              "location": "cond_space",
+              "fraction": 1.0,
+              "insulated": false,
+              "sealed": false
+            }
+          ]
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "natural_gas",
+        "efficiency_method": "user",
+        "energy_factor": 0.56
+      }
+    }
+  }
+}

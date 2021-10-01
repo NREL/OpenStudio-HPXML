@@ -10,20 +10,39 @@ require_relative '../measure.rb'
 require 'fileutils'
 
 class HEScoreRulesetTest < MiniTest::Test
-  def test_sample_files
+  def test_regression_files
     this_dir = File.dirname(__FILE__)
 
     args_hash = {}
 
-    Dir["#{this_dir}/../../../workflow/sample_files/*.xml"].sort.each do |xml|
-      puts "Testing #{File.absolute_path(xml)}..."
+    Dir["#{this_dir}/../../../workflow/regression_files/*.json"].sort.each do |json|
+      puts "Testing #{File.absolute_path(json)}..."
 
-      args_hash['hpxml_path'] = File.absolute_path(xml)
-      args_hash['hpxml_output_path'] = File.absolute_path(xml).gsub('.xml', '.xml.out')
+      args_hash['json_path'] = File.absolute_path(json)
+      args_hash['hpxml_output_path'] = File.absolute_path(json).gsub('.json', '.xml.out')
 
-      _test_schema_validation(this_dir, xml)
       _test_measure(args_hash)
-      _test_schema_validation(this_dir, xml.gsub('.xml', '.xml.out'))
+      _test_schema_validation(this_dir, json.gsub('.json', '.xml.out'))
+      _test_assembly_effective_rvalues(args_hash)
+      _test_conditioned_building_volume(args_hash)
+
+      FileUtils.rm_f(args_hash['hpxml_output_path']) # Cleanup
+    end
+  end
+
+  def test_historic_files
+    this_dir = File.dirname(__FILE__)
+
+    args_hash = {}
+
+    Dir["#{this_dir}/../../../workflow/historic_files/*.json"].sort.each do |json|
+      puts "Testing #{File.absolute_path(json)}..."
+
+      args_hash['json_path'] = File.absolute_path(json)
+      args_hash['hpxml_output_path'] = File.absolute_path(json).gsub('.json', '.xml.out')
+
+      _test_measure(args_hash)
+      _test_schema_validation(this_dir, json.gsub('.json', '.xml.out'))
       _test_assembly_effective_rvalues(args_hash)
       _test_conditioned_building_volume(args_hash)
 
@@ -33,11 +52,11 @@ class HEScoreRulesetTest < MiniTest::Test
 
   def test_neighbors
     this_dir = File.dirname(__FILE__)
-    xml = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Base_hpxml.xml")
+    json = File.absolute_path("#{this_dir}/../../../workflow/regression_files/Base.json")
 
     args_hash = {
-      'hpxml_path' => xml,
-      'hpxml_output_path' => xml.gsub('.xml', '.xml.out')
+      'json_path' => json,
+      'hpxml_output_path' => json.gsub('.json', '.xml.out')
     }
 
     _test_measure(args_hash)
@@ -152,8 +171,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationAtticUnconditioned]]
+    fnd_types = { 'slab_on_grade' => 1000.0 }
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(9.7, ach50, 0.01)
 
@@ -165,8 +184,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationAtticUnconditioned]]
+    fnd_types = { 'slab_on_grade' => 1000.0 }
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(11.8, ach50, 0.01)
 
@@ -178,8 +197,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 2000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationAtticUnconditioned]]
+    fnd_types = { 'slab_on_grade' => 2000.0 }
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(10.2, ach50, 0.01)
 
@@ -191,8 +210,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationAtticUnconditioned]]
+    fnd_types = { 'slab_on_grade' => 1000.0 }
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(7.6, ach50, 0.01)
 
@@ -204,8 +223,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 2013
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationAtticUnconditioned]]
+    fnd_types = { 'slab_on_grade' => 1000.0 }
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(5.3, ach50, 0.01)
 
@@ -217,8 +236,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '4C'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationAtticUnconditioned]]
+    fnd_types = { 'slab_on_grade' => 1000.0 }
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(13.1, ach50, 0.01)
 
@@ -230,8 +249,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationBasementConditioned => 1000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationAtticUnconditioned]]
+    fnd_types = { 'cond_basement' => 1000.0 }
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(11.2, ach50, 0.01)
 
@@ -243,8 +262,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationLivingSpace]]
+    fnd_types = { 'slab_on_grade' => 1000.0 }
+    ducts = [[1.0, 1.0, 'cond_space']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(8.0, ach50, 0.01)
 
@@ -256,8 +275,8 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessTight
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
-    ducts = [[1.0, 1.0, HPXML::LocationAtticUnconditioned]]
+    fnd_types = { 'slab_on_grade' => 1000.0 }
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(7.3, ach50, 0.01)
 
@@ -269,14 +288,14 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 600.0,
-                  HPXML::LocationBasementConditioned => 400.0 }
-    ducts = [[0.75, 0.5, HPXML::LocationAtticUnconditioned],
-             [0.75, 0.25, HPXML::LocationLivingSpace],
-             [0.75, 0.25, HPXML::LocationCrawlspaceVented],
-             [0.25, 0.5, HPXML::LocationCrawlspaceUnvented],
-             [0.25, 0.3, HPXML::LocationAtticUnconditioned],
-             [0.25, 0.2, HPXML::LocationCrawlspaceVented]]
+    fnd_types = { 'slab_on_grade' => 600.0,
+                  'cond_basement' => 400.0 }
+    ducts = [[0.75, 0.5, 'uncond_attic'],
+             [0.75, 0.25, 'cond_space'],
+             [0.75, 0.25, 'vented_crawl'],
+             [0.25, 0.5, 'unvented_crawl'],
+             [0.25, 0.3, 'uncond_attic'],
+             [0.25, 0.2, 'vented_crawl']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(10.2, ach50, 0.01)
 
@@ -289,10 +308,10 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
+    fnd_types = { 'slab_on_grade' => 1000.0 }
     ducts = []
     ach50_ductless = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
-    ducts = [[1.0, 1.0, HPXML::LocationLivingSpace]]
+    ducts = [[1.0, 1.0, 'cond_space']]
     ach50_ducted = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_equal(ach50_ductless, ach50_ducted)
 
@@ -305,36 +324,37 @@ class HEScoreRulesetTest < MiniTest::Test
     desc = HPXML::LeakinessAverage
     year_built = 1975
     iecc_cz = '3B'
-    fnd_types = { HPXML::LocationLivingSpace => 1000.0 }
-    ducts = [[0.5, 1.0, 'attic - unconditioned']] # 50% ducts in attic + 50% ductless
+    fnd_types = { 'slab_on_grade' => 1000.0 }
+    ducts = [[0.5, 1.0, 'uncond_attic']] # 50% ducts in attic + 50% ductless
     ach50_mixed = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
-    ducts = [[1.0, 1.0, 'living space']]
+    ducts = [[1.0, 1.0, 'cond_space']]
     ach50_cond = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
-    ducts = [[1.0, 1.0, 'attic - unconditioned']]
+    ducts = [[1.0, 1.0, 'uncond_attic']]
     ach50_uncond = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(ach50_mixed, (ach50_cond + ach50_uncond) / 2.0, 0.01)
   end
 
   def test_foundation_area_lookup
     this_dir = File.dirname(__FILE__)
-    xml = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Floor2_conditioned_basement_hpxml.xml")
+    json_path = File.absolute_path("#{this_dir}/../../../workflow/regression_files/Floor2_conditioned_basement.json")
 
-    orig_hpxml = HPXML.new(hpxml_path: xml)
+    json_file = File.open(json_path)
+    json = JSON.parse(json_file.read)
     new_hpxml = HPXML.new()
 
-    HEScoreRuleset.set_summary(orig_hpxml, new_hpxml)
+    HEScoreRuleset.set_summary(json, new_hpxml)
     bldg_length_side = HEScoreRuleset.instance_variable_get(:@bldg_length_side)
     bldg_length_front = HEScoreRuleset.instance_variable_get(:@bldg_length_front)
 
-    slab_foundation = orig_hpxml.foundations[0]
-    slab_area = slab_foundation.area
+    slab_foundation = json['building']['zone']['zone_floor'][0]
+    slab_area = slab_foundation['floor_area'].to_f
     assert_in_epsilon(slab_area, 600.0, 0.01)
-    basement_foundation = orig_hpxml.foundations[1]
-    basement_area = basement_foundation.area
+    basement_foundation = json['building']['zone']['zone_floor'][1]
+    basement_area = basement_foundation['floor_area'].to_f
     assert_in_epsilon(basement_area, 400.0, 0.01)
 
-    slab_perimeter = HEScoreRuleset.get_foundation_perimeter(orig_hpxml, slab_foundation)
-    basement_perimeter = HEScoreRuleset.get_foundation_perimeter(orig_hpxml, basement_foundation)
+    slab_perimeter = HEScoreRuleset.get_foundation_perimeter(json, slab_foundation)
+    basement_perimeter = HEScoreRuleset.get_foundation_perimeter(json, basement_foundation)
     total_area = slab_area + basement_area
     slab_area_frac = slab_area / total_area
     bsmt_area_frac = basement_area / total_area
@@ -536,13 +556,14 @@ class HEScoreRulesetTest < MiniTest::Test
   end
 
   def _test_assembly_effective_rvalues(args_hash)
-    in_doc = XMLHelper.parse_file(args_hash['hpxml_path'])
+    json_file = File.open(args_hash['json_path'])
+    in_doc = JSON.parse(json_file.read)
     out_doc = XMLHelper.parse_file(args_hash['hpxml_output_path'])
 
     wall_code_by_id = {}
-    XMLHelper.get_elements(in_doc, 'HPXML/Building/BuildingDetails/Enclosure/Walls/Wall') do |wall|
-      wall_code = XMLHelper.get_value(wall, 'extension/hescore_wall_code', :string)
-      wallid = XMLHelper.get_attribute_value(XMLHelper.get_element(wall, 'SystemIdentifier'), 'id')
+    in_doc['building']['zone']['zone_wall'].each do |wall|
+      wall_code = wall['wall_assembly_code']
+      wallid = "#{wall['side']}_wall"
       wall_code_by_id[wallid] = wall_code
     end
 
@@ -555,9 +576,10 @@ class HEScoreRulesetTest < MiniTest::Test
     end
 
     roof_code_by_id = {}
-    XMLHelper.get_elements(in_doc, 'HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof') do |roof|
-      roofid = XMLHelper.get_attribute_value(XMLHelper.get_element(roof, 'SystemIdentifier'), 'id')
-      roof_code_by_id[roofid] = XMLHelper.get_value(roof, 'extension/roof_assembly_code', :string)
+    in_doc['building']['zone']['zone_roof'].each_with_index do |roof, idx|
+      roof_code = roof['roof_assembly_code']
+      roofid = "#{roof['roof_name']}_#{idx}"
+      roof_code_by_id[roofid] = roof_code
     end
 
     XMLHelper.get_elements(out_doc, 'HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof') do |roof|
@@ -568,15 +590,28 @@ class HEScoreRulesetTest < MiniTest::Test
   end
 
   def _test_conditioned_building_volume(args_hash)
-    in_doc = XMLHelper.parse_file(args_hash['hpxml_path'])
+    json_file = File.open(args_hash['json_path'])
+    in_doc = JSON.parse(json_file.read)
     out_doc = XMLHelper.parse_file(args_hash['hpxml_output_path'])
 
-    cfa = XMLHelper.get_value(in_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea', :float)
-    ceil_height = XMLHelper.get_value(in_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/AverageCeilingHeight', :float)
+    cfa = in_doc['building']['about']['conditioned_floor_area']
+    ceil_height = in_doc['building']['about']['floor_to_ceiling_height']
     cbv = XMLHelper.get_value(out_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume', :float)
 
-    has_conditioned_attic = XMLHelper.has_element(in_doc, "HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/AtticType/Attic[Conditioned='true']")
-    has_cathedral_ceiling = XMLHelper.has_element(in_doc, 'HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/AtticType/CathedralCeiling')
+    has_conditioned_attic = false
+    in_doc['building']['zone']['zone_roof'].each do |roof|
+      if roof['roof_type'] == 'cond_attic'
+        has_conditioned_attic = true
+        break
+      end
+    end
+    has_cathedral_ceiling = false
+    in_doc['building']['zone']['zone_roof'].each do |roof|
+      if roof['roof_type'] == 'cath_ceiling'
+        has_cathedral_ceiling = true
+        break
+      end
+    end
 
     if not (has_cathedral_ceiling || has_conditioned_attic)
       assert_in_epsilon(cfa * ceil_height, cbv, 0.01)

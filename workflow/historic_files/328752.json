@@ -1,0 +1,114 @@
+{
+  "building_address": {
+    "address": "87 Snodgrass Lane",
+    "city": "Crested Butte",
+    "state": "CO",
+    "zip_code": "81224",
+    "assessment_type": "test",
+    "external_building_id": "83733"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2016-08-18",
+      "shape": "rectangle",
+      "year_built": 1978,
+      "number_bedrooms": 5,
+      "num_floor_above_grade": 3,
+      "floor_to_ceiling_height": 10,
+      "conditioned_floor_area": 2403,
+      "orientation": "north_west",
+      "blower_door_test": true,
+      "envelope_leakage": 1850
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 801.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "dark",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf49",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 801.0,
+          "foundation_type": "cond_basement",
+          "foundation_insulation_level": 19,
+          "floor_assembly_code": "efwf11ca"
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewwf21wo",
+          "zone_window": {
+            "window_area": 77.0,
+            "window_method": "code",
+            "window_code": "thmabw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewwf21wo",
+          "zone_window": {
+            "window_area": 68.0,
+            "window_method": "code",
+            "window_code": "thmabw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewwf21wo",
+          "zone_window": {
+            "window_area": 143.0,
+            "window_method": "code",
+            "window_code": "thmabw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewwf21wo",
+          "zone_window": {
+            "window_area": 48.0,
+            "window_method": "code",
+            "window_code": "thmabw",
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "natural_gas",
+            "type": "boiler",
+            "efficiency_method": "user",
+            "efficiency": 0.96
+          },
+          "cooling": {
+            "type": "none"
+          },
+          "hvac_distribution": []
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "combined",
+        "type": "indirect"
+      }
+    }
+  }
+}

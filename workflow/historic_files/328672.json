@@ -1,0 +1,130 @@
+{
+  "building_address": {
+    "address": "3371 TWIN OAKS DRIVE",
+    "city": "Napa",
+    "state": "CA",
+    "zip_code": "94558",
+    "assessment_type": "test",
+    "external_building_id": "30719"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2018-10-16",
+      "shape": "rectangle",
+      "year_built": 1975,
+      "number_bedrooms": 4,
+      "num_floor_above_grade": 1,
+      "floor_to_ceiling_height": 8,
+      "conditioned_floor_area": 1845,
+      "orientation": "north_east",
+      "blower_door_test": false,
+      "air_sealing_present": false
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 1845.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "medium_dark",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf25",
+          "zone_skylight": {
+            "skylight_area": 12.0,
+            "skylight_method": "code",
+            "skylight_code": "dtab",
+            "solar_screen": false
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 1845.0,
+          "foundation_type": "vented_crawl",
+          "foundation_insulation_level": 0,
+          "floor_assembly_code": "efwf00ca"
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewwf15st",
+          "zone_window": {
+            "window_area": 52.0,
+            "window_method": "code",
+            "window_code": "dcaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewwf15st",
+          "zone_window": {
+            "window_area": 32.0,
+            "window_method": "code",
+            "window_code": "dcaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewwf15st",
+          "zone_window": {
+            "window_area": 24.0,
+            "window_method": "code",
+            "window_code": "dcaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewwf15st",
+          "zone_window": {
+            "window_area": 42.0,
+            "window_method": "code",
+            "window_code": "dcaw",
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "natural_gas",
+            "type": "central_furnace",
+            "efficiency_method": "user",
+            "efficiency": 0.96
+          },
+          "cooling": {
+            "type": "split_dx",
+            "efficiency_method": "user",
+            "efficiency": 15.0
+          },
+          "hvac_distribution": [
+            {
+              "name": "duct1",
+              "location": "uncond_attic",
+              "fraction": 1.0,
+              "insulated": true,
+              "sealed": true
+            }
+          ]
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "natural_gas",
+        "efficiency_method": "user",
+        "energy_factor": 0.62
+      }
+    }
+  }
+}
