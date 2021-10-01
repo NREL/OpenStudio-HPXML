@@ -717,10 +717,12 @@ class HEScoreRuleset
       # HVACDistribution
       next unless is_ducted_heating_system(orig_hvac) || is_ducted_cooling_system(orig_hvac)
 
-      if orig_hvac['hvac_distribution']['leakage_method'] = 'quantitative'
+      if orig_hvac['hvac_distribution']['leakage_method'] == 'quantitative'
         cfm25 = orig_hvac['hvac_distribution']['leakage_to_outside']
-      else
+      elsif orig_hvac['hvac_distribution']['leakage_method'] == 'qualitative'
         sealed = orig_hvac['hvac_distribution']['sealed']
+      else
+        fail 'Unexpected leakage_method.'
       end
 
       tot_frac = 0.0
@@ -1305,9 +1307,12 @@ def calc_duct_values(ncfl_ag, cfa, sealed, frac_inside, cfm25 = nil)
     return HPXML::UnitsCFM25, cfm25_s.round(2), cfm25_r.round(2), uncond_area_s.round(2), uncond_area_r.round(2)
   else
     # Total leakage fraction of air handler flow
+    puts "#{sealed} #{sealed.class}"
     if sealed
+      puts 1
       total_leakage_frac = 0.10
     else
+      puts 2
       total_leakage_frac = 0.25
     end
 
