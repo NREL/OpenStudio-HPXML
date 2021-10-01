@@ -717,7 +717,11 @@ class HEScoreRuleset
       # HVACDistribution
       next unless is_ducted_heating_system(orig_hvac) || is_ducted_cooling_system(orig_hvac)
 
-      sealed = orig_hvac['hvac_distribution']['sealed']
+      if orig_hvac['hvac_distribution']['leakage_method'] = 'quantitative'
+        cfm25 = orig_hvac['hvac_distribution']['leakage_to_outside']
+      else
+        sealed = orig_hvac['hvac_distribution']['sealed']
+      end
 
       tot_frac = 0.0
       frac_inside = 0.0
@@ -746,17 +750,17 @@ class HEScoreRuleset
       hvac_fraction = orig_hvac['hvac_fraction']
       new_hpxml.hvac_distributions[-1].conditioned_floor_area_served = hvac_fraction * @cfa
 
-      lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(@ncfl_ag, @cfa, sealed, frac_inside)
+      lto_units, lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(@ncfl_ag, @cfa, sealed, frac_inside, cfm25)
 
       # Supply duct leakage to the outside
       new_hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                                     duct_leakage_units: HPXML::UnitsPercent,
+                                                                     duct_leakage_units: lto_units,
                                                                      duct_leakage_value: lto_s,
                                                                      duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
 
       # Return duct leakage to the outside
       new_hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                                     duct_leakage_units: HPXML::UnitsPercent,
+                                                                     duct_leakage_units: lto_units,
                                                                      duct_leakage_value: lto_r,
                                                                      duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
 
@@ -1272,14 +1276,7 @@ def get_roof_solar_absorptance(roof_color)
   fail "Could not get roof absorptance for color '#{roof_color}'"
 end
 
-def calc_duct_values(ncfl_ag, cfa, is_sealed, frac_inside)
-  # Total leakage fraction of air handler flow
-  if is_sealed
-    total_leakage_frac = 0.10
-  else
-    total_leakage_frac = 0.25
-  end
-
+def calc_duct_values(ncfl_ag, cfa, sealed, frac_inside, cfm25 = nil)
   # Fraction of ducts that are outside conditioned space
   if frac_inside > 0
     f_out_s = 1.0 - frac_inside
@@ -1297,15 +1294,29 @@ def calc_duct_values(ncfl_ag, cfa, is_sealed, frac_inside)
     f_out_r = 1.0
   end
 
-  # Duct leakages to the outside (assume total leakage equally split between supply/return)
-  lto_s = total_leakage_frac / 2.0 * f_out_s
-  lto_r = total_leakage_frac / 2.0 * f_out_r
-
   # Duct surface areas that are outside conditioned space
   uncond_area_s = 0.27 * f_out_s * cfa
   uncond_area_r = 0.05 * ncfl_ag * f_out_r * cfa
 
-  return lto_s.round(5), lto_r.round(5), uncond_area_s.round(2), uncond_area_r.round(2)
+  if not cfm25.nil? # Duct blaster measurements provided
+    cfm25_s = cfm25 / 2.0
+    cfm25_r = cfm25 / 2.0
+
+    return HPXML::UnitsCFM25, cfm25_s.round(2), cfm25_r.round(2), uncond_area_s.round(2), uncond_area_r.round(2)
+  else
+    # Total leakage fraction of air handler flow
+    if sealed
+      total_leakage_frac = 0.10
+    else
+      total_leakage_frac = 0.25
+    end
+
+    # Duct leakages to the outside (assume total leakage equally split between supply/return)
+    percent_s = total_leakage_frac / 2.0 * f_out_s
+    percent_r = total_leakage_frac / 2.0 * f_out_r
+
+    return HPXML::UnitsPercent, percent_s.round(5), percent_r.round(5), uncond_area_s.round(2), uncond_area_r.round(2)
+  end
 end
 
 def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
