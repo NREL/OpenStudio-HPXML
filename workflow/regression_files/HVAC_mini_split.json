@@ -86,24 +86,6 @@
             "type": "mini_split",
             "efficiency_method": "user",
             "efficiency": 13
-          },
-          "hvac_distribution": {
-            "leakage_method": "qualitative",
-            "sealed": null,
-            "duct": [
-              {
-                "name": "duct1",
-                "fraction": 0
-              },
-              {
-                "name": "duct2",
-                "fraction": 0
-              },
-              {
-                "name": "duct3",
-                "fraction": 0
-              }
-            ]
           }
         }
       ],

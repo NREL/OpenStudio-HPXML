@@ -101,10 +101,7 @@
           },
           "cooling": {
             "type": "none"
-          },
-          "hvac_distribution": [
-
-          ]
+          }
         },
         {
           "hvac_name": "hvac2",
@@ -115,10 +112,7 @@
           },
           "cooling": {
             "type": "none"
-          },
-          "hvac_distribution": [
-
-          ]
+          }
         }
       ],
       "domestic_hot_water": {

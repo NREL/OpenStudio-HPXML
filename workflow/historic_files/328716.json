@@ -135,10 +135,7 @@
             "type": "mini_split",
             "efficiency_method": "user",
             "efficiency": 16.0
-          },
-          "hvac_distribution": [
-
-          ]
+          }
         }
       ],
       "domestic_hot_water": {
