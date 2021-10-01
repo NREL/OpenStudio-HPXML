@@ -30,6 +30,10 @@
           <SiteType>suburban</SiteType>
           <Surroundings>attached on one side</Surroundings>
           <AzimuthOfFrontOfHome>180</AzimuthOfFrontOfHome>
+          <FuelTypesAvailable>
+            <Fuel>electricity</Fuel>
+            <Fuel>natural gas</Fuel>
+          </FuelTypesAvailable>
         </Site>
         <BuildingOccupancy>
           <NumberofResidents>3.0</NumberofResidents>
@@ -78,6 +82,7 @@
                 <Vented>false</Vented>
               </Attic>
             </AtticType>
+            <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToWall idref='Wall3'/>
             <AttachedToWall idref='Wall4'/>
@@ -93,9 +98,9 @@
               </Basement>
             </FoundationType>
             <AttachedToRimJoist idref='RimJoist1'/>
-            <AttachedToRimJoist idref='RimJoist3'/>
+            <AttachedToRimJoist idref='RimJoist2'/>
             <AttachedToFoundationWall idref='FoundationWall1'/>
-            <AttachedToFoundationWall idref='FoundationWall3'/>
+            <AttachedToFoundationWall idref='FoundationWall2'/>
             <AttachedToSlab idref='Slab1'/>
           </Foundation>
         </Foundations>
@@ -105,7 +110,8 @@
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <Area>1006.0</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
-            <RoofColor>medium</RoofColor>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
             <Pitch>6.0</Pitch>
             <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
@@ -121,20 +127,22 @@
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>66.0</Area>
             <Siding>wood siding</Siding>
-            <Color>medium</Color>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
             </Insulation>
           </RimJoist>
           <RimJoist>
-            <SystemIdentifier id='RimJoist3'/>
+            <SystemIdentifier id='RimJoist2'/>
             <ExteriorAdjacentTo>basement - conditioned</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>28.0</Area>
-            <Color>medium</Color>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
             <Insulation>
-              <SystemIdentifier id='RimJoist3Insulation'/>
+              <SystemIdentifier id='RimJoist2Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
             </Insulation>
           </RimJoist>
@@ -149,7 +157,8 @@
             </WallType>
             <Area>1372.0</Area>
             <Siding>wood siding</Siding>
-            <Color>medium</Color>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
@@ -166,7 +175,8 @@
               <WoodStud/>
             </WallType>
             <Area>588.0</Area>
-            <Color>medium</Color>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
@@ -185,7 +195,8 @@
             </WallType>
             <Area>169.0</Area>
             <Siding>wood siding</Siding>
-            <Color>medium</Color>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='Wall3Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
@@ -199,7 +210,8 @@
               <WoodStud/>
             </WallType>
             <Area>169.0</Area>
-            <Color>medium</Color>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='Wall4Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
@@ -231,15 +243,11 @@
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>
           <FoundationWall>
-            <SystemIdentifier id='FoundationWall3'/>
+            <SystemIdentifier id='FoundationWall2'/>
             <ExteriorAdjacentTo>basement - conditioned</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>8.0</Height>
@@ -250,22 +258,14 @@
               <Type>gypsum board</Type>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='FoundationWall3Insulation'/>
+              <SystemIdentifier id='FoundationWall2Insulation'/>
               <Layer>
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>
@@ -315,7 +315,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>
-            <Area>72.0</Area>
+            <Area>71.0</Area>
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -329,7 +329,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>70.0</Area>
+            <Area>71.0</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -343,7 +343,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>110.0</Area>
+            <Area>106.0</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -361,6 +361,7 @@
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall1'/>
             <Area>40.0</Area>
+            <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
           </Door>
         </Doors>

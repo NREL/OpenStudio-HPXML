@@ -257,6 +257,7 @@ class HPXML < Object
   SolarThermalTypeEvacuatedTube = 'evacuated tube'
   SolarThermalTypeICS = 'integrated collector storage'
   SolarThermalTypeSingleGlazing = 'single glazing black'
+  SolarThermalSystemType = 'hot water'
   SurroundingsOneSide = 'attached on one side'
   SurroundingsTwoSides = 'attached on two sides'
   SurroundingsStandAlone = 'stand-alone'
@@ -975,6 +976,11 @@ class HPXML < Object
           XMLHelper.add_element(fuel_types_available, 'Fuel', fuel, :string)
         end
       end
+
+      if site.children.size == 0
+        bldg_summary = XMLHelper.get_element(doc, '/HPXML/Building/BuildingDetails/BuildingSummary')
+        XMLHelper.delete_element(bldg_summary, 'Site')
+      end
     end
 
     def from_oga(hpxml)
@@ -1546,6 +1552,7 @@ class HPXML < Object
           fail "Unhandled foundation type '#{@foundation_type}'."
         end
       end
+      XMLHelper.add_element(foundation, 'WithinInfiltrationVolume', @within_infiltration_volume, :boolean) unless @within_infiltration_volume.nil?
       if not @attached_to_rim_joist_idrefs.nil?
         @attached_to_rim_joist_idrefs.each do |rim_joist|
           rim_joist_attached = XMLHelper.add_element(foundation, 'AttachedToRimJoist')
@@ -1576,7 +1583,6 @@ class HPXML < Object
           XMLHelper.add_attribute(slab_attached, 'idref', slab)
         end
       end
-      XMLHelper.add_element(foundation, 'WithinInfiltrationVolume', @within_infiltration_volume, :boolean) unless @within_infiltration_volume.nil?
     end
 
     def from_oga(foundation)
@@ -5666,7 +5672,7 @@ class HPXML < Object
     return doc
   end
 
-  def collapse_enclosure_surfaces()
+  def collapse_enclosure_surfaces(surf_types_of_interest = nil)
     # Collapses like surfaces into a single surface with, e.g., aggregate surface area.
     # This can significantly speed up performance for HPXML files with lots of individual
     # surfaces (e.g., windows).
@@ -5686,10 +5692,13 @@ class HPXML < Object
                        :perimeter_insulation_id,
                        :under_slab_insulation_id,
                        :area,
+                       :length,
                        :exposed_perimeter]
 
     # Look for pairs of surfaces that can be collapsed
     surf_types.each do |surf_type, surfaces|
+      next unless surf_types_of_interest.nil? || surf_types_of_interest.include?(surf_type)
+
       for i in 0..surfaces.size - 1
         surf = surfaces[i]
         next if surf.nil?
@@ -5716,6 +5725,9 @@ class HPXML < Object
           end
           if (surf_type == :slabs) && (not surf.exposed_perimeter.nil?) && (not surf2.exposed_perimeter.nil?)
             surf.exposed_perimeter += surf2.exposed_perimeter
+          end
+          if (surf_type == :foundation_walls) && (not surf.length.nil?) && (not surf2.length.nil?)
+            surf.length += surf2.length
           end
 
           # Update subsurface idrefs as appropriate
@@ -5941,6 +5953,20 @@ class HPXML < Object
       elsif primary_indicators == 0
         errors << 'Could not find a primary refrigerator.'
       end
+    end
+
+    # Check for correct PrimaryHeatingSystem values across all HVAC systems
+    n_primary_heating = @heating_systems.select { |h| h.primary_system }.size +
+                        @heat_pumps.select { |h| h.primary_heating_system }.size
+    if n_primary_heating > 1
+      errors << 'More than one heating system designated as the primary.'
+    end
+
+    # Check for correct PrimaryCoolingSystem values across all HVAC systems
+    n_primary_cooling = @cooling_systems.select { |c| c.primary_system }.size +
+                        @heat_pumps.select { |c| c.primary_cooling_system }.size
+    if n_primary_cooling > 1
+      errors << 'More than one cooling system designated as the primary.'
     end
 
     # Check for at most 1 shared heating system and 1 shared cooling system

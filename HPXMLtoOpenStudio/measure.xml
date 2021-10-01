@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>ef986929-2b23-4894-b4f8-b9515494ac42</version_id>
-  <version_modified>20210924T232951Z</version_modified>
+  <version_id>f9830754-5565-43b9-8438-9fe8cbab6c8d</version_id>
+  <version_modified>20210930T233400Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -230,12 +230,6 @@
       <checksum>7DAA5F02</checksum>
     </file>
     <file>
-      <filename>test_validation.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>4C662AE0</checksum>
-    </file>
-    <file>
       <filename>test_hotwater_appliance.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -451,16 +445,22 @@
       <checksum>A24949A2</checksum>
     </file>
     <file>
+      <filename>test_validation.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6CD48219</checksum>
+    </file>
+    <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>249FD640</checksum>
+      <checksum>129EDE25</checksum>
     </file>
     <file>
       <filename>HPXMLvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A9413FCC</checksum>
+      <checksum>09239E3E</checksum>
     </file>
   </files>
 </measure>
