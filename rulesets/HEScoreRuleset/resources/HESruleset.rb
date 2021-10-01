@@ -717,14 +717,14 @@ class HEScoreRuleset
       # HVACDistribution
       next unless is_ducted_heating_system(orig_hvac) || is_ducted_cooling_system(orig_hvac)
 
+      sealed = orig_hvac['hvac_distribution']['sealed']
+
       tot_frac = 0.0
       frac_inside = 0.0
-      sealed = []
-      orig_hvac['hvac_distribution'].each do |orig_duct|
+      orig_hvac['hvac_distribution']['duct'].each do |orig_duct|
         next if orig_duct['fraction'] == 0
 
         tot_frac += orig_duct['fraction'].to_f
-        sealed << orig_duct['sealed']
 
         duct_location = { 'cond_space' => HPXML::LocationLivingSpace,
                           'uncond_basement' => HPXML::LocationBasementUnconditioned,
@@ -746,7 +746,6 @@ class HEScoreRuleset
       hvac_fraction = orig_hvac['hvac_fraction']
       new_hpxml.hvac_distributions[-1].conditioned_floor_area_served = hvac_fraction * @cfa
 
-      sealed = sealed.all? { |d| d == true }
       lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(@ncfl_ag, @cfa, sealed, frac_inside)
 
       # Supply duct leakage to the outside
@@ -761,7 +760,7 @@ class HEScoreRuleset
                                                                      duct_leakage_value: lto_r,
                                                                      duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
 
-      orig_hvac['hvac_distribution'].each do |orig_duct|
+      orig_hvac['hvac_distribution']['duct'].each do |orig_duct|
         next if orig_duct['fraction'] == 0
 
         duct_location = { 'cond_space' => HPXML::LocationLivingSpace,
@@ -1506,7 +1505,7 @@ def get_ducts_details(json)
 
     hvac_frac = orig_hvac['hvac_fraction']
 
-    orig_hvac['hvac_distribution'].each do |orig_duct|
+    orig_hvac['hvac_distribution']['duct'].each do |orig_duct|
       next if orig_duct['fraction'].to_f == 0
 
       ducts << [hvac_frac, orig_duct['fraction'].to_f, orig_duct['location']]

@@ -85,15 +85,18 @@
           "cooling": {
             "type": "none"
           },
-          "hvac_distribution": [
-            {
-              "name": "duct1",
-              "location": "cond_space",
-              "fraction": 1.0,
-              "insulated": false,
-              "sealed": false
-            }
-          ]
+          "hvac_distribution": {
+            "leakage_method": "qualitative",
+            "sealed": false,
+            "duct": [
+              {
+                "name": "duct1",
+                "location": "cond_space",
+                "fraction": 1.0,
+                "insulated": false
+              }
+            ]
+          }
         }
       ],
       "domestic_hot_water": {

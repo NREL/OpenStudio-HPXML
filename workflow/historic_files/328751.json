@@ -114,7 +114,9 @@
           "cooling": {
             "type": "dec"
           },
-          "hvac_distribution": []
+          "hvac_distribution": [
+
+          ]
         }
       ],
       "domestic_hot_water": {

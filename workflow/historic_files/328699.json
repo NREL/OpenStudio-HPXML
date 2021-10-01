@@ -85,15 +85,18 @@
             "efficiency_method": "user",
             "efficiency": 10.0
           },
-          "hvac_distribution": [
-            {
-              "name": "duct1",
-              "location": "cond_space",
-              "fraction": 1.0,
-              "insulated": true,
-              "sealed": true
-            }
-          ]
+          "hvac_distribution": {
+            "leakage_method": "qualitative",
+            "sealed": true,
+            "duct": [
+              {
+                "name": "duct1",
+                "location": "cond_space",
+                "fraction": 1.0,
+                "insulated": true
+              }
+            ]
+          }
         }
       ],
       "domestic_hot_water": {

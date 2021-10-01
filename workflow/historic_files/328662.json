@@ -111,7 +111,9 @@
             "efficiency_method": "user",
             "efficiency": 16.4
           },
-          "hvac_distribution": []
+          "hvac_distribution": [
+
+          ]
         }
       ],
       "domestic_hot_water": {

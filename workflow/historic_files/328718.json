@@ -114,7 +114,9 @@
             "efficiency_method": "shipment_weighted",
             "year": 2017
           },
-          "hvac_distribution": []
+          "hvac_distribution": [
+
+          ]
         }
       ],
       "domestic_hot_water": {
