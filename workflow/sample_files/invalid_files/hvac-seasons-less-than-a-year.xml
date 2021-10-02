@@ -194,10 +194,6 @@
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>
@@ -353,18 +349,6 @@
             <ControlType>manual thermostat</ControlType>
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
-            <HeatingSeason>
-              <BeginMonth>10</BeginMonth>
-              <BeginDayOfMonth>1</BeginDayOfMonth>
-              <EndMonth>5</EndMonth>
-              <EndDayOfMonth>31</EndDayOfMonth>
-            </HeatingSeason>
-            <CoolingSeason>
-              <BeginMonth>7</BeginMonth>
-              <BeginDayOfMonth>1</BeginDayOfMonth>
-              <EndMonth>9</EndMonth>
-              <EndDayOfMonth>30</EndDayOfMonth>
-            </CoolingSeason>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution1'/>

@@ -28,6 +28,7 @@
       <BuildingSummary>
         <Site>
           <SiteType>suburban</SiteType>
+          <Surroundings>attached on one side</Surroundings>
           <AzimuthOfFrontOfHome>180</AzimuthOfFrontOfHome>
           <FuelTypesAvailable>
             <Fuel>electricity</Fuel>
@@ -318,7 +319,7 @@
       </Systems>
       <Appliances>
         <ClothesWasher>
-          <SystemIdentifier id='ClothesWasher2'/>
+          <SystemIdentifier id='ClothesWasher1'/>
           <IsSharedAppliance>true</IsSharedAppliance>
           <AttachedToWaterHeatingSystem idref='WaterHeatingSystem1'/>
           <Location>other heated space</Location>
@@ -331,7 +332,7 @@
           <Capacity>3.2</Capacity>
         </ClothesWasher>
         <ClothesDryer>
-          <SystemIdentifier id='ClothesDryer2'/>
+          <SystemIdentifier id='ClothesDryer1'/>
           <IsSharedAppliance>true</IsSharedAppliance>
           <Location>other heated space</Location>
           <FuelType>electricity</FuelType>
@@ -340,7 +341,7 @@
           <VentedFlowRate>150.0</VentedFlowRate>
         </ClothesDryer>
         <Dishwasher>
-          <SystemIdentifier id='SharedDishwasher'/>
+          <SystemIdentifier id='Dishwasher1'/>
           <IsSharedAppliance>true</IsSharedAppliance>
           <AttachedToWaterHeatingSystem idref='foobar'/>
           <Location>other heated space</Location>

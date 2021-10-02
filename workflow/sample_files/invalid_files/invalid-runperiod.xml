@@ -10,6 +10,8 @@
     <extension>
       <SimulationControl>
         <Timestep>60</Timestep>
+        <BeginMonth>3</BeginMonth>
+        <BeginDayOfMonth>10</BeginDayOfMonth>
         <EndMonth>4</EndMonth>
         <EndDayOfMonth>31</EndDayOfMonth>
       </SimulationControl>
@@ -196,10 +198,6 @@
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>

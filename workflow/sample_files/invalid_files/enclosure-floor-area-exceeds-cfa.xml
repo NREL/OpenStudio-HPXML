@@ -194,10 +194,6 @@
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>
@@ -563,7 +559,7 @@
           <PlugLoadType>other</PlugLoadType>
           <Load>
             <Units>kWh/year</Units>
-            <Value>1227.408</Value>
+            <Value>2457.0</Value>
           </Load>
           <extension>
             <FracSensible>0.855</FracSensible>

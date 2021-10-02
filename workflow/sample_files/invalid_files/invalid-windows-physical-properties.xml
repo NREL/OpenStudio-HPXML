@@ -194,10 +194,6 @@
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>
@@ -286,7 +282,7 @@
             <Azimuth>180</Azimuth>
             <FrameType>
               <Metal>
-                <ThermalBreak>true</ThermalBreak>
+                <ThermalBreak>false</ThermalBreak>
               </Metal>
             </FrameType>
             <GlassLayers>double-pane</GlassLayers>

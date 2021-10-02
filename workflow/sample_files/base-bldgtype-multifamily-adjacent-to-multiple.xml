@@ -28,6 +28,7 @@
       <BuildingSummary>
         <Site>
           <SiteType>suburban</SiteType>
+          <Surroundings>attached on one side</Surroundings>
           <AzimuthOfFrontOfHome>180</AzimuthOfFrontOfHome>
           <FuelTypesAvailable>
             <Fuel>electricity</Fuel>
@@ -172,12 +173,15 @@
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>900.0</Area>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+            </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
             <extension>
-              <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
+              <OtherSpaceAboveOrBelow>above</OtherSpaceAboveOrBelow>
             </extension>
           </FrameFloor>
           <FrameFloor>
@@ -270,7 +274,7 @@
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall2'/>
+            <AttachedToWall idref='Wall3'/>
           </Window>
         </Windows>
         <Doors>
@@ -290,7 +294,7 @@
           </Door>
           <Door>
             <SystemIdentifier id='Door3'/>
-            <AttachedToWall idref='Wall3'/>
+            <AttachedToWall idref='Wall5'/>
             <Area>20.0</Area>
             <Azimuth>0</Azimuth>
             <RValue>4.4</RValue>

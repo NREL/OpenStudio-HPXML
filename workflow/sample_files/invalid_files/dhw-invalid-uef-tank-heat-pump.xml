@@ -194,10 +194,6 @@
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>
@@ -401,7 +397,6 @@
             <Location>living space</Location>
             <TankVolume>50.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>18767.0</HeatingCapacity>
             <UniformEnergyFactor>1.0</UniformEnergyFactor>
             <UsageBin>medium</UsageBin>
             <HotWaterTemperature>125.0</HotWaterTemperature>

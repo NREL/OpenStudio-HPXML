@@ -83,7 +83,7 @@
             </AtticType>
             <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
             <AttachedToRoof idref='Roof1'/>
-            <AttachedToWall idref='Wall2'/>
+            <AttachedToWall idref='Wall1'/>
             <AttachedToFrameFloor idref='FrameFloor1'/>
           </Attic>
         </Attics>
@@ -133,7 +133,7 @@
         </RimJoists>
         <Walls>
           <Wall>
-            <SystemIdentifier id='Wall2'/>
+            <SystemIdentifier id='Wall1'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <AtticWallType>gable</AtticWallType>
@@ -145,7 +145,7 @@
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
-              <SystemIdentifier id='Wall2Insulation'/>
+              <SystemIdentifier id='Wall1Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
@@ -175,10 +175,6 @@
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>

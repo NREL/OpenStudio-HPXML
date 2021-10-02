@@ -28,6 +28,7 @@
       <BuildingSummary>
         <Site>
           <SiteType>suburban</SiteType>
+          <Surroundings>attached on one side</Surroundings>
           <AzimuthOfFrontOfHome>180</AzimuthOfFrontOfHome>
           <FuelTypesAvailable>
             <Fuel>electricity</Fuel>
@@ -201,49 +202,47 @@
         <HVAC>
           <HVACPlant>
             <PrimarySystems>
-              <PrimaryHeatingSystem idref='HeatingSystem2'/>
+              <PrimaryCoolingSystem idref='CoolingSystem2'/>
             </PrimarySystems>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem1'/>
+            <CoolingSystem>
+              <SystemIdentifier id='CoolingSystem1'/>
               <DistributionSystem idref='HVACDistribution1'/>
               <IsSharedSystem>true</IsSharedSystem>
               <NumberofUnitsServed>6</NumberofUnitsServed>
-              <HeatingSystemType>
-                <Boiler/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.92</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
+              <CoolingSystemType>chiller</CoolingSystemType>
+              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity>144000.0</CoolingCapacity>
+              <FractionCoolLoadServed>0.5</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>kW/ton</Units>
+                <Value>0.9</Value>
+              </AnnualCoolingEfficiency>
               <extension>
                 <SharedLoopWatts>600.0</SharedLoopWatts>
               </extension>
-            </HeatingSystem>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem2'/>
-              <DistributionSystem idref='HVACDistribution12'/>
+            </CoolingSystem>
+            <CoolingSystem>
+              <SystemIdentifier id='CoolingSystem2'/>
+              <DistributionSystem idref='HVACDistribution2'/>
               <IsSharedSystem>true</IsSharedSystem>
               <NumberofUnitsServed>6</NumberofUnitsServed>
-              <HeatingSystemType>
-                <Boiler/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.92</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
+              <CoolingSystemType>chiller</CoolingSystemType>
+              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity>144000.0</CoolingCapacity>
+              <FractionCoolLoadServed>0.5</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>kW/ton</Units>
+                <Value>0.9</Value>
+              </AnnualCoolingEfficiency>
               <extension>
                 <SharedLoopWatts>600.0</SharedLoopWatts>
               </extension>
-            </HeatingSystem>
+            </CoolingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
             <ControlType>manual thermostat</ControlType>
-            <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
+            <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution1'/>

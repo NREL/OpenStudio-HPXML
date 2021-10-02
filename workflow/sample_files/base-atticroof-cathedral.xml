@@ -136,7 +136,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>1200.0</Area>
+            <Area>1426.0</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -145,25 +145,6 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall2'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <WallType>
-              <WoodStud/>
-            </WallType>
-            <Area>226.0</Area>
-            <Siding>wood siding</Siding>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
-            <Emittance>0.92</Emittance>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Wall2Insulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
@@ -193,10 +174,6 @@
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>
@@ -245,7 +222,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>108.0</Area>
+            <Area>120.0</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -273,7 +250,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window4'/>
-            <Area>108.0</Area>
+            <Area>120.0</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -284,24 +261,6 @@
             </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='Window5'/>
-            <Area>12.0</Area>
-            <Azimuth>90</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <FractionOperable>0.0</FractionOperable>
-            <AttachedToWall idref='Wall2'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='Window6'/>
-            <Area>12.0</Area>
-            <Azimuth>270</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <FractionOperable>0.0</FractionOperable>
-            <AttachedToWall idref='Wall2'/>
           </Window>
         </Windows>
         <Doors>

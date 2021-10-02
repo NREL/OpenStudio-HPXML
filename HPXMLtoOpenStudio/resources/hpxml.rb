@@ -1546,6 +1546,7 @@ class HPXML < Object
           fail "Unhandled foundation type '#{@foundation_type}'."
         end
       end
+      XMLHelper.add_element(foundation, 'WithinInfiltrationVolume', @within_infiltration_volume, :boolean) unless @within_infiltration_volume.nil?
       if not @attached_to_rim_joist_idrefs.nil?
         @attached_to_rim_joist_idrefs.each do |rim_joist|
           rim_joist_attached = XMLHelper.add_element(foundation, 'AttachedToRimJoist')
@@ -1576,7 +1577,6 @@ class HPXML < Object
           XMLHelper.add_attribute(slab_attached, 'idref', slab)
         end
       end
-      XMLHelper.add_element(foundation, 'WithinInfiltrationVolume', @within_infiltration_volume, :boolean) unless @within_infiltration_volume.nil?
     end
 
     def from_oga(foundation)

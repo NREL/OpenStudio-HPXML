@@ -83,7 +83,7 @@
             </AtticType>
             <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
             <AttachedToRoof idref='Roof1'/>
-            <AttachedToWall idref='Wall4'/>
+            <AttachedToWall idref='Wall2'/>
             <AttachedToFrameFloor idref='FrameFloor1'/>
           </Attic>
         </Attics>
@@ -104,7 +104,7 @@
           <Roof>
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>2181.0</Area>
+            <Area>2180.0</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -153,20 +153,19 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='Wall2'/>
-            <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
+            <AtticWallType>gable</AtticWallType>
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>240.0</Area>
+            <Area>338.0</Area>
+            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-            </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -187,19 +186,20 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='Wall4'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <AtticWallType>gable</AtticWallType>
+            <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>113.0</Area>
-            <Siding>wood siding</Siding>
+            <Area>240.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+            </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall4Insulation'/>
-              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
         </Walls>
@@ -228,10 +228,6 @@
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>
@@ -321,7 +317,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>12.0</Area>
+            <Area>72.0</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -335,7 +331,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>108.0</Area>
+            <Area>12.0</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -372,7 +368,7 @@
           </Door>
           <Door>
             <SystemIdentifier id='Door2'/>
-            <AttachedToWall idref='Wall2'/>
+            <AttachedToWall idref='Wall3'/>
             <Area>70.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>

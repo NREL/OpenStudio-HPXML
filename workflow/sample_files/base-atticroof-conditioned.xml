@@ -256,10 +256,6 @@
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>
@@ -370,7 +366,7 @@
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <FractionOperable>0.0</FractionOperable>
-            <AttachedToWall idref='Wall2'/>
+            <AttachedToWall idref='Wall3'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window6'/>
@@ -379,7 +375,7 @@
             <UFactor>0.3</UFactor>
             <SHGC>0.45</SHGC>
             <FractionOperable>0.0</FractionOperable>
-            <AttachedToWall idref='Wall2'/>
+            <AttachedToWall idref='Wall3'/>
           </Window>
         </Windows>
         <Doors>

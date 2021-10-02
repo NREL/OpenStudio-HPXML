@@ -188,17 +188,13 @@
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>4.0</DistanceToBottomOfInsulation>
+                  <DistanceToTopOfInsulation>12.0</DistanceToTopOfInsulation>
+                  <DistanceToBottomOfInsulation>10.0</DistanceToBottomOfInsulation>
                 </extension>
               </Layer>
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>12.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>10.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>

@@ -95,11 +95,11 @@
                 <Vented>false</Vented>
               </Crawlspace>
             </FoundationType>
+            <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
             <AttachedToRimJoist idref='RimJoist1'/>
             <AttachedToFoundationWall idref='FoundationWall1'/>
             <AttachedToFrameFloor idref='FrameFloor2'/>
             <AttachedToSlab idref='Slab1'/>
-            <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
           </Foundation>
         </Foundations>
         <Roofs>
@@ -196,10 +196,6 @@
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>

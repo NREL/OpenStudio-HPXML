@@ -28,6 +28,7 @@
       <BuildingSummary>
         <Site>
           <SiteType>suburban</SiteType>
+          <Surroundings>attached on one side</Surroundings>
           <AzimuthOfFrontOfHome>180</AzimuthOfFrontOfHome>
           <FuelTypesAvailable>
             <Fuel>electricity</Fuel>
@@ -315,7 +316,7 @@
         <extension>
           <Generators>
             <Generator>
-              <SystemIdentifier id='Generator'/>
+              <SystemIdentifier id='Generator1'/>
               <IsSharedSystem>true</IsSharedSystem>
               <FuelType>propane</FuelType>
               <AnnualConsumptionkBtu>85000.0</AnnualConsumptionkBtu>

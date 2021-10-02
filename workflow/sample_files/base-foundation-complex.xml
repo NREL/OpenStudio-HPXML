@@ -100,10 +100,8 @@
             <AttachedToFoundationWall idref='FoundationWall2'/>
             <AttachedToFoundationWall idref='FoundationWall3'/>
             <AttachedToFoundationWall idref='FoundationWall4'/>
-            <AttachedToFoundationWall idref='FoundationWall5'/>
             <AttachedToSlab idref='Slab1'/>
             <AttachedToSlab idref='Slab2'/>
-            <AttachedToSlab idref='Slab3'/>
           </Foundation>
         </Foundations>
         <Roofs>
@@ -192,18 +190,10 @@
               <Layer>
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>
@@ -231,10 +221,6 @@
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>
@@ -254,18 +240,10 @@
               <Layer>
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>
@@ -274,7 +252,7 @@
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>4.0</Height>
-            <Area>120.0</Area>
+            <Area>200.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>3.0</DepthBelowGrade>
             <InteriorFinish>
@@ -293,41 +271,6 @@
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
-              </Layer>
-            </Insulation>
-          </FoundationWall>
-          <FoundationWall>
-            <SystemIdentifier id='FoundationWall5'/>
-            <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Height>4.0</Height>
-            <Area>80.0</Area>
-            <Thickness>8.0</Thickness>
-            <DepthBelowGrade>3.0</DepthBelowGrade>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='FoundationWall5Insulation'/>
-              <Layer>
-                <InstallationType>continuous - exterior</InstallationType>
-                <NominalRValue>8.9</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>4.0</DistanceToBottomOfInsulation>
-                </extension>
-              </Layer>
-              <Layer>
-                <InstallationType>continuous - interior</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>
@@ -376,9 +319,9 @@
           <Slab>
             <SystemIdentifier id='Slab2'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>405.0</Area>
+            <Area>675.0</Area>
             <Thickness>4.0</Thickness>
-            <ExposedPerimeter>45.0</ExposedPerimeter>
+            <ExposedPerimeter>75.0</ExposedPerimeter>
             <PerimeterInsulationDepth>1.0</PerimeterInsulationDepth>
             <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
             <PerimeterInsulation>
@@ -389,31 +332,6 @@
             </PerimeterInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='Slab2UnderSlabInsulation'/>
-              <Layer>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
-            </UnderSlabInsulation>
-            <extension>
-              <CarpetFraction>0.0</CarpetFraction>
-              <CarpetRValue>0.0</CarpetRValue>
-            </extension>
-          </Slab>
-          <Slab>
-            <SystemIdentifier id='Slab3'/>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>270.0</Area>
-            <Thickness>4.0</Thickness>
-            <ExposedPerimeter>30.0</ExposedPerimeter>
-            <PerimeterInsulationDepth>1.0</PerimeterInsulationDepth>
-            <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
-            <PerimeterInsulation>
-              <SystemIdentifier id='Slab3PerimeterInsulation'/>
-              <Layer>
-                <NominalRValue>5.0</NominalRValue>
-              </Layer>
-            </PerimeterInsulation>
-            <UnderSlabInsulation>
-              <SystemIdentifier id='Slab3UnderSlabInsulation'/>
               <Layer>
                 <NominalRValue>0.0</NominalRValue>
               </Layer>

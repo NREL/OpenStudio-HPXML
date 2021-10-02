@@ -28,6 +28,7 @@
       <BuildingSummary>
         <Site>
           <SiteType>suburban</SiteType>
+          <Surroundings>attached on one side</Surroundings>
           <AzimuthOfFrontOfHome>180</AzimuthOfFrontOfHome>
           <FuelTypesAvailable>
             <Fuel>electricity</Fuel>
@@ -448,7 +449,7 @@
           <PlugLoadType>other</PlugLoadType>
           <Load>
             <Units>kWh/year</Units>
-            <Value>817.908</Value>
+            <Value>819.0</Value>
           </Load>
           <extension>
             <FracSensible>0.855</FracSensible>
