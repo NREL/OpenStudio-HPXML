@@ -58,6 +58,7 @@
       <sch:assert role='ERROR' test='number(h:Azimuth) &gt;= 0 or not(h:Azimuth)'>Expected Azimuth to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:Azimuth) &lt; 360 or not(h:Azimuth)'>Expected Azimuth to be less than 360</sch:assert>
       <sch:assert role='ERROR' test='h:RoofType[text()="shingles" or text()="slate or tile shingles" or text()="wood shingles or shakes" or text()="asphalt or fiberglass shingles" or text()="metal surfacing" or text()="expanded polystyrene sheathing" or text()="plastic/rubber/synthetic sheeting" or text()="concrete" or text()="cool roof" or text()="green roof" or text()="no one major type" or text()="other"] or not(h:RoofType)'>Expected RoofType to be 'shingles' or 'slate or tile shingles' or 'wood shingles or shakes' or 'asphalt or fiberglass shingles' or 'metal surfacing' or 'expanded polystyrene sheathing' or 'plastic/rubber/synthetic sheeting' or 'concrete' or 'cool roof' or 'green roof' or 'no one major type' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='h:RoofColor[text()="light" or text()="medium" or text()="medium dark" or text()="dark" or text()="reflective"] or not(h:RoofColor)'>Expected RoofColor to be 'light' or 'medium' or 'medium dark' or 'dark' or 'reflective'</sch:assert>
       <sch:assert role='ERROR' test='number(h:SolarAbsorptance) &gt;= 0 or not(h:SolarAbsorptance)'>Expected SolarAbsorptance to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:SolarAbsorptance) &lt;= 1 or not(h:SolarAbsorptance)'>Expected SolarAbsorptance to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='number(h:Emittance) &gt;= 0 or not(h:Emittance)'>Expected Emittance to be greater than or equal to 0</sch:assert>
@@ -69,6 +70,7 @@
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof/h:InteriorFinish'>
       <sch:assert role='ERROR' test='h:Type[text()="gypsum board" or text()="gypsum composite board" or text()="plaster" or text()="wood" or text()="other" or text()="none"] or not(h:Type)'>Expected Type to be 'gypsum board' or 'gypsum composite board' or 'plaster' or 'wood' or 'other' or 'none'</sch:assert>
+      <sch:assert role='ERROR' test='number(h:Thickness) &gt;= 0 or not(h:Thickness)'>Expected Thickness to be greater than or equal to 0</sch:assert>
     </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof/h:Insulation'>
       <sch:assert role='ERROR' test='number(h:AssemblyEffectiveRValue) &gt; 0 or not(h:AssemblyEffectiveRValue)'>Expected AssemblyEffectiveRValue to be greater than 0</sch:assert>
@@ -81,6 +83,7 @@
       <sch:assert role='ERROR' test='number(h:Azimuth) &gt;= 0 or not(h:Azimuth)'>Expected Azimuth to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:Azimuth) &lt; 360 or not(h:Azimuth)'>Expected Azimuth to be less than 360</sch:assert>
       <sch:assert role='ERROR' test='h:Siding[text()="wood siding" or text()="stucco" or text()="synthetic stucco" or text()="vinyl siding" or text()="aluminum siding" or text()="brick veneer" or text()="asbestos siding" or text()="fiber cement siding" or text()="composite shingle siding" or text()="masonite siding" or text()="other" or text()="none"] or not(h:Siding)'>Expected Siding to be 'wood siding' or 'stucco' or 'synthetic stucco' or 'vinyl siding' or 'aluminum siding' or 'brick veneer' or 'asbestos siding' or 'fiber cement siding' or 'composite shingle siding' or 'masonite siding' or 'other' or 'none'</sch:assert>
+      <sch:assert role='ERROR' test='h:Color[text()="light" or text()="medium" or text()="medium dark" or text()="dark" or text()="reflective"] or not(h:Color)'>Expected Color to be 'light' or 'medium' or 'medium dark' or 'dark' or 'reflective'</sch:assert>
       <sch:assert role='ERROR' test='number(h:SolarAbsorptance) &gt;= 0 or not(h:SolarAbsorptance)'>Expected SolarAbsorptance to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:SolarAbsorptance) &lt;= 1 or not(h:SolarAbsorptance)'>Expected SolarAbsorptance to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='number(h:Emittance) &gt;= 0 or not(h:Emittance)'>Expected Emittance to be greater than or equal to 0</sch:assert>
@@ -99,6 +102,7 @@
       <sch:assert role='ERROR' test='number(h:Azimuth) &gt;= 0 or not(h:Azimuth)'>Expected Azimuth to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:Azimuth) &lt; 360 or not(h:Azimuth)'>Expected Azimuth to be less than 360</sch:assert>
       <sch:assert role='ERROR' test='h:Siding[text()="wood siding" or text()="stucco" or text()="synthetic stucco" or text()="vinyl siding" or text()="aluminum siding" or text()="brick veneer" or text()="asbestos siding" or text()="fiber cement siding" or text()="composite shingle siding" or text()="masonite siding" or text()="other" or text()="none"] or not(h:Siding)'>Expected Siding to be 'wood siding' or 'stucco' or 'synthetic stucco' or 'vinyl siding' or 'aluminum siding' or 'brick veneer' or 'asbestos siding' or 'fiber cement siding' or 'composite shingle siding' or 'masonite siding' or 'other' or 'none'</sch:assert>
+      <sch:assert role='ERROR' test='h:Color[text()="light" or text()="medium" or text()="medium dark" or text()="dark" or text()="reflective"] or not(h:Color)'>Expected Color to be 'light' or 'medium' or 'medium dark' or 'dark' or 'reflective'</sch:assert>
       <sch:assert role='ERROR' test='number(h:SolarAbsorptance) &gt;= 0 or not(h:SolarAbsorptance)'>Expected SolarAbsorptance to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:SolarAbsorptance) &lt;= 1 or not(h:SolarAbsorptance)'>Expected SolarAbsorptance to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='number(h:Emittance) &gt;= 0 or not(h:Emittance)'>Expected Emittance to be greater than or equal to 0</sch:assert>

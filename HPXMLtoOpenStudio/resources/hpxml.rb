@@ -1301,6 +1301,10 @@ class HPXML < Object
       end
     end
 
+    def delete
+      @hpxml_object.attics.delete(self)
+    end
+
     def check_for_errors
       errors = []
       begin; attached_roofs; rescue StandardError => e; errors << e.message; end
@@ -1507,6 +1511,10 @@ class HPXML < Object
         end
       end
       return sum_area
+    end
+
+    def delete
+      @hpxml_object.foundations.delete(self)
     end
 
     def check_for_errors

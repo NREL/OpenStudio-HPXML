@@ -2359,7 +2359,9 @@ def apply_hpxml_modification_ashrae_140(hpxml_file, hpxml)
   # --------------- #
 
   hpxml.attics[0].vented_attic_ach = 2.4
-  hpxml.foundations.clear
+  hpxml.foundations.reverse_each do |foundation|
+    foundation.delete
+  end
   hpxml.roofs.each do |roof|
     if roof.roof_color == HPXML::ColorReflective
       roof.solar_absorptance = 0.2
@@ -2437,6 +2439,12 @@ end
 def apply_hpxml_modification(hpxml_file, hpxml)
   # Set detailed HPXML values for sample files
 
+  if hpxml_file.include? 'split-surfaces'
+    (hpxml.roofs + hpxml.rim_joists + hpxml.walls + hpxml.foundation_walls).each do |surface|
+      surface.azimuth = nil
+    end
+    hpxml.collapse_enclosure_surfaces()
+  end
   renumber_hpxml_ids(hpxml)
 
   # ------------ #
@@ -2852,8 +2860,12 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.windows[3].interior_shading_factor_summer = 0.0
     hpxml.windows[3].interior_shading_factor_winter = 1.0
   elsif ['base-misc-defaults.xml'].include? hpxml_file
-    hpxml.attics.clear
-    hpxml.foundations.clear
+    hpxml.attics.reverse_each do |attic|
+      attic.delete
+    end
+    hpxml.foundations.reverse_each do |foundation|
+      foundation.delete
+    end
     hpxml.air_infiltration_measurements[0].infiltration_volume = nil
     (hpxml.roofs + hpxml.walls + hpxml.rim_joists).each do |surface|
       surface.solar_absorptance = nil
@@ -3097,7 +3109,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml.foundations[0].attached_to_slab_idrefs << slab.id
     end
   elsif ['base-foundation-basement-garage.xml'].include? hpxml_file
-    hpxml.roofs[0].area += 671
+    hpxml.roofs[0].area += 670
     hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationGarage,
                     interior_adjacent_to: HPXML::LocationBasementConditioned,
@@ -3146,6 +3158,287 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     area: 4,
                     azimuth: 0,
                     r_value: 4.4)
+  elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
+    hpxml.rim_joists.reverse_each do |rim_joist|
+      rim_joist.delete
+    end
+    siding_types = [[HPXML::SidingTypeAluminum, HPXML::ColorDark],
+                    [HPXML::SidingTypeAsbestos, HPXML::ColorMedium],
+                    [HPXML::SidingTypeBrick, HPXML::ColorReflective],
+                    [HPXML::SidingTypeCompositeShingle, HPXML::ColorDark],
+                    [HPXML::SidingTypeFiberCement, HPXML::ColorMediumDark],
+                    [HPXML::SidingTypeMasonite, HPXML::ColorLight],
+                    [HPXML::SidingTypeStucco, HPXML::ColorMedium],
+                    [HPXML::SidingTypeSyntheticStucco, HPXML::ColorMediumDark],
+                    [HPXML::SidingTypeVinyl, HPXML::ColorLight],
+                    [HPXML::SidingTypeNone, HPXML::ColorMedium]]
+    siding_types.each_with_index do |siding_type, i|
+      hpxml.rim_joists.add(id: "RimJoist#{hpxml.rim_joists.size + 1}",
+                           exterior_adjacent_to: HPXML::LocationOutside,
+                           interior_adjacent_to: HPXML::LocationBasementConditioned,
+                           siding: siding_type[0],
+                           color: siding_type[1],
+                           area: 116 / siding_types.size,
+                           emittance: 0.92,
+                           insulation_assembly_r_value: 23.0)
+      hpxml.foundations[0].attached_to_rim_joist_idrefs << hpxml.rim_joists[-1].id
+    end
+    gable_walls = hpxml.walls.select { |w| w.interior_adjacent_to == HPXML::LocationAtticUnvented }
+    hpxml.walls.reverse_each do |wall|
+      wall.delete
+    end
+    walls_map = { HPXML::WallTypeCMU => 12,
+                  HPXML::WallTypeDoubleWoodStud => 28.7,
+                  HPXML::WallTypeICF => 21,
+                  HPXML::WallTypeLog => 7.1,
+                  HPXML::WallTypeSIP => 16.1,
+                  HPXML::WallTypeConcrete => 1.35,
+                  HPXML::WallTypeSteelStud => 8.1,
+                  HPXML::WallTypeStone => 5.4,
+                  HPXML::WallTypeStrawBale => 58.8,
+                  HPXML::WallTypeBrick => 7.9,
+                  HPXML::WallTypeAdobe => 5.0 }
+    siding_types = [[HPXML::SidingTypeAluminum, HPXML::ColorReflective],
+                    [HPXML::SidingTypeAsbestos, HPXML::ColorLight],
+                    [HPXML::SidingTypeBrick, HPXML::ColorMediumDark],
+                    [HPXML::SidingTypeCompositeShingle, HPXML::ColorReflective],
+                    [HPXML::SidingTypeFiberCement, HPXML::ColorMedium],
+                    [HPXML::SidingTypeMasonite, HPXML::ColorDark],
+                    [HPXML::SidingTypeStucco, HPXML::ColorLight],
+                    [HPXML::SidingTypeSyntheticStucco, HPXML::ColorMedium],
+                    [HPXML::SidingTypeVinyl, HPXML::ColorDark],
+                    [HPXML::SidingTypeNone, HPXML::ColorMedium]]
+    int_finish_types = [[HPXML::InteriorFinishGypsumBoard, 0.5],
+                        [HPXML::InteriorFinishGypsumBoard, 1.0],
+                        [HPXML::InteriorFinishGypsumCompositeBoard, 0.5],
+                        [HPXML::InteriorFinishPlaster, 0.5],
+                        [HPXML::InteriorFinishWood, 0.5],
+                        [HPXML::InteriorFinishNone, nil]]
+    walls_map.each_with_index do |(wall_type, assembly_r), i|
+      hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
+                      exterior_adjacent_to: HPXML::LocationOutside,
+                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                      wall_type: wall_type,
+                      siding: siding_types[i % siding_types.size][0],
+                      color: siding_types[i % siding_types.size][1],
+                      area: 1200 / walls_map.size,
+                      emittance: 0.92,
+                      interior_finish_type: int_finish_types[i % int_finish_types.size][0],
+                      interior_finish_thickness: int_finish_types[i % int_finish_types.size][1],
+                      insulation_assembly_r_value: assembly_r)
+    end
+    gable_walls.each do |gable_wall|
+      hpxml.walls << gable_wall
+      hpxml.walls[-1].id = "Wall#{hpxml.walls.size}"
+      hpxml.attics[0].attached_to_wall_idrefs << hpxml.walls[-1].id
+    end
+    hpxml.windows.reverse_each do |window|
+      window.delete
+    end
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
+                      area: 108 / 8,
+                      azimuth: 0,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      wall_idref: 'Wall1')
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
+                      area: 72 / 8,
+                      azimuth: 90,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      wall_idref: 'Wall2')
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
+                      area: 108 / 8,
+                      azimuth: 180,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      wall_idref: 'Wall3')
+    hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
+                      area: 72 / 8,
+                      azimuth: 270,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      wall_idref: 'Wall4')
+    hpxml.doors.reverse_each do |door|
+      door.delete
+    end
+    hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
+                    wall_idref: 'Wall9',
+                    area: 20,
+                    azimuth: 0,
+                    r_value: 4.4)
+    hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
+                    wall_idref: 'Wall10',
+                    area: 20,
+                    azimuth: 180,
+                    r_value: 4.4)
+  elsif ['base-enclosure-rooftypes.xml'].include? hpxml_file
+    hpxml.roofs.reverse_each do |roof|
+      roof.delete
+    end
+    roof_types = [[HPXML::RoofTypeClayTile, HPXML::ColorLight],
+                  [HPXML::RoofTypeMetal, HPXML::ColorReflective],
+                  [HPXML::RoofTypeWoodShingles, HPXML::ColorDark],
+                  [HPXML::RoofTypeShingles, HPXML::ColorMediumDark],
+                  [HPXML::RoofTypePlasticRubber, HPXML::ColorLight],
+                  [HPXML::RoofTypeEPS, HPXML::ColorMedium],
+                  [HPXML::RoofTypeConcrete, HPXML::ColorLight],
+                  [HPXML::RoofTypeCool, HPXML::ColorReflective]]
+    int_finish_types = [[HPXML::InteriorFinishGypsumBoard, 0.5],
+                        [HPXML::InteriorFinishPlaster, 0.5],
+                        [HPXML::InteriorFinishWood, 0.5]]
+    roof_types.each_with_index do |roof_type, i|
+      hpxml.roofs.add(id: "Roof#{hpxml.roofs.size + 1}",
+                      interior_adjacent_to: HPXML::LocationAtticUnvented,
+                      area: 1509.3 / roof_types.size,
+                      roof_type: roof_type[0],
+                      roof_color: roof_type[1],
+                      emittance: 0.92,
+                      pitch: 6,
+                      radiant_barrier: false,
+                      interior_finish_type: int_finish_types[i % int_finish_types.size][0],
+                      interior_finish_thickness: int_finish_types[i % int_finish_types.size][1],
+                      insulation_assembly_r_value: roof_type[0] == HPXML::RoofTypeEPS ? 7.0 : 2.3)
+      hpxml.attics[0].attached_to_roof_idrefs << hpxml.roofs[-1].id
+    end
+  elsif ['base-enclosure-split-surfaces.xml',
+         'base-enclosure-split-surfaces2.xml'].include? hpxml_file
+    for n in 1..hpxml.roofs.size
+      hpxml.roofs[n - 1].area /= 9.0
+      for i in 2..9
+        hpxml.roofs << hpxml.roofs[n - 1].dup
+        hpxml.roofs[-1].id += "_#{i}"
+        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
+          hpxml.roofs[-1].insulation_assembly_r_value += 0.01 * i
+        end
+      end
+    end
+    hpxml.roofs << hpxml.roofs[-1].dup
+    hpxml.roofs[-1].id += '_tiny'
+    hpxml.roofs[-1].area = 0.05
+    for n in 1..hpxml.rim_joists.size
+      hpxml.rim_joists[n - 1].area /= 9.0
+      for i in 2..9
+        hpxml.rim_joists << hpxml.rim_joists[n - 1].dup
+        hpxml.rim_joists[-1].id += "_#{i}"
+        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
+          hpxml.rim_joists[-1].insulation_assembly_r_value += 0.01 * i
+        end
+      end
+    end
+    hpxml.rim_joists << hpxml.rim_joists[-1].dup
+    hpxml.rim_joists[-1].id += '_tiny'
+    hpxml.rim_joists[-1].area = 0.05
+    for n in 1..hpxml.walls.size
+      hpxml.walls[n - 1].area /= 9.0
+      for i in 2..9
+        hpxml.walls << hpxml.walls[n - 1].dup
+        hpxml.walls[-1].id += "_#{i}"
+        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
+          hpxml.walls[-1].insulation_assembly_r_value += 0.01 * i
+        end
+      end
+    end
+    hpxml.walls << hpxml.walls[-1].dup
+    hpxml.walls[-1].id += '_tiny'
+    hpxml.walls[-1].area = 0.05
+    for n in 1..hpxml.foundation_walls.size
+      hpxml.foundation_walls[n - 1].area /= 9.0
+      for i in 2..9
+        hpxml.foundation_walls << hpxml.foundation_walls[n - 1].dup
+        hpxml.foundation_walls[-1].id += "_#{i}"
+        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
+          hpxml.foundation_walls[-1].insulation_exterior_r_value += 0.01 * i
+        end
+      end
+    end
+    hpxml.foundation_walls << hpxml.foundation_walls[-1].dup
+    hpxml.foundation_walls[-1].id += '_tiny'
+    hpxml.foundation_walls[-1].area = 0.05
+    for n in 1..hpxml.frame_floors.size
+      hpxml.frame_floors[n - 1].area /= 9.0
+      for i in 2..9
+        hpxml.frame_floors << hpxml.frame_floors[n - 1].dup
+        hpxml.frame_floors[-1].id += "_#{i}"
+        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
+          hpxml.frame_floors[-1].insulation_assembly_r_value += 0.01 * i
+        end
+      end
+    end
+    hpxml.frame_floors << hpxml.frame_floors[-1].dup
+    hpxml.frame_floors[-1].id += '_tiny'
+    hpxml.frame_floors[-1].area = 0.05
+    for n in 1..hpxml.slabs.size
+      hpxml.slabs[n - 1].area /= 9.0
+      hpxml.slabs[n - 1].exposed_perimeter /= 9.0
+      for i in 2..9
+        hpxml.slabs << hpxml.slabs[n - 1].dup
+        hpxml.slabs[-1].id += "_#{i}"
+        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
+          hpxml.slabs[-1].perimeter_insulation_depth += 0.01 * i
+          hpxml.slabs[-1].perimeter_insulation_r_value += 0.01 * i
+        end
+      end
+    end
+    hpxml.slabs << hpxml.slabs[-1].dup
+    hpxml.slabs[-1].id += '_tiny'
+    hpxml.slabs[-1].area = 0.05
+    area_adjustments = []
+    for n in 1..hpxml.windows.size
+      hpxml.windows[n - 1].area /= 9.0
+      hpxml.windows[n - 1].fraction_operable = 0.0
+      for i in 2..9
+        hpxml.windows << hpxml.windows[n - 1].dup
+        hpxml.windows[-1].id += "_#{i}"
+        hpxml.windows[-1].wall_idref += "_#{i}"
+        if i >= 4
+          hpxml.windows[-1].fraction_operable = 1.0
+        end
+        next unless hpxml_file == 'base-enclosure-split-surfaces2.xml'
+
+        hpxml.windows[-1].ufactor += 0.01 * i
+        hpxml.windows[-1].interior_shading_factor_summer -= 0.02 * i
+        hpxml.windows[-1].interior_shading_factor_winter -= 0.01 * i
+      end
+    end
+    hpxml.windows << hpxml.windows[-1].dup
+    hpxml.windows[-1].id += '_tiny'
+    hpxml.windows[-1].area = 0.05
+    for n in 1..hpxml.skylights.size
+      hpxml.skylights[n - 1].area /= 9.0
+      for i in 2..9
+        hpxml.skylights << hpxml.skylights[n - 1].dup
+        hpxml.skylights[-1].id += "_#{i}"
+        hpxml.skylights[-1].roof_idref += "_#{i}"
+        next unless hpxml_file == 'base-enclosure-split-surfaces2.xml'
+
+        hpxml.skylights[-1].ufactor += 0.01 * i
+        hpxml.skylights[-1].interior_shading_factor_summer -= 0.02 * i
+        hpxml.skylights[-1].interior_shading_factor_winter -= 0.01 * i
+      end
+    end
+    hpxml.skylights << hpxml.skylights[-1].dup
+    hpxml.skylights[-1].id += '_tiny'
+    hpxml.skylights[-1].area = 0.05
+    area_adjustments = []
+    for n in 1..hpxml.doors.size
+      hpxml.doors[n - 1].area /= 9.0
+      for i in 2..9
+        hpxml.doors << hpxml.doors[n - 1].dup
+        hpxml.doors[-1].id += "_#{i}"
+        hpxml.doors[-1].wall_idref += "_#{i}"
+        if hpxml_file == 'base-enclosure-split-surfaces2.xml'
+          hpxml.doors[-1].r_value += 0.01 * i
+        end
+      end
+    end
+    hpxml.doors << hpxml.doors[-1].dup
+    hpxml.doors[-1].id += '_tiny'
+    hpxml.doors[-1].area = 0.05
   end
   if ['base-enclosure-2stories-garage.xml',
       'base-enclosure-garage.xml'].include? hpxml_file
@@ -3210,71 +3503,85 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     end
     if hpxml_file.include? 'boiler'
       hpxml.hvac_controls[0].cooling_setpoint_temp = 78.0
+      hpxml.cooling_systems[-1].distribution_system_idref = hpxml.hvac_distributions[-1].id
     else
       hpxml.hvac_controls.add(id: "HVACControl#{hpxml.hvac_controls.size + 1}",
                               control_type: HPXML::HVACControlTypeManual,
                               cooling_setpoint_temp: 78.0)
-      if hpxml_file.include? 'fan-coil'
-        hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
-                                     distribution_system_type: HPXML::HVACDistributionTypeAir,
-                                     air_type: HPXML::AirTypeFanCoil)
-      elsif hpxml_file.include? 'water-loop-heat-pump'
-        hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
-                                     distribution_system_type: HPXML::HVACDistributionTypeHydronic,
-                                     hydronic_type: HPXML::HydronicTypeWaterLoop)
-      else
+      if hpxml_file.include? 'baseboard'
         hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
                                      distribution_system_type: HPXML::HVACDistributionTypeHydronic,
                                      hydronic_type: HPXML::HydronicTypeBaseboard)
+        hpxml.cooling_systems[-1].distribution_system_idref = hpxml.hvac_distributions[-1].id
       end
     end
-    hpxml.cooling_systems[-1].distribution_system_idref = hpxml.hvac_distributions[-1].id
   end
-  if hpxml_file.include?('water-loop-heat-pump') || hpxml_file.include?('fan-coil-ducted')
+  if hpxml_file.include?('water-loop-heat-pump') || hpxml_file.include?('fan-coil')
     # Handle WLHP/ducted fan coil
+    hpxml.hvac_distributions.reverse_each do |hvac_distribution|
+      hvac_distribution.delete
+    end
     if hpxml_file.include? 'water-loop-heat-pump'
+      hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
+                                   distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                   hydronic_type: HPXML::HydronicTypeWaterLoop)
       hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
                            heat_pump_type: HPXML::HVACTypeHeatPumpWaterLoopToAir,
                            heat_pump_fuel: HPXML::FuelTypeElectricity)
       if hpxml_file.include? 'boiler'
         hpxml.heat_pumps[-1].heating_capacity = 24000
         hpxml.heat_pumps[-1].heating_efficiency_cop = 4.4
+        hpxml.heating_systems[-1].distribution_system_idref = hpxml.hvac_distributions[-1].id
       end
       if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
         hpxml.heat_pumps[-1].cooling_capacity = 24000
         hpxml.heat_pumps[-1].cooling_efficiency_eer = 12.8
+        hpxml.cooling_systems[-1].distribution_system_idref = hpxml.hvac_distributions[-1].id
       end
-      hpxml.hvac_distributions.clear
-      hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
-                                   distribution_system_type: HPXML::HVACDistributionTypeHydronic,
-                                   hydronic_type: HPXML::HydronicTypeWaterLoop)
       hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
                                    distribution_system_type: HPXML::HVACDistributionTypeAir,
                                    air_type: HPXML::AirTypeRegularVelocity)
       hpxml.heat_pumps[-1].distribution_system_idref = hpxml.hvac_distributions[-1].id
+    elsif hpxml_file.include? 'fan-coil'
+      hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
+                                   distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                   air_type: HPXML::AirTypeFanCoil)
+
+      if hpxml_file.include? 'boiler'
+        hpxml.heating_systems[-1].distribution_system_idref = hpxml.hvac_distributions[-1].id
+      end
+      if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
+        hpxml.cooling_systems[-1].distribution_system_idref = hpxml.hvac_distributions[-1].id
+      end
     end
-    hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                               duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 15,
-                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-    hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                               duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 10,
-                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-    hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
-                                           duct_insulation_r_value: 0,
-                                           duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
-                                           duct_surface_area: 50)
-    hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeReturn,
-                                           duct_insulation_r_value: 0,
-                                           duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
-                                           duct_surface_area: 20)
-    hpxml.hvac_distributions[-1].number_of_return_registers = 1
-    hpxml.hvac_distributions[-1].conditioned_floor_area_served = 900
+    if hpxml_file.include?('water-loop-heat-pump') || hpxml_file.include?('fan-coil-ducted')
+      hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                                 duct_leakage_units: HPXML::UnitsCFM25,
+                                                                 duct_leakage_value: 15,
+                                                                 duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+      hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                                 duct_leakage_units: HPXML::UnitsCFM25,
+                                                                 duct_leakage_value: 10,
+                                                                 duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+      hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
+                                             duct_insulation_r_value: 0,
+                                             duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
+                                             duct_surface_area: 50)
+      hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeReturn,
+                                             duct_insulation_r_value: 0,
+                                             duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
+                                             duct_surface_area: 20)
+      hpxml.hvac_distributions[-1].number_of_return_registers = 1
+      hpxml.hvac_distributions[-1].conditioned_floor_area_served = 900
+    end
   end
   if hpxml_file.include? 'shared-ground-loop'
-    hpxml.heating_systems.clear
-    hpxml.cooling_systems.clear
+    hpxml.heating_systems.reverse_each do |heating_system|
+      heating_system.delete
+    end
+    hpxml.cooling_systems.reverse_each do |cooling_system|
+      cooling_system.delete
+    end
     hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
                          distribution_system_idref: hpxml.hvac_distributions[-1].id,
                          heat_pump_type: HPXML::HVACTypeHeatPumpGroundToAir,
@@ -3391,7 +3698,9 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml.hvac_distributions[0].ducts[3].duct_fraction_area = 0.25
     end
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
-    hpxml.hvac_distributions.clear
+    hpxml.hvac_distributions.reverse_each do |hvac_distribution|
+      hvac_distribution.delete
+    end
     hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
                                  distribution_system_type: HPXML::HVACDistributionTypeAir,
                                  air_type: HPXML::AirTypeRegularVelocity,
@@ -3433,7 +3742,9 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.hvac_distributions[-1].id = "HVACDistribution#{hpxml.hvac_distributions.size}"
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id = "HVACDistribution#{hpxml.hvac_distributions.size}"
-    hpxml.heating_systems.clear
+    hpxml.heating_systems.reverse_each do |heating_system|
+      heating_system.delete
+    end
     hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size + 1}",
                               distribution_system_idref: hpxml.hvac_distributions[0].id,
                               heating_system_type: HPXML::HVACTypeFurnace,
@@ -3599,7 +3910,9 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.hot_water_distributions[0].shared_recirculation_pump_power = 220
     hpxml.hot_water_distributions[0].shared_recirculation_control_type = HPXML::DHWRecirControlTypeTimer
   elsif ['base-bldgtype-multifamily-shared-laundry-room.xml'].include? hpxml_file
-    hpxml.water_heating_systems.clear
+    hpxml.water_heating_systems.reverse_each do |water_heating_system|
+      water_heating_system.delete
+    end
     hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size + 1}",
                                     is_shared_system: true,
                                     number_of_units_served: 6,
@@ -4001,10 +4314,12 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   # ----- #
 
   # Collapse some surfaces whose azimuth is a minor effect to simplify HPXMLs.
-  (hpxml.roofs + hpxml.rim_joists + hpxml.walls + hpxml.foundation_walls).each do |surface|
-    surface.azimuth = nil
+  if not hpxml_file.include? 'split-surfaces'
+    (hpxml.roofs + hpxml.rim_joists + hpxml.walls + hpxml.foundation_walls).each do |surface|
+      surface.azimuth = nil
+    end
+    hpxml.collapse_enclosure_surfaces()
   end
-  hpxml.collapse_enclosure_surfaces()
 
   renumber_hpxml_ids(hpxml)
 end
