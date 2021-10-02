@@ -726,6 +726,7 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'The Standard Ratings is calculated for'
       next if err_line.include?('WetBulb not converged after') && err_line.include?('iterations(PsyTwbFnTdbWPb)')
       next if err_line.include? 'Inside surface heat balance did not converge with Max Temp Difference'
+      next if err_line.include? 'Inside surface heat balance convergence problem continues'
       next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too low) for fluid')
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too high) for fluid')
