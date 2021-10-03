@@ -3233,7 +3233,6 @@ class HPXMLFile
                                        :slabs, :windows, :skylights, :doors])
 
     # After surfaces are collapsed, round all areas
-    # FIXME: Switch to round(1) after comparison is complete
     (hpxml.roofs +
      hpxml.rim_joists +
      hpxml.walls +
@@ -3243,7 +3242,7 @@ class HPXMLFile
      hpxml.windows +
      hpxml.skylights +
      hpxml.doors).each do |s|
-      s.area = s.area.round
+      s.area = s.area.round(1)
     end
 
     # Check for errors in the HPXML object

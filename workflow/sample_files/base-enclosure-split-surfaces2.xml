@@ -104,7 +104,7 @@
           <Roof>
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.77777777777777</Area>
+            <Area>167.7111111111111</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -118,7 +118,7 @@
           <Roof>
             <SystemIdentifier id='Roof2'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.77777777777777</Area>
+            <Area>167.7111111111111</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -132,7 +132,7 @@
           <Roof>
             <SystemIdentifier id='Roof3'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.77777777777777</Area>
+            <Area>167.7111111111111</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -146,7 +146,7 @@
           <Roof>
             <SystemIdentifier id='Roof4'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.77777777777777</Area>
+            <Area>167.7111111111111</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -160,7 +160,7 @@
           <Roof>
             <SystemIdentifier id='Roof5'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.77777777777777</Area>
+            <Area>167.7111111111111</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -174,7 +174,7 @@
           <Roof>
             <SystemIdentifier id='Roof6'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.77777777777777</Area>
+            <Area>167.7111111111111</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -188,7 +188,7 @@
           <Roof>
             <SystemIdentifier id='Roof7'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.77777777777777</Area>
+            <Area>167.7111111111111</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -202,7 +202,7 @@
           <Roof>
             <SystemIdentifier id='Roof8'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.77777777777777</Area>
+            <Area>167.7111111111111</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -216,7 +216,7 @@
           <Roof>
             <SystemIdentifier id='Roof9'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>167.77777777777777</Area>
+            <Area>167.7111111111111</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -247,7 +247,7 @@
             <SystemIdentifier id='RimJoist1'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>12.88888888888889</Area>
+            <Area>12.844444444444443</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -260,7 +260,7 @@
             <SystemIdentifier id='RimJoist2'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>12.88888888888889</Area>
+            <Area>12.844444444444443</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -273,7 +273,7 @@
             <SystemIdentifier id='RimJoist3'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>12.88888888888889</Area>
+            <Area>12.844444444444443</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -286,7 +286,7 @@
             <SystemIdentifier id='RimJoist4'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>12.88888888888889</Area>
+            <Area>12.844444444444443</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -299,7 +299,7 @@
             <SystemIdentifier id='RimJoist5'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>12.88888888888889</Area>
+            <Area>12.844444444444443</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -312,7 +312,7 @@
             <SystemIdentifier id='RimJoist6'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>12.88888888888889</Area>
+            <Area>12.844444444444443</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -325,7 +325,7 @@
             <SystemIdentifier id='RimJoist7'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>12.88888888888889</Area>
+            <Area>12.844444444444443</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -338,7 +338,7 @@
             <SystemIdentifier id='RimJoist8'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>12.88888888888889</Area>
+            <Area>12.844444444444443</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -351,7 +351,7 @@
             <SystemIdentifier id='RimJoist9'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>12.88888888888889</Area>
+            <Area>12.844444444444443</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -402,7 +402,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>25.11111111111111</Area>
+            <Area>25.0</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -571,7 +571,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>25.11111111111111</Area>
+            <Area>25.0</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -588,7 +588,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>25.11111111111111</Area>
+            <Area>25.0</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -605,7 +605,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>25.11111111111111</Area>
+            <Area>25.0</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -622,7 +622,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>25.11111111111111</Area>
+            <Area>25.0</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -639,7 +639,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>25.11111111111111</Area>
+            <Area>25.0</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -656,7 +656,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>25.11111111111111</Area>
+            <Area>25.0</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -673,7 +673,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>25.11111111111111</Area>
+            <Area>25.0</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -690,7 +690,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>25.11111111111111</Area>
+            <Area>25.0</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>

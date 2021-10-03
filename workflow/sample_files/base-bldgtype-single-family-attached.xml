@@ -108,7 +108,7 @@
           <Roof>
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>1006.0</Area>
+            <Area>1006.2</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -125,7 +125,7 @@
             <SystemIdentifier id='RimJoist1'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>66.0</Area>
+            <Area>66.1</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -138,7 +138,7 @@
             <SystemIdentifier id='RimJoist2'/>
             <ExteriorAdjacentTo>basement - conditioned</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>28.0</Area>
+            <Area>28.3</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -155,7 +155,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>686.0</Area>
+            <Area>685.9</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -174,7 +174,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>294.0</Area>
+            <Area>293.9</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <InteriorFinish>
@@ -193,7 +193,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>169.0</Area>
+            <Area>168.7</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -209,7 +209,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>169.0</Area>
+            <Area>168.7</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -224,7 +224,7 @@
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>8.0</Height>
-            <Area>686.0</Area>
+            <Area>685.9</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <InteriorFinish>
@@ -251,7 +251,7 @@
             <ExteriorAdjacentTo>basement - conditioned</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>8.0</Height>
-            <Area>294.0</Area>
+            <Area>293.9</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <InteriorFinish>
@@ -315,7 +315,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>
-            <Area>35.0</Area>
+            <Area>35.3</Area>
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -329,7 +329,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>35.0</Area>
+            <Area>35.3</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -343,7 +343,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>53.0</Area>
+            <Area>52.9</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
