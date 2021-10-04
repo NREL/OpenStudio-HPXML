@@ -844,7 +844,7 @@ class HVAC
   end
 
   def self.apply_dehumidifiers(model, runner, dehumidifiers, living_space)
-    dehumidifier_id = dehumidifiers[0].id # Syncs with SimulationOutputReport, which only looks at first dehumidifier ID
+    dehumidifier_id = dehumidifiers[0].id # Syncs with the ReportSimulationOutput measure, which only looks at first dehumidifier ID
 
     if dehumidifiers.map { |d| d.rh_setpoint }.uniq.size > 1
       fail 'All dehumidifiers must have the same setpoint but multiple setpoints were specified.'
@@ -1042,7 +1042,6 @@ class HVAC
     cooling_setpoint = HourlyByDaySchedule.new(model, Constants.ObjectNameCoolingSetpoint, clg_weekday_setpoints, clg_weekend_setpoints, nil, false)
 
     # Set the setpoint schedules
-    thermostat_setpoint = living_zone.thermostatSetpointDualSetpoint
     thermostat_setpoint = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(model)
     thermostat_setpoint.setName("#{living_zone.name} temperature setpoint")
     thermostat_setpoint.setHeatingSetpointTemperatureSchedule(heating_setpoint.schedule)
@@ -1052,12 +1051,12 @@ class HVAC
 
   def self.get_default_heating_setpoint(control_type)
     # Per ANSI/RESNET/ICC 301
-    htg_sp = 68 # F
+    htg_sp = 68.0 # F
     htg_setback_sp = nil
     htg_setback_hrs_per_week = nil
     htg_setback_start_hr = nil
     if control_type == HPXML::HVACControlTypeProgrammable
-      htg_setback_sp = 66 # F
+      htg_setback_sp = 66.0 # F
       htg_setback_hrs_per_week = 7 * 7 # 11 p.m. to 5:59 a.m., 7 days a week
       htg_setback_start_hr = 23 # 11 p.m.
     elsif control_type != HPXML::HVACControlTypeManual
@@ -1068,12 +1067,12 @@ class HVAC
 
   def self.get_default_cooling_setpoint(control_type)
     # Per ANSI/RESNET/ICC 301
-    clg_sp = 78 # F
+    clg_sp = 78.0 # F
     clg_setup_sp = nil
     clg_setup_hrs_per_week = nil
     clg_setup_start_hr = nil
     if control_type == HPXML::HVACControlTypeProgrammable
-      clg_setup_sp = 80 # F
+      clg_setup_sp = 80.0 # F
       clg_setup_hrs_per_week = 6 * 7 # 9 a.m. to 2:59 p.m., 7 days a week
       clg_setup_start_hr = 9 # 9 a.m.
     elsif control_type != HPXML::HVACControlTypeManual
