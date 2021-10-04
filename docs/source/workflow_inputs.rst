@@ -1179,8 +1179,8 @@ If a backup system fuel is provided, additional information is entered in ``Heat
 
 .. note::
 
-  The distribution system attached to the heat pump will also apply to any backup heating specified.
-  So the backup heating should represent, e.g., built-in electric resistance heating or an integrated backup furnace (in the case of a dual-fuel heat pump).
+  The heat pump's distribution system and blower fan power will apply to any backup heating specified.
+  So the backup heating can represent, e.g., built-in electric resistance heating or an integrated backup furnace (in the case of a dual-fuel heat pump).
 
 Air-to-Air Heat Pump
 ~~~~~~~~~~~~~~~~~~~~
