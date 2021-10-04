@@ -2687,6 +2687,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       window.orientation = { 0 => 'north', 90 => 'east', 180 => 'south', 270 => 'west' }[window.azimuth]
       window.azimuth = nil
     end
+    hpxml.doors[0].delete
     hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
                     wall_idref: 'Wall1',
                     area: 20,
