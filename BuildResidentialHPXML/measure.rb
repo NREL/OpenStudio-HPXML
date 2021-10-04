@@ -3146,8 +3146,7 @@ class HPXMLFile
                     HPXML::LocationBasementUnconditioned => 2,
                     HPXML::LocationCrawlspaceUnvented => 2,
                     HPXML::LocationCrawlspaceVented => 2,
-                    HPXML::LocationGarage => 3,
-                    HPXML::LocationOutside => 4 }
+                    HPXML::LocationGarage => 3 }
       location = Geometry.get_adjacent_to(surface: s)
       if location == HPXML::LocationLivingSpace && s.adjacentSurface.is_initialized
         location2 = Geometry.get_adjacent_to(surface: s.adjacentSurface.get)
@@ -3155,7 +3154,7 @@ class HPXMLFile
       else
         order = order_map[location]
       end
-      fail "Unexpected location: #{location}" if order.nil?
+      order = order_map.values.max + 1 if order.nil?
 
       order = order * 10 + s.azimuth / 1000.0
       if s.outsideBoundaryCondition.downcase == 'adiabatic'
