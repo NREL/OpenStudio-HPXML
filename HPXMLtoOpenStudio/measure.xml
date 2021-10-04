@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>13f128a9-9af7-47fe-b17c-0403f5e395ac</version_id>
-  <version_modified>20210928T154404Z</version_modified>
+  <version_id>9eb9cfdf-3d2e-4ff3-bb07-bdd4d9e49093</version_id>
+  <version_modified>20211004T195857Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -230,12 +230,6 @@
       <checksum>7DAA5F02</checksum>
     </file>
     <file>
-      <filename>test_validation.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>4C662AE0</checksum>
-    </file>
-    <file>
       <filename>test_hotwater_appliance.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -397,22 +391,10 @@
       <checksum>0F47F4D4</checksum>
     </file>
     <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>AA3422C3</checksum>
-    </file>
-    <file>
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>B4536890</checksum>
-    </file>
-    <file>
-      <filename>EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F088BDA6</checksum>
     </file>
     <file>
       <filename>hvac.rb</filename>
@@ -421,16 +403,34 @@
       <checksum>29815900</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6ED21198</checksum>
-    </file>
-    <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>ED02FFC2</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>637DA2AC</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1D4CF0B4</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B1E97B90</checksum>
+    </file>
+    <file>
+      <filename>test_validation.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>BF11A77C</checksum>
     </file>
     <file>
       <filename>version.rb</filename>
