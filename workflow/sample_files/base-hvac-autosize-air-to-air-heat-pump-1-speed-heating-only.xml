@@ -11,6 +11,9 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
+      <HVACSizingControl>
+        <UseMaxLoadForHeatPumps>true</UseMaxLoadForHeatPumps>
+      </HVACSizingControl>
     </extension>
   </SoftwareInfo>
   <Building>

@@ -3138,41 +3138,36 @@ class HPXMLFile
 
     # Sorting of objects
     def self.surface_order(s)
+      # Sort by adjacent space(s), then azimuth
+      order_map = { HPXML::LocationLivingSpace => 0,
+                    HPXML::LocationAtticUnvented => 1,
+                    HPXML::LocationAtticVented => 1,
+                    HPXML::LocationBasementConditioned => 2,
+                    HPXML::LocationBasementUnconditioned => 2,
+                    HPXML::LocationCrawlspaceUnvented => 2,
+                    HPXML::LocationCrawlspaceVented => 2,
+                    HPXML::LocationGarage => 3,
+                    HPXML::LocationOutside => 4 }
       location = Geometry.get_adjacent_to(surface: s)
       if location == HPXML::LocationLivingSpace && s.adjacentSurface.is_initialized
-        location = Geometry.get_adjacent_to(surface: s.adjacentSurface.get)
-      end
-      if location == HPXML::LocationLivingSpace
-        if s.outsideBoundaryCondition.downcase != 'adiabatic'
-          order = 0 + s.azimuth / 100.0
-        else
-          order = 1 + s.azimuth / 100.0
-        end
-      elsif [HPXML::LocationAtticUnvented,
-             HPXML::LocationAtticVented].include? location
-        if s.outsideBoundaryCondition.downcase != 'adiabatic'
-          order = 2 + s.azimuth / 100.0
-        else
-          order = 3 + s.azimuth / 100.0
-        end
-      elsif not [HPXML::LocationGarage].include? location
-        if s.outsideBoundaryCondition.downcase != 'adiabatic'
-          order = 4 + s.azimuth / 100.0
-        else
-          order = 5 + s.azimuth / 100.0
-        end
+        location2 = Geometry.get_adjacent_to(surface: s.adjacentSurface.get)
+        order = order_map[location2]
       else
-        if s.outsideBoundaryCondition.downcase != 'adiabatic'
-          order = 6 + s.azimuth / 100.0
-        else
-          order = 7 + s.azimuth / 100.0
-        end
+        order = order_map[location]
+      end
+      fail "Unexpected location: #{location}" if order.nil?
+
+      order = order * 10 + s.azimuth / 1000.0
+      if s.outsideBoundaryCondition.downcase == 'adiabatic'
+        order += 0.5
+      elsif (not location2.nil?) && location == HPXML::LocationLivingSpace
+        order -= 0.5
       end
       return order
     end
 
     sorted_surfaces = model.getSurfaces.sort_by { |s| surface_order(s) }
-    sorted_subsurfaces = model.getSubSurfaces.sort_by { |s| s.azimuth } # Sorted by azimuth
+    sorted_subsurfaces = model.getSubSurfaces.sort_by { |s| surface_order(s.surface.get) } # Sorted by azimuth
 
     hpxml = HPXML.new
 
@@ -4164,7 +4159,7 @@ class HPXMLFile
     return if heat_pump_type == 'none'
 
     if args[:heat_pump_heating_capacity] == Constants.AutoMaxLoad
-      # hpxml.header.use_max_load_for_heat_pumps = true
+      hpxml.header.use_max_load_for_heat_pumps = true
     elsif args[:heat_pump_heating_capacity] == Constants.Auto
       hpxml.header.use_max_load_for_heat_pumps = false
     else
