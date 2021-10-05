@@ -56,7 +56,7 @@ def run_design(basedir, rundir, design, resultsdir, json, debug, skip_simulation
     update_args_hash(measures, measure_subdir, args)
 
     # Add reporting measure to workflow
-    measure_subdir = 'hpxml-measures/SimulationOutputReport'
+    measure_subdir = 'hpxml-measures/ReportSimulationOutput'
     args = {}
     args['timeseries_frequency'] = 'monthly'
     args['include_timeseries_fuel_consumptions'] = false
