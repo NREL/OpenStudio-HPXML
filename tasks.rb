@@ -493,7 +493,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['geometry_unit_num_bedrooms'] = 3
     args['geometry_unit_num_bathrooms'] = 2
     args['geometry_unit_num_occupants'] = 3
-    args['geometry_has_flue_or_chimney'] = Constants.Auto
     args['floor_over_foundation_assembly_r'] = 0
     args['floor_over_garage_assembly_r'] = 0
     args['foundation_wall_insulation_r'] = 8.9
@@ -513,15 +512,10 @@ def set_measure_argument_values(hpxml_file, args)
     args['roof_color'] = HPXML::ColorMedium
     args['roof_assembly_r'] = 2.3
     args['roof_radiant_barrier'] = false
-    args['roof_radiant_barrier_grade'] = 1
     args['neighbor_front_distance'] = 0
     args['neighbor_back_distance'] = 0
     args['neighbor_left_distance'] = 0
     args['neighbor_right_distance'] = 0
-    args['neighbor_front_height'] = Constants.Auto
-    args['neighbor_back_height'] = Constants.Auto
-    args['neighbor_left_height'] = Constants.Auto
-    args['neighbor_right_height'] = Constants.Auto
     args['wall_type'] = HPXML::WallTypeWoodStud
     args['wall_siding_type'] = HPXML::SidingTypeWood
     args['wall_color'] = HPXML::ColorMedium
@@ -530,10 +524,10 @@ def set_measure_argument_values(hpxml_file, args)
     args['window_back_wwr'] = 0
     args['window_left_wwr'] = 0
     args['window_right_wwr'] = 0
-    args['window_area_front'] = 108.0
-    args['window_area_back'] = 108.0
-    args['window_area_left'] = 72.0
-    args['window_area_right'] = 72.0
+    args['window_front_area'] = 108.0
+    args['window_back_area'] = 108.0
+    args['window_left_area'] = 72.0
+    args['window_right_area'] = 72.0
     args['window_aspect_ratio'] = 1.333
     args['window_fraction_operable'] = 0.67
     args['window_ufactor'] = 0.33
@@ -563,7 +557,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['air_leakage_units'] = HPXML::UnitsACH
     args['air_leakage_house_pressure'] = 50
     args['air_leakage_value'] = 3
-    args['site_shielding_of_home'] = Constants.Auto
     args['heating_system_type'] = HPXML::HVACTypeFurnace
     args['heating_system_fuel'] = HPXML::FuelTypeNaturalGas
     args['heating_system_heating_efficiency'] = 0.92
@@ -656,7 +649,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['dwhr_efficiency'] = 0.55
     args['water_fixtures_shower_low_flow'] = true
     args['water_fixtures_sink_low_flow'] = false
-    args['water_fixtures_usage_multiplier'] = 1.0
     args['solar_thermal_system_type'] = 'none'
     args['solar_thermal_collector_area'] = 40.0
     args['solar_thermal_collector_loop_type'] = HPXML::SolarThermalLoopTypeDirect
@@ -665,11 +657,8 @@ def set_measure_argument_values(hpxml_file, args)
     args['solar_thermal_collector_tilt'] = 20
     args['solar_thermal_collector_rated_optical_efficiency'] = 0.5
     args['solar_thermal_collector_rated_thermal_losses'] = 0.2799
-    args['solar_thermal_storage_volume'] = Constants.Auto
     args['solar_thermal_solar_fraction'] = 0
     args['pv_system_module_type'] = 'none'
-    args['pv_system_location'] = Constants.Auto
-    args['pv_system_tracking'] = Constants.Auto
     args['pv_system_array_azimuth'] = 180
     args['pv_system_array_tilt'] = 20
     args['pv_system_max_power_output'] = 4000
@@ -677,8 +666,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_system_losses_fraction'] = 0.14
     args['pv_system_num_units_served'] = 1
     args['pv_system_2_module_type'] = 'none'
-    args['pv_system_2_location'] = Constants.Auto
-    args['pv_system_2_tracking'] = Constants.Auto
     args['pv_system_2_array_azimuth'] = 180
     args['pv_system_2_array_tilt'] = 20
     args['pv_system_2_max_power_output'] = 4000
@@ -688,17 +675,13 @@ def set_measure_argument_values(hpxml_file, args)
     args['lighting_interior_fraction_cfl'] = 0.4
     args['lighting_interior_fraction_lfl'] = 0.1
     args['lighting_interior_fraction_led'] = 0.25
-    args['lighting_interior_usage_multiplier'] = 1.0
     args['lighting_exterior_fraction_cfl'] = 0.4
     args['lighting_exterior_fraction_lfl'] = 0.1
     args['lighting_exterior_fraction_led'] = 0.25
-    args['lighting_exterior_usage_multiplier'] = 1.0
     args['lighting_garage_fraction_cfl'] = 0.4
     args['lighting_garage_fraction_lfl'] = 0.1
     args['lighting_garage_fraction_led'] = 0.25
-    args['lighting_garage_usage_multiplier'] = 1.0
     args['holiday_lighting_present'] = false
-    args['holiday_lighting_daily_kwh'] = Constants.Auto
     args['dehumidifier_type'] = 'none'
     args['dehumidifier_efficiency_type'] = 'EnergyFactor'
     args['dehumidifier_efficiency'] = 1.8
@@ -714,13 +697,11 @@ def set_measure_argument_values(hpxml_file, args)
     args['clothes_washer_label_annual_gas_cost'] = 27.0
     args['clothes_washer_label_usage'] = 6.0
     args['clothes_washer_capacity'] = 3.2
-    args['clothes_washer_usage_multiplier'] = 1.0
     args['clothes_dryer_location'] = HPXML::LocationLivingSpace
     args['clothes_dryer_fuel_type'] = HPXML::FuelTypeElectricity
     args['clothes_dryer_efficiency_type'] = 'CombinedEnergyFactor'
     args['clothes_dryer_efficiency'] = 3.73
     args['clothes_dryer_vented_flow_rate'] = 150.0
-    args['clothes_dryer_usage_multiplier'] = 1.0
     args['dishwasher_location'] = HPXML::LocationLivingSpace
     args['dishwasher_efficiency_type'] = 'RatedAnnualkWh'
     args['dishwasher_efficiency'] = 307
@@ -729,65 +710,42 @@ def set_measure_argument_values(hpxml_file, args)
     args['dishwasher_label_annual_gas_cost'] = 22.32
     args['dishwasher_label_usage'] = 4.0
     args['dishwasher_place_setting_capacity'] = 12
-    args['dishwasher_usage_multiplier'] = 1.0
     args['refrigerator_location'] = HPXML::LocationLivingSpace
     args['refrigerator_rated_annual_kwh'] = 650.0
-    args['refrigerator_usage_multiplier'] = 1.0
     args['extra_refrigerator_location'] = 'none'
-    args['extra_refrigerator_rated_annual_kwh'] = Constants.Auto
     args['extra_refrigerator_usage_multiplier'] = 1.0
     args['freezer_location'] = 'none'
-    args['freezer_rated_annual_kwh'] = Constants.Auto
     args['freezer_usage_multiplier'] = 1.0
     args['cooking_range_oven_location'] = HPXML::LocationLivingSpace
     args['cooking_range_oven_fuel_type'] = HPXML::FuelTypeElectricity
     args['cooking_range_oven_is_induction'] = false
     args['cooking_range_oven_is_convection'] = false
-    args['cooking_range_oven_usage_multiplier'] = 1.0
     args['ceiling_fan_present'] = false
-    args['ceiling_fan_efficiency'] = Constants.Auto
-    args['ceiling_fan_quantity'] = Constants.Auto
-    args['ceiling_fan_cooling_setpoint_temp_offset'] = 0
     args['misc_plug_loads_television_present'] = true
     args['misc_plug_loads_television_annual_kwh'] = 620.0
-    args['misc_plug_loads_television_usage_multiplier'] = 1.0
     args['misc_plug_loads_other_annual_kwh'] = 2457.0
     args['misc_plug_loads_other_frac_sensible'] = 0.855
     args['misc_plug_loads_other_frac_latent'] = 0.045
-    args['misc_plug_loads_other_usage_multiplier'] = 1.0
     args['misc_plug_loads_well_pump_present'] = false
-    args['misc_plug_loads_well_pump_annual_kwh'] = Constants.Auto
     args['misc_plug_loads_well_pump_usage_multiplier'] = 0.0
     args['misc_plug_loads_vehicle_present'] = false
-    args['misc_plug_loads_vehicle_annual_kwh'] = Constants.Auto
     args['misc_plug_loads_vehicle_usage_multiplier'] = 0.0
     args['misc_fuel_loads_grill_present'] = false
     args['misc_fuel_loads_grill_fuel_type'] = HPXML::FuelTypeNaturalGas
-    args['misc_fuel_loads_grill_annual_therm'] = Constants.Auto
     args['misc_fuel_loads_grill_usage_multiplier'] = 0.0
     args['misc_fuel_loads_lighting_present'] = false
     args['misc_fuel_loads_lighting_fuel_type'] = HPXML::FuelTypeNaturalGas
-    args['misc_fuel_loads_lighting_annual_therm'] = Constants.Auto
     args['misc_fuel_loads_lighting_usage_multiplier'] = 0.0
     args['misc_fuel_loads_fireplace_present'] = false
     args['misc_fuel_loads_fireplace_fuel_type'] = HPXML::FuelTypeNaturalGas
-    args['misc_fuel_loads_fireplace_annual_therm'] = Constants.Auto
-    args['misc_fuel_loads_fireplace_frac_sensible'] = Constants.Auto
-    args['misc_fuel_loads_fireplace_frac_latent'] = Constants.Auto
     args['misc_fuel_loads_fireplace_usage_multiplier'] = 0.0
     args['pool_present'] = false
-    args['pool_pump_annual_kwh'] = Constants.Auto
     args['pool_pump_usage_multiplier'] = 1.0
     args['pool_heater_type'] = HPXML::HeaterTypeElectricResistance
-    args['pool_heater_annual_kwh'] = Constants.Auto
-    args['pool_heater_annual_therm'] = Constants.Auto
     args['pool_heater_usage_multiplier'] = 1.0
     args['hot_tub_present'] = false
-    args['hot_tub_pump_annual_kwh'] = Constants.Auto
     args['hot_tub_pump_usage_multiplier'] = 1.0
     args['hot_tub_heater_type'] = HPXML::HeaterTypeElectricResistance
-    args['hot_tub_heater_annual_kwh'] = Constants.Auto
-    args['hot_tub_heater_annual_therm'] = Constants.Auto
     args['hot_tub_heater_usage_multiplier'] = 1.0
   elsif ['ASHRAE_Standard_140/L100AC.xml'].include? hpxml_file
     args['weather_station_epw_filepath'] = 'USA_CO_Colorado.Springs-Peterson.Field.724660_TMY3.epw'
@@ -812,9 +770,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['geometry_attic_type'] = HPXML::AtticTypeVented
     args['geometry_eaves_depth'] = 0
     args['geometry_unit_num_bedrooms'] = 3
-    args['geometry_unit_num_bathrooms'] = Constants.Auto
     args['geometry_unit_num_occupants'] = 0
-    args['geometry_has_flue_or_chimney'] = Constants.Auto
     args['floor_over_foundation_assembly_r'] = 14.15
     args['floor_over_garage_assembly_r'] = 0
     args['foundation_wall_insulation_r'] = 0
@@ -834,15 +790,10 @@ def set_measure_argument_values(hpxml_file, args)
     args['roof_color'] = HPXML::ColorMedium
     args['roof_assembly_r'] = 1.99
     args['roof_radiant_barrier'] = false
-    args['roof_radiant_barrier_grade'] = 1
     args['neighbor_front_distance'] = 0
     args['neighbor_back_distance'] = 0
     args['neighbor_left_distance'] = 0
     args['neighbor_right_distance'] = 0
-    args['neighbor_front_height'] = Constants.Auto
-    args['neighbor_back_height'] = Constants.Auto
-    args['neighbor_left_height'] = Constants.Auto
-    args['neighbor_right_height'] = Constants.Auto
     args['wall_type'] = HPXML::WallTypeWoodStud
     args['wall_siding_type'] = HPXML::SidingTypeWood
     args['wall_color'] = HPXML::ColorMedium
@@ -851,10 +802,10 @@ def set_measure_argument_values(hpxml_file, args)
     args['window_back_wwr'] = 0
     args['window_left_wwr'] = 0
     args['window_right_wwr'] = 0
-    args['window_area_front'] = 90
-    args['window_area_back'] = 90
-    args['window_area_left'] = 45
-    args['window_area_right'] = 45
+    args['window_front_area'] = 90
+    args['window_back_area'] = 90
+    args['window_left_area'] = 45
+    args['window_right_area'] = 45
     args['window_aspect_ratio'] = 5.0 / 3.0
     args['window_fraction_operable'] = 0
     args['window_ufactor'] = 1.039
@@ -884,7 +835,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['air_leakage_units'] = HPXML::UnitsACHNatural
     args['air_leakage_house_pressure'] = 50
     args['air_leakage_value'] = 0.67
-    args['site_shielding_of_home'] = Constants.Auto
     args['heating_system_type'] = 'none'
     args['heating_system_fuel'] = HPXML::FuelTypeNaturalGas
     args['heating_system_heating_efficiency'] = 0
@@ -934,20 +884,14 @@ def set_measure_argument_values(hpxml_file, args)
     args['heating_system_2_heating_capacity'] = Constants.Auto
     args['heating_system_2_fraction_heat_load_served'] = 0
     args['mech_vent_fan_type'] = 'none'
-    args['mech_vent_flow_rate'] = 0
-    args['mech_vent_hours_in_operation'] = 0
     args['mech_vent_recovery_efficiency_type'] = 'Unadjusted'
     args['mech_vent_total_recovery_efficiency'] = 0
     args['mech_vent_sensible_recovery_efficiency'] = 0
-    args['mech_vent_fan_power'] = 0
     args['mech_vent_num_units_served'] = 0
     args['mech_vent_2_fan_type'] = 'none'
-    args['mech_vent_2_flow_rate'] = 0
-    args['mech_vent_2_hours_in_operation'] = 0
     args['mech_vent_2_recovery_efficiency_type'] = 'Unadjusted'
     args['mech_vent_2_total_recovery_efficiency'] = 0
     args['mech_vent_2_sensible_recovery_efficiency'] = 0
-    args['mech_vent_2_fan_power'] = 0
     args['kitchen_fans_quantity'] = 0
     args['bathroom_fans_quantity'] = 0
     args['whole_house_fan_present'] = false
@@ -956,14 +900,9 @@ def set_measure_argument_values(hpxml_file, args)
     args['water_heater_type'] = 'none'
     args['water_heater_fuel_type'] = HPXML::FuelTypeElectricity
     args['water_heater_location'] = HPXML::LocationLivingSpace
-    args['water_heater_tank_volume'] = 0
     args['water_heater_efficiency_type'] = 'EnergyFactor'
     args['water_heater_efficiency'] = 0
-    args['water_heater_recovery_efficiency'] = 0
-    args['water_heater_heating_capacity'] = Constants.Auto
     args['water_heater_standby_loss'] = 0
-    args['water_heater_jacket_rvalue'] = 0
-    args['water_heater_setpoint_temperature'] = 0
     args['water_heater_num_units_served'] = 0
     args['hot_water_distribution_system_type'] = HPXML::DHWDistTypeStandard
     args['hot_water_distribution_standard_piping_length'] = 0
@@ -977,7 +916,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['dwhr_efficiency'] = 0
     args['water_fixtures_shower_low_flow'] = false
     args['water_fixtures_sink_low_flow'] = false
-    args['water_fixtures_usage_multiplier'] = 0
     args['solar_thermal_system_type'] = 'none'
     args['solar_thermal_collector_area'] = 0
     args['solar_thermal_collector_loop_type'] = HPXML::SolarThermalLoopTypeDirect
@@ -986,11 +924,8 @@ def set_measure_argument_values(hpxml_file, args)
     args['solar_thermal_collector_tilt'] = 0
     args['solar_thermal_collector_rated_optical_efficiency'] = 0
     args['solar_thermal_collector_rated_thermal_losses'] = 0
-    args['solar_thermal_storage_volume'] = Constants.Auto
     args['solar_thermal_solar_fraction'] = 0
     args['pv_system_module_type'] = 'none'
-    args['pv_system_location'] = Constants.Auto
-    args['pv_system_tracking'] = Constants.Auto
     args['pv_system_array_azimuth'] = 0
     args['pv_system_array_tilt'] = 0
     args['pv_system_max_power_output'] = 0
@@ -998,8 +933,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_system_losses_fraction'] = 0
     args['pv_system_num_units_served'] = 0
     args['pv_system_2_module_type'] = 'none'
-    args['pv_system_2_location'] = Constants.Auto
-    args['pv_system_2_tracking'] = Constants.Auto
     args['pv_system_2_array_azimuth'] = 0
     args['pv_system_2_array_tilt'] = 0
     args['pv_system_2_max_power_output'] = 0
@@ -1020,7 +953,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['lighting_garage_fraction_led'] = 0
     args['lighting_garage_usage_multiplier'] = 0
     args['holiday_lighting_present'] = false
-    args['holiday_lighting_daily_kwh'] = Constants.Auto
     args['dehumidifier_type'] = 'none'
     args['dehumidifier_efficiency_type'] = 'EnergyFactor'
     args['dehumidifier_efficiency'] = 0
@@ -1029,88 +961,35 @@ def set_measure_argument_values(hpxml_file, args)
     args['dehumidifier_fraction_dehumidification_load_served'] = 0
     args['clothes_washer_location'] = 'none'
     args['clothes_washer_efficiency_type'] = 'IntegratedModifiedEnergyFactor'
-    args['clothes_washer_efficiency'] = 0
-    args['clothes_washer_rated_annual_kwh'] = 0
-    args['clothes_washer_label_electric_rate'] = 0
-    args['clothes_washer_label_gas_rate'] = 0
-    args['clothes_washer_label_annual_gas_cost'] = 0
-    args['clothes_washer_label_usage'] = 0
-    args['clothes_washer_capacity'] = 0
-    args['clothes_washer_usage_multiplier'] = 0
     args['clothes_dryer_location'] = 'none'
     args['clothes_dryer_fuel_type'] = HPXML::FuelTypeElectricity
     args['clothes_dryer_efficiency_type'] = 'CombinedEnergyFactor'
-    args['clothes_dryer_efficiency'] = 0
-    args['clothes_dryer_vented_flow_rate'] = 0
-    args['clothes_dryer_usage_multiplier'] = 0
     args['dishwasher_location'] = 'none'
     args['dishwasher_efficiency_type'] = 'RatedAnnualkWh'
-    args['dishwasher_efficiency'] = 0
-    args['dishwasher_label_electric_rate'] = 0
-    args['dishwasher_label_gas_rate'] = 0
-    args['dishwasher_label_annual_gas_cost'] = 0
-    args['dishwasher_label_usage'] = 0
-    args['dishwasher_place_setting_capacity'] = 0
-    args['dishwasher_usage_multiplier'] = 0
     args['refrigerator_location'] = 'none'
-    args['refrigerator_rated_annual_kwh'] = 0
-    args['refrigerator_usage_multiplier'] = 0
     args['extra_refrigerator_location'] = 'none'
-    args['extra_refrigerator_rated_annual_kwh'] = Constants.Auto
-    args['extra_refrigerator_usage_multiplier'] = 0
     args['freezer_location'] = 'none'
-    args['freezer_rated_annual_kwh'] = Constants.Auto
-    args['freezer_usage_multiplier'] = 0
     args['cooking_range_oven_location'] = 'none'
     args['cooking_range_oven_fuel_type'] = HPXML::FuelTypeElectricity
     args['cooking_range_oven_is_induction'] = false
     args['cooking_range_oven_is_convection'] = false
-    args['cooking_range_oven_usage_multiplier'] = 0
     args['ceiling_fan_present'] = false
-    args['ceiling_fan_efficiency'] = Constants.Auto
-    args['ceiling_fan_quantity'] = Constants.Auto
-    args['ceiling_fan_cooling_setpoint_temp_offset'] = 0
     args['misc_plug_loads_television_present'] = false
-    args['misc_plug_loads_television_annual_kwh'] = 0
-    args['misc_plug_loads_television_usage_multiplier'] = 0
     args['misc_plug_loads_other_annual_kwh'] = 7302.0
     args['misc_plug_loads_other_frac_sensible'] = 0.822
     args['misc_plug_loads_other_frac_latent'] = 0.178
-    args['misc_plug_loads_other_usage_multiplier'] = 1.0
     args['misc_plug_loads_well_pump_present'] = false
-    args['misc_plug_loads_well_pump_annual_kwh'] = Constants.Auto
-    args['misc_plug_loads_well_pump_usage_multiplier'] = 0
     args['misc_plug_loads_vehicle_present'] = false
-    args['misc_plug_loads_vehicle_annual_kwh'] = Constants.Auto
-    args['misc_plug_loads_vehicle_usage_multiplier'] = 0
     args['misc_fuel_loads_grill_present'] = false
     args['misc_fuel_loads_grill_fuel_type'] = HPXML::FuelTypeNaturalGas
-    args['misc_fuel_loads_grill_annual_therm'] = Constants.Auto
-    args['misc_fuel_loads_grill_usage_multiplier'] = 0
     args['misc_fuel_loads_lighting_present'] = false
     args['misc_fuel_loads_lighting_fuel_type'] = HPXML::FuelTypeNaturalGas
-    args['misc_fuel_loads_lighting_annual_therm'] = Constants.Auto
-    args['misc_fuel_loads_lighting_usage_multiplier'] = 0
     args['misc_fuel_loads_fireplace_present'] = false
     args['misc_fuel_loads_fireplace_fuel_type'] = HPXML::FuelTypeNaturalGas
-    args['misc_fuel_loads_fireplace_annual_therm'] = Constants.Auto
-    args['misc_fuel_loads_fireplace_frac_sensible'] = Constants.Auto
-    args['misc_fuel_loads_fireplace_frac_latent'] = Constants.Auto
-    args['misc_fuel_loads_fireplace_usage_multiplier'] = 0
     args['pool_present'] = false
-    args['pool_pump_annual_kwh'] = Constants.Auto
-    args['pool_pump_usage_multiplier'] = 0
-    args['pool_heater_type'] = HPXML::HeaterTypeElectricResistance
-    args['pool_heater_annual_kwh'] = Constants.Auto
-    args['pool_heater_annual_therm'] = Constants.Auto
-    args['pool_heater_usage_multiplier'] = 0
+    args['pool_heater_type'] = HPXML::TypeNone
     args['hot_tub_present'] = false
-    args['hot_tub_pump_annual_kwh'] = Constants.Auto
-    args['hot_tub_pump_usage_multiplier'] = 0
-    args['hot_tub_heater_type'] = HPXML::HeaterTypeElectricResistance
-    args['hot_tub_heater_annual_kwh'] = Constants.Auto
-    args['hot_tub_heater_annual_therm'] = Constants.Auto
-    args['hot_tub_heater_usage_multiplier'] = 0
+    args['hot_tub_heater_type'] = HPXML::TypeNone
   end
 
   # ASHRAE 140
@@ -1129,16 +1008,16 @@ def set_measure_argument_values(hpxml_file, args)
     args['window_shgc'] = 0.335
   elsif ['ASHRAE_Standard_140/L140AC.xml',
          'ASHRAE_Standard_140/L140AL.xml'].include? hpxml_file
-    args['window_area_front'] = 0.0
-    args['window_area_back'] = 0.0
-    args['window_area_left'] = 0.0
-    args['window_area_right'] = 0.0
+    args['window_front_area'] = 0.0
+    args['window_back_area'] = 0.0
+    args['window_left_area'] = 0.0
+    args['window_right_area'] = 0.0
   elsif ['ASHRAE_Standard_140/L150AC.xml',
          'ASHRAE_Standard_140/L150AL.xml'].include? hpxml_file
-    args['window_area_front'] = 270.0
-    args['window_area_back'] = 0.0
-    args['window_area_left'] = 0.0
-    args['window_area_right'] = 0.0
+    args['window_front_area'] = 270.0
+    args['window_back_area'] = 0.0
+    args['window_left_area'] = 0.0
+    args['window_right_area'] = 0.0
     args['window_aspect_ratio'] = 5.0 / 1.5
   elsif ['ASHRAE_Standard_140/L155AC.xml',
          'ASHRAE_Standard_140/L155AL.xml'].include? hpxml_file
@@ -1147,10 +1026,10 @@ def set_measure_argument_values(hpxml_file, args)
     args['overhangs_front_distance_to_bottom_of_window'] = 6.0
   elsif ['ASHRAE_Standard_140/L160AC.xml',
          'ASHRAE_Standard_140/L160AL.xml'].include? hpxml_file
-    args['window_area_front'] = 0.0
-    args['window_area_back'] = 0.0
-    args['window_area_left'] = 135.0
-    args['window_area_right'] = 135.0
+    args['window_front_area'] = 0.0
+    args['window_back_area'] = 0.0
+    args['window_left_area'] = 135.0
+    args['window_right_area'] = 135.0
     args['window_aspect_ratio'] = 5.0 / 1.5
   elsif ['ASHRAE_Standard_140/L170AC.xml',
          'ASHRAE_Standard_140/L170AL.xml'].include? hpxml_file
@@ -1189,7 +1068,7 @@ def set_measure_argument_values(hpxml_file, args)
   if ['base-appliances-coal.xml'].include? hpxml_file
     args['clothes_dryer_fuel_type'] = HPXML::FuelTypeCoal
     args['clothes_dryer_efficiency'] = 3.3
-    args['clothes_dryer_vented_flow_rate'] = Constants.Auto
+    args.delete('clothes_dryer_vented_flow_rate')
     args['cooking_range_oven_fuel_type'] = HPXML::FuelTypeCoal
   elsif ['base-appliances-dehumidifier.xml'].include? hpxml_file
     args['heating_system_heating_capacity'] = 24000.0
@@ -1202,7 +1081,7 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-appliances-gas.xml'].include? hpxml_file
     args['clothes_dryer_fuel_type'] = HPXML::FuelTypeNaturalGas
     args['clothes_dryer_efficiency'] = 3.3
-    args['clothes_dryer_vented_flow_rate'] = Constants.Auto
+    args.delete('clothes_dryer_vented_flow_rate')
     args['cooking_range_oven_fuel_type'] = HPXML::FuelTypeNaturalGas
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     args['clothes_washer_efficiency_type'] = 'ModifiedEnergyFactor'
@@ -1222,17 +1101,17 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-appliances-oil.xml'].include? hpxml_file
     args['clothes_dryer_fuel_type'] = HPXML::FuelTypeOil
     args['clothes_dryer_efficiency'] = 3.3
-    args['clothes_dryer_vented_flow_rate'] = Constants.Auto
+    args.delete('clothes_dryer_vented_flow_rate')
     args['cooking_range_oven_fuel_type'] = HPXML::FuelTypeOil
   elsif ['base-appliances-propane.xml'].include? hpxml_file
     args['clothes_dryer_fuel_type'] = HPXML::FuelTypePropane
     args['clothes_dryer_efficiency'] = 3.3
-    args['clothes_dryer_vented_flow_rate'] = Constants.Auto
+    args.delete('clothes_dryer_vented_flow_rate')
     args['cooking_range_oven_fuel_type'] = HPXML::FuelTypePropane
   elsif ['base-appliances-wood.xml'].include? hpxml_file
     args['clothes_dryer_fuel_type'] = HPXML::FuelTypeWoodCord
     args['clothes_dryer_efficiency'] = 3.3
-    args['clothes_dryer_vented_flow_rate'] = Constants.Auto
+    args.delete('clothes_dryer_vented_flow_rate')
     args['cooking_range_oven_fuel_type'] = HPXML::FuelTypeWoodCord
   end
 
@@ -1278,10 +1157,10 @@ def set_measure_argument_values(hpxml_file, args)
     args['geometry_attic_type'] = HPXML::AtticTypeConditioned
     args['geometry_num_floors_above_grade'] = 2
     args['geometry_unit_cfa'] = 4050
-    args['window_area_front'] = 108.0
-    args['window_area_back'] = 108.0
-    args['window_area_left'] = 120.0
-    args['window_area_right'] = 120.0
+    args['window_front_area'] = 108.0
+    args['window_back_area'] = 108.0
+    args['window_left_area'] = 120.0
+    args['window_right_area'] = 120.0
     args['window_aspect_ratio'] = 5.0 / 2.5
     args['roof_assembly_r'] = 25.8
     args['ducts_supply_location'] = HPXML::LocationLivingSpace
@@ -1301,10 +1180,10 @@ def set_measure_argument_values(hpxml_file, args)
     args['window_back_wwr'] = 0.18
     args['window_left_wwr'] = 0.18
     args['window_right_wwr'] = 0.18
-    args['window_area_front'] = 0
-    args['window_area_back'] = 0
-    args['window_area_left'] = 0
-    args['window_area_right'] = 0
+    args['window_front_area'] = 0
+    args['window_back_area'] = 0
+    args['window_left_area'] = 0
+    args['window_right_area'] = 0
     args['heating_system_heating_capacity'] = 24000.0
     args['misc_plug_loads_other_annual_kwh'] = 1638.0
   elsif ['base-bldgtype-single-family-attached-2stories.xml'].include? hpxml_file
@@ -1333,10 +1212,10 @@ def set_measure_argument_values(hpxml_file, args)
     args['window_back_wwr'] = 0.18
     args['window_left_wwr'] = 0.18
     args['window_right_wwr'] = 0.18
-    args['window_area_front'] = 0
-    args['window_area_back'] = 0
-    args['window_area_left'] = 0
-    args['window_area_right'] = 0
+    args['window_front_area'] = 0
+    args['window_back_area'] = 0
+    args['window_left_area'] = 0
+    args['window_right_area'] = 0
     args['heating_system_heating_capacity'] = 12000.0
     args['cooling_system_cooling_capacity'] = 12000.0
     args['ducts_supply_leakage_to_outside_value'] = 0.0
@@ -1397,7 +1276,7 @@ def set_measure_argument_values(hpxml_file, args)
   # DHW
   if ['base-dhw-combi-tankless.xml'].include? hpxml_file
     args['water_heater_type'] = HPXML::WaterHeaterTypeCombiTankless
-    args['water_heater_tank_volume'] = Constants.Auto
+    args.delete('water_heater_tank_volume')
   elsif ['base-dhw-combi-tankless-outside.xml',
          'base-dhw-indirect-outside.xml',
          'base-dhw-tank-gas-outside.xml',
@@ -1500,7 +1379,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['solar_thermal_storage_volume'] = 60
   elsif ['base-dhw-tankless-electric.xml'].include? hpxml_file
     args['water_heater_type'] = HPXML::WaterHeaterTypeTankless
-    args['water_heater_tank_volume'] = Constants.Auto
+    args.delete('water_heater_tank_volume')
     args['water_heater_efficiency'] = 0.99
   elsif ['base-dhw-tankless-electric-uef.xml'].include? hpxml_file
     args['water_heater_efficiency_type'] = 'UniformEnergyFactor'
@@ -1508,7 +1387,7 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-dhw-tankless-gas.xml'].include? hpxml_file
     args['water_heater_type'] = HPXML::WaterHeaterTypeTankless
     args['water_heater_fuel_type'] = HPXML::FuelTypeNaturalGas
-    args['water_heater_tank_volume'] = Constants.Auto
+    args.delete('water_heater_tank_volume')
     args['water_heater_efficiency'] = 0.82
   elsif ['base-dhw-tankless-gas-uef.xml'].include? hpxml_file
     args['water_heater_efficiency_type'] = 'UniformEnergyFactor'
@@ -1528,7 +1407,7 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-dhw-desuperheater-tankless.xml'].include? hpxml_file
     args['water_heater_uses_desuperheater'] = true
     args['water_heater_type'] = HPXML::WaterHeaterTypeTankless
-    args['water_heater_tank_volume'] = Constants.Auto
+    args.delete('water_heater_tank_volume')
     args['water_heater_efficiency'] = 0.99
   end
 
@@ -1536,10 +1415,10 @@ def set_measure_argument_values(hpxml_file, args)
   if ['base-enclosure-2stories.xml'].include? hpxml_file
     args['geometry_unit_cfa'] = 4050.0
     args['geometry_num_floors_above_grade'] = 2
-    args['window_area_front'] = 216.0
-    args['window_area_back'] = 216.0
-    args['window_area_left'] = 144.0
-    args['window_area_right'] = 144.0
+    args['window_front_area'] = 216.0
+    args['window_back_area'] = 216.0
+    args['window_left_area'] = 144.0
+    args['window_right_area'] = 144.0
     args['heating_system_heating_capacity'] = 48000.0
     args['cooling_system_cooling_capacity'] = 36000.0
     args['ducts_supply_surface_area'] = 112.5
@@ -1575,7 +1454,7 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     args['geometry_garage_width'] = 30.0
     args['geometry_garage_protrusion'] = 1.0
-    args['window_area_front'] = 12.0
+    args['window_front_area'] = 12.0
     args['window_aspect_ratio'] = 5.0 / 1.5
     args['ducts_supply_location'] = HPXML::LocationGarage
     args['ducts_return_location'] = HPXML::LocationGarage
@@ -1593,7 +1472,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['air_leakage_units'] = HPXML::UnitsCFM
     args['air_leakage_value'] = 1080
   elsif ['base-enclosure-infil-flue.xml'].include? hpxml_file
-    args['geometry_has_flue_or_chimney'] = 'true'
+    args['geometry_has_flue_or_chimney'] = true
   elsif ['base-enclosure-infil-natural-ach.xml'].include? hpxml_file
     args['air_leakage_units'] = HPXML::UnitsACHNatural
     args['air_leakage_value'] = 0.2
@@ -1609,10 +1488,10 @@ def set_measure_argument_values(hpxml_file, args)
     args['overhangs_right_distance_to_top_of_window'] = 2.0
     args['overhangs_right_distance_to_bottom_of_window'] = 6.0
   elsif ['base-enclosure-windows-none.xml'].include? hpxml_file
-    args['window_area_front'] = 0
-    args['window_area_back'] = 0
-    args['window_area_left'] = 0
-    args['window_area_right'] = 0
+    args['window_front_area'] = 0
+    args['window_back_area'] = 0
+    args['window_left_area'] = 0
+    args['window_right_area'] = 0
   elsif ['base-enclosure-skylights.xml'].include? hpxml_file
     args['skylight_area_front'] = 15
     args['skylight_area_back'] = 15
@@ -1642,7 +1521,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['geometry_foundation_type'] = HPXML::FoundationTypeSlab
     args['geometry_foundation_height'] = 0.0
     args['geometry_foundation_height_above_grade'] = 0.0
-    args['foundation_wall_insulation_distance_to_bottom'] = Constants.Auto
     args['slab_under_insulation_r'] = 5
     args['slab_under_width'] = 999
     args['slab_carpet_fraction'] = 1.0
@@ -2141,13 +2019,13 @@ def set_measure_argument_values(hpxml_file, args)
   if ['base-misc-defaults.xml'].include? hpxml_file
     args.delete('simulation_control_timestep')
     args.delete('site_type')
-    args['geometry_unit_num_bathrooms'] = Constants.Auto
-    args['geometry_unit_num_occupants'] = Constants.Auto
-    args['foundation_wall_insulation_distance_to_top'] = Constants.Auto
-    args['foundation_wall_insulation_distance_to_bottom'] = Constants.Auto
-    args['foundation_wall_thickness'] = Constants.Auto
-    args['slab_thickness'] = Constants.Auto
-    args['slab_carpet_fraction'] = Constants.Auto
+    args.delete('geometry_unit_num_bathrooms')
+    args.delete('geometry_unit_num_occupants')
+    args.delete('foundation_wall_insulation_distance_to_top')
+    args.delete('foundation_wall_insulation_distance_to_bottom')
+    args.delete('foundation_wall_thickness')
+    args.delete('slab_thickness')
+    args.delete('slab_carpet_fraction')
     args.delete('roof_material_type')
     args['roof_color'] = HPXML::ColorLight
     args.delete('roof_material_type')
@@ -2160,62 +2038,62 @@ def set_measure_argument_values(hpxml_file, args)
     args.delete('cooling_system_cooling_compressor_type')
     args.delete('cooling_system_cooling_sensible_heat_fraction')
     args['mech_vent_fan_type'] = HPXML::MechVentTypeExhaust
-    args['mech_vent_hours_in_operation'] = Constants.Auto
-    args['mech_vent_fan_power'] = Constants.Auto
-    args['ducts_supply_location'] = Constants.Auto
-    args['ducts_return_location'] = Constants.Auto
-    args['ducts_supply_surface_area'] = Constants.Auto
-    args['ducts_return_surface_area'] = Constants.Auto
-    args['kitchen_fans_quantity'] = Constants.Auto
-    args['bathroom_fans_quantity'] = Constants.Auto
-    args['water_heater_location'] = Constants.Auto
-    args['water_heater_tank_volume'] = Constants.Auto
-    args['water_heater_setpoint_temperature'] = Constants.Auto
-    args['hot_water_distribution_standard_piping_length'] = Constants.Auto
-    args['hot_water_distribution_pipe_r'] = Constants.Auto
+    args.delete('mech_vent_hours_in_operation')
+    args.delete('mech_vent_fan_power')
+    args.delete('ducts_supply_location')
+    args.delete('ducts_return_location')
+    args.delete('ducts_supply_surface_area')
+    args.delete('ducts_return_surface_area')
+    args.delete('kitchen_fans_quantity')
+    args.delete('bathroom_fans_quantity')
+    args.delete('water_heater_location')
+    args.delete('water_heater_tank_volume')
+    args.delete('water_heater_setpoint_temperature')
+    args.delete('hot_water_distribution_standard_piping_length')
+    args.delete('hot_water_distribution_pipe_r')
     args['solar_thermal_system_type'] = HPXML::SolarThermalSystemType
     args['solar_thermal_collector_type'] = HPXML::SolarThermalTypeSingleGlazing
     args['solar_thermal_collector_rated_optical_efficiency'] = 0.77
     args['solar_thermal_collector_rated_thermal_losses'] = 0.793
-    args['pv_system_module_type'] = Constants.Auto
+    args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
     args.delete('pv_system_inverter_efficiency')
     args.delete('pv_system_system_losses_fraction')
-    args['clothes_washer_location'] = Constants.Auto
-    args['clothes_washer_efficiency'] = Constants.Auto
-    args['clothes_washer_rated_annual_kwh'] = Constants.Auto
-    args['clothes_washer_label_electric_rate'] = Constants.Auto
-    args['clothes_washer_label_gas_rate'] = Constants.Auto
-    args['clothes_washer_label_annual_gas_cost'] = Constants.Auto
-    args['clothes_washer_label_usage'] = Constants.Auto
-    args['clothes_washer_capacity'] = Constants.Auto
-    args['clothes_dryer_location'] = Constants.Auto
-    args['clothes_dryer_efficiency'] = Constants.Auto
-    args['clothes_dryer_vented_flow_rate'] = Constants.Auto
-    args['dishwasher_location'] = Constants.Auto
-    args['dishwasher_efficiency'] = Constants.Auto
-    args['dishwasher_label_electric_rate'] = Constants.Auto
-    args['dishwasher_label_gas_rate'] = Constants.Auto
-    args['dishwasher_label_annual_gas_cost'] = Constants.Auto
-    args['dishwasher_label_usage'] = Constants.Auto
-    args['dishwasher_place_setting_capacity'] = Constants.Auto
-    args['refrigerator_location'] = Constants.Auto
-    args['refrigerator_rated_annual_kwh'] = Constants.Auto
-    args['cooking_range_oven_location'] = Constants.Auto
+    args.delete('clothes_washer_location')
+    args.delete('clothes_washer_efficiency')
+    args.delete('clothes_washer_rated_annual_kwh')
+    args.delete('clothes_washer_label_electric_rate')
+    args.delete('clothes_washer_label_gas_rate')
+    args.delete('clothes_washer_label_annual_gas_cost')
+    args.delete('clothes_washer_label_usage')
+    args.delete('clothes_washer_capacity')
+    args.delete('clothes_dryer_location')
+    args.delete('clothes_dryer_efficiency')
+    args.delete('clothes_dryer_vented_flow_rate')
+    args.delete('dishwasher_location')
+    args.delete('dishwasher_efficiency')
+    args.delete('dishwasher_label_electric_rate')
+    args.delete('dishwasher_label_gas_rate')
+    args.delete('dishwasher_label_annual_gas_cost')
+    args.delete('dishwasher_label_usage')
+    args.delete('dishwasher_place_setting_capacity')
+    args.delete('refrigerator_location')
+    args.delete('refrigerator_rated_annual_kwh')
+    args.delete('cooking_range_oven_location')
     args.delete('cooking_range_oven_is_induction')
     args.delete('cooking_range_oven_is_convection')
     args['ceiling_fan_present'] = true
-    args['misc_plug_loads_television_annual_kwh'] = Constants.Auto
-    args['misc_plug_loads_other_annual_kwh'] = Constants.Auto
-    args['misc_plug_loads_other_frac_sensible'] = Constants.Auto
-    args['misc_plug_loads_other_frac_latent'] = Constants.Auto
-    args['mech_vent_flow_rate'] = Constants.Auto
-    args['kitchen_fans_flow_rate'] = Constants.Auto
-    args['bathroom_fans_flow_rate'] = Constants.Auto
+    args.delete('misc_plug_loads_television_annual_kwh')
+    args.delete('misc_plug_loads_other_annual_kwh')
+    args.delete('misc_plug_loads_other_frac_sensible')
+    args.delete('misc_plug_loads_other_frac_latent')
+    args.delete('mech_vent_flow_rate')
+    args.delete('kitchen_fans_flow_rate')
+    args.delete('bathroom_fans_flow_rate')
     args['whole_house_fan_present'] = true
-    args['whole_house_fan_flow_rate'] = Constants.Auto
-    args['whole_house_fan_power'] = Constants.Auto
+    args.delete('whole_house_fan_flow_rate')
+    args.delete('whole_house_fan_power')
   elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
-    args['extra_refrigerator_location'] = Constants.Auto
+    args['extra_refrigerator_location'] = HPXML::LocationLivingSpace
     args['extra_refrigerator_rated_annual_kwh'] = 700.0
     args['freezer_location'] = HPXML::LocationLivingSpace
     args['freezer_rated_annual_kwh'] = 300.0
@@ -2245,6 +2123,18 @@ def set_measure_argument_values(hpxml_file, args)
     args['hot_tub_present'] = true
     args['hot_tub_pump_annual_kwh'] = 1000.0
     args['hot_tub_heater_annual_kwh'] = 1300.0
+    args.delete('refrigerator_usage_multiplier')
+    args.delete('extra_refrigerator_usage_multiplier')
+    args.delete('freezer_usage_multiplier')
+    args.delete('pool_pump_usage_multiplier')
+    args.delete('pool_heater_usage_multiplier')
+    args.delete('hot_tub_pump_usage_multiplier')
+    args.delete('hot_tub_heater_usage_multiplier')
+    args.delete('misc_plug_loads_vehicle_usage_multiplier')
+    args.delete('misc_plug_loads_well_pump_usage_multiplier')
+    args.delete('misc_fuel_loads_grill_usage_multiplier')
+    args.delete('misc_fuel_loads_lighting_usage_multiplier')
+    args.delete('misc_fuel_loads_fireplace_usage_multiplier')
   elsif ['base-misc-loads-large-uncommon2.xml'].include? hpxml_file
     args['pool_heater_type'] = HPXML::TypeNone
     args['hot_tub_heater_type'] = HPXML::HeaterTypeHeatPump
@@ -2300,8 +2190,8 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-misc-loads-none.xml'].include? hpxml_file
     args['misc_plug_loads_television_present'] = false
     args['misc_plug_loads_other_annual_kwh'] = 0.0
-    args['misc_plug_loads_other_frac_sensible'] = Constants.Auto
-    args['misc_plug_loads_other_frac_latent'] = Constants.Auto
+    args.delete('misc_plug_loads_other_frac_sensible')
+    args.delete('misc_plug_loads_other_frac_latent')
   end
 
   # PV
@@ -4157,6 +4047,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   # Logic that can only be applied based on the file name
   if ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.pv_systems[0].year_modules_manufactured = 2015
+    hpxml.pv_systems[0].module_type = nil
   elsif ['base-misc-generators.xml'].include? hpxml_file
     hpxml.generators.add(id: "Generator#{hpxml.generators.size + 1}",
                          fuel_type: HPXML::FuelTypeNaturalGas,

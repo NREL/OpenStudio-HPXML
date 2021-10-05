@@ -492,6 +492,7 @@
         </Refrigerator>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator2'/>
+          <Location>living space</Location>
           <RatedAnnualkWh>700.0</RatedAnnualkWh>
           <PrimaryIndicator>false</PrimaryIndicator>
           <extension>

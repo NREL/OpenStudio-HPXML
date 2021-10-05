@@ -472,7 +472,7 @@
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
           <PrimaryIndicator>true</PrimaryIndicator>
           <extension>
-            <UsageMultiplier>0.9</UsageMultiplier>
+            <UsageMultiplier>0.8999999761581421</UsageMultiplier>
           </extension>
         </Refrigerator>
         <Freezer>

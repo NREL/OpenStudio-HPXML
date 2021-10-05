@@ -852,10 +852,10 @@ class Geometry
                                         window_back_wwr:,
                                         window_left_wwr:,
                                         window_right_wwr:,
-                                        window_area_front:,
-                                        window_area_back:,
-                                        window_area_left:,
-                                        window_area_right:,
+                                        window_front_area:,
+                                        window_back_area:,
+                                        window_left_area:,
+                                        window_right_area:,
                                         window_aspect_ratio:,
                                         skylight_area_front:,
                                         skylight_area_back:,
@@ -870,10 +870,10 @@ class Geometry
     wwrs[Constants.FacadeLeft] = window_left_wwr
     wwrs[Constants.FacadeRight] = window_right_wwr
     window_areas = {}
-    window_areas[Constants.FacadeFront] = window_area_front
-    window_areas[Constants.FacadeBack] = window_area_back
-    window_areas[Constants.FacadeLeft] = window_area_left
-    window_areas[Constants.FacadeRight] = window_area_right
+    window_areas[Constants.FacadeFront] = window_front_area
+    window_areas[Constants.FacadeBack] = window_back_area
+    window_areas[Constants.FacadeLeft] = window_left_area
+    window_areas[Constants.FacadeRight] = window_right_area
 
     skylight_areas = {}
     skylight_areas[Constants.FacadeFront] = skylight_area_front
