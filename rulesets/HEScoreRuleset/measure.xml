@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>he_score_measure</name>
   <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
-  <version_id>fcf752f9-22d5-4abd-afb0-c1e717535d03</version_id>
-  <version_modified>20210928T142349Z</version_modified>
+  <version_id>b9dafae9-a4b4-4ff3-af12-f682dafe8d08</version_id>
+  <version_modified>20211006T165407Z</version_modified>
   <xml_checksum>2AF3A68E</xml_checksum>
   <class_name>HEScoreMeasure</class_name>
   <display_name>Apply Home Energy Score Ruleset</display_name>
@@ -75,12 +75,6 @@
       <checksum>FBD37897</checksum>
     </file>
     <file>
-      <filename>lu_hvac_equipment_efficiency.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8711ABD8</checksum>
-    </file>
-    <file>
       <filename>lu_roof_eff_rvalue.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -126,6 +120,12 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>65DA55F5</checksum>
+    </file>
+    <file>
+      <filename>lu_hvac_equipment_efficiency.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C1A6A85C</checksum>
     </file>
   </files>
 </measure>

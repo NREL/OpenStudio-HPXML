@@ -158,9 +158,6 @@ class HEScoreTest < MiniTest::Test
         # FIXME: Remove this warning when https://github.com/NREL/OpenStudio-HPXML/issues/638 is resolved
         next if log_line.include?('Glazing U-factor') && log_line.include?('above maximum expected value. U-factor decreased')
 
-        # Some regression files (e.g., Heating_wall_furnace_year_1972) generate this warning
-        next if log_line.include?('AFUE should typically be greater than or equal to 0.6')
-
         # Files w/o cooling systems
         no_spc_clg = false
         json['building']['systems']['hvac'].each do |hvac|
@@ -178,11 +175,6 @@ class HEScoreTest < MiniTest::Test
           end
         end
         next if no_spc_htg && log_line.include?('No space heating specified, the model will not include space heating energy use.')
-
-        # Files w/o windows
-        if json['building']['zone']['zone_wall'].map { |w| w.key?('zone_window') ? w['zone_window']['window_area'] : 0 }.sum(0.0) <= 1.0
-          next if log_line.include?('No windows specified, the model will not include window heat transfer.')
-        end
 
         flunk "Unexpected warning found in run.log: #{log_line}"
       end
