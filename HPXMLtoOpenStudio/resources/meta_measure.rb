@@ -67,7 +67,6 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
   success = report_ft_errors_warnings(forward_translator, rundir)
 
   # Remove objects
-  workspace.getObjectByTypeAndName('LifeCycleCost:NonrecurringCost'.to_IddObjectType, 'Default Cost').get.remove # FUTURE: Can remove this code if https://github.com/NREL/OpenStudio/issues/4404 is fixed
   remove_objects.each do |remove_object|
     workspace.getObjectByTypeAndName(remove_object[0].to_IddObjectType, remove_object[1]).get.remove
   end
