@@ -2697,7 +2697,12 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     area: 20,
                     orientation: HPXML::OrientationSouth,
                     r_value: 4.4)
+  elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
+    hpxml.foundations[0].within_infiltration_volume = false
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
+    hpxml.attics.add(id: "Attic#{hpxml.attics.size + 1}",
+                     attic_type: HPXML::AtticTypeUnvented,
+                     within_infiltration_volume: false)
     hpxml.roofs.each do |roof|
       roof.area = 1006.0 / hpxml.roofs.size
       roof.insulation_assembly_r_value = 25.8
