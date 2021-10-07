@@ -2217,8 +2217,8 @@ class OSModel
         next unless i.name.to_s.start_with? prefix
         next unless i.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
 
-        { 'Infiltration Sensible Heat Gain Energy' => '+',
-          'Infiltration Sensible Heat Loss Energy' => '-' }.each do |var, sign|
+        { 'Infiltration Sensible Heat Gain Energy' => ' - ',
+          'Infiltration Sensible Heat Loss Energy' => ' + ' }.each do |var, sign|
           name = var.split(' ')[-2].downcase
           sensor_name = prefix.gsub(' ', '_') + '_' + name
           airflow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
