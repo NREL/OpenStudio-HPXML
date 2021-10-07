@@ -563,7 +563,7 @@ If insulation layers are provided, additional information is entered in each ``F
   ``extension/DistanceToBottomOfInsulation``  double    ft            See [#]_     No        Height   Vertical distance from top of foundation wall to bottom of insulation
   ==========================================  ========  ============  ===========  ========  =======  =====================================================================
 
-  .. [#] DistanceToBottomOfInsulation must be greater than DistanceToTopOfInsulation and less than or equal to FoundationWall/Height when NominalRValue is non-zero.
+  .. [#] When NominalRValue is non-zero, DistanceToBottomOfInsulation must be greater than DistanceToTopOfInsulation and less than or equal to FoundationWall/Height.
 
 HPXML Frame Floors
 ******************
@@ -732,7 +732,7 @@ If overhangs are specified, additional information is entered in ``Overhangs``.
   ============================  ========  ======  ===========  ========  =======  ========================================================
 
   .. [#] The difference between DistanceToBottomOfWindow and DistanceToTopOfWindow defines the height of the window.
-  .. [#] DistanceToBottomOfWindow must be greater than DistanceToTopOfWindow when Depth is non-zero.
+  .. [#] When Depth is non-zero, DistanceToBottomOfWindow must be greater than DistanceToTopOfWindow.
 
 HPXML Skylights
 ***************
