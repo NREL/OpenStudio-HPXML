@@ -51,6 +51,7 @@ __Bugfixes__
 - Negative `DistanceToTopOfInsulation` values are now disallowed.
 - Fixes workflow errors if a `VentilationFan` has zero airflow rate or zero hours of operation.
 - Fixes duct design load calculations for HPXML files with multiple ducted HVAC systems.
+- Relaxes `Overhangs` DistanceToBottomOfWindow vs DistanceToBottomOfWindow validation when Depth is zero.
 
 ## OpenStudio-HPXML v1.2.0
 
