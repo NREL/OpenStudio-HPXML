@@ -2230,28 +2230,30 @@ class OSModel
       airflow_s[prefix] = sensor_s
     end
 
-    mechvent_sensors = []
+    mechvents_sensors = []
     model.getElectricEquipments.sort.each do |o|
       next unless o.name.to_s.start_with? Constants.ObjectNameMechanicalVentilation
 
+      mechvents_sensors << []
       { 'Electric Equipment Convective Heating Energy' => 'mv_conv',
         'Electric Equipment Radiant Heating Energy' => 'mv_rad' }.each do |var, name|
         mechvent_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
         mechvent_sensor.setName(name)
         mechvent_sensor.setKeyName(o.name.to_s)
-        mechvent_sensors << mechvent_sensor
+        mechvents_sensors[-1] << mechvent_sensor
         objects_already_processed << o
       end
     end
     model.getOtherEquipments.sort.each do |o|
       next unless o.name.to_s.start_with? Constants.ObjectNameMechanicalVentilationHouseFan
 
+      mechvents_sensors << []
       { 'Other Equipment Convective Heating Energy' => 'mv_conv',
         'Other Equipment Radiant Heating Energy' => 'mv_rad' }.each do |var, name|
         mechvent_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
         mechvent_sensor.setName(name)
         mechvent_sensor.setKeyName(o.name.to_s)
-        mechvent_sensors << mechvent_sensor
+        mechvents_sensors[-1] << mechvent_sensor
         objects_already_processed << o
       end
     end
@@ -2432,17 +2434,16 @@ class OSModel
     program.addLine("Set hr_infil = #{airflow_s[Constants.ObjectNameInfiltration]}") # Airflow heat attributed to infiltration
     program.addLine("Set hr_natvent = #{airflow_s[Constants.ObjectNameNaturalVentilation]}") # Airflow heat attributed to natural ventilation
     program.addLine("Set hr_whf = #{airflow_s[Constants.ObjectNameWholeHouseFan]}") # Airflow heat attributed to whole house fan
-    program.addLine('Set hr_mechvent = 0')
-    mechvent_sensors.each do |sensor|
-      program.addLine("Set hr_mechvent = hr_mechvent - #{sensor.name}")
-    end
-    program.addLine('Set hr_ducts = 0')
-    ducts_sensors.each do |duct_sensors|
-      s = 'Set hr_ducts = hr_ducts'
-      duct_sensors.each do |sensor|
-        s += " - #{sensor.name}"
+    { mechvents_sensors => 'mechvent',
+      ducts_sensors => 'ducts' }.each do |all_sensors, loadtype|
+      program.addLine("Set hr_#{loadtype} = 0")
+      all_sensors.each do |sensors|
+        s = "Set hr_#{loadtype} = hr_#{loadtype}"
+        sensors.each do |sensor|
+          s += " - #{sensor.name}"
+        end
+        program.addLine(s) if sensors.size > 0
       end
-      program.addLine(s) if duct_sensors.size > 0
     end
     if (not ducts_mix_loss_sensor.nil?) && (not ducts_mix_gain_sensor.nil?)
       program.addLine("Set hr_ducts = hr_ducts + (#{ducts_mix_loss_sensor.name} - #{ducts_mix_gain_sensor.name})")
