@@ -2208,26 +2208,24 @@ class OSModel
     end
 
     # EMS Sensors: Infiltration, Mechanical Ventilation, Natural Ventilation, Whole House Fan
-    airflow_s = {}
-    [Constants.ObjectNameInfiltration,
-     Constants.ObjectNameNaturalVentilation,
-     Constants.ObjectNameWholeHouseFan].each do |prefix|
-      sensor_s = '0.0'
+    infil_sensors = []
+    natvent_sensors = []
+    whf_sensors = []
+    { Constants.ObjectNameInfiltration => infil_sensors,
+      Constants.ObjectNameNaturalVentilation => natvent_sensors,
+      Constants.ObjectNameWholeHouseFan => whf_sensors }.each do |prefix, array|
       model.getSpaceInfiltrationDesignFlowRates.sort.each do |i|
         next unless i.name.to_s.start_with? prefix
         next unless i.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
 
-        { 'Infiltration Sensible Heat Gain Energy' => ' - ',
-          'Infiltration Sensible Heat Loss Energy' => ' + ' }.each do |var, sign|
-          name = var.split(' ')[-2].downcase
-          sensor_name = prefix.gsub(' ', '_') + '_' + name
+        { 'Infiltration Sensible Heat Gain Energy' => prefix.gsub(' ', '_') + '_' + 'gain',
+          'Infiltration Sensible Heat Loss Energy' => prefix.gsub(' ', '_') + '_' + 'loss' }.each do |var, name|
           airflow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-          airflow_sensor.setName(sensor_name)
+          airflow_sensor.setName(name)
           airflow_sensor.setKeyName(i.name.to_s)
-          sensor_s += (sign + airflow_sensor.name.get)
+          array << airflow_sensor
         end
       end
-      airflow_s[prefix] = sensor_s
     end
 
     mechvent_sensors = []
@@ -2429,9 +2427,18 @@ class OSModel
     end
 
     # EMS program: Infiltration, Natural Ventilation, Mechanical Ventilation, Ducts
-    program.addLine("Set hr_infil = #{airflow_s[Constants.ObjectNameInfiltration]}") # Airflow heat attributed to infiltration
-    program.addLine("Set hr_natvent = #{airflow_s[Constants.ObjectNameNaturalVentilation]}") # Airflow heat attributed to natural ventilation
-    program.addLine("Set hr_whf = #{airflow_s[Constants.ObjectNameWholeHouseFan]}") # Airflow heat attributed to whole house fan
+    { infil_sensors => 'hr_infil',
+      natvent_sensors => 'hr_natvent',
+      whf_sensors => 'hr_whf' }.each do |sensors, s|
+      program.addLine("Set #{s} = 0")
+      sensors.each do |sensor|
+        if sensor.name.to_s.include? 'gain'
+          program.addLine("Set #{s} = #{s} - #{sensor.name}")
+        elsif sensor.name.to_s.include? 'loss'
+          program.addLine("Set #{s} = #{s} + #{sensor.name}")
+        end
+      end
+    end
     program.addLine('Set hr_mechvent = 0')
     mechvent_sensors.each do |sensor|
       program.addLine("Set hr_mechvent = hr_mechvent - #{sensor.name}")
