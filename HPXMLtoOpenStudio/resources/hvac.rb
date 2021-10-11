@@ -295,8 +295,8 @@ class HVAC
         # Grid AC
         if heat_pump.ihp_grid_ac
           grid_clg_coil = create_dx_cooling_coil(model, obj_name, heat_pump, cooling_grid_signal_schedule)
-          grid_clg_coil.setLowerBoundToApplyGridResponsiveControl(1000.0)
-          grid_clg_coil.setMaxSpeedLevelDuringGridResponsiveControl(1)
+          grid_clg_coil.setLowerBoundToApplyGridResponsiveControl(1)
+          grid_clg_coil.setMaxSpeedLevelDuringGridResponsiveControl(heat_pump.max_flex_speed)
         end
 
         # Storage
@@ -372,8 +372,8 @@ class HVAC
     unless grid_signal_schedule.nil?
       chiller_coil.setGridSignalSchedule(grid_signal_schedule)
     end
-    chiller_coil.setLowerBoundToApplyGridResponsiveControl(0.1)
-    chiller_coil.setUpperBoundToApplyGridResponsiveControl(1000.0)
+    chiller_coil.setLowerBoundToApplyGridResponsiveControl(1)
+    chiller_coil.setUpperBoundToApplyGridResponsiveControl(1)
     chiller_coil.setMaxSpeedLevelDuringGridResponsiveControl(0)
     chiller_coil_speed_1 = OpenStudio::Model::CoilChillerAirSourceVariableSpeedSpeedData.new(model)
     chiller_coil.addSpeed(chiller_coil_speed_1)
