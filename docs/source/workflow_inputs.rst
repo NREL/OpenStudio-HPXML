@@ -46,45 +46,40 @@ Input Defaults
 A large number of elements in the HPXML file are optional and can be defaulted.
 Default values, equations, and logic are described throughout this documentation.
 
-Defaults can also be seen in the ``in.xml`` file generated in the run directory, where additional fields are populated for inspection.
-
-For example, suppose a HPXML file has a window defined as follows:
+For example, suppose a HPXML file has a refrigerator defined as follows:
 
 .. code-block:: XML
 
-  <Window>
-    <SystemIdentifier id='Window'/>
-    <Area>108.0</Area>
-    <Azimuth>0</Azimuth>
-    <UFactor>0.33</UFactor>
-    <SHGC>0.45</SHGC>
-    <AttachedToWall idref='Wall'/>
-  </Window>
+  <Refrigerator>
+    <SystemIdentifier id='Refrigerator1'/>
+  </Refrigerator>
 
-In the ``in.xml`` file, the window would have additional elements like so:
+Default values would be used for the refrigerator energy use, location, and schedule:
 
 .. code-block:: XML
 
-  <Window>
-    <SystemIdentifier id='Window'/>
-    <Area>108.0</Area>
-    <Azimuth>0</Azimuth>
-    <UFactor>0.33</UFactor>
-    <SHGC>0.45</SHGC>
-    <InteriorShading>
-      <SystemIdentifier id='WindowInteriorShading'/>
-      <SummerShadingCoefficient dataSource='software'>0.7</SummerShadingCoefficient>
-      <WinterShadingCoefficient dataSource='software'>0.85</WinterShadingCoefficient>
-    </InteriorShading>
-    <FractionOperable dataSource='software'>0.67</FractionOperable>
-    <AttachedToWall idref='Wall'/>
-  </Window>
+  <Refrigerator>
+    <SystemIdentifier id='Refrigerator1'/>
+    <Location dataSource='software'>living space</Location>
+    <RatedAnnualkWh dataSource='software'>691.0</RatedAnnualkWh>
+    <PrimaryIndicator dataSource='software'>true</PrimaryIndicator>
+    <extension>
+      <UsageMultiplier dataSource='software'>1.0</UsageMultiplier>
+      <WeekdayScheduleFractions dataSource='software'>0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041</WeekdayScheduleFractions>
+      <WeekendScheduleFractions dataSource='software'>0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041</WeekendScheduleFractions>
+      <MonthlyScheduleMultipliers dataSource='software'>0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837</MonthlyScheduleMultipliers>
+    </extension>
+  </Refrigerator>
 
-.. note::
+These defaults will be reflected in the EnergyPlus simulation results.
 
-  The OpenStudio-HPXML workflow generally treats missing elements differently than missing values.
-  For example, if there is a ``Window`` with no ``Overhangs`` element defined, the window will be interpreted as having no overhangs and modeled this way.
-  On the other hand, if there is a ``Window`` with no ``FractionOperable`` value defined, it is assumed that the operable property of the window is unknown and will be defaulted in the model according to :ref:`windowinputs`.
+ .. note::
+
+  The OpenStudio-HPXML workflow generally treats missing *elements* differently than missing *values*.
+  For example, if there is no ``Refrigerator`` element defined, the model will proceed without refrigerator energy use.
+  On the other hand, if there is a ``Refrigerator`` element but with no values defined (i.e., no ``Location`` or ``RatedAnnualkWh``), it is assumed that a refrigerator exists but its properties are unknown, so they will be defaulted in the model.
+
+See :ref:`hpxml_defaults` for information on how default values can be inspected.
 
 HPXML Software Info
 -------------------
