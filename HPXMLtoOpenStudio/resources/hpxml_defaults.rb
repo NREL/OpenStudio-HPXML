@@ -44,6 +44,8 @@ class HPXMLDefaults
     apply_windows(hpxml)
     apply_skylights(hpxml)
     apply_doors(hpxml)
+    apply_partition_wall_mass(hpxml)
+    apply_furniture_mass(hpxml)
     apply_hvac(hpxml, weather, convert_shared_systems)
     apply_hvac_control(hpxml)
     apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
@@ -725,6 +727,32 @@ class HPXMLDefaults
         door.azimuth = primary_azimuth
         door.azimuth_isdefaulted = true
       end
+    end
+  end
+
+  def self.apply_partition_wall_mass(hpxml)
+    if hpxml.partition_wall_mass.area_fraction.nil?
+      hpxml.partition_wall_mass.area_fraction = 1.0
+      hpxml.partition_wall_mass.area_fraction_isdefaulted = true
+    end
+    if hpxml.partition_wall_mass.interior_finish_type.nil?
+      hpxml.partition_wall_mass.interior_finish_type = HPXML::InteriorFinishGypsumBoard
+      hpxml.partition_wall_mass.interior_finish_type_isdefaulted = true
+    end
+    if hpxml.partition_wall_mass.interior_finish_thickness.nil?
+      hpxml.partition_wall_mass.interior_finish_thickness = 0.5
+      hpxml.partition_wall_mass.interior_finish_thickness_isdefaulted = true
+    end
+  end
+
+  def self.apply_furniture_mass(hpxml)
+    if hpxml.furniture_mass.area_fraction.nil?
+      hpxml.furniture_mass.area_fraction = 1.0 # Fixme: BEopt uses 0.4? Need to be further investigated
+      hpxml.furniture_mass.area_fraction_isdefaulted = true
+    end
+    if hpxml.furniture_mass.type.nil?
+      hpxml.furniture_mass.type = HPXML::FurnitureMassTypeLightWeight
+      hpxml.furniture_mass.type_isdefaulted = true
     end
   end
 

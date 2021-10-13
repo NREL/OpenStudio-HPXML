@@ -1284,15 +1284,20 @@ class OSModel
       Constructions.apply_partition_walls(runner, model, 'PartitionWallConstruction', mat_int_finish, partition_frac_of_cfa,
                                           basement_frac_of_cfa, @cond_bsmnt_surfaces, spaces[HPXML::LocationLivingSpace])
     else
-      mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
-      partition_frac_of_cfa = 1.0 # Ratio of exposed partition wall area (both sides) to conditioned floor area
+      mat_int_finish = Material.InteriorFinishMaterial(@hpxml.partition_wall_mass.interior_finish_type, @hpxml.partition_wall_mass.interior_finish_thickness)
+      partition_frac_of_cfa = @hpxml.partition_wall_mass.area_fraction # Ratio of exposed partition wall area (both sides) to conditioned floor area
       basement_frac_of_cfa = cfa_basement / @cfa
       Constructions.apply_partition_walls(runner, model, 'PartitionWallConstruction', mat_int_finish, partition_frac_of_cfa,
                                           basement_frac_of_cfa, @cond_bsmnt_surfaces, spaces[HPXML::LocationLivingSpace])
 
-      mass_lb_per_sqft = 8.0
-      density_lb_per_cuft = 40.0
-      mat = BaseMaterial.Wood
+      if @hpxml.furniture_mass.type == HPXML::FurnitureMassTypeLightWeight
+        mass_lb_per_sqft = 8.0
+        density_lb_per_cuft = 40.0
+      elsif @hpxml.furniture_mass.type == HPXML::FurnitureMassTypeHeavyWeight
+        mass_lb_per_sqft = 16.0
+        density_lb_per_cuft = 80.0
+      end
+      mat = BaseMaterial.Wood # Fixme: Should we keep this assumption or should we replace it with BEopt conductivity and specific heat?
       Constructions.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft, mat,
                                     basement_frac_of_cfa, @cond_bsmnt_surfaces, spaces[HPXML::LocationLivingSpace])
     end
