@@ -123,9 +123,9 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
   end
 
-  def test_ptac_cooling_only
+  def test_ptac
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-ptac-cooling-only.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-ptac.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
@@ -143,9 +143,9 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     assert_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
   end
 
-  def test_ptac_electric_resistance
+  def test_ptac_with_heating
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-ptac-electric-resistance.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-ptac-with-heating.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values

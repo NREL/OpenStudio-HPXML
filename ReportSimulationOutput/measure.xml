@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>8090325f-d670-473e-be85-42a57ea77560</version_id>
-  <version_modified>20210923T044749Z</version_modified>
+  <version_id>5f0a305f-430b-4513-b95b-aff64a7979e2</version_id>
+  <version_modified>20211007T223048Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -159,28 +159,6 @@
       <name>include_timeseries_component_loads</name>
       <display_name>Generate Timeseries Output: Component Loads</display_name>
       <description>Generates timeseries heating and cooling loads disaggregated by component type.</description>
-      <type>Boolean</type>
-      <units></units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
-      <choices>
-        <choice>
-          <value>true</value>
-          <display_name>true</display_name>
-        </choice>
-        <choice>
-          <value>false</value>
-          <display_name>false</display_name>
-        </choice>
-      </choices>
-      <min_value></min_value>
-      <max_value></max_value>
-    </argument>
-    <argument>
-      <name>include_timeseries_unmet_loads</name>
-      <display_name>Generate Timeseries Output: Unmet Loads</display_name>
-      <description>Generates timeseries unmet heating and cooling loads.</description>
       <type>Boolean</type>
       <units></units>
       <required>true</required>
@@ -1616,7 +1594,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>7402E7FD</checksum>
+      <checksum>F3E4ACB8</checksum>
     </file>
   </files>
 </measure>

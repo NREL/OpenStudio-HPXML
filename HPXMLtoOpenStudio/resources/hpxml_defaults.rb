@@ -1670,7 +1670,7 @@ class HPXMLDefaults
           refrigerator.location = HotWaterAndAppliances.get_default_extra_refrigerator_and_freezer_locations(hpxml)
           refrigerator.location_isdefaulted = true
         end
-        if refrigerator.adjusted_annual_kwh.nil? && refrigerator.rated_annual_kwh.nil?
+        if refrigerator.rated_annual_kwh.nil?
           default_values = HotWaterAndAppliances.get_extra_refrigerator_default_values
           refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
           refrigerator.rated_annual_kwh_isdefaulted = true
@@ -1692,7 +1692,7 @@ class HPXMLDefaults
           refrigerator.location = HPXML::LocationLivingSpace
           refrigerator.location_isdefaulted = true
         end
-        if refrigerator.adjusted_annual_kwh.nil? && refrigerator.rated_annual_kwh.nil?
+        if refrigerator.rated_annual_kwh.nil?
           default_values = HotWaterAndAppliances.get_refrigerator_default_values(nbeds)
           refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
           refrigerator.rated_annual_kwh_isdefaulted = true
@@ -1722,7 +1722,7 @@ class HPXMLDefaults
         freezer.location = HotWaterAndAppliances.get_default_extra_refrigerator_and_freezer_locations(hpxml)
         freezer.location_isdefaulted = true
       end
-      if freezer.adjusted_annual_kwh.nil? && freezer.rated_annual_kwh.nil?
+      if freezer.rated_annual_kwh.nil?
         default_values = HotWaterAndAppliances.get_freezer_default_values
         freezer.rated_annual_kwh = default_values[:rated_annual_kwh]
         freezer.rated_annual_kwh_isdefaulted = true
