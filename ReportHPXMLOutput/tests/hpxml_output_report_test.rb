@@ -73,7 +73,10 @@ class ReportHPXMLOutputTest < MiniTest::Test
       'Systems: Mechanical Ventilation Flow Rate (cfm)' => 0.0,
       'Primary Systems: Heating Capacity (kBtu/h)' => 36.0,
       'Primary Systems: Cooling Capacity (kBtu/h)' => 24.0,
-      'Primary Systems: Heat Pump Backup Capacity (kBtu/h)' => 0.0
+      'Primary Systems: Heat Pump Backup Capacity (kBtu/h)' => 0.0,
+      'Design Loads Heating: Total (MBtu)' => 32302.0,
+      'Design Loads Cooling Sensible: Total (MBtu)' => 17964.0,
+      'Design Loads Cooling Latent: Total (MBtu)' => 0.0,
     }
 
     actual_multipliers = {}
