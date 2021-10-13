@@ -101,6 +101,9 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
     cost_multipliers[BS::HeatPumpBackup] = BaseOutput.new
     cost_multipliers[BS::WaterHeater] = BaseOutput.new
     cost_multipliers[BS::FlowRateMechanicalVentilation] = BaseOutput.new
+    cost_multipliers[BS::HeatingTotal] = BaseOutput.new
+    cost_multipliers[BS::CoolingSensibleTotal] = BaseOutput.new
+    cost_multipliers[BS::CoolingLatentTotal] = BaseOutput.new
 
     # Cost multipliers
     cost_multipliers.each do |cost_mult_type, cost_mult|
@@ -274,6 +277,12 @@ class ReportHPXMLOutput < OpenStudio::Measure::ReportingMeasure
 
         cost_mult += ventilation_fan.flow_rate.to_f
       end
+    elsif cost_mult_type == 'Design Loads Heating: Total'
+      cost_mult += hpxml.hvac_plant.hdl_total
+    elsif cost_mult_type == 'Design Loads Cooling Sensible: Total'
+      cost_mult += hpxml.hvac_plant.cdl_sens_total
+    elsif cost_mult_type == 'Design Loads Cooling Latent: Total'
+      cost_mult += hpxml.hvac_plant.cdl_lat_total
     end
     return cost_mult
   end
