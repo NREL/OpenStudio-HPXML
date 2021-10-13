@@ -80,8 +80,8 @@
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Windows/h:Window) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Windows/Window</sch:assert> <!-- see [Window] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Skylights/h:Skylight) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Skylights/Skylight</sch:assert> <!-- see [Skylight] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Doors/h:Door) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Doors/Door</sch:assert> <!-- see [Door] -->
-      <sch:assert role='ERROR' test='count(h:Enclosure/h:extension/h:PartitionWallMass) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/extension/PartitionWallMass</sch:assert> <!-- see [PartitionWallMass] -->
-      <sch:assert role='ERROR' test='count(h:Enclosure/h:extension/h:FurnitureMass) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/extension/FurnitureMass</sch:assert> <!-- see [FurnitureMass] -->
+      <sch:assert role='ERROR' test='count(h:Enclosure/h:extension/h:PartitionWallMass) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Enclosure/extension/PartitionWallMass</sch:assert> <!-- see [PartitionWallMass] -->
+      <sch:assert role='ERROR' test='count(h:Enclosure/h:extension/h:FurnitureMass) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Enclosure/extension/FurnitureMass</sch:assert> <!-- see [FurnitureMass] -->
       <sch:assert role='ERROR' test='count(h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/HVAC/HVACPlant/HeatingSystem</sch:assert> <!-- see [HeatingSystem] -->
       <sch:assert role='ERROR' test='count(h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/HVAC/HVACPlant/CoolingSystem</sch:assert> <!-- see [CoolingSystem] -->
       <sch:assert role='ERROR' test='count(h:Systems/h:HVAC/h:HVACPlant/h:HeatPump) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/HVAC/HVACPlant/HeatPump</sch:assert> <!-- see [HeatPump] -->
