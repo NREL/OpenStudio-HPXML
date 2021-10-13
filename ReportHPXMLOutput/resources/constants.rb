@@ -42,11 +42,12 @@ class BS
   CoolingSensibleSlabs = 'Design Loads Cooling Sensible: Slabs'
   CoolingSensibleCeilings = 'Design Loads Cooling Sensible: Ceilings'
   CoolingSensibleInfilVent = 'Design Loads Cooling Sensible: Infiltration/Ventilation'
+  CoolingSensibleIntGains = 'Design Loads Cooling Sensible: Internal Gains'
 
   CoolingLatentTotal = 'Design Loads Cooling Latent: Total'
   CoolingLatentDucts = 'Design Loads Cooling Latent: Ducts'
   CoolingLatentInfilVent = 'Design Loads Cooling Latent: Infiltration/Ventilation'
-  CoolingLatentInternalGains = 'Design Loads Cooling Latent: Internal Gains'
+  CoolingLatentIntGains = 'Design Loads Cooling Latent: Internal Gains'
 
   def self.get_units(cost_mult_type)
     if cost_mult_type.include?('Area')
@@ -61,8 +62,8 @@ class BS
       return 'cfm'
     elsif cost_mult_type == 'Fixed'
       return '1'
-    elsif cost_mult_type.include?('Loads')
-      return 'MBtu'
+    elsif cost_mult_type.include?('Design Loads')
+      return 'Btu/h'
     end
 
     fail "Unable to assign units to: #{cost_mult_type}"
