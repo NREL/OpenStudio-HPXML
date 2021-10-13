@@ -398,10 +398,6 @@
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <UniformEnergyFactor>0.93</UniformEnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
-            <extension>
-              <TankModelType>mixed</TankModelType>
-              <OperatingMode>standard</OperatingMode>
-            </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>

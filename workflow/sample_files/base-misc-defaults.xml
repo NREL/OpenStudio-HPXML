@@ -317,7 +317,6 @@
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <extension>
               <TankModelType>mixed</TankModelType>
-              <OperatingMode>standard</OperatingMode>
             </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>

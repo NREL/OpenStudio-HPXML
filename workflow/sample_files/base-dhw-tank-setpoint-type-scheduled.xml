@@ -403,7 +403,6 @@
             <extension>
               <TankModelType>mixed</TankModelType>
               <SetpointScheduleFilepath>HPXMLtoOpenStudio/resources/schedule_files/tank/hourly_setpoint_schedule.csv</SetpointScheduleFilepath>
-              <OperatingMode>standard</OperatingMode>
             </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>

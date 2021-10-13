@@ -384,10 +384,6 @@
             <HotWaterTemperature>125.0</HotWaterTemperature>
             <UsesDesuperheater>true</UsesDesuperheater>
             <RelatedHVACSystem idref='CoolingSystem1'/>
-            <extension>
-              <TankModelType>mixed</TankModelType>
-              <OperatingMode>standard</OperatingMode>
-            </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>

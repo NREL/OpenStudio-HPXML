@@ -400,7 +400,6 @@
             <EnergyFactor>2.3</EnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
             <extension>
-              <TankModelType>mixed</TankModelType>
               <OperatingModeScheduleFilepath>HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_operating_mode_schedule.csv</OperatingModeScheduleFilepath>
             </extension>
           </WaterHeatingSystem>

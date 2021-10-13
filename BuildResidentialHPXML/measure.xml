@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>d2d74ed5-2d14-4890-8b46-681e86e12131</version_id>
-  <version_modified>20211013T194619Z</version_modified>
+  <version_id>671c2451-36e7-482a-8943-5f0cdeee140d</version_id>
+  <version_modified>20211013T231730Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -3442,7 +3442,7 @@
     <argument>
       <name>water_heater_tank_model_type</name>
       <display_name>Water Heater: Tank Type</display_name>
-      <description>TODO.</description>
+      <description>Type of tank model to use. The 'stratified' tank generally provide more accurate results, but may significantly increase run time. Applies only to storage water heater.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -3461,7 +3461,7 @@
     <argument>
       <name>water_heater_scheduled_setpoint_path</name>
       <display_name>Water Heater: Scheduled Setpoint Path</display_name>
-      <description>TODO.</description>
+      <description>Absolute (or relative) path of the csv file containing the setpoint schedule. Setpoint should be defined (in F) for every hour. Applies only to storage water heater and heat pump water heater.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -3469,7 +3469,7 @@
     <argument>
       <name>water_heater_scheduled_operating_mode_path</name>
       <display_name>Water Heater: Scheduled Operating Mode Path</display_name>
-      <description>TODO.</description>
+      <description>Absolute (or relative) path of the csv file containing the operating mode schedule. Valid values are 'standard' and 'hp_only' and values must be specified for every hour. Applies only to heat pump water heater.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -3477,7 +3477,7 @@
     <argument>
       <name>water_heater_operating_mode</name>
       <display_name>Water Heater: Operating Mode</display_name>
-      <description>TODO.</description>
+      <description>The water heater operating mode. The 'heat pump only' option only uses the heat pump, while 'standard' allows the backup electric resistance to come on in high demand situations. This is ignored if a scheduled operating mode type is selected. Applies only to heat pump water heater.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -5778,7 +5778,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>D3D2E3EF</checksum>
+      <checksum>7FEE8B3B</checksum>
     </file>
   </files>
 </measure>

@@ -400,7 +400,6 @@
             <EnergyFactor>2.3</EnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
             <extension>
-              <TankModelType>mixed</TankModelType>
               <OperatingMode>standard</OperatingMode>
             </extension>
           </WaterHeatingSystem>

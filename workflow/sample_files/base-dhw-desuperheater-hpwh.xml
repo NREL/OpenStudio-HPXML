@@ -402,7 +402,6 @@
             <UsesDesuperheater>true</UsesDesuperheater>
             <RelatedHVACSystem idref='CoolingSystem1'/>
             <extension>
-              <TankModelType>mixed</TankModelType>
               <OperatingMode>standard</OperatingMode>
             </extension>
           </WaterHeatingSystem>

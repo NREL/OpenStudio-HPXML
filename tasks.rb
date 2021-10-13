@@ -132,6 +132,7 @@ def create_hpxmls
     'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar-fraction.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-setpoint-type-scheduled.xml' => 'base-dhw-tank-heat-pump.xml',
+    'base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-operating-mode-type-scheduled.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-model-type-stratified.xml' => 'base.xml',
     'base-dhw-tank-oil.xml' => 'base-dhw-tank-gas.xml',
@@ -1540,6 +1541,8 @@ def set_measure_argument_values(hpxml_file, args)
     args['water_heater_efficiency'] = 0.99
   elsif ['base-dhw-tank-heat-pump-setpoint-type-scheduled.xml'].include? hpxml_file
     args['water_heater_scheduled_setpoint_path'] = 'HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_setpoint_schedule.csv'
+  elsif ['base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml'].include? hpxml_file
+    args['water_heater_operating_mode'] = HPXML::WaterHeaterOperatingModeHeatPumpOnly
   elsif ['base-dhw-tank-heat-pump-operating-mode-type-scheduled.xml'].include? hpxml_file
     args['water_heater_scheduled_operating_mode_path'] = 'HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_operating_mode_schedule.csv'
   elsif ['base-dhw-tank-model-type-stratified.xml'].include? hpxml_file

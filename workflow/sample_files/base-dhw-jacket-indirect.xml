@@ -358,10 +358,6 @@
             </WaterHeaterInsulation>
             <HotWaterTemperature>125.0</HotWaterTemperature>
             <RelatedHVACSystem idref='HeatingSystem1'/>
-            <extension>
-              <TankModelType>mixed</TankModelType>
-              <OperatingMode>standard</OperatingMode>
-            </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>

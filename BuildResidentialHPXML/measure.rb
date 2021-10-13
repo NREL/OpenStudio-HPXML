@@ -1777,18 +1777,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('water_heater_tank_model_type', water_heater_tank_model_type_choices, true)
     arg.setDisplayName('Water Heater: Tank Type')
-    arg.setDescription('TODO.')
+    arg.setDescription("Type of tank model to use. The '#{HPXML::WaterHeaterTankModelTypeStratified}' tank generally provide more accurate results, but may significantly increase run time. Applies only to #{HPXML::WaterHeaterTypeStorage}.")
     arg.setDefaultValue(HPXML::WaterHeaterTankModelTypeMixed)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('water_heater_scheduled_setpoint_path', false)
     arg.setDisplayName('Water Heater: Scheduled Setpoint Path')
-    arg.setDescription('TODO.')
+    arg.setDescription("Absolute (or relative) path of the csv file containing the setpoint schedule. Setpoint should be defined (in F) for every hour. Applies only to #{HPXML::WaterHeaterTypeStorage} and #{HPXML::WaterHeaterTypeHeatPump}.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('water_heater_scheduled_operating_mode_path', false)
     arg.setDisplayName('Water Heater: Scheduled Operating Mode Path')
-    arg.setDescription('TODO.')
+    arg.setDescription("Absolute (or relative) path of the csv file containing the operating mode schedule. Valid values are 'standard' and 'hp_only' and values must be specified for every hour. Applies only to #{HPXML::WaterHeaterTypeHeatPump}.")
     args << arg
 
     water_heater_operating_mode_choices = OpenStudio::StringVector.new
@@ -1797,7 +1797,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('water_heater_operating_mode', water_heater_operating_mode_choices, true)
     arg.setDisplayName('Water Heater: Operating Mode')
-    arg.setDescription('TODO.')
+    arg.setDescription("The water heater operating mode. The '#{HPXML::WaterHeaterOperatingModeHeatPumpOnly}' option only uses the heat pump, while '#{HPXML::WaterHeaterOperatingModeStandard}' allows the backup electric resistance to come on in high demand situations. This is ignored if a scheduled operating mode type is selected. Applies only to #{HPXML::WaterHeaterTypeHeatPump}.")
     arg.setDefaultValue(HPXML::WaterHeaterOperatingModeStandard)
     args << arg
 
@@ -4847,10 +4847,16 @@ class HPXMLFile
       setpoint_schedule_filepath = args[:water_heater_scheduled_setpoint_path].get
     end
 
+    if water_heater_type == HPXML::WaterHeaterTypeStorage
+      tank_model_type = args[:water_heater_tank_model_type]
+    end
+
     if args[:water_heater_scheduled_operating_mode_path].is_initialized
       operating_mode_schedule_filepath = args[:water_heater_scheduled_operating_mode_path].get
     else
-      operating_mode = args[:water_heater_operating_mode]
+      if water_heater_type == HPXML::WaterHeaterTypeHeatPump
+        operating_mode = args[:water_heater_operating_mode]
+      end
     end
 
     hpxml.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml.water_heating_systems.size + 1}",
@@ -4871,7 +4877,7 @@ class HPXMLFile
                                     heating_capacity: heating_capacity,
                                     is_shared_system: is_shared_system,
                                     number_of_units_served: number_of_units_served,
-                                    tank_model_type: args[:water_heater_tank_model_type],
+                                    tank_model_type: tank_model_type,
                                     setpoint_schedule_filepath: setpoint_schedule_filepath,
                                     operating_mode: operating_mode,
                                     operating_mode_schedule_filepath: operating_mode_schedule_filepath)

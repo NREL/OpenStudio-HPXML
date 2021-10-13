@@ -404,7 +404,6 @@
             <RelatedHVACSystem idref='HeatPump1'/>
             <extension>
               <TankModelType>mixed</TankModelType>
-              <OperatingMode>standard</OperatingMode>
             </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>
