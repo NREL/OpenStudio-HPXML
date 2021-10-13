@@ -19,6 +19,35 @@ class BS
   WaterHeater = 'Systems: Water Heater Tank Volume'
   FlowRateMechanicalVentilation = 'Systems: Mechanical Ventilation Flow Rate'
 
+  HeatingTotal = 'Design Loads Heating: Total'
+  HeatingDucts = 'Design Loads Heating: Ducts'
+  HeatingWindows = 'Design Loads Heating: Windows'
+  HeatingSkylights = 'Design Loads Heating: Skylights'
+  HeatingDoors = 'Design Loads Heating: Doors'
+  HeatingWalls = 'Design Loads Heating: Walls'
+  HeatingRoofs = 'Design Loads Heating: Roofs'
+  HeatingFloors = 'Design Loads Heating: Floors'
+  HeatingSlabs = 'Design Loads Heating: Slabs'
+  HeatingCeilings = 'Design Loads Heating: Ceilings'
+  HeatingInfilVent = 'Design Loads Heating: Infiltration/Ventilation'
+
+  CoolingSensibleTotal = 'Design Loads Cooling Sensible: Total'
+  CoolingSensibleDucts = 'Design Loads Cooling Sensible: Ducts'
+  CoolingSensibleWindows = 'Design Loads Cooling Sensible: Windows'
+  CoolingSensibleSkylights = 'Design Loads Cooling Sensible: Skylights'
+  CoolingSensibleDoors = 'Design Loads Cooling Sensible: Doors'
+  CoolingSensibleWalls = 'Design Loads Cooling Sensible: Walls'
+  CoolingSensibleRoofs = 'Design Loads Cooling Sensible: Roofs'
+  CoolingSensibleFloors = 'Design Loads Cooling Sensible: Floors'
+  CoolingSensibleSlabs = 'Design Loads Cooling Sensible: Slabs'
+  CoolingSensibleCeilings = 'Design Loads Cooling Sensible: Ceilings'
+  CoolingSensibleInfilVent = 'Design Loads Cooling Sensible: Infiltration/Ventilation'
+
+  CoolingLatentTotal = 'Design Loads Cooling Latent: Total'
+  CoolingLatentDucts = 'Design Loads Cooling Latent: Ducts'
+  CoolingLatentInfilVent = 'Design Loads Cooling Latent: Infiltration/Ventilation'
+  CoolingLatentInternalGains = 'Design Loads Cooling Latent: Internal Gains'
+
   def self.get_units(cost_mult_type)
     if cost_mult_type.include?('Area')
       return 'ft^2'
@@ -32,6 +61,8 @@ class BS
       return 'cfm'
     elsif cost_mult_type == 'Fixed'
       return '1'
+    elsif cost_mult_type.include?('Loads')
+      return 'MBtu'
     end
 
     fail "Unable to assign units to: #{cost_mult_type}"
