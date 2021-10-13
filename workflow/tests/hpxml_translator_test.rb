@@ -26,6 +26,8 @@ class HPXMLTest < MiniTest::Test
     xmls = []
     sample_files_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files'))
     Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
+      next if xml.include? 'base-multiple-buildings.xml' # This is tested in test_multiple_building_ids
+
       xmls << File.absolute_path(xml)
     end
 
@@ -80,6 +82,8 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? json_output_path)
     json_output_path = File.join(File.dirname(xml), 'run', 'results_timeseries.json')
     assert(File.exist? json_output_path)
+    json_output_path = File.join(File.dirname(xml), 'run', 'results_hpxml.json')
+    assert(File.exist? json_output_path)
 
     # Check for debug files
     osm_path = File.join(File.dirname(xml), 'run', 'in.osm')
@@ -106,6 +110,8 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? sql_path)
     csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
     assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_hpxml.csv')
+    assert(File.exist? csv_output_path)
   end
 
   def test_run_simulation_idf_input
@@ -125,6 +131,8 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? sql_path)
     csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
     assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_hpxml.csv')
+    assert(File.exist? csv_output_path)
   end
 
   def test_run_simulation_faster_performance
@@ -139,6 +147,8 @@ class HPXMLTest < MiniTest::Test
     sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
     assert(File.exist? sql_path)
     csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_hpxml.csv')
     assert(File.exist? csv_output_path)
 
     # Check component loads don't exist
@@ -183,6 +193,8 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? sql_path)
     csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv')
     assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_hpxml.csv')
+    assert(File.exist? csv_output_path)
 
     # Check for debug files
     osm_path = File.join(File.dirname(osw_path_test), 'run', 'in.osm')
@@ -226,6 +238,8 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? sql_path)
     csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv')
     assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_hpxml.csv')
+    assert(File.exist? csv_output_path)
 
     # Check for debug files
     osm_path = File.join(File.dirname(osw_path_test), 'run', 'in.osm')
@@ -239,199 +253,86 @@ class HPXMLTest < MiniTest::Test
     File.delete(xml_path_test)
   end
 
+  def test_template_osw_with_build_hpxml_and_schedule
+    # Check that simulation works using template2.osw
+    require 'json'
+
+    os_cli = OpenStudio.getOpenStudioCLI
+    osw_path = File.join(File.dirname(__FILE__), '..', 'template-build-hpxml-and-stocastic-schedules.osw')
+
+    # Create derivative OSW for testing
+    osw_path_test = osw_path.gsub('.osw', '_test.osw')
+    FileUtils.cp(osw_path, osw_path_test)
+
+    # Turn on debug mode
+    json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
+    json[:steps][2][:arguments][:debug] = true
+
+    if Dir.exist? File.join(File.dirname(__FILE__), '..', '..', 'project')
+      # CI checks out the repo as "project", so update dir name
+      json[:steps][1][:measure_dir_name] = 'project'
+    end
+
+    File.open(osw_path_test, 'w') do |f|
+      f.write(JSON.pretty_generate(json))
+    end
+
+    command = "#{os_cli} run -w #{osw_path_test}"
+    system(command, err: File::NULL)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(osw_path_test), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_hpxml.csv')
+    assert(File.exist? csv_output_path)
+
+    # Check for debug files
+    osm_path = File.join(File.dirname(osw_path_test), 'run', 'in.osm')
+    assert(File.exist? osm_path)
+    hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
+    assert(File.exist? hpxml_defaults_path)
+
+    # Cleanup
+    File.delete(osw_path_test)
+    xml_path_test = File.join(File.dirname(__FILE__), '..', 'built.xml')
+    File.delete(xml_path_test)
+    xml_path_test = File.join(File.dirname(__FILE__), '..', 'built-stochastic-schedules.xml')
+    File.delete(xml_path_test)
+  end
+
+  def test_multiple_building_ids
+    os_cli = OpenStudio.getOpenStudioCLI
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base-multiple-buildings.xml')
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    run_log = File.join(File.dirname(xml), 'run', 'run.log')
+
+    # Check successful simulation when providing correct building ID
+    command = "#{os_cli} #{rb_path} -x #{xml} --building-id MyBuilding"
+    system(command, err: File::NULL)
+    assert_equal(true, File.exist?(csv_output_path))
+
+    # Check unsuccessful simulation when providing incorrect building ID
+    command = "#{os_cli} #{rb_path} -x #{xml} --building-id MyFoo"
+    system(command, err: File::NULL)
+    assert_equal(false, File.exist?(csv_output_path))
+    assert(File.readlines(run_log).select { |l| l.include? "Could not find Building element with ID 'MyFoo'." }.size > 0)
+
+    # Check unsuccessful simulation when not providing building ID
+    command = "#{os_cli} #{rb_path} -x #{xml}"
+    system(command, err: File::NULL)
+    assert_equal(false, File.exist?(csv_output_path))
+    assert(File.readlines(run_log).select { |l| l.include? 'Multiple Building elements defined in HPXML file; Building ID argument must be provided.' }.size > 0)
+  end
+
   def test_weather_cache
     cache_orig = File.join(@this_dir, '..', '..', 'weather', 'USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv')
     cache_bak = cache_orig + '.bak'
     File.rename(cache_orig, cache_bak)
     _run_xml(File.absolute_path(File.join(@this_dir, '..', 'sample_files', 'base.xml')))
     File.rename(cache_bak, cache_orig) # Put original file back
-  end
-
-  def test_invalid
-    sample_files_dir = File.join(@this_dir, '..', 'sample_files')
-
-    expected_error_msgs = { 'boiler-invalid-afue.xml' => ['Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1'],
-                            'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
-                            'clothes-dryer-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
-                            'clothes-washer-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
-                            'cooking-range-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
-                            'dehumidifier-fraction-served.xml' => ['Expected FractionDehumidificationLoadServed to sum to <= 1, but calculated sum is 1.1.'],
-                            'dehumidifier-setpoints.xml' => ['All dehumidifiers must have the same setpoint but multiple setpoints were specified.'],
-                            'dishwasher-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
-                            'dhw-frac-load-served.xml' => ['Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15.'],
-                            'dhw-invalid-ef-tank.xml' => ['Expected EnergyFactor to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="storage water heater"], id: "WaterHeater"]'],
-                            'dhw-invalid-uef-tank-heat-pump.xml' => ['Expected UniformEnergyFactor to be greater than 1 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="heat pump water heater"], id: "WaterHeater"]'],
-                            'duct-leakage-cfm25.xml' => ['Expected Value to be greater than or equal to 0 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement/DuctLeakage[Units="CFM25"], id: "HVACDistribution"]'],
-                            'duct-leakage-percent.xml' => ['Expected Value to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement/DuctLeakage[Units="Percent"], id: "HVACDistribution"]'],
-                            'duct-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
-                            'duct-location-unconditioned-space.xml' => ["Expected DuctLocation to be 'living space' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'attic - vented' or 'attic - unvented' or 'garage' or 'exterior wall' or 'under slab' or 'roof deck' or 'outside' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts, id: \"HVACDistribution\"]"],
-                            'duplicate-id.xml' => ["Duplicate SystemIdentifier IDs detected for 'WindowNorth'."],
-                            'enclosure-attic-missing-roof.xml' => ['There must be at least one roof adjacent to "attic - unvented". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="attic - unvented" or ExteriorAdjacentTo="attic - unvented"]]]'],
-                            'enclosure-basement-missing-exterior-foundation-wall.xml' => ['There must be at least one exterior foundation wall adjacent to "basement - unconditioned". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="basement - unconditioned" or ExteriorAdjacentTo="basement - unconditioned"]]]'],
-                            'enclosure-basement-missing-slab.xml' => ['There must be at least one slab adjacent to "basement - unconditioned". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="basement - unconditioned" or ExteriorAdjacentTo="basement - unconditioned"]]]'],
-                            'enclosure-floor-area-exceeds-cfa.xml' => ['Expected ConditionedFloorArea to be greater than or equal to the sum of conditioned slab/floor areas. [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]'],
-                            'enclosure-floor-area-exceeds-cfa2.xml' => ['Expected ConditionedFloorArea to be greater than or equal to the sum of conditioned slab/floor areas. [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]'],
-                            'enclosure-garage-missing-exterior-wall.xml' => ['There must be at least one exterior wall/foundation wall adjacent to "garage". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="garage" or ExteriorAdjacentTo="garage"]]]'],
-                            'enclosure-garage-missing-roof-ceiling.xml' => ['There must be at least one roof/ceiling adjacent to "garage". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="garage" or ExteriorAdjacentTo="garage"]]]'],
-                            'enclosure-garage-missing-slab.xml' => ['There must be at least one slab adjacent to "garage". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="garage" or ExteriorAdjacentTo="garage"]]]'],
-                            'enclosure-living-missing-ceiling-roof.xml' => ['There must be at least one ceiling/roof adjacent to conditioned space. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="living space"]]]',
-                                                                            'There must be at least one floor adjacent to "attic - unvented". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="attic - unvented" or ExteriorAdjacentTo="attic - unvented"]]]'],
-                            'enclosure-living-missing-exterior-wall.xml' => ['There must be at least one exterior wall adjacent to conditioned space. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="living space"]]]'],
-                            'enclosure-living-missing-floor-slab.xml' => ['There must be at least one floor/slab adjacent to conditioned space. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="living space"]]]'],
-                            'frac-sensible-fuel-load.xml' => ['Expected extension/FracSensible to be greater than or equal to 0 [context: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill" or FuelLoadType="lighting" or FuelLoadType="fireplace"], id: "FuelLoadMisc"]'],
-                            'frac-sensible-plug-load.xml' => ['Expected extension/FracSensible to be greater than or equal to 0 [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoadMisc"]'],
-                            'frac-total-fuel-load.xml' => ['Expected sum of extension/FracSensible and extension/FracLatent to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill" or FuelLoadType="lighting" or FuelLoadType="fireplace"], id: "FuelLoadMisc"]'],
-                            'frac-total-plug-load.xml' => ['Expected sum of extension/FracSensible and extension/FracLatent to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoadMisc"]'],
-                            'furnace-invalid-afue.xml' => ['Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1'],
-                            'generator-number-of-bedrooms-served.xml' => ['Expected NumberofBedroomsServed to be greater than ../../../../BuildingSummary/BuildingConstruction/NumberofBedrooms [context: /HPXML/Building/BuildingDetails/Systems/extension/Generators/Generator[IsSharedSystem="true"], id: "Generator"]'],
-                            'generator-output-greater-than-consumption.xml' => ['Expected AnnualConsumptionkBtu to be greater than AnnualOutputkWh*3412 [context: /HPXML/Building/BuildingDetails/Systems/extension/Generators/Generator, id: "Generator"]'],
-                            'heat-pump-mixed-fixed-and-autosize-capacities.xml' => ['Expected 0 or 2 element(s) for xpath: HeatingCapacity | BackupHeatingCapacity [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel], id: "HeatPump"]'],
-                            'hvac-distribution-multiple-attached-cooling.xml' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution2'."],
-                            'hvac-distribution-multiple-attached-heating.xml' => ["Multiple heating systems found attached to distribution system 'HVACDistribution'."],
-                            'hvac-distribution-return-duct-leakage-missing.xml' => ['Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"] [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution[AirDistributionType[text()="regular velocity" or text()="gravity"]], id: "HVACDistribution"]'],
-                            'hvac-dse-multiple-attached-cooling.xml' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution'."],
-                            'hvac-dse-multiple-attached-heating.xml' => ["Multiple heating systems found attached to distribution system 'HVACDistribution'."],
-                            'hvac-frac-load-served.xml' => ['Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is 1.2.',
-                                                            'Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1.'],
-                            'hvac-inconsistent-fan-powers.xml' => ["Fan powers for heating system 'HeatingSystem' and cooling system 'CoolingSystem' are attached to a single distribution system and therefore must be the same."],
-                            'hvac-invalid-distribution-system-type.xml' => ["Incorrect HVAC distribution system type for HVAC type: 'Furnace'. Should be one of: ["],
-                            'hvac-seasons-less-than-a-year.xml' => ['HeatingSeason and CoolingSeason, when combined, must span the entire year.'],
-                            'hvac-shared-negative-seer-eq.xml' => ["Negative SEER equivalent calculated for cooling system 'CoolingSystem', double check inputs."],
-                            'invalid-assembly-effective-rvalue.xml' => ['Expected AssemblyEffectiveRValue to be greater than 0 [context: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation, id: "WallInsulation"]'],
-                            'invalid-datatype-boolean.xml' => ["Cannot convert 'FOOBAR' to boolean for Roof/RadiantBarrier."],
-                            'invalid-datatype-integer.xml' => ["Cannot convert '2.5' to integer for BuildingConstruction/NumberofBedrooms."],
-                            'invalid-datatype-float.xml' => ["Cannot convert 'FOOBAR' to float for Slab/extension/CarpetFraction."],
-                            'invalid-daylight-saving.xml' => ['Daylight Saving End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
-                            'invalid-distribution-cfa-served.xml' => ['The total conditioned floor area served by the HVAC distribution system(s) for heating is larger than the conditioned floor area of the building.',
-                                                                      'The total conditioned floor area served by the HVAC distribution system(s) for cooling is larger than the conditioned floor area of the building.'],
-                            'invalid-duct-area-fractions.xml' => ['Expected FractionDuctArea for Ducts (of type supply) to sum to 1, but calculated sum is 0.8.',
-                                                                  'Expected FractionDuctArea for Ducts (of type return) to sum to 1, but calculated sum is 0.8.'],
-                            'invalid-epw-filepath.xml' => ["foo.epw' could not be found."],
-                            'invalid-facility-type-equipment.xml' => ['Expected 1 element(s) for xpath: ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"], id: "SharedWaterHeater"]',
-                                                                      'Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher[IsSharedAppliance="true"], id: "SharedClothesWasher"]',
-                                                                      'Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer[IsSharedAppliance="true"], id: "SharedClothesDryer"]',
-                                                                      'Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher[IsSharedAppliance="true"], id: "SharedDishwasher"]'],
-                            'invalid-facility-type-surfaces.xml' => ["The building is of type 'single-family detached' but the surface 'RimJoistOther' is adjacent to Attached/Multifamily space 'other housing unit'.",
-                                                                     "The building is of type 'single-family detached' but the surface 'WallOther' is adjacent to Attached/Multifamily space 'other housing unit'.",
-                                                                     "The building is of type 'single-family detached' but the surface 'FoundationWallOther' is adjacent to Attached/Multifamily space 'other housing unit'.",
-                                                                     "The building is of type 'single-family detached' but the surface 'FloorAboveOther' is adjacent to Attached/Multifamily space 'other housing unit'.",
-                                                                     "The building is of type 'single-family detached' but the surface 'CeilingBelowOther' is adjacent to Attached/Multifamily space 'other housing unit'."],
-                            'invalid-foundation-wall-properties.xml' => ['Expected DepthBelowGrade to be less than or equal to Height [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall, id: "FoundationWall"]',
-                                                                         'Expected extension/DistanceToBottomOfInsulation to be greater than or equal to extension/DistanceToTopOfInsulation [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer[InstallationType="continuous - exterior" or InstallationType="continuous - interior"], id: "FoundationWallInsulation"]',
-                                                                         'Expected extension/DistanceToBottomOfInsulation to be less than or equal to ../../Height [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer[InstallationType="continuous - exterior" or InstallationType="continuous - interior"], id: "FoundationWallInsulation"]'],
-                            'invalid-id.xml' => ["Empty SystemIdentifier ID ('') detected for skylights."],
-                            'invalid-id2.xml' => ['Expected id attribute for SystemIdentifier [context: /HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight]'],
-                            'invalid-infiltration-volume.xml' => ['Expected InfiltrationVolume to be greater than or equal to ../../../BuildingSummary/BuildingConstruction/ConditionedBuildingVolume [context: /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure[text()="ACH" or text()="CFM"]], id: "InfiltrationMeasurement"]'],
-                            'invalid-input-parameters.xml' => ["Expected Transaction to be 'create' or 'update' [context: /HPXML/XMLTransactionHeaderInformation]",
-                                                               "Expected SiteType to be 'rural' or 'suburban' or 'urban' [context: /HPXML/Building/BuildingDetails/BuildingSummary/Site]",
-                                                               "Expected Year to be '2012' or '2009' or '2006' or '2003' [context: /HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC]",
-                                                               'Expected Azimuth to be less than 360 [context: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof, id: "Roof"]',
-                                                               'Expected RadiantBarrierGrade to be less than or equal to 3 [context: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof, id: "Roof"]',
-                                                               'Expected EnergyFactor to be less than or equal to 5 [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher, id: "Dishwasher"]'],
-                            'invalid-insulation-top.xml' => ['Expected extension/DistanceToTopOfInsulation to be greater than or equal to 0 [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer[InstallationType="continuous - exterior" or InstallationType="continuous - interior"], id: "FoundationWallInsulation"]'],
-                            'invalid-neighbor-shading-azimuth.xml' => ['A neighbor building has an azimuth (145) not equal to the azimuth of any wall.'],
-                            'invalid-number-of-bedrooms-served.xml' => ['Expected extension/NumberofBedroomsServed to be greater than ../../../BuildingSummary/BuildingConstruction/NumberofBedrooms [context: /HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem[IsSharedSystem="true"], id: "PVSystem"]'],
-                            'invalid-number-of-conditioned-floors.xml' => ['Expected NumberofConditionedFloors to be greater than or equal to NumberofConditionedFloorsAboveGrade [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]'],
-                            'invalid-number-of-units-served.xml' => ['Expected NumberofUnitsServed to be greater than 1 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"], id: "SharedWaterHeater"]'],
-                            'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
-                            'invalid-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem_bad' not found for water heating system 'WaterHeater'."],
-                            'invalid-schema-version.xml' => ['HPXML version 3.0 is required.'],
-                            'invalid-shared-vent-in-unit-flowrate.xml' => ['Expected RatedFlowRate to be greater than extension/InUnitFlowRate [context: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"], id: "SharedSupplyFan"]'],
-                            'invalid-timestep.xml' => ['Timestep (45) must be one of: 60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1.'],
-                            'invalid-runperiod.xml' => ['Run Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
-                            'invalid-window-height.xml' => ['Expected DistanceToBottomOfWindow to be greater than DistanceToTopOfWindow [context: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs, id: "WindowEast"]'],
-                            'lighting-fractions.xml' => ['Sum of fractions of interior lighting (1.15) is greater than 1.'],
-                            'missing-elements.xml' => ['Expected 1 element(s) for xpath: NumberofConditionedFloors [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]',
-                                                       'Expected 1 element(s) for xpath: ConditionedFloorArea [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]'],
-                            'missing-duct-area.xml' => ['Expected 1 or more element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctLocation], id: "HVACDistribution"]',
-                                                        'Expected 1 or more element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctLocation], id: "HVACDistribution2"]',
-                                                        'Expected 1 or more element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctLocation], id: "HVACDistribution5"]',
-                                                        'Expected 1 or more element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctLocation], id: "HVACDistribution6"]'],
-                            'missing-duct-location.xml' => ['Expected 0 element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctLocation)], id: "HVACDistribution"]',
-                                                            'Expected 0 element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctLocation)], id: "HVACDistribution2"]',
-                                                            'Expected 0 element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctLocation)], id: "HVACDistribution5"]',
-                                                            'Expected 0 element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctLocation)], id: "HVACDistribution6"]'],
-                            'multifamily-reference-appliance.xml' => ["The building is of type 'single-family detached' but"],
-                            'multifamily-reference-duct.xml' => ["The building is of type 'single-family detached' but"],
-                            'multifamily-reference-surface.xml' => ["The building is of type 'single-family detached' but"],
-                            'multifamily-reference-water-heater.xml' => ["The building is of type 'single-family detached' but"],
-                            'multiple-buildings-without-building-id.xml' => ['Multiple Building elements defined in HPXML file; Building ID argument must be provided.'],
-                            'multiple-buildings-wrong-building-id.xml' => ["Could not find Building element with ID 'MyFoo'."],
-                            'multiple-shared-cooling-systems.xml' => ['More than one shared cooling system found.'],
-                            'multiple-shared-heating-systems.xml' => ['More than one shared heating system found.'],
-                            'net-area-negative-wall.xml' => ["Calculated a negative net surface area for surface 'Wall'."],
-                            'net-area-negative-roof.xml' => ["Calculated a negative net surface area for surface 'Roof'."],
-                            'orphaned-hvac-distribution.xml' => ["Distribution system 'HVACDistribution' found but no HVAC system attached to it."],
-                            'refrigerator-location.xml' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
-                            'refrigerators-multiple-primary.xml' => ['More than one refrigerator designated as the primary.'],
-                            'refrigerators-no-primary.xml' => ['Could not find a primary refrigerator.'],
-                            'repeated-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem' is attached to multiple water heating systems."],
-                            'repeated-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem' is attached to multiple water heating systems."],
-                            'schedule-detailed-bad-values-max-not-one.xml' => ["Schedule max value for column 'plug_loads_vehicle' must be less than or equal to 1. [context: HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-max-not-one.csv]"],
-                            'schedule-detailed-bad-values-negative.xml' => ["Schedule min value for column 'plug_loads_well_pump' must be non-negative. [context: HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-negative.csv]"],
-                            'schedule-detailed-bad-values-non-numeric.xml' => ["Schedule value must be numeric for column 'hot_water_fixtures'. [context: HPXMLtoOpenStudio/resources/schedule_files/invalid-bad-values-non-numeric.csv]"],
-                            'schedule-detailed-wrong-columns.xml' => ["Schedule column name 'lighting' is invalid. [context: HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-columns.csv]"],
-                            'schedule-detailed-wrong-filename.xml' => ["Schedules file path 'HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-filename.csv' does not exist."],
-                            'schedule-detailed-wrong-rows.xml' => ["Schedule has invalid number of rows (8759) for column 'refrigerator'. Must be one of: 8760, 17520, 26280, 35040, 43800, 52560, 87600, 105120, 131400, 175200, 262800, 525600. [context: HPXMLtoOpenStudio/resources/schedule_files/invalid-wrong-rows.csv]"],
-                            'schedule-extra-inputs.xml' => ['Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy]',
-                                                            'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture"]',
-                                                            'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture2"]',
-                                                            'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture"]',
-                                                            'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture2"]',
-                                                            'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture"]',
-                                                            'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture2"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher, id: "ClothesWasher"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher, id: "ClothesWasher"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher, id: "ClothesWasher"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer, id: "ClothesDryer"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer, id: "ClothesDryer"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer, id: "ClothesDryer"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher, id: "Dishwasher"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher, id: "Dishwasher"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher, id: "Dishwasher"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Refrigerator, id: "Refrigerator"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Refrigerator, id: "Refrigerator"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Refrigerator, id: "Refrigerator"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/CookingRange, id: "Range"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/CookingRange, id: "Range"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/CookingRange, id: "Range"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/InteriorWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/InteriorWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/InteriorMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/GarageWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/GarageWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/GarageMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/ExteriorWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/ExteriorWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/ExteriorMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoadMisc"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoadMisc2"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoadMisc"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoadMisc2"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoadMisc"]',
-                                                            'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoadMisc2"]'],
-                            'solar-fraction-one.xml' => ['Expected SolarFraction to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem, id: "SolarThermalSystem"]'],
-                            'solar-thermal-system-with-combi-tankless.xml' => ["Water heating system 'WaterHeater' connected to solar thermal system 'SolarThermalSystem' cannot be a space-heating boiler."],
-                            'solar-thermal-system-with-desuperheater.xml' => ["Water heating system 'WaterHeater' connected to solar thermal system 'SolarThermalSystem' cannot be attached to a desuperheater."],
-                            'solar-thermal-system-with-dhw-indirect.xml' => ["Water heating system 'WaterHeater' connected to solar thermal system 'SolarThermalSystem' cannot be a space-heating boiler."],
-                            'unattached-cfis.xml' => ["Attached HVAC distribution system 'foobar' not found for ventilation fan 'MechanicalVentilation'."],
-                            'unattached-door.xml' => ["Attached wall 'foobar' not found for door 'DoorNorth'."],
-                            'unattached-hvac-distribution.xml' => ["Attached HVAC distribution system 'foobar' not found for HVAC system 'HeatingSystem'."],
-                            'unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'SkylightNorth'."],
-                            'unattached-solar-thermal-system.xml' => ["Attached water heating system 'foobar' not found for solar thermal system 'SolarThermalSystem'."],
-                            'unattached-shared-clothes-washer-water-heater.xml' => ["Attached water heating system 'foobar' not found for clothes washer"],
-                            'unattached-shared-dishwasher-water-heater.xml' => ["Attached water heating system 'foobar' not found for dishwasher"],
-                            'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
-                            'water-heater-location.xml' => ['A location is specified as "crawlspace - vented" but no surfaces were found adjacent to this space type.'],
-                            'water-heater-location-other.xml' => ["Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem, id: \"WaterHeater\"]"] }
-
-    # Test simulations
-    xmls = Dir["#{sample_files_dir}/invalid_files/*.xml"].sort
-    Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
-      _run_xml(File.absolute_path(xml), Parallel.worker_number, true, expected_error_msgs[File.basename(xml)])
-    end
   end
 
   def test_release_zips
@@ -448,6 +349,7 @@ class HPXMLTest < MiniTest::Test
       command = "#{OpenStudio.getOpenStudioCLI} OpenStudio-HPXML/workflow/run_simulation.rb -x OpenStudio-HPXML/workflow/sample_files/base.xml"
       system(command)
       assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_annual.csv')
+      assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_hpxml.csv')
       File.delete(zip)
       rm_path('OpenStudio-HPXML')
     end
@@ -455,20 +357,14 @@ class HPXMLTest < MiniTest::Test
 
   private
 
-  def _run_xml(xml, worker_num = nil, expect_error = false, expect_error_msgs = nil)
+  def _run_xml(xml, worker_num = nil)
     print "Testing #{File.basename(xml)}...\n"
     rundir = File.join(@this_dir, "test#{worker_num}")
 
     # Uses 'monthly' to verify timeseries results match annual results via error-checking
-    # inside the SimulationOutputReport measure.
+    # inside the ReportSimulationOutput measure.
     cli_path = OpenStudio.getOpenStudioCLI
-    building_id = ''
-    if xml.include? 'base-multiple-buildings.xml'
-      building_id = '--building-id MyBuilding'
-    elsif xml.include? 'multiple-buildings-wrong-building-id.xml'
-      building_id = '--building-id MyFoo'
-    end
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} --add-component-loads -o #{rundir} --debug --monthly ALL #{building_id}"
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} --add-component-loads -o #{rundir} --debug --monthly ALL"
     workflow_start = Time.now
     success = system(command)
     workflow_time = Time.now - workflow_start
@@ -476,40 +372,15 @@ class HPXMLTest < MiniTest::Test
     rundir = File.join(rundir, 'run')
 
     # Check results
-    if expect_error
-      assert_equal(false, success)
-
-      if expect_error_msgs.nil?
-        flunk "No error message defined for #{File.basename(xml)}."
-      else
-        run_log = File.readlines(File.join(rundir, 'run.log')).map(&:strip)
-        n_errors = 0
-        expect_error_msgs.each_with_index do |error_msg, i|
-          found_error_msg = false
-          run_log.each do |run_line|
-            next unless run_line.start_with? 'Error: '
-
-            n_errors += 1 if i == 0
-
-            next unless run_line.include? error_msg
-
-            found_error_msg = true
-          end
-          assert(found_error_msg)
-        end
-        assert_equal(n_errors, expect_error_msgs.size)
-      end
-
-      return
-    end
-
     assert_equal(true, success)
 
     # Check for output files
     annual_csv_path = File.join(rundir, 'results_annual.csv')
     timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
+    hpxml_csv_path = File.join(rundir, 'results_hpxml.csv')
     assert(File.exist? annual_csv_path)
     assert(File.exist? timeseries_csv_path)
+    assert(File.exist? hpxml_csv_path)
 
     # Get results
     results = _get_simulation_results(annual_csv_path, xml)
@@ -544,8 +415,8 @@ class HPXMLTest < MiniTest::Test
     if not xml.include? 'ASHRAE_Standard_140'
       sum_component_htg_loads = results.select { |k, v| k.start_with? 'Component Load: Heating:' }.map { |k, v| v }.sum(0.0)
       sum_component_clg_loads = results.select { |k, v| k.start_with? 'Component Load: Cooling:' }.map { |k, v| v }.sum(0.0)
-      residual_htg_load = results['Load: Heating (MBtu)'] - sum_component_htg_loads
-      residual_clg_load = results['Load: Cooling (MBtu)'] - sum_component_clg_loads
+      residual_htg_load = results['Load: Heating: Delivered (MBtu)'] - sum_component_htg_loads
+      residual_clg_load = results['Load: Cooling: Delivered (MBtu)'] - sum_component_clg_loads
       assert_operator(residual_htg_load.abs, :<, 0.5)
       assert_operator(residual_clg_load.abs, :<, 0.5)
     end
@@ -709,6 +580,7 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'The Standard Ratings is calculated for'
       next if err_line.include?('WetBulb not converged after') && err_line.include?('iterations(PsyTwbFnTdbWPb)')
       next if err_line.include? 'Inside surface heat balance did not converge with Max Temp Difference'
+      next if err_line.include? 'Inside surface heat balance convergence problem continues'
       next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too low) for fluid')
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too high) for fluid')
@@ -759,11 +631,8 @@ class HPXMLTest < MiniTest::Test
       if hpxml.solar_thermal_systems.size > 0
         next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
       end
-      if hpxml_path.include?('base-schedules-detailed') || hpxml_path.include?('setpoint-type-scheduled')
+      if hpxml_path.include?('base-schedules-detailed')
         next if err_line.include?('GetCurrentScheduleValue: Schedule=') && err_line.include?('is a Schedule:File')
-      end
-      if hpxml_path.include?('base-dhw-tank-model-type-stratified') # FIXME
-        next if err_line.include?('Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings')
       end
 
       flunk "Unexpected warning found: #{err_line}"
@@ -1128,6 +997,7 @@ class HPXMLTest < MiniTest::Test
         hpxml_value = 1.0 / (1.0 / hpxml_value - Material.AirFilmVertical.rvalue)
         hpxml_value = 1.0 / (1.0 / hpxml_value - Material.AirFilmVertical.rvalue)
       end
+      hpxml_value = [hpxml_value, UnitConversions.convert(7.0, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')].min # FUTURE: Remove when U-factor restriction is lifted in EnergyPlus
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='#{col_name}' AND Units='W/m2-K'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       if subsurface.is_a? HPXML::Skylight
@@ -1373,15 +1243,15 @@ class HPXMLTest < MiniTest::Test
       end
     end
 
-    # Check unmet loads
-    unmet_htg_load = results.select { |k, v| k.include? 'Unmet Load: Heating' }.map { |k, v| v }.sum(0.0)
-    unmet_clg_load = results.select { |k, v| k.include? 'Unmet Load: Cooling' }.map { |k, v| v }.sum(0.0)
+    # Check unmet hours
+    unmet_hours_htg = results.select { |k, v| k.include? 'Unmet Hours: Heating' }.map { |k, v| v }.sum(0.0)
+    unmet_hours_clg = results.select { |k, v| k.include? 'Unmet Hours: Cooling' }.map { |k, v| v }.sum(0.0)
     if hpxml_path.include? 'base-hvac-undersized.xml'
-      assert_operator(unmet_htg_load, :>, 0.5)
-      assert_operator(unmet_clg_load, :>, 0.5)
+      assert_operator(unmet_hours_htg, :>, 1000)
+      assert_operator(unmet_hours_clg, :>, 1000)
     else
-      assert_operator(unmet_htg_load, :<, 0.5)
-      assert_operator(unmet_clg_load, :<, 0.5)
+      assert_operator(unmet_hours_htg, :<, 100)
+      assert_operator(unmet_hours_clg, :<, 100)
     end
 
     sqlFile.close
@@ -1453,7 +1323,7 @@ class HPXMLTest < MiniTest::Test
       all_results.sort.each do |xml, xml_results|
         next unless xml.include? 'C.xml'
 
-        htg_load = xml_results['Load: Heating (MBtu)'].round(2)
+        htg_load = xml_results['Load: Heating: Delivered (MBtu)'].round(2)
         csv << [File.basename(xml), htg_load, 'N/A']
         test_name = File.basename(xml, File.extname(xml))
         htg_loads[test_name] = htg_load
@@ -1461,7 +1331,7 @@ class HPXMLTest < MiniTest::Test
       all_results.sort.each do |xml, xml_results|
         next unless xml.include? 'L.xml'
 
-        clg_load = xml_results['Load: Cooling (MBtu)'].round(2)
+        clg_load = xml_results['Load: Cooling: Delivered (MBtu)'].round(2)
         csv << [File.basename(xml), 'N/A', clg_load]
         test_name = File.basename(xml, File.extname(xml))
         clg_loads[test_name] = clg_load

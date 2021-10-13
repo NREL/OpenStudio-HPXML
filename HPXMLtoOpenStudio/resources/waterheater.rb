@@ -97,16 +97,13 @@ class Waterheater
     hpwh_bottom_element_sp.setName("#{obj_name_hpwh} BottomElementSetpoint")
     hpwh_bottom_element_sp.setValue(-60)
 
-    sp_type = water_heating_system.setpoint_type
-    if sp_type == HPXML::WaterHeaterSetpointTypeConstant
+    setpoint_schedule_file = nil
+    if water_heating_system.setpoint_schedule_filepath.nil?
       hpwh_top_element_sp = OpenStudio::Model::ScheduleConstant.new(model)
       hpwh_top_element_sp.setName("#{obj_name_hpwh} TopElementSetpoint")
       hpwh_top_element_sp.setValue((tset_C - 9.0001).round(4))
-    elsif sp_type
-      setpoint_schedule_file = nil
-      unless water_heating_system.setpoint_schedule_filepath.nil?
-        setpoint_schedule_file = SchedulesFile.new(model: model, year: year, schedules_path: water_heating_system.setpoint_schedule_filepath, col_names: ['water_heater_setpoint'], schedule_max_val: 150)
-      end
+    else
+      setpoint_schedule_file = SchedulesFile.new(model: model, year: year, schedules_path: water_heating_system.setpoint_schedule_filepath, col_names: ['water_heater_setpoint'], schedule_max_val: 150)
       hpwh_top_element_sp = setpoint_schedule_file.create_schedule_file(col_name: 'water_heater_setpoint')
     end
 
@@ -127,7 +124,7 @@ class Waterheater
     fan = setup_hpwh_fan(model, water_heating_system, obj_name_hpwh, airflow_rate)
 
     # WaterHeater:HeatPump:WrappedCondenser
-    hpwh = setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, tset_C, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, sp_type)
+    hpwh = setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, tset_C, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, setpoint_schedule_file)
 
     # Amb temp & RH sensors, temp sensor shared across programs
     amb_temp_sensor, amb_rh_sensors = get_loc_temp_rh_sensors(model, obj_name_hpwh, loc_schedule, loc_space, living_zone)
@@ -659,17 +656,17 @@ class Waterheater
 
   private
 
-  def self.setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, tset_C, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, sp_type)
+  def self.setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, tset_C, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, setpoint_schedule_file)
     h_condtop = (1.0 - (5.5 / 12.0)) * h_tank # in the 6th node of the tank (counting from top)
     h_condbot = 0.01 # bottom node
     h_hpctrl_up = (1.0 - (2.5 / 12.0)) * h_tank # in the 3rd node of the tank
     h_hpctrl_low = (1.0 - (8.5 / 12.0)) * h_tank # in the 9th node of the tank
 
-    if sp_type == HPXML::WaterHeaterSetpointTypeConstant
+    if setpoint_schedule_file.nil?
       hp_setpoint = OpenStudio::Model::ScheduleConstant.new(model)
       hp_setpoint.setName("#{obj_name_hpwh} WaterHeaterHPSchedule")
       hp_setpoint.setValue(tset_C)
-    elsif sp_type == HPXML::WaterHeaterSetpointTypeScheduled
+    else
       hp_setpoint = OpenStudio::Model::ScheduleConstant.new(model)
       hp_setpoint.setName("#{obj_name_hpwh} hp control")
       hp_setpoint.setValue(51.67)
@@ -1602,7 +1599,6 @@ class Waterheater
       tank_type = water_heating_system.water_heater_type
       cap = water_heating_system.heating_capacity / 1000.0
       tank_model_type = water_heating_system.tank_model_type
-      setpoint_type = water_heating_system.setpoint_type
 
       setpoint_schedule_file = nil
       unless water_heating_system.setpoint_schedule_filepath.nil?
@@ -1624,7 +1620,7 @@ class Waterheater
       new_heater.setTankHeight(h_tank)
       new_heater.setMaximumTemperatureLimit(90)
       new_heater.setHeaterPriorityControl('MasterSlave')
-      configure_stratified_tank_setpoint_schedules(new_heater, setpoint_type, setpoint_schedule_file, t_set_c, model)
+      configure_stratified_tank_setpoint_schedules(new_heater, setpoint_schedule_file, t_set_c, model)
       new_heater.setHeater1Capacity(UnitConversions.convert(cap, 'kBtu/hr', 'W'))
       new_heater.setHeater1Height(h_UE)
       new_heater.setHeater1DeadbandTemperatureDifference(5.556)
@@ -1663,7 +1659,7 @@ class Waterheater
       new_heater.setName(name)
       new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
       new_heater.setHeaterFuelType(EPlus.fuel_type(fuel)) unless fuel.nil?
-      configure_mixed_tank_setpoint_schedule(new_heater, setpoint_type, setpoint_schedule_file, t_set_c, model)
+      configure_mixed_tank_setpoint_schedule(new_heater, setpoint_schedule_file, t_set_c, model)
       new_heater.setMaximumTemperatureLimit(99.0)
       if [HPXML::WaterHeaterTypeTankless, HPXML::WaterHeaterTypeCombiTankless].include? tank_type
         new_heater.setHeaterControlType('Modulate')
@@ -1763,8 +1759,8 @@ class Waterheater
     end
   end
 
-  def self.configure_mixed_tank_setpoint_schedule(new_heater, set_type, set_sch_file, set_temp_c, model)
-    if set_type == HPXML::WaterHeaterSetpointTypeScheduled
+  def self.configure_mixed_tank_setpoint_schedule(new_heater, set_sch_file, set_temp_c, model)
+    if not set_sch_file.nil?
       new_schedule = set_sch_file.create_schedule_file(col_name: 'water_heater_setpoint')
     else # constant
       new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
@@ -1777,8 +1773,8 @@ class Waterheater
     new_heater.setSetpointTemperatureSchedule(new_schedule)
   end
 
-  def self.configure_stratified_tank_setpoint_schedules(new_heater, set_type, set_sch_file, set_temp_c, model)
-    if set_type == HPXML::WaterHeaterSetpointTypeScheduled
+  def self.configure_stratified_tank_setpoint_schedules(new_heater, set_sch_file, set_temp_c, model)
+    if not set_sch_file.nil?
       new_schedule = set_sch_file.create_schedule_file(col_name: 'water_heater_setpoint')
     else # constant
       new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
