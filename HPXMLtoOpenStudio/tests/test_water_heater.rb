@@ -1152,6 +1152,9 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert(wh.heater1SetpointTemperatureSchedule.to_ScheduleFile.is_initialized)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency, 0.001)
 
+    # Check heat pump cooling coil cop
+    assert_in_epsilon(cop, coil.ratedCOP, 0.001)
+
     # Check schedule
     assert_equal(1, model.getScheduleFiles.size)
     sch = model.getScheduleFiles[0]
@@ -1174,11 +1177,11 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     # Expected value
     tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
-    u =  0.925
+    u =  1.045
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') - 9
     ther_eff = 1.0
-    cop = 2.820
-    tank_height = 1.598
+    cop = 4.004
+    tank_height = 1.0335
 
     # Check water heater
     assert_equal(1, model.getWaterHeaterHeatPumpWrappedCondensers.size)
@@ -1195,6 +1198,9 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(u, wh.uniformSkinLossCoefficientperUnitAreatoAmbientTemperature.get, 0.001)
     assert_in_epsilon(t_set, wh.heater1SetpointTemperatureSchedule.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency, 0.001)
+
+    # Check heat pump cooling coil cop
+    assert_in_epsilon(cop, coil.ratedCOP, 0.001)
   end
 
   def test_tank_heat_pump_operating_mode_scheduled
@@ -1208,11 +1214,11 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     # Expected value
     tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
-    u =  0.925
+    u =  1.045
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') - 9
     ther_eff = 1.0
-    cop = 2.820
-    tank_height = 1.598
+    cop = 4.004
+    tank_height = 1.0335
 
     # Check water heater
     assert_equal(1, model.getWaterHeaterHeatPumpWrappedCondensers.size)
@@ -1230,15 +1236,18 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(t_set, wh.heater1SetpointTemperatureSchedule.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency, 0.001)
 
-    # Check schedule
-    # assert_equal(1, model.getScheduleFiles.size)
-    # sch = model.getScheduleFiles[0]
+    # Check heat pump cooling coil cop
+    assert_in_epsilon(cop, coil.ratedCOP, 0.001)
 
-    # schedule_file_names = []
-    # model.getScheduleFiles.each do |schedule_file|
-    # schedule_file_names << "#{schedule_file.name}"
-    # end
-    # assert(schedule_file_names.include?('water_heater_operating_mode'))
+    # Check schedule
+    assert_equal(1, model.getScheduleFiles.size)
+    sch = model.getScheduleFiles[0]
+
+    schedule_file_names = []
+    model.getScheduleFiles.each do |schedule_file|
+      schedule_file_names << "#{schedule_file.name}"
+    end
+    assert(schedule_file_names.include?('water_heater_operating_mode'))
   end
 
   def test_tank_mixed_setpoint_scheduled

@@ -1788,7 +1788,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('water_heater_scheduled_operating_mode_path', false)
     arg.setDisplayName('Water Heater: Scheduled Operating Mode Path')
-    arg.setDescription("Absolute (or relative) path of the csv file containing the operating mode schedule. Valid values are 'standard' and 'hp_only' and values must be specified for every hour. Applies only to #{HPXML::WaterHeaterTypeHeatPump}.")
+    arg.setDescription("Absolute (or relative) path of the csv file containing the operating mode schedule. Valid values are 0 (standard) and 1 (heat pump only) and must be specified for every hour. Applies only to #{HPXML::WaterHeaterTypeHeatPump}.")
     args << arg
 
     water_heater_operating_mode_choices = OpenStudio::StringVector.new
