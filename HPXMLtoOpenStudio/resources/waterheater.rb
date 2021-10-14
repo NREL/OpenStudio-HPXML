@@ -1007,26 +1007,31 @@ class Waterheater
       hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = 0")
       hpwh_ctrl_program.addLine('EndIf')
     elsif control_logic == 'GE'
-      # TODO
-      if not op_mode_schedule_file.nil?
+      if op_mode_schedule_file.nil?
+        if op_mode == HPXML::WaterHeaterOperatingModeStandard
+          if setpoint_schedule_file.nil?
+            hpwh_ctrl_program.addLine('Set TODO=0')
+          else
+            hpwh_ctrl_program.addLine('Set TODO=0')
+          end
+        elsif op_mode == HPXML::WaterHeaterOperatingModeHeatPumpOnly
+          if setpoint_schedule_file.nil?
+            hpwh_ctrl_program.addLine('Set TODO=0')
+          else
+            hpwh_ctrl_program.addLine('Set TODO=0')
+          end
+        end
+      else
         op_mode_schedule = op_mode_schedule_file.create_schedule_file(col_name: 'water_heater_operating_mode')
 
         op_mode_schedule_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
         op_mode_schedule_sensor.setName("#{obj_name_hpwh} Op_mode")
         op_mode_schedule_sensor.setKeyName("#{obj_name_hpwh} OpModeSchedule")
-      else
-        if op_mode == HPXML::WaterHeaterOperatingModeStandard
-          if not setpoint_schedule_file.nil?
 
-          else
-
-          end
-        elsif op_mode == HPXML::WaterHeaterOperatingModeHeatPumpOnly
-          if not setpoint_schedule_file.nil?
-
-          else
-
-          end
+        if setpoint_schedule_file.nil?
+          hpwh_ctrl_program.addLine('Set TODO=0')
+        else
+          hpwh_ctrl_program.addLine('Set TODO=0')
         end
       end
     end
