@@ -395,9 +395,10 @@
             <FuelType>electricity</FuelType>
             <WaterHeaterType>heat pump water heater</WaterHeaterType>
             <Location>living space</Location>
-            <TankVolume>80.0</TankVolume>
+            <TankVolume>50.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <EnergyFactor>2.3</EnergyFactor>
+            <UniformEnergyFactor>3.75</UniformEnergyFactor>
+            <UsageBin>medium</UsageBin>
             <HotWaterTemperature>125.0</HotWaterTemperature>
             <extension>
               <OperatingModeScheduleFilepath>HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_operating_mode_schedule.csv</OperatingModeScheduleFilepath>
