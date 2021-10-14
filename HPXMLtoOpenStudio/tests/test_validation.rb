@@ -37,7 +37,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       # Test validation
       hpxml_doc = HPXML.new(hpxml_path: xml, building_id: 'MyBuilding').to_oga()
       _test_schema_validation(hpxml_doc, xml)
-      _test_schematron_validation(hpxml_doc)
+      _test_schematron_validation(hpxml_doc, expected_errors: []) # Ensure no errors
     end
     puts
   end
@@ -909,11 +909,15 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
   private
 
-  def _test_schematron_validation(hpxml_doc, expected_errors: [], expected_warnings: [])
+  def _test_schematron_validation(hpxml_doc, expected_errors: nil, expected_warnings: nil)
     # Validate via validator.rb
     errors, warnings = Validator.run_validators(hpxml_doc, [@epvalidator_stron_path, @hpxml_stron_path])
-    _compare_errors_or_warnings('error', errors, expected_errors)
-    _compare_errors_or_warnings('warning', warnings, expected_warnings)
+    if not expected_errors.nil?
+      _compare_errors_or_warnings('error', errors, expected_errors)
+    end
+    if not expected_warnings.nil?
+      _compare_errors_or_warnings('warning', warnings, expected_warnings)
+    end
   end
 
   def _test_schema_validation(hpxml_doc, xml)
