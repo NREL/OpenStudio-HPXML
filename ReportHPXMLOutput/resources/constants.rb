@@ -55,7 +55,7 @@ class BS
     elsif cost_mult_type.include?('Perimeter')
       return 'ft'
     elsif cost_mult_type.include?('Capacity')
-      return 'kBtu/h'
+      return 'Btu/h'
     elsif cost_mult_type.include?('Tank Volume')
       return 'gal'
     elsif cost_mult_type.include?('Flow Rate')
