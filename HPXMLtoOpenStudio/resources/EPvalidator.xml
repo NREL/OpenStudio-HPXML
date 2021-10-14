@@ -967,6 +967,9 @@
       <sch:assert role='ERROR' test='count(h:SetbackTempHeatingSeason) + count(h:extension/h:WeekdaySetpointTempsHeatingSeason) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SetbackTempHeatingSeason | extension/WeekdaySetpointTempsHeatingSeason</sch:assert> <!-- See [HVACControl=HeatingSetback] -->
       <sch:assert role='ERROR' test='count(h:SetbackTempHeatingSeason) + count(h:extension/h:WeekendSetpointTempsHeatingSeason) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SetbackTempHeatingSeason | extension/WeekendSetpointTempsHeatingSeason</sch:assert> <!-- See [HVACControl=HeatingSetback] -->
       <sch:assert role='ERROR' test='count(h:HeatingSeason) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Heating</sch:assert> <!-- See [HVACControl=HeatingSeason] -->
+      <!-- Warnings -->
+      <sch:report role='WARN' test='number(h:SetpointTempHeatingSeason) &lt; 58'>Heating setpoint should typically be greater than or equal to 58 deg-F.</sch:report>
+      <sch:report role='WARN' test='number(h:SetpointTempHeatingSeason) &gt; 76'>Heating setpoint should typically be less than or equal to 76 deg-F.</sch:report>
     </sch:rule>
   </sch:pattern>
 
@@ -999,6 +1002,9 @@
       <sch:assert role='ERROR' test='count(h:SetupTempCoolingSeason) + count(h:extension/h:WeekendSetpointTempsCoolingSeason) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SetupTempCoolingSeason | extension/WeekendSetpointTempsCoolingSeason</sch:assert> <!-- See [HVACControl=CoolingSetup] -->
       <sch:assert role='ERROR' test='count(h:extension/h:CeilingFanSetpointTempCoolingSeasonOffset) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/CeilingFanSetpointTempCoolingSeasonOffset</sch:assert> <!-- deg F -->
       <sch:assert role='ERROR' test='count(h:CoolingSeason) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Cooling</sch:assert> <!-- See [HVACControl=CoolingSeason] -->
+      <!-- Warnings -->
+      <sch:report role='WARN' test='number(h:SetpointTempCoolingSeason) &lt; 68'>Cooling setpoint should typically be greater than or equal to 68 deg-F.</sch:report>
+      <sch:report role='WARN' test='number(h:SetpointTempCoolingSeason) &gt; 86'>Cooling setpoint should typically be less than or equal to 86 deg-F.</sch:report>
     </sch:rule>
   </sch:pattern>
 
@@ -1091,6 +1097,9 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution[h:DistributionSystemType[h:Other[text()="DSE"]]]'>
       <sch:assert role='ERROR' test='count(h:AnnualHeatingDistributionSystemEfficiency) = 1'>Expected 1 element(s) for xpath: AnnualHeatingDistributionSystemEfficiency</sch:assert>
       <sch:assert role='ERROR' test='count(h:AnnualCoolingDistributionSystemEfficiency) = 1'>Expected 1 element(s) for xpath: AnnualCoolingDistributionSystemEfficiency</sch:assert>
+      <!-- Warnings -->
+      <sch:report role='WARN' test='number(h:AnnualHeatingDistributionSystemEfficiency) &lt; 0.5'>Heating DSE should typically be greater than or equal to 0.5.</sch:report>
+      <sch:report role='WARN' test='number(h:AnnualCoolingDistributionSystemEfficiency) &lt; 0.5'>Cooling DSE should typically be greater than or equal to 0.5.</sch:report>
     </sch:rule>
   </sch:pattern>
 
@@ -1236,6 +1245,8 @@
       <sch:assert role='ERROR' test='count(h:FractionDHWLoadServed) = 1'>Expected 1 element(s) for xpath: FractionDHWLoadServed</sch:assert>
       <sch:assert role='ERROR' test='count(h:HotWaterTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HotWaterTemperature</sch:assert>
       <sch:assert role='ERROR' test='count(h:UsesDesuperheater) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UsesDesuperheater</sch:assert> <!-- See [Desuperheater] -->
+      <!-- Warnings -->
+      <sch:report role='WARN' test='number(h:HotWaterTemperature) &lt; 110'>Hot water setpoint should typically be greater than or equal to 110 deg-F.</sch:report>
     </sch:rule>
   </sch:pattern>
 
