@@ -2915,7 +2915,10 @@ class HPXML < Object
       end
     end
 
-    def from_oga(partition_wall_mass)
+    def from_oga(hpxml)
+      return if hpxml.nil?
+
+      partition_wall_mass = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/Enclosure/extension/PartitionWallMass')
       return if partition_wall_mass.nil?
 
       @area_fraction = XMLHelper.get_value(partition_wall_mass, 'AreaFraction', :float)
@@ -2944,7 +2947,10 @@ class HPXML < Object
       XMLHelper.add_element(furniture_mass, 'Type', @type, :string, @type_isdefaulted) unless @type.nil?
     end
 
-    def from_oga(furniture_mass)
+    def from_oga(hpxml)
+      return if hpxml.nil?
+
+      furniture_mass = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/Enclosure/extension/FurnitureMass')
       return if furniture_mass.nil?
 
       @area_fraction = XMLHelper.get_value(furniture_mass, 'AreaFraction', :float)
