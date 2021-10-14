@@ -1748,57 +1748,14 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_heating_capacity_17_f'] = 23040.0
     args['heat_pump_cooling_efficiency'] = 22.0
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
-  elsif ['base-hvac-autosize.xml',
-         'base-hvac-autosize-boiler-elec-only.xml',
-         'base-hvac-autosize-boiler-gas-central-ac-1-speed.xml',
-         'base-hvac-autosize-boiler-gas-only.xml',
-         'base-hvac-autosize-central-ac-only-1-speed.xml',
-         'base-hvac-autosize-central-ac-only-2-speed.xml',
-         'base-hvac-autosize-central-ac-only-var-speed.xml',
-         'base-hvac-autosize-elec-resistance-only.xml',
-         'base-hvac-autosize-evap-cooler-furnace-gas.xml',
-         'base-hvac-autosize-floor-furnace-propane-only.xml',
-         'base-hvac-autosize-furnace-elec-only.xml',
-         'base-hvac-autosize-furnace-gas-central-ac-2-speed.xml',
-         'base-hvac-autosize-furnace-gas-central-ac-var-speed.xml',
-         'base-hvac-autosize-furnace-gas-only.xml',
-         'base-hvac-autosize-furnace-gas-room-ac.xml',
-         'base-hvac-autosize-mini-split-air-conditioner-only-ducted.xml',
-         'base-hvac-autosize-room-ac-only.xml',
-         'base-hvac-autosize-stove-oil-only.xml',
-         'base-hvac-autosize-wall-furnace-elec-only.xml'].include? hpxml_file
+  elsif hpxml_file.include? 'autosize'
     args['heating_system_heating_capacity'] = Constants.Auto
     args['cooling_system_cooling_capacity'] = Constants.Auto
-  elsif ['base-hvac-autosize-air-to-air-heat-pump-1-speed.xml',
-         'base-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only.xml',
-         'base-hvac-autosize-air-to-air-heat-pump-1-speed-heating-only.xml',
-         'base-hvac-autosize-air-to-air-heat-pump-2-speed.xml',
-         'base-hvac-autosize-air-to-air-heat-pump-var-speed.xml',
-         'base-hvac-autosize-dual-fuel-air-to-air-heat-pump-1-speed.xml',
-         'base-hvac-autosize-dual-fuel-mini-split-heat-pump-ducted.xml',
-         'base-hvac-autosize-ground-to-air-heat-pump.xml',
-         'base-hvac-autosize-ground-to-air-heat-pump-cooling-only.xml',
-         'base-hvac-autosize-ground-to-air-heat-pump-heating-only.xml',
-         'base-hvac-autosize-mini-split-heat-pump-ducted.xml',
-         'base-hvac-autosize-mini-split-heat-pump-ducted-cooling-only.xml',
-         'base-hvac-autosize-mini-split-heat-pump-ducted-heating-only.xml'].include? hpxml_file
-    args['heat_pump_heating_capacity'] = Constants.AutoMaxLoad
-    args['heat_pump_heating_capacity_17_f'] = Constants.Auto
-    args['heat_pump_backup_heating_capacity'] = Constants.Auto
-    args['heat_pump_cooling_capacity'] = Constants.Auto
-  elsif ['base-hvac-autosize-air-to-air-heat-pump-1-speed-manual-s-oversize-allowances.xml',
-         'base-hvac-autosize-air-to-air-heat-pump-2-speed-manual-s-oversize-allowances.xml',
-         'base-hvac-autosize-air-to-air-heat-pump-var-speed-manual-s-oversize-allowances.xml',
-         'base-hvac-autosize-ground-to-air-heat-pump-manual-s-oversize-allowances.xml',
-         'base-hvac-autosize-mini-split-heat-pump-ducted-manual-s-oversize-allowances.xml'].include? hpxml_file
-    args['heat_pump_heating_capacity'] = Constants.Auto
-    args['heat_pump_heating_capacity_17_f'] = Constants.Auto
-    args['heat_pump_backup_heating_capacity'] = Constants.Auto
-    args['heat_pump_cooling_capacity'] = Constants.Auto
-  elsif ['base-hvac-autosize-central-ac-plus-air-to-air-heat-pump-heating.xml'].include? hpxml_file
-    args['heating_system_heating_capacity'] = Constants.Auto
-    args['cooling_system_cooling_capacity'] = Constants.Auto
-    args['heat_pump_heating_capacity'] = Constants.AutoMaxLoad
+    if hpxml_file.include? 'manual-s-oversize-allowances'
+      args['heat_pump_heating_capacity'] = Constants.Auto
+    else
+      args['heat_pump_heating_capacity'] = Constants.AutoMaxLoad
+    end
     args['heat_pump_heating_capacity_17_f'] = Constants.Auto
     args['heat_pump_backup_heating_capacity'] = Constants.Auto
     args['heat_pump_cooling_capacity'] = Constants.Auto

@@ -321,7 +321,6 @@
                 <PackagedTerminalAirConditionerHeating/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>36000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>
@@ -332,7 +331,6 @@
               <SystemIdentifier id='CoolingSystem1'/>
               <CoolingSystemType>packaged terminal air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>24000.0</CoolingCapacity>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>
