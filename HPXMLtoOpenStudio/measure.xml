@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>fb1050fe-2607-4524-afb5-dc40130b4385</version_id>
-  <version_modified>20211014T161830Z</version_modified>
+  <version_id>428e5dd2-b56f-4c64-934f-1f55cea9ce33</version_id>
+  <version_modified>20211014T195410Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -404,10 +404,22 @@
       <checksum>568D49B8</checksum>
     </file>
     <file>
+      <filename>test_water_heater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>10DD2CC8</checksum>
+    </file>
+    <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>2E4AE5B8</checksum>
+    </file>
+    <file>
+      <filename>waterheater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8E023E64</checksum>
     </file>
     <file>
       <version>
@@ -427,40 +439,28 @@
       <checksum>27C07844</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>00E35F8C</checksum>
-    </file>
-    <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>354FF221</checksum>
     </file>
     <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>00E35F8C</checksum>
+    </file>
+    <file>
       <filename>EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>8E5C7DB9</checksum>
+      <checksum>18365B3A</checksum>
     </file>
     <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>498BAA68</checksum>
-    </file>
-    <file>
-      <filename>waterheater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8E023E64</checksum>
-    </file>
-    <file>
-      <filename>test_water_heater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>10DD2CC8</checksum>
+      <checksum>BC78ABF1</checksum>
     </file>
   </files>
 </measure>
