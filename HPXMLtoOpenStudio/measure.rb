@@ -1647,7 +1647,7 @@ class OSModel
         next # Already processed combined AC+furnace
       end
       if (heating_system.heating_system_type == HPXML::HVACTypePTACHeating) && (not cooling_system.nil?)
-        next # Fixme: Processed with PTAC cooling in add_cooling_system, currently it'll never be here because ptac heating is always modeled standalone if without distribution system. Leave it here for ducted ptac in the future.
+        fail 'Unhandled ducted PTAC/PTHP system.'
       end
 
       # Calculate heating sequential load fractions
