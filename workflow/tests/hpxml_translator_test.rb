@@ -570,6 +570,7 @@ class HPXMLTest < MiniTest::Test
       # General
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
       next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
+      next if err_line.include?('Schedule:File=') && err_line.include?('Blank Schedule Type Limits Name input')
       next if err_line.include? 'Entered Zone Volumes differ from calculated zone volume'
       next if err_line.include?('CalculateZoneVolume') && err_line.include?('not fully enclosed')
       next if err_line.include?('GetInputViewFactors') && err_line.include?('not enough values')
@@ -631,13 +632,18 @@ class HPXMLTest < MiniTest::Test
       if hpxml.solar_thermal_systems.size > 0
         next if err_line.include? 'Supply Side is storing excess heat the majority of the time.'
       end
-      if hpxml_path.include?('base-schedules-detailed')
+      if hpxml_path.include?('base-schedules-detailed') || hpxml_path.include?('type-scheduled')
         next if err_line.include?('GetCurrentScheduleValue: Schedule=') && err_line.include?('is a Schedule:File')
       end
 
       # FIXME: is this warning expected?
       if hpxml.water_heating_systems.select { |wh| wh.tank_model_type == HPXML::WaterHeaterTankModelTypeStratified }.size > 0
         next if err_line.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
+      end
+
+      # FIXME: is this warning expected?
+      if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump && !wh.setpoint_schedule_filepath.nil? }.size > 0
+        next if err_line.include? 'Water heater tank set point temperature is greater than or equal to the cut-in temperature of the heat pump water heater.'
       end
 
       flunk "Unexpected warning found: #{err_line}"

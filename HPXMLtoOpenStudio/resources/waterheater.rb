@@ -1026,7 +1026,7 @@ class Waterheater
 
         op_mode_schedule_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
         op_mode_schedule_sensor.setName("#{obj_name_hpwh} Op_mode")
-        op_mode_schedule_sensor.setKeyName("#{obj_name_hpwh} OpModeSchedule")
+        op_mode_schedule_sensor.setKeyName(op_mode_schedule.name.to_s)
 
         if setpoint_schedule_file.nil?
           hpwh_ctrl_program.addLine('Set TODO=0')
