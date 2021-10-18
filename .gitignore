@@ -2,6 +2,8 @@
 /docs/_build
 /results
 /run
+/workflow/generated_files
+/workflow/tests/comparisons
 /weather/USA_AK_Adak.NAS.704540_TMY3-cache.csv
 /weather/USA_AK_Adak.NAS.704540_TMY3.epw
 /weather/USA_AK_Ambler.701718_TMY3-cache.csv
@@ -2010,5 +2012,4 @@
 /workflow/tests/test*
 /workflow/sample_files/results
 /workflow/sample_files/run
-/workflow/sample_files/invalid_files/results
-/workflow/sample_files/invalid_files/run
+/files

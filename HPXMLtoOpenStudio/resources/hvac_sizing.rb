@@ -8,6 +8,21 @@ class HVACSizing
 
     @hpxml = hpxml
 
+    def self.is_system_to_skip(hvac)
+      # These shared systems should be converted to other equivalent
+      # systems before being autosized
+      if [HPXML::HVACTypeChiller,
+          HPXML::HVACTypeCoolingTower].include?(hvac.CoolType)
+        return true
+      end
+      if [HPXML::HVACTypeHeatPumpWaterLoopToAir].include?(hvac.HeatType) &&
+         hvac.HeatingLoadFraction.nil?
+        return true
+      end
+
+      return false
+    end
+
     process_site_calcs_and_design_temps(weather)
 
     # Calculate loads for the conditioned thermal zone
@@ -25,24 +40,37 @@ class HVACSizing
     # Aggregate zone loads into initial loads
     aggregate_loads(bldg_design_loads)
 
-    # Loop through each HVAC system
+    # Get HVAC information for each HVAC system.
+    hvac_infos = {}
+    hvac_systems.each do |hvac_system|
+      hvac_infos[hvac_system] = get_hvac_information(hvac_system)
+    end
+
+    # Loop through each HVAC system and apply duct loads
+    # to calculate total building design loads.
+    total_ducts_heat_load = 0.0
+    total_ducts_cool_load_sens = 0.0
+    total_ducts_cool_load_lat = 0.0
+    hvac_systems.each do |hvac_system|
+      hvac = hvac_infos[hvac_system]
+      next if is_system_to_skip(hvac)
+
+      apply_hvac_temperatures(hvac, bldg_design_loads)
+      ducts_heat_load = calculate_load_ducts_heating(bldg_design_loads, weather, hvac)
+      ducts_cool_load_sens, ducts_cool_load_lat = calculate_load_ducts_cooling(bldg_design_loads, weather, hvac)
+
+      total_ducts_heat_load += ducts_heat_load.to_f
+      total_ducts_cool_load_sens += ducts_cool_load_sens.to_f
+      total_ducts_cool_load_lat += ducts_cool_load_lat.to_f
+    end
+    apply_load_ducts(bldg_design_loads, total_ducts_heat_load, total_ducts_cool_load_sens, total_ducts_cool_load_lat)
+
+    # Loop through each HVAC system and calculate equipment values.
     all_hvac_sizing_values = {}
     hvac_systems.each do |hvac_system|
-      hvac = get_hvac_information(hvac_system)
+      hvac = hvac_infos[hvac_system]
+      next if is_system_to_skip(hvac)
 
-      # These shared systems should be converted to other equivalent
-      # systems before being autosized
-      next if [HPXML::HVACTypeChiller,
-               HPXML::HVACTypeCoolingTower].include?(hvac.CoolType)
-      next if [HPXML::HVACTypeHeatPumpWaterLoopToAir].include?(hvac.HeatType) &&
-              hvac.HeatingLoadFraction.nil?
-
-      # Add duct losses
-      apply_hvac_temperatures(hvac, bldg_design_loads)
-      apply_load_ducts_heating(bldg_design_loads, weather, hvac)
-      apply_load_ducts_cooling(bldg_design_loads, weather, hvac)
-
-      # Calculate equipment values
       hvac_sizing_values = HVACSizingValues.new
       apply_hvac_loads(hvac, hvac_sizing_values, bldg_design_loads)
       apply_hvac_heat_pump_logic(hvac_sizing_values, hvac)
@@ -116,89 +144,89 @@ class HVACSizing
     @cool_design_temps = {}
     @heat_design_temps = {}
 
-    space_types = []
+    locations = []
     (@hpxml.roofs + @hpxml.rim_joists + @hpxml.walls + @hpxml.foundation_walls + @hpxml.frame_floors + @hpxml.slabs).each do |surface|
-      space_types << surface.interior_adjacent_to
-      space_types << surface.exterior_adjacent_to
+      locations << surface.interior_adjacent_to
+      locations << surface.exterior_adjacent_to
     end
     @hpxml.hvac_distributions.each do |hvac_dist|
       hvac_dist.ducts.each do |duct|
-        space_types << duct.duct_location
+        locations << duct.duct_location
       end
     end
 
-    space_types.uniq.each do |space_type|
-      next if [HPXML::LocationGround].include? space_type
+    locations.uniq.each do |location|
+      next if [HPXML::LocationGround].include? location
 
       if [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
-          HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab].include? space_type
-        @cool_design_temps[space_type] = calculate_scheduled_space_design_temps(space_type, @cool_setpoint, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max)
-        @heat_design_temps[space_type] = calculate_scheduled_space_design_temps(space_type, @heat_setpoint, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
-      elsif [HPXML::LocationOutside, HPXML::LocationRoofDeck].include? space_type
-        @cool_design_temps[space_type] = weather.design.CoolingDrybulb
-        @heat_design_temps[space_type] = weather.design.HeatingDrybulb
-      elsif space_type == HPXML::LocationBasementConditioned
-        @cool_design_temps[space_type] = process_design_temp_cooling(weather, HPXML::LocationLivingSpace)
-        @heat_design_temps[space_type] = process_design_temp_heating(weather, HPXML::LocationLivingSpace)
+          HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab].include? location
+        @cool_design_temps[location] = calculate_scheduled_space_design_temps(location, @cool_setpoint, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max)
+        @heat_design_temps[location] = calculate_scheduled_space_design_temps(location, @heat_setpoint, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
+      elsif [HPXML::LocationOutside, HPXML::LocationRoofDeck].include? location
+        @cool_design_temps[location] = weather.design.CoolingDrybulb
+        @heat_design_temps[location] = weather.design.HeatingDrybulb
+      elsif location == HPXML::LocationBasementConditioned
+        @cool_design_temps[location] = process_design_temp_cooling(weather, HPXML::LocationLivingSpace)
+        @heat_design_temps[location] = process_design_temp_heating(weather, HPXML::LocationLivingSpace)
       else
-        @cool_design_temps[space_type] = process_design_temp_cooling(weather, space_type)
-        @heat_design_temps[space_type] = process_design_temp_heating(weather, space_type)
+        @cool_design_temps[location] = process_design_temp_cooling(weather, location)
+        @heat_design_temps[location] = process_design_temp_heating(weather, location)
       end
     end
   end
 
-  def self.process_design_temp_heating(weather, space_type)
-    if space_type == HPXML::LocationLivingSpace
+  def self.process_design_temp_heating(weather, location)
+    if location == HPXML::LocationLivingSpace
       heat_temp = @heat_setpoint
 
-    elsif space_type == HPXML::LocationGarage
+    elsif location == HPXML::LocationGarage
       heat_temp = weather.design.HeatingDrybulb + 13.0
 
-    elsif (space_type == HPXML::LocationAtticUnvented) || (space_type == HPXML::LocationAtticVented)
+    elsif (location == HPXML::LocationAtticUnvented) || (location == HPXML::LocationAtticVented)
 
-      attic_floors = @hpxml.frame_floors.select { |f| f.is_ceiling && [f.interior_adjacent_to, f.exterior_adjacent_to].include?(space_type) }
+      attic_floors = @hpxml.frame_floors.select { |f| f.is_ceiling && [f.interior_adjacent_to, f.exterior_adjacent_to].include?(location) }
       avg_floor_rvalue = calculate_average_r_value(attic_floors)
 
-      attic_roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }
+      attic_roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == location }
       avg_roof_rvalue = calculate_average_r_value(attic_roofs)
 
       if avg_floor_rvalue < avg_roof_rvalue
         # Attic is considered to be encapsulated. MJ8 says to use an attic
         # temperature of 95F, however alternative approaches are permissible
-        if space_type == HPXML::LocationAtticVented
+        if location == HPXML::LocationAtticVented
           heat_temp = weather.design.HeatingDrybulb
         else
-          heat_temp = calculate_space_design_temps(space_type, weather, @heat_setpoint, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
+          heat_temp = calculate_space_design_temps(location, weather, @heat_setpoint, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
         end
       else
         heat_temp = weather.design.HeatingDrybulb
       end
 
-    elsif [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? space_type
-      heat_temp = calculate_space_design_temps(space_type, weather, @heat_setpoint, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
+    elsif [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? location
+      heat_temp = calculate_space_design_temps(location, weather, @heat_setpoint, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
 
     end
 
-    fail "Design temp heating not calculated for #{space_type}." if heat_temp.nil?
+    fail "Design temp heating not calculated for #{location}." if heat_temp.nil?
 
     return heat_temp
   end
 
-  def self.process_design_temp_cooling(weather, space_type)
-    if space_type == HPXML::LocationLivingSpace
+  def self.process_design_temp_cooling(weather, location)
+    if location == HPXML::LocationLivingSpace
       cool_temp = @cool_setpoint
 
-    elsif space_type == HPXML::LocationGarage
+    elsif location == HPXML::LocationGarage
       # Calculate fraction of garage under conditioned space
       area_total = 0.0
       area_conditioned = 0.0
       @hpxml.roofs.each do |roof|
-        next unless roof.interior_adjacent_to == space_type
+        next unless roof.interior_adjacent_to == location
 
         area_total += roof.area
       end
       @hpxml.frame_floors.each do |frame_floor|
-        next unless [frame_floor.interior_adjacent_to, frame_floor.exterior_adjacent_to].include? space_type
+        next unless [frame_floor.interior_adjacent_to, frame_floor.exterior_adjacent_to].include? location
 
         area_total += frame_floor.area
         area_conditioned += frame_floor.area if frame_floor.is_thermal_boundary
@@ -225,21 +253,21 @@ class HVACSizing
                      (12.0 * (1.0 - garage_frac_under_conditioned)))
       end
 
-    elsif (space_type == HPXML::LocationAtticUnvented) || (space_type == HPXML::LocationAtticVented)
+    elsif (location == HPXML::LocationAtticUnvented) || (location == HPXML::LocationAtticVented)
 
-      attic_floors = @hpxml.frame_floors.select { |f| f.is_ceiling && [f.interior_adjacent_to, f.exterior_adjacent_to].include?(space_type) }
+      attic_floors = @hpxml.frame_floors.select { |f| f.is_ceiling && [f.interior_adjacent_to, f.exterior_adjacent_to].include?(location) }
       avg_floor_rvalue = calculate_average_r_value(attic_floors)
 
-      attic_roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }
+      attic_roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == location }
       avg_roof_rvalue = calculate_average_r_value(attic_roofs)
 
       if avg_floor_rvalue < avg_roof_rvalue
         # Attic is considered to be encapsulated. MJ8 says to use an attic
         # temperature of 95F, however alternative approaches are permissible
-        if space_type == HPXML::LocationAtticVented
+        if location == HPXML::LocationAtticVented
           cool_temp = weather.design.CoolingDrybulb + 40.0 # This is the number from a California study with dark shingle roof and similar ventilation.
         else
-          cool_temp = calculate_space_design_temps(space_type, weather, @cool_setpoint, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max, true)
+          cool_temp = calculate_space_design_temps(location, weather, @cool_setpoint, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max, true)
         end
 
       else
@@ -249,11 +277,11 @@ class HVACSizing
         cool_temp = 0.0
 
         @hpxml.roofs.each do |roof|
-          next unless roof.interior_adjacent_to == space_type
+          next unless roof.interior_adjacent_to == location
 
           tot_roof_area += roof.net_area
 
-          if space_type == HPXML::LocationAtticUnvented
+          if location == HPXML::LocationAtticUnvented
             if not roof.radiant_barrier
               cool_temp += (150.0 + (weather.design.CoolingDrybulb - 95.0) + @daily_range_temp_adjust[@daily_range_num]) * roof.net_area
             else
@@ -322,12 +350,12 @@ class HVACSizing
         cool_temp += (weather.design.CoolingDrybulb - 95.0) + @daily_range_temp_adjust[@daily_range_num]
       end
 
-    elsif [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? space_type
-      cool_temp = calculate_space_design_temps(space_type, weather, @cool_setpoint, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max)
+    elsif [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? location
+      cool_temp = calculate_space_design_temps(location, weather, @cool_setpoint, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max)
 
     end
 
-    fail "Design temp cooling not calculated for #{space_type}." if cool_temp.nil?
+    fail "Design temp cooling not calculated for #{location}." if cool_temp.nil?
 
     return cool_temp
   end
@@ -897,6 +925,7 @@ class HVACSizing
             sum_ua_wall += (1.0 / wall.insulation_assembly_r_value * wall.net_area)
           end
           fail 'Could not find connected walls.' if sum_a_wall <= 0
+
           u_wall = sum_ua_wall / sum_a_wall
 
           # Calculate partition temperature different cooling (PTDC) per Manual J Figure A12-17
@@ -1190,7 +1219,7 @@ class HVACSizing
     return dse_Fregain
   end
 
-  def self.apply_load_ducts_heating(bldg_design_loads, weather, hvac)
+  def self.calculate_load_ducts_heating(bldg_design_loads, weather, hvac)
     '''
     Heating Duct Loads
     '''
@@ -1240,12 +1269,10 @@ class HVACSizing
     end
 
     ducts_heat_load = heat_load_next - init_heat_load
-
-    bldg_design_loads.Heat_Ducts += ducts_heat_load
-    bldg_design_loads.Heat_Tot += ducts_heat_load
+    return ducts_heat_load
   end
 
-  def self.apply_load_ducts_cooling(bldg_design_loads, weather, hvac)
+  def self.calculate_load_ducts_cooling(bldg_design_loads, weather, hvac)
     '''
     Cooling Duct Loads
     '''
@@ -1304,12 +1331,17 @@ class HVACSizing
 
     ducts_cool_load_sens = cool_load_sens - init_cool_load_sens
     ducts_cool_load_lat = cool_load_lat - init_cool_load_lat
+    return ducts_cool_load_sens, ducts_cool_load_lat
+  end
 
-    bldg_design_loads.Cool_Ducts_Sens += ducts_cool_load_sens
-    bldg_design_loads.Cool_Sens += ducts_cool_load_sens
-    bldg_design_loads.Cool_Ducts_Lat += ducts_cool_load_lat
-    bldg_design_loads.Cool_Lat += ducts_cool_load_lat
-    bldg_design_loads.Cool_Tot += ducts_cool_load_sens + ducts_cool_load_lat
+  def self.apply_load_ducts(bldg_design_loads, total_ducts_heat_load, total_ducts_cool_load_sens, total_ducts_cool_load_lat)
+    bldg_design_loads.Heat_Ducts += total_ducts_heat_load
+    bldg_design_loads.Heat_Tot += total_ducts_heat_load
+    bldg_design_loads.Cool_Ducts_Sens += total_ducts_cool_load_sens
+    bldg_design_loads.Cool_Sens += total_ducts_cool_load_sens
+    bldg_design_loads.Cool_Ducts_Lat += total_ducts_cool_load_lat
+    bldg_design_loads.Cool_Lat += total_ducts_cool_load_lat
+    bldg_design_loads.Cool_Tot += total_ducts_cool_load_sens + total_ducts_cool_load_lat
   end
 
   def self.apply_hvac_equipment_adjustments(hvac_sizing_values, weather, hvac, cfa)
@@ -1553,7 +1585,6 @@ class HVACSizing
     elsif hvac.HeatType == HPXML::HVACTypeHeatPumpGroundToAir
 
       if hvac_sizing_values.Cool_Capacity > 0
-        coil_bf = gshp_coil_bf
         hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
         hvac_sizing_values.Heat_Capacity_Supp = hvac_sizing_values.Heat_Load
 
@@ -1570,7 +1601,7 @@ class HVACSizing
 
         hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
         cool_Load_SensCap_Design = (hvac_sizing_values.Cool_Capacity_Sens * sensibleCap_CurveValue /
-                                   (1.0 + (1.0 - coil_bf * bypassFactor_CurveValue) *
+                                   (1.0 + (1.0 - gshp_coil_bf * bypassFactor_CurveValue) *
                                    (80.0 - @cool_setpoint) / (@cool_setpoint - hvac.LeavingAirTemp)))
         hvac_sizing_values.Cool_Airflow = calc_airflow_rate(cool_Load_SensCap_Design, (@cool_setpoint - hvac.LeavingAirTemp))
       else
@@ -1650,180 +1681,168 @@ class HVACSizing
     tout_cool = UnitConversions.convert(weather.design.CoolingDrybulb, 'F', 'C')
     tout_heat = UnitConversions.convert(weather.design.HeatingDrybulb, 'F', 'C')
 
-    if hvac.CoolType == HPXML::HVACTypeHeatPumpGroundToAir
-      if hvac.CoolingLoadFraction > 0
-        # Cooling
-        coil_bf = gshp_coil_bf
-        # Calculate curve point w/ and w/o defect ratios
-        design_wb_temp = UnitConversions.convert(@wetbulb_indoor_cooling, 'f', 'k')
-        design_db_temp = UnitConversions.convert(@cool_setpoint, 'f', 'k')
-        design_w_temp = UnitConversions.convert(hvac.GSHP_design_chw, 'f', 'k')
-        design_vfr_air = UnitConversions.convert(hvac_sizing_values.Cool_Airflow, 'cfm', 'm^3/s')
-        design_vfr_air_defect = UnitConversions.convert(hvac_sizing_values.Cool_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioCooling)
-        # calculate water flow based on current capacity.
-        loop_flow = [1.0, UnitConversions.convert([hvac_sizing_values.Heat_Capacity, hvac_sizing_values.Cool_Capacity].max, 'Btu/hr', 'ton')].max.floor * 3.0
-        loop_flow_m3s = UnitConversions.convert(loop_flow, 'gal/min', 'm^3/s')
+    f_ch = hvac.ChargeDefectRatio.round(3)
 
-        totalCap_CurveValue, sensibleCap_CurveValue = calc_gshp_clg_curve_value(hvac, design_wb_temp, design_db_temp, design_w_temp, design_vfr_air, loop_flow_m3s)
-        totalCap_CurveValue_d, sensibleCap_CurveValue_d = calc_gshp_clg_curve_value(hvac, design_wb_temp, design_db_temp, design_w_temp, design_vfr_air_defect, loop_flow_m3s)
+    # Cooling
+    if [HPXML::HVACTypeHeatPumpAirToAir,
+        HPXML::HVACTypeCentralAirConditioner,
+        HPXML::HVACTypeHeatPumpMiniSplit,
+        HPXML::HVACTypeMiniSplitAirConditioner,
+        HPXML::HVACTypeHeatPumpGroundToAir].include?(hvac.CoolType) && hvac.CoolingLoadFraction > 0
 
-        cap_clg_ratio = 1 / (totalCap_CurveValue_d / totalCap_CurveValue)
-        if cap_clg_ratio > 1
-          hvac_sizing_values.Cool_Capacity *= cap_clg_ratio
-          hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
-          bypassFactor_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, @cool_setpoint, gshp_coil_bf_ft_spec)
-
-          cool_Load_SensCap_Design = (hvac_sizing_values.Cool_Capacity_Sens * sensibleCap_CurveValue /
-                                     (1.0 + (1.0 - coil_bf * bypassFactor_CurveValue) *
-                                     (80.0 - @cool_setpoint) / (@cool_setpoint - hvac.LeavingAirTemp)))
-          hvac_sizing_values.Cool_Airflow = calc_airflow_rate(cool_Load_SensCap_Design, (@cool_setpoint - hvac.LeavingAirTemp))
-        end
-      end
-
-      # Heating
-      if hvac.HeatingLoadFraction > 0
-        # Calculate curve point w/ and w/o defect ratios
-        design_db_temp = UnitConversions.convert(@heat_setpoint, 'f', 'k')
-        design_w_temp = UnitConversions.convert(hvac.GSHP_design_chw, 'f', 'k')
-        design_vfr_air = UnitConversions.convert(hvac_sizing_values.Heat_Airflow, 'cfm', 'm^3/s')
-        design_vfr_air_defect = UnitConversions.convert(hvac_sizing_values.Heat_Airflow, 'cfm', 'm^3/s') * (1 + hvac.AirflowDefectRatioHeating)
-        # calculate water flow based on current capacity.
-        loop_flow = [1.0, UnitConversions.convert([hvac_sizing_values.Heat_Capacity, hvac_sizing_values.Cool_Capacity].max, 'Btu/hr', 'ton')].max.floor * 3.0
-        loop_flow_m3s = UnitConversions.convert(loop_flow, 'gal/min', 'm^3/s')
-
-        totalCap_CurveValue = calc_gshp_htg_curve_value(hvac, design_db_temp, design_w_temp, design_vfr_air, loop_flow_m3s)
-        totalCap_CurveValue_d = calc_gshp_htg_curve_value(hvac, design_db_temp, design_w_temp, design_vfr_air_defect, loop_flow_m3s)
-
-        cap_htg_ratio = 1 / (totalCap_CurveValue_d / totalCap_CurveValue)
-        if cap_htg_ratio > 1
-          hvac_sizing_values.Heat_Capacity *= cap_htg_ratio
-          hvac_sizing_values.Heat_Airflow = calc_airflow_rate(hvac_sizing_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
-        end
-      end
-    else
-      f_ch = hvac.ChargeDefectRatio.round(3)
-
-      # Cooling
-      if [HPXML::HVACTypeHeatPumpAirToAir,
-          HPXML::HVACTypeCentralAirConditioner,
-          HPXML::HVACTypeHeatPumpMiniSplit,
-          HPXML::HVACTypeMiniSplitAirConditioner].include?(hvac.CoolType) && hvac.CoolingLoadFraction > 0
-        cool_airflow_rated_defect_ratio = []
-        cool_airflow_rated_ratio = []
-        cool_cfm_m3s = UnitConversions.convert(hvac_sizing_values.Cool_Airflow, 'cfm', 'm^3/s')
+      cool_airflow_rated_defect_ratio = []
+      cool_airflow_rated_ratio = []
+      cool_cfm_m3s = UnitConversions.convert(hvac_sizing_values.Cool_Airflow, 'cfm', 'm^3/s')
+      if hvac.CoolType != HPXML::HVACTypeHeatPumpGroundToAir
         for speed in 0..(hvac.NumSpeedsCooling - 1)
           cool_airflow_rated_ratio << cool_cfm_m3s / HVAC.calc_rated_airflow(hvac_sizing_values.Cool_Capacity, hvac.RatedCFMperTonCooling[speed], hvac.CapacityRatioCooling[speed])
           cool_airflow_rated_defect_ratio << cool_cfm_m3s * (1 + hvac.AirflowDefectRatioCooling) / HVAC.calc_rated_airflow(hvac_sizing_values.Cool_Capacity, hvac.RatedCFMperTonCooling[speed], hvac.CapacityRatioCooling[speed])
         end
-        if not cool_airflow_rated_defect_ratio.empty?
-          cap_clg_ratios = []
-          for speed in 0..(hvac.NumSpeedsCooling - 1)
-            # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
+      else
+        cool_airflow_rated_ratio = [1.0] # actual air flow is equal to rated (before applying defect ratio) in current methodology
+        cool_airflow_rated_defect_ratio = [1 + hvac.AirflowDefectRatioCooling]
+      end
+      if not cool_airflow_rated_defect_ratio.empty?
+        cap_clg_ratios = []
+        for speed in 0..(hvac.NumSpeedsCooling - 1)
+          # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
+          if hvac.CoolType != HPXML::HVACTypeHeatPumpGroundToAir
             a1_AF_Qgr_c = hvac.COOL_CAP_FFLOW_SPEC[speed][0]
             a2_AF_Qgr_c = hvac.COOL_CAP_FFLOW_SPEC[speed][1]
             a3_AF_Qgr_c = hvac.COOL_CAP_FFLOW_SPEC[speed][2]
-
-            p_values, qgr_values, ff_chg_values = HVAC.get_installation_quality_cooling_coeff(f_ch)
-
-            a1_CH_Qgr_c = qgr_values[0]
-            a2_CH_Qgr_c = qgr_values[1]
-            a3_CH_Qgr_c = qgr_values[2]
-            a4_CH_Qgr_c = qgr_values[3]
-
-            ff_ch_c = (1.0 / (1.0 + (qgr_values[0] + (qgr_values[1] * ff_chg_values[0]) + (qgr_values[2] * ff_chg_values[1]) + (qgr_values[3] * f_ch)) * f_ch)).round(3)
-
-            q0_CH = a1_CH_Qgr_c
-            q1_CH = a2_CH_Qgr_c * tin_cool
-            q2_CH = a3_CH_Qgr_c * tout_cool
-            q3_CH = a4_CH_Qgr_c * f_ch
-            y_CH_Q_c = 1 + ((q0_CH + q1_CH + q2_CH + q3_CH) * f_ch)
-
-            q0_AF_CH = a1_AF_Qgr_c
-            q1_AF_CH = a2_AF_Qgr_c * ff_ch_c
-            q2_AF_CH = a3_AF_Qgr_c * ff_ch_c * ff_ch_c
-            p_CH_Q_c = y_CH_Q_c / (q0_AF_CH + q1_AF_CH + q2_AF_CH)
-
-            ff_AF_c = cool_airflow_rated_defect_ratio[speed].round(3)
-            ff_AF_c_nodefect = cool_airflow_rated_ratio[speed].round(3)
-            ff_AF_comb_c = ff_ch_c * ff_AF_c
-
-            q0_AF_comb = a1_AF_Qgr_c
-            q1_AF_comb = a2_AF_Qgr_c * ff_AF_comb_c
-            q2_AF_comb = a3_AF_Qgr_c * ff_AF_comb_c * ff_AF_comb_c
-            p_AF_Q_c = q0_AF_comb + q1_AF_comb + q2_AF_comb
-
-            cool_cap_fff = (p_CH_Q_c * p_AF_Q_c)
-            cool_cap_fff_nodefect = a1_AF_Qgr_c + a2_AF_Qgr_c * ff_AF_c_nodefect + a3_AF_Qgr_c * ff_AF_c_nodefect * ff_AF_c_nodefect
-            cap_clg_ratio = 1 / (cool_cap_fff / cool_cap_fff_nodefect)
-            cap_clg_ratios << cap_clg_ratio
+          else
+            a1_AF_Qgr_c = 1 - hvac.COOL_CAP_CURVE_SPEC[hvac.SizingSpeed][3]
+            a2_AF_Qgr_c = hvac.COOL_CAP_CURVE_SPEC[hvac.SizingSpeed][3]
+            a3_AF_Qgr_c = 0
           end
-          prev_capacity = hvac_sizing_values.Cool_Capacity
-          hvac_sizing_values.Cool_Capacity *= cap_clg_ratios.max
-          hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
+
+          p_values, qgr_values, ff_chg_values = HVAC.get_installation_quality_cooling_coeff(f_ch)
+
+          a1_CH_Qgr_c = qgr_values[0]
+          a2_CH_Qgr_c = qgr_values[1]
+          a3_CH_Qgr_c = qgr_values[2]
+          a4_CH_Qgr_c = qgr_values[3]
+
+          q0_CH = a1_CH_Qgr_c
+          q1_CH = a2_CH_Qgr_c * tin_cool
+          q2_CH = a3_CH_Qgr_c * tout_cool
+          q3_CH = a4_CH_Qgr_c * f_ch
+          y_CH_Q_c = 1 + ((q0_CH + q1_CH + q2_CH + q3_CH) * f_ch)
+
+          ff_ch_c = (1.0 / (1.0 + (qgr_values[0] + (qgr_values[1] * ff_chg_values[0]) + (qgr_values[2] * ff_chg_values[1]) + (qgr_values[3] * f_ch)) * f_ch)).round(3)
+          ff_AF_c = cool_airflow_rated_defect_ratio[speed].round(3)
+          ff_AF_comb_c = ff_ch_c * ff_AF_c
+
+          q_AF_CH = a1_AF_Qgr_c + (a2_AF_Qgr_c * ff_ch_c) + (a3_AF_Qgr_c * ff_ch_c * ff_ch_c)
+          p_CH_Q_c = y_CH_Q_c / q_AF_CH
+
+          p_AF_Q_c = a1_AF_Qgr_c + (a2_AF_Qgr_c * ff_AF_comb_c) + (a3_AF_Qgr_c * ff_AF_comb_c * ff_AF_comb_c)
+
+          cool_cap_fff = (p_CH_Q_c * p_AF_Q_c)
+
+          # calculate the capacity impact by defects
+          ff_AF_c_nodefect = cool_airflow_rated_ratio[speed].round(3)
+          if hvac.CoolType != HPXML::HVACTypeHeatPumpGroundToAir
+            cool_cap_fff_nodefect = a1_AF_Qgr_c + a2_AF_Qgr_c * ff_AF_c_nodefect + a3_AF_Qgr_c * ff_AF_c_nodefect * ff_AF_c_nodefect
+          else
+            cool_cap_fff_nodefect = 1
+          end
+          cap_clg_ratio = 1 / (cool_cap_fff / cool_cap_fff_nodefect)
+          cap_clg_ratios << cap_clg_ratio
+        end
+
+        prev_capacity = hvac_sizing_values.Cool_Capacity
+        hvac_sizing_values.Cool_Capacity *= cap_clg_ratios.max
+        hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
+        if hvac.CoolType != HPXML::HVACTypeHeatPumpGroundToAir
           if prev_capacity > 0 # Preserve cfm/ton
             hvac_sizing_values.Cool_Airflow = hvac_sizing_values.Cool_Airflow * hvac_sizing_values.Cool_Capacity / prev_capacity
           else
             hvac_sizing_values.Cool_Airflow = 0.0
           end
+        else
+          design_wb_temp = UnitConversions.convert(@wetbulb_indoor_cooling, 'f', 'k')
+          design_db_temp = UnitConversions.convert(@cool_setpoint, 'f', 'k')
+          design_w_temp = UnitConversions.convert(hvac.GSHP_design_chw, 'f', 'k')
+          # calculate water flow based on current capacity.
+          loop_flow = [1.0, UnitConversions.convert([hvac_sizing_values.Heat_Capacity, hvac_sizing_values.Cool_Capacity].max, 'Btu/hr', 'ton')].max.floor * 3.0
+          sensibleCap_CurveValue = calc_gshp_clg_curve_value(hvac, design_wb_temp, design_db_temp, design_w_temp, UnitConversions.convert(hvac_sizing_values.Cool_Airflow, 'cfm', 'm^3/s'), UnitConversions.convert(loop_flow, 'gal/min', 'm^3/s'))[1]
+          bypassFactor_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, @cool_setpoint, gshp_coil_bf_ft_spec)
+          cool_Load_SensCap_Design = (hvac_sizing_values.Cool_Capacity_Sens * sensibleCap_CurveValue /
+                                     (1.0 + (1.0 - gshp_coil_bf * bypassFactor_CurveValue) *
+                                     (80.0 - @cool_setpoint) / (@cool_setpoint - hvac.LeavingAirTemp)))
+          hvac_sizing_values.Cool_Airflow = calc_airflow_rate(cool_Load_SensCap_Design, (@cool_setpoint - hvac.LeavingAirTemp))
         end
       end
+    end
 
-      # Heating
-      if [HPXML::HVACTypeHeatPumpAirToAir,
-          HPXML::HVACTypeHeatPumpMiniSplit].include?(hvac.HeatType) && hvac.HeatingLoadFraction > 0
-        heat_airflow_rated_defect_ratio = []
-        heat_airflow_rated_ratio = []
-        heat_cfm_m3s = UnitConversions.convert(hvac_sizing_values.Heat_Airflow, 'cfm', 'm^3/s')
+    # Heating
+    if [HPXML::HVACTypeHeatPumpAirToAir,
+        HPXML::HVACTypeHeatPumpMiniSplit,
+        HPXML::HVACTypeHeatPumpGroundToAir].include?(hvac.HeatType) && hvac.HeatingLoadFraction > 0
+      heat_airflow_rated_defect_ratio = []
+      heat_airflow_rated_ratio = []
+      heat_cfm_m3s = UnitConversions.convert(hvac_sizing_values.Heat_Airflow, 'cfm', 'm^3/s')
+      if hvac.HeatType != HPXML::HVACTypeHeatPumpGroundToAir
         for speed in 0..(hvac.NumSpeedsHeating - 1)
           heat_airflow_rated_ratio << heat_cfm_m3s / HVAC.calc_rated_airflow(hvac_sizing_values.Heat_Capacity, hvac.RatedCFMperTonHeating[speed], hvac.CapacityRatioHeating[speed])
           heat_airflow_rated_defect_ratio << heat_cfm_m3s * (1 + hvac.AirflowDefectRatioHeating) / HVAC.calc_rated_airflow(hvac_sizing_values.Heat_Capacity, hvac.RatedCFMperTonHeating[speed], hvac.CapacityRatioHeating[speed])
         end
-        if not heat_airflow_rated_defect_ratio.empty?
-          cap_htg_ratios = []
-          for speed in 0..(hvac.NumSpeedsHeating - 1)
+      else
+        heat_airflow_rated_ratio = [1.0] # actual air flow is equal to rated (before applying defect ratio) in current methodology
+        heat_airflow_rated_defect_ratio = [1 + hvac.AirflowDefectRatioHeating]
+      end
+      if not heat_airflow_rated_defect_ratio.empty?
+        cap_htg_ratios = []
+        for speed in 0..(hvac.NumSpeedsHeating - 1)
+          if hvac.HeatType != HPXML::HVACTypeHeatPumpGroundToAir
             a1_AF_Qgr_h = hvac.HEAT_CAP_FFLOW_SPEC[speed][0]
             a2_AF_Qgr_h = hvac.HEAT_CAP_FFLOW_SPEC[speed][1]
             a3_AF_Qgr_h = hvac.HEAT_CAP_FFLOW_SPEC[speed][2]
-
-            p_values, qgr_values, ff_chg_values = HVAC.get_installation_quality_heating_coeff(f_ch)
-
-            a1_CH_Qgr_h = qgr_values[0]
-            a2_CH_Qgr_h = qgr_values[1]
-            a3_CH_Qgr_h = qgr_values[2]
-
-            ff_ch_h = (1 / (1 + (qgr_values[0] + qgr_values[1] * ff_chg_values[0] + qgr_values[2] * f_ch) * f_ch)).round(3)
-
-            qh1_CH = a1_CH_Qgr_h
-            qh2_CH = a2_CH_Qgr_h * tout_heat
-            qh3_CH = a3_CH_Qgr_h * f_ch
-            y_CH_Q_h = 1 + ((qh1_CH + qh2_CH + qh3_CH) * f_ch)
-
-            qh0_AF_CH = a1_AF_Qgr_h
-            qh1_AF_CH = a2_AF_Qgr_h * ff_ch_h
-            qh2_AF_CH = a3_AF_Qgr_h * ff_ch_h * ff_ch_h
-            p_CH_Q_h = y_CH_Q_h / (qh0_AF_CH + qh1_AF_CH + qh2_AF_CH)
-
-            ff_AF_h = heat_airflow_rated_defect_ratio[speed].round(3)
-            ff_AF_h_nodefect = heat_airflow_rated_ratio[speed].round(3)
-            ff_AF_comb_h = ff_ch_h * ff_AF_h
-
-            qh0_AF_comb = a1_AF_Qgr_h
-            qh1_AF_comb = a2_AF_Qgr_h * ff_AF_comb_h
-            qh2_AF_comb = a3_AF_Qgr_h * ff_AF_comb_h * ff_AF_comb_h
-            p_AF_Q_h = qh0_AF_comb + qh1_AF_comb + qh2_AF_comb
-
-            heat_cap_fff = (p_CH_Q_h * p_AF_Q_h)
-            heat_cap_fff_nodefect = a1_AF_Qgr_h + a2_AF_Qgr_h * ff_AF_h_nodefect + a3_AF_Qgr_h * ff_AF_h_nodefect * ff_AF_h_nodefect
-            cap_htg_ratio = 1 / (heat_cap_fff / heat_cap_fff_nodefect)
-            cap_htg_ratios << cap_htg_ratio
-          end
-          prev_capacity = hvac_sizing_values.Heat_Capacity
-          hvac_sizing_values.Heat_Capacity *= cap_htg_ratios.max
-          if prev_capacity > 0 # Preserve cfm/ton
-            hvac_sizing_values.Heat_Airflow = hvac_sizing_values.Heat_Airflow * hvac_sizing_values.Heat_Capacity / prev_capacity
           else
-            hvac_sizing_values.Heat_Airflow = 0.0
+            a1_AF_Qgr_h = 1 - hvac.HEAT_CAP_CURVE_SPEC[hvac.SizingSpeed][3]
+            a2_AF_Qgr_h = hvac.HEAT_CAP_CURVE_SPEC[hvac.SizingSpeed][3]
+            a3_AF_Qgr_h = 0
           end
+
+          p_values, qgr_values, ff_chg_values = HVAC.get_installation_quality_heating_coeff(f_ch)
+
+          a1_CH_Qgr_h = qgr_values[0]
+          a2_CH_Qgr_h = qgr_values[1]
+          a3_CH_Qgr_h = qgr_values[2]
+
+          qh1_CH = a1_CH_Qgr_h
+          qh2_CH = a2_CH_Qgr_h * tout_heat
+          qh3_CH = a3_CH_Qgr_h * f_ch
+          y_CH_Q_h = 1 + ((qh1_CH + qh2_CH + qh3_CH) * f_ch)
+
+          ff_ch_h = (1 / (1 + (qgr_values[0] + qgr_values[1] * ff_chg_values[0] + qgr_values[2] * f_ch) * f_ch)).round(3)
+          ff_AF_h = heat_airflow_rated_defect_ratio[speed].round(3)
+          ff_AF_comb_h = ff_ch_h * ff_AF_h
+
+          qh_AF_CH = a1_AF_Qgr_h + (a2_AF_Qgr_h * ff_ch_h) + (a3_AF_Qgr_h * ff_ch_h * ff_ch_h)
+          p_CH_Q_h = y_CH_Q_h / qh_AF_CH
+
+          p_AF_Q_h = a1_AF_Qgr_h + (a2_AF_Qgr_h * ff_AF_comb_h) + (a3_AF_Qgr_h * ff_AF_comb_h * ff_AF_comb_h)
+
+          heat_cap_fff = (p_CH_Q_h * p_AF_Q_h)
+
+          # calculate the capacity impact by defects
+          ff_AF_h_nodefect = heat_airflow_rated_ratio[speed].round(3)
+          if hvac.HeatType != HPXML::HVACTypeHeatPumpGroundToAir
+            heat_cap_fff_nodefect = a1_AF_Qgr_h + a2_AF_Qgr_h * ff_AF_h_nodefect + a3_AF_Qgr_h * ff_AF_h_nodefect * ff_AF_h_nodefect
+          else
+            heat_cap_fff_nodefect = 1
+          end
+          cap_htg_ratio = 1 / (heat_cap_fff / heat_cap_fff_nodefect)
+          cap_htg_ratios << cap_htg_ratio
+        end
+        prev_capacity = hvac_sizing_values.Heat_Capacity
+        hvac_sizing_values.Heat_Capacity *= cap_htg_ratios.max
+        if prev_capacity > 0 # Preserve cfm/ton
+          hvac_sizing_values.Heat_Airflow = hvac_sizing_values.Heat_Airflow * hvac_sizing_values.Heat_Capacity / prev_capacity
+        else
+          hvac_sizing_values.Heat_Airflow = 0.0
         end
       end
     end
@@ -2002,7 +2021,7 @@ class HVACSizing
   end
 
   def self.get_ventilation_rates()
-    vent_fans_mech = @hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }
+    vent_fans_mech = @hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && f.flow_rate > 0 && f.hours_in_operation > 0 }
     if vent_fans_mech.empty?
       return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     end
@@ -2058,24 +2077,29 @@ class HVACSizing
     return load_or_capacity / (1.1 * @acf * deltaT)
   end
 
-  def self.calc_gshp_clg_curve_value(hvac, wb_temp, db_temp, w_temp, vfr_air, loop_flow)
+  def self.calc_gshp_clg_curve_value(hvac, wb_temp, db_temp, w_temp, vfr_air, loop_flow = nil, rated_vfr_air = nil)
     # Reference conditions in thesis with largest capacity:
     # See Appendix B Figure B.3 of  https://hvac.okstate.edu/sites/default/files/pubs/theses/MS/27-Tang_Thesis_05.pdf
     ref_temp = 283 # K
-    ref_vfr_air = UnitConversions.convert(1200, 'cfm', 'm^3/s')
+    if rated_vfr_air.nil?
+      # rated volume flow rate used to fit the curve
+      ref_vfr_air = UnitConversions.convert(1200, 'cfm', 'm^3/s')
+    else
+      ref_vfr_air = UnitConversions.convert(rated_vfr_air, 'cfm', 'm^3/s')
+    end
     ref_vfr_water = 0.000284
 
-    a_1 = hvac.COOL_CAP_FT_SPEC[hvac.SizingSpeed][0]
-    a_2 = hvac.COOL_CAP_FT_SPEC[hvac.SizingSpeed][1]
-    a_3 = hvac.COOL_CAP_FT_SPEC[hvac.SizingSpeed][2]
-    a_4 = hvac.COOL_CAP_FT_SPEC[hvac.SizingSpeed][3]
-    a_5 = hvac.COOL_CAP_FT_SPEC[hvac.SizingSpeed][4]
-    b_1 = hvac.COOL_SH_FT_SPEC[hvac.SizingSpeed][0]
-    b_2 = hvac.COOL_SH_FT_SPEC[hvac.SizingSpeed][1]
-    b_3 = hvac.COOL_SH_FT_SPEC[hvac.SizingSpeed][2]
-    b_4 = hvac.COOL_SH_FT_SPEC[hvac.SizingSpeed][3]
-    b_5 = hvac.COOL_SH_FT_SPEC[hvac.SizingSpeed][4]
-    b_6 = hvac.COOL_SH_FT_SPEC[hvac.SizingSpeed][5]
+    a_1 = hvac.COOL_CAP_CURVE_SPEC[hvac.SizingSpeed][0]
+    a_2 = hvac.COOL_CAP_CURVE_SPEC[hvac.SizingSpeed][1]
+    a_3 = hvac.COOL_CAP_CURVE_SPEC[hvac.SizingSpeed][2]
+    a_4 = hvac.COOL_CAP_CURVE_SPEC[hvac.SizingSpeed][3]
+    a_5 = hvac.COOL_CAP_CURVE_SPEC[hvac.SizingSpeed][4]
+    b_1 = hvac.COOL_SH_CURVE_SPEC[hvac.SizingSpeed][0]
+    b_2 = hvac.COOL_SH_CURVE_SPEC[hvac.SizingSpeed][1]
+    b_3 = hvac.COOL_SH_CURVE_SPEC[hvac.SizingSpeed][2]
+    b_4 = hvac.COOL_SH_CURVE_SPEC[hvac.SizingSpeed][3]
+    b_5 = hvac.COOL_SH_CURVE_SPEC[hvac.SizingSpeed][4]
+    b_6 = hvac.COOL_SH_CURVE_SPEC[hvac.SizingSpeed][5]
 
     if not loop_flow.nil?
       totalCap_CurveValue = a_1 + wb_temp / ref_temp * a_2 + w_temp / ref_temp * a_3 + vfr_air / ref_vfr_air * a_4 + loop_flow / ref_vfr_water * a_5
@@ -2404,6 +2428,15 @@ class HVACSizing
       if hpxml_hvac_ap.respond_to? :heat_cap_fflow_spec
         hvac.HEAT_CAP_FFLOW_SPEC = hpxml_hvac_ap.heat_cap_fflow_spec
       end
+      if hpxml_hvac_ap.respond_to? :cool_cap_curve_spec
+        hvac.COOL_CAP_CURVE_SPEC = hpxml_hvac_ap.cool_cap_curve_spec
+      end
+      if hpxml_hvac_ap.respond_to? :cool_sh_curve_spec
+        hvac.COOL_SH_CURVE_SPEC = hpxml_hvac_ap.cool_sh_curve_spec
+      end
+      if hpxml_hvac_ap.respond_to? :heat_cap_curve_spec
+        hvac.HEAT_CAP_CURVE_SPEC = hpxml_hvac_ap.heat_cap_curve_spec
+      end
 
       # WLHP
       if hpxml_hvac.respond_to? :heating_efficiency_cop
@@ -2441,6 +2474,7 @@ class HVACSizing
       # FUTURE: Consolidate w/ ducts code in measure.rb
       hvac.Ducts = []
       next unless not hpxml_hvac.distribution_system.nil?
+
       lto = { supply_percent: nil, supply_cfm25: nil, return_percent: nil, return_cfm25: nil }
       hpxml_hvac.distribution_system.duct_leakage_measurements.each do |m|
         next unless m.duct_leakage_total_or_to_outside == 'to outside'
@@ -2490,6 +2524,7 @@ class HVACSizing
         hvac.Ducts << d
       end
       next unless (lto[:return_percent].to_f + lto[:return_cfm25].to_f) > 0 && total_uncond_return_area == 0
+
       d = DuctInfo.new
       d.Side = HPXML::DuctTypeReturn
       d.Location = HPXML::LocationOutside
@@ -2543,8 +2578,8 @@ class HVACSizing
     return true_az
   end
 
-  def self.get_space_ua_values(space_type, weather)
-    if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? space_type
+  def self.get_space_ua_values(location, weather)
+    if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? location
       fail 'Method should not be called for a conditioned space.'
     end
 
@@ -2554,8 +2589,8 @@ class HVACSizing
 
     # Surface UAs
     (@hpxml.roofs + @hpxml.frame_floors + @hpxml.walls + @hpxml.foundation_walls).each do |surface|
-      next unless ((space_type == surface.interior_adjacent_to && space_UAs.keys.include?(surface.exterior_adjacent_to)) ||
-                   (space_type == surface.exterior_adjacent_to && space_UAs.keys.include?(surface.interior_adjacent_to)))
+      next unless ((location == surface.interior_adjacent_to && space_UAs.keys.include?(surface.exterior_adjacent_to)) ||
+                   (location == surface.exterior_adjacent_to && space_UAs.keys.include?(surface.interior_adjacent_to)))
 
       if [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationOutside
         space_UAs[HPXML::LocationOutside] += (1.0 / surface.insulation_assembly_r_value) * surface.area
@@ -2574,9 +2609,9 @@ class HVACSizing
     # Infiltration UA
     infiltration_cfm = nil
     ach = nil
-    if [HPXML::LocationCrawlspaceVented, HPXML::LocationAtticVented].include? space_type
+    if [HPXML::LocationCrawlspaceVented, HPXML::LocationAtticVented].include? location
       # Vented space
-      if space_type == HPXML::LocationCrawlspaceVented
+      if location == HPXML::LocationCrawlspaceVented
         vented_crawl = @hpxml.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceVented }[0]
         sla = vented_crawl.vented_crawlspace_sla
       else
@@ -2589,26 +2624,9 @@ class HVACSizing
       end
       ach = Airflow.get_infiltration_ACH_from_SLA(sla, 8.202, weather) if ach.nil?
     else # Unvented space
-      ach = 0.1 # Assumption
+      ach = Airflow.get_default_unvented_space_ach()
     end
-    # FUTURE: Reuse code from Geometry.set_zone_volumes()
-    if [HPXML::LocationAtticVented, HPXML::LocationAtticUnvented].include? space_type
-      floor_area = @hpxml.frame_floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? space_type }.map { |s| s.area }.sum(0.0)
-      roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }
-      avg_pitch = roofs.map { |r| r.pitch }.sum(0.0) / roofs.size
-      # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
-      length = floor_area**0.5
-      height = 0.5 * Math.sin(Math.atan(avg_pitch / 12.0)) * length
-      volume = [floor_area * height / 3.0, 0.01].max
-    else # foundation/garage space
-      floor_area = @hpxml.slabs.select { |s| s.interior_adjacent_to == space_type }.map { |s| s.area }.sum(0.0)
-      if space_type == HPXML::LocationGarage
-        height = 8.0
-      else
-        height = @hpxml.foundation_walls.select { |w| w.interior_adjacent_to == space_type }.map { |w| w.height }.max
-      end
-      volume = floor_area * height
-    end
+    volume = Geometry.calculate_zone_volume(@hpxml, location)
     infiltration_cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
     outside_air_density = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * (weather.data.AnnualAvgDrybulb + 460.0))
     space_UAs['infil'] = infiltration_cfm * outside_air_density * Gas.Air.cp * UnitConversions.convert(1.0, 'hr', 'min')
@@ -2622,8 +2640,8 @@ class HVACSizing
     return space_UAs
   end
 
-  def self.calculate_space_design_temps(space_type, weather, conditioned_design_temp, design_db, ground_db, is_cooling_for_unvented_attic_roof_insulation = false)
-    space_UAs = get_space_ua_values(space_type, weather)
+  def self.calculate_space_design_temps(location, weather, conditioned_design_temp, design_db, ground_db, is_cooling_for_unvented_attic_roof_insulation = false)
+    space_UAs = get_space_ua_values(location, weather)
 
     # Calculate space design temp from space UAs
     design_temp = nil
@@ -2681,8 +2699,8 @@ class HVACSizing
     return design_temp
   end
 
-  def self.calculate_scheduled_space_design_temps(space_type, setpoint, oa_db, gnd_db)
-    space_values = Geometry.get_temperature_scheduled_space_values(space_type)
+  def self.calculate_scheduled_space_design_temps(location, setpoint, oa_db, gnd_db)
+    space_values = Geometry.get_temperature_scheduled_space_values(location)
     design_temp = setpoint * space_values[:indoor_weight] + oa_db * space_values[:outdoor_weight] + gnd_db * space_values[:ground_weight]
     if not space_values[:temp_min].nil?
       design_temp = [design_temp, space_values[:temp_min]].max
@@ -3388,6 +3406,7 @@ class HVACInfo
                 :RatedCFMperTonCooling, :RatedCFMperTonHeating, :ChargeDefectRatio,
                 :COOL_CAP_FT_SPEC, :HEAT_CAP_FT_SPEC, :COOL_SH_FT_SPEC,
                 :COOL_CAP_FFLOW_SPEC, :HEAT_CAP_FFLOW_SPEC,
+                :COOL_CAP_CURVE_SPEC, :COOL_SH_CURVE_SPEC, :HEAT_CAP_CURVE_SPEC,
                 :SHRRated, :CapacityRatioCooling, :CapacityRatioHeating,
                 :OverSizeLimit, :OverSizeDelta,
                 :HeatingEIR, :CoolingEIR, :SizingSpeed, :HeatingCOP,

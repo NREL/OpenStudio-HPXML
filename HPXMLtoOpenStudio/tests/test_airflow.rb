@@ -6,36 +6,11 @@ require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
+require_relative 'util.rb'
 
 class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
   def sample_files_dir
     return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
-  end
-
-  def get_ems_values(ems_objects, name)
-    values = {}
-    ems_objects.each do |ems_object|
-      next unless ems_object.name.to_s.include? name.gsub(' ', '_')
-
-      ems_object.lines.each do |line|
-        next unless line.downcase.start_with? 'set'
-
-        lhs, rhs = line.split('=')
-        lhs = lhs.gsub('Set', '').gsub('set', '').strip
-        rhs = rhs.gsub(',', '').gsub(';', '').strip
-        values[lhs] = [] if values[lhs].nil?
-        # eg. "Q = Q + 1.5"
-        if rhs.include? '+'
-          rhs_els = rhs.split('+')
-          rhs = rhs_els.map { |s| s.to_f }.sum(0.0)
-        else
-          rhs = rhs.to_f
-        end
-        values[lhs] << rhs
-      end
-    end
-    assert_operator(values.size, :>, 0)
-    return values
   end
 
   def get_eed_for_ventilation(model, ee_name)
@@ -321,10 +296,10 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
 
     # Get HPXML values
     bath_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }[0]
-    bath_fan_cfm = bath_fan.rated_flow_rate * bath_fan.quantity
+    bath_fan_cfm = bath_fan.flow_rate * bath_fan.quantity
     bath_fan_power = bath_fan.fan_power * bath_fan.quantity
     kitchen_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }[0]
-    kitchen_fan_cfm = kitchen_fan.rated_flow_rate * (kitchen_fan.quantity.nil? ? 1 : kitchen_fan.quantity)
+    kitchen_fan_cfm = kitchen_fan.flow_rate * (kitchen_fan.quantity.nil? ? 1 : kitchen_fan.quantity)
     kitchen_fan_power = kitchen_fan.fan_power * (kitchen_fan.quantity.nil? ? 1 : kitchen_fan.quantity)
 
     # Check infiltration/ventilation program
@@ -358,7 +333,7 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
 
     # Check infiltration/ventilation program
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameInfiltration} program")
-    assert_in_epsilon(clothes_dryer_cfm, UnitConversions.convert(program_values['Qdryer'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_operator(UnitConversions.convert(program_values['Qdryer'].sum, 'm^3/s', 'cfm'), :>, 0)
   end
 
   def test_multiple_mechvent
@@ -367,30 +342,32 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
-    bath_fans = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }
-    bath_fan_cfm = bath_fans.map { |bath_fan| bath_fan.rated_flow_rate * bath_fan.quantity }.sum(0.0)
+    vent_fans = hpxml.ventilation_fans.select { |f| f.flow_rate > 0 && f.hours_in_operation.to_f > 0 }
+
+    bath_fans = vent_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }
+    bath_fan_cfm = bath_fans.map { |bath_fan| bath_fan.flow_rate * bath_fan.quantity }.sum(0.0)
     bath_fan_power = bath_fans.map { |bath_fan| bath_fan.fan_power * bath_fan.quantity }.sum(0.0)
-    kitchen_fans = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }
-    kitchen_fan_cfm = kitchen_fans.map { |kitchen_fan| kitchen_fan.rated_flow_rate }.sum(0.0)
+    kitchen_fans = vent_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }
+    kitchen_fan_cfm = kitchen_fans.map { |kitchen_fan| kitchen_fan.flow_rate }.sum(0.0)
     kitchen_fan_power = kitchen_fans.map { |kitchen_fan| kitchen_fan.fan_power }.sum(0.0)
 
-    # Get HPXML values
-    vent_fan_sup = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && (f.fan_type == HPXML::MechVentTypeSupply) }
+    vent_fan_sup = vent_fans.select { |f| f.used_for_whole_building_ventilation && (f.fan_type == HPXML::MechVentTypeSupply) }
     vent_fan_cfm_sup = vent_fan_sup.map { |f| f.average_total_unit_flow_rate }.sum(0.0)
     vent_fan_power_sup = vent_fan_sup.map { |f| f.average_unit_fan_power }.sum(0.0)
-    vent_fan_exh = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && (f.fan_type == HPXML::MechVentTypeExhaust) }
+    vent_fan_exh = vent_fans.select { |f| f.used_for_whole_building_ventilation && (f.fan_type == HPXML::MechVentTypeExhaust) }
     vent_fan_cfm_exh = vent_fan_exh.map { |f| f.average_total_unit_flow_rate }.sum(0.0)
     vent_fan_power_exh = vent_fan_exh.map { |f| f.average_unit_fan_power }.sum(0.0)
-    vent_fan_bal = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && (f.fan_type == HPXML::MechVentTypeBalanced) }
+    vent_fan_bal = vent_fans.select { |f| f.used_for_whole_building_ventilation && (f.fan_type == HPXML::MechVentTypeBalanced) }
     vent_fan_cfm_bal = vent_fan_bal.map { |f| f.average_total_unit_flow_rate }.sum(0.0)
     vent_fan_power_bal = vent_fan_bal.map { |f| f.average_unit_fan_power }.sum(0.0)
-    vent_fan_ervhrv = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include?(f.fan_type) }
+    vent_fan_ervhrv = vent_fans.select { |f| f.used_for_whole_building_ventilation && [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include?(f.fan_type) }
     vent_fan_cfm_ervhrv = vent_fan_ervhrv.map { |f| f.average_total_unit_flow_rate }.sum(0.0)
     vent_fan_power_ervhrv = vent_fan_ervhrv.map { |f| f.average_unit_fan_power }.sum(0.0)
-    vent_fan_cfis = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && (f.fan_type == HPXML::MechVentTypeCFIS) }
+    vent_fan_cfis = vent_fans.select { |f| f.used_for_whole_building_ventilation && (f.fan_type == HPXML::MechVentTypeCFIS) }
     vent_fan_cfm_cfis = vent_fan_cfis.map { |f| f.oa_unit_flow_rate }.sum(0.0)
     vent_fan_power_cfis = vent_fan_cfis.map { |f| f.fan_power }.sum(0.0)
     vent_fan_mins_cfis = vent_fan_cfis.map { |f| f.hours_in_operation / 24.0 * 60.0 }.sum(0.0)
+
     # total mech vent fan power excluding cfis
     total_mechvent_pow = vent_fan_power_sup + vent_fan_power_exh + vent_fan_power_bal + vent_fan_power_ervhrv
     fraction_heat_gain = (1.0 * vent_fan_power_sup + 0.0 * vent_fan_power_sup + 0.5 * (vent_fan_power_bal + vent_fan_power_ervhrv)) / total_mechvent_pow
@@ -518,14 +495,14 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     # Base
     hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base.xml')))
     total_area, exterior_area = hpxml.compartmentalization_boundary_areas
-    assert_equal(5216, exterior_area)
-    assert_equal(5216, total_area)
+    assert_in_delta(5216, exterior_area, 1.0)
+    assert_in_delta(5216, total_area, 1.0)
 
     # Test adjacent garage
     hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base-enclosure-garage.xml')))
     total_area, exterior_area = hpxml.compartmentalization_boundary_areas
-    assert_equal(4976, exterior_area)
-    assert_equal(5216, total_area)
+    assert_in_delta(4976, exterior_area, 1.0)
+    assert_in_delta(5216, total_area, 1.0)
 
     # Test unvented attic/crawlspace within infiltration volume
     hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base-foundation-unvented-crawlspace.xml')))
@@ -536,8 +513,8 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
       foundation.within_infiltration_volume = true
     end
     total_area, exterior_area = hpxml.compartmentalization_boundary_areas
-    assert_equal(5066, exterior_area)
-    assert_equal(5066, total_area)
+    assert_in_delta(5000, exterior_area, 1.0)
+    assert_in_delta(5000, total_area, 1.0)
 
     # Test unvented attic/crawlspace not within infiltration volume
     hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base-foundation-unvented-crawlspace.xml')))
@@ -548,14 +525,14 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
       foundation.within_infiltration_volume = false
     end
     total_area, exterior_area = hpxml.compartmentalization_boundary_areas
-    assert_equal(3900, exterior_area)
-    assert_equal(3900, total_area)
+    assert_in_delta(3900, exterior_area, 1.0)
+    assert_in_delta(3900, total_area, 1.0)
 
     # Test multifamily
     hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily.xml')))
     total_area, exterior_area = hpxml.compartmentalization_boundary_areas
-    assert_equal(686, exterior_area)
-    assert_equal(2780, total_area)
+    assert_in_delta(686, exterior_area, 1.0)
+    assert_in_delta(2780, total_area, 1.0)
   end
 
   def test_infiltration_assumed_height

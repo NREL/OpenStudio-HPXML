@@ -15,24 +15,28 @@ For more information on running simulations, generating HPXML files, etc., pleas
 ## Workflows
 
 A simple [run_simulation.rb script](https://github.com/NREL/OpenStudio-HPXML/blob/master/workflow/run_simulation.rb) is provided to run a residential EnergyPlus simulation from an HPXML file.
-See the [Getting Started](https://openstudio-hpxml.readthedocs.io/en/latest/getting_started.html#getting-started) section of the documentation for running simulations.
+See the [Usage Instructions](https://openstudio-hpxml.readthedocs.io/en/latest/usage_instructions.html) for documentation on running the workflow.
 
-Since [OpenStudio measures](http://nrel.github.io/OpenStudio-user-documentation/getting_started/about_measures/) are used for model generation, additional OpenStudio-based workflows and interfaces can be used instead if desired.
+Since [OpenStudio measures](http://nrel.github.io/OpenStudio-user-documentation/getting_started/about_measures/) are used for model generation, additional OpenStudio-based workflows and interfaces can instead be used if desired.
 
 ## Measures
 
-This repository contains two OpenStudio measures:
+This repository contains several OpenStudio measures:
+- `BuildResidentialHPXML`: A measure that generates an HPXML file from a set of building description inputs (including, e.g., simplified geometry inputs).
+- `BuildResidentialScheduleFile`: A measure that generates a CSV of detailed schedules (e.g., stochastic occupancy) for use in the simulation.
 - `HPXMLtoOpenStudio`: A measure that translates an HPXML file to an OpenStudio model.
-- `SimulationOutputReport`: A reporting measure that generates a variety of annual/timeseries CSV outputs for a residential HPXML-based model.
+- `ReportSimulationOutput`: A reporting measure that generates a variety of simulation-based annual/timeseries outputs in CSV or JSON format.
+- `ReportHPXMLOutput`: A reporting measure that generates a variety of HPXML-based outputs (including defaults like autosized HVAC capacities) in CSV or JSON format.
 
 ## Projects
 
 The OpenStudio-HPXML workflow is used by a number of other residential projects, including:
-- [Energy Rating Index (ERI)](https://github.com/NREL/OpenStudio-ERI)
-- Home Energy Score (pending)
-- Weatherization Assistant (pending)
-- ResStock (pending)
+- [Energy Rating Index (ERI) and ENERGY STAR](https://github.com/NREL/OpenStudio-ERI)
+- [Home Energy Score](https://betterbuildingssolutioncenter.energy.gov/home-energy-score)
 - [UrbanOpt](https://www.nrel.gov/buildings/urbanopt.html)
+- [ResStock](https://resstock.nrel.gov/) (pending)
+- [BEopt](https://beopt.nrel.gov) (pending)
+- [Weatherization Assistant](https://weatherization.ornl.gov/obtain) (pending)
 
 ## License
 

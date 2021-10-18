@@ -3,7 +3,8 @@
 require 'fileutils'
 
 def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars: [],
-                       output_meters: [], run_measures_only: false, print_prefix: '')
+                       output_meters: [], run_measures_only: false, print_prefix: '',
+                       ep_input_format: 'idf')
   rm_path(rundir)
   FileUtils.mkdir_p(rundir)
 
@@ -47,11 +48,29 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
     om.setReportingFrequency(output_meter[1])
   end
 
-  # Translate model to IDF
+  # Remove unused objects automatically added by OpenStudio?
+  remove_objects = []
+  if model.alwaysOnContinuousSchedule.directUseCount == 0
+    remove_objects << ['Schedule:Constant', model.alwaysOnContinuousSchedule.name.to_s]
+  end
+  if model.alwaysOnDiscreteSchedule.directUseCount == 0
+    remove_objects << ['Schedule:Constant', model.alwaysOnDiscreteSchedule.name.to_s]
+  end
+  if model.alwaysOffDiscreteSchedule.directUseCount == 0
+    remove_objects << ['Schedule:Constant', model.alwaysOffDiscreteSchedule.name.to_s]
+  end
+
+  # Translate model to workspace
   forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
   forward_translator.setExcludeLCCObjects(true)
-  model_idf = forward_translator.translateModel(model)
+  workspace = forward_translator.translateModel(model)
   success = report_ft_errors_warnings(forward_translator, rundir)
+
+  # Remove objects
+  workspace.getObjectByTypeAndName('LifeCycleCost:NonrecurringCost'.to_IddObjectType, 'Default Cost').get.remove # FUTURE: Can remove this code if https://github.com/NREL/OpenStudio/issues/4404 is fixed
+  remove_objects.each do |remove_object|
+    workspace.getObjectByTypeAndName(remove_object[0].to_IddObjectType, remove_object[1]).get.remove
+  end
 
   if not success
     print "#{print_prefix}Creating input unsuccessful.\n"
@@ -60,16 +79,25 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
   end
 
   # Apply reporting measure output requests
-  apply_energyplus_output_requests(measures_dir, measures, runner, model, model_idf)
+  apply_energyplus_output_requests(measures_dir, measures, runner, model, workspace)
 
-  # Write IDF to file
-  File.open(File.join(rundir, 'in.idf'), 'w') { |f| f << model_idf.to_s }
+  # Write to file
+  if ep_input_format == 'idf'
+    ep_input_filename = 'in.idf'
+    File.open(File.join(rundir, ep_input_filename), 'w') { |f| f << workspace.to_s }
+  elsif ep_input_format == 'epjson'
+    ep_input_filename = 'in.epJSON'
+    json = OpenStudio::EPJSON::toJSONString(workspace.toIdfFile)
+    File.open(File.join(rundir, ep_input_filename), 'w') { |f| f << json.to_s }
+  else
+    fail "Unexpected ep_input_format: #{ep_input_format}."
+  end
 
   # Run simulation
   print "#{print_prefix}Running simulation...\n"
   ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus')) # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
   simulation_start = Time.now
-  command = "\"#{ep_path}\" -w \"#{model.getWeatherFile.path.get}\" in.idf"
+  command = "\"#{ep_path}\" -w \"#{model.getWeatherFile.path.get}\" #{ep_input_filename}"
   if debug
     File.open(File.join(rundir, 'run.log'), 'a') do |f|
       f << "Executing command '#{command}' from working directory '#{rundir}'.\n"
@@ -135,7 +163,29 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
   return { success: true, runner: runner, sim_time: sim_time }
 end
 
-def apply_measures(measures_dir, measures, runner, model, show_measure_calls = true, measure_type = 'OpenStudio::Measure::ModelMeasure')
+def apply_measures(measures_dir, measures, runner, model, show_measure_calls = true, measure_type = 'OpenStudio::Measure::ModelMeasure', osw_out = nil)
+  if not osw_out.nil?
+    # Create a workflow based on the measures we're going to call. Convenient for debugging.
+    workflowJSON = OpenStudio::WorkflowJSON.new
+    workflowJSON.setOswPath(File.expand_path("../#{osw_out}"))
+    workflowJSON.addMeasurePath('measures')
+    workflowJSON.addMeasurePath('resources/hpxml-measures')
+    steps = OpenStudio::WorkflowStepVector.new
+    measures.each do |measure_subdir, args_array|
+      args_array.each do |args|
+        step = OpenStudio::MeasureStep.new(measure_subdir)
+        args.each do |k, v|
+          next if v.nil?
+
+          step.setArgument(k, "#{v}")
+        end
+        steps.push(step)
+      end
+    end
+    workflowJSON.setWorkflowSteps(steps)
+    workflowJSON.save
+  end
+
   # Call each measure in the specified order
   measures.keys.each do |measure_subdir|
     # Gather measure arguments and call measure
@@ -159,7 +209,7 @@ def apply_measures(measures_dir, measures, runner, model, show_measure_calls = t
   return true
 end
 
-def apply_energyplus_output_requests(measures_dir, measures, runner, model, model_idf)
+def apply_energyplus_output_requests(measures_dir, measures, runner, model, workspace)
   # Call each measure in the specified order
   measures.keys.each do |measure_subdir|
     # Gather measure arguments and call measure
@@ -173,7 +223,7 @@ def apply_energyplus_output_requests(measures_dir, measures, runner, model, mode
       runner.setLastOpenStudioModel(model)
       idf_objects = measure.energyPlusOutputRequests(runner, argument_map)
       idf_objects.each do |idf_object|
-        model_idf.addObject(idf_object)
+        workspace.addObject(idf_object)
       end
     end
   end
@@ -280,6 +330,19 @@ def get_argument_map(model, measure, provided_args, lookup_file, measure_name, r
   return argument_map
 end
 
+def get_value_from_workflow_step_value(step_value)
+  variant_type = step_value.variantType
+  if variant_type == 'Boolean'.to_VariantType
+    return step_value.valueAsBoolean
+  elsif variant_type == 'Double'.to_VariantType
+    return step_value.valueAsDouble
+  elsif variant_type == 'Integer'.to_VariantType
+    return step_value.valueAsInteger
+  elsif variant_type == 'String'.to_VariantType
+    return step_value.valueAsString
+  end
+end
+
 def run_measure(model, measure, argument_map, runner)
   begin
     # run the measure
@@ -302,6 +365,11 @@ def run_measure(model, measure, argument_map, runner)
     end
     if result_child.finalCondition.is_initialized
       runner.registerFinalCondition(result_child.finalCondition.get.logMessage)
+    end
+
+    # re-register runner child registered values on the parent runner
+    result_child.stepValues.each do |step_value|
+      runner.registerValue(step_value.name, get_value_from_workflow_step_value(step_value))
     end
 
     # log messages
@@ -448,4 +516,48 @@ class String
 
     return true
   end
+end
+
+def get_argument_values(runner, arguments, user_arguments)
+  args = {}
+  arguments.each do |argument|
+    if argument.required
+      case argument.type
+      when 'Choice'.to_OSArgumentType
+        args[argument.name] = runner.getStringArgumentValue(argument.name, user_arguments)
+      when 'Boolean'.to_OSArgumentType
+        args[argument.name] = runner.getBoolArgumentValue(argument.name, user_arguments)
+      when 'Double'.to_OSArgumentType
+        args[argument.name] = runner.getDoubleArgumentValue(argument.name, user_arguments)
+      when 'Integer'.to_OSArgumentType
+        args[argument.name] = runner.getIntegerArgumentValue(argument.name, user_arguments)
+      when 'String'.to_OSArgumentType
+        args[argument.name] = runner.getStringArgumentValue(argument.name, user_arguments)
+      end
+    else
+      case argument.type
+      when 'Choice'.to_OSArgumentType
+        args[argument.name] = runner.getOptionalStringArgumentValue(argument.name, user_arguments)
+      when 'Boolean'.to_OSArgumentType
+        # TODO: Update this if https://github.com/NREL/OpenStudio/issues/4390 is addressed
+        args[argument.name] = runner.getOptionalStringArgumentValue(argument.name, user_arguments)
+        if args[argument.name].is_initialized
+          if args[argument.name].get.downcase == 'true'
+            args[argument.name] = OpenStudio::OptionalBool.new(true)
+          elsif args[argument.name].get.downcase == 'false'
+            args[argument.name] = OpenStudio::OptionalBool.new(false)
+          else
+            fail 'Unexpected value'
+          end
+        end
+      when 'Double'.to_OSArgumentType
+        args[argument.name] = runner.getOptionalDoubleArgumentValue(argument.name, user_arguments)
+      when 'Integer'.to_OSArgumentType
+        args[argument.name] = runner.getOptionalIntegerArgumentValue(argument.name, user_arguments)
+      when 'String'.to_OSArgumentType
+        args[argument.name] = runner.getOptionalStringArgumentValue(argument.name, user_arguments)
+      end
+    end
+  end
+  return args
 end

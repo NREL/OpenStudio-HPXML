@@ -189,7 +189,7 @@
 			<xs:group ref="SystemInfo"/>
 			<xs:element minOccurs="0" name="InsulationGrade" type="InsulationGrade"/>
 			<xs:element minOccurs="0" name="InsulationCondition" type="InsulationCondition"/>
-			<xs:element minOccurs="0" name="AssemblyEffectiveRValue" type="RValue">
+			<xs:element minOccurs="0" name="AssemblyEffectiveRValue" type="AssemblyRValue">
 				<xs:annotation>
 					<xs:documentation>This should indicate the effective R-value of the complete assembly including any air films or other treatments.</xs:documentation>
 				</xs:annotation>
@@ -211,6 +211,19 @@
 					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
+			<xs:element ref="extension" minOccurs="0"/>
+		</xs:sequence>
+		<xs:attribute name="dataSource" type="DataSource"/>
+	</xs:complexType>
+	<xs:complexType name="InteriorFinishInfo">
+		<xs:sequence>
+			<xs:element minOccurs="0" name="Type" type="InteriorFinish"/>
+			<xs:element minOccurs="0" name="Thickness" type="LengthMeasurement">
+				<xs:annotation>
+					<xs:documentation>[in]</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="Color" type="WallAndRoofColor"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
 		<xs:attribute name="dataSource" type="DataSource"/>
@@ -248,7 +261,7 @@
 					<xs:element name="FuelType" type="FuelType" minOccurs="0"/>
 					<xs:element minOccurs="0" name="Usage" type="HPXMLDouble">
 						<xs:annotation>
-							<xs:documentation>loads/week</xs:documentation>
+							<xs:documentation>loads/week of actual usage by the occupants</xs:documentation>
 						</xs:annotation>
 					</xs:element>
 					<xs:element minOccurs="0" name="EnergyFactor" type="HPXMLDouble">
@@ -264,6 +277,8 @@
 						</xs:annotation>
 					</xs:element>
 					<xs:element maxOccurs="unbounded" minOccurs="0" name="ControlType" type="ClothesDryerControlType"> </xs:element>
+					<xs:element minOccurs="0" name="Vented" type="HPXMLBoolean"/>
+					<xs:element minOccurs="0" name="VentedFlowRate" type="FlowRate"/>
 					<xs:element ref="extension" minOccurs="0"/>
 				</xs:sequence>
 			</xs:extension>
@@ -304,7 +319,7 @@
 					</xs:element>
 					<xs:element minOccurs="0" name="Usage" type="HPXMLDouble">
 						<xs:annotation>
-							<xs:documentation>loads/week</xs:documentation>
+							<xs:documentation>loads/week of actual usage by the occupants; use LabelUsage instead for the loads/week on the EnergyGuide label</xs:documentation>
 						</xs:annotation>
 					</xs:element>
 					<xs:element minOccurs="0" name="RatedAnnualkWh" type="RatedAnnualkWh">
@@ -329,7 +344,7 @@
 					</xs:element>
 					<xs:element minOccurs="0" name="LabelUsage" type="HPXMLDouble">
 						<xs:annotation>
-							<xs:documentation>loads/week per the Energy Guide label</xs:documentation>
+							<xs:documentation>loads/week per the Energy Guide label; use Usage instead for loads/week of actual usage by the occupants</xs:documentation>
 						</xs:annotation>
 					</xs:element>
 					<xs:element minOccurs="0" name="Capacity" type="HPXMLDouble">
@@ -363,7 +378,7 @@
 					<xs:element minOccurs="0" name="PlaceSettingCapacity" type="IntegerGreaterThanZero"/>
 					<xs:element minOccurs="0" name="Usage" type="HPXMLDouble">
 						<xs:annotation>
-							<xs:documentation>loads/week</xs:documentation>
+							<xs:documentation>loads/week of actual usage by the occupants; use LabelUsage instead for the loads/week on the EnergyGuide label</xs:documentation>
 						</xs:annotation>
 					</xs:element>
 					<xs:element minOccurs="0" name="LabelElectricRate" type="HPXMLDouble">
@@ -383,7 +398,7 @@
 					</xs:element>
 					<xs:element minOccurs="0" name="LabelUsage" type="HPXMLDouble">
 						<xs:annotation>
-							<xs:documentation>loads/week per the Energy Guide label</xs:documentation>
+							<xs:documentation>loads/week per the Energy Guide label; use Usage instead for loads/week of actual usage by the occupants</xs:documentation>
 						</xs:annotation>
 					</xs:element>
 					<xs:element ref="extension" minOccurs="0"/>
@@ -698,8 +713,13 @@
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="AttachedToRoof" type="LocalReference" maxOccurs="unbounded"/>
+									<xs:element minOccurs="0" name="AttachedToCeiling" type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToWall" type="LocalReference" maxOccurs="unbounded"/>
-									<xs:element minOccurs="0" name="AttachedToFrameFloor" type="LocalReference" maxOccurs="unbounded"/>
+									<xs:element minOccurs="0" name="AttachedToFrameFloor" type="LocalReference" maxOccurs="unbounded">
+										<xs:annotation>
+											<xs:documentation>DEPRECATION WARNING: AttachedToFrameFloor will be deprecated in the future. Use AttachedToCeiling instead.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
 									<xs:element name="AnnualEnergyUse" minOccurs="0">
 										<xs:complexType>
 											<xs:sequence>
@@ -786,6 +806,7 @@
 									</xs:element>
 									<xs:element minOccurs="0" name="AttachedToRoof" type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToWall" type="LocalReference" maxOccurs="unbounded"/>
+									<xs:element minOccurs="0" name="AttachedToCeiling" type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToFoundationWall" type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToFrameFloor" type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToSlab" type="LocalReference" maxOccurs="unbounded"/>
@@ -833,6 +854,7 @@
 									<xs:element minOccurs="0" name="RoofColor" type="WallAndRoofColor"/>
 									<xs:element minOccurs="0" name="SolarAbsorptance" type="SolarAbsorptance"/>
 									<xs:element minOccurs="0" name="Emittance" type="Emittance"/>
+									<xs:element minOccurs="0" name="InteriorFinish" type="InteriorFinishInfo"> </xs:element>
 									<xs:element minOccurs="0" name="Rafters" type="StudProperties"/>
 									<xs:element minOccurs="0" name="DeckType" type="DeckType"/>
 									<xs:element minOccurs="0" name="Pitch" type="Pitch">
@@ -938,7 +960,13 @@
 									<xs:element minOccurs="0" name="Color" type="WallAndRoofColor"/>
 									<xs:element minOccurs="0" name="SolarAbsorptance" type="SolarAbsorptance"/>
 									<xs:element minOccurs="0" name="Emittance" type="Emittance"/>
+									<xs:element minOccurs="0" name="InteriorFinish" type="InteriorFinishInfo"> </xs:element>
 									<xs:element minOccurs="0" maxOccurs="1" name="Insulation" type="InsulationInfo"/>
+									<xs:element minOccurs="0" name="Vented" type="HPXMLBoolean">
+										<xs:annotation>
+											<xs:documentation>Indicates whether the walls are vented or not. For example, the walls of a mobile home may be intentionally ventilated to remove accumulated moisture by having corrugated metal siding open at the bottom to provide space for air to flow between the exterior and interior wall materials.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
 									<xs:element name="AnnualEnergyUse" minOccurs="0">
 										<xs:complexType>
 											<xs:sequence>
@@ -1004,6 +1032,7 @@
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="InteriorStuds" type="StudProperties"/>
+									<xs:element minOccurs="0" name="InteriorFinish" type="InteriorFinishInfo"> </xs:element>
 									<xs:element minOccurs="0" name="DistanceToTopOfInsulation" type="LengthMeasurement">
 										<xs:annotation>
 											<xs:documentation>[ft] Vertical distance from top of foundation wall to top of insulation.</xs:documentation>
@@ -1024,13 +1053,46 @@
 					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
+			<xs:element minOccurs="0" name="Ceilings">
+				<xs:annotation>
+					<xs:documentation>Use Ceilings for horizontal surfaces above living space (e.g., sufaces between living space and attic).</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Ceiling" maxOccurs="unbounded" minOccurs="1">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" ref="AttachedToSpace"/>
+									<xs:element name="ExteriorAdjacentTo" type="AdjacentTo" minOccurs="0"> </xs:element>
+									<xs:element minOccurs="0" name="InteriorAdjacentTo" type="AdjacentTo"/>
+									<xs:element minOccurs="0" name="CeilingJoists" type="StudProperties"/>
+									<xs:element minOccurs="0" name="CeilingTrusses" type="StudProperties"/>
+									<xs:element minOccurs="0" name="Area" type="SurfaceArea">
+										<xs:annotation>
+											<xs:documentation>[sq.ft.]</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="InteriorFinish" type="InteriorFinishInfo"> </xs:element>
+									<xs:element minOccurs="0" maxOccurs="1" name="Insulation" type="InsulationInfo"> </xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
+								</xs:sequence>
+								<xs:attribute name="dataSource" type="DataSource"/>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="dataSource" type="DataSource"/>
+				</xs:complexType>
+			</xs:element>
 			<xs:element minOccurs="0" name="FrameFloors">
+				<xs:annotation>
+					<xs:documentation>Use FrameFloors for horizontal surfaces below living space (e.g., sufaces between living space and crawlspace/basement/ambient foundations).</xs:documentation>
+				</xs:annotation>
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element name="FrameFloor" maxOccurs="unbounded" minOccurs="1">
 							<xs:annotation>
-								<xs:documentation>Use the FrameFloor element for all floors/ceilings. For example, living space ceilings/attic floors, floors above foundations, floors under bonus
-									rooms, cantilevered floors, etc. Interior partition surfaces should not be described using the FrameFloor element.</xs:documentation>
+								<xs:documentation>Interior partition surfaces should not be described using the FrameFloor element.</xs:documentation>
 							</xs:annotation>
 							<xs:complexType>
 								<xs:sequence>
@@ -1046,6 +1108,7 @@
 											<xs:documentation>[sq.ft.]</xs:documentation>
 										</xs:annotation>
 									</xs:element>
+									<xs:element minOccurs="0" name="InteriorFinish" type="InteriorFinishInfo"> </xs:element>
 									<xs:element minOccurs="0" maxOccurs="1" name="Insulation" type="InsulationInfo"> </xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
@@ -1132,6 +1195,7 @@
 							<xs:complexType>
 								<xs:sequence>
 									<xs:group ref="WindowInfo"/>
+									<xs:element minOccurs="0" name="WindowType" type="WindowType"/>
 									<xs:element minOccurs="0" name="WindowtoWallRatio" type="Fraction"/>
 									<xs:element minOccurs="0" name="AttachedToWall" type="LocalReference"/>
 									<xs:element name="AnnualEnergyUse" minOccurs="0">
@@ -1206,7 +1270,11 @@
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="Orientation" type="OrientationType"/>
-									<xs:element minOccurs="0" name="DoorType" type="DoorType"/>
+									<xs:element minOccurs="0" name="DoorType" type="DoorType">
+										<xs:annotation>
+											<xs:documentation>DEPRECATION WARNING: The "storm" choice will be deprecated in the future; use the StormDoor element instead.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
 									<xs:element name="DoorMaterial" type="DoorMaterial" minOccurs="0"/>
 									<xs:element minOccurs="0" name="WeatherStripping" type="HPXMLBoolean"/>
 									<xs:element name="StormDoor" type="HPXMLBoolean" minOccurs="0"/>
@@ -1443,6 +1511,9 @@
 															to.</xs:documentation>
 													</xs:annotation>
 												</xs:element>
+												<xs:element minOccurs="0" name="PreconditioningHeatingSystem" type="HeatingSystemInfoType"/>
+												<xs:element minOccurs="0" name="PreconditioningCoolingSystem" type="CoolingSystemInfoType"/>
+												<xs:element minOccurs="0" name="PreconditioningHeatPump" type="HeatPumpInfoType"/>
 												<xs:element minOccurs="0" ref="extension"/>
 											</xs:sequence>
 											<xs:attribute name="dataSource" type="DataSource"/>
@@ -1539,6 +1610,11 @@
 										<xs:annotation>
 											<xs:documentation>[gal per hour] An estimate of the maximum volume of hot water in gallons that a storage water heater can supply within an hour that begins
 												with the water heater fully heated.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="UsageBin" type="UsageBin">
+										<xs:annotation>
+											<xs:documentation>A water heater's usage bin is derived from its First Hour Rating (FHR) as part of the Uniform Energy Factor (UEF) testing procedures.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="GallonsPerMinute" type="Volume">
@@ -3458,6 +3534,11 @@
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="HVACMaintenance" type="HVACMaintenance"/>
+			<xs:element minOccurs="0" name="IsPackagedSystem" type="HPXMLBoolean">
+				<xs:annotation>
+					<xs:documentation>Is the system a packaged system?</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element minOccurs="0" name="IsSharedSystem" type="HPXMLBoolean">
 				<xs:annotation>
 					<xs:documentation>Does the system serve multiple building/dwelling units?</xs:documentation>
@@ -3478,9 +3559,14 @@
 				<xs:sequence minOccurs="1" maxOccurs="1">
 					<xs:element name="HeatingSystemType" type="HeatingSystemType" minOccurs="0"/>
 					<xs:element name="HeatingSystemFuel" type="FuelType" minOccurs="0"/>
-					<xs:element name="HeatingCapacity" type="Capacity" minOccurs="0">
+					<xs:element name="HeatingInputRating" type="Capacity" minOccurs="0">
 						<xs:annotation>
 							<xs:documentation>[Btuh] Input Heating Capacity</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="HeatingCapacity" type="Capacity" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>[Btuh] Output Heating Capacity</xs:documentation>
 						</xs:annotation>
 					</xs:element>
 					<xs:element minOccurs="0" name="AnnualHeatingEfficiency" type="HeatingEfficiencyType" maxOccurs="unbounded"> </xs:element>
@@ -3572,6 +3658,7 @@
 								<xs:documentation>[grams per hour] from EPA label http://www.epa.gov/compliance/monitoring/programs/caa/woodheaters.html</xs:documentation>
 							</xs:annotation>
 						</xs:element>
+						<xs:element minOccurs="0" name="AtmosphericBurner" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" name="AutomaticVentDamper" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" name="PilotLight" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="HPXMLBoolean"/>
@@ -3589,6 +3676,18 @@
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="FixedHeater">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" name="AtmosphericBurner" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="AutomaticVentDamper" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="PilotLight" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+					<xs:attribute name="dataSource" type="DataSource"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="PackagedTerminalAirConditionerHeating">
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
@@ -3634,17 +3733,17 @@
 					<xs:element minOccurs="0" name="HeatPumpFuel" type="FuelType"/>
 					<xs:element name="HeatingCapacity" type="Capacity" minOccurs="0">
 						<xs:annotation>
-							<xs:documentation>[Btuh] Typically the nameplate capacity at 47F.</xs:documentation>
+							<xs:documentation>[Btuh] Output heating capacity; typically the nameplate capacity at 47F.</xs:documentation>
 						</xs:annotation>
 					</xs:element>
 					<xs:element minOccurs="0" name="HeatingCapacity17F" type="Capacity">
 						<xs:annotation>
-							<xs:documentation>[Btuh] Capacity at 17F from AHRI database.</xs:documentation>
+							<xs:documentation>[Btuh] Output heating capacity at 17F from AHRI database.</xs:documentation>
 						</xs:annotation>
 					</xs:element>
 					<xs:element minOccurs="0" name="CoolingCapacity" type="Capacity">
 						<xs:annotation>
-							<xs:documentation>[Btuh]</xs:documentation>
+							<xs:documentation>[Btuh] Output cooling capacity</xs:documentation>
 						</xs:annotation>
 					</xs:element>
 					<xs:element minOccurs="0" name="CompressorType" type="CompressorType"/>
@@ -3663,9 +3762,14 @@
 					</xs:element>
 					<xs:element name="BackupSystemFuel" type="FuelType" minOccurs="0"/>
 					<xs:element name="BackupAnnualHeatingEfficiency" minOccurs="0" type="HeatingEfficiencyType" maxOccurs="unbounded"> </xs:element>
+					<xs:element minOccurs="0" name="BackupHeatingInputRating" type="Capacity">
+						<xs:annotation>
+							<xs:documentation>[Btuh] Input heating capacity</xs:documentation>
+						</xs:annotation>
+					</xs:element>
 					<xs:element minOccurs="0" name="BackupHeatingCapacity" type="Capacity">
 						<xs:annotation>
-							<xs:documentation>[Btuh]</xs:documentation>
+							<xs:documentation>[Btuh] Output heating capacity</xs:documentation>
 						</xs:annotation>
 					</xs:element>
 					<xs:element minOccurs="0" name="BackupHeatingSwitchoverTemperature" type="Temperature">
@@ -3695,7 +3799,7 @@
 					<xs:element minOccurs="0" name="CoolingSystemFuel" type="FuelType"/>
 					<xs:element minOccurs="0" name="CoolingCapacity" type="Capacity">
 						<xs:annotation>
-							<xs:documentation>[Btuh]</xs:documentation>
+							<xs:documentation>[Btuh] Output cooling capacity</xs:documentation>
 						</xs:annotation>
 					</xs:element>
 					<xs:element minOccurs="0" name="CompressorType" type="CompressorType"/>
@@ -4883,8 +4987,10 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" name="GlazingMaterial" type="GlazingMaterial"/>
 						<xs:element minOccurs="0" name="GlassType" type="GlassType"/>
 						<xs:element minOccurs="0" name="FrameType" type="WindowFrameType"/>
+						<xs:element minOccurs="0" name="Location" type="StormLocation"/>
 						<xs:element minOccurs="0" name="Operable" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>DEPRECATED. This will be removed in v4.0. Use FractionOperable element instead.</xs:documentation>
@@ -5224,6 +5330,11 @@
 								<xs:documentation>Please specify stud spacing and framing factor in the appropriate places as well.</xs:documentation>
 							</xs:annotation>
 						</xs:element>
+						<xs:element minOccurs="0" name="FramingType" type="FramingType">
+							<xs:annotation>
+								<xs:documentation>See https://thecraftsmanblog.com/framing-timber-balloon-platform for a description of different framing types.</xs:documentation>
+							</xs:annotation>
+						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
 					<xs:attribute name="dataSource" type="DataSource"/>
@@ -5388,6 +5499,8 @@
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="HVACSystemsServed" type="LocalReference" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element maxOccurs="1" minOccurs="0" name="HeatingSeason" type="Season"/>
+			<xs:element maxOccurs="1" minOccurs="0" name="CoolingSeason" type="Season"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
 		<xs:attribute name="dataSource" type="DataSource"/>
@@ -5794,4 +5907,13 @@
 			<xs:attribute name="dataSource" type="DataSource"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:complexType name="Season">
+		<xs:sequence>
+			<xs:element maxOccurs="1" minOccurs="0" name="BeginMonth" type="Month"/>
+			<xs:element maxOccurs="1" minOccurs="0" name="BeginDayOfMonth" type="DayOfMonth"/>
+			<xs:element maxOccurs="1" minOccurs="0" name="EndMonth" type="Month"/>
+			<xs:element maxOccurs="1" minOccurs="0" name="EndDayOfMonth" type="DayOfMonth"/>
+		</xs:sequence>
+		<xs:attribute name="dataSource" type="DataSource"/>
+	</xs:complexType>
 </xs:schema>
