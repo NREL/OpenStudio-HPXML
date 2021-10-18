@@ -1466,7 +1466,7 @@ Additional information is entered in each ``DuctLeakageMeasurement``.
   ``DuctLeakage/TotalOrToOutside``  string            See [#]_     Yes                  Type of duct leakage (outside conditioned space vs total)
   ================================  =======  =======  ===========  ========  =========  =========================================================
   
-  .. [#] Units choices are "CFM25" or "Percent".
+  .. [#] Units choices are "CFM25", "CFM50", or "Percent".
   .. [#] Value also must be < 1 if Units is Percent.
   .. [#] If the HVAC system has no return ducts (e.g., a ducted evaporative cooler), use zero for the Value.
   .. [#] TotalOrToOutside only choice is "to outside".

@@ -1301,6 +1301,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     duct_leakage_units_choices = OpenStudio::StringVector.new
     duct_leakage_units_choices << HPXML::UnitsCFM25
+    duct_leakage_units_choices << HPXML::UnitsCFM50
     duct_leakage_units_choices << HPXML::UnitsPercent
 
     duct_location_choices = OpenStudio::StringVector.new
@@ -1325,19 +1326,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_leakage_units', duct_leakage_units_choices, true)
     arg.setDisplayName('Ducts: Leakage Units')
     arg.setDescription('The leakage units of the ducts.')
-    arg.setDefaultValue(HPXML::UnitsCFM25)
+    arg.setDefaultValue(HPXML::UnitsPercent)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_supply_leakage_to_outside_value', true)
     arg.setDisplayName('Ducts: Supply Leakage to Outside Value')
     arg.setDescription('The leakage value to outside for the supply ducts.')
-    arg.setDefaultValue(75)
+    arg.setDefaultValue(0.1)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_return_leakage_to_outside_value', true)
     arg.setDisplayName('Ducts: Return Leakage to Outside Value')
     arg.setDescription('The leakage value to outside for the return ducts.')
-    arg.setDefaultValue(25)
+    arg.setDefaultValue(0.1)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_supply_location', duct_location_choices, true)
