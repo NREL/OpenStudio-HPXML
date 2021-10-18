@@ -374,9 +374,9 @@ System outputs are listed below.
    =======================================================  ====================
    Type                                                     Notes
    =======================================================  ====================
-   Systems: Cooling Capacity (kBtu/h)                       Total HVAC cooling capacity
-   Systems: Heating Capacity (kBtu/h)                       Total HVAC heating capacity
-   Systems: Heat Pump Backup Capacity (kBtu/h)              Total HVAC heat pump backup capacity
+   Systems: Cooling Capacity (Btu/h)                        Total HVAC cooling capacity
+   Systems: Heating Capacity (Btu/h)                        Total HVAC heating capacity
+   Systems: Heat Pump Backup Capacity (Btu/h)               Total HVAC heat pump backup capacity
    Systems: Water Heater Tank Volume (gal)                  Total water heater tank volume
    Systems: Mechanical Ventilation Flow Rate (cfm)          Total mechanical ventilation flow rate
    =======================================================  ====================
@@ -386,10 +386,47 @@ If the HPXML file has ``Systems/HVAC/HVACPlant/PrimarySystems`` populated, then 
    =======================================================  ====================
    Type                                                     Notes
    =======================================================  ====================
-   Primary Systems: Cooling Capacity (kBtu/h)               Cooling capacity of primary system
-   Primary Systems: Heating Capacity (kBtu/h)               Heating capacity of primary system
-   Primary Systems: Heat Pump Backup Capacity (kBtu/h)      Heat pump backup capacity of primary system
-   Secondary Systems: Cooling Capacity (kBtu/h)             Cooling capacity of secondary system; only provided if a non-primary system is present
-   Secondary Systems: Heating Capacity (kBtu/h)             Heating capacity of secondary system; only provided if a non-primary system is present
-   Secondary Systems: Heat Pump Backup Capacity (kBtu/h)    Heat pump backup capacity of secondary system; only provided if a non-primary system is present
+   Primary Systems: Cooling Capacity (Btu/h)                Cooling capacity of primary system
+   Primary Systems: Heating Capacity (Btu/h)                Heating capacity of primary system
+   Primary Systems: Heat Pump Backup Capacity (Btu/h)       Heat pump backup capacity of primary system
+   Secondary Systems: Cooling Capacity (Btu/h)              Cooling capacity of secondary system; only provided if a non-primary system is present
+   Secondary Systems: Heating Capacity (Btu/h)              Heating capacity of secondary system; only provided if a non-primary system is present
+   Secondary Systems: Heat Pump Backup Capacity (Btu/h)     Heat pump backup capacity of secondary system; only provided if a non-primary system is present
    =======================================================  ====================
+
+Design Loads
+~~~~~~~~~~~~
+
+Design load outputs are listed below.
+
+   ================================================================  ====================
+   Type                                                              Notes
+   ================================================================  ====================
+   Design Loads Heating: Total (Btu/h)                               Total heating design load
+   Design Loads Heating: Ducts (Btu/h)                               Heating design load for ducts
+   Design Loads Heating: Windows (Btu/h)                             Heating design load for windows
+   Design Loads Heating: Skylights (Btu/h)                           Heating design load for skylights
+   Design Loads Heating: Doors (Btu/h)                               Heating design load for doors
+   Design Loads Heating: Walls (Btu/h)                               Heating design load for walls
+   Design Loads Heating: Roofs (Btu/h)                               Heating design load for roofs
+   Design Loads Heating: Floors (Btu/h)                              Heating design load for floors
+   Design Loads Heating: Slabs (Btu/h)                               Heating design load for slabs
+   Design Loads Heating: Ceilings (Btu/h)                            Heating design load for ceilings
+   Design Loads Heating: Infiltration/Ventilation (Btu/h)            Heating design load for infiltration/ventilation
+   Design Loads Cooling Sensible: Total (Btu/h)                      Total sensible cooling design load
+   Design Loads Cooling Sensible: Ducts (Btu/h)                      Sensible cooling design load for ducts
+   Design Loads Cooling Sensible: Windows (Btu/h)                    Sensible cooling design load for windows
+   Design Loads Cooling Sensible: Skylights (Btu/h)                  Sensible cooling design load for skylights
+   Design Loads Cooling Sensible: Doors (Btu/h)                      Sensible cooling design load for doors
+   Design Loads Cooling Sensible: Walls (Btu/h)                      Sensible cooling design load for walls
+   Design Loads Cooling Sensible: Roofs (Btu/h)                      Sensible cooling design load for roofs
+   Design Loads Cooling Sensible: Floors (Btu/h)                     Sensible cooling design load for floors
+   Design Loads Cooling Sensible: Slabs (Btu/h)                      Sensible cooling design load for slabs
+   Design Loads Cooling Sensible: Ceilings (Btu/h)                   Sensible cooling design load for ceilings
+   Design Loads Cooling Sensible: Infiltration/Ventilation (Btu/h)   Sensible cooling design load for infiltration/ventilation
+   Design Loads Cooling Sensible: Internal Gains (Btu/h)             Sensible cooling design load for internal gains
+   Design Loads Cooling Latent: Total (Btu/h)                        Total latent cooling design load
+   Design Loads Cooling Latent: Ducts (Btu/h)                        Latent cooling design load for ducts
+   Design Loads Cooling Latent: Infiltration/Ventilation (Btu/h)     Latent cooling design load for infiltration/ventilation
+   Design Loads Cooling Latent: Internal Gains (Btu/h)               Latent cooling design load for internal gains
+   ================================================================  ====================

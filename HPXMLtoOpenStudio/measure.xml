@@ -436,13 +436,13 @@
       <filename>EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>8AA9BC90</checksum>
+      <checksum>65BB2A26</checksum>
     </file>
     <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>B8FF58A0</checksum>
+      <checksum>A64BC1EE</checksum>
     </file>
     <file>
       <filename>BaseElements.xsd</filename>
