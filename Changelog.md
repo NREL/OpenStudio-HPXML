@@ -11,12 +11,7 @@ __New Features__
   - Introduces a measure for automatically generating detailed smooth/stochastic schedule CSV files.
   - Expands simplified weekday/weekend/monthly schedule inputs to additional building features.
   - Allows `HeatingSeason` & `CoolingSeason` to be specified for defining heating and cooling equipment availability.
-- Allows non-zero refrigerant charge defect ratios for ground source heat pumps.
-- Expands choices allowed for `Siding` (Wall/RimJoist) and `RoofType` (Roof) elements.
-- Allows "none" for wall/rim joist siding.
-- Allows interior finish inputs (e.g., 0.5" drywall) for walls, ceilings, and roofs.
 - Adds a new results_hpxml.csv output file to summarize HPXML values (e.g., surface areas, HVAC capacities).
-- Allows additional fuel types for generators.
 - Adds alternative inputs:
   - Window/skylight physical properties (`GlassLayers`, `FrameType`, etc.) instead of `UFactor` & `SHGC`.
   - `Ducts/FractionDuctArea` instead of `Ducts/DuctSurfaceArea`.
@@ -24,6 +19,7 @@ __New Features__
   - `Orientation` instead of `Azimuth` for all applicable surfaces, PV systems, and solar thermal systems.
   - CEER (Combined Energy Efficiency Ratio) instead of EER for room ACs.
   - `UsageBin` instead of `FirstHourRating` (for water heaters w/ UEF metric).
+  - `CFM50` instead of `CFM25` or `Percent` for duct leakage.
 - Allows more defaulting (optional inputs):
   - Mechanical ventilation airflow rate per ASHRAE 62.2-2019.
   - HVAC/DHW system efficiency (by age).
@@ -33,6 +29,11 @@ __New Features__
   - Door azimuth.
   - Radiant barrier grade.
   - Whole house fan airflow rate and fan power.
+- Allows non-zero refrigerant charge defect ratios for ground source heat pumps.
+- Expands choices allowed for `Siding` (Wall/RimJoist) and `RoofType` (Roof) elements.
+- Allows "none" for wall/rim joist siding.
+- Allows interior finish inputs (e.g., 0.5" drywall) for walls, ceilings, and roofs.
+- Allows additional fuel types for generators.
 - Switches to the EnergyPlus Fan:SystemModel object for all HVAC systems.
 - Introduces a small amount of infiltration for unvented spaces.
 - Revises shared mechanical ventilation preconditioning control logic to operate less often.
