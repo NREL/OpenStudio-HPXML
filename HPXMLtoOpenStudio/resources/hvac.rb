@@ -102,7 +102,7 @@ class HVAC
   def self.apply_central_air_conditioner_furnace_two_speed_realistic(model, runner, cooling_system, heating_system,
                                                                      sequential_cool_load_fracs, sequential_heat_load_fracs,
                                                                      control_zone)
-    #Fix me: use new actuator instead of creating two single speed systems
+    # Fix me: use new actuator instead of creating two single speed systems
     if not cooling_system.nil?
       clg_ap = cooling_system.additional_properties
       clg_ap.num_speeds = 1
@@ -3043,10 +3043,6 @@ class HVAC
         end
         htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
         htg_coil.setRatedAirFlowRate(calc_rated_airflow(heating_system.heating_capacity, htg_ap.heat_rated_cfm_per_ton[0], 1.0))
-        if is_ddb_control
-          # Apply startup capacity degradation
-          apply_capacity_degradation_EMS(model, htg_ap, htg_coil.name.get, false, cap_fff_curve, eir_fff_curve)
-        end
       else
         if htg_coil.nil?
           htg_coil = OpenStudio::Model::CoilHeatingDXMultiSpeed.new(model)
@@ -3078,6 +3074,10 @@ class HVAC
     end
     htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(htg_ap.crankcase_kw, 'kW', 'W'))
     htg_coil.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
+    if is_ddb_control
+      # Apply startup capacity degradation
+      apply_capacity_degradation_EMS(model, htg_ap, htg_coil.name.get, false, cap_fff_curve, eir_fff_curve)
+    end
 
     return htg_coil
   end

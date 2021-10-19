@@ -1602,7 +1602,7 @@ class OSModel
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
       hvac_control = @hpxml.hvac_controls[0]
       is_realistic_staging = false
-      #Fixme: Handle two speed with ddb control only (no realistic staging?)
+      # Fixme: Handle two speed with ddb control only (no realistic staging?)
       is_ddb_control = (not hvac_control.onoff_thermostat_deadband.nil?) && (hvac_control.onoff_thermostat_deadband > 0) && (cooling_system.additional_properties.num_speeds == 1)
 
       # Calculate cooling sequential load fractions
@@ -1621,8 +1621,8 @@ class OSModel
       if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
         if (cooling_system.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
           airloop_map[sys_id] = HVAC.apply_central_air_conditioner_furnace_two_speed_realistic(model, runner, cooling_system, heating_system,
-                                                                         sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                                                         living_zone)
+                                                                                               sequential_cool_load_fracs, sequential_heat_load_fracs,
+                                                                                               living_zone)
         else
           airloop_map[sys_id] = HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
                                                                            sequential_cool_load_fracs, sequential_heat_load_fracs,
@@ -1711,7 +1711,7 @@ class OSModel
 
       hvac_control = @hpxml.hvac_controls[0]
       is_realistic_staging = false
-      #Fixme: Handle two speed with ddb control only (no realistic staging?)
+      # Fixme: Handle two speed with ddb control only (no realistic staging?)
       is_ddb_control = (not hvac_control.onoff_thermostat_deadband.nil?) && (hvac_control.onoff_thermostat_deadband > 0) && (heat_pump.additional_properties.num_speeds == 1)
       # Calculate heating sequential load fractions
       sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heat_pump.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
@@ -1729,8 +1729,8 @@ class OSModel
                                                                      living_zone)
 
       elsif [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
-        if (cooling_system.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
-          #Fixme: not implemented yet
+        if (heat_pump.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
+          # Fixme: not implemented yet
           airloop_map[sys_id] = HVAC.apply_central_air_to_air_heat_pump_two_speed_realistic(model, runner, heat_pump,
                                                                                             sequential_heat_load_fracs, sequential_cool_load_fracs,
                                                                                             living_zone)
@@ -1782,32 +1782,32 @@ class OSModel
 
     # only enable residual ideal system when hvac's not on on/off thermostat control, the sum of fractions load served must be 1 to enable onoff control
     if @hpxml.hvac_controls[0].onoff_thermostat_deadband.nil? || (@hpxml.hvac_controls[0].onoff_thermostat_deadband == 0.0)
-    if (@hpxml.total_fraction_heat_load_served < 1.0) && (@hpxml.total_fraction_heat_load_served > 0.0)
-      sequential_heat_load_frac = @remaining_heat_load_frac - @hpxml.total_fraction_heat_load_served
-      @remaining_heat_load_frac -= sequential_heat_load_frac
-    else
-      sequential_heat_load_frac = 0.0
-    end
+      if (@hpxml.total_fraction_heat_load_served < 1.0) && (@hpxml.total_fraction_heat_load_served > 0.0)
+        sequential_heat_load_frac = @remaining_heat_load_frac - @hpxml.total_fraction_heat_load_served
+        @remaining_heat_load_frac -= sequential_heat_load_frac
+      else
+        sequential_heat_load_frac = 0.0
+      end
 
-    if (@hpxml.total_fraction_cool_load_served < 1.0) && (@hpxml.total_fraction_cool_load_served > 0.0)
-      sequential_cool_load_frac = @remaining_cool_load_frac - @hpxml.total_fraction_cool_load_served
-      @remaining_cool_load_frac -= sequential_cool_load_frac
-    else
-      sequential_cool_load_frac = 0.0
-    end
+      if (@hpxml.total_fraction_cool_load_served < 1.0) && (@hpxml.total_fraction_cool_load_served > 0.0)
+        sequential_cool_load_frac = @remaining_cool_load_frac - @hpxml.total_fraction_cool_load_served
+        @remaining_cool_load_frac -= sequential_cool_load_frac
+      else
+        sequential_cool_load_frac = 0.0
+      end
 
-    return if @heating_days.nil?
+      return if @heating_days.nil?
 
-    # For periods of the year outside the HVAC season, operate this ideal air system to meet
-    # 100% of the load; for all other periods, operate to meet the fraction of the load not
-    # met by the HVAC system(s).
-    sequential_heat_load_fracs = @heating_days.map { |d| d == 0 ? 1.0 : sequential_heat_load_frac }
-    sequential_cool_load_fracs = @cooling_days.map { |d| d == 0 ? 1.0 : sequential_cool_load_frac }
+      # For periods of the year outside the HVAC season, operate this ideal air system to meet
+      # 100% of the load; for all other periods, operate to meet the fraction of the load not
+      # met by the HVAC system(s).
+      sequential_heat_load_fracs = @heating_days.map { |d| d == 0 ? 1.0 : sequential_heat_load_frac }
+      sequential_cool_load_fracs = @cooling_days.map { |d| d == 0 ? 1.0 : sequential_cool_load_frac }
 
-    if (sequential_heat_load_fracs.sum > 0.0) || (sequential_cool_load_fracs.sum > 0.0)
-      HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                 living_zone)
-    end
+      if (sequential_heat_load_fracs.sum > 0.0) || (sequential_cool_load_fracs.sum > 0.0)
+        HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_fracs, sequential_heat_load_fracs,
+                                   living_zone)
+      end
     end
   end
 

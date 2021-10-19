@@ -115,7 +115,9 @@
       <sch:assert role='ERROR' test='count(h:MiscLoads/h:FuelLoad[h:FuelLoadType[text()="fireplace"]]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MiscLoads/FuelLoad[FuelLoadType[text()="fireplace"]]</sch:assert> <!-- See [FuelLoad] -->
       <!-- Sum Checks -->
       <sch:assert role='ERROR' test='sum(h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem/h:FractionHeatLoadServed) + sum(h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:FractionHeatLoadServed) &lt;= 1.01'>Expected sum(FractionHeatLoadServed) to be less than or equal to 1</sch:assert>
+      <sch:assert role='ERROR' test='sum(h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem/h:FractionHeatLoadServed) + sum(h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:FractionHeatLoadServed) &gt;= 0.99 or count(h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem/h:FractionHeatLoadServed) + count(h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:FractionHeatLoadServed) = 0 or not(h:Systems/h:HVAC/h:HVACControl/h:extension/h:OnOffThermostatDeadband)'>Expected sum(FractionHeatLoadServed) to be equal to 1</sch:assert>
       <sch:assert role='ERROR' test='sum(h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem/h:FractionCoolLoadServed) + sum(h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:FractionCoolLoadServed) &lt;= 1.01'>Expected sum(FractionCoolLoadServed) to be less than or equal to 1</sch:assert>
+      <sch:assert role='ERROR' test='sum(h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem/h:FractionCoolLoadServed) + sum(h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:FractionCoolLoadServed) &gt;= 0.99 or count(h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem/h:FractionCoolLoadServed) + count(h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:FractionCoolLoadServed) = 0 or not(h:Systems/h:HVAC/h:HVACControl/h:extension/h:OnOffThermostatDeadband)'>Expected sum(FractionHeatLoadServed) to be equal to 1</sch:assert>
       <sch:assert role='ERROR' test='sum(h:Appliances/h:Dehumidifier/h:FractionDehumidificationLoadServed) &lt;= 1.01'>Expected sum(FractionDehumidificationLoadServed) to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='(sum(h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:FractionDHWLoadServed) &lt;= 1.01 and sum(h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:FractionDHWLoadServed) &gt;= 0.99) or count(h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:FractionDHWLoadServed) = 0'>Expected sum(FractionDHWLoadServed) to be 1</sch:assert>
       <!-- Warnings -->
@@ -1007,13 +1009,6 @@
       <sch:assert role='ERROR' test='count(h:BeginDayOfMonth) = 1'>Expected 1 element(s) for xpath: BeginDayOfMonth</sch:assert> <!-- integer -->
       <sch:assert role='ERROR' test='count(h:EndMonth) = 1'>Expected 1 element(s) for xpath: EndMonth</sch:assert> <!-- integer -->
       <sch:assert role='ERROR' test='count(h:EndDayOfMonth) = 1'>Expected 1 element(s) for xpath: EndDayOfMonth</sch:assert> <!-- integer -->
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern>
-    <sch:title>[OnOffThermostatDeadband]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl/h:extension[h:OnOffThermostatDeadband]'>
-      <sch:assert role='ERROR' test='sum(../../h:HVACPlant/h:HeatingSystem/h:FractionHeatLoadServed) + sum(h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:FractionHeatLoadServed) &gt;= 0.99'>Expected sum(FractionHeatLoadServed) to be equal to 1</sch:assert>
     </sch:rule>
   </sch:pattern>
   
