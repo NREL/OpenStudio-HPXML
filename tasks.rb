@@ -1683,6 +1683,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['geometry_unit_cfa'] = 1350.0
     args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceUnvented
     args['geometry_foundation_height'] = 4.0
+    args['slab_thickness'] = 0.0
     args['floor_over_foundation_assembly_r'] = 18.7
     args['foundation_wall_insulation_distance_to_bottom'] = 4.0
     args['ducts_supply_location'] = HPXML::LocationCrawlspaceUnvented
@@ -1694,6 +1695,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['geometry_unit_cfa'] = 1350.0
     args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceVented
     args['geometry_foundation_height'] = 4.0
+    args['slab_thickness'] = 0.0
     args['floor_over_foundation_assembly_r'] = 18.7
     args['foundation_wall_insulation_distance_to_bottom'] = 4.0
     args['ducts_supply_location'] = HPXML::LocationCrawlspaceVented
