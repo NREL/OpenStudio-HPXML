@@ -851,7 +851,7 @@ class HVAC
   end
 
   def self.apply_dehumidifiers(model, runner, dehumidifiers, living_space)
-    dehumidifier_id = dehumidifiers[0].id # Syncs with SimulationOutputReport, which only looks at first dehumidifier ID
+    dehumidifier_id = dehumidifiers[0].id # Syncs with the ReportSimulationOutput measure, which only looks at first dehumidifier ID
 
     if dehumidifiers.map { |d| d.rh_setpoint }.uniq.size > 1
       fail 'All dehumidifiers must have the same setpoint but multiple setpoints were specified.'
@@ -920,12 +920,13 @@ class HVAC
     cfm_per_w = ceiling_fan.efficiency
     quantity = ceiling_fan.quantity
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, 'Wh', 'kWh')
-    annual_kwh *= ceiling_fan.monthly_multipliers.split(',').map(&:to_f).sum(0.0) / 12.0
 
     if not schedules_file.nil?
+      annual_kwh *= Schedule.CeilingFanMonthlyMultipliers(weather: weather).split(',').map(&:to_f).sum(0.0) / 12.0
       ceiling_fan_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: 'ceiling_fan', annual_kwh: annual_kwh)
       ceiling_fan_sch = schedules_file.create_schedule_file(col_name: 'ceiling_fan')
     else
+      annual_kwh *= ceiling_fan.monthly_multipliers.split(',').map(&:to_f).sum(0.0) / 12.0
       weekday_sch = ceiling_fan.weekday_fractions
       weekend_sch = ceiling_fan.weekend_fractions
       monthly_sch = ceiling_fan.monthly_multipliers
@@ -1072,12 +1073,12 @@ class HVAC
 
   def self.get_default_heating_setpoint(control_type)
     # Per ANSI/RESNET/ICC 301
-    htg_sp = 68 # F
+    htg_sp = 68.0 # F
     htg_setback_sp = nil
     htg_setback_hrs_per_week = nil
     htg_setback_start_hr = nil
     if control_type == HPXML::HVACControlTypeProgrammable
-      htg_setback_sp = 66 # F
+      htg_setback_sp = 66.0 # F
       htg_setback_hrs_per_week = 7 * 7 # 11 p.m. to 5:59 a.m., 7 days a week
       htg_setback_start_hr = 23 # 11 p.m.
     elsif control_type != HPXML::HVACControlTypeManual
@@ -1088,12 +1089,12 @@ class HVAC
 
   def self.get_default_cooling_setpoint(control_type)
     # Per ANSI/RESNET/ICC 301
-    clg_sp = 78 # F
+    clg_sp = 78.0 # F
     clg_setup_sp = nil
     clg_setup_hrs_per_week = nil
     clg_setup_start_hr = nil
     if control_type == HPXML::HVACControlTypeProgrammable
-      clg_setup_sp = 80 # F
+      clg_setup_sp = 80.0 # F
       clg_setup_hrs_per_week = 6 * 7 # 9 a.m. to 2:59 p.m., 7 days a week
       clg_setup_start_hr = 9 # 9 a.m.
     elsif control_type != HPXML::HVACControlTypeManual
