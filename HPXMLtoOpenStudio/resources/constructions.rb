@@ -907,8 +907,16 @@ class Constructions
                          Material.AirFilmVertical)
   end
 
-  def self.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft,
-                           mat, basement_frac_of_cfa, cond_base_surfaces, living_space)
+  def self.apply_furniture(runner, model, furniture_mass,
+                           basement_frac_of_cfa, cond_base_surfaces, living_space)
+
+    if furniture_mass.type == HPXML::FurnitureMassTypeLightWeight
+      mass_lb_per_sqft = 8.0
+      mat = BaseMaterial.FurnitureLightWeight
+    elsif furniture_mass.type == HPXML::FurnitureMassTypeHeavyWeight
+      mass_lb_per_sqft = 16.0
+      mat = BaseMaterial.FurnitureHeavyWeight
+    end
 
     # Add user-specified furniture mass
     model.getSpaces.each do |space|
@@ -916,9 +924,9 @@ class Constructions
       furnConductivity = mat.k_in
       furnSolarAbsorptance = 0.6
       furnSpecHeat = mat.cp
-      furnDensity = density_lb_per_cuft
+      furnDensity = mat.rho
       if (space == living_space) || Geometry.is_unconditioned_basement(space)
-        furnAreaFraction = 1.0
+        furnAreaFraction = furniture_mass.area_fraction
         furnMass = mass_lb_per_sqft
       elsif Geometry.is_garage(space)
         furnAreaFraction = 0.1
