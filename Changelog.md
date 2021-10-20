@@ -55,7 +55,7 @@ __Bugfixes__
 - Fixes duct design load calculations for HPXML files with multiple ducted HVAC systems.
 - Relaxes `Overhangs` DistanceToBottomOfWindow vs DistanceToBottomOfWindow validation when Depth is zero.
 - Fixes possibility of double-counting HVAC distribution losses if an `HVACDistribution` element has both AirDistribution properties and DSE values
-- Fixes possibility of "Peak Electricity: Winter Total (W)" and "Peak Electricity: Summer Total (W)" outputs incorrectly having the same value.
+- Fixes possibility of incorrect "Peak Electricity: Winter Total (W)" and "Peak Electricity: Summer Total (W)" outputs for homes with duct losses.
 
 ## OpenStudio-HPXML v1.2.0
 
