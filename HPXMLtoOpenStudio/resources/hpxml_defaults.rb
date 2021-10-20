@@ -60,6 +60,7 @@ class HPXMLDefaults
     apply_fuel_loads(hpxml, cfa, nbeds)
     apply_pv_systems(hpxml)
     apply_generators(hpxml)
+    apply_batteries(hpxml)
 
     # Do HVAC sizing after all other defaults have been applied
     apply_hvac_sizing(hpxml, weather, cfa, nbeds)
@@ -1508,6 +1509,12 @@ class HPXMLDefaults
         generator.is_shared_system = false
         generator.is_shared_system_isdefaulted = true
       end
+    end
+  end
+
+  def self.apply_batteries(hpxml)
+    hpxml.batteries.each do |battery|
+      # TODO
     end
   end
 
