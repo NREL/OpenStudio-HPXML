@@ -2089,6 +2089,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('battery_present', true)
+    arg.setDisplayName('Battery: Present')
+    arg.setDescription('Whether there is a lithium ion battery.')
+    arg.setDefaultValue(false)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('lighting_present', false)
     arg.setDisplayName('Lighting: Present')
     arg.setDescription('Whether there is lighting energy use.')
@@ -3201,6 +3207,7 @@ class HPXMLFile
     set_water_fixtures(hpxml, runner, args)
     set_solar_thermal(hpxml, runner, args, epw_file)
     set_pv_systems(hpxml, runner, args, epw_file)
+    set_battery(hpxml, runner, args)
     set_lighting(hpxml, runner, args)
     set_dehumidifier(hpxml, runner, args)
     set_clothes_washer(hpxml, runner, args)
@@ -4977,6 +4984,13 @@ class HPXMLFile
                            is_shared_system: is_shared_system,
                            number_of_bedrooms_served: number_of_bedrooms_served)
     end
+  end
+
+  def self.set_battery(hpxml, runner, args)
+    return unless args[:battery_present]
+
+    hpxml.batteries.add(id: "Battery#{hpxml.batteries.size + 1}",
+                        type: HPXML::BatteryTypeLithiumIon)
   end
 
   def self.set_lighting(hpxml, runner, args)
