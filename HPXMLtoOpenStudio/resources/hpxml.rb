@@ -55,7 +55,7 @@ class HPXML < Object
                  :skylights, :doors, :heating_systems, :cooling_systems, :heat_pumps, :hvac_plant,
                  :hvac_controls, :hvac_distributions, :ventilation_fans, :water_heating_systems,
                  :hot_water_distributions, :water_fixtures, :water_heating, :solar_thermal_systems,
-                 :pv_systems, :generators, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
+                 :pv_systems, :generators, :batteries, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
                  :freezers, :dehumidifiers, :cooking_ranges, :ovens, :lighting_groups, :lighting,
                  :ceiling_fans, :pools, :hot_tubs, :plug_loads, :fuel_loads]
   attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings)
@@ -72,6 +72,7 @@ class HPXML < Object
   AtticTypeUnvented = 'UnventedAttic'
   AtticTypeVented = 'VentedAttic'
   AtticWallTypeGable = 'gable'
+  BatteryTypeLithiumIon = 'Li-ion'
   CertificationEnergyStar = 'Energy Star'
   ClothesDryerControlTypeMoisture = 'moisture'
   ClothesDryerControlTypeTimer = 'timer'
@@ -619,6 +620,7 @@ class HPXML < Object
     @solar_thermal_systems.to_oga(@doc)
     @pv_systems.to_oga(@doc)
     @generators.to_oga(@doc)
+    @batteries.to_oga(@doc)
     @clothes_washers.to_oga(@doc)
     @clothes_dryers.to_oga(@doc)
     @dishwashers.to_oga(@doc)
@@ -670,6 +672,7 @@ class HPXML < Object
     @solar_thermal_systems = SolarThermalSystems.new(self, hpxml)
     @pv_systems = PVSystems.new(self, hpxml)
     @generators = Generators.new(self, hpxml)
+    @batteries = Batteries.new(self, hpxml)
     @clothes_washers = ClothesWashers.new(self, hpxml)
     @clothes_dryers = ClothesDryers.new(self, hpxml)
     @dishwashers = Dishwashers.new(self, hpxml)
@@ -4601,6 +4604,51 @@ class HPXML < Object
       @annual_consumption_kbtu = XMLHelper.get_value(generator, 'AnnualConsumptionkBtu', :float)
       @annual_output_kwh = XMLHelper.get_value(generator, 'AnnualOutputkWh', :float)
       @number_of_bedrooms_served = XMLHelper.get_value(generator, 'NumberofBedroomsServed', :integer)
+    end
+  end
+
+  class Batteries < BaseArrayElement
+    def add(**kwargs)
+      self << Battery.new(@hpxml_object, **kwargs)
+    end
+
+    def from_oga(hpxml)
+      return if hpxml.nil?
+
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/Batteries/Battery').each do |battery|
+        self << Battery.new(@hpxml_object, battery)
+      end
+    end
+  end
+
+  class Battery < BaseElement
+    ATTRS = [:id, :type]
+    attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.batteries.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_oga(doc)
+      return if nil?
+
+      batteries = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'Batteries'])
+      battery = XMLHelper.add_element(batteries, 'Battery')
+      sys_id = XMLHelper.add_element(battery, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(battery, 'BatteryType', @type, :string) unless @type.nil?
+    end
+
+    def from_oga(battery)
+      return if battery.nil?
+
+      @id = HPXML::get_id(battery)
+      @type = XMLHelper.get_value(battery, 'BatteryType', :string)
     end
   end
 
