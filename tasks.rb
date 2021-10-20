@@ -458,6 +458,10 @@ def create_hpxmls
     end
   end
 
+  if hpxml_docs.size != hpxmls_files.size
+    return
+  end
+
   return hpxml_docs
 end
 
@@ -4763,7 +4767,9 @@ if ARGV[0].to_sym == :update_hpxmls
   hpxml_docs = create_hpxmls()
 
   # Create Schematron file that reflects HPXML schema
-  create_schematron_hpxml_validator(hpxml_docs)
+  if not hpxml_docs.nil?
+    create_schematron_hpxml_validator(hpxml_docs)
+  end
 end
 
 if ARGV[0].to_sym == :cache_weather
