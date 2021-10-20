@@ -7,6 +7,7 @@ require 'pathname'
 require 'csv'
 require 'oga'
 require_relative 'resources/airflow'
+require_relative 'resources/battery'
 require_relative 'resources/constants'
 require_relative 'resources/constructions'
 require_relative 'resources/energyplus'
@@ -279,6 +280,7 @@ class OSModel
     add_airflow(runner, model, weather, spaces, airloop_map)
     add_photovoltaics(runner, model)
     add_generators(runner, model)
+    add_batteries(runner, model)
     add_additional_properties(runner, model, hpxml_path, building_id)
 
     # Output
@@ -2018,6 +2020,12 @@ class OSModel
   def self.add_generators(runner, model)
     @hpxml.generators.each do |generator|
       Generator.apply(model, @nbeds, generator)
+    end
+  end
+
+  def self.add_batteries(runner, model)
+    @hpxml.batteries.each do |battery|
+      Battery.apply(model, battery)
     end
   end
 
