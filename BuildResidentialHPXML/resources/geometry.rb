@@ -1627,10 +1627,6 @@ class Geometry
       runner.registerError('Starting model is not empty.')
       return false
     end
-    if foundation_type.downcase.include?('crawlspace') && ((foundation_height < 1.5) || (foundation_height > 5.0))
-      runner.registerError('The crawlspace height can be set between 1.5 and 5 ft.')
-      return false
-    end
     if (num_units == 1) && has_rear_units
       runner.registerError("Specified building as having rear units, but didn't specify enough units.")
       return false
@@ -2095,10 +2091,6 @@ class Geometry
     # error checking
     if model.getSpaces.size > 0
       runner.registerError('Starting model is not empty.')
-      return false
-    end
-    if foundation_type.downcase.include?('crawlspace') && ((foundation_height < 1.5) || (foundation_height > 5.0)) && level == 'Bottom'
-      runner.registerError('The crawlspace height can be set between 1.5 and 5 ft.')
       return false
     end
     if !has_rear_units && ((corridor_position == 'Double-Loaded Interior') || (corridor_position == 'Double Exterior'))

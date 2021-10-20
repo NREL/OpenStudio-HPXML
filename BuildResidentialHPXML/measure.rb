@@ -2964,8 +2964,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       errors << "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_unit_level=#{args[:geometry_unit_level].get} and geometry_foundation_type=#{args[:geometry_foundation_type]} and geometry_foundation_height=#{args[:geometry_foundation_height]}" if error
     end
 
-    # multifamily and finished basement
-    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && (args[:geometry_foundation_type] == HPXML::FoundationTypeBasementConditioned)
+    # multifamily and conditioned basement/crawlspace
+    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && ([HPXML::FoundationTypeBasementConditioned, HPXML::FoundationTypeCrawlspaceConditioned].include? args[:geometry_foundation_type])
     errors << "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_foundation_type=#{args[:geometry_foundation_type]}" if error
 
     # slab and foundation height above grade > 0
