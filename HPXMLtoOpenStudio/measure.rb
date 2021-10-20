@@ -2051,12 +2051,14 @@ class OSModel
   end
 
   def self.add_total_loads_output(runner, model, living_zone)
+    # Energy transferred in the conditioned space, used for determining heating (winter) vs cooling (summer)
     liv_load_sensors = {}
     liv_load_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{living_zone.name.to_s.upcase}")
     liv_load_sensors[:htg].setName('htg_load_liv')
     liv_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{living_zone.name.to_s.upcase}")
     liv_load_sensors[:clg].setName('clg_load_liv')
 
+    # Total energy transferred (above plus ducts)
     tot_load_sensors = {}
     tot_load_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating:EnergyTransfer')
     tot_load_sensors[:htg].setName('htg_load_tot')
