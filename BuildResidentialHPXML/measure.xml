@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>1acb0be3-82b8-466f-a065-2f19facace70</version_id>
-  <version_modified>20211018T205041Z</version_modified>
+  <version_id>280a3f11-05fb-400f-af2b-20b0ce4cb927</version_id>
+  <version_modified>20211020T230531Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -5852,17 +5852,6 @@
       <checksum>7A2C5503</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>823FD7DD</checksum>
-    </file>
-    <file>
       <filename>base-hvac-dual-fuel-air-to-air-heat-pump-var-speed-flex-dual-source-not-grid-connected.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -5921,6 +5910,35 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>F2406A78</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>7D2C59A4</checksum>
+    </file>
+    <file>
+      <filename>out.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8578CF9A</checksum>
+    </file>
+    <file>
+      <filename>test_measure.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E0771035</checksum>
+    </file>
+    <file>
+      <filename>test_rakefile.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9375B2EC</checksum>
     </file>
   </files>
 </measure>
