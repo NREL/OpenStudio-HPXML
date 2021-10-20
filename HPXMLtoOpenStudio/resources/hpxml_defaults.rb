@@ -228,7 +228,7 @@ class HPXMLDefaults
   end
 
   def self.apply_building_construction(hpxml, cfa, nbeds, infil_volume)
-    # FIXME: Need to update for conditioned crawl
+    cond_crawl_volume = hpxml.inferred_conditioned_crawlspace_volume()
     if hpxml.building_construction.conditioned_building_volume.nil? && hpxml.building_construction.average_ceiling_height.nil?
       if not infil_volume.nil?
         hpxml.building_construction.average_ceiling_height = [infil_volume / cfa, 8.0].min
@@ -236,13 +236,13 @@ class HPXMLDefaults
         hpxml.building_construction.average_ceiling_height = 8.0
       end
       hpxml.building_construction.average_ceiling_height_isdefaulted = true
-      hpxml.building_construction.conditioned_building_volume = cfa * hpxml.building_construction.average_ceiling_height
+      hpxml.building_construction.conditioned_building_volume = cfa * hpxml.building_construction.average_ceiling_height + cond_crawl_volume
       hpxml.building_construction.conditioned_building_volume_isdefaulted = true
     elsif hpxml.building_construction.conditioned_building_volume.nil?
-      hpxml.building_construction.conditioned_building_volume = cfa * hpxml.building_construction.average_ceiling_height
+      hpxml.building_construction.conditioned_building_volume = cfa * hpxml.building_construction.average_ceiling_height + cond_crawl_volume
       hpxml.building_construction.conditioned_building_volume_isdefaulted = true
     elsif hpxml.building_construction.average_ceiling_height.nil?
-      hpxml.building_construction.average_ceiling_height = hpxml.building_construction.conditioned_building_volume / cfa
+      hpxml.building_construction.average_ceiling_height = (hpxml.building_construction.conditioned_building_volume - cond_crawl_volume) / cfa
       hpxml.building_construction.average_ceiling_height_isdefaulted = true
     end
 

@@ -570,13 +570,7 @@ class HPXML < Object
     if has_walkout_basement()
       infil_height = ncfl_ag * infil_volume / cfa
     else
-      # FIXME: Double-check this
-      if has_location(HPXML::LocationCrawlspaceConditioned)
-        conditioned_crawl_area = @slabs.select { |s| s.interior_adjacent_to == HPXML::LocationCrawlspaceConditioned }.map { |s| s.area }.sum
-        conditioned_crawl_height = @foundation_walls.select { |w| w.interior_adjacent_to == HPXML::LocationCrawlspaceConditioned }.map { |w| w.height }.max
-        conditioned_crawl_volume = conditioned_crawl_area * conditioned_crawl_height
-        infil_volume -= conditioned_crawl_volume
-      end
+      infil_volume -= inferred_conditioned_crawlspace_volume()
 
       # Calculate maximum above-grade height of conditioned foundation walls
       max_cond_fnd_wall_height_ag = 0.0
@@ -600,6 +594,15 @@ class HPXML < Object
       infil_height = ncfl_ag * infil_volume / cfa + max_cond_fnd_wall_height_ag + cond_fnd_rim_joist_height
     end
     return infil_height
+  end
+
+  def inferred_conditioned_crawlspace_volume
+    if has_location(HPXML::LocationCrawlspaceConditioned)
+      conditioned_crawl_area = @slabs.select { |s| s.interior_adjacent_to == HPXML::LocationCrawlspaceConditioned }.map { |s| s.area }.sum
+      conditioned_crawl_height = @foundation_walls.select { |w| w.interior_adjacent_to == HPXML::LocationCrawlspaceConditioned }.map { |w| w.height }.max
+      return conditioned_crawl_area * conditioned_crawl_height
+    end
+    return 0.0
   end
 
   def to_oga()
