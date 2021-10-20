@@ -517,7 +517,7 @@ class HPXML < Object
     exterior_area = 0.0 # Same as above excluding surfaces attached to garage or other housing units
 
     # Determine which spaces are within infiltration volume
-    spaces_within_infil_volume = HPXML::conditioned_locations - [HPXML::LocationOtherHousingUnit]
+    spaces_within_infil_volume = HPXML::conditioned_locations_this_unit
     @attics.each do |attic|
       next unless [AtticTypeUnvented].include? attic.attic_type
       next unless attic.within_infiltration_volume
@@ -5984,10 +5984,15 @@ class HPXML < Object
             HPXML::LocationOtherHousingUnit]
   end
 
-  def self.conditioned_finished_locations
+  def self.conditioned_locations_this_unit
     return [HPXML::LocationLivingSpace,
             HPXML::LocationBasementConditioned,
-            HPXML::LocationOtherHousingUnit]
+            HPXML::LocationCrawlspaceConditioned]
+  end
+
+  def self.conditioned_finished_locations
+    return [HPXML::LocationLivingSpace,
+            HPXML::LocationBasementConditioned]
   end
 
   def self.conditioned_below_grade_locations
