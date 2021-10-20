@@ -214,6 +214,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
+    # Peak Load outputs (annual only)
+    @peak_loads.values.each do |peak_load|
+      result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{peak_load.ems_variable}_peakload_outvar,#{peak_load.ems_variable},Summed,ZoneTimestep,#{total_loads_program.name},J;").get
+      result << OpenStudio::IdfObject.load("Output:Table:Monthly,#{peak_load.report},2,#{peak_load.ems_variable}_peakload_outvar,Maximum;").get
+    end
+
     # Component Load outputs
     @component_loads.values.each do |comp_load|
       next if comp_loads_program.nil?
@@ -507,7 +513,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Peak Building Space Heating/Cooling Loads (total heating/cooling energy delivered including backup ideal air system)
     @peak_loads.each do |load_type, peak_load|
-      peak_load.annual_output = UnitConversions.convert(get_tabular_data_value('EnergyMeters', 'Entire Facility', 'Annual and Peak Values - Other', peak_load.meters, 'Maximum Value', 'W'), 'Wh', peak_load.annual_units)
+      peak_load.annual_output = UnitConversions.convert(get_tabular_data_value(peak_load.report.upcase, 'EMS', 'Custom Monthly Report', ['Maximum of Months'], "#{peak_load.ems_variable.upcase}_PEAKLOAD_OUTVAR {Maximum", 'W'), 'Wh', peak_load.annual_units)
     end
 
     # End Uses
@@ -1388,11 +1394,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   class PeakLoad < BaseOutput
-    def initialize(meters:)
+    def initialize(ems_variable:, report:)
       super()
-      @meters = meters
+      @ems_variable = ems_variable
+      @report = report
     end
-    attr_accessor(:meters)
+    attr_accessor(:ems_variable, :report)
   end
 
   class ZoneTemp < BaseOutput
@@ -1681,10 +1688,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Peak Loads
-    # Using meters for total energy transferred (i.e. including ducts)
     @peak_loads = {}
-    @peak_loads[PLT::Heating] = PeakLoad.new(meters: ['Heating:EnergyTransfer'])
-    @peak_loads[PLT::Cooling] = PeakLoad.new(meters: ['Cooling:EnergyTransfer'])
+    @peak_loads[PLT::Heating] = PeakLoad.new(ems_variable: 'loads_htg_tot', report: 'Peak Heating Load')
+    @peak_loads[PLT::Cooling] = PeakLoad.new(ems_variable: 'loads_clg_tot', report: 'Peak Cooling Load')
 
     @peak_loads.each do |load_type, peak_load|
       peak_load.name = "Peak Load: #{load_type}"
