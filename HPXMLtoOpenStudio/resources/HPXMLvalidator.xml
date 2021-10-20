@@ -445,6 +445,10 @@
       <sch:assert role='ERROR' test='number(h:SystemLossesFraction) &lt;= 1 or not(h:SystemLossesFraction)'>Expected SystemLossesFraction to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:SystemIdentifier[@id]) = count(h:SystemIdentifier)'>Expected id attribute for SystemIdentifier</sch:assert>
     </sch:rule>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:Batteries/h:Battery'>
+      <sch:assert role='ERROR' test='h:BatteryType[text()="Li-ion" or text()="lead acid" or text()="Ni-Cd" or text()="salt water" or text()="other"] or not(h:BatteryType)'>Expected BatteryType to be 'Li-ion' or 'lead acid' or 'Ni-Cd' or 'salt water' or 'other'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:SystemIdentifier[@id]) = count(h:SystemIdentifier)'>Expected id attribute for SystemIdentifier</sch:assert>
+    </sch:rule>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesWasher'>
       <sch:assert role='ERROR' test='h:Location[text()="basement" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="garage - conditioned" or text()="garage - unconditioned" or text()="laundry room" or text()="living space" or text()="other" or text()="other heated space" or text()="other housing unit" or text()="other multifamily buffer space" or text()="other non-freezing space" or text()="unconditioned space"] or not(h:Location)'>Expected Location to be 'basement' or 'basement - conditioned' or 'basement - unconditioned' or 'garage' or 'garage - conditioned' or 'garage - unconditioned' or 'laundry room' or 'living space' or 'other' or 'other heated space' or 'other housing unit' or 'other multifamily buffer space' or 'other non-freezing space' or 'unconditioned space'</sch:assert>
       <sch:assert role='ERROR' test='number(h:RatedAnnualkWh) &gt; 0 or not(h:RatedAnnualkWh)'>Expected RatedAnnualkWh to be greater than 0</sch:assert>
