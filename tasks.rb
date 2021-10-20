@@ -56,6 +56,7 @@ def create_hpxmls
     'base-atticroof-radiant-barrier.xml' => 'base-location-dallas-tx.xml',
     'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
     'base-atticroof-vented.xml' => 'base.xml',
+    'base-battery.xml' => 'base.xml',
     'base-bldgtype-multifamily.xml' => 'base.xml',
     'base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-adjacent-to-multiple.xml' => 'base-bldgtype-multifamily.xml',
@@ -686,6 +687,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_2_inverter_efficiency'] = 0.96
     args['pv_system_2_system_losses_fraction'] = 0.14
     args['pv_system_2_num_units_served'] = 1
+    args['battery_present'] = false
     args['lighting_interior_fraction_cfl'] = 0.4
     args['lighting_interior_fraction_lfl'] = 0.1
     args['lighting_interior_fraction_led'] = 0.25
@@ -1007,6 +1009,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_2_inverter_efficiency'] = 0
     args['pv_system_2_system_losses_fraction'] = 0
     args['pv_system_2_num_units_served'] = 0
+    args['battery_present'] = false
     args['lighting_present'] = false
     args['lighting_interior_fraction_cfl'] = 0
     args['lighting_interior_fraction_lfl'] = 0
@@ -2317,6 +2320,11 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_2_tracking'] = HPXML::PVTrackingTypeFixed
     args['pv_system_2_array_azimuth'] = 90
     args['pv_system_2_max_power_output'] = 1500
+  end
+
+  # Battery
+  if ['base-battery.xml'].include? hpxml_file
+    args['battery_present'] = true
   end
 
   # Simulation Control
