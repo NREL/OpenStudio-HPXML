@@ -496,7 +496,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         next # Don't report unmet hours if there is no heating/cooling system
       end
 
-      unmet_hour.annual_output = get_tabular_data_value('SystemSummary', 'Entire Facility', 'Time Setpoint Not Met', ['LIVING SPACE'], unmet_hour.col_name, unmet_hour.annual_units)
+      unmet_hour.annual_output = get_tabular_data_value('SystemSummary', 'Entire Facility', 'Time Setpoint Not Met', [HPXML::LocationLivingSpace.upcase], unmet_hour.col_name, unmet_hour.annual_units)
     end
 
     # Ideal system loads (expected fraction of loads that are not met by partial HVAC (e.g., room AC that meets 30% of load))
@@ -1590,9 +1590,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Peak Fuels
+    # Using meters for energy transferred in conditioned space only (i.e., excluding ducts) to determine winter vs summer.
     @peak_fuels = {}
-    @peak_fuels[[FT::Elec, PFT::Winter]] = PeakFuel.new(meters: ['Heating:EnergyTransfer'], report: 'Peak Electricity Winter Total')
-    @peak_fuels[[FT::Elec, PFT::Summer]] = PeakFuel.new(meters: ['Cooling:EnergyTransfer'], report: 'Peak Electricity Summer Total')
+    @peak_fuels[[FT::Elec, PFT::Winter]] = PeakFuel.new(meters: ["Heating:EnergyTransfer:Zone:#{HPXML::LocationLivingSpace.upcase}"], report: 'Peak Electricity Winter Total')
+    @peak_fuels[[FT::Elec, PFT::Summer]] = PeakFuel.new(meters: ["Cooling:EnergyTransfer:Zone:#{HPXML::LocationLivingSpace.upcase}"], report: 'Peak Electricity Summer Total')
 
     @peak_fuels.each do |key, peak_fuel|
       fuel_type, peak_fuel_type = key
@@ -1684,6 +1685,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Peak Loads
+    # Using meters for total energy transferred (i.e. including ducts)
     @peak_loads = {}
     @peak_loads[PLT::Heating] = PeakLoad.new(meters: ['Heating:EnergyTransfer'])
     @peak_loads[PLT::Cooling] = PeakLoad.new(meters: ['Cooling:EnergyTransfer'])
