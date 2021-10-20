@@ -2094,6 +2094,21 @@ If not entered, the simulation will not include generators.
 
   Generators will be modeled as operating continuously (24/7).
 
+HPXML Batteries
+***************
+
+Each battery is entered as a ``/HPXML/Building/BuildingDetails/Systems/Batteries/Battery``.
+If not entered, the simulation will not include batteries.
+
+  ==========================  =======  =======  ===========  ========  =======  ============================================
+  Element                     Type     Units    Constraints  Required  Default  Notes
+  ==========================  =======  =======  ===========  ========  =======  ============================================
+  ``SystemIdentifier``        id                             Yes                Unique identifier
+  ``BatteryType``             string            See [#]_     Yes                Battery type
+  ==========================  =======  =======  ===========  ========  =======  ============================================
+
+  .. [#] BatteryType choices are "Li-ion".
+
 HPXML Appliances
 ----------------
 
