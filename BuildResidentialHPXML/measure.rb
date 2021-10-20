@@ -3137,9 +3137,8 @@ class HPXMLFile
 
     @surface_ids = {}
 
-    # Sorting of objects
+    # Sorting of objects to make the measure deterministic
     def self.surface_order(s)
-      # Sort by adjacent space(s), then azimuth
       order_map = { HPXML::LocationLivingSpace => 0,
                     HPXML::LocationAtticUnvented => 1,
                     HPXML::LocationAtticVented => 1,
@@ -3159,7 +3158,11 @@ class HPXMLFile
 
       order = order * 10 + s.azimuth / 1000.0
       if s.outsideBoundaryCondition.downcase == 'adiabatic'
-        order += 0.5
+        if s.surfaceType != 'RoofCeiling' # Ensure adiabatic ceiling before adiabatic floor
+          order += 0.5
+        else
+          order += 0.4
+        end
       elsif (not location2.nil?) && location == HPXML::LocationLivingSpace
         order -= 0.5
       end
