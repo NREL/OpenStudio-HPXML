@@ -864,16 +864,16 @@ If electric resistance heating is specified, additional information is entered i
 PTAC - Heating
 ~~~~~~~~~~~~~~
 
-If electric resistance heating is specified, additional information is entered in ``HeatingSystem``.
+If a PTAC with non-heat pump (e.g., electric resistance) heating is specified, additional information is entered in ``HeatingSystem``.
 
   ==================================================  ======  =========  ===========  ========  =======  ==================================
   Element                                             Type    Units      Constraints  Required  Default  Notes
   ==================================================  ======  =========  ===========  ========  =======  ==================================
   ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac       0 - 1        No        1.0      Efficiency
-  ``AttachedToCoolingSystem``                         idref   See [#]_                No                 ID of attached ptac cooling system
   ==================================================  ======  =========  ===========  ========  =======  ==================================
 
-  .. [#] AttachedToCoolingSystem is required for ``PackagedTerminalAirConditionerHeating``. The cooling system being attached must be of type "packaged terminal air conditioner".
+  .. [#] A cooling system of type "packaged terminal air conditioner" must be specified in ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
+
 Furnace
 ~~~~~~~
 
@@ -1068,25 +1068,18 @@ If a room air conditioner is specified, additional information is entered in ``C
 
   .. [#] If AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value not provided, defaults to EER from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
 
-.. _hvac_cooling_ptac:
-
 Packaged Terminal Air Conditioner
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If a ptac is specified, additional information is entered in ``CoolingSystem``.
+If a PTAC is specified, additional information is entered in ``CoolingSystem``.
 
   ===================================================================  =================  ===========  ===============  ========  =========  ==================================
   Element                                                              Type               Units        Constraints      Required  Default    Notes
   ===================================================================  =================  ===========  ===============  ========  =========  ==================================
-  ``YearInstalled`` or ``AnnualCoolingEfficiency[Units="EER"]/Value``  integer or double  # or Btu/Wh  > 1600 or > 0    Yes       See [#]_   Year installed or Rated efficiency
+  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``       integer or double  # or Btu/Wh  > 1600 or > 0    Yes                  Rated cooling efficiency
   ``CoolingCapacity``                                                  double             Btu/hr       >= 0             No        autosized  Cooling capacity
   ``SensibleHeatFraction``                                             double             frac         0 - 1            No                   Sensible heat fraction
-  ``CompressorType``                                                   string             See [#]_                      No        See [#]_   Type of compressor
   ===================================================================  =================  ===========  ===============  ========  =========  ==================================
-
-  .. [#] If AnnualCoolingEfficiency[Units="EER"]/Value not provided, defaults to EER from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
-  .. [#] The only CompressorType choice supported is "single stage" for now.
-  .. [#] If CompressorType not provided, defaults to "single stage".
 
 Evaporative Cooler
 ~~~~~~~~~~~~~~~~~~
@@ -1280,6 +1273,26 @@ If a mini-split heat pump is specified, additional information is entered in ``H
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
          A non-zero charge defect should typically only be applied for systems that are pre-charged on site.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
+
+Packaged Terminal Heat Pump
+~~~~~~~~~~~~~~~~~~~~
+
+If a packaged terminal heat pump is specified, additional information is entered in ``HeatPump``.
+
+  ===============================================================  ========  ======  ===========  ========  =========  ==============================================
+  Element                                                          Type      Units   Constraints  Required  Default    Notes
+  ===============================================================  ========  ======  ===========  ========  =========  ==============================================
+  ``HeatingCapacity``                                              double    Btu/hr  >= 0         No        autosized  Heating output capacity (excluding any backup heating)
+  ``CoolingCapacity``                                              double    Btu/hr  >= 0         No        autosized  Cooling output capacity
+  ``CoolingSensibleHeatFraction``                                  double    frac    0 - 1        No                   Sensible heat fraction
+  ``FractionHeatLoadServed``                                       double    frac    0 - 1 [#]_   Yes                  Fraction of heating load served
+  ``FractionCoolLoadServed``                                       double    frac    0 - 1 [#]_   Yes                  Fraction of cooling load served
+  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``   double    Btu/Wh  > 0          Yes                  Rated cooling efficiency
+  ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    Btu/Wh  > 0          Yes                  Rated heating efficiency
+  ===============================================================  ========  ======  ===========  ========  =========  ==============================================
+
+  .. [#] The sum of all ``FractionHeatLoadServed`` (across both HeatingSystems and HeatPumps) must be less than or equal to 1.
+  .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
 
 Ground-to-Air Heat Pump
 ~~~~~~~~~~~~~~~~~~~~~~~

@@ -1104,7 +1104,8 @@ class HVACSizing
     if [HPXML::HVACTypeHeatPumpAirToAir,
         HPXML::HVACTypeHeatPumpMiniSplit,
         HPXML::HVACTypeHeatPumpGroundToAir,
-        HPXML::HVACTypeHeatPumpWaterLoopToAir].include? hvac.HeatType
+        HPXML::HVACTypeHeatPumpWaterLoopToAir,
+        HPXML::HVACTypeHeatPumpPTHP].include? hvac.HeatType
       hvac.SupplyAirTemp = 105.0 # F
     else
       hvac.SupplyAirTemp = 120.0 # F
@@ -1560,8 +1561,7 @@ class HVACSizing
       hvac_sizing_values.Heat_Capacity_Supp = 0.0
       hvac_sizing_values.Heat_Airflow = 0.0
 
-    elsif hvac.HeatType == HPXML::HVACTypeHeatPumpAirToAir
-
+    elsif [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpPTHP].include? hvac.HeatType
       if hvac_sizing_values.Cool_Capacity > 0
         process_heat_pump_adjustment(hvac_sizing_values, weather, hvac, totalCap_CurveValue)
         hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Cool_Capacity
@@ -1572,7 +1572,7 @@ class HVACSizing
       end
       hvac_sizing_values.Heat_Airflow = calc_airflow_rate(hvac_sizing_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
 
-    elsif [HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP].include? hvac.HeatType
+    elsif hvac.HeatType == HPXML::HVACTypeHeatPumpMiniSplit
       if hvac_sizing_values.Cool_Capacity > 0
         process_heat_pump_adjustment(hvac_sizing_values, weather, hvac, totalCap_CurveValue)
         hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Cool_Capacity
@@ -2013,9 +2013,9 @@ class HVACSizing
         # Cold winter and no latent cooling load (add a ton rule applies)
         hvac_sizing_values.Cool_Capacity = [(hvac_sizing_values.Cool_Load_Tot + hvac.OverSizeDelta) / totalCap_CurveValue, heatCap_Rated].min
       end
-      if hvac.HeatType == HPXML::HVACTypeHeatPumpAirToAir
+      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpPTHP].include? hvac.HeatType
         hvac_sizing_values.Cool_Airflow = cfm_per_btuh * hvac_sizing_values.Cool_Capacity
-      elsif [HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP].include? hvac.HeatType
+      elsif hvac.HeatType == HPXML::HVACTypeHeatPumpMiniSplit
         hvac_sizing_values.Cool_Airflow = hvac.RatedCFMperTonCooling[-1] * hvac.CapacityRatioCooling[-1] * UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton')
       end
     end

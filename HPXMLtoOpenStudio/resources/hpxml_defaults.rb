@@ -1028,7 +1028,7 @@ class HPXMLDefaults
         # Note: We use HP cooling curve so that a central AC behaves the same.
         HVAC.set_num_speeds(cooling_system)
         HVAC.set_fan_power_rated(cooling_system) unless use_eer
-        HVAC.set_crankcase_assumptions(cooling_system) unless use_eer
+        HVAC.set_crankcase_assumptions(cooling_system)
         HVAC.set_cool_c_d(cooling_system, clg_ap.num_speeds)
         HVAC.set_cool_curves_central_air_source(cooling_system, use_eer)
         HVAC.set_cool_rated_cfm_per_ton(cooling_system)
@@ -1075,7 +1075,7 @@ class HPXMLDefaults
         end
         HVAC.set_num_speeds(heat_pump)
         HVAC.set_fan_power_rated(heat_pump) unless use_eer_cop
-        HVAC.set_crankcase_assumptions(heat_pump) unless use_eer_cop
+        HVAC.set_crankcase_assumptions(heat_pump)
         HVAC.set_heat_pump_temperatures(heat_pump)
 
         HVAC.set_cool_c_d(heat_pump, hp_ap.num_speeds)

@@ -2699,9 +2699,7 @@ class HVAC
 
       if clg_ap.num_speeds == 1
         clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
-        if [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC, HPXML::HVACTypeHeatPumpPTHP].include? clg_type # Is this correct?
-          clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(10)
-        end
+        # Coil COP calculation based on system type
         if [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC, HPXML::HVACTypeHeatPumpPTHP].include? clg_type
           if cooling_system.cooling_efficiency_ceer.nil?
             ceer = calc_ceer_from_eer(cooling_system)
@@ -2710,9 +2708,9 @@ class HVAC
           end
           clg_coil.setRatedCOP(UnitConversions.convert(ceer, 'Btu/hr', 'W'))
         else
-          clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C')) unless clg_ap.crankcase_temp.nil?
           clg_coil.setRatedCOP(1.0 / clg_ap.cool_rated_eirs[i])
         end
+        clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C'))
         clg_coil.setRatedSensibleHeatRatio(clg_ap.cool_rated_shrs_gross[i])
         clg_coil.setNominalTimeForCondensateRemovalToBegin(1000.0)
         clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(1.5)
@@ -2727,9 +2725,7 @@ class HVAC
           clg_coil.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
           clg_coil.setFuelType(EPlus::FuelTypeElectricity)
           clg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
-          if not clg_ap.crankcase_temp.nil?
-            clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C'))
-          end
+          clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(clg_ap.crankcase_temp, 'F', 'C'))
         end
         stage = OpenStudio::Model::CoilCoolingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_biquadratic)
         stage.setGrossRatedCoolingCOP(1.0 / clg_ap.cool_rated_eirs[i])
@@ -2747,9 +2743,7 @@ class HVAC
 
     clg_coil.setName(obj_name + ' clg coil')
     clg_coil.setCondenserType('AirCooled')
-    if not [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC, HPXML::HVACTypeHeatPumpPTHP].include? clg_type
-      clg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(clg_ap.crankcase_kw, 'kW', 'W'))
-    end
+    clg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(clg_ap.crankcase_kw, 'kW', 'W'))
     clg_coil.additionalProperties.setFeature('HPXML_ID', cooling_system.id) # Used by reporting measure
 
     return clg_coil
@@ -2786,9 +2780,6 @@ class HVAC
         else # PTHP
           htg_coil.setRatedCOP(heating_system.heating_efficiency_cop)
         end
-        if (htg_type != HPXML::HVACTypeHeatPumpPTHP) && (not htg_ap.crankcase_temp.nil?)
-          htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(htg_ap.crankcase_temp, 'F', 'C'))
-        end
         htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
         htg_coil.setRatedAirFlowRate(calc_rated_airflow(heating_system.heating_capacity, htg_ap.heat_rated_cfm_per_ton[0], 1.0))
       else
@@ -2797,9 +2788,6 @@ class HVAC
           htg_coil.setFuelType(EPlus::FuelTypeElectricity)
           htg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
           htg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
-          if not htg_ap.crankcase_temp.nil?
-            htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(htg_ap.crankcase_temp, 'F', 'C'))
-          end
         end
         stage = OpenStudio::Model::CoilHeatingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_biquadratic)
         stage.setGrossRatedHeatingCOP(1.0 / htg_ap.heat_rated_eirs[i])
@@ -2820,7 +2808,8 @@ class HVAC
     if heating_system.fraction_heat_load_served == 0
       htg_coil.setResistiveDefrostHeaterCapacity(0)
     end
-    htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(htg_ap.crankcase_kw, 'kW', 'W')) unless (htg_type == HPXML::HVACTypeHeatPumpPTHP)
+    htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(htg_ap.crankcase_temp, 'F', 'C'))
+    htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(htg_ap.crankcase_kw, 'kW', 'W'))
     htg_coil.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
 
     return htg_coil
@@ -2902,7 +2891,7 @@ class HVAC
 
     # Degradation coefficient for heating
     if (heating_system.is_a? HPXML::HeatPump) && (heating_system.heat_pump_type == HPXML::HVACTypeHeatPumpPTHP)
-      htg_ap.heat_c_d = 0.22 # Fixme: Is it correct to use the same c_d with cooling?
+      htg_ap.heat_c_d = 0.22
     elsif num_speeds == 1
       if heating_system.heating_efficiency_hspf < 7.0
         htg_ap.heat_c_d =  0.20
@@ -3445,18 +3434,27 @@ class HVAC
 
   def self.set_crankcase_assumptions(hvac_system)
     hvac_ap = hvac_system.additional_properties
+    if hvac_system.is_a?(HPXML::HeatPump)
+      clg_sys_type = hvac_system.heat_pump_type
+    elsif hvac_system.is_a?(HPXML::CoolingSystem)
+      clg_sys_type = hvac_system.cooling_system_type
+    end
 
     if hvac_system.is_a?(HPXML::HeatPump) && (hvac_system.fraction_heat_load_served <= 0)
       hvac_ap.crankcase_kw = 0.0
       hvac_ap.crankcase_temp = nil
-    elsif hvac_system.is_a?(HPXML::HeatPump) && (hvac_system.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit)
+    elsif clg_sys_type == HPXML::HVACTypeHeatPumpMiniSplit
       hvac_ap.crankcase_kw = 0.0
       hvac_ap.crankcase_temp = nil
-    elsif hvac_system.is_a?(HPXML::CoolingSystem) && (hvac_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner)
+    elsif clg_sys_type == HPXML::HVACTypeMiniSplitAirConditioner
       hvac_ap.crankcase_kw = 0.0
       hvac_ap.crankcase_temp = nil
     else
-      hvac_ap.crankcase_kw = 0.05 * hvac_system.fraction_cool_load_served # From RESNET Publication No. 002-2017
+      if [HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypePTAC, HPXML::HVACTypeRoomAirConditioner].include? clg_sys_type
+        hvac_ap.crankcase_kw = 0.0
+      else
+        hvac_ap.crankcase_kw = 0.05 * hvac_system.fraction_cool_load_served # From RESNET Publication No. 002-2017
+      end
       hvac_ap.crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
     end
   end
