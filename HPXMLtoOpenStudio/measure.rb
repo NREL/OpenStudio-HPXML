@@ -1601,9 +1601,9 @@ class OSModel
 
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
       hvac_control = @hpxml.hvac_controls[0]
-      is_realistic_staging = false
       # Fixme: Handle two speed with ddb control only (no realistic staging?)
       is_ddb_control = (not hvac_control.onoff_thermostat_deadband.nil?) && (hvac_control.onoff_thermostat_deadband > 0) && (cooling_system.additional_properties.num_speeds == 1)
+      is_realistic_staging = (cooling_system.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
 
       # Calculate cooling sequential load fractions
       sequential_cool_load_fracs = HVAC.calc_sequential_load_fractions(cooling_system.fraction_cool_load_served.to_f, @remaining_cool_load_frac, @cooling_days)
@@ -1619,15 +1619,9 @@ class OSModel
 
       sys_id = cooling_system.id
       if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
-        if (cooling_system.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
-          airloop_map[sys_id] = HVAC.apply_central_air_conditioner_furnace_two_speed_realistic(model, runner, cooling_system, heating_system,
-                                                                                               sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                                                                               living_zone)
-        else
           airloop_map[sys_id] = HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
                                                                            sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                                                           living_zone, is_ddb_control)
-        end
+                                                                           living_zone, is_ddb_control, is_realistic_staging)
 
       elsif [HPXML::HVACTypeRoomAirConditioner].include? cooling_system.cooling_system_type
 
@@ -1710,9 +1704,9 @@ class OSModel
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
       hvac_control = @hpxml.hvac_controls[0]
-      is_realistic_staging = false
       # Fixme: Handle two speed with ddb control only (no realistic staging?)
       is_ddb_control = (not hvac_control.onoff_thermostat_deadband.nil?) && (hvac_control.onoff_thermostat_deadband > 0) && (heat_pump.additional_properties.num_speeds == 1)
+      is_realistic_staging = (heat_pump.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
       # Calculate heating sequential load fractions
       sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heat_pump.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
       @remaining_heat_load_frac -= heat_pump.fraction_heat_load_served
@@ -1729,16 +1723,10 @@ class OSModel
                                                                      living_zone)
 
       elsif [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
-        if (heat_pump.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
-          # Fixme: not implemented yet
-          airloop_map[sys_id] = HVAC.apply_central_air_to_air_heat_pump_two_speed_realistic(model, runner, heat_pump,
-                                                                                            sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                                                                            living_zone)
-        else
           airloop_map[sys_id] = HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
                                                                         sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                                                        living_zone, is_ddb_control)
-        end
+                                                                        living_zone, is_ddb_control, is_realistic_staging)
+                                                                        
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
 
         airloop_map[sys_id] = HVAC.apply_mini_split_heat_pump(model, runner, heat_pump,

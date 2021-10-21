@@ -95,73 +95,12 @@ class HVAC
 
     # HVAC Installation Quality
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
+    
+    if is_realistic_staging
+      apply_two_speed_realistic_staging_EMS(model, air_loop_unitary)
+    end
 
     return air_loop
-  end
-
-  def self.apply_central_air_conditioner_furnace_two_speed_realistic(model, runner, cooling_system, heating_system,
-                                                                     sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                                                     control_zone)
-    # Fix me: use new actuator instead of creating two single speed systems
-    if not cooling_system.nil?
-      clg_ap = cooling_system.additional_properties
-      clg_ap.num_speeds = 1
-      cooling_system2 = cooling_system.dup
-
-      cool_fan_speed_ratios = clg_ap.cool_fan_speed_ratios
-      cool_rated_eirs = clg_ap.cool_rated_eirs
-      cool_rated_shrs_gross = clg_ap.cool_rated_shrs_gross
-      cool_rated_cfm_per_ton = clg_ap.cool_rated_cfm_per_ton
-      cool_capacity_ratios = clg_ap.cool_capacity_ratios
-      cool_cap_ft_spec = clg_ap.cool_cap_ft_spec
-      cool_cap_fflow_spec = clg_ap.cool_cap_fflow_spec
-      cool_eir_ft_spec = clg_ap.cool_eir_ft_spec
-      cool_eir_fflow_spec = clg_ap.cool_eir_fflow_spec
-      cool_plf_fplr_spec = clg_ap.cool_plf_fplr_spec
-
-      clg_ap.cool_fan_speed_ratios = [1.0]
-      clg_ap.cool_capacity_ratios = [1.0]
-      clg_ap.cool_rated_eirs = [cool_rated_eirs[0]]
-      clg_ap.cool_rated_shrs_gross = [cool_rated_shrs_gross[0]]
-      clg_ap.cool_rated_cfm_per_ton = [cool_rated_cfm_per_ton[0]]
-      clg_ap.cool_cap_ft_spec = [cool_cap_ft_spec[0]]
-      clg_ap.cool_cap_fflow_spec = [cool_cap_fflow_spec[0]]
-      clg_ap.cool_eir_ft_spec = [cool_eir_ft_spec[0]]
-      clg_ap.cool_eir_fflow_spec = [cool_eir_fflow_spec[0]]
-      clg_ap.cool_plf_fplr_spec = [cool_plf_fplr_spec[0]]
-
-      cooling_system.cooling_capacity *= cool_capacity_ratios[0]
-      cooling_system.cooling_airflow_cfm *= cool_fan_speed_ratios[0]
-      puts cool_capacity_ratios
-      puts cooling_system.cooling_capacity
-
-      apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
-                                            sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                            control_zone, true)
-      clg_ap2 = cooling_system2.additional_properties
-      clg_ap2.cool_fan_speed_ratios = [1.0]
-      clg_ap2.cool_capacity_ratios = [1.0]
-      clg_ap2.cool_rated_eirs = [cool_rated_eirs[1]]
-      clg_ap2.cool_rated_shrs_gross = [cool_rated_shrs_gross[1]]
-      clg_ap2.cool_rated_cfm_per_ton = [cool_rated_cfm_per_ton[1]]
-      clg_ap2.cool_cap_ft_spec = [cool_cap_ft_spec[1]]
-      clg_ap2.cool_cap_fflow_spec = [cool_cap_fflow_spec[1]]
-      clg_ap2.cool_eir_ft_spec = [cool_eir_ft_spec[1]]
-      clg_ap2.cool_eir_fflow_spec = [cool_eir_fflow_spec[1]]
-      clg_ap2.cool_plf_fplr_spec = [cool_plf_fplr_spec[1]]
-
-      cooling_system2.cooling_capacity *= cool_capacity_ratios[1]
-      cooling_system2.cooling_airflow_cfm *= cool_fan_speed_ratios[1]
-      puts cooling_system2.cooling_capacity
-
-      apply_central_air_conditioner_furnace(model, runner, cooling_system2, heating_system,
-                                            sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                            control_zone, false)
-    else
-      apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
-                                            sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                            control_zone)
-    end
   end
 
   def self.apply_room_air_conditioner(model, runner, cooling_system,
@@ -285,7 +224,7 @@ class HVAC
 
   def self.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
                                               sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                              control_zone, is_ddb_control = false)
+                                              control_zone, is_ddb_control = false, is_realistic_staging = false)
 
     obj_name = Constants.ObjectNameAirSourceHeatPump
 
@@ -334,6 +273,10 @@ class HVAC
     # HVAC Installation Quality
     apply_installation_quality(model, heat_pump, heat_pump, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
+    if is_realistic_staging
+      apply_two_speed_realistic_staging_EMS(model, air_loop_unitary)
+    end
+    
     return air_loop
   end
 
@@ -3235,7 +3178,7 @@ class HVAC
     # oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
   end
 
-  def self.apply_two_speed_realistic_staging_EMS(model, unitary_systems, clg_coil_1, htg_coil_1)
+  def self.apply_two_speed_realistic_staging_EMS(model, unitary_system)
     # Note: Currently only available in 1 min time step
     number_of_timestep_logged = 5 # wait 5 mins to check demand
 
@@ -3253,88 +3196,46 @@ class HVAC
     clg_sp_ss.setKeyName(Constants.ObjectNameCoolingSetpoint)
 
     ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
-
-    coil_energy_clg = nil
-    coil_energy_htg = nil
-    if not clg_coil_1.nil?
-      coil_energy_clg = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Electricity Energy')
-      coil_energy_clg.setName('low speed clg coil ee')
-      coil_energy_clg.setKeyName(clg_coil_1.name.get)
-      # Trend variable
-      clg_energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, coil_energy_clg)
-      clg_energy_trend.setName("#{coil_energy_clg.name} Trend")
-      clg_energy_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
-    end
-    if not htg_coil_1.nil?
-      coil_energy_htg = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electricity Energy')
-      coil_energy_htg.setName('low speed htg coil ee')
-      coil_energy_htg.setKeyName(htg_coil_1.name.get)
-      # Trend variable
-      htg_energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, coil_energy_htg)
-      htg_energy_trend.setName("#{coil_energy_htg.name} Trend")
-      htg_energy_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
-    end
-    unitary_hi_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    unitary_hi_ss.setName('high speed unitary sys avail')
-    unitary_hi_ss.setKeyName(unitary_systems[1].availabilitySchedule.get.name.get)
+    
+    unitary_speed_level = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Speed Level')
+    unitary_speed_level.setName(unitary_system.name.get + 'speed level')
+    unitary_speed_level.setKeyName(unitary_system.name.get)
+    
     # Trend variable
-    unitary_hi_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, unitary_hi_ss)
-    unitary_hi_trend.setName("#{unitary_hi_ss.name} Trend")
-    unitary_hi_trend.setNumberOfTimestepsToBeLogged(2) # only need 1 min ago
+    unitary_speed_level_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, unitary_speed_level)
+    unitary_speed_level_trend.setName("#{unitary_speed_level.name} Trend")
+    unitary_speed_level_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
 
     # Actuators
-    unitary_acts = []
-    unitary_systems.each_with_index do |unitary_system, i|
-      unitary_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(unitary_system.availabilitySchedule.get.to_ScheduleConstant.get, 'Schedule:Constant', 'Schedule Value')
-      unitary_actuator.setName(unitary_system.name.get + "#{i + 1} avail")
-      unitary_acts << unitary_actuator
-    end
+    unitary_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(unitary_system, 'Coil Speed Control', 'Unitary System DX Coil Speed Value')
+    unitary_actuator.setName(unitary_system.name.get + " speed override")
 
     # Program
     realistic_cycling_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     # Check values within min/max limits
-    realistic_cycling_program.setName('two speed coil realistic cycling')
+    realistic_cycling_program.setName("#{unitary_system.name.get} realistic cycling")
     realistic_cycling_program.addLine("Set living_t = #{living_temp_ss.name}")
     realistic_cycling_program.addLine("Set htg_sp_l = #{htg_sp_ss.name}")
     realistic_cycling_program.addLine("Set htg_sp_h = #{htg_sp_ss.name} + #{ddb}")
     realistic_cycling_program.addLine("Set clg_sp_l = #{clg_sp_ss.name} - #{ddb}")
     realistic_cycling_program.addLine("Set clg_sp_h = #{clg_sp_ss.name}")
-    s_unmet_demand = []
-    s_unmet_ddb = []
+    
     s_trend = []
-    if not coil_energy_clg.nil?
-      s_trend_clg = []
-      (1...number_of_timestep_logged).each do |t_i|
-        realistic_cycling_program.addLine("Set cc_ee_#{t_i}_ago = @TrendValue #{clg_energy_trend.name} #{t_i}")
-        s_trend_clg << "(cc_ee_#{t_i}_ago > 0)"
-      end
-      s_unmet_demand << '(living_t - clg_sp_h > 0.0)'
-      s_unmet_ddb << '(living_t - clg_sp_l > 0.0)'
-      s_trend << "(#{s_trend_clg.join(' && ')})"
+    (1...number_of_timestep_logged).each do |t_i|
+      realistic_cycling_program.addLine("Set unitary_level_#{t_i}_ago = @TrendValue #{unitary_speed_level_trend.name} #{t_i}")
+      s_trend << "(unitary_level_#{t_i}_ago == 1)"
     end
-    if not coil_energy_htg.nil?
-      s_trend_htg = []
-      (1...number_of_timestep_logged).each do |t_i|
-        realistic_cycling_program.addLine("Set hc_ee_#{t_i}_ago = @TrendValue #{htg_energy_trend.name} #{t_i}")
-        s_trend_htg << "(hc_ee_#{t_i}_ago > 0)"
-      end
-      s_unmet_demand << '(htg_sp_l - living_t > 0.0)'
-      s_unmet_ddb << '(htg_sp_h - living_t > 0.0)'
-      s_trend << "(#{s_trend_htg.join(' && ')})"
-    end
-    realistic_cycling_program.addLine("Set unitary_highspeed_1_ago = #{unitary_hi_trend.name} 1")
+      
+    realistic_cycling_program.addLine("Set unitary_level_1_ago = #{unitary_speed_level_trend.name} 1")
     # Setpoint not met and low speed is on for 5 time steps
-    realistic_cycling_program.addLine("If (#{s_unmet_demand.join(' || ')}) && (#{s_trend.join(' || ')})")
+    realistic_cycling_program.addLine("If ((living_t - clg_sp_h > 0.0) || (htg_sp_l - living_t > 0.0)) && (#{s_trend.join(' && ')})")
     # Enable high speed unitary system
-    realistic_cycling_program.addLine("  Set #{unitary_acts[1].name} = 1")
-    realistic_cycling_program.addLine("  Set #{unitary_acts[0].name} = 0")
+    realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = 2")
     # Keep high speed unitary on until setpoint +- deadband is met
-    realistic_cycling_program.addLine("ElseIf (unitary_highspeed_1_ago == 1) && (#{s_unmet_ddb.join(' || ')})")
-    realistic_cycling_program.addLine("  Set #{unitary_acts[1].name} = 1")
-    realistic_cycling_program.addLine("  Set #{unitary_acts[0].name} = 0")
+    realistic_cycling_program.addLine("ElseIf (unitary_level_1_ago == 2) && ((living_t - clg_sp_l > 0.0) || (htg_sp_h - living_t > 0.0))")
+    realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = 2")
     realistic_cycling_program.addLine('Else')
-    realistic_cycling_program.addLine("  Set #{unitary_acts[1].name} = 0")
-    realistic_cycling_program.addLine("  Set #{unitary_acts[0].name} = 1")
+    realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = 1")
     realistic_cycling_program.addLine('EndIf')
 
     # ProgramCallingManagers
