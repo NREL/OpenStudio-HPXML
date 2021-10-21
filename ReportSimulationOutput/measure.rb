@@ -452,7 +452,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Peak Electricity Consumption
     @peak_fuels.each do |key, peak_fuel|
-      peak_fuel.annual_output = get_tabular_data_value(peak_fuel.report.upcase, 'Meter', 'Custom Monthly Report', ['Maximum of Months'], 'ELECTRICITY:FACILITY {MAX FOR HOURS SHOWN', peak_fuel.annual_units)
+      peak_fuel.annual_output = get_tabular_data_value(peak_fuel.report.upcase, 'Meter', 'Custom Monthly Report', ['Maximum of Months'], 'ELECTRICITY:FACILITY {MAX FOR HOURS SHOWN}', peak_fuel.annual_units)
     end
 
     # Total loads
