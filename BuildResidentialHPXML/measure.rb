@@ -2089,10 +2089,43 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('battery_present', true)
-    arg.setDisplayName('Battery: Present')
-    arg.setDescription('Whether there is a lithium ion battery.')
-    arg.setDefaultValue(false)
+    battery_location_choices = OpenStudio::StringVector.new
+    battery_location_choices << Constants.Auto
+    battery_location_choices << 'none'
+    battery_location_choices << HPXML::LocationOutside
+    # battery_location_choices << HPXML::LocationGarage
+    # battery_location_choices << HPXML::LocationLivingSpace
+    # battery_location_choices << HPXML::LocationUnconditionedSpace
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('battery_location', battery_location_choices, true)
+    arg.setDisplayName('Battery: Location')
+    arg.setDescription('The space type for the lithium ion battery location.')
+    arg.setDefaultValue('none')
+    args << arg
+
+    battery_lifetime_model_choices = OpenStudio::StringVector.new
+    battery_lifetime_model_choices << Constants.Auto
+    battery_lifetime_model_choices << HPXML::BatteryLifetimeModelNone
+    battery_lifetime_model_choices << HPXML::BatteryLifetimeModelKandlerSmith
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('battery_lifetime_model', battery_lifetime_model_choices, true)
+    arg.setDisplayName('Battery: Lifetime Model')
+    arg.setDescription('The lifetime model for the lithium ion battery.')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('battery_capacity', true)
+    arg.setDisplayName('Battery: Capacity')
+    arg.setDescription('The capacity of the lithium ion battery.')
+    arg.setUnits('kWh')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('battery_voltage', true)
+    arg.setDisplayName('Battery: Voltage')
+    arg.setDescription('The voltage of the lithium ion battery.')
+    arg.setUnits('V')
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('lighting_present', false)
@@ -4987,10 +5020,30 @@ class HPXMLFile
   end
 
   def self.set_battery(hpxml, runner, args)
-    return unless args[:battery_present]
+    return if args[:battery_location] == 'none'
+
+    if args[:battery_location] != Constants.Auto
+      location = args[:battery_location]
+    end
+
+    if args[:battery_lifetime_model] != Constants.Auto
+      lifetime_model = args[:battery_lifetime_model]
+    end
+
+    if args[:battery_capacity] != Constants.Auto
+      capacity = args[:battery_capacity]
+    end
+
+    if args[:battery_voltage] != Constants.Auto
+      voltage = args[:battery_voltage]
+    end
 
     hpxml.batteries.add(id: "Battery#{hpxml.batteries.size + 1}",
-                        type: HPXML::BatteryTypeLithiumIon)
+                        type: HPXML::BatteryTypeLithiumIon,
+                        location: location,
+                        lifetime_model: lifetime_model,
+                        capacity: capacity,
+                        voltage: voltage)
   end
 
   def self.set_lighting(hpxml, runner, args)
