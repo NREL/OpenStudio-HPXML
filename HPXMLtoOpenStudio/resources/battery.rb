@@ -4,14 +4,40 @@ class Battery
   def self.apply(model, battery)
     obj_name = battery.id
 
-    # TODO
+    # FIXME: calculate the following from capacity/voltage
+    number_of_cells_in_series = 14
+    number_of_strings_in_parallel = 62
+    battery_mass = 99
+    battery_surface_area = 1.42
 
-    battery = OpenStudio::Model::ElectricLoadCenterStorageLiIonNMCBattery.new(model)
-    battery.setName("#{obj_name} battery")
+    if battery.location != HPXML::LocationOutside
+      fail ''
+    end
 
-    elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
-    elcd.setName("#{obj_name} elec load center dist")
-    elcd.setElectricalBussType('AlternatingCurrentWithStorage')
-    elcd.setElectricalStorage(battery)
+    elcs = OpenStudio::Model::ElectricLoadCenterStorageLiIonNMCBattery.new(model, number_of_cells_in_series, number_of_strings_in_parallel, battery_mass, battery_surface_area)
+    elcs.setName("#{obj_name} li ion")
+    elcs.setLifetimeModel(battery.lifetime_model)
+    elcs.setNumberofCellsinSeries(number_of_cells_in_series)
+    elcs.setNumberofStringsinParallel(number_of_strings_in_parallel)
+    elcs.setBatteryMass(battery_mass)
+    elcs.setBatterySurfaceArea(battery_surface_area)
+    elcs.setFractionofCellCapacityRemovedattheEndofExponentialZone(2.584)
+    elcs.setFractionofCellCapacityRemovedattheEndofNominalZone(3.126)
+
+    elcds = model.getElectricLoadCenterDistributions
+
+    if elcds.size == 0
+      elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
+      elcd.setName("#{obj_name} elec load center dist")
+    end
+
+    elcds.each_with_index do |elcd, i|
+      elcd.setElectricalBussType('DirectCurrentWithInverterDCStorage')
+      if i == 0
+        elcd.setElectricalStorage(elcs)
+      else
+        elcd.setElectricalStorage(elcs.clone.to_ElectricLoadCenterStorageLiIonNMCBattery.get)
+      end
+    end
   end
 end

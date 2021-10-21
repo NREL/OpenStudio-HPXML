@@ -1514,7 +1514,22 @@ class HPXMLDefaults
 
   def self.apply_batteries(hpxml)
     hpxml.batteries.each do |battery|
-      # TODO
+      if battery.location.nil?
+        battery.location = HPXML::LocationOutside
+        battery.location_isdefaulted = true
+      end
+      if battery.lifetime_model.nil?
+        battery.lifetime_model = HPXML::BatteryLifetimeModelNone
+        battery.lifetime_model_isdefaulted = true
+      end
+      if battery.capacity.nil?
+        battery.capacity = 10
+        battery.capacity_isdefaulted = true
+      end
+      if battery.voltage.nil?
+        battery.voltage = 50
+        battery.voltage_isdefaulted = true
+      end
     end
   end
 
