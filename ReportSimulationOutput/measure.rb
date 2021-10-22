@@ -186,6 +186,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
     if @end_uses.select { |key, end_use| end_use.is_negative && end_use.variables.size > 0 }.size > 0
       result << OpenStudio::IdfObject.load('Output:Meter,ElectricityProduced:Facility,runperiod;').get # Used for error checking
+    end
+    if @end_uses.select { |key, end_use| key == [FT::Elec, EUT::Battery] && end_use.variables.size > 0 }.size > 0
       result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,runperiod;').get # Used for error checking
     end
     if include_timeseries_fuel_consumptions
