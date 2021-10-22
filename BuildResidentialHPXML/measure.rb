@@ -2093,9 +2093,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     battery_location_choices << Constants.Auto
     battery_location_choices << 'none'
     battery_location_choices << HPXML::LocationOutside
-    # battery_location_choices << HPXML::LocationGarage
-    # battery_location_choices << HPXML::LocationLivingSpace
-    # battery_location_choices << HPXML::LocationUnconditionedSpace
+    battery_location_choices << HPXML::LocationGarage
+    battery_location_choices << HPXML::LocationLivingSpace
+    battery_location_choices << HPXML::LocationUnconditionedSpace
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('battery_location', battery_location_choices, true)
     arg.setDisplayName('Battery: Location')

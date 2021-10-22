@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>307d45b7-8a24-4481-aa8b-a58b30b8661b</version_id>
-  <version_modified>20211022T152315Z</version_modified>
+  <version_id>af657cf6-7d65-4702-baaf-915ec55bc2c7</version_id>
+  <version_modified>20211022T171545Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -428,33 +428,10 @@
       <checksum>6220E424</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.2.0</identifier>
-        <min_compatible>3.2.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>6D80738E</checksum>
-    </file>
-    <file>
-      <filename>HPXMLvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>59D29B06</checksum>
-    </file>
-    <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>4B6CC2B0</checksum>
-    </file>
-    <file>
-      <filename>EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>5B7AF3B9</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
@@ -463,16 +440,39 @@
       <checksum>47D6E24E</checksum>
     </file>
     <file>
-      <filename>battery.rb</filename>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.2.0</identifier>
+        <min_compatible>3.2.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
       <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>15E386AE</checksum>
+    </file>
+    <file>
+      <filename>HPXMLvalidator.xml</filename>
+      <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>20D27302</checksum>
+      <checksum>9504D0A5</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9496A862</checksum>
     </file>
     <file>
       <filename>test_battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>20D72A48</checksum>
+      <checksum>14BF7570</checksum>
+    </file>
+    <file>
+      <filename>battery.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B404056D</checksum>
     </file>
   </files>
 </measure>

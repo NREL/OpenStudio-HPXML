@@ -30,11 +30,33 @@ class HPXMLtoOpenStudioBatterTest < MiniTest::Test
       battery = get_battery(model, hpxml_battery.id)
 
       # Check object
+      assert(!battery.thermalZone.is_initialized)
+      assert_equal(0, battery.radiativeFraction)
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
       assert_in_epsilon(14, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(63, battery.numberofStringsinParallel, 0.01)
       assert_in_epsilon(99, battery.batteryMass, 0.01)
       assert_in_epsilon(1.42, battery.batterySurfaceArea, 0.01)
+    end
+  end
+
+  def test_battery_garage
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-pv-battery-garage.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    hpxml.batteries.each do |hpxml_battery|
+      battery = get_battery(model, hpxml_battery.id)
+
+      # Check object
+      assert(battery.thermalZone.is_initialized)
+      assert_equal(HPXML::LocationGarage, battery.thermalZone.get.name.to_s)
+      assert_equal(0.6, battery.radiativeFraction)
+      assert_equal(HPXML::BatteryLifetimeModelKandlerSmith, battery.lifetimeModel)
+      assert_in_epsilon(17, battery.numberofCellsinSeries, 0.01)
+      assert_in_epsilon(63, battery.numberofStringsinParallel, 0.01)
+      assert_in_epsilon(118.8, battery.batteryMass, 0.01)
+      assert_in_epsilon(1.6, battery.batterySurfaceArea, 0.01)
     end
   end
 

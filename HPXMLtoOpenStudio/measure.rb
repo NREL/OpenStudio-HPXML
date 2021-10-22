@@ -280,7 +280,7 @@ class OSModel
     add_airflow(runner, model, weather, spaces, airloop_map)
     add_photovoltaics(runner, model)
     add_generators(runner, model)
-    add_batteries(runner, model)
+    add_batteries(runner, model, spaces)
     add_additional_properties(runner, model, hpxml_path, building_id)
 
     # Output
@@ -2023,8 +2023,12 @@ class OSModel
     end
   end
 
-  def self.add_batteries(runner, model)
+  def self.add_batteries(runner, model, spaces)
     @hpxml.batteries.each do |battery|
+      # Assign space
+      if battery.location != HPXML::LocationOutside
+        battery.additional_properties.space = get_space_from_location(battery.location, 'Battery', model, spaces)
+      end
       Battery.apply(model, battery)
     end
   end

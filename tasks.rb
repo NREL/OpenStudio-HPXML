@@ -332,6 +332,7 @@ def create_hpxmls
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
     'base-pv-battery.xml' => 'base-pv.xml',
+    'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
     'base-schedules-simple.xml' => 'base.xml',
     'base-schedules-detailed-smooth.xml' => 'base.xml',
     'base-schedules-detailed-stochastic.xml' => 'base.xml',
@@ -2331,6 +2332,19 @@ def set_measure_argument_values(hpxml_file, args)
   # Battery
   if ['base-pv-battery.xml'].include? hpxml_file
     args['battery_location'] = Constants.Auto
+  elsif ['base-pv-battery-garage.xml'].include? hpxml_file
+    args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
+    args['pv_system_location'] = HPXML::LocationRoof
+    args['pv_system_tracking'] = HPXML::PVTrackingTypeFixed
+    args['pv_system_2_module_type'] = HPXML::PVModuleTypePremium
+    args['pv_system_2_location'] = HPXML::LocationRoof
+    args['pv_system_2_tracking'] = HPXML::PVTrackingTypeFixed
+    args['pv_system_2_array_azimuth'] = 90
+    args['pv_system_2_max_power_output'] = 1500
+    args['battery_location'] = HPXML::LocationGarage
+    args['battery_lifetime_model'] = HPXML::BatteryLifetimeModelKandlerSmith
+    args['battery_capacity'] = '12'
+    args['battery_voltage'] = '60'
   end
 
   # Simulation Control

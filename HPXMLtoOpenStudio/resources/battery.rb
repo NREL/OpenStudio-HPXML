@@ -4,18 +4,26 @@ class Battery
   def self.apply(model, battery)
     obj_name = battery.id
 
+    is_outside = (battery.location == HPXML::LocationOutside)
+    if not is_outside
+      frac_sens = 1.0
+    else # Internal gains outside unit
+      frac_sens = 0.0
+    end
+
     number_of_cells_in_series = Integer((battery.voltage / 3.6).round)
     number_of_strings_in_parallel = Integer(((battery.capacity * 1000.0) / (battery.voltage * 3.2)).round)
-    # FIXME: calculate the following from capacity/voltage
-    battery_mass = 99
-    battery_surface_area = 1.42
-
-    if battery.location != HPXML::LocationOutside
-      fail ''
-    end
+    battery_mass = (battery.capacity / 10.0) * 99.0
+    battery_surface_area = 0.306 * (battery.capacity**(2.0 / 3.0))
 
     elcs = OpenStudio::Model::ElectricLoadCenterStorageLiIonNMCBattery.new(model, number_of_cells_in_series, number_of_strings_in_parallel, battery_mass, battery_surface_area)
     elcs.setName("#{obj_name} li ion")
+    unless is_outside
+      space = battery.additional_properties.space
+      thermal_zone = space.thermalZone.get
+      elcs.setThermalZone(thermal_zone)
+    end
+    elcs.setRadiativeFraction(0.6 * frac_sens)
     elcs.setLifetimeModel(battery.lifetime_model)
     elcs.setNumberofCellsinSeries(number_of_cells_in_series)
     elcs.setNumberofStringsinParallel(number_of_strings_in_parallel)
