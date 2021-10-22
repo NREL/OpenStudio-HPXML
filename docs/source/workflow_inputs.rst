@@ -2105,9 +2105,15 @@ If not entered, the simulation will not include batteries.
   ==========================  =======  =======  ===========  ========  =======  ============================================
   ``SystemIdentifier``        id                             Yes                Unique identifier
   ``BatteryType``             string            See [#]_     Yes                Battery type
+  ``Location``                string            See [#]_     No        outside  Location
+  ``LifetimeModel``           string            See [#]_     No        None     Lifetime model
+  ``NominalCapacity``         double   kWh      > 0          No        10       Nominal capacity
+  ``NominalVoltage``          double   V        > 0          No        50       Nominal voltage
   ==========================  =======  =======  ===========  ========  =======  ============================================
 
   .. [#] BatteryType choices are "Li-ion".
+  .. [#] Location choices are "outside", "garage", "living space", or "unconditioned space".
+  .. [#] LifetimeModel choices are "None" or "KandlerSmith".
 
 HPXML Appliances
 ----------------
