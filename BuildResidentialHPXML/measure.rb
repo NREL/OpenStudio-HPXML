@@ -2115,15 +2115,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('battery_capacity', true)
-    arg.setDisplayName('Battery: Capacity')
-    arg.setDescription('The capacity of the lithium ion battery.')
+    arg.setDisplayName('Battery: Nominal Capacity')
+    arg.setDescription('The nominal capacity of the lithium ion battery.')
     arg.setUnits('kWh')
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('battery_voltage', true)
-    arg.setDisplayName('Battery: Voltage')
-    arg.setDescription('The voltage of the lithium ion battery.')
+    arg.setDisplayName('Battery: Nominal Voltage')
+    arg.setDescription('The nominal voltage of the lithium ion battery.')
     arg.setUnits('V')
     arg.setDefaultValue(Constants.Auto)
     args << arg

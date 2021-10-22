@@ -1523,11 +1523,11 @@ class HPXMLDefaults
         battery.lifetime_model_isdefaulted = true
       end
       if battery.capacity.nil?
-        battery.capacity = 10
+        battery.capacity = 10 # kWh
         battery.capacity_isdefaulted = true
       end
       if battery.voltage.nil?
-        battery.voltage = 50
+        battery.voltage = 50 # V
         battery.voltage_isdefaulted = true
       end
     end

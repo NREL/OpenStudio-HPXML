@@ -4,9 +4,9 @@ class Battery
   def self.apply(model, battery)
     obj_name = battery.id
 
+    number_of_cells_in_series = Integer((battery.voltage / 3.6).round)
+    number_of_strings_in_parallel = Integer(((battery.capacity * 1000.0) / (battery.voltage * 3.2)).round)
     # FIXME: calculate the following from capacity/voltage
-    number_of_cells_in_series = 14
-    number_of_strings_in_parallel = 62
     battery_mass = 99
     battery_surface_area = 1.42
 
