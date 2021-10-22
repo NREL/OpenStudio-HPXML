@@ -1633,9 +1633,13 @@ class Waterheater
       # Fuel storage water heater
       # EF cutoffs derived from Figure 2 of http://title24stakeholders.com/wp-content/uploads/2017/10/2013_CASE-Report_High-efficiency-Water-Heater-Ready.pdf
       # FUTURE: Add an optional HPXML input for water heater type for a user to specify this (and default based on EF as below)
-      if water_heating_system.energy_factor < 0.64
+      ef = water_heating_system.energy_factor
+      if ef.nil?
+        ef = calc_ef_from_uef(water_heating_system)
+      end
+      if ef < 0.64
         skinlossfrac = 0.64 # Natural draft
-      elsif water_heating_system.energy_factor < 0.77
+      elsif ef < 0.77
         skinlossfrac = 0.91 # Power vent
       else
         skinlossfrac = 0.96 # Condensing
