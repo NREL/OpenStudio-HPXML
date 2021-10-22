@@ -254,8 +254,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if include_timeseries_zone_temperatures
       result << OpenStudio::IdfObject.load("Output:Variable,*,Zone Mean Air Temperature,#{timeseries_frequency};").get
       # For reporting temperature-scheduled spaces timeseries temperatures.
-      keys = [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace,
-              HPXML::LocationOtherHousingUnit, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab]
+      keys = [HPXML::LocationOtherHeatedSpace,
+              HPXML::LocationOtherMultifamilyBufferSpace,
+              HPXML::LocationOtherNonFreezingSpace,
+              HPXML::LocationOtherHousingUnit,
+              HPXML::LocationExteriorWall,
+              HPXML::LocationUnderSlab]
       keys.each do |key|
         next if @model.getScheduleConstants.select { |o| o.name.to_s == key }.size == 0
 
