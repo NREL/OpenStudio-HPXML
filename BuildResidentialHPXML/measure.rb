@@ -7,6 +7,7 @@ require 'openstudio'
 require 'oga'
 require 'csv'
 require_relative 'resources/geometry'
+require_relative '../HPXMLtoOpenStudio/resources/battery'
 require_relative '../HPXMLtoOpenStudio/resources/constants'
 require_relative '../HPXMLtoOpenStudio/resources/constructions'
 require_relative '../HPXMLtoOpenStudio/resources/geometry'
@@ -5064,12 +5065,21 @@ class HPXMLFile
       lifetime_model = args[:battery_lifetime_model]
     end
 
+    capacity = nil
     if args[:battery_capacity] != Constants.Auto
-      capacity = args[:battery_capacity]
+      capacity = Float(args[:battery_capacity]) # kWh
     end
 
+    voltage = nil
     if args[:battery_voltage] != Constants.Auto
-      voltage = args[:battery_voltage]
+      voltage = Float(args[:battery_voltage]) # V
+    end
+
+    if (not capacity.nil?) && (not voltage.nil?)
+      capacity = Battery.get_Ah_from_kWh(capacity, voltage)
+    elsif not capacity.nil?
+      default_values = Battery.get_battery_default_values()
+      capacity = Battery.get_Ah_from_kWh(capacity, default_values[:voltage])
     end
 
     hpxml.batteries.add(id: "Battery#{hpxml.batteries.size + 1}",

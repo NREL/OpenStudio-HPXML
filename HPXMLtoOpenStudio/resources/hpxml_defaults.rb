@@ -1513,21 +1513,27 @@ class HPXMLDefaults
   end
 
   def self.apply_batteries(hpxml)
+    default_values = Battery.get_battery_default_values()
     hpxml.batteries.each do |battery|
       if battery.location.nil?
-        battery.location = HPXML::LocationOutside
+        battery.location = default_values[:location]
         battery.location_isdefaulted = true
       end
       if battery.lifetime_model.nil?
-        battery.lifetime_model = HPXML::BatteryLifetimeModelNone
+        battery.lifetime_model = default_values[:lifetime_model]
         battery.lifetime_model_isdefaulted = true
       end
       if battery.capacity.nil?
-        battery.capacity = 10 # kWh
+        if battery.voltage.nil?
+          capacity = Battery.get_Ah_from_kWh(default_values[:capacity], default_values[:voltage])
+        else
+          capacity = Battery.get_Ah_from_kWh(default_values[:capacity], battery.voltage)
+        end
+        battery.capacity = capacity # Ah
         battery.capacity_isdefaulted = true
       end
       if battery.voltage.nil?
-        battery.voltage = 50 # V
+        battery.voltage = default_values[:voltage] # V
         battery.voltage_isdefaulted = true
       end
     end

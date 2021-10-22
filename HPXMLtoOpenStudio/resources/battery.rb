@@ -4,8 +4,8 @@ class Battery
   def self.apply(model, battery)
     obj_name = battery.id
 
-    capacity = battery.capacity
-    voltage = battery.voltage
+    voltage = battery.voltage # V
+    capacity = get_kWh_from_Ah(battery.capacity, voltage) # kWh
 
     return if capacity <= 0 || voltage <= 0
 
@@ -18,8 +18,8 @@ class Battery
 
     number_of_cells_in_series = Integer((voltage / 3.6).round)
     number_of_strings_in_parallel = Integer(((capacity * 1000.0) / (voltage * 3.2)).round)
-    battery_mass = (capacity / 10.0) * 99.0
-    battery_surface_area = 0.306 * (capacity**(2.0 / 3.0))
+    battery_mass = (capacity / 10.0) * 99.0 # kg
+    battery_surface_area = 0.306 * (capacity**(2.0 / 3.0)) # m^2
 
     elcs = OpenStudio::Model::ElectricLoadCenterStorageLiIonNMCBattery.new(model, number_of_cells_in_series, number_of_strings_in_parallel, battery_mass, battery_surface_area)
     elcs.setName("#{obj_name} li ion")
@@ -52,5 +52,20 @@ class Battery
         elcd.setElectricalStorage(elcs.clone.to_ElectricLoadCenterStorageLiIonNMCBattery.get)
       end
     end
+  end
+
+  def self.get_battery_default_values()
+    return { location: HPXML::LocationOutside,
+             lifetime_model: HPXML::BatteryLifetimeModelNone,
+             capacity: 10.0,
+             voltage: 50.0 }
+  end
+
+  def self.get_Ah_from_kWh(capacity, voltage)
+    return capacity * 1000.0 / voltage
+  end
+
+  def self.get_kWh_from_Ah(capacity, voltage)
+    return capacity * voltage / 1000.0
   end
 end

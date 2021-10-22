@@ -2107,7 +2107,7 @@ If not entered, the simulation will not include batteries.
   ``BatteryType``             string            See [#]_     Yes                Battery type
   ``Location``                string            See [#]_     No        outside  Location
   ``LifetimeModel``           string            See [#]_     No        None     Lifetime model
-  ``NominalCapacity``         double   kWh      > 0          No        10       Nominal capacity
+  ``NominalCapacity``         double   Ah       > 0          No        10       Nominal capacity in Ampere hours
   ``NominalVoltage``          double   V        > 0          No        50       Nominal voltage
   ==========================  =======  =======  ===========  ========  =======  ============================================
 

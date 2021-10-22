@@ -523,7 +523,7 @@
             <SystemIdentifier id='Battery1'/>
             <BatteryType>Li-ion</BatteryType>
             <Location>garage</Location>
-            <NominalCapacity>12.0</NominalCapacity>
+            <NominalCapacity>200.0</NominalCapacity>
             <NominalVoltage>60.0</NominalVoltage>
             <extension>
               <LifetimeModel>KandlerSmith</LifetimeModel>
