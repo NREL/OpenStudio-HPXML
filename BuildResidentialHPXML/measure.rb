@@ -325,6 +325,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     foundation_type_choices << HPXML::FoundationTypeSlab
     foundation_type_choices << HPXML::FoundationTypeCrawlspaceVented
     foundation_type_choices << HPXML::FoundationTypeCrawlspaceUnvented
+    foundation_type_choices << HPXML::FoundationTypeCrawlspaceConditioned
     foundation_type_choices << HPXML::FoundationTypeBasementUnconditioned
     foundation_type_choices << HPXML::FoundationTypeBasementConditioned
     foundation_type_choices << HPXML::FoundationTypeAmbient
@@ -560,7 +561,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('slab_thickness', true)
     arg.setDisplayName('Slab: Thickness')
-    arg.setDescription('The thickness of the slab.')
+    arg.setDescription('The thickness of the slab. Zero can be entered if there is a dirt floor instead of a slab.')
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
@@ -1314,6 +1315,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     duct_location_choices << HPXML::LocationBasementUnconditioned
     duct_location_choices << HPXML::LocationCrawlspaceVented
     duct_location_choices << HPXML::LocationCrawlspaceUnvented
+    duct_location_choices << HPXML::LocationCrawlspaceConditioned
     duct_location_choices << HPXML::LocationAtticVented
     duct_location_choices << HPXML::LocationAtticUnvented
     duct_location_choices << HPXML::LocationGarage
@@ -1672,6 +1674,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     water_heater_location_choices << HPXML::LocationAtticUnvented
     water_heater_location_choices << HPXML::LocationCrawlspaceVented
     water_heater_location_choices << HPXML::LocationCrawlspaceUnvented
+    water_heater_location_choices << HPXML::LocationCrawlspaceConditioned
     water_heater_location_choices << HPXML::LocationOtherExterior
     water_heater_location_choices << HPXML::LocationOtherHousingUnit
     water_heater_location_choices << HPXML::LocationOtherHeatedSpace
@@ -2964,8 +2967,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       errors << "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_unit_level=#{args[:geometry_unit_level].get} and geometry_foundation_type=#{args[:geometry_foundation_type]} and geometry_foundation_height=#{args[:geometry_foundation_height]}" if error
     end
 
-    # multifamily and finished basement
-    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && (args[:geometry_foundation_type] == HPXML::FoundationTypeBasementConditioned)
+    # multifamily and conditioned basement/crawlspace
+    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && ([HPXML::FoundationTypeBasementConditioned, HPXML::FoundationTypeCrawlspaceConditioned].include? args[:geometry_foundation_type])
     errors << "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_foundation_type=#{args[:geometry_foundation_type]}" if error
 
     # slab and foundation height above grade > 0
@@ -3149,6 +3152,7 @@ class HPXMLFile
                     HPXML::LocationBasementUnconditioned => 2,
                     HPXML::LocationCrawlspaceUnvented => 2,
                     HPXML::LocationCrawlspaceVented => 2,
+                    HPXML::LocationCrawlspaceConditioned => 2,
                     HPXML::LocationGarage => 3 }
       location = Geometry.get_adjacent_to(surface: s)
       if location == HPXML::LocationLivingSpace && s.adjacentSurface.is_initialized
@@ -3470,7 +3474,7 @@ class HPXMLFile
       house_pressure = nil
       unit_of_measure = HPXML::UnitsACHNatural
     end
-    infiltration_volume = args[:geometry_unit_cfa] * args[:geometry_average_ceiling_height]
+    infiltration_volume = hpxml.building_construction.conditioned_building_volume
 
     hpxml.air_infiltration_measurements.add(id: "AirInfiltrationMeasurement#{hpxml.air_infiltration_measurements.size + 1}",
                                             house_pressure: house_pressure,
@@ -3532,7 +3536,11 @@ class HPXMLFile
       next unless Geometry.surface_is_rim_joist(surface, args[:geometry_rim_joist_height])
 
       interior_adjacent_to = Geometry.get_adjacent_to(surface: surface)
-      next unless [HPXML::LocationBasementConditioned, HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? interior_adjacent_to
+      next unless [HPXML::LocationBasementConditioned,
+                   HPXML::LocationBasementUnconditioned,
+                   HPXML::LocationCrawlspaceUnvented,
+                   HPXML::LocationCrawlspaceVented,
+                   HPXML::LocationCrawlspaceConditioned].include? interior_adjacent_to
 
       exterior_adjacent_to = HPXML::LocationOutside
       if surface.outsideBoundaryCondition == 'Adiabatic' # can be adjacent to foundation space
@@ -3662,7 +3670,11 @@ class HPXMLFile
       next if Geometry.surface_is_rim_joist(surface, args[:geometry_rim_joist_height])
 
       interior_adjacent_to = Geometry.get_adjacent_to(surface: surface)
-      next unless [HPXML::LocationBasementConditioned, HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? interior_adjacent_to
+      next unless [HPXML::LocationBasementConditioned,
+                   HPXML::LocationBasementUnconditioned,
+                   HPXML::LocationCrawlspaceUnvented,
+                   HPXML::LocationCrawlspaceVented,
+                   HPXML::LocationCrawlspaceConditioned].include? interior_adjacent_to
 
       exterior_adjacent_to = HPXML::LocationGround
       if surface.outsideBoundaryCondition == 'Adiabatic' # can be adjacent to foundation space
@@ -3740,7 +3752,8 @@ class HPXMLFile
   end
 
   def self.set_frame_floors(hpxml, runner, model, args, sorted_surfaces)
-    if [HPXML::FoundationTypeBasementConditioned].include?(args[:geometry_foundation_type]) && (args[:floor_over_foundation_assembly_r] > 2.1)
+    if [HPXML::FoundationTypeBasementConditioned,
+        HPXML::FoundationTypeCrawlspaceConditioned].include?(args[:geometry_foundation_type]) && (args[:floor_over_foundation_assembly_r] > 2.1)
       args[:floor_over_foundation_assembly_r] = 2.1 # Uninsulated
     end
 
@@ -3769,7 +3782,9 @@ class HPXMLFile
 
       next if interior_adjacent_to == exterior_adjacent_to
       next if (surface.surfaceType == 'RoofCeiling') && (exterior_adjacent_to == HPXML::LocationOutside)
-      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? exterior_adjacent_to
+      next if [HPXML::LocationLivingSpace,
+               HPXML::LocationBasementConditioned,
+               HPXML::LocationCrawlspaceConditioned].include? exterior_adjacent_to
 
       hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                              exterior_adjacent_to: exterior_adjacent_to,
@@ -3801,13 +3816,21 @@ class HPXMLFile
       next if [HPXML::LocationOutside, HPXML::LocationOtherHousingUnit].include? interior_adjacent_to
 
       has_foundation_walls = false
-      if [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned].include? interior_adjacent_to
+      if [HPXML::LocationCrawlspaceVented,
+          HPXML::LocationCrawlspaceUnvented,
+          HPXML::LocationCrawlspaceConditioned,
+          HPXML::LocationBasementUnconditioned,
+          HPXML::LocationBasementConditioned].include? interior_adjacent_to
         has_foundation_walls = true
       end
       exposed_perimeter = Geometry.calculate_exposed_perimeter(model, [surface], has_foundation_walls).round(1)
       next if exposed_perimeter == 0 # this could be, e.g., the foundation floor of an interior corridor
 
-      if [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned].include? interior_adjacent_to
+      if [HPXML::LocationCrawlspaceVented,
+          HPXML::LocationCrawlspaceUnvented,
+          HPXML::LocationCrawlspaceConditioned,
+          HPXML::LocationBasementUnconditioned,
+          HPXML::LocationBasementConditioned].include? interior_adjacent_to
         exposed_perimeter -= Geometry.get_unexposed_garage_perimeter(**args)
       end
 
@@ -3821,9 +3844,7 @@ class HPXMLFile
         under_slab_insulation_width = args[:slab_under_width]
       end
 
-      if interior_adjacent_to.include? 'crawlspace'
-        thickness = 0.0 # Assume soil
-      elsif args[:slab_thickness] != Constants.Auto
+      if args[:slab_thickness] != Constants.Auto
         thickness = Float(args[:slab_thickness])
       end
 
@@ -3849,6 +3870,13 @@ class HPXMLFile
                       carpet_fraction: carpet_fraction,
                       carpet_r_value: carpet_r_value)
       @surface_ids[surface.name.to_s] = hpxml.slabs[-1].id
+
+      next unless interior_adjacent_to == HPXML::LocationCrawlspaceConditioned
+
+      # Increase Conditioned Building Volume & Infiltration Volume
+      conditioned_crawlspace_volume = hpxml.slabs[-1].area * args[:geometry_foundation_height]
+      hpxml.building_construction.conditioned_building_volume += conditioned_crawlspace_volume
+      hpxml.air_infiltration_measurements[0].infiltration_volume += conditioned_crawlspace_volume
     end
   end
 
@@ -4023,8 +4051,11 @@ class HPXMLFile
                  'walls' => { 'surfaces' => hpxml.walls, 'ids' => [] },
                  'rim_joists' => { 'surfaces' => hpxml.rim_joists, 'ids' => [] }, }
 
-    foundation_locations = [HPXML::LocationBasementConditioned, HPXML::LocationBasementUnconditioned,
-                            HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented]
+    foundation_locations = [HPXML::LocationBasementConditioned,
+                            HPXML::LocationBasementUnconditioned,
+                            HPXML::LocationCrawlspaceUnvented,
+                            HPXML::LocationCrawlspaceVented,
+                            HPXML::LocationCrawlspaceConditioned]
 
     surf_ids.each do |surf_type, surf_hash|
       surf_hash['surfaces'].each do |surface|

@@ -68,7 +68,7 @@ class Airflow
     end
 
     # Vented clothes dryers in conditioned space
-    vented_dryers = hpxml.clothes_dryers.select { |cd| cd.is_vented && cd.vented_flow_rate.to_f > 0 && [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include?(cd.location) }
+    vented_dryers = hpxml.clothes_dryers.select { |cd| cd.is_vented && cd.vented_flow_rate.to_f > 0 && HPXML::conditioned_locations_this_unit.include?(cd.location) }
 
     # Initialization
     initialize_cfis(model, vent_fans_mech, airloop_map)
