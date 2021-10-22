@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>4a2f686e-35af-4672-ae2c-154211d3bc60</version_id>
-  <version_modified>20211022T171538Z</version_modified>
+  <version_id>0415d885-23de-45a9-b173-8b8e8d10ba12</version_id>
+  <version_modified>20211022T171848Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -652,6 +652,10 @@
           <display_name>UnventedCrawlspace</display_name>
         </choice>
         <choice>
+          <value>ConditionedCrawlspace</value>
+          <display_name>ConditionedCrawlspace</display_name>
+        </choice>
+        <choice>
           <value>UnconditionedBasement</value>
           <display_name>UnconditionedBasement</display_name>
         </choice>
@@ -1038,7 +1042,7 @@
     <argument>
       <name>slab_thickness</name>
       <display_name>Slab: Thickness</display_name>
-      <description>The thickness of the slab.</description>
+      <description>The thickness of the slab. Zero can be entered if there is a dirt floor instead of a slab.</description>
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -2534,6 +2538,10 @@
           <display_name>crawlspace - unvented</display_name>
         </choice>
         <choice>
+          <value>crawlspace - conditioned</value>
+          <display_name>crawlspace - conditioned</display_name>
+        </choice>
+        <choice>
           <value>attic - vented</value>
           <display_name>attic - vented</display_name>
         </choice>
@@ -2631,6 +2639,10 @@
         <choice>
           <value>crawlspace - unvented</value>
           <display_name>crawlspace - unvented</display_name>
+        </choice>
+        <choice>
+          <value>crawlspace - conditioned</value>
+          <display_name>crawlspace - conditioned</display_name>
         </choice>
         <choice>
           <value>attic - vented</value>
@@ -3280,6 +3292,10 @@
         <choice>
           <value>crawlspace - unvented</value>
           <display_name>crawlspace - unvented</display_name>
+        </choice>
+        <choice>
+          <value>crawlspace - conditioned</value>
+          <display_name>crawlspace - conditioned</display_name>
         </choice>
         <choice>
           <value>other exterior</value>
@@ -5789,13 +5805,13 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6581D5A2</checksum>
+      <checksum>E12DF4C0</checksum>
     </file>
     <file>
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>7A2C5503</checksum>
+      <checksum>C2AB19BE</checksum>
     </file>
     <file>
       <version>
@@ -5806,7 +5822,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>2F1152B7</checksum>
+      <checksum>772B7150</checksum>
     </file>
   </files>
 </measure>
