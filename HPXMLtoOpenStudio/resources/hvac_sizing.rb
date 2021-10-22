@@ -165,7 +165,7 @@ class HVACSizing
       elsif [HPXML::LocationOutside, HPXML::LocationRoofDeck].include? location
         @cool_design_temps[location] = weather.design.CoolingDrybulb
         @heat_design_temps[location] = weather.design.HeatingDrybulb
-      elsif location == HPXML::LocationBasementConditioned
+      elsif HPXML::conditioned_locations.include? location
         @cool_design_temps[location] = process_design_temp_cooling(weather, HPXML::LocationLivingSpace)
         @heat_design_temps[location] = process_design_temp_heating(weather, HPXML::LocationLivingSpace)
       else
@@ -963,7 +963,7 @@ class HVACSizing
       if slab.interior_adjacent_to == HPXML::LocationLivingSpace # Slab-on-grade
         f_value = calc_slab_f_value(slab)
         bldg_design_loads.Heat_Slabs += f_value * slab.exposed_perimeter * @htd
-      elsif slab.interior_adjacent_to == HPXML::LocationBasementConditioned
+      elsif HPXML::conditioned_below_grade_locations.include? slab.interior_adjacent_to
         # Based on MJ 8th Ed. A12-7 and ASHRAE HoF 2013 pg 18.31 Eq 40
         # FIXME: Assumes slab is uninsulated?
         k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, 'in', 'ft')
@@ -1211,7 +1211,7 @@ class HVACSizing
     elsif [HPXML::LocationGarage].include? duct.Location
       dse_Fregain = 0.05
 
-    elsif [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.Location
+    elsif HPXML::conditioned_locations.include? duct.Location
       dse_Fregain = 1.0
 
     end
@@ -2218,14 +2218,14 @@ class HVACSizing
     '''
     uncond_area = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     ducts.each do |duct|
-      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.Location
+      next if HPXML::conditioned_locations_this_unit.include? duct.Location
 
       uncond_area[duct.Side] += duct.Area
     end
 
     value = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     ducts.each do |duct|
-      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.Location
+      next if HPXML::conditioned_locations_this_unit.include? duct.Location
 
       if uncond_area[duct.Side] > 0
         value[duct.Side] += values[duct.Side][duct.Location] * duct.Area / uncond_area[duct.Side]
@@ -2244,7 +2244,7 @@ class HVACSizing
 
     areas = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     ducts.each do |duct|
-      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.Location
+      next if HPXML::conditioned_locations_this_unit.include? duct.Location
 
       areas[duct.Side] += duct.Area
     end
@@ -2259,7 +2259,7 @@ class HVACSizing
 
     cfms = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     ducts.each do |duct|
-      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.Location
+      next if HPXML::conditioned_locations_this_unit.include? duct.Location
 
       if duct.LeakageFrac.to_f > 0
         cfms[duct.Side] += duct.LeakageFrac * system_cfm
@@ -2280,7 +2280,7 @@ class HVACSizing
 
     u_factors = { HPXML::DuctTypeSupply => {}, HPXML::DuctTypeReturn => {} }
     ducts.each do |duct|
-      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.Location
+      next if HPXML::conditioned_locations_this_unit.include? duct.Location
 
       u_factors[duct.Side][duct.Location] = 1.0 / duct.Rvalue
     end
@@ -2498,7 +2498,7 @@ class HVACSizing
       total_uncond_supply_area = hpxml_hvac.distribution_system.total_unconditioned_duct_areas[HPXML::DuctTypeSupply]
       total_uncond_return_area = hpxml_hvac.distribution_system.total_unconditioned_duct_areas[HPXML::DuctTypeReturn]
       hpxml_hvac.distribution_system.ducts.each do |duct|
-        next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.duct_location
+        next if HPXML::conditioned_locations_this_unit.include? duct.duct_location
 
         d = DuctInfo.new
         d.Side = duct.duct_type
@@ -2589,7 +2589,7 @@ class HVACSizing
   end
 
   def self.get_space_ua_values(location, weather)
-    if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? location
+    if HPXML::conditioned_locations.include? location
       fail 'Method should not be called for a conditioned space.'
     end
 
@@ -2604,9 +2604,7 @@ class HVACSizing
 
       if [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationOutside
         space_UAs[HPXML::LocationOutside] += (1.0 / surface.insulation_assembly_r_value) * surface.area
-      elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationLivingSpace
-        space_UAs[HPXML::LocationLivingSpace] += (1.0 / surface.insulation_assembly_r_value) * surface.area
-      elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationBasementConditioned
+      elsif HPXML::conditioned_locations.include?(surface.interior_adjacent_to) || HPXML::conditioned_locations.include?(surface.exterior_adjacent_to)
         space_UAs[HPXML::LocationLivingSpace] += (1.0 / surface.insulation_assembly_r_value) * surface.area
       elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationGround
         if surface.is_a? HPXML::FoundationWall
