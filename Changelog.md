@@ -29,7 +29,7 @@ __New Features__
   - Door azimuth.
   - Radiant barrier grade.
   - Whole house fan airflow rate and fan power.
-- Allows conditioned crawlspaces (`crawlspace - conditioned`) to be specified.
+- Allows conditioned crawlspaces to be specified; modeled as crawlspaces that are actively maintained at setpoint.
 - Allows non-zero refrigerant charge defect ratios for ground source heat pumps.
 - Expands choices allowed for `Siding` (Wall/RimJoist) and `RoofType` (Roof) elements.
 - Allows "none" for wall/rim joist siding.
