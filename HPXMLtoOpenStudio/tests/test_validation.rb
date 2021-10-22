@@ -37,7 +37,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       # Test validation
       hpxml_doc = HPXML.new(hpxml_path: xml, building_id: 'MyBuilding').to_oga()
       _test_schema_validation(hpxml_doc, xml)
-      _test_schematron_validation(hpxml_doc)
+      _test_schematron_validation(hpxml_doc, expected_errors: []) # Ensure no errors
     end
     puts
   end
@@ -99,7 +99,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'dhw-invalid-ef-tank' => ['Expected EnergyFactor to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="storage water heater"], id: "WaterHeatingSystem1"]'],
                             'dhw-invalid-uef-tank-heat-pump' => ['Expected UniformEnergyFactor to be greater than 1 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="heat pump water heater"], id: "WaterHeatingSystem1"]'],
                             'dishwasher-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
-                            'duct-leakage-cfm25' => ['Expected Value to be greater than or equal to 0 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement/DuctLeakage[Units="CFM25"], id: "HVACDistribution1"]'],
+                            'duct-leakage-cfm25' => ['Expected Value to be greater than or equal to 0 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement/DuctLeakage[Units="CFM25" or Units="CFM50"], id: "HVACDistribution1"]'],
+                            'duct-leakage-cfm50' => ['Expected Value to be greater than or equal to 0 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement/DuctLeakage[Units="CFM25" or Units="CFM50"], id: "HVACDistribution1"]'],
                             'duct-leakage-percent' => ['Expected Value to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement/DuctLeakage[Units="Percent"], id: "HVACDistribution1"]'],
                             'duct-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'duct-location-unconditioned-space' => ["Expected DuctLocation to be 'living space' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'attic - vented' or 'attic - unvented' or 'garage' or 'exterior wall' or 'under slab' or 'roof deck' or 'outside' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts, id: \"HVACDistribution1\"]"],
@@ -123,7 +124,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'generator-number-of-bedrooms-served' => ['Expected NumberofBedroomsServed to be greater than ../../../../BuildingSummary/BuildingConstruction/NumberofBedrooms [context: /HPXML/Building/BuildingDetails/Systems/extension/Generators/Generator[IsSharedSystem="true"], id: "Generator1"]'],
                             'generator-output-greater-than-consumption' => ['Expected AnnualConsumptionkBtu to be greater than AnnualOutputkWh*3412 [context: /HPXML/Building/BuildingDetails/Systems/extension/Generators/Generator, id: "Generator1"]'],
                             'heat-pump-mixed-fixed-and-autosize-capacities' => ['Expected 0 or 2 element(s) for xpath: HeatingCapacity | BackupHeatingCapacity [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel], id: "HeatPump1"]'],
-                            'hvac-distribution-return-duct-leakage-missing' => ['Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"] [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution[AirDistributionType[text()="regular velocity" or text()="gravity"]], id: "HVACDistribution1"]'],
+                            'hvac-distribution-return-duct-leakage-missing' => ['Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="CFM50" or Units="Percent") and TotalOrToOutside="to outside"] [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution[AirDistributionType[text()="regular velocity" or text()="gravity"]], id: "HVACDistribution1"]'],
                             'hvac-frac-load-served' => ['Expected sum(FractionHeatLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails]',
                                                         'Expected sum(FractionCoolLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails]'],
                             'invalid-assembly-effective-rvalue' => ['Expected AssemblyEffectiveRValue to be greater than 0 [context: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation, id: "Wall1Insulation"]'],
@@ -149,7 +150,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'invalid-number-of-conditioned-floors' => ['Expected NumberofConditionedFloors to be greater than or equal to NumberofConditionedFloorsAboveGrade [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction]'],
                             'invalid-number-of-units-served' => ['Expected NumberofUnitsServed to be greater than 1 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"], id: "WaterHeatingSystem1"]'],
                             'invalid-shared-vent-in-unit-flowrate' => ['Expected RatedFlowRate to be greater than extension/InUnitFlowRate [context: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"], id: "VentilationFan1"]'],
-                            'invalid-window-height' => ['Expected DistanceToBottomOfWindow to be greater than DistanceToTopOfWindow [context: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs, id: "Window2"]'],
+                            'invalid-window-height' => ['Expected DistanceToBottomOfWindow to be greater than DistanceToTopOfWindow [context: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs[number(Depth) > 0], id: "Window2"]'],
                             'lighting-fractions' => ['Expected sum(LightingGroup/FractionofUnitsInLocation) for Location="interior" to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails/Lighting]'],
                             'missing-duct-area' => ['Expected 1 or more element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctLocation], id: "HVACDistribution1"]',
                                                     'Expected 1 or more element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctLocation], id: "HVACDistribution2"]',
@@ -237,6 +238,10 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml.dishwashers[0].location = HPXML::LocationGarage
       elsif ['duct-leakage-cfm25'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = -2
+        hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = -2
+      elsif ['duct-leakage-cfm50'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-ducts-leakage-cfm50.xml'))
         hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = -2
         hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = -2
       elsif ['duct-leakage-percent'].include? error_case
@@ -451,7 +456,85 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       end
 
       # Test against schematron
-      _test_schematron_validation(hpxml_doc, expected_errors)
+      _test_schematron_validation(hpxml_doc, expected_errors: expected_errors)
+    end
+  end
+
+  def test_schematron_warning_messages
+    # Test case => Warning message
+    all_expected_warnings = { 'dhw-efficiencies-low' => ['EnergyFactor should typically be greater than or equal to 0.45.',
+                                                         'EnergyFactor should typically be greater than or equal to 0.45.',
+                                                         'No space cooling specified, the model will not include space cooling energy use.'],
+                              'dhw-setpoint-low' => ['Hot water setpoint should typically be greater than or equal to 110 deg-F.'],
+                              'hvac-dse-low' => ['Heating DSE should typically be greater than or equal to 0.5.',
+                                                 'Cooling DSE should typically be greater than or equal to 0.5.'],
+                              'hvac-efficiencies-low' => ['Percent efficiency should typically be greater than or equal to 0.95.',
+                                                          'AFUE should typically be greater than or equal to 0.6.',
+                                                          'AFUE should typically be greater than or equal to 0.6.',
+                                                          'AFUE should typically be greater than or equal to 0.6.',
+                                                          'Percent efficiency should typically be greater than or equal to 0.6.',
+                                                          'SEER should typically be greater than or equal to 8.',
+                                                          'EER should typically be greater than or equal to 8.',
+                                                          'SEER should typically be greater than or equal to 8.',
+                                                          'HSPF should typically be greater than or equal to 6.',
+                                                          'SEER should typically be greater than or equal to 8.',
+                                                          'HSPF should typically be greater than or equal to 6.',
+                                                          'EER should typically be greater than or equal to 8.',
+                                                          'COP should typically be greater than or equal to 2.'],
+                              'hvac-setpoints-high' => ['Heating setpoint should typically be less than or equal to 76 deg-F.',
+                                                        'Cooling setpoint should typically be less than or equal to 86 deg-F.'],
+                              'hvac-setpoints-low' => ['Heating setpoint should typically be greater than or equal to 58 deg-F.',
+                                                       'Cooling setpoint should typically be greater than or equal to 68 deg-F.'],
+                              'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'] }
+
+    all_expected_warnings.each_with_index do |(warning_case, expected_warnings), i|
+      puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."
+      # Create HPXML object
+      if ['dhw-efficiencies-low'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-dhw-multiple.xml'))
+        hpxml.water_heating_systems.select { |w| w.water_heater_type == HPXML::WaterHeaterTypeStorage }[0].energy_factor = 0.1
+        hpxml.water_heating_systems.select { |w| w.water_heater_type == HPXML::WaterHeaterTypeTankless }[0].energy_factor = 0.1
+      elsif ['dhw-setpoint-low'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.water_heating_systems[0].temperature = 100
+      elsif ['hvac-dse-low'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-dse.xml'))
+        hpxml.hvac_distributions[0].annual_heating_dse = 0.1
+        hpxml.hvac_distributions[0].annual_cooling_dse = 0.1
+      elsif ['hvac-efficiencies-low'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-multiple.xml'))
+        hpxml.heating_systems.select { |h| h.heating_system_type == HPXML::HVACTypeElectricResistance }[0].heating_efficiency_percent = 0.1
+        hpxml.heating_systems.select { |h| h.heating_system_type == HPXML::HVACTypeFurnace }[0].heating_efficiency_afue = 0.1
+        hpxml.heating_systems.select { |h| h.heating_system_type == HPXML::HVACTypeWallFurnace }[0].heating_efficiency_afue = 0.1
+        hpxml.heating_systems.select { |h| h.heating_system_type == HPXML::HVACTypeBoiler }[0].heating_efficiency_afue = 0.1
+        hpxml.heating_systems.select { |h| h.heating_system_type == HPXML::HVACTypeStove }[0].heating_efficiency_percent = 0.1
+        hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeCentralAirConditioner }[0].cooling_efficiency_seer = 0.1
+        hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeRoomAirConditioner }[0].cooling_efficiency_eer = 0.1
+        hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir }[0].cooling_efficiency_seer = 0.1
+        hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir }[0].heating_efficiency_hspf = 0.1
+        hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit }[0].cooling_efficiency_seer = 0.1
+        hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit }[0].heating_efficiency_hspf = 0.1
+        hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }[0].cooling_efficiency_eer = 0.1
+        hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }[0].heating_efficiency_cop = 0.1
+      elsif ['hvac-setpoints-high'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.hvac_controls[0].heating_setpoint_temp = 100
+        hpxml.hvac_controls[0].cooling_setpoint_temp = 100
+      elsif ['hvac-setpoints-low'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.hvac_controls[0].heating_setpoint_temp = 0
+        hpxml.hvac_controls[0].cooling_setpoint_temp = 0
+      elsif ['slab-zero-exposed-perimeter'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
+        hpxml.slabs[0].exposed_perimeter = 0
+      else
+        fail "Unhandled case: #{warning_case}."
+      end
+
+      hpxml_doc = hpxml.to_oga()
+
+      # Test against schematron
+      _test_schematron_validation(hpxml_doc, expected_warnings: expected_warnings)
     end
   end
 
@@ -831,10 +914,15 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
   private
 
-  def _test_schematron_validation(hpxml_doc, expected_errors = [])
+  def _test_schematron_validation(hpxml_doc, expected_errors: nil, expected_warnings: nil)
     # Validate via validator.rb
     errors, warnings = Validator.run_validators(hpxml_doc, [@epvalidator_stron_path, @hpxml_stron_path])
-    _compare_errors(errors, expected_errors)
+    if not expected_errors.nil?
+      _compare_errors_or_warnings('error', errors, expected_errors)
+    end
+    if not expected_warnings.nil?
+      _compare_errors_or_warnings('warning', warnings, expected_warnings)
+    end
   end
 
   def _test_schema_validation(hpxml_doc, xml)
@@ -842,9 +930,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     schemas_dir = File.absolute_path(File.join(@root_path, 'HPXMLtoOpenStudio', 'resources'))
     errors = XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), nil)
     if errors.size > 0
-      puts "#{xml}: #{errors}"
+      flunk "#{xml}: #{errors}"
     end
-    assert_equal(0, errors.size)
   end
 
   def _test_measure(error_case, expected_errors)
@@ -881,31 +968,32 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     result.stepErrors.each do |s|
       errors << s
     end
-    _compare_errors(errors, expected_errors)
+    _compare_errors_or_warnings('error', errors, expected_errors)
   end
 
-  def _compare_errors(actual_errors, expected_errors)
-    if expected_errors.empty?
-      if actual_errors.size > 0
-        puts "Found unexpected error messages:\n#{actual_errors}"
+  def _compare_errors_or_warnings(type, actual_msgs, expected_msgs)
+    if expected_msgs.empty?
+      if actual_msgs.size > 0
+        flunk "Found unexpected #{type} messages:\n#{actual_msgs}"
       end
-      assert(actual_errors.size == 0)
     else
-      expected_errors.each do |expected_error|
-        found_error = false
-        actual_errors.each do |actual_error|
-          found_error = true if actual_error.include? expected_error
+      expected_msgs.each do |expected_msg|
+        found_msg = false
+        actual_msgs.each do |actual_msg|
+          next unless actual_msg.include? expected_msg
+
+          found_msg = true
+          actual_msgs.delete(actual_msg)
+          break
         end
 
-        if not found_error
-          puts "Did not find expected error message\n'#{expected_error}'\nin\n#{actual_errors}"
+        if not found_msg
+          flunk "Did not find expected #{type} message\n'#{expected_msg}'\nin\n#{actual_msgs}"
         end
-        assert(found_error)
       end
-      if expected_errors.size != actual_errors.size
-        puts "Found extra error messages:\n#{actual_errors}"
+      if actual_msgs.size > 0
+        flunk "Found extra #{type} messages:\n#{actual_msgs}"
       end
-      assert_equal(expected_errors.size, actual_errors.size)
     end
   end
 end
