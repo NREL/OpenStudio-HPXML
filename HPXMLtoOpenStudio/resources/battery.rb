@@ -28,7 +28,7 @@ class Battery
       thermal_zone = space.thermalZone.get
       elcs.setThermalZone(thermal_zone)
     end
-    elcs.setRadiativeFraction(0.6 * frac_sens)
+    elcs.setRadiativeFraction(0.9 * frac_sens)
     elcs.setLifetimeModel(battery.lifetime_model)
     elcs.setNumberofCellsinSeries(number_of_cells_in_series)
     elcs.setNumberofStringsinParallel(number_of_strings_in_parallel)
