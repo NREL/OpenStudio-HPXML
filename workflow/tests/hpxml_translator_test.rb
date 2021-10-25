@@ -598,6 +598,7 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'sensible part-load ratio out of range error continues'
       next if err_line.include? 'Iteration limit exceeded in calculating sensible part-load ratio error continues'
       next if err_line.include?('setupIHGOutputs: Output variables=Zone Other Equipment') && err_line.include?('are not available.')
+      next if err_line.include?('setupIHGOutputs: Output variables=Space Other Equipment') && err_line.include?('are not available')
       next if err_line.include? 'Actual air mass flow rate is smaller than 25% of water-to-air heat pump coil rated air flow rate.' # FUTURE: Remove this when https://github.com/NREL/EnergyPlus/issues/9125 is resolved
 
       # HPWHs
