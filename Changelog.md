@@ -37,6 +37,7 @@ __New Features__
 - Allows additional fuel types for generators.
 - Switches to the EnergyPlus Fan:SystemModel object for all HVAC systems.
 - Introduces a small amount of infiltration for unvented spaces.
+- Updates the assumption of flue losses vs tank losses for higher efficiency non-electric storage water heaters.
 - Revises shared mechanical ventilation preconditioning control logic to operate less often.
 - Adds more warnings of inputs based on ANSI/BPI 2400 Standard.
 - Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
