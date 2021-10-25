@@ -46,6 +46,7 @@ __New Features__
 - Relaxes requirement for heating (or cooling) setpoints so that they are only needed if heating (or cooling) equipment is present.
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
 - Eliminates EnergyPlus warnings related to unused objects or invalid output meters/variables.
+- Allows modeling PTAC and PTHP HVAC systems. 
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
