@@ -2597,7 +2597,7 @@ class OSModel
     if space_values[:indoor_weight] > 0
       sensor_ia = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
       sensor_ia.setName('cond_zone_temp')
-      sensor_ia.setKeyName(spaces[HPXML::LocationLivingSpace].name.to_s)
+      sensor_ia.setKeyName(spaces[HPXML::LocationLivingSpace].thermalZone.get.name.to_s)
     end
 
     if space_values[:outdoor_weight] > 0
