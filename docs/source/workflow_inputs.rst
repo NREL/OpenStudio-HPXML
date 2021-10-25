@@ -1185,7 +1185,7 @@ Each heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/H
   ``BackupSystemFuel``               string            See [#]_     No                   Fuel type of backup heating, if present
   =================================  ========  ======  ===========  ========  =========  ===============================================
 
-  .. [#] HeatPumpType choices are "air-to-air", "mini-split", "ground-to-air", or "water-loop-to-air".
+  .. [#] HeatPumpType choices are "air-to-air", "mini-split", "ground-to-air", "water-loop-to-air", or "packaged terminal heat pump".
   .. [#] HeatPumpFuel only choice is "electricity".
   .. [#] BackupSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
 
@@ -1278,7 +1278,7 @@ If a mini-split heat pump is specified, additional information is entered in ``H
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
 
 Packaged Terminal Heat Pump
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If a packaged terminal heat pump is specified, additional information is entered in ``HeatPump``.
 
