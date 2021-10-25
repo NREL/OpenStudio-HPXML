@@ -521,8 +521,8 @@
         <Batteries>
           <Battery>
             <SystemIdentifier id='Battery1'/>
-            <BatteryType>Li-ion</BatteryType>
             <Location>garage</Location>
+            <BatteryType>Li-ion</BatteryType>
             <NominalCapacity>200.0</NominalCapacity>
             <NominalVoltage>60.0</NominalVoltage>
             <extension>

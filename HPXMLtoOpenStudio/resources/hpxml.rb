@@ -4671,8 +4671,8 @@ class HPXML < Object
       battery = XMLHelper.add_element(batteries, 'Battery')
       sys_id = XMLHelper.add_element(battery, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      XMLHelper.add_element(battery, 'BatteryType', @type, :string) unless @type.nil?
       XMLHelper.add_element(battery, 'Location', @location, :string, @location_isdefaulted) unless @location.nil?
+      XMLHelper.add_element(battery, 'BatteryType', @type, :string) unless @type.nil?
       XMLHelper.add_element(battery, 'NominalCapacity', @capacity, :float, @capacity_isdefaulted) unless @capacity.nil?
       XMLHelper.add_element(battery, 'NominalVoltage', @voltage, :float, @voltage_isdefaulted) unless @voltage.nil?
       XMLHelper.add_extension(battery, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
@@ -4682,8 +4682,8 @@ class HPXML < Object
       return if battery.nil?
 
       @id = HPXML::get_id(battery)
-      @type = XMLHelper.get_value(battery, 'BatteryType', :string)
       @location = XMLHelper.get_value(battery, 'Location', :string)
+      @type = XMLHelper.get_value(battery, 'BatteryType', :string)
       @capacity = XMLHelper.get_value(battery, 'NominalCapacity', :float)
       @voltage = XMLHelper.get_value(battery, 'NominalVoltage', :float)
       @lifetime_model = XMLHelper.get_value(battery, 'extension/LifetimeModel', :string)
