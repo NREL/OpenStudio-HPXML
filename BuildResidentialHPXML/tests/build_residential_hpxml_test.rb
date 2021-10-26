@@ -909,7 +909,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
            'extra-mf-unvented-crawlspace-right-bottom-rear-units.xml',
            'extra-mf-unvented-crawlspace-right-middle-rear-units.xml',
            'extra-mf-unvented-crawlspace-right-top-rear-units.xml'].include? hpxml_file
-        args['geometry_unit_front_wall_is_adiabatic'] = true
+      args['geometry_unit_front_wall_is_adiabatic'] = true
     end
 
     # Error
