@@ -7,7 +7,7 @@ require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
 
-class HPXMLtoOpenStudioBatterTest < MiniTest::Test
+class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
   def sample_files_dir
     return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
@@ -95,7 +95,7 @@ class HPXMLtoOpenStudioBatterTest < MiniTest::Test
       assert(battery.thermalZone.is_initialized)
       assert_equal(HPXML::LocationBasementUnconditioned, battery.thermalZone.get.name.to_s)
       assert_equal(0.9, battery.radiativeFraction)
-      assert_equal(HPXML::BatteryLifetimeModelKandlerSmith, battery.lifetimeModel)
+      assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
       assert_in_epsilon(14, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(63, battery.numberofStringsinParallel, 0.01)
       assert_in_epsilon(1, battery.initialFractionalStateofCharge, 0.01)

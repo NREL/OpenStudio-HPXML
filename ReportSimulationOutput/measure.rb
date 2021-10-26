@@ -462,7 +462,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Electricity Produced (used for error checking)
     outputs[:total_elec_produced] = get_report_meter_data_annual(['ElectricityProduced:Facility'])
-    outputs[:total_elec_produced] -= get_report_meter_data_annual(['ElectricStorage:ElectricityProduced'])
+    # outputs[:total_elec_produced] -= get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']) # FIXME
 
     # Peak Electricity Consumption
     @peak_fuels.each do |key, peak_fuel|
@@ -689,9 +689,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     sum_elec_produced = -1 * @end_uses.select { |k, eu| eu.is_negative }.map { |k, eu| eu.annual_output.to_f }.sum(0.0)
     total_elec_produced = outputs[:total_elec_produced]
     if (sum_elec_produced - total_elec_produced).abs > 0.1
-      # FIXME
-      # runner.registerError("#{FT::Elec} produced category end uses (#{sum_elec_produced}) do not sum to total (#{total_elec_produced}).")
-      # return false
+      # FIXME: this throws when separate_elcd = false
+      runner.registerError("#{FT::Elec} produced category end uses (#{sum_elec_produced}) do not sum to total (#{total_elec_produced}).")
+      return false
     end
 
     # Check sum of end use outputs match fuel outputs
@@ -1492,8 +1492,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                                 is_negative: true)
     @end_uses[[FT::Elec, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Generator]),
                                                        is_negative: true)
-    @end_uses[[FT::Elec, EUT::Battery]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Battery]),
-                                                     is_negative: true)
+    @end_uses[[FT::Elec, EUT::Battery]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Battery]))
     @end_uses[[FT::Gas, EUT::Heating]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Heating]))
     @end_uses[[FT::Gas, EUT::HotWater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::HotWater]))
     @end_uses[[FT::Gas, EUT::ClothesDryer]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::ClothesDryer]))
@@ -1848,9 +1847,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       elsif object.to_ElectricLoadCenterInverterPVWatts.is_initialized
         return { [FT::Elec, EUT::PV] => ["Inverter AC Output #{EPlus::FuelTypeElectricity} Energy"] }
-
-        # elsif object.to_GeneratorPVWatts.is_initialized
-        # return { [FT::Elec, EUT::PV] => ['Generator Produced DC Electricity Energy'] }
 
       elsif object.to_GeneratorMicroTurbine.is_initialized
         fuel = object.to_GeneratorMicroTurbine.get.fuelType

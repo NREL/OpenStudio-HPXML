@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>3e749ffd-2f22-4a14-aad1-2024ffda8656</version_id>
-  <version_modified>20211026T015728Z</version_modified>
+  <version_id>1f7c11dc-2b27-4fe5-b1ba-5858c35c59aa</version_id>
+  <version_modified>20211026T160635Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -392,54 +392,6 @@
       <checksum>8B0CBA89</checksum>
     </file>
     <file>
-      <filename>invalid-bad-values-max-not-one.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>145EABFE</checksum>
-    </file>
-    <file>
-      <filename>invalid-bad-values-negative.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6B89791C</checksum>
-    </file>
-    <file>
-      <filename>invalid-bad-values-non-numeric.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BC19250F</checksum>
-    </file>
-    <file>
-      <filename>invalid-wrong-columns.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3EA3044A</checksum>
-    </file>
-    <file>
-      <filename>invalid-wrong-rows.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>552D0E89</checksum>
-    </file>
-    <file>
-      <filename>smooth.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3659E63B</checksum>
-    </file>
-    <file>
-      <filename>stochastic-vacancy.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1574B5D9</checksum>
-    </file>
-    <file>
-      <filename>stochastic.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>23A47B50</checksum>
-    </file>
-    <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -514,13 +466,61 @@
       <filename>test_battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>6DA85C09</checksum>
+      <checksum>45FE393F</checksum>
+    </file>
+    <file>
+      <filename>invalid-bad-values-max-not-one.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>145EABFE</checksum>
+    </file>
+    <file>
+      <filename>invalid-bad-values-negative.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6B89791C</checksum>
+    </file>
+    <file>
+      <filename>invalid-bad-values-non-numeric.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BC19250F</checksum>
+    </file>
+    <file>
+      <filename>invalid-wrong-columns.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3EA3044A</checksum>
+    </file>
+    <file>
+      <filename>invalid-wrong-rows.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>552D0E89</checksum>
+    </file>
+    <file>
+      <filename>smooth.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3659E63B</checksum>
+    </file>
+    <file>
+      <filename>stochastic-vacancy.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1574B5D9</checksum>
+    </file>
+    <file>
+      <filename>stochastic.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>23A47B50</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DAF51387</checksum>
+      <checksum>7C018BD7</checksum>
     </file>
   </files>
 </measure>

@@ -41,10 +41,23 @@ class Battery
     elcs.setFractionofCellCapacityRemovedattheEndofExponentialZone(2.584) # from Rohit C.
     elcs.setFractionofCellCapacityRemovedattheEndofNominalZone(3.126) # from Rohit C.
 
-    elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
-    elcd.setName("#{obj_name} elec load center dist")
-    elcd.setElectricalBussType('DirectCurrentWithInverterDCStorage')
+    # TODO: choose one
+    separate_elcd = true
+    elcds = model.getElectricLoadCenterDistributions
+    if separate_elcd || elcds.size == 0
+      elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
+      elcd.setName("#{obj_name} elec load center dist")
+      elcd.setElectricalBussType('AlternatingCurrentWithStorage')
+    elsif elcds.size > 0
+      elcd = elcds[0]
+      elcd.setElectricalBussType('DirectCurrentWithInverterDCStorage')
+    end
+    elcd.setGeneratorOperationSchemeType('TrackElectrical')
+    elcd.setDemandLimitSchemePurchasedElectricDemandLimit(0)
+    elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
     elcd.setElectricalStorage(elcs)
+    elcd.setMaximumStorageStateofChargeFraction(0.95)
+    elcd.setMinimumStorageStateofChargeFraction(0.20)
   end
 
   def self.get_battery_default_values()
