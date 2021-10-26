@@ -820,6 +820,37 @@ Each opaque door is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Do
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] If neither Azimuth nor Orientation nor AttachedToWall azimuth provided, defaults to the azimuth with the largest surface area defined in the HPXML file.
 
+HPXML Partition Wall Masses
+***************************
+
+Each partition wall mass is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/extension/PartitionWallMass``.
+
+  ============================================  =================  ============  ===================  ========  =========  =================================================
+  Element                                       Type               Units         Constraints          Required  Default    Notes
+  ============================================  =================  ============  ===================  ========  =========  =================================================
+  ``AreaFraction``                              double                           >= 0                 No        1.0        Fraction of both sides of wall area to floor area
+  ``InteriorFinish/Type``                       string                           See [#]_             No        See [#]_   Interior finish material
+  ``InteriorFinish/Thickness``                  double             in            >= 0                 No        0.5        Interior finish thickness
+  ============================================  =================  ============  ===================  ========  =========  =================================================
+
+  .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
+  .. [#] InteriorFinish/Type defaults to "gypsum board".
+
+HPXML Furniture Masses
+***************************
+
+Each furniture mass is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/extension/FurnitureMass``.
+
+  ============================================  =================  ============  ===================  ========  =========  =================================================
+  Element                                       Type               Units         Constraints          Required  Default    Notes
+  ============================================  =================  ============  ===================  ========  =========  =================================================
+  ``AreaFraction``                              double                           >= 0                 No        1.0        Fraction of furniture area to floor area
+  ``Type``                                      string                           See [#]_             No        See [#]_   Interior finish material
+  ============================================  =================  ============  ===================  ========  =========  =================================================
+
+  .. [#] Type choices are "light-weight" and "heavy-weight". 
+  .. [#] Type defaults to "light-weight".
+
 HPXML Systems
 -------------
 
