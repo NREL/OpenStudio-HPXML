@@ -450,6 +450,7 @@
         <Batteries>
           <Battery>
             <SystemIdentifier id='Battery1'/>
+            <Location>outside</Location>
             <BatteryType>Li-ion</BatteryType>
           </Battery>
         </Batteries>

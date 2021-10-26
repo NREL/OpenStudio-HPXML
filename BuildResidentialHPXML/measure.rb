@@ -2099,10 +2099,22 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     battery_location_choices = OpenStudio::StringVector.new
     battery_location_choices << Constants.Auto
     battery_location_choices << 'none'
-    battery_location_choices << HPXML::LocationOutside
-    battery_location_choices << HPXML::LocationGarage
     battery_location_choices << HPXML::LocationLivingSpace
-    battery_location_choices << HPXML::LocationUnconditionedSpace
+    battery_location_choices << HPXML::LocationBasementConditioned
+    battery_location_choices << HPXML::LocationBasementUnconditioned
+    battery_location_choices << HPXML::LocationCrawlspaceVented
+    battery_location_choices << HPXML::LocationCrawlspaceUnvented
+    battery_location_choices << HPXML::LocationCrawlspaceConditioned
+    battery_location_choices << HPXML::LocationAtticVented
+    battery_location_choices << HPXML::LocationAtticUnvented
+    battery_location_choices << HPXML::LocationGarage
+    battery_location_choices << HPXML::LocationExteriorWall
+    battery_location_choices << HPXML::LocationRoofDeck
+    battery_location_choices << HPXML::LocationOutside
+    battery_location_choices << HPXML::LocationOtherHousingUnit
+    battery_location_choices << HPXML::LocationOtherHeatedSpace
+    battery_location_choices << HPXML::LocationOtherMultifamilyBufferSpace
+    battery_location_choices << HPXML::LocationOtherNonFreezingSpace
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('battery_location', battery_location_choices, true)
     arg.setDisplayName('Battery: Location')
@@ -2110,28 +2122,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('none')
     args << arg
 
-    battery_lifetime_model_choices = OpenStudio::StringVector.new
-    battery_lifetime_model_choices << Constants.Auto
-    battery_lifetime_model_choices << HPXML::BatteryLifetimeModelNone
-    battery_lifetime_model_choices << HPXML::BatteryLifetimeModelKandlerSmith
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('battery_lifetime_model', battery_lifetime_model_choices, true)
-    arg.setDisplayName('Battery: Lifetime Model')
-    arg.setDescription('The lifetime model for the lithium ion battery.')
-    arg.setDefaultValue(Constants.Auto)
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('battery_capacity', true)
     arg.setDisplayName('Battery: Nominal Capacity')
     arg.setDescription('The nominal capacity of the lithium ion battery.')
     arg.setUnits('kWh')
-    arg.setDefaultValue(Constants.Auto)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('battery_voltage', true)
-    arg.setDisplayName('Battery: Nominal Voltage')
-    arg.setDescription('The nominal voltage of the lithium ion battery.')
-    arg.setUnits('V')
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
@@ -5071,23 +5065,9 @@ class HPXMLFile
       location = args[:battery_location]
     end
 
-    if args[:battery_lifetime_model] != Constants.Auto
-      lifetime_model = args[:battery_lifetime_model]
-    end
-
-    capacity = nil
     if args[:battery_capacity] != Constants.Auto
       capacity = Float(args[:battery_capacity]) # kWh
-    end
 
-    voltage = nil
-    if args[:battery_voltage] != Constants.Auto
-      voltage = Float(args[:battery_voltage]) # V
-    end
-
-    if (not capacity.nil?) && (not voltage.nil?)
-      capacity = Battery.get_Ah_from_kWh(capacity, voltage)
-    elsif not capacity.nil?
       default_values = Battery.get_battery_default_values()
       capacity = Battery.get_Ah_from_kWh(capacity, default_values[:voltage])
     end
@@ -5095,9 +5075,7 @@ class HPXMLFile
     hpxml.batteries.add(id: "Battery#{hpxml.batteries.size + 1}",
                         type: HPXML::BatteryTypeLithiumIon,
                         location: location,
-                        lifetime_model: lifetime_model,
-                        capacity: capacity,
-                        voltage: voltage)
+                        capacity: capacity)
   end
 
   def self.set_lighting(hpxml, runner, args)
