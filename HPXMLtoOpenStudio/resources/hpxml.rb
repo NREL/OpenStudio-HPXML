@@ -101,9 +101,18 @@ class HPXML < Object
   FoundationTypeAmbient = 'Ambient'
   FoundationTypeBasementConditioned = 'ConditionedBasement'
   FoundationTypeBasementUnconditioned = 'UnconditionedBasement'
+  FoundationTypeCrawlspaceConditioned = 'ConditionedCrawlspace'
   FoundationTypeCrawlspaceUnvented = 'UnventedCrawlspace'
   FoundationTypeCrawlspaceVented = 'VentedCrawlspace'
   FoundationTypeSlab = 'SlabOnGrade'
+  FoundationWallTypeConcreteBlock = 'concrete block'
+  FoundationWallTypeConcreteBlockFoamCore = 'concrete block foam core'
+  FoundationWallTypeConcreteBlockPerliteCore = 'concrete block perlite core'
+  FoundationWallTypeConcreteBlockSolidCore = 'concrete block solid core'
+  FoundationWallTypeConcreteBlockVermiculiteCore = 'concrete block vermiculite core'
+  FoundationWallTypeDoubleBrick = 'double brick'
+  FoundationWallTypeSolidConcrete = 'solid concrete'
+  FoundationWallTypeWood = 'wood'
   FrameFloorOtherSpaceAbove = 'above'
   FrameFloorOtherSpaceBelow = 'below'
   FuelLoadTypeGrill = 'grill'
@@ -146,13 +155,16 @@ class HPXML < Object
   HVACTypeFixedHeater = 'FixedHeater'
   HVACTypeFloorFurnace = 'FloorFurnace'
   HVACTypeFurnace = 'Furnace'
+  HVACTypePTACHeating = 'PackagedTerminalAirConditionerHeating'
   HVACTypeHeatPumpAirToAir = 'air-to-air'
   HVACTypeHeatPumpGroundToAir = 'ground-to-air'
   HVACTypeHeatPumpMiniSplit = 'mini-split'
   HVACTypeHeatPumpWaterLoopToAir = 'water-loop-to-air'
+  HVACTypeHeatPumpPTHP = 'packaged terminal heat pump'
   HVACTypeMiniSplitAirConditioner = 'mini-split'
   HVACTypePortableHeater = 'PortableHeater'
   HVACTypeRoomAirConditioner = 'room air conditioner'
+  HVACTypePTAC = 'packaged terminal air conditioner'
   HVACTypeStove = 'Stove'
   HVACTypeWallFurnace = 'WallFurnace'
   HydronicTypeBaseboard = 'baseboard'
@@ -176,6 +188,7 @@ class HPXML < Object
   LocationBasementConditioned = 'basement - conditioned'
   LocationBasementUnconditioned = 'basement - unconditioned'
   LocationBath = 'bath'
+  LocationCrawlspaceConditioned = 'crawlspace - conditioned'
   LocationCrawlspaceUnvented = 'crawlspace - unvented'
   LocationCrawlspaceVented = 'crawlspace - vented'
   LocationExterior = 'exterior'
@@ -268,6 +281,7 @@ class HPXML < Object
   UnitsAFUE = 'AFUE'
   UnitsCFM = 'CFM'
   UnitsCFM25 = 'CFM25'
+  UnitsCFM50 = 'CFM50'
   UnitsCOP = 'COP'
   UnitsEER = 'EER'
   UnitsCEER = 'CEER'
@@ -514,7 +528,7 @@ class HPXML < Object
     exterior_area = 0.0 # Same as above excluding surfaces attached to garage or other housing units
 
     # Determine which spaces are within infiltration volume
-    spaces_within_infil_volume = [LocationLivingSpace, LocationBasementConditioned]
+    spaces_within_infil_volume = HPXML::conditioned_locations_this_unit
     @attics.each do |attic|
       next unless [AtticTypeUnvented].include? attic.attic_type
       next unless attic.within_infiltration_volume
@@ -522,7 +536,8 @@ class HPXML < Object
       spaces_within_infil_volume << attic.to_location
     end
     @foundations.each do |foundation|
-      next unless [FoundationTypeBasementUnconditioned, FoundationTypeCrawlspaceUnvented].include? foundation.foundation_type
+      next unless [FoundationTypeBasementUnconditioned,
+                   FoundationTypeCrawlspaceUnvented].include? foundation.foundation_type
       next unless foundation.within_infiltration_volume
 
       spaces_within_infil_volume << foundation.to_location
@@ -532,7 +547,8 @@ class HPXML < Object
     spaces_within_infil_volume.each do |location|
       (@roofs + @rim_joists + @walls + @foundation_walls + @frame_floors + @slabs).each do |surface|
         is_adiabatic_surface = (surface.interior_adjacent_to == surface.exterior_adjacent_to)
-        next unless [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? location
+        next unless [surface.interior_adjacent_to,
+                     surface.exterior_adjacent_to].include? location
 
         if not is_adiabatic_surface
           # Exclude surfaces between two different spaces that are both within infiltration volume
@@ -541,8 +557,11 @@ class HPXML < Object
 
         # Update Compartmentalization Boundary areas
         total_area += surface.area
-        next unless (not [LocationGarage, LocationOtherHousingUnit, LocationOtherHeatedSpace,
-                          LocationOtherMultifamilyBufferSpace, LocationOtherNonFreezingSpace].include? surface.exterior_adjacent_to) &&
+        next unless (not [LocationGarage,
+                          LocationOtherHousingUnit,
+                          LocationOtherHeatedSpace,
+                          LocationOtherMultifamilyBufferSpace,
+                          LocationOtherNonFreezingSpace].include? surface.exterior_adjacent_to) &&
                     (not is_adiabatic_surface)
 
         exterior_area += surface.area
@@ -556,32 +575,45 @@ class HPXML < Object
     # Infiltration height: vertical distance between lowest and highest above-grade points within the pressure boundary.
     # Height is inferred from available HPXML properties.
     # The WithinInfiltrationVolume properties are intentionally ignored for now.
-    # FUTURE: Move into AirInfiltrationMeasurement class?
     cfa = @building_construction.conditioned_floor_area
+
     ncfl_ag = @building_construction.number_of_conditioned_floors_above_grade
     if has_walkout_basement()
       infil_height = ncfl_ag * infil_volume / cfa
     else
-      # Calculate maximum above-grade height of conditioned basement walls
-      max_cond_bsmt_wall_height_ag = 0.0
+      infil_volume -= inferred_conditioned_crawlspace_volume()
+
+      # Calculate maximum above-grade height of conditioned foundation walls
+      max_cond_fnd_wall_height_ag = 0.0
       @foundation_walls.each do |foundation_wall|
-        next unless foundation_wall.is_exterior && (foundation_wall.interior_adjacent_to == LocationBasementConditioned)
+        next unless foundation_wall.is_exterior && HPXML::conditioned_below_grade_locations.include?(foundation_wall.interior_adjacent_to)
 
         height_ag = foundation_wall.height - foundation_wall.depth_below_grade
-        next unless height_ag > max_cond_bsmt_wall_height_ag
+        next unless height_ag > max_cond_fnd_wall_height_ag
 
-        max_cond_bsmt_wall_height_ag = height_ag
+        max_cond_fnd_wall_height_ag = height_ag
       end
+
       # Add assumed rim joist height
-      cond_bsmt_rim_joist_height = 0
+      cond_fnd_rim_joist_height = 0
       @rim_joists.each do |rim_joist|
-        next unless rim_joist.is_exterior && (rim_joist.interior_adjacent_to == LocationBasementConditioned)
+        next unless rim_joist.is_exterior && HPXML::conditioned_below_grade_locations.include?(rim_joist.interior_adjacent_to)
 
-        cond_bsmt_rim_joist_height = UnitConversions.convert(9, 'in', 'ft')
+        cond_fnd_rim_joist_height = UnitConversions.convert(9, 'in', 'ft')
       end
-      infil_height = ncfl_ag * infil_volume / cfa + max_cond_bsmt_wall_height_ag + cond_bsmt_rim_joist_height
+
+      infil_height = ncfl_ag * infil_volume / cfa + max_cond_fnd_wall_height_ag + cond_fnd_rim_joist_height
     end
     return infil_height
+  end
+
+  def inferred_conditioned_crawlspace_volume
+    if has_location(HPXML::LocationCrawlspaceConditioned)
+      conditioned_crawl_area = @slabs.select { |s| s.interior_adjacent_to == HPXML::LocationCrawlspaceConditioned }.map { |s| s.area }.sum
+      conditioned_crawl_height = @foundation_walls.select { |w| w.interior_adjacent_to == HPXML::LocationCrawlspaceConditioned }.map { |w| w.height }.max
+      return conditioned_crawl_area * conditioned_crawl_height
+    end
+    return 0.0
   end
 
   def to_oga()
@@ -1491,6 +1523,8 @@ class HPXML < Object
         return LocationCrawlspaceUnvented
       elsif @foundation_type == FoundationTypeCrawlspaceVented
         return LocationCrawlspaceVented
+      elsif @foundation_type == FoundationTypeCrawlspaceConditioned
+        return LocationCrawlspaceConditioned
       elsif @foundation_type == FoundationTypeSlab
         return LocationLivingSpace
       else
@@ -1556,6 +1590,9 @@ class HPXML < Object
         elsif @foundation_type == FoundationTypeCrawlspaceUnvented
           crawlspace = XMLHelper.add_element(foundation_type_el, 'Crawlspace')
           XMLHelper.add_element(crawlspace, 'Vented', false, :boolean)
+        elsif @foundation_type == FoundationTypeCrawlspaceConditioned
+          crawlspace = XMLHelper.add_element(foundation_type_el, 'Crawlspace')
+          XMLHelper.add_element(crawlspace, 'Conditioned', true, :boolean)
         else
           fail "Unhandled foundation type '#{@foundation_type}'."
         end
@@ -1607,6 +1644,8 @@ class HPXML < Object
         @foundation_type = FoundationTypeCrawlspaceUnvented
       elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='true']")
         @foundation_type = FoundationTypeCrawlspaceVented
+      elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Conditioned='true']")
+        @foundation_type = FoundationTypeCrawlspaceConditioned
       elsif XMLHelper.has_element(foundation, 'FoundationType/Ambient')
         @foundation_type = FoundationTypeAmbient
       end
@@ -2098,7 +2137,7 @@ class HPXML < Object
 
   class FoundationWall < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :length, :height, :area, :orientation,
-             :azimuth, :thickness, :depth_below_grade, :insulation_id, :insulation_interior_r_value,
+             :type, :azimuth, :thickness, :depth_below_grade, :insulation_id, :insulation_interior_r_value,
              :insulation_interior_distance_to_top, :insulation_interior_distance_to_bottom,
              :insulation_exterior_r_value, :insulation_exterior_distance_to_top,
              :insulation_exterior_distance_to_bottom, :insulation_assembly_r_value,
@@ -2184,6 +2223,7 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(foundation_wall, 'ExteriorAdjacentTo', @exterior_adjacent_to, :string) unless @exterior_adjacent_to.nil?
       XMLHelper.add_element(foundation_wall, 'InteriorAdjacentTo', @interior_adjacent_to, :string) unless @interior_adjacent_to.nil?
+      XMLHelper.add_element(foundation_wall, 'Type', @type, :string, @type_isdefaulted) unless @type.nil?
       XMLHelper.add_element(foundation_wall, 'Length', @length, :float) unless @length.nil?
       XMLHelper.add_element(foundation_wall, 'Height', @height, :float) unless @height.nil?
       XMLHelper.add_element(foundation_wall, 'Area', @area, :float, @area_isdefaulted) unless @area.nil?
@@ -2226,6 +2266,7 @@ class HPXML < Object
       @id = HPXML::get_id(foundation_wall)
       @exterior_adjacent_to = XMLHelper.get_value(foundation_wall, 'ExteriorAdjacentTo', :string)
       @interior_adjacent_to = XMLHelper.get_value(foundation_wall, 'InteriorAdjacentTo', :string)
+      @type = XMLHelper.get_value(foundation_wall, 'Type', :string)
       @length = XMLHelper.get_value(foundation_wall, 'Length', :float)
       @height = XMLHelper.get_value(foundation_wall, 'Height', :float)
       @area = XMLHelper.get_value(foundation_wall, 'Area', :float)
@@ -2928,11 +2969,13 @@ class HPXML < Object
     def attached_cooling_system
       return if distribution_system.nil?
 
+      # by distribution system
       distribution_system.hvac_systems.each do |hvac_system|
         next if hvac_system.id == @id
 
         return hvac_system
       end
+
       return
     end
 
@@ -3082,6 +3125,7 @@ class HPXML < Object
     end
 
     def attached_heating_system
+      # by distribution system
       return if distribution_system.nil?
 
       distribution_system.hvac_systems.each do |hvac_system|
@@ -3229,7 +3273,7 @@ class HPXML < Object
              :cooling_shr, :backup_heating_fuel, :backup_heating_capacity,
              :backup_heating_efficiency_percent, :backup_heating_efficiency_afue,
              :backup_heating_switchover_temp, :fraction_heat_load_served, :fraction_cool_load_served,
-             :cooling_efficiency_seer, :cooling_efficiency_eer, :heating_efficiency_hspf,
+             :cooling_efficiency_seer, :cooling_efficiency_eer, :cooling_efficiency_ceer, :heating_efficiency_hspf,
              :heating_efficiency_cop, :third_party_certification, :seed_id, :pump_watts_per_ton,
              :fan_watts_per_cfm, :is_shared_system, :number_of_units_served, :shared_loop_watts,
              :shared_loop_motor_efficiency, :airflow_defect_ratio, :charge_defect_ratio,
@@ -3323,6 +3367,11 @@ class HPXML < Object
         XMLHelper.add_element(annual_efficiency, 'Units', UnitsSEER, :string)
         XMLHelper.add_element(annual_efficiency, 'Value', @cooling_efficiency_seer, :float, @cooling_efficiency_seer_isdefaulted)
       end
+      if not @cooling_efficiency_ceer.nil?
+        annual_efficiency = XMLHelper.add_element(heat_pump, 'AnnualCoolingEfficiency')
+        XMLHelper.add_element(annual_efficiency, 'Units', UnitsCEER, :string)
+        XMLHelper.add_element(annual_efficiency, 'Value', @cooling_efficiency_ceer, :float, @cooling_efficiency_ceer_isdefaulted)
+      end
       if not @cooling_efficiency_eer.nil?
         annual_efficiency = XMLHelper.add_element(heat_pump, 'AnnualCoolingEfficiency')
         XMLHelper.add_element(annual_efficiency, 'Units', UnitsEER, :string)
@@ -3382,6 +3431,7 @@ class HPXML < Object
       @fraction_heat_load_served = XMLHelper.get_value(heat_pump, 'FractionHeatLoadServed', :float)
       @fraction_cool_load_served = XMLHelper.get_value(heat_pump, 'FractionCoolLoadServed', :float)
       @cooling_efficiency_seer = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsSEER}']/Value", :float)
+      @cooling_efficiency_ceer = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsCEER}']/Value", :float)
       @cooling_efficiency_eer = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsEER}']/Value", :float)
       @heating_efficiency_hspf = XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='#{UnitsHSPF}']/Value", :float)
       @heating_efficiency_cop = XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='#{UnitsCOP}']/Value", :float)
@@ -3523,6 +3573,15 @@ class HPXML < Object
       return errors
     end
 
+    def is_deadband_control
+      if not @onoff_thermostat_deadband.nil?
+        if @onoff_thermostat_deadband > 0.0
+          return true
+        end
+      end
+      return false
+    end
+
     def to_oga(doc)
       return if nil?
 
@@ -3554,12 +3613,11 @@ class HPXML < Object
       XMLHelper.add_extension(hvac_control, 'SetbackStartHourHeating', @heating_setback_start_hour, :integer, @heating_setback_start_hour_isdefaulted) unless @heating_setback_start_hour.nil?
       XMLHelper.add_extension(hvac_control, 'SetupStartHourCooling', @cooling_setup_start_hour, :integer, @cooling_setup_start_hour_isdefaulted) unless @cooling_setup_start_hour.nil?
       XMLHelper.add_extension(hvac_control, 'CeilingFanSetpointTempCoolingSeasonOffset', @ceiling_fan_cooling_setpoint_temp_offset, :float) unless @ceiling_fan_cooling_setpoint_temp_offset.nil?
-      XMLHelper.add_extension(hvac_control, 'OnOffThermostatDeadband', @onoff_thermostat_deadband, :float) unless @onoff_thermostat_deadband.nil?
-      XMLHelper.add_extension(hvac_control, 'TwospeedRealisticStaging', @realistic_staging, :boolean) unless @realistic_staging.nil?
       XMLHelper.add_extension(hvac_control, 'WeekdaySetpointTempsHeatingSeason', @weekday_heating_setpoints, :string) unless @weekday_heating_setpoints.nil?
       XMLHelper.add_extension(hvac_control, 'WeekendSetpointTempsHeatingSeason', @weekend_heating_setpoints, :string) unless @weekend_heating_setpoints.nil?
       XMLHelper.add_extension(hvac_control, 'WeekdaySetpointTempsCoolingSeason', @weekday_cooling_setpoints, :string) unless @weekday_cooling_setpoints.nil?
       XMLHelper.add_extension(hvac_control, 'WeekendSetpointTempsCoolingSeason', @weekend_cooling_setpoints, :string) unless @weekend_cooling_setpoints.nil?
+      XMLHelper.add_extension(hvac_control, 'OnOffThermostatDeadband', @onoff_thermostat_deadband, :float) unless @onoff_thermostat_deadband.nil?
     end
 
     def from_oga(hvac_control)
@@ -3584,12 +3642,11 @@ class HPXML < Object
       @heating_setback_start_hour = XMLHelper.get_value(hvac_control, 'extension/SetbackStartHourHeating', :integer)
       @cooling_setup_start_hour = XMLHelper.get_value(hvac_control, 'extension/SetupStartHourCooling', :integer)
       @ceiling_fan_cooling_setpoint_temp_offset = XMLHelper.get_value(hvac_control, 'extension/CeilingFanSetpointTempCoolingSeasonOffset', :float)
-      @onoff_thermostat_deadband = XMLHelper.get_value(hvac_control, 'extension/OnOffThermostatDeadband', :float)
-      @realistic_staging = XMLHelper.get_value(hvac_control, 'extension/TwospeedRealisticStaging', :boolean)
       @weekday_heating_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekdaySetpointTempsHeatingSeason', :string)
       @weekend_heating_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekendSetpointTempsHeatingSeason', :string)
       @weekday_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekdaySetpointTempsCoolingSeason', :string)
       @weekend_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekendSetpointTempsCoolingSeason', :string)
+      @onoff_thermostat_deadband = XMLHelper.get_value(hvac_control, 'extension/OnOffThermostatDeadband', :float)
     end
   end
 
@@ -3657,7 +3714,7 @@ class HPXML < Object
       areas = { HPXML::DuctTypeSupply => 0,
                 HPXML::DuctTypeReturn => 0 }
       @ducts.each do |duct|
-        next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.duct_location
+        next if HPXML::conditioned_locations.include? duct.duct_location
         next if duct.duct_type.nil?
 
         areas[duct.duct_type] += duct.duct_surface_area
@@ -5956,7 +6013,24 @@ class HPXML < Object
   def self.conditioned_locations
     return [HPXML::LocationLivingSpace,
             HPXML::LocationBasementConditioned,
+            HPXML::LocationCrawlspaceConditioned,
             HPXML::LocationOtherHousingUnit]
+  end
+
+  def self.conditioned_locations_this_unit
+    return [HPXML::LocationLivingSpace,
+            HPXML::LocationBasementConditioned,
+            HPXML::LocationCrawlspaceConditioned]
+  end
+
+  def self.conditioned_finished_locations
+    return [HPXML::LocationLivingSpace,
+            HPXML::LocationBasementConditioned]
+  end
+
+  def self.conditioned_below_grade_locations
+    return [HPXML::LocationBasementConditioned,
+            HPXML::LocationCrawlspaceConditioned]
   end
 
   def self.is_conditioned(surface)
