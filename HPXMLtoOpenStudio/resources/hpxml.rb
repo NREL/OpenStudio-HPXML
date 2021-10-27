@@ -4664,7 +4664,8 @@ class HPXML < Object
 
   class Battery < BaseElement
     ATTRS = [:id, :type, :location,
-             :lifetime_model, :capacity, :voltage]
+             :lifetime_model, :capacity, :voltage,
+             :new_elcd]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4688,6 +4689,7 @@ class HPXML < Object
       XMLHelper.add_element(battery, 'NominalCapacity', @capacity, :float, @capacity_isdefaulted) unless @capacity.nil?
       XMLHelper.add_element(battery, 'NominalVoltage', @voltage, :float, @voltage_isdefaulted) unless @voltage.nil?
       XMLHelper.add_extension(battery, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
+      XMLHelper.add_extension(battery, 'NewELCD', @new_elcd, :boolean, @new_elcd_isdefaulted) unless @new_elcd.nil?
     end
 
     def from_oga(battery)
@@ -4699,6 +4701,7 @@ class HPXML < Object
       @capacity = XMLHelper.get_value(battery, 'NominalCapacity', :float)
       @voltage = XMLHelper.get_value(battery, 'NominalVoltage', :float)
       @lifetime_model = XMLHelper.get_value(battery, 'extension/LifetimeModel', :string)
+      @new_elcd = XMLHelper.get_value(battery, 'extension/NewELCD', :boolean)
     end
   end
 

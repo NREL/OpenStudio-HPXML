@@ -343,6 +343,10 @@ def create_hpxmls
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
     'base-pv-battery-living-space.xml' => 'base-pv.xml',
     'base-pv-battery-unconditioned-space.xml' => 'base-foundation-unconditioned-basement.xml',
+    'base-pv-battery-outside-new-elcd.xml' => 'base-pv-battery-outside.xml',
+    'base-pv-battery-garage-new-elcd.xml' => 'base-pv-battery-garage.xml',
+    'base-pv-battery-living-new-space-elcd.xml' => 'base-pv-battery-living-space.xml',
+    'base-pv-battery-unconditioned-space-new-elcd.xml' => 'base-pv-battery-unconditioned-space.xml',
     'base-schedules-simple.xml' => 'base.xml',
     'base-schedules-detailed-smooth.xml' => 'base.xml',
     'base-schedules-detailed-stochastic.xml' => 'base.xml',
@@ -4364,6 +4368,17 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.fuel_loads[2].weekday_fractions = '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
     hpxml.fuel_loads[2].weekend_fractions = '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
     hpxml.fuel_loads[2].monthly_multipliers = '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
+  end
+
+  # FIXME
+  if ['base-pv-battery-outside-new-elcd.xml'].include? hpxml_file
+    hpxml.batteries[0].new_elcd = true
+  elsif ['base-pv-battery-garage-new-elcd.xml'].include? hpxml_file
+    hpxml.batteries[0].new_elcd = true
+  elsif ['base-pv-battery-living-space-new-elcd.xml'].include? hpxml_file
+    hpxml.batteries[0].new_elcd = true
+  elsif ['base-pv-battery-unconditioned-space-new-elcd.xml'].include? hpxml_file
+    hpxml.batteries[0].new_elcd = true
   end
 
   # ----- #

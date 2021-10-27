@@ -42,9 +42,8 @@ class Battery
     elcs.setFractionofCellCapacityRemovedattheEndofNominalZone(3.126) # from Rohit C.
 
     # TODO: choose one
-    separate_elcd = true
-    elcds = model.getElectricLoadCenterDistributions
-    if separate_elcd || elcds.size == 0
+    elcds = model.getElectricLoadCenterDistributions.sort_by { |e| e.name.to_s }
+    if battery.new_elcd || elcds.size == 0
       elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
       elcd.setName("#{obj_name} elec load center dist")
       elcd.setElectricalBussType('AlternatingCurrentWithStorage')
