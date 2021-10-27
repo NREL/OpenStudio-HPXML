@@ -3618,6 +3618,7 @@ class HPXML < Object
       XMLHelper.add_extension(hvac_control, 'WeekdaySetpointTempsCoolingSeason', @weekday_cooling_setpoints, :string) unless @weekday_cooling_setpoints.nil?
       XMLHelper.add_extension(hvac_control, 'WeekendSetpointTempsCoolingSeason', @weekend_cooling_setpoints, :string) unless @weekend_cooling_setpoints.nil?
       XMLHelper.add_extension(hvac_control, 'OnOffThermostatDeadband', @onoff_thermostat_deadband, :float) unless @onoff_thermostat_deadband.nil?
+      XMLHelper.add_extension(hvac_control, 'TwospeedRealisticStaging', @realistic_staging, :boolean) unless @realistic_staging.nil?
     end
 
     def from_oga(hvac_control)
@@ -3647,6 +3648,7 @@ class HPXML < Object
       @weekday_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekdaySetpointTempsCoolingSeason', :string)
       @weekend_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekendSetpointTempsCoolingSeason', :string)
       @onoff_thermostat_deadband = XMLHelper.get_value(hvac_control, 'extension/OnOffThermostatDeadband', :float)
+      @realistic_staging = XMLHelper.get_value(hvac_control, 'extension/TwospeedRealisticStaging', :boolean)
     end
   end
 

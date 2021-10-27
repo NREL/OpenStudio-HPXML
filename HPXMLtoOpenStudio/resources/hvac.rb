@@ -139,7 +139,7 @@ class HVAC
     air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_fracs, sequential_cool_load_fracs, [htg_cfm.to_f, clg_cfm.to_f].max)
 
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
-    
+
     if is_realistic_staging
       apply_two_speed_realistic_staging_EMS(model, air_loop_unitary)
     end
@@ -3088,11 +3088,11 @@ class HVAC
     clg_sp_ss.setKeyName(Constants.ObjectNameCoolingSetpoint)
 
     ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
-    
+
     unitary_speed_level = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Speed Level')
     unitary_speed_level.setName(unitary_system.name.get + 'speed level')
     unitary_speed_level.setKeyName(unitary_system.name.get)
-    
+
     # Trend variable
     unitary_speed_level_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, unitary_speed_level)
     unitary_speed_level_trend.setName("#{unitary_speed_level.name} Trend")
@@ -3100,7 +3100,7 @@ class HVAC
 
     # Actuators
     unitary_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(unitary_system, 'Coil Speed Control', 'Unitary System DX Coil Speed Value')
-    unitary_actuator.setName(unitary_system.name.get + " speed override")
+    unitary_actuator.setName(unitary_system.name.get + ' speed override')
 
     # Program
     realistic_cycling_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
@@ -3111,20 +3111,20 @@ class HVAC
     realistic_cycling_program.addLine("Set htg_sp_h = #{htg_sp_ss.name} + #{ddb}")
     realistic_cycling_program.addLine("Set clg_sp_l = #{clg_sp_ss.name} - #{ddb}")
     realistic_cycling_program.addLine("Set clg_sp_h = #{clg_sp_ss.name}")
-    
+
     s_trend = []
     (1...number_of_timestep_logged).each do |t_i|
       realistic_cycling_program.addLine("Set unitary_level_#{t_i}_ago = @TrendValue #{unitary_speed_level_trend.name} #{t_i}")
       s_trend << "(unitary_level_#{t_i}_ago == 1)"
     end
-      
+
     realistic_cycling_program.addLine("Set unitary_level_1_ago = #{unitary_speed_level_trend.name} 1")
     # Setpoint not met and low speed is on for 5 time steps
     realistic_cycling_program.addLine("If ((living_t - clg_sp_h > 0.0) || (htg_sp_l - living_t > 0.0)) && (#{s_trend.join(' && ')})")
     # Enable high speed unitary system
     realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = 2")
     # Keep high speed unitary on until setpoint +- deadband is met
-    realistic_cycling_program.addLine("ElseIf (unitary_level_1_ago == 2) && ((living_t - clg_sp_l > 0.0) || (htg_sp_h - living_t > 0.0))")
+    realistic_cycling_program.addLine('ElseIf (unitary_level_1_ago == 2) && ((living_t - clg_sp_l > 0.0) || (htg_sp_h - living_t > 0.0))')
     realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = 2")
     realistic_cycling_program.addLine('Else')
     realistic_cycling_program.addLine("  Set #{unitary_actuator.name} = 1")
