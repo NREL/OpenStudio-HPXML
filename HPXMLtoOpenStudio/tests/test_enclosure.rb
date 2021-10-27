@@ -558,7 +558,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # Check properties
-    os_surface = model.getInternalMassDefinitions.select { |s| s.name.to_s.start_with? 'furniture mass living space above' }[0]
+    os_surface = model.getInternalMassDefinitions.select { |s| s.name.to_s.start_with?('furniture mass living space') && s.name.to_s.include?('above') }[0]
     _check_surface(hpxml.furniture_mass, os_surface, furniture_mass_layer_names)
   end
 
