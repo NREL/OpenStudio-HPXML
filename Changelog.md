@@ -1,7 +1,7 @@
 ## OpenStudio-HPXML v1.3.0 (Pending)
 
 __New Features__
-- Updates to OpenStudio 3.2.1/EnergyPlus 9.5.0.
+- Updates to OpenStudio 3.3.0/EnergyPlus 9.6.0.
 - **Breaking change**: Replaces "Unmet Load" outputs with "Unmet Hours".
 - **Breaking change**: Renames "Load: Heating" and "Peak Load: Heating" (and Cooling) outputs to include "Delivered".
 - **Breaking change**: Replaces ClothesDryer `extension/IsVented` and `extension/VentedFlowRate` with `Vented` and `VentedFlowRate`.
@@ -34,17 +34,21 @@ __New Features__
 - Expands choices allowed for `Siding` (Wall/RimJoist) and `RoofType` (Roof) elements.
 - Allows "none" for wall/rim joist siding.
 - Allows interior finish inputs (e.g., 0.5" drywall) for walls, ceilings, and roofs.
+- Allows specifying the foundation wall type (e.g., solid concrete, concrete block, wood, etc.).
 - Allows additional fuel types for generators.
 - Switches to the EnergyPlus Fan:SystemModel object for all HVAC systems.
 - Introduces a small amount of infiltration for unvented spaces.
+- Updates the assumption of flue losses vs tank losses for higher efficiency non-electric storage water heaters.
 - Revises shared mechanical ventilation preconditioning control logic to operate less often.
 - Adds more warnings of inputs based on ANSI/BPI 2400 Standard.
 - Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
 - Updates the reporting measure to register all outputs from the annual CSV with the OS runner (for use in, e.g., PAT).
 - Removes timeseries CSV output columns that are all zeroes to reduce file size and processing time.
+- Improves consistency of installation quality calculations for two/variable-speed air source heat pumps and ground source heat pumps.
 - Relaxes requirement for heating (or cooling) setpoints so that they are only needed if heating (or cooling) equipment is present.
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
 - Eliminates EnergyPlus warnings related to unused objects or invalid output meters/variables.
+- Allows modeling PTAC and PTHP HVAC systems. 
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
@@ -53,6 +57,7 @@ __Bugfixes__
 - Negative `DistanceToTopOfInsulation` values are now disallowed.
 - Fixes workflow errors if a `VentilationFan` has zero airflow rate or zero hours of operation.
 - Fixes duct design load calculations for HPXML files with multiple ducted HVAC systems.
+- Fixes ground source heat pump rated airflow.
 - Relaxes `Overhangs` DistanceToBottomOfWindow vs DistanceToBottomOfWindow validation when Depth is zero.
 - Fixes possibility of double-counting HVAC distribution losses if an `HVACDistribution` element has both AirDistribution properties and DSE values
 - Fixes possibility of incorrect "Peak Electricity: Winter Total (W)" and "Peak Electricity: Summer Total (W)" outputs for homes with duct losses.

@@ -472,6 +472,29 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(28.1)
     args << arg
 
+    foundation_wall_type_choices = OpenStudio::StringVector.new
+    foundation_wall_type_choices << Constants.Auto
+    foundation_wall_type_choices << HPXML::FoundationWallTypeSolidConcrete
+    foundation_wall_type_choices << HPXML::FoundationWallTypeConcreteBlock
+    foundation_wall_type_choices << HPXML::FoundationWallTypeConcreteBlockFoamCore
+    foundation_wall_type_choices << HPXML::FoundationWallTypeConcreteBlockPerliteCore
+    foundation_wall_type_choices << HPXML::FoundationWallTypeConcreteBlockVermiculiteCore
+    foundation_wall_type_choices << HPXML::FoundationWallTypeConcreteBlockSolidCore
+    foundation_wall_type_choices << HPXML::FoundationWallTypeDoubleBrick
+    foundation_wall_type_choices << HPXML::FoundationWallTypeWood
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('foundation_wall_type', true)
+    arg.setDisplayName('Foundation Wall: Type')
+    arg.setDescription('The material type of the foundation wall.')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('foundation_wall_thickness', true)
+    arg.setDisplayName('Foundation Wall: Thickness')
+    arg.setDescription('The thickness of the foundation wall.')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('foundation_wall_insulation_r', true)
     arg.setDisplayName('Foundation Wall: Insulation Nominal R-value')
     arg.setUnits('h-ft^2-R/Btu')
@@ -508,12 +531,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Foundation Wall: Assembly R-value')
     arg.setUnits('h-ft^2-R/Btu')
     arg.setDescription('Assembly R-value for the foundation walls. Only applies to basements/crawlspaces. If provided, overrides the previous foundation wall insulation inputs.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('foundation_wall_thickness', true)
-    arg.setDisplayName('Foundation Wall: Thickness')
-    arg.setDescription('The thickness of the foundation wall.')
-    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('rim_joist_assembly_r', false)
@@ -930,6 +947,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_type_choices << HPXML::HVACTypePortableHeater
     heating_system_type_choices << HPXML::HVACTypeFireplace
     heating_system_type_choices << HPXML::HVACTypeFixedHeater
+    heating_system_type_choices << HPXML::HVACTypePTACHeating
     heating_system_type_choices << "Shared #{HPXML::HVACTypeBoiler} w/ Baseboard"
     heating_system_type_choices << "Shared #{HPXML::HVACTypeBoiler} w/ Ductless Fan Coil"
 
@@ -948,6 +966,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     cooling_system_type_choices << HPXML::HVACTypeRoomAirConditioner
     cooling_system_type_choices << HPXML::HVACTypeEvaporativeCooler
     cooling_system_type_choices << HPXML::HVACTypeMiniSplitAirConditioner
+    cooling_system_type_choices << HPXML::HVACTypePTAC
 
     cooling_efficiency_type_choices = OpenStudio::StringVector.new
     cooling_efficiency_type_choices << HPXML::UnitsSEER
@@ -967,7 +986,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system_fuel', heating_system_fuel_choices, true)
     arg.setDisplayName('Heating System: Fuel Type')
-    arg.setDescription("The fuel type of the heating system. Ignored for #{HPXML::HVACTypeElectricResistance}.")
+    arg.setDescription("The fuel type of the heating system. Ignored for #{HPXML::HVACTypeElectricResistance} and #{HPXML::HVACTypePTACHeating}.")
     arg.setDefaultValue(HPXML::FuelTypeNaturalGas)
     args << arg
 
@@ -1006,7 +1025,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_cooling_efficiency_type', cooling_efficiency_type_choices, true)
     arg.setDisplayName('Cooling System: Efficiency Type')
-    arg.setDescription("The efficiency type of the cooling system. System types #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner} use #{HPXML::UnitsSEER}. System type #{HPXML::HVACTypeRoomAirConditioner} uses #{HPXML::UnitsEER} or #{HPXML::UnitsCEER}. Ignored for system type #{HPXML::HVACTypeEvaporativeCooler}.")
+    arg.setDescription("The efficiency type of the cooling system. System types #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner} use #{HPXML::UnitsSEER}. System types #{HPXML::HVACTypeRoomAirConditioner} and #{HPXML::HVACTypePTAC} use #{HPXML::UnitsEER} or #{HPXML::UnitsCEER}. Ignored for system type #{HPXML::HVACTypeEvaporativeCooler}.")
     arg.setDefaultValue(HPXML::UnitsSEER)
     args << arg
 
@@ -1019,7 +1038,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_cooling_compressor_type', compressor_type_choices, false)
     arg.setDisplayName('Cooling System: Cooling Compressor Type')
-    arg.setDescription('The compressor type of the cooling system. Only applies to central air conditioner.')
+    arg.setDescription("The compressor type of the cooling system. Only applies to #{HPXML::HVACTypeCentralAirConditioner}.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_sensible_heat_fraction', false)
@@ -1044,7 +1063,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('cooling_system_is_ducted', true)
     arg.setDisplayName('Cooling System: Is Ducted')
-    arg.setDescription("Whether the cooling system is ducted or not. Only used for #{HPXML::HVACTypeMiniSplitAirConditioner} and #{HPXML::HVACTypeEvaporativeCooler}. It's assumed that #{HPXML::HVACTypeCentralAirConditioner} is ducted and #{HPXML::HVACTypeRoomAirConditioner} is not ducted.")
+    arg.setDescription("Whether the cooling system is ducted or not. Only used for #{HPXML::HVACTypeMiniSplitAirConditioner} and #{HPXML::HVACTypeEvaporativeCooler}. It's assumed that #{HPXML::HVACTypeCentralAirConditioner} is ducted, and #{HPXML::HVACTypeRoomAirConditioner} and #{HPXML::HVACTypePTAC} are not ducted.")
     arg.setDefaultValue(false)
     args << arg
 
@@ -1065,6 +1084,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpAirToAir
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpMiniSplit
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpGroundToAir
+    heat_pump_type_choices << HPXML::HVACTypeHeatPumpPTHP
 
     heat_pump_heating_efficiency_type_choices = OpenStudio::StringVector.new
     heat_pump_heating_efficiency_type_choices << HPXML::UnitsHSPF
@@ -1088,7 +1108,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_heating_efficiency_type', heat_pump_heating_efficiency_type_choices, true)
     arg.setDisplayName('Heat Pump: Heating Efficiency Type')
-    arg.setDescription("The heating efficiency type of heat pump. System types #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit} use #{HPXML::UnitsHSPF}. System type #{HPXML::HVACTypeHeatPumpGroundToAir} uses #{HPXML::UnitsCOP}.")
+    arg.setDescription("The heating efficiency type of heat pump. System types #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit} use #{HPXML::UnitsHSPF}. System types #{HPXML::HVACTypeHeatPumpGroundToAir} and #{HPXML::HVACTypeHeatPumpPTHP} use #{HPXML::UnitsCOP}.")
     arg.setDefaultValue(HPXML::UnitsHSPF)
     args << arg
 
@@ -1101,7 +1121,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_cooling_efficiency_type', cooling_efficiency_type_choices, true)
     arg.setDisplayName('Heat Pump: Cooling Efficiency Type')
-    arg.setDescription("The cooling efficiency type of heat pump. System types #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit} use #{HPXML::UnitsSEER}. System type #{HPXML::HVACTypeHeatPumpGroundToAir} uses #{HPXML::UnitsEER}.")
+    arg.setDescription("The cooling efficiency type of heat pump. System types #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit} use #{HPXML::UnitsSEER}. System types #{HPXML::HVACTypeHeatPumpGroundToAir} and #{HPXML::HVACTypeHeatPumpPTHP} use #{HPXML::UnitsEER}.")
     arg.setDefaultValue(HPXML::UnitsSEER)
     args << arg
 
@@ -1114,7 +1134,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_cooling_compressor_type', compressor_type_choices, false)
     arg.setDisplayName('Heat Pump: Cooling Compressor Type')
-    arg.setDescription('The compressor type of the heat pump. Only applies to air-to-air and mini-split.')
+    arg.setDescription("The compressor type of the heat pump. Only applies to #{HPXML::HVACTypeHeatPumpAirToAir}.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_sensible_heat_fraction', false)
@@ -3709,11 +3729,16 @@ class HPXMLFile
         thickness = Float(args[:foundation_wall_thickness])
       end
 
+      if args[:foundation_wall_type] != Constants.Auto
+        type = args[:foundation_wall_type]
+      end
+
       azimuth = Geometry.get_surface_azimuth(surface: surface, orientation: args[:geometry_unit_orientation])
 
       hpxml.foundation_walls.add(id: "FoundationWall#{hpxml.foundation_walls.size + 1}",
                                  exterior_adjacent_to: exterior_adjacent_to,
                                  interior_adjacent_to: interior_adjacent_to,
+                                 type: type,
                                  azimuth: azimuth,
                                  height: args[:geometry_foundation_height],
                                  area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
@@ -4056,15 +4081,22 @@ class HPXMLFile
       heating_capacity = Float(args[:heating_system_heating_capacity])
     end
 
-    if heating_system_type == HPXML::HVACTypeElectricResistance
+    if [HPXML::HVACTypeElectricResistance, HPXML::HVACTypePTACHeating].include? heating_system_type
       heating_system_fuel = HPXML::FuelTypeElectricity
     else
       heating_system_fuel = args[:heating_system_fuel]
     end
 
-    if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace].include?(heating_system_type) || heating_system_type.include?(HPXML::HVACTypeBoiler)
+    if [HPXML::HVACTypeFurnace,
+        HPXML::HVACTypeWallFurnace,
+        HPXML::HVACTypeFloorFurnace].include?(heating_system_type) || heating_system_type.include?(HPXML::HVACTypeBoiler)
       heating_efficiency_afue = args[:heating_system_heating_efficiency]
-    elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypeStove, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFireplace, HPXML::HVACTypeFixedHeater].include?(heating_system_type)
+    elsif [HPXML::HVACTypeElectricResistance,
+           HPXML::HVACTypeStove,
+           HPXML::HVACTypePortableHeater,
+           HPXML::HVACTypeFireplace,
+           HPXML::HVACTypeFixedHeater,
+           HPXML::HVACTypePTACHeating].include?(heating_system_type)
       heating_efficiency_percent = args[:heating_system_heating_efficiency]
     end
 
@@ -4203,7 +4235,7 @@ class HPXMLFile
     end
 
     if args[:heat_pump_cooling_compressor_type].is_initialized
-      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
+      if [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump_type
         compressor_type = args[:heat_pump_cooling_compressor_type].get
       end
     end

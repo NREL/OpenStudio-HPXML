@@ -510,30 +510,32 @@ Each wall that is in contact with the ground should be specified as an ``/HPXML/
 
 Other walls (e.g., wood framed walls) that are connected to a below-grade space but have no contact with the ground should be specified as a ``Wall`` and not a ``FoundationWall``.
 
-  ==============================================================  =================  ================  ===================  =========  ========  ====================================
-  Element                                                         Type               Units             Constraints          Required   Default   Notes
-  ==============================================================  =================  ================  ===================  =========  ========  ====================================
-  ``SystemIdentifier``                                            id                                                        Yes                  Unique identifier
-  ``ExteriorAdjacentTo``                                          string                               See [#]_             Yes                  Exterior adjacent space type [#]_
-  ``InteriorAdjacentTo``                                          string                               See [#]_             Yes                  Interior adjacent space type
-  ``Height``                                                      double             ft                > 0                  Yes                  Total height
-  ``Area`` or ``Length``                                          double             ft2 or ft         > 0                  Yes                  Gross area (including doors/windows) or length
-  ``Azimuth`` or ``Orientation``                                  integer or string  deg or direction  0 - 359 or See [#]_  No         See [#]_  Direction (clockwise from North)
-  ``Thickness``                                                   double             inches            > 0                  No         8.0       Thickness excluding interior framing
-  ``DepthBelowGrade``                                             double             ft                0 - Height           Yes                  Depth below grade [#]_
-  ``InteriorFinish/Type``                                         string                               See [#]_             No         See [#]_  Interior finish material
-  ``InteriorFinish/Thickness``                                    double             in                >= 0                 No         0.5       Interior finish thickness
-  ``Insulation/SystemIdentifier``                                 id                                                        Yes                  Unique identifier
-  ``Insulation/Layer[InstallationType="continuous - interior"]``  element                              0 - 1                See [#]_             Interior insulation layer
-  ``Insulation/Layer[InstallationType="continuous - exterior"]``  element                              0 - 1                See [#]_             Exterior insulation layer
-  ``Insulation/AssemblyEffectiveRValue``                          double             F-ft2-hr/Btu      > 0                  See [#]_             Assembly R-value [#]_
-  ==============================================================  =================  ================  ===================  =========  ========  ====================================
+  ==============================================================  =================  ================  ===================  =========  ==============  ====================================
+  Element                                                         Type               Units             Constraints          Required   Default         Notes
+  ==============================================================  =================  ================  ===================  =========  ==============  ====================================
+  ``SystemIdentifier``                                            id                                                        Yes                        Unique identifier
+  ``ExteriorAdjacentTo``                                          string                               See [#]_             Yes                        Exterior adjacent space type [#]_
+  ``InteriorAdjacentTo``                                          string                               See [#]_             Yes                        Interior adjacent space type
+  ``Type``                                                        string                               See [#]_             No         solid concrete  Type of material
+  ``Height``                                                      double             ft                > 0                  Yes                        Total height
+  ``Area`` or ``Length``                                          double             ft2 or ft         > 0                  Yes                        Gross area (including doors/windows) or length
+  ``Azimuth`` or ``Orientation``                                  integer or string  deg or direction  0 - 359 or See [#]_  No         See [#]_        Direction (clockwise from North)
+  ``Thickness``                                                   double             inches            > 0                  No         8.0             Thickness excluding interior framing
+  ``DepthBelowGrade``                                             double             ft                0 - Height           Yes                        Depth below grade [#]_
+  ``InteriorFinish/Type``                                         string                               See [#]_             No         See [#]_        Interior finish material
+  ``InteriorFinish/Thickness``                                    double             in                >= 0                 No         0.5             Interior finish thickness
+  ``Insulation/SystemIdentifier``                                 id                                                        Yes                        Unique identifier
+  ``Insulation/Layer[InstallationType="continuous - interior"]``  element                              0 - 1                See [#]_                   Interior insulation layer
+  ``Insulation/Layer[InstallationType="continuous - exterior"]``  element                              0 - 1                See [#]_                   Exterior insulation layer
+  ``Insulation/AssemblyEffectiveRValue``                          double             F-ft2-hr/Btu      > 0                  See [#]_                   Assembly R-value [#]_
+  ==============================================================  =================  ================  ===================  =========  ==============  ====================================
 
   .. [#] ExteriorAdjacentTo choices are "ground", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] Interior foundation walls (e.g., between basement and crawlspace) should **not** use "ground" even if the foundation wall has some contact with the ground due to the difference in below-grade depths of the two adjacent spaces.
+  .. [#] Type choices are "solid concrete", "concrete block", "concrete block foam core", "concrete block vermiculite core", "concrete block perlite core", "concrete block solid core", "double brick", or "wood".
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] If neither Azimuth nor Orientation provided, modeled as four surfaces of equal area facing every direction.
   .. [#] For exterior foundation walls, depth below grade is relative to the ground plane.
@@ -842,9 +844,10 @@ Each heating system (other than a heat pump) is entered as an ``/HPXML/Building/
   ``FractionHeatLoadServed``         double    frac    0 - 1 [#]_   Yes                  Fraction of heating load served
   =================================  ========  ======  ===========  ========  =========  ===============================
 
-  .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``PortableHeater``, ``FixedHeater``, or ``Fireplace``.
+  .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``PortableHeater``, ``FixedHeater``, ``Fireplace``, or ``PackagedTerminalAirConditionerHeating``.
   .. [#] HeatingSystemFuel choices are  "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
          For ``ElectricResistance``, "electricity" is required.
+         For ``PackagedTerminalAirConditionerHeating``, "electricity" is currently the only choice.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across both HeatingSystems and HeatPumps) must be less than or equal to 1.
 
 Electric Resistance
@@ -857,6 +860,19 @@ If electric resistance heating is specified, additional information is entered i
   ==================================================  ======  =====  ===========  ========  =======  ==========
   ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        No        1.0      Efficiency
   ==================================================  ======  =====  ===========  ========  =======  ==========
+
+PTAC Heating
+~~~~~~~~~~~~
+
+If a PTAC with non-heat pump (e.g., electric resistance) heating is specified, additional information is entered in ``HeatingSystem``.
+
+  ==================================================  ======  =========  ===========  ========  =======  ==================================
+  Element                                             Type    Units      Constraints  Required  Default  Notes
+  ==================================================  ======  =========  ===========  ========  =======  ==================================
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac       0 - 1        No        1.0      Efficiency
+  ==================================================  ======  =========  ===========  ========  =======  ==================================
+
+  .. [#] A cooling system of type "packaged terminal air conditioner" must be specified in ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
 Furnace
 ~~~~~~~
@@ -1003,7 +1019,7 @@ Each cooling system (other than a heat pump) is entered as an ``/HPXML/Building/
   ``FractionCoolLoadServed``  double    frac    0 - 1 [#]_   Yes                Fraction of cooling load served
   ==========================  ========  ======  ===========  ========  =======  ===============================
 
-  .. [#] CoolingSystemType choices are "central air conditioner", "room air conditioner", "evaporative cooler", "mini-split", "chiller", or "cooling tower".
+  .. [#] CoolingSystemType choices are "central air conditioner", "room air conditioner", "evaporative cooler", "mini-split", "chiller", "cooling tower", or "packaged terminal air conditioner".
   .. [#] CoolingSystemFuel only choice is "electricity".
   .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
 
@@ -1051,6 +1067,19 @@ If a room air conditioner is specified, additional information is entered in ``C
   ===================================================================================  =================  ===========  ===============  ========  =========  ==================================
 
   .. [#] If AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value not provided, defaults to EER from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
+
+Packaged Terminal Air Conditioner
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If a PTAC is specified, additional information is entered in ``CoolingSystem``.
+
+  ===================================================================  =================  ===========  ===============  ========  =========  ==================================
+  Element                                                              Type               Units        Constraints      Required  Default    Notes
+  ===================================================================  =================  ===========  ===============  ========  =========  ==================================
+  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``       integer or double  # or Btu/Wh  > 1600 or > 0    Yes                  Rated efficiency
+  ``CoolingCapacity``                                                  double             Btu/hr       >= 0             No        autosized  Cooling output capacity
+  ``SensibleHeatFraction``                                             double             frac         0 - 1            No                   Sensible heat fraction
+  ===================================================================  =================  ===========  ===============  ========  =========  ==================================
 
 Evaporative Cooler
 ~~~~~~~~~~~~~~~~~~
@@ -1158,7 +1187,7 @@ Each heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/H
   ``BackupSystemFuel``               string            See [#]_     No                   Fuel type of backup heating, if present
   =================================  ========  ======  ===========  ========  =========  ===============================================
 
-  .. [#] HeatPumpType choices are "air-to-air", "mini-split", "ground-to-air", or "water-loop-to-air".
+  .. [#] HeatPumpType choices are "air-to-air", "mini-split", "ground-to-air", "water-loop-to-air", or "packaged terminal heat pump".
   .. [#] HeatPumpFuel only choice is "electricity".
   .. [#] BackupSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
 
@@ -1249,6 +1278,26 @@ If a mini-split heat pump is specified, additional information is entered in ``H
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
          A non-zero charge defect should typically only be applied for systems that are pre-charged on site.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
+
+Packaged Terminal Heat Pump
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If a packaged terminal heat pump is specified, additional information is entered in ``HeatPump``.
+
+  ===============================================================  ========  ======  ===========  ========  =========  ==============================================
+  Element                                                          Type      Units   Constraints  Required  Default    Notes
+  ===============================================================  ========  ======  ===========  ========  =========  ==============================================
+  ``HeatingCapacity``                                              double    Btu/hr  >= 0         No        autosized  Heating output capacity (excluding any backup heating)
+  ``CoolingCapacity``                                              double    Btu/hr  >= 0         No        autosized  Cooling output capacity
+  ``CoolingSensibleHeatFraction``                                  double    frac    0 - 1        No                   Sensible heat fraction
+  ``FractionHeatLoadServed``                                       double    frac    0 - 1 [#]_   Yes                  Fraction of heating load served
+  ``FractionCoolLoadServed``                                       double    frac    0 - 1 [#]_   Yes                  Fraction of cooling load served
+  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``   double    Btu/Wh  > 0          Yes                  Rated cooling efficiency
+  ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    Btu/Wh  > 0          Yes                  Rated heating efficiency
+  ===============================================================  ========  ======  ===========  ========  =========  ==============================================
+
+  .. [#] The sum of all ``FractionHeatLoadServed`` (across both HeatingSystems and HeatPumps) must be less than or equal to 1.
+  .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
 
 Ground-to-Air Heat Pump
 ~~~~~~~~~~~~~~~~~~~~~~~
