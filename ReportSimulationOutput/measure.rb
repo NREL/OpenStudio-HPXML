@@ -187,10 +187,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if @end_uses.select { |key, end_use| end_use.is_negative && end_use.variables.size > 0 }.size > 0
       result << OpenStudio::IdfObject.load('Output:Meter,ElectricityProduced:Facility,runperiod;').get # Used for error checking
     end
-    if @end_uses.select { |key, end_use| key == [FT::Elec, EUT::Battery] && end_use.variables.size > 0 }.size > 0
-      result << OpenStudio::IdfObject.load("Output:Meter,ElectricStorage:ElectricityProduced,#{timeseries_frequency};").get
-      result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,runperiod;').get # Used for error checking
-    end
     if include_timeseries_fuel_consumptions
       # If fuel uses are selected, we also need to select end uses because fuels may be adjusted by DSE.
       # TODO: This could be removed if we could account for DSE in E+ or used EMS.
@@ -456,9 +452,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Fuel Uses
     @fuels.each do |fuel_type, fuel|
       fuel.annual_output = get_report_meter_data_annual(fuel.meters)
-      next unless include_timeseries_fuel_consumptions
-
-      fuel.timeseries_output = get_report_meter_data_timeseries(fuel.meters, UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)
+      if include_timeseries_fuel_consumptions
+        fuel.timeseries_output = get_report_meter_data_timeseries(fuel.meters, UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)
+      end
     end
 
     # Electricity Produced (used for error checking)
@@ -688,7 +684,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Check sum of electricity produced end use outputs match total
     sum_elec_produced = -1 * @end_uses.select { |k, eu| eu.is_negative && k[1] != EUT::Battery }.map { |k, eu| eu.annual_output.to_f }.sum(0.0)
     total_elec_produced = outputs[:total_elec_produced]
-    if (sum_elec_produced - total_elec_produced).abs > 0.02
+    if (sum_elec_produced - total_elec_produced).abs > 0.05
       runner.registerError("#{FT::Elec} produced category end uses (#{sum_elec_produced}) do not sum to total (#{total_elec_produced}).")
       return false
     end
@@ -700,10 +696,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       if fuel_type == FT::Elec
         fuel_total -= sum_elec_produced
       end
-      next unless (fuel_total - sum_categories).abs > 0.02
-
-      runner.registerError("#{fuel_type} category end uses (#{sum_categories}) do not sum to total (#{fuel_total}).")
-      return false
+      if (fuel_total - sum_categories).abs > 0.05
+        runner.registerError("#{fuel_type} category end uses (#{sum_categories}) do not sum to total (#{fuel_total}).")
+        return false
+      end
     end
 
     # Check sum of timeseries outputs match annual outputs
@@ -716,10 +712,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
         sum_timeseries = UnitConversions.convert(obj.timeseries_output.sum(0.0), obj.timeseries_units, obj.annual_units)
         annual_total = obj.annual_output.to_f
-        next unless (annual_total - sum_timeseries).abs > 0.02
-
-        runner.registerError("Timeseries outputs (#{sum_timeseries}) do not sum to annual output (#{annual_total}) for #{output_type}: #{key}.")
-        return false
+        if (annual_total - sum_timeseries).abs > 0.05
+          runner.registerError("Timeseries outputs (#{sum_timeseries}) do not sum to annual output (#{annual_total}) for #{output_type}: #{key}.")
+          return false
+        end
       end
     end
 
