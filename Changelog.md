@@ -61,6 +61,7 @@ __Bugfixes__
 - Relaxes `Overhangs` DistanceToBottomOfWindow vs DistanceToBottomOfWindow validation when Depth is zero.
 - Fixes possibility of double-counting HVAC distribution losses if an `HVACDistribution` element has both AirDistribution properties and DSE values
 - Fixes possibility of incorrect "Peak Electricity: Winter Total (W)" and "Peak Electricity: Summer Total (W)" outputs for homes with duct losses.
+- Fixes heating/cooling seasons (used for e.g. summer vs winter window shading) for the southern hemisphere.
 
 ## OpenStudio-HPXML v1.2.0
 
