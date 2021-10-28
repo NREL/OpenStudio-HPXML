@@ -1550,10 +1550,6 @@ class HPXMLDefaults
         battery.voltage = default_values[:voltage] # V
         battery.voltage_isdefaulted = true
       end
-      if battery.new_elcd.nil?
-        battery.new_elcd = false
-        battery.new_elcd_isdefaulted = true
-      end
     end
   end
 

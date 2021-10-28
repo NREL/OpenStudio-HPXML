@@ -24,6 +24,25 @@ class Battery
     battery_mass = (capacity / default_values[:capacity]) * 99.0 # kg
     battery_surface_area = 0.306 * (capacity**(2.0 / 3.0)) # m^2
 
+    elcds = model.getElectricLoadCenterDistributions
+    if elcds.empty?
+      elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
+      elcd.setName('Battery elec load center dist')
+      elcd.setElectricalBussType('AlternatingCurrentWithStorage')
+    else
+      elcd = elcds[0]
+
+      if elcd.inverter.is_initialized
+        elcd.setElectricalBussType('DirectCurrentWithInverterDCStorage')
+      end
+    end
+
+    # elcd.setGeneratorOperationSchemeType('TrackElectrical')
+    # elcd.setDemandLimitSchemePurchasedElectricDemandLimit(0)
+    # elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
+    # elcd.setMaximumStorageStateofChargeFraction(0.95)
+    # elcd.setMinimumStorageStateofChargeFraction(0.20)
+
     elcs = OpenStudio::Model::ElectricLoadCenterStorageLiIonNMCBattery.new(model, number_of_cells_in_series, number_of_strings_in_parallel, battery_mass, battery_surface_area)
     elcs.setName("#{obj_name} li ion")
     unless is_outside
@@ -41,22 +60,7 @@ class Battery
     elcs.setFractionofCellCapacityRemovedattheEndofExponentialZone(2.584) # from Rohit C.
     elcs.setFractionofCellCapacityRemovedattheEndofNominalZone(3.126) # from Rohit C.
 
-    # TODO: choose one
-    elcds = model.getElectricLoadCenterDistributions.sort_by { |e| e.name.to_s }
-    if battery.new_elcd || elcds.size == 0
-      elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
-      elcd.setName("#{obj_name} elec load center dist")
-      elcd.setElectricalBussType('AlternatingCurrentWithStorage')
-    elsif elcds.size > 0
-      elcd = elcds[0]
-      elcd.setElectricalBussType('DirectCurrentWithInverterDCStorage')
-    end
-    elcd.setGeneratorOperationSchemeType('TrackElectrical')
-    elcd.setDemandLimitSchemePurchasedElectricDemandLimit(0)
-    elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
     elcd.setElectricalStorage(elcs)
-    elcd.setMaximumStorageStateofChargeFraction(0.95)
-    elcd.setMinimumStorageStateofChargeFraction(0.20)
   end
 
   def self.get_battery_default_values()
