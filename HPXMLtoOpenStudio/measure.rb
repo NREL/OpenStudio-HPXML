@@ -1602,7 +1602,12 @@ class OSModel
       heating_system = hvac_system[:heating]
 
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
-      is_ddb_control = @hpxml.hvac_controls[0].is_deadband_control && (cooling_system.additional_properties.num_speeds == 1)
+      
+      if cooling_system.additional_properties.respond_to? :num_speeds
+        is_ddb_control = @hpxml.hvac_controls[0].is_deadband_control && (cooling_system.additional_properties.num_speeds == 1)
+      else
+        is_ddb_control = false
+      end
 
       # Calculate cooling sequential load fractions
       sequential_cool_load_fracs = HVAC.calc_sequential_load_fractions(cooling_system.fraction_cool_load_served.to_f, @remaining_cool_load_frac, @cooling_days)
@@ -1697,7 +1702,12 @@ class OSModel
       heat_pump = hvac_system[:cooling]
 
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
-      is_ddb_control = @hpxml.hvac_controls[0].is_deadband_control && (heat_pump.additional_properties.num_speeds == 1)
+      
+      if heat_pump.additional_properties.respond_to? :num_speeds
+        is_ddb_control = @hpxml.hvac_controls[0].is_deadband_control && (heat_pump.additional_properties.num_speeds == 1)
+      else
+        is_ddb_control = false
+      end
 
       # Calculate heating sequential load fractions
       sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heat_pump.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
