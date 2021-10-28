@@ -54,7 +54,7 @@ class Battery
     elcs.setLifetimeModel(battery.lifetime_model)
     elcs.setNumberofCellsinSeries(number_of_cells_in_series)
     elcs.setNumberofStringsinParallel(number_of_strings_in_parallel)
-    elcs.setInitialFractionalStateofCharge(1.0) # from meeting with Joe R./Scott H./Noel M.
+    elcs.setInitialFractionalStateofCharge(0.0) # FIXME
     elcs.setBatteryMass(battery_mass)
     elcs.setBatterySurfaceArea(battery_surface_area)
     elcs.setFractionofCellCapacityRemovedattheEndofExponentialZone(2.584) # from Rohit C.
