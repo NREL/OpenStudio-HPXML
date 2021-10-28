@@ -1855,7 +1855,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
         return { [FT::Elec, EUT::Battery] => ['Electric Storage Discharge Energy', 'Electric Storage Production Decrement Energy'] }
-        # return { [FT::Elec, EUT::Battery] => ['Electric Storage Discharge Energy'] }
 
       elsif object.to_ElectricEquipment.is_initialized
         end_use = { Constants.ObjectNameHotWaterRecircPump => EUT::HotWaterRecircPump,
