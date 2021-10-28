@@ -307,6 +307,7 @@ def create_hpxmls
     'base-lighting-none.xml' => 'base.xml',
     'base-location-AMY-2012.xml' => 'base.xml',
     'base-location-baltimore-md.xml' => 'base-foundation-unvented-crawlspace.xml',
+    'base-location-capetown-zaf.xml' => 'base-foundation-vented-crawlspace.xml',
     'base-location-dallas-tx.xml' => 'base-foundation-slab.xml',
     'base-location-duluth-mn.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-location-helena-mt.xml' => 'base.xml',
@@ -2081,6 +2082,9 @@ def set_measure_argument_values(hpxml_file, args)
     args['heating_system_heating_capacity'] = 24000.0
   elsif ['base-location-portland-or.xml'].include? hpxml_file
     args['weather_station_epw_filepath'] = 'USA_OR_Portland.Intl.AP.726980_TMY3.epw'
+    args['heating_system_heating_capacity'] = 24000.0
+  elsif ['base-location-capetown-zaf.xml'].include? hpxml_file
+    args['weather_station_epw_filepath'] = 'ZAF_Cape.Town.688160_IWEC.epw'
     args['heating_system_heating_capacity'] = 24000.0
   end
 
