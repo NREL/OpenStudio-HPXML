@@ -2102,7 +2102,7 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
   ``ArrayAzimuth`` or ``ArrayOrientation``                 integer or string  deg or direction  0 - 359 or See [#]_  Yes                 Direction panels face (clockwise from North)
   ``ArrayTilt``                                            double             deg               0 - 90               Yes                 Tilt relative to horizontal
   ``MaxPowerOutput``                                       double             W                 >= 0                 Yes                 Peak power
-  ``InverterEfficiency``                                   double             frac              0 - 1                No        0.96      Inverter efficiency
+  ``InverterEfficiency``                                   double             frac              See [#]_             No        0.96      Inverter efficiency
   ``SystemLossesFraction`` or ``YearModulesManufactured``  double or integer  frac or #         0 - 1 or > 1600      No        0.14      System losses [#]_
   ``extension/NumberofBedroomsServed``                     integer                              > 1                  See [#]_            Number of bedrooms served
   =======================================================  =================  ================  ===================  ========  ========  ============================================
@@ -2111,6 +2111,7 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
   .. [#] ModuleType choices are "standard", "premium", or "thin film".
   .. [#] Tracking choices are "fixed", "1-axis", "1-axis backtracked", or "2-axis".
   .. [#] ArrayOrientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
+  .. [#] Value must be 0 - 1 and equal for all inverters.
   .. [#] System losses due to soiling, shading, snow, mismatch, wiring, degradation, etc.
          If YearModulesManufactured provided but not SystemLossesFraction, system losses calculated as:
          SystemLossesFraction = 1.0 - (1.0 - 0.14) * (1.0 - (1.0 - 0.995^(CurrentYear - YearModulesManufactured))).
