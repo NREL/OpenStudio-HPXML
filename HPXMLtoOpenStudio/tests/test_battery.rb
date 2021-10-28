@@ -35,7 +35,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
       assert_in_epsilon(14, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(63, battery.numberofStringsinParallel, 0.01)
-      assert_in_epsilon(1, battery.initialFractionalStateofCharge, 0.01)
+      assert_in_epsilon(0, battery.initialFractionalStateofCharge, 0.01)
       assert_in_epsilon(99, battery.batteryMass, 0.01)
       assert_in_epsilon(1.42, battery.batterySurfaceArea, 0.01)
     end
@@ -56,7 +56,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
       assert_in_epsilon(14, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(94, battery.numberofStringsinParallel, 0.01)
-      assert_in_epsilon(1, battery.initialFractionalStateofCharge, 0.01)
+      assert_in_epsilon(0, battery.initialFractionalStateofCharge, 0.01)
       assert_in_epsilon(148.5, battery.batteryMass, 0.01)
       assert_in_epsilon(1.86, battery.batterySurfaceArea, 0.01)
     end
@@ -77,7 +77,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
       assert_in_epsilon(14, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(63, battery.numberofStringsinParallel, 0.01)
-      assert_in_epsilon(1, battery.initialFractionalStateofCharge, 0.01)
+      assert_in_epsilon(0, battery.initialFractionalStateofCharge, 0.01)
       assert_in_epsilon(99, battery.batteryMass, 0.01)
       assert_in_epsilon(1.42, battery.batterySurfaceArea, 0.01)
     end
@@ -98,7 +98,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
       assert_in_epsilon(14, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(63, battery.numberofStringsinParallel, 0.01)
-      assert_in_epsilon(1, battery.initialFractionalStateofCharge, 0.01)
+      assert_in_epsilon(0, battery.initialFractionalStateofCharge, 0.01)
       assert_in_epsilon(99, battery.batteryMass, 0.01)
       assert_in_epsilon(1.42, battery.batterySurfaceArea, 0.01)
     end

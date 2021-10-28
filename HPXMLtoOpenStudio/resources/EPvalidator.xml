@@ -1465,7 +1465,7 @@
       <sch:assert role='ERROR' test='count(h:ArrayAzimuth) + count(h:ArrayOrientation) &gt;= 1'>Expected 1 or more element(s) for xpath: ArrayAzimuth | ArrayOrientation</sch:assert>
       <sch:assert role='ERROR' test='count(h:ArrayTilt) = 1'>Expected 1 element(s) for xpath: ArrayTilt</sch:assert>
       <sch:assert role='ERROR' test='count(h:MaxPowerOutput) = 1'>Expected 1 element(s) for xpath: MaxPowerOutput</sch:assert>
-      <sch:assert role='ERROR' test='count(h:InverterEfficiency) = 1'>Expected 0 or 1 element(s) for xpath: InverterEfficiency</sch:assert>
+      <sch:assert role='ERROR' test='count(h:InverterEfficiency) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InverterEfficiency</sch:assert>
       <sch:assert role='ERROR' test='../../h:Photovoltaics/*/h:InverterEfficiency = h:InverterEfficiency'>Expected all InverterEfficiency values to be equal</sch:assert>
       <sch:assert role='ERROR' test='count(h:SystemLossesFraction) + count(h:YearModulesManufactured) &gt;= 0'>Expected 0 or more element(s) for xpath: SystemLossesFraction | YearModulesManufactured</sch:assert>
     </sch:rule>
