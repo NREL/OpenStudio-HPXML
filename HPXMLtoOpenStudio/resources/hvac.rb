@@ -71,10 +71,10 @@ class HVAC
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
         # Heating Coil
-        htg_coil = create_dx_heating_coil(model, obj_name, heating_system)
+        htg_coil = create_dx_heating_coil(model, obj_name, heating_system, is_ddb_control)
 
         # Supplemental Heating Coil
-        htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system)
+        htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system, is_ddb_control)
         htg_ap.heat_fan_speed_ratios.each do |r|
           fan_cfms << htg_cfm * r
         end
