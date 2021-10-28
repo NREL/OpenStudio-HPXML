@@ -2039,7 +2039,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_inverter_efficiency', false)
     arg.setDisplayName('PV System: Inverter Efficiency')
     arg.setUnits('Frac')
-    arg.setDescription('Inverter efficiency of the PV system.')
+    arg.setDescription('Inverter efficiency of the PV system. It is assumed that the inverter efficiency of a second PV system is equal.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_system_losses_fraction', false)
@@ -2092,12 +2092,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('W')
     arg.setDescription('Maximum power output of the second PV system. For a shared system, this is the total building maximum power output.')
     arg.setDefaultValue(4000)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_2_inverter_efficiency', false)
-    arg.setDisplayName('PV System 2: Inverter Efficiency')
-    arg.setUnits('Frac')
-    arg.setDescription('Inverter efficiency of the second PV system.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_2_system_losses_fraction', false)
@@ -5052,8 +5046,8 @@ class HPXMLFile
 
       max_power_output = [args[:pv_system_max_power_output], args[:pv_system_2_max_power_output]][i]
 
-      if [args[:pv_system_inverter_efficiency], args[:pv_system_2_inverter_efficiency]][i].is_initialized
-        inverter_efficiency = [args[:pv_system_inverter_efficiency], args[:pv_system_2_inverter_efficiency]][i].get
+      if [args[:pv_system_inverter_efficiency], args[:pv_system_inverter_efficiency]][i].is_initialized
+        inverter_efficiency = [args[:pv_system_inverter_efficiency], args[:pv_system_inverter_efficiency]][i].get
       end
 
       if [args[:pv_system_system_losses_fraction], args[:pv_system_2_system_losses_fraction]][i].is_initialized

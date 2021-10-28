@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>8e100578-e0b1-47fd-8333-4d849b1a66d2</version_id>
-  <version_modified>20211028T154016Z</version_modified>
+  <version_id>9b2a0db1-0787-45e5-b1b9-b00a604232e5</version_id>
+  <version_modified>20211028T172959Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -3936,7 +3936,7 @@
     <argument>
       <name>pv_system_inverter_efficiency</name>
       <display_name>PV System: Inverter Efficiency</display_name>
-      <description>Inverter efficiency of the PV system.</description>
+      <description>Inverter efficiency of the PV system. It is assumed that the inverter efficiency of a second PV system is equal.</description>
       <type>Double</type>
       <units>Frac</units>
       <required>false</required>
@@ -4075,15 +4075,6 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>4000</default_value>
-    </argument>
-    <argument>
-      <name>pv_system_2_inverter_efficiency</name>
-      <display_name>PV System 2: Inverter Efficiency</display_name>
-      <description>Inverter efficiency of the second PV system.</description>
-      <type>Double</type>
-      <units>Frac</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>pv_system_2_system_losses_fraction</name>
@@ -5858,7 +5849,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>28E004DF</checksum>
+      <checksum>386FFC8B</checksum>
     </file>
   </files>
 </measure>
