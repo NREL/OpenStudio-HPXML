@@ -71,10 +71,10 @@ class HVAC
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
         # Heating Coil
-        htg_coil = create_dx_heating_coil(model, obj_name, heating_system)
+        htg_coil = create_dx_heating_coil(model, obj_name, heating_system, is_ddb_control)
 
         # Supplemental Heating Coil
-        htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system)
+        htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system, is_ddb_control)
         htg_ap.heat_fan_speed_ratios.each do |r|
           fan_cfms << htg_cfm * r
         end
@@ -2728,6 +2728,10 @@ class HVAC
       end
       cap_fff_curve = create_curve_quadratic(model, clg_ap.cool_cap_fflow_spec[i], "Cool-CAP-fFF#{i + 1}", 0, 2, 0, 2)
       eir_fff_curve = create_curve_quadratic(model, clg_ap.cool_eir_fflow_spec[i], "Cool-EIR-fFF#{i + 1}", 0, 2, 0, 2)
+      if i == 0
+        cap_fff_curve_0 = cap_fff_curve
+        eir_fff_curve_0 = eir_fff_curve
+      end
 
       if clg_ap.num_speeds == 1
         clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
@@ -2779,7 +2783,7 @@ class HVAC
     clg_coil.additionalProperties.setFeature('HPXML_ID', cooling_system.id) # Used by reporting measure
     if is_ddb_control
       # Apply startup capacity degradation
-      apply_capacity_degradation_EMS(model, clg_ap, clg_coil.name.get, true, cap_fff_curve, eir_fff_curve)
+      apply_capacity_degradation_EMS(model, clg_ap, clg_coil.name.get, true, cap_fff_curve_0, eir_fff_curve_0)
     end
 
     return clg_coil
@@ -2814,6 +2818,10 @@ class HVAC
       end
       cap_fff_curve = create_curve_quadratic(model, htg_ap.heat_cap_fflow_spec[i], "Heat-CAP-fFF#{i + 1}", 0, 2, 0, 2)
       eir_fff_curve = create_curve_quadratic(model, htg_ap.heat_eir_fflow_spec[i], "Heat-EIR-fFF#{i + 1}", 0, 2, 0, 2)
+      if i == 0
+        cap_fff_curve_0 = cap_fff_curve
+        eir_fff_curve_0 = eir_fff_curve
+      end
 
       if htg_ap.num_speeds == 1
         htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
@@ -2855,7 +2863,7 @@ class HVAC
     htg_coil.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
     if is_ddb_control
       # Apply startup capacity degradation
-      apply_capacity_degradation_EMS(model, htg_ap, htg_coil.name.get, false, cap_fff_curve, eir_fff_curve)
+      apply_capacity_degradation_EMS(model, htg_ap, htg_coil.name.get, false, cap_fff_curve_0, eir_fff_curve_0)
     end
 
     return htg_coil

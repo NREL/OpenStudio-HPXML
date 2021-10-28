@@ -1604,8 +1604,13 @@ class OSModel
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
       hvac_control = @hpxml.hvac_controls[0]
       # Fixme: Handle two speed with ddb control only (no realistic staging?)
-      is_ddb_control = hvac_control.is_deadband_control && (cooling_system.additional_properties.num_speeds == 1)
-      is_realistic_staging = (cooling_system.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
+      if cooling_system.additional_properties.respond_to? :num_speeds
+        is_realistic_staging = (cooling_system.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
+        is_ddb_control = (hvac_control.is_deadband_control && (cooling_system.additional_properties.num_speeds == 1)) || is_realistic_staging
+      else
+        is_ddb_control = false
+        is_realistic_staging = false
+      end
 
       # Calculate cooling sequential load fractions
       sequential_cool_load_fracs = HVAC.calc_sequential_load_fractions(cooling_system.fraction_cool_load_served.to_f, @remaining_cool_load_frac, @cooling_days)
@@ -1703,8 +1708,13 @@ class OSModel
 
       hvac_control = @hpxml.hvac_controls[0]
       # Fixme: Handle two speed with ddb control only (no realistic staging?)
-      is_ddb_control = hvac_control.is_deadband_control && (heat_pump.additional_properties.num_speeds == 1)
-      is_realistic_staging = (heat_pump.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
+      if heat_pump.additional_properties.respond_to? :num_speeds
+        is_realistic_staging = (heat_pump.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
+        is_ddb_control = (hvac_control.is_deadband_control && (heat_pump.additional_properties.num_speeds == 1)) || is_realistic_staging
+      else
+        is_ddb_control = false
+        is_realistic_staging = false
+      end
       # Calculate heating sequential load fractions
       sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heat_pump.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
       @remaining_heat_load_frac -= heat_pump.fraction_heat_load_served
