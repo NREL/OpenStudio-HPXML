@@ -3661,6 +3661,13 @@ def apply_hpxml_modification(hpxml_file, hpxml)
         'base-hvac-realistic-control-2-speed-central-ac.xml'].include? hpxml_file
       hpxml.hvac_controls[0].realistic_staging = true
     end
+    if ['base-hvac-realistic-control-2-speed-central-ac.xml'].include? hpxml_file
+      hpxml.cooling_systems[0].cooling_capacity = 10000
+    else
+      hpxml.heat_pumps[0].cooling_capacity = 10000
+      hpxml.heat_pumps[0].heating_capacity = 10000
+      hpxml.heat_pumps[0].heating_capacity_17F = 5900.0
+    end
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].conditioned_floor_area_served = 2700
   elsif ['base-hvac-dse.xml',
