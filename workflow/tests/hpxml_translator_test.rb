@@ -1216,7 +1216,7 @@ class HPXMLTest < MiniTest::Test
       assert_operator(unmet_hours_htg, :>, 1000)
       assert_operator(unmet_hours_clg, :>, 1000)
     else
-      if not hpxml_path.include? 'base-hvac-onoff-thermostat-deadband.xml'
+      if (not hpxml_path.include? 'base-hvac-onoff-thermostat-deadband.xml') || (not hpxml_path.include? 'base-hvac-realistic-control-2-speed-ashp.xml') || (not hpxml_path.include? 'base-hvac-realistic-control-2-speed-central-ac.xml')
         assert_operator(unmet_hours_htg, :<, 100)
         assert_operator(unmet_hours_clg, :<, 100)
       end
