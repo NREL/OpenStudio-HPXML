@@ -693,16 +693,13 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_max_power_output'] = 4000
     args['pv_system_inverter_efficiency'] = 0.96
     args['pv_system_system_losses_fraction'] = 0.14
-    args['pv_system_num_units_served'] = 1
+    args['pv_system_num_bedrooms_served'] = 3
     args['pv_system_2_module_type'] = 'none'
     args['pv_system_2_location'] = Constants.Auto
     args['pv_system_2_tracking'] = Constants.Auto
     args['pv_system_2_array_azimuth'] = 180
     args['pv_system_2_array_tilt'] = 20
     args['pv_system_2_max_power_output'] = 4000
-    args['pv_system_2_inverter_efficiency'] = 0.96
-    args['pv_system_2_system_losses_fraction'] = 0.14
-    args['pv_system_2_num_units_served'] = 1
     args['battery_location'] = 'none'
     args['battery_capacity'] = Constants.Auto
     args['lighting_interior_fraction_cfl'] = 0.4
@@ -1017,16 +1014,13 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_max_power_output'] = 0
     args['pv_system_inverter_efficiency'] = 0
     args['pv_system_system_losses_fraction'] = 0
-    args['pv_system_num_units_served'] = 0
+    args['pv_system_num_bedrooms_served'] = 0
     args['pv_system_2_module_type'] = 'none'
     args['pv_system_2_location'] = Constants.Auto
     args['pv_system_2_tracking'] = Constants.Auto
     args['pv_system_2_array_azimuth'] = 0
     args['pv_system_2_array_tilt'] = 0
     args['pv_system_2_max_power_output'] = 0
-    args['pv_system_2_inverter_efficiency'] = 0
-    args['pv_system_2_system_losses_fraction'] = 0
-    args['pv_system_2_num_units_served'] = 0
     args['battery_location'] = 'none'
     args['battery_capacity'] = Constants.Auto
     args['lighting_present'] = false
@@ -1350,7 +1344,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['geometry_unit_level'] = 'Middle'
     args['geometry_unit_horizontal_location'] = 'Left'
     args['geometry_building_num_units'] = 6
-    args['geometry_building_num_bedrooms'] = 6 * 3
     args['geometry_num_floors_above_grade'] = 3
     args['window_front_wwr'] = 0.18
     args['window_back_wwr'] = 0.18
@@ -1399,7 +1392,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['mech_vent_shared_precooling_efficiency'] = 4.0
     args['mech_vent_shared_precooling_fraction_cool_load_served'] = 0.8
   elsif ['base-bldgtype-multifamily-shared-pv.xml'].include? hpxml_file
-    args['pv_system_num_units_served'] = 6
+    args['pv_system_num_bedrooms_served'] = 6 * 3
     args['pv_system_location'] = HPXML::LocationGround
     args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
     args['pv_system_tracking'] = HPXML::PVTrackingTypeFixed

@@ -462,16 +462,13 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['pv_system_max_power_output'] = 4000
       args['pv_system_inverter_efficiency'] = 0.96
       args['pv_system_system_losses_fraction'] = 0.14
-      args['pv_system_num_units_served'] = 1
+      args['pv_system_num_bedrooms_served'] = 3
       args['pv_system_2_module_type'] = 'none'
       args['pv_system_2_location'] = Constants.Auto
       args['pv_system_2_tracking'] = Constants.Auto
       args['pv_system_2_array_azimuth'] = 180
       args['pv_system_2_array_tilt'] = 20
       args['pv_system_2_max_power_output'] = 4000
-      args['pv_system_2_inverter_efficiency'] = 0.96
-      args['pv_system_2_system_losses_fraction'] = 0.14
-      args['pv_system_2_num_units_served'] = 1
       args['lighting_interior_fraction_cfl'] = 0.4
       args['lighting_interior_fraction_lfl'] = 0.1
       args['lighting_interior_fraction_led'] = 0.25
@@ -598,7 +595,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['geometry_unit_level'] = 'Middle'
       args['geometry_unit_horizontal_location'] = 'Left'
       args['geometry_building_num_units'] = 6
-      args['geometry_building_num_bedrooms'] = 6 * 3
       args['geometry_num_floors_above_grade'] = 3
       args['window_front_wwr'] = 0.18
       args['window_back_wwr'] = 0.18

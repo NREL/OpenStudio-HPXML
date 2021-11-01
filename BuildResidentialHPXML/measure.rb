@@ -226,12 +226,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The number of units in the building. This is required for #{HPXML::ResidentialTypeSFA} and #{HPXML::ResidentialTypeApartment}s.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_building_num_bedrooms', false)
-    arg.setDisplayName('Geometry: Building Number of Bedrooms')
-    arg.setUnits('#')
-    arg.setDescription("The number of bedrooms in the building. This is required for #{HPXML::ResidentialTypeSFA} and #{HPXML::ResidentialTypeApartment}s with shared PV systems.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_average_ceiling_height', true)
     arg.setDisplayName('Geometry: Average Ceiling Height')
     arg.setUnits('ft')
@@ -1999,7 +1993,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_module_type', pv_system_module_type_choices, true)
     arg.setDisplayName('PV System: Module Type')
-    arg.setDescription("Module type of the PV system. Use 'none' if there is no PV system 1.")
+    arg.setDescription("Module type of the PV system. Use 'none' if there is no PV system.")
     arg.setDefaultValue('none')
     args << arg
 
@@ -2039,20 +2033,20 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_inverter_efficiency', false)
     arg.setDisplayName('PV System: Inverter Efficiency')
     arg.setUnits('Frac')
-    arg.setDescription('Inverter efficiency of the PV system. It is assumed that the inverter efficiency of a second PV system is equal.')
+    arg.setDescription('Inverter efficiency of the PV system. If there are two PV systems, this will apply to both.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_system_losses_fraction', false)
     arg.setDisplayName('PV System: System Losses Fraction')
     arg.setUnits('Frac')
-    arg.setDescription('System losses fraction of the PV system.')
+    arg.setDescription('System losses fraction of the PV system. If there are two PV systems, this will apply to both.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('pv_system_num_units_served', true)
-    arg.setDisplayName('PV System: Number of Units Served')
-    arg.setDescription("Number of dwelling units served by PV system. Must be 1 if #{HPXML::ResidentialTypeSFD}. Used to apportion PV generation to the unit.")
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('pv_system_num_bedrooms_served', true)
+    arg.setDisplayName('PV System: Number of Bedrooms Served')
+    arg.setDescription("Number of bedrooms served by PV system. Ignored if #{HPXML::ResidentialTypeSFD}. Used to apportion PV generation to the unit of a SFA/MF building. If there are two PV systems, this will apply to both.")
     arg.setUnits('#')
-    arg.setDefaultValue(1)
+    arg.setDefaultValue(3)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_2_module_type', pv_system_module_type_choices, true)
@@ -2092,19 +2086,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('W')
     arg.setDescription('Maximum power output of the second PV system. For a shared system, this is the total building maximum power output.')
     arg.setDefaultValue(4000)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_2_system_losses_fraction', false)
-    arg.setDisplayName('PV System 2: System Losses Fraction')
-    arg.setUnits('Frac')
-    arg.setDescription('System losses fraction of the second PV system.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('pv_system_2_num_units_served', true)
-    arg.setDisplayName('PV System 2: Number of Units Served')
-    arg.setDescription("Number of dwelling units served by second PV system. Must be 1 if #{HPXML::ResidentialTypeSFD}. Used to apportion PV generation to the unit.")
-    arg.setUnits('#')
-    arg.setDefaultValue(1)
     args << arg
 
     battery_location_choices = OpenStudio::StringVector.new
@@ -5046,18 +5027,19 @@ class HPXMLFile
 
       max_power_output = [args[:pv_system_max_power_output], args[:pv_system_2_max_power_output]][i]
 
-      if [args[:pv_system_inverter_efficiency], args[:pv_system_inverter_efficiency]][i].is_initialized
-        inverter_efficiency = [args[:pv_system_inverter_efficiency], args[:pv_system_inverter_efficiency]][i].get
+      if args[:pv_system_inverter_efficiency].is_initialized
+        inverter_efficiency = args[:pv_system_inverter_efficiency].get
       end
 
-      if [args[:pv_system_system_losses_fraction], args[:pv_system_2_system_losses_fraction]][i].is_initialized
-        system_losses_fraction = [args[:pv_system_system_losses_fraction], args[:pv_system_2_system_losses_fraction]][i].get
+      if args[:pv_system_system_losses_fraction].is_initialized
+        system_losses_fraction = args[:pv_system_system_losses_fraction].get
       end
 
-      num_units_served = [args[:pv_system_num_units_served], args[:pv_system_2_num_units_served]][i]
-      if num_units_served > 1
-        is_shared_system = true
-        number_of_bedrooms_served = (args[:geometry_building_num_bedrooms].get * num_units_served / args[:geometry_building_num_units].get).to_i
+      if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
+        if args[:pv_system_num_bedrooms_served] > args[:geometry_unit_num_bedrooms]
+          is_shared_system = true
+          number_of_bedrooms_served = args[:pv_system_num_bedrooms_served]
+        end
       end
 
       hpxml.pv_systems.add(id: "PVSystem#{hpxml.pv_systems.size + 1}",
