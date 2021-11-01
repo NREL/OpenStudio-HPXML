@@ -927,7 +927,7 @@ class Constructions
         furnMass = mass_lb_per_sqft
         floor_area = cfa
       elsif Geometry.is_unconditioned_basement(space)
-        furnAreaFraction = furniture_mass.area_fraction # Fixme: or assume 1.0?
+        furnAreaFraction = 0.4
         furnMass = mass_lb_per_sqft
         floor_area = ubfa
       elsif Geometry.is_garage(space)
