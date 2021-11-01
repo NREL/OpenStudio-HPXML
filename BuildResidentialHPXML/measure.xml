@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>9b2a0db1-0787-45e5-b1b9-b00a604232e5</version_id>
-  <version_modified>20211028T172959Z</version_modified>
+  <version_id>f1e4de39-9516-4a57-bd71-24994a61c8d6</version_id>
+  <version_modified>20211101T214019Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -520,15 +520,6 @@
       <name>geometry_building_num_units</name>
       <display_name>Geometry: Building Number of Units</display_name>
       <description>The number of units in the building. This is required for single-family attached and apartment units.</description>
-      <type>Integer</type>
-      <units>#</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>geometry_building_num_bedrooms</name>
-      <display_name>Geometry: Building Number of Bedrooms</display_name>
-      <description>The number of bedrooms in the building. This is required for single-family attached and apartment units with shared PV systems.</description>
       <type>Integer</type>
       <units>#</units>
       <required>false</required>
@@ -3821,7 +3812,7 @@
     <argument>
       <name>pv_system_module_type</name>
       <display_name>PV System: Module Type</display_name>
-      <description>Module type of the PV system. Use 'none' if there is no PV system 1.</description>
+      <description>Module type of the PV system. Use 'none' if there is no PV system.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -3936,7 +3927,7 @@
     <argument>
       <name>pv_system_inverter_efficiency</name>
       <display_name>PV System: Inverter Efficiency</display_name>
-      <description>Inverter efficiency of the PV system. It is assumed that the inverter efficiency of a second PV system is equal.</description>
+      <description>Inverter efficiency of the PV system. If there are two PV systems, this will apply to both.</description>
       <type>Double</type>
       <units>Frac</units>
       <required>false</required>
@@ -3945,21 +3936,21 @@
     <argument>
       <name>pv_system_system_losses_fraction</name>
       <display_name>PV System: System Losses Fraction</display_name>
-      <description>System losses fraction of the PV system.</description>
+      <description>System losses fraction of the PV system. If there are two PV systems, this will apply to both.</description>
       <type>Double</type>
       <units>Frac</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>pv_system_num_units_served</name>
-      <display_name>PV System: Number of Units Served</display_name>
-      <description>Number of dwelling units served by PV system. Must be 1 if single-family detached. Used to apportion PV generation to the unit.</description>
+      <name>pv_system_num_bedrooms_served</name>
+      <display_name>PV System: Number of Bedrooms Served</display_name>
+      <description>Number of bedrooms served by PV system. Ignored if single-family detached. Used to apportion PV generation to the unit of a SFA/MF building. If there are two PV systems, this will apply to both.</description>
       <type>Integer</type>
       <units>#</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>1</default_value>
+      <default_value>3</default_value>
     </argument>
     <argument>
       <name>pv_system_2_module_type</name>
@@ -4075,25 +4066,6 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>4000</default_value>
-    </argument>
-    <argument>
-      <name>pv_system_2_system_losses_fraction</name>
-      <display_name>PV System 2: System Losses Fraction</display_name>
-      <description>System losses fraction of the second PV system.</description>
-      <type>Double</type>
-      <units>Frac</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>pv_system_2_num_units_served</name>
-      <display_name>PV System 2: Number of Units Served</display_name>
-      <description>Number of dwelling units served by second PV system. Must be 1 if single-family detached. Used to apportion PV generation to the unit.</description>
-      <type>Integer</type>
-      <units>#</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>1</default_value>
     </argument>
     <argument>
       <name>battery_location</name>
@@ -5838,7 +5810,7 @@
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>C2AB19BE</checksum>
+      <checksum>D7B90835</checksum>
     </file>
     <file>
       <version>
@@ -5849,7 +5821,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>386FFC8B</checksum>
+      <checksum>71F98F37</checksum>
     </file>
   </files>
 </measure>
