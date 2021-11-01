@@ -3692,17 +3692,9 @@ class HVAC
         fault_program.addLine("Set EIR_c2_#{suffix} = #{eir_pow_fff_curve.coefficient2x}")
         fault_program.addLine("Set EIR_c3_#{suffix} = #{eir_pow_fff_curve.coefficient3xPOW2}")
         fault_program.addLine("Set cap_curve_v_pre_#{suffix} = (CAP_c1_#{suffix}) + ((CAP_c2_#{suffix})*FF_AF_nodef_#{suffix}) + ((CAP_c3_#{suffix})*FF_AF_nodef_#{suffix}*FF_AF_nodef_#{suffix})")
-        fault_program.addLine("If cap_curve_v_pre_#{suffix} < 0.0")
-        fault_program.addLine("  Set #{cap_fff_act.name} = 1.0")
-        fault_program.addLine("Else")
-        fault_program.addLine("  Set #{cap_fff_act.name} = cap_curve_v_pre_#{suffix} * CAP_IQ_adj_#{suffix}")
-        fault_program.addLine('EndIf')
         fault_program.addLine("Set eir_curve_v_pre_#{suffix} = (EIR_c1_#{suffix}) + ((EIR_c2_#{suffix})*FF_AF_nodef_#{suffix}) + ((EIR_c3_#{suffix})*FF_AF_nodef_#{suffix}*FF_AF_nodef_#{suffix})")
-        fault_program.addLine("If eir_curve_v_pre_#{suffix} < 0.0")
-        fault_program.addLine("  Set #{eir_pow_act.name} = 1.0")
-        fault_program.addLine("Else")
-        fault_program.addLine("  Set #{eir_pow_act.name} = eir_curve_v_pre_#{suffix} * EIR_IQ_adj_#{suffix}")
-        fault_program.addLine('EndIf')
+        fault_program.addLine("Set #{cap_fff_act.name} = cap_curve_v_pre_#{suffix} * CAP_IQ_adj_#{suffix}")
+        fault_program.addLine("Set #{eir_pow_act.name} = eir_curve_v_pre_#{suffix} * EIR_IQ_adj_#{suffix}")
       else
         fault_program.addLine("Set CAP_c1_#{suffix} = #{cap_fff_curve.coefficient1Constant}")
         fault_program.addLine("Set CAP_c2_#{suffix} = #{cap_fff_curve.coefficient2w}")
@@ -3715,18 +3707,17 @@ class HVAC
         fault_program.addLine("Set Pow_c4_#{suffix} = #{eir_pow_fff_curve.coefficient4y}")
         fault_program.addLine("Set Pow_c5_#{suffix} = #{eir_pow_fff_curve.coefficient5z}")
         fault_program.addLine("Set cap_curve_v_pre_#{suffix} = CAP_c1_#{suffix} + ((CAP_c2_#{suffix})*#{var1_sensor.name}) + (CAP_c3_#{suffix}*#{var2_sensor.name}) + (CAP_c4_#{suffix}*FF_AF_nodef_#{suffix}) + (CAP_c5_#{suffix}*#{var4_sensor.name})")
-        fault_program.addLine("If cap_curve_v_pre_#{suffix} < 0.0")
-        fault_program.addLine("  Set #{cap_fff_act.name} = 1.0")
-        fault_program.addLine("Else")
-        fault_program.addLine("  Set #{cap_fff_act.name} = cap_curve_v_pre_#{suffix} * CAP_IQ_adj_#{suffix}")
-        fault_program.addLine('EndIf')
         fault_program.addLine("Set pow_curve_v_pre_#{suffix} = Pow_c1_#{suffix} + ((Pow_c2_#{suffix})*#{var1_sensor.name}) + (Pow_c3_#{suffix}*#{var2_sensor.name}) + (Pow_c4_#{suffix}*FF_AF_nodef_#{suffix})+ (Pow_c5_#{suffix}*#{var4_sensor.name})")
-        fault_program.addLine("If pow_curve_v_pre_#{suffix} < 0.0")
-        fault_program.addLine("  Set #{eir_pow_act.name} = 1.0")
-        fault_program.addLine("Else")
+        fault_program.addLine("Set #{cap_fff_act.name} = cap_curve_v_pre_#{suffix} * CAP_IQ_adj_#{suffix}")
+
         fault_program.addLine("Set #{eir_pow_act.name} = pow_curve_v_pre_#{suffix} * EIR_IQ_adj_#{suffix} * CAP_IQ_adj_#{suffix}") # equationfit power curve modifies power instead of cop/eir, should also multiply capacity adjustment
-        fault_program.addLine('EndIf')
       end
+      fault_program.addLine("If #{cap_fff_act.name} < 0.0")
+      fault_program.addLine("  Set #{cap_fff_act.name} = 1.0")
+      fault_program.addLine("EndIf")
+      fault_program.addLine("If #{eir_pow_act.name} < 0.0")
+      fault_program.addLine("  Set #{eir_pow_act.name} = 1.0")
+      fault_program.addLine("EndIf")
     end
   end
 
