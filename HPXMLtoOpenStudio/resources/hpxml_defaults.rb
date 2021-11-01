@@ -751,7 +751,7 @@ class HPXMLDefaults
 
   def self.apply_furniture_mass(hpxml)
     if hpxml.furniture_mass.area_fraction.nil?
-      hpxml.furniture_mass.area_fraction = 1.0 # Fixme: BEopt uses 0.4? Need to be further investigated
+      hpxml.furniture_mass.area_fraction = 0.4
       hpxml.furniture_mass.area_fraction_isdefaulted = true
     end
     if hpxml.furniture_mass.type.nil?

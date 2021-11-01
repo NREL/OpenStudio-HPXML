@@ -718,7 +718,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_partition_wall_mass_values(hpxml_default.partition_wall_mass, 1.0, HPXML::InteriorFinishGypsumBoard, 0.5)
-    _test_default_furniture_mass_values(hpxml_default.furniture_mass, 1.0, HPXML::FurnitureMassTypeLightWeight)
+    _test_default_furniture_mass_values(hpxml_default.furniture_mass, 0.4, HPXML::FurnitureMassTypeLightWeight)
   end
 
   def test_central_air_conditioners
