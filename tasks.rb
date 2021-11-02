@@ -57,6 +57,7 @@ def create_hpxmls
     'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
     'base-atticroof-vented.xml' => 'base.xml',
     'base-battery.xml' => 'base.xml',
+    'base-battery-multiple.xml' => 'base-battery.xml',
     'base-bldgtype-multifamily.xml' => 'base.xml',
     'base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-adjacent-to-multiple.xml' => 'base-bldgtype-multifamily.xml',
@@ -4230,6 +4231,16 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          annual_consumption_kbtu: 85000,
                          annual_output_kwh: 5000,
                          number_of_bedrooms_served: 18)
+  end
+
+  # ------------- #
+  # HPXML Battery #
+  # ------------- #
+
+  # Logic that can only be applied based on the file name
+  if ['base-battery-multiple.xml'].include? hpxml_file
+    hpxml.batteries.add(id: "Battery#{hpxml.batteries.size + 1}",
+                        type: HPXML::BatteryTypeLithiumIon)
   end
 
   # ---------------- #
