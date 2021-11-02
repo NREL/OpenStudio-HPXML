@@ -428,7 +428,8 @@
             <SystemIdentifier id='Battery1'/>
             <Location>outside</Location>
             <BatteryType>Li-ion</BatteryType>
-            <NominalCapacitykWh>12</NominalCapacitykWh>
+            <NominalCapacitykWh>20.0</NominalCapacitykWh>
+            <RatedPowerOutput>15.0</RatedPowerOutput>
           </Battery>
         </Batteries>
       </Systems>

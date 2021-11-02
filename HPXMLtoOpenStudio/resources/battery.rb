@@ -4,10 +4,11 @@ class Battery
   def self.apply(model, battery)
     obj_name = battery.id
 
-    voltage = battery.nominal_voltage # V
+    power = battery.rated_power_output # kW
     capacity = battery.nominal_capacity # kWh
+    voltage = battery.nominal_voltage # V
 
-    return if capacity <= 0 || voltage <= 0
+    return if power <= 0 || capacity <= 0 || voltage <= 0
 
     is_outside = (battery.location == HPXML::LocationOutside)
     if not is_outside
@@ -21,9 +22,10 @@ class Battery
     number_of_strings_in_parallel = Integer(((capacity * 1000.0) / (voltage * 3.2)).round)
     battery_mass = (capacity / 10.0) * 99.0 # kg
     battery_surface_area = 0.306 * (capacity**(2.0 / 3.0)) # m^2
+    c_rate = power / capacity
 
-    minimum_storage_state_of_charge_fraction = 0.1
-    maximum_storage_state_of_charge_fraction = 0.9
+    minimum_storage_state_of_charge_fraction = 0.15 # from SAM
+    maximum_storage_state_of_charge_fraction = 0.95 # from SAM
     initial_fractional_state_of_charge = minimum_storage_state_of_charge_fraction
 
     elcds = model.getElectricLoadCenterDistributions
@@ -36,15 +38,14 @@ class Battery
 
       if elcd.inverter.is_initialized
         elcd.setElectricalBussType('DirectCurrentWithInverterDCStorage')
-        initial_fractional_state_of_charge = (minimum_storage_state_of_charge_fraction + maximum_storage_state_of_charge_fraction) / 2.0
+        initial_fractional_state_of_charge = 0.5 # from SAM
       end
     end
 
     elcd.setMinimumStorageStateofChargeFraction(minimum_storage_state_of_charge_fraction)
     elcd.setMaximumStorageStateofChargeFraction(maximum_storage_state_of_charge_fraction)
-    # elcd.setGeneratorOperationSchemeType('TrackElectrical')
     # elcd.setDemandLimitSchemePurchasedElectricDemandLimit(0)
-    # elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
+    elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
 
     elcs = OpenStudio::Model::ElectricLoadCenterStorageLiIonNMCBattery.new(model, number_of_cells_in_series, number_of_strings_in_parallel, battery_mass, battery_surface_area)
     elcs.setName("#{obj_name} li ion")
@@ -62,6 +63,7 @@ class Battery
     elcs.setBatterySurfaceArea(battery_surface_area)
     elcs.setFractionofCellCapacityRemovedattheEndofExponentialZone(2.584) # from Rohit C.
     elcs.setFractionofCellCapacityRemovedattheEndofNominalZone(3.126) # from Rohit C.
+    elcs.setChargeRateatWhichVoltagevsCapacityCurveWasGenerated(c_rate)
 
     elcd.setElectricalStorage(elcs)
   end
@@ -69,6 +71,7 @@ class Battery
   def self.get_battery_default_values()
     return { location: HPXML::LocationOutside,
              lifetime_model: HPXML::BatteryLifetimeModelNone,
+             rated_power_output: 10.0,
              nominal_capacity: 10.0,
              nominal_voltage: 50.0 }
   end

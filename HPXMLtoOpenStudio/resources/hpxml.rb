@@ -4744,8 +4744,8 @@ class HPXML < Object
   end
 
   class Battery < BaseElement
-    ATTRS = [:id, :type, :location,
-             :lifetime_model, :nominal_capacity, :nominal_voltage]
+    ATTRS = [:id, :type, :location, :lifetime_model,
+             :rated_power_output, :nominal_capacity, :nominal_voltage]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4767,6 +4767,7 @@ class HPXML < Object
       XMLHelper.add_element(battery, 'Location', @location, :string, @location_isdefaulted) unless @location.nil?
       XMLHelper.add_element(battery, 'BatteryType', @type, :string) unless @type.nil?
       XMLHelper.add_element(battery, 'NominalCapacitykWh', @nominal_capacity, :float, @nominal_capacity_isdefaulted) unless @nominal_capacity.nil?
+      XMLHelper.add_element(battery, 'RatedPowerOutput', @rated_power_output, :float, @rated_power_output_isdefaulted) unless @rated_power_output.nil?
       XMLHelper.add_element(battery, 'NominalVoltage', @nominal_voltage, :float, @nominal_voltage_isdefaulted) unless @nominal_voltage.nil?
       XMLHelper.add_extension(battery, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
     end
@@ -4778,6 +4779,7 @@ class HPXML < Object
       @location = XMLHelper.get_value(battery, 'Location', :string)
       @type = XMLHelper.get_value(battery, 'BatteryType', :string)
       @nominal_capacity = XMLHelper.get_value(battery, 'NominalCapacitykWh', :float)
+      @rated_power_output = XMLHelper.get_value(battery, 'RatedPowerOutput', :float)
       @nominal_voltage = XMLHelper.get_value(battery, 'NominalVoltage', :float)
       @lifetime_model = XMLHelper.get_value(battery, 'extension/LifetimeModel', :string)
     end

@@ -454,6 +454,9 @@
             <BatteryType>Li-ion</BatteryType>
             <NominalCapacitykWh>20.0</NominalCapacitykWh>
             <RatedPowerOutput>15.0</RatedPowerOutput>
+            <extension>
+              <LifetimeModel>KandlerSmith</LifetimeModel>
+            </extension>
           </Battery>
         </Batteries>
       </Systems>

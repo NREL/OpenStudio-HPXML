@@ -2190,6 +2190,7 @@ If not entered, the simulation will not include batteries.
   ``BatteryType``             string            See [#]_     Yes                Battery type
   ``Location``                string            See [#]_     No        outside  Location
   ``LifetimeModel``[#]_       string            See [#]_     No        None     Lifetime model
+  ``RatedPowerOutput``        string   kW       > 0          No        10       Rated power output in kW
   ``NominalCapacitykWh``      double   kWh      > 0          No        10       Nominal capacity in kWh
   ``NominalVoltage``          double   V        > 0          No        50       Nominal voltage in V
   ==========================  =======  =======  ===========  ========  =======  ============================================

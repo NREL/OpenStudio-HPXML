@@ -342,6 +342,7 @@ def create_hpxmls
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
     'base-pv-battery-outside.xml' => 'base-battery-outside.xml',
+    'base-pv-battery-outside-degrades.xml' => 'base-pv-battery-outside.xml',
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
     'base-schedules-simple.xml' => 'base.xml',
     'base-schedules-detailed-smooth.xml' => 'base.xml',
@@ -701,6 +702,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_2_array_tilt'] = 20
     args['pv_system_2_max_power_output'] = 4000
     args['battery_location'] = 'none'
+    args['battery_power'] = Constants.Auto
     args['battery_capacity'] = Constants.Auto
     args['lighting_interior_fraction_cfl'] = 0.4
     args['lighting_interior_fraction_lfl'] = 0.1
@@ -1022,6 +1024,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_2_array_tilt'] = 0
     args['pv_system_2_max_power_output'] = 0
     args['battery_location'] = 'none'
+    args['battery_power'] = Constants.Auto
     args['battery_capacity'] = Constants.Auto
     args['lighting_present'] = false
     args['lighting_interior_fraction_cfl'] = 0
@@ -2325,7 +2328,8 @@ def set_measure_argument_values(hpxml_file, args)
   # Battery
   if ['base-battery-outside.xml'].include? hpxml_file
     args['battery_location'] = HPXML::LocationOutside
-    args['battery_capacity'] = '12'
+    args['battery_power'] = '15'
+    args['battery_capacity'] = '20'
   elsif ['base-pv-battery-outside.xml'].include? hpxml_file
     args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
     args['pv_system_location'] = HPXML::LocationRoof
@@ -2345,7 +2349,8 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_2_array_azimuth'] = 90
     args['pv_system_2_max_power_output'] = 1500
     args['battery_location'] = HPXML::LocationGarage
-    args['battery_capacity'] = '15'
+    args['battery_power'] = '15'
+    args['battery_capacity'] = '20'
   end
 
   # Simulation Control
@@ -4249,7 +4254,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   # HPXML Battery #
   # ------------- #
 
-  if ['base-pv-battery-garage.xml'].include? hpxml_file
+  if ['base-pv-battery-outside-degrades.xml'].include? hpxml_file
     hpxml.batteries[0].lifetime_model = HPXML::BatteryLifetimeModelKandlerSmith
   end
 
