@@ -171,11 +171,13 @@ def create_hpxmls
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-enclosure-windows-physical-properties.xml' => 'base.xml',
     'base-enclosure-windows-shading.xml' => 'base.xml',
+    'base-enclosure-thermal-mass.xml' => 'base.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-basement-garage.xml' => 'base.xml',
     'base-foundation-complex.xml' => 'base.xml',
     'base-foundation-conditioned-basement-slab-insulation.xml' => 'base.xml',
     'base-foundation-conditioned-basement-wall-interior-insulation.xml' => 'base.xml',
+    'base-foundation-conditioned-crawlspace.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-slab.xml' => 'base.xml',
     'base-foundation-unconditioned-basement.xml' => 'base.xml',
@@ -225,6 +227,9 @@ def create_hpxmls
     'base-hvac-autosize-mini-split-heat-pump-ducted-heating-only.xml' => 'base-hvac-mini-split-heat-pump-ducted-heating-only.xml',
     'base-hvac-autosize-mini-split-heat-pump-ducted-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-mini-split-heat-pump-ducted.xml',
     'base-hvac-autosize-mini-split-air-conditioner-only-ducted.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
+    'base-hvac-autosize-ptac.xml' => 'base-hvac-ptac.xml',
+    'base-hvac-autosize-ptac-with-heating.xml' => 'base-hvac-ptac-with-heating.xml',
+    'base-hvac-autosize-pthp.xml' => 'base-hvac-pthp.xml',
     'base-hvac-autosize-room-ac-only.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-autosize-stove-oil-only.xml' => 'base-hvac-stove-oil-only.xml',
     'base-hvac-autosize-wall-furnace-elec-only.xml' => 'base-hvac-wall-furnace-elec-only.xml',
@@ -245,6 +250,7 @@ def create_hpxmls
     'base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
     'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
+    'base-hvac-ducts-leakage-cfm50.xml' => 'base.xml',
     'base-hvac-ducts-leakage-percent.xml' => 'base.xml',
     'base-hvac-ducts-area-fractions.xml' => 'base-enclosure-2stories.xml',
     'base-hvac-elec-resistance-only.xml' => 'base.xml',
@@ -289,6 +295,9 @@ def create_hpxmls
     'base-hvac-portable-heater-gas-only.xml' => 'base.xml',
     'base-hvac-programmable-thermostat.xml' => 'base.xml',
     'base-hvac-programmable-thermostat-detailed.xml' => 'base-hvac-programmable-thermostat.xml',
+    'base-hvac-ptac.xml' => 'base.xml',
+    'base-hvac-ptac-with-heating.xml' => 'base-hvac-ptac.xml',
+    'base-hvac-pthp.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-room-ac-only-ceer.xml' => 'base-hvac-room-ac-only.xml',
@@ -304,6 +313,7 @@ def create_hpxmls
     'base-lighting-none.xml' => 'base.xml',
     'base-location-AMY-2012.xml' => 'base.xml',
     'base-location-baltimore-md.xml' => 'base-foundation-unvented-crawlspace.xml',
+    'base-location-capetown-zaf.xml' => 'base-foundation-vented-crawlspace.xml',
     'base-location-dallas-tx.xml' => 'base-foundation-slab.xml',
     'base-location-duluth-mn.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-location-helena-mt.xml' => 'base.xml',
@@ -461,6 +471,10 @@ def create_hpxmls
     end
   end
 
+  if hpxml_docs.size != hpxmls_files.size
+    return
+  end
+
   return hpxml_docs
 end
 
@@ -501,10 +515,11 @@ def set_measure_argument_values(hpxml_file, args)
     args['geometry_has_flue_or_chimney'] = Constants.Auto
     args['floor_over_foundation_assembly_r'] = 0
     args['floor_over_garage_assembly_r'] = 0
+    args['foundation_wall_type'] = Constants.Auto
+    args['foundation_wall_thickness'] = 8.0
     args['foundation_wall_insulation_r'] = 8.9
     args['foundation_wall_insulation_distance_to_top'] = 0.0
     args['foundation_wall_insulation_distance_to_bottom'] = 8.0
-    args['foundation_wall_thickness'] = 8.0
     args['rim_joist_assembly_r'] = 23.0
     args['slab_perimeter_insulation_r'] = 0
     args['slab_perimeter_depth'] = 0
@@ -824,10 +839,11 @@ def set_measure_argument_values(hpxml_file, args)
     args['geometry_has_flue_or_chimney'] = Constants.Auto
     args['floor_over_foundation_assembly_r'] = 14.15
     args['floor_over_garage_assembly_r'] = 0
+    args['foundation_wall_type'] = Constants.Auto
+    args['foundation_wall_thickness'] = 6.0
     args['foundation_wall_insulation_r'] = 0
     args['foundation_wall_insulation_distance_to_top'] = 0
     args['foundation_wall_insulation_distance_to_bottom'] = 0
-    args['foundation_wall_thickness'] = 6.0
     args['rim_joist_assembly_r'] = 5.01
     args['slab_perimeter_insulation_r'] = 0
     args['slab_perimeter_depth'] = 0
@@ -1652,6 +1668,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['slab_under_insulation_r'] = 10
     args['slab_under_width'] = 4
   elsif ['base-foundation-conditioned-basement-wall-interior-insulation.xml'].include? hpxml_file
+    args['foundation_wall_type'] = HPXML::FoundationWallTypeConcreteBlockFoamCore
     args['foundation_wall_insulation_r'] = 18.9
     args['foundation_wall_insulation_distance_to_top'] = 1.0
   elsif ['base-foundation-slab.xml'].include? hpxml_file
@@ -1700,9 +1717,9 @@ def set_measure_argument_values(hpxml_file, args)
     args['geometry_unit_cfa'] = 1350.0
     args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceUnvented
     args['geometry_foundation_height'] = 4.0
+    args['slab_thickness'] = 0.0
     args['floor_over_foundation_assembly_r'] = 18.7
     args['foundation_wall_insulation_distance_to_bottom'] = 4.0
-    args['slab_carpet_r'] = 2.5
     args['ducts_supply_location'] = HPXML::LocationCrawlspaceUnvented
     args['ducts_return_location'] = HPXML::LocationCrawlspaceUnvented
     args['ducts_number_of_return_registers'] = 1
@@ -1712,13 +1729,26 @@ def set_measure_argument_values(hpxml_file, args)
     args['geometry_unit_cfa'] = 1350.0
     args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceVented
     args['geometry_foundation_height'] = 4.0
+    args['slab_thickness'] = 0.0
     args['floor_over_foundation_assembly_r'] = 18.7
     args['foundation_wall_insulation_distance_to_bottom'] = 4.0
-    args['slab_carpet_r'] = 2.5
     args['ducts_supply_location'] = HPXML::LocationCrawlspaceVented
     args['ducts_return_location'] = HPXML::LocationCrawlspaceVented
     args['ducts_number_of_return_registers'] = 1
     args['water_heater_location'] = HPXML::LocationCrawlspaceVented
+    args['misc_plug_loads_other_annual_kwh'] = 1228.5
+  elsif ['base-foundation-conditioned-crawlspace.xml'].include? hpxml_file
+    args['geometry_unit_cfa'] = 1350.0
+    args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceConditioned
+    args['geometry_foundation_height'] = 4.0
+    args['floor_over_foundation_assembly_r'] = 18.7
+    args['foundation_wall_insulation_distance_to_bottom'] = 4.0
+    args['ducts_supply_location'] = HPXML::LocationCrawlspaceConditioned
+    args['ducts_return_location'] = HPXML::LocationCrawlspaceConditioned
+    args['ducts_supply_leakage_to_outside_value'] = 0.0
+    args['ducts_return_leakage_to_outside_value'] = 0.0
+    args['ducts_number_of_return_registers'] = 1
+    args['water_heater_location'] = HPXML::LocationCrawlspaceConditioned
     args['misc_plug_loads_other_annual_kwh'] = 1228.5
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
     args['geometry_foundation_height_above_grade'] = 5.0
@@ -1761,57 +1791,14 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_heating_capacity_17_f'] = 23040.0
     args['heat_pump_cooling_efficiency'] = 22.0
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
-  elsif ['base-hvac-autosize.xml',
-         'base-hvac-autosize-boiler-elec-only.xml',
-         'base-hvac-autosize-boiler-gas-central-ac-1-speed.xml',
-         'base-hvac-autosize-boiler-gas-only.xml',
-         'base-hvac-autosize-central-ac-only-1-speed.xml',
-         'base-hvac-autosize-central-ac-only-2-speed.xml',
-         'base-hvac-autosize-central-ac-only-var-speed.xml',
-         'base-hvac-autosize-elec-resistance-only.xml',
-         'base-hvac-autosize-evap-cooler-furnace-gas.xml',
-         'base-hvac-autosize-floor-furnace-propane-only.xml',
-         'base-hvac-autosize-furnace-elec-only.xml',
-         'base-hvac-autosize-furnace-gas-central-ac-2-speed.xml',
-         'base-hvac-autosize-furnace-gas-central-ac-var-speed.xml',
-         'base-hvac-autosize-furnace-gas-only.xml',
-         'base-hvac-autosize-furnace-gas-room-ac.xml',
-         'base-hvac-autosize-mini-split-air-conditioner-only-ducted.xml',
-         'base-hvac-autosize-room-ac-only.xml',
-         'base-hvac-autosize-stove-oil-only.xml',
-         'base-hvac-autosize-wall-furnace-elec-only.xml'].include? hpxml_file
+  elsif hpxml_file.include? 'autosize'
     args['heating_system_heating_capacity'] = Constants.Auto
     args['cooling_system_cooling_capacity'] = Constants.Auto
-  elsif ['base-hvac-autosize-air-to-air-heat-pump-1-speed.xml',
-         'base-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only.xml',
-         'base-hvac-autosize-air-to-air-heat-pump-1-speed-heating-only.xml',
-         'base-hvac-autosize-air-to-air-heat-pump-2-speed.xml',
-         'base-hvac-autosize-air-to-air-heat-pump-var-speed.xml',
-         'base-hvac-autosize-dual-fuel-air-to-air-heat-pump-1-speed.xml',
-         'base-hvac-autosize-dual-fuel-mini-split-heat-pump-ducted.xml',
-         'base-hvac-autosize-ground-to-air-heat-pump.xml',
-         'base-hvac-autosize-ground-to-air-heat-pump-cooling-only.xml',
-         'base-hvac-autosize-ground-to-air-heat-pump-heating-only.xml',
-         'base-hvac-autosize-mini-split-heat-pump-ducted.xml',
-         'base-hvac-autosize-mini-split-heat-pump-ducted-cooling-only.xml',
-         'base-hvac-autosize-mini-split-heat-pump-ducted-heating-only.xml'].include? hpxml_file
-    args['heat_pump_heating_capacity'] = Constants.AutoMaxLoad
-    args['heat_pump_heating_capacity_17_f'] = Constants.Auto
-    args['heat_pump_backup_heating_capacity'] = Constants.Auto
-    args['heat_pump_cooling_capacity'] = Constants.Auto
-  elsif ['base-hvac-autosize-air-to-air-heat-pump-1-speed-manual-s-oversize-allowances.xml',
-         'base-hvac-autosize-air-to-air-heat-pump-2-speed-manual-s-oversize-allowances.xml',
-         'base-hvac-autosize-air-to-air-heat-pump-var-speed-manual-s-oversize-allowances.xml',
-         'base-hvac-autosize-ground-to-air-heat-pump-manual-s-oversize-allowances.xml',
-         'base-hvac-autosize-mini-split-heat-pump-ducted-manual-s-oversize-allowances.xml'].include? hpxml_file
-    args['heat_pump_heating_capacity'] = Constants.Auto
-    args['heat_pump_heating_capacity_17_f'] = Constants.Auto
-    args['heat_pump_backup_heating_capacity'] = Constants.Auto
-    args['heat_pump_cooling_capacity'] = Constants.Auto
-  elsif ['base-hvac-autosize-central-ac-plus-air-to-air-heat-pump-heating.xml'].include? hpxml_file
-    args['heating_system_heating_capacity'] = Constants.Auto
-    args['cooling_system_cooling_capacity'] = Constants.Auto
-    args['heat_pump_heating_capacity'] = Constants.AutoMaxLoad
+    if hpxml_file.include? 'manual-s-oversize-allowances'
+      args['heat_pump_heating_capacity'] = Constants.Auto
+    else
+      args['heat_pump_heating_capacity'] = Constants.AutoMaxLoad
+    end
     args['heat_pump_heating_capacity_17_f'] = Constants.Auto
     args['heat_pump_backup_heating_capacity'] = Constants.Auto
     args['heat_pump_cooling_capacity'] = Constants.Auto
@@ -1875,6 +1862,10 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeNaturalGas
     args['heat_pump_backup_heating_efficiency'] = 0.95
     args['heat_pump_backup_heating_switchover_temp'] = 25
+  elsif ['base-hvac-ducts-leakage-cfm50.xml'].include? hpxml_file
+    args['ducts_leakage_units'] = HPXML::UnitsCFM50
+    args['ducts_supply_leakage_to_outside_value'] = 100
+    args['ducts_return_leakage_to_outside_value'] = 125
   elsif ['base-hvac-ducts-leakage-percent.xml'].include? hpxml_file
     args['ducts_leakage_units'] = HPXML::UnitsPercent
     args['ducts_supply_leakage_to_outside_value'] = 0.1
@@ -2057,6 +2048,19 @@ def set_measure_argument_values(hpxml_file, args)
     args['heating_system_fuel'] = HPXML::FuelTypeElectricity
     args['heating_system_heating_efficiency'] = 0.98
     args['cooling_system_type'] = 'none'
+  elsif ['base-hvac-pthp.xml'].include? hpxml_file
+    args['heat_pump_type'] = HPXML::HVACTypeHeatPumpPTHP
+    args['heat_pump_cooling_efficiency'] = 11.4
+    args['heat_pump_cooling_sensible_heat_fraction'] = 0.65
+  elsif ['base-hvac-ptac.xml'].include? hpxml_file
+    args['heating_system_type'] = 'none'
+    args['cooling_system_type'] = HPXML::HVACTypePTAC
+    args['cooling_system_cooling_efficiency_type'] = HPXML::UnitsEER
+    args['cooling_system_cooling_efficiency'] = 10.7
+    args['cooling_system_cooling_sensible_heat_fraction'] = 0.65
+  elsif ['base-hvac-ptac-with-heating.xml'].include? hpxml_file
+    args['heating_system_type'] = HPXML::HVACTypePTACHeating
+    args['heating_system_heating_efficiency'] = 1.0
   end
 
   # Lighting
@@ -2098,6 +2102,9 @@ def set_measure_argument_values(hpxml_file, args)
     args['heating_system_heating_capacity'] = 24000.0
   elsif ['base-location-portland-or.xml'].include? hpxml_file
     args['weather_station_epw_filepath'] = 'USA_OR_Portland.Intl.AP.726980_TMY3.epw'
+    args['heating_system_heating_capacity'] = 24000.0
+  elsif ['base-location-capetown-zaf.xml'].include? hpxml_file
+    args['weather_station_epw_filepath'] = 'ZAF_Cape.Town.688160_IWEC.epw'
     args['heating_system_heating_capacity'] = 24000.0
   end
 
@@ -2881,6 +2888,12 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.windows[3].exterior_shading_factor_winter = 1.0
     hpxml.windows[3].interior_shading_factor_summer = 0.0
     hpxml.windows[3].interior_shading_factor_winter = 1.0
+  elsif ['base-enclosure-thermal-mass.xml'].include? hpxml_file
+    hpxml.partition_wall_mass.area_fraction = 0.8
+    hpxml.partition_wall_mass.interior_finish_type = HPXML::InteriorFinishGypsumBoard
+    hpxml.partition_wall_mass.interior_finish_thickness = 0.25
+    hpxml.furniture_mass.area_fraction = 0.8
+    hpxml.furniture_mass.type = HPXML::FurnitureMassTypeHeavyWeight
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.attics.reverse_each do |attic|
       attic.delete
@@ -3826,15 +3839,22 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                               fraction_heat_load_served: 0.1,
                               fan_watts: 0.0)
     hpxml.cooling_systems[0].distribution_system_idref = hpxml.hvac_distributions[1].id
-    hpxml.cooling_systems[0].fraction_cool_load_served = 0.2
-    hpxml.cooling_systems[0].cooling_capacity *= 0.2
+    hpxml.cooling_systems[0].fraction_cool_load_served = 0.1333
+    hpxml.cooling_systems[0].cooling_capacity *= 0.1333
     hpxml.cooling_systems[0].primary_system = false
     hpxml.cooling_systems.add(id: "CoolingSystem#{hpxml.cooling_systems.size + 1}",
                               cooling_system_type: HPXML::HVACTypeRoomAirConditioner,
                               cooling_system_fuel: HPXML::FuelTypeElectricity,
                               cooling_capacity: 9600,
-                              fraction_cool_load_served: 0.2,
+                              fraction_cool_load_served: 0.1333,
                               cooling_efficiency_eer: 8.5,
+                              cooling_shr: 0.65)
+    hpxml.cooling_systems.add(id: "CoolingSystem#{hpxml.cooling_systems.size + 1}",
+                              cooling_system_type: HPXML::HVACTypePTAC,
+                              cooling_system_fuel: HPXML::FuelTypeElectricity,
+                              cooling_capacity: 9600,
+                              fraction_cool_load_served: 0.1333,
+                              cooling_efficiency_eer: 10.7,
                               cooling_shr: 0.65)
     hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
                          distribution_system_idref: hpxml.hvac_distributions[4].id,
@@ -4763,7 +4783,9 @@ if ARGV[0].to_sym == :update_hpxmls
   hpxml_docs = create_hpxmls()
 
   # Create Schematron file that reflects HPXML schema
-  create_schematron_hpxml_validator(hpxml_docs)
+  if not hpxml_docs.nil?
+    create_schematron_hpxml_validator(hpxml_docs)
+  end
 end
 
 if ARGV[0].to_sym == :cache_weather
