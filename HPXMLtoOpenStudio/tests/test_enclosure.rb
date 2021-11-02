@@ -574,6 +574,38 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     end
   end
 
+  def test_partition_wall_mass
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+
+    # Thermal masses
+    partition_wall_mass_layer_names = ['gypsum board', 'wall stud and cavity', 'gypsum board']
+
+    hpxml = _create_hpxml('base-enclosure-thermal-mass.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(args_hash)
+
+    # Check properties
+    os_surface = model.getInternalMassDefinitions.select { |s| s.name.to_s.start_with? 'partition wall mass above' }[0]
+    _check_surface(hpxml.partition_wall_mass, os_surface, partition_wall_mass_layer_names)
+  end
+
+  def test_furniture_mass
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+
+    # Thermal masses
+    furniture_mass_layer_names = ['furniture material living space']
+
+    hpxml = _create_hpxml('base-enclosure-thermal-mass.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(args_hash)
+
+    # Check properties
+    os_surface = model.getInternalMassDefinitions.select { |s| s.name.to_s.start_with?('furniture mass living space') && s.name.to_s.include?('above') }[0]
+    _check_surface(hpxml.furniture_mass, os_surface, furniture_mass_layer_names)
+  end
+
   def test_compartmentaliztion_area
     # Test single-family detached
     hpxml = _create_hpxml('base.xml')

@@ -49,6 +49,7 @@ __New Features__
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
 - Eliminates EnergyPlus warnings related to unused objects or invalid output meters/variables.
 - Allows modeling PTAC and PTHP HVAC systems. 
+- Allows user inputs for partition wall mass and furniture mass.
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
