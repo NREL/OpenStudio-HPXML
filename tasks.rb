@@ -56,8 +56,7 @@ def create_hpxmls
     'base-atticroof-radiant-barrier.xml' => 'base-location-dallas-tx.xml',
     'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
     'base-atticroof-vented.xml' => 'base.xml',
-    'base-battery.xml' => 'base.xml',
-    'base-battery-multiple.xml' => 'base-battery.xml',
+    'base-battery-outside.xml' => 'base.xml',
     'base-bldgtype-multifamily.xml' => 'base.xml',
     'base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-adjacent-to-multiple.xml' => 'base-bldgtype-multifamily.xml',
@@ -341,10 +340,8 @@ def create_hpxmls
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
-    'base-pv-battery-outside.xml' => 'base-pv.xml',
+    'base-pv-battery-outside.xml' => 'base-battery-outside.xml',
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
-    'base-pv-battery-living-space.xml' => 'base-pv.xml',
-    'base-pv-battery-unconditioned-space.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-schedules-simple.xml' => 'base.xml',
     'base-schedules-detailed-smooth.xml' => 'base.xml',
     'base-schedules-detailed-stochastic.xml' => 'base.xml',
@@ -2187,6 +2184,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_module_type'] = Constants.Auto
     args.delete('pv_system_inverter_efficiency')
     args.delete('pv_system_system_losses_fraction')
+    args['battery_location'] = Constants.Auto
     args['clothes_washer_location'] = Constants.Auto
     args['clothes_washer_efficiency'] = Constants.Auto
     args['clothes_washer_rated_annual_kwh'] = Constants.Auto
@@ -2324,10 +2322,18 @@ def set_measure_argument_values(hpxml_file, args)
   end
 
   # Battery
-  if ['base-battery.xml'].include? hpxml_file
-    args['battery_location'] = Constants.Auto
-  elsif ['base-pv-battery-outside.xml'].include? hpxml_file
+  if ['base-battery-outside.xml'].include? hpxml_file
     args['battery_location'] = HPXML::LocationOutside
+    args['battery_capacity'] = '12'
+  elsif ['base-pv-battery-outside.xml'].include? hpxml_file
+    args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
+    args['pv_system_location'] = HPXML::LocationRoof
+    args['pv_system_tracking'] = HPXML::PVTrackingTypeFixed
+    args['pv_system_2_module_type'] = HPXML::PVModuleTypePremium
+    args['pv_system_2_location'] = HPXML::LocationRoof
+    args['pv_system_2_tracking'] = HPXML::PVTrackingTypeFixed
+    args['pv_system_2_array_azimuth'] = 90
+    args['pv_system_2_max_power_output'] = 1500
   elsif ['base-pv-battery-garage.xml'].include? hpxml_file
     args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
     args['pv_system_location'] = HPXML::LocationRoof
@@ -2339,18 +2345,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_2_max_power_output'] = 1500
     args['battery_location'] = HPXML::LocationGarage
     args['battery_capacity'] = '15'
-  elsif ['base-pv-battery-living-space.xml'].include? hpxml_file
-    args['battery_location'] = HPXML::LocationLivingSpace
-  elsif ['base-pv-battery-unconditioned-space.xml'].include? hpxml_file
-    args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
-    args['pv_system_location'] = HPXML::LocationRoof
-    args['pv_system_tracking'] = HPXML::PVTrackingTypeFixed
-    args['pv_system_2_module_type'] = HPXML::PVModuleTypePremium
-    args['pv_system_2_location'] = HPXML::LocationRoof
-    args['pv_system_2_tracking'] = HPXML::PVTrackingTypeFixed
-    args['pv_system_2_array_azimuth'] = 90
-    args['pv_system_2_max_power_output'] = 1500
-    args['battery_location'] = HPXML::LocationBasementUnconditioned
   end
 
   # Simulation Control
@@ -4237,10 +4231,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   # HPXML Battery #
   # ------------- #
 
-  # Logic that can only be applied based on the file name
-  if ['base-battery-multiple.xml'].include? hpxml_file
-    hpxml.batteries.add(id: "Battery#{hpxml.batteries.size + 1}",
-                        type: HPXML::BatteryTypeLithiumIon)
+  if ['base-pv-battery-garage.xml'].include? hpxml_file
+    hpxml.batteries[0].lifetime_model = HPXML::BatteryLifetimeModelKandlerSmith
   end
 
   # ---------------- #

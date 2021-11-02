@@ -2156,13 +2156,14 @@ If not entered, the simulation will not include batteries.
   ``SystemIdentifier``        id                             Yes                Unique identifier
   ``BatteryType``             string            See [#]_     Yes                Battery type
   ``Location``                string            See [#]_     No        outside  Location
-  ``LifetimeModel``           string            See [#]_     No        None     Lifetime model
-  ``NominalCapacity``         double   Ah       > 0          No        200      Nominal capacity in Ampere hours
-  ``NominalVoltage``          double   V        > 0          No        50       Nominal voltage
+  ``LifetimeModel``[#]_       string            See [#]_     No        None     Lifetime model
+  ``NominalCapacitykWh``      double   kWh      > 0          No        10       Nominal capacity in kWh
+  ``NominalVoltage``          double   V        > 0          No        50       Nominal voltage in V
   ==========================  =======  =======  ===========  ========  =======  ============================================
 
   .. [#] BatteryType choices are "Li-ion".
   .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "attic - vented", "attic - unvented", "garage", or "outside".
+  .. [#] See the "Lifetime Model" `EnergyPlus documentation <https://bigladdersoftware.com/epx/docs/9-6/input-output-reference/group-electric-load-center-generator.html#liion-lifetime-model>`_ for more information.
   .. [#] LifetimeModel choices are "None" or "KandlerSmith".
 
 HPXML Appliances

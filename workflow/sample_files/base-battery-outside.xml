@@ -426,11 +426,9 @@
         <Batteries>
           <Battery>
             <SystemIdentifier id='Battery1'/>
+            <Location>outside</Location>
             <BatteryType>Li-ion</BatteryType>
-          </Battery>
-          <Battery>
-            <SystemIdentifier id='Battery2'/>
-            <BatteryType>Li-ion</BatteryType>
+            <NominalCapacitykWh>12</NominalCapacitykWh>
           </Battery>
         </Batteries>
       </Systems>

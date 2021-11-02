@@ -5058,16 +5058,13 @@ class HPXMLFile
     end
 
     if args[:battery_capacity] != Constants.Auto
-      capacity = Float(args[:battery_capacity]) # kWh
-
-      default_values = Battery.get_battery_default_values()
-      capacity = Battery.get_Ah_from_kWh(capacity, default_values[:voltage])
+      nominal_capacity = Float(args[:battery_capacity])
     end
 
     hpxml.batteries.add(id: "Battery#{hpxml.batteries.size + 1}",
                         type: HPXML::BatteryTypeLithiumIon,
                         location: location,
-                        capacity: capacity)
+                        nominal_capacity: nominal_capacity)
   end
 
   def self.set_lighting(hpxml, runner, args)

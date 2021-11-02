@@ -1537,18 +1537,13 @@ class HPXMLDefaults
         battery.lifetime_model = default_values[:lifetime_model]
         battery.lifetime_model_isdefaulted = true
       end
-      if battery.capacity.nil?
-        if battery.voltage.nil?
-          capacity = Battery.get_Ah_from_kWh(default_values[:capacity], default_values[:voltage])
-        else
-          capacity = Battery.get_Ah_from_kWh(default_values[:capacity], battery.voltage)
-        end
-        battery.capacity = capacity # Ah
-        battery.capacity_isdefaulted = true
+      if battery.nominal_capacity.nil?
+        battery.nominal_capacity = default_values[:nominal_capacity] # kWh
+        battery.nominal_capacity_isdefaulted = true
       end
-      if battery.voltage.nil?
-        battery.voltage = default_values[:voltage] # V
-        battery.voltage_isdefaulted = true
+      if battery.nominal_voltage.nil?
+        battery.nominal_voltage = default_values[:nominal_voltage] # V
+        battery.nominal_voltage_isdefaulted = true
       end
     end
   end
