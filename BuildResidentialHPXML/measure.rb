@@ -3011,14 +3011,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     errors << "heating_system_type=#{args[:heating_system_type]} and heat_pump_type=#{args[:heat_pump_type]} and heating_system_2_type=#{args[:heating_system_2_type]}" if error
 
     # single-family attached and num units, horizontal location not specified
-    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFA) && (!args[:geometry_building_num_units].is_initialized)
+    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFA) && !args[:geometry_building_num_units].is_initialized
     if error
       error = "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_building_num_units=not provided"
       errors << error
     end
 
     # apartment unit and num units, level, horizontal location not specified
-    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && (!args[:geometry_building_num_units].is_initialized)
+    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && !args[:geometry_building_num_units].is_initialized
     if error
       error = "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_building_num_units=not provided"
       errors << error
