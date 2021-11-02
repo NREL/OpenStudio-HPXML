@@ -63,6 +63,8 @@ __Bugfixes__
 - Fixes possibility of double-counting HVAC distribution losses if an `HVACDistribution` element has both AirDistribution properties and DSE values
 - Fixes possibility of incorrect "Peak Electricity: Winter Total (W)" and "Peak Electricity: Summer Total (W)" outputs for homes with duct losses.
 - Fixes heating/cooling seasons (used for e.g. summer vs winter window shading) for the southern hemisphere.
+- Fixes possibility of EnergyPlus simulation failure for homes with ground-source heat pumps and airflow and/or charge defects.
+- Fixes peak load/electricity outputs for homes with ground-source heat pumps and airflow and/or charge defects.
 
 ## OpenStudio-HPXML v1.2.0
 
