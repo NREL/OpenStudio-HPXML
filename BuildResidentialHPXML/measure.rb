@@ -3430,14 +3430,12 @@ class HPXMLFile
 
   def self.set_building_construction(hpxml, runner, args)
     if args[:geometry_unit_type] == HPXML::ResidentialTypeApartment
-      number_of_conditioned_floors_above_grade = 1
-      number_of_conditioned_floors = 1
-    else
-      number_of_conditioned_floors_above_grade = args[:geometry_unit_num_floors_above_grade]
-      number_of_conditioned_floors = number_of_conditioned_floors_above_grade
-      if args[:geometry_foundation_type] == HPXML::FoundationTypeBasementConditioned
-        number_of_conditioned_floors += 1
-      end
+      args[:geometry_unit_num_floors_above_grade] = 1
+    end
+    number_of_conditioned_floors_above_grade = args[:geometry_unit_num_floors_above_grade]
+    number_of_conditioned_floors = number_of_conditioned_floors_above_grade
+    if args[:geometry_foundation_type] == HPXML::FoundationTypeBasementConditioned
+      number_of_conditioned_floors += 1
     end
 
     if args[:geometry_unit_num_bathrooms] != Constants.Auto
