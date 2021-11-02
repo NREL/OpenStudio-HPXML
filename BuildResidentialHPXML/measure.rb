@@ -2100,13 +2100,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     battery_location_choices << HPXML::LocationAtticVented
     battery_location_choices << HPXML::LocationAtticUnvented
     battery_location_choices << HPXML::LocationGarage
-    battery_location_choices << HPXML::LocationExteriorWall
-    battery_location_choices << HPXML::LocationRoofDeck
     battery_location_choices << HPXML::LocationOutside
-    battery_location_choices << HPXML::LocationOtherHousingUnit
-    battery_location_choices << HPXML::LocationOtherHeatedSpace
-    battery_location_choices << HPXML::LocationOtherMultifamilyBufferSpace
-    battery_location_choices << HPXML::LocationOtherNonFreezingSpace
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('battery_location', battery_location_choices, true)
     arg.setDisplayName('Battery: Location')
