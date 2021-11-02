@@ -758,20 +758,17 @@ class Constructions
   def self.apply_foundation_wall(runner, model, surfaces, constr_name,
                                  ext_rigid_ins_offset, int_rigid_ins_offset, ext_rigid_ins_height,
                                  int_rigid_ins_height, ext_rigid_r, int_rigid_r, mat_int_finish,
-                                 concrete_thick_in, height_above_grade)
+                                 mat_wall, height_above_grade)
 
     # Create Kiva foundation
     foundation = apply_kiva_walled_foundation(model, ext_rigid_r, int_rigid_r, ext_rigid_ins_offset,
                                               int_rigid_ins_offset, ext_rigid_ins_height,
                                               int_rigid_ins_height, height_above_grade,
-                                              concrete_thick_in, mat_int_finish)
-
-    # Define materials
-    mat_concrete = Material.Concrete(concrete_thick_in)
+                                              mat_wall.thick_in, mat_int_finish)
 
     # Define construction
     constr = Construction.new(constr_name, [1])
-    constr.add_layer(mat_concrete)
+    constr.add_layer(mat_wall)
     if not mat_int_finish.nil?
       constr.add_layer(mat_int_finish)
     end
@@ -907,8 +904,16 @@ class Constructions
                          Material.AirFilmVertical)
   end
 
-  def self.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft, mat, cfa,
-                           ubfa, gfa, basement_frac_of_cfa, cond_base_surfaces, living_space)
+  def self.apply_furniture(runner, model, furniture_mass, cfa, ubfa, gfa,
+                           basement_frac_of_cfa, cond_base_surfaces, living_space)
+
+    if furniture_mass.type == HPXML::FurnitureMassTypeLightWeight
+      mass_lb_per_sqft = 8.0
+      mat = BaseMaterial.FurnitureLightWeight
+    elsif furniture_mass.type == HPXML::FurnitureMassTypeHeavyWeight
+      mass_lb_per_sqft = 16.0
+      mat = BaseMaterial.FurnitureHeavyWeight
+    end
 
     # Add user-specified furniture mass
     model.getSpaces.each do |space|
@@ -916,13 +921,13 @@ class Constructions
       furnConductivity = mat.k_in
       furnSolarAbsorptance = 0.6
       furnSpecHeat = mat.cp
-      furnDensity = density_lb_per_cuft
+      furnDensity = mat.rho
       if space == living_space
-        furnAreaFraction = 1.0
+        furnAreaFraction = furniture_mass.area_fraction
         furnMass = mass_lb_per_sqft
         floor_area = cfa
       elsif Geometry.is_unconditioned_basement(space)
-        furnAreaFraction = 1.0
+        furnAreaFraction = 0.4
         furnMass = mass_lb_per_sqft
         floor_area = ubfa
       elsif Geometry.is_garage(space)
@@ -1248,7 +1253,7 @@ class Constructions
 
   def self.apply_kiva_walled_foundation(model, ext_vert_r, int_vert_r,
                                         ext_vert_offset, int_vert_offset, ext_vert_depth, int_vert_depth,
-                                        wall_height_above_grade, wall_concrete_thick_in, wall_mat_int_finish)
+                                        wall_height_above_grade, wall_material_thick_in, wall_mat_int_finish)
 
     # Create the Foundation:Kiva object for crawl/basement foundations
     foundation = OpenStudio::Model::FoundationKiva.new(model)
@@ -1268,7 +1273,7 @@ class Constructions
       wall_mat_int_finish_thick_in = wall_mat_int_finish.nil? ? 0.0 : wall_mat_int_finish.thick_in
       foundation.addCustomBlock(ext_vert_mat,
                                 UnitConversions.convert(ext_vert_depth, 'ft', 'm'),
-                                UnitConversions.convert(wall_concrete_thick_in + wall_mat_int_finish_thick_in, 'in', 'm'),
+                                UnitConversions.convert(wall_material_thick_in + wall_mat_int_finish_thick_in, 'in', 'm'),
                                 UnitConversions.convert(ext_vert_offset, 'ft', 'm'))
     end
 
