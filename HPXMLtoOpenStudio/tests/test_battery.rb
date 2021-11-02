@@ -104,6 +104,26 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
     end
   end
 
+  def test_battery_multiple
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-battery-multiple.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    hpxml.batteries.each do |hpxml_battery|
+      battery = get_battery(model, hpxml_battery.id)
+
+      # Check object
+      assert(!battery.thermalZone.is_initialized)
+      assert_equal(0, battery.radiativeFraction)
+      assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
+      assert_in_epsilon(14, battery.numberofCellsinSeries, 0.01)
+      assert_in_epsilon(63, battery.numberofStringsinParallel, 0.01)
+      assert_in_epsilon(0, battery.initialFractionalStateofCharge, 0.01)
+      assert_in_epsilon(99, battery.batteryMass, 0.01)
+      assert_in_epsilon(1.42, battery.batterySurfaceArea, 0.01)
+    end
+  end
+
   def _test_measure(args_hash)
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new
