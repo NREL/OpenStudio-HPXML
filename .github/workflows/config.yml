@@ -11,7 +11,7 @@ jobs:
   run-tests:
     runs-on: ubuntu-latest
     container:
-      image: nrel/openstudio:3.2.1
+      image: nrel/openstudio:3.3.0-rc2
     steps:
       - uses: actions/checkout@v2
         with:
