@@ -167,6 +167,7 @@ def create_hpxmls
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-enclosure-windows-physical-properties.xml' => 'base.xml',
     'base-enclosure-windows-shading.xml' => 'base.xml',
+    'base-enclosure-thermal-mass.xml' => 'base.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-basement-garage.xml' => 'base.xml',
     'base-foundation-complex.xml' => 'base.xml',
@@ -2494,6 +2495,17 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
   elsif ['base-schedules-detailed-smooth.xml'].include? hpxml_file
     hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
+  elsif ['base-location-capetown-zaf.xml'].include? hpxml_file
+    hpxml.header.state_code = nil
+  end
+
+  # ------------------------- #
+  # HPXML ClimateandRiskZones #
+  # ------------------------- #
+
+  if ['base-location-capetown-zaf.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.iecc_zone = '3A'
+    hpxml.climate_and_risk_zones.iecc_year = 2006
   end
 
   # --------------------- #
@@ -2895,6 +2907,12 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.windows[3].exterior_shading_factor_winter = 1.0
     hpxml.windows[3].interior_shading_factor_summer = 0.0
     hpxml.windows[3].interior_shading_factor_winter = 1.0
+  elsif ['base-enclosure-thermal-mass.xml'].include? hpxml_file
+    hpxml.partition_wall_mass.area_fraction = 0.8
+    hpxml.partition_wall_mass.interior_finish_type = HPXML::InteriorFinishGypsumBoard
+    hpxml.partition_wall_mass.interior_finish_thickness = 0.25
+    hpxml.furniture_mass.area_fraction = 0.8
+    hpxml.furniture_mass.type = HPXML::FurnitureMassTypeHeavyWeight
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.attics.reverse_each do |attic|
       attic.delete
