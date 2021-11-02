@@ -140,8 +140,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-ducts-location-and-areas-not-same-type.xml' => 'base-sfd.xml',
       'error-second-heating-system-serves-total-heat-load.xml' => 'base-sfd.xml',
       'error-second-heating-system-but-no-primary-heating.xml' => 'base-sfd.xml',
-      # 'error-sfa-no-building-orientation.xml' => 'base-sfa.xml',
-      # 'error-mf-no-building-orientation.xml' => 'base-mf.xml',
+      'error-sfa-no-building-num-units.xml' => 'base-sfa.xml',
+      'error-mf-no-building-num-units.xml' => 'base-mf.xml',
       'error-dhw-indirect-without-boiler.xml' => 'base-sfd.xml',
       'error-foundation-wall-insulation-greater-than-height.xml' => 'base-sfd.xml',
       'error-conditioned-attic-with-one-floor-above-grade.xml' => 'base-sfd.xml',
@@ -182,8 +182,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-ducts-location-and-areas-not-same-type.xml' => 'ducts_supply_location=auto and ducts_supply_surface_area=150.0 and ducts_return_location=attic - unvented and ducts_return_surface_area=50.0',
       'error-second-heating-system-serves-total-heat-load.xml' => 'heating_system_2_type=Fireplace and heating_system_2_fraction_heat_load_served=1.0',
       'error-second-heating-system-but-no-primary-heating.xml' => 'heating_system_type=none and heat_pump_type=none and heating_system_2_type=Fireplace',
-      # 'error-sfa-no-building-orientation.xml' => 'geometry_unit_type=single-family attached and geometry_building_num_units=not provided and geometry_unit_horizontal_location=not provided',
-      # 'error-mf-no-building-orientation.xml' => 'geometry_unit_type=apartment unit and geometry_building_num_units=not provided and geometry_unit_level=not provided and geometry_unit_horizontal_location=not provided',
+      'error-sfa-no-building-num-units.xml' => 'geometry_unit_type=single-family attached and geometry_building_num_units=not provided',
+      'error-mf-no-building-num-units.xml' => 'geometry_unit_type=apartment unit and geometry_building_num_units=not provided',
       'error-dhw-indirect-without-boiler.xml' => 'water_heater_type=space-heating boiler with storage tank and heating_system_type=Furnace',
       'error-conditioned-attic-with-one-floor-above-grade.xml' => 'geometry_unit_num_floors_above_grade=1 and geometry_attic_type=ConditionedAttic',
       'error-zero-number-of-bedrooms.xml' => 'geometry_unit_num_bedrooms=0',
@@ -947,13 +947,10 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     elsif ['error-second-heating-system-but-no-primary-heating.xml'].include? hpxml_file
       args['heating_system_type'] = 'none'
       args['heating_system_2_type'] = HPXML::HVACTypeFireplace
-    elsif ['error-sfa-no-building-orientation.xml'].include? hpxml_file
+    elsif ['error-sfa-no-building-num-units.xml'].include? hpxml_file
       args.delete('geometry_building_num_units')
-      # args.delete('geometry_unit_horizontal_location')
-    elsif ['error-mf-no-building-orientation.xml'].include? hpxml_file
+    elsif ['error-mf-no-building-num-units.xml'].include? hpxml_file
       args.delete('geometry_building_num_units')
-      # args.delete('geometry_unit_level')
-      # args.delete('geometry_unit_horizontal_location')
     elsif ['error-dhw-indirect-without-boiler.xml'].include? hpxml_file
       args['water_heater_type'] = HPXML::WaterHeaterTypeCombiStorage
     elsif ['error-conditioned-attic-with-one-floor-above-grade.xml'].include? hpxml_file

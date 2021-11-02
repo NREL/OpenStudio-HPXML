@@ -2999,6 +2999,20 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:heating_system_type] == 'none') && (args[:heat_pump_type] == 'none') && (args[:heating_system_2_type] != 'none')
     errors << "heating_system_type=#{args[:heating_system_type]} and heat_pump_type=#{args[:heat_pump_type]} and heating_system_2_type=#{args[:heating_system_2_type]}" if error
 
+    # single-family attached and num units, horizontal location not specified
+    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFA) && (!args[:geometry_building_num_units].is_initialized)
+    if error
+      error = "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_building_num_units=not provided"
+      errors << error
+    end
+
+    # apartment unit and num units, level, horizontal location not specified
+    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && (!args[:geometry_building_num_units].is_initialized)
+    if error
+      error = "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_building_num_units=not provided"
+      errors << error
+    end
+
     # crawlspace or unconditioned basement with foundation wall and ceiling insulation
     warning = [HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeBasementUnconditioned].include?(args[:geometry_foundation_type]) && ((args[:foundation_wall_insulation_r] > 0) || args[:foundation_wall_assembly_r].is_initialized) && (args[:floor_over_foundation_assembly_r] > 2.1)
     if warning
