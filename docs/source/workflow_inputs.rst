@@ -2162,7 +2162,7 @@ If not entered, the simulation will not include batteries.
   ==========================  =======  =======  ===========  ========  =======  ============================================
 
   .. [#] BatteryType choices are "Li-ion".
-  .. [#] Location choices are "outside", "garage", "living space", or "unconditioned space".
+  .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "attic - vented", "attic - unvented", "garage", or "outside".
   .. [#] LifetimeModel choices are "None" or "KandlerSmith".
 
 HPXML Appliances
