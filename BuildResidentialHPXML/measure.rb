@@ -168,7 +168,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_unit_front_wall_is_adiabatic', true)
     arg.setDisplayName('Geometry: Unit Front Wall Is Adiabatic')
-    arg.setDescription('Presence of an adiabatic front wall.')
+    arg.setDescription('Presence of an adiabatic front wall, for example, the unit is adjacent to a conditioned corridor.')
     arg.setDefaultValue(false)
     args << arg
 
