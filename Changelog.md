@@ -50,6 +50,7 @@ __New Features__
 - Eliminates EnergyPlus warnings related to unused objects or invalid output meters/variables.
 - Allows modeling PTAC and PTHP HVAC systems. 
 - Allows user inputs for partition wall mass and furniture mass.
+- Adds an optional argument for site IECC zone; if provided, overrides IECC zone corresponding to EPW location.
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
