@@ -370,6 +370,7 @@ Systems
 ~~~~~~~
 
 System outputs are listed below.
+Autosized HVAC systems are based on ACCA Manual S calculations.
 
    =======================================================  ====================
    Type                                                     Notes
@@ -398,6 +399,7 @@ Design Loads
 ~~~~~~~~~~~~
 
 Design load outputs are listed below.
+Design loads are based on block load ACCA Manual J calculations.
 
    ================================================================  ====================
    Type                                                              Notes
