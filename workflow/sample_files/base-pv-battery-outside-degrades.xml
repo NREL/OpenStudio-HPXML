@@ -456,7 +456,7 @@
               <Units>kWh</Units>
               <Value>20.0</Value>
             </NominalCapacity>
-            <RatedPowerOutput>15.0</RatedPowerOutput>
+            <RatedPowerOutput>15000.0</RatedPowerOutput>
             <extension>
               <LifetimeModel>KandlerSmith</LifetimeModel>
             </extension>

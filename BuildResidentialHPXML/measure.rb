@@ -2122,7 +2122,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('battery_power', true)
     arg.setDisplayName('Battery: Rated Power Output')
     arg.setDescription('The rated power output of the lithium ion battery.')
-    arg.setUnits('kW')
+    arg.setUnits('W')
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
@@ -5081,7 +5081,7 @@ class HPXMLFile
     end
 
     if args[:battery_power] != Constants.Auto
-      rated_power_output = UnitConversions.convert(Float(args[:battery_power]), 'kW', 'W')
+      rated_power_output = Float(args[:battery_power])
     end
 
     if args[:battery_capacity] != Constants.Auto

@@ -2328,7 +2328,7 @@ def set_measure_argument_values(hpxml_file, args)
   # Battery
   if ['base-battery-outside.xml'].include? hpxml_file
     args['battery_location'] = HPXML::LocationOutside
-    args['battery_power'] = '15'
+    args['battery_power'] = '15000'
     args['battery_capacity'] = '20'
   elsif ['base-pv-battery-outside.xml'].include? hpxml_file
     args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
@@ -2349,7 +2349,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_2_array_azimuth'] = 90
     args['pv_system_2_max_power_output'] = 1500
     args['battery_location'] = HPXML::LocationGarage
-    args['battery_power'] = '15'
+    args['battery_power'] = '15000'
     args['battery_capacity'] = '20'
   end
 
@@ -4232,8 +4232,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   # Logic that can only be applied based on the file name
   if ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.pv_systems[0].year_modules_manufactured = 2015
-  elsif ['base-misc-generators.xml',
-         'base-misc-generators-battery-outside.xml'].include? hpxml_file
+  elsif ['base-misc-generators.xml'].include? hpxml_file
     hpxml.generators.add(id: "Generator#{hpxml.generators.size + 1}",
                          fuel_type: HPXML::FuelTypeNaturalGas,
                          annual_consumption_kbtu: 8500,
