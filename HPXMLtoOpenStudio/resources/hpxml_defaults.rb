@@ -1566,7 +1566,7 @@ class HPXMLDefaults
         battery.lifetime_model_isdefaulted = true
       end
       if battery.rated_power_output.nil?
-        battery.rated_power_output = default_values[:rated_power_output] # kW
+        battery.rated_power_output = default_values[:rated_power_output] # W
         battery.rated_power_output_isdefaulted = true
       end
       if battery.nominal_capacity_kwh.nil?

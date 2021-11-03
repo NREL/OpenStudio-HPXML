@@ -2183,17 +2183,17 @@ HPXML Batteries
 Each battery is entered as a ``/HPXML/Building/BuildingDetails/Systems/Batteries/Battery``.
 If not entered, the simulation will not include batteries.
 
-  ==========================  =======  =======  ===========  ========  =======  ============================================
-  Element                     Type     Units    Constraints  Required  Default  Notes
-  ==========================  =======  =======  ===========  ========  =======  ============================================
-  ``SystemIdentifier``        id                             Yes                Unique identifier
-  ``BatteryType``             string            See [#]_     Yes                Battery type
-  ``Location``                string            See [#]_     No        outside  Location
-  ``LifetimeModel``[#]_       string            See [#]_     No        None     Lifetime model
-  ``RatedPowerOutput``        string   kW       > 0          No        10       Rated power output in kW
-  ``NominalCapacitykWh``      double   kWh      > 0          No        10       Nominal capacity in kWh
-  ``NominalVoltage``          double   V        > 0          No        50       Nominal voltage in V
-  ==========================  =======  =======  ===========  ========  =======  ============================================
+  ===============================  =======  =======  ===========  ========  =======  ============================================
+  Element                          Type     Units    Constraints  Required  Default  Notes
+  ===============================  =======  =======  ===========  ========  =======  ============================================
+  ``SystemIdentifier``             id                             Yes                Unique identifier
+  ``BatteryType``                  string            See [#]_     Yes                Battery type
+  ``Location``                     string            See [#]_     No        outside  Location
+  ``LifetimeModel``[#]_            string            See [#]_     No        None     Lifetime model
+  ``RatedPowerOutput``             string   W        > 0          No        10000    Rated power output in W
+  ``NominalCapacity[Units="kWh"]`` double   kWh      > 0          No        10       Nominal capacity in kWh
+  ``NominalVoltage``               double   V        > 0          No        50       Nominal voltage in V
+  ===============================  =======  =======  ===========  ========  =======  ============================================
 
   .. [#] BatteryType choices are "Li-ion".
   .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "attic - vented", "attic - unvented", "garage", or "outside".

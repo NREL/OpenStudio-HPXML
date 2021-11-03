@@ -4,7 +4,7 @@ class Battery
   def self.apply(model, battery)
     obj_name = battery.id
 
-    power = battery.rated_power_output # kW
+    power = UnitConversions.convert(battery.rated_power_output, 'W', 'kW') # kW
     capacity = battery.nominal_capacity_kwh # kWh
     voltage = battery.nominal_voltage # V
 
@@ -60,7 +60,7 @@ class Battery
   def self.get_battery_default_values()
     return { location: HPXML::LocationOutside,
              lifetime_model: HPXML::BatteryLifetimeModelNone,
-             rated_power_output: 10.0,
+             rated_power_output: 10000.0,
              nominal_capacity_kwh: 10.0,
              nominal_voltage: 50.0 }
   end

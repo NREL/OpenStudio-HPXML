@@ -5081,7 +5081,7 @@ class HPXMLFile
     end
 
     if args[:battery_power] != Constants.Auto
-      rated_power_output = Float(args[:battery_power])
+      rated_power_output = UnitConversions.convert(Float(args[:battery_power]), 'kW', 'W')
     end
 
     if args[:battery_capacity] != Constants.Auto
