@@ -333,6 +333,7 @@ def create_hpxmls
     'base-mechvent-whole-house-fan.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-generators.xml' => 'base.xml',
+    'base-misc-generators-battery-outside.xml' => 'base-pv-battery-outside.xml',
     'base-misc-loads-large-uncommon.xml' => 'base-schedules-simple.xml',
     'base-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-misc-loads-none.xml' => 'base.xml',
@@ -4232,7 +4233,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   # Logic that can only be applied based on the file name
   if ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.pv_systems[0].year_modules_manufactured = 2015
-  elsif ['base-misc-generators.xml'].include? hpxml_file
+  elsif ['base-misc-generators.xml',
+         'base-misc-generators-battery-outside.xml'].include? hpxml_file
     hpxml.generators.add(id: "Generator#{hpxml.generators.size + 1}",
                          fuel_type: HPXML::FuelTypeNaturalGas,
                          annual_consumption_kbtu: 8500,

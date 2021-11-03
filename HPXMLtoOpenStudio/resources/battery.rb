@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Battery
-  def self.apply(model, battery)
+  def self.apply(model, battery, pv_systems)
     obj_name = battery.id
 
     power = battery.rated_power_output # kW
@@ -28,18 +28,15 @@ class Battery
     maximum_storage_state_of_charge_fraction = 0.95 # from SAM
     initial_fractional_state_of_charge = minimum_storage_state_of_charge_fraction
 
-    elcds = model.getElectricLoadCenterDistributions
-    if elcds.empty?
+    if pv_systems.empty?
       elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
       elcd.setName('Battery elec load center dist')
       elcd.setElectricalBussType('AlternatingCurrentWithStorage')
-    else # has PV
-      elcd = elcds[0]
-
-      if elcd.inverter.is_initialized
-        elcd.setElectricalBussType('DirectCurrentWithInverterDCStorage')
-        initial_fractional_state_of_charge = 0.5 # from SAM
-      end
+    else
+      elcds = model.getElectricLoadCenterDistributions
+      elcd = elcds[0] # there can be only 1 pv system
+      elcd.setElectricalBussType('DirectCurrentWithInverterDCStorage')
+      initial_fractional_state_of_charge = 0.5 # from SAM
     end
 
     elcd.setMinimumStorageStateofChargeFraction(minimum_storage_state_of_charge_fraction)
