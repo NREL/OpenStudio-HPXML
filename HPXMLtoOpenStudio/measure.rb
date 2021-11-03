@@ -2012,12 +2012,14 @@ class OSModel
   end
 
   def self.add_batteries(runner, model, spaces)
+    return if @hpxml.pv_systems.empty?
+
     @hpxml.batteries.each do |battery|
       # Assign space
       if battery.location != HPXML::LocationOutside
         battery.additional_properties.space = get_space_from_location(battery.location, 'Battery', model, spaces)
       end
-      Battery.apply(model, battery, @hpxml.pv_systems)
+      Battery.apply(model, battery)
     end
   end
 

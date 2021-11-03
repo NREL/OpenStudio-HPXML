@@ -493,7 +493,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                                                         'Cooling setpoint should typically be less than or equal to 86 deg-F.'],
                               'hvac-setpoints-low' => ['Heating setpoint should typically be greater than or equal to 58 deg-F.',
                                                        'Cooling setpoint should typically be greater than or equal to 68 deg-F.'],
-                              'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'] }
+                              'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'],
+                              'battery-no-pv' => ['No PV is specified, but battery is specified.'] }
 
     all_expected_warnings.each_with_index do |(warning_case, expected_warnings), i|
       puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."
@@ -535,6 +536,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['slab-zero-exposed-perimeter'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.slabs[0].exposed_perimeter = 0
+      elsif ['battery-no-pv'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-battery-outside.xml'))
       else
         fail "Unhandled case: #{warning_case}."
       end

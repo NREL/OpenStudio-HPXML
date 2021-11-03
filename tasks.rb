@@ -333,7 +333,6 @@ def create_hpxmls
     'base-mechvent-whole-house-fan.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-generators.xml' => 'base.xml',
-    'base-misc-generators-battery-outside.xml' => 'base-pv-battery-outside.xml',
     'base-misc-loads-large-uncommon.xml' => 'base-schedules-simple.xml',
     'base-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-misc-loads-none.xml' => 'base.xml',

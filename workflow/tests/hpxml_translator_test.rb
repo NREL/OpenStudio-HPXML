@@ -559,6 +559,9 @@ class HPXMLTest < MiniTest::Test
       if hpxml.windows.empty?
         next if log_line.include? 'No windows specified, the model will not include window heat transfer.'
       end
+      if hpxml.pv_systems.empty? && !hpxml.batteries.empty?
+        next if log_line.include? 'No PV is specified, but battery is specified.'
+      end
 
       flunk "Unexpected warning found in run.log: #{log_line}"
     end

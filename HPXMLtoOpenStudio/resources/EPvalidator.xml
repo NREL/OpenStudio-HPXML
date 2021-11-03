@@ -126,6 +126,7 @@
       <sch:report role='WARN' test='sum(h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem/h:FractionHeatLoadServed) + sum(h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:FractionHeatLoadServed) = 0'>No space heating specified, the model will not include space heating energy use.</sch:report>
       <sch:report role='WARN' test='sum(h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem/h:FractionCoolLoadServed) + sum(h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:FractionCoolLoadServed) = 0'>No space cooling specified, the model will not include space cooling energy use.</sch:report>
       <sch:report role='WARN' test='sum(h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:FractionDHWLoadServed) = 0'>No water heating specified, the model will not include water heating energy use.</sch:report>
+      <sch:report role='WARN' test='count(h:Systems/h:Photovoltaics/h:PVSystem) = 0 and count(h:Systems/h:Batteries/h:Battery) &gt;= 1'>No PV is specified, but battery is specified.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:ClothesWasher) = 0'>No clothes washer specified, the model will not include clothes washer energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:ClothesDryer) = 0'>No clothes dryer specified, the model will not include clothes dryer energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:Dishwasher) = 0'>No dishwasher specified, the model will not include dishwasher energy use.</sch:report>

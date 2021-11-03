@@ -13,7 +13,6 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
   end
 
   def get_battery(model, name)
-    generator = nil
     model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |b|
       next unless b.name.to_s.start_with? "#{name} "
 
@@ -59,26 +58,11 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
     hpxml.batteries.each do |hpxml_battery|
       battery = get_battery(model, hpxml_battery.id)
 
-      # Check object
-      assert(!battery.thermalZone.is_initialized)
-      assert_equal(0, battery.radiativeFraction)
-      assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
-      assert_in_epsilon(14, battery.numberofCellsinSeries, 0.01)
-      assert_in_epsilon(125, battery.numberofStringsinParallel, 0.01)
-      assert_in_epsilon(0.15, battery.initialFractionalStateofCharge, 0.01)
-      assert_in_epsilon(198.0, battery.batteryMass, 0.01)
-      assert_in_epsilon(2.25, battery.batterySurfaceArea, 0.01)
-      assert_in_epsilon(0.75, battery.chargeRateatWhichVoltagevsCapacityCurveWasGenerated, 0.01)
+      assert_empty(battery)
     end
 
     elcds = model.getElectricLoadCenterDistributions
-    assert_equal(1, elcds.size)
-    elcd = elcds[0]
-    assert_equal('AlternatingCurrentWithStorage', elcd.electricalBussType)
-    assert_equal(0.15, elcd.minimumStorageStateofChargeFraction)
-    assert_equal(0.95, elcd.maximumStorageStateofChargeFraction)
-    # assert_in_epsilon(0, elcd.demandLimitSchemePurchasedElectricDemandLimit.get, 0.01)
-    assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
+    assert_equal(0, elcds.size)
   end
 
   def test_pv_battery_outside
@@ -164,36 +148,6 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
 
     elcds = model.getElectricLoadCenterDistributions
     assert_equal(1, elcds.size)
-    elcd = elcds[0]
-    assert_equal('DirectCurrentWithInverterDCStorage', elcd.electricalBussType)
-    assert_equal(0.15, elcd.minimumStorageStateofChargeFraction)
-    assert_equal(0.95, elcd.maximumStorageStateofChargeFraction)
-    # assert_in_epsilon(0, elcd.demandLimitSchemePurchasedElectricDemandLimit.get, 0.01)
-    assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
-  end
-
-  def test_generator_battery_outside
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-misc-generators-battery-outside.xml'))
-    model, hpxml = _test_measure(args_hash)
-
-    hpxml.batteries.each do |hpxml_battery|
-      battery = get_battery(model, hpxml_battery.id)
-
-      # Check object
-      assert(!battery.thermalZone.is_initialized)
-      assert_equal(0, battery.radiativeFraction)
-      assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
-      assert_in_epsilon(14, battery.numberofCellsinSeries, 0.01)
-      assert_in_epsilon(125, battery.numberofStringsinParallel, 0.01)
-      assert_in_epsilon(0.5, battery.initialFractionalStateofCharge, 0.01)
-      assert_in_epsilon(198.0, battery.batteryMass, 0.01)
-      assert_in_epsilon(2.25, battery.batterySurfaceArea, 0.01)
-      assert_in_epsilon(0.75, battery.chargeRateatWhichVoltagevsCapacityCurveWasGenerated, 0.01)
-    end
-
-    elcds = model.getElectricLoadCenterDistributions
-    assert_equal(3, elcds.size)
     elcd = elcds[0]
     assert_equal('DirectCurrentWithInverterDCStorage', elcd.electricalBussType)
     assert_equal(0.15, elcd.minimumStorageStateofChargeFraction)
