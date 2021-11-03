@@ -137,7 +137,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-non-integer-ceiling-fan-quantity.xml' => 'base-sfd.xml',
       'error-sfd-conditioned-basement-zero-foundation-height.xml' => 'base-sfd.xml',
       'error-sfa-ambient.xml' => 'base-sfa.xml',
-      # 'error-mf-bottom-crawlspace-zero-foundation-height.xml' => 'base-mf.xml',
+      'error-mf-bottom-crawlspace-zero-foundation-height.xml' => 'base-mf.xml',
       'error-ducts-location-and-areas-not-same-type.xml' => 'base-sfd.xml',
       'error-second-heating-system-serves-total-heat-load.xml' => 'base-sfd.xml',
       'error-second-heating-system-but-no-primary-heating.xml' => 'base-sfd.xml',
@@ -153,7 +153,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
       'warning-non-electric-heat-pump-water-heater.xml' => 'base-sfd.xml',
       'warning-sfd-slab-non-zero-foundation-height.xml' => 'base-sfd.xml',
-      # 'warning-mf-bottom-slab-non-zero-foundation-height.xml' => 'base-mf.xml',
+      'warning-mf-bottom-slab-non-zero-foundation-height.xml' => 'base-mf.xml',
       'warning-slab-non-zero-foundation-height-above-grade.xml' => 'base-sfd.xml',
       'warning-second-heating-system-serves-majority-heat.xml' => 'base-sfd.xml',
       'warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml' => 'base-sfd.xml',
@@ -179,7 +179,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-sfa-ambient.xml' => 'geometry_unit_type=single-family attached and geometry_foundation_type=Ambient',
       'error-mf-conditioned-basement' => 'geometry_unit_type=apartment unit and geometry_foundation_type=ConditionedBasement',
       'error-mf-conditioned-crawlspace' => 'geometry_unit_type=apartment unit and geometry_foundation_type=ConditionedCrawlspace',
-      'error-mf-bottom-crawlspace-zero-foundation-height.xml' => 'geometry_unit_type=apartment unit and geometry_unit_level=Bottom and geometry_foundation_type=UnventedCrawlspace and geometry_foundation_height=0.0',
+      'error-mf-bottom-crawlspace-zero-foundation-height.xml' => 'geometry_unit_type=apartment unit and geometry_foundation_type=UnventedCrawlspace and geometry_foundation_height=0.0',
       'error-ducts-location-and-areas-not-same-type.xml' => 'ducts_supply_location=auto and ducts_supply_surface_area=150.0 and ducts_return_location=attic - unvented and ducts_return_surface_area=50.0',
       'error-second-heating-system-serves-total-heat-load.xml' => 'heating_system_2_type=Fireplace and heating_system_2_fraction_heat_load_served=1.0',
       'error-second-heating-system-but-no-primary-heating.xml' => 'heating_system_type=none and heat_pump_type=none and heating_system_2_type=Fireplace',
@@ -196,7 +196,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     expected_warnings = {
       'warning-non-electric-heat-pump-water-heater.xml' => 'water_heater_type=heat pump water heater and water_heater_fuel_type=natural gas',
       'warning-sfd-slab-non-zero-foundation-height.xml' => 'geometry_unit_type=single-family detached and geometry_foundation_type=SlabOnGrade and geometry_foundation_height=8.0',
-      # 'warning-mf-bottom-slab-non-zero-foundation-height.xml' => 'geometry_unit_type=apartment unit and geometry_unit_level=Bottom and geometry_foundation_type=SlabOnGrade and geometry_foundation_height=8.0',
+      'warning-mf-bottom-slab-non-zero-foundation-height.xml' => 'geometry_unit_type=apartment unit and geometry_foundation_type=SlabOnGrade and geometry_foundation_height=8.0',
       'warning-slab-non-zero-foundation-height-above-grade.xml' => 'geometry_foundation_type=SlabOnGrade and geometry_foundation_height_above_grade=1.0',
       'warning-second-heating-system-serves-majority-heat.xml' => 'heating_system_2_type=Fireplace and heating_system_2_fraction_heat_load_served=0.6',
       'warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml' => 'geometry_foundation_type=VentedCrawlspace and foundation_wall_insulation_r=8.9 and foundation_wall_assembly_r=10.0 and floor_over_foundation_assembly_r=10.0',
@@ -1084,9 +1084,19 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     # check warnings/errors
     if not expected_error.nil?
+      if runner.result.stepErrors.select { |s| s == expected_error }.size <= 0
+        runner.result.stepErrors.each do |s|
+          puts "ERROR: #{s}"
+        end
+      end
       assert(runner.result.stepErrors.select { |s| s == expected_error }.size > 0)
     end
     if not expected_warning.nil?
+      if runner.result.stepWarnings.select { |s| s == expected_warning }.size <= 0
+        runner.result.stepErrors.each do |s|
+          puts "WARNING: #{s}"
+        end
+      end
       assert(runner.result.stepWarnings.select { |s| s == expected_warning }.size > 0)
     end
   end
