@@ -46,7 +46,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
     assert_equal('DirectCurrentWithInverterDCStorage', elcd.electricalBussType)
     assert_equal(0.15, elcd.minimumStorageStateofChargeFraction)
     assert_equal(0.95, elcd.maximumStorageStateofChargeFraction)
-    # assert_in_epsilon(0, elcd.demandLimitSchemePurchasedElectricDemandLimit.get)
+    assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
     assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
   end
 
@@ -91,7 +91,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
     assert_equal('DirectCurrentWithInverterDCStorage', elcd.electricalBussType)
     assert_equal(0.15, elcd.minimumStorageStateofChargeFraction)
     assert_equal(0.95, elcd.maximumStorageStateofChargeFraction)
-    # assert_in_epsilon(0, elcd.demandLimitSchemePurchasedElectricDemandLimit.get, 0.01)
+    assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
     assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
   end
 
@@ -121,7 +121,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
     assert_equal('DirectCurrentWithInverterDCStorage', elcd.electricalBussType)
     assert_equal(0.15, elcd.minimumStorageStateofChargeFraction)
     assert_equal(0.95, elcd.maximumStorageStateofChargeFraction)
-    # assert_in_epsilon(0, elcd.demandLimitSchemePurchasedElectricDemandLimit.get, 0.01)
+    assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
     assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
   end
 
@@ -152,7 +152,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
     assert_equal('DirectCurrentWithInverterDCStorage', elcd.electricalBussType)
     assert_equal(0.15, elcd.minimumStorageStateofChargeFraction)
     assert_equal(0.95, elcd.maximumStorageStateofChargeFraction)
-    # assert_in_epsilon(0, elcd.demandLimitSchemePurchasedElectricDemandLimit.get, 0.01)
+    assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
     assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
   end
 
