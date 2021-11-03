@@ -3835,7 +3835,7 @@
 	</xs:complexType>
 	<xs:complexType name="BatteryCapacityType">
 		<xs:sequence>
-			<xs:element name="Units" type="BatteryCapacity"> </xs:element>
+			<xs:element name="Units" type="BatteryCapacityUnits"> </xs:element>
 			<xs:element name="Value" type="BatteryCapacity">
 				<xs:annotation>
 					<xs:documentation>Ah is computed by multiplying the discharge current (Amps) by the discharge time (hours). kWh is computed by multiplying the power output (kW) by the discharge time (hours).</xs:documentation>

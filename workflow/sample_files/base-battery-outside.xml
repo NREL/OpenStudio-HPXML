@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<HPXML xmlns='http://hpxmlonline.com/2019/10' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://hpxmlonline.com/2019/10' schemaVersion='3.0'>
+<HPXML xmlns='http://hpxmlonline.com/2019/10' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://hpxmlonline.com/2019/10' schemaVersion='4.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>tasks.rb</XMLGeneratedBy>
@@ -428,7 +428,10 @@
             <SystemIdentifier id='Battery1'/>
             <Location>outside</Location>
             <BatteryType>Li-ion</BatteryType>
-            <NominalCapacitykWh>20.0</NominalCapacitykWh>
+            <NominalCapacity>
+              <Units>kWh</Units>
+              <Value>20.0</Value>
+            </NominalCapacity>
             <RatedPowerOutput>15.0</RatedPowerOutput>
           </Battery>
         </Batteries>

@@ -5,7 +5,7 @@ class Battery
     obj_name = battery.id
 
     power = battery.rated_power_output # kW
-    capacity = battery.nominal_capacity # kWh
+    capacity = battery.nominal_capacity_kwh # kWh
     voltage = battery.nominal_voltage # V
 
     return if power <= 0 || capacity <= 0 || voltage <= 0
@@ -61,7 +61,7 @@ class Battery
     return { location: HPXML::LocationOutside,
              lifetime_model: HPXML::BatteryLifetimeModelNone,
              rated_power_output: 10.0,
-             nominal_capacity: 10.0,
+             nominal_capacity_kwh: 10.0,
              nominal_voltage: 50.0 }
   end
 

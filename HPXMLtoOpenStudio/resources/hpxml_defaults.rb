@@ -1569,9 +1569,9 @@ class HPXMLDefaults
         battery.rated_power_output = default_values[:rated_power_output] # kW
         battery.rated_power_output_isdefaulted = true
       end
-      if battery.nominal_capacity.nil?
-        battery.nominal_capacity = default_values[:nominal_capacity] # kWh
-        battery.nominal_capacity_isdefaulted = true
+      if battery.nominal_capacity_kwh.nil?
+        battery.nominal_capacity_kwh = default_values[:nominal_capacity_kwh] # kWh
+        battery.nominal_capacity_kwh_isdefaulted = true
       end
       if battery.nominal_voltage.nil?
         battery.nominal_voltage = default_values[:nominal_voltage] # V
