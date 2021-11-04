@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>8af58af2-ac3a-43a1-b8b9-ab9340ca89b0</version_id>
-  <version_modified>20211103T190919Z</version_modified>
+  <version_id>be30939e-0f1d-407d-8d47-12244c9b04e9</version_id>
+  <version_modified>20211104T005135Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -404,6 +404,12 @@
       <checksum>80061D4B</checksum>
     </file>
     <file>
+      <filename>BaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>54DB70EA</checksum>
+    </file>
+    <file>
       <filename>test_pv.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -433,46 +439,40 @@
       <checksum>EFD4F8D6</checksum>
     </file>
     <file>
-      <filename>EPvalidator.xml</filename>
-      <filetype>xml</filetype>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EA9136F0</checksum>
+      <checksum>3B5BBE82</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6EC5AFAC</checksum>
+      <checksum>05318082</checksum>
+    </file>
+    <file>
+      <filename>HPXMLvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D6298D09</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4AC739B2</checksum>
     </file>
     <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>F5B4A228</checksum>
+      <checksum>479C4926</checksum>
     </file>
     <file>
       <filename>test_battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>BB9B6C79</checksum>
-    </file>
-    <file>
-      <filename>BaseElements.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E4F5E1D1</checksum>
-    </file>
-    <file>
-      <filename>HPXMLvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>89600572</checksum>
-    </file>
-    <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3B5BBE82</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
