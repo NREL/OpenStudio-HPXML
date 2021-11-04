@@ -5,8 +5,12 @@ class Battery
     obj_name = battery.id
 
     power = UnitConversions.convert(battery.rated_power_output, 'W', 'kW') # kW
-    capacity = battery.nominal_capacity_kwh # kWh
     voltage = battery.nominal_voltage # V
+    if not battery.nominal_capacity_kwh.nil?
+      capacity = battery.nominal_capacity_kwh # kWh
+    else
+      capacity = get_kWh_from_Ah(battery.nominal_capacity_ah, voltage) # kWh
+    end
 
     return if power <= 0 || capacity <= 0 || voltage <= 0
 

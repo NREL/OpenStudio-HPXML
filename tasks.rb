@@ -341,6 +341,7 @@ def create_hpxmls
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
+    'base-pv-battery-ah.xml' => 'base-pv-battery-outside.xml',
     'base-pv-battery-outside.xml' => 'base-battery-outside.xml',
     'base-pv-battery-outside-degrades.xml' => 'base-pv-battery-outside.xml',
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
@@ -4256,6 +4257,11 @@ def apply_hpxml_modification(hpxml_file, hpxml)
 
   if ['base-pv-battery-outside-degrades.xml'].include? hpxml_file
     hpxml.batteries[0].lifetime_model = HPXML::BatteryLifetimeModelKandlerSmith
+  elsif ['base-pv-battery-ah.xml'].include? hpxml_file
+    default_voltage = Battery.get_battery_default_values()[:nominal_voltage]
+    hpxml.batteries[0].nominal_capacity_ah = Battery.get_Ah_from_kWh(hpxml.batteries[0].nominal_capacity_kwh,
+                                                                     default_voltage)
+    hpxml.batteries[0].nominal_capacity_kwh = nil
   end
 
   # ---------------- #

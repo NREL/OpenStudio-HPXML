@@ -12,14 +12,14 @@ __New Features__
   - Moves `Slab/PerimeterInsulationDepth` to `Slab/PerimeterInsulation/Layer/InsulationDepth`.
   - Moves `Slab/UnderSlabInsulationWidth` to `Slab/UnderSlabInsulation/Layer/InsulationWidth`.
   - Moves `Slab/UnderSlabInsulationSpansEntireSlab` to `Slab/UnderSlabInsulation/Layer/InsulationSpansEntireSlab`.
-- **Breaking change**: Requires that all PV inverters have equal efficiency values.
+- **Breaking change**: For homes with multiple PV arrays, all inverter efficiencies must have the same value.
 - Initial release of BuildResidentialHPXML measure, which generates an HPXML file from a set of building description inputs.
+- Adds a new results_hpxml.csv output file to summarize HPXML values (e.g., surface areas, HVAC capacities).
 - Expanded capabilities for scheduling:
   - Allows modeling detailed occupancy via a schedule CSV file.
   - Introduces a measure for automatically generating detailed smooth/stochastic schedule CSV files.
   - Expands simplified weekday/weekend/monthly schedule inputs to additional building features.
   - Allows `HeatingSeason` & `CoolingSeason` to be specified for defining heating and cooling equipment availability.
-- Adds a new results_hpxml.csv output file to summarize HPXML values (e.g., surface areas, HVAC capacities).
 - Adds alternative inputs:
   - Window/skylight physical properties (`GlassLayers`, `FrameType`, etc.) instead of `UFactor` & `SHGC`.
   - `Ducts/FractionDuctArea` instead of `Ducts/DuctSurfaceArea`.
@@ -37,6 +37,8 @@ __New Features__
   - Door azimuth.
   - Radiant barrier grade.
   - Whole house fan airflow rate and fan power.
+- Allows modeling lithium ion batteries.
+- Allows modeling PTAC and PTHP HVAC systems. 
 - Allows conditioned crawlspaces to be specified; modeled as crawlspaces that are actively maintained at setpoint.
 - Allows non-zero refrigerant charge defect ratios for ground source heat pumps.
 - Expands choices allowed for `Siding` (Wall/RimJoist) and `RoofType` (Roof) elements.
@@ -56,9 +58,7 @@ __New Features__
 - Relaxes requirement for heating (or cooling) setpoints so that they are only needed if heating (or cooling) equipment is present.
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
 - Eliminates EnergyPlus warnings related to unused objects or invalid output meters/variables.
-- Allows modeling PTAC and PTHP HVAC systems. 
 - Allows user inputs for partition wall mass and furniture mass.
-- Allows modeling lithium ion batteries.
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
