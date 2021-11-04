@@ -136,13 +136,19 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-non-integer-geometry-num-bathrooms.xml' => 'base-sfd.xml',
       'error-non-integer-ceiling-fan-quantity.xml' => 'base-sfd.xml',
       'error-sfd-conditioned-basement-zero-foundation-height.xml' => 'base-sfd.xml',
+      'error-sfd-adiabatic-walls.xml' => 'base-sfd.xml',
       'error-sfa-ambient.xml' => 'base-sfa.xml',
       'error-mf-bottom-crawlspace-zero-foundation-height.xml' => 'base-mf.xml',
       'error-ducts-location-and-areas-not-same-type.xml' => 'base-sfd.xml',
       'error-second-heating-system-serves-total-heat-load.xml' => 'base-sfd.xml',
       'error-second-heating-system-but-no-primary-heating.xml' => 'base-sfd.xml',
       'error-sfa-no-building-num-units.xml' => 'base-sfa.xml',
+      'error-sfa-above-apartment.xml' => 'base-sfa.xml',
+      'error-sfa-below-apartment.xml' => 'base-sfa.xml',
+      'error-sfa-all-adiabatic-walls.xml' => 'base-sfa.xml',
       'error-mf-no-building-num-units.xml' => 'base-mf.xml',
+      'error-mf-all-adiabatic-walls.xml' => 'base-mf.xml',
+      'error-mf-two-stories.xml' => 'base-mf.xml',
       'error-dhw-indirect-without-boiler.xml' => 'base-sfd.xml',
       'error-foundation-wall-insulation-greater-than-height.xml' => 'base-sfd.xml',
       'error-conditioned-attic-with-one-floor-above-grade.xml' => 'base-sfd.xml',
@@ -176,6 +182,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-non-integer-geometry-num-bathrooms.xml' => 'geometry_unit_num_bathrooms=1.5',
       'error-non-integer-ceiling-fan-quantity.xml' => 'ceiling_fan_quantity=0.5',
       'error-sfd-conditioned-basement-zero-foundation-height.xml' => 'geometry_unit_type=single-family detached and geometry_foundation_type=ConditionedBasement and geometry_foundation_height=0.0',
+      'error-sfd-adiabatic-walls.xml' => 'No adiabatic surfaces can be applied to single-family detached homes',
       'error-sfa-ambient.xml' => 'geometry_unit_type=single-family attached and geometry_foundation_type=Ambient',
       'error-mf-conditioned-basement' => 'geometry_unit_type=apartment unit and geometry_foundation_type=ConditionedBasement',
       'error-mf-conditioned-crawlspace' => 'geometry_unit_type=apartment unit and geometry_foundation_type=ConditionedCrawlspace',
@@ -184,7 +191,12 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-second-heating-system-serves-total-heat-load.xml' => 'heating_system_2_type=Fireplace and heating_system_2_fraction_heat_load_served=1.0',
       'error-second-heating-system-but-no-primary-heating.xml' => 'heating_system_type=none and heat_pump_type=none and heating_system_2_type=Fireplace',
       'error-sfa-no-building-num-units.xml' => 'geometry_unit_type=single-family attached and geometry_building_num_units=not provided',
+      'error-sfa-above-apartment.xml' => 'Single-family attached buildings cannot be above another unit',
+      'error-sfa-below-apartment.xml' => 'Single-family attached buildings cannot be below another unit',
+      'error-sfa-all-adiabatic-walls.xml' => 'At least one wall must be set to non-adiabatic',
       'error-mf-no-building-num-units.xml' => 'geometry_unit_type=apartment unit and geometry_building_num_units=not provided',
+      'error-mf-all-adiabatic-walls.xml' => 'At least one wall must be set to non-adiabatic',
+      'error-mf-two-stories.xml' => 'Apartment units can only have one above grade floor',
       'error-dhw-indirect-without-boiler.xml' => 'water_heater_type=space-heating boiler with storage tank and heating_system_type=Furnace',
       'error-conditioned-attic-with-one-floor-above-grade.xml' => 'geometry_unit_num_floors_above_grade=1 and geometry_attic_type=ConditionedAttic',
       'error-zero-number-of-bedrooms.xml' => 'geometry_unit_num_bedrooms=0',
@@ -929,6 +941,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     elsif ['error-sfd-conditioned-basement-zero-foundation-height.xml'].include? hpxml_file
       args['geometry_foundation_height'] = 0.0
       args['foundation_wall_insulation_distance_to_bottom'] = Constants.Auto
+    elsif ['error-sfd-adiabatic-walls.xml'].include? hpxml_file
+      args['geometry_unit_left_wall_is_adiabatic'] = true
     elsif ['error-sfa-ambient.xml'].include? hpxml_file
       args['geometry_foundation_type'] = HPXML::FoundationTypeAmbient
       args.delete('geometry_rim_joist_height')
@@ -952,8 +966,24 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['heating_system_2_type'] = HPXML::HVACTypeFireplace
     elsif ['error-sfa-no-building-num-units.xml'].include? hpxml_file
       args.delete('geometry_building_num_units')
+    elsif ['error-sfa-above-apartment.xml'].include? hpxml_file
+      args['geometry_foundation_type'] = HPXML::FoundationTypeAboveApartment
+    elsif ['error-sfa-below-apartment.xml'].include? hpxml_file
+      args['geometry_attic_type'] = HPXML::AtticTypeBelowApartment
+    elsif ['error-sfa-all-adiabatic-walls.xml'].include? hpxml_file
+      args['geometry_unit_left_wall_is_adiabatic'] = true
+      args['geometry_unit_right_wall_is_adiabatic'] = true
+      args['geometry_unit_front_wall_is_adiabatic'] = true
+      args['geometry_unit_back_wall_is_adiabatic'] = true
     elsif ['error-mf-no-building-num-units.xml'].include? hpxml_file
       args.delete('geometry_building_num_units')
+    elsif ['error-mf-all-adiabatic-walls.xml'].include? hpxml_file
+      args['geometry_unit_left_wall_is_adiabatic'] = true
+      args['geometry_unit_right_wall_is_adiabatic'] = true
+      args['geometry_unit_front_wall_is_adiabatic'] = true
+      args['geometry_unit_back_wall_is_adiabatic'] = true
+    elsif ['error-mf-two-stories.xml'].include? hpxml_file
+      args['geometry_unit_num_floors_above_grade'] = 2
     elsif ['error-dhw-indirect-without-boiler.xml'].include? hpxml_file
       args['water_heater_type'] = HPXML::WaterHeaterTypeCombiStorage
     elsif ['error-conditioned-attic-with-one-floor-above-grade.xml'].include? hpxml_file

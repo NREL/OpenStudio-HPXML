@@ -1586,6 +1586,14 @@ class Geometry
       runner.registerError('At least one wall must be set to non-adiabatic')
       return false
     end
+    if foundation_type == HPXML::FoundationTypeAboveApartment
+      runner.registerError('Single-family attached buildings cannot be above another unit')
+      return false
+    end
+    if attic_type == HPXML::AtticTypeBelowApartment
+      runner.registerError('Single-family attached buildings cannot be below another unit')
+      return false
+    end
 
     # Convert to SI
     cfa = UnitConversions.convert(cfa, 'ft^2', 'm^2')
@@ -1637,7 +1645,7 @@ class Geometry
     living_spaces_front << living_space
 
     # Adiabatic surfaces for walls
-    adb_facade_hash = {'left' => adiabatic_left_wall, 'right' => adiabatic_right_wall, 'front' => adiabatic_front_wall, 'back' => adiabatic_back_wall}
+    adb_facade_hash = { 'left' => adiabatic_left_wall, 'right' => adiabatic_right_wall, 'front' => adiabatic_front_wall, 'back' => adiabatic_back_wall }
     adb_facades = adb_facade_hash.select { |_, v| v == true }.keys
 
     # Make surfaces adiabatic
@@ -2089,7 +2097,7 @@ class Geometry
     living_spaces_front << living_space
 
     # Map surface facades to adiabatic walls
-    adb_facade_hash = {'left' => adiabatic_left_wall, 'right' => adiabatic_right_wall, 'front' => adiabatic_front_wall, 'back' => adiabatic_back_wall}
+    adb_facade_hash = { 'left' => adiabatic_left_wall, 'right' => adiabatic_right_wall, 'front' => adiabatic_front_wall, 'back' => adiabatic_back_wall }
     adb_facades = adb_facade_hash.select { |_, v| v == true }.keys
 
     # Adiabatic floor/ceiling
