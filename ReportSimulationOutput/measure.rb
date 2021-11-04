@@ -1847,9 +1847,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         return { [FT::Elec, EUT::Generator] => ["Generator Produced AC #{EPlus::FuelTypeElectricity} Energy"],
                  [to_ft[fuel], EUT::Generator] => ["Generator #{fuel} HHV Basis Energy"] }
 
-      #elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
-      #  return { [FT::Elec, EUT::PV] => ['Electric Storage Discharge Energy', 'Electric Storage Production Decrement Energy'] }
-
       elsif object.to_ElectricEquipment.is_initialized
         end_use = { Constants.ObjectNameHotWaterRecircPump => EUT::HotWaterRecircPump,
                     Constants.ObjectNameClothesWasher => EUT::ClothesWasher,
