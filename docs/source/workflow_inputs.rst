@@ -2183,22 +2183,24 @@ HPXML Batteries
 Each battery is entered as a ``/HPXML/Building/BuildingDetails/Systems/Batteries/Battery``.
 If not entered, the simulation will not include batteries.
 
-  ===============================  =======  =======  ===========  ========  =======  ============================================
-  Element                          Type     Units    Constraints  Required  Default  Notes
-  ===============================  =======  =======  ===========  ========  =======  ============================================
-  ``SystemIdentifier``             id                             Yes                Unique identifier
-  ``BatteryType``                  string            See [#]_     Yes                Battery type
-  ``Location``                     string            See [#]_     No        outside  Location
-  ``LifetimeModel``[#]_            string            See [#]_     No        None     Lifetime model
-  ``RatedPowerOutput``             string   W        > 0          No        10000    Rated power output in W
-  ``NominalCapacity[Units="kWh"]`` double   kWh      > 0          No        10       Nominal capacity in kWh
-  ``NominalVoltage``               double   V        > 0          No        50       Nominal voltage in V
-  ===============================  =======  =======  ===========  ========  =======  ============================================
+  ===============================  =======  =======  ===========  ========  ========  ============================================
+  Element                          Type     Units    Constraints  Required  Default   Notes
+  ===============================  =======  =======  ===========  ========  ========  ============================================
+  ``SystemIdentifier``             id                             Yes                 Unique identifier
+  ``BatteryType``                  string            See [#]_     Yes                 Battery type
+  ``Location``                     string            See [#]_     No        outside   Location
+  ``LifetimeModel``[#]_            string            See [#]_     No        None      Lifetime model
+  ``RatedPowerOutput``             string   W        > 0          No        See [#]_  Rated power output in W
+  ``NominalCapacity[Units="kWh"]`` double   kWh      > 0          No        See [#]_  Nominal capacity in kWh
+  ``NominalVoltage``               double   V        > 0          No        50        Nominal voltage in V
+  ===============================  =======  =======  ===========  ========  ========  ============================================
 
   .. [#] BatteryType choices are "Li-ion".
   .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "attic - vented", "attic - unvented", "garage", or "outside".
   .. [#] See the "Lifetime Model" `EnergyPlus documentation <https://bigladdersoftware.com/epx/docs/9-6/input-output-reference/group-electric-load-center-generator.html#liion-lifetime-model>`_ for more information.
   .. [#] LifetimeModel choices are "None" or "KandlerSmith".
+  .. [#] RatedPowerOutput is defaulted to 5000 W if NominalCapacity is not specified; otherwise it is calculated as NominalCapacity * 1000 * C-rate, where C-rate = 0.5.
+  .. [#] NominalCapacity is defaulted to 10 kWh if RatedPowerOutput is not specified; otherwise it is calculated as RatedPowerOutput / 1000 / C-rate, where C-rate = 0.5.
 
 HPXML Appliances
 ----------------

@@ -37,7 +37,7 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert_in_epsilon(0.5, battery.initialFractionalStateofCharge, 0.01)
       assert_in_epsilon(99.0, battery.batteryMass, 0.01)
       assert_in_epsilon(1.42, battery.batterySurfaceArea, 0.01)
-      assert_in_epsilon(1.0, battery.chargeRateatWhichVoltagevsCapacityCurveWasGenerated, 0.01)
+      assert_in_epsilon(0.5, battery.chargeRateatWhichVoltagevsCapacityCurveWasGenerated, 0.01)
     end
 
     elcds = model.getElectricLoadCenterDistributions
