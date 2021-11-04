@@ -322,7 +322,7 @@
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>10000.0</HeatingCapacity>
               <HeatingCapacity17F>5900.0</HeatingCapacity17F>
-              <CoolingCapacity>10000.0</CoolingCapacity>
+              <CoolingCapacity>36000.0</CoolingCapacity>
               <CompressorType>single stage</CompressorType>
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <BackupSystemFuel>electricity</BackupSystemFuel>
