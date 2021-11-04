@@ -497,7 +497,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                               'hvac-setpoints-low' => ['Heating setpoint should typically be greater than or equal to 58 deg-F.',
                                                        'Cooling setpoint should typically be greater than or equal to 68 deg-F.'],
                               'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'],
-                              'battery-no-pv' => ['No PV is specified, but battery is specified.'] }
+                              'battery-no-pv' => ['Battery without PV specified; battery is assumed to operate as backup and will not be modeled.'] }
 
     all_expected_warnings.each_with_index do |(warning_case, expected_warnings), i|
       puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."

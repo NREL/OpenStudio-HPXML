@@ -2135,7 +2135,7 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
   ``ArrayAzimuth`` or ``ArrayOrientation``                 integer or string  deg or direction  0 - 359 or See [#]_  Yes                 Direction panels face (clockwise from North)
   ``ArrayTilt``                                            double             deg               0 - 90               Yes                 Tilt relative to horizontal
   ``MaxPowerOutput``                                       double             W                 >= 0                 Yes                 Peak power
-  ``InverterEfficiency``                                   double             frac              See [#]_             No        0.96      Inverter efficiency
+  ``InverterEfficiency``                                   double             frac              0 - 1 [#]_             No        0.96      Inverter efficiency
   ``SystemLossesFraction`` or ``YearModulesManufactured``  double or integer  frac or #         0 - 1 or > 1600      No        0.14      System losses [#]_
   ``extension/NumberofBedroomsServed``                     integer                              > 1                  See [#]_            Number of bedrooms served
   =======================================================  =================  ================  ===================  ========  ========  ============================================
@@ -2144,7 +2144,7 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
   .. [#] ModuleType choices are "standard", "premium", or "thin film".
   .. [#] Tracking choices are "fixed", "1-axis", "1-axis backtracked", or "2-axis".
   .. [#] ArrayOrientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
-  .. [#] Value must be 0 - 1 and equal for all inverters.
+  .. [#] For homes with multiple PV arrays, all InverterEfficiency elements must have the same value.
   .. [#] System losses due to soiling, shading, snow, mismatch, wiring, degradation, etc.
          If YearModulesManufactured provided but not SystemLossesFraction, system losses calculated as:
          SystemLossesFraction = 1.0 - (1.0 - 0.14) * (1.0 - (1.0 - 0.995^(CurrentYear - YearModulesManufactured))).
@@ -2180,25 +2180,25 @@ If not entered, the simulation will not include generators.
 HPXML Batteries
 ***************
 
-Each battery is entered as a ``/HPXML/Building/BuildingDetails/Systems/Batteries/Battery``.
+A single battery can be entered as a ``/HPXML/Building/BuildingDetails/Systems/Batteries/Battery``.
 If not entered, the simulation will not include batteries.
 
-  ===============================  =======  =======  ===========  ========  =======  ============================================
-  Element                          Type     Units    Constraints  Required  Default  Notes
-  ===============================  =======  =======  ===========  ========  =======  ============================================
-  ``SystemIdentifier``             id                             Yes                Unique identifier
-  ``BatteryType``                  string            See [#]_     Yes                Battery type
-  ``Location``                     string            See [#]_     No        outside  Location
-  ``LifetimeModel``[#]_            string            See [#]_     No        None     Lifetime model
-  ``RatedPowerOutput``             string   W        > 0          No        10000    Rated power output in W
-  ``NominalCapacity[Units="kWh"]`` double   kWh      > 0          No        10       Nominal capacity in kWh
-  ``NominalVoltage``               double   V        > 0          No        50       Nominal voltage in V
-  ===============================  =======  =======  ===========  ========  =======  ============================================
+  ===================================================  =======  =========  ===========  ========  =======  ============================================
+  Element                                              Type     Units      Constraints  Required  Default  Notes
+  ===================================================  =======  =========  ===========  ========  =======  ============================================
+  ``SystemIdentifier``                                 id                               Yes                Unique identifier
+  ``Location``                                         string              See [#]_     No        outside  Location
+  ``BatteryType``                                      string              See [#]_     Yes                Battery type
+  ``NominalCapacity[Units="kWh" or Units="Ah"]/Value`` double   kWh or Ah  >= 0         No        10 kWh   Nominal (not usable) capacity
+  ``RatedPowerOutput``                                 string   W          >= 0         No        10000    Rated power output
+  ``NominalVoltage``                                   double   V          >= 0         No        50       Nominal voltage
+  ``extension/LifetimeModel``                          string              See [#]_     No        None     Lifetime model [#]_
+  ===================================================  =======  =========  ===========  ========  =======  ============================================
 
-  .. [#] BatteryType choices are "Li-ion".
   .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "attic - vented", "attic - unvented", "garage", or "outside".
-  .. [#] See the "Lifetime Model" `EnergyPlus documentation <https://bigladdersoftware.com/epx/docs/9-6/input-output-reference/group-electric-load-center-generator.html#liion-lifetime-model>`_ for more information.
+  .. [#] BatteryType choices are "Li-ion".
   .. [#] LifetimeModel choices are "None" or "KandlerSmith".
+  .. [#] See the "Lifetime Model" `EnergyPlus documentation <https://bigladdersoftware.com/epx/docs/9-6/input-output-reference/group-electric-load-center-generator.html#liion-lifetime-model>`_ for more information.
 
 HPXML Appliances
 ----------------
