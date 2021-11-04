@@ -1278,24 +1278,20 @@ class OSModel
 
   def self.add_thermal_mass(runner, model, spaces)
     cfa_basement = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationBasementConditioned }.map { |s| s.area }.sum(0.0)
+    basement_frac_of_cfa = cfa_basement / @cfa
     if @apply_ashrae140_assumptions
       # 1024 ft2 of interior partition wall mass, no furniture mass
       mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
       partition_wall_area = 1024.0 * 2 # Exposed partition wall area (both sides)
-      basement_frac_of_cfa = cfa_basement / @cfa
       Constructions.apply_partition_walls(runner, model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area,
                                           basement_frac_of_cfa, @cond_below_grade_surfaces, spaces[HPXML::LocationLivingSpace])
     else
-      mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
-      partition_wall_area = 1.0 * @cfa # Exposed partition wall area (both sides) assumed to be equal to conditioned floor area
-      basement_frac_of_cfa = cfa_basement / @cfa
+      mat_int_finish = Material.InteriorFinishMaterial(@hpxml.partition_wall_mass.interior_finish_type, @hpxml.partition_wall_mass.interior_finish_thickness)
+      partition_wall_area = @hpxml.partition_wall_mass.area_fraction * @cfa # Exposed partition wall area (both sides)
       Constructions.apply_partition_walls(runner, model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area,
                                           basement_frac_of_cfa, @cond_below_grade_surfaces, spaces[HPXML::LocationLivingSpace])
 
-      mass_lb_per_sqft = 8.0
-      density_lb_per_cuft = 40.0
-      mat = BaseMaterial.Wood
-      Constructions.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft, mat, @cfa, @ubfa, @gfa,
+      Constructions.apply_furniture(runner, model, @hpxml.furniture_mass, @cfa, @ubfa, @gfa,
                                     basement_frac_of_cfa, @cond_below_grade_surfaces, spaces[HPXML::LocationLivingSpace])
     end
   end
@@ -1602,8 +1598,9 @@ class OSModel
       heating_system = hvac_system[:heating]
 
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
+
       hvac_control = @hpxml.hvac_controls[0]
-      # Fixme: Handle two speed with ddb control only (no realistic staging?)
+      # Fixme:  Avoid two speed with only ddb control specified (not allowed)
       if cooling_system.additional_properties.respond_to? :num_speeds
         is_realistic_staging = (cooling_system.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
         is_ddb_control = (hvac_control.is_deadband_control && (cooling_system.additional_properties.num_speeds == 1)) || is_realistic_staging
@@ -1707,7 +1704,7 @@ class OSModel
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
       hvac_control = @hpxml.hvac_controls[0]
-      # Fixme: Handle two speed with ddb control only (no realistic staging?)
+      # Fixme:  Avoid two speed with only ddb control specified (not allowed)
       if heat_pump.additional_properties.respond_to? :num_speeds
         is_realistic_staging = (heat_pump.additional_properties.num_speeds == 2) && (hvac_control.realistic_staging == true)
         is_ddb_control = (hvac_control.is_deadband_control && (heat_pump.additional_properties.num_speeds == 1)) || is_realistic_staging
