@@ -64,7 +64,7 @@ class Battery
   def self.get_battery_default_values()
     return { location: HPXML::LocationOutside,
              lifetime_model: HPXML::BatteryLifetimeModelNone,
-             rated_power_output: 10000.0,
+             rated_power_output: 5000.0,
              nominal_capacity_kwh: 10.0,
              nominal_voltage: 50.0 }
   end
