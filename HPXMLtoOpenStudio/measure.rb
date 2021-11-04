@@ -1598,7 +1598,7 @@ class OSModel
       heating_system = hvac_system[:heating]
 
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
-      
+
       if cooling_system.additional_properties.respond_to? :num_speeds
         is_ddb_control = @hpxml.hvac_controls[0].is_deadband_control && (cooling_system.additional_properties.num_speeds == 1)
       else
@@ -1698,7 +1698,7 @@ class OSModel
       heat_pump = hvac_system[:cooling]
 
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
-      
+
       if heat_pump.additional_properties.respond_to? :num_speeds
         is_ddb_control = @hpxml.hvac_controls[0].is_deadband_control && (heat_pump.additional_properties.num_speeds == 1)
       else
