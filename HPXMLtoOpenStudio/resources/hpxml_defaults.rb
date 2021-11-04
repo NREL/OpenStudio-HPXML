@@ -1574,7 +1574,7 @@ class HPXMLDefaults
           battery.rated_power_output = default_values[:rated_power_output] # W
         else
           if not battery.nominal_capacity_ah.nil?
-            battery.nominal_capacity_kwh = get_kWh_from_Ah(battery.nominal_capacity_ah, battery.nominal_voltage)
+            battery.nominal_capacity_kwh = Battery.get_kWh_from_Ah(battery.nominal_capacity_ah, battery.nominal_voltage)
           end
           c_rate = default_values[:rated_power_output] / UnitConversions.convert(default_values[:nominal_capacity_kwh], 'kWh', 'Wh')
           battery.rated_power_output = UnitConversions.convert(battery.nominal_capacity_kwh, 'kWh', 'Wh') * c_rate # W
