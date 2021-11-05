@@ -1653,6 +1653,9 @@ class OSModel
         # Heating system will be last in the EquipmentList and should meet entirety of
         # remaining load during the heating season.
         sequential_heat_load_fracs = @heating_days.map(&:to_f)
+        if not heating_system.fraction_heat_load_served.nil?
+          fail 'Heat pump backup system cannot have a fraction heat load served specified.'
+        end
       else
         sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heating_system.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
         @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
