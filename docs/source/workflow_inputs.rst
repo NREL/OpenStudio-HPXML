@@ -556,8 +556,8 @@ If insulation layers are provided, additional information is entered in each ``F
   Element                                     Type      Units         Constraints  Required  Default  Notes
   ==========================================  ========  ============  ===========  ========  =======  =====================================================================
   ``NominalRValue``                           double    F-ft2-hr/Btu  >= 0         Yes                R-value of the foundation wall insulation; use zero if no insulation
-  ``extension/DistanceToTopOfInsulation``     double    ft            >= 0         No        0        Vertical distance from top of foundation wall to top of insulation
-  ``extension/DistanceToBottomOfInsulation``  double    ft            See [#]_     No        Height   Vertical distance from top of foundation wall to bottom of insulation
+  ``DistanceToTopOfInsulation``               double    ft            >= 0         No        0        Vertical distance from top of foundation wall to top of insulation
+  ``DistanceToBottomOfInsulation``            double    ft            See [#]_     No        Height   Vertical distance from top of foundation wall to bottom of insulation
   ==========================================  ========  ============  ===========  ========  =======  =====================================================================
 
   .. [#] When NominalRValue is non-zero, DistanceToBottomOfInsulation must be greater than DistanceToTopOfInsulation and less than or equal to FoundationWall/Height.
@@ -603,25 +603,25 @@ HPXML Slabs
 
 Each space type that borders the ground (i.e., basements, crawlspaces, garages, and slab-on-grade foundations) should have a slab entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab``.
 
-  ===========================================  ========  ============  ===========  =========  ========  ====================================================
-  Element                                      Type      Units         Constraints  Required   Default   Notes
-  ===========================================  ========  ============  ===========  =========  ========  ====================================================
-  ``SystemIdentifier``                         id                                   Yes                  Unique identifier
-  ``InteriorAdjacentTo``                       string                  See [#]_     Yes                  Interior adjacent space type
-  ``Area``                                     double    ft2           > 0          Yes                  Gross area
-  ``Thickness``                                double    inches        >= 0         No         See [#]_  Thickness [#]_
-  ``ExposedPerimeter``                         double    ft            >= 0         Yes                  Perimeter exposed to ambient conditions [#]_
-  ``PerimeterInsulationDepth``                 double    ft            >= 0         Yes                  Depth from grade to bottom of vertical insulation
-  ``UnderSlabInsulationWidth``                 double    ft            >= 0         See [#]_             Width from slab edge inward of horizontal insulation
-  ``UnderSlabInsulationSpansEntireSlab``       boolean                              See [#]_             Whether horizontal insulation spans entire slab
-  ``DepthBelowGrade``                          double    ft            >= 0         See [#]_             Depth from the top of the slab surface to grade
-  ``PerimeterInsulation/SystemIdentifier``     id                                   Yes                  Unique identifier
-  ``PerimeterInsulation/Layer/NominalRValue``  double    F-ft2-hr/Btu  >= 0         Yes                  R-value of vertical insulation
-  ``UnderSlabInsulation/SystemIdentifier``     id                                   Yes                  Unique identifier
-  ``UnderSlabInsulation/Layer/NominalRValue``  double    F-ft2-hr/Btu  >= 0         Yes                  R-value of horizontal insulation
-  ``extension/CarpetFraction``                 double    frac          0 - 1        No         See [#]_  Fraction of slab covered by carpet
-  ``extension/CarpetRValue``                   double    F-ft2-hr/Btu  >= 0         No         See [#]_  Carpet R-value
-  ===========================================  ========  ============  ===========  =========  ========  ====================================================
+  =======================================================  ========  ============  ===========  =========  ========  ====================================================
+  Element                                                  Type      Units         Constraints  Required   Default   Notes
+  =======================================================  ========  ============  ===========  =========  ========  ====================================================
+  ``SystemIdentifier``                                     id                                   Yes                  Unique identifier
+  ``InteriorAdjacentTo``                                   string                  See [#]_     Yes                  Interior adjacent space type
+  ``Area``                                                 double    ft2           > 0          Yes                  Gross area
+  ``Thickness``                                            double    inches        >= 0         No         See [#]_  Thickness [#]_
+  ``ExposedPerimeter``                                     double    ft            >= 0         Yes                  Perimeter exposed to ambient conditions [#]_
+  ``DepthBelowGrade``                                      double    ft            >= 0         See [#]_             Depth from the top of the slab surface to grade
+  ``PerimeterInsulation/SystemIdentifier``                 id                                   Yes                  Unique identifier
+  ``PerimeterInsulation/Layer/NominalRValue``              double    F-ft2-hr/Btu  >= 0         Yes                  R-value of vertical insulation
+  ``PerimeterInsulation/Layer/InsulationDepth``            double    ft            >= 0         Yes                  Depth from grade to bottom of vertical insulation
+  ``UnderSlabInsulation/SystemIdentifier``                 id                                   Yes                  Unique identifier
+  ``UnderSlabInsulation/Layer/NominalRValue``              double    F-ft2-hr/Btu  >= 0         Yes                  R-value of horizontal insulation
+  ``UnderSlabInsulation/Layer/InsulationWidth``            double    ft            >= 0         See [#]_             Width from slab edge inward of horizontal insulation
+  ``UnderSlabInsulation/Layer/InsulationSpansEntireSlab``  boolean                              See [#]_             Whether horizontal insulation spans entire slab
+  ``extension/CarpetFraction``                             double    frac          0 - 1        No         See [#]_  Fraction of slab covered by carpet
+  ``extension/CarpetRValue``                               double    F-ft2-hr/Btu  >= 0         No         See [#]_  Carpet R-value
+  =======================================================  ========  ============  ===========  =========  ========  ====================================================
 
   .. [#] InteriorAdjacentTo choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
@@ -629,10 +629,10 @@ Each space type that borders the ground (i.e., basements, crawlspaces, garages, 
   .. [#] For a crawlspace with a dirt floor, enter a thickness of zero.
   .. [#] ExposedPerimeter includes any slab length that falls along the perimeter of the building's footprint (i.e., is exposed to ambient conditions).
          So a basement slab edge adjacent to a garage or crawlspace, for example, should not be included.
-  .. [#] UnderSlabInsulationWidth only required if UnderSlabInsulationSpansEntireSlab=true is not provided.
-  .. [#] UnderSlabInsulationSpansEntireSlab=true only required if UnderSlabInsulationWidth is not provided.
   .. [#] DepthBelowGrade only required if the attached foundation has no ``FoundationWalls``.
          For foundation types with walls, the the slab's position relative to grade is determined by the ``FoundationWall/DepthBelowGrade`` value.
+  .. [#] InsulationWidth only required if InsulationSpansEntireSlab=true is not provided.
+  .. [#] InsulationSpansEntireSlab=true only required if InsulationWidth is not provided.
   .. [#] If CarpetFraction not provided, defaults to 0.8 when adjacent to conditioned space, otherwise 0.0.
   .. [#] If CarpetRValue not provided, defaults to 2.0 when adjacent to conditioned space, otherwise 0.0.
   
@@ -1247,23 +1247,23 @@ Air-to-Air Heat Pump
 
 If an air-to-air heat pump is specified, additional information is entered in ``HeatPump``.
 
-  ====================================================================  =================  ===========  =======================  ========  =========  =================================================
-  Element                                                               Type               Units        Constraints              Required  Default    Notes
-  ====================================================================  =================  ===========  =======================  ========  =========  =================================================
-  ``DistributionSystem``                                                idref                           See [#]_                 Yes                  ID of attached distribution system
-  ``CompressorType``                                                    string                          See [#]_                 No        See [#]_   Type of compressor
-  ``HeatingCapacity``                                                   double             Btu/hr       >= 0                     No        autosized  Heating output capacity (excluding any backup heating)
-  ``HeatingCapacity17F``                                                double             Btu/hr       >= 0, < HeatingCapacity  No                   Heating output capacity at 17F, if available
-  ``CoolingCapacity``                                                   double             Btu/hr       >= 0                     No        autosized  Cooling output capacity
-  ``CoolingSensibleHeatFraction``                                       double             frac         0 - 1                    No                   Sensible heat fraction
-  ``FractionHeatLoadServed``                                            double             frac         0 - 1 [#]_               Yes                  Fraction of heating load served
-  ``FractionCoolLoadServed``                                            double             frac         0 - 1 [#]_               Yes                  Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="SEER"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600            Yes       See [#]_   Rated cooling efficiency or Year installed
-  ``AnnualHeatingEfficiency[Units="HSPF"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600            Yes       See [#]_   Rated heating efficiency or Year installed
-  ``extension/FanPowerWattsPerCFM``                                     double             W/cfm        >= 0                     No        See [#]_   Fan efficiency at maximum airflow rate
-  ``extension/AirflowDefectRatio``                                      double             frac         > -1                     No        0.0        Deviation between design/installed airflows [#]_
-  ``extension/ChargeDefectRatio``                                       double             frac         > -1                     No        0.0        Deviation between design/installed charges [#]_
-  ====================================================================  =================  ===========  =======================  ========  =========  =================================================
+  ====================================================================  =================  ===========  ========================  ========  =========  =================================================
+  Element                                                               Type               Units        Constraints               Required  Default    Notes
+  ====================================================================  =================  ===========  ========================  ========  =========  =================================================
+  ``DistributionSystem``                                                idref                           See [#]_                  Yes                  ID of attached distribution system
+  ``CompressorType``                                                    string                          See [#]_                  No        See [#]_   Type of compressor
+  ``HeatingCapacity``                                                   double             Btu/hr       >= 0                      No        autosized  Heating output capacity (excluding any backup heating)
+  ``HeatingCapacity17F``                                                double             Btu/hr       >= 0, <= HeatingCapacity  No                   Heating output capacity at 17F, if available
+  ``CoolingCapacity``                                                   double             Btu/hr       >= 0                      No        autosized  Cooling output capacity
+  ``CoolingSensibleHeatFraction``                                       double             frac         0 - 1                     No                   Sensible heat fraction
+  ``FractionHeatLoadServed``                                            double             frac         0 - 1 [#]_                Yes                  Fraction of heating load served
+  ``FractionCoolLoadServed``                                            double             frac         0 - 1 [#]_                Yes                  Fraction of cooling load served
+  ``AnnualCoolingEfficiency[Units="SEER"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600             Yes       See [#]_   Rated cooling efficiency or Year installed
+  ``AnnualHeatingEfficiency[Units="HSPF"]/Value`` or ``YearInstalled``  double or integer  Btu/Wh or #  > 0 or > 1600             Yes       See [#]_   Rated heating efficiency or Year installed
+  ``extension/FanPowerWattsPerCFM``                                     double             W/cfm        >= 0                      No        See [#]_   Fan efficiency at maximum airflow rate
+  ``extension/AirflowDefectRatio``                                      double             frac         > -1                      No        0.0        Deviation between design/installed airflows [#]_
+  ``extension/ChargeDefectRatio``                                       double             frac         > -1                      No        0.0        Deviation between design/installed charges [#]_
+  ====================================================================  =================  ===========  ========================  ========  =========  =================================================
 
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
   .. [#] CompressorType choices are "single stage", "two stage", or "variable speed".
@@ -1284,22 +1284,22 @@ Mini-Split Heat Pump
 
 If a mini-split heat pump is specified, additional information is entered in ``HeatPump``.
 
-  ===============================================  ========  ======  ===========  ========  =========  ==============================================
-  Element                                          Type      Units   Constraints  Required  Default    Notes
-  ===============================================  ========  ======  ===========  ========  =========  ==============================================
-  ``DistributionSystem``                           idref             See [#]_     No                   ID of attached distribution system, if present
-  ``HeatingCapacity``                              double    Btu/hr  >= 0         No        autosized  Heating output capacity (excluding any backup heating)
-  ``HeatingCapacity17F``                           double    Btu/hr  >= 0         No                   Heating output capacity at 17F, if available
-  ``CoolingCapacity``                              double    Btu/hr  >= 0         No        autosized  Cooling output capacity
-  ``CoolingSensibleHeatFraction``                  double    frac    0 - 1        No                   Sensible heat fraction
-  ``FractionHeatLoadServed``                       double    frac    0 - 1 [#]_   Yes                  Fraction of heating load served
-  ``FractionCoolLoadServed``                       double    frac    0 - 1 [#]_   Yes                  Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  > 0          Yes                  Rated cooling efficiency
-  ``AnnualHeatingEfficiency[Units="HSPF"]/Value``  double    Btu/Wh  > 0          Yes                  Rated heating efficiency
-  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_   Fan efficiency at maximum airflow rate
-  ``extension/AirflowDefectRatio``                 double    frac    > -1         No        0.0        Deviation between design/installed airflows [#]_
-  ``extension/ChargeDefectRatio``                  double    frac    > -1         No        0.0        Deviation between design/installed charges [#]_
-  ===============================================  ========  ======  ===========  ========  =========  ==============================================
+  ===============================================  ========  ======  ========================  ========  =========  ==============================================
+  Element                                          Type      Units   Constraints               Required  Default    Notes
+  ===============================================  ========  ======  ========================  ========  =========  ==============================================
+  ``DistributionSystem``                           idref             See [#]_                  No                   ID of attached distribution system, if present
+  ``HeatingCapacity``                              double    Btu/hr  >= 0                      No        autosized  Heating output capacity (excluding any backup heating)
+  ``HeatingCapacity17F``                           double    Btu/hr  >= 0, <= HeatingCapacity  No                   Heating output capacity at 17F, if available
+  ``CoolingCapacity``                              double    Btu/hr  >= 0                      No        autosized  Cooling output capacity
+  ``CoolingSensibleHeatFraction``                  double    frac    0 - 1                     No                   Sensible heat fraction
+  ``FractionHeatLoadServed``                       double    frac    0 - 1 [#]_                Yes                  Fraction of heating load served
+  ``FractionCoolLoadServed``                       double    frac    0 - 1 [#]_                Yes                  Fraction of cooling load served
+  ``AnnualCoolingEfficiency[Units="SEER"]/Value``  double    Btu/Wh  > 0                       Yes                  Rated cooling efficiency
+  ``AnnualHeatingEfficiency[Units="HSPF"]/Value``  double    Btu/Wh  > 0                       Yes                  Rated heating efficiency
+  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0                      No        See [#]_   Fan efficiency at maximum airflow rate
+  ``extension/AirflowDefectRatio``                 double    frac    > -1                      No        0.0        Deviation between design/installed airflows [#]_
+  ``extension/ChargeDefectRatio``                  double    frac    > -1                      No        0.0        Deviation between design/installed charges [#]_
+  ===============================================  ========  ======  ========================  ========  =========  ==============================================
 
   .. [#] If provided, HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across both HeatingSystems and HeatPumps) must be less than or equal to 1.
