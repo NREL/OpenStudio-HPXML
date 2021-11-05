@@ -561,6 +561,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     all_expected_errors = { 'cfis-with-hydronic-distribution' => ["Attached HVAC distribution system 'HVACDistribution1' cannot be hydronic for ventilation fan 'VentilationFan1'."],
                             'dehumidifier-setpoints' => ['All dehumidifiers must have the same setpoint but multiple setpoints were specified.'],
                             'duplicate-id' => ["Duplicate SystemIdentifier IDs detected for 'Window1'."],
+                            'heat-pump-backup-system-furnace' => ["Heat pump backup system cannot be of type 'Furnace'."],
                             'heat-pump-backup-system-load-fraction' => ['Heat pump backup system cannot have a fraction heat load served specified.'],
                             'hvac-distribution-multiple-attached-cooling' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution2'."],
                             'hvac-distribution-multiple-attached-heating' => ["Multiple heating systems found attached to distribution system 'HVACDistribution1'."],
@@ -637,6 +638,12 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['duplicate-id'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.windows[-1].id = hpxml.windows[0].id
+      elsif ['heat-pump-backup-system-furnace'].include? error_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml'))
+        hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeFurnace
+        hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeDSE
+        hpxml.hvac_distributions[0].annual_heating_dse = 0.9
+        hpxml.hvac_distributions[0].annual_cooling_dse = 0.9
       elsif ['heat-pump-backup-system-load-fraction'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml'))
         hpxml.heating_systems[0].fraction_heat_load_served = 0.5

@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>55d12ab3-d6af-401c-ba84-43fcd75502f6</version_id>
-  <version_modified>20211105T210749Z</version_modified>
+  <version_id>c844ada1-efe0-4f89-8e20-78c22c43c7ee</version_id>
+  <version_modified>20211105T232632Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -2294,7 +2294,7 @@
     <argument>
       <name>heat_pump_backup_type</name>
       <display_name>Heat Pump: Backup Type</display_name>
-      <description>The backup type of the heat pump. If 'integrated' (e.g., built-in electric resistance or dual-fuel integrated furnace), the subsequent backup inputs apply. If 'separate', the Heating System 2 specified below will be selected as the backup system. Use 'none' if there is no backup heating.</description>
+      <description>The backup type of the heat pump. If 'integrated', represents e.g. built-in electric strip heat or dual-fuel integrated furnace. If 'separate', represents e.g. electric baseboard or boiler based on the Heating System 2 specified below. Use 'none' if there is no backup heating.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -2317,7 +2317,7 @@
     <argument>
       <name>heat_pump_backup_fuel</name>
       <display_name>Heat Pump: Backup Fuel Type</display_name>
-      <description>The backup fuel type of the heat pump.</description>
+      <description>The backup fuel type of the heat pump. Only applies if Backup Type is 'integrated'.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -2344,7 +2344,7 @@
     <argument>
       <name>heat_pump_backup_heating_efficiency</name>
       <display_name>Heat Pump: Backup Rated Efficiency</display_name>
-      <description>The backup rated efficiency value of the heat pump. Percent for electricity fuel type. AFUE otherwise.</description>
+      <description>The backup rated efficiency value of the heat pump. Percent for electricity fuel type. AFUE otherwise. Only applies if Backup Type is 'integrated'.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -2353,7 +2353,7 @@
     <argument>
       <name>heat_pump_backup_heating_capacity</name>
       <display_name>Heat Pump: Backup Heating Capacity</display_name>
-      <description>The backup output heating capacity of the heat pump. Enter 'auto' to size the capacity based on ACCA Manual J/S.</description>
+      <description>The backup output heating capacity of the heat pump. Enter 'auto' to size the capacity based on ACCA Manual J/S. Only applies if Backup Type is 'integrated'.</description>
       <type>String</type>
       <units>Btu/hr</units>
       <required>true</required>
@@ -2363,7 +2363,7 @@
     <argument>
       <name>heat_pump_backup_heating_switchover_temp</name>
       <display_name>Heat Pump: Backup Heating Switchover Temperature</display_name>
-      <description>The temperature at which the heat pump stops operating and the backup heating system starts running. Only applies to air-to-air and mini-split. If not provided, backup heating will operate as needed when heat pump capacity is insufficient.</description>
+      <description>The temperature at which the heat pump stops operating and the backup heating system starts running. Only applies to air-to-air and mini-split. If not provided, backup heating will operate as needed when heat pump capacity is insufficient. Applies if Backup Type is either 'integrated' or 'separate'.</description>
       <type>Double</type>
       <units>deg-F</units>
       <required>false</required>
@@ -5873,7 +5873,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>530ABDC1</checksum>
+      <checksum>891F8F4E</checksum>
     </file>
   </files>
 </measure>

@@ -452,7 +452,7 @@ class HPXMLTest < MiniTest::Test
       if htg_sys.respond_to? :backup_heating_capacity
         results['heating_backup_capacity [Btuh]'] += htg_sys.backup_heating_capacity
       end
-      results['heating_airflow [cfm]'] += htg_sys.heating_airflow_cfm
+      results['heating_airflow [cfm]'] += htg_sys.heating_airflow_cfm.to_f
     end
 
     # Cooling capacity/airflows

@@ -11,9 +11,6 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <HVACSizingControl>
-        <UseMaxLoadForHeatPumps>true</UseMaxLoadForHeatPumps>
-      </HVACSizingControl>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -321,18 +318,25 @@
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1'/>
               <HeatingSystemType>
-                <ElectricResistance/>
+                <Stove/>
               </HeatingSystemType>
-              <HeatingSystemFuel>electricity</HeatingSystemFuel>
+              <HeatingSystemFuel>fuel oil</HeatingSystemFuel>
+              <HeatingCapacity>60000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>Percent</Units>
-                <Value>1.0</Value>
+                <Value>0.6</Value>
               </AnnualHeatingEfficiency>
+              <extension>
+                <FanPowerWatts>40.0</FanPowerWatts>
+              </extension>
             </HeatingSystem>
             <HeatPump>
               <SystemIdentifier id='HeatPump1'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity>18000.0</HeatingCapacity>
+              <HeatingCapacity17F>10800.0</HeatingCapacity17F>
+              <CoolingCapacity>18000.0</CoolingCapacity>
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <BackupType>separate</BackupType>
               <BackupSystem idref='HeatingSystem1'/>

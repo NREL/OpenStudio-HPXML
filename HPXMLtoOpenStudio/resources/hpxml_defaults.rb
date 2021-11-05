@@ -2357,8 +2357,16 @@ class HPXMLDefaults
         end
 
         # Heating airflow
-        htg_sys.heating_airflow_cfm = hvac_sizing_values.Heat_Airflow.round
-        htg_sys.heating_airflow_cfm_isdefaulted = true
+        if not (htg_sys.is_a?(HPXML::HeatingSystem) &&
+                [HPXML::HVACTypeBoiler,
+                 HPXML::HVACTypeElectricResistance].include?(htg_sys.heating_system_type))
+          htg_sys.heating_airflow_cfm = hvac_sizing_values.Heat_Airflow.round
+          htg_sys.heating_airflow_cfm_isdefaulted = true
+        end
+        if htg_sys.is_a?(HPXML::HeatPump) && (htg_sys.backup_type == HPXML::HeatPumpBackupTypeSeparate)
+          htg_sys.backup_system.heating_airflow_cfm = hvac_sizing_values.Heat_Airflow_Supp.round
+          htg_sys.backup_system.heating_airflow_cfm_isdefaulted = true
+        end
 
         # Heating GSHP loop
         if htg_sys.is_a? HPXML::HeatPump

@@ -188,6 +188,7 @@ def create_hpxmls
     'base-hvac-air-to-air-heat-pump-2-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-var-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
+    'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml',
     'base-hvac-autosize.xml' => 'base.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml',
@@ -223,7 +224,7 @@ def create_hpxmls
     'base-hvac-autosize-mini-split-heat-pump-ducted-cooling-only.xml' => 'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml',
     'base-hvac-autosize-mini-split-heat-pump-ducted-heating-only.xml' => 'base-hvac-mini-split-heat-pump-ducted-heating-only.xml',
     'base-hvac-autosize-mini-split-heat-pump-ducted-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-mini-split-heat-pump-ducted.xml',
-    'base-hvac-autosize-mini-split-heat-pump-ductless-backup-elec-resistance.xml' => 'base-hvac-mini-split-heat-pump-ductless-backup-elec-resistance.xml',
+    'base-hvac-autosize-mini-split-heat-pump-ductless-backup-stove.xml' => 'base-hvac-mini-split-heat-pump-ductless-backup-stove.xml',
     'base-hvac-autosize-mini-split-air-conditioner-only-ducted.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
     'base-hvac-autosize-ptac.xml' => 'base-hvac-ptac.xml',
     'base-hvac-autosize-ptac-with-heating.xml' => 'base-hvac-ptac-with-heating.xml',
@@ -288,7 +289,7 @@ def create_hpxmls
     'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ducted-heating-only.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ductless.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
-    'base-hvac-mini-split-heat-pump-ductless-backup-elec-resistance.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
+    'base-hvac-mini-split-heat-pump-ductless-backup-stove.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
     'base-hvac-multiple.xml' => 'base.xml',
     'base-hvac-none.xml' => 'base.xml',
     'base-hvac-portable-heater-gas-only.xml' => 'base.xml',
@@ -1787,13 +1788,15 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml'].include? hpxml_file
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeSeparate
-    args['heat_pump_heating_capacity'] = 24000.0
-    args['heat_pump_cooling_capacity'] = 24000.0
+    args['heat_pump_heating_capacity'] = 18000.0
+    args['heat_pump_cooling_capacity'] = 18000.0
     args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heating_system_2_type'] = HPXML::HVACTypeBoiler
     args['heating_system_2_fuel'] = HPXML::FuelTypeNaturalGas
     args['heating_system_2_heating_efficiency'] = 0.8
     args['heating_system_2_heating_capacity'] = 60000.0
+  elsif ['base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml'].include? hpxml_file
+    args['heat_pump_backup_heating_switchover_temp'] = 25
   elsif hpxml_file.include? 'autosize'
     args['heating_system_heating_capacity'] = Constants.Auto
     args['heating_system_2_heating_capacity'] = Constants.Auto
@@ -2017,14 +2020,14 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-hvac-mini-split-heat-pump-ductless.xml'].include? hpxml_file
     args['heat_pump_backup_type'] = 'none'
     args['heat_pump_is_ducted'] = false
-  elsif ['base-hvac-mini-split-heat-pump-ductless-backup-elec-resistance.xml'].include? hpxml_file
+  elsif ['base-hvac-mini-split-heat-pump-ductless-backup-stove.xml'].include? hpxml_file
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeSeparate
-    args['heat_pump_heating_capacity'] = 24000.0
-    args['heat_pump_cooling_capacity'] = 24000.0
+    args['heat_pump_heating_capacity'] = 18000.0
+    args['heat_pump_cooling_capacity'] = 18000.0
     args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
-    args['heating_system_2_type'] = HPXML::HVACTypeElectricResistance
-    args['heating_system_2_fuel'] = HPXML::FuelTypeElectricity
-    args['heating_system_2_heating_efficiency'] = 1.0
+    args['heating_system_2_type'] = HPXML::HVACTypeStove
+    args['heating_system_2_fuel'] = HPXML::FuelTypeOil
+    args['heating_system_2_heating_efficiency'] = 0.6
     args['heating_system_2_heating_capacity'] = 60000.0
   elsif ['base-hvac-none.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'

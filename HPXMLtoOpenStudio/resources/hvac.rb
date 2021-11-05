@@ -110,10 +110,11 @@ class HVAC
       end
     end
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms)
-    if not cooling_system.nil?
+    if not cooling_system.nil? && heating_system.nil?
+      disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, cooling_system.id)
+    elsif not cooling_system.nil?
       disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil, cooling_system.id)
-    end
-    if not heating_system.nil?
+    elsif not heating_system.nil?
       disaggregate_fan_or_pump(model, fan, htg_coil, nil, htg_supp_coil, heating_system.id)
     end
 
@@ -4019,10 +4020,10 @@ class HVAC
                         heating: heating_system }
     end
 
-    # Heat pump with backup system must be handled last so that it's the
-    # last HVAC system in the EquipmentList.
-    # FIXME: Need to test
-    hpxml.heat_pumps.sort_by { |hp| !hp.backup_system.nil? }.each do |heat_pump|
+    # Heat pump with backup system must be sorted last so that the last two
+    # HVAC systems in the EnergyPlus EquipmentList are 1) the heat pump and
+    # 2) the heat pump backup system.
+    hpxml.heat_pumps.sort_by { |hp| hp.backup_system_idref.to_s }.each do |heat_pump|
       hvac_systems << { cooling: heat_pump,
                         heating: heat_pump }
     end

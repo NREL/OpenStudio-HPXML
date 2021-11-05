@@ -874,7 +874,7 @@ Each heating system (other than a heat pump) is entered as an ``/HPXML/Building/
   ``HeatingSystemType``              element           1 [#]_       Yes                  Type of heating system
   ``HeatingSystemFuel``              string            See [#]_     Yes                  Fuel type
   ``HeatingCapacity``                double    Btu/hr  >= 0         No        autosized  Heating output capacity
-  ``FractionHeatLoadServed``         double    frac    0 - 1 [#]_   Yes                  Fraction of heating load served
+  ``FractionHeatLoadServed``         double    frac    0 - 1 [#]_   See [#]_             Fraction of heating load served
   =================================  ========  ======  ===========  ========  =========  ===============================
 
   .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``PortableHeater``, ``FixedHeater``, ``Fireplace``, or ``PackagedTerminalAirConditionerHeating``.
@@ -882,6 +882,7 @@ Each heating system (other than a heat pump) is entered as an ``/HPXML/Building/
          For ``ElectricResistance``, "electricity" is required.
          For ``PackagedTerminalAirConditionerHeating``, "electricity" is currently the only choice.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across both HeatingSystems and HeatPumps) must be less than or equal to 1.
+  .. [#] FractionHeatLoadServed is required unless the heating system is a heat pump backup system (i.e., referenced by a ``HeatPump[BackupType="separate"]/BackupSystem``; see :ref:`hvac_heatpump`), in which case FractionHeatLoadServed is not allowed.
 
 Electric Resistance
 ~~~~~~~~~~~~~~~~~~~
@@ -1217,30 +1218,49 @@ Each heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/H
   ``SystemIdentifier``               id                             Yes                  Unique identifier
   ``HeatPumpType``                   string            See [#]_     Yes                  Type of heat pump
   ``HeatPumpFuel``                   string            See [#]_     Yes                  Fuel type
-  ``BackupSystemFuel``               string            See [#]_     No                   Fuel type of backup heating, if present
+  ``BackupType``                     string            See [#]_     No        <none>     Type of backup heating
   =================================  ========  ======  ===========  ========  =========  ===============================================
 
   .. [#] HeatPumpType choices are "air-to-air", "mini-split", "ground-to-air", "water-loop-to-air", or "packaged terminal heat pump".
   .. [#] HeatPumpFuel only choice is "electricity".
-  .. [#] BackupSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
+  .. [#] BackupType choices are "integrated" or "separate".
+         Use "integrated" if the heat pump's distribution system and blower fan power applies to the backup heating (e.g., built-in electric strip heat or an integrated backup furnace, i.e., a dual-fuel heat pump).
+         Use "separate" if the backup system has its own distribution system (e.g., electric baseboard or a boiler).
 
-If a backup system fuel is provided, additional information is entered in ``HeatPump``.
+If a backup type of "integrated" is provided, additional information is entered in ``HeatPump``.
 
   ========================================================================  ========  ======  ===========  ========  =========  ==========================================
   Element                                                                   Type      Units   Constraints  Required  Default    Notes
   ========================================================================  ========  ======  ===========  ========  =========  ==========================================
-  ``BackupAnnualHeatingEfficiency[Units="Percent" or Units="AFUE"]/Value``  double    frac    0 - 1        Yes                  Backup heating efficiency
-  ``BackupHeatingCapacity``                                                 double    Btu/hr  >= 0         No        autosized  Backup heating output capacity
-  ``BackupHeatingSwitchoverTemperature``                                    double    F                    No        <none>     Backup heating switchover temperature [#]_
+  ``BackupSystemFuel``                                                      string            See [#]_     Yes                  Integrated backup heating fuel type
+  ``BackupAnnualHeatingEfficiency[Units="Percent" or Units="AFUE"]/Value``  double    frac    0 - 1        Yes                  Integrated backup heating efficiency
+  ``BackupHeatingCapacity``                                                 double    Btu/hr  >= 0         No        autosized  Integrated backup heating output capacity
+  ``BackupHeatingSwitchoverTemperature``                                    double    F                    No        <none>     Integrated backup heating switchover temperature [#]_
   ========================================================================  ========  ======  ===========  ========  =========  ==========================================
 
-  .. [#] Provide BackupHeatingSwitchoverTemperature for, e.g., a dual-fuel heat pump, in which there is a discrete outdoor temperature when the heat pump stops operating and the backup heating system starts operating.
-         If not provided, the backup heating system will operate as needed when the heat pump has insufficient capacity.
+  .. [#] BackupSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
+  .. [#] Provide BackupHeatingSwitchoverTemperature for a situation in which there is a discrete outdoor temperature when the heat pump stops operating and the backup heating system starts operating.
+         If not provided, the backup heating system will operate as needed for hours when the heat pump has insufficient capacity.
 
-.. note::
+If a backup type of "separate" is provided, additional information is entered in ``HeatPump``.
 
-  The heat pump's distribution system and blower fan power will apply to any backup heating specified.
-  So the backup heating can represent, e.g., built-in electric resistance heating or an integrated backup furnace (in the case of a dual-fuel heat pump).
+  ======================================  ========  ======  ===========  ========  =========  ==========================================
+  Element                                 Type      Units   Constraints  Required  Default    Notes
+  ======================================  ========  ======  ===========  ========  =========  ==========================================
+  ``BackupSystem``                        idref             See [#]_     Yes                  ID of separate backup heating system 
+  ``BackupHeatingSwitchoverTemperature``  double    F                    No        <none>     Separate backup heating system switchover temperature [#]_
+  ======================================  ========  ======  ===========  ========  =========  ==========================================
+  
+  .. [#] HeatingSystem must be of type ``ElectricResistance``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``PortableHeater``, ``FixedHeater``, or ``Fireplace``.
+  .. [#] Provide BackupHeatingSwitchoverTemperature for a situation in which there is a discrete outdoor temperature when the heat pump stops operating and the backup heating system starts operating.
+         If not provided, the backup heating system will operate as needed for hours when the heat pump has insufficient capacity.
+
+  .. note::
+
+    Due to how the separate backup heating system is modeled in EnergyPlus, there are a few restrictions:
+
+    - The conditioned space cannot be partially heated (i.e., the sum of all ``FractionHeatLoadServed`` must be 1).
+    - There cannot be multiple backup heating systems.
 
 Air-to-Air Heat Pump
 ~~~~~~~~~~~~~~~~~~~~
