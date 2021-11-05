@@ -2297,14 +2297,18 @@ class HVACSizing
       end
 
       # Capacities
-      if hpxml_hvac.respond_to? :heating_capacity
+      if hpxml_hvac.is_a?(HPXML::HeatingSystem) || hpxml_hvac.is_a?(HPXML::HeatPump)
         hvac.FixedHeatingCapacity = hpxml_hvac.heating_capacity
       end
-      if hpxml_hvac.respond_to? :cooling_capacity
+      if hpxml_hvac.is_a?(HPXML::CoolingSystem) || hpxml_hvac.is_a?(HPXML::HeatPump)
         hvac.FixedCoolingCapacity = hpxml_hvac.cooling_capacity
       end
-      if hpxml_hvac.respond_to? :backup_heating_capacity
-        hvac.FixedSuppHeatingCapacity = hpxml_hvac.backup_heating_capacity
+      if hpxml_hvac.is_a?(HPXML::HeatPump)
+        if not hpxml_hvac.backup_heating_capacity.nil?
+          hvac.FixedSuppHeatingCapacity = hpxml_hvac.backup_heating_capacity
+        elsif not hpxml_hvac.backup_system.nil?
+          hvac.FixedSuppHeatingCapacity = hpxml_hvac.backup_system.heating_capacity
+        end
       end
 
       # Number of speeds

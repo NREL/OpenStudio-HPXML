@@ -2249,7 +2249,7 @@ class HPXMLDefaults
       end
     end
 
-    hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml)
+    hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml, exclude_hp_backup_systems: true)
 
     # Calculate building design loads and equipment capacities/airflows
     bldg_design_loads, all_hvac_sizing_values = HVACSizing.calculate(weather, hpxml, cfa, nbeds, hvac_systems)
@@ -2322,7 +2322,7 @@ class HPXMLDefaults
         # Heating capacities
         if htg_sys.heating_capacity.nil? || ((htg_sys.heating_capacity - hvac_sizing_values.Heat_Capacity).abs >= 1.0)
           # Heating capacity @ 17F
-          if htg_sys.respond_to? :heating_capacity_17F
+          if htg_sys.is_a? HPXML::HeatPump
             if (not htg_sys.heating_capacity.nil?) && (not htg_sys.heating_capacity_17F.nil?)
               # Fixed value entered; scale w/ heating_capacity in case allow_increased_fixed_capacities=true
               htg_cap_17f = htg_sys.heating_capacity_17F * hvac_sizing_values.Heat_Capacity.round / htg_sys.heating_capacity
@@ -2340,14 +2340,19 @@ class HPXMLDefaults
           htg_sys.heating_capacity = hvac_sizing_values.Heat_Capacity.round
           htg_sys.heating_capacity_isdefaulted = true
         end
-        if htg_sys.respond_to? :backup_heating_capacity
-          if not htg_sys.backup_heating_fuel.nil? # If there is a backup heating source
+        if htg_sys.is_a? HPXML::HeatPump
+          if htg_sys.backup_type.nil?
+            htg_sys.backup_heating_capacity = 0.0
+          elsif htg_sys.backup_type == HPXML::HeatPumpBackupTypeIntegrated
             if htg_sys.backup_heating_capacity.nil? || ((htg_sys.backup_heating_capacity - hvac_sizing_values.Heat_Capacity_Supp).abs >= 1.0)
               htg_sys.backup_heating_capacity = hvac_sizing_values.Heat_Capacity_Supp.round
               htg_sys.backup_heating_capacity_isdefaulted = true
             end
-          else
-            htg_sys.backup_heating_capacity = 0.0
+          elsif htg_sys.backup_type == HPXML::HeatPumpBackupTypeSeparate
+            if htg_sys.backup_system.heating_capacity.nil? || ((htg_sys.backup_system.heating_capacity - hvac_sizing_values.Heat_Capacity_Supp).abs >= 1.0)
+              htg_sys.backup_system.heating_capacity = hvac_sizing_values.Heat_Capacity_Supp.round
+              htg_sys.backup_system.heating_capacity_isdefaulted = true
+            end
           end
         end
 

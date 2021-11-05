@@ -376,7 +376,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['heat_pump_cooling_capacity'] = 36000.0
       args['heat_pump_fraction_heat_load_served'] = 1
       args['heat_pump_fraction_cool_load_served'] = 1
-      args['heat_pump_backup_fuel'] = 'none'
+      args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
+      args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
       args['heat_pump_backup_heating_efficiency'] = 1
       args['heat_pump_backup_heating_capacity'] = 36000.0
       args['hvac_control_type'] = HPXML::HVACControlTypeManual
@@ -669,6 +670,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['cooling_system_type'] = 'none'
       args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
       args['heat_pump_heating_capacity_17_f'] = 22680.0
+      args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
       args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
       args['heat_pump_heating_capacity'] = 48000.0
       args['heat_pump_fraction_heat_load_served'] = 0.75
@@ -697,6 +699,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['heat_pump_heating_efficiency'] = 3.6
       args['heat_pump_cooling_efficiency_type'] = HPXML::UnitsEER
       args['heat_pump_cooling_efficiency'] = 16.6
+      args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
       args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
       args['heat_pump_fraction_heat_load_served'] = 0.75
       args['heating_system_2_type'] = HPXML::HVACTypeBoiler

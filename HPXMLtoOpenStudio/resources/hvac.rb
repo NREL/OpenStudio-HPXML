@@ -413,7 +413,6 @@ class HVAC
 
   def self.apply_boiler(model, runner, heating_system,
                         sequential_heat_load_fracs, control_zone)
-
     obj_name = Constants.ObjectNameBoiler
     is_condensing = false # FUTURE: Expose as input; default based on AFUE
     oat_reset_enabled = false
@@ -3993,7 +3992,7 @@ class HVAC
     return true
   end
 
-  def self.get_hpxml_hvac_systems(hpxml)
+  def self.get_hpxml_hvac_systems(hpxml, exclude_hp_backup_systems: false)
     # Returns a list of heating/cooling systems, incorporating whether
     # multiple systems are connected to the same distribution system
     # (e.g., a furnace + central air conditioner w/ the same ducts).
@@ -4012,12 +4011,18 @@ class HVAC
       if is_attached_heating_and_cooling_systems(hpxml, heating_system, heating_system.attached_cooling_system)
         next # Already processed with cooling
       end
+      if exclude_hp_backup_systems && heating_system.is_heat_pump_backup_system
+        next
+      end
 
       hvac_systems << { cooling: nil,
                         heating: heating_system }
     end
 
-    hpxml.heat_pumps.each do |heat_pump|
+    # Heat pump with backup system must be handled last so that it's the
+    # last HVAC system in the EquipmentList.
+    # FIXME: Need to test
+    hpxml.heat_pumps.sort_by { |hp| !hp.backup_system.nil? }.each do |heat_pump|
       hvac_systems << { cooling: heat_pump,
                         heating: heat_pump }
     end
@@ -4030,7 +4035,9 @@ class HVAC
     min_airflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
     hpxml.heating_systems.each do |htg_sys|
       htg_sys.heating_capacity = [htg_sys.heating_capacity, min_capacity].max
-      htg_sys.heating_airflow_cfm = [htg_sys.heating_airflow_cfm, min_airflow].max
+      if not htg_sys.heating_airflow_cfm.nil? # FIXME: Need to address
+        htg_sys.heating_airflow_cfm = [htg_sys.heating_airflow_cfm, min_airflow].max
+      end
     end
     hpxml.cooling_systems.each do |clg_sys|
       clg_sys.cooling_capacity = [clg_sys.cooling_capacity, min_capacity].max

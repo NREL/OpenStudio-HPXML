@@ -5,6 +5,7 @@ __New Features__
 - **Breaking change**: Replaces "Unmet Load" outputs with "Unmet Hours".
 - **Breaking change**: Renames "Load: Heating" and "Peak Load: Heating" (and Cooling) outputs to include "Delivered".
 - **Breaking change**: Replaces ClothesDryer `extension/IsVented` and `extension/VentedFlowRate` with `Vented` and `VentedFlowRate`.
+- **Breaking change**: Any heat pump backup heating requires `HeatPump/BackupType` to be specified.
 - Initial release of BuildResidentialHPXML measure, which generates an HPXML file from a set of building description inputs.
 - Expanded capabilities for scheduling:
   - Allows modeling detailed occupancy via a schedule CSV file.
@@ -12,6 +13,18 @@ __New Features__
   - Expands simplified weekday/weekend/monthly schedule inputs to additional building features.
   - Allows `HeatingSeason` & `CoolingSeason` to be specified for defining heating and cooling equipment availability.
 - Adds a new results_hpxml.csv output file to summarize HPXML values (e.g., surface areas, HVAC capacities).
+- Allows use of `HeatPump/BackupSystem` for modeling a standalone (i.e., not integrated) backup heating system.
+- Allows conditioned crawlspaces to be specified; modeled as crawlspaces that are actively maintained at setpoint.
+- Allows non-zero refrigerant charge defect ratios for ground source heat pumps.
+- Expands choices allowed for `Siding` (Wall/RimJoist) and `RoofType` (Roof) elements.
+- Allows "none" for wall/rim joist siding.
+- Allows interior finish inputs (e.g., 0.5" drywall) for walls, ceilings, and roofs.
+- Allows specifying the foundation wall type (e.g., solid concrete, concrete block, wood, etc.).
+- Allows additional fuel types for generators.
+- Switches to the EnergyPlus Fan:SystemModel object for all HVAC systems.
+- Introduces a small amount of infiltration for unvented spaces.
+- Updates the assumption of flue losses vs tank losses for higher efficiency non-electric storage water heaters.
+- Revises shared mechanical ventilation preconditioning control logic to operate less often.
 - Adds alternative inputs:
   - Window/skylight physical properties (`GlassLayers`, `FrameType`, etc.) instead of `UFactor` & `SHGC`.
   - `Ducts/FractionDuctArea` instead of `Ducts/DuctSurfaceArea`.
@@ -29,17 +42,6 @@ __New Features__
   - Door azimuth.
   - Radiant barrier grade.
   - Whole house fan airflow rate and fan power.
-- Allows conditioned crawlspaces to be specified; modeled as crawlspaces that are actively maintained at setpoint.
-- Allows non-zero refrigerant charge defect ratios for ground source heat pumps.
-- Expands choices allowed for `Siding` (Wall/RimJoist) and `RoofType` (Roof) elements.
-- Allows "none" for wall/rim joist siding.
-- Allows interior finish inputs (e.g., 0.5" drywall) for walls, ceilings, and roofs.
-- Allows specifying the foundation wall type (e.g., solid concrete, concrete block, wood, etc.).
-- Allows additional fuel types for generators.
-- Switches to the EnergyPlus Fan:SystemModel object for all HVAC systems.
-- Introduces a small amount of infiltration for unvented spaces.
-- Updates the assumption of flue losses vs tank losses for higher efficiency non-electric storage water heaters.
-- Revises shared mechanical ventilation preconditioning control logic to operate less often.
 - Adds more warnings of inputs based on ANSI/BPI 2400 Standard.
 - Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
 - Updates the reporting measure to register all outputs from the annual CSV with the OS runner (for use in, e.g., PAT).

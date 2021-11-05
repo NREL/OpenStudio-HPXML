@@ -1102,8 +1102,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heat_pump_fuel_choices = OpenStudio::StringVector.new
     heat_pump_fuel_choices << HPXML::FuelTypeElectricity
 
+    heat_pump_backup_type_choices = OpenStudio::StringVector.new
+    heat_pump_backup_type_choices << 'none'
+    heat_pump_backup_type_choices << HPXML::HeatPumpBackupTypeIntegrated
+    heat_pump_backup_type_choices << HPXML::HeatPumpBackupTypeSeparate
+
     heat_pump_backup_fuel_choices = OpenStudio::StringVector.new
-    heat_pump_backup_fuel_choices << 'none'
     heat_pump_backup_fuel_choices << HPXML::FuelTypeElectricity
     heat_pump_backup_fuel_choices << HPXML::FuelTypeNaturalGas
     heat_pump_backup_fuel_choices << HPXML::FuelTypeOil
@@ -1187,10 +1191,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_backup_type', heat_pump_backup_type_choices, true)
+    arg.setDisplayName('Heat Pump: Backup Type')
+    arg.setDescription("The backup type of the heat pump. If '#{HPXML::HeatPumpBackupTypeIntegrated}' (e.g., built-in electric resistance or dual-fuel integrated furnace), the subsequent backup inputs apply. If '#{HPXML::HeatPumpBackupTypeSeparate}', the Heating System 2 specified below will be selected as the backup system. Use 'none' if there is no backup heating.")
+    arg.setDefaultValue(HPXML::HeatPumpBackupTypeIntegrated)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_backup_fuel', heat_pump_backup_fuel_choices, true)
     arg.setDisplayName('Heat Pump: Backup Fuel Type')
-    arg.setDescription("The backup fuel type of the heat pump. Use 'none' if there is no backup heating.")
-    arg.setDefaultValue('none')
+    arg.setDescription('The backup fuel type of the heat pump.')
+    arg.setDefaultValue(HPXML::FuelTypeElectricity)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_backup_heating_efficiency', true)
@@ -1267,7 +1277,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_2_fraction_heat_load_served', true)
     arg.setDisplayName('Heating System 2: Fraction Heat Load Served')
-    arg.setDescription('The heat load served fraction of the second heating system.')
+    arg.setDescription('The heat load served fraction of the second heating system. Ignored if this heating system serves as a backup system for a heat pump.')
     arg.setUnits('Frac')
     arg.setDefaultValue(0.25)
     args << arg
@@ -4134,9 +4144,6 @@ class HPXMLFile
     end
 
     fraction_heat_load_served = args[:heating_system_fraction_heat_load_served]
-    if args[:heating_system_2_type] != 'none' && fraction_heat_load_served + args[:heating_system_2_fraction_heat_load_served] > 1.0
-      fraction_heat_load_served = 1.0 - args[:heating_system_2_fraction_heat_load_served]
-    end
 
     if heating_system_type.include?('Shared')
       is_shared_system = true
@@ -4238,7 +4245,8 @@ class HPXMLFile
       end
     end
 
-    if args[:heat_pump_backup_fuel] != 'none'
+    if args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeIntegrated
+      backup_type = args[:heat_pump_backup_type]
       backup_heating_fuel = args[:heat_pump_backup_fuel]
 
       if args[:heat_pump_backup_heating_capacity] != Constants.Auto
@@ -4255,6 +4263,13 @@ class HPXMLFile
           backup_heating_switchover_temp = args[:heat_pump_backup_heating_switchover_temp].get
         end
       end
+    elsif args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeSeparate
+      if args[:heating_system_2_type] == 'none'
+        fail "Heat pump backup type specified as '#{args[:heat_pump_backup_type]}' but no heating system provided."
+      end
+
+      backup_type = args[:heat_pump_backup_type]
+      backup_system_idref = "HeatingSystem#{hpxml.heating_systems.size + 1}"
     end
 
     if args[:heat_pump_cooling_capacity] != Constants.Auto
@@ -4296,10 +4311,6 @@ class HPXMLFile
     fraction_heat_load_served = args[:heat_pump_fraction_heat_load_served]
     fraction_cool_load_served = args[:heat_pump_fraction_cool_load_served]
 
-    if args[:heating_system_2_type] != 'none' && fraction_heat_load_served + args[:heating_system_2_fraction_heat_load_served] > 1.0
-      fraction_heat_load_served = 1.0 - args[:heating_system_2_fraction_heat_load_served]
-    end
-
     if fraction_heat_load_served > 0
       primary_heating_system = true
     end
@@ -4318,6 +4329,8 @@ class HPXMLFile
                          cooling_capacity: cooling_capacity,
                          fraction_heat_load_served: fraction_heat_load_served,
                          fraction_cool_load_served: fraction_cool_load_served,
+                         backup_type: backup_type,
+                         backup_system_idref: backup_system_idref,
                          backup_heating_fuel: backup_heating_fuel,
                          backup_heating_capacity: backup_heating_capacity,
                          backup_heating_efficiency_afue: backup_heating_efficiency_afue,
@@ -4335,8 +4348,9 @@ class HPXMLFile
 
   def self.set_secondary_heating_systems(hpxml, runner, args)
     heating_system_type = args[:heating_system_2_type]
+    heating_system_is_heatpump_backup = (args[:heat_pump_type] != 'none' && args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeSeparate)
 
-    return if heating_system_type == 'none'
+    return if heating_system_type == 'none' && (not heating_system_is_heatpump_backup)
 
     if args[:heating_system_2_heating_capacity] != Constants.Auto
       heating_capacity = Float(args[:heating_system_2_heating_capacity])
@@ -4358,11 +4372,15 @@ class HPXMLFile
       heating_system_type = HPXML::HVACTypeBoiler
     end
 
+    if not heating_system_is_heatpump_backup
+      fraction_heat_load_served = args[:heating_system_2_fraction_heat_load_served]
+    end
+
     hpxml.heating_systems.add(id: "HeatingSystem#{hpxml.heating_systems.size + 1}",
                               heating_system_type: heating_system_type,
                               heating_system_fuel: heating_system_fuel,
                               heating_capacity: heating_capacity,
-                              fraction_heat_load_served: args[:heating_system_2_fraction_heat_load_served],
+                              fraction_heat_load_served: fraction_heat_load_served,
                               heating_efficiency_afue: heating_efficiency_afue,
                               heating_efficiency_percent: heating_efficiency_percent)
   end
