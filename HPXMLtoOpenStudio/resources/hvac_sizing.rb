@@ -1640,7 +1640,6 @@ class HVACSizing
 
       if hvac.RatedCFMperTonHeating[0] > 0
         # Fixed airflow rate
-        # FIXME: Is this still needed?
         hvac_sizing_values.Heat_Airflow = UnitConversions.convert(hvac_sizing_values.Heat_Capacity, 'Btu/hr', 'ton') * hvac.RatedCFMperTonHeating[0]
       else
         # Autosized airflow rate
