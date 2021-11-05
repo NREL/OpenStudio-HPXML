@@ -4,8 +4,9 @@
 # files lazy loading as needed, as it prevents multiple lookups for the
 # same gem.
 require 'openstudio'
-require 'oga'
+require 'pathname'
 require 'csv'
+require 'oga'
 require_relative 'resources/geometry'
 require_relative '../HPXMLtoOpenStudio/resources/constants'
 require_relative '../HPXMLtoOpenStudio/resources/constructions'
