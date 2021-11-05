@@ -1771,34 +1771,31 @@ class OSModel
       return
     end
 
-    # only enable residual ideal system when hvac's not on on/off thermostat control, the sum of fractions load served must be 1 to enable onoff control
-    if @hpxml.hvac_controls[0].onoff_thermostat_deadband.nil? || (@hpxml.hvac_controls[0].onoff_thermostat_deadband == 0.0)
-      if (@hpxml.total_fraction_heat_load_served < 1.0) && (@hpxml.total_fraction_heat_load_served > 0.0)
-        sequential_heat_load_frac = @remaining_heat_load_frac - @hpxml.total_fraction_heat_load_served
-        @remaining_heat_load_frac -= sequential_heat_load_frac
-      else
-        sequential_heat_load_frac = 0.0
-      end
+    if (@hpxml.total_fraction_heat_load_served < 1.0) && (@hpxml.total_fraction_heat_load_served > 0.0)
+      sequential_heat_load_frac = @remaining_heat_load_frac - @hpxml.total_fraction_heat_load_served
+      @remaining_heat_load_frac -= sequential_heat_load_frac
+    else
+      sequential_heat_load_frac = 0.0
+    end
 
-      if (@hpxml.total_fraction_cool_load_served < 1.0) && (@hpxml.total_fraction_cool_load_served > 0.0)
-        sequential_cool_load_frac = @remaining_cool_load_frac - @hpxml.total_fraction_cool_load_served
-        @remaining_cool_load_frac -= sequential_cool_load_frac
-      else
-        sequential_cool_load_frac = 0.0
-      end
+    if (@hpxml.total_fraction_cool_load_served < 1.0) && (@hpxml.total_fraction_cool_load_served > 0.0)
+      sequential_cool_load_frac = @remaining_cool_load_frac - @hpxml.total_fraction_cool_load_served
+      @remaining_cool_load_frac -= sequential_cool_load_frac
+    else
+      sequential_cool_load_frac = 0.0
+    end
 
-      return if @heating_days.nil?
+    return if @heating_days.nil?
 
-      # For periods of the year outside the HVAC season, operate this ideal air system to meet
-      # 100% of the load; for all other periods, operate to meet the fraction of the load not
-      # met by the HVAC system(s).
-      sequential_heat_load_fracs = @heating_days.map { |d| d == 0 ? 1.0 : sequential_heat_load_frac }
-      sequential_cool_load_fracs = @cooling_days.map { |d| d == 0 ? 1.0 : sequential_cool_load_frac }
+    # For periods of the year outside the HVAC season, operate this ideal air system to meet
+    # 100% of the load; for all other periods, operate to meet the fraction of the load not
+    # met by the HVAC system(s).
+    sequential_heat_load_fracs = @heating_days.map { |d| d == 0 ? 1.0 : sequential_heat_load_frac }
+    sequential_cool_load_fracs = @cooling_days.map { |d| d == 0 ? 1.0 : sequential_cool_load_frac }
 
-      if (sequential_heat_load_fracs.sum > 0.0) || (sequential_cool_load_fracs.sum > 0.0)
-        HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                   living_zone)
-      end
+    if (sequential_heat_load_fracs.sum > 0.0) || (sequential_cool_load_fracs.sum > 0.0)
+      HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_fracs, sequential_heat_load_fracs,
+                                 living_zone)
     end
   end
 
