@@ -110,7 +110,7 @@ class HVAC
       end
     end
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms)
-    if not cooling_system.nil? && heating_system.nil?
+    if (not cooling_system.nil?) && (not heating_system.nil?)
       disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, cooling_system.id)
     elsif not cooling_system.nil?
       disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil, cooling_system.id)
