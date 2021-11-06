@@ -110,6 +110,10 @@ class HVAC
       end
     end
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms)
+    if heating_system.is_a?(HPXML::HeatPump) && (not heating_system.backup_system.nil?) && (not heating_system.backup_heating_switchover_temp.nil?)
+      # Disable blower fan power below switchover temperature
+      set_fan_power_ems_program(model, fan, htg_ap.hp_min_temp)
+    end
     if (not cooling_system.nil?) && (not heating_system.nil?) && (cooling_system == heating_system)
       disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, cooling_system.id)
     else
@@ -1237,6 +1241,39 @@ class HVAC
   end
 
   private
+
+  def self.set_fan_power_ems_program(model, fan, hp_min_temp)
+    # EMS is used to disable the fan power below the hp_min_temp; the backup heating
+    # system will be operating instead.
+
+    # Sensors
+    tout_db_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
+    tout_db_sensor.setKeyName('Environment')
+
+    # Actuators
+    fan_pressure_rise_act = OpenStudio::Model::EnergyManagementSystemActuator.new(fan, *EPlus::EMSActuatorFanPressureRise)
+    fan_pressure_rise_act.setName("#{fan.name} pressure rise act")
+
+    fan_total_efficiency_act = OpenStudio::Model::EnergyManagementSystemActuator.new(fan, *EPlus::EMSActuatorFanTotalEfficiency)
+    fan_total_efficiency_act.setName("#{fan.name} total efficiency act")
+
+    # Program
+    fan_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    fan_program.setName("#{fan.name} power program")
+    fan_program.addLine("If #{tout_db_sensor.name} < #{UnitConversions.convert(hp_min_temp, 'F', 'C').round(2)}")
+    fan_program.addLine("  Set #{fan_pressure_rise_act.name} = 0")
+    fan_program.addLine("  Set #{fan_total_efficiency_act.name} = 1")
+    fan_program.addLine('Else')
+    fan_program.addLine("  Set #{fan_pressure_rise_act.name} = NULL")
+    fan_program.addLine("  Set #{fan_total_efficiency_act.name} = NULL")
+    fan_program.addLine('EndIf')
+
+    # Calling Point
+    fan_program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    fan_program_calling_manager.setName("#{fan.name} power program calling manager")
+    fan_program_calling_manager.setCallingPoint('AfterPredictorBeforeHVACManagers')
+    fan_program_calling_manager.addProgram(fan_program)
+  end
 
   def self.set_pump_power_ems_program(model, pump_w, pump, heating_object)
     # EMS is used to set the pump power.
