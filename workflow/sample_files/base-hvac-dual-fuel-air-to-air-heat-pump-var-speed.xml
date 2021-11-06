@@ -325,6 +325,7 @@
               <CoolingCapacity>36000.0</CoolingCapacity>
               <CompressorType>variable speed</CompressorType>
               <CoolingSensibleHeatFraction>0.78</CoolingSensibleHeatFraction>
+              <BackupType>integrated</BackupType>
               <BackupSystemFuel>natural gas</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
                 <Units>AFUE</Units>
