@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Battery
-  def self.apply(model, battery)
+  def self.apply(runner, model, battery)
     obj_name = battery.id
 
     power = battery.rated_power_output # W
@@ -56,6 +56,7 @@ class Battery
       elcd.setMaximumStorageStateofChargeFraction(maximum_storage_state_of_charge_fraction)
       elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
       elcd.setElectricalStorage(elcs)
+      runner.registerWarning("Due to an OpenStudio bug, the battery's rated power output will not be honored; the simulation will proceed without a maximum charge/discharge limit.")
       elcd.setDesignStorageControlDischargePower(power)
       elcd.setDesignStorageControlChargePower(power)
     end

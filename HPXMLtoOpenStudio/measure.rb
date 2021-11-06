@@ -2019,7 +2019,7 @@ class OSModel
       if battery.location != HPXML::LocationOutside
         battery.additional_properties.space = get_space_from_location(battery.location, 'Battery', model, spaces)
       end
-      Battery.apply(model, battery)
+      Battery.apply(runner, model, battery)
     end
   end
 
