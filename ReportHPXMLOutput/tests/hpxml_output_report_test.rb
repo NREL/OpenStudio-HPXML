@@ -126,7 +126,7 @@ class ReportHPXMLOutputTest < MiniTest::Test
         hp_capacity = 36000.0
         backup_capacity = 36000.0
       elsif hpxml_file == 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml'
-        hp_capacity = 24000.0
+        hp_capacity = 18000.0
         backup_capacity = 60000.0
       end
 
