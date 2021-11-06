@@ -4433,9 +4433,14 @@ def download_epws
   UrlResolver.fetch('https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip', tmpfile)
 
   puts 'Extracting weather files...'
+  require 'zip'
   weather_dir = File.join(File.dirname(__FILE__), 'weather')
-  unzip_file = OpenStudio::UnzipFile.new(tmpfile.path.to_s)
-  unzip_file.extractAllFiles(OpenStudio::toPath(weather_dir))
+  Zip.on_exists_proc = true
+  Zip::File.open(tmpfile.path.to_s) do |zip_file|
+    zip_file.each do |f|
+      zip_file.extract(f, File.join(weather_dir, f.name))
+    end
+  end
 
   num_epws_actual = Dir[File.join(weather_dir, '*.epw')].count
   puts "#{num_epws_actual} weather files are available in the weather directory."
