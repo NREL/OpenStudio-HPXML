@@ -4839,18 +4839,13 @@ if ARGV[0].to_sym == :create_release_zips
     File.delete(zip_path) if File.exist? zip_path
   end
 
-  if ENV['CI']
-    # CI doesn't have git, so default to everything
-    git_files = Dir['**/*.*']
-  else
-    # Only include files under git version control
-    command = 'git ls-files'
-    begin
-      git_files = `#{command}`
-    rescue
-      puts "Command failed: '#{command}'. Perhaps git needs to be installed?"
-      exit!
-    end
+  # Only include files under git version control
+  command = 'git ls-files'
+  begin
+    git_files = `#{command}`
+  rescue
+    puts "Command failed: '#{command}'. Perhaps git needs to be installed?"
+    exit!
   end
 
   files = ['Changelog.md',
@@ -4874,69 +4869,66 @@ if ARGV[0].to_sym == :create_release_zips
            'documentation/index.html',
            'documentation/_static/**/*.*']
 
-  if not ENV['CI']
-    # Generate documentation
-    puts 'Generating documentation...'
-    command = 'sphinx-build -b singlehtml docs/source documentation'
-    begin
-      `#{command}`
-      if not File.exist? File.join(File.dirname(__FILE__), 'documentation', 'index.html')
-        puts 'Documentation was not successfully generated. Aborting...'
-        exit!
-      end
-    rescue
-      puts "Command failed: '#{command}'. Perhaps sphinx needs to be installed?"
+  # Generate documentation
+  puts 'Generating documentation...'
+  command = 'sphinx-build -b singlehtml docs/source documentation'
+  begin
+    `#{command}`
+    if not File.exist? File.join(File.dirname(__FILE__), 'documentation', 'index.html')
+      puts 'Documentation was not successfully generated. Aborting...'
       exit!
     end
-    FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation', '_static', 'fonts'))
+  rescue
+    puts "Command failed: '#{command}'. Perhaps sphinx needs to be installed?"
+    exit!
+  end
+  FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation', '_static', 'fonts'))
 
-    # Check if we need to download weather files for the full release zip
-    num_epws_expected = 1011
-    num_epws_local = 0
-    files.each do |f|
-      Dir[f].each do |file|
-        next unless file.end_with? '.epw'
+  # Check if we need to download weather files for the full release zip
+  num_epws_expected = 1011
+  num_epws_local = 0
+  files.each do |f|
+    Dir[f].each do |file|
+      next unless file.end_with? '.epw'
 
-        num_epws_local += 1
-      end
-    end
-
-    # Make sure we have the full set of weather files
-    if num_epws_local < num_epws_expected
-      puts 'Fetching all weather files...'
-      command = "#{OpenStudio.getOpenStudioCLI} #{__FILE__} download_weather"
-      log = `#{command}`
+      num_epws_local += 1
     end
   end
 
+  # Make sure we have the full set of weather files
+  if num_epws_local < num_epws_expected
+    puts 'Fetching all weather files...'
+    command = "#{OpenStudio.getOpenStudioCLI} #{__FILE__} download_weather"
+    log = `#{command}`
+  end
+
   # Create zip files
+  require 'zip'
   release_map.each do |zip_path, include_all_epws|
     puts "Creating #{zip_path}..."
-    zip = OpenStudio::ZipFile.new(zip_path, false)
-    files.each do |f|
-      Dir[f].each do |file|
-        if file.start_with? 'documentation'
-          # always include
-        elsif include_all_epws
-          if (not git_files.include? file) && (not file.start_with? 'weather')
-            next
+    Zip::File.open(zip_path, create: true) do |zipfile|
+      files.each do |f|
+        Dir[f].each do |file|
+          if file.start_with? 'documentation'
+            # always include
+          elsif include_all_epws
+            if (not git_files.include? file) && (not file.start_with? 'weather')
+              next
+            end
+          else
+            if not git_files.include? file
+              next
+            end
           end
-        else
-          if not git_files.include? file
-            next
-          end
+          zipfile.add(File.join('OpenStudio-HPXML', file), file)
         end
-
-        zip.addFile(file, File.join('OpenStudio-HPXML', file))
       end
     end
     puts "Wrote file at #{zip_path}."
   end
 
   # Cleanup
-  if not ENV['CI']
-    FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation'))
-  end
+  FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation'))
 
   puts 'Done.'
 end
