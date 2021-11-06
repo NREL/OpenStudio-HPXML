@@ -449,8 +449,12 @@ class HPXMLTest < MiniTest::Test
     results['heating_airflow [cfm]'] = 0.0
     (hpxml.heating_systems + hpxml.heat_pumps).each do |htg_sys|
       results['heating_capacity [Btuh]'] += htg_sys.heating_capacity
-      if htg_sys.respond_to? :backup_heating_capacity
-        results['heating_backup_capacity [Btuh]'] += htg_sys.backup_heating_capacity
+      if htg_sys.is_a? HPXML::HeatPump
+        if not htg_sys.backup_heating_capacity.nil?
+          results['heating_backup_capacity [Btuh]'] += htg_sys.backup_heating_capacity
+        elsif not htg_sys.backup_system.nil?
+          results['heating_backup_capacity [Btuh]'] += htg_sys.backup_system.heating_capacity
+        end
       end
       results['heating_airflow [cfm]'] += htg_sys.heating_airflow_cfm.to_f
     end
