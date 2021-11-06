@@ -36,11 +36,11 @@ jobs:
         with:
           path: coverage
           name: coverage
-      
+
       - name: Store release zips
         uses: actions/upload-artifact@v2
         with:
-          path: *.zip
+          path: ./*.zip
           name: release_zips
 
   compare-results:
