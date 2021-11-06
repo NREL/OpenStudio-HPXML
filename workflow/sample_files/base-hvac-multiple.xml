@@ -517,7 +517,7 @@
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>4800.0</HeatingCapacity>
-              <HeatingCapacity17F>4799.567307692308</HeatingCapacity17F>
+              <HeatingCapacity17F>2723.076923076923</HeatingCapacity17F>
               <CoolingCapacity>4800.0</CoolingCapacity>
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <BackupType>integrated</BackupType>

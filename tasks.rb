@@ -3943,7 +3943,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          fraction_cool_load_served: 0.2,
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 19,
-                         heating_capacity_17F: 4800 * 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0),
+                         heating_capacity_17F: 4800 * (1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)),
                          # TODO: heating_capacity_17F: 4800 * 0.6,
                          cooling_shr: 0.73,
                          primary_cooling_system: true,
