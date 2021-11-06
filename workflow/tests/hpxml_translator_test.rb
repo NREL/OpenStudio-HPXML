@@ -352,13 +352,6 @@ class HPXMLTest < MiniTest::Test
       assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_annual.csv')
       assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_hpxml.csv')
 
-      # Test OSW
-      osw_path = 'OpenStudio-HPXML/workflow/template-build-hpxml-and-stocastic-schedules.osw'
-      command = "#{OpenStudio.getOpenStudioCLI} run -w #{osw_path}"
-      system(command, err: File::NULL)
-      assert(File.exist? 'OpenStudio-HPXML/workflow/run/results_annual.csv')
-      assert(File.exist? 'OpenStudio-HPXML/workflow/run/results_hpxml.csv')
-
       if not ENV['CI'] # Don't clean up on CI so we can post the artifact
         File.delete(zip_path)
       end
