@@ -18,7 +18,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_simulations
-    skip
     results_out = File.join(@results_dir, 'results.csv')
     File.delete(results_out) if File.exist? results_out
     sizing_out = File.join(@results_dir, 'results_hvac_sizing.csv')
@@ -47,7 +46,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_ashrae_140
-    skip
     ashrae140_out = File.join(@results_dir, 'results_ashrae_140.csv')
     File.delete(ashrae140_out) if File.exist? ashrae140_out
 
@@ -70,7 +68,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_run_simulation_json_output
-    skip
     # Check that the simulation produces JSON outputs (instead of CSV outputs) if requested
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
     xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
@@ -96,7 +93,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_run_simulation_epjson_input
-    skip
     # Check that we can run a simulation using epJSON (instead of IDF) if requested
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
     xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
@@ -117,7 +113,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_run_simulation_idf_input
-    skip
     # Check that we can run a simulation using IDF (instead of epJSON) if requested
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
     xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
@@ -138,7 +133,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_run_simulation_faster_performance
-    skip
     # Run w/ --skip-validation and w/o --add-component-loads arguments
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
     xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
@@ -164,7 +158,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_template_osw
-    skip
     # Check that simulation works using template.osw
     require 'json'
 
@@ -209,7 +202,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_template_osw_with_schedule
-    skip
     # Check that simulation works using template.osw
     require 'json'
 
@@ -256,7 +248,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_template_osw_with_build_hpxml_and_schedule
-    skip
     # Check that simulation works using template2.osw
     require 'json'
 
@@ -305,7 +296,7 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_multiple_building_ids
-    skip
+    os_cli = OpenStudio.getOpenStudioCLI
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
     xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base-multiple-buildings.xml')
     csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
@@ -330,7 +321,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def test_weather_cache
-    skip
     cache_orig = File.join(@this_dir, '..', '..', 'weather', 'USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv')
     cache_bak = cache_orig + '.bak'
     File.rename(cache_orig, cache_bak)
@@ -355,20 +345,20 @@ class HPXMLTest < MiniTest::Test
           zip_file.extract(f, f.name)
         end
       end
-      
+
       # Test run_simulation.rb
       command = "#{OpenStudio.getOpenStudioCLI} OpenStudio-HPXML/workflow/run_simulation.rb -x OpenStudio-HPXML/workflow/sample_files/base.xml"
       system(command)
       assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_annual.csv')
       assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_hpxml.csv')
-      
+
       # Test OSW
       osw_path = 'OpenStudio-HPXML/workflow/template-build-hpxml-and-stocastic-schedules.osw'
       command = "#{OpenStudio.getOpenStudioCLI} run -w #{osw_path}"
       system(command, err: File::NULL)
       assert(File.exist? 'OpenStudio-HPXML/workflow/run/results_annual.csv')
       assert(File.exist? 'OpenStudio-HPXML/workflow/run/results_hpxml.csv')
-      
+
       if not ENV['CI'] # Don't clean up on CI so we can post the artifact
         File.delete(zip_path)
       end

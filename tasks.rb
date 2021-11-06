@@ -4839,13 +4839,18 @@ if ARGV[0].to_sym == :create_release_zips
     File.delete(zip_path) if File.exist? zip_path
   end
 
-  # Only include files under git version control
-  command = 'git ls-files'
-  begin
-    git_files = `#{command}`
-  rescue
-    puts "Command failed: '#{command}'. Perhaps git needs to be installed?"
-    exit!
+  if ENV['CI']
+    # CI doesn't have git, so default to everything
+    git_files = Dir['**/*.*']
+  else
+    # Only include files under git version control
+    command = 'git ls-files'
+    begin
+      git_files = `#{command}`
+    rescue
+      puts "Command failed: '#{command}'. Perhaps git needs to be installed?"
+      exit!
+    end
   end
 
   files = ['Changelog.md',
@@ -4869,37 +4874,39 @@ if ARGV[0].to_sym == :create_release_zips
            'documentation/index.html',
            'documentation/_static/**/*.*']
 
-  # Generate documentation
-  puts 'Generating documentation...'
-  command = 'sphinx-build -b singlehtml docs/source documentation'
-  begin
-    `#{command}`
-    if not File.exist? File.join(File.dirname(__FILE__), 'documentation', 'index.html')
-      puts 'Documentation was not successfully generated. Aborting...'
+  if not ENV['CI']
+    # Generate documentation
+    puts 'Generating documentation...'
+    command = 'sphinx-build -b singlehtml docs/source documentation'
+    begin
+      `#{command}`
+      if not File.exist? File.join(File.dirname(__FILE__), 'documentation', 'index.html')
+        puts 'Documentation was not successfully generated. Aborting...'
+        exit!
+      end
+    rescue
+      puts "Command failed: '#{command}'. Perhaps sphinx needs to be installed?"
       exit!
     end
-  rescue
-    puts "Command failed: '#{command}'. Perhaps sphinx needs to be installed?"
-    exit!
-  end
-  FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation', '_static', 'fonts'))
+    FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation', '_static', 'fonts'))
 
-  # Check if we need to download weather files for the full release zip
-  num_epws_expected = 1011
-  num_epws_local = 0
-  files.each do |f|
-    Dir[f].each do |file|
-      next unless file.end_with? '.epw'
+    # Check if we need to download weather files for the full release zip
+    num_epws_expected = 1011
+    num_epws_local = 0
+    files.each do |f|
+      Dir[f].each do |file|
+        next unless file.end_with? '.epw'
 
-      num_epws_local += 1
+        num_epws_local += 1
+      end
     end
-  end
 
-  # Make sure we have the full set of weather files
-  if num_epws_local < num_epws_expected
-    puts 'Fetching all weather files...'
-    command = "#{OpenStudio.getOpenStudioCLI} #{__FILE__} download_weather"
-    log = `#{command}`
+    # Make sure we have the full set of weather files
+    if num_epws_local < num_epws_expected
+      puts 'Fetching all weather files...'
+      command = "#{OpenStudio.getOpenStudioCLI} #{__FILE__} download_weather"
+      log = `#{command}`
+    end
   end
 
   # Create zip files
@@ -4928,7 +4935,9 @@ if ARGV[0].to_sym == :create_release_zips
   end
 
   # Cleanup
-  FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation'))
+  if not ENV['CI']
+    FileUtils.rm_r(File.join(File.dirname(__FILE__), 'documentation'))
+  end
 
   puts 'Done.'
 end
