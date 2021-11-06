@@ -621,6 +621,7 @@ class HEScoreRuleset
       if (has_heating_system && (hp_types.include? orig_heating['type'])) ||
          (has_cooling_system && (hp_types.include? orig_cooling['type']))
         heat_pump_fuel = HPXML::FuelTypeElectricity
+        backup_type = HPXML::HeatPumpBackupTypeIntegrated
         backup_heating_fuel = HPXML::FuelTypeElectricity
         backup_heating_efficiency_percent = 1.0
         distribution_system_idref = nil
@@ -704,6 +705,7 @@ class HEScoreRuleset
                                  distribution_system_idref: distribution_system_idref,
                                  heat_pump_type: heat_pump_type,
                                  heat_pump_fuel: heat_pump_fuel,
+                                 backup_type: backup_type,
                                  backup_heating_fuel: backup_heating_fuel,
                                  backup_heating_efficiency_percent: backup_heating_efficiency_percent,
                                  fraction_heat_load_served: heatpump_fraction_heat_load_served,
