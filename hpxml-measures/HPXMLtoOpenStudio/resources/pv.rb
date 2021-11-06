@@ -43,6 +43,7 @@ class PV
 
     elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
     elcd.setName("#{obj_name} elec load center dist")
+    elcd.setGeneratorOperationSchemeType('TrackElectrical')
     elcd.addGenerator(gpvwatts)
     elcd.setInverter(ipvwatts)
   end
