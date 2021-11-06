@@ -4,7 +4,7 @@ class Battery
   def self.apply(model, battery)
     obj_name = battery.id
 
-    power = UnitConversions.convert(battery.rated_power_output, 'W', 'kW') # kW
+    power = battery.rated_power_output # W
     voltage = battery.nominal_voltage # V
     if not battery.nominal_capacity_kwh.nil?
       capacity = battery.nominal_capacity_kwh # kWh
@@ -26,7 +26,6 @@ class Battery
     number_of_strings_in_parallel = Integer(((capacity * 1000.0) / (voltage * 3.2)).round)
     battery_mass = (capacity / 10.0) * 99.0 # kg
     battery_surface_area = 0.306 * (capacity**(2.0 / 3.0)) # m^2
-    c_rate = power / capacity
 
     minimum_storage_state_of_charge_fraction = 0.15 # from SAM
     maximum_storage_state_of_charge_fraction = 0.95 # from SAM
@@ -48,7 +47,6 @@ class Battery
     elcs.setBatterySurfaceArea(battery_surface_area)
     elcs.setFractionofCellCapacityRemovedattheEndofExponentialZone(2.584) # from Rohit C.
     elcs.setFractionofCellCapacityRemovedattheEndofNominalZone(3.126) # from Rohit C.
-    elcs.setChargeRateatWhichVoltagevsCapacityCurveWasGenerated(c_rate)
 
     model.getElectricLoadCenterDistributions.each do |elcd|
       next unless elcd.inverter.is_initialized
@@ -58,6 +56,8 @@ class Battery
       elcd.setMaximumStorageStateofChargeFraction(maximum_storage_state_of_charge_fraction)
       elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
       elcd.setElectricalStorage(elcs)
+      elcd.setDesignStorageControlDischargePower(power)
+      elcd.setDesignStorageControlChargePower(power)
     end
   end
 

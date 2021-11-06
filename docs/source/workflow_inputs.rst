@@ -2171,8 +2171,8 @@ If not entered, the simulation will not include batteries.
 
   .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "attic - vented", "attic - unvented", "garage", or "outside".
   .. [#] BatteryType choices are "Li-ion".
-  .. [#] NominalCapacity is defaulted to 10 kWh if RatedPowerOutput is not specified; otherwise it is calculated as RatedPowerOutput / 1000 / C-rate, where C-rate = 0.5.
-  .. [#] RatedPowerOutput is defaulted to 5000 W if NominalCapacity is not specified; otherwise it is calculated as NominalCapacity * 1000 * C-rate, where C-rate = 0.5 and NominalCapacity is in kWh.
+  .. [#] NominalCapacity is defaulted to 10 kWh if RatedPowerOutput is not specified; otherwise it is calculated as (RatedPowerOutput / 1000) / 0.5.
+  .. [#] RatedPowerOutput is defaulted to 5000 W if NominalCapacity is not specified; otherwise it is calculated as NominalCapacity * 1000 * 0.5.
   .. [#] LifetimeModel choices are "None" or "KandlerSmith".
   .. [#] See the "Lifetime Model" `EnergyPlus documentation <https://bigladdersoftware.com/epx/docs/9-6/input-output-reference/group-electric-load-center-generator.html#liion-lifetime-model>`_ for more information.
 
