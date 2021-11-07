@@ -1651,11 +1651,26 @@ class OSModel
       end
 
       # Calculate heating sequential load fractions
-      sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heating_system.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
-      @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
+      if heating_system.is_heat_pump_backup_system
+        # Heating system will be last in the EquipmentList and should meet entirety of
+        # remaining load during the heating season.
+        sequential_heat_load_fracs = @heating_days.map(&:to_f)
+        if not heating_system.fraction_heat_load_served.nil?
+          fail 'Heat pump backup system cannot have a fraction heat load served specified.'
+        end
+      else
+        sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heating_system.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
+        @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
+      end
 
       sys_id = heating_system.id
       if [HPXML::HVACTypeFurnace, HPXML::HVACTypePTACHeating].include? heating_system.heating_system_type
+
+        if heating_system.is_heat_pump_backup_system
+          # If we ever want to support this in the future, we have to address HVAC
+          # sizing related to 1) distribution losses and 2) calculating the airflow rate.
+          fail "Heat pump backup system cannot be of type '#{heating_system.heating_system_type}'."
+        end
 
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, runner, nil, heating_system,
                                                                  [0], sequential_heat_load_fracs,
@@ -1681,6 +1696,12 @@ class OSModel
         HVAC.apply_unit_heater(model, runner, heating_system,
                                sequential_heat_load_fracs, living_zone)
       end
+
+      next unless heating_system.is_heat_pump_backup_system
+
+      # Store OS object for later use
+      equipment_list = model.getZoneHVACEquipmentLists.select { |el| el.thermalZone == living_zone }[0]
+      @heat_pump_backup_system_object = equipment_list.equipment[-1]
     end
   end
 
@@ -1723,6 +1744,14 @@ class OSModel
                                                                  living_zone)
 
       end
+
+      next unless not heat_pump.backup_system.nil?
+
+      equipment_list = model.getZoneHVACEquipmentLists.select { |el| el.thermalZone == living_zone }[0]
+
+      # Set priority to be last (i.e., after the heat pump that it is backup for)
+      equipment_list.setHeatingPriority(@heat_pump_backup_system_object, 99)
+      equipment_list.setCoolingPriority(@heat_pump_backup_system_object, 99)
     end
   end
 

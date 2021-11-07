@@ -550,7 +550,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Apply Heating/Cooling DSEs
     (@hpxml.heating_systems + @hpxml.heat_pumps).each do |htg_system|
-      next unless htg_system.fraction_heat_load_served > 0
+      next unless (htg_system.is_a?(HPXML::HeatingSystem) && htg_system.is_heat_pump_backup_system) || htg_system.fraction_heat_load_served > 0
       next if htg_system.distribution_system_idref.nil?
       next unless htg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
       next if htg_system.distribution_system.annual_heating_dse.nil?
@@ -691,7 +691,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Check sum of end use outputs match fuel outputs
     @fuels.keys.each do |fuel_type|
-      sum_categories = @end_uses.select { |k, eu| k[0] == fuel_type}.map { |k, eu| eu.annual_output.to_f }.sum(0.0)
+      sum_categories = @end_uses.select { |k, eu| k[0] == fuel_type }.map { |k, eu| eu.annual_output.to_f }.sum(0.0)
       fuel_total = @fuels[fuel_type].annual_output.to_f
       if fuel_type == FT::Elec
         fuel_total -= sum_elec_produced

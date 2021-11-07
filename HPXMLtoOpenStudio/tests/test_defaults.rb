@@ -1963,7 +1963,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_battery_values(hpxml_default, 10.0, nil, 5000.0, HPXML::LocationOutside, HPXML::BatteryLifetimeModelNone)
-    
+
     # Test defaults w/ kWh
     hpxml.batteries[0].nominal_capacity_kwh = 14.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
