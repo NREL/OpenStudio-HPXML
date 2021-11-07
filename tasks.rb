@@ -4707,9 +4707,9 @@ def create_schematron_hpxml_validator(hpxml_docs)
         XMLHelper.add_attribute(rule, 'context', context_xpath)
         rules[context_xpath] = rule
       end
-      assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected id attribute for #{element_name}", :string)
+      assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name} with id attribute", :string)
       XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-      XMLHelper.add_attribute(assertion, 'test', "count(h:#{element_name}[@id]) = count(h:#{element_name})")
+      XMLHelper.add_attribute(assertion, 'test', "count(h:#{element_name}[@id]) = 1")
     elsif idref_names.include?(element_name)
       rule = rules[context_xpath]
       if rule.nil?
