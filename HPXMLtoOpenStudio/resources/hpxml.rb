@@ -142,6 +142,8 @@ class HPXML < Object
   HeaterTypeElectricResistance = 'electric resistance'
   HeaterTypeGas = 'gas fired'
   HeaterTypeHeatPump = 'heat pump'
+  HeatPumpBackupTypeIntegrated = 'integrated'
+  HeatPumpBackupTypeSeparate = 'separate'
   HVACCompressorTypeSingleStage = 'single stage'
   HVACCompressorTypeTwoStage = 'two stage'
   HVACCompressorTypeVariableSpeed = 'variable speed'
@@ -3070,6 +3072,16 @@ class HPXML < Object
       return
     end
 
+    def is_heat_pump_backup_system
+      @hpxml_object.heat_pumps.each do |heat_pump|
+        next if heat_pump.backup_system_idref.nil?
+        next if heat_pump.backup_system_idref != @id
+
+        return true
+      end
+      return false
+    end
+
     def delete
       @hpxml_object.heating_systems.delete(self)
       @hpxml_object.water_heating_systems.each do |water_heating_system|
@@ -3352,7 +3364,7 @@ class HPXML < Object
   class HeatPump < BaseElement
     ATTRS = [:id, :distribution_system_idref, :year_installed, :heat_pump_type, :heat_pump_fuel,
              :heating_capacity, :heating_capacity_17F, :cooling_capacity, :compressor_type,
-             :cooling_shr, :backup_heating_fuel, :backup_heating_capacity,
+             :cooling_shr, :backup_type, :backup_system_idref, :backup_heating_fuel, :backup_heating_capacity,
              :backup_heating_efficiency_percent, :backup_heating_efficiency_afue,
              :backup_heating_switchover_temp, :fraction_heat_load_served, :fraction_cool_load_served,
              :cooling_efficiency_seer, :cooling_efficiency_eer, :cooling_efficiency_ceer, :heating_efficiency_hspf,
@@ -3388,6 +3400,16 @@ class HPXML < Object
       return true if @primary_heating_system || @primary_cooling_system
 
       return false
+    end
+
+    def backup_system
+      return if @backup_system_idref.nil?
+
+      @hpxml_object.heating_systems.each do |heating_system|
+        next unless heating_system.id == @backup_system_idref
+
+        return heating_system
+      end
     end
 
     def delete
@@ -3429,7 +3451,12 @@ class HPXML < Object
       XMLHelper.add_element(heat_pump, 'CoolingCapacity', @cooling_capacity, :float, @cooling_capacity_isdefaulted) unless @cooling_capacity.nil?
       XMLHelper.add_element(heat_pump, 'CompressorType', @compressor_type, :string, @compressor_type_isdefaulted) unless @compressor_type.nil?
       XMLHelper.add_element(heat_pump, 'CoolingSensibleHeatFraction', @cooling_shr, :float, @cooling_shr_isdefaulted) unless @cooling_shr.nil?
-      XMLHelper.add_element(heat_pump, 'BackupSystemFuel', @backup_heating_fuel, :string) unless @backup_heating_fuel.nil?
+      XMLHelper.add_element(heat_pump, 'BackupType', @backup_type, :string, @backup_type_isdefaulted) unless @backup_type.nil?
+      if not @backup_system_idref.nil?
+        backup_system = XMLHelper.add_element(heat_pump, 'BackupSystem')
+        XMLHelper.add_attribute(backup_system, 'idref', @backup_system_idref)
+      end
+      XMLHelper.add_element(heat_pump, 'BackupSystemFuel', @backup_heating_fuel, :string, @backup_heating_fuel_isdefaulted) unless @backup_heating_fuel.nil?
       if not @backup_heating_efficiency_percent.nil?
         backup_eff = XMLHelper.add_element(heat_pump, 'BackupAnnualHeatingEfficiency')
         XMLHelper.add_element(backup_eff, 'Units', UnitsPercent, :string)
@@ -3441,7 +3468,7 @@ class HPXML < Object
         XMLHelper.add_element(backup_eff, 'Value', @backup_heating_efficiency_afue, :float)
       end
       XMLHelper.add_element(heat_pump, 'BackupHeatingCapacity', @backup_heating_capacity, :float, @backup_heating_capacity_isdefaulted) unless @backup_heating_capacity.nil?
-      XMLHelper.add_element(heat_pump, 'BackupHeatingSwitchoverTemperature', @backup_heating_switchover_temp, :float) unless @backup_heating_switchover_temp.nil?
+      XMLHelper.add_element(heat_pump, 'BackupHeatingSwitchoverTemperature', @backup_heating_switchover_temp, :float, @backup_heating_switchover_temp_isdefaulted) unless @backup_heating_switchover_temp.nil?
       XMLHelper.add_element(heat_pump, 'FractionHeatLoadServed', @fraction_heat_load_served, :float, @fraction_heat_load_served_isdefaulted) unless @fraction_heat_load_served.nil?
       XMLHelper.add_element(heat_pump, 'FractionCoolLoadServed', @fraction_cool_load_served, :float, @fraction_cool_load_served_isdefaulted) unless @fraction_cool_load_served.nil?
       if not @cooling_efficiency_seer.nil?
@@ -3505,6 +3532,8 @@ class HPXML < Object
       @cooling_capacity = XMLHelper.get_value(heat_pump, 'CoolingCapacity', :float)
       @compressor_type = XMLHelper.get_value(heat_pump, 'CompressorType', :string)
       @cooling_shr = XMLHelper.get_value(heat_pump, 'CoolingSensibleHeatFraction', :float)
+      @backup_type = XMLHelper.get_value(heat_pump, 'BackupType', :string)
+      @backup_system_idref = HPXML::get_idref(XMLHelper.get_element(heat_pump, 'BackupSystem'))
       @backup_heating_fuel = XMLHelper.get_value(heat_pump, 'BackupSystemFuel', :string)
       @backup_heating_efficiency_percent = XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='Percent']/Value", :float)
       @backup_heating_efficiency_afue = XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='#{UnitsAFUE}']/Value", :float)

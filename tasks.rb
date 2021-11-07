@@ -187,6 +187,8 @@ def create_hpxmls
     'base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-air-to-air-heat-pump-2-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-var-speed.xml' => 'base.xml',
+    'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
+    'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml',
     'base-hvac-autosize.xml' => 'base.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only.xml' => 'base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml',
@@ -196,6 +198,7 @@ def create_hpxmls
     'base-hvac-autosize-air-to-air-heat-pump-2-speed-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-air-to-air-heat-pump-2-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-var-speed.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-autosize-air-to-air-heat-pump-var-speed-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-air-to-air-heat-pump-var-speed.xml',
+    'base-hvac-autosize-air-to-air-heat-pump-var-speed-backup-boiler.xml' => 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml',
     'base-hvac-autosize-boiler-elec-only.xml' => 'base-hvac-boiler-elec-only.xml',
     'base-hvac-autosize-boiler-gas-central-ac-1-speed.xml' => 'base-hvac-boiler-gas-central-ac-1-speed.xml',
     'base-hvac-autosize-boiler-gas-only.xml' => 'base-hvac-boiler-gas-only.xml',
@@ -221,6 +224,7 @@ def create_hpxmls
     'base-hvac-autosize-mini-split-heat-pump-ducted-cooling-only.xml' => 'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml',
     'base-hvac-autosize-mini-split-heat-pump-ducted-heating-only.xml' => 'base-hvac-mini-split-heat-pump-ducted-heating-only.xml',
     'base-hvac-autosize-mini-split-heat-pump-ducted-manual-s-oversize-allowances.xml' => 'base-hvac-autosize-mini-split-heat-pump-ducted.xml',
+    'base-hvac-autosize-mini-split-heat-pump-ductless-backup-stove.xml' => 'base-hvac-mini-split-heat-pump-ductless-backup-stove.xml',
     'base-hvac-autosize-mini-split-air-conditioner-only-ducted.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
     'base-hvac-autosize-ptac.xml' => 'base-hvac-ptac.xml',
     'base-hvac-autosize-ptac-with-heating.xml' => 'base-hvac-ptac-with-heating.xml',
@@ -285,6 +289,7 @@ def create_hpxmls
     'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ducted-heating-only.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ductless.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
+    'base-hvac-mini-split-heat-pump-ductless-backup-stove.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
     'base-hvac-multiple.xml' => 'base.xml',
     'base-hvac-none.xml' => 'base.xml',
     'base-hvac-portable-heater-gas-only.xml' => 'base.xml',
@@ -606,7 +611,8 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_cooling_capacity'] = 36000.0
     args['heat_pump_fraction_heat_load_served'] = 1
     args['heat_pump_fraction_cool_load_served'] = 1
-    args['heat_pump_backup_fuel'] = 'none'
+    args['heat_pump_backup_type'] = 'none'
+    args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
     args['heat_pump_backup_heating_efficiency'] = 1
     args['heat_pump_backup_heating_capacity'] = 36000.0
     args['hvac_control_type'] = HPXML::HVACControlTypeManual
@@ -930,7 +936,8 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_cooling_capacity'] = Constants.Auto
     args['heat_pump_fraction_heat_load_served'] = 0
     args['heat_pump_fraction_cool_load_served'] = 0
-    args['heat_pump_backup_fuel'] = 'none'
+    args['heat_pump_backup_type'] = 'none'
+    args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
     args['heat_pump_backup_heating_efficiency'] = 0
     args['heat_pump_backup_heating_capacity'] = Constants.Auto
     args['hvac_control_type'] = HPXML::HVACControlTypeManual
@@ -1744,13 +1751,14 @@ def set_measure_argument_values(hpxml_file, args)
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = 'none'
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
-    args['heat_pump_heating_capacity_17_f'] = 22680.0
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
+    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml'].include? hpxml_file
     args['heat_pump_heating_capacity'] = 0.0
     args['heat_pump_heating_capacity_17_f'] = 0.0
     args['heat_pump_fraction_heat_load_served'] = 0
-    args['heat_pump_backup_fuel'] = 'none'
+    args['heat_pump_backup_type'] = 'none'
   elsif ['base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml'].include? hpxml_file
     args['heat_pump_cooling_capacity'] = 0.0
     args['heat_pump_fraction_cool_load_served'] = 0
@@ -1760,8 +1768,9 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
     args['heat_pump_heating_efficiency'] = 9.3
     args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeTwoStage
-    args['heat_pump_heating_capacity_17_f'] = 21240.0
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_cooling_efficiency'] = 18.0
+    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-air-to-air-heat-pump-var-speed.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'
@@ -1770,11 +1779,24 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_heating_efficiency'] = 10.0
     args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
     args['heat_pump_cooling_sensible_heat_fraction'] = 0.78
-    args['heat_pump_heating_capacity_17_f'] = 23040.0
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_cooling_efficiency'] = 22.0
+    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
+  elsif ['base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml'].include? hpxml_file
+    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeSeparate
+    args['heat_pump_heating_capacity'] = 18000.0
+    args['heat_pump_cooling_capacity'] = 18000.0
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
+    args['heating_system_2_type'] = HPXML::HVACTypeBoiler
+    args['heating_system_2_fuel'] = HPXML::FuelTypeNaturalGas
+    args['heating_system_2_heating_efficiency'] = 0.8
+    args['heating_system_2_heating_capacity'] = 60000.0
+  elsif ['base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml'].include? hpxml_file
+    args['heat_pump_backup_heating_switchover_temp'] = 25
   elsif hpxml_file.include? 'autosize'
     args['heating_system_heating_capacity'] = Constants.Auto
+    args['heating_system_2_heating_capacity'] = Constants.Auto
     args['cooling_system_cooling_capacity'] = Constants.Auto
     if hpxml_file.include? 'manual-s-oversize-allowances'
       args['heat_pump_heating_capacity'] = Constants.Auto
@@ -1820,27 +1842,32 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'].include? hpxml_file
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
     args['heat_pump_heating_efficiency'] = 7.7
-    args['heat_pump_heating_capacity_17_f'] = 22680.0
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_fraction_cool_load_served'] = 0
+    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml'].include? hpxml_file
     args['cooling_system_type'] = 'none'
     args['heat_pump_heating_efficiency'] = 7.7
-    args['heat_pump_heating_capacity_17_f'] = 22680.0
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
+    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeNaturalGas
     args['heat_pump_backup_heating_efficiency'] = 0.95
     args['heat_pump_backup_heating_switchover_temp'] = 25
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.xml'].include? hpxml_file
+    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
     args['heat_pump_backup_heating_efficiency'] = 1.0
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml',
          'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml'].include? hpxml_file
+    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeNaturalGas
     args['heat_pump_backup_heating_efficiency'] = 0.95
     args['heat_pump_backup_heating_switchover_temp'] = 25
   elsif ['base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     args['heat_pump_heating_capacity'] = 36000.0
-    args['heat_pump_heating_capacity_17_f'] = 20423.0
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
+    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeNaturalGas
     args['heat_pump_backup_heating_efficiency'] = 0.95
     args['heat_pump_backup_heating_switchover_temp'] = 25
@@ -1927,11 +1954,12 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_cooling_efficiency_type'] = HPXML::UnitsEER
     args['heat_pump_cooling_efficiency'] = 16.6
     args.delete('heat_pump_cooling_compressor_type')
+    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-ground-to-air-heat-pump-cooling-only.xml'].include? hpxml_file
     args['heat_pump_heating_capacity'] = 0.0
     args['heat_pump_fraction_heat_load_served'] = 0
-    args['heat_pump_backup_fuel'] = 'none'
+    args['heat_pump_backup_type'] = 'none'
   elsif ['base-hvac-ground-to-air-heat-pump-heating-only.xml'].include? hpxml_file
     args['heat_pump_cooling_capacity'] = 0.0
     args['heat_pump_fraction_cool_load_served'] = 0
@@ -1960,10 +1988,11 @@ def set_measure_argument_values(hpxml_file, args)
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = 'none'
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpMiniSplit
-    args['heat_pump_heating_capacity_17_f'] = 20423.0
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_heating_efficiency'] = 10.0
     args['heat_pump_cooling_efficiency'] = 19.0
     args.delete('heat_pump_cooling_compressor_type')
+    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
     args['heat_pump_is_ducted'] = true
     args['ducts_supply_leakage_to_outside_value'] = 15.0
@@ -1975,14 +2004,24 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_heating_capacity'] = 0
     args['heat_pump_heating_capacity_17_f'] = 0
     args['heat_pump_fraction_heat_load_served'] = 0
-    args['heat_pump_backup_fuel'] = 'none'
+    args['heat_pump_backup_type'] = 'none'
   elsif ['base-hvac-mini-split-heat-pump-ducted-heating-only.xml'].include? hpxml_file
     args['heat_pump_cooling_capacity'] = 0
     args['heat_pump_fraction_cool_load_served'] = 0
+    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-mini-split-heat-pump-ductless.xml'].include? hpxml_file
-    args['heat_pump_backup_fuel'] = 'none'
+    args['heat_pump_backup_type'] = 'none'
     args['heat_pump_is_ducted'] = false
+  elsif ['base-hvac-mini-split-heat-pump-ductless-backup-stove.xml'].include? hpxml_file
+    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeSeparate
+    args['heat_pump_heating_capacity'] = 18000.0
+    args['heat_pump_cooling_capacity'] = 18000.0
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
+    args['heating_system_2_type'] = HPXML::HVACTypeStove
+    args['heating_system_2_fuel'] = HPXML::FuelTypeOil
+    args['heating_system_2_heating_efficiency'] = 0.6
+    args['heating_system_2_heating_capacity'] = 60000.0
   elsif ['base-hvac-none.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = 'none'
@@ -3623,6 +3662,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          distribution_system_idref: hpxml.hvac_distributions[-1].id,
                          heat_pump_type: HPXML::HVACTypeHeatPumpGroundToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
+                         backup_type: HPXML::HeatPumpBackupTypeIntegrated,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
                          is_shared_system: true,
                          number_of_units_served: 6,
@@ -3855,6 +3895,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
                          heating_capacity: 4800,
                          cooling_capacity: 4800,
+                         backup_type: HPXML::HeatPumpBackupTypeIntegrated,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
                          backup_heating_capacity: 3412,
                          backup_heating_efficiency_percent: 1.0,
@@ -3862,7 +3903,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          fraction_cool_load_served: 0.2,
                          heating_efficiency_hspf: 7.7,
                          cooling_efficiency_seer: 13,
-                         heating_capacity_17F: 4800 * 0.630, # Based on OAT slope of default curves
+                         heating_capacity_17F: 4800 * 0.6,
                          cooling_shr: 0.73,
                          compressor_type: HPXML::HVACCompressorTypeSingleStage)
     hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
@@ -3871,6 +3912,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
                          heating_capacity: 4800,
                          cooling_capacity: 4800,
+                         backup_type: HPXML::HeatPumpBackupTypeIntegrated,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
                          backup_heating_capacity: 3412,
                          backup_heating_efficiency_percent: 1.0,
@@ -3880,12 +3922,12 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          cooling_efficiency_eer: 16.6,
                          cooling_shr: 0.73,
                          pump_watts_per_ton: 30.0)
-    f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
                          heat_pump_type: HPXML::HVACTypeHeatPumpMiniSplit,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
                          heating_capacity: 4800,
                          cooling_capacity: 4800,
+                         backup_type: HPXML::HeatPumpBackupTypeIntegrated,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
                          backup_heating_capacity: 3412,
                          backup_heating_efficiency_percent: 1.0,
@@ -3893,7 +3935,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          fraction_cool_load_served: 0.2,
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 19,
-                         heating_capacity_17F: 4800 * f,
+                         heating_capacity_17F: 4800 * 0.6,
                          cooling_shr: 0.73,
                          primary_cooling_system: true,
                          primary_heating_system: true)
@@ -4641,7 +4683,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
   end
 
   # Add ID/IDref checks
-  # TODO: Dynamically obtain these lists
+  # FUTURE: Dynamically obtain these lists
   id_names = ['SystemIdentifier',
               'BuildingID']
   idref_names = ['AttachedToRoof',
