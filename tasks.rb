@@ -4433,9 +4433,14 @@ def download_epws
   UrlResolver.fetch('https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip', tmpfile)
 
   puts 'Extracting weather files...'
+  require 'zip'
   weather_dir = File.join(File.dirname(__FILE__), 'weather')
-  unzip_file = OpenStudio::UnzipFile.new(tmpfile.path.to_s)
-  unzip_file.extractAllFiles(OpenStudio::toPath(weather_dir))
+  Zip.on_exists_proc = true
+  Zip::File.open(tmpfile.path.to_s) do |zip_file|
+    zip_file.each do |f|
+      zip_file.extract(f, File.join(weather_dir, f.name))
+    end
+  end
 
   num_epws_actual = Dir[File.join(weather_dir, '*.epw')].count
   puts "#{num_epws_actual} weather files are available in the weather directory."
@@ -4851,15 +4856,15 @@ if ARGV[0].to_sym == :create_release_zips
   files = ['Changelog.md',
            'LICENSE.md',
            'BuildResidentialHPXML/measure.*',
-           'BuildResidentialHPXML/resources/*.*',
+           'BuildResidentialHPXML/resources/**/*.*',
            'BuildResidentialScheduleFile/measure.*',
-           'BuildResidentialScheduleFile/resources/*.*',
+           'BuildResidentialScheduleFile/resources/**/*.*',
            'HPXMLtoOpenStudio/measure.*',
-           'HPXMLtoOpenStudio/resources/*.*',
+           'HPXMLtoOpenStudio/resources/**/*.*',
            'ReportSimulationOutput/measure.*',
-           'ReportSimulationOutput/resources/*.*',
+           'ReportSimulationOutput/resources/**/*.*',
            'ReportHPXMLOutput/measure.*',
-           'ReportHPXMLOutput/resources/*.*',
+           'ReportHPXMLOutput/resources/**/*.*',
            'weather/*.*',
            'workflow/*.*',
            'workflow/sample_files/*.xml',
@@ -4905,24 +4910,25 @@ if ARGV[0].to_sym == :create_release_zips
   end
 
   # Create zip files
+  require 'zip'
   release_map.each do |zip_path, include_all_epws|
     puts "Creating #{zip_path}..."
-    zip = OpenStudio::ZipFile.new(zip_path, false)
-    files.each do |f|
-      Dir[f].each do |file|
-        if file.start_with? 'documentation'
-          # always include
-        elsif include_all_epws
-          if (not git_files.include? file) && (not file.start_with? 'weather')
-            next
+    Zip::File.open(zip_path, create: true) do |zipfile|
+      files.each do |f|
+        Dir[f].each do |file|
+          if file.start_with? 'documentation'
+            # always include
+          elsif include_all_epws
+            if (not git_files.include? file) && (not file.start_with? 'weather')
+              next
+            end
+          else
+            if not git_files.include? file
+              next
+            end
           end
-        else
-          if not git_files.include? file
-            next
-          end
+          zipfile.add(File.join('OpenStudio-HPXML', file), file)
         end
-
-        zip.addFile(file, File.join('OpenStudio-HPXML', file))
       end
     end
     puts "Wrote file at #{zip_path}."
