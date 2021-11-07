@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>be043a3b-e6df-4d3b-b794-f8fa64e24382</version_id>
-  <version_modified>20211107T033241Z</version_modified>
+  <version_id>3cd4118b-3794-49bf-a6e7-72e3d0716c10</version_id>
+  <version_modified>20211107T050006Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -374,6 +374,30 @@
       <checksum>80061D4B</checksum>
     </file>
     <file>
+      <filename>hvac_sizing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B4B76267</checksum>
+    </file>
+    <file>
+      <filename>energyplus.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>64E3EB57</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F79E8505</checksum>
+    </file>
+    <file>
+      <filename>test_hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C267D934</checksum>
+    </file>
+    <file>
       <filename>test_pv.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -386,10 +410,10 @@
       <checksum>61E63336</checksum>
     </file>
     <file>
-      <filename>pv.rb</filename>
+      <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>04E10882</checksum>
+      <usage_type>test</usage_type>
+      <checksum>8A5D3D79</checksum>
     </file>
     <file>
       <filename>BaseElements.xsd</filename>
@@ -398,34 +422,10 @@
       <checksum>EC333E1C</checksum>
     </file>
     <file>
-      <filename>test_battery.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2D76F76D</checksum>
-    </file>
-    <file>
-      <filename>energyplus.rb</filename>
+      <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>64E3EB57</checksum>
-    </file>
-    <file>
-      <filename>test_hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C267D934</checksum>
-    </file>
-    <file>
-      <filename>hvac_sizing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B4B76267</checksum>
-    </file>
-    <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F79E8505</checksum>
+      <checksum>575A2809</checksum>
     </file>
     <file>
       <version>
@@ -439,46 +439,46 @@
       <checksum>3D43B014</checksum>
     </file>
     <file>
-      <filename>EPvalidator.xml</filename>
-      <filetype>xml</filetype>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9E003FC9</checksum>
+      <checksum>338008E6</checksum>
     </file>
     <file>
-      <filename>test_validation.rb</filename>
+      <filename>pv.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>032DD1E3</checksum>
+      <usage_type>resource</usage_type>
+      <checksum>04E10882</checksum>
     </file>
     <file>
       <filename>HPXMLvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>505A25CB</checksum>
+      <checksum>CEE1B9E9</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
+      <filename>EPvalidator.xml</filename>
+      <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>575A2809</checksum>
+      <checksum>D23547B5</checksum>
+    </file>
+    <file>
+      <filename>test_validation.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>34176FD4</checksum>
+    </file>
+    <file>
+      <filename>test_battery.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2D76F76D</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>3789D738</checksum>
-    </file>
-    <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8A5D3D79</checksum>
-    </file>
-    <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>338008E6</checksum>
     </file>
   </files>
 </measure>
