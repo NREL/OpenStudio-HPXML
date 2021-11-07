@@ -352,9 +352,7 @@ class HPXMLTest < MiniTest::Test
       assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_annual.csv')
       assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_hpxml.csv')
 
-      if not ENV['CI'] # Don't clean up on CI so we can post the artifact
-        File.delete(zip_path)
-      end
+      File.delete(zip_path)
       rm_path('OpenStudio-HPXML')
     end
   end

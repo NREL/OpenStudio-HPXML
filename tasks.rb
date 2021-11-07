@@ -1751,8 +1751,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = 'none'
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
-    args['heat_pump_heating_capacity_17_f'] = 22680.0
-    # TODO: args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity']*0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml'].include? hpxml_file
@@ -1769,8 +1768,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
     args['heat_pump_heating_efficiency'] = 9.3
     args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeTwoStage
-    args['heat_pump_heating_capacity_17_f'] = 21240.0
-    # TODO: args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity']*0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_cooling_efficiency'] = 18.0
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
@@ -1781,8 +1779,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_heating_efficiency'] = 10.0
     args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
     args['heat_pump_cooling_sensible_heat_fraction'] = 0.78
-    args['heat_pump_heating_capacity_17_f'] = 23040.0
-    # TODO: args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity']*0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_cooling_efficiency'] = 22.0
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
@@ -1845,16 +1842,14 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'].include? hpxml_file
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
     args['heat_pump_heating_efficiency'] = 7.7
-    args['heat_pump_heating_capacity_17_f'] = 22680.0
-    # TODO: args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity']*0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_fraction_cool_load_served'] = 0
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml'].include? hpxml_file
     args['cooling_system_type'] = 'none'
     args['heat_pump_heating_efficiency'] = 7.7
-    args['heat_pump_heating_capacity_17_f'] = 22680.0
-    # TODO: args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity']*0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeNaturalGas
     args['heat_pump_backup_heating_efficiency'] = 0.95
@@ -1871,8 +1866,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_backup_heating_switchover_temp'] = 25
   elsif ['base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     args['heat_pump_heating_capacity'] = 36000.0
-    args['heat_pump_heating_capacity_17_f'] = 20423.0
-    # TODO: args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity']*0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeNaturalGas
     args['heat_pump_backup_heating_efficiency'] = 0.95
@@ -1994,8 +1988,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = 'none'
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpMiniSplit
-    args['heat_pump_heating_capacity_17_f'] = 20423.0
-    # TODO: args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity']*0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_heating_efficiency'] = 10.0
     args['heat_pump_cooling_efficiency'] = 19.0
     args.delete('heat_pump_cooling_compressor_type')
@@ -3910,8 +3903,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          fraction_cool_load_served: 0.2,
                          heating_efficiency_hspf: 7.7,
                          cooling_efficiency_seer: 13,
-                         heating_capacity_17F: 4800 * 0.630, # Based on OAT slope of default curves
-                         # TODO: heating_capacity_17F: 4800 * 0.6,
+                         heating_capacity_17F: 4800 * 0.6,
                          cooling_shr: 0.73,
                          compressor_type: HPXML::HVACCompressorTypeSingleStage)
     hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
@@ -3943,8 +3935,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          fraction_cool_load_served: 0.2,
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 19,
-                         heating_capacity_17F: 4800 * (1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)),
-                         # TODO: heating_capacity_17F: 4800 * 0.6,
+                         heating_capacity_17F: 4800 * 0.6,
                          cooling_shr: 0.73,
                          primary_cooling_system: true,
                          primary_heating_system: true)
@@ -4692,7 +4683,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
   end
 
   # Add ID/IDref checks
-  # TODO: Dynamically obtain these lists
+  # FUTURE: Dynamically obtain these lists
   id_names = ['SystemIdentifier',
               'BuildingID']
   idref_names = ['AttachedToRoof',
