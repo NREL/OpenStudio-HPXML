@@ -94,6 +94,7 @@
       <sch:assert role='ERROR' test='count(h:Systems/h:WaterHeating/h:WaterFixture) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/WaterHeating/WaterFixture</sch:assert> <!-- See [WaterFixture] -->
       <sch:assert role='ERROR' test='count(h:Systems/h:SolarThermal/h:SolarThermalSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Systems/SolarThermal/SolarThermalSystem</sch:assert> <!-- See [SolarThermalSystem] -->
       <sch:assert role='ERROR' test='count(h:Systems/h:Photovoltaics/h:PVSystem) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/Photovoltaics/PVSystem</sch:assert> <!-- See [PVSystem] -->
+      <sch:assert role='ERROR' test='count(h:Systems/h:Batteries/h:Battery) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Systems/Batteries/Battery</sch:assert> <!-- See [Battery] -->
       <sch:assert role='ERROR' test='count(h:Systems/h:extension/h:Generators/h:Generator) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/extension/Generators/Generator</sch:assert> <!-- See [Generator] -->
       <sch:assert role='ERROR' test='count(h:Appliances/h:ClothesWasher) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Appliances/ClothesWasher</sch:assert> <!-- See [ClothesWasher] -->
       <sch:assert role='ERROR' test='count(h:Appliances/h:ClothesDryer) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Appliances/ClothesDryer</sch:assert> <!-- See [ClothesDryer] -->
@@ -126,6 +127,7 @@
       <sch:report role='WARN' test='sum(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionHeatLoadServed) = 0'>No space heating specified, the model will not include space heating energy use.</sch:report>
       <sch:report role='WARN' test='sum(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) = 0'>No space cooling specified, the model will not include space cooling energy use.</sch:report>
       <sch:report role='WARN' test='sum(h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:FractionDHWLoadServed) = 0'>No water heating specified, the model will not include water heating energy use.</sch:report>
+      <sch:report role='WARN' test='count(h:Systems/h:Photovoltaics/h:PVSystem) = 0 and count(h:Systems/h:Batteries/h:Battery) &gt;= 1'>Battery without PV specified; battery is assumed to operate as backup and will not be modeled.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:ClothesWasher) = 0'>No clothes washer specified, the model will not include clothes washer energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:ClothesDryer) = 0'>No clothes dryer specified, the model will not include clothes dryer energy use.</sch:report>
       <sch:report role='WARN' test='count(h:Appliances/h:Dishwasher) = 0'>No dishwasher specified, the model will not include dishwasher energy use.</sch:report>
@@ -1464,6 +1466,7 @@
       <sch:assert role='ERROR' test='count(h:ArrayTilt) = 1'>Expected 1 element(s) for xpath: ArrayTilt</sch:assert>
       <sch:assert role='ERROR' test='count(h:MaxPowerOutput) = 1'>Expected 1 element(s) for xpath: MaxPowerOutput</sch:assert>
       <sch:assert role='ERROR' test='count(h:InverterEfficiency) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InverterEfficiency</sch:assert>
+      <sch:assert role='ERROR' test='../../h:Photovoltaics/*/h:InverterEfficiency = h:InverterEfficiency'>Expected all InverterEfficiency values to be equal</sch:assert>
       <sch:assert role='ERROR' test='count(h:SystemLossesFraction) + count(h:YearModulesManufactured) &gt;= 0'>Expected 0 or more element(s) for xpath: SystemLossesFraction | YearModulesManufactured</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -1474,6 +1477,20 @@
       <sch:assert role='ERROR' test='count(../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected 1 element(s) for xpath: ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:NumberofBedroomsServed) = 1'>Expected 1 element(s) for xpath: extension/NumberofBedroomsServed</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:NumberofBedroomsServed) &gt; number(../../../h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms) or not(h:extension/h:NumberofBedroomsServed) or not(../../../h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms)'>Expected extension/NumberofBedroomsServed to be greater than ../../../BuildingSummary/BuildingConstruction/NumberofBedrooms</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[Battery]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:Batteries/h:Battery'>
+      <sch:assert role='ERROR' test='count(h:BatteryType[text()="Li-ion"]) = 1'>Expected 1 element(s) for xpath: BatteryType[text()="Li-ion"]</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert>
+      <sch:assert role='ERROR' test='h:Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="crawlspace - conditioned" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="outside"] or not(h:Location)'>Expected Location to be 'living space' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'crawlspace - conditioned' or 'attic - vented' or 'attic - unvented' or 'garage' or 'outside'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:NominalCapacity[h:Units="kWh" or h:Units="Ah"]/Value) &gt;= 0'>Expected 0 or more element(s) for xpath: NominalCapacity[Units="kWh" or Units="Ah"]/Value</sch:assert>
+      <sch:assert role='ERROR' test='count(h:RatedPowerOutput) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RatedPowerOutput</sch:assert>
+      <sch:assert role='ERROR' test='count(h:NominalVoltage) &lt;= 1'>Expected 0 or 1 element(s) for xpath: NominalVoltage</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:LifetimeModel) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/LifetimeModel</sch:assert>
+      <sch:assert role='ERROR' test='h:extension/h:LifetimeModel[text()="None" or text()="KandlerSmith"] or not(h:extension/h:LifetimeModel)'>Expected extension/LifetimeModel to be 'None' or 'KandlerSmith'</sch:assert>
     </sch:rule>
   </sch:pattern>
 

@@ -8,6 +8,7 @@ require 'pathname'
 require 'csv'
 require 'oga'
 require_relative 'resources/geometry'
+require_relative '../HPXMLtoOpenStudio/resources/battery'
 require_relative '../HPXMLtoOpenStudio/resources/constants'
 require_relative '../HPXMLtoOpenStudio/resources/constructions'
 require_relative '../HPXMLtoOpenStudio/resources/geometry'
@@ -243,12 +244,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Geometry: Building Number of Units')
     arg.setUnits('#')
     arg.setDescription("The number of units in the building. This is required for #{HPXML::ResidentialTypeSFA} and #{HPXML::ResidentialTypeApartment}s.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_building_num_bedrooms', false)
-    arg.setDisplayName('Geometry: Building Number of Bedrooms')
-    arg.setUnits('#')
-    arg.setDescription("The number of bedrooms in the building. This is required for #{HPXML::ResidentialTypeSFA} and #{HPXML::ResidentialTypeApartment}s with shared PV systems.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_average_ceiling_height', true)
@@ -2011,7 +2006,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_module_type', pv_system_module_type_choices, true)
     arg.setDisplayName('PV System: Module Type')
-    arg.setDescription("Module type of the PV system. Use 'none' if there is no PV system 1.")
+    arg.setDescription("Module type of the PV system. Use 'none' if there is no PV system.")
     arg.setDefaultValue('none')
     args << arg
 
@@ -2051,20 +2046,20 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_inverter_efficiency', false)
     arg.setDisplayName('PV System: Inverter Efficiency')
     arg.setUnits('Frac')
-    arg.setDescription('Inverter efficiency of the PV system.')
+    arg.setDescription('Inverter efficiency of the PV system. If there are two PV systems, this will apply to both.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_system_losses_fraction', false)
     arg.setDisplayName('PV System: System Losses Fraction')
     arg.setUnits('Frac')
-    arg.setDescription('System losses fraction of the PV system.')
+    arg.setDescription('System losses fraction of the PV system. If there are two PV systems, this will apply to both.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('pv_system_num_units_served', true)
-    arg.setDisplayName('PV System: Number of Units Served')
-    arg.setDescription("Number of dwelling units served by PV system. Must be 1 if #{HPXML::ResidentialTypeSFD}. Used to apportion PV generation to the unit.")
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('pv_system_num_bedrooms_served', true)
+    arg.setDisplayName('PV System: Number of Bedrooms Served')
+    arg.setDescription("Number of bedrooms served by PV system. Ignored if #{HPXML::ResidentialTypeSFD}. Used to apportion PV generation to the unit of a SFA/MF building. If there are two PV systems, this will apply to both.")
     arg.setUnits('#')
-    arg.setDefaultValue(1)
+    arg.setDefaultValue(3)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_2_module_type', pv_system_module_type_choices, true)
@@ -2106,23 +2101,38 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(4000)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_2_inverter_efficiency', false)
-    arg.setDisplayName('PV System 2: Inverter Efficiency')
-    arg.setUnits('Frac')
-    arg.setDescription('Inverter efficiency of the second PV system.')
+    battery_location_choices = OpenStudio::StringVector.new
+    battery_location_choices << Constants.Auto
+    battery_location_choices << 'none'
+    battery_location_choices << HPXML::LocationLivingSpace
+    battery_location_choices << HPXML::LocationBasementConditioned
+    battery_location_choices << HPXML::LocationBasementUnconditioned
+    battery_location_choices << HPXML::LocationCrawlspaceVented
+    battery_location_choices << HPXML::LocationCrawlspaceUnvented
+    battery_location_choices << HPXML::LocationCrawlspaceConditioned
+    battery_location_choices << HPXML::LocationAtticVented
+    battery_location_choices << HPXML::LocationAtticUnvented
+    battery_location_choices << HPXML::LocationGarage
+    battery_location_choices << HPXML::LocationOutside
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('battery_location', battery_location_choices, true)
+    arg.setDisplayName('Battery: Location')
+    arg.setDescription('The space type for the lithium ion battery location.')
+    arg.setDefaultValue('none')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_2_system_losses_fraction', false)
-    arg.setDisplayName('PV System 2: System Losses Fraction')
-    arg.setUnits('Frac')
-    arg.setDescription('System losses fraction of the second PV system.')
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('battery_power', true)
+    arg.setDisplayName('Battery: Rated Power Output')
+    arg.setDescription('The rated power output of the lithium ion battery.')
+    arg.setUnits('W')
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('pv_system_2_num_units_served', true)
-    arg.setDisplayName('PV System 2: Number of Units Served')
-    arg.setDescription("Number of dwelling units served by second PV system. Must be 1 if #{HPXML::ResidentialTypeSFD}. Used to apportion PV generation to the unit.")
-    arg.setUnits('#')
-    arg.setDefaultValue(1)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('battery_capacity', true)
+    arg.setDisplayName('Battery: Nominal Capacity')
+    arg.setDescription('The nominal capacity of the lithium ion battery.')
+    arg.setUnits('kWh')
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('lighting_present', false)
@@ -3224,6 +3234,7 @@ class HPXMLFile
     set_water_fixtures(hpxml, runner, args)
     set_solar_thermal(hpxml, runner, args, epw_file)
     set_pv_systems(hpxml, runner, args, epw_file)
+    set_battery(hpxml, runner, args)
     set_lighting(hpxml, runner, args)
     set_dehumidifier(hpxml, runner, args)
     set_clothes_washer(hpxml, runner, args)
@@ -5038,18 +5049,19 @@ class HPXMLFile
 
       max_power_output = [args[:pv_system_max_power_output], args[:pv_system_2_max_power_output]][i]
 
-      if [args[:pv_system_inverter_efficiency], args[:pv_system_2_inverter_efficiency]][i].is_initialized
-        inverter_efficiency = [args[:pv_system_inverter_efficiency], args[:pv_system_2_inverter_efficiency]][i].get
+      if args[:pv_system_inverter_efficiency].is_initialized
+        inverter_efficiency = args[:pv_system_inverter_efficiency].get
       end
 
-      if [args[:pv_system_system_losses_fraction], args[:pv_system_2_system_losses_fraction]][i].is_initialized
-        system_losses_fraction = [args[:pv_system_system_losses_fraction], args[:pv_system_2_system_losses_fraction]][i].get
+      if args[:pv_system_system_losses_fraction].is_initialized
+        system_losses_fraction = args[:pv_system_system_losses_fraction].get
       end
 
-      num_units_served = [args[:pv_system_num_units_served], args[:pv_system_2_num_units_served]][i]
-      if num_units_served > 1
-        is_shared_system = true
-        number_of_bedrooms_served = (args[:geometry_building_num_bedrooms].get * num_units_served / args[:geometry_building_num_units].get).to_i
+      if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
+        if args[:pv_system_num_bedrooms_served] > args[:geometry_unit_num_bedrooms]
+          is_shared_system = true
+          number_of_bedrooms_served = args[:pv_system_num_bedrooms_served]
+        end
       end
 
       hpxml.pv_systems.add(id: "PVSystem#{hpxml.pv_systems.size + 1}",
@@ -5064,6 +5076,28 @@ class HPXMLFile
                            is_shared_system: is_shared_system,
                            number_of_bedrooms_served: number_of_bedrooms_served)
     end
+  end
+
+  def self.set_battery(hpxml, runner, args)
+    return if args[:battery_location] == 'none'
+
+    if args[:battery_location] != Constants.Auto
+      location = args[:battery_location]
+    end
+
+    if args[:battery_power] != Constants.Auto
+      rated_power_output = Float(args[:battery_power])
+    end
+
+    if args[:battery_capacity] != Constants.Auto
+      nominal_capacity_kwh = Float(args[:battery_capacity])
+    end
+
+    hpxml.batteries.add(id: "Battery#{hpxml.batteries.size + 1}",
+                        type: HPXML::BatteryTypeLithiumIon,
+                        location: location,
+                        rated_power_output: rated_power_output,
+                        nominal_capacity_kwh: nominal_capacity_kwh)
   end
 
   def self.set_lighting(hpxml, runner, args)

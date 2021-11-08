@@ -7,6 +7,7 @@ require 'pathname'
 require 'csv'
 require 'oga'
 require_relative 'resources/airflow'
+require_relative 'resources/battery'
 require_relative 'resources/constants'
 require_relative 'resources/constructions'
 require_relative 'resources/energyplus'
@@ -279,6 +280,7 @@ class OSModel
     add_airflow(runner, model, weather, spaces, airloop_map)
     add_photovoltaics(runner, model)
     add_generators(runner, model)
+    add_batteries(runner, model, spaces)
     add_additional_properties(runner, model, hpxml_path, building_id)
 
     # Output
@@ -2035,6 +2037,18 @@ class OSModel
   def self.add_generators(runner, model)
     @hpxml.generators.each do |generator|
       Generator.apply(model, @nbeds, generator)
+    end
+  end
+
+  def self.add_batteries(runner, model, spaces)
+    return if @hpxml.pv_systems.empty?
+
+    @hpxml.batteries.each do |battery|
+      # Assign space
+      if battery.location != HPXML::LocationOutside
+        battery.additional_properties.space = get_space_from_location(battery.location, 'Battery', model, spaces)
+      end
+      Battery.apply(runner, model, battery)
     end
   end
 

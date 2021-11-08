@@ -56,6 +56,7 @@ def create_hpxmls
     'base-atticroof-radiant-barrier.xml' => 'base-location-dallas-tx.xml',
     'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
     'base-atticroof-vented.xml' => 'base.xml',
+    'base-battery-outside.xml' => 'base.xml',
     'base-bldgtype-multifamily.xml' => 'base.xml',
     'base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-adjacent-to-multiple.xml' => 'base-bldgtype-multifamily.xml',
@@ -345,6 +346,10 @@ def create_hpxmls
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
+    'base-pv-battery-ah.xml' => 'base-pv-battery-outside.xml',
+    'base-pv-battery-outside.xml' => 'base-battery-outside.xml',
+    'base-pv-battery-outside-degrades.xml' => 'base-pv-battery-outside.xml',
+    'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
     'base-schedules-simple.xml' => 'base.xml',
     'base-schedules-detailed-smooth.xml' => 'base.xml',
     'base-schedules-detailed-stochastic.xml' => 'base.xml',
@@ -698,16 +703,16 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_max_power_output'] = 4000
     args['pv_system_inverter_efficiency'] = 0.96
     args['pv_system_system_losses_fraction'] = 0.14
-    args['pv_system_num_units_served'] = 1
+    args['pv_system_num_bedrooms_served'] = 3
     args['pv_system_2_module_type'] = 'none'
     args['pv_system_2_location'] = Constants.Auto
     args['pv_system_2_tracking'] = Constants.Auto
     args['pv_system_2_array_azimuth'] = 180
     args['pv_system_2_array_tilt'] = 20
     args['pv_system_2_max_power_output'] = 4000
-    args['pv_system_2_inverter_efficiency'] = 0.96
-    args['pv_system_2_system_losses_fraction'] = 0.14
-    args['pv_system_2_num_units_served'] = 1
+    args['battery_location'] = 'none'
+    args['battery_power'] = Constants.Auto
+    args['battery_capacity'] = Constants.Auto
     args['lighting_interior_fraction_cfl'] = 0.4
     args['lighting_interior_fraction_lfl'] = 0.1
     args['lighting_interior_fraction_led'] = 0.25
@@ -1023,16 +1028,16 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_max_power_output'] = 0
     args['pv_system_inverter_efficiency'] = 0
     args['pv_system_system_losses_fraction'] = 0
-    args['pv_system_num_units_served'] = 0
+    args['pv_system_num_bedrooms_served'] = 0
     args['pv_system_2_module_type'] = 'none'
     args['pv_system_2_location'] = Constants.Auto
     args['pv_system_2_tracking'] = Constants.Auto
     args['pv_system_2_array_azimuth'] = 0
     args['pv_system_2_array_tilt'] = 0
     args['pv_system_2_max_power_output'] = 0
-    args['pv_system_2_inverter_efficiency'] = 0
-    args['pv_system_2_system_losses_fraction'] = 0
-    args['pv_system_2_num_units_served'] = 0
+    args['battery_location'] = 'none'
+    args['battery_power'] = Constants.Auto
+    args['battery_capacity'] = Constants.Auto
     args['lighting_present'] = false
     args['lighting_interior_fraction_cfl'] = 0
     args['lighting_interior_fraction_lfl'] = 0
@@ -1352,7 +1357,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['geometry_attic_type'] = HPXML::AtticTypeBelowApartment
     args['geometry_unit_right_wall_is_adiabatic'] = true
     args['geometry_building_num_units'] = 6
-    args['geometry_building_num_bedrooms'] = 6 * 3
     args['window_front_wwr'] = 0.18
     args['window_back_wwr'] = 0.18
     args['window_left_wwr'] = 0.18
@@ -1400,7 +1404,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['mech_vent_shared_precooling_efficiency'] = 4.0
     args['mech_vent_shared_precooling_fraction_cool_load_served'] = 0.8
   elsif ['base-bldgtype-multifamily-shared-pv.xml'].include? hpxml_file
-    args['pv_system_num_units_served'] = 6
+    args['pv_system_num_bedrooms_served'] = 6 * 3
     args['pv_system_location'] = HPXML::LocationGround
     args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
     args['pv_system_tracking'] = HPXML::PVTrackingTypeFixed
@@ -2225,6 +2229,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_module_type'] = Constants.Auto
     args.delete('pv_system_inverter_efficiency')
     args.delete('pv_system_system_losses_fraction')
+    args['battery_location'] = Constants.Auto
     args['clothes_washer_location'] = Constants.Auto
     args['clothes_washer_efficiency'] = Constants.Auto
     args['clothes_washer_rated_annual_kwh'] = Constants.Auto
@@ -2359,6 +2364,34 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_2_tracking'] = HPXML::PVTrackingTypeFixed
     args['pv_system_2_array_azimuth'] = 90
     args['pv_system_2_max_power_output'] = 1500
+  end
+
+  # Battery
+  if ['base-battery-outside.xml'].include? hpxml_file
+    args['battery_location'] = HPXML::LocationOutside
+    args['battery_power'] = '15000'
+    args['battery_capacity'] = '20'
+  elsif ['base-pv-battery-outside.xml'].include? hpxml_file
+    args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
+    args['pv_system_location'] = HPXML::LocationRoof
+    args['pv_system_tracking'] = HPXML::PVTrackingTypeFixed
+    args['pv_system_2_module_type'] = HPXML::PVModuleTypePremium
+    args['pv_system_2_location'] = HPXML::LocationRoof
+    args['pv_system_2_tracking'] = HPXML::PVTrackingTypeFixed
+    args['pv_system_2_array_azimuth'] = 90
+    args['pv_system_2_max_power_output'] = 1500
+  elsif ['base-pv-battery-garage.xml'].include? hpxml_file
+    args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
+    args['pv_system_location'] = HPXML::LocationRoof
+    args['pv_system_tracking'] = HPXML::PVTrackingTypeFixed
+    args['pv_system_2_module_type'] = HPXML::PVModuleTypePremium
+    args['pv_system_2_location'] = HPXML::LocationRoof
+    args['pv_system_2_tracking'] = HPXML::PVTrackingTypeFixed
+    args['pv_system_2_array_azimuth'] = 90
+    args['pv_system_2_max_power_output'] = 1500
+    args['battery_location'] = HPXML::LocationGarage
+    args['battery_power'] = '15000'
+    args['battery_capacity'] = '20'
   end
 
   # Simulation Control
@@ -4259,6 +4292,19 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          annual_consumption_kbtu: 85000,
                          annual_output_kwh: 5000,
                          number_of_bedrooms_served: 18)
+  end
+
+  # ------------- #
+  # HPXML Battery #
+  # ------------- #
+
+  if ['base-pv-battery-outside-degrades.xml'].include? hpxml_file
+    hpxml.batteries[0].lifetime_model = HPXML::BatteryLifetimeModelKandlerSmith
+  elsif ['base-pv-battery-ah.xml'].include? hpxml_file
+    default_voltage = Battery.get_battery_default_values()[:nominal_voltage]
+    hpxml.batteries[0].nominal_capacity_ah = Battery.get_Ah_from_kWh(hpxml.batteries[0].nominal_capacity_kwh,
+                                                                     default_voltage)
+    hpxml.batteries[0].nominal_capacity_kwh = nil
   end
 
   # ---------------- #

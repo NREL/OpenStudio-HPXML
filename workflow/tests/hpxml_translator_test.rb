@@ -565,6 +565,12 @@ class HPXMLTest < MiniTest::Test
       if hpxml.windows.empty?
         next if log_line.include? 'No windows specified, the model will not include window heat transfer.'
       end
+      if hpxml.pv_systems.empty? && !hpxml.batteries.empty?
+        next if log_line.include? 'Battery without PV specified; battery is assumed to operate as backup and will not be modeled.'
+      end
+      if !hpxml.pv_systems.empty? && !hpxml.batteries.empty?
+        next if log_line.include? "Due to an OpenStudio bug, the battery's rated power output will not be honored; the simulation will proceed without a maximum charge/discharge limit."
+      end
 
       flunk "Unexpected warning found in run.log: #{log_line}"
     end
@@ -772,7 +778,8 @@ class HPXMLTest < MiniTest::Test
                                       'base-enclosure-garage.xml' => 2,                  # additional instance for garage
                                       'base-foundation-walkout-basement.xml' => 4,       # 3 foundation walls plus a no-wall exposed perimeter
                                       'base-foundation-complex.xml' => 10,               # lots of foundations for testing
-                                      'base-enclosure-split-surfaces2.xml' => 81 }       # lots of foundations for testing
+                                      'base-enclosure-split-surfaces2.xml' => 81,        # lots of foundations for testing
+                                      'base-pv-battery-garage.xml' => 2 }                # additional instance for garage
 
       if not num_expected_kiva_instances[File.basename(hpxml_path)].nil?
         assert_equal(num_expected_kiva_instances[File.basename(hpxml_path)], num_kiva_instances)
