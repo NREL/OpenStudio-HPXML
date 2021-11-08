@@ -56,6 +56,7 @@ def create_hpxmls
     'base-atticroof-radiant-barrier.xml' => 'base-location-dallas-tx.xml',
     'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
     'base-atticroof-vented.xml' => 'base.xml',
+    'base-battery-outside.xml' => 'base.xml',
     'base-bldgtype-multifamily.xml' => 'base.xml',
     'base-bldgtype-multifamily-adjacent-to-multifamily-buffer-space.xml' => 'base-bldgtype-multifamily.xml',
     'base-bldgtype-multifamily-adjacent-to-multiple.xml' => 'base-bldgtype-multifamily.xml',
@@ -345,6 +346,10 @@ def create_hpxmls
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-multiple-buildings.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
+    'base-pv-battery-ah.xml' => 'base-pv-battery-outside.xml',
+    'base-pv-battery-outside.xml' => 'base-battery-outside.xml',
+    'base-pv-battery-outside-degrades.xml' => 'base-pv-battery-outside.xml',
+    'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
     'base-schedules-simple.xml' => 'base.xml',
     'base-schedules-detailed-smooth.xml' => 'base.xml',
     'base-schedules-detailed-stochastic.xml' => 'base.xml',
@@ -698,16 +703,16 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_max_power_output'] = 4000
     args['pv_system_inverter_efficiency'] = 0.96
     args['pv_system_system_losses_fraction'] = 0.14
-    args['pv_system_num_units_served'] = 1
+    args['pv_system_num_bedrooms_served'] = 3
     args['pv_system_2_module_type'] = 'none'
     args['pv_system_2_location'] = Constants.Auto
     args['pv_system_2_tracking'] = Constants.Auto
     args['pv_system_2_array_azimuth'] = 180
     args['pv_system_2_array_tilt'] = 20
     args['pv_system_2_max_power_output'] = 4000
-    args['pv_system_2_inverter_efficiency'] = 0.96
-    args['pv_system_2_system_losses_fraction'] = 0.14
-    args['pv_system_2_num_units_served'] = 1
+    args['battery_location'] = 'none'
+    args['battery_power'] = Constants.Auto
+    args['battery_capacity'] = Constants.Auto
     args['lighting_interior_fraction_cfl'] = 0.4
     args['lighting_interior_fraction_lfl'] = 0.1
     args['lighting_interior_fraction_led'] = 0.25
@@ -1023,16 +1028,16 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_max_power_output'] = 0
     args['pv_system_inverter_efficiency'] = 0
     args['pv_system_system_losses_fraction'] = 0
-    args['pv_system_num_units_served'] = 0
+    args['pv_system_num_bedrooms_served'] = 0
     args['pv_system_2_module_type'] = 'none'
     args['pv_system_2_location'] = Constants.Auto
     args['pv_system_2_tracking'] = Constants.Auto
     args['pv_system_2_array_azimuth'] = 0
     args['pv_system_2_array_tilt'] = 0
     args['pv_system_2_max_power_output'] = 0
-    args['pv_system_2_inverter_efficiency'] = 0
-    args['pv_system_2_system_losses_fraction'] = 0
-    args['pv_system_2_num_units_served'] = 0
+    args['battery_location'] = 'none'
+    args['battery_power'] = Constants.Auto
+    args['battery_capacity'] = Constants.Auto
     args['lighting_present'] = false
     args['lighting_interior_fraction_cfl'] = 0
     args['lighting_interior_fraction_lfl'] = 0
@@ -1352,7 +1357,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['geometry_attic_type'] = HPXML::AtticTypeBelowApartment
     args['geometry_unit_right_wall_is_adiabatic'] = true
     args['geometry_building_num_units'] = 6
-    args['geometry_building_num_bedrooms'] = 6 * 3
     args['window_front_wwr'] = 0.18
     args['window_back_wwr'] = 0.18
     args['window_left_wwr'] = 0.18
@@ -1400,7 +1404,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['mech_vent_shared_precooling_efficiency'] = 4.0
     args['mech_vent_shared_precooling_fraction_cool_load_served'] = 0.8
   elsif ['base-bldgtype-multifamily-shared-pv.xml'].include? hpxml_file
-    args['pv_system_num_units_served'] = 6
+    args['pv_system_num_bedrooms_served'] = 6 * 3
     args['pv_system_location'] = HPXML::LocationGround
     args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
     args['pv_system_tracking'] = HPXML::PVTrackingTypeFixed
@@ -1751,8 +1755,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = 'none'
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
-    args['heat_pump_heating_capacity_17_f'] = 22680.0
-    # TODO: args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity']*0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml'].include? hpxml_file
@@ -1769,8 +1772,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
     args['heat_pump_heating_efficiency'] = 9.3
     args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeTwoStage
-    args['heat_pump_heating_capacity_17_f'] = 21240.0
-    # TODO: args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity']*0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_cooling_efficiency'] = 18.0
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
@@ -1781,8 +1783,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_heating_efficiency'] = 10.0
     args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
     args['heat_pump_cooling_sensible_heat_fraction'] = 0.78
-    args['heat_pump_heating_capacity_17_f'] = 23040.0
-    # TODO: args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity']*0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_cooling_efficiency'] = 22.0
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
@@ -1845,16 +1846,14 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'].include? hpxml_file
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
     args['heat_pump_heating_efficiency'] = 7.7
-    args['heat_pump_heating_capacity_17_f'] = 22680.0
-    # TODO: args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity']*0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_fraction_cool_load_served'] = 0
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml'].include? hpxml_file
     args['cooling_system_type'] = 'none'
     args['heat_pump_heating_efficiency'] = 7.7
-    args['heat_pump_heating_capacity_17_f'] = 22680.0
-    # TODO: args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity']*0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeNaturalGas
     args['heat_pump_backup_heating_efficiency'] = 0.95
@@ -1871,8 +1870,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_backup_heating_switchover_temp'] = 25
   elsif ['base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     args['heat_pump_heating_capacity'] = 36000.0
-    args['heat_pump_heating_capacity_17_f'] = 20423.0
-    # TODO: args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity']*0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeNaturalGas
     args['heat_pump_backup_heating_efficiency'] = 0.95
@@ -1994,8 +1992,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = 'none'
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpMiniSplit
-    args['heat_pump_heating_capacity_17_f'] = 20423.0
-    # TODO: args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity']*0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_heating_efficiency'] = 10.0
     args['heat_pump_cooling_efficiency'] = 19.0
     args.delete('heat_pump_cooling_compressor_type')
@@ -2232,6 +2229,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_module_type'] = Constants.Auto
     args.delete('pv_system_inverter_efficiency')
     args.delete('pv_system_system_losses_fraction')
+    args['battery_location'] = Constants.Auto
     args['clothes_washer_location'] = Constants.Auto
     args['clothes_washer_efficiency'] = Constants.Auto
     args['clothes_washer_rated_annual_kwh'] = Constants.Auto
@@ -2366,6 +2364,34 @@ def set_measure_argument_values(hpxml_file, args)
     args['pv_system_2_tracking'] = HPXML::PVTrackingTypeFixed
     args['pv_system_2_array_azimuth'] = 90
     args['pv_system_2_max_power_output'] = 1500
+  end
+
+  # Battery
+  if ['base-battery-outside.xml'].include? hpxml_file
+    args['battery_location'] = HPXML::LocationOutside
+    args['battery_power'] = '15000'
+    args['battery_capacity'] = '20'
+  elsif ['base-pv-battery-outside.xml'].include? hpxml_file
+    args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
+    args['pv_system_location'] = HPXML::LocationRoof
+    args['pv_system_tracking'] = HPXML::PVTrackingTypeFixed
+    args['pv_system_2_module_type'] = HPXML::PVModuleTypePremium
+    args['pv_system_2_location'] = HPXML::LocationRoof
+    args['pv_system_2_tracking'] = HPXML::PVTrackingTypeFixed
+    args['pv_system_2_array_azimuth'] = 90
+    args['pv_system_2_max_power_output'] = 1500
+  elsif ['base-pv-battery-garage.xml'].include? hpxml_file
+    args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
+    args['pv_system_location'] = HPXML::LocationRoof
+    args['pv_system_tracking'] = HPXML::PVTrackingTypeFixed
+    args['pv_system_2_module_type'] = HPXML::PVModuleTypePremium
+    args['pv_system_2_location'] = HPXML::LocationRoof
+    args['pv_system_2_tracking'] = HPXML::PVTrackingTypeFixed
+    args['pv_system_2_array_azimuth'] = 90
+    args['pv_system_2_max_power_output'] = 1500
+    args['battery_location'] = HPXML::LocationGarage
+    args['battery_power'] = '15000'
+    args['battery_capacity'] = '20'
   end
 
   # Simulation Control
@@ -3910,8 +3936,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          fraction_cool_load_served: 0.2,
                          heating_efficiency_hspf: 7.7,
                          cooling_efficiency_seer: 13,
-                         heating_capacity_17F: 4800 * 0.630, # Based on OAT slope of default curves
-                         # TODO: heating_capacity_17F: 4800 * 0.6,
+                         heating_capacity_17F: 4800 * 0.6,
                          cooling_shr: 0.73,
                          compressor_type: HPXML::HVACCompressorTypeSingleStage)
     hpxml.heat_pumps.add(id: "HeatPump#{hpxml.heat_pumps.size + 1}",
@@ -3943,8 +3968,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          fraction_cool_load_served: 0.2,
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 19,
-                         heating_capacity_17F: 4800 * (1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)),
-                         # TODO: heating_capacity_17F: 4800 * 0.6,
+                         heating_capacity_17F: 4800 * 0.6,
                          cooling_shr: 0.73,
                          primary_cooling_system: true,
                          primary_heating_system: true)
@@ -4270,6 +4294,19 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          number_of_bedrooms_served: 18)
   end
 
+  # ------------- #
+  # HPXML Battery #
+  # ------------- #
+
+  if ['base-pv-battery-outside-degrades.xml'].include? hpxml_file
+    hpxml.batteries[0].lifetime_model = HPXML::BatteryLifetimeModelKandlerSmith
+  elsif ['base-pv-battery-ah.xml'].include? hpxml_file
+    default_voltage = Battery.get_battery_default_values()[:nominal_voltage]
+    hpxml.batteries[0].nominal_capacity_ah = Battery.get_Ah_from_kWh(hpxml.batteries[0].nominal_capacity_kwh,
+                                                                     default_voltage)
+    hpxml.batteries[0].nominal_capacity_kwh = nil
+  end
+
   # ---------------- #
   # HPXML Appliances #
   # ---------------- #
@@ -4484,9 +4521,14 @@ def download_epws
   UrlResolver.fetch('https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip', tmpfile)
 
   puts 'Extracting weather files...'
+  require 'zip'
   weather_dir = File.join(File.dirname(__FILE__), 'weather')
-  unzip_file = OpenStudio::UnzipFile.new(tmpfile.path.to_s)
-  unzip_file.extractAllFiles(OpenStudio::toPath(weather_dir))
+  Zip.on_exists_proc = true
+  Zip::File.open(tmpfile.path.to_s) do |zip_file|
+    zip_file.each do |f|
+      zip_file.extract(f, File.join(weather_dir, f.name))
+    end
+  end
 
   num_epws_actual = Dir[File.join(weather_dir, '*.epw')].count
   puts "#{num_epws_actual} weather files are available in the weather directory."
@@ -4687,7 +4729,7 @@ def create_schematron_hpxml_validator(hpxml_docs)
   end
 
   # Add ID/IDref checks
-  # TODO: Dynamically obtain these lists
+  # FUTURE: Dynamically obtain these lists
   id_names = ['SystemIdentifier',
               'BuildingID']
   idref_names = ['AttachedToRoof',
@@ -4711,9 +4753,9 @@ def create_schematron_hpxml_validator(hpxml_docs)
         XMLHelper.add_attribute(rule, 'context', context_xpath)
         rules[context_xpath] = rule
       end
-      assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected id attribute for #{element_name}", :string)
+      assertion = XMLHelper.add_element(rule, 'sch:assert', "Expected #{element_name} with id attribute", :string)
       XMLHelper.add_attribute(assertion, 'role', 'ERROR')
-      XMLHelper.add_attribute(assertion, 'test', "count(h:#{element_name}[@id]) = count(h:#{element_name})")
+      XMLHelper.add_attribute(assertion, 'test', "count(h:#{element_name}[@id]) = 1")
     elsif idref_names.include?(element_name)
       rule = rules[context_xpath]
       if rule.nil?
@@ -4902,15 +4944,15 @@ if ARGV[0].to_sym == :create_release_zips
   files = ['Changelog.md',
            'LICENSE.md',
            'BuildResidentialHPXML/measure.*',
-           'BuildResidentialHPXML/resources/*.*',
+           'BuildResidentialHPXML/resources/**/*.*',
            'BuildResidentialScheduleFile/measure.*',
-           'BuildResidentialScheduleFile/resources/*.*',
+           'BuildResidentialScheduleFile/resources/**/*.*',
            'HPXMLtoOpenStudio/measure.*',
-           'HPXMLtoOpenStudio/resources/*.*',
+           'HPXMLtoOpenStudio/resources/**/*.*',
            'ReportSimulationOutput/measure.*',
-           'ReportSimulationOutput/resources/*.*',
+           'ReportSimulationOutput/resources/**/*.*',
            'ReportHPXMLOutput/measure.*',
-           'ReportHPXMLOutput/resources/*.*',
+           'ReportHPXMLOutput/resources/**/*.*',
            'weather/*.*',
            'workflow/*.*',
            'workflow/sample_files/*.xml',
@@ -4956,24 +4998,25 @@ if ARGV[0].to_sym == :create_release_zips
   end
 
   # Create zip files
+  require 'zip'
   release_map.each do |zip_path, include_all_epws|
     puts "Creating #{zip_path}..."
-    zip = OpenStudio::ZipFile.new(zip_path, false)
-    files.each do |f|
-      Dir[f].each do |file|
-        if file.start_with? 'documentation'
-          # always include
-        elsif include_all_epws
-          if (not git_files.include? file) && (not file.start_with? 'weather')
-            next
+    Zip::File.open(zip_path, create: true) do |zipfile|
+      files.each do |f|
+        Dir[f].each do |file|
+          if file.start_with? 'documentation'
+            # always include
+          elsif include_all_epws
+            if (not git_files.include? file) && (not file.start_with? 'weather')
+              next
+            end
+          else
+            if not git_files.include? file
+              next
+            end
           end
-        else
-          if not git_files.include? file
-            next
-          end
+          zipfile.add(File.join('OpenStudio-HPXML', file), file)
         end
-
-        zip.addFile(file, File.join('OpenStudio-HPXML', file))
       end
     end
     puts "Wrote file at #{zip_path}."

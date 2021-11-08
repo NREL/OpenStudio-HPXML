@@ -2155,7 +2155,7 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
   ``ArrayAzimuth`` or ``ArrayOrientation``                 integer or string  deg or direction  0 - 359 or See [#]_  Yes                 Direction panels face (clockwise from North)
   ``ArrayTilt``                                            double             deg               0 - 90               Yes                 Tilt relative to horizontal
   ``MaxPowerOutput``                                       double             W                 >= 0                 Yes                 Peak power
-  ``InverterEfficiency``                                   double             frac              0 - 1                No        0.96      Inverter efficiency
+  ``InverterEfficiency``                                   double             frac              0 - 1 [#]_           No        0.96      Inverter efficiency
   ``SystemLossesFraction`` or ``YearModulesManufactured``  double or integer  frac or #         0 - 1 or > 1600      No        0.14      System losses [#]_
   ``extension/NumberofBedroomsServed``                     integer                              > 1                  See [#]_            Number of bedrooms served
   =======================================================  =================  ================  ===================  ========  ========  ============================================
@@ -2164,11 +2164,37 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
   .. [#] ModuleType choices are "standard", "premium", or "thin film".
   .. [#] Tracking choices are "fixed", "1-axis", "1-axis backtracked", or "2-axis".
   .. [#] ArrayOrientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
+  .. [#] For homes with multiple PV arrays, all InverterEfficiency elements must have the same value.
   .. [#] System losses due to soiling, shading, snow, mismatch, wiring, degradation, etc.
          If YearModulesManufactured provided but not SystemLossesFraction, system losses calculated as:
          SystemLossesFraction = 1.0 - (1.0 - 0.14) * (1.0 - (1.0 - 0.995^(CurrentYear - YearModulesManufactured))).
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true, in which case it must be > NumberofBedrooms.
          PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the PV system.
+
+HPXML Batteries
+***************
+
+A single battery can be entered as a ``/HPXML/Building/BuildingDetails/Systems/Batteries/Battery``.
+If not entered, the simulation will not include batteries.
+
+  ====================================================  =======  =========  ===========  ========  ========  ============================================
+  Element                                               Type     Units      Constraints  Required  Default   Notes
+  ====================================================  =======  =========  ===========  ========  ========  ============================================
+  ``SystemIdentifier``                                  id                               Yes                 Unique identifier
+  ``Location``                                          string              See [#]_     No        outside   Location
+  ``BatteryType``                                       string              See [#]_     Yes                 Battery type
+  ``NominalCapacity[Units="kWh" or Units="Ah"]/Value``  double   kWh or Ah  >= 0         No        See [#]_  Nominal (not usable) capacity
+  ``RatedPowerOutput``                                  double   W          >= 0         No        See [#]_  Rated power output
+  ``NominalVoltage``                                    double   V          >= 0         No        50        Nominal voltage
+  ``extension/LifetimeModel``                           string              See [#]_     No        None      Lifetime model [#]_
+  ====================================================  =======  =========  ===========  ========  ========  ============================================
+
+  .. [#] Location choices are "living space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "attic - vented", "attic - unvented", "garage", or "outside".
+  .. [#] BatteryType choices are "Li-ion".
+  .. [#] NominalCapacity is defaulted to 10 kWh if RatedPowerOutput is not specified; otherwise it is calculated as (RatedPowerOutput / 1000) / 0.5.
+  .. [#] RatedPowerOutput is defaulted to 5000 W if NominalCapacity is not specified; otherwise it is calculated as NominalCapacity * 1000 * 0.5.
+  .. [#] LifetimeModel choices are "None" or "KandlerSmith".
+  .. [#] See the "Lifetime Model" `EnergyPlus documentation <https://bigladdersoftware.com/epx/docs/9-6/input-output-reference/group-electric-load-center-generator.html#liion-lifetime-model>`_ for more information.
 
 HPXML Generators
 ****************
