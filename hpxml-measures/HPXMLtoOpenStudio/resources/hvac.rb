@@ -4076,7 +4076,7 @@ class HVAC
     min_airflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
     hpxml.heating_systems.each do |htg_sys|
       htg_sys.heating_capacity = [htg_sys.heating_capacity, min_capacity].max
-      if not htg_sys.heating_airflow_cfm.nil? # FIXME: Need to address
+      if not htg_sys.heating_airflow_cfm.nil?
         htg_sys.heating_airflow_cfm = [htg_sys.heating_airflow_cfm, min_airflow].max
       end
     end

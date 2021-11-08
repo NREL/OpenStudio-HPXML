@@ -62,6 +62,7 @@ class HPXMLDefaults
     apply_fuel_loads(hpxml, cfa, nbeds)
     apply_pv_systems(hpxml)
     apply_generators(hpxml)
+    apply_batteries(hpxml)
 
     # Do HVAC sizing after all other defaults have been applied
     apply_hvac_sizing(hpxml, weather, cfa, nbeds)
@@ -1549,6 +1550,40 @@ class HPXMLDefaults
       if generator.is_shared_system.nil?
         generator.is_shared_system = false
         generator.is_shared_system_isdefaulted = true
+      end
+    end
+  end
+
+  def self.apply_batteries(hpxml)
+    default_values = Battery.get_battery_default_values()
+    hpxml.batteries.each do |battery|
+      if battery.location.nil?
+        battery.location = default_values[:location]
+        battery.location_isdefaulted = true
+      end
+      if battery.lifetime_model.nil?
+        battery.lifetime_model = default_values[:lifetime_model]
+        battery.lifetime_model_isdefaulted = true
+      end
+      if battery.nominal_voltage.nil?
+        battery.nominal_voltage = default_values[:nominal_voltage] # V
+        battery.nominal_voltage_isdefaulted = true
+      end
+      if battery.rated_power_output.nil? && battery.nominal_capacity_kwh.nil? && battery.nominal_capacity_ah.nil?
+        battery.rated_power_output = default_values[:rated_power_output] # W
+        battery.rated_power_output_isdefaulted = true
+        battery.nominal_capacity_kwh = default_values[:nominal_capacity_kwh] # kWh
+        battery.nominal_capacity_kwh_isdefaulted = true
+      elsif battery.rated_power_output.nil?
+        nominal_capacity_kwh = battery.nominal_capacity_kwh
+        if nominal_capacity_kwh.nil?
+          nominal_capacity_kwh = Battery.get_kWh_from_Ah(battery.nominal_capacity_ah, battery.nominal_voltage)
+        end
+        battery.rated_power_output = UnitConversions.convert(nominal_capacity_kwh, 'kWh', 'Wh') * 0.5 # W
+        battery.rated_power_output_isdefaulted = true
+      elsif battery.nominal_capacity_kwh.nil? && battery.nominal_capacity_ah.nil?
+        battery.nominal_capacity_kwh = UnitConversions.convert(battery.rated_power_output, 'W', 'kW') / 0.5 # kWh
+        battery.nominal_capacity_kwh_isdefaulted = true
       end
     end
   end
