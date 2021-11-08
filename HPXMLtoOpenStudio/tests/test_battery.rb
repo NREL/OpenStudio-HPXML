@@ -20,6 +20,11 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
     end
   end
 
+  def calc_nom_capacity(battery)
+    return (battery.numberofCellsinSeries * battery.numberofStringsinParallel *
+            battery.cellVoltageatEndofNominalZone * battery.fullyChargedCellCapacity)
+  end
+
   def test_battery_default
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-misc-defaults.xml'))
@@ -32,11 +37,12 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert(!battery.thermalZone.is_initialized)
       assert_equal(0, battery.radiativeFraction)
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
-      assert_in_epsilon(14, battery.numberofCellsinSeries, 0.01)
-      assert_in_epsilon(63, battery.numberofStringsinParallel, 0.01)
+      assert_in_epsilon(15, battery.numberofCellsinSeries, 0.01)
+      assert_in_epsilon(62, battery.numberofStringsinParallel, 0.01)
       assert_in_epsilon(0.5, battery.initialFractionalStateofCharge, 0.01)
       assert_in_epsilon(99.0, battery.batteryMass, 0.01)
       assert_in_epsilon(1.42, battery.batterySurfaceArea, 0.01)
+      assert_in_epsilon(10000, calc_nom_capacity(battery), 0.01)
 
       elcds = model.getElectricLoadCenterDistributions
       assert_equal(1, elcds.size)
@@ -78,11 +84,12 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert(!battery.thermalZone.is_initialized)
       assert_equal(0, battery.radiativeFraction)
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
-      assert_in_epsilon(14, battery.numberofCellsinSeries, 0.01)
+      assert_in_epsilon(15, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(125, battery.numberofStringsinParallel, 0.01)
       assert_in_epsilon(0.5, battery.initialFractionalStateofCharge, 0.01)
       assert_in_epsilon(198.0, battery.batteryMass, 0.01)
       assert_in_epsilon(2.25, battery.batterySurfaceArea, 0.01)
+      assert_in_epsilon(20000, calc_nom_capacity(battery), 0.01)
 
       elcds = model.getElectricLoadCenterDistributions
       assert_equal(1, elcds.size)
@@ -109,11 +116,12 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert(!battery.thermalZone.is_initialized)
       assert_equal(0, battery.radiativeFraction)
       assert_equal(HPXML::BatteryLifetimeModelKandlerSmith, battery.lifetimeModel)
-      assert_in_epsilon(14, battery.numberofCellsinSeries, 0.01)
+      assert_in_epsilon(15, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(125, battery.numberofStringsinParallel, 0.01)
       assert_in_epsilon(0.5, battery.initialFractionalStateofCharge, 0.01)
       assert_in_epsilon(198.0, battery.batteryMass, 0.01)
       assert_in_epsilon(2.25, battery.batterySurfaceArea, 0.01)
+      assert_in_epsilon(20000, calc_nom_capacity(battery), 0.01)
 
       elcds = model.getElectricLoadCenterDistributions
       assert_equal(1, elcds.size)
@@ -141,11 +149,12 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert_equal(HPXML::LocationGarage, battery.thermalZone.get.name.to_s)
       assert_equal(0.9, battery.radiativeFraction)
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
-      assert_in_epsilon(14, battery.numberofCellsinSeries, 0.01)
+      assert_in_epsilon(15, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(125, battery.numberofStringsinParallel, 0.01)
       assert_in_epsilon(0.5, battery.initialFractionalStateofCharge, 0.01)
       assert_in_epsilon(198.0, battery.batteryMass, 0.01)
       assert_in_epsilon(2.25, battery.batterySurfaceArea, 0.01)
+      assert_in_epsilon(20000, calc_nom_capacity(battery), 0.01)
 
       elcds = model.getElectricLoadCenterDistributions
       assert_equal(1, elcds.size)
@@ -172,11 +181,12 @@ class HPXMLtoOpenStudioBatteryTest < MiniTest::Test
       assert(!battery.thermalZone.is_initialized)
       assert_equal(0, battery.radiativeFraction)
       assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
-      assert_in_epsilon(14, battery.numberofCellsinSeries, 0.01)
+      assert_in_epsilon(15, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(125, battery.numberofStringsinParallel, 0.01)
       assert_in_epsilon(0.5, battery.initialFractionalStateofCharge, 0.01)
       assert_in_epsilon(198.0, battery.batteryMass, 0.01)
       assert_in_epsilon(2.25, battery.batterySurfaceArea, 0.01)
+      assert_in_epsilon(20000, calc_nom_capacity(battery), 0.01)
 
       elcds = model.getElectricLoadCenterDistributions
       assert_equal(1, elcds.size)
