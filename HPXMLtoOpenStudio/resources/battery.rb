@@ -38,15 +38,13 @@ class Battery
       thermal_zone = space.thermalZone.get
       elcs.setThermalZone(thermal_zone)
     end
-    elcs.setRadiativeFraction(0.9 * frac_sens) # from Rohit C.
+    elcs.setRadiativeFraction(0.9 * frac_sens)
     elcs.setLifetimeModel(battery.lifetime_model)
     elcs.setNumberofCellsinSeries(number_of_cells_in_series)
     elcs.setNumberofStringsinParallel(number_of_strings_in_parallel)
     elcs.setInitialFractionalStateofCharge(initial_fractional_state_of_charge)
     elcs.setBatteryMass(battery_mass)
     elcs.setBatterySurfaceArea(battery_surface_area)
-    elcs.setFractionofCellCapacityRemovedattheEndofExponentialZone(2.584) # from Rohit C.
-    elcs.setFractionofCellCapacityRemovedattheEndofNominalZone(3.126) # from Rohit C.
 
     model.getElectricLoadCenterDistributions.each do |elcd|
       next unless elcd.inverter.is_initialized
