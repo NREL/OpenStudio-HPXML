@@ -1,10 +1,11 @@
-## OpenStudio-HPXML v1.3.0 (Pending)
+## OpenStudio-HPXML v1.3.0
 
 __New Features__
 - Updates to OpenStudio 3.3.0/EnergyPlus 9.6.0.
 - **Breaking change**: Replaces "Unmet Load" outputs with "Unmet Hours".
 - **Breaking change**: Renames "Load: Heating" and "Peak Load: Heating" (and Cooling) outputs to include "Delivered".
 - **Breaking change**: Any heat pump backup heating requires `HeatPump/BackupType` ("integrated" or "separate") to be specified.
+- **Breaking change**: For homes with multiple PV arrays, all inverter efficiencies must have the same value.
 - **Breaking change**: HPXML schema version must now be '4.0' (proposed).
   - Moves `ClothesDryer/extension/IsVented` to `ClothesDryer/IsVented`.
   - Moves `ClothesDryer/extension/VentedFlowRate` to `ClothesDryer/VentedFlowRate`.
@@ -20,6 +21,7 @@ __New Features__
   - Expands simplified weekday/weekend/monthly schedule inputs to additional building features.
   - Allows `HeatingSeason` & `CoolingSeason` to be specified for defining heating and cooling equipment availability.
 - Adds a new results_hpxml.csv output file to summarize HPXML values (e.g., surface areas, HVAC capacities).
+- Allows modeling lithium ion batteries.
 - Allows use of `HeatPump/BackupSystem` for modeling a standalone (i.e., not integrated) backup heating system.
 - Allows conditioned crawlspaces to be specified; modeled as crawlspaces that are actively maintained at setpoint.
 - Allows non-zero refrigerant charge defect ratios for ground source heat pumps.

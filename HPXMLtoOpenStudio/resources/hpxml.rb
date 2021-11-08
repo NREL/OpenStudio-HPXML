@@ -56,7 +56,7 @@ class HPXML < Object
                  :cooling_systems, :heat_pumps, :hvac_plant, :hvac_controls, :hvac_distributions,
                  :ventilation_fans, :water_heating_systems,
                  :hot_water_distributions, :water_fixtures, :water_heating, :solar_thermal_systems,
-                 :pv_systems, :generators, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
+                 :pv_systems, :generators, :batteries, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
                  :freezers, :dehumidifiers, :cooking_ranges, :ovens, :lighting_groups, :lighting,
                  :ceiling_fans, :pools, :hot_tubs, :plug_loads, :fuel_loads]
   attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings)
@@ -74,6 +74,9 @@ class HPXML < Object
   AtticTypeUnvented = 'UnventedAttic'
   AtticTypeVented = 'VentedAttic'
   AtticWallTypeGable = 'gable'
+  BatteryTypeLithiumIon = 'Li-ion'
+  BatteryLifetimeModelNone = 'None'
+  BatteryLifetimeModelKandlerSmith = 'KandlerSmith'
   CertificationEnergyStar = 'Energy Star'
   ClothesDryerControlTypeMoisture = 'moisture'
   ClothesDryerControlTypeTimer = 'timer'
@@ -287,6 +290,7 @@ class HPXML < Object
   UnitsACH = 'ACH'
   UnitsACHNatural = 'ACHnatural'
   UnitsAFUE = 'AFUE'
+  UnitsAh = 'Ah'
   UnitsCFM = 'CFM'
   UnitsCFM25 = 'CFM25'
   UnitsCFM50 = 'CFM50'
@@ -294,7 +298,9 @@ class HPXML < Object
   UnitsEER = 'EER'
   UnitsCEER = 'CEER'
   UnitsHSPF = 'HSPF'
+  UnitsKwh = 'kWh'
   UnitsKwhPerYear = 'kWh/year'
+  UnitsKwhPerDay = 'kWh/day'
   UnitsKwPerTon = 'kW/ton'
   UnitsPercent = 'Percent'
   UnitsSEER = 'SEER'
@@ -663,6 +669,7 @@ class HPXML < Object
     @water_heating.to_oga(@doc)
     @solar_thermal_systems.to_oga(@doc)
     @pv_systems.to_oga(@doc)
+    @batteries.to_oga(@doc)
     @generators.to_oga(@doc)
     @clothes_washers.to_oga(@doc)
     @clothes_dryers.to_oga(@doc)
@@ -716,6 +723,7 @@ class HPXML < Object
     @water_heating = WaterHeating.new(self, hpxml)
     @solar_thermal_systems = SolarThermalSystems.new(self, hpxml)
     @pv_systems = PVSystems.new(self, hpxml)
+    @batteries = Batteries.new(self, hpxml)
     @generators = Generators.new(self, hpxml)
     @clothes_washers = ClothesWashers.new(self, hpxml)
     @clothes_dryers = ClothesDryers.new(self, hpxml)
@@ -4764,6 +4772,72 @@ class HPXML < Object
     end
   end
 
+  class Batteries < BaseArrayElement
+    def add(**kwargs)
+      self << Battery.new(@hpxml_object, **kwargs)
+    end
+
+    def from_oga(hpxml)
+      return if hpxml.nil?
+
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/Batteries/Battery').each do |battery|
+        self << Battery.new(@hpxml_object, battery)
+      end
+    end
+  end
+
+  class Battery < BaseElement
+    ATTRS = [:id, :type, :location, :lifetime_model, :rated_power_output,
+             :nominal_capacity_kwh, :nominal_capacity_ah, :nominal_voltage]
+    attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.batteries.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_oga(doc)
+      return if nil?
+
+      batteries = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'Batteries'])
+      battery = XMLHelper.add_element(batteries, 'Battery')
+      sys_id = XMLHelper.add_element(battery, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(battery, 'Location', @location, :string, @location_isdefaulted) unless @location.nil?
+      XMLHelper.add_element(battery, 'BatteryType', @type, :string) unless @type.nil?
+      if not @nominal_capacity_kwh.nil?
+        nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
+        XMLHelper.add_element(nominal_capacity, 'Units', UnitsKwh, :string)
+        XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_kwh, :float, @nominal_capacity_kwh_isdefaulted)
+      end
+      if not @nominal_capacity_ah.nil?
+        nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
+        XMLHelper.add_element(nominal_capacity, 'Units', UnitsAh, :string)
+        XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_ah, :float, @nominal_capacity_ah_isdefaulted)
+      end
+      XMLHelper.add_element(battery, 'RatedPowerOutput', @rated_power_output, :float, @rated_power_output_isdefaulted) unless @rated_power_output.nil?
+      XMLHelper.add_element(battery, 'NominalVoltage', @nominal_voltage, :float, @nominal_voltage_isdefaulted) unless @nominal_voltage.nil?
+      XMLHelper.add_extension(battery, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
+    end
+
+    def from_oga(battery)
+      return if battery.nil?
+
+      @id = HPXML::get_id(battery)
+      @location = XMLHelper.get_value(battery, 'Location', :string)
+      @type = XMLHelper.get_value(battery, 'BatteryType', :string)
+      @nominal_capacity_kwh = XMLHelper.get_value(battery, "NominalCapacity[Units='#{UnitsKwh}']/Value", :float)
+      @nominal_capacity_ah = XMLHelper.get_value(battery, "NominalCapacity[Units='#{UnitsAh}']/Value", :float)
+      @rated_power_output = XMLHelper.get_value(battery, 'RatedPowerOutput', :float)
+      @nominal_voltage = XMLHelper.get_value(battery, 'NominalVoltage', :float)
+      @lifetime_model = XMLHelper.get_value(battery, 'extension/LifetimeModel', :string)
+    end
+  end
+
   class ClothesWashers < BaseArrayElement
     def add(**kwargs)
       self << ClothesWasher.new(@hpxml_object, **kwargs)
@@ -5385,7 +5459,7 @@ class HPXML < Object
         exterior_holiday_lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting', 'extension', 'ExteriorHolidayLighting'])
         if not @holiday_kwh_per_day.nil?
           holiday_lighting_load = XMLHelper.add_element(exterior_holiday_lighting, 'Load')
-          XMLHelper.add_element(holiday_lighting_load, 'Units', 'kWh/day', :string)
+          XMLHelper.add_element(holiday_lighting_load, 'Units', UnitsKwhPerDay, :string)
           XMLHelper.add_element(holiday_lighting_load, 'Value', @holiday_kwh_per_day, :float, @holiday_kwh_per_day_isdefaulted)
         end
         XMLHelper.add_element(exterior_holiday_lighting, 'PeriodBeginMonth', @holiday_period_begin_month, :integer, @holiday_period_begin_month_isdefaulted) unless @holiday_period_begin_month.nil?
@@ -5417,7 +5491,7 @@ class HPXML < Object
       @exterior_monthly_multipliers = XMLHelper.get_value(lighting, 'extension/ExteriorMonthlyScheduleMultipliers', :string)
       if not XMLHelper.get_element(hpxml, 'Building/BuildingDetails/Lighting/extension/ExteriorHolidayLighting').nil?
         @holiday_exists = true
-        @holiday_kwh_per_day = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/Load[Units="kWh/day"]/Value', :float)
+        @holiday_kwh_per_day = XMLHelper.get_value(lighting, "extension/ExteriorHolidayLighting/Load[Units='#{UnitsKwhPerDay}']/Value", :float)
         @holiday_period_begin_month = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/PeriodBeginMonth', :integer)
         @holiday_period_begin_day = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/PeriodBeginDayOfMonth', :integer)
         @holiday_period_end_month = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/PeriodEndMonth', :integer)
