@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5dc98eb7-a419-4165-bd7d-7724143261bf</version_id>
-  <version_modified>20211108T215551Z</version_modified>
+  <version_id>acaa5201-a5e3-4216-a64a-9134824cde6a</version_id>
+  <version_modified>20211111T202526Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -284,12 +284,6 @@
       <checksum>3BFACFDE</checksum>
     </file>
     <file>
-      <filename>meta_measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7EC12F73</checksum>
-    </file>
-    <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -445,12 +439,6 @@
       <checksum>04E10882</checksum>
     </file>
     <file>
-      <filename>HPXMLvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>CEE1B9E9</checksum>
-    </file>
-    <file>
       <filename>test_battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -479,6 +467,18 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>C8EEE7E8</checksum>
+    </file>
+    <file>
+      <filename>meta_measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>7356E5FF</checksum>
+    </file>
+    <file>
+      <filename>HPXMLvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>17675B87</checksum>
     </file>
   </files>
 </measure>
