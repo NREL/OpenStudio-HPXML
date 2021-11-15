@@ -849,11 +849,11 @@ class HVAC
     # Apply thermostat offset due to onoff control
     offset_db = hvac_control.onoff_thermostat_deadband
     if not offset_db.nil?
-      for m in 1..12
-        clg_weekday_setpoints[m - 1] = clg_weekday_setpoints[m - 1].map { |i| i + offset_db / 2.0 }
-        htg_weekday_setpoints[m - 1] = htg_weekday_setpoints[m - 1].map { |i| i - offset_db / 2.0 }
-        clg_weekend_setpoints[m - 1] = clg_weekend_setpoints[m - 1].map { |i| i + offset_db / 2.0 }
-        htg_weekend_setpoints[m - 1] = htg_weekend_setpoints[m - 1].map { |i| i - offset_db / 2.0 }
+      (0..(num_days - 1)).to_a.each do |i|
+        clg_weekday_setpoints[i] = clg_weekday_setpoints[i].map { |i| i + offset_db / 2.0 }
+        htg_weekday_setpoints[i] = htg_weekday_setpoints[i].map { |i| i - offset_db / 2.0 }
+        clg_weekend_setpoints[i] = clg_weekend_setpoints[i].map { |i| i + offset_db / 2.0 }
+        htg_weekend_setpoints[i] = htg_weekend_setpoints[i].map { |i| i - offset_db / 2.0 }
       end
     end
 
