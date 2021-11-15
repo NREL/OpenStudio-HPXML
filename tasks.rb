@@ -294,8 +294,6 @@ def create_hpxmls
     'base-hvac-multiple.xml' => 'base.xml',
     'base-hvac-none.xml' => 'base.xml',
     'base-hvac-portable-heater-gas-only.xml' => 'base.xml',
-    'base-hvac-programmable-thermostat.xml' => 'base.xml',
-    'base-hvac-programmable-thermostat-detailed.xml' => 'base-hvac-programmable-thermostat.xml',
     'base-hvac-ptac.xml' => 'base.xml',
     'base-hvac-ptac-with-heating.xml' => 'base-hvac-ptac.xml',
     'base-hvac-pthp.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
@@ -304,6 +302,8 @@ def create_hpxmls
     'base-hvac-room-ac-only-ceer.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-seasons.xml' => 'base.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
+    'base-hvac-setpoints-daily-schedules.xml' => 'base-hvac-setpoints-daily-setbacks.xml',
+    'base-hvac-setpoints-daily-setbacks.xml' => 'base.xml',
     'base-hvac-stove-oil-only.xml' => 'base.xml',
     'base-hvac-stove-wood-pellets-only.xml' => 'base-hvac-stove-oil-only.xml',
     'base-hvac-undersized.xml' => 'base.xml',
@@ -620,7 +620,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
     args['heat_pump_backup_heating_efficiency'] = 1
     args['heat_pump_backup_heating_capacity'] = 36000.0
-    args['hvac_control_type'] = HPXML::HVACControlTypeManual
     args['hvac_control_heating_weekday_setpoint'] = 68
     args['hvac_control_heating_weekend_setpoint'] = 68
     args['hvac_control_cooling_weekday_setpoint'] = 78
@@ -945,7 +944,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
     args['heat_pump_backup_heating_efficiency'] = 0
     args['heat_pump_backup_heating_capacity'] = Constants.Auto
-    args['hvac_control_type'] = HPXML::HVACControlTypeManual
     args['hvac_control_heating_weekday_setpoint'] = 68
     args['hvac_control_heating_weekend_setpoint'] = 68
     args['hvac_control_cooling_weekday_setpoint'] = 78
@@ -1749,9 +1747,7 @@ def set_measure_argument_values(hpxml_file, args)
   end
 
   # HVAC
-  if ['base-hvac-programmable-thermostat.xml'].include? hpxml_file
-    args['hvac_control_type'] = HPXML::HVACControlTypeProgrammable
-  elsif ['base-hvac-air-to-air-heat-pump-1-speed.xml'].include? hpxml_file
+  if ['base-hvac-air-to-air-heat-pump-1-speed.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = 'none'
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
@@ -2033,7 +2029,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['heating_system_type'] = HPXML::HVACTypePortableHeater
     args['heating_system_heating_efficiency'] = 1.0
     args['cooling_system_type'] = 'none'
-  elsif ['base-hvac-programmable-thermostat-detailed.xml'].include? hpxml_file
+  elsif ['base-hvac-setpoints-daily-schedules.xml'].include? hpxml_file
     args['hvac_control_heating_weekday_setpoint'] = '64, 64, 64, 64, 64, 64, 64, 70, 70, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64'
     args['hvac_control_heating_weekend_setpoint'] = '68, 68, 68, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70'
     args['hvac_control_cooling_weekday_setpoint'] = '80, 80, 80, 80, 80, 80, 80, 75, 75, 80, 80, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 80, 80'
@@ -3738,7 +3734,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.hvac_systems.each do |hvac_system|
       hvac_system.fan_watts_per_cfm = 0.365
     end
-  elsif ['base-hvac-programmable-thermostat.xml'].include? hpxml_file
+  elsif ['base-hvac-setpoints-daily-setbacks.xml'].include? hpxml_file
     hpxml.hvac_controls[0].heating_setback_temp = 66
     hpxml.hvac_controls[0].heating_setback_hours_per_week = 7 * 7
     hpxml.hvac_controls[0].heating_setback_start_hour = 23 # 11pm
