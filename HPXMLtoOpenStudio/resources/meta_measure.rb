@@ -560,7 +560,7 @@ def check_args(args, exclusions = [])
 
       duplicates << "#{arg_name}=#{args[i][arg_name]}" if args[i][arg_name] == args[i + 1][arg_name]
     end
-    puts "Warning: Did not need #{duplicates}" if !duplicates.empty?
+    puts "Warning: Did not need #{duplicates}\n" if !duplicates.empty?
     args[0].merge!(args[i + 1])
   end
   args = args[0]

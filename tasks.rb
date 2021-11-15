@@ -1793,17 +1793,23 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml'].include? hpxml_file
     args['heat_pump_backup_heating_switchover_temp'] = 25
   elsif hpxml_file.include? 'autosize'
-    args['heating_system_heating_capacity'] = Constants.Auto
-    args['heating_system_2_heating_capacity'] = Constants.Auto
-    args['cooling_system_cooling_capacity'] = Constants.Auto
-    if hpxml_file.include? 'manual-s-oversize-allowances'
+    if hpxml_file.end_with? 'autosize.xml'
+      args['heating_system_heating_capacity'] = Constants.Auto
+      args['cooling_system_cooling_capacity'] = Constants.Auto
+      args['heat_pump_heating_capacity'] = Constants.AutoMaxLoad
+      args['heat_pump_backup_heating_capacity'] = Constants.Auto
+      args['heat_pump_cooling_capacity'] = Constants.Auto
+    elsif hpxml_file.include? 'manual-s-oversize-allowances'
       args['heat_pump_heating_capacity'] = Constants.Auto
     else
+      args['heating_system_heating_capacity'] = Constants.Auto
+      args['heating_system_2_heating_capacity'] = Constants.Auto
+      args['cooling_system_cooling_capacity'] = Constants.Auto
       args['heat_pump_heating_capacity'] = Constants.AutoMaxLoad
+      args['heat_pump_heating_capacity_17_f'] = Constants.Auto
+      args['heat_pump_backup_heating_capacity'] = Constants.Auto
+      args['heat_pump_cooling_capacity'] = Constants.Auto
     end
-    args['heat_pump_heating_capacity_17_f'] = Constants.Auto
-    args['heat_pump_backup_heating_capacity'] = Constants.Auto
-    args['heat_pump_cooling_capacity'] = Constants.Auto
   elsif ['base-hvac-boiler-coal-only.xml',
          'base-hvac-furnace-coal-only.xml'].include? hpxml_file
     args['heating_system_fuel'] = HPXML::FuelTypeCoal
@@ -1845,15 +1851,11 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml'].include? hpxml_file
-    args['cooling_system_type'] = 'none'
     args['heat_pump_heating_efficiency'] = 7.7
-    args['heat_pump_heating_capacity_17_f'] = 36000.0 * 0.6
-    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeNaturalGas
     args['heat_pump_backup_heating_efficiency'] = 0.95
     args['heat_pump_backup_heating_switchover_temp'] = 25
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.xml'].include? hpxml_file
-    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
     args['heat_pump_backup_heating_efficiency'] = 1.0
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml',
@@ -1863,8 +1865,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_backup_heating_switchover_temp'] = 25
   elsif ['base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     args['heat_pump_heating_capacity'] = 36000.0
-    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
-    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeNaturalGas
     args['heat_pump_backup_heating_efficiency'] = 0.95
     args['heat_pump_backup_heating_switchover_temp'] = 25
@@ -2003,7 +2003,6 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-hvac-mini-split-heat-pump-ducted-heating-only.xml'].include? hpxml_file
     args['heat_pump_cooling_capacity'] = 0
     args['heat_pump_fraction_cool_load_served'] = 0
-    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-mini-split-heat-pump-ductless.xml'].include? hpxml_file
     args['heat_pump_backup_type'] = 'none'
