@@ -89,7 +89,7 @@ Fuel uses are listed below.
    Type                                  Notes
    ====================================  ===========================
    Fuel Use: Electricity: Total (MBtu)
-   Fuel Use: Electricity: Net (MBtu)     Subtracts any power produced by PV or generators.
+   Fuel Use: Electricity: Net (MBtu)     Subtracts any power produced by PV (including any battery storage) or generators.
    Fuel Use: Natural Gas: Total (MBtu)
    Fuel Use: Fuel Oil: Total (MBtu)      Includes "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "kerosene", and "diesel"
    Fuel Use: Propane: Total (MBtu)
@@ -139,7 +139,7 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
    End Use: Electricity: Pool Pump (MBtu)
    End Use: Electricity: Hot Tub Heater (MBtu)
    End Use: Electricity: Hot Tub Pump (MBtu)
-   End Use: Electricity: PV (MBtu)                                      Negative value for any power produced
+   End Use: Electricity: PV (MBtu)                                      Negative value for any power produced (including any battery storage)
    End Use: Electricity: Generator (MBtu)                               Negative value for any power produced
    End Use: Natural Gas: Heating (MBtu)
    End Use: Natural Gas: Hot Water (MBtu)
@@ -324,7 +324,6 @@ Depending on the outputs requested, the file may include:
    Hot Water Uses                       Water use for each end use type (in gallons).
    Total Loads                          Heating, cooling, and hot water loads (in kBtu) for the building.
    Component Loads                      Heating and cooling loads (in kBtu) disaggregated by component (e.g., Walls, Windows, Infiltration, Ducts, etc.).
-   Unmet Loads                          Unmet heating and cooling loads (in kBtu) for the building.
    Zone Temperatures                    Average temperatures (in deg-F) for each space modeled (e.g., living space, attic, garage, basement, crawlspace, etc.).
    Airflows                             Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.
    Weather                              Weather file data including outdoor temperatures, relative humidity, wind speed, and solar.
