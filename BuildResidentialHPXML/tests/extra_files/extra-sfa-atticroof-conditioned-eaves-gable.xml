@@ -270,7 +270,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window7'/>
-            <Area>30.4</Area>
+            <Area>52.9</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -281,27 +281,27 @@
             </InteriorShading>
             <Overhangs>
               <Depth>2.0</Depth>
-              <DistanceToTopOfWindow>12.51181</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>16.2</DistanceToBottomOfWindow>
+              <DistanceToTopOfWindow>18.18559</DistanceToTopOfWindow>
+              <DistanceToBottomOfWindow>21.9</DistanceToBottomOfWindow>
             </Overhangs>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
-            <SystemIdentifier id='Window10'/>
-            <Area>52.9</Area>
+            <SystemIdentifier id='Window12'/>
+            <Area>30.4</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='Window10InteriorShading'/>
+              <SystemIdentifier id='Window12InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>2.0</Depth>
-              <DistanceToTopOfWindow>18.18559</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>21.9</DistanceToBottomOfWindow>
+              <DistanceToTopOfWindow>12.51181</DistanceToTopOfWindow>
+              <DistanceToBottomOfWindow>16.2</DistanceToBottomOfWindow>
             </Overhangs>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
