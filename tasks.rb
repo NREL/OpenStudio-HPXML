@@ -1208,8 +1208,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['geometry_foundation_type'] = HPXML::FoundationTypeBasementConditioned
     args['geometry_unit_cfa'] = 3078
     args['air_leakage_value'] = 0.335
-    args['foundation_wall_insulation_distance_to_top'] = 0
-    args['foundation_wall_insulation_distance_to_bottom'] = 0
   elsif ['ASHRAE_Standard_140/L324XC.xml'].include? hpxml_file
     args['rim_joist_assembly_r'] = 13.14
     args['foundation_wall_insulation_r'] = 10.2
@@ -1224,7 +1222,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['clothes_dryer_vented_flow_rate'] = Constants.Auto
     args['cooking_range_oven_fuel_type'] = HPXML::FuelTypeCoal
   elsif ['base-appliances-dehumidifier.xml'].include? hpxml_file
-    args['heating_system_heating_capacity'] = 24000.0
     args['dehumidifier_type'] = HPXML::DehumidifierTypePortable
   elsif ['base-appliances-dehumidifier-ief-portable.xml'].include? hpxml_file
     args['dehumidifier_efficiency_type'] = 'IntegratedEnergyFactor'
@@ -1310,8 +1307,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['geometry_attic_type'] = HPXML::AtticTypeConditioned
     args['geometry_unit_num_floors_above_grade'] = 2
     args['geometry_unit_cfa'] = 4050
-    args['window_area_front'] = 108.0
-    args['window_area_back'] = 108.0
     args['window_area_left'] = 120.0
     args['window_area_right'] = 120.0
     args['window_aspect_ratio'] = 5.0 / 2.5
@@ -1372,7 +1367,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['ducts_supply_location'] = HPXML::LocationLivingSpace
     args['ducts_return_location'] = HPXML::LocationLivingSpace
     args['ducts_supply_insulation_r'] = 0.0
-    args['ducts_return_insulation_r'] = 0.0
     args['ducts_number_of_return_registers'] = 1
     args['door_area'] = 20.0
     args['misc_plug_loads_other_annual_kwh'] = 819.0
@@ -1383,7 +1377,6 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-bldgtype-multifamily-shared-boiler-only-fan-coil.xml',
          'base-bldgtype-multifamily-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
     args['heating_system_type'] = "Shared #{HPXML::HVACTypeBoiler} w/ Ductless Fan Coil"
-    args['cooling_system_type'] = 'none'
   elsif ['base-bldgtype-multifamily-shared-chiller-only-baseboard.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = 'none'
@@ -1577,8 +1570,6 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
     args['geometry_unit_cfa'] = 3250.0
     args['geometry_garage_width'] = 20.0
-    args['ducts_supply_surface_area'] = 112.5
-    args['ducts_return_surface_area'] = 37.5
     args['misc_plug_loads_other_annual_kwh'] = 2957.5
     args['floor_over_garage_assembly_r'] = 39.3
   elsif ['base-enclosure-beds-1.xml'].include? hpxml_file
@@ -1642,8 +1633,6 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-enclosure-skylights.xml'].include? hpxml_file
     args['skylight_area_front'] = 15
     args['skylight_area_back'] = 15
-    args['skylight_ufactor'] = 0.33
-    args['skylight_shgc'] = 0.45
   elsif ['base-enclosure-split-level.xml'].include? hpxml_file
     args['ducts_number_of_return_registers'] = 2
   end
@@ -1757,7 +1746,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
     args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
-    args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml'].include? hpxml_file
     args['heat_pump_heating_capacity'] = 0.0
     args['heat_pump_heating_capacity_17_f'] = 0.0
@@ -1775,7 +1763,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_cooling_efficiency'] = 18.0
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
-    args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-air-to-air-heat-pump-var-speed.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = 'none'
@@ -1786,7 +1773,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_cooling_efficiency'] = 22.0
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
-    args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml'].include? hpxml_file
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeSeparate
     args['heat_pump_heating_capacity'] = 18000.0
@@ -1851,27 +1837,20 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml'].include? hpxml_file
-    args['cooling_system_type'] = 'none'
     args['heat_pump_heating_efficiency'] = 7.7
-    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
-    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeNaturalGas
     args['heat_pump_backup_heating_efficiency'] = 0.95
     args['heat_pump_backup_heating_switchover_temp'] = 25
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.xml'].include? hpxml_file
-    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
     args['heat_pump_backup_heating_efficiency'] = 1.0
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml',
          'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml'].include? hpxml_file
-    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeNaturalGas
     args['heat_pump_backup_heating_efficiency'] = 0.95
     args['heat_pump_backup_heating_switchover_temp'] = 25
   elsif ['base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     args['heat_pump_heating_capacity'] = 36000.0
-    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
-    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeNaturalGas
     args['heat_pump_backup_heating_efficiency'] = 0.95
     args['heat_pump_backup_heating_switchover_temp'] = 25
@@ -1959,7 +1938,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_cooling_efficiency'] = 16.6
     args.delete('heat_pump_cooling_compressor_type')
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
-    args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-ground-to-air-heat-pump-cooling-only.xml'].include? hpxml_file
     args['heat_pump_heating_capacity'] = 0.0
     args['heat_pump_fraction_heat_load_served'] = 0
@@ -1997,7 +1975,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_cooling_efficiency'] = 19.0
     args.delete('heat_pump_cooling_compressor_type')
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
-    args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
     args['heat_pump_is_ducted'] = true
     args['ducts_supply_leakage_to_outside_value'] = 15.0
     args['ducts_return_leakage_to_outside_value'] = 5.0
@@ -2012,7 +1989,6 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-hvac-mini-split-heat-pump-ducted-heating-only.xml'].include? hpxml_file
     args['heat_pump_cooling_capacity'] = 0
     args['heat_pump_fraction_cool_load_served'] = 0
-    args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
   elsif ['base-hvac-mini-split-heat-pump-ductless.xml'].include? hpxml_file
     args['heat_pump_backup_type'] = 'none'
@@ -2200,9 +2176,7 @@ def set_measure_argument_values(hpxml_file, args)
     args.delete('roof_material_type')
     args['roof_color'] = HPXML::ColorLight
     args.delete('roof_material_type')
-    args['roof_radiant_barrier'] = false
     args.delete('wall_siding_type')
-    args['wall_color'] = HPXML::ColorMedium
     args.delete('window_fraction_operable')
     args.delete('window_interior_shading_winter')
     args.delete('window_interior_shading_summer')
@@ -2331,7 +2305,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['hot_tub_present'] = true
     args['hot_tub_pump_annual_kwh'] = 1000.0
     args['hot_tub_pump_usage_multiplier'] = 0.9
-    args['hot_tub_heater_type'] = HPXML::HeaterTypeElectricResistance
     args['hot_tub_heater_annual_kwh'] = 1300.0
     args['hot_tub_heater_usage_multiplier'] = 0.9
     args['misc_fuel_loads_grill_present'] = true
