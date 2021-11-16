@@ -446,6 +446,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['water_heater_jacket_rvalue'] = 0
       args['water_heater_setpoint_temperature'] = 125
       args['water_heater_num_units_served'] = 1
+      args['water_heater_tank_model_type'] = HPXML::WaterHeaterTankModelTypeMixed
+      args['water_heater_operating_mode'] = HPXML::WaterHeaterOperatingModeStandard
       args['hot_water_distribution_system_type'] = HPXML::DHWDistTypeStandard
       args['hot_water_distribution_standard_piping_length'] = 50
       args['hot_water_distribution_recirc_control_type'] = HPXML::DHWRecirControlTypeNone
