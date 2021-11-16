@@ -230,8 +230,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     puts "Generating #{hpxmls_files.size} HPXML files..."
 
     hpxmls_files.each_with_index do |(hpxml_file, parent), i|
-      # puts "[#{i + 1}/#{hpxmls_files.size}] Generating #{hpxml_file}..."
-      # next if hpxml_file != 'extra-sfa-atticroof-conditioned-eaves-gable.xml'
+      puts "[#{i + 1}/#{hpxmls_files.size}] Generating #{hpxml_file}..."
+
       begin
         all_hpxml_files = [hpxml_file]
         unless parent.nil?

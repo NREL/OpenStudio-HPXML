@@ -975,7 +975,8 @@ class Geometry
                       'none' => [] }
 
     get_conditioned_spaces(model.getSpaces).each do |space|
-      space.surfaces.each do |surface|
+      sorted_surfaces = space.surfaces.sort_by { |s| s.additionalProperties.getFeatureAsInteger('Index').get }
+      sorted_surfaces.each do |surface|
         next unless (surface.surfaceType.downcase == 'wall') && (surface.outsideBoundaryCondition.downcase == 'outdoors')
         next if (90 - surface.tilt * 180 / Math::PI).abs > 0.01 # Not a vertical wall
 
@@ -986,7 +987,8 @@ class Geometry
       end
     end
     model.getSpaces.each do |space|
-      space.surfaces.each do |surface|
+      sorted_surfaces = space.surfaces.sort_by { |s| s.additionalProperties.getFeatureAsInteger('Index').get }
+      sorted_surfaces.each do |surface|
         next unless (surface.surfaceType.downcase == 'roofceiling') && (surface.outsideBoundaryCondition.downcase == 'outdoors')
 
         facade = get_facade_for_surface(surface)
@@ -1495,7 +1497,8 @@ class Geometry
       get_conditioned_spaces(model.getSpaces).each do |space|
         next if space_is_below_grade(space)
 
-        space.surfaces.each do |surface|
+        sorted_surfaces = space.surfaces.sort_by { |s| s.additionalProperties.getFeatureAsInteger('Index').get }
+        sorted_surfaces.each do |surface|
           next unless get_facade_for_surface(surface) == Constants.FacadeFront
           next unless (surface.outsideBoundaryCondition.downcase == 'outdoors') || (surface.outsideBoundaryCondition.downcase == 'adiabatic')
           next if (90 - surface.tilt * 180 / Math::PI).abs > 0.01 # Not a vertical wall
