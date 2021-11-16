@@ -105,7 +105,10 @@ class Geometry
       rim_joist_polygon = p
 
       # make space
-      rim_joist_space = from_floor_print(rim_joist_polygon, rim_joist_height, model)
+      # rim_joist_space = from_floor_print(rim_joist_polygon, rim_joist_height, model)
+      rim_joist_space = OpenStudio::Model::Space::fromFloorPrint(rim_joist_polygon, rim_joist_height, model)
+      rim_joist_space = rim_joist_space.get
+      assign_surface_indexes(model, rim_joist_polygon, rim_joist_space)
 
       space.surfaces.each do |surface|
         next if surface.surfaceType.downcase != 'roofceiling'
@@ -187,6 +190,49 @@ class Geometry
     roofCeiling.setSpace(space)
 
     return space
+  end
+
+  def self.assign_surface_indexes(model, polygon, space)
+    ix = indexer(model)
+
+    space.surfaces.each do |surface|
+      next if surface.surfaceType != 'Floor'
+
+      surface.additionalProperties.setFeature('Index', ix)
+      ix += 1
+    end
+
+    num_points = polygon.size
+    (1..num_points).to_a.each do |i|
+      pt1 = polygon[i % num_points]
+      pt2 = polygon[i - 1]
+      polygon_points = [pt1, pt2]
+
+      space.surfaces.each do |surface|
+        next if surface.surfaceType != 'Wall'
+
+        j = 0
+        polygon_points.each do |polygon_point|
+          surface.vertices.each do |surface_point|
+            x = polygon_point.x - surface_point.x
+            y = polygon_point.y - surface_point.y
+            z = polygon_point.z - surface_point.z
+            j += 1 if x.abs < Constants.small && y.abs < Constants.small && z.abs < Constants.small
+          end
+        end
+        next if j < 2
+
+        surface.additionalProperties.setFeature('Index', ix)
+        ix += 1
+      end
+    end
+
+    space.surfaces.each do |surface|
+      next if surface.surfaceType != 'RoofCeiling'
+
+      surface.additionalProperties.setFeature('Index', ix)
+      ix += 1
+    end
   end
 
   def self.create_surface(polygon, model)
@@ -364,7 +410,10 @@ class Geometry
         end
 
         # make space
-        garage_space = from_floor_print(garage_polygon, average_ceiling_height, model)
+        # garage_space = from_floor_print(garage_polygon, average_ceiling_height, model)
+        garage_space = OpenStudio::Model::Space::fromFloorPrint(garage_polygon, average_ceiling_height, model)
+        garage_space = garage_space.get
+        assign_surface_indexes(model, garage_polygon, garage_space)
         garage_space.setName(garage_space_name)
         garage_space_type = OpenStudio::Model::SpaceType.new(model)
         garage_space_type.setStandardsSpaceType(garage_space_name)
@@ -454,7 +503,10 @@ class Geometry
       end
 
       # make space
-      living_space = from_floor_print(living_polygon, average_ceiling_height, model)
+      # living_space = from_floor_print(living_polygon, average_ceiling_height, model)
+      living_space = OpenStudio::Model::Space::fromFloorPrint(living_polygon, average_ceiling_height, model)
+      living_space = living_space.get
+      assign_surface_indexes(model, living_polygon, living_space)
 
       if floor > 0
         living_space_name = "#{HPXML::LocationLivingSpace}|story #{floor + 1}"
@@ -607,7 +659,10 @@ class Geometry
       foundation_polygon = p
 
       # make space
-      foundation_space = from_floor_print(foundation_polygon, foundation_height, model)
+      # foundation_space = from_floor_print(foundation_polygon, foundation_height, model)
+      foundation_space = OpenStudio::Model::Space::fromFloorPrint(foundation_polygon, foundation_height, model)
+      foundation_space = foundation_space.get
+      assign_surface_indexes(model, foundation_polygon, foundation_space)
       if foundation_type == HPXML::FoundationTypeCrawlspaceVented
         foundation_space_name = HPXML::LocationCrawlspaceVented
       elsif foundation_type == HPXML::FoundationTypeCrawlspaceUnvented
@@ -1722,7 +1777,10 @@ class Geometry
 
     # first floor front
     living_spaces_front = []
-    living_space = from_floor_print(living_polygon, average_ceiling_height, model)
+    # living_space = from_floor_print(living_polygon, average_ceiling_height, model)
+    living_space = OpenStudio::Model::Space::fromFloorPrint(living_polygon, average_ceiling_height, model)
+    living_space = living_space.get
+    assign_surface_indexes(model, living_polygon, living_space)
     living_space.setName(HPXML::LocationLivingSpace)
     living_space_type = OpenStudio::Model::SpaceType.new(model)
     living_space_type.setStandardsSpaceType(HPXML::LocationLivingSpace)
@@ -1789,7 +1847,10 @@ class Geometry
 
       # foundation front
       foundation_space_front = []
-      foundation_space = from_floor_print(foundation_front_polygon, foundation_height, model)
+      # foundation_space = from_floor_print(foundation_front_polygon, foundation_height, model)
+      foundation_space = OpenStudio::Model::Space::fromFloorPrint(foundation_front_polygon, foundation_height, model)
+      foundation_space = foundation_space.get
+      assign_surface_indexes(model, foundation_front_polygon, foundation_space)
       m = initialize_transformation_matrix(OpenStudio::Matrix.new(4, 4, 0))
       m[2, 3] = foundation_height
       foundation_space.changeTransformation(OpenStudio::Transformation.new(m))
@@ -2168,7 +2229,10 @@ class Geometry
 
     # first floor front
     living_spaces_front = []
-    living_space = from_floor_print(living_polygon, average_ceiling_height, model)
+    # living_space = from_floor_print(living_polygon, average_ceiling_height, model)
+    living_space = OpenStudio::Model::Space::fromFloorPrint(living_polygon, average_ceiling_height, model)
+    living_space = living_space.get
+    assign_surface_indexes(model, living_polygon, living_space)
     living_space.setName(HPXML::LocationLivingSpace)
     living_space_type = OpenStudio::Model::SpaceType.new(model)
     living_space_type.setStandardsSpaceType(HPXML::LocationLivingSpace)
@@ -2224,7 +2288,10 @@ class Geometry
 
       # foundation front
       foundation_space_front = []
-      foundation_space = from_floor_print(foundation_front_polygon, foundation_height, model)
+      # foundation_space = from_floor_print(foundation_front_polygon, foundation_height, model)
+      foundation_space = OpenStudio::Model::Space::fromFloorPrint(foundation_front_polygon, foundation_height, model)
+      foundation_space = foundation_space.get
+      assign_surface_indexes(model, foundation_front_polygon, foundation_space)
       m = initialize_transformation_matrix(OpenStudio::Matrix.new(4, 4, 0))
       m[2, 3] = foundation_height + rim_joist_height
       foundation_space.changeTransformation(OpenStudio::Transformation.new(m))
