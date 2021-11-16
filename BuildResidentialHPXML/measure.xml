@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>34cc1fbf-117d-4b1b-a416-4bcf732a1ce5</version_id>
-  <version_modified>20211116T174037Z</version_modified>
+  <version_id>1de4978b-7624-4214-bf8a-7a84c30a5830</version_id>
+  <version_modified>20211116T175709Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -5906,18 +5906,6 @@
       <checksum>3233DE0E</checksum>
     </file>
     <file>
-      <filename>geometry.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>06648D14</checksum>
-    </file>
-    <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>9BA4A855</checksum>
-    </file>
-    <file>
       <filename>extra_files/base-mf.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
@@ -5934,18 +5922,6 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>2AC95363</checksum>
-    </file>
-    <file>
-      <filename>extra_files/error-foundation-wall-insulation-greater-than-height.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8C8BD0EE</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-auto.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C999C031</checksum>
     </file>
     <file>
       <filename>extra_files/extra-dhw-solar-latitude.xml</filename>
@@ -5966,40 +5942,10 @@
       <checksum>16D50A84</checksum>
     </file>
     <file>
-      <filename>extra_files/extra-enclosure-garage-atticroof-conditioned.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>76D9C88D</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-enclosure-garage-partially-protruded.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C96A9B9E</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-enclosure-windows-shading.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2EEA4795</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-gas-hot-tub-heater-with-zero-kwh.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A1BC9EAF</checksum>
-    </file>
-    <file>
       <filename>extra_files/extra-gas-pool-heater-with-zero-kwh.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>8A225B39</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-iecc-zone-different-than-epw.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F6346E58</checksum>
     </file>
     <file>
       <filename>extra_files/extra-mf-eaves.xml</filename>
@@ -6386,30 +6332,6 @@
       <checksum>A144F128</checksum>
     </file>
     <file>
-      <filename>extra_files/extra-pv-roofpitch.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>767E6DA4</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-second-heating-system-boiler-to-heat-pump.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1D0D774C</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-second-heating-system-boiler-to-heating-system.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E5448210</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-second-heating-system-fireplace-to-heat-pump.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>854F1A13</checksum>
-    </file>
-    <file>
       <filename>extra_files/extra-second-heating-system-fireplace-to-heating-system.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
@@ -6420,12 +6342,6 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>ECD43CB4</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-second-heating-system-portable-heater-to-heating-system.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>DD6B965A</checksum>
     </file>
     <file>
       <filename>extra_files/extra-second-refrigerator.xml</filename>
@@ -6470,22 +6386,10 @@
       <checksum>3E408472</checksum>
     </file>
     <file>
-      <filename>extra_files/extra-sfa-slab-middle.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>9C2141A5</checksum>
-    </file>
-    <file>
       <filename>extra_files/extra-sfa-slab-right.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>D997E459</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-slab.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3C5E3E00</checksum>
     </file>
     <file>
       <filename>extra_files/extra-sfa-unconditioned-basement-middle.xml</filename>
@@ -6548,46 +6452,16 @@
       <checksum>A6D71AAA</checksum>
     </file>
     <file>
-      <filename>extra_files/extra-zero-clothes-washer-kwh.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6438E6DF</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-zero-dishwasher-kwh.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A54C750C</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-zero-extra-refrigerator-kwh.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>BD3D5238</checksum>
-    </file>
-    <file>
       <filename>extra_files/extra-zero-freezer-kwh.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>2AC95363</checksum>
     </file>
     <file>
-      <filename>extra_files/extra-zero-refrigerator-kwh.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>06E4D293</checksum>
-    </file>
-    <file>
       <filename>extra_files/warning-conditioned-attic-with-floor-insulation.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>6A05810A</checksum>
-    </file>
-    <file>
-      <filename>extra_files/warning-conditioned-basement-with-ceiling-insulation.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8C8BD0EE</checksum>
     </file>
     <file>
       <filename>extra_files/warning-mf-bottom-slab-non-zero-foundation-height.xml</filename>
@@ -6602,64 +6476,10 @@
       <checksum>2AC95363</checksum>
     </file>
     <file>
-      <filename>extra_files/warning-multipliers-without-other-plug-loads.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F8EB8913</checksum>
-    </file>
-    <file>
-      <filename>extra_files/warning-multipliers-without-tv-plug-loads.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>D21DB13F</checksum>
-    </file>
-    <file>
-      <filename>extra_files/warning-multipliers-without-vehicle-plug-loads.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C1BB753B</checksum>
-    </file>
-    <file>
       <filename>extra_files/warning-multipliers-without-well-pump-plug-loads.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>2AC95363</checksum>
-    </file>
-    <file>
-      <filename>extra_files/warning-non-electric-heat-pump-water-heater.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E09B6C82</checksum>
-    </file>
-    <file>
-      <filename>extra_files/warning-second-heating-system-serves-majority-heat.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2AE22624</checksum>
-    </file>
-    <file>
-      <filename>extra_files/warning-sfd-slab-non-zero-foundation-height.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E490D533</checksum>
-    </file>
-    <file>
-      <filename>extra_files/warning-slab-non-zero-foundation-height-above-grade.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E490D533</checksum>
-    </file>
-    <file>
-      <filename>extra_files/warning-unconditioned-basement-with-wall-and-ceiling-insulation.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>09B21389</checksum>
-    </file>
-    <file>
-      <filename>extra_files/warning-unvented-attic-with-floor-and-roof-insulation.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1DA3061B</checksum>
     </file>
     <file>
       <filename>extra_files/warning-unvented-crawlspace-with-wall-and-ceiling-insulation.xml</filename>
@@ -6668,16 +6488,190 @@
       <checksum>721C39FD</checksum>
     </file>
     <file>
-      <filename>extra_files/warning-vented-attic-with-floor-and-roof-insulation.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>828824BF</checksum>
-    </file>
-    <file>
       <filename>extra_files/warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>0C06C071</checksum>
+    </file>
+    <file>
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>57FA5F0B</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>98773892</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-auto.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>100D8173</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-garage-atticroof-conditioned.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>88B6DDA6</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-garage-partially-protruded.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>850ACE2B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-windows-shading.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>61DEA793</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-gas-hot-tub-heater-with-zero-kwh.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>35F505B1</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-iecc-zone-different-than-epw.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1D464800</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-pv-roofpitch.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DDC1615E</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-boiler-to-heat-pump.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>928B1AF7</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-boiler-to-heating-system.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F0C77349</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-fireplace-to-heat-pump.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C457F9A4</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-portable-heater-to-heating-system.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4E40F36D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-slab-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D997E459</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-slab.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5FB6FCB2</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-zero-clothes-washer-kwh.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AC593ED9</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-zero-dishwasher-kwh.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9DF06924</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-zero-extra-refrigerator-kwh.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2AC95363</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-zero-refrigerator-kwh.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>581C2F5E</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-conditioned-basement-with-ceiling-insulation.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2AC95363</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-multipliers-without-other-plug-loads.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>09381113</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-multipliers-without-tv-plug-loads.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D3FE160F</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-multipliers-without-vehicle-plug-loads.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2AC95363</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-non-electric-heat-pump-water-heater.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>259A8F63</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-second-heating-system-serves-majority-heat.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>BC8BE0D1</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-sfd-slab-non-zero-foundation-height.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FF7CC552</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-slab-non-zero-foundation-height-above-grade.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FF7CC552</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-unconditioned-basement-with-wall-and-ceiling-insulation.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2106337F</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-unvented-attic-with-floor-and-roof-insulation.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>89F65B71</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-vented-attic-with-floor-and-roof-insulation.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>31EBEEC4</checksum>
     </file>
   </files>
 </measure>

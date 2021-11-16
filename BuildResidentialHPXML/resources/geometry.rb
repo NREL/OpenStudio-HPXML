@@ -172,6 +172,16 @@ class Geometry
     end
   end
 
+  def self.assign_remaining_surface_indexes(model)
+    # index remaining surfaces created from intersecting/matching
+    # we can't deterministically assign indexes to these surfaces
+    model.getSurfaces.each do |surface|
+      next if surface.additionalProperties.getFeatureAsInteger('Index').is_initialized
+
+      surface.additionalProperties.setFeature('Index', indexer(model))
+    end
+  end
+
   def self.create_surface(polygon, model)
     surface = OpenStudio::Model::Surface.new(polygon, model)
     surface.additionalProperties.setFeature('Index', indexer(model))
@@ -188,16 +198,6 @@ class Geometry
     surfaces = model.getSurfaces.select { |s| s.additionalProperties.getFeatureAsInteger('Index').is_initialized }.size
     sub_surfaces = model.getSubSurfaces.select { |ss| ss.additionalProperties.getFeatureAsInteger('Index').is_initialized }.size
     return surfaces + sub_surfaces
-  end
-
-  def self.assign_remaining_surface_indexes(model)
-    # index remaining surfaces (created from intersecting/matching) with the same index
-    # we can't deterministically assign indexes to these surfaces
-    model.getSurfaces.each do |surface|
-      next if surface.additionalProperties.getFeatureAsInteger('Index').is_initialized
-
-      surface.additionalProperties.setFeature('Index', indexer(model))
-    end
   end
 
   def self.create_single_family_detached(runner:,
