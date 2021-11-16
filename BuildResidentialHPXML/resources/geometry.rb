@@ -205,6 +205,16 @@ class Geometry
     return model.getSurfaces.size + model.getSubSurfaces.size
   end
 
+  def self.assign_remaining_surface_indexes(model)
+    # index remaining surfaces (created from intersecting/matching) with the same index
+    # we can't deterministically assign indexes to these surfaces
+    model.getSurfaces.each do |surface|
+      next if surface.additionalProperties.getFeatureAsInteger('Index').is_initialized
+
+      surface.additionalProperties.setFeature('Index', indexer(model))
+    end
+  end
+
   def self.create_single_family_detached(runner:,
                                          model:,
                                          geometry_unit_cfa:,
@@ -354,7 +364,7 @@ class Geometry
         end
 
         # make space
-        garage_space = from_floor_print(garage_polygon, average_ceiling_height, model, 100)
+        garage_space = from_floor_print(garage_polygon, average_ceiling_height, model)
         garage_space.setName(garage_space_name)
         garage_space_type = OpenStudio::Model::SpaceType.new(model)
         garage_space_type.setStandardsSpaceType(garage_space_name)
@@ -764,6 +774,7 @@ class Geometry
         end
 
         surface.createAdjacentSurface(garage_attic_space) # garage attic floor
+        surface.adjacentSurface.get.additionalProperties.setFeature('Index', indexer(model))
         garage_attic_space.setName(garage_attic_space_name)
         garage_attic_space_type = OpenStudio::Model::SpaceType.new(model)
         garage_attic_space_type.setStandardsSpaceType(garage_attic_space_name)
@@ -863,6 +874,8 @@ class Geometry
         end
       end
     end
+
+    assign_remaining_surface_indexes(model)
 
     return true
   end
@@ -1930,6 +1943,8 @@ class Geometry
       surface.setOutsideBoundaryCondition('Foundation')
     end
 
+    assign_remaining_surface_indexes(model)
+
     return true
   end
 
@@ -2294,6 +2309,8 @@ class Geometry
 
       surface.setOutsideBoundaryCondition('Foundation')
     end
+
+    assign_remaining_surface_indexes(model)
 
     return true
   end
