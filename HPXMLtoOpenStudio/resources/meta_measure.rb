@@ -550,23 +550,3 @@ def get_argument_values(runner, arguments, user_arguments)
   end
   return args
 end
-
-def check_args(args, exclusions = [])
-  (0...args.size - 1).to_a.each do |i|
-    duplicates = []
-    (args[i].keys & args[i + 1].keys).each do |arg_name|
-      next if exclusions.include?(arg_name)
-      next if arg_name == 'delete'
-
-      duplicates << "#{arg_name}=#{args[i][arg_name]}" if args[i][arg_name] == args[i + 1][arg_name]
-    end
-    puts "Warning: Did not need #{duplicates}\n" if !duplicates.empty?
-    args[0].merge!(args[i + 1])
-  end
-  args = args[0]
-  args['delete'].each do |arg_name|
-    args.delete(arg_name)
-  end
-  args.delete('delete')
-  return args
-end

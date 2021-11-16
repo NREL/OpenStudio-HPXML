@@ -242,13 +242,10 @@ class BuildResidentialHPXMLTest < MiniTest::Test
           parent = hpxmls_files[parent]
         end
 
-        args = []
+        args = {}
         all_hpxml_files.each do |f|
-          args << {}
-          _set_measure_argument_values(f, args.last)
+          _set_measure_argument_values(f, args)
         end
-
-        args = check_args(args)
 
         File.delete(args['hpxml_path']) if File.exist? args['hpxml_path']
         _test_measure(args, expected_errors[hpxml_file], expected_warnings[hpxml_file])
@@ -264,7 +261,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
   private
 
   def _set_measure_argument_values(hpxml_file, args)
-    args['delete'] = []
     args['hpxml_path'] = File.absolute_path(File.join(File.dirname(__FILE__), hpxml_file))
 
     # Base
@@ -771,8 +767,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['hot_tub_heater_type'] = HPXML::HeaterTypeGas
       args['hot_tub_heater_annual_kwh'] = 0
     elsif ['extra-no-rim-joists.xml'].include? hpxml_file
-      args['delete'] << 'geometry_rim_joist_height'
-      args['delete'] << 'rim_joist_assembly_r'
+      args.delete('geometry_rim_joist_height')
+      args.delete('rim_joist_assembly_r')
     elsif ['extra-iecc-zone-different-than-epw.xml'].include? hpxml_file
       args['site_iecc_zone'] = '6B'
     elsif ['extra-state-code-different-than-epw.xml'].include? hpxml_file
@@ -951,8 +947,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['geometry_unit_left_wall_is_adiabatic'] = true
     elsif ['error-sfa-ambient.xml'].include? hpxml_file
       args['geometry_foundation_type'] = HPXML::FoundationTypeAmbient
-      args['delete'] << 'geometry_rim_joist_height'
-      args['delete'] << 'rim_joist_assembly_r'
+      args.delete('geometry_rim_joist_height')
+      args.delete('rim_joist_assembly_r')
     elsif ['error-mf-conditioned-basement'].include? hpxml_file
       args['geometry_foundation_type'] = HPXML::FoundationTypeBasementConditioned
     elsif ['error-mf-conditioned-crawlspace'].include? hpxml_file
@@ -970,7 +966,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['heating_system_type'] = 'none'
       args['heating_system_2_type'] = HPXML::HVACTypeFireplace
     elsif ['error-sfa-no-building-num-units.xml'].include? hpxml_file
-      args['delete'] << 'geometry_building_num_units'
+      args.delete('geometry_building_num_units')
     elsif ['error-sfa-above-apartment.xml'].include? hpxml_file
       args['geometry_foundation_type'] = HPXML::FoundationTypeAboveApartment
     elsif ['error-sfa-below-apartment.xml'].include? hpxml_file
@@ -980,7 +976,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['geometry_unit_front_wall_is_adiabatic'] = true
       args['geometry_unit_back_wall_is_adiabatic'] = true
     elsif ['error-mf-no-building-num-units.xml'].include? hpxml_file
-      args['delete'] << 'geometry_building_num_units'
+      args.delete('geometry_building_num_units')
     elsif ['error-mf-all-adiabatic-walls.xml'].include? hpxml_file
       args['geometry_unit_left_wall_is_adiabatic'] = true
       args['geometry_unit_front_wall_is_adiabatic'] = true
@@ -997,9 +993,9 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     elsif ['error-sfd-with-shared-system.xml'].include? hpxml_file
       args['heating_system_type'] = "Shared #{HPXML::HVACTypeBoiler} w/ Baseboard"
     elsif ['error-rim-joist-height-but-no-assembly-r.xml'].include? hpxml_file
-      args['delete'] << 'rim_joist_assembly_r'
+      args.delete('rim_joist_assembly_r')
     elsif ['error-rim-joist-assembly-r-but-no-height.xml'].include? hpxml_file
-      args['delete'] << 'geometry_rim_joist_height'
+      args.delete('geometry_rim_joist_height')
     end
 
     # Warning

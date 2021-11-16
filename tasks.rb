@@ -381,13 +381,10 @@ def create_hpxmls
         parent = hpxmls_files[parent]
       end
 
-      args = []
+      args = {}
       all_hpxml_files.each do |f|
-        args << {}
-        set_measure_argument_values(f, args.last)
+        set_measure_argument_values(f, args)
       end
-
-      args = check_args(args)
 
       measures_dir = File.dirname(__FILE__)
       measures = { 'BuildResidentialHPXML' => [args] }
@@ -487,7 +484,6 @@ def create_hpxmls
 end
 
 def set_measure_argument_values(hpxml_file, args)
-  args['delete'] = []
   if hpxml_file.include? 'ASHRAE_Standard_140'
     args['hpxml_path'] = "../workflow/tests/#{hpxml_file}"
   else
@@ -1611,11 +1607,7 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-enclosure-infil-ach-house-pressure.xml',
          'base-enclosure-infil-cfm-house-pressure.xml'].include? hpxml_file
     args['air_leakage_house_pressure'] = 45
-    if hpxml_file.include? 'ach'
-      args['air_leakage_value'] = 3 * 0.9338
-    elsif hpxml_file.include? 'cfm'
-      args['air_leakage_value'] = 1080 * 0.9338
-    end
+    args['air_leakage_value'] *= 0.9338
   elsif ['base-enclosure-infil-cfm50.xml'].include? hpxml_file
     args['air_leakage_units'] = HPXML::UnitsCFM
     args['air_leakage_value'] = 1080
@@ -1649,9 +1641,9 @@ def set_measure_argument_values(hpxml_file, args)
   if ['base-foundation-ambient.xml'].include? hpxml_file
     args['geometry_unit_cfa'] = 1350.0
     args['geometry_foundation_type'] = HPXML::FoundationTypeAmbient
-    args['delete'] << 'geometry_rim_joist_height'
+    args.delete('geometry_rim_joist_height')
     args['floor_over_foundation_assembly_r'] = 18.7
-    args['delete'] << 'rim_joist_assembly_r'
+    args.delete('rim_joist_assembly_r')
     args['ducts_number_of_return_registers'] = 1
     args['misc_plug_loads_other_annual_kwh'] = 1228.5
   elsif ['base-foundation-conditioned-basement-slab-insulation.xml'].include? hpxml_file
@@ -1752,7 +1744,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = 'none'
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
-    args['heat_pump_heating_capacity_17_f'] = 36000.0 * 0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
   elsif ['base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml'].include? hpxml_file
     args['heat_pump_heating_capacity'] = 0.0
@@ -1768,7 +1760,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
     args['heat_pump_heating_efficiency'] = 9.3
     args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeTwoStage
-    args['heat_pump_heating_capacity_17_f'] = 36000.0 * 0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_cooling_efficiency'] = 18.0
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
   elsif ['base-hvac-air-to-air-heat-pump-var-speed.xml'].include? hpxml_file
@@ -1778,7 +1770,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_heating_efficiency'] = 10.0
     args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
     args['heat_pump_cooling_sensible_heat_fraction'] = 0.78
-    args['heat_pump_heating_capacity_17_f'] = 36000.0 * 0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_cooling_efficiency'] = 22.0
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml'].include? hpxml_file
@@ -1793,23 +1785,17 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml'].include? hpxml_file
     args['heat_pump_backup_heating_switchover_temp'] = 25
   elsif hpxml_file.include? 'autosize'
-    if hpxml_file.end_with? 'autosize.xml'
-      args['heating_system_heating_capacity'] = Constants.Auto
-      args['cooling_system_cooling_capacity'] = Constants.Auto
-      args['heat_pump_heating_capacity'] = Constants.AutoMaxLoad
-      args['heat_pump_backup_heating_capacity'] = Constants.Auto
-      args['heat_pump_cooling_capacity'] = Constants.Auto
-    elsif hpxml_file.include? 'manual-s-oversize-allowances'
+    args['heating_system_heating_capacity'] = Constants.Auto
+    args['heating_system_2_heating_capacity'] = Constants.Auto
+    args['cooling_system_cooling_capacity'] = Constants.Auto
+    if hpxml_file.include? 'manual-s-oversize-allowances'
       args['heat_pump_heating_capacity'] = Constants.Auto
     else
-      args['heating_system_heating_capacity'] = Constants.Auto
-      args['heating_system_2_heating_capacity'] = Constants.Auto
-      args['cooling_system_cooling_capacity'] = Constants.Auto
       args['heat_pump_heating_capacity'] = Constants.AutoMaxLoad
-      args['heat_pump_heating_capacity_17_f'] = Constants.Auto
-      args['heat_pump_backup_heating_capacity'] = Constants.Auto
-      args['heat_pump_cooling_capacity'] = Constants.Auto
     end
+    args['heat_pump_heating_capacity_17_f'] = Constants.Auto
+    args['heat_pump_backup_heating_capacity'] = Constants.Auto
+    args['heat_pump_cooling_capacity'] = Constants.Auto
   elsif ['base-hvac-boiler-coal-only.xml',
          'base-hvac-furnace-coal-only.xml'].include? hpxml_file
     args['heating_system_fuel'] = HPXML::FuelTypeCoal
@@ -1846,7 +1832,7 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'].include? hpxml_file
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
     args['heat_pump_heating_efficiency'] = 7.7
-    args['heat_pump_heating_capacity_17_f'] = 36000.0 * 0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_fraction_cool_load_served'] = 0
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
@@ -1883,18 +1869,18 @@ def set_measure_argument_values(hpxml_file, args)
     args['cooling_system_type'] = 'none'
   elsif ['base-hvac-evap-cooler-furnace-gas.xml'].include? hpxml_file
     args['cooling_system_type'] = HPXML::HVACTypeEvaporativeCooler
-    args['delete'] << 'cooling_system_cooling_compressor_type'
-    args['delete'] << 'cooling_system_cooling_sensible_heat_fraction'
+    args.delete('cooling_system_cooling_compressor_type')
+    args.delete('cooling_system_cooling_sensible_heat_fraction')
   elsif ['base-hvac-evap-cooler-only.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = HPXML::HVACTypeEvaporativeCooler
-    args['delete'] << 'cooling_system_cooling_compressor_type'
-    args['delete'] << 'cooling_system_cooling_sensible_heat_fraction'
+    args.delete('cooling_system_cooling_compressor_type')
+    args.delete('cooling_system_cooling_sensible_heat_fraction')
   elsif ['base-hvac-evap-cooler-only-ducted.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = HPXML::HVACTypeEvaporativeCooler
-    args['delete'] << 'cooling_system_cooling_compressor_type'
-    args['delete'] << 'cooling_system_cooling_sensible_heat_fraction'
+    args.delete('cooling_system_cooling_compressor_type')
+    args.delete('cooling_system_cooling_sensible_heat_fraction')
     args['cooling_system_is_ducted'] = true
     args['ducts_return_leakage_to_outside_value'] = 0.0
   elsif ['base-hvac-fireplace-wood-only.xml'].include? hpxml_file
@@ -1927,13 +1913,13 @@ def set_measure_argument_values(hpxml_file, args)
     args['cooling_system_type'] = HPXML::HVACTypeRoomAirConditioner
     args['cooling_system_cooling_efficiency_type'] = HPXML::UnitsEER
     args['cooling_system_cooling_efficiency'] = 8.5
-    args['delete'] << 'cooling_system_cooling_compressor_type'
+    args.delete('cooling_system_cooling_compressor_type')
     args['cooling_system_cooling_sensible_heat_fraction'] = 0.65
   elsif ['base-hvac-mini-split-air-conditioner-only-ducted.xml'].include? hpxml_file
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = HPXML::HVACTypeMiniSplitAirConditioner
     args['cooling_system_cooling_efficiency'] = 19.0
-    args['delete'] << 'cooling_system_cooling_compressor_type'
+    args.delete('cooling_system_cooling_compressor_type')
     args['cooling_system_is_ducted'] = true
     args['ducts_supply_leakage_to_outside_value'] = 15.0
     args['ducts_return_leakage_to_outside_value'] = 5.0
@@ -1950,7 +1936,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['heat_pump_heating_efficiency'] = 3.6
     args['heat_pump_cooling_efficiency_type'] = HPXML::UnitsEER
     args['heat_pump_cooling_efficiency'] = 16.6
-    args['delete'] << 'heat_pump_cooling_compressor_type'
+    args.delete('heat_pump_cooling_compressor_type')
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
   elsif ['base-hvac-ground-to-air-heat-pump-cooling-only.xml'].include? hpxml_file
     args['heat_pump_heating_capacity'] = 0.0
@@ -1984,10 +1970,10 @@ def set_measure_argument_values(hpxml_file, args)
     args['heating_system_type'] = 'none'
     args['cooling_system_type'] = 'none'
     args['heat_pump_type'] = HPXML::HVACTypeHeatPumpMiniSplit
-    args['heat_pump_heating_capacity_17_f'] = 36000.0 * 0.6
+    args['heat_pump_heating_capacity_17_f'] = args['heat_pump_heating_capacity'] * 0.6
     args['heat_pump_heating_efficiency'] = 10.0
     args['heat_pump_cooling_efficiency'] = 19.0
-    args['delete'] << 'heat_pump_cooling_compressor_type'
+    args.delete('heat_pump_cooling_compressor_type')
     args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
     args['heat_pump_is_ducted'] = true
     args['ducts_supply_leakage_to_outside_value'] = 15.0
@@ -2033,7 +2019,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['cooling_system_type'] = HPXML::HVACTypeRoomAirConditioner
     args['cooling_system_cooling_efficiency_type'] = HPXML::UnitsEER
     args['cooling_system_cooling_efficiency'] = 8.5
-    args['delete'] << 'cooling_system_cooling_compressor_type'
+    args.delete('cooling_system_cooling_compressor_type')
     args['cooling_system_cooling_sensible_heat_fraction'] = 0.65
   elsif ['base-hvac-room-ac-only-ceer.xml'].include? hpxml_file
     args['cooling_system_cooling_efficiency_type'] = HPXML::UnitsCEER
@@ -2178,8 +2164,8 @@ def set_measure_argument_values(hpxml_file, args)
 
   # Misc
   if ['base-misc-defaults.xml'].include? hpxml_file
-    args['delete'] << 'simulation_control_timestep'
-    args['delete'] << 'site_type'
+    args.delete('simulation_control_timestep')
+    args.delete('site_type')
     args['geometry_unit_num_bathrooms'] = Constants.Auto
     args['geometry_unit_num_occupants'] = Constants.Auto
     args['foundation_wall_insulation_distance_to_top'] = Constants.Auto
@@ -2187,15 +2173,15 @@ def set_measure_argument_values(hpxml_file, args)
     args['foundation_wall_thickness'] = Constants.Auto
     args['slab_thickness'] = Constants.Auto
     args['slab_carpet_fraction'] = Constants.Auto
-    args['delete'] << 'roof_material_type'
+    args.delete('roof_material_type')
     args['roof_color'] = HPXML::ColorLight
-    args['delete'] << 'roof_material_type'
-    args['delete'] << 'wall_siding_type'
-    args['delete'] << 'window_fraction_operable'
-    args['delete'] << 'window_interior_shading_winter'
-    args['delete'] << 'window_interior_shading_summer'
-    args['delete'] << 'cooling_system_cooling_compressor_type'
-    args['delete'] << 'cooling_system_cooling_sensible_heat_fraction'
+    args.delete('roof_material_type')
+    args.delete('wall_siding_type')
+    args.delete('window_fraction_operable')
+    args.delete('window_interior_shading_winter')
+    args.delete('window_interior_shading_summer')
+    args.delete('cooling_system_cooling_compressor_type')
+    args.delete('cooling_system_cooling_sensible_heat_fraction')
     args['mech_vent_fan_type'] = HPXML::MechVentTypeExhaust
     args['mech_vent_hours_in_operation'] = Constants.Auto
     args['mech_vent_fan_power'] = Constants.Auto
@@ -2215,8 +2201,8 @@ def set_measure_argument_values(hpxml_file, args)
     args['solar_thermal_collector_rated_optical_efficiency'] = 0.77
     args['solar_thermal_collector_rated_thermal_losses'] = 0.793
     args['pv_system_module_type'] = Constants.Auto
-    args['delete'] << 'pv_system_inverter_efficiency'
-    args['delete'] << 'pv_system_system_losses_fraction'
+    args.delete('pv_system_inverter_efficiency')
+    args.delete('pv_system_system_losses_fraction')
     args['battery_location'] = Constants.Auto
     args['clothes_washer_location'] = Constants.Auto
     args['clothes_washer_efficiency'] = Constants.Auto
@@ -2239,8 +2225,8 @@ def set_measure_argument_values(hpxml_file, args)
     args['refrigerator_location'] = Constants.Auto
     args['refrigerator_rated_annual_kwh'] = Constants.Auto
     args['cooking_range_oven_location'] = Constants.Auto
-    args['delete'] << 'cooking_range_oven_is_induction'
-    args['delete'] << 'cooking_range_oven_is_convection'
+    args.delete('cooking_range_oven_is_induction')
+    args.delete('cooking_range_oven_is_convection')
     args['ceiling_fan_present'] = true
     args['misc_plug_loads_television_annual_kwh'] = Constants.Auto
     args['misc_plug_loads_other_annual_kwh'] = Constants.Auto
