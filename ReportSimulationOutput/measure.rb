@@ -137,6 +137,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     super(runner, user_arguments)
 
     result = OpenStudio::IdfObjectVector.new
+    return result if runner.halted
 
     model = runner.lastOpenStudioModel
     if model.empty?
@@ -550,7 +551,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Apply Heating/Cooling DSEs
     (@hpxml.heating_systems + @hpxml.heat_pumps).each do |htg_system|
-      next unless htg_system.fraction_heat_load_served > 0
+      next unless (htg_system.is_a?(HPXML::HeatingSystem) && htg_system.is_heat_pump_backup_system) || htg_system.fraction_heat_load_served > 0
       next if htg_system.distribution_system_idref.nil?
       next unless htg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
       next if htg_system.distribution_system.annual_heating_dse.nil?
