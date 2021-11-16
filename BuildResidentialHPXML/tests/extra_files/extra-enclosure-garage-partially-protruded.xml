@@ -2,8 +2,8 @@
 <HPXML xmlns='http://hpxmlonline.com/2019/10' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://hpxmlonline.com/2019/10' schemaVersion='4.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
-    <XMLGeneratedBy>BuildResidentialHPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2021-11-16T09:48:09-07:00</CreatedDateAndTime>
+    <XMLGeneratedBy>build_residential_hpxml_test.rb</XMLGeneratedBy>
+    <CreatedDateAndTime>2000-01-01T00:00:00-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -84,8 +84,8 @@
             <AttachedToRoof idref='Roof3'/>
             <AttachedToRoof idref='Roof4'/>
             <AttachedToWall idref='Wall6'/>
-            <AttachedToWall idref='Wall9'/>
-            <AttachedToWall idref='Wall13'/>
+            <AttachedToWall idref='Wall8'/>
+            <AttachedToWall idref='Wall14'/>
             <AttachedToFrameFloor idref='FrameFloor1'/>
             <AttachedToFrameFloor idref='FrameFloor2'/>
           </Attic>
@@ -338,21 +338,6 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='Wall8'/>
-            <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <WallType>
-              <WoodStud/>
-            </WallType>
-            <Area>80.0</Area>
-            <Azimuth>90</Azimuth>
-            <Color>medium</Color>
-            <Insulation>
-              <SystemIdentifier id='Wall8Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall9'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <AtticWallType>gable</AtticWallType>
@@ -364,8 +349,23 @@
             <Siding>wood siding</Siding>
             <Color>medium</Color>
             <Insulation>
-              <SystemIdentifier id='Wall9Insulation'/>
+              <SystemIdentifier id='Wall8Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
+            </Insulation>
+          </Wall>
+          <Wall>
+            <SystemIdentifier id='Wall9'/>
+            <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <WallType>
+              <WoodStud/>
+            </WallType>
+            <Area>80.0</Area>
+            <Azimuth>90</Azimuth>
+            <Color>medium</Color>
+            <Insulation>
+              <SystemIdentifier id='Wall9Insulation'/>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -387,13 +387,12 @@
           <Wall>
             <SystemIdentifier id='Wall13'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <AtticWallType>gable</AtticWallType>
+            <InteriorAdjacentTo>garage</InteriorAdjacentTo>
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>18.0</Area>
-            <Azimuth>180</Azimuth>
+            <Area>80.0</Area>
+            <Azimuth>270</Azimuth>
             <Siding>wood siding</Siding>
             <Color>medium</Color>
             <Insulation>
@@ -404,12 +403,13 @@
           <Wall>
             <SystemIdentifier id='Wall14'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>garage</InteriorAdjacentTo>
+            <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
+            <AtticWallType>gable</AtticWallType>
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>80.0</Area>
-            <Azimuth>270</Azimuth>
+            <Area>18.0</Area>
+            <Azimuth>180</Azimuth>
             <Siding>wood siding</Siding>
             <Color>medium</Color>
             <Insulation>

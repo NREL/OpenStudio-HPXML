@@ -2,8 +2,8 @@
 <HPXML xmlns='http://hpxmlonline.com/2019/10' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://hpxmlonline.com/2019/10' schemaVersion='4.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
-    <XMLGeneratedBy>BuildResidentialHPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2021-11-16T09:47:52-07:00</CreatedDateAndTime>
+    <XMLGeneratedBy>build_residential_hpxml_test.rb</XMLGeneratedBy>
+    <CreatedDateAndTime>2000-01-01T00:00:00-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -81,7 +81,7 @@
             </AtticType>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToRoof idref='Roof2'/>
-            <AttachedToWall idref='Wall7'/>
+            <AttachedToWall idref='Wall6'/>
             <AttachedToWall idref='Wall8'/>
             <AttachedToFrameFloor idref='FrameFloor1'/>
           </Attic>
@@ -255,7 +255,7 @@
             </Insulation>
           </Wall>
           <Wall>
-            <SystemIdentifier id='Wall7'/>
+            <SystemIdentifier id='Wall6'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <AtticWallType>gable</AtticWallType>
@@ -267,7 +267,7 @@
             <Siding>wood siding</Siding>
             <Color>medium</Color>
             <Insulation>
-              <SystemIdentifier id='Wall7Insulation'/>
+              <SystemIdentifier id='Wall6Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>

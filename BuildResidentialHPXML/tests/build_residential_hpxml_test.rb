@@ -266,8 +266,11 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
         hpxml_path = File.absolute_path(File.join(tests_dir, hpxml_file))
         hpxml = HPXML.new(hpxml_path: hpxml_path, collapse_enclosure: false)
+        hpxml.header.xml_generated_by = 'build_residential_hpxml_test.rb'
+        hpxml.header.created_date_and_time = Time.new(2000, 1, 1).strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
 
         hpxml_doc = hpxml.to_oga()
+        XMLHelper.write_file(hpxml_doc, hpxml_path)
 
         # Validate file against HPXML schema
         schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources'))
