@@ -255,7 +255,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window19'/>
-            <Area>44.9</Area>
+            <Area>27.1</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -266,25 +266,6 @@
             </InteriorShading>
             <Overhangs>
               <Depth>2.0</Depth>
-              <DistanceToTopOfWindow>18.68246</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>22.5</DistanceToBottomOfWindow>
-            </Overhangs>
-            <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall1'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='Window23'/>
-            <Area>27.1</Area>
-            <Azimuth>270</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <InteriorShading>
-              <SystemIdentifier id='Window23InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
-            </InteriorShading>
-            <Overhangs>
-              <Depth>2.0</Depth>
               <DistanceToTopOfWindow>13.209539999999999</DistanceToTopOfWindow>
               <DistanceToBottomOfWindow>16.7</DistanceToBottomOfWindow>
             </Overhangs>
@@ -292,8 +273,27 @@
             <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
-            <SystemIdentifier id='Window26'/>
+            <SystemIdentifier id='Window22'/>
             <Area>44.9</Area>
+            <Azimuth>270</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window22InteriorShading'/>
+              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+            </InteriorShading>
+            <Overhangs>
+              <Depth>2.0</Depth>
+              <DistanceToTopOfWindow>18.68246</DistanceToTopOfWindow>
+              <DistanceToBottomOfWindow>22.5</DistanceToBottomOfWindow>
+            </Overhangs>
+            <FractionOperable>0.67</FractionOperable>
+            <AttachedToWall idref='Wall1'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='Window26'/>
+            <Area>27.1</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -304,27 +304,27 @@
             </InteriorShading>
             <Overhangs>
               <Depth>2.0</Depth>
-              <DistanceToTopOfWindow>18.68246</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>22.5</DistanceToBottomOfWindow>
+              <DistanceToTopOfWindow>13.209539999999999</DistanceToTopOfWindow>
+              <DistanceToBottomOfWindow>16.7</DistanceToBottomOfWindow>
             </Overhangs>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall3'/>
           </Window>
           <Window>
-            <SystemIdentifier id='Window30'/>
-            <Area>27.1</Area>
+            <SystemIdentifier id='Window29'/>
+            <Area>44.9</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='Window30InteriorShading'/>
+              <SystemIdentifier id='Window29InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>2.0</Depth>
-              <DistanceToTopOfWindow>13.209539999999999</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>16.7</DistanceToBottomOfWindow>
+              <DistanceToTopOfWindow>18.68246</DistanceToTopOfWindow>
+              <DistanceToBottomOfWindow>22.5</DistanceToBottomOfWindow>
             </Overhangs>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall3'/>
