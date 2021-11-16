@@ -310,7 +310,7 @@
             </Insulation>
           </Wall>
           <Wall>
-            <SystemIdentifier id='Wall8'/>
+            <SystemIdentifier id='Wall7'/>
             <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <WallType>
@@ -320,7 +320,7 @@
             <Azimuth>180</Azimuth>
             <Color>medium</Color>
             <Insulation>
-              <SystemIdentifier id='Wall8Insulation'/>
+              <SystemIdentifier id='Wall7Insulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>

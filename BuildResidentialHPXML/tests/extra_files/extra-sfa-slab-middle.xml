@@ -81,7 +81,7 @@
             </AtticType>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToRoof idref='Roof2'/>
-            <AttachedToWall idref='Wall5'/>
+            <AttachedToWall idref='Wall7'/>
             <AttachedToWall idref='Wall8'/>
             <AttachedToFrameFloor idref='FrameFloor1'/>
           </Attic>
@@ -189,7 +189,7 @@
             </Insulation>
           </Wall>
           <Wall>
-            <SystemIdentifier id='Wall5'/>
+            <SystemIdentifier id='Wall7'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <WallType>
@@ -199,7 +199,7 @@
             <Azimuth>270</Azimuth>
             <Color>medium</Color>
             <Insulation>
-              <SystemIdentifier id='Wall5Insulation'/>
+              <SystemIdentifier id='Wall7Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
