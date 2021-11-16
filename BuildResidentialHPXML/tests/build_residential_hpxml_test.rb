@@ -394,7 +394,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
       args['heat_pump_backup_heating_efficiency'] = 1
       args['heat_pump_backup_heating_capacity'] = 36000.0
-      args['hvac_control_type'] = HPXML::HVACControlTypeManual
       args['hvac_control_heating_weekday_setpoint'] = 68
       args['hvac_control_heating_weekend_setpoint'] = 68
       args['hvac_control_cooling_weekday_setpoint'] = 78
