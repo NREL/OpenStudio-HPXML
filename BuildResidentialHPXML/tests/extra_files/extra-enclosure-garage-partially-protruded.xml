@@ -85,7 +85,7 @@
             <AttachedToRoof idref='Roof4'/>
             <AttachedToWall idref='Wall11'/>
             <AttachedToWall idref='Wall12'/>
-            <AttachedToWall idref='Wall13'/>
+            <AttachedToWall idref='Wall14'/>
             <AttachedToFrameFloor idref='FrameFloor1'/>
             <AttachedToFrameFloor idref='FrameFloor2'/>
           </Attic>
@@ -387,13 +387,12 @@
           <Wall>
             <SystemIdentifier id='Wall13'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <AtticWallType>gable</AtticWallType>
+            <InteriorAdjacentTo>garage</InteriorAdjacentTo>
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>18.0</Area>
-            <Azimuth>180</Azimuth>
+            <Area>80.0</Area>
+            <Azimuth>270</Azimuth>
             <Siding>wood siding</Siding>
             <Color>medium</Color>
             <Insulation>
@@ -404,12 +403,13 @@
           <Wall>
             <SystemIdentifier id='Wall14'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>garage</InteriorAdjacentTo>
+            <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
+            <AtticWallType>gable</AtticWallType>
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>80.0</Area>
-            <Azimuth>270</Azimuth>
+            <Area>18.0</Area>
+            <Azimuth>180</Azimuth>
             <Siding>wood siding</Siding>
             <Color>medium</Color>
             <Insulation>
