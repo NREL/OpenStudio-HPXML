@@ -130,13 +130,10 @@ class Geometry
   end
 
   def self.assign_surface_indexes(model, polygon, space)
-    ix = indexer(model)
-
     space.surfaces.each do |surface|
       next if surface.surfaceType != 'Floor'
 
-      surface.additionalProperties.setFeature('Index', ix)
-      ix += 1
+      surface.additionalProperties.setFeature('Index', indexer(model))
     end
 
     num_points = polygon.size
@@ -159,16 +156,14 @@ class Geometry
         end
         next if j < 2
 
-        surface.additionalProperties.setFeature('Index', ix)
-        ix += 1
+        surface.additionalProperties.setFeature('Index', indexer(model))
       end
     end
 
     space.surfaces.each do |surface|
       next if surface.surfaceType != 'RoofCeiling'
 
-      surface.additionalProperties.setFeature('Index', ix)
-      ix += 1
+      surface.additionalProperties.setFeature('Index', indexer(model))
     end
   end
 
