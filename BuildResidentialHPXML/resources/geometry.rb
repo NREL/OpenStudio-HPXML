@@ -190,9 +190,13 @@ class Geometry
   end
 
   def self.indexer(model)
-    surfaces = model.getSurfaces.select { |s| s.additionalProperties.getFeatureAsInteger('Index').is_initialized }.size
-    sub_surfaces = model.getSubSurfaces.select { |ss| ss.additionalProperties.getFeatureAsInteger('Index').is_initialized }.size
-    return surfaces + sub_surfaces
+    indexes = [0]
+    (model.getSurfaces + model.getSubSurfaces).each do |s|
+      next if !s.additionalProperties.getFeatureAsInteger('Index').is_initialized
+
+      indexes << s.additionalProperties.getFeatureAsInteger('Index').get
+    end
+    return indexes.max + 1
   end
 
   def self.create_single_family_detached(runner:,

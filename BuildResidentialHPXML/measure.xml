@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>8ec60adf-c51a-4034-9365-da67a36ef7a1</version_id>
-  <version_modified>20211116T200400Z</version_modified>
+  <version_id>df912f14-0408-4ca2-bce3-d61275e5436a</version_id>
+  <version_modified>20211116T215243Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -5895,29 +5895,6 @@
   </attributes>
   <files>
     <file>
-      <filename>geometry.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8A8D8C4E</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>3233DE0E</checksum>
-    </file>
-    <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>98773892</checksum>
-    </file>
-    <file>
       <filename>extra_files/base-mf.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
@@ -6428,12 +6405,6 @@
       <checksum>AD5553A9</checksum>
     </file>
     <file>
-      <filename>extra_files/extra-sfa-atticroof-conditioned-eaves-gable.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7578131C</checksum>
-    </file>
-    <file>
       <filename>extra_files/extra-sfa-atticroof-conditioned-eaves-hip.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
@@ -6672,6 +6643,35 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>0C06C071</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>34F38A49</checksum>
+    </file>
+    <file>
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>79555264</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B02D8A87</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-atticroof-conditioned-eaves-gable.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7578131C</checksum>
     </file>
   </files>
 </measure>

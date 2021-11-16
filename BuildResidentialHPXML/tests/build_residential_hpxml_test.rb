@@ -230,8 +230,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     puts "Generating #{hpxmls_files.size} HPXML files..."
 
     hpxmls_files.each_with_index do |(hpxml_file, parent), i|
-      puts "[#{i + 1}/#{hpxmls_files.size}] Generating #{hpxml_file}..."
-
+      # puts "[#{i + 1}/#{hpxmls_files.size}] Generating #{hpxml_file}..."
+      # next if hpxml_file != 'extra-sfa-atticroof-conditioned-eaves-gable.xml'
       begin
         all_hpxml_files = [hpxml_file]
         unless parent.nil?
@@ -261,7 +261,16 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
         _test_measure(runner, expected_errors[hpxml_file], expected_warnings[hpxml_file])
 
-        next if not success
+        if not success
+          runner.result.stepErrors.each do |s|
+            puts "Error: #{s}"
+          end
+
+          next if hpxml_file.start_with?('error')
+
+          puts "\nError: Did not successfully generate #{hpxml_file}."
+          exit!
+        end
 
         hpxml_path = File.absolute_path(File.join(tests_dir, hpxml_file))
         hpxml = HPXML.new(hpxml_path: hpxml_path, collapse_enclosure: false)
