@@ -1280,16 +1280,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(0.25)
     args << arg
 
-    hvac_control_type_choices = OpenStudio::StringVector.new
-    hvac_control_type_choices << HPXML::HVACControlTypeManual
-    hvac_control_type_choices << HPXML::HVACControlTypeProgrammable
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_control_type', hvac_control_type_choices, false)
-    arg.setDisplayName('HVAC Control: Type')
-    arg.setDescription('The type of thermostat.')
-    arg.setDefaultValue(HPXML::HVACControlTypeManual)
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_heating_weekday_setpoint', true)
     arg.setDisplayName('HVAC Control: Heating Weekday Setpoint Schedule')
     arg.setDescription('Specify the constant or 24-hour comma-separated weekday heating setpoint schedule.')
@@ -4572,12 +4562,7 @@ class HPXMLFile
 
     end
 
-    if args[:hvac_control_type].is_initialized
-      hvac_control_type = args[:hvac_control_type].get
-    end
-
     hpxml.hvac_controls.add(id: "HVACControl#{hpxml.hvac_controls.size + 1}",
-                            control_type: hvac_control_type,
                             heating_setpoint_temp: heating_setpoint_temp,
                             cooling_setpoint_temp: cooling_setpoint_temp,
                             weekday_heating_setpoints: weekday_heating_setpoints,
