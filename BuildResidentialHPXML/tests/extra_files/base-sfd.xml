@@ -30,19 +30,20 @@
           <SiteType>suburban</SiteType>
           <Surroundings>stand-alone</Surroundings>
           <VerticalSurroundings>no units above or below</VerticalSurroundings>
-          <AzimuthOfFrontOfHome>158</AzimuthOfFrontOfHome>
+          <AzimuthOfFrontOfHome>180</AzimuthOfFrontOfHome>
         </Site>
         <BuildingOccupancy>
-          <NumberofResidents>7.0</NumberofResidents>
+          <NumberofResidents>3.0</NumberofResidents>
         </BuildingOccupancy>
         <BuildingConstruction>
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
-          <NumberofConditionedFloors>3.0</NumberofConditionedFloors>
-          <NumberofConditionedFloorsAboveGrade>3.0</NumberofConditionedFloorsAboveGrade>
+          <NumberofConditionedFloors>2.0</NumberofConditionedFloors>
+          <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
           <AverageCeilingHeight>8.0</AverageCeilingHeight>
-          <NumberofBedrooms>2</NumberofBedrooms>
-          <ConditionedFloorArea>8194.0</ConditionedFloorArea>
-          <ConditionedBuildingVolume>65552.0</ConditionedBuildingVolume>
+          <NumberofBedrooms>3</NumberofBedrooms>
+          <NumberofBathrooms>2</NumberofBathrooms>
+          <ConditionedFloorArea>2700.0</ConditionedFloorArea>
+          <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -67,7 +68,7 @@
               <UnitofMeasure>ACH</UnitofMeasure>
               <AirLeakage>3.0</AirLeakage>
             </BuildingAirLeakage>
-            <InfiltrationVolume>65552.0</InfiltrationVolume>
+            <InfiltrationVolume>21600.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Attics>
@@ -80,26 +81,36 @@
             </AtticType>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToRoof idref='Roof2'/>
-            <AttachedToWall idref='Wall15'/>
-            <AttachedToWall idref='Wall16'/>
-            <AttachedToFrameFloor idref='FrameFloor2'/>
+            <AttachedToWall idref='Wall7'/>
+            <AttachedToWall idref='Wall8'/>
+            <AttachedToFrameFloor idref='FrameFloor1'/>
           </Attic>
         </Attics>
         <Foundations>
           <Foundation>
             <SystemIdentifier id='Foundation1'/>
             <FoundationType>
-              <Ambient/>
+              <Basement>
+                <Conditioned>true</Conditioned>
+              </Basement>
             </FoundationType>
-            <AttachedToFrameFloor idref='FrameFloor1'/>
+            <AttachedToRimJoist idref='RimJoist1'/>
+            <AttachedToRimJoist idref='RimJoist2'/>
+            <AttachedToRimJoist idref='RimJoist3'/>
+            <AttachedToRimJoist idref='RimJoist4'/>
+            <AttachedToFoundationWall idref='FoundationWall1'/>
+            <AttachedToFoundationWall idref='FoundationWall2'/>
+            <AttachedToFoundationWall idref='FoundationWall3'/>
+            <AttachedToFoundationWall idref='FoundationWall4'/>
+            <AttachedToSlab idref='Slab1'/>
           </Foundation>
         </Foundations>
         <Roofs>
           <Roof>
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>1526.9</Area>
-            <Azimuth>158</Azimuth>
+            <Area>754.7</Area>
+            <Azimuth>180</Azimuth>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <RoofColor>medium</RoofColor>
             <Pitch>6.0</Pitch>
@@ -112,8 +123,8 @@
           <Roof>
             <SystemIdentifier id='Roof2'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>1526.9</Area>
-            <Azimuth>338</Azimuth>
+            <Area>754.7</Area>
+            <Azimuth>0</Azimuth>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <RoofColor>medium</RoofColor>
             <Pitch>6.0</Pitch>
@@ -124,6 +135,60 @@
             </Insulation>
           </Roof>
         </Roofs>
+        <RimJoists>
+          <RimJoist>
+            <SystemIdentifier id='RimJoist1'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Area>23.1</Area>
+            <Azimuth>270</Azimuth>
+            <Siding>wood siding</Siding>
+            <Color>medium</Color>
+            <Insulation>
+              <SystemIdentifier id='RimJoist1Insulation'/>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+            </Insulation>
+          </RimJoist>
+          <RimJoist>
+            <SystemIdentifier id='RimJoist2'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Area>34.7</Area>
+            <Azimuth>0</Azimuth>
+            <Siding>wood siding</Siding>
+            <Color>medium</Color>
+            <Insulation>
+              <SystemIdentifier id='RimJoist2Insulation'/>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+            </Insulation>
+          </RimJoist>
+          <RimJoist>
+            <SystemIdentifier id='RimJoist3'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Area>23.1</Area>
+            <Azimuth>90</Azimuth>
+            <Siding>wood siding</Siding>
+            <Color>medium</Color>
+            <Insulation>
+              <SystemIdentifier id='RimJoist3Insulation'/>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+            </Insulation>
+          </RimJoist>
+          <RimJoist>
+            <SystemIdentifier id='RimJoist4'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Area>34.7</Area>
+            <Azimuth>180</Azimuth>
+            <Siding>wood siding</Siding>
+            <Color>medium</Color>
+            <Insulation>
+              <SystemIdentifier id='RimJoist4Insulation'/>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+            </Insulation>
+          </RimJoist>
+        </RimJoists>
         <Walls>
           <Wall>
             <SystemIdentifier id='Wall1'/>
@@ -132,8 +197,8 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>934.9</Area>
-            <Azimuth>248</Azimuth>
+            <Area>240.0</Area>
+            <Azimuth>270</Azimuth>
             <Siding>wood siding</Siding>
             <Color>medium</Color>
             <Insulation>
@@ -148,8 +213,8 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>1682.8</Area>
-            <Azimuth>338</Azimuth>
+            <Area>360.0</Area>
+            <Azimuth>0</Azimuth>
             <Siding>wood siding</Siding>
             <Color>medium</Color>
             <Insulation>
@@ -164,8 +229,8 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>934.9</Area>
-            <Azimuth>68</Azimuth>
+            <Area>240.0</Area>
+            <Azimuth>90</Azimuth>
             <Siding>wood siding</Siding>
             <Color>medium</Color>
             <Insulation>
@@ -180,8 +245,8 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>1682.8</Area>
-            <Azimuth>158</Azimuth>
+            <Area>360.0</Area>
+            <Azimuth>180</Azimuth>
             <Siding>wood siding</Siding>
             <Color>medium</Color>
             <Insulation>
@@ -190,67 +255,178 @@
             </Insulation>
           </Wall>
           <Wall>
-            <SystemIdentifier id='Wall15'/>
+            <SystemIdentifier id='Wall7'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <AtticWallType>gable</AtticWallType>
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>189.7</Area>
-            <Azimuth>248</Azimuth>
+            <Area>112.5</Area>
+            <Azimuth>270</Azimuth>
             <Siding>wood siding</Siding>
             <Color>medium</Color>
             <Insulation>
-              <SystemIdentifier id='Wall15Insulation'/>
+              <SystemIdentifier id='Wall7Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
-            <SystemIdentifier id='Wall16'/>
+            <SystemIdentifier id='Wall8'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <AtticWallType>gable</AtticWallType>
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>189.7</Area>
-            <Azimuth>68</Azimuth>
+            <Area>112.5</Area>
+            <Azimuth>90</Azimuth>
             <Siding>wood siding</Siding>
             <Color>medium</Color>
             <Insulation>
-              <SystemIdentifier id='Wall16Insulation'/>
+              <SystemIdentifier id='Wall8Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
         </Walls>
+        <FoundationWalls>
+          <FoundationWall>
+            <SystemIdentifier id='FoundationWall1'/>
+            <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Height>8.0</Height>
+            <Area>240.0</Area>
+            <Azimuth>270</Azimuth>
+            <Thickness>8.0</Thickness>
+            <DepthBelowGrade>7.0</DepthBelowGrade>
+            <Insulation>
+              <SystemIdentifier id='FoundationWall1Insulation'/>
+              <Layer>
+                <InstallationType>continuous - exterior</InstallationType>
+                <NominalRValue>8.9</NominalRValue>
+                <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
+                <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
+              </Layer>
+              <Layer>
+                <InstallationType>continuous - interior</InstallationType>
+                <NominalRValue>0.0</NominalRValue>
+              </Layer>
+            </Insulation>
+          </FoundationWall>
+          <FoundationWall>
+            <SystemIdentifier id='FoundationWall2'/>
+            <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Height>8.0</Height>
+            <Area>360.0</Area>
+            <Azimuth>0</Azimuth>
+            <Thickness>8.0</Thickness>
+            <DepthBelowGrade>7.0</DepthBelowGrade>
+            <Insulation>
+              <SystemIdentifier id='FoundationWall2Insulation'/>
+              <Layer>
+                <InstallationType>continuous - exterior</InstallationType>
+                <NominalRValue>8.9</NominalRValue>
+                <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
+                <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
+              </Layer>
+              <Layer>
+                <InstallationType>continuous - interior</InstallationType>
+                <NominalRValue>0.0</NominalRValue>
+              </Layer>
+            </Insulation>
+          </FoundationWall>
+          <FoundationWall>
+            <SystemIdentifier id='FoundationWall3'/>
+            <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Height>8.0</Height>
+            <Area>240.0</Area>
+            <Azimuth>90</Azimuth>
+            <Thickness>8.0</Thickness>
+            <DepthBelowGrade>7.0</DepthBelowGrade>
+            <Insulation>
+              <SystemIdentifier id='FoundationWall3Insulation'/>
+              <Layer>
+                <InstallationType>continuous - exterior</InstallationType>
+                <NominalRValue>8.9</NominalRValue>
+                <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
+                <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
+              </Layer>
+              <Layer>
+                <InstallationType>continuous - interior</InstallationType>
+                <NominalRValue>0.0</NominalRValue>
+              </Layer>
+            </Insulation>
+          </FoundationWall>
+          <FoundationWall>
+            <SystemIdentifier id='FoundationWall4'/>
+            <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Height>8.0</Height>
+            <Area>360.0</Area>
+            <Azimuth>180</Azimuth>
+            <Thickness>8.0</Thickness>
+            <DepthBelowGrade>7.0</DepthBelowGrade>
+            <Insulation>
+              <SystemIdentifier id='FoundationWall4Insulation'/>
+              <Layer>
+                <InstallationType>continuous - exterior</InstallationType>
+                <NominalRValue>8.9</NominalRValue>
+                <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
+                <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
+              </Layer>
+              <Layer>
+                <InstallationType>continuous - interior</InstallationType>
+                <NominalRValue>0.0</NominalRValue>
+              </Layer>
+            </Insulation>
+          </FoundationWall>
+        </FoundationWalls>
         <FrameFloors>
           <FrameFloor>
             <SystemIdentifier id='FrameFloor1'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>2731.3</Area>
-            <Insulation>
-              <SystemIdentifier id='FrameFloor1Insulation'/>
-              <AssemblyEffectiveRValue>1.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </FrameFloor>
-          <FrameFloor>
-            <SystemIdentifier id='FrameFloor2'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>2731.3</Area>
+            <Area>1350.0</Area>
             <Insulation>
-              <SystemIdentifier id='FrameFloor2Insulation'/>
+              <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
         </FrameFloors>
+        <Slabs>
+          <Slab>
+            <SystemIdentifier id='Slab1'/>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Area>1350.0</Area>
+            <Thickness>4.0</Thickness>
+            <ExposedPerimeter>150.0</ExposedPerimeter>
+            <PerimeterInsulation>
+              <SystemIdentifier id='Slab1PerimeterInsulation'/>
+              <Layer>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationDepth>0.0</InsulationDepth>
+              </Layer>
+            </PerimeterInsulation>
+            <UnderSlabInsulation>
+              <SystemIdentifier id='Slab1UnderSlabInsulation'/>
+              <Layer>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationWidth>0.0</InsulationWidth>
+              </Layer>
+            </UnderSlabInsulation>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
+          </Slab>
+        </Slabs>
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>
-            <Area>33.8</Area>
-            <Azimuth>158</Azimuth>
+            <Area>108.0</Area>
+            <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
@@ -258,94 +434,27 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>3.0</Depth>
-              <DistanceToTopOfWindow>17.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>20.9</DistanceToBottomOfWindow>
-            </Overhangs>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall4'/>
           </Window>
           <Window>
-            <SystemIdentifier id='Window4'/>
-            <Area>37.1</Area>
-            <Azimuth>158</Azimuth>
+            <SystemIdentifier id='Window10'/>
+            <Area>108.0</Area>
+            <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='Window4InteriorShading'/>
+              <SystemIdentifier id='Window10InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>3.0</Depth>
-              <DistanceToTopOfWindow>9.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>12.5</DistanceToBottomOfWindow>
-            </Overhangs>
-            <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall4'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='Window8'/>
-            <Area>37.1</Area>
-            <Azimuth>158</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <InteriorShading>
-              <SystemIdentifier id='Window8InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
-            </InteriorShading>
-            <Overhangs>
-              <Depth>3.0</Depth>
-              <DistanceToTopOfWindow>1.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>4.5</DistanceToBottomOfWindow>
-            </Overhangs>
-            <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall4'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='Window12'/>
-            <Area>36.0</Area>
-            <Azimuth>338</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <InteriorShading>
-              <SystemIdentifier id='Window12InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
-            </InteriorShading>
-            <Overhangs>
-              <Depth>3.0</Depth>
-              <DistanceToTopOfWindow>17.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>21.0</DistanceToBottomOfWindow>
-            </Overhangs>
-            <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall2'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='Window15'/>
-            <Area>36.0</Area>
-            <Azimuth>338</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <InteriorShading>
-              <SystemIdentifier id='Window15InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
-            </InteriorShading>
-            <Overhangs>
-              <Depth>3.0</Depth>
-              <DistanceToTopOfWindow>9.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>12.5</DistanceToBottomOfWindow>
-            </Overhangs>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall2'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window19'/>
-            <Area>36.0</Area>
-            <Azimuth>338</Azimuth>
+            <Area>72.0</Area>
+            <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
@@ -353,125 +462,20 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>3.0</Depth>
-              <DistanceToTopOfWindow>1.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>5.0</DistanceToBottomOfWindow>
-            </Overhangs>
-            <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall2'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='Window22'/>
-            <Area>24.0</Area>
-            <Azimuth>248</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <InteriorShading>
-              <SystemIdentifier id='Window22InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
-            </InteriorShading>
-            <Overhangs>
-              <Depth>3.0</Depth>
-              <DistanceToTopOfWindow>17.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>21.0</DistanceToBottomOfWindow>
-            </Overhangs>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
-            <SystemIdentifier id='Window24'/>
-            <Area>24.0</Area>
-            <Azimuth>248</Azimuth>
+            <SystemIdentifier id='Window25'/>
+            <Area>72.0</Area>
+            <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='Window24InteriorShading'/>
+              <SystemIdentifier id='Window25InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>3.0</Depth>
-              <DistanceToTopOfWindow>9.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>12.3</DistanceToBottomOfWindow>
-            </Overhangs>
-            <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall1'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='Window27'/>
-            <Area>24.0</Area>
-            <Azimuth>248</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <InteriorShading>
-              <SystemIdentifier id='Window27InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
-            </InteriorShading>
-            <Overhangs>
-              <Depth>3.0</Depth>
-              <DistanceToTopOfWindow>1.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>5.0</DistanceToBottomOfWindow>
-            </Overhangs>
-            <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall1'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='Window29'/>
-            <Area>24.0</Area>
-            <Azimuth>68</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <InteriorShading>
-              <SystemIdentifier id='Window29InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
-            </InteriorShading>
-            <Overhangs>
-              <Depth>3.0</Depth>
-              <DistanceToTopOfWindow>17.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>21.0</DistanceToBottomOfWindow>
-            </Overhangs>
-            <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall3'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='Window31'/>
-            <Area>24.0</Area>
-            <Azimuth>68</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <InteriorShading>
-              <SystemIdentifier id='Window31InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
-            </InteriorShading>
-            <Overhangs>
-              <Depth>3.0</Depth>
-              <DistanceToTopOfWindow>9.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>12.3</DistanceToBottomOfWindow>
-            </Overhangs>
-            <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall3'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='Window34'/>
-            <Area>24.0</Area>
-            <Azimuth>68</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <InteriorShading>
-              <SystemIdentifier id='Window34InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
-            </InteriorShading>
-            <Overhangs>
-              <Depth>3.0</Depth>
-              <DistanceToTopOfWindow>1.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>5.0</DistanceToBottomOfWindow>
-            </Overhangs>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall3'/>
           </Window>
@@ -481,7 +485,7 @@
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall4'/>
             <Area>40.0</Area>
-            <Azimuth>158</Azimuth>
+            <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
           </Door>
         </Doors>
@@ -563,7 +567,7 @@
                 <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>8194.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
