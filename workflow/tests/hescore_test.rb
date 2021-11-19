@@ -63,7 +63,6 @@ class HEScoreTest < MiniTest::Test
     cli_path = OpenStudio.getOpenStudioCLI
     json = File.absolute_path(File.join(parent_dir, 'regression_files', 'Base.json'))
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" --skip-simulation -j #{json}"
-    start_time = Time.now
     success = system(command)
     assert_equal(true, success)
 
@@ -76,13 +75,26 @@ class HEScoreTest < MiniTest::Test
     assert(!File.exist?(idf))
   end
 
+  def test_hourly_output
+    parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
+
+    cli_path = OpenStudio.getOpenStudioCLI
+    json = File.absolute_path(File.join(parent_dir, 'regression_files', 'Base.json'))
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" --hourly -j #{json}"
+    success = system(command)
+    assert_equal(true, success)
+
+    # Check for hourly output CSV
+    hourly_output_csv = File.join(parent_dir, 'HEScoreDesign', 'results_hourly.csv')
+    assert(File.exist?(hourly_output_csv))
+  end
+
   def test_invalid_simulation
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
     json = File.absolute_path(File.join(parent_dir, 'regression_files', 'Missing.json'))
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -j #{json}"
-    start_time = Time.now
     success = system(command)
     assert_equal(false, success)
   end

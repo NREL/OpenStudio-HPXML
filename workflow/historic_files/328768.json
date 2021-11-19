@@ -126,7 +126,7 @@
       ],
       "domestic_hot_water": {
         "category": "unit",
-        "type": "storage",
+        "type": "tankless",
         "fuel_primary": "electric",
         "efficiency_method": "user",
         "energy_factor": 0.99
