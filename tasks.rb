@@ -2654,9 +2654,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.refrigerators[0].location = adjacent_to
     hpxml.cooking_ranges[0].location = adjacent_to
   elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
-    hpxml.walls.each_with_index do |wall, i|
-      hpxml.walls[i].delete if wall.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-    end
+    hpxml.walls[2].delete
     hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -2693,9 +2691,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 4.0)
-    hpxml.frame_floors.each_with_index do |frame_floor, i|
-      hpxml.frame_floors[i].delete if frame_floor.other_space_above_or_below == HPXML::FrameFloorOtherSpaceBelow
-    end
+    hpxml.frame_floors[0].delete
     hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -3060,9 +3056,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                depth_below_grade: 3,
                                insulation_interior_r_value: 0,
                                insulation_exterior_r_value: 0)
-    hpxml.frame_floors.each_with_index do |frame_floor, i|
-      hpxml.frame_floors[i].area = 675 if frame_floor.exterior_adjacent_to == HPXML::LocationBasementUnconditioned
-    end
+    hpxml.frame_floors[0].area = 675
     hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
