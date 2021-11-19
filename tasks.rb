@@ -3062,12 +3062,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 675,
                            insulation_assembly_r_value: 18.7)
-    hpxml.slabs.each_with_index do |slab|
-      next if slab.interior_adjacent_to != HPXML::LocationBasementUnconditioned
-
-      hpxml.slabs[0].area = 675
-      hpxml.slabs[0].exposed_perimeter = 75
-    end
+    hpxml.slabs[0].area = 675
+    hpxml.slabs[0].exposed_perimeter = 75
     hpxml.slabs.add(id: "Slab#{hpxml.slabs.size + 1}",
                     interior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                     area: 675,
