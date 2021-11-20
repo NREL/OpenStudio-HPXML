@@ -291,7 +291,7 @@
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>7.25</Height>
-            <Area>195.74999999999997</Area>
+            <Area>195.7</Area>
             <Azimuth>270</Azimuth>
             <Thickness>6.0</Thickness>
             <DepthBelowGrade>6.583</DepthBelowGrade>
@@ -315,7 +315,7 @@
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>7.25</Height>
-            <Area>413.25</Area>
+            <Area>413.3</Area>
             <Azimuth>0</Azimuth>
             <Thickness>6.0</Thickness>
             <DepthBelowGrade>6.583</DepthBelowGrade>
@@ -339,7 +339,7 @@
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>7.25</Height>
-            <Area>195.74999999999997</Area>
+            <Area>195.7</Area>
             <Azimuth>90</Azimuth>
             <Thickness>6.0</Thickness>
             <DepthBelowGrade>6.583</DepthBelowGrade>
@@ -363,7 +363,7 @@
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>7.25</Height>
-            <Area>413.25</Area>
+            <Area>413.3</Area>
             <Azimuth>180</Azimuth>
             <Thickness>6.0</Thickness>
             <DepthBelowGrade>6.583</DepthBelowGrade>

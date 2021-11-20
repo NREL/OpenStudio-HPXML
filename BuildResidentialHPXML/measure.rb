@@ -3219,6 +3219,19 @@ class HPXMLFile
     hpxml.collapse_enclosure_surfaces([:roofs, :walls, :rim_joists, :frame_floors,
                                        :slabs, :windows, :skylights, :doors])
 
+    # After surfaces are collapsed, round all areas
+    (hpxml.roofs +
+     hpxml.rim_joists +
+     hpxml.walls +
+     hpxml.foundation_walls +
+     hpxml.frame_floors +
+     hpxml.slabs +
+     hpxml.windows +
+     hpxml.skylights +
+     hpxml.doors).each do |s|
+      s.area = s.area.round(1)
+    end
+
     # Check for errors in the HPXML object
     if not skip_error_checking
       errors = hpxml.check_for_errors()
