@@ -2629,7 +2629,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     elsif hpxml_file == 'base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'
       adjacent_to = HPXML::LocationOtherHousingUnit
     end
-    hpxml.walls[-1].exterior_adjacent_to = adjacent_to
+    hpxml.walls[2].exterior_adjacent_to = adjacent_to
     hpxml.frame_floors[0].exterior_adjacent_to = adjacent_to
     hpxml.frame_floors[1].exterior_adjacent_to = adjacent_to
     if hpxml_file != 'base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'

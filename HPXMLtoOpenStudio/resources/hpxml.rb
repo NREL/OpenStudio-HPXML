@@ -5985,6 +5985,11 @@ class HPXML < Object
           surfaces[j].delete
         end
       end
+
+      # After surfaces are collapsed, round all areas
+      surfaces.each do |s|
+        s.area = s.area.round(1) unless s.area.nil?
+      end
     end
   end
 
