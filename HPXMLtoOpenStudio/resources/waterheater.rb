@@ -102,7 +102,7 @@ class Waterheater
 
     # Parameter determines which manufacturer's details (AO Smith or GE) gets used
     control_logic = 'GE'
-    if (vol > 50) && (cop < 3.2)
+    if (vol => 50) && (cop < 3.2)
       control_logic = 'AOSmith'
     end
 
@@ -688,10 +688,16 @@ class Waterheater
   private
 
   def self.setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, tset_C, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, setpoint_schedule_file, control_logic)
-    h_condtop = (1.0 - (5.5 / 12.0)) * h_tank # in the 6th node of the tank (counting from top)
-    h_condbot = 0.01 # bottom node
-    h_hpctrl_up = (1.0 - (2.5 / 12.0)) * h_tank # in the 3rd node of the tank
-    h_hpctrl_low = (1.0 - (8.5 / 12.0)) * h_tank # in the 9th node of the tank
+    if control_logic == 'AOSmith'
+      h_condtop = (1.0 - (5.5 / 12.0)) * h_tank # in the 6th node of the tank (counting from top)
+      h_condbot = 0.001 # bottom node
+      h_hpctrl_up = (1.0 - (2.5 / 12.0)) * h_tank # in the 3rd node of the tank
+      h_hpctrl_low = (1.0 - (8.5 / 12.0)) * h_tank # in the 9th node of the tank
+    else
+      h_condtop = (1.0 - (5.5 / 12.0)) * h_tank # in the 6th node of the tank (counting from top)
+      h_condbot = (1.0 - (10.5 / 12.0)) * h_tank # in the 11th node of the tank
+      h_hpctrl_up = (1.0 - (3.5 / 12.0)) * h_tank # in the 4th node of the tank
+      h_hpctrl_low = (1.0 - (10.5 / 12.0)) * h_tank # in the 11th node of the tank
 
     if setpoint_schedule_file.nil?
       hp_setpoint = OpenStudio::Model::ScheduleConstant.new(model)
@@ -808,8 +814,13 @@ class Waterheater
     tank_ua = apply_tank_jacket(water_heating_system, tank_ua, a_side)
     u_tank = ((5.678 * tank_ua) / a_tank) * (1.0 - solar_fraction)
 
-    h_UE = (1.0 - (3.5 / 12.0)) * h_tank # in the 3rd node of the tank (counting from top)
-    h_LE = (1.0 - (9.5 / 12.0)) * h_tank # in the 10th node of the tank (counting from top)
+    if control_logic == 'AOSmith'
+      h_UE = (1.0 - (3.5 / 12.0)) * h_tank # in the 3rd node of a 12 node tank (counting from top)
+      h_LE = (1.0 - (9.5 / 12.0)) * h_tank # in the 10th node of a 12 node tank (counting from top)
+    else
+      h_UE = (1.0 - (4.5 / 12.0)) * h_tank # in the 4th node of a 12 node tank (counting from top)
+      h_LE = (1.0 - (10.5 / 12.0)) * h_tank # in the 11th node of a 12 node tank (counting from top)
+    end
 
     tank = OpenStudio::Model::WaterHeaterStratified.new(model)
     tank.setName("#{obj_name_hpwh} tank")
