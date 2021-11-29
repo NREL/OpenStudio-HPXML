@@ -1,3 +1,10 @@
+## OpenStudio-HPXML v1.4.0
+__New Features__
+- ...
+
+__Bugfixes__
+- Fixes possible HVAC sizing error if design temperature difference (TD) is negative.
+
 ## OpenStudio-HPXML v1.3.0
 
 __New Features__
