@@ -1098,8 +1098,7 @@ end
 class SchedulesFile
   def initialize(runner: nil,
                  model: nil,
-                 schedules_path:,
-                 **remainder)
+                 schedules_path:)
 
     @runner = runner
     @model = model
@@ -1143,6 +1142,7 @@ class SchedulesFile
 
     columns = CSV.read(@schedules_path).transpose
     columns.each do |col|
+      col_name = col[0]
       values = col[1..-1].reject { |v| v.nil? }
       values = values.map { |v| Float(v) }
       schedule_length = values.length
