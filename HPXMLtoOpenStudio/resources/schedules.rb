@@ -1120,8 +1120,9 @@ class SchedulesFile
     @schedules = {}
     columns = CSV.read(@schedules_path).transpose
     columns.each do |col|
-      unless col_names.include? col[0]
-        fail "Schedule column name '#{col[0]}' is invalid. [context: #{@schedules_path}]"
+      col_name = col[0]
+      unless col_names.include? col_name
+        fail "Schedule column name '#{col_name}' is invalid. [context: #{@schedules_path}]"
       end
 
       values = col[1..-1].reject { |v| v.nil? }
@@ -1132,7 +1133,7 @@ class SchedulesFile
         fail "Schedule value must be numeric for column '#{col_name}'. [context: #{@schedules_path}]"
       end
 
-      @schedules[col[0]] = values
+      @schedules[col_name] = values
     end
   end
 
