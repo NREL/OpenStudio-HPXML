@@ -526,9 +526,11 @@ class Geometry
     occ_lost = 1 - occ_lat - occ_conv - occ_rad
 
     # Create schedule
+    people_sch = false
     if not schedules_file.nil?
       people_sch = schedules_file.create_schedule_file(col_name: 'occupants')
-    else
+    end
+    if not people_sch
       weekday_sch = hpxml.building_occupancy.weekday_fractions.split(',').map(&:to_f)
       weekday_sch = weekday_sch.map { |v| v / weekday_sch.max }.join(',')
       weekend_sch = hpxml.building_occupancy.weekend_fractions.split(',').map(&:to_f)
@@ -536,6 +538,8 @@ class Geometry
       monthly_sch = hpxml.building_occupancy.monthly_multipliers
       people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, Constants.ScheduleTypeLimitsFraction)
       people_sch = people_sch.schedule
+    elsif !hpxml.building_occupancy.weekday_fractions.nil? && !hpxml.building_occupancy.weekend_fractions.nil? && !hpxml.building_occupancy.monthly_multipliers.nil?
+      puts "Warning: Using 'occupants' schedule even though weekday/weekend fractions and monthly multipliers are provided."
     end
 
     # Create schedule

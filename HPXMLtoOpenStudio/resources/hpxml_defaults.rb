@@ -6,7 +6,7 @@ class HPXMLDefaults
   # being written to the HPXML file. This is useful to associate additional values
   # with the HPXML objects that will ultimately get passed around.
 
-  def self.apply(hpxml, eri_version, weather, epw_file: nil, convert_shared_systems: true)
+  def self.apply(hpxml, eri_version, weather, epw_file: nil, schedules_file: nil, convert_shared_systems: true)
     cfa = hpxml.building_construction.conditioned_floor_area
     nbeds = hpxml.building_construction.number_of_bedrooms
     ncfl = hpxml.building_construction.number_of_conditioned_floors
@@ -30,7 +30,7 @@ class HPXMLDefaults
     apply_header(hpxml, epw_file)
     apply_site(hpxml)
     apply_neighbor_buildings(hpxml)
-    apply_building_occupancy(hpxml, nbeds)
+    apply_building_occupancy(hpxml, nbeds, schedules_file)
     apply_building_construction(hpxml, cfa, nbeds, infil_volume)
     apply_infiltration(hpxml, infil_volume, infil_measurements)
     apply_attics(hpxml)
@@ -211,20 +211,26 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_building_occupancy(hpxml, nbeds)
+  def self.apply_building_occupancy(hpxml, nbeds, schedules_file)
     if hpxml.building_occupancy.number_of_residents.nil?
       hpxml.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(nbeds)
       hpxml.building_occupancy.number_of_residents_isdefaulted = true
     end
-    if hpxml.building_occupancy.weekday_fractions.nil? && hpxml.header.schedules_filepath.nil?
+    schedules_file_includes_occupants = false
+    if not schedules_file.nil?
+      if schedules_file.schedules.keys.include?('occupants')
+        schedules_file_includes_occupants = true
+      end
+    end
+    if hpxml.building_occupancy.weekday_fractions.nil? && !schedules_file_includes_occupants
       hpxml.building_occupancy.weekday_fractions = Schedule.OccupantsWeekdayFractions
       hpxml.building_occupancy.weekday_fractions_isdefaulted = true
     end
-    if hpxml.building_occupancy.weekend_fractions.nil? && hpxml.header.schedules_filepath.nil?
+    if hpxml.building_occupancy.weekend_fractions.nil? && !schedules_file_includes_occupants
       hpxml.building_occupancy.weekend_fractions = Schedule.OccupantsWeekendFractions
       hpxml.building_occupancy.weekend_fractions_isdefaulted = true
     end
-    if hpxml.building_occupancy.monthly_multipliers.nil? && hpxml.header.schedules_filepath.nil?
+    if hpxml.building_occupancy.monthly_multipliers.nil? && !schedules_file_includes_occupants
       hpxml.building_occupancy.monthly_multipliers = Schedule.OccupantsMonthlyMultipliers
       hpxml.building_occupancy.monthly_multipliers_isdefaulted = true
     end
