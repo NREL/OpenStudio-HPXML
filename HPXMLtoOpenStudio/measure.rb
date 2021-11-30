@@ -216,16 +216,19 @@ class OSModel
 
     # Init
 
-    weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
-    set_defaults_and_globals(runner, output_dir, epw_file, weather)
-    Location.apply(model, runner, weather, epw_file, @hpxml)
-    add_simulation_params(model)
-
     @schedules_file = nil
-    unless @hpxml.header.schedules_filepath.nil?
-      @schedules_file = SchedulesFile.new(runner: runner, model: model, year: hpxml.header.sim_calendar_year,
+    if not @hpxml.header.schedules_filepath.nil?
+      @schedules_file = SchedulesFile.new(runner: runner, model: model,
                                           schedules_path: @hpxml.header.schedules_filepath)
     end
+
+    weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
+    set_defaults_and_globals(runner, output_dir, epw_file, weather, @schedules_file)
+    if not @schedules_file.nil?
+      @schedules_file.validate_schedules(year: @hpxml.header.sim_calendar_year)
+    end
+    Location.apply(model, runner, weather, epw_file, @hpxml)
+    add_simulation_params(model)
 
     # Conditioned space/zone
 
@@ -299,7 +302,7 @@ class OSModel
 
   private
 
-  def self.set_defaults_and_globals(runner, output_dir, epw_file, weather)
+  def self.set_defaults_and_globals(runner, output_dir, epw_file, weather, schedules_file)
     # Initialize
     @remaining_heat_load_frac = 1.0
     @remaining_cool_load_frac = 1.0
@@ -315,7 +318,7 @@ class OSModel
     @default_azimuths = HPXMLDefaults.get_default_azimuths(@hpxml)
 
     # Apply defaults to HPXML object
-    HPXMLDefaults.apply(@hpxml, @eri_version, weather, epw_file: epw_file)
+    HPXMLDefaults.apply(@hpxml, @eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
 
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
