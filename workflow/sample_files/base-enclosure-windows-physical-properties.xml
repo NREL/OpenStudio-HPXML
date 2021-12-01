@@ -246,10 +246,13 @@
             <Area>108.0</Area>
             <Azimuth>180</Azimuth>
             <FrameType>
-              <Wood/>
+              <Metal>
+                <ThermalBreak>true</ThermalBreak>
+              </Metal>
             </FrameType>
-            <GlassLayers>single-pane</GlassLayers>
-            <GlassType>tinted</GlassType>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>low-e</GlassType>
+            <GasFill>argon</GasFill>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
@@ -263,11 +266,10 @@
             <Area>108.0</Area>
             <Azimuth>0</Azimuth>
             <FrameType>
-              <Vinyl/>
+              <Wood/>
             </FrameType>
-            <GlassLayers>double-pane</GlassLayers>
-            <GlassType>reflective</GlassType>
-            <GasFill>air</GasFill>
+            <GlassLayers>single-pane</GlassLayers>
+            <GlassType>tinted</GlassType>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
@@ -280,14 +282,7 @@
             <SystemIdentifier id='Window3'/>
             <Area>72.0</Area>
             <Azimuth>270</Azimuth>
-            <FrameType>
-              <Metal>
-                <ThermalBreak>true</ThermalBreak>
-              </Metal>
-            </FrameType>
-            <GlassLayers>double-pane</GlassLayers>
-            <GlassType>low-e</GlassType>
-            <GasFill>argon</GasFill>
+            <GlassLayers>glass block</GlassLayers>
             <InteriorShading>
               <SystemIdentifier id='Window3InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
@@ -300,7 +295,12 @@
             <SystemIdentifier id='Window4'/>
             <Area>72.0</Area>
             <Azimuth>90</Azimuth>
-            <GlassLayers>glass block</GlassLayers>
+            <FrameType>
+              <Vinyl/>
+            </FrameType>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>reflective</GlassType>
+            <GasFill>air</GasFill>
             <InteriorShading>
               <SystemIdentifier id='Window4InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>

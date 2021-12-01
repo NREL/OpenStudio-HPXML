@@ -304,10 +304,13 @@
             <Area>15.0</Area>
             <Azimuth>180</Azimuth>
             <FrameType>
-              <Wood/>
+              <Metal>
+                <ThermalBreak>true</ThermalBreak>
+              </Metal>
             </FrameType>
-            <GlassLayers>single-pane</GlassLayers>
-            <GlassType>tinted</GlassType>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>low-e</GlassType>
+            <GasFill>krypton</GasFill>
             <InteriorShading>
               <SystemIdentifier id='Skylight1InteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
@@ -320,13 +323,10 @@
             <Area>15.0</Area>
             <Azimuth>0</Azimuth>
             <FrameType>
-              <Metal>
-                <ThermalBreak>true</ThermalBreak>
-              </Metal>
+              <Wood/>
             </FrameType>
-            <GlassLayers>double-pane</GlassLayers>
-            <GlassType>low-e</GlassType>
-            <GasFill>krypton</GasFill>
+            <GlassLayers>single-pane</GlassLayers>
+            <GlassType>tinted</GlassType>
             <InteriorShading>
               <SystemIdentifier id='Skylight2InteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>

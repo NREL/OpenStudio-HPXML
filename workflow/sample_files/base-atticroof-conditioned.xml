@@ -330,7 +330,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>72.0</Area>
+            <Area>108.0</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
