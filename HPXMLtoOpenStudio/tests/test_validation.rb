@@ -950,7 +950,30 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       end
 
       XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
-      model, hpxml = _test_measure(error_case, expected_errors)
+      model, hpxml = _test_measure('error', error_case, expected_errors)
+    end
+  end
+
+  def test_measure_warning_messages
+    # Test case => Error message
+    all_expected_warnings = { 'schedule-file-and-weekday-weekend-multipliers' => ["Both 'occupants' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'occupants' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'occupants' schedule file and monthly multipliers provided; the latter will be ignored."] }
+
+    all_expected_warnings.each_with_index do |(warning_case, expected_warnings), i|
+      puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."
+      # Create HPXML object
+      if ['schedule-file-and-weekday-weekend-multipliers'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-schedules-simple.xml'))
+        hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
+      else
+        fail "Unhandled case: #{warning_case}."
+      end
+
+      hpxml_doc = hpxml.to_oga()
+
+      XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
+      model, hpxml = _test_measure('warning', warning_case, expected_warnings)
     end
   end
 
@@ -976,7 +999,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     end
   end
 
-  def _test_measure(error_case, expected_errors)
+  def _test_measure(error_or_warning, error_or_warning_case, expected_errors_or_warnings)
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new
 
@@ -1004,13 +1027,22 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     measure.run(model, runner, argument_map)
     result = runner.result
 
-    assert_equal('Fail', result.value.valueName)
+    actual_errors_or_warnings = []
+    if error_or_warning == 'error'
+      assert_equal('Fail', result.value.valueName)
 
-    errors = []
-    result.stepErrors.each do |s|
-      errors << s
+      result.stepErrors.each do |s|
+        actual_errors_or_warnings << s
+      end
+    elsif error_or_warning == 'warning'
+      assert_equal('Success', result.value.valueName)
+
+      result.stepWarnings.each do |s|
+        actual_errors_or_warnings << s
+      end
     end
-    _compare_errors_or_warnings('error', errors, expected_errors)
+
+    _compare_errors_or_warnings(error_or_warning, actual_errors_or_warnings, expected_errors_or_warnings)
   end
 
   def _compare_errors_or_warnings(type, actual_msgs, expected_msgs)

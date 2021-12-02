@@ -1206,7 +1206,7 @@ class SchedulesFile
 
     if @schedules[col_name].nil?
       puts "Could not find the '#{col_name}' schedule."
-      return false
+      return
     end
 
     col_index = get_col_index(col_name: col_name)

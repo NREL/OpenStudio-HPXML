@@ -548,7 +548,7 @@ class OSModel
     num_occ = @hpxml.building_occupancy.number_of_residents
     return if num_occ <= 0
 
-    Geometry.apply_occupants(model, @hpxml, num_occ, @cfa, spaces[HPXML::LocationLivingSpace], @schedules_file)
+    Geometry.apply_occupants(model, runner, @hpxml, num_occ, @cfa, spaces[HPXML::LocationLivingSpace], @schedules_file)
   end
 
   def self.create_or_get_space(model, spaces, location)
