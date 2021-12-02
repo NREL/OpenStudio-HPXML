@@ -582,7 +582,7 @@ class Constructions
     constr.add_layer(inside_film)
 
     constr.set_exterior_material_properties(solar_absorptance, emittance)
-    constr.set_interior_material_properties()
+    constr.set_interior_material_properties() unless has_radiant_barrier
 
     # Create and assign construction to roof surfaces
     constr.create_and_assign_constructions(runner, surfaces, model)
@@ -652,7 +652,7 @@ class Constructions
     constr.add_layer(inside_film)
 
     constr.set_exterior_material_properties(solar_absorptance, emittance)
-    constr.set_interior_material_properties()
+    constr.set_interior_material_properties() unless has_radiant_barrier
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(runner, surfaces, model)
@@ -758,20 +758,17 @@ class Constructions
   def self.apply_foundation_wall(runner, model, surfaces, constr_name,
                                  ext_rigid_ins_offset, int_rigid_ins_offset, ext_rigid_ins_height,
                                  int_rigid_ins_height, ext_rigid_r, int_rigid_r, mat_int_finish,
-                                 concrete_thick_in, height_above_grade)
+                                 mat_wall, height_above_grade)
 
     # Create Kiva foundation
     foundation = apply_kiva_walled_foundation(model, ext_rigid_r, int_rigid_r, ext_rigid_ins_offset,
                                               int_rigid_ins_offset, ext_rigid_ins_height,
                                               int_rigid_ins_height, height_above_grade,
-                                              concrete_thick_in, mat_int_finish)
-
-    # Define materials
-    mat_concrete = Material.Concrete(concrete_thick_in)
+                                              mat_wall.thick_in, mat_int_finish)
 
     # Define construction
     constr = Construction.new(constr_name, [1])
-    constr.add_layer(mat_concrete)
+    constr.add_layer(mat_wall)
     if not mat_int_finish.nil?
       constr.add_layer(mat_int_finish)
     end
@@ -874,19 +871,19 @@ class Constructions
     apply_window_skylight(runner, model, 'Skylight', subsurface, constr_name, ufactor, shgc)
   end
 
-  def self.apply_partition_walls(runner, model, constr_name, mat_int_finish, frac_of_ffa,
+  def self.apply_partition_walls(runner, model, constr_name, mat_int_finish, partition_wall_area,
                                  basement_frac_of_cfa, cond_base_surfaces, living_space)
 
     imdefs = []
 
     # Determine additional partition wall mass required
-    addtl_surface_area_base = frac_of_ffa * living_space.floorArea * basement_frac_of_cfa
-    addtl_surface_area_lv = frac_of_ffa * living_space.floorArea * (1.0 - basement_frac_of_cfa)
+    addtl_surface_area_base = partition_wall_area * basement_frac_of_cfa
+    addtl_surface_area_lv = partition_wall_area * (1.0 - basement_frac_of_cfa)
 
     if addtl_surface_area_lv > 0
       # Add remaining partition walls within spaces (those without geometric representation)
       # as internal mass object.
-      obj_name = "#{living_space.name} Living Partition"
+      obj_name = 'partition wall mass above grade'
       imdef = create_os_int_mass_and_def(model, obj_name, living_space, addtl_surface_area_lv)
       imdefs << imdef
     end
@@ -894,7 +891,7 @@ class Constructions
     if addtl_surface_area_base > 0
       # Add remaining partition walls within spaces (those without geometric representation)
       # as internal mass object.
-      obj_name = "#{living_space.name} Basement Partition"
+      obj_name = 'partition wall mass below grade'
       imdef = create_os_int_mass_and_def(model, obj_name, living_space, addtl_surface_area_base)
       cond_base_surfaces << imdef
       imdefs << imdef
@@ -907,8 +904,16 @@ class Constructions
                          Material.AirFilmVertical)
   end
 
-  def self.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft,
-                           mat, basement_frac_of_cfa, cond_base_surfaces, living_space)
+  def self.apply_furniture(runner, model, furniture_mass, cfa, ubfa, gfa,
+                           basement_frac_of_cfa, cond_base_surfaces, living_space)
+
+    if furniture_mass.type == HPXML::FurnitureMassTypeLightWeight
+      mass_lb_per_sqft = 8.0
+      mat = BaseMaterial.FurnitureLightWeight
+    elsif furniture_mass.type == HPXML::FurnitureMassTypeHeavyWeight
+      mass_lb_per_sqft = 16.0
+      mat = BaseMaterial.FurnitureHeavyWeight
+    end
 
     # Add user-specified furniture mass
     model.getSpaces.each do |space|
@@ -916,13 +921,19 @@ class Constructions
       furnConductivity = mat.k_in
       furnSolarAbsorptance = 0.6
       furnSpecHeat = mat.cp
-      furnDensity = density_lb_per_cuft
-      if (space == living_space) || Geometry.is_unconditioned_basement(space)
-        furnAreaFraction = 1.0
+      furnDensity = mat.rho
+      if space == living_space
+        furnAreaFraction = furniture_mass.area_fraction
         furnMass = mass_lb_per_sqft
+        floor_area = cfa
+      elsif Geometry.is_unconditioned_basement(space)
+        furnAreaFraction = 0.4
+        furnMass = mass_lb_per_sqft
+        floor_area = ubfa
       elsif Geometry.is_garage(space)
         furnAreaFraction = 0.1
         furnMass = 2.0
+        floor_area = gfa
       end
 
       next if furnAreaFraction.nil?
@@ -948,23 +959,23 @@ class Constructions
       imdefs = []
       if space == living_space
         # if living space, judge if includes conditioned basement, create furniture independently
-        living_surface_area = furnAreaFraction * space.floorArea * (1 - basement_frac_of_cfa)
-        base_surface_area = furnAreaFraction * space.floorArea * basement_frac_of_cfa
+        living_surface_area = furnAreaFraction * floor_area * (1 - basement_frac_of_cfa)
+        base_surface_area = furnAreaFraction * floor_area * basement_frac_of_cfa
         # living furniture mass
         if living_surface_area > 0
-          living_obj_name = mass_obj_name_space + ' living'
+          living_obj_name = mass_obj_name_space + ' above grade'
           imdef = create_os_int_mass_and_def(model, living_obj_name, space, living_surface_area)
           imdefs << imdef
         end
         # basement furniture mass
         if base_surface_area > 0
-          base_obj_name = mass_obj_name_space + ' basement'
+          base_obj_name = mass_obj_name_space + ' below grade'
           imdef = create_os_int_mass_and_def(model, base_obj_name, space, base_surface_area)
           cond_base_surfaces << imdef
           imdefs << imdef
         end
       else
-        surface_area = furnAreaFraction * space.floorArea
+        surface_area = furnAreaFraction * floor_area
         imdef = create_os_int_mass_and_def(model, mass_obj_name_space, space, surface_area)
         imdefs << imdef
       end
@@ -978,7 +989,7 @@ class Constructions
     # then the user should input twice the area when defining the Internal Mass object.
     imdef = OpenStudio::Model::InternalMassDefinition.new(model)
     imdef.setName(object_name)
-    imdef.setSurfaceArea(area)
+    imdef.setSurfaceArea(UnitConversions.convert(area, 'ft^2', 'm^2'))
 
     im = OpenStudio::Model::InternalMass.new(imdef)
     im.setName(object_name)
@@ -1019,6 +1030,104 @@ class Constructions
   def self.get_default_wall_solar_absorptance(color)
     map = get_wall_color_and_solar_absorptance_map
     return map[color]
+  end
+
+  def self.get_default_window_skylight_ufactor_shgc(window_or_skylight, type)
+    if window_or_skylight.glass_layers == HPXML::WindowLayersSinglePane
+      n_panes = 1
+    elsif window_or_skylight.glass_layers == HPXML::WindowLayersDoublePane
+      n_panes = 2
+    elsif window_or_skylight.glass_layers == HPXML::WindowLayersTriplePane
+      n_panes = 3
+    elsif window_or_skylight.glass_layers == HPXML::WindowLayersGlassBlock
+      return [0.6, 0.6] # From https://www.federalregister.gov/documents/2016/06/17/2016-13547/energy-conservation-standards-for-manufactured-housing
+    end
+
+    if [HPXML::WindowFrameTypeAluminum,
+        HPXML::WindowFrameTypeMetal].include? window_or_skylight.frame_type
+      is_metal_frame = true
+    elsif [HPXML::WindowFrameTypeWood,
+           HPXML::WindowFrameTypeVinyl,
+           HPXML::WindowFrameTypeFiberglass].include? window_or_skylight.frame_type
+      is_metal_frame = false
+    else
+      fail "Unexpected #{type.downcase} frame type."
+    end
+
+    if window_or_skylight.glass_type.nil?
+      glass_type = 'clear'
+    elsif [HPXML::WindowGlassTypeTinted,
+           HPXML::WindowGlassTypeTintedReflective].include? window_or_skylight.glass_type
+      glass_type = 'tinted'
+    elsif [HPXML::WindowGlassTypeLowE].include? window_or_skylight.glass_type
+      glass_type = 'low_e'
+    elsif [HPXML::WindowGlassTypeReflective].include? window_or_skylight.glass_type
+      glass_type = 'reflective'
+    else
+      fail "Unexpected #{type.downcase} glass type."
+    end
+
+    if window_or_skylight.glass_layers == HPXML::WindowLayersSinglePane
+      gas_fill = 'none'
+    elsif [HPXML::WindowGasAir].include? window_or_skylight.gas_fill
+      gas_fill = 'air'
+    elsif [HPXML::WindowGasArgon,
+           HPXML::WindowGasKrypton,
+           HPXML::WindowGasXenon,
+           HPXML::WindowGasNitrogen,
+           HPXML::WindowGasOther].include? window_or_skylight.gas_fill
+      gas_fill = 'gas'
+    else
+      fail "Unexpected #{type.downcase} gas type."
+    end
+
+    # Lookup values
+    # From http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/window-skylight-construction-types
+    key = [is_metal_frame, window_or_skylight.thermal_break, n_panes, glass_type, gas_fill]
+    if type.downcase == 'window'
+      vals = { [true, false, 1, 'clear', 'none'] => [1.27, 0.75], # Single-pane, clear, aluminum frame
+               [false, nil, 1, 'clear', 'none'] => [0.89, 0.64], # Single-pane, clear, wood or vinyl frame
+               [true, false, 1, 'tinted', 'none'] => [1.27, 0.64], # Single-pane, tinted, aluminum frame
+               [false, nil, 1, 'tinted', 'none'] => [0.89, 0.54], # Single-pane, tinted, wood or vinyl frame
+               [true, false, 2, 'clear', 'air'] => [0.81, 0.67], # Double-pane, clear, aluminum frame
+               [true, true, 2, 'clear', 'air'] => [0.60, 0.67], # Double-pane, clear, aluminum frame w/ thermal break
+               [false, nil, 2, 'clear', 'air'] => [0.51, 0.56], # Double-pane, clear, wood or vinyl frame
+               [true, false, 2, 'tinted', 'air'] => [0.81, 0.55], # Double-pane, tinted, aluminum frame
+               [true, true, 2, 'tinted', 'air'] => [0.60, 0.55], # Double-pane, tinted, aluminum frame w/ thermal break
+               [false, nil, 2, 'tinted', 'air'] => [0.51, 0.46], # Double-pane, tinted, wood or vinyl frame
+               [false, nil, 2, 'low_e', 'air'] => [0.42, 0.52], # Double-pane, insulating low-E, wood or vinyl frame
+               [true, true, 2, 'low_e', 'gas'] => [0.47, 0.62], # Double-pane, insulating low-E, argon gas fill, aluminum frame w/ thermal break
+               [false, nil, 2, 'low_e', 'gas'] => [0.39, 0.52], # Double-pane, insulating low-E, argon gas fill, wood or vinyl frame
+               [true, false, 2, 'reflective', 'air'] => [0.67, 0.37], # Double-pane, solar-control low-E, aluminum frame
+               [true, true, 2, 'reflective', 'air'] => [0.47, 0.37], # Double-pane, solar-control low-E, aluminum frame w/ thermal break
+               [false, nil, 2, 'reflective', 'air'] => [0.39, 0.31], # Double-pane, solar-control low-E, wood or vinyl frame
+               [false, nil, 2, 'reflective', 'gas'] => [0.36, 0.31], # Double-pane, solar-control low-E, argon gas fill, wood or vinyl frame
+               [false, nil, 3, 'low_e', 'gas'] => [0.27, 0.31] }[key] # Triple-pane, insulating low-E, argon gas fill, wood or vinyl frame
+    elsif type.downcase == 'skylight'
+      vals = { [true, false, 1, 'clear', 'none'] => [1.98, 0.75], # Single-pane, clear, aluminum frame
+               [false, nil, 1, 'clear', 'none'] => [1.47, 0.64], # Single-pane, clear, wood or vinyl frame
+               [true, false, 1, 'tinted', 'none'] => [1.98, 0.64], # Single-pane, tinted, aluminum frame
+               [false, nil, 1, 'tinted', 'none'] => [1.47, 0.54], # Single-pane, tinted, wood or vinyl frame
+               [true, false, 2, 'clear', 'air'] => [1.30, 0.67], # Double-pane, clear, aluminum frame
+               [true, true, 2, 'clear', 'air'] => [1.10, 0.67], # Double-pane, clear, aluminum frame w/ thermal break
+               [false, nil, 2, 'clear', 'air'] => [0.84, 0.56], # Double-pane, clear, wood or vinyl frame
+               [true, false, 2, 'tinted', 'air'] => [1.30, 0.55], # Double-pane, tinted, aluminum frame
+               [true, true, 2, 'tinted', 'air'] => [1.10, 0.55], # Double-pane, tinted, aluminum frame w/ thermal break
+               [false, nil, 2, 'tinted', 'air'] => [0.84, 0.46], # Double-pane, tinted, wood or vinyl frame
+               [false, nil, 2, 'low_e', 'air'] => [0.74, 0.52], # Double-pane, insulating low-E, wood or vinyl frame
+               [true, true, 2, 'low_e', 'gas'] => [0.95, 0.62], # Double-pane, insulating low-E, argon gas fill, aluminum frame w/ thermal break
+               [false, nil, 2, 'low_e', 'gas'] => [0.68, 0.52], # Double-pane, insulating low-E, argon gas fill, wood or vinyl frame
+               [true, false, 2, 'reflective', 'air'] => [1.17, 0.37], # Double-pane, solar-control low-E, aluminum frame
+               [true, true, 2, 'reflective', 'air'] => [0.98, 0.37], # Double-pane, solar-control low-E, aluminum frame w/ thermal break
+               [false, nil, 2, 'reflective', 'air'] => [0.71, 0.31], # Double-pane, solar-control low-E, wood or vinyl frame
+               [false, nil, 2, 'reflective', 'gas'] => [0.65, 0.31], # Double-pane, solar-control low-E, argon gas fill, wood or vinyl frame
+               [false, nil, 3, 'low_e', 'gas'] => [0.47, 0.31] }[key] # Triple-pane, insulating low-E, argon gas fill, wood or vinyl frame
+    else
+      fail 'Unexpected type.'
+    end
+    return vals if not vals.nil?
+
+    fail "Could not lookup UFactor and SHGC for #{type.downcase} '#{window_or_skylight.id}'."
   end
 
   private
@@ -1144,7 +1253,7 @@ class Constructions
 
   def self.apply_kiva_walled_foundation(model, ext_vert_r, int_vert_r,
                                         ext_vert_offset, int_vert_offset, ext_vert_depth, int_vert_depth,
-                                        wall_height_above_grade, wall_concrete_thick_in, wall_mat_int_finish)
+                                        wall_height_above_grade, wall_material_thick_in, wall_mat_int_finish)
 
     # Create the Foundation:Kiva object for crawl/basement foundations
     foundation = OpenStudio::Model::FoundationKiva.new(model)
@@ -1164,7 +1273,7 @@ class Constructions
       wall_mat_int_finish_thick_in = wall_mat_int_finish.nil? ? 0.0 : wall_mat_int_finish.thick_in
       foundation.addCustomBlock(ext_vert_mat,
                                 UnitConversions.convert(ext_vert_depth, 'ft', 'm'),
-                                UnitConversions.convert(wall_concrete_thick_in + wall_mat_int_finish_thick_in, 'in', 'm'),
+                                UnitConversions.convert(wall_material_thick_in + wall_mat_int_finish_thick_in, 'in', 'm'),
                                 UnitConversions.convert(ext_vert_offset, 'ft', 'm'))
     end
 

@@ -63,7 +63,6 @@ class HEScoreTest < MiniTest::Test
     cli_path = OpenStudio.getOpenStudioCLI
     json = File.absolute_path(File.join(parent_dir, 'regression_files', 'Base.json'))
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" --skip-simulation -j #{json}"
-    start_time = Time.now
     success = system(command)
     assert_equal(true, success)
 
@@ -76,13 +75,26 @@ class HEScoreTest < MiniTest::Test
     assert(!File.exist?(idf))
   end
 
+  def test_hourly_output
+    parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
+
+    cli_path = OpenStudio.getOpenStudioCLI
+    json = File.absolute_path(File.join(parent_dir, 'regression_files', 'Base.json'))
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" --hourly -j #{json}"
+    success = system(command)
+    assert_equal(true, success)
+
+    # Check for hourly output CSV
+    hourly_output_csv = File.join(parent_dir, 'HEScoreDesign', 'results_hourly.csv')
+    assert(File.exist?(hourly_output_csv))
+  end
+
   def test_invalid_simulation
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
     json = File.absolute_path(File.join(parent_dir, 'regression_files', 'Missing.json'))
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -j #{json}"
-    start_time = Time.now
     success = system(command)
     assert_equal(false, success)
   end
@@ -228,25 +240,6 @@ class HEScoreTest < MiniTest::Test
       end
     end
 
-    # Retrieve some additional results from results_annual.csv
-    csv_path = File.join(parent_dir, 'HEScoreDesign', 'results_annual.csv')
-    CSV.read(csv_path, headers: false).each do |row|
-      next if row.empty?
-      next if row.size < 2
-      next unless row[0].include? 'Unmet Load'
-
-      if row[0].include? 'Heating'
-        results[['unmet_load', 'heating', 'MBtu']] = Float(row[1])
-      elsif row[0].include? 'Cooling'
-        results[['unmet_load', 'cooling', 'MBtu']] = Float(row[1])
-      else
-        fail "Unexpected name: #{row[0]}."
-      end
-    end
-    # Make sure we found the unmet load outputs:
-    assert(results.keys.include? ['unmet_load', 'heating', 'MBtu'])
-    assert(results.keys.include? ['unmet_load', 'cooling', 'MBtu'])
-
     return results
   end
 
@@ -313,7 +306,6 @@ class HEScoreTest < MiniTest::Test
     tested_end_uses = []
     results.each do |key, value|
       resource_type, end_use, units = key
-      next if resource_type == 'unmet_load'
 
       # Check lighting end use matches ERI calculation
       if (end_use == 'lighting') && (resource_type == 'electric') && (units == 'kWh')

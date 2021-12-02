@@ -31,7 +31,7 @@ def get_output_hpxml_path(resultsdir, rundir)
   return File.join(resultsdir, File.basename(rundir) + '.xml')
 end
 
-def run_design(basedir, rundir, design, resultsdir, json, debug, skip_simulation)
+def run_design(basedir, rundir, design, resultsdir, json, hourly_output, debug, skip_simulation)
   measures_dir = File.join(basedir, '..')
   output_hpxml_path = get_output_hpxml_path(resultsdir, rundir)
 
@@ -56,7 +56,7 @@ def run_design(basedir, rundir, design, resultsdir, json, debug, skip_simulation
     update_args_hash(measures, measure_subdir, args)
 
     # Add reporting measure to workflow
-    measure_subdir = 'hpxml-measures/SimulationOutputReport'
+    measure_subdir = 'hpxml-measures/ReportSimulationOutput'
     args = {}
     args['timeseries_frequency'] = 'monthly'
     args['include_timeseries_fuel_consumptions'] = false
@@ -64,11 +64,28 @@ def run_design(basedir, rundir, design, resultsdir, json, debug, skip_simulation
     args['include_timeseries_hot_water_uses'] = true
     args['include_timeseries_total_loads'] = false
     args['include_timeseries_component_loads'] = false
-    args['include_timeseries_unmet_loads'] = false
     args['include_timeseries_zone_temperatures'] = false
     args['include_timeseries_airflows'] = false
     args['include_timeseries_weather'] = false
+    args['timeseries_output_file_name'] = 'results_monthly.csv'
     update_args_hash(measures, measure_subdir, args)
+
+    if hourly_output
+      # Add reporting measure to workflow
+      measure_subdir = 'hpxml-measures/ReportSimulationOutput'
+      args = {}
+      args['timeseries_frequency'] = 'hourly'
+      args['include_timeseries_fuel_consumptions'] = false
+      args['include_timeseries_end_use_consumptions'] = true
+      args['include_timeseries_hot_water_uses'] = true
+      args['include_timeseries_total_loads'] = false
+      args['include_timeseries_component_loads'] = false
+      args['include_timeseries_zone_temperatures'] = false
+      args['include_timeseries_airflows'] = false
+      args['include_timeseries_weather'] = false
+      args['timeseries_output_file_name'] = 'results_hourly.csv'
+      update_args_hash(measures, measure_subdir, args)
+    end
   end
 
   results = run_hpxml_workflow(rundir, measures, measures_dir,
@@ -78,8 +95,8 @@ def run_design(basedir, rundir, design, resultsdir, json, debug, skip_simulation
   return results[:success] unless results[:success]
 
   # Gather monthly outputs for results JSON
-  timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
-  return false unless File.exist? timeseries_csv_path
+  monthly_csv_path = File.join(rundir, 'results_monthly.csv')
+  return false unless File.exist? monthly_csv_path
 
   units_map = get_units_map()
   output_map = get_output_map()
@@ -89,7 +106,7 @@ def run_design(basedir, rundir, design, resultsdir, json, debug, skip_simulation
   end
   row_index = {}
   units = nil
-  CSV.foreach(timeseries_csv_path).with_index do |row, row_num|
+  CSV.foreach(monthly_csv_path).with_index do |row, row_num|
     if row_num == 0 # Header
       output_map.each do |ep_output, hes_output|
         row_index[ep_output] = row.index(ep_output)
@@ -168,8 +185,13 @@ def download_epws
   UrlResolver.fetch('https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip', tmpfile)
 
   puts 'Extracting weather files...'
-  unzip_file = OpenStudio::UnzipFile.new(tmpfile.path.to_s)
-  unzip_file.extractAllFiles(OpenStudio::toPath(weather_dir))
+  require 'zip'
+  Zip.on_exists_proc = true
+  Zip::File.open(tmpfile.path.to_s) do |zip_file|
+    zip_file.each do |f|
+      zip_file.extract(f, File.join(weather_dir, f.name))
+    end
+  end
 
   num_epws_actual = Dir[File.join(weather_dir, '*.epw')].count
   puts "#{num_epws_actual} weather files are available in the weather directory."
@@ -187,6 +209,11 @@ OptionParser.new do |opts|
 
   opts.on('-o', '--output-dir <DIR>', 'Output directory') do |t|
     options[:output_dir] = t
+  end
+
+  options[:hourly_output] = false
+  opts.on('--hourly', 'Request hourly output CSV') do |t|
+    options[:hourly_output] = true
   end
 
   opts.on('-w', '--download-weather', 'Downloads all weather files') do |t|
@@ -246,7 +273,8 @@ puts "JSON: #{options[:json]}"
 design = 'HEScoreDesign'
 rundir = get_rundir(options[:output_dir], design)
 
-success = run_design(basedir, rundir, design, resultsdir, options[:json], options[:debug], options[:skip_simulation])
+success = run_design(basedir, rundir, design, resultsdir, options[:json], options[:hourly_output],
+                     options[:debug], options[:skip_simulation])
 
 if not success
   exit! 1
