@@ -105,7 +105,7 @@ class Airflow
     end
 
     apply_natural_ventilation_and_whole_house_fan(model, weather, hpxml.site, vent_fans_whf, open_window_area, clg_ssn_sensor)
-    apply_infiltration_and_ventilation_fans(model, weather, hpxml.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
+    apply_infiltration_and_ventilation_fans(model, @runner, weather, hpxml.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                             hpxml.building_construction.has_flue_or_chimney, hpxml.air_infiltration_measurements,
                                             vented_attic, vented_crawl, clg_ssn_sensor, schedules_file)
   end
@@ -1247,14 +1247,13 @@ class Airflow
     return obj_sch_sensors
   end
 
-  def self.apply_dryer_exhaust(model, vented_dryers, schedules_file)
+  def self.apply_dryer_exhaust(model, runner, vented_dryers, schedules_file)
     obj_sch_sensors = {}
     obj_type_name = Constants.ObjectNameClothesDryerExhaust
     vented_dryers.each_with_index do |vented_dryer, index|
       obj_name = "#{obj_type_name} #{index}"
 
       # Create schedule
-      obj_sch = nil
       if not schedules_file.nil?
         obj_sch_name = Constants.ClothesDryer
         obj_sch = schedules_file.create_schedule_file(col_name: obj_sch_name)
@@ -1268,10 +1267,6 @@ class Airflow
         obj_sch = obj_sch.schedule
         obj_sch_name = obj_sch.name.to_s
         full_load_hrs = Schedule.annual_equivalent_full_load_hrs(@year, obj_sch)
-      else
-        runner.registerWarning("Both '#{Constants.ClothesDryer}' schedule file and weekday fractions provided; the latter will be ignored.") if !vented_dryer.weekday_fractions.nil?
-        runner.registerWarning("Both '#{Constants.ClothesDryer}' schedule file and weekend fractions provided; the latter will be ignored.") if !vented_dryer.weekend_fractions.nil?
-        runner.registerWarning("Both '#{Constants.ClothesDryer}' schedule file and monthly multipliers provided; the latter will be ignored.") if !vented_dryer.monthly_multipliers.nil?
       end
       # Assume standard dryer exhaust runs 1 hr/day per BA HSP
       cfm_mult = Constants.NumDaysInYear(@year) * vented_dryer.usage_multiplier / full_load_hrs
@@ -1716,7 +1711,7 @@ class Airflow
     program_calling_manager.addProgram(infil_program)
   end
 
-  def self.apply_infiltration_and_ventilation_fans(model, weather, site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
+  def self.apply_infiltration_and_ventilation_fans(model, runner, weather, site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                                    has_flue_chimney, air_infils, vented_attic, vented_crawl, clg_ssn_sensor, schedules_file)
     # Get living space infiltration
     living_ach50 = nil
@@ -1751,7 +1746,7 @@ class Airflow
     bath_sch_sensors_map = apply_local_ventilation(model, vent_fans_bath, Constants.ObjectNameMechanicalVentilationBathFan)
 
     # Clothes dryer exhaust
-    dryer_exhaust_sch_sensors_map = apply_dryer_exhaust(model, vented_dryers, schedules_file)
+    dryer_exhaust_sch_sensors_map = apply_dryer_exhaust(model, runner, vented_dryers, schedules_file)
 
     # Get mechanical ventilation
     apply_infiltration_and_mechanical_ventilation(model, site, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, vented_dryers,

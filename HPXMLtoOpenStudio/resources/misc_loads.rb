@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class MiscLoads
-  def self.apply_plug(model, plug_load, obj_name, living_space, apply_ashrae140_assumptions, schedules_file)
+  def self.apply_plug(model, runner, plug_load, obj_name, living_space, apply_ashrae140_assumptions, schedules_file)
     kwh = 0
     if not plug_load.nil?
       kwh = plug_load.kWh_per_year * plug_load.usage_multiplier
@@ -10,7 +10,6 @@ class MiscLoads
     return if kwh <= 0
 
     # Create schedule
-    sch = nil
     if not schedules_file.nil?
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
         col_name = Constants.PlugLoadsOther
@@ -65,7 +64,6 @@ class MiscLoads
       therm = fuel_load.therm_per_year * fuel_load.usage_multiplier
 
       # Create schedule
-      sch = nil
       if not schedules_file.nil?
         if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
           col_name = Constants.FuelLoadsGrill
@@ -115,7 +113,6 @@ class MiscLoads
     heater_therm = 0
 
     # Create schedule
-    heater_sch = nil
     if not schedules_file.nil?
       if obj_name.include?('pool')
         col_name = 'pool_heater'
@@ -186,7 +183,6 @@ class MiscLoads
     pump_kwh = 0
 
     # Create schedule
-    pump_sch = nil
     if not schedules_file.nil?
       if obj_name.include?('pool')
         col_name = 'pool_pump'

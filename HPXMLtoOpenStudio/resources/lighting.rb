@@ -29,7 +29,6 @@ class Lighting
     if int_kwh > 0
 
       # Create schedule
-      interior_sch = nil
       if not schedules_file.nil?
         design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: Constants.LightingInterior, annual_kwh: int_kwh)
         interior_sch = schedules_file.create_schedule_file(col_name: Constants.LightingInterior)
@@ -72,7 +71,6 @@ class Lighting
     if grg_kwh > 0
 
       # Create schedule
-      garage_sch = nil
       if not schedules_file.nil?
         design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: Constants.LightingGarage, annual_kwh: grg_kwh)
         garage_sch = schedules_file.create_schedule_file(col_name: Constants.LightingGarage)
@@ -104,7 +102,6 @@ class Lighting
     if ext_kwh > 0
 
       # Create schedule
-      exterior_sch = nil
       if not schedules_file.nil?
         design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: Constants.LightingExterior, annual_kwh: ext_kwh)
         exterior_sch = schedules_file.create_schedule_file(col_name: Constants.LightingExterior)
@@ -132,7 +129,6 @@ class Lighting
     if not lighting.holiday_kwh_per_day.nil?
 
       # Create schedule
-      exterior_holiday_sch = nil
       if not schedules_file.nil?
         design_level = schedules_file.calc_design_level_from_daily_kwh(col_name: Constants.LightingExteriorHoliday, daily_kwh: lighting.holiday_kwh_per_day)
         exterior_holiday_sch = schedules_file.create_schedule_file(col_name: Constants.LightingExteriorHoliday)

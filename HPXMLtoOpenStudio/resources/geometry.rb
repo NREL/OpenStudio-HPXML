@@ -526,7 +526,6 @@ class Geometry
     occ_lost = 1 - occ_lat - occ_conv - occ_rad
 
     # Create schedule
-    people_sch = nil
     if not schedules_file.nil?
       people_sch = schedules_file.create_schedule_file(col_name: Constants.Occupants)
     end

@@ -217,7 +217,6 @@ class OSModel
 
     # Init
 
-    @schedules_file = nil
     if not @hpxml.header.schedules_filepath.nil?
       @schedules_file = SchedulesFile.new(runner: runner, model: model,
                                           schedules_path: @hpxml.header.schedules_filepath)
@@ -1872,7 +1871,7 @@ class OSModel
         next
       end
 
-      MiscLoads.apply_plug(model, plug_load, obj_name, spaces[HPXML::LocationLivingSpace], @apply_ashrae140_assumptions, @schedules_file)
+      MiscLoads.apply_plug(model, runner, plug_load, obj_name, spaces[HPXML::LocationLivingSpace], @apply_ashrae140_assumptions, @schedules_file)
     end
   end
 
