@@ -107,7 +107,7 @@ class HotWaterAndAppliances
         dw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: Constants.Dishwasher, daily_kwh: dw_annual_kwh / 365.0)
         power_dw_schedule = schedules_file.create_schedule_file(col_name: Constants.Dishwasher)
       end
-      if power_cw_schedule.nil?
+      if power_dw_schedule.nil?
         dw_weekday_sch = dishwasher.weekday_fractions
         dw_weekend_sch = dishwasher.weekend_fractions
         dw_monthly_sch = dishwasher.monthly_multipliers
@@ -187,7 +187,7 @@ class HotWaterAndAppliances
       cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = calc_range_oven_energy(nbeds, cooking_range, oven, cooking_range.additional_properties.space.nil?)
 
       # Create schedule
-      cook_schedule - nil
+      cook_schedule = nil
       if not schedules_file.nil?
         cook_design_level_e = schedules_file.calc_design_level_from_annual_kwh(col_name: Constants.CookingRange, annual_kwh: cook_annual_kwh)
         cook_design_level_f = schedules_file.calc_design_level_from_annual_therm(col_name: Constants.CookingRange, annual_therm: cook_annual_therm)
