@@ -958,7 +958,37 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     # Test case => Error message
     all_expected_warnings = { 'schedule-file-and-weekday-weekend-multipliers' => ["Both 'occupants' schedule file and weekday fractions provided; the latter will be ignored.",
                                                                                   "Both 'occupants' schedule file and weekend fractions provided; the latter will be ignored.",
-                                                                                  "Both 'occupants' schedule file and monthly multipliers provided; the latter will be ignored."] }
+                                                                                  "Both 'occupants' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'clothes_washer' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'clothes_washer' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'clothes_washer' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'clothes_dryer' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'clothes_dryer' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'clothes_dryer' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'dishwasher' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'dishwasher' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'dishwasher' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'refrigerator' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'refrigerator' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'refrigerator' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'cooking_range' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'cooking_range' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'cooking_range' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'hot_water_fixtures' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'hot_water_fixtures' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'hot_water_fixtures' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'plug_loads_tv' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'plug_loads_tv' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'plug_loads_tv' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'plug_loads_other' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'plug_loads_other' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'plug_loads_other' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'lighting_interior' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'lighting_interior' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'lighting_interior' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'lighting_exterior' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'lighting_exterior' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'lighting_exterior' schedule file and monthly multipliers provided; the latter will be ignored."] }
 
     all_expected_warnings.each_with_index do |(warning_case, expected_warnings), i|
       puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."
