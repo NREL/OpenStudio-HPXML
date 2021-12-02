@@ -2641,7 +2641,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       window.area *= 0.35
     end
     hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
-                    wall_idref: hpxml.walls[-1].id,
+                    wall_idref: hpxml.walls[2].id,
                     area: 20,
                     azimuth: 0,
                     r_value: 4.4)
@@ -2655,6 +2655,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.cooking_ranges[0].location = adjacent_to
   elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
     hpxml.walls[2].delete
+    hpxml.walls[-1].id = "Wall#{hpxml.walls.size}"
+    hpxml.doors[0].wall_idref = hpxml.walls[-1].id
     hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                     interior_adjacent_to: HPXML::LocationLivingSpace,

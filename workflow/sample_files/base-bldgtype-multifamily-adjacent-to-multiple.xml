@@ -254,7 +254,7 @@
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall1'/>
+            <AttachedToWall idref='Wall2'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
@@ -304,7 +304,7 @@
           </Door>
           <Door>
             <SystemIdentifier id='Door2'/>
-            <AttachedToWall idref='Wall1'/>
+            <AttachedToWall idref='Wall2'/>
             <Area>20.0</Area>
             <Azimuth>0</Azimuth>
             <RValue>4.4</RValue>
