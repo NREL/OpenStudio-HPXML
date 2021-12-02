@@ -2656,6 +2656,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
     hpxml.walls[2].delete
     hpxml.walls[-1].id = "Wall#{hpxml.walls.size}"
+    hpxml.windows[0].wall_idref = hpxml.walls[-1].id
     hpxml.doors[0].wall_idref = hpxml.walls[-1].id
     hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
