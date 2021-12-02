@@ -1253,11 +1253,14 @@ class Airflow
     vented_dryers.each_with_index do |vented_dryer, index|
       obj_name = "#{obj_type_name} #{index}"
 
+      # Create schedule
+      obj_sch = nil
       if not schedules_file.nil?
-        obj_sch = schedules_file.create_schedule_file(col_name: 'clothes_dryer')
-        obj_sch_name = 'clothes_dryer'
-        full_load_hrs = schedules_file.annual_equivalent_full_load_hrs(col_name: 'clothes_dryer')
-      else
+        obj_sch_name = Constants.ClothesDryer
+        obj_sch = schedules_file.create_schedule_file(col_name: obj_sch_name)
+        full_load_hrs = schedules_file.annual_equivalent_full_load_hrs(col_name: obj_sch_name)
+      end
+      if obj_sch.nil?
         cd_weekday_sch = vented_dryer.weekday_fractions
         cd_weekend_sch = vented_dryer.weekend_fractions
         cd_monthly_sch = vented_dryer.monthly_multipliers
@@ -1265,6 +1268,10 @@ class Airflow
         obj_sch = obj_sch.schedule
         obj_sch_name = obj_sch.name.to_s
         full_load_hrs = Schedule.annual_equivalent_full_load_hrs(@year, obj_sch)
+      else
+        runner.registerWarning("Both '#{Constants.ClothesDryer}' schedule file and weekday fractions provided; the latter will be ignored.") if !vented_dryer.weekday_fractions.nil?
+        runner.registerWarning("Both '#{Constants.ClothesDryer}' schedule file and weekend fractions provided; the latter will be ignored.") if !vented_dryer.weekend_fractions.nil?
+        runner.registerWarning("Both '#{Constants.ClothesDryer}' schedule file and monthly multipliers provided; the latter will be ignored.") if !vented_dryer.monthly_multipliers.nil?
       end
       # Assume standard dryer exhaust runs 1 hr/day per BA HSP
       cfm_mult = Constants.NumDaysInYear(@year) * vented_dryer.usage_multiplier / full_load_hrs
