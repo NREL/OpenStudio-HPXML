@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>7a1e5cb6-8eba-4697-8744-b7ced9693d5f</version_id>
-  <version_modified>20211202T015908Z</version_modified>
+  <version_id>7a7251eb-b363-4105-b32b-5bdb78b20ced</version_id>
+  <version_modified>20211202T172637Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -218,18 +218,6 @@
       <checksum>852E38C5</checksum>
     </file>
     <file>
-      <filename>misc_loads.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>81977FB8</checksum>
-    </file>
-    <file>
-      <filename>test_schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>15D49E99</checksum>
-    </file>
-    <file>
       <filename>xmlhelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -254,12 +242,6 @@
       <checksum>F1FF6B39</checksum>
     </file>
     <file>
-      <filename>lighting.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FCE5670A</checksum>
-    </file>
-    <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -276,12 +258,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>7EC12F73</checksum>
-    </file>
-    <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8D837149</checksum>
     </file>
     <file>
       <filename>waterheater.rb</filename>
@@ -306,12 +282,6 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>23A47B50</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>5BE2D30C</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -434,28 +404,64 @@
       <checksum>6E99E1DE</checksum>
     </file>
     <file>
+      <filename>EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>ABBBA4D3</checksum>
+    </file>
+    <file>
+      <filename>test_validation.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5FECF6A7</checksum>
+    </file>
+    <file>
+      <filename>misc_loads.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8B47AFE8</checksum>
+    </file>
+    <file>
+      <filename>test_schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5F810A01</checksum>
+    </file>
+    <file>
+      <filename>lighting.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D396F54A</checksum>
+    </file>
+    <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E0C29C5F</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>31B2B118</checksum>
+    </file>
+    <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EA63BF5E</checksum>
+      <checksum>A9A028D8</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D4BB12DD</checksum>
+      <checksum>CEB98162</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FDCD8CEC</checksum>
-    </file>
-    <file>
-      <filename>EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>ABBBA4D3</checksum>
+      <checksum>941D63A6</checksum>
     </file>
     <file>
       <version>
@@ -466,19 +472,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>16E0DA7D</checksum>
-    </file>
-    <file>
-      <filename>test_validation.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>5FECF6A7</checksum>
+      <checksum>6CEB1E31</checksum>
     </file>
     <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FF7445E5</checksum>
+      <checksum>D41366FD</checksum>
     </file>
   </files>
 </measure>

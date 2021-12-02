@@ -211,22 +211,12 @@ class HPXMLDefaults
     end
   end
 
-  def self.schedules_file_includes_col_name(schedules_file, col_name)
-    schedules_file_includes_col_name = false
-    if not schedules_file.nil?
-      if schedules_file.schedules.keys.include?(col_name)
-        schedules_file_includes_col_name = true
-      end
-    end
-    return schedules_file_includes_col_name
-  end
-
   def self.apply_building_occupancy(hpxml, nbeds, schedules_file)
     if hpxml.building_occupancy.number_of_residents.nil?
       hpxml.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(nbeds)
       hpxml.building_occupancy.number_of_residents_isdefaulted = true
     end
-    schedules_file_includes_occupants = schedules_file_includes_col_name(schedules_file, 'occupants')
+    schedules_file_includes_occupants = Schedule.schedules_file_includes_col_name(schedules_file, Constants.Occupants)
     if hpxml.building_occupancy.weekday_fractions.nil? && !schedules_file_includes_occupants
       hpxml.building_occupancy.weekday_fractions = Schedule.OccupantsWeekdayFractions
       hpxml.building_occupancy.weekday_fractions_isdefaulted = true

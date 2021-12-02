@@ -43,8 +43,8 @@ class HotWaterAndAppliances
       cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, clothes_washer.additional_properties.space.nil?)
 
       if not schedules_file.nil?
-        cw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: 'clothes_washer', daily_kwh: cw_annual_kwh / 365.0)
-        power_cw_schedule = schedules_file.create_schedule_file(col_name: 'clothes_washer')
+        cw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: Constants.ClothesWasher, daily_kwh: cw_annual_kwh / 365.0)
+        power_cw_schedule = schedules_file.create_schedule_file(col_name: Constants.ClothesWasher)
       else
         cw_weekday_sch = clothes_washer.weekday_fractions
         cw_weekend_sch = clothes_washer.weekend_fractions
@@ -64,9 +64,9 @@ class HotWaterAndAppliances
       cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, clothes_dryer.additional_properties.space.nil?)
 
       if not schedules_file.nil?
-        cd_design_level_e = schedules_file.calc_design_level_from_annual_kwh(col_name: 'clothes_dryer', annual_kwh: cd_annual_kwh)
-        cd_design_level_f = schedules_file.calc_design_level_from_annual_therm(col_name: 'clothes_dryer', annual_therm: cd_annual_therm)
-        cd_schedule = schedules_file.create_schedule_file(col_name: 'clothes_dryer')
+        cd_design_level_e = schedules_file.calc_design_level_from_annual_kwh(col_name: Constants.ClothesDryer, annual_kwh: cd_annual_kwh)
+        cd_design_level_f = schedules_file.calc_design_level_from_annual_therm(col_name: Constants.ClothesDryer, annual_therm: cd_annual_therm)
+        cd_schedule = schedules_file.create_schedule_file(col_name: Constants.ClothesDryer)
       else
         cd_weekday_sch = clothes_dryer.weekday_fractions
         cd_weekend_sch = clothes_dryer.weekend_fractions
@@ -88,8 +88,8 @@ class HotWaterAndAppliances
       dw_annual_kwh, dw_frac_sens, dw_frac_lat, dw_gpd = calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, dishwasher.additional_properties.space.nil?)
 
       if not schedules_file.nil?
-        dw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: 'dishwasher', daily_kwh: dw_annual_kwh / 365.0)
-        power_dw_schedule = schedules_file.create_schedule_file(col_name: 'dishwasher')
+        dw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: Constants.Dishwasher, daily_kwh: dw_annual_kwh / 365.0)
+        power_dw_schedule = schedules_file.create_schedule_file(col_name: Constants.Dishwasher)
       else
         dw_weekday_sch = dishwasher.weekday_fractions
         dw_weekend_sch = dishwasher.weekend_fractions
@@ -109,7 +109,7 @@ class HotWaterAndAppliances
       rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_or_freezer_energy(refrigerator, refrigerator.additional_properties.space.nil?)
 
       if not schedules_file.nil?
-        fridge_col_name = refrigerator.primary_indicator ? 'refrigerator' : 'extra_refrigerator'
+        fridge_col_name = refrigerator.primary_indicator ? Constants.Refrigerator : Constants.ExtraRefrigerator
         fridge_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: fridge_col_name, annual_kwh: rf_annual_kwh)
         fridge_schedule = schedules_file.create_schedule_file(col_name: fridge_col_name)
       else
@@ -131,8 +131,8 @@ class HotWaterAndAppliances
       fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_refrigerator_or_freezer_energy(freezer, freezer.additional_properties.space.nil?)
 
       if not schedules_file.nil?
-        freezer_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: 'freezer', annual_kwh: fz_annual_kwh)
-        freezer_schedule = schedules_file.create_schedule_file(col_name: 'freezer')
+        freezer_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: Constants.Freezer, annual_kwh: fz_annual_kwh)
+        freezer_schedule = schedules_file.create_schedule_file(col_name: Constants.Freezer)
       else
         freezer_weekday_sch = freezer.weekday_fractions
         freezer_weekend_sch = freezer.weekend_fractions

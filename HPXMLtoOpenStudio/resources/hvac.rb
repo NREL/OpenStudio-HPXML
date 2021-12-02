@@ -759,8 +759,8 @@ class HVAC
 
     if not schedules_file.nil?
       annual_kwh *= Schedule.CeilingFanMonthlyMultipliers(weather: weather).split(',').map(&:to_f).sum(0.0) / 12.0
-      ceiling_fan_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: 'ceiling_fan', annual_kwh: annual_kwh)
-      ceiling_fan_sch = schedules_file.create_schedule_file(col_name: 'ceiling_fan')
+      ceiling_fan_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: Constants.CeilingFan, annual_kwh: annual_kwh)
+      ceiling_fan_sch = schedules_file.create_schedule_file(col_name: Constants.CeilingFan)
     else
       annual_kwh *= ceiling_fan.monthly_multipliers.split(',').map(&:to_f).sum(0.0) / 12.0
       weekday_sch = ceiling_fan.weekday_fractions

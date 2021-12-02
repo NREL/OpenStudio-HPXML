@@ -62,33 +62,33 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     model.getScheduleFiles.each do |schedule_file|
       schedule_file_names << "#{schedule_file.name}"
     end
-    assert(schedule_file_names.include?('occupants'))
-    assert(schedule_file_names.include?('lighting_interior'))
-    assert(schedule_file_names.include?('lighting_exterior'))
-    assert(!schedule_file_names.include?('lighting_garage'))
-    assert(!schedule_file_names.include?('lighting_exterior_holiday'))
-    assert(schedule_file_names.include?('cooking_range'))
-    assert(schedule_file_names.include?('refrigerator'))
-    assert(!schedule_file_names.include?('extra_refrigerator'))
-    assert(!schedule_file_names.include?('freezer'))
-    assert(schedule_file_names.include?('dishwasher'))
-    assert(schedule_file_names.include?('clothes_washer'))
-    assert(schedule_file_names.include?('clothes_dryer'))
-    assert(!schedule_file_names.include?('ceiling_fan'))
-    assert(schedule_file_names.include?('plug_loads_other'))
-    assert(schedule_file_names.include?('plug_loads_tv'))
-    assert(!schedule_file_names.include?('plug_loads_vehicle'))
-    assert(!schedule_file_names.include?('plug_loads_well_pump'))
-    assert(!schedule_file_names.include?('fuel_loads_grill'))
-    assert(!schedule_file_names.include?('fuel_loads_lighting'))
-    assert(!schedule_file_names.include?('fuel_loads_fireplace'))
-    assert(!schedule_file_names.include?('pool_pump'))
-    assert(!schedule_file_names.include?('pool_heater'))
-    assert(!schedule_file_names.include?('hot_tub_pump'))
-    assert(!schedule_file_names.include?('hot_tub_heater'))
-    assert(schedule_file_names.include?('hot_water_clothes_washer'))
-    assert(schedule_file_names.include?('hot_water_dishwasher'))
-    assert(schedule_file_names.include?('hot_water_fixtures'))
+    assert(schedule_file_names.include?(Constants.Occupants))
+    assert(schedule_file_names.include?(Constants.LightingInterior))
+    assert(schedule_file_names.include?(Constants.LightingExterior))
+    assert(!schedule_file_names.include?(Constants.LightingGarage))
+    assert(!schedule_file_names.include?(Constants.LightingExteriorHoliday))
+    assert(schedule_file_names.include?(Constants.CookingRange))
+    assert(schedule_file_names.include?(Constants.Refrigerator))
+    assert(!schedule_file_names.include?(Constants.ExtraRefrigerator))
+    assert(!schedule_file_names.include?(Constants.Freezer))
+    assert(schedule_file_names.include?(Constants.Dishwasher))
+    assert(schedule_file_names.include?(Constants.ClothesWasher))
+    assert(schedule_file_names.include?(Constants.ClothesDryer))
+    assert(!schedule_file_names.include?(Constants.CeilingFan))
+    assert(schedule_file_names.include?(Constants.PlugLoadsOther))
+    assert(schedule_file_names.include?(Constants.PlugLoadsTV))
+    assert(!schedule_file_names.include?(Constants.PlugLoadsVehicle))
+    assert(!schedule_file_names.include?(Constants.PlugLoadsWellPump))
+    assert(!schedule_file_names.include?(Constants.FuelLoadsGrill))
+    assert(!schedule_file_names.include?(Constants.FuelLoadsLighting))
+    assert(!schedule_file_names.include?(Constants.FuelLoadsFireplace))
+    assert(!schedule_file_names.include?(Constants.PoolPump))
+    assert(!schedule_file_names.include?(Constants.PoolHeater))
+    assert(!schedule_file_names.include?(Constants.HotTubPump))
+    assert(!schedule_file_names.include?(Constants.HotTubHeater))
+    assert(schedule_file_names.include?(Constants.HotWaterClothesWasher))
+    assert(schedule_file_names.include?(Constants.HotWaterDishwasher))
+    assert(schedule_file_names.include?(Constants.HotWaterFixtures))
 
     # add a pool
     hpxml.pools.add(id: 'Pool',
@@ -108,8 +108,8 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     model.getScheduleFiles.each do |schedule_file|
       schedule_file_names << "#{schedule_file.name}"
     end
-    assert(schedule_file_names.include?('pool_pump'))
-    assert(schedule_file_names.include?('pool_heater'))
+    assert(schedule_file_names.include?(Constants.PoolPump))
+    assert(schedule_file_names.include?(Constants.PoolHeater))
   end
 
   def test_stochastic_vacancy_schedules
