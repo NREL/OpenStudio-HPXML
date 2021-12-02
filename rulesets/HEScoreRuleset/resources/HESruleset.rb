@@ -921,7 +921,7 @@ class HEScoreRuleset
     elsif orig_pv_system['array_tilt'] == 'low_slope'
       array_tilt = 15.0 # 3:12, approximately
     elsif orig_pv_system['array_tilt'] == 'medium_slope'
-      array_tilt = 30.0 # 6:12, approximately
+      array_tilt = 30.0 # 7:12, approximately
     elsif orig_pv_system['array_tilt'] == 'steep_slope'
       array_tilt = 45.0 # 12:12
     else
