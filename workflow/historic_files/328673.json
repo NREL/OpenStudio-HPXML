@@ -134,7 +134,8 @@
           "capacity_known": true,
           "system_capacity": 2.5,
           "year": 2007,
-          "array_azimuth": "south"
+          "array_azimuth": "south",
+          "array_tilt": "medium_slope"
         }
       }
     }

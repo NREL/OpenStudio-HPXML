@@ -118,7 +118,8 @@
                     "capacity_known": true,
                     "system_capacity": 4,
                     "year": 2011,
-                    "array_azimuth": "south"
+                    "array_azimuth": "south",
+                    "array_tilt": "medium_slope"
                 }
             }
         }
