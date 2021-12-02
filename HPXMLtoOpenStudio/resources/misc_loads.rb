@@ -57,7 +57,7 @@ class MiscLoads
     mel.setSchedule(sch)
   end
 
-  def self.apply_fuel(model, fuel_load, obj_name, living_space, schedules_file)
+  def self.apply_fuel(model, runner, fuel_load, obj_name, living_space, schedules_file)
     therm = 0
 
     if not fuel_load.nil?

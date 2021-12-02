@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>a6d67c48-9833-435a-9550-ea4a6d35413e</version_id>
-  <version_modified>20211202T210135Z</version_modified>
+  <version_id>8ebd9360-f141-4e13-902a-79628e3d101b</version_id>
+  <version_modified>20211202T224330Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -446,27 +446,10 @@
       <checksum>C3A44039</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.2.0</identifier>
-        <min_compatible>3.2.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>67BFE404</checksum>
-    </file>
-    <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>F85975E8</checksum>
-    </file>
-    <file>
-      <filename>misc_loads.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6E642941</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -479,6 +462,23 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>277F616E</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.2.0</identifier>
+        <min_compatible>3.2.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>9E653D1E</checksum>
+    </file>
+    <file>
+      <filename>misc_loads.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>AC67AB29</checksum>
     </file>
   </files>
 </measure>
