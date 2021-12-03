@@ -1254,6 +1254,7 @@ class Airflow
       obj_name = "#{obj_type_name} #{index}"
 
       # Create schedule
+      obj_sch = nil
       if not schedules_file.nil?
         obj_sch_name = Constants.ClothesDryer
         obj_sch = schedules_file.create_schedule_file(col_name: obj_sch_name)
