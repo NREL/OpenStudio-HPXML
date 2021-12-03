@@ -217,6 +217,7 @@ class OSModel
 
     # Init
 
+    @schedules_file = nil
     if not @hpxml.header.schedules_filepath.nil?
       @schedules_file = SchedulesFile.new(runner: runner, model: model,
                                           schedules_path: @hpxml.header.schedules_filepath)
