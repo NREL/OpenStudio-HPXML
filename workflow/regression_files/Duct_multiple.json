@@ -107,7 +107,7 @@
                             "name": "duct3",
                             "location": "cond_space",
                             "fraction": 0.2,
-                            "insulated": true,
+                            "insulated": false,
                             "sealed": false
                         }
                     ]
