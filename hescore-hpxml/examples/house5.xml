@@ -1,0 +1,271 @@
+<HPXML xmlns="http://hpxmlonline.com/2014/6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.3">
+    <XMLTransactionHeaderInformation>
+        <XMLType/>
+        <XMLGeneratedBy/>
+        <CreatedDateAndTime>2014-12-01T15:34:15</CreatedDateAndTime>
+        <Transaction>create</Transaction>
+    </XMLTransactionHeaderInformation>
+    <SoftwareInfo/>
+    <Building>
+        <BuildingID id="bldg1"/>
+        <Site>
+            <SiteID id="address"/>
+            <Address>
+                <AddressType>street</AddressType>
+                <Address1>5 API House</Address1>
+                <CityMunicipality>Springfield</CityMunicipality>
+                <StateCode>MO</StateCode>
+                <ZipCode>65802</ZipCode>
+            </Address>
+        </Site>
+        <ProjectStatus>
+            <EventType>proposed workscope</EventType>
+            <Date>2014-10-30</Date>
+        </ProjectStatus>
+        <BuildingDetails>
+            <BuildingSummary>
+                <Site>
+                    <OrientationOfFrontOfHome>southeast</OrientationOfFrontOfHome>
+                </Site>
+                <BuildingConstruction>
+                    <YearBuilt>1890</YearBuilt>
+                    <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
+                    <NumberofConditionedFloorsAboveGrade>2</NumberofConditionedFloorsAboveGrade>
+                    <NumberofBedrooms>4</NumberofBedrooms>
+                    <ConditionedFloorArea>2323</ConditionedFloorArea>
+                    <ConditionedBuildingVolume>20380</ConditionedBuildingVolume>
+                </BuildingConstruction>
+            </BuildingSummary>
+            <Enclosure>
+                <AirInfiltration>
+                    <AirInfiltrationMeasurement>
+                        <SystemIdentifier id="airinfiltest"/>
+                        <TypeOfInfiltrationMeasurement>blower door</TypeOfInfiltrationMeasurement>
+                        <HousePressure>50</HousePressure>
+                        <BuildingAirLeakage>
+                            <UnitofMeasure>CFM</UnitofMeasure>
+                            <AirLeakage>4200</AirLeakage>
+                        </BuildingAirLeakage>
+                    </AirInfiltrationMeasurement>
+                </AirInfiltration>
+                <AtticAndRoof>
+                    <Roofs>
+                        <Roof>
+                            <SystemIdentifier id="roof1"/>
+                            <RoofColor>medium</RoofColor>
+                            <RoofType>wood shingles or shakes</RoofType>
+                        </Roof>
+                    </Roofs>
+                    <Attics>
+                        <Attic>
+                            <SystemIdentifier id="attic1"/>
+                            <AttachedToRoof idref="roof1"/>
+                            <AtticType>vented attic</AtticType>
+                            <AtticRoofInsulation>
+                                <SystemIdentifier id="attic1ins"/>
+                                <Layer>
+                                    <NominalRValue>30</NominalRValue>
+                                </Layer>
+                            </AtticRoofInsulation>
+                            <Area>898</Area>
+                        </Attic>
+                    </Attics>
+                </AtticAndRoof>
+                <Foundations>
+                    <Foundation>
+                        <SystemIdentifier id="fnd1"/>
+                        <FoundationType>
+                            <Crawlspace>
+                                <Vented>false</Vented>
+                            </Crawlspace>
+                        </FoundationType>
+                        <FrameFloor>
+                            <SystemIdentifier id="crawlflr"/>
+                            <Area>371</Area>
+                        </FrameFloor>
+                        <FoundationWall>
+                            <SystemIdentifier id="crawlwall"/>
+                            <Insulation>
+                                <SystemIdentifier id="crawlwallins"/>
+                                <Layer>
+                                    <InsulationMaterial>
+                                        <SprayFoam>unknown</SprayFoam>
+                                    </InsulationMaterial>
+                                    <NominalRValue>13</NominalRValue>
+                                </Layer>
+                            </Insulation>
+                        </FoundationWall>
+                    </Foundation>
+                    <Foundation>
+                        <SystemIdentifier id="fnd2"/>
+                        <FoundationType>
+                            <Basement>
+                                <Conditioned>true</Conditioned>
+                            </Basement>
+                        </FoundationType>
+                        <Slab>
+                            <SystemIdentifier id="slab"/>
+                            <Area>527</Area>
+                        </Slab>
+                    </Foundation>
+                </Foundations>
+                <Walls>
+                    <Wall>
+                        <SystemIdentifier id="wall1"/>
+                        <WallType>
+                            <WoodStud/>
+                        </WallType>
+                        <Studs>
+                            <Size>2x4</Size>
+                        </Studs>
+                        <Siding>vinyl siding</Siding>
+                        <Insulation>
+                            <SystemIdentifier id="wall1ins"/>
+                            <Layer>
+                                <InstallationType>cavity</InstallationType>
+                                <NominalRValue>13</NominalRValue>
+                            </Layer>
+                        </Insulation>
+                    </Wall>
+                </Walls>
+                <Windows>
+                    <Window>
+                        <SystemIdentifier id="frontwindows1"/>
+                        <Area>105.0</Area><!-- 3x5 -->
+                        <Quantity>7</Quantity>
+                        <Orientation>southeast</Orientation>
+                        <FrameType>
+                            <Wood/>
+                        </FrameType>
+                        <GlassLayers>triple-pane</GlassLayers>
+                    </Window>
+                    <Window>
+                        <SystemIdentifier id="rightwindows2"/>
+                        <Area>80.0</Area><!-- 4x4 -->
+                        <Quantity>5</Quantity>
+                        <Orientation>southwest</Orientation>
+                        <FrameType>
+                            <Wood/>
+                        </FrameType>
+                        <GlassLayers>triple-pane</GlassLayers>
+                    </Window>
+                    <Window>
+                        <SystemIdentifier id="backwindows1"/>
+                        <Area>144.0</Area><!-- 3x6 -->
+                        <Quantity>8</Quantity>
+                        <Orientation>northwest</Orientation>
+                        <FrameType>
+                            <Wood/>
+                        </FrameType>
+                        <GlassLayers>triple-pane</GlassLayers>
+                    </Window>
+                    <Window>
+                        <SystemIdentifier id="leftwindows1"/>
+                        <Area>72.0</Area><!-- 3x6 -->
+                        <Quantity>4</Quantity>
+                        <Orientation>northeast</Orientation>
+                        <FrameType>
+                            <Wood/>
+                        </FrameType>
+                        <GlassLayers>triple-pane</GlassLayers>
+                    </Window>
+                </Windows>
+            </Enclosure>
+            <Systems>
+                <HVAC>
+                    <HVACPlant>
+                        <HeatingSystem>
+                            <SystemIdentifier id="backfurnace"/>
+                            <YearInstalled>1995</YearInstalled>
+                            <DistributionSystem idref="backducts"/>
+                            <HeatingSystemType>
+                                <Furnace/>
+                            </HeatingSystemType>
+                            <HeatingSystemFuel>propane</HeatingSystemFuel>
+                            <HeatingCapacity>100000</HeatingCapacity>
+                            <AnnualHeatingEfficiency>
+                                <Units>AFUE</Units>
+                                <Value>0.80</Value>
+                            </AnnualHeatingEfficiency>
+                            <FloorAreaServed>1581</FloorAreaServed>
+                        </HeatingSystem>
+                        <HeatingSystem>
+                            <SystemIdentifier id="frontfurnace"/>
+                            <YearInstalled>2010</YearInstalled>
+                            <DistributionSystem idref="frontducts"/>
+                            <HeatingSystemType>
+                                <Furnace/>
+                            </HeatingSystemType>
+                            <HeatingSystemFuel>propane</HeatingSystemFuel>
+                            <HeatingCapacity>60000</HeatingCapacity>
+                            <AnnualHeatingEfficiency>
+                                <Units>AFUE</Units>
+                                <Value>0.92</Value>
+                            </AnnualHeatingEfficiency>
+                            <FloorAreaServed>742</FloorAreaServed>
+                        </HeatingSystem>
+                        <CoolingSystem>
+                            <SystemIdentifier id="backcentralair"/>
+                            <YearInstalled>1995</YearInstalled>
+                            <DistributionSystem idref="backducts"/>
+                            <CoolingSystemType>central air conditioning</CoolingSystemType>
+                            <CoolingCapacity>42000</CoolingCapacity><!-- 3.5 ton -->
+                            <FloorAreaServed>1581</FloorAreaServed>
+                            <AnnualCoolingEfficiency>
+                                <Units>SEER</Units>
+                                <Value>10</Value>
+                            </AnnualCoolingEfficiency>
+                        </CoolingSystem>
+                        <CoolingSystem>
+                            <SystemIdentifier id="frontcentralair"/>
+                            <YearInstalled>2000</YearInstalled>
+                            <DistributionSystem idref="frontducts"/>
+                            <CoolingSystemType>central air conditioning</CoolingSystemType>
+                            <CoolingCapacity>30000</CoolingCapacity><!-- 2.5 ton -->
+                            <FloorAreaServed>742</FloorAreaServed>
+                            <AnnualCoolingEfficiency>
+                                <Units>SEER</Units>
+                                <Value>15</Value>
+                            </AnnualCoolingEfficiency>
+                        </CoolingSystem>
+                    </HVACPlant>
+                    <HVACDistribution>
+                        <SystemIdentifier id="backducts"/>
+                        <DistributionSystemType>
+                            <AirDistribution>
+                                <Ducts>
+                                    <DuctInsulationRValue>0</DuctInsulationRValue>
+                                    <DuctLocation>conditioned space</DuctLocation>
+                                    <FractionDuctArea>1</FractionDuctArea>
+                                </Ducts>
+                            </AirDistribution>
+                        </DistributionSystemType>
+                        <ConditionedFloorAreaServed>1581</ConditionedFloorAreaServed>
+                    </HVACDistribution>
+                    <HVACDistribution>
+                        <SystemIdentifier id="frontducts"/>
+                        <DistributionSystemType>
+                            <AirDistribution>
+                                <Ducts>
+                                    <DuctInsulationRValue>0</DuctInsulationRValue>
+                                    <DuctLocation>conditioned space</DuctLocation>
+                                    <FractionDuctArea>1</FractionDuctArea>
+                                </Ducts>
+                            </AirDistribution>
+                        </DistributionSystemType>
+                        <ConditionedFloorAreaServed>742</ConditionedFloorAreaServed>
+                    </HVACDistribution>
+                </HVAC>
+                <WaterHeating>
+                    <WaterHeatingSystem>
+                        <SystemIdentifier id="dhw1"/>
+                        <FuelType>propane</FuelType>
+                        <WaterHeaterType>storage water heater</WaterHeaterType>
+                        <YearInstalled>2000</YearInstalled>
+                        <EnergyFactor>0.55</EnergyFactor>
+                    </WaterHeatingSystem>
+                </WaterHeating>
+            </Systems>
+        </BuildingDetails>
+    </Building>
+</HPXML>
