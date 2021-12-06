@@ -123,7 +123,7 @@
             <SystemIdentifier id='RimJoist1'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>115.60000000000001</Area>
+            <Area>115.6</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -244,15 +244,12 @@
           <Window>
             <SystemIdentifier id='Window1'/>
             <Area>108.0</Area>
-            <Azimuth>180</Azimuth>
+            <Azimuth>0</Azimuth>
             <FrameType>
-              <Metal>
-                <ThermalBreak>true</ThermalBreak>
-              </Metal>
+              <Wood/>
             </FrameType>
-            <GlassLayers>double-pane</GlassLayers>
-            <GlassType>low-e</GlassType>
-            <GasFill>argon</GasFill>
+            <GlassLayers>single-pane</GlassLayers>
+            <GlassType>tinted</GlassType>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
@@ -263,13 +260,14 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>108.0</Area>
-            <Azimuth>0</Azimuth>
+            <Area>72.0</Area>
+            <Azimuth>90</Azimuth>
             <FrameType>
-              <Wood/>
+              <Vinyl/>
             </FrameType>
-            <GlassLayers>single-pane</GlassLayers>
-            <GlassType>tinted</GlassType>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>reflective</GlassType>
+            <GasFill>air</GasFill>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
@@ -280,9 +278,16 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>72.0</Area>
-            <Azimuth>270</Azimuth>
-            <GlassLayers>glass block</GlassLayers>
+            <Area>108.0</Area>
+            <Azimuth>180</Azimuth>
+            <FrameType>
+              <Metal>
+                <ThermalBreak>true</ThermalBreak>
+              </Metal>
+            </FrameType>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>low-e</GlassType>
+            <GasFill>argon</GasFill>
             <InteriorShading>
               <SystemIdentifier id='Window3InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
@@ -294,13 +299,8 @@
           <Window>
             <SystemIdentifier id='Window4'/>
             <Area>72.0</Area>
-            <Azimuth>90</Azimuth>
-            <FrameType>
-              <Vinyl/>
-            </FrameType>
-            <GlassLayers>double-pane</GlassLayers>
-            <GlassType>reflective</GlassType>
-            <GasFill>air</GasFill>
+            <Azimuth>270</Azimuth>
+            <GlassLayers>glass block</GlassLayers>
             <InteriorShading>
               <SystemIdentifier id='Window4InteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>

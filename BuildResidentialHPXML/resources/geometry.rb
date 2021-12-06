@@ -140,8 +140,8 @@ class Geometry
 
     num_points = footprint_polygon.size
     (1..num_points).to_a.each do |i|
-      pt1 = footprint_polygon[i % num_points]
-      pt2 = footprint_polygon[i - 1]
+      pt1 = footprint_polygon[(i + 1) % num_points]
+      pt2 = footprint_polygon[i % num_points]
       polygon_points = [pt1, pt2]
 
       space.surfaces.each do |surface|
@@ -533,18 +533,18 @@ class Geometry
       surface_floor = create_surface(polygon_floor, model)
       surface_floor.setSurfaceType('Floor')
       surface_floor.setOutsideBoundaryCondition('Surface')
-      surface_s_roof = create_surface(polygon_s_roof, model)
-      surface_s_roof.setSurfaceType('RoofCeiling')
-      surface_s_roof.setOutsideBoundaryCondition('Outdoors')
       surface_n_roof = create_surface(polygon_n_roof, model)
       surface_n_roof.setSurfaceType('RoofCeiling')
       surface_n_roof.setOutsideBoundaryCondition('Outdoors')
-      surface_w_wall = create_surface(polygon_w_wall, model)
-      surface_w_wall.setSurfaceType(side_type)
-      surface_w_wall.setOutsideBoundaryCondition('Outdoors')
       surface_e_wall = create_surface(polygon_e_wall, model)
       surface_e_wall.setSurfaceType(side_type)
       surface_e_wall.setOutsideBoundaryCondition('Outdoors')
+      surface_s_roof = create_surface(polygon_s_roof, model)
+      surface_s_roof.setSurfaceType('RoofCeiling')
+      surface_s_roof.setOutsideBoundaryCondition('Outdoors')
+      surface_w_wall = create_surface(polygon_w_wall, model)
+      surface_w_wall.setSurfaceType(side_type)
+      surface_w_wall.setOutsideBoundaryCondition('Outdoors')
 
       # assign surfaces to the space
       attic_space = create_space(model)
@@ -740,17 +740,17 @@ class Geometry
         polygon_n_wall = make_polygon(nw_point, roof_n_point, ne_point)
         polygon_s_wall = make_polygon(sw_point, se_point, roof_s_point)
 
-        deck_w = create_surface(polygon_w_roof, model)
-        deck_w.setSurfaceType('RoofCeiling')
-        deck_w.setOutsideBoundaryCondition('Outdoors')
+        wall_n = create_surface(polygon_n_wall, model)
+        wall_n.setSurfaceType('Wall')
         deck_e = create_surface(polygon_e_roof, model)
         deck_e.setSurfaceType('RoofCeiling')
         deck_e.setOutsideBoundaryCondition('Outdoors')
-        wall_n = create_surface(polygon_n_wall, model)
-        wall_n.setSurfaceType('Wall')
         wall_s = create_surface(polygon_s_wall, model)
         wall_s.setSurfaceType('Wall')
         wall_s.setOutsideBoundaryCondition('Outdoors')
+        deck_w = create_surface(polygon_w_roof, model)
+        deck_w.setSurfaceType('RoofCeiling')
+        deck_w.setOutsideBoundaryCondition('Outdoors')
 
         garage_attic_space = create_space(model)
         deck_w.setSpace(garage_attic_space)
@@ -955,24 +955,24 @@ class Geometry
                                         skylight_area_left:,
                                         skylight_area_right:,
                                         **remainder)
-    facades = [Constants.FacadeFront, Constants.FacadeBack, Constants.FacadeLeft, Constants.FacadeRight]
+    facades = [Constants.FacadeBack, Constants.FacadeRight, Constants.FacadeFront, Constants.FacadeLeft]
 
     wwrs = {}
-    wwrs[Constants.FacadeFront] = window_front_wwr
     wwrs[Constants.FacadeBack] = window_back_wwr
-    wwrs[Constants.FacadeLeft] = window_left_wwr
     wwrs[Constants.FacadeRight] = window_right_wwr
+    wwrs[Constants.FacadeFront] = window_front_wwr
+    wwrs[Constants.FacadeLeft] = window_left_wwr
     window_areas = {}
-    window_areas[Constants.FacadeFront] = window_area_front
     window_areas[Constants.FacadeBack] = window_area_back
-    window_areas[Constants.FacadeLeft] = window_area_left
     window_areas[Constants.FacadeRight] = window_area_right
+    window_areas[Constants.FacadeFront] = window_area_front
+    window_areas[Constants.FacadeLeft] = window_area_left
 
     skylight_areas = {}
-    skylight_areas[Constants.FacadeFront] = skylight_area_front
     skylight_areas[Constants.FacadeBack] = skylight_area_back
-    skylight_areas[Constants.FacadeLeft] = skylight_area_left
     skylight_areas[Constants.FacadeRight] = skylight_area_right
+    skylight_areas[Constants.FacadeFront] = skylight_area_front
+    skylight_areas[Constants.FacadeLeft] = skylight_area_left
     skylight_areas['none'] = 0
 
     # Store surfaces that should get windows by facade

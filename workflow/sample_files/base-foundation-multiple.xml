@@ -133,7 +133,7 @@
             <SystemIdentifier id='RimJoist1'/>
             <ExteriorAdjacentTo>crawlspace - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
-            <Area>115.60000000000001</Area>
+            <Area>115.6</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -263,7 +263,7 @@
             <SystemIdentifier id='FrameFloor1'/>
             <ExteriorAdjacentTo>basement - unconditioned</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>675.0</Area>
+            <Area>1350.0</Area>
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
@@ -273,7 +273,7 @@
             <SystemIdentifier id='FrameFloor2'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>1350.0</Area>
+            <Area>675.0</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
@@ -349,7 +349,7 @@
           <Window>
             <SystemIdentifier id='Window1'/>
             <Area>108.0</Area>
-            <Azimuth>180</Azimuth>
+            <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
@@ -362,8 +362,8 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>108.0</Area>
-            <Azimuth>0</Azimuth>
+            <Area>72.0</Area>
+            <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
@@ -376,8 +376,8 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>72.0</Area>
-            <Azimuth>270</Azimuth>
+            <Area>108.0</Area>
+            <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
@@ -391,7 +391,7 @@
           <Window>
             <SystemIdentifier id='Window4'/>
             <Area>72.0</Area>
-            <Azimuth>90</Azimuth>
+            <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>

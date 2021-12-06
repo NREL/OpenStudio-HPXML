@@ -2629,11 +2629,15 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     elsif hpxml_file == 'base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'
       adjacent_to = HPXML::LocationOtherHousingUnit
     end
-    hpxml.walls[2].exterior_adjacent_to = adjacent_to
+    wall = hpxml.walls.select { |w|
+             w.interior_adjacent_to == HPXML::LocationLivingSpace &&
+               w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+           }           [0]
+    wall.exterior_adjacent_to = adjacent_to
     hpxml.frame_floors[0].exterior_adjacent_to = adjacent_to
     hpxml.frame_floors[1].exterior_adjacent_to = adjacent_to
     if hpxml_file != 'base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'
-      hpxml.walls[2].insulation_assembly_r_value = 23
+      wall.insulation_assembly_r_value = 23
       hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
       hpxml.frame_floors[1].insulation_assembly_r_value = 18.7
     end
@@ -2641,7 +2645,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       window.area *= 0.35
     end
     hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
-                    wall_idref: hpxml.walls[2].id,
+                    wall_idref: wall.id,
                     area: 20,
                     azimuth: 0,
                     r_value: 4.4)
@@ -2654,10 +2658,14 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.refrigerators[0].location = adjacent_to
     hpxml.cooking_ranges[0].location = adjacent_to
   elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
-    hpxml.walls[2].delete
-    hpxml.walls[-1].id = "Wall#{hpxml.walls.size}"
-    hpxml.windows[0].wall_idref = hpxml.walls[-1].id
-    hpxml.doors[0].wall_idref = hpxml.walls[-1].id
+    wall = hpxml.walls.select { |w|
+             w.interior_adjacent_to == HPXML::LocationLivingSpace &&
+               w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+           }           [0]
+    wall.delete
+    hpxml.walls.select.with_index { |w, i| w.id = "Wall#{i + 1}" }
+    hpxml.windows.select { |w| w.wall_idref = hpxml.walls[-1].id }
+    hpxml.doors.select { |d| d.wall_idref = hpxml.walls[-1].id }
     hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -2694,7 +2702,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 4.0)
-    hpxml.frame_floors[0].delete
+    hpxml.frame_floors[-1].delete
     hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -2823,8 +2831,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                            insulation_assembly_r_value: 39.3)
     hpxml.slabs[0].area = 1350
     hpxml.slabs[0].exposed_perimeter = 150
+    hpxml.windows[1].area = 108
     hpxml.windows[3].area = 108
-    hpxml.windows[2].area = 108
     hpxml.windows.add(id: "Window#{hpxml.windows.size + 1}",
                       area: 12,
                       azimuth: 90,
@@ -2869,18 +2877,18 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                       fraction_operable: 0.0,
                       wall_idref: hpxml.foundation_walls[0].id)
   elsif ['base-enclosure-skylights-physical-properties.xml'].include? hpxml_file
-    hpxml.skylights[1].ufactor = nil
-    hpxml.skylights[1].shgc = nil
-    hpxml.skylights[1].glass_layers = HPXML::WindowLayersSinglePane
-    hpxml.skylights[1].frame_type = HPXML::WindowFrameTypeWood
-    hpxml.skylights[1].glass_type = HPXML::WindowGlassTypeTinted
     hpxml.skylights[0].ufactor = nil
     hpxml.skylights[0].shgc = nil
-    hpxml.skylights[0].glass_layers = HPXML::WindowLayersDoublePane
-    hpxml.skylights[0].frame_type = HPXML::WindowFrameTypeMetal
-    hpxml.skylights[0].thermal_break = true
-    hpxml.skylights[0].glass_type = HPXML::WindowGlassTypeLowE
-    hpxml.skylights[0].gas_fill = HPXML::WindowGasKrypton
+    hpxml.skylights[0].glass_layers = HPXML::WindowLayersSinglePane
+    hpxml.skylights[0].frame_type = HPXML::WindowFrameTypeWood
+    hpxml.skylights[0].glass_type = HPXML::WindowGlassTypeTinted
+    hpxml.skylights[1].ufactor = nil
+    hpxml.skylights[1].shgc = nil
+    hpxml.skylights[1].glass_layers = HPXML::WindowLayersDoublePane
+    hpxml.skylights[1].frame_type = HPXML::WindowFrameTypeMetal
+    hpxml.skylights[1].thermal_break = true
+    hpxml.skylights[1].glass_type = HPXML::WindowGlassTypeLowE
+    hpxml.skylights[1].gas_fill = HPXML::WindowGasKrypton
   elsif ['base-enclosure-skylights-shading.xml'].include? hpxml_file
     hpxml.skylights[0].exterior_shading_factor_summer = 0.1
     hpxml.skylights[0].exterior_shading_factor_winter = 0.9
@@ -2891,40 +2899,40 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.skylights[1].interior_shading_factor_summer = 0.5
     hpxml.skylights[1].interior_shading_factor_winter = 1.0
   elsif ['base-enclosure-windows-physical-properties.xml'].include? hpxml_file
-    hpxml.windows[1].ufactor = nil
-    hpxml.windows[1].shgc = nil
-    hpxml.windows[1].glass_layers = HPXML::WindowLayersSinglePane
-    hpxml.windows[1].frame_type = HPXML::WindowFrameTypeWood
-    hpxml.windows[1].glass_type = HPXML::WindowGlassTypeTinted
-    hpxml.windows[3].ufactor = nil
-    hpxml.windows[3].shgc = nil
-    hpxml.windows[3].glass_layers = HPXML::WindowLayersDoublePane
-    hpxml.windows[3].frame_type = HPXML::WindowFrameTypeVinyl
-    hpxml.windows[3].glass_type = HPXML::WindowGlassTypeReflective
-    hpxml.windows[3].gas_fill = HPXML::WindowGasAir
     hpxml.windows[0].ufactor = nil
     hpxml.windows[0].shgc = nil
-    hpxml.windows[0].glass_layers = HPXML::WindowLayersDoublePane
-    hpxml.windows[0].frame_type = HPXML::WindowFrameTypeMetal
-    hpxml.windows[0].thermal_break = true
-    hpxml.windows[0].glass_type = HPXML::WindowGlassTypeLowE
-    hpxml.windows[0].gas_fill = HPXML::WindowGasArgon
+    hpxml.windows[0].glass_layers = HPXML::WindowLayersSinglePane
+    hpxml.windows[0].frame_type = HPXML::WindowFrameTypeWood
+    hpxml.windows[0].glass_type = HPXML::WindowGlassTypeTinted
+    hpxml.windows[1].ufactor = nil
+    hpxml.windows[1].shgc = nil
+    hpxml.windows[1].glass_layers = HPXML::WindowLayersDoublePane
+    hpxml.windows[1].frame_type = HPXML::WindowFrameTypeVinyl
+    hpxml.windows[1].glass_type = HPXML::WindowGlassTypeReflective
+    hpxml.windows[1].gas_fill = HPXML::WindowGasAir
     hpxml.windows[2].ufactor = nil
     hpxml.windows[2].shgc = nil
-    hpxml.windows[2].glass_layers = HPXML::WindowLayersGlassBlock
+    hpxml.windows[2].glass_layers = HPXML::WindowLayersDoublePane
+    hpxml.windows[2].frame_type = HPXML::WindowFrameTypeMetal
+    hpxml.windows[2].thermal_break = true
+    hpxml.windows[2].glass_type = HPXML::WindowGlassTypeLowE
+    hpxml.windows[2].gas_fill = HPXML::WindowGasArgon
+    hpxml.windows[3].ufactor = nil
+    hpxml.windows[3].shgc = nil
+    hpxml.windows[3].glass_layers = HPXML::WindowLayersGlassBlock
   elsif ['base-enclosure-windows-shading.xml'].include? hpxml_file
-    hpxml.windows[3].exterior_shading_factor_summer = 0.5
-    hpxml.windows[3].exterior_shading_factor_winter = 0.5
-    hpxml.windows[3].interior_shading_factor_summer = 0.5
-    hpxml.windows[3].interior_shading_factor_winter = 0.5
-    hpxml.windows[0].exterior_shading_factor_summer = 0.1
-    hpxml.windows[0].exterior_shading_factor_winter = 0.9
-    hpxml.windows[0].interior_shading_factor_summer = 0.01
-    hpxml.windows[0].interior_shading_factor_winter = 0.99
-    hpxml.windows[2].exterior_shading_factor_summer = 0.0
-    hpxml.windows[2].exterior_shading_factor_winter = 1.0
-    hpxml.windows[2].interior_shading_factor_summer = 0.0
-    hpxml.windows[2].interior_shading_factor_winter = 1.0
+    hpxml.windows[1].exterior_shading_factor_summer = 0.5
+    hpxml.windows[1].exterior_shading_factor_winter = 0.5
+    hpxml.windows[1].interior_shading_factor_summer = 0.5
+    hpxml.windows[1].interior_shading_factor_winter = 0.5
+    hpxml.windows[2].exterior_shading_factor_summer = 0.1
+    hpxml.windows[2].exterior_shading_factor_winter = 0.9
+    hpxml.windows[2].interior_shading_factor_summer = 0.01
+    hpxml.windows[2].interior_shading_factor_winter = 0.99
+    hpxml.windows[3].exterior_shading_factor_summer = 0.0
+    hpxml.windows[3].exterior_shading_factor_winter = 1.0
+    hpxml.windows[3].interior_shading_factor_summer = 0.0
+    hpxml.windows[3].interior_shading_factor_winter = 1.0
   elsif ['base-enclosure-thermal-mass.xml'].include? hpxml_file
     hpxml.partition_wall_mass.area_fraction = 0.8
     hpxml.partition_wall_mass.interior_finish_type = HPXML::InteriorFinishGypsumBoard
@@ -3059,7 +3067,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                depth_below_grade: 3,
                                insulation_interior_r_value: 0,
                                insulation_exterior_r_value: 0)
-    hpxml.frame_floors[0].area = 675
+    hpxml.frame_floors[1].area = 675
     hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -4423,6 +4431,21 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       surface.azimuth = nil
     end
     hpxml.collapse_enclosure_surfaces()
+  end
+
+  # After surfaces are collapsed, round all areas
+  (hpxml.roofs +
+     hpxml.rim_joists +
+     hpxml.walls +
+     hpxml.foundation_walls +
+     hpxml.frame_floors +
+     hpxml.slabs +
+     hpxml.windows +
+     hpxml.skylights +
+     hpxml.doors).each do |s|
+    next if s.area.nil?
+
+    s.area = s.area.round(1)
   end
 
   renumber_hpxml_ids(hpxml)

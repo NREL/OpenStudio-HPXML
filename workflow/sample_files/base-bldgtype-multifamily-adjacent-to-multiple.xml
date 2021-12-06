@@ -190,15 +190,12 @@
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>900.0</Area>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-            </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='FrameFloor1Insulation'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
             <extension>
-              <OtherSpaceAboveOrBelow>above</OtherSpaceAboveOrBelow>
+              <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
             </extension>
           </FrameFloor>
           <FrameFloor>
@@ -245,7 +242,7 @@
           <Window>
             <SystemIdentifier id='Window1'/>
             <Area>35.3</Area>
-            <Azimuth>180</Azimuth>
+            <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
@@ -259,7 +256,7 @@
           <Window>
             <SystemIdentifier id='Window2'/>
             <Area>35.3</Area>
-            <Azimuth>0</Azimuth>
+            <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
