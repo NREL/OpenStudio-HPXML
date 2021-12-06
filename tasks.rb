@@ -3067,7 +3067,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                depth_below_grade: 3,
                                insulation_interior_r_value: 0,
                                insulation_exterior_r_value: 0)
-    hpxml.frame_floors[1].area = 675
+    hpxml.frame_floors[0].area = 675
     hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
