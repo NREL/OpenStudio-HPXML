@@ -869,24 +869,24 @@ class Geometry
                                         skylight_area_left:,
                                         skylight_area_right:,
                                         **remainder)
-    facades = [Constants.FacadeFront, Constants.FacadeBack, Constants.FacadeLeft, Constants.FacadeRight]
+    facades = [Constants.FacadeBack, Constants.FacadeRight, Constants.FacadeFront, Constants.FacadeLeft]
 
     wwrs = {}
-    wwrs[Constants.FacadeFront] = window_front_wwr
     wwrs[Constants.FacadeBack] = window_back_wwr
-    wwrs[Constants.FacadeLeft] = window_left_wwr
     wwrs[Constants.FacadeRight] = window_right_wwr
+    wwrs[Constants.FacadeFront] = window_front_wwr
+    wwrs[Constants.FacadeLeft] = window_left_wwr
     window_areas = {}
-    window_areas[Constants.FacadeFront] = window_area_front
     window_areas[Constants.FacadeBack] = window_area_back
-    window_areas[Constants.FacadeLeft] = window_area_left
     window_areas[Constants.FacadeRight] = window_area_right
+    window_areas[Constants.FacadeFront] = window_area_front
+    window_areas[Constants.FacadeLeft] = window_area_left
 
     skylight_areas = {}
-    skylight_areas[Constants.FacadeFront] = skylight_area_front
     skylight_areas[Constants.FacadeBack] = skylight_area_back
-    skylight_areas[Constants.FacadeLeft] = skylight_area_left
     skylight_areas[Constants.FacadeRight] = skylight_area_right
+    skylight_areas[Constants.FacadeFront] = skylight_area_front
+    skylight_areas[Constants.FacadeLeft] = skylight_area_left
     skylight_areas['none'] = 0
 
     # Store surfaces that should get windows by facade

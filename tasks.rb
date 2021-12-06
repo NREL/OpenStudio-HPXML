@@ -4422,6 +4422,21 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.collapse_enclosure_surfaces()
   end
 
+  # After surfaces are collapsed, round all areas
+  (hpxml.roofs +
+     hpxml.rim_joists +
+     hpxml.walls +
+     hpxml.foundation_walls +
+     hpxml.frame_floors +
+     hpxml.slabs +
+     hpxml.windows +
+     hpxml.skylights +
+     hpxml.doors).each do |s|
+    next if s.area.nil?
+
+    s.area = s.area.round(1)
+  end
+
   renumber_hpxml_ids(hpxml)
 end
 
