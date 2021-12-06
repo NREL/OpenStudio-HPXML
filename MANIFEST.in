@@ -1,0 +1,2 @@
+recursive-include hescorehpxml/schemas *.xsd
+

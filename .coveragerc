@@ -1,0 +1,4 @@
+[run]
+omit = 
+    hescorehpxml/create_all_example_json.py
+    hescorehpxml/__main__.py
