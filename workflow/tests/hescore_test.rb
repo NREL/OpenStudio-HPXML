@@ -57,6 +57,27 @@ class HEScoreTest < MiniTest::Test
     _write_summary_results(results.sort_by { |k, v| k.downcase }.to_h, results_csv_path)
   end
 
+  def test_hescore_hpxml_example_files
+    results_zip_path = File.join(@results_dir, 'results_hescore-hpxml_example_jsons.zip')
+    File.delete(results_zip_path) if File.exist? results_zip_path
+    results_csv_path = File.join(@results_dir, 'results_hescore-hpxml_example.csv')
+    File.delete(results_csv_path) if File.exist? results_csv_path
+
+    zipfile = OpenStudio::ZipFile.new(OpenStudio::Path.new(results_zip_path), false)
+
+    results = {}
+    parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
+    root_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
+    Parallel.map(Dir["#{root_dir}/hescore-hpxml/examples/*.json"].sort, in_threads: Parallel.processor_count) do |json|
+      next unless json
+
+      out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
+      results[File.basename(json)] = run_and_check(json, out_dir, false, zipfile)
+    end
+
+    _write_summary_results(results.sort_by { |k, v| k.downcase }.to_h, results_csv_path)
+  end
+
   def test_skip_simulation
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
