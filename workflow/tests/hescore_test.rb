@@ -18,7 +18,6 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_regression_files
-    skip
     results_zip_path = File.join(@results_dir, 'results_regression_jsons.zip')
     File.delete(results_zip_path) if File.exist? results_zip_path
     results_csv_path = File.join(@results_dir, 'results_regression.csv')
@@ -39,7 +38,6 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_historic_files
-    skip
     results_zip_path = File.join(@results_dir, 'results_historic_jsons.zip')
     File.delete(results_zip_path) if File.exist? results_zip_path
     results_csv_path = File.join(@results_dir, 'results_historic.csv')
@@ -70,7 +68,7 @@ class HEScoreTest < MiniTest::Test
     results = {}
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
     root_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
-    Parallel.map(Dir["#{root_dir}/hescore-hpxml/examples/*.json"].sort, in_threads: 1) do |json|
+    Parallel.map(Dir["#{root_dir}/hescore-hpxml/examples/*.json"].sort, in_threads: Parallel.processor_count) do |json|
       next unless json
 
       out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
@@ -81,7 +79,6 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_skip_simulation
-    skip
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
@@ -100,7 +97,6 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_hourly_output
-    skip
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
@@ -115,7 +111,6 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_invalid_simulation
-    skip
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
@@ -126,7 +121,6 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_floor_areas
-    skip
     # Run modified HES HPXML w/ sum of conditioned floor areas' > CFA.
     # This file would normally generate errors in OS-HPXML, but the ruleset
     # now handles it. Check for successful run.
@@ -167,16 +161,8 @@ class HEScoreTest < MiniTest::Test
     # Run workflow
     cli_path = OpenStudio.getOpenStudioCLI
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -j #{json_path} -o #{parent_dir} --debug"
-    puts command
     start_time = Time.now
-    #success = system(command)
-    require 'open3'
-    stdout, stderr, status = Open3.capture3(command)
-    puts "\nSTDOUT:\n#{stdout}\n"
-    puts "\nSTDERR:\n#{stderr}\n"
-    puts "\nSTATUS:\n#{status}\n"
-    success = status.success?
-    puts "\nSUCCESS:\n#{success}\n"
+    success = system(command)
     assert_equal(true, success)
     runtime = Time.now - start_time
 
