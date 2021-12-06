@@ -2691,7 +2691,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 4.0)
-    hpxml.frame_floors[-1].delete
+    hpxml.frame_floors[0].delete
     hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -3056,7 +3056,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                depth_below_grade: 3,
                                insulation_interior_r_value: 0,
                                insulation_exterior_r_value: 0)
-    hpxml.frame_floors[1].area = 675
+    hpxml.frame_floors[0].area = 675
     hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -4420,6 +4420,21 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       surface.azimuth = nil
     end
     hpxml.collapse_enclosure_surfaces()
+  end
+
+  # After surfaces are collapsed, round all areas
+  (hpxml.roofs +
+     hpxml.rim_joists +
+     hpxml.walls +
+     hpxml.foundation_walls +
+     hpxml.frame_floors +
+     hpxml.slabs +
+     hpxml.windows +
+     hpxml.skylights +
+     hpxml.doors).each do |s|
+    next if s.area.nil?
+
+    s.area = s.area.round(1)
   end
 
   renumber_hpxml_ids(hpxml)

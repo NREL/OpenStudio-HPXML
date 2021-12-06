@@ -3159,13 +3159,14 @@ class HPXMLFile
     # Sorting of objects to make the measure deterministic
     def self.surface_order(s)
       order_map = { HPXML::LocationLivingSpace => 0,
-                    HPXML::LocationAtticUnvented => 1,
-                    HPXML::LocationAtticVented => 1,
-                    HPXML::LocationBasementConditioned => 2,
-                    HPXML::LocationBasementUnconditioned => 2,
-                    HPXML::LocationCrawlspaceUnvented => 2,
-                    HPXML::LocationCrawlspaceVented => 2,
-                    HPXML::LocationCrawlspaceConditioned => 2,
+                    HPXML::LocationBasementConditioned => 1,
+                    HPXML::LocationBasementUnconditioned => 1,
+                    HPXML::LocationCrawlspaceUnvented => 1,
+                    HPXML::LocationCrawlspaceVented => 1,
+                    HPXML::LocationCrawlspaceConditioned => 1,
+                    HPXML::LocationOutside => 1,
+                    HPXML::LocationAtticUnvented => 2,
+                    HPXML::LocationAtticVented => 2,
                     HPXML::LocationGarage => 3 }
       location = Geometry.get_adjacent_to(surface: s)
       if location == HPXML::LocationLivingSpace && s.adjacentSurface.is_initialized
@@ -3178,10 +3179,10 @@ class HPXMLFile
 
       order = order * 10 + s.azimuth / 1000.0
       if s.outsideBoundaryCondition.downcase == 'adiabatic'
-        if s.surfaceType != 'RoofCeiling' # Ensure adiabatic ceiling before adiabatic floor
-          order += 0.5
-        else
+        if s.surfaceType != 'RoofCeiling' # Ensure adiabatic floor before adiabatic ceiling
           order += 0.4
+        else
+          order += 0.5
         end
       elsif (not location2.nil?) && location == HPXML::LocationLivingSpace
         order -= 0.5
