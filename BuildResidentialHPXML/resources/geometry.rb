@@ -129,7 +129,7 @@ class Geometry
     end
   end
 
-  def self.assign_indexes(model, polygon, space)
+  def self.assign_indexes(model, footprint_polygon, space)
     space.additionalProperties.setFeature('Index', indexer(model))
 
     space.surfaces.each do |surface|
@@ -138,25 +138,25 @@ class Geometry
       surface.additionalProperties.setFeature('Index', indexer(model))
     end
 
-    num_points = polygon.size
+    num_points = footprint_polygon.size
     (1..num_points).to_a.each do |i|
-      pt1 = polygon[i % num_points]
-      pt2 = polygon[i - 1]
+      pt1 = footprint_polygon[i % num_points]
+      pt2 = footprint_polygon[i - 1]
       polygon_points = [pt1, pt2]
 
       space.surfaces.each do |surface|
         next if surface.surfaceType != 'Wall'
 
-        j = 0
+        num_points_matched = 0
         polygon_points.each do |polygon_point|
           surface.vertices.each do |surface_point|
             x = polygon_point.x - surface_point.x
             y = polygon_point.y - surface_point.y
             z = polygon_point.z - surface_point.z
-            j += 1 if x.abs < Constants.small && y.abs < Constants.small && z.abs < Constants.small
+            num_points_matched += 1 if x.abs < Constants.small && y.abs < Constants.small && z.abs < Constants.small
           end
         end
-        next if j < 2
+        next if num_points_matched < 2 # match at least 2 points of the footprint_polygon and you've found the correct wall surface
 
         surface.additionalProperties.setFeature('Index', indexer(model))
       end
