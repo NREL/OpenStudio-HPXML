@@ -70,7 +70,7 @@ class HEScoreTest < MiniTest::Test
     results = {}
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
     root_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
-    Parallel.map(Dir["#{root_dir}/hescore-hpxml/examples/*.json"].sort, in_threads: Parallel.processor_count) do |json|
+    Parallel.map(Dir["#{root_dir}/hescore-hpxml/examples/*.json"].sort, in_threads: 1) do |json|
       next unless json
 
       out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
@@ -169,8 +169,14 @@ class HEScoreTest < MiniTest::Test
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -j #{json_path} -o #{parent_dir} --debug"
     puts command
     start_time = Time.now
-    success = system(command)
-    puts success
+    #success = system(command)
+    require 'open3'
+    stdout, stderr, status = Open3.capture3(command)
+    puts "\nSTDOUT:\n#{stdout}\n"
+    puts "\nSTDERR:\n#{stderr}\n"
+    puts "\nSTATUS:\n#{status}\n"
+    success = status.success?
+    puts "\nSUCCESS:\n#{success}\n"
     assert_equal(true, success)
     runtime = Time.now - start_time
 
