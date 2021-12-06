@@ -18,6 +18,7 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_regression_files
+    skip
     results_zip_path = File.join(@results_dir, 'results_regression_jsons.zip')
     File.delete(results_zip_path) if File.exist? results_zip_path
     results_csv_path = File.join(@results_dir, 'results_regression.csv')
@@ -31,13 +32,14 @@ class HEScoreTest < MiniTest::Test
       next unless json
 
       out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
-      results[File.basename(json)] = run_and_check(json, out_dir, false, zipfile)
+      results[File.basename(json)] = run_and_check(json, out_dir, zipfile)
     end
 
     _write_summary_results(results.sort_by { |k, v| k.downcase }.to_h, results_csv_path)
   end
 
   def test_historic_files
+    skip
     results_zip_path = File.join(@results_dir, 'results_historic_jsons.zip')
     File.delete(results_zip_path) if File.exist? results_zip_path
     results_csv_path = File.join(@results_dir, 'results_historic.csv')
@@ -51,7 +53,7 @@ class HEScoreTest < MiniTest::Test
       next unless json
 
       out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
-      results[File.basename(json)] = run_and_check(json, out_dir, false, zipfile)
+      results[File.basename(json)] = run_and_check(json, out_dir, zipfile)
     end
 
     _write_summary_results(results.sort_by { |k, v| k.downcase }.to_h, results_csv_path)
@@ -72,13 +74,14 @@ class HEScoreTest < MiniTest::Test
       next unless json
 
       out_dir = File.join(parent_dir, "run#{Parallel.worker_number}")
-      results[File.basename(json)] = run_and_check(json, out_dir, false, zipfile)
+      results[File.basename(json)] = run_and_check(json, out_dir, zipfile)
     end
 
     _write_summary_results(results.sort_by { |k, v| k.downcase }.to_h, results_csv_path)
   end
 
   def test_skip_simulation
+    skip
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
@@ -97,6 +100,7 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_hourly_output
+    skip
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
@@ -111,6 +115,7 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_invalid_simulation
+    skip
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
@@ -121,6 +126,7 @@ class HEScoreTest < MiniTest::Test
   end
 
   def test_floor_areas
+    skip
     # Run modified HES HPXML w/ sum of conditioned floor areas' > CFA.
     # This file would normally generate errors in OS-HPXML, but the ruleset
     # now handles it. Check for successful run.
@@ -153,7 +159,7 @@ class HEScoreTest < MiniTest::Test
 
   private
 
-  def run_and_check(json, parent_dir, expect_error, zipfile)
+  def run_and_check(json, parent_dir, zipfile)
     json_path = File.absolute_path(json)
     json_file = File.open(json_path)
     json = JSON.parse(json_file.read)
@@ -161,68 +167,66 @@ class HEScoreTest < MiniTest::Test
     # Run workflow
     cli_path = OpenStudio.getOpenStudioCLI
     command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -j #{json_path} -o #{parent_dir} --debug"
+    puts command
     start_time = Time.now
     success = system(command)
+    puts success
     assert_equal(true, success)
     runtime = Time.now - start_time
 
     results_json = File.join(parent_dir, 'results', 'results.json')
-    results = nil
-    if expect_error
-      assert(!File.exist?(results_json))
-    else
-      # Check all output files exist
-      hes_hpxml = File.join(parent_dir, 'results', 'HEScoreDesign.xml')
-      assert(File.exist?(hes_hpxml))
-      assert(File.exist?(results_json))
 
-      # Check HPXMLs are valid
-      schemas_dir = File.absolute_path(File.join(parent_dir, '..', '..', 'hpxml-measures', 'HPXMLtoOpenStudio', 'resources'))
-      _test_schema_validation(parent_dir, hes_hpxml, schemas_dir)
+    # Check all output files exist
+    hes_hpxml = File.join(parent_dir, 'results', 'HEScoreDesign.xml')
+    assert(File.exist?(hes_hpxml))
+    assert(File.exist?(results_json))
 
-      # Check run.log for messages
-      File.readlines(File.join(parent_dir, 'HEScoreDesign', 'run.log')).each do |log_line|
-        next if log_line.strip.empty?
-        next if log_line.start_with? 'Info: '
-        next if log_line.start_with? 'Executing command'
+    # Check HPXMLs are valid
+    schemas_dir = File.absolute_path(File.join(parent_dir, '..', '..', 'hpxml-measures', 'HPXMLtoOpenStudio', 'resources'))
+    _test_schema_validation(parent_dir, hes_hpxml, schemas_dir)
 
-        next if log_line.include? 'Warning: Could not load nokogiri, no HPXML validation performed.'
+    # Check run.log for messages
+    File.readlines(File.join(parent_dir, 'HEScoreDesign', 'run.log')).each do |log_line|
+      next if log_line.strip.empty?
+      next if log_line.start_with? 'Info: '
+      next if log_line.start_with? 'Executing command'
 
-        # FIXME: Remove this warning when https://github.com/NREL/OpenStudio-HPXML/issues/638 is resolved
-        next if log_line.include?('Glazing U-factor') && log_line.include?('above maximum expected value. U-factor decreased')
+      next if log_line.include? 'Warning: Could not load nokogiri, no HPXML validation performed.'
 
-        # Files w/o cooling systems
-        no_spc_clg = false
-        json['building']['systems']['hvac'].each do |hvac|
-          if hvac['cooling'].nil? || hvac['cooling']['type'] == 'none'
-            no_spc_clg = true
-          end
+      # FIXME: Remove this warning when https://github.com/NREL/OpenStudio-HPXML/issues/638 is resolved
+      next if log_line.include?('Glazing U-factor') && log_line.include?('above maximum expected value. U-factor decreased')
+
+      # Files w/o cooling systems
+      no_spc_clg = false
+      json['building']['systems']['hvac'].each do |hvac|
+        if hvac['cooling'].nil? || hvac['cooling']['type'] == 'none'
+          no_spc_clg = true
         end
-        next if no_spc_clg && log_line.include?('No space cooling specified, the model will not include space cooling energy use.')
+      end
+      next if no_spc_clg && log_line.include?('No space cooling specified, the model will not include space cooling energy use.')
 
-        # Files w/o heating systems
-        no_spc_htg = false
-        json['building']['systems']['hvac'].each do |hvac|
-          if hvac['heating'].nil? || hvac['heating']['type'] == 'none'
-            no_spc_htg = true
-          end
+      # Files w/o heating systems
+      no_spc_htg = false
+      json['building']['systems']['hvac'].each do |hvac|
+        if hvac['heating'].nil? || hvac['heating']['type'] == 'none'
+          no_spc_htg = true
         end
-        next if no_spc_htg && log_line.include?('No space heating specified, the model will not include space heating energy use.')
+      end
+      next if no_spc_htg && log_line.include?('No space heating specified, the model will not include space heating energy use.')
 
-        # Files w/o windows
-        if json['building']['zone']['zone_wall'].map { |w| w.key?('zone_window') ? w['zone_window']['window_area'] : 0 }.sum(0.0) <= 1.0
-          next if log_line.include?('No windows specified, the model will not include window heat transfer.')
-        end
-
-        flunk "Unexpected warning found in run.log: #{log_line}"
+      # Files w/o windows
+      if json['building']['zone']['zone_wall'].map { |w| w.key?('zone_window') ? w['zone_window']['window_area'] : 0 }.sum(0.0) <= 1.0
+        next if log_line.include?('No windows specified, the model will not include window heat transfer.')
       end
 
-      # Add results.json to zip file for storage on CI
-      zipfile.addFile(OpenStudio::Path.new(results_json), OpenStudio::Path.new(File.basename(json_path.gsub('.json', '_results.json'))))
-
-      results = _get_results(parent_dir)
-      _test_results(json_path, json, results)
+      flunk "Unexpected warning found in run.log: #{log_line}"
     end
+
+    # Add results.json to zip file for storage on CI
+    zipfile.addFile(OpenStudio::Path.new(results_json), OpenStudio::Path.new(File.basename(json_path.gsub('.json', '_results.json'))))
+
+    results = _get_results(parent_dir)
+    _test_results(json_path, json, results)
 
     return results
   end
