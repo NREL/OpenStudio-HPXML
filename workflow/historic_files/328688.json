@@ -100,8 +100,7 @@
             "type": "packaged_dx",
             "efficiency_method": "user",
             "efficiency": 9.0
-          },
-          "hvac_distribution": []
+          }
         }
       ],
       "domestic_hot_water": {

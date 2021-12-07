@@ -104,8 +104,7 @@
           },
           "cooling": {
             "type": "none"
-          },
-          "hvac_distribution": []
+          }
         }
       ],
       "domestic_hot_water": {
