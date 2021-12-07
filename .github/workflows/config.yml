@@ -18,6 +18,10 @@ jobs:
           ref: ${{ github.head_ref }}
       - name: Install gems
         run: rm -f Gemfile.lock && bundle install
+      - name: Validate JSONs
+        shell: bash
+        run: |
+          for file in workflow/tests/*/*.json; do jsonschema -i $file hescore-hpxml/hescorehpxml/schemas/hescore_json.schema.json; done
       - name: Run tests
         run: bundle exec rake test_all
       - name: Store results
