@@ -118,6 +118,7 @@
                     "capacity_known": false,
                     "year": 2011,
                     "array_azimuth": "south",
+                    "array_tilt": "medium_slope",
                     "num_panels": 20
                 }
             }
