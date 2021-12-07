@@ -17,8 +17,7 @@ jobs:
       - name: Validate JSONs
         shell: bash
         run: |
-          pip install jsonschema
-          for file in workflow/tests/*/*.json; do jsonschema -i $file hescore-hpxml/hescorehpxml/schemas/hescore_json.schema.json; done
+          for file in workflow/*/*.json; do echo Validating $file... && jsonschema -i $file hescore-hpxml/hescorehpxml/schemas/hescore_json.schema.json; done
   
   run-tests:
     runs-on: ubuntu-latest
