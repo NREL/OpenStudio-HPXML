@@ -84,16 +84,7 @@
                     "cooling": {
                         "type": "mini_split",
                         "efficiency_level": "energy_star"
-                    },
-                    "hvac_distribution": [
-                        {
-                            "name": "duct1",
-                            "location": "uncond_attic",
-                            "fraction": 1,
-                            "insulated": true,
-                            "sealed": true
-                        }
-                    ]
+                    }
                 }
             ],
             "domestic_hot_water": {
