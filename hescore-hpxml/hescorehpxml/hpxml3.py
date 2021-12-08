@@ -201,10 +201,9 @@ class HPXML3toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
         # 'validate_hescore_inputs' error checking
         return loc_hierarchy[0]
 
-    # Please review the new location mapping.
     duct_location_map = {'living space': ['cond_space'],
                          'unconditioned space': ['uncond_basement', 'vented_crawl', 'unvented_crawl', 'uncond_attic'],
-                         'under slab': ['vented_crawl'],
+                         'under slab': ['under_slab'],
                          'basement': ['uncond_basement', 'cond_space'],
                          'basement - unconditioned': ['uncond_basement'],
                          'basement - conditioned': ['cond_space'],
@@ -213,13 +212,13 @@ class HPXML3toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
                          'crawlspace - unconditioned': ['vented_crawl', 'unvented_crawl'],
                          'crawlspace - conditioned': ['cond_space'],
                          'crawlspace': ['vented_crawl', 'unvented_crawl', 'cond_space'],
-                         'exterior wall': None,
+                         'exterior wall': ['exterior_wall'],
                          'interstitial space': None,
                          'garage - conditioned': ['cond_space'],
                          'garage - unconditioned': ['unvented_crawl'],
                          'garage': ['unvented_crawl'],
-                         'roof deck': ['vented_crawl'],
-                         'outside': ['vented_crawl'],
+                         'roof deck': ['outside'],
+                         'outside': ['outside'],
                          'attic': ['uncond_attic', 'cond_space'],
                          'attic - unconditioned': ['uncond_attic'],
                          'attic - conditioned': ['cond_space'],
