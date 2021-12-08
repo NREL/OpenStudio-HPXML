@@ -524,39 +524,37 @@ def test_invalid_hvac_distribution(hpxml_filebase):
     js1 = copy.deepcopy(js)
     js1['building']['systems']['hvac'][0]['heating']['type'] = 'wall_furnace'
     js1['building']['systems']['hvac'][0]['cooling']['type'] = 'packaged_dx'
-    del js1['building']['systems']['hvac'][0]['hvac_distribution'][0]['location']
-    del js1['building']['systems']['hvac'][0]['hvac_distribution'][0]['insulated']
-    del js1['building']['systems']['hvac'][0]['hvac_distribution'][0]['sealed']
+    del js1['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['location']
+    del js1['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['insulated']
     errors = get_error_messages(js1, js_schema)
     if hpxml_filebase == 'townhouse_walls':
         assert ("{'required': ['hvac_distribution']} is not allowed for {'hvac_name': 'hvac1', 'hvac_fraction': 1.0, "
                 "'heating': {'fuel_primary': 'natural_gas', 'type': 'wall_furnace', 'efficiency_method': 'user', "
                 "'efficiency': 0.95}, 'cooling': {'type': 'packaged_dx', 'efficiency_method': 'user', "
-                "'efficiency': 13.0}, 'hvac_distribution': [{'name': 'duct1', 'fraction': 1.0}]}") in errors
+                "'efficiency': 13.0}, 'hvac_distribution': {'leakage_method': 'qualitative', 'sealed': False, "
+                "'duct': [{'name': 'duct1', 'fraction': 1.0}]}}") in errors
     elif hpxml_filebase == 'house1':
         assert ("{'required': ['hvac_distribution']} is not allowed for {'hvac_name': 'hvac1', 'hvac_fraction': 1.0, "
                 "'heating': {'fuel_primary': 'natural_gas', 'type': 'wall_furnace', 'efficiency_method': 'user', "
                 "'efficiency': 0.92}, 'cooling': {'type': 'packaged_dx', 'efficiency_method': 'user', "
-                "'efficiency': 13.0}, 'hvac_distribution': [{'name': 'duct1', 'fraction': 0.5}, {'name': 'duct2', "
-                "'location': 'uncond_attic', 'fraction': 0.35, 'insulated': True, 'sealed': False}, {'name': 'duct3', "
-                "'location': 'cond_space', 'fraction': 0.15, 'insulated': False, 'sealed': False}]}") in errors
+                "'efficiency': 13.0}, 'hvac_distribution': {'leakage_method': 'qualitative', 'sealed': False, "
+                "'duct': [{'name': 'duct1', 'fraction': 0.5}, {'name': 'duct2', 'location': 'uncond_attic', "
+                "'fraction': 0.35, 'insulated': True}, {'name': 'duct3', 'location': 'cond_space', 'fraction': 0.15, "
+                "'insulated': False}]}}") in errors
 
     js2 = copy.deepcopy(js)
-    del js2['building']['systems']['hvac'][0]['hvac_distribution'][0]['name']
-    del js2['building']['systems']['hvac'][0]['hvac_distribution'][0]['location']
-    del js2['building']['systems']['hvac'][0]['hvac_distribution'][0]['insulated']
-    del js2['building']['systems']['hvac'][0]['hvac_distribution'][0]['sealed']
+    del js2['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['name']
+    del js2['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['location']
+    del js2['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['insulated']
     errors = get_error_messages(js2, js_schema)
     assert "'name' is a required property" in errors
     assert "'location' is a required property" in errors
     assert "'insulated' is a required property" in errors
-    assert "'sealed' is a required property" in errors
-    del js2['building']['systems']['hvac'][0]['hvac_distribution'][0]['fraction']
+    del js2['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['fraction']
     errors = get_error_messages(js2, js_schema)
     assert "'fraction' is a required property" in errors
     assert "'location' is a required property" not in errors
     assert "'insulated' is a required property" not in errors
-    assert "'sealed' is a required property" not in errors
 
     js3 = copy.deepcopy(js)
     del js3['building']['systems']['hvac'][0]['hvac_distribution']
@@ -571,6 +569,29 @@ def test_invalid_hvac_distribution(hpxml_filebase):
     js3['building']['systems']['hvac'][0]['cooling']['type'] = 'packaged_dx'
     errors = get_error_messages(js3, js_schema)
     assert len(errors) == 0
+
+    js4 = copy.deepcopy(js)
+    del js4['building']['systems']['hvac'][0]['hvac_distribution']['leakage_method']
+    errors = get_error_messages(js4, js_schema)
+    assert "'leakage_method' is a required property" in errors
+    js4['building']['systems']['hvac'][0]['hvac_distribution']['leakage_method'] = 'quantitative'
+    errors = get_error_messages(js4, js_schema)
+    assert "'leakage_to_outside' is a required property" in errors
+    if hpxml_filebase == 'townhouse_walls':
+        assert ("{'required': ['sealed']} is not allowed for {'sealed': False, 'duct': [{'name': 'duct1', "
+                "'location': 'cond_space', 'fraction': 1.0, 'insulated': False}], "
+                "'leakage_method': 'quantitative'}") in errors
+    elif hpxml_filebase == 'house1':
+        assert ("{'required': ['sealed']} is not allowed for {'sealed': False, 'duct': [{'name': 'duct1', "
+                "'location': 'vented_crawl', 'fraction': 0.5, 'insulated': True}, {'name': 'duct2', "
+                "'location': 'uncond_attic', 'fraction': 0.35, 'insulated': True}, {'name': 'duct3', "
+                "'location': 'cond_space', 'fraction': 0.15, 'insulated': False}], "
+                "'leakage_method': 'quantitative'}") in errors
+
+    js5 = copy.deepcopy(js)
+    del js5['building']['systems']['hvac'][0]['hvac_distribution']['sealed']
+    errors = get_error_messages(js5, js_schema)
+    assert "'sealed' is a required property" in errors
 
 
 @pytest.mark.parametrize('hpxml_filebase', hescore_examples)
