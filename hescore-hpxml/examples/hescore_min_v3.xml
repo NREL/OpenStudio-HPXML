@@ -1,0 +1,216 @@
+<HPXML xmlns="http://hpxmlonline.com/2019/10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="3.0">
+    <XMLTransactionHeaderInformation>
+        <XMLType/>
+        <XMLGeneratedBy/>
+        <CreatedDateAndTime>2014-08-21T11:41:49.968796</CreatedDateAndTime>
+        <Transaction>create</Transaction>
+    </XMLTransactionHeaderInformation>
+    <SoftwareInfo>
+        <SoftwareProgramUsed>Oxygen XML</SoftwareProgramUsed>
+        <SoftwareProgramVersion>16</SoftwareProgramVersion>
+    </SoftwareInfo>
+    <Building>
+        <BuildingID id="bldg1"/>
+        <Site>
+            <SiteID id="bldg1site"/>
+            <Address>
+                <AddressType>street</AddressType>
+                <Address1>123 Main Street</Address1>
+                <CityMunicipality>Golden</CityMunicipality>
+                <StateCode>CO</StateCode>
+                <ZipCode>80401</ZipCode>
+            </Address>
+        </Site>
+        <ProjectStatus>
+            <EventType>audit</EventType>
+            <Date>2014-12-02</Date>
+        </ProjectStatus>
+        <BuildingDetails>
+            <BuildingSummary>
+                <Site>
+                    <Surroundings>stand-alone</Surroundings>
+                    <OrientationOfFrontOfHome>north</OrientationOfFrontOfHome>
+                </Site>
+                <BuildingConstruction>
+                    <YearBuilt>1961</YearBuilt>
+                    <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
+                    <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
+                    <AverageCeilingHeight>7</AverageCeilingHeight>
+                    <NumberofBedrooms>4</NumberofBedrooms>
+                    <ConditionedFloorArea>2400</ConditionedFloorArea>
+                </BuildingConstruction>
+            </BuildingSummary>
+            <Enclosure>
+                <AirInfiltration>
+                    <AirInfiltrationMeasurement>
+                        <SystemIdentifier id="infilt1"/>
+                        <TypeOfInfiltrationMeasurement>blower door</TypeOfInfiltrationMeasurement>
+                        <HousePressure>50</HousePressure>
+                        <BuildingAirLeakage>
+                            <UnitofMeasure>ACH</UnitofMeasure>
+                            <AirLeakage>4.3</AirLeakage>
+                        </BuildingAirLeakage>
+                    </AirInfiltrationMeasurement>
+                </AirInfiltration>
+                <Attics>
+                    <Attic>
+                        <SystemIdentifier id="attic1"/>
+                        <AtticType>
+                            <Attic>
+                                <Vented>true</Vented>
+                            </Attic>
+                        </AtticType>
+                        <AttachedToRoof idref="roof1"/>
+                        <AttachedToFrameFloor idref="framefloor1"/>
+                    </Attic>
+                </Attics>
+                <Foundations>
+                    <Foundation>
+                        <SystemIdentifier id="bsmt1"/>
+                        <FoundationType>
+                            <Basement>
+                                <Conditioned>true</Conditioned>
+                            </Basement>
+                        </FoundationType>
+                    </Foundation>
+                </Foundations>
+                <Roofs>
+                    <Roof>
+                        <SystemIdentifier id="roof1"/>
+                        <RoofType>asphalt or fiberglass shingles</RoofType>
+                        <RoofColor>medium</RoofColor>
+                        <RadiantBarrier>false</RadiantBarrier>
+                        <Insulation>
+                            <SystemIdentifier id="attic1roofins"/>
+                            <Layer>
+                                <NominalRValue>0</NominalRValue>
+                            </Layer>
+                        </Insulation>
+                    </Roof>
+                </Roofs>
+                <Walls>
+                    <Wall>
+                        <SystemIdentifier id="wall1"/>
+                        <WallType>
+                            <WoodStud/>
+                        </WallType>
+                        <Siding>brick veneer</Siding>
+                        <Insulation>
+                            <SystemIdentifier id="wall1ins"/>
+                            <Layer>
+                                <InstallationType>cavity</InstallationType>
+                                <NominalRValue>11</NominalRValue>
+                            </Layer>
+                        </Insulation>
+                    </Wall>
+                </Walls>
+                <FrameFloors>
+                    <FrameFloor>
+                        <SystemIdentifier id="framefloor1"/>
+                        <Area>1200</Area>
+                        <Insulation>
+                            <SystemIdentifier id="attic1flrins"/>
+                            <Layer>
+                                <NominalRValue>49</NominalRValue>
+                            </Layer>
+                        </Insulation>
+                    </FrameFloor>
+                </FrameFloors>
+                <Windows>
+                    <Window>
+                        <SystemIdentifier id="window1"/>
+                        <Area>1</Area>
+                        <Orientation>north</Orientation>
+                        <UFactor>1</UFactor>
+                        <SHGC>.75</SHGC>
+                    </Window>
+                    <Window>
+                        <SystemIdentifier id="window2"/>
+                        <Area>2</Area>
+                        <Orientation>east</Orientation>
+                        <FrameType>
+                            <Vinyl/>
+                        </FrameType>
+                        <GlassLayers>double-pane</GlassLayers>
+                    </Window>
+                    <Window>
+                        <SystemIdentifier id="window3"/>
+                        <Area>3</Area>
+                        <Orientation>south</Orientation>
+                        <FrameType>
+                            <Vinyl/>
+                        </FrameType>
+                        <GlassLayers>double-pane</GlassLayers>
+                    </Window>
+                    <Window>
+                        <SystemIdentifier id="window4"/>
+                        <Area>4</Area>
+                        <Orientation>west</Orientation>
+                        <FrameType>
+                            <Vinyl/>
+                        </FrameType>
+                        <GlassLayers>double-pane</GlassLayers>
+                    </Window>
+                </Windows>
+                <Skylights>
+                    <Skylight>
+                        <SystemIdentifier id="sky1"/>
+                        <Area>11</Area>
+                        <FrameType>
+                            <Aluminum>
+                                <ThermalBreak>true</ThermalBreak>
+                            </Aluminum>
+                        </FrameType>
+                        <GlassLayers>double-pane</GlassLayers>
+                    </Skylight>
+                </Skylights>
+            </Enclosure>
+            <Systems>
+                <HVAC>
+                    <HVACPlant>
+                        <HeatingSystem>
+                            <SystemIdentifier id="furnace1"/>
+                            <DistributionSystem idref="hvacd1"/>
+                            <HeatingSystemType>
+                                <Furnace/>
+                            </HeatingSystemType>
+                            <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+                            <AnnualHeatingEfficiency>
+                                <Units>AFUE</Units>
+                                <Value>0.95</Value>
+                            </AnnualHeatingEfficiency>
+                        </HeatingSystem>
+                        <CoolingSystem>
+                            <SystemIdentifier id="centralair1"/>
+                            <DistributionSystem idref="hvacd1"/>
+                            <CoolingSystemType>central air conditioner</CoolingSystemType>
+                            <AnnualCoolingEfficiency>
+                                <Units>SEER</Units>
+                                <Value>13</Value>
+                            </AnnualCoolingEfficiency>
+                        </CoolingSystem>
+                    </HVACPlant>
+                    <HVACDistribution>
+                        <SystemIdentifier id="hvacd1"/>
+                        <DistributionSystemType>
+                            <AirDistribution>
+                                <Ducts>
+                                    <DuctLocation>living space</DuctLocation>
+                                    <FractionDuctArea>1</FractionDuctArea>
+                                </Ducts>
+                            </AirDistribution>
+                        </DistributionSystemType>
+                    </HVACDistribution>
+                </HVAC>
+                <WaterHeating>
+                    <WaterHeatingSystem>
+                        <SystemIdentifier id="dhw1"/>
+                        <FuelType>natural gas</FuelType>
+                        <WaterHeaterType>storage water heater</WaterHeaterType>
+                        <YearInstalled>2010</YearInstalled>
+                    </WaterHeatingSystem>
+                </WaterHeating>
+            </Systems>
+        </BuildingDetails>
+    </Building>
+</HPXML>

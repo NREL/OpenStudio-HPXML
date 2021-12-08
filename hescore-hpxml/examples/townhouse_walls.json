@@ -1,0 +1,121 @@
+{
+  "building_address": {
+    "address": "123 Main Street",
+    "city": "Golden",
+    "state": "CO",
+    "zip_code": "80401",
+    "assessment_type": "initial"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2014-12-02",
+      "shape": "town_house",
+      "town_house_walls": "back_front_left",
+      "year_built": 1961,
+      "number_bedrooms": 4,
+      "num_floor_above_grade": 2,
+      "floor_to_ceiling_height": 7,
+      "conditioned_floor_area": 2400,
+      "orientation": "north",
+      "blower_door_test": true,
+      "envelope_leakage": 1204
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 1200.0,
+          "roof_assembly_code": "rfwf00co",
+          "roof_color": "medium",
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf49",
+          "zone_skylight": {
+            "skylight_area": 11.0,
+            "skylight_method": "code",
+            "skylight_code": "dcab",
+            "solar_screen": false
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 800,
+          "foundation_type": "cond_basement",
+          "foundation_insulation_level": 0,
+          "floor_assembly_code": "efwf00ca"
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewwf11br",
+          "zone_window": {
+            "window_area": 1.0,
+            "window_method": "custom",
+            "window_u_value": 1.0,
+            "window_shgc": 0.75,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewwf19wo",
+          "zone_window": {
+            "window_area": 4.0,
+            "window_method": "code",
+            "window_code": "dcaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewwf15vi",
+          "zone_window": {
+            "window_area": 3.0,
+            "window_method": "code",
+            "window_code": "dcaw",
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "natural_gas",
+            "type": "central_furnace",
+            "efficiency_method": "user",
+            "efficiency": 0.95
+          },
+          "cooling": {
+            "type": "split_dx",
+            "efficiency_method": "user",
+            "efficiency": 13.0
+          },
+          "hvac_distribution": [
+            {
+              "name": "duct1",
+              "location": "cond_space",
+              "fraction": 1.0,
+              "insulated": false,
+              "sealed": false
+            }
+          ]
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "natural_gas",
+        "efficiency_method": "shipment_weighted",
+        "year": 2010
+      }
+    }
+  }
+}

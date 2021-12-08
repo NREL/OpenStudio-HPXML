@@ -1,6 +1,6 @@
 {
   "building_address": {
-    "address": "Historic run",
+    "address": "227 Northwest 117th Way",
     "city": "Coral Springs",
     "state": "FL",
     "zip_code": "33071",
@@ -139,7 +139,8 @@
           "capacity_known": true,
           "system_capacity": 3.5,
           "year": 2017,
-          "array_azimuth": "south"
+          "array_azimuth": "south",
+          "array_tilt": "medium_slope"
         }
       }
     }

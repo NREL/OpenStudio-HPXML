@@ -8,8 +8,20 @@ on:
   workflow_dispatch:
 
 jobs:
+  validate-jsons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Validate JSONs
+        shell: bash
+        run: |
+          for file in workflow/*/*.json; do echo Validating $file... && jsonschema -i $file hescore-hpxml/hescorehpxml/schemas/hescore_json.schema.json; done
+  
   run-tests:
     runs-on: ubuntu-latest
+    needs: validate-jsons
     container:
       image: nrel/openstudio:3.3.0
     steps:

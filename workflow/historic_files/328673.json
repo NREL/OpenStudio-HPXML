@@ -1,6 +1,6 @@
 {
   "building_address": {
-    "address": "Historic run",
+    "address": "200 Via Lerida",
     "city": "Larkspur",
     "state": "CA",
     "zip_code": "94904",
@@ -137,7 +137,8 @@
           "capacity_known": true,
           "system_capacity": 2.5,
           "year": 2007,
-          "array_azimuth": "south"
+          "array_azimuth": "south",
+          "array_tilt": "medium_slope"
         }
       }
     }
