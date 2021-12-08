@@ -1766,7 +1766,45 @@ class TestPhotovoltaics(unittest.TestCase, ComparatorBase):
             )
 
 
-class TesHPXMLVersion2Point3(unittest.TestCase, ComparatorBase):
+class TestDuctLocations(unittest.TestCase, ComparatorBase):
+    '''
+    These are tests related to allowing additional duct locations
+    '''
+
+    def _set_duct_location(self, location):
+        el = self.xpath('//h:Ducts/h:DuctLocation')
+        el.text = location
+
+    def test_under_slab(self):
+        tr = self._load_xmlfile('house3_v3')
+        self._set_duct_location('under slab')
+        hesd = tr.hpxml_to_hescore()
+        duct = hesd['building']['systems']['hvac'][0]['hvac_distribution'][0]
+        self.assertEqual(duct['location'], 'under_slab')
+
+    def test_exterior_wall(self):
+        tr = self._load_xmlfile('house3_v3')
+        self._set_duct_location('exterior wall')
+        hesd = tr.hpxml_to_hescore()
+        duct = hesd['building']['systems']['hvac'][0]['hvac_distribution'][0]
+        self.assertEqual(duct['location'], 'exterior_wall')
+
+    def test_outside(self):
+        tr = self._load_xmlfile('house3_v3')
+        self._set_duct_location('outside')
+        hesd = tr.hpxml_to_hescore()
+        duct = hesd['building']['systems']['hvac'][0]['hvac_distribution'][0]
+        self.assertEqual(duct['location'], 'outside')
+
+    def test_roof_deck(self):
+        tr = self._load_xmlfile('house3_v3')
+        self._set_duct_location('roof deck')
+        hesd = tr.hpxml_to_hescore()
+        duct = hesd['building']['systems']['hvac'][0]['hvac_distribution'][0]
+        self.assertEqual(duct['location'], 'outside')
+
+
+class TestHPXMLVersion2Point3(unittest.TestCase, ComparatorBase):
 
     def test_floor_furnace(self):
         tr = self._load_xmlfile('hescore_min')
