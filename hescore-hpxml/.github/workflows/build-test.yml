@@ -1,0 +1,60 @@
+name: Tests
+on: [pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.6, 3.7, 3.8, 3.9]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run : |
+          python -m pip install --progress-bar off --upgrade pip
+          pip install --progress-bar off setuptools wheel
+          pip install --progress-bar off ".[test]"
+      - name: Linting
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --max-line-length=127 --statistics
+      - name: Run Tests and Coverage Report
+        run: pytest --junitxml=coverage/junit.xml --cov=hescorehpxml --cov-report=xml:coverage/coverage.xml --cov-report=html:coverage/htmlreport
+        continue-on-error: ${{ matrix.python-version == 3.9 }}
+      - name: Test Report
+        uses: mikepenz/action-junit-report@v2.4.3
+        if: ${{ matrix.python-version == 3.9 }}
+        with:
+          report_paths: coverage/junit.xml
+          check_name: Testing Report
+          fail_on_failure: true
+      - name: Save Coverage Report
+        uses: actions/upload-artifact@v2
+        if: ${{ matrix.python-version == 3.9 }}
+        with:
+          name: coverage-report-html
+          path: coverage/htmlreport/
+      - name: Report coverage to PR
+        uses: 5monkeys/cobertura-action@v9
+        if: ${{ matrix.python-version == 3.9 }}
+        with:
+          path: coverage/coverage.xml
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          minimum_coverage: 83
+      - name: Build documentation
+        if: ${{ matrix.python-version == 3.9 }}
+        run: |
+          cd docs
+          make html
+      - name: Save Docs
+        uses: actions/upload-artifact@v2
+        if: ${{ matrix.python-version == 3.9 }}
+        with:
+          name: documentation
+          path: docs/build/html/

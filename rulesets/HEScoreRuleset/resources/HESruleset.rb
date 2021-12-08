@@ -908,12 +908,24 @@ class HEScoreRuleset
       max_power_output = orig_pv_system['num_panels'] * module_power
     end
 
+    if orig_pv_system['array_tilt'] == 'flat'
+      array_tilt = 0.0
+    elsif orig_pv_system['array_tilt'] == 'low_slope'
+      array_tilt = 15.0 # 3:12, approximately
+    elsif orig_pv_system['array_tilt'] == 'medium_slope'
+      array_tilt = 30.0 # 7:12, approximately
+    elsif orig_pv_system['array_tilt'] == 'steep_slope'
+      array_tilt = 45.0 # 12:12
+    else
+      fail "Unexpected array_tilt: #{orig_pv_system['array_tilt']}."
+    end
+
     new_hpxml.pv_systems.add(id: 'PVSystem',
                              location: HPXML::LocationRoof,
                              module_type: HPXML::PVModuleTypeStandard,
                              tracking: HPXML::PVTrackingTypeFixed,
                              array_azimuth: orientation_to_azimuth(orig_pv_system['array_azimuth']),
-                             array_tilt: @roof_angle,
+                             array_tilt: array_tilt,
                              max_power_output: max_power_output,
                              year_modules_manufactured: orig_pv_system['year'])
   end

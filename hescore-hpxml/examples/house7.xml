@@ -1,0 +1,144 @@
+<HPXML xmlns="http://hpxmlonline.com/2014/6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.3">
+    <XMLTransactionHeaderInformation>
+        <XMLType/>
+        <XMLGeneratedBy/>
+        <CreatedDateAndTime>2014-12-01T15:34:15</CreatedDateAndTime>
+        <Transaction>create</Transaction>
+    </XMLTransactionHeaderInformation>
+    <SoftwareInfo/>
+    <Building>
+        <BuildingID id="bldg1"/>
+        <Site>
+            <SiteID id="address"/>
+            <Address>
+                <AddressType>street</AddressType>
+                <Address1>7 API House</Address1>
+                <CityMunicipality>Washington</CityMunicipality>
+                <StateCode>DC</StateCode>
+                <ZipCode>20011</ZipCode>
+            </Address>
+        </Site>
+        <ProjectStatus>
+            <EventType>construction-period testing/daily test out</EventType>
+            <Date>2014-12-18</Date>
+        </ProjectStatus>
+        <BuildingDetails>
+            <BuildingSummary>
+                <Site>
+                    <Surroundings>attached on two sides</Surroundings>
+                    <OrientationOfFrontOfHome>southeast</OrientationOfFrontOfHome>
+                </Site>
+                <BuildingConstruction>
+                    <YearBuilt>1935</YearBuilt>
+                    <ResidentialFacilityType>multi-family - town homes</ResidentialFacilityType>
+                    <NumberofConditionedFloorsAboveGrade>4</NumberofConditionedFloorsAboveGrade>
+                    <AverageCeilingHeight>8.5</AverageCeilingHeight>
+                    <NumberofBedrooms>5</NumberofBedrooms>
+                    <ConditionedFloorArea>3600</ConditionedFloorArea>
+                </BuildingConstruction>
+            </BuildingSummary>
+            <Enclosure>
+                <AtticAndRoof>
+                    <Roofs>
+                        <Roof>
+                            <SystemIdentifier id="roof1"/>
+                            <RoofColor>medium</RoofColor>
+                            <RoofType>plastic/rubber/synthetic sheeting</RoofType><!-- tar and gravel -->
+                        </Roof>
+                    </Roofs>
+                    <Attics>
+                        <Attic>
+                            <SystemIdentifier id="attic1"/>
+                            <AttachedToRoof idref="roof1"/>
+                            <AtticType>flat roof</AtticType>
+                            <AtticRoofInsulation>
+                                <SystemIdentifier id="attic1ins"/>
+                                <Layer>
+                                    <NominalRValue>19</NominalRValue>
+                                </Layer>
+                            </AtticRoofInsulation>
+                            <Area>900</Area>
+                        </Attic>
+                    </Attics>
+                </AtticAndRoof>
+                <Foundations>
+                    <Foundation>
+                        <SystemIdentifier id="fnd1"/>
+                        <FoundationType>
+                            <SlabOnGrade/>
+                        </FoundationType>
+                        <Slab>
+                            <SystemIdentifier id="slab1"/>
+                            <Area>900</Area>
+                            <!-- omitting insulation to see if it comes out at zero -->
+                        </Slab>
+                    </Foundation>
+                </Foundations>
+                <Walls>
+                    <Wall>
+                        <SystemIdentifier id="wallfront"/>
+                        <WallType>
+                            <StructuralBrick/>
+                        </WallType>
+                        <!-- Intentionally omitting insulation to see if it comes up with zero as it should -->
+                    </Wall>
+                </Walls>
+                <Windows>
+                    <Window>
+                        <SystemIdentifier id="frontwindows"/>
+                        <Area>112.0</Area><!-- 4x7 -->
+                        <Quantity>4</Quantity>
+                        <Orientation>southeast</Orientation>
+                        <FrameType>
+                            <Vinyl/>
+                        </FrameType>
+                        <GlassLayers>double-pane</GlassLayers>
+                    </Window>
+                    <Window>
+                        <SystemIdentifier id="backwindows"/>
+                        <Area>108.0</Area><!-- 3x6 -->
+                        <Quantity>6</Quantity>
+                        <Orientation>northwest</Orientation>
+                        <FrameType>
+                            <Vinyl/>
+                        </FrameType>
+                        <GlassLayers>double-pane</GlassLayers>
+                    </Window>
+                </Windows>
+            </Enclosure>
+            <Systems>
+                <HVAC>
+                    <HVACPlant>
+                        <HeatingSystem>
+                            <SystemIdentifier id="boiler"/>
+                            <HeatingSystemType>
+                                <Boiler/>
+                            </HeatingSystemType>
+                            <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+                            <AnnualHeatingEfficiency>
+                                <Units>AFUE</Units>
+                                <Value>0.8</Value>
+                            </AnnualHeatingEfficiency>
+                        </HeatingSystem>
+                        <CoolingSystem>
+                            <SystemIdentifier id="roomac"/>
+                            <CoolingSystemType>room air conditioner</CoolingSystemType>
+                            <CoolingSystemFuel>electricity</CoolingSystemFuel>
+                            <AnnualCoolingEfficiency>
+                                <Units>EER</Units>
+                                <Value>9</Value>
+                            </AnnualCoolingEfficiency>
+                        </CoolingSystem>
+                    </HVACPlant>
+                </HVAC>
+                <WaterHeating>
+                    <WaterHeatingSystem>
+                        <SystemIdentifier id="dhw1"/>
+                        <WaterHeaterType>space-heating boiler with storage tank</WaterHeaterType>
+                        <RelatedHeatingSystem idref="boiler"/>
+                    </WaterHeatingSystem>
+                </WaterHeating>
+            </Systems>
+        </BuildingDetails>
+    </Building>
+</HPXML>

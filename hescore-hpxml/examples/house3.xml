@@ -1,0 +1,208 @@
+<HPXML xmlns="http://hpxmlonline.com/2014/6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.3">
+    <XMLTransactionHeaderInformation>
+        <XMLType/>
+        <XMLGeneratedBy/>
+        <CreatedDateAndTime>2014-10-29T10:37:07</CreatedDateAndTime>
+        <Transaction>create</Transaction>
+    </XMLTransactionHeaderInformation>
+    <SoftwareInfo/>
+    <Building>
+        <BuildingID id="bldg1"/>
+        <Site>
+            <SiteID id="address"/>
+            <Address>
+                <AddressType>street</AddressType>
+                <Address1>3 API House</Address1>
+                <CityMunicipality>Hunstville</CityMunicipality>
+                <StateCode>AL</StateCode>
+                <ZipCode>35801</ZipCode>
+            </Address>
+        </Site>
+        <ProjectStatus>
+            <EventType>quality assurance/monitoring</EventType>
+            <Date>2014-10-29</Date>
+        </ProjectStatus>
+        <BuildingDetails>
+            <BuildingSummary>
+                <Site>
+                    <OrientationOfFrontOfHome>southwest</OrientationOfFrontOfHome>
+                </Site>
+                <BuildingConstruction>
+                    <YearBuilt>1980</YearBuilt>
+                    <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
+                    <NumberofConditionedFloorsAboveGrade>3</NumberofConditionedFloorsAboveGrade>
+                    <AverageCeilingHeight>8</AverageCeilingHeight>
+                    <NumberofBedrooms>5</NumberofBedrooms>
+                    <ConditionedFloorArea>2038.875</ConditionedFloorArea>
+                </BuildingConstruction>
+            </BuildingSummary>
+            <Enclosure>
+                <AirInfiltration>
+                    <AirInfiltrationMeasurement>
+                        <SystemIdentifier id="blowerdoor1"/>
+                        <TypeOfInfiltrationMeasurement>blower door</TypeOfInfiltrationMeasurement>
+                        <HousePressure>50</HousePressure>
+                        <BuildingAirLeakage>
+                            <UnitofMeasure>CFM</UnitofMeasure>
+                            <AirLeakage>2500</AirLeakage>
+                        </BuildingAirLeakage>
+                    </AirInfiltrationMeasurement>
+                </AirInfiltration>
+                <AtticAndRoof>
+                    <Roofs>
+                        <Roof>
+                            <SystemIdentifier id="roof1"/>
+                            <RoofColor>medium</RoofColor>
+                            <RoofType>slate or tile shingles</RoofType>
+                        </Roof>
+                    </Roofs>
+                    <Attics>
+                        <Attic>
+                            <SystemIdentifier id="attic1"/>
+                            <AttachedToRoof idref="roof1"/>
+                            <AtticType>cathedral ceiling</AtticType>
+                            <AtticRoofInsulation>
+                                <SystemIdentifier id="ceilins1"/>
+                                <Layer>
+                                    <NominalRValue>15</NominalRValue>
+                                </Layer>
+                            </AtticRoofInsulation>
+                        </Attic>
+                    </Attics>
+                </AtticAndRoof>
+                <Foundations>
+                    <Foundation>
+                        <SystemIdentifier id="fnd1"/>
+                        <FoundationType>
+                            <SlabOnGrade/>
+                        </FoundationType>
+                        <Slab>
+                            <SystemIdentifier id="slab1"/>
+                            <PerimeterInsulation>
+                                <SystemIdentifier id="slab1perimeterins"/>
+                                <Layer>
+                                    <NominalRValue>5</NominalRValue>
+                                </Layer>
+                            </PerimeterInsulation>
+                        </Slab>
+                    </Foundation>
+                </Foundations>
+                <Walls>
+                    <Wall>
+                        <SystemIdentifier id="wall1"/>
+                        <WallType>
+                            <WoodStud>
+                                <ExpandedPolystyreneSheathing>true</ExpandedPolystyreneSheathing>
+                            </WoodStud>
+                        </WallType>
+                        <Siding>aluminum siding</Siding>
+                        <Insulation>
+                            <SystemIdentifier id="wall1ins"/>
+                            <Layer>
+                                <InstallationType>cavity</InstallationType>
+                                <NominalRValue>13</NominalRValue>
+                            </Layer>
+                            <Layer>
+                                <InstallationType>continuous</InstallationType>
+                                <InsulationMaterial>
+                                    <Rigid>xps</Rigid>
+                                </InsulationMaterial>
+                                <NominalRValue>5</NominalRValue>
+                            </Layer>
+                        </Insulation>
+                    </Wall>
+                </Walls>
+                <Windows>
+                    <Window>
+                        <SystemIdentifier id="frontwindows"/>
+                        <Area>120.0</Area><!-- 4x5 -->
+                        <Quantity>6</Quantity>
+                        <Orientation>southwest</Orientation>
+                        <FrameType>
+                            <Aluminum>
+                                <ThermalBreak>true</ThermalBreak>
+                            </Aluminum>
+                        </FrameType>
+                        <GlassLayers>double-pane</GlassLayers>
+                        <GlassType>reflective</GlassType>
+                    </Window>
+                    <Window>
+                        <SystemIdentifier id="rightwindows"/>
+                        <Area>36.0</Area><!-- 3x4 -->
+                        <Quantity>3</Quantity>
+                        <Orientation>northwest</Orientation>
+                        <FrameType>
+                            <Aluminum>
+                                <ThermalBreak>true</ThermalBreak>
+                            </Aluminum>
+                        </FrameType>
+                        <GlassLayers>double-pane</GlassLayers>
+                        <GlassType>reflective</GlassType>
+                    </Window>
+                    <Window>
+                        <SystemIdentifier id="backwindows1"/>
+                        <Area>72.0</Area><!-- 4x6 -->
+                        <Quantity>3</Quantity>
+                        <Orientation>northeast</Orientation>
+                        <FrameType>
+                            <Aluminum>
+                                <ThermalBreak>true</ThermalBreak>
+                            </Aluminum>
+                        </FrameType>
+                        <GlassLayers>double-pane</GlassLayers>
+                        <GlassType>reflective</GlassType>
+                    </Window>
+                    <Window>
+                        <SystemIdentifier id="leftwindows"/>
+                        <Area>75.0</Area><!-- 3x5 -->
+                        <Quantity>5</Quantity>
+                        <Orientation>southeast</Orientation>
+                        <FrameType>
+                            <Aluminum>
+                                <ThermalBreak>true</ThermalBreak>
+                            </Aluminum>
+                        </FrameType>
+                        <GlassLayers>double-pane</GlassLayers>
+                        <GlassType>reflective</GlassType>
+                    </Window>
+                </Windows>
+            </Enclosure>
+            <Systems>
+                <HVAC>
+                    <HVACPlant>
+                        <HeatPump>
+                            <SystemIdentifier id="heatpump1"/>
+                            <YearInstalled>2000</YearInstalled>
+                            <DistributionSystem idref="ductsys1"/>
+                            <HeatPumpType>air-to-air</HeatPumpType>
+                        </HeatPump>
+                    </HVACPlant>
+                    <HVACDistribution>
+                        <SystemIdentifier id="ductsys1"/>
+                        <DistributionSystemType>
+                            <AirDistribution>
+                                <DuctLeakageMeasurement>
+                                    <LeakinessObservedVisualInspection>connections sealed w mastic</LeakinessObservedVisualInspection>
+                                </DuctLeakageMeasurement>
+                                <Ducts>
+                                    <DuctInsulationRValue>0</DuctInsulationRValue>
+                                    <DuctLocation>conditioned space</DuctLocation>
+                                    <FractionDuctArea>1</FractionDuctArea>
+                                </Ducts>
+                            </AirDistribution>
+                        </DistributionSystemType>
+                    </HVACDistribution>
+                </HVAC>
+                <WaterHeating>
+                    <WaterHeatingSystem>
+                        <SystemIdentifier id="dhw1"/>
+                        <FuelType>propane</FuelType>
+                        <WaterHeaterType>storage water heater</WaterHeaterType>
+                        <YearInstalled>2005</YearInstalled>
+                        <EnergyFactor>0.56</EnergyFactor>
+                    </WaterHeatingSystem>
+                </WaterHeating>
+            </Systems>
+        </BuildingDetails>
+    </Building>
+</HPXML>

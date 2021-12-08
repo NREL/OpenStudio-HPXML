@@ -1,0 +1,93 @@
+{
+  "building_address": {
+    "address": "7 API House",
+    "city": "Washington",
+    "state": "DC",
+    "zip_code": "20011",
+    "assessment_type": "test"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2014-12-18",
+      "shape": "town_house",
+      "town_house_walls": "back_front",
+      "year_built": 1935,
+      "number_bedrooms": 5,
+      "num_floor_above_grade": 4,
+      "floor_to_ceiling_height": 9,
+      "conditioned_floor_area": 3600,
+      "orientation": "south_east",
+      "blower_door_test": false,
+      "air_sealing_present": false
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 900.0,
+          "roof_assembly_code": "rfwf19tg",
+          "roof_color": "medium",
+          "roof_type": "cath_ceiling",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 900.0,
+          "foundation_type": "slab_on_grade",
+          "foundation_insulation_level": 0
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewbr00nn",
+          "zone_window": {
+            "window_area": 112.0,
+            "window_method": "code",
+            "window_code": "dcaw",
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewbr00nn",
+          "zone_window": {
+            "window_area": 108.0,
+            "window_method": "code",
+            "window_code": "dcaw",
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "natural_gas",
+            "type": "boiler",
+            "efficiency_method": "user",
+            "efficiency": 0.8
+          },
+          "cooling": {
+            "type": "packaged_dx",
+            "efficiency_method": "user",
+            "efficiency": 9.0
+          }
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "combined",
+        "type": "indirect"
+      }
+    }
+  }
+}
