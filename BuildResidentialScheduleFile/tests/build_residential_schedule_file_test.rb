@@ -179,7 +179,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(2650, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotTubHeater, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(298, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotWaterDishwasher, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(325, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(1009, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(887, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
     assert(!sf.schedules.keys.include?('vacancy'))
   end
 
@@ -235,7 +235,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(2650, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotTubHeater, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(298 * occupied_ratio, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotWaterDishwasher, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(325 * occupied_ratio, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(1009 * occupied_ratio, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(887 * occupied_ratio, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(vacancy_hrs, sf.annual_equivalent_full_load_hrs(col_name: 'vacancy', schedules: sf.tmp_schedules), 0.1)
   end
 
@@ -333,8 +333,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(2502, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotTubPump, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(2650, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotTubHeater, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(226, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotWaterDishwasher, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(274, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(975, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(244, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
+    assert_in_epsilon(1077, sf.annual_equivalent_full_load_hrs(col_name: Constants.HotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
     assert(!sf.schedules.keys.include?('vacancy'))
   end
 

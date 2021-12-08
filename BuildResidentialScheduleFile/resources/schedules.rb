@@ -49,7 +49,6 @@ class ScheduleGenerator
 
       @schedules[col_name] = Array.new(@total_days_in_year * @steps_in_day, 0.0)
     end
-    @schedules['sleep'] = Array.new(@total_days_in_year * @steps_in_day, 0.0)
 
     return @schedules
   end
@@ -71,12 +70,6 @@ class ScheduleGenerator
 
     success = set_vacancy(args: args)
     return false if not success
-
-    # Remove columns
-    @schedules.delete('sleep')
-    @schedules.delete('sinks')
-    @schedules.delete('showers')
-    @schedules.delete('baths')
 
     return true
   end
@@ -381,7 +374,6 @@ class ScheduleGenerator
         minute = day * 1440 + step * @minutes_per_step
         index_15 = (minute / 15).to_i
         sleep = sum_across_occupants(all_simulated_values, 0, index_15).to_f / args[:geometry_num_occupants]
-        @schedules['sleep'][day * @steps_in_day + step] = sleep
         away_schedule << sum_across_occupants(all_simulated_values, 5, index_15).to_f / args[:geometry_num_occupants]
         idle_schedule << sum_across_occupants(all_simulated_values, 6, index_15).to_f / args[:geometry_num_occupants]
         active_occupancy_percentage = 1 - (away_schedule[-1] + sleep)
@@ -714,26 +706,30 @@ class ScheduleGenerator
 
     offset_range = 30
 
+    # showers, sinks, baths
+
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     shower_activity_sch = shower_activity_sch.rotate(random_offset)
     shower_activity_sch = apply_monthly_offsets(array: shower_activity_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
     shower_activity_sch = aggregate_array(shower_activity_sch, @minutes_per_step)
     shower_peak_flow = shower_activity_sch.max
-    @schedules['showers'] = shower_activity_sch.map { |flow| flow / shower_peak_flow }
+    showers = shower_activity_sch.map { |flow| flow / shower_peak_flow }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     sink_activity_sch = sink_activity_sch.rotate(-4 * 60 + random_offset) # 4 am shifting
     sink_activity_sch = apply_monthly_offsets(array: sink_activity_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
     sink_activity_sch = aggregate_array(sink_activity_sch, @minutes_per_step)
     sink_peak_flow = sink_activity_sch.max
-    @schedules['sinks'] = sink_activity_sch.map { |flow| flow / sink_peak_flow }
+    sinks = sink_activity_sch.map { |flow| flow / sink_peak_flow }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     bath_activity_sch = bath_activity_sch.rotate(random_offset)
     bath_activity_sch = apply_monthly_offsets(array: bath_activity_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
     bath_activity_sch = aggregate_array(bath_activity_sch, @minutes_per_step)
     bath_peak_flow = bath_activity_sch.max
-    @schedules['baths'] = bath_activity_sch.map { |flow| flow / bath_peak_flow }
+    baths = bath_activity_sch.map { |flow| flow / bath_peak_flow }
+
+    # hot water dishwasher/clothes washer/fixtures, cooking range, clothes washer/dryer, dishwasher, occupants
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     dw_activity_sch = dw_activity_sch.rotate(random_offset)
@@ -779,7 +775,7 @@ class ScheduleGenerator
 
     @schedules[Constants.Occupants] = away_schedule.map { |i| 1.0 - i }
 
-    @schedules[Constants.HotWaterFixtures] = [@schedules['showers'], @schedules['sinks'], @schedules['baths']].transpose.map { |flow| flow.reduce(:+) }
+    @schedules[Constants.HotWaterFixtures] = [showers, sinks, baths].transpose.map { |flow| flow.reduce(:+) }
     fixtures_peak_flow = @schedules[Constants.HotWaterFixtures].max
     @schedules[Constants.HotWaterFixtures] = @schedules[Constants.HotWaterFixtures].map { |flow| flow / fixtures_peak_flow }
 
