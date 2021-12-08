@@ -54,12 +54,12 @@ class HPXMLDefaults
     apply_hot_water_distribution(hpxml, cfa, ncfl, has_uncond_bsmnt)
     apply_water_fixtures(hpxml, schedules_file)
     apply_solar_thermal_systems(hpxml)
-    apply_appliances(hpxml, nbeds, eri_version)
-    apply_lighting(hpxml)
-    apply_ceiling_fans(hpxml, nbeds, weather)
-    apply_pools_and_hot_tubs(hpxml, cfa, nbeds)
-    apply_plug_loads(hpxml, cfa, nbeds)
-    apply_fuel_loads(hpxml, cfa, nbeds)
+    apply_appliances(hpxml, nbeds, eri_version, schedules_file)
+    apply_lighting(hpxml, schedules_file)
+    apply_ceiling_fans(hpxml, nbeds, weather, schedules_file)
+    apply_pools_and_hot_tubs(hpxml, cfa, nbeds, schedules_file)
+    apply_plug_loads(hpxml, cfa, nbeds, schedules_file)
+    apply_fuel_loads(hpxml, cfa, nbeds, schedules_file)
     apply_pv_systems(hpxml)
     apply_generators(hpxml)
     apply_batteries(hpxml)
@@ -1590,7 +1590,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_appliances(hpxml, nbeds, eri_version)
+  def self.apply_appliances(hpxml, nbeds, eri_version, schedules_file)
     # Default clothes washer
     if hpxml.clothes_washers.size > 0
       clothes_washer = hpxml.clothes_washers[0]
@@ -1862,7 +1862,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_lighting(hpxml)
+  def self.apply_lighting(hpxml, schedules_file)
     return if hpxml.lighting_groups.empty?
 
     if hpxml.lighting.interior_usage_multiplier.nil?
@@ -1943,7 +1943,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_ceiling_fans(hpxml, nbeds, weather)
+  def self.apply_ceiling_fans(hpxml, nbeds, weather, schedules_file)
     return if hpxml.ceiling_fans.size == 0
 
     ceiling_fan = hpxml.ceiling_fans[0]
@@ -1971,7 +1971,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_pools_and_hot_tubs(hpxml, cfa, nbeds)
+  def self.apply_pools_and_hot_tubs(hpxml, cfa, nbeds, schedules_file)
     hpxml.pools.each do |pool|
       next if pool.type == HPXML::TypeNone
 
@@ -2085,7 +2085,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_plug_loads(hpxml, cfa, nbeds)
+  def self.apply_plug_loads(hpxml, cfa, nbeds, schedules_file)
     hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
         default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_residual_mels_default_values(cfa)
@@ -2203,7 +2203,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_fuel_loads(hpxml, cfa, nbeds)
+  def self.apply_fuel_loads(hpxml, cfa, nbeds, schedules_file)
     hpxml.fuel_loads.each do |fuel_load|
       if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
         if fuel_load.therm_per_year.nil?
