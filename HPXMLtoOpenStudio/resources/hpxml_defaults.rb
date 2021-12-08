@@ -1478,7 +1478,7 @@ class HPXMLDefaults
       hpxml.water_heating.water_fixtures_usage_multiplier = 1.0
       hpxml.water_heating.water_fixtures_usage_multiplier_isdefaulted = true
     end
-    schedules_file_includes_fixtures = Schedule.schedules_file_includes_col_name(schedules_file, Contants.HotWaterFixtures)
+    schedules_file_includes_fixtures = Schedule.schedules_file_includes_col_name(schedules_file, Constants.HotWaterFixtures)
     if hpxml.water_heating.water_fixtures_weekday_fractions.nil? && !schedules_file_includes_fixtures
       hpxml.water_heating.water_fixtures_weekday_fractions = Schedule.FixturesWeekdayFractions
       hpxml.water_heating.water_fixtures_weekday_fractions_isdefaulted = true
