@@ -307,6 +307,12 @@ def test_invalid_wall(hpxml_filebase):
         assert '\"wall_assembly_code\" is not allowed for zone_wall/side[\"back\"]' in errors
         assert '\"wall_assembly_code\" is not allowed for zone_wall/side[\"right\"]' in errors
 
+    if hpxml_filebase == 'townhouse_walls':
+        js3 = copy.deepcopy(js)
+        js3['building']['zone']['zone_wall'].append({'side': 'right'})
+        errors = get_error_messages(js3, js_schema)
+        assert 'zone_wall/side[\"right\"] not allowed' in errors
+
 
 @pytest.mark.parametrize('hpxml_filebase', hescore_examples)
 def test_invalid_window(hpxml_filebase):
