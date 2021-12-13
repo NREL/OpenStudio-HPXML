@@ -1,6 +1,6 @@
 ## OpenStudio-HPXML v1.4.0
 __New Features__
-- ...
+- Allows optional `AirInfiltrationMeasurement/InfiltrationHeight` input.
 
 __Bugfixes__
 - Fixes possible HVAC sizing error if design temperature difference (TD) is negative.
