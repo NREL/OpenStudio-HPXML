@@ -2548,6 +2548,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     hpxml.building_construction.conditioned_building_volume = 23850
     hpxml.air_infiltration_measurements[0].infiltration_volume = hpxml.building_construction.conditioned_building_volume
+    hpxml.air_infiltration_measurements[0].infiltration_height = 15.0
   elsif ['base-enclosure-split-level.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors = 1.5
     hpxml.building_construction.number_of_conditioned_floors_above_grade = 1.5

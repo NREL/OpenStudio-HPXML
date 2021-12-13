@@ -14,6 +14,7 @@ class HPXMLDefaults
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
 
     infil_volume = nil
+    infil_height = nil
     infil_measurements = []
     hpxml.air_infiltration_measurements.each do |measurement|
       is_ach = ((measurement.unit_of_measure == HPXML::UnitsACH) && !measurement.house_pressure.nil?)
@@ -22,9 +23,12 @@ class HPXMLDefaults
       next unless (is_ach || is_cfm || is_nach)
 
       infil_measurements << measurement
-      next if measurement.infiltration_volume.nil?
-
-      infil_volume = measurement.infiltration_volume
+      if not measurement.infiltration_volume.nil?
+        infil_volume = measurement.infiltration_volume
+      end
+      if not measurement.infiltration_height.nil?
+        infil_height = measurement.infiltration_height
+      end
     end
 
     apply_header(hpxml, epw_file)
@@ -32,7 +36,7 @@ class HPXMLDefaults
     apply_neighbor_buildings(hpxml)
     apply_building_occupancy(hpxml, nbeds, schedules_file)
     apply_building_construction(hpxml, cfa, nbeds, infil_volume)
-    apply_infiltration(hpxml, infil_volume, infil_measurements)
+    apply_infiltration(hpxml, infil_volume, infil_height, infil_measurements)
     apply_attics(hpxml)
     apply_foundations(hpxml)
     apply_roofs(hpxml)
@@ -285,12 +289,19 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_infiltration(hpxml, infil_volume, infil_measurements)
+  def self.apply_infiltration(hpxml, infil_volume, infil_height, infil_measurements)
     if infil_volume.nil?
       infil_volume = hpxml.building_construction.conditioned_building_volume
       infil_measurements.each do |measurement|
         measurement.infiltration_volume = infil_volume
         measurement.infiltration_volume_isdefaulted = true
+      end
+    end
+    if infil_height.nil?
+      infil_height = hpxml.inferred_infiltration_height(infil_volume)
+      infil_measurements.each do |measurement|
+        measurement.infiltration_height = infil_height
+        measurement.infiltration_height_isdefaulted = true
       end
     end
   end

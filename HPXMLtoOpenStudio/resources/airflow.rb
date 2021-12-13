@@ -11,7 +11,7 @@ class Airflow
     @spaces = spaces
     @year = hpxml.header.sim_calendar_year
     @infil_volume = hpxml.air_infiltration_measurements.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
-    @infil_height = hpxml.inferred_infiltration_height(@infil_volume)
+    @infil_height = hpxml.air_infiltration_measurements.select { |i| !i.infiltration_height.nil? }[0].infiltration_height
     @living_space = spaces[HPXML::LocationLivingSpace]
     @living_zone = @living_space.thermalZone.get
     @nbeds = nbeds
@@ -151,7 +151,7 @@ class Airflow
   def self.get_default_mech_vent_flow_rate(hpxml, vent_fan, infil_measurements, weather, infil_a_ext, cfa, nbeds)
     # Calculates Qfan cfm requirement per ASHRAE 62.2-2019
     infil_volume = infil_measurements[0].infiltration_volume
-    infil_height = hpxml.inferred_infiltration_height(infil_volume)
+    infil_height = infil_measurements[0].infiltration_height
 
     infil_a_ext = 1.0
     if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? hpxml.building_construction.residential_facility_type
