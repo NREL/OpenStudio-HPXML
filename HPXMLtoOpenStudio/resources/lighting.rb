@@ -158,7 +158,7 @@ class Lighting
                        f_int_led, f_ext_led, f_grg_led,
                        interior_usage_multiplier = 1.0, garage_usage_multiplier = 1.0, exterior_usage_multiplier = 1.0)
 
-    if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014ADEG')
+    if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014AEG')
       # Calculate fluorescent (CFL + LFL) fractions
       f_int_fl = f_int_cfl + f_int_lfl
       f_ext_fl = f_ext_cfl + f_ext_lfl

@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>009c7447-6863-4a2c-a3c4-8a58d976b241</version_id>
-  <version_modified>20211213T170043Z</version_modified>
+  <version_id>a4a198c7-bac7-4d4d-a0ca-37d2c6f443e6</version_id>
+  <version_modified>20211213T222109Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -254,12 +254,6 @@
       <checksum>F1FF6B39</checksum>
     </file>
     <file>
-      <filename>lighting.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FCE5670A</checksum>
-    </file>
-    <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -312,12 +306,6 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>23A47B50</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>5BE2D30C</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -463,12 +451,6 @@
       <checksum>D2F62290</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>66230B87</checksum>
-    </file>
-    <file>
       <filename>EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
@@ -479,6 +461,24 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>EA916DE9</checksum>
+    </file>
+    <file>
+      <filename>lighting.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5A1CD271</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D8F80FE5</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>7A3772E6</checksum>
     </file>
   </files>
 </measure>
