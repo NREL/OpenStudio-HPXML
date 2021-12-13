@@ -1,5 +1,6 @@
 ## OpenStudio-HPXML v1.4.0
 __New Features__
+- Allows optional `AirInfiltrationMeasurement/InfiltrationHeight` input.
 - Allows user-specified annual/timeseries output file names in the ReportSimulationOutput reporting measure.
 
 __Bugfixes__
