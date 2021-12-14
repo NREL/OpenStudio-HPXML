@@ -1804,24 +1804,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('water_heater_scheduled_setpoint_path', false)
-    arg.setDisplayName('Water Heater: Scheduled Setpoint Path')
-    arg.setDescription("Absolute (or relative) path of the csv file containing the setpoint schedule. Setpoint should be defined (in F) for every hour. Applies only to #{HPXML::WaterHeaterTypeStorage} and #{HPXML::WaterHeaterTypeHeatPump}.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('water_heater_scheduled_operating_mode_path', false)
-    arg.setDisplayName('Water Heater: Scheduled Operating Mode Path')
-    arg.setDescription("Absolute (or relative) path of the csv file containing the operating mode schedule. Valid values are 0 (standard) and 1 (heat pump only) and must be specified for every hour. Applies only to #{HPXML::WaterHeaterTypeHeatPump}.")
-    args << arg
-
     water_heater_operating_mode_choices = OpenStudio::StringVector.new
+    water_heater_operating_mode_choices << Constants.Auto
     water_heater_operating_mode_choices << HPXML::WaterHeaterOperatingModeStandard
     water_heater_operating_mode_choices << HPXML::WaterHeaterOperatingModeHeatPumpOnly
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('water_heater_operating_mode', water_heater_operating_mode_choices, true)
     arg.setDisplayName('Water Heater: Operating Mode')
     arg.setDescription("The water heater operating mode. The '#{HPXML::WaterHeaterOperatingModeHeatPumpOnly}' option only uses the heat pump, while '#{HPXML::WaterHeaterOperatingModeStandard}' allows the backup electric resistance to come on in high demand situations. This is ignored if a scheduled operating mode type is selected. Applies only to #{HPXML::WaterHeaterTypeHeatPump}.")
-    arg.setDefaultValue(HPXML::WaterHeaterOperatingModeStandard)
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     hot_water_distribution_system_type_choices = OpenStudio::StringVector.new
@@ -4894,22 +4885,12 @@ class HPXMLFile
       if args[:water_heater_heating_capacity] != Constants.Auto
         heating_capacity = Float(args[:water_heater_heating_capacity])
       end
-    end
 
-    if args[:water_heater_scheduled_setpoint_path].is_initialized
-      setpoint_schedule_filepath = args[:water_heater_scheduled_setpoint_path].get
-    end
-
-    if water_heater_type == HPXML::WaterHeaterTypeStorage
       if args[:water_heater_tank_model_type] != Constants.Auto
         tank_model_type = args[:water_heater_tank_model_type]
       end
-    end
-
-    if args[:water_heater_scheduled_operating_mode_path].is_initialized
-      operating_mode_schedule_filepath = args[:water_heater_scheduled_operating_mode_path].get
-    else
-      if water_heater_type == HPXML::WaterHeaterTypeHeatPump
+    elsif [HPXML::WaterHeaterTypeHeatPump].include? water_heater_type
+      if args[:water_heater_operating_mode] != Constants.Auto
         operating_mode = args[:water_heater_operating_mode]
       end
     end
@@ -4933,9 +4914,7 @@ class HPXMLFile
                                     is_shared_system: is_shared_system,
                                     number_of_units_served: number_of_units_served,
                                     tank_model_type: tank_model_type,
-                                    setpoint_schedule_filepath: setpoint_schedule_filepath,
-                                    operating_mode: operating_mode,
-                                    operating_mode_schedule_filepath: operating_mode_schedule_filepath)
+                                    operating_mode: operating_mode)
   end
 
   def self.set_hot_water_distribution(hpxml, runner, args)

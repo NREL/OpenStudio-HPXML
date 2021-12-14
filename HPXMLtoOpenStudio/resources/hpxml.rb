@@ -4293,8 +4293,7 @@ class HPXML < Object
              :tank_volume, :fraction_dhw_load_served, :heating_capacity, :energy_factor, :usage_bin,
              :uniform_energy_factor, :first_hour_rating, :recovery_efficiency, :uses_desuperheater, :jacket_r_value,
              :related_hvac_idref, :third_party_certification, :standby_loss, :temperature, :is_shared_system,
-             :number_of_units_served, :tank_model_type,
-             :setpoint_schedule_filepath, :operating_mode, :operating_mode_schedule_filepath]
+             :number_of_units_served, :tank_model_type, :operating_mode]
     attr_accessor(*ATTRS)
 
     def related_hvac_system
@@ -4361,9 +4360,7 @@ class HPXML < Object
       if (not @tank_model_type.nil?) || (not @setpoint_schedule_filepath.nil?) || (not @operating_mode.nil?) || (not @operating_mode_schedule_filepath.nil?)
         extension = XMLHelper.create_elements_as_needed(water_heating_system, ['extension'])
         XMLHelper.add_element(extension, 'TankModelType', @tank_model_type, :string) unless @tank_model_type.nil?
-        XMLHelper.add_element(extension, 'SetpointScheduleFilepath', @setpoint_schedule_filepath, :string) unless @setpoint_schedule_filepath.nil?
         XMLHelper.add_element(extension, 'OperatingMode', @operating_mode, :string) unless @operating_mode.nil?
-        XMLHelper.add_element(extension, 'OperatingModeScheduleFilepath', @operating_mode_schedule_filepath, :string) unless @operating_mode_schedule_filepath.nil?
       end
     end
 
@@ -4393,9 +4390,7 @@ class HPXML < Object
       @uses_desuperheater = XMLHelper.get_value(water_heating_system, 'UsesDesuperheater', :boolean)
       @related_hvac_idref = HPXML::get_idref(XMLHelper.get_element(water_heating_system, 'RelatedHVACSystem'))
       @tank_model_type = XMLHelper.get_value(water_heating_system, 'extension/TankModelType', :string)
-      @setpoint_schedule_filepath = XMLHelper.get_value(water_heating_system, 'extension/SetpointScheduleFilepath', :string)
       @operating_mode = XMLHelper.get_value(water_heating_system, 'extension/OperatingMode', :string)
-      @operating_mode_schedule_filepath = XMLHelper.get_value(water_heating_system, 'extension/OperatingModeScheduleFilepath', :string)
     end
   end
 

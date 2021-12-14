@@ -132,12 +132,9 @@ def create_hpxmls
     'base-dhw-tank-heat-pump-uef.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar-fraction.xml' => 'base-dhw-tank-heat-pump.xml',
-    'base-dhw-tank-heat-pump-setpoint-type-scheduled.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml' => 'base-dhw-tank-heat-pump-uef.xml',
-    'base-dhw-tank-heat-pump-operating-mode-type-scheduled.xml' => 'base-dhw-tank-heat-pump-uef.xml',
     'base-dhw-tank-model-type-stratified.xml' => 'base.xml',
     'base-dhw-tank-oil.xml' => 'base-dhw-tank-gas.xml',
-    'base-dhw-tank-setpoint-type-scheduled.xml' => 'base.xml',
     'base-dhw-tank-wood.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
     'base-dhw-tankless-electric-outside.xml' => 'base-dhw-tankless-electric.xml',
@@ -677,7 +674,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['water_heater_setpoint_temperature'] = 125
     args['water_heater_num_units_served'] = 1
     args['water_heater_tank_model_type'] = Constants.Auto
-    args['water_heater_operating_mode'] = HPXML::WaterHeaterOperatingModeStandard
+    args['water_heater_operating_mode'] = Constants.Auto
     args['hot_water_distribution_system_type'] = HPXML::DHWDistTypeStandard
     args['hot_water_distribution_standard_piping_length'] = 50
     args['hot_water_distribution_recirc_control_type'] = HPXML::DHWRecirControlTypeNone
@@ -1002,8 +999,8 @@ def set_measure_argument_values(hpxml_file, args)
     args['water_heater_jacket_rvalue'] = 0
     args['water_heater_setpoint_temperature'] = 0
     args['water_heater_num_units_served'] = 0
-    args['water_heater_tank_model_type'] = HPXML::WaterHeaterTankModelTypeMixed
-    args['water_heater_operating_mode'] = HPXML::WaterHeaterOperatingModeStandard
+    args['water_heater_tank_model_type'] = Constants.Auto
+    args['water_heater_operating_mode'] = Constants.Auto
     args['hot_water_distribution_system_type'] = HPXML::DHWDistTypeStandard
     args['hot_water_distribution_standard_piping_length'] = 0
     args['hot_water_distribution_recirc_control_type'] = HPXML::DHWRecirControlTypeNone
@@ -1558,16 +1555,10 @@ def set_measure_argument_values(hpxml_file, args)
     args['water_heater_type'] = HPXML::WaterHeaterTypeTankless
     args['water_heater_tank_volume'] = Constants.Auto
     args['water_heater_efficiency'] = 0.99
-  elsif ['base-dhw-tank-heat-pump-setpoint-type-scheduled.xml'].include? hpxml_file
-    args['water_heater_scheduled_setpoint_path'] = 'HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_setpoint_schedule.csv'
   elsif ['base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml'].include? hpxml_file
     args['water_heater_operating_mode'] = HPXML::WaterHeaterOperatingModeHeatPumpOnly
-  elsif ['base-dhw-tank-heat-pump-operating-mode-type-scheduled.xml'].include? hpxml_file
-    args['water_heater_scheduled_operating_mode_path'] = 'HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_operating_mode_schedule.csv'
   elsif ['base-dhw-tank-model-type-stratified.xml'].include? hpxml_file
     args['water_heater_tank_model_type'] = HPXML::WaterHeaterTankModelTypeStratified
-  elsif ['base-dhw-tank-setpoint-type-scheduled.xml'].include? hpxml_file
-    args['water_heater_scheduled_setpoint_path'] = 'HPXMLtoOpenStudio/resources/schedule_files/tank/hourly_setpoint_schedule.csv'
   end
 
   # Enclosure

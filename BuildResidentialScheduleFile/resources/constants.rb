@@ -149,3 +149,23 @@ class ScheduleColumns
     }
   end
 end
+
+class WaterHeaterScheduleColumns
+  # Strings --------------------
+
+  def self.WaterHeaterSetpoint
+    return 'water_heater_setpoint'
+  end
+
+  def self.WaterHeaterOperatingMode
+    return 'water_heater_operating_mode'
+  end
+
+  def self.ColNames
+    # col_name => affected_by_vacancy
+    return {
+      WaterHeaterScheduleColumns.WaterHeaterSetpoint => false,
+      WaterHeaterScheduleColumns.WaterHeaterOperatingMode => false
+    }
+  end
+end

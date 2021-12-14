@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>82d9d0ae-74ce-4ec0-9a2c-9634e483385c</version_id>
-  <version_modified>20211214T212210Z</version_modified>
+  <version_id>ac2df19c-17ce-49ee-8d90-442f9296ab70</version_id>
+  <version_modified>20211214T231800Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -21,7 +21,7 @@
     </argument>
     <argument>
       <name>schedules_type</name>
-      <display_name>Schedules: Type</display_name>
+      <display_name>Occupancy Schedules: Type</display_name>
       <description>The type of occupant-related schedules to use.</description>
       <type>Choice</type>
       <required>true</required>
@@ -40,7 +40,7 @@
     </argument>
     <argument>
       <name>schedules_vacancy_period</name>
-      <display_name>Schedules: Vacancy Period</display_name>
+      <display_name>Occupancy Schedules: Vacancy Period</display_name>
       <description>Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15".</description>
       <type>String</type>
       <required>false</required>
@@ -48,7 +48,7 @@
     </argument>
     <argument>
       <name>schedules_random_seed</name>
-      <display_name>Schedules: Random Seed</display_name>
+      <display_name>Occupancy Schedules: Random Seed</display_name>
       <description>This numeric field is the seed for the random number generator. Only applies if the schedules type is 'stochastic'.</description>
       <type>Integer</type>
       <units>#</units>
@@ -57,16 +57,40 @@
     </argument>
     <argument>
       <name>output_csv_path</name>
-      <display_name>Schedules: Output CSV Path</display_name>
+      <display_name>Occupancy Schedules: Output CSV Path</display_name>
       <description>Absolute (or relative) path of the csv file containing user-specified occupancy schedules.</description>
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
+      <name>water_heater_scheduled_setpoint_path</name>
+      <display_name>Water Heater Schedules: Scheduled Setpoint Path</display_name>
+      <description>Absolute (or relative) path of the csv file containing the setpoint schedule. Setpoint should be defined (in F) for every hour. Applies only to storage water heater and heat pump water heater.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>water_heater_scheduled_operating_mode_path</name>
+      <display_name>Water Heater Schedules: Scheduled Operating Mode Path</display_name>
+      <description>Absolute (or relative) path of the csv file containing the operating mode schedule. Valid values are 0 (standard) and 1 (heat pump only) and must be specified for every hour. Applies only to heat pump water heater.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>water_heater_output_csv_path</name>
+      <display_name>Water Heater Schedules: Output CSV Path</display_name>
+      <description>Absolute (or relative) path of the csv file containing user-specified occupancy schedules.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
       <name>hpxml_output_path</name>
       <display_name>HPXML Output File Path</display_name>
-      <description>Absolute/relative output path of the HPXML file. This HPXML file will include the output CSV path.</description>
+      <description>Absolute/relative output path of the HPXML file. This HPXML file will include the output CSV path(s).</description>
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -872,6 +896,12 @@
       <checksum>419E598E</checksum>
     </file>
     <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1335D157</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.2.0</identifier>
@@ -880,25 +910,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>B74F4E22</checksum>
+      <checksum>A64C4DA9</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F5308285</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1335D157</checksum>
+      <checksum>EB825E72</checksum>
     </file>
     <file>
       <filename>build_residential_schedule_file_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>6F2230F5</checksum>
+      <checksum>BF5FDCFC</checksum>
     </file>
   </files>
 </measure>

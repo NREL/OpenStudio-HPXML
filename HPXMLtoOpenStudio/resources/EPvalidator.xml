@@ -1334,7 +1334,6 @@
       <sch:assert role='ERROR' test='number(h:RecoveryEfficiency) &gt; number(h:EnergyFactor) or not(h:RecoveryEfficiency) or not (h:EnergyFactor)'>Expected RecoveryEfficiency to be greater than EnergyFactor</sch:assert>
       <sch:assert role='ERROR' test='number(h:RecoveryEfficiency) &gt; number(h:UniformEnergyFactor) or not(h:RecoveryEfficiency) or not (h:UniformEnergyFactor)'>Expected RecoveryEfficiency to be greater than UniformEnergyFactor</sch:assert>
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:SetpointScheduleFilepath) = 0 or count(h:extension/h:SetpointScheduleFilepath) = 1'>Expected 0 or 1 element(s) for xpath: extension/SetpointScheduleFilepath</sch:assert> <!-- integer -->
       <sch:assert role='ERROR' test='count(h:extension/h:TankModelType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/TankModelType</sch:assert>
       <sch:assert role='ERROR' test='h:extension/h:TankModelType[text()="mixed" or text()="stratified"] or not(h:extension/h:TankModelType)'>Expected extension/TankModelType to be 'mixed' or 'stratified'</sch:assert>
       <!-- Warnings -->
@@ -1369,8 +1368,6 @@
       <sch:assert role='ERROR' test='number(h:UniformEnergyFactor) &gt; 1 or not(h:UniformEnergyFactor)'>Expected UniformEnergyFactor to be greater than 1</sch:assert>
       <sch:assert role='ERROR' test='number(h:EnergyFactor) &gt; 1 or not(h:EnergyFactor)'>Expected EnergyFactor to be greater than 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:SetpointScheduleFilepath) = 0 or count(h:extension/h:SetpointScheduleFilepath) = 1'>Expected 0 or 1 element(s) for xpath: extension/SetpointScheduleFilepath</sch:assert> <!-- integer -->
-      <sch:assert role='ERROR' test='count(h:extension/h:OperatingModeScheduleFilepath) = 0 or count(h:extension/h:OperatingModeScheduleFilepath) = 1'>Expected 0 or 1 element(s) for xpath: extension/OperatingModeScheduleFilepath</sch:assert> <!-- integer -->
       <sch:assert role='ERROR' test='count(h:extension/h:OperatingMode) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/OperatingMode</sch:assert>
       <sch:assert role='ERROR' test='h:extension/h:OperatingMode[text()="standard" or text()="heat pump only"] or not(h:extension/h:OperatingMode)'>Expected extension/OperatingMode to be 'standard' or 'heat pump only'</sch:assert>
     </sch:rule>
