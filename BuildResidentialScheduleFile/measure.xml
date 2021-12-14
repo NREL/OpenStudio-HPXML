@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>8f1577c6-4465-45d6-9b99-714611df154a</version_id>
-  <version_modified>20211214T181946Z</version_modified>
+  <version_id>4eedcf20-fb02-4c3e-98d1-fd7a86fb2e22</version_id>
+  <version_modified>20211214T204240Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -98,12 +98,6 @@
       <checksum>0CB5683C</checksum>
     </file>
     <file>
-      <filename>build_residential_schedule_file_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A18C70F9</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.2.0</identifier>
@@ -112,7 +106,25 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>7C5869C1</checksum>
+      <checksum>B74F4E22</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F5308285</checksum>
+    </file>
+    <file>
+      <filename>build_residential_schedule_file_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>73500F75</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4D69FD47</checksum>
     </file>
     <file>
       <filename>clothes_dryer_consumption_dist.csv</filename>
@@ -887,12 +899,6 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>5FC694CF</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>58BF6B13</checksum>
     </file>
   </files>
 </measure>
