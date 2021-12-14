@@ -698,6 +698,7 @@ class Waterheater
       h_condbot = (1.0 - (10.5 / 12.0)) * h_tank # in the 11th node of the tank
       h_hpctrl_up = (1.0 - (3.5 / 12.0)) * h_tank # in the 4th node of the tank
       h_hpctrl_low = (1.0 - (10.5 / 12.0)) * h_tank # in the 11th node of the tank
+    end
 
     if setpoint_schedule_file.nil?
       hp_setpoint = OpenStudio::Model::ScheduleConstant.new(model)
