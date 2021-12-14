@@ -150,44 +150,43 @@ Detailed Schedule Inputs
 
 Detailed schedule inputs allow schedule values for every hour or timestep of the simulation.
 They can be smooth schedules, or they can reflect real-world or stochastic occupancy.
-Note that if detailed schedule inputs are used, they must be used for *all* building features; you cannot use detailed schedules for some features and simple/default schedules for other features.
 
 Detailed schedule inputs are provided via a CSV file that should be referenced in the HPXML file at ``/HPXML/SoftwareInfo/extension/SchedulesFilePath``.
 Each column must be normalized to MAX=1; that is, the schedules only define *when* energy is used, not *how much* energy is used.
 The columns in the schedule CSV are:
 
-  =============================  ========  ========================================================  ===================
-  Column Name                    Required  Description                                               Affected by Vacancy
-  =============================  ========  ========================================================  ===================
-  ``occupants``                  Yes       Occupant heat gain schedule.                              Yes
-  ``lighting_interior``          Yes       Interior lighting energy use schedule.                    Yes
-  ``lighting_exterior``          Yes       Exterior lighting energy use schedule.                    Yes
-  ``lighting_garage``            Yes       Garage lighting energy use schedule.                      Yes
-  ``lighting_exterior_holiday``  Yes       Exterior holiday lighting energy use schedule.            Yes
-  ``cooking_range``              Yes       Cooking range & oven energy use schedule.                 Yes
-  ``refrigerator``               Yes       Primary refrigerator energy use schedule.                 No
-  ``extra_refrigerator``         Yes       Non-primary refrigerator energy use schedule.             No
-  ``freezer``                    Yes       Freezer energy use schedule.                              No
-  ``dishwasher``                 Yes       Dishwasher energy use schedule.                           Yes
-  ``clothes_washer``             Yes       Clothes washer energy use schedule.                       Yes
-  ``clothes_dryer``              Yes       Clothes dryer energy use schedule.                        Yes
-  ``ceiling_fan``                Yes       Ceiling fan energy use schedule.                          Yes
-  ``plug_loads_other``           Yes       Other plug load energy use schedule.                      Yes
-  ``plug_loads_tv``              Yes       Television plug load energy use schedule.                 Yes
-  ``plug_loads_vehicle``         Yes       Electric vehicle plug load energy use schedule.           Yes
-  ``plug_loads_well_pump``       Yes       Well pump plug load energy use schedule.                  Yes
-  ``fuel_loads_grill``           Yes       Grill fuel load energy use schedule.                      Yes
-  ``fuel_loads_lighting``        Yes       Lighting fuel load energy use schedule.                   Yes
-  ``fuel_loads_fireplace``       Yes       Fireplace fuel load energy use schedule.                  Yes
-  ``pool_pump``                  Yes       Pool pump energy use schedule.                            No
-  ``pool_heater``                Yes       Pool heater energy use schedule.                          No
-  ``hot_tub_pump``               Yes       Hot tub pump energy use schedule.                         No
-  ``hot_tub_heater``             Yes       Hot tub heater energy use schedule.                       No
-  ``hot_water_dishwasher``       Yes       Dishwasher hot water use schedule.                        Yes
-  ``hot_water_clothes_washer``   Yes       Clothes washer hot water use schedule.                    Yes
-  ``hot_water_fixtures``         Yes       Fixtures (sinks, showers, baths) hot water use schedule.  Yes
-  ``vacancy``                    No        1=Home is vacant. Automatically overrides other columns.  N/A
-  =============================  ========  ========================================================  ===================
+  =============================  ========================================================  ===================
+  Column Name                    Description                                               Affected by Vacancy
+  =============================  ========================================================  ===================
+  ``occupants``                  Occupant heat gain schedule.                              Yes
+  ``lighting_interior``          Interior lighting energy use schedule.                    Yes
+  ``lighting_exterior``          Exterior lighting energy use schedule.                    Yes
+  ``lighting_garage``            Garage lighting energy use schedule.                      Yes
+  ``lighting_exterior_holiday``  Exterior holiday lighting energy use schedule.            Yes
+  ``cooking_range``              Cooking range & oven energy use schedule.                 Yes
+  ``refrigerator``               Primary refrigerator energy use schedule.                 No
+  ``extra_refrigerator``         Non-primary refrigerator energy use schedule.             No
+  ``freezer``                    Freezer energy use schedule.                              No
+  ``dishwasher``                 Dishwasher energy use schedule.                           Yes
+  ``clothes_washer``             Clothes washer energy use schedule.                       Yes
+  ``clothes_dryer``              Clothes dryer energy use schedule.                        Yes
+  ``ceiling_fan``                Ceiling fan energy use schedule.                          Yes
+  ``plug_loads_other``           Other plug load energy use schedule.                      Yes
+  ``plug_loads_tv``              Television plug load energy use schedule.                 Yes
+  ``plug_loads_vehicle``         Electric vehicle plug load energy use schedule.           Yes
+  ``plug_loads_well_pump``       Well pump plug load energy use schedule.                  Yes
+  ``fuel_loads_grill``           Grill fuel load energy use schedule.                      Yes
+  ``fuel_loads_lighting``        Lighting fuel load energy use schedule.                   Yes
+  ``fuel_loads_fireplace``       Fireplace fuel load energy use schedule.                  Yes
+  ``pool_pump``                  Pool pump energy use schedule.                            No
+  ``pool_heater``                Pool heater energy use schedule.                          No
+  ``hot_tub_pump``               Hot tub pump energy use schedule.                         No
+  ``hot_tub_heater``             Hot tub heater energy use schedule.                       No
+  ``hot_water_dishwasher``       Dishwasher hot water use schedule.                        Yes
+  ``hot_water_clothes_washer``   Clothes washer hot water use schedule.                    Yes
+  ``hot_water_fixtures``         Fixtures (sinks, showers, baths) hot water use schedule.  Yes
+  ``vacancy``                    1=Home is vacant. Automatically overrides other columns.  N/A
+  =============================  ========================================================  ===================
 
 A couple schedule CSV file examples are provided in the ``HPXMLtoOpenStudio/resources/schedule_files`` directory.
 
@@ -198,7 +197,7 @@ Default Schedules
 
 If neither simple nor detailed inputs are provided, then schedules are defaulted.
 Default schedules are typically smooth, averaged schedules.
-These default schedules are described elsewhere in the documentation (e.g., see :ref:`buildingoccupancy`).
+These default schedules are described elsewhere in the documentation (e.g., see :ref:`buildingoccupancy` for the default occupant heat gain schedule).
 
 HPXML Building Summary
 ----------------------
@@ -680,14 +679,13 @@ If UFactor and SHGC are not provided and GlassLayers is not "glass block", addit
   ============================  ========  ======  =======================  ========  ========  ========================================================
   ``FrameType``                 element           See [#]_                 Yes                 Type of frame
   ``FrameType/*/ThermalBreak``  boolean           See [#]_                 No        false     Whether the Aluminum or Metal frame has a thermal break
-  ``GlassType``                 string            See [#]_                 No        <none>    Type of glass
+  ``GlassType``                 string            See [#]_                 No        clear     Type of glass
   ``GasFill``                   string            See [#]_                 No        See [#]_  Type of gas inside double/triple-pane windows
   ============================  ========  ======  =======================  ========  ========  ========================================================
   
   .. [#] FrameType child element choices are ``Aluminum``, ``Fiberglass``, ``Metal``, ``Vinyl``, or ``Wood``.
   .. [#] ThermalBreak is only valid if FrameType is ``Aluminum`` or ``Metal``.
   .. [#] GlassType choices are "clear", "low-e", "tinted", "tinted/reflective", or "reflective".
-         Do not specify this element if the window has clear glass.
   .. [#] GasFill choices are "air", "argon", "krypton", "xenon", "nitrogen", or "other".
   .. [#] If GasFill not provided, defaults to "air" for double-pane windows and "argon" for triple-pane windows.
 
