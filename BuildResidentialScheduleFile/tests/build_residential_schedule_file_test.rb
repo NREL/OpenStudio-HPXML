@@ -43,7 +43,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
     assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: ScheduleColumns.ColNames.keys)
     sf.validate_schedules(year: 2007)
 
     assert_in_epsilon(6020, sf.annual_equivalent_full_load_hrs(col_name: ScheduleColumns.Occupants, schedules: sf.tmp_schedules), 0.1)
@@ -95,7 +95,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod=Dec 1 - Jan 31') })
     assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: ScheduleColumns.ColNames.keys)
     sf.validate_schedules(year: 2007)
 
     vacancy_hrs = 31.0 * 2.0 * 24.0
@@ -150,7 +150,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
     assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: ScheduleColumns.ColNames.keys)
     sf.validate_schedules(year: 2007)
 
     assert_in_epsilon(6689, sf.annual_equivalent_full_load_hrs(col_name: ScheduleColumns.Occupants, schedules: sf.tmp_schedules), 0.1)
@@ -203,7 +203,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod=Dec 1 - Jan 31') })
     assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: ScheduleColumns.ColNames.keys)
     sf.validate_schedules(year: 2007)
 
     vacancy_hrs = 31.0 * 2.0 * 24.0
@@ -259,7 +259,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
     assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: ScheduleColumns.ColNames.keys)
     sf.validate_schedules(year: 2007)
 
     assert_in_epsilon(6689, sf.annual_equivalent_full_load_hrs(col_name: ScheduleColumns.Occupants, schedules: sf.tmp_schedules), 0.1)
@@ -305,7 +305,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
     assert(warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: ScheduleColumns.ColNames.keys)
     sf.validate_schedules(year: 2007)
 
     assert_in_epsilon(6072, sf.annual_equivalent_full_load_hrs(col_name: ScheduleColumns.Occupants, schedules: sf.tmp_schedules), 0.1)
@@ -357,7 +357,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod=Jan 1 - Dec 31') })
     assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: ScheduleColumns.ColNames.keys)
     sf.validate_schedules(year: 2012)
 
     vacancy_hrs = 366.0 * 24.0
@@ -410,7 +410,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
     assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: ScheduleColumns.ColNames.keys)
     sf.validate_schedules(year: 2007)
 
     assert_in_epsilon(6020, sf.annual_equivalent_full_load_hrs(col_name: ScheduleColumns.Occupants, schedules: sf.tmp_schedules), 0.1)
@@ -461,7 +461,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
     assert(warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: Constants.ScheduleColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['output_csv_path'], col_names: ScheduleColumns.ColNames.keys)
     sf.validate_schedules(year: 2007)
 
     assert_in_epsilon(6020, sf.annual_equivalent_full_load_hrs(col_name: ScheduleColumns.Occupants, schedules: sf.tmp_schedules), 0.1)
@@ -492,6 +492,60 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(4158, sf.annual_equivalent_full_load_hrs(col_name: ScheduleColumns.HotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
     assert_in_epsilon(4204, sf.annual_equivalent_full_load_hrs(col_name: ScheduleColumns.HotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
     assert(!sf.schedules.keys.include?('vacancy'))
+  end
+
+  def test_water_heater_tank_scheduled
+    hpxml = _create_hpxml('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'smooth.csv'))
+    @args_hash['water_heater_scheduled_setpoint_path'] = 'HPXMLtoOpenStudio/resources/schedule_files/tank/hourly_setpoint_schedule.csv'
+    @args_hash['water_heater_output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'water_heater.csv'))
+    model, hpxml, result = _test_measure()
+
+    info_msgs = result.info.map { |x| x.logMessage }
+    warn_msgs = result.warnings.map { |x| x.logMessage }
+    assert(info_msgs.any? { |info_msg| info_msg.include?('Created') })
+    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
+
+    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['water_heater_output_csv_path'], col_names: WaterHeaterScheduleColumns.ColNames.keys, schedule_max_val: 150)
+    sf.validate_schedules(year: 2007)
+
+    assert(sf.schedules.keys.include?(WaterHeaterScheduleColumns.WaterHeaterSetpoint))
+    assert(sf.schedules[WaterHeaterScheduleColumns.WaterHeaterSetpoint].include?(120))
+    assert(sf.schedules[WaterHeaterScheduleColumns.WaterHeaterSetpoint].include?(125))
+    assert(sf.schedules[WaterHeaterScheduleColumns.WaterHeaterSetpoint].include?(130))
+    assert(!sf.schedules[WaterHeaterScheduleColumns.WaterHeaterSetpoint].include?(135))
+    assert(sf.schedules[WaterHeaterScheduleColumns.WaterHeaterSetpoint].include?(140))
+  end
+
+  def test_water_heater_heat_pump_scheduled
+    hpxml = _create_hpxml('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'smooth.csv'))
+    @args_hash['water_heater_scheduled_setpoint_path'] = 'HPXMLtoOpenStudio/resources/schedule_files/tank/hourly_setpoint_schedule.csv'
+    @args_hash['water_heater_scheduled_operating_mode_path'] = 'HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_operating_mode_schedule.csv'
+    @args_hash['water_heater_output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'water_heater.csv'))
+    model, hpxml, result = _test_measure()
+
+    info_msgs = result.info.map { |x| x.logMessage }
+    warn_msgs = result.warnings.map { |x| x.logMessage }
+    assert(info_msgs.any? { |info_msg| info_msg.include?('Created') })
+    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
+
+    sf = SchedulesFile.new(model: model, schedules_path: @args_hash['water_heater_output_csv_path'], col_names: WaterHeaterScheduleColumns.ColNames.keys, schedule_max_val: 150)
+    sf.validate_schedules(year: 2007)
+
+    assert(sf.schedules.keys.include?(WaterHeaterScheduleColumns.WaterHeaterSetpoint))
+    assert(sf.schedules[WaterHeaterScheduleColumns.WaterHeaterSetpoint].include?(120))
+    assert(sf.schedules[WaterHeaterScheduleColumns.WaterHeaterSetpoint].include?(125))
+    assert(sf.schedules[WaterHeaterScheduleColumns.WaterHeaterSetpoint].include?(130))
+    assert(!sf.schedules[WaterHeaterScheduleColumns.WaterHeaterSetpoint].include?(135))
+    assert(sf.schedules[WaterHeaterScheduleColumns.WaterHeaterSetpoint].include?(140))
+    assert(sf.schedules.keys.include?(WaterHeaterScheduleColumns.WaterHeaterOperatingMode))
+    assert(sf.schedules[WaterHeaterScheduleColumns.WaterHeaterOperatingMode].include?(0))
+    assert(sf.schedules[WaterHeaterScheduleColumns.WaterHeaterOperatingMode].include?(1))
   end
 
   def _test_measure()
