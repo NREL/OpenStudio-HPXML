@@ -293,17 +293,17 @@ class ScheduleGenerator
     # shape of all_simulated_values is [2, 35040, 7]
     (1..args[:geometry_num_occupants]).each do |i|
       occ_type_id = weighted_random(prng, schedule_config['occupancy_types']['probabilities'])
-      init_prob_file_weekday = args[:resources_path] + "/schedules_weekday_mkv_chain_initial_prob_cluster_#{occ_type_id}.csv"
+      init_prob_file_weekday = args[:resources_path] + "/weekday/mkv_chain_initial_prob_cluster_#{occ_type_id}.csv"
       initial_prob_weekday = CSV.read(init_prob_file_weekday)
       initial_prob_weekday = initial_prob_weekday.map { |x| x[0].to_f }
-      init_prob_file_weekend = args[:resources_path] + "/schedules_weekend_mkv_chain_initial_prob_cluster_#{occ_type_id}.csv"
+      init_prob_file_weekend = args[:resources_path] + "/weekend/mkv_chain_initial_prob_cluster_#{occ_type_id}.csv"
       initial_prob_weekend = CSV.read(init_prob_file_weekend)
       initial_prob_weekend = initial_prob_weekend.map { |x| x[0].to_f }
 
-      transition_matrix_file_weekday = args[:resources_path] + "/schedules_weekday_mkv_chain_transition_prob_cluster_#{occ_type_id}.csv"
+      transition_matrix_file_weekday = args[:resources_path] + "/weekday/mkv_chain_transition_prob_cluster_#{occ_type_id}.csv"
       transition_matrix_weekday = CSV.read(transition_matrix_file_weekday)
       transition_matrix_weekday = transition_matrix_weekday.map { |x| x.map { |y| y.to_f } }
-      transition_matrix_file_weekend = args[:resources_path] + "/schedules_weekend_mkv_chain_transition_prob_cluster_#{occ_type_id}.csv"
+      transition_matrix_file_weekend = args[:resources_path] + "/weekend/mkv_chain_transition_prob_cluster_#{occ_type_id}.csv"
       transition_matrix_weekend = CSV.read(transition_matrix_file_weekend)
       transition_matrix_weekend = transition_matrix_weekend.map { |x| x.map { |y| y.to_f } }
 
@@ -835,7 +835,7 @@ class ScheduleGenerator
   end
 
   def read_monthly_shift_minutes(resources_path:, daytype:)
-    shift_file = resources_path + "/schedules_#{daytype}_state_and_monthly_schedule_shift.csv"
+    shift_file = resources_path + "/#{daytype}/state_and_monthly_schedule_shift.csv"
     shifts = CSV.read(shift_file)
     state_index = shifts[0].find_index('State')
     lead_index = shifts[0].find_index('Lead')
@@ -849,8 +849,8 @@ class ScheduleGenerator
     activity_names = ['clothes_washer', 'dishwasher', 'clothes_dryer', 'cooking']
     power_dist_map = {}
     activity_names.each do |activity|
-      duration_file = resources_path + "/schedules_#{activity}_duration_dist.csv"
-      consumption_file = resources_path + "/schedules_#{activity}_consumption_dist.csv"
+      duration_file = resources_path + "/#{activity}_duration_dist.csv"
+      consumption_file = resources_path + "/#{activity}_consumption_dist.csv"
       duration_vals = CSV.read(duration_file)
       consumption_vals = CSV.read(consumption_file)
       duration_vals = duration_vals.map { |a| a.map { |i| i.to_i } }
@@ -883,7 +883,7 @@ class ScheduleGenerator
     activity_names = ['hot_water_clothes_washer', 'hot_water_dishwasher', 'shower']
     cluster_size_prob_map = {}
     activity_names.each do |activity|
-      cluster_size_file = resources_path + "/schedules_#{activity}_cluster_size_probability.csv"
+      cluster_size_file = resources_path + "/#{activity}_cluster_size_probability.csv"
       cluster_size_probabilities = CSV.read(cluster_size_file)
       cluster_size_probabilities = cluster_size_probabilities.map { |entry| entry[0].to_f }
       cluster_size_prob_map[activity] = cluster_size_probabilities
@@ -895,7 +895,7 @@ class ScheduleGenerator
     activity_names = ['hot_water_clothes_washer', 'hot_water_dishwasher', 'shower']
     event_duration_probabilites_map = {}
     activity_names.each do |activity|
-      duration_file = resources_path + "/schedules_#{activity}_event_duration_probability.csv"
+      duration_file = resources_path + "/#{activity}_event_duration_probability.csv"
       duration_probabilities = CSV.read(duration_file)
       durations = duration_probabilities.map { |entry| entry[0].to_f / 60 } # convert to minute
       probabilities = duration_probabilities.map { |entry| entry[1].to_f }
@@ -914,7 +914,7 @@ class ScheduleGenerator
       day_types.each do |day_type|
         time_of_days.each do |time_of_day|
           activity_names.each do |activity_name|
-            duration_file = resources_path + "/schedules_#{day_type}_duration_probability_cluster_#{cluster_type}_#{activity_name}_#{time_of_day}_duration_probability.csv"
+            duration_file = resources_path + "/#{day_type}/duration_probability/cluster_#{cluster_type}_#{activity_name}_#{time_of_day}_duration_probability.csv"
             duration_probabilities = CSV.read(duration_file)
             durations = duration_probabilities.map { |entry| entry[0].to_i }
             probabilities = duration_probabilities.map { |entry| entry[1].to_f }
