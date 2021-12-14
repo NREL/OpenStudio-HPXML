@@ -176,45 +176,6 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                             'ptac-unattached-cooling-system' => ['Expected 1 or more element(s) for xpath: ../CoolingSystem/CoolingSystemType[text()="packaged terminal air conditioner"'],
                             'pv-unequal-inverter-efficiencies' => ['Expected all InverterEfficiency values to be equal [context: /HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem, id: "PVSystem2"]'],
                             'refrigerator-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
-                            'schedule-extra-inputs' => ['Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy]',
-                                                        'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture2"]',
-                                                        'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture2"]',
-                                                        'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: ../extension/WaterFixturesMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture, id: "WaterFixture2"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher, id: "ClothesWasher1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher, id: "ClothesWasher1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher, id: "ClothesWasher1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer, id: "ClothesDryer1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer, id: "ClothesDryer1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer, id: "ClothesDryer1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher, id: "Dishwasher1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher, id: "Dishwasher1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher, id: "Dishwasher1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Refrigerator, id: "Refrigerator1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Refrigerator, id: "Refrigerator1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/Refrigerator, id: "Refrigerator1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/CookingRange, id: "CookingRange1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/CookingRange, id: "CookingRange1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Appliances/CookingRange, id: "CookingRange1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/InteriorWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/InteriorWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/InteriorMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/GarageWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/GarageWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/GarageMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/ExteriorWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/ExteriorWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/ExteriorMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/Lighting]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoad1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoad2"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoad1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoad2"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoad1"]',
-                                                        'Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesFilePath [context: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"], id: "PlugLoad2"]'],
                             'solar-fraction-one' => ['Expected SolarFraction to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem, id: "SolarThermalSystem1"]'],
                             'water-heater-location' => ['A location is specified as "crawlspace - vented" but no surfaces were found adjacent to this space type.'],
                             'water-heater-location-other' => ["Expected Location to be 'living space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'crawlspace - conditioned' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem, id: \"WaterHeatingSystem1\"]"],
@@ -475,9 +436,6 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['refrigerator-location'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.refrigerators[0].location = HPXML::LocationGarage
-      elsif ['schedule-extra-inputs'].include? error_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-schedules-simple.xml'))
-        hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
       elsif ['solar-fraction-one'].include? error_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-dhw-solar-fraction.xml'))
         hpxml.solar_thermal_systems[0].solar_fraction = 1.0
@@ -509,13 +467,42 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
   def test_schematron_warning_messages
     # Test case => Warning message
-    all_expected_warnings = { 'dhw-efficiencies-low' => ['EnergyFactor should typically be greater than or equal to 0.45.',
+    all_expected_warnings = { 'battery-pv-output-power-low' => ['Max power output should typically be greater than or equal to 500 W.',
+                                                                'Max power output should typically be greater than or equal to 500 W.',
+                                                                'Rated power output should typically be greater than or equal to 1000 W.'],
+                              'dhw-capacities-low' => ['Heating capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                       'Heating capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                       'No space cooling specified, the model will not include space cooling energy use.'],
+                              'dhw-efficiencies-low' => ['EnergyFactor should typically be greater than or equal to 0.45.',
+                                                         'EnergyFactor should typically be greater than or equal to 0.45.',
+                                                         'EnergyFactor should typically be greater than or equal to 0.45.',
                                                          'EnergyFactor should typically be greater than or equal to 0.45.',
                                                          'No space cooling specified, the model will not include space cooling energy use.'],
                               'dhw-setpoint-low' => ['Hot water setpoint should typically be greater than or equal to 110 deg-F.'],
                               'hvac-dse-low' => ['Heating DSE should typically be greater than or equal to 0.5.',
                                                  'Cooling DSE should typically be greater than or equal to 0.5.'],
+                              'hvac-capacities-low' => ['Heating capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Heating capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Heating capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Heating capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Heating capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Heating capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Heating capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Cooling capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Cooling capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Cooling capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Heating capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Cooling capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Heating capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Cooling capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Heating capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Cooling capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Backup heating capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Backup heating capacity should typically be greater than or equal to 1000 Btu/hr.',
+                                                        'Backup heating capacity should typically be greater than or equal to 1000 Btu/hr.'],
                               'hvac-efficiencies-low' => ['Percent efficiency should typically be greater than or equal to 0.95.',
+                                                          'AFUE should typically be greater than or equal to 0.6.',
+                                                          'AFUE should typically be greater than or equal to 0.6.',
                                                           'AFUE should typically be greater than or equal to 0.6.',
                                                           'AFUE should typically be greater than or equal to 0.6.',
                                                           'AFUE should typically be greater than or equal to 0.6.',
@@ -532,16 +519,31 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
                                                         'Cooling setpoint should typically be less than or equal to 86 deg-F.'],
                               'hvac-setpoints-low' => ['Heating setpoint should typically be greater than or equal to 58 deg-F.',
                                                        'Cooling setpoint should typically be greater than or equal to 68 deg-F.'],
-                              'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'],
-                              'battery-no-pv' => ['Battery without PV specified; battery is assumed to operate as backup and will not be modeled.'] }
+                              'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'] }
 
     all_expected_warnings.each_with_index do |(warning_case, expected_warnings), i|
       puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."
       # Create HPXML object
-      if ['dhw-efficiencies-low'].include? warning_case
+      if ['battery-pv-output-power-low'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-pv-battery-outside.xml'))
+        hpxml.batteries[0].rated_power_output = 0.1
+        hpxml.pv_systems[0].max_power_output = 0.1
+        hpxml.pv_systems[1].max_power_output = 0.1
+      elsif ['dhw-capacities-low'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-dhw-multiple.xml'))
-        hpxml.water_heating_systems.select { |w| w.water_heater_type == HPXML::WaterHeaterTypeStorage }[0].energy_factor = 0.1
-        hpxml.water_heating_systems.select { |w| w.water_heater_type == HPXML::WaterHeaterTypeTankless }[0].energy_factor = 0.1
+        hpxml.water_heating_systems.each do |water_heating_system|
+          if [HPXML::WaterHeaterTypeStorage].include? water_heating_system.water_heater_type
+            water_heating_system.heating_capacity = 0.1
+          end
+        end
+      elsif ['dhw-efficiencies-low'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-dhw-multiple.xml'))
+        hpxml.water_heating_systems.each do |water_heating_system|
+          if [HPXML::WaterHeaterTypeStorage,
+              HPXML::WaterHeaterTypeTankless].include? water_heating_system.water_heater_type
+            water_heating_system.energy_factor = 0.1
+          end
+        end
       elsif ['dhw-setpoint-low'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.water_heating_systems[0].temperature = 100
@@ -549,21 +551,48 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-dse.xml'))
         hpxml.hvac_distributions[0].annual_heating_dse = 0.1
         hpxml.hvac_distributions[0].annual_cooling_dse = 0.1
+      elsif ['hvac-capacities-low'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-multiple.xml'))
+        hpxml.hvac_systems.each do |hvac_system|
+          if hvac_system.is_a? HPXML::HeatingSystem
+            hvac_system.heating_capacity = 0.1
+          elsif hvac_system.is_a? HPXML::CoolingSystem
+            hvac_system.cooling_capacity = 0.1
+          elsif hvac_system.is_a? HPXML::HeatPump
+            hvac_system.heating_capacity = 0.1
+            hvac_system.cooling_capacity = 0.1
+            hvac_system.backup_heating_capacity = 0.1
+          end
+        end
       elsif ['hvac-efficiencies-low'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-multiple.xml'))
-        hpxml.heating_systems.select { |h| h.heating_system_type == HPXML::HVACTypeElectricResistance }[0].heating_efficiency_percent = 0.1
-        hpxml.heating_systems.select { |h| h.heating_system_type == HPXML::HVACTypeFurnace }[0].heating_efficiency_afue = 0.1
-        hpxml.heating_systems.select { |h| h.heating_system_type == HPXML::HVACTypeWallFurnace }[0].heating_efficiency_afue = 0.1
-        hpxml.heating_systems.select { |h| h.heating_system_type == HPXML::HVACTypeBoiler }[0].heating_efficiency_afue = 0.1
-        hpxml.heating_systems.select { |h| h.heating_system_type == HPXML::HVACTypeStove }[0].heating_efficiency_percent = 0.1
-        hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeCentralAirConditioner }[0].cooling_efficiency_seer = 0.1
-        hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeRoomAirConditioner }[0].cooling_efficiency_eer = 0.1
-        hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir }[0].cooling_efficiency_seer = 0.1
-        hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir }[0].heating_efficiency_hspf = 0.1
-        hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit }[0].cooling_efficiency_seer = 0.1
-        hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit }[0].heating_efficiency_hspf = 0.1
-        hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }[0].cooling_efficiency_eer = 0.1
-        hpxml.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }[0].heating_efficiency_cop = 0.1
+        hpxml.hvac_systems.each do |hvac_system|
+          if hvac_system.is_a? HPXML::HeatingSystem
+            if [HPXML::HVACTypeElectricResistance,
+                HPXML::HVACTypeStove].include? hvac_system.heating_system_type
+              hvac_system.heating_efficiency_percent = 0.1
+            elsif [HPXML::HVACTypeFurnace,
+                   HPXML::HVACTypeWallFurnace,
+                   HPXML::HVACTypeBoiler].include? hvac_system.heating_system_type
+              hvac_system.heating_efficiency_afue = 0.1
+            end
+          elsif hvac_system.is_a? HPXML::CoolingSystem
+            if [HPXML::HVACTypeCentralAirConditioner].include? hvac_system.cooling_system_type
+              hvac_system.cooling_efficiency_seer = 0.1
+            elsif [HPXML::HVACTypeRoomAirConditioner].include? hvac_system.cooling_system_type
+              hvac_system.cooling_efficiency_eer = 0.1
+            end
+          elsif hvac_system.is_a? HPXML::HeatPump
+            if [HPXML::HVACTypeHeatPumpAirToAir,
+                HPXML::HVACTypeHeatPumpMiniSplit].include? hvac_system.heat_pump_type
+              hvac_system.cooling_efficiency_seer = 0.1
+              hvac_system.heating_efficiency_hspf = 0.1
+            elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? hvac_system.heat_pump_type
+              hvac_system.cooling_efficiency_eer = 0.1
+              hvac_system.heating_efficiency_cop = 0.1
+            end
+          end
+        end
       elsif ['hvac-setpoints-high'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.hvac_controls[0].heating_setpoint_temp = 100
@@ -575,8 +604,6 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       elsif ['slab-zero-exposed-perimeter'].include? warning_case
         hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
         hpxml.slabs[0].exposed_perimeter = 0
-      elsif ['battery-no-pv'].include? warning_case
-        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-battery-outside.xml'))
       else
         fail "Unhandled case: #{warning_case}."
       end
@@ -923,7 +950,60 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       end
 
       XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
-      model, hpxml = _test_measure(error_case, expected_errors)
+      model, hpxml = _test_measure('error', error_case, expected_errors)
+    end
+  end
+
+  def test_measure_warning_messages
+    # Test case => Error message
+    all_expected_warnings = { 'schedule-file-and-weekday-weekend-multipliers' => ["Both 'occupants' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'occupants' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'occupants' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'clothes_washer' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'clothes_washer' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'clothes_washer' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'clothes_dryer' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'clothes_dryer' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'clothes_dryer' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'dishwasher' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'dishwasher' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'dishwasher' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'refrigerator' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'refrigerator' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'refrigerator' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'cooking_range' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'cooking_range' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'cooking_range' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'hot_water_fixtures' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'hot_water_fixtures' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'hot_water_fixtures' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'plug_loads_tv' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'plug_loads_tv' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'plug_loads_tv' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'plug_loads_other' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'plug_loads_other' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'plug_loads_other' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'lighting_interior' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'lighting_interior' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'lighting_interior' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'lighting_exterior' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'lighting_exterior' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'lighting_exterior' schedule file and monthly multipliers provided; the latter will be ignored."] }
+
+    all_expected_warnings.each_with_index do |(warning_case, expected_warnings), i|
+      puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."
+      # Create HPXML object
+      if ['schedule-file-and-weekday-weekend-multipliers'].include? warning_case
+        hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-schedules-simple.xml'))
+        hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
+      else
+        fail "Unhandled case: #{warning_case}."
+      end
+
+      hpxml_doc = hpxml.to_oga()
+
+      XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
+      model, hpxml = _test_measure('warning', warning_case, expected_warnings)
     end
   end
 
@@ -949,7 +1029,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     end
   end
 
-  def _test_measure(error_case, expected_errors)
+  def _test_measure(error_or_warning, error_or_warning_case, expected_errors_or_warnings)
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new
 
@@ -977,13 +1057,22 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     measure.run(model, runner, argument_map)
     result = runner.result
 
-    assert_equal('Fail', result.value.valueName)
+    actual_errors_or_warnings = []
+    if error_or_warning == 'error'
+      assert_equal('Fail', result.value.valueName)
 
-    errors = []
-    result.stepErrors.each do |s|
-      errors << s
+      result.stepErrors.each do |s|
+        actual_errors_or_warnings << s
+      end
+    elsif error_or_warning == 'warning'
+      assert_equal('Success', result.value.valueName)
+
+      result.stepWarnings.each do |s|
+        actual_errors_or_warnings << s
+      end
     end
-    _compare_errors_or_warnings('error', errors, expected_errors)
+
+    _compare_errors_or_warnings(error_or_warning, actual_errors_or_warnings, expected_errors_or_warnings)
   end
 
   def _compare_errors_or_warnings(type, actual_msgs, expected_msgs)

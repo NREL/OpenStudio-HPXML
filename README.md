@@ -33,7 +33,7 @@ This repository contains several OpenStudio measures:
 The OpenStudio-HPXML workflow is used by a number of other residential projects, including:
 - [Energy Rating Index (ERI) and ENERGY STAR](https://github.com/NREL/OpenStudio-ERI)
 - [Home Energy Score](https://betterbuildingssolutioncenter.energy.gov/home-energy-score)
-- [UrbanOpt](https://www.nrel.gov/buildings/urbanopt.html)
+- [URBANopt](https://www.nrel.gov/buildings/urbanopt.html)
 - [ResStock](https://resstock.nrel.gov/) (pending)
 - [BEopt](https://beopt.nrel.gov) (pending)
 - [Weatherization Assistant](https://weatherization.ornl.gov/obtain) (pending)

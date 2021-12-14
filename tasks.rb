@@ -2567,6 +2567,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     hpxml.building_construction.conditioned_building_volume = 23850
     hpxml.air_infiltration_measurements[0].infiltration_volume = hpxml.building_construction.conditioned_building_volume
+    hpxml.air_infiltration_measurements[0].infiltration_height = 15.0
   elsif ['base-enclosure-split-level.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors = 1.5
     hpxml.building_construction.number_of_conditioned_floors_above_grade = 1.5
@@ -2648,11 +2649,15 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     elsif hpxml_file == 'base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'
       adjacent_to = HPXML::LocationOtherHousingUnit
     end
-    hpxml.walls[-1].exterior_adjacent_to = adjacent_to
+    wall = hpxml.walls.select { |w|
+             w.interior_adjacent_to == HPXML::LocationLivingSpace &&
+               w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+           }           [0]
+    wall.exterior_adjacent_to = adjacent_to
     hpxml.frame_floors[0].exterior_adjacent_to = adjacent_to
     hpxml.frame_floors[1].exterior_adjacent_to = adjacent_to
     if hpxml_file != 'base-bldgtype-multifamily-adjacent-to-other-housing-unit.xml'
-      hpxml.walls[-1].insulation_assembly_r_value = 23
+      wall.insulation_assembly_r_value = 23
       hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
       hpxml.frame_floors[1].insulation_assembly_r_value = 18.7
     end
@@ -2660,7 +2665,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       window.area *= 0.35
     end
     hpxml.doors.add(id: "Door#{hpxml.doors.size + 1}",
-                    wall_idref: hpxml.walls[-1].id,
+                    wall_idref: wall.id,
                     area: 20,
                     azimuth: 0,
                     r_value: 4.4)
@@ -2673,7 +2678,14 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.refrigerators[0].location = adjacent_to
     hpxml.cooking_ranges[0].location = adjacent_to
   elsif ['base-bldgtype-multifamily-adjacent-to-multiple.xml'].include? hpxml_file
-    hpxml.walls[-1].delete
+    wall = hpxml.walls.select { |w|
+             w.interior_adjacent_to == HPXML::LocationLivingSpace &&
+               w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+           }           [0]
+    wall.delete
+    hpxml.walls.select.with_index { |w, i| w.id = "Wall#{i + 1}" }
+    hpxml.windows.select { |w| w.wall_idref = hpxml.walls[-1].id }
+    hpxml.doors.select { |d| d.wall_idref = hpxml.walls[-1].id }
     hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
                     exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -2710,7 +2722,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                     emittance: 0.92,
                     interior_finish_type: HPXML::InteriorFinishGypsumBoard,
                     insulation_assembly_r_value: 4.0)
-    hpxml.frame_floors[-1].delete
+    hpxml.frame_floors[0].delete
     hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -3075,7 +3087,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                depth_below_grade: 3,
                                insulation_interior_r_value: 0,
                                insulation_exterior_r_value: 0)
-    hpxml.frame_floors[1].area = 675
+    hpxml.frame_floors[0].area = 675
     hpxml.frame_floors.add(id: "FrameFloor#{hpxml.frame_floors.size + 1}",
                            exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -4439,6 +4451,21 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       surface.azimuth = nil
     end
     hpxml.collapse_enclosure_surfaces()
+  end
+
+  # After surfaces are collapsed, round all areas
+  (hpxml.roofs +
+     hpxml.rim_joists +
+     hpxml.walls +
+     hpxml.foundation_walls +
+     hpxml.frame_floors +
+     hpxml.slabs +
+     hpxml.windows +
+     hpxml.skylights +
+     hpxml.doors).each do |s|
+    next if s.area.nil?
+
+    s.area = s.area.round(1)
   end
 
   renumber_hpxml_ids(hpxml)

@@ -150,44 +150,43 @@ Detailed Schedule Inputs
 
 Detailed schedule inputs allow schedule values for every hour or timestep of the simulation.
 They can be smooth schedules, or they can reflect real-world or stochastic occupancy.
-Note that if detailed schedule inputs are used, they must be used for *all* building features; you cannot use detailed schedules for some features and simple/default schedules for other features.
 
 Detailed schedule inputs are provided via a CSV file that should be referenced in the HPXML file at ``/HPXML/SoftwareInfo/extension/SchedulesFilePath``.
 Each column must be normalized to MAX=1; that is, the schedules only define *when* energy is used, not *how much* energy is used.
 The columns in the schedule CSV are:
 
-  =============================  ========  ========================================================  ===================
-  Column Name                    Required  Description                                               Affected by Vacancy
-  =============================  ========  ========================================================  ===================
-  ``occupants``                  Yes       Occupant heat gain schedule.                              Yes
-  ``lighting_interior``          Yes       Interior lighting energy use schedule.                    Yes
-  ``lighting_exterior``          Yes       Exterior lighting energy use schedule.                    Yes
-  ``lighting_garage``            Yes       Garage lighting energy use schedule.                      Yes
-  ``lighting_exterior_holiday``  Yes       Exterior holiday lighting energy use schedule.            Yes
-  ``cooking_range``              Yes       Cooking range & oven energy use schedule.                 Yes
-  ``refrigerator``               Yes       Primary refrigerator energy use schedule.                 No
-  ``extra_refrigerator``         Yes       Non-primary refrigerator energy use schedule.             No
-  ``freezer``                    Yes       Freezer energy use schedule.                              No
-  ``dishwasher``                 Yes       Dishwasher energy use schedule.                           Yes
-  ``clothes_washer``             Yes       Clothes washer energy use schedule.                       Yes
-  ``clothes_dryer``              Yes       Clothes dryer energy use schedule.                        Yes
-  ``ceiling_fan``                Yes       Ceiling fan energy use schedule.                          Yes
-  ``plug_loads_other``           Yes       Other plug load energy use schedule.                      Yes
-  ``plug_loads_tv``              Yes       Television plug load energy use schedule.                 Yes
-  ``plug_loads_vehicle``         Yes       Electric vehicle plug load energy use schedule.           Yes
-  ``plug_loads_well_pump``       Yes       Well pump plug load energy use schedule.                  Yes
-  ``fuel_loads_grill``           Yes       Grill fuel load energy use schedule.                      Yes
-  ``fuel_loads_lighting``        Yes       Lighting fuel load energy use schedule.                   Yes
-  ``fuel_loads_fireplace``       Yes       Fireplace fuel load energy use schedule.                  Yes
-  ``pool_pump``                  Yes       Pool pump energy use schedule.                            No
-  ``pool_heater``                Yes       Pool heater energy use schedule.                          No
-  ``hot_tub_pump``               Yes       Hot tub pump energy use schedule.                         No
-  ``hot_tub_heater``             Yes       Hot tub heater energy use schedule.                       No
-  ``hot_water_dishwasher``       Yes       Dishwasher hot water use schedule.                        Yes
-  ``hot_water_clothes_washer``   Yes       Clothes washer hot water use schedule.                    Yes
-  ``hot_water_fixtures``         Yes       Fixtures (sinks, showers, baths) hot water use schedule.  Yes
-  ``vacancy``                    No        1=Home is vacant. Automatically overrides other columns.  N/A
-  =============================  ========  ========================================================  ===================
+  =============================  ========================================================  ===================
+  Column Name                    Description                                               Affected by Vacancy
+  =============================  ========================================================  ===================
+  ``occupants``                  Occupant heat gain schedule.                              Yes
+  ``lighting_interior``          Interior lighting energy use schedule.                    Yes
+  ``lighting_exterior``          Exterior lighting energy use schedule.                    Yes
+  ``lighting_garage``            Garage lighting energy use schedule.                      Yes
+  ``lighting_exterior_holiday``  Exterior holiday lighting energy use schedule.            Yes
+  ``cooking_range``              Cooking range & oven energy use schedule.                 Yes
+  ``refrigerator``               Primary refrigerator energy use schedule.                 No
+  ``extra_refrigerator``         Non-primary refrigerator energy use schedule.             No
+  ``freezer``                    Freezer energy use schedule.                              No
+  ``dishwasher``                 Dishwasher energy use schedule.                           Yes
+  ``clothes_washer``             Clothes washer energy use schedule.                       Yes
+  ``clothes_dryer``              Clothes dryer energy use schedule.                        Yes
+  ``ceiling_fan``                Ceiling fan energy use schedule.                          Yes
+  ``plug_loads_other``           Other plug load energy use schedule.                      Yes
+  ``plug_loads_tv``              Television plug load energy use schedule.                 Yes
+  ``plug_loads_vehicle``         Electric vehicle plug load energy use schedule.           Yes
+  ``plug_loads_well_pump``       Well pump plug load energy use schedule.                  Yes
+  ``fuel_loads_grill``           Grill fuel load energy use schedule.                      Yes
+  ``fuel_loads_lighting``        Lighting fuel load energy use schedule.                   Yes
+  ``fuel_loads_fireplace``       Fireplace fuel load energy use schedule.                  Yes
+  ``pool_pump``                  Pool pump energy use schedule.                            No
+  ``pool_heater``                Pool heater energy use schedule.                          No
+  ``hot_tub_pump``               Hot tub pump energy use schedule.                         No
+  ``hot_tub_heater``             Hot tub heater energy use schedule.                       No
+  ``hot_water_dishwasher``       Dishwasher hot water use schedule.                        Yes
+  ``hot_water_clothes_washer``   Clothes washer hot water use schedule.                    Yes
+  ``hot_water_fixtures``         Fixtures (sinks, showers, baths) hot water use schedule.  Yes
+  ``vacancy``                    1=Home is vacant. Automatically overrides other columns.  N/A
+  =============================  ========================================================  ===================
 
 A couple schedule CSV file examples are provided in the ``HPXMLtoOpenStudio/resources/schedule_files`` directory.
 
@@ -198,7 +197,7 @@ Default Schedules
 
 If neither simple nor detailed inputs are provided, then schedules are defaulted.
 Default schedules are typically smooth, averaged schedules.
-These default schedules are described elsewhere in the documentation (e.g., see :ref:`buildingoccupancy`).
+These default schedules are described elsewhere in the documentation (e.g., see :ref:`buildingoccupancy` for the default occupant heat gain schedule).
 
 HPXML Building Summary
 ----------------------
@@ -329,19 +328,22 @@ HPXML Air Infiltration
 
 Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
 
-  ====================================  ======  =====  =================================  =========  =========================  ===============================================
-  Element                               Type    Units  Constraints                        Required   Default                    Notes
-  ====================================  ======  =====  =================================  =========  =========================  ===============================================
-  ``SystemIdentifier``                  id                                                Yes                                   Unique identifier
-  ``BuildingAirLeakage/UnitofMeasure``  string         See [#]_                           Yes                                   Units for air leakage
-  ``HousePressure``                     double  Pa     > 0                                See [#]_                              House pressure with respect to outside [#]_
-  ``BuildingAirLeakage/AirLeakage``     double         > 0                                Yes                                   Value for air leakage
-  ``InfiltrationVolume``                double  ft3    > 0, >= ConditionedBuildingVolume  No         ConditionedBuildingVolume  Volume associated with infiltration measurement
-  ====================================  ======  =====  =================================  =========  =========================  ===============================================
+  ====================================  ======  =====  ============================  =========  =========================  ===============================================
+  Element                               Type    Units  Constraints                   Required   Default                    Notes
+  ====================================  ======  =====  ============================  =========  =========================  ===============================================
+  ``SystemIdentifier``                  id                                           Yes                                   Unique identifier
+  ``BuildingAirLeakage/UnitofMeasure``  string         See [#]_                      Yes                                   Units for air leakage
+  ``HousePressure``                     double  Pa     > 0                           See [#]_                              House pressure with respect to outside [#]_
+  ``BuildingAirLeakage/AirLeakage``     double         > 0                           Yes                                   Value for air leakage
+  ``InfiltrationVolume``                double  ft3    >= ConditionedBuildingVolume  No         ConditionedBuildingVolume  Volume associated with infiltration measurement
+  ``InfiltrationHeight``                double  ft     > 0                           No         See [#]_                   Height associated with infiltration measurement [#]_
+  ====================================  ======  =====  ============================  =========  =========================  ===============================================
 
   .. [#] UnitofMeasure choices are "ACH" (air changes per hour at user-specified pressure), "CFM" (cubic feet per minute at user-specified pressure), or "ACHnatural" (natural air changes per hour).
   .. [#] HousePressure only required if BuildingAirLeakage/UnitofMeasure is not "ACHnatural".
   .. [#] HousePressure typical value is 50 Pa.
+  .. [#] If InfiltrationHeight not provided, it is inferred from other inputs (e.g., conditioned floor area, number of conditioned floors above-grade, above-grade foundation wall height, etc.).
+  .. [#] InfiltrationHeight is defined as the vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2.
 
 HPXML Attics
 ************
@@ -677,14 +679,13 @@ If UFactor and SHGC are not provided and GlassLayers is not "glass block", addit
   ============================  ========  ======  =======================  ========  ========  ========================================================
   ``FrameType``                 element           See [#]_                 Yes                 Type of frame
   ``FrameType/*/ThermalBreak``  boolean           See [#]_                 No        false     Whether the Aluminum or Metal frame has a thermal break
-  ``GlassType``                 string            See [#]_                 No        <none>    Type of glass
+  ``GlassType``                 string            See [#]_                 No        clear     Type of glass
   ``GasFill``                   string            See [#]_                 No        See [#]_  Type of gas inside double/triple-pane windows
   ============================  ========  ======  =======================  ========  ========  ========================================================
   
   .. [#] FrameType child element choices are ``Aluminum``, ``Fiberglass``, ``Metal``, ``Vinyl``, or ``Wood``.
   .. [#] ThermalBreak is only valid if FrameType is ``Aluminum`` or ``Metal``.
   .. [#] GlassType choices are "clear", "low-e", "tinted", "tinted/reflective", or "reflective".
-         Do not specify this element if the window has clear glass.
   .. [#] GasFill choices are "air", "argon", "krypton", "xenon", "nitrogen", or "other".
   .. [#] If GasFill not provided, defaults to "air" for double-pane windows and "argon" for triple-pane windows.
 
@@ -1843,7 +1844,7 @@ If a conventional storage water heater is specified, additional information is e
   ================================================================  =================  =============  ===============  ========  ========  ====================================================
   ``FuelType``                                                      string                            See [#]_         Yes                 Fuel type
   ``TankVolume``                                                    double             gal            > 0              No        See [#]_  Tank volume
-  ``HeatingCapacity``                                               double             Btuh           > 0              No        See [#]_  Heating capacity
+  ``HeatingCapacity``                                               double             Btu/hr         > 0              No        See [#]_  Heating capacity
   ``UniformEnergyFactor`` or ``EnergyFactor`` or ``YearInstalled``  double or integer  frac or #      < 1 or > 1600    Yes       See [#]_  EnergyGuide label rated efficiency or Year installed
   ``UsageBin`` or ``FirstHourRating``                               string or double   str or gal/hr  See [#]_ or > 0  No        See [#]_  EnergyGuide label usage bin/first hour rating
   ``RecoveryEfficiency``                                            double             frac           0 - 1 [#]_       No        See [#]_  Recovery efficiency
