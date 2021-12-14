@@ -398,9 +398,6 @@
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <EnergyFactor>2.3</EnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
-            <extension>
-              <OperatingMode>standard</OperatingMode>
-            </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>

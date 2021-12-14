@@ -399,9 +399,6 @@
             <UniformEnergyFactor>3.75</UniformEnergyFactor>
             <UsageBin>medium</UsageBin>
             <HotWaterTemperature>125.0</HotWaterTemperature>
-            <extension>
-              <OperatingMode>standard</OperatingMode>
-            </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>
