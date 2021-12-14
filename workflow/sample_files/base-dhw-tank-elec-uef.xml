@@ -400,9 +400,6 @@
             <UniformEnergyFactor>0.93</UniformEnergyFactor>
             <UsageBin>low</UsageBin>
             <HotWaterTemperature>125.0</HotWaterTemperature>
-            <extension>
-              <TankModelType>mixed</TankModelType>
-            </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>

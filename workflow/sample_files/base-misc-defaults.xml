@@ -316,9 +316,6 @@
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <YearInstalled>2009</YearInstalled>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <extension>
-              <TankModelType>mixed</TankModelType>
-            </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>

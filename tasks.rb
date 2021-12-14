@@ -676,7 +676,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['water_heater_jacket_rvalue'] = 0
     args['water_heater_setpoint_temperature'] = 125
     args['water_heater_num_units_served'] = 1
-    args['water_heater_tank_model_type'] = HPXML::WaterHeaterTankModelTypeMixed
+    args['water_heater_tank_model_type'] = Constants.Auto
     args['water_heater_operating_mode'] = HPXML::WaterHeaterOperatingModeStandard
     args['hot_water_distribution_system_type'] = HPXML::DHWDistTypeStandard
     args['hot_water_distribution_standard_piping_length'] = 50

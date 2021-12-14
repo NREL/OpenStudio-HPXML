@@ -1794,13 +1794,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     water_heater_tank_model_type_choices = OpenStudio::StringVector.new
+    water_heater_tank_model_type_choices << Constants.Auto
     water_heater_tank_model_type_choices << HPXML::WaterHeaterTankModelTypeMixed
     water_heater_tank_model_type_choices << HPXML::WaterHeaterTankModelTypeStratified
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('water_heater_tank_model_type', water_heater_tank_model_type_choices, true)
     arg.setDisplayName('Water Heater: Tank Type')
     arg.setDescription("Type of tank model to use. The '#{HPXML::WaterHeaterTankModelTypeStratified}' tank generally provide more accurate results, but may significantly increase run time. Applies only to #{HPXML::WaterHeaterTypeStorage}.")
-    arg.setDefaultValue(HPXML::WaterHeaterTankModelTypeMixed)
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('water_heater_scheduled_setpoint_path', false)
@@ -4900,7 +4901,9 @@ class HPXMLFile
     end
 
     if water_heater_type == HPXML::WaterHeaterTypeStorage
-      tank_model_type = args[:water_heater_tank_model_type]
+      if args[:water_heater_tank_model_type] != Constants.Auto
+        tank_model_type = args[:water_heater_tank_model_type]
+      end
     end
 
     if args[:water_heater_scheduled_operating_mode_path].is_initialized
