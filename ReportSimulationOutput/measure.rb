@@ -272,7 +272,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
               HPXML::LocationExteriorWall,
               HPXML::LocationUnderSlab]
       keys.each do |key|
-        next if @model.getScheduleConstants.select { |o| o.name.to_s == key }.size == 0
+        next if @model.getScheduleColumns.select { |o| o.name.to_s == key }.size == 0
 
         result << OpenStudio::IdfObject.load("Output:Variable,#{key},Schedule Value,#{timeseries_frequency};").get
       end
@@ -652,7 +652,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           zone_names << zone.name.to_s.upcase
         end
       end
-      @model.getScheduleConstants.each do |schedule|
+      @model.getScheduleColumns.each do |schedule|
         next unless [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace,
                      HPXML::LocationOtherHousingUnit, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab].include? schedule.name.to_s
 

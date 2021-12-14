@@ -1114,7 +1114,7 @@ class SchedulesFile
     @model = model
     @schedules_path = schedules_path
 
-    import(col_names: Constants.ScheduleColNames.keys)
+    import(col_names: ScheduleColumns.ColNames.keys)
 
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_vacancy
@@ -1215,7 +1215,6 @@ class SchedulesFile
     end
 
     if @schedules[col_name].nil?
-      puts "Could not find the '#{col_name}' schedule."
       return
     end
 
@@ -1307,7 +1306,7 @@ class SchedulesFile
     return unless @tmp_schedules.keys.include? 'vacancy'
     return if @tmp_schedules['vacancy'].all? { |i| i == 0 }
 
-    col_names = Constants.ScheduleColNames
+    col_names = ScheduleColumns.ColNames
 
     @tmp_schedules[col_names.keys[0]].each_with_index do |ts, i|
       col_names.keys.each do |col_name|

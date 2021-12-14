@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Constants
+class ScheduleColumns
   # Strings --------------------
 
   def self.Occupants
@@ -115,37 +115,37 @@ class Constants
     return 'vacancy'
   end
 
-  def self.ScheduleColNames
+  def self.ColNames
     # col_name => affected_by_vacancy
     return {
-      Constants.Occupants => true,
-      Constants.LightingInterior => true,
-      Constants.LightingExterior => true,
-      Constants.LightingGarage => true,
-      Constants.LightingExteriorHoliday => true,
-      Constants.CookingRange => true,
-      Constants.Refrigerator => false,
-      Constants.ExtraRefrigerator => false,
-      Constants.Freezer => false,
-      Constants.Dishwasher => true,
-      Constants.ClothesWasher => true,
-      Constants.ClothesDryer => true,
-      Constants.CeilingFan => true,
-      Constants.PlugLoadsOther => true,
-      Constants.PlugLoadsTV => true,
-      Constants.PlugLoadsVehicle => true,
-      Constants.PlugLoadsWellPump => true,
-      Constants.FuelLoadsGrill => true,
-      Constants.FuelLoadsLighting => true,
-      Constants.FuelLoadsFireplace => true,
-      Constants.PoolPump => false,
-      Constants.PoolHeater => false,
-      Constants.HotTubPump => false,
-      Constants.HotTubHeater => false,
-      Constants.HotWaterDishwasher => true,
-      Constants.HotWaterClothesWasher => true,
-      Constants.HotWaterFixtures => true,
-      Constants.Vacancy => nil,
+      ScheduleColumns.Occupants => true,
+      ScheduleColumns.LightingInterior => true,
+      ScheduleColumns.LightingExterior => true,
+      ScheduleColumns.LightingGarage => true,
+      ScheduleScheduleColumns.LightingExteriorHoliday => true,
+      ScheduleColumns.CookingRange => true,
+      ScheduleColumns.Refrigerator => false,
+      ScheduleColumns.ExtraRefrigerator => false,
+      ScheduleColumns.Freezer => false,
+      ScheduleColumns.Dishwasher => true,
+      ScheduleColumns.ClothesWasher => true,
+      ScheduleColumns.ClothesDryer => true,
+      ScheduleColumns.CeilingFan => true,
+      ScheduleColumns.PlugLoadsOther => true,
+      ScheduleColumns.PlugLoadsTV => true,
+      ScheduleColumns.PlugLoadsVehicle => true,
+      ScheduleColumns.PlugLoadsWellPump => true,
+      ScheduleColumns.FuelLoadsGrill => true,
+      ScheduleColumns.FuelLoadsLighting => true,
+      ScheduleColumns.FuelLoadsFireplace => true,
+      ScheduleColumns.PoolPump => false,
+      ScheduleColumns.PoolHeater => false,
+      ScheduleColumns.HotTubPump => false,
+      ScheduleColumns.HotTubHeater => false,
+      ScheduleColumns.HotWaterDishwasher => true,
+      ScheduleColumns.HotWaterClothesWasher => true,
+      ScheduleColumns.HotWaterFixtures => true,
+      ScheduleColumns.Vacancy => nil,
     }
   end
 end

@@ -35,7 +35,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     schedule_fixed_intervals = 1
     schedule_files = 0
 
-    assert_equal(schedule_constants, model.getScheduleConstants.size)
+    assert_equal(schedule_constants, model.getScheduleColumns.size)
     assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
     assert_equal(schedule_fixed_intervals, model.getScheduleFixedIntervals.size)
     assert_equal(schedule_files, model.getScheduleFiles.size)
@@ -52,7 +52,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     schedule_fixed_intervals = 1
     schedule_files = 13
 
-    assert_equal(schedule_constants, model.getScheduleConstants.size)
+    assert_equal(schedule_constants, model.getScheduleColumns.size)
     assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
     assert_equal(schedule_fixed_intervals, model.getScheduleFixedIntervals.size)
     assert_equal(schedule_files, model.getScheduleFiles.size)
@@ -62,33 +62,33 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     model.getScheduleFiles.each do |schedule_file|
       schedule_file_names << "#{schedule_file.name}"
     end
-    assert(schedule_file_names.include?(Constants.Occupants))
-    assert(schedule_file_names.include?(Constants.LightingInterior))
-    assert(schedule_file_names.include?(Constants.LightingExterior))
-    assert(!schedule_file_names.include?(Constants.LightingGarage))
-    assert(!schedule_file_names.include?(Constants.LightingExteriorHoliday))
-    assert(schedule_file_names.include?(Constants.CookingRange))
-    assert(schedule_file_names.include?(Constants.Refrigerator))
-    assert(!schedule_file_names.include?(Constants.ExtraRefrigerator))
-    assert(!schedule_file_names.include?(Constants.Freezer))
-    assert(schedule_file_names.include?(Constants.Dishwasher))
-    assert(schedule_file_names.include?(Constants.ClothesWasher))
-    assert(schedule_file_names.include?(Constants.ClothesDryer))
-    assert(!schedule_file_names.include?(Constants.CeilingFan))
-    assert(schedule_file_names.include?(Constants.PlugLoadsOther))
-    assert(schedule_file_names.include?(Constants.PlugLoadsTV))
-    assert(!schedule_file_names.include?(Constants.PlugLoadsVehicle))
-    assert(!schedule_file_names.include?(Constants.PlugLoadsWellPump))
-    assert(!schedule_file_names.include?(Constants.FuelLoadsGrill))
-    assert(!schedule_file_names.include?(Constants.FuelLoadsLighting))
-    assert(!schedule_file_names.include?(Constants.FuelLoadsFireplace))
-    assert(!schedule_file_names.include?(Constants.PoolPump))
-    assert(!schedule_file_names.include?(Constants.PoolHeater))
-    assert(!schedule_file_names.include?(Constants.HotTubPump))
-    assert(!schedule_file_names.include?(Constants.HotTubHeater))
-    assert(schedule_file_names.include?(Constants.HotWaterClothesWasher))
-    assert(schedule_file_names.include?(Constants.HotWaterDishwasher))
-    assert(schedule_file_names.include?(Constants.HotWaterFixtures))
+    assert(schedule_file_names.include?(ScheduleColumns.Occupants))
+    assert(schedule_file_names.include?(ScheduleColumns.LightingInterior))
+    assert(schedule_file_names.include?(ScheduleColumns.LightingExterior))
+    assert(!schedule_file_names.include?(ScheduleColumns.LightingGarage))
+    assert(!schedule_file_names.include?(ScheduleScheduleColumns.LightingExteriorHoliday))
+    assert(schedule_file_names.include?(ScheduleColumns.CookingRange))
+    assert(schedule_file_names.include?(ScheduleColumns.Refrigerator))
+    assert(!schedule_file_names.include?(ScheduleColumns.ExtraRefrigerator))
+    assert(!schedule_file_names.include?(ScheduleColumns.Freezer))
+    assert(schedule_file_names.include?(ScheduleColumns.Dishwasher))
+    assert(schedule_file_names.include?(ScheduleColumns.ClothesWasher))
+    assert(schedule_file_names.include?(ScheduleColumns.ClothesDryer))
+    assert(!schedule_file_names.include?(ScheduleColumns.CeilingFan))
+    assert(schedule_file_names.include?(ScheduleColumns.PlugLoadsOther))
+    assert(schedule_file_names.include?(ScheduleColumns.PlugLoadsTV))
+    assert(!schedule_file_names.include?(ScheduleColumns.PlugLoadsVehicle))
+    assert(!schedule_file_names.include?(ScheduleColumns.PlugLoadsWellPump))
+    assert(!schedule_file_names.include?(ScheduleColumns.FuelLoadsGrill))
+    assert(!schedule_file_names.include?(ScheduleColumns.FuelLoadsLighting))
+    assert(!schedule_file_names.include?(ScheduleColumns.FuelLoadsFireplace))
+    assert(!schedule_file_names.include?(ScheduleColumns.PoolPump))
+    assert(!schedule_file_names.include?(ScheduleColumns.PoolHeater))
+    assert(!schedule_file_names.include?(ScheduleColumns.HotTubPump))
+    assert(!schedule_file_names.include?(ScheduleColumns.HotTubHeater))
+    assert(schedule_file_names.include?(ScheduleColumns.HotWaterClothesWasher))
+    assert(schedule_file_names.include?(ScheduleColumns.HotWaterDishwasher))
+    assert(schedule_file_names.include?(ScheduleColumns.HotWaterFixtures))
 
     # add a pool
     hpxml.pools.add(id: 'Pool',
@@ -108,8 +108,8 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     model.getScheduleFiles.each do |schedule_file|
       schedule_file_names << "#{schedule_file.name}"
     end
-    assert(schedule_file_names.include?(Constants.PoolPump))
-    assert(schedule_file_names.include?(Constants.PoolHeater))
+    assert(schedule_file_names.include?(ScheduleColumns.PoolPump))
+    assert(schedule_file_names.include?(ScheduleColumns.PoolHeater))
   end
 
   def test_stochastic_vacancy_schedules
@@ -122,7 +122,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     schedule_fixed_intervals = 1
     schedule_files = 13
 
-    assert_equal(schedule_constants, model.getScheduleConstants.size)
+    assert_equal(schedule_constants, model.getScheduleColumns.size)
     assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
     assert_equal(schedule_fixed_intervals, model.getScheduleFixedIntervals.size)
     assert_equal(schedule_files, model.getScheduleFiles.size)
@@ -139,7 +139,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     schedule_fixed_intervals = 1
     schedule_files = 13
 
-    assert_equal(schedule_constants, model.getScheduleConstants.size)
+    assert_equal(schedule_constants, model.getScheduleColumns.size)
     assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
     assert_equal(schedule_fixed_intervals, model.getScheduleFixedIntervals.size)
     assert_equal(schedule_files, model.getScheduleFiles.size)
