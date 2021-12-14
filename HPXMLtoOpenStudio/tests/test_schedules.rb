@@ -35,7 +35,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     schedule_fixed_intervals = 1
     schedule_files = 0
 
-    assert_equal(schedule_constants, model.getScheduleColumns.size)
+    assert_equal(schedule_constants, model.getScheduleConstants.size)
     assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
     assert_equal(schedule_fixed_intervals, model.getScheduleFixedIntervals.size)
     assert_equal(schedule_files, model.getScheduleFiles.size)
@@ -52,7 +52,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     schedule_fixed_intervals = 1
     schedule_files = 13
 
-    assert_equal(schedule_constants, model.getScheduleColumns.size)
+    assert_equal(schedule_constants, model.getScheduleConstants.size)
     assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
     assert_equal(schedule_fixed_intervals, model.getScheduleFixedIntervals.size)
     assert_equal(schedule_files, model.getScheduleFiles.size)
@@ -122,7 +122,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     schedule_fixed_intervals = 1
     schedule_files = 13
 
-    assert_equal(schedule_constants, model.getScheduleColumns.size)
+    assert_equal(schedule_constants, model.getScheduleConstants.size)
     assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
     assert_equal(schedule_fixed_intervals, model.getScheduleFixedIntervals.size)
     assert_equal(schedule_files, model.getScheduleFiles.size)
@@ -139,7 +139,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     schedule_fixed_intervals = 1
     schedule_files = 13
 
-    assert_equal(schedule_constants, model.getScheduleColumns.size)
+    assert_equal(schedule_constants, model.getScheduleConstants.size)
     assert_equal(schedule_rulesets, model.getScheduleRulesets.size)
     assert_equal(schedule_fixed_intervals, model.getScheduleFixedIntervals.size)
     assert_equal(schedule_files, model.getScheduleFiles.size)

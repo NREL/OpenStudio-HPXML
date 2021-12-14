@@ -2615,7 +2615,7 @@ class OSModel
     # can be shared by any surface, duct adjacent to / located in those spaces
 
     # return if already exists
-    model.getScheduleColumns.each do |sch|
+    model.getScheduleConstants.each do |sch|
       next unless sch.name.to_s == location
 
       return sch
