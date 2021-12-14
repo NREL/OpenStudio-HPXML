@@ -120,7 +120,7 @@ class ScheduleGenerator
   end
 
   def create_average_lighting_exterior_holiday
-    create_timeseries_from_weekday_weekend_monthly(sch_name: ScheduleScheduleColumns.LightingExteriorHoliday, weekday_sch: Schedule.LightingExteriorHolidayWeekdayFractions, weekend_sch: Schedule.LightingExteriorHolidayWeekendFractions, monthly_sch: Schedule.LightingExteriorHolidayMonthlyMultipliers, begin_month: 11, begin_day: 24, end_month: 1, end_day: 6)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: ScheduleColumns.LightingExteriorHoliday, weekday_sch: Schedule.LightingExteriorHolidayWeekdayFractions, weekend_sch: Schedule.LightingExteriorHolidayWeekendFractions, monthly_sch: Schedule.LightingExteriorHolidayMonthlyMultipliers, begin_month: 11, begin_day: 24, end_month: 1, end_day: 6)
   end
 
   def create_average_cooking_range
@@ -381,7 +381,7 @@ class ScheduleGenerator
         @schedules[ScheduleColumns.LightingInterior][day * @steps_in_day + step] = scale_lighting_by_occupancy(interior_lighting_schedule, minute, active_occupancy_percentage)
         @schedules[ScheduleColumns.LightingExterior][day * @steps_in_day + step] = get_value_from_daily_sch(lighting_sch, month, is_weekday, minute, 1)
         @schedules[ScheduleColumns.LightingGarage][day * @steps_in_day + step] = get_value_from_daily_sch(lighting_sch, month, is_weekday, minute, 1)
-        @schedules[ScheduleScheduleColumns.LightingExteriorHoliday][day * @steps_in_day + step] = scale_lighting_by_occupancy(holiday_lighting_schedule, minute, 1)
+        @schedules[ScheduleColumns.LightingExteriorHoliday][day * @steps_in_day + step] = scale_lighting_by_occupancy(holiday_lighting_schedule, minute, 1)
         @schedules[ScheduleColumns.CeilingFan][day * @steps_in_day + step] = get_value_from_daily_sch(ceiling_fan_sch, month, is_weekday, minute, active_occupancy_percentage)
       end
     end
@@ -389,7 +389,7 @@ class ScheduleGenerator
     @schedules[ScheduleColumns.LightingInterior] = normalize(@schedules[ScheduleColumns.LightingInterior])
     @schedules[ScheduleColumns.LightingExterior] = normalize(@schedules[ScheduleColumns.LightingExterior])
     @schedules[ScheduleColumns.LightingGarage] = normalize(@schedules[ScheduleColumns.LightingGarage])
-    @schedules[ScheduleScheduleColumns.LightingExteriorHoliday] = normalize(@schedules[ScheduleScheduleColumns.LightingExteriorHoliday])
+    @schedules[ScheduleColumns.LightingExteriorHoliday] = normalize(@schedules[ScheduleColumns.LightingExteriorHoliday])
     @schedules[ScheduleColumns.CeilingFan] = normalize(@schedules[ScheduleColumns.CeilingFan])
 
     # Generate the Sink Schedule

@@ -122,7 +122,7 @@ class ScheduleColumns
       ScheduleColumns.LightingInterior => true,
       ScheduleColumns.LightingExterior => true,
       ScheduleColumns.LightingGarage => true,
-      ScheduleScheduleColumns.LightingExteriorHoliday => true,
+      ScheduleColumns.LightingExteriorHoliday => true,
       ScheduleColumns.CookingRange => true,
       ScheduleColumns.Refrigerator => false,
       ScheduleColumns.ExtraRefrigerator => false,

@@ -1942,7 +1942,7 @@ class HPXMLDefaults
         hpxml.lighting.holiday_period_end_day = 6
         hpxml.lighting.holiday_period_end_day_isdefaulted = true
       end
-      schedules_file_includes_lighting_holiday_exterior = Schedule.schedules_file_includes_col_name(schedules_file, ScheduleScheduleColumns.LightingExteriorHoliday)
+      schedules_file_includes_lighting_holiday_exterior = Schedule.schedules_file_includes_col_name(schedules_file, ScheduleColumns.LightingExteriorHoliday)
       if hpxml.lighting.holiday_weekday_fractions.nil? && !schedules_file_includes_lighting_holiday_exterior
         hpxml.lighting.holiday_weekday_fractions = Schedule.LightingExteriorHolidayWeekdayFractions
         hpxml.lighting.holiday_weekday_fractions_isdefaulted = true

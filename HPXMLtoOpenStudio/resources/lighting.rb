@@ -134,17 +134,17 @@ class Lighting
       # Create schedule
       exterior_holiday_sch = nil
       if not schedules_file.nil?
-        design_level = schedules_file.calc_design_level_from_daily_kwh(col_name: ScheduleScheduleColumns.LightingExteriorHoliday, daily_kwh: lighting.holiday_kwh_per_day)
-        exterior_holiday_sch = schedules_file.create_schedule_file(col_name: ScheduleScheduleColumns.LightingExteriorHoliday)
+        design_level = schedules_file.calc_design_level_from_daily_kwh(col_name: ScheduleColumns.LightingExteriorHoliday, daily_kwh: lighting.holiday_kwh_per_day)
+        exterior_holiday_sch = schedules_file.create_schedule_file(col_name: ScheduleColumns.LightingExteriorHoliday)
       end
       if exterior_holiday_sch.nil?
         exterior_holiday_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameLightingExteriorHoliday + ' schedule', lighting.holiday_weekday_fractions, lighting.holiday_weekend_fractions, lighting.exterior_monthly_multipliers, Constants.ScheduleTypeLimitsFraction, true, lighting.holiday_period_begin_month, lighting.holiday_period_begin_day, lighting.holiday_period_end_month, lighting.holiday_period_end_day)
         design_level = exterior_holiday_sch.calcDesignLevelFromDailykWh(lighting.holiday_kwh_per_day)
         exterior_holiday_sch = exterior_holiday_sch.schedule
       else
-        runner.registerWarning("Both '#{ScheduleScheduleColumns.LightingExteriorHoliday}' schedule file and weekday fractions provided; the latter will be ignored.") if !lighting.holiday_weekday_fractions.nil?
-        runner.registerWarning("Both '#{ScheduleScheduleColumns.LightingExteriorHoliday}' schedule file and weekend fractions provided; the latter will be ignored.") if !lighting.holiday_weekend_fractions.nil?
-        runner.registerWarning("Both '#{ScheduleScheduleColumns.LightingExteriorHoliday}' schedule file and monthly multipliers provided; the latter will be ignored.") if !lighting.exterior_monthly_multipliers.nil?
+        runner.registerWarning("Both '#{ScheduleColumns.LightingExteriorHoliday}' schedule file and weekday fractions provided; the latter will be ignored.") if !lighting.holiday_weekday_fractions.nil?
+        runner.registerWarning("Both '#{ScheduleColumns.LightingExteriorHoliday}' schedule file and weekend fractions provided; the latter will be ignored.") if !lighting.holiday_weekend_fractions.nil?
+        runner.registerWarning("Both '#{ScheduleColumns.LightingExteriorHoliday}' schedule file and monthly multipliers provided; the latter will be ignored.") if !lighting.exterior_monthly_multipliers.nil?
       end
 
       # Add exterior holiday lighting

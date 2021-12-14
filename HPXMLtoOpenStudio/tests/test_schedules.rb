@@ -66,7 +66,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     assert(schedule_file_names.include?(ScheduleColumns.LightingInterior))
     assert(schedule_file_names.include?(ScheduleColumns.LightingExterior))
     assert(!schedule_file_names.include?(ScheduleColumns.LightingGarage))
-    assert(!schedule_file_names.include?(ScheduleScheduleColumns.LightingExteriorHoliday))
+    assert(!schedule_file_names.include?(ScheduleColumns.LightingExteriorHoliday))
     assert(schedule_file_names.include?(ScheduleColumns.CookingRange))
     assert(schedule_file_names.include?(ScheduleColumns.Refrigerator))
     assert(!schedule_file_names.include?(ScheduleColumns.ExtraRefrigerator))
