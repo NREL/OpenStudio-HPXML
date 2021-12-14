@@ -11,8 +11,8 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
   def setup
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
-    @epvalidator_stron_path = File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'EPvalidator.xml')
-    @hpxml_stron_path = File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'HPXMLvalidator.xml')
+    @epvalidator_stron_path = File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')
+    @hpxml_stron_path = File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'HPXMLvalidator.xml')
 
     @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
     @tmp_csv_path = File.join(@sample_files_path, 'tmp.csv')
@@ -1022,7 +1022,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
   def _test_schema_validation(hpxml_doc, xml)
     # TODO: Remove this when schema validation is included with CLI calls
-    schemas_dir = File.absolute_path(File.join(@root_path, 'HPXMLtoOpenStudio', 'resources'))
+    schemas_dir = File.absolute_path(File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema'))
     errors = XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), nil)
     if errors.size > 0
       flunk "#{xml}: #{errors}"
