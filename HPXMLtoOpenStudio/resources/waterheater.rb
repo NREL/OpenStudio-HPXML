@@ -102,7 +102,7 @@ class Waterheater
 
     # Parameter determines which manufacturer's details (AO Smith or GE) gets used
     control_logic = 'GE'
-    if (vol => 50) && (cop < 3.2)
+    if (vol >= 50) && (cop < 3.2)
       control_logic = 'AOSmith'
     end
 
