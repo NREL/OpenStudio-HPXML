@@ -217,11 +217,11 @@ class OSModel
 
     # Init
 
-    @schedules_file = nil
-    if not @hpxml.header.schedules_filepath.nil?
-      @schedules_file = SchedulesFile.new(runner: runner, model: model,
-                                          schedules_path: @hpxml.header.schedules_filepath, col_names: Constants.ScheduleColNames.keys)
-    end
+    @schedules_file = SchedulesFile.new(runner: runner, model: model,
+                                        schedules_paths: [@hpxml.header.schedules_filepath, @hpxml.header.water_heater_schedules_filepath],
+                                        col_names: [ScheduleColumns.ColNames.keys, WaterHeaterScheduleColumns.ColNames.keys],
+                                        schedule_min_vals: [0, nil],
+                                        schedule_max_vals: [1, nil])
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
     set_defaults_and_globals(runner, output_dir, epw_file, weather, @schedules_file)
@@ -1567,12 +1567,12 @@ class OSModel
 
       sys_id = water_heating_system.id
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
-        plantloop_map[sys_id] = Waterheater.apply_tank(model, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, @hpxml.header.sim_calendar_year)
+        plantloop_map[sys_id] = Waterheater.apply_tank(model, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, @hpxml.header.sim_calendar_year, @schedules_file)
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
         plantloop_map[sys_id] = Waterheater.apply_tankless(model, loc_space, loc_schedule, water_heating_system, ec_adj, @nbeds, solar_thermal_system)
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
         living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
-        plantloop_map[sys_id] = Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone, @hpxml.header.sim_calendar_year)
+        plantloop_map[sys_id] = Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, solar_thermal_system, living_zone, @hpxml.header.sim_calendar_year, @schedules_file)
       elsif [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
         plantloop_map[sys_id] = Waterheater.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system)
       else

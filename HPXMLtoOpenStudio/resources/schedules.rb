@@ -1108,14 +1108,17 @@ end
 class SchedulesFile
   def initialize(runner: nil,
                  model: nil,
-                 schedules_path:,
+                 schedules_paths:,
                  col_names:,
-                 schedule_max_val: 1)
+                 schedule_min_vals: [0],
+                 schedule_max_vals: [1])
+    return if schedules_paths.all? { |x| x.nil? }
 
     @runner = runner
     @model = model
-    @schedules_path = schedules_path
-    @schedule_max_val = schedule_max_val
+    @schedules_paths = schedules_paths
+    @schedule_min_vals = schedule_min_vals
+    @schedule_max_vals = schedule_max_vals
 
     import(col_names: col_names)
 
@@ -1131,22 +1134,26 @@ class SchedulesFile
 
   def import(col_names:)
     @schedules = {}
-    columns = CSV.read(@schedules_path).transpose
-    columns.each do |col|
-      col_name = col[0]
-      unless col_names.include? col_name
-        fail "Schedule column name '#{col_name}' is invalid. [context: #{@schedules_path}]"
+    @schedules_paths.each_with_index do |schedules_path, i|
+      next if schedules_path.nil?
+
+      columns = CSV.read(schedules_path).transpose
+      columns.each do |col|
+        col_name = col[0]
+        unless col_names[i].include? col_name
+          fail "Schedule column name '#{col_name}' is invalid. [context: #{schedules_path}]"
+        end
+
+        values = col[1..-1].reject { |v| v.nil? }
+
+        begin
+          values = values.map { |v| Float(v) }
+        rescue ArgumentError
+          fail "Schedule value must be numeric for column '#{col_name}'. [context: #{schedules_path}]"
+        end
+
+        @schedules[col_name] = values
       end
-
-      values = col[1..-1].reject { |v| v.nil? }
-
-      begin
-        values = values.map { |v| Float(v) }
-      rescue ArgumentError
-        fail "Schedule value must be numeric for column '#{col_name}'. [context: #{@schedules_path}]"
-      end
-
-      @schedules[col_name] = values
     end
   end
 
@@ -1154,25 +1161,33 @@ class SchedulesFile
     @year = year
     num_hrs_in_year = Constants.NumHoursInYear(@year)
 
-    columns = CSV.read(@schedules_path).transpose
-    columns.each do |col|
-      col_name = col[0]
-      values = col[1..-1].reject { |v| v.nil? }
-      values = values.map { |v| Float(v) }
-      schedule_length = values.length
+    @schedules_paths.each_with_index do |schedules_path, i|
+      next if schedules_path.nil?
 
-      if values.max > @schedule_max_val
-        fail "Schedule max value for column '#{col_name}' must be less than or equal to #{@schedule_max_val}. [context: #{@schedules_path}]"
-      end
+      columns = CSV.read(schedules_path).transpose
+      columns.each do |col|
+        col_name = col[0]
+        values = col[1..-1].reject { |v| v.nil? }
+        values = values.map { |v| Float(v) }
+        schedule_length = values.length
 
-      if values.min < 0
-        fail "Schedule min value for column '#{col_name}' must be non-negative. [context: #{@schedules_path}]"
-      end
+        if not @schedule_max_vals[i].nil?
+          if values.max > @schedule_max_vals[i]
+            fail "Schedule max value for column '#{col_name}' must be less than or equal to #{@schedule_max_vals[i]}. [context: #{schedules_path}]"
+          end
+        end
 
-      valid_minutes_per_item = [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60]
-      valid_num_rows = valid_minutes_per_item.map { |min_per_item| (60.0 * num_hrs_in_year / min_per_item).to_i }
-      unless valid_num_rows.include? schedule_length
-        fail "Schedule has invalid number of rows (#{schedule_length}) for column '#{col_name}'. Must be one of: #{valid_num_rows.reverse.join(', ')}. [context: #{@schedules_path}]"
+        if not @schedule_min_vals[i].nil?
+          if values.min < @schedule_min_vals[i]
+            fail "Schedule min value for column '#{col_name}' must be greater than or equal to #{@schedule_min_vals[i]}. [context: #{schedules_path}]"
+          end
+        end
+
+        valid_minutes_per_item = [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60]
+        valid_num_rows = valid_minutes_per_item.map { |min_per_item| (60.0 * num_hrs_in_year / min_per_item).to_i }
+        unless valid_num_rows.include? schedule_length
+          fail "Schedule has invalid number of rows (#{schedule_length}) for column '#{col_name}'. Must be one of: #{valid_num_rows.reverse.join(', ')}. [context: #{@schedules_path}]"
+        end
       end
     end
   end
@@ -1204,7 +1219,12 @@ class SchedulesFile
   end
 
   def get_col_index(col_name:)
-    headers = CSV.open(@schedules_path, 'r') { |csv| csv.first }
+    headers = []
+    @schedules_paths.each do |schedules_path|
+      next if schedules_path.nil?
+
+      headers += CSV.open(schedules_path, 'r') { |csv| csv.first }
+    end
     col_num = headers.index(col_name)
     return col_num
   end

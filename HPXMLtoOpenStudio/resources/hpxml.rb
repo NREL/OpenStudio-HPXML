@@ -864,7 +864,7 @@ class HPXML < Object
              :sim_begin_month, :sim_begin_day, :sim_end_month, :sim_end_day, :sim_calendar_year,
              :dst_enabled, :dst_begin_month, :dst_begin_day, :dst_end_month, :dst_end_day,
              :use_max_load_for_heat_pumps, :allow_increased_fixed_capacities,
-             :apply_ashrae140_assumptions, :energystar_calculation_version, :schedules_filepath]
+             :apply_ashrae140_assumptions, :energystar_calculation_version, :schedules_filepath, :water_heater_schedules_filepath]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -896,6 +896,12 @@ class HPXML < Object
       if not @schedules_filepath.nil?
         unless File.exist? @schedules_filepath
           errors << "Schedules file path '#{@schedules_filepath}' does not exist."
+        end
+      end
+
+      if not @water_heater_schedules_filepath.nil?
+        unless File.exist? @water_heater_schedules_filepath
+          errors << "Schedules file path '#{@water_heater_schedules_filepath}' does not exist."
         end
       end
 
@@ -962,6 +968,10 @@ class HPXML < Object
         extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
         XMLHelper.add_element(extension, 'SchedulesFilePath', @schedules_filepath, :string) unless @schedules_filepath.nil?
       end
+      if not @water_heater_schedules_filepath.nil?
+        extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
+        XMLHelper.add_element(extension, 'WaterHeaterSchedulesFilePath', @water_heater_schedules_filepath, :string) unless @water_heater_schedules_filepath.nil?
+      end
 
       building = XMLHelper.add_element(hpxml, 'Building')
       building_building_id = XMLHelper.add_element(building, 'BuildingID')
@@ -1005,6 +1015,7 @@ class HPXML < Object
       @use_max_load_for_heat_pumps = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/UseMaxLoadForHeatPumps', :boolean)
       @allow_increased_fixed_capacities = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/AllowIncreasedFixedCapacities', :boolean)
       @schedules_filepath = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SchedulesFilePath', :string)
+      @water_heater_schedules_filepath = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/WaterHeaterSchedulesFilePath', :string)
       @building_id = HPXML::get_id(hpxml, 'Building/BuildingID')
       @event_type = XMLHelper.get_value(hpxml, 'Building/ProjectStatus/EventType', :string)
       @state_code = XMLHelper.get_value(hpxml, 'Building/Site/Address/StateCode', :string)
