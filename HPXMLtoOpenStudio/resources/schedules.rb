@@ -1110,15 +1110,15 @@ class SchedulesFile
                  model: nil,
                  schedules_paths:,
                  col_names:,
-                 schedule_min_vals: [0],
-                 schedule_max_vals: [1])
-    return if schedules_paths.all? { |x| x.nil? }
+                 schedule_min_val: 0,
+                 schedule_max_val: 1)
+    return if schedules_paths.nil?
 
     @runner = runner
     @model = model
-    @schedules_paths = schedules_paths
-    @schedule_min_vals = schedule_min_vals
-    @schedule_max_vals = schedule_max_vals
+    @schedules_paths = schedules_paths.split(',')
+    @schedule_min_val = schedule_min_val
+    @schedule_max_val = schedule_max_val
 
     import(col_names: col_names)
 
@@ -1136,18 +1136,17 @@ class SchedulesFile
     if @schedules.nil?
       return true
     end
+
     return false
   end
 
   def import(col_names:)
     @schedules = {}
-    @schedules_paths.each_with_index do |schedules_path, i|
-      next if schedules_path.nil?
-
+    @schedules_paths.each do |schedules_path|
       columns = CSV.read(schedules_path).transpose
       columns.each do |col|
         col_name = col[0]
-        unless col_names[i].include? col_name
+        unless col_names.include? col_name
           fail "Schedule column name '#{col_name}' is invalid. [context: #{schedules_path}]"
         end
 
@@ -1168,9 +1167,7 @@ class SchedulesFile
     @year = year
     num_hrs_in_year = Constants.NumHoursInYear(@year)
 
-    @schedules_paths.each_with_index do |schedules_path, i|
-      next if schedules_path.nil?
-
+    @schedules_paths.each do |schedules_path|
       columns = CSV.read(schedules_path).transpose
       columns.each do |col|
         col_name = col[0]
@@ -1178,15 +1175,15 @@ class SchedulesFile
         values = values.map { |v| Float(v) }
         schedule_length = values.length
 
-        if not @schedule_max_vals[i].nil?
-          if values.max > @schedule_max_vals[i]
-            fail "Schedule max value for column '#{col_name}' must be less than or equal to #{@schedule_max_vals[i]}. [context: #{schedules_path}]"
+        if not @schedule_max_val.nil?
+          if values.max > @schedule_max_val
+            fail "Schedule max value for column '#{col_name}' must be less than or equal to #{@schedule_max_val}. [context: #{schedules_path}]"
           end
         end
 
-        if not @schedule_min_vals[i].nil?
-          if values.min < @schedule_min_vals[i]
-            fail "Schedule min value for column '#{col_name}' must be greater than or equal to #{@schedule_min_vals[i]}. [context: #{schedules_path}]"
+        if not @schedule_min_val.nil?
+          if values.min < @schedule_min_val
+            fail "Schedule min value for column '#{col_name}' must be greater than or equal to #{@schedule_min_val}. [context: #{schedules_path}]"
           end
         end
 
@@ -1266,6 +1263,10 @@ class SchedulesFile
   # the equivalent number of hours in the year, if the schedule was at full load (1.0)
   def annual_equivalent_full_load_hrs(col_name:,
                                       schedules: nil)
+    if @schedules[col_name].nil?
+      return
+    end
+
     if schedules.nil?
       schedules = @schedules # the schedules before vacancy is applied
     end
@@ -1283,6 +1284,9 @@ class SchedulesFile
   # is at 1.0, so that, for the given schedule values, the equipment will consume annual_kwh energy in a year.
   def calc_design_level_from_annual_kwh(col_name:,
                                         annual_kwh:)
+    if @schedules[col_name].nil?
+      return
+    end
 
     ann_equiv_full_load_hrs = annual_equivalent_full_load_hrs(col_name: col_name)
     design_level = annual_kwh * 1000.0 / ann_equiv_full_load_hrs # W
@@ -1293,6 +1297,9 @@ class SchedulesFile
   # Similar to ann_equiv_full_load_hrs, but for thermal energy
   def calc_design_level_from_annual_therm(col_name:,
                                           annual_therm:)
+    if @schedules[col_name].nil?
+      return
+    end
 
     annual_kwh = UnitConversions.convert(annual_therm, 'therm', 'kWh')
     design_level = calc_design_level_from_annual_kwh(col_name: col_name, annual_kwh: annual_kwh)
@@ -1304,6 +1311,10 @@ class SchedulesFile
   # level
   def calc_design_level_from_daily_kwh(col_name:,
                                        daily_kwh:)
+    if @schedules[col_name].nil?
+      return
+    end
+
     full_load_hrs = annual_equivalent_full_load_hrs(col_name: col_name)
     num_days_in_year = Constants.NumDaysInYear(@year)
     daily_full_load_hrs = full_load_hrs / num_days_in_year
@@ -1313,7 +1324,12 @@ class SchedulesFile
   end
 
   # similar to calc_design_level_from_daily_kwh but for water usage
-  def calc_peak_flow_from_daily_gpm(col_name:, daily_water:)
+  def calc_peak_flow_from_daily_gpm(col_name:,
+                                    daily_water:)
+    if @schedules[col_name].nil?
+      return
+    end
+
     ann_equiv_full_load_hrs = annual_equivalent_full_load_hrs(col_name: col_name)
     num_days_in_year = Constants.NumDaysInYear(@year)
     daily_full_load_hrs = ann_equiv_full_load_hrs / num_days_in_year

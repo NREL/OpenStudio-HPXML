@@ -11,7 +11,7 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <SchedulesFilePaths>HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv</SchedulesFilePaths>
+      <SchedulesFilePaths>HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_operating_mode_schedule.csv</SchedulesFilePaths>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -393,12 +393,12 @@
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeatingSystem1'/>
             <FuelType>electricity</FuelType>
-            <WaterHeaterType>storage water heater</WaterHeaterType>
+            <WaterHeaterType>heat pump water heater</WaterHeaterType>
             <Location>living space</Location>
-            <TankVolume>40.0</TankVolume>
+            <TankVolume>50.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>18767.0</HeatingCapacity>
-            <EnergyFactor>0.95</EnergyFactor>
+            <UniformEnergyFactor>3.75</UniformEnergyFactor>
+            <UsageBin>medium</UsageBin>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>

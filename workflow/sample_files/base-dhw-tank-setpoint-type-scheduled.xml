@@ -11,7 +11,7 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <SchedulesFilePaths>HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv</SchedulesFilePaths>
+      <SchedulesFilePaths>HPXMLtoOpenStudio/resources/schedule_files/tank/hourly_setpoint_schedule.csv</SchedulesFilePaths>
     </extension>
   </SoftwareInfo>
   <Building>

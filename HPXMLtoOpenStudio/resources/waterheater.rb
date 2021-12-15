@@ -124,9 +124,11 @@ class Waterheater
     hpwh_bottom_element_sp.setName("#{obj_name_hpwh} BottomElementSetpoint")
     hpwh_bottom_element_sp.setValue(-60)
 
+    hpwh_top_element_sp = nil
     if not schedules_file.nil?
-      hpwh_top_element_sp = schedules_file.create_schedule_file(col_name: WaterHeaterScheduleColumns.WaterHeaterSetpoint)
-    else
+      hpwh_top_element_sp = schedules_file.create_schedule_file(col_name: ScheduleColumns.WaterHeaterSetpoint)
+    end
+    if hpwh_top_element_sp.nil?
       hpwh_top_element_sp = OpenStudio::Model::ScheduleConstant.new(model)
       hpwh_top_element_sp.setName("#{obj_name_hpwh} TopElementSetpoint")
       hpwh_top_element_sp.setValue((tset_C - 9.0001).round(4))
@@ -157,11 +159,7 @@ class Waterheater
 
     # EMS for the HPWH control logic
     op_mode = water_heating_system.operating_mode
-    op_mode_schedule_file = nil
-    unless water_heating_system.operating_mode_schedule_filepath.nil?
-      op_mode_schedule_file = SchedulesFile.new(model: model, year: year, schedules_path: water_heating_system.operating_mode_schedule_filepath, col_names: ['water_heater_operating_mode'], schedule_max_val: 150)
-    end
-    hpwh_ctrl_program = add_hpwh_control_program(model, obj_name_hpwh, amb_temp_sensor, hpwh_bottom_element_sp, min_temp, max_temp, tset_C, schedules_file, op_mode, op_mode_schedule_file, control_logic)
+    hpwh_ctrl_program = add_hpwh_control_program(model, obj_name_hpwh, amb_temp_sensor, hpwh_bottom_element_sp, min_temp, max_temp, tset_C, schedules_file, op_mode, control_logic)
 
     # ProgramCallingManagers
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
@@ -1018,30 +1016,19 @@ class Waterheater
       hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = 0")
       hpwh_ctrl_program.addLine('EndIf')
     elsif control_logic == 'GE'
-      if op_mode_schedule_file.nil?
-        if op_mode == HPXML::WaterHeaterOperatingModeStandard
-          if not schedules_file.nil?
-            hpwh_ctrl_program.addLine('Set TODO=0')
-          else
-            hpwh_ctrl_program.addLine('Set TODO=0')
-          end
-        elsif op_mode == HPXML::WaterHeaterOperatingModeHeatPumpOnly
-          if not schedules_file.nil?
-            hpwh_ctrl_program.addLine('Set TODO=0')
-          else
-            hpwh_ctrl_program.addLine('Set TODO=0')
-          end
+      op_mode_schedule = nil
+      if not schedules_file.nil?
+        op_mode_schedule = schedules_file.create_schedule_file(col_name: ScheduleColumns.WaterHeaterOperatingMode)
+        if not op_mode_schedule.nil?
+          op_mode_schedule_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+          op_mode_schedule_sensor.setName("#{obj_name_hpwh} Op_mode")
+          op_mode_schedule_sensor.setKeyName(op_mode_schedule.name.to_s)
         end
-      else
-        op_mode_schedule = schedules_file.create_schedule_file(col_name: WaterHeaterScheduleColumns.WaterHeaterOperatingMode)
-
-        op_mode_schedule_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-        op_mode_schedule_sensor.setName("#{obj_name_hpwh} Op_mode")
-        op_mode_schedule_sensor.setKeyName(op_mode_schedule.name.to_s)
-
-        if setpoint_schedule_file.nil?
+      end
+      if op_mode_schedule.nil?
+        if op_mode == HPXML::WaterHeaterOperatingModeStandard
           hpwh_ctrl_program.addLine('Set TODO=0')
-        else
+        elsif op_mode == HPXML::WaterHeaterOperatingModeHeatPumpOnly
           hpwh_ctrl_program.addLine('Set TODO=0')
         end
       end
@@ -1814,7 +1801,7 @@ class Waterheater
   def self.configure_mixed_tank_setpoint_schedule(new_heater, schedules_file, set_temp_c, model)
     new_schedule = nil
     if not schedules_file.nil?
-      new_schedule = schedules_file.create_schedule_file(col_name: WaterHeaterScheduleColumns.WaterHeaterSetpoint)
+      new_schedule = schedules_file.create_schedule_file(col_name: ScheduleColumns.WaterHeaterSetpoint)
     end
     if new_schedule.nil? # constant
       new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
@@ -1829,7 +1816,7 @@ class Waterheater
 
   def self.configure_stratified_tank_setpoint_schedules(new_heater, schedules_file, set_temp_c, model)
     if not schedules_file.nil?
-      new_schedule = schedules_file.create_schedule_file(col_name: WaterHeaterScheduleColumns.WaterHeaterSetpoint)
+      new_schedule = schedules_file.create_schedule_file(col_name: ScheduleColumns.WaterHeaterSetpoint)
     else # constant
       new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
       new_schedule.setName('WH Setpoint Temp')

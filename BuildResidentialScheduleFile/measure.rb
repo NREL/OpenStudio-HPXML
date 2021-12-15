@@ -132,12 +132,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     # modify the hpxml with the schedules path
     doc = XMLHelper.parse_file(hpxml_path)
     extension = XMLHelper.create_elements_as_needed(XMLHelper.get_element(doc, '/HPXML'), ['SoftwareInfo', 'extension'])
-    schedules_filepath = XMLHelper.get_value(extension, 'SchedulesFilePath', :string)
+    schedules_filepath = XMLHelper.get_value(extension, 'SchedulesFilePaths', :string)
     if !schedules_filepath.nil?
-      runner.registerWarning("Overwriting existing SchedulesFilePath element: #{schedules_filepath}")
-      XMLHelper.delete_element(extension, 'SchedulesFilePath')
+      runner.registerWarning("Overwriting existing SchedulesFilePaths element: #{schedules_filepath}")
+      XMLHelper.delete_element(extension, 'SchedulesFilePaths')
     end
-    XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)
+    schedules_filepaths = [args[:output_csv_path]]
 
     # water heater scheduled setpoints and/or operating modes
     if args[:water_heater_scheduled_setpoint_path].is_initialized || args[:water_heater_scheduled_operating_mode_path].is_initialized
@@ -145,13 +145,10 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       success = create_water_heater_schedules(runner, hpxml, args)
       return false if not success
 
-      water_heater_schedules_filepath = XMLHelper.get_value(extension, 'WaterHeaterSchedulesFilePath', :string)
-      if !water_heater_schedules_filepath.nil?
-        runner.registerWarning("Overwriting existing WaterHeaterSchedulesFilePath element: #{water_heater_schedules_filepath}")
-        XMLHelper.delete_element(extension, 'WaterHeaterSchedulesFilePath')
-      end
-      XMLHelper.add_element(extension, 'WaterHeaterSchedulesFilePath', args[:water_heater_output_csv_path].get, :string)
+      schedules_filepaths << args[:water_heater_output_csv_path].get
     end
+    schedules_filepaths = schedules_filepaths.join(',')
+    XMLHelper.add_element(extension, 'SchedulesFilePaths', schedules_filepaths, :string)
 
     # write out the modified hpxml
     hpxml_output_path = args[:hpxml_output_path]
@@ -159,7 +156,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       hpxml_output_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_output_path))
     end
 
-    if (hpxml_path != hpxml_output_path) || (schedules_filepath != args[:output_csv_path]) || (water_heater_schedules_filepath != args[:water_heater_output_csv_path])
+    if (hpxml_path != hpxml_output_path) || (schedules_filepath != schedules_filepaths)
       XMLHelper.write_file(doc, hpxml_output_path)
       runner.registerInfo("Wrote file: #{hpxml_output_path}")
     end
@@ -238,23 +235,24 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   end
 
   def create_water_heater_schedules(runner, hpxml, args)
-    columns = []
     rows = []
 
     if args[:water_heater_scheduled_setpoint_path].is_initialized
-      columns << WaterHeaterScheduleColumns.WaterHeaterSetpoint
       rows << CSV.read(args[:water_heater_scheduled_setpoint_path].get)
     end
 
     if args[:water_heater_scheduled_operating_mode_path].is_initialized
-      columns << WaterHeaterScheduleColumns.WaterHeaterOperatingMode
       rows << CSV.read(args[:water_heater_scheduled_operating_mode_path].get)
     end
 
     CSV.open(args[:water_heater_output_csv_path].get, 'w') do |csv|
-      csv << columns
       rows = rows.transpose
-      rows.each do |row|
+      columns = []
+      rows[0].each do |column|
+        columns << column[0]
+      end
+      csv << columns
+      rows[1..-1].each do |row|
         csv << row.map { |x| '%.3g' % x }
       end
     end

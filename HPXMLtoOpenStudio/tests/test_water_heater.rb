@@ -1130,11 +1130,11 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     # Expected value
     tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
-    u =  0.925
+    u =  1.045
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') - 9
     ther_eff = 1.0
-    cop = 2.820
-    tank_height = 1.598
+    cop = 4.004
+    tank_height = 1.0335
 
     # Check water heater
     assert_equal(1, model.getWaterHeaterHeatPumpWrappedCondensers.size)

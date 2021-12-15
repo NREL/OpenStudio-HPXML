@@ -218,16 +218,14 @@ class OSModel
     # Init
 
     @schedules_file = SchedulesFile.new(runner: runner, model: model,
-                                        schedules_paths: [@hpxml.header.schedules_filepath, @hpxml.header.water_heater_schedules_filepath],
-                                        col_names: [ScheduleColumns.ColNames.keys, WaterHeaterScheduleColumns.ColNames.keys],
-                                        schedule_min_vals: [0, nil],
-                                        schedule_max_vals: [1, nil])
+                                        schedules_paths: @hpxml.header.schedules_filepaths,
+                                        col_names: ScheduleColumns.ColNames.keys,
+                                        schedule_min_val: 0,
+                                        schedule_max_val: 150)
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
     set_defaults_and_globals(runner, output_dir, epw_file, weather, @schedules_file)
-    if not @schedules_file.nil?
-      @schedules_file.validate_schedules(year: @hpxml.header.sim_calendar_year)
-    end
+    @schedules_file.validate_schedules(year: @hpxml.header.sim_calendar_year) if not @schedules_file.nil?
     Location.apply(model, runner, weather, epw_file, @hpxml)
     add_simulation_params(model)
 
