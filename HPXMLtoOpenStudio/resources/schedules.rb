@@ -1427,6 +1427,8 @@ class SchedulesFile
       ColumnHotWaterClothesWasher => true,
       ColumnHotWaterFixtures => true,
       ColumnVacancy => nil,
+      ColumnWaterHeaterSetpoint => false,
+      ColumnWaterHeaterOperatingMode => false
     }
   end
 end

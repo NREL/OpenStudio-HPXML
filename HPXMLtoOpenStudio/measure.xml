@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>462a0290-5a81-4b52-95a7-8e8e3b5aaad9</version_id>
-  <version_modified>20211215T221328Z</version_modified>
+  <version_id>860c8604-d85c-4971-876f-a87a38d6925b</version_id>
+  <version_modified>20211215T222231Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -464,23 +464,6 @@
       <checksum>21CD7A0A</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.2.0</identifier>
-        <min_compatible>3.2.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>B212A6F6</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4577A4D6</checksum>
-    </file>
-    <file>
       <filename>schedule_files/heatpump/hourly_operating_mode_schedule.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -497,6 +480,23 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>2DFF87CD</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.2.0</identifier>
+        <min_compatible>3.2.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>D5AC5539</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>46F7C3FE</checksum>
     </file>
   </files>
 </measure>

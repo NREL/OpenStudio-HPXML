@@ -218,7 +218,7 @@ class OSModel
 
     @schedules_file = SchedulesFile.new(runner: runner, model: model,
                                         schedules_paths: @hpxml.header.schedules_filepaths,
-                                        col_names: ScheduleColumns.ColNames.keys,
+                                        col_names: SchedulesFile.ColumnNames.keys,
                                         schedule_min_val: 0,
                                         schedule_max_val: 150)
 

@@ -43,7 +43,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
     assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: ScheduleColumns.ColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames.keys)
     sf.validate_schedules(year: 2007)
 
     assert_in_epsilon(6020, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnOccupants, schedules: sf.tmp_schedules), 0.1)
@@ -95,7 +95,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod=Dec 1 - Jan 31') })
     assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: ScheduleColumns.ColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames.keys)
     sf.validate_schedules(year: 2007)
 
     vacancy_hrs = 31.0 * 2.0 * 24.0
@@ -150,7 +150,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
     assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: ScheduleColumns.ColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames.keys)
     sf.validate_schedules(year: 2007)
 
     assert_in_epsilon(6689, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnOccupants, schedules: sf.tmp_schedules), 0.1)
@@ -203,7 +203,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod=Dec 1 - Jan 31') })
     assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: ScheduleColumns.ColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames.keys)
     sf.validate_schedules(year: 2007)
 
     vacancy_hrs = 31.0 * 2.0 * 24.0
@@ -259,7 +259,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
     assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: ScheduleColumns.ColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames.keys)
     sf.validate_schedules(year: 2007)
 
     assert_in_epsilon(6689, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnOccupants, schedules: sf.tmp_schedules), 0.1)
@@ -305,7 +305,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
     assert(warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: ScheduleColumns.ColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames.keys)
     sf.validate_schedules(year: 2007)
 
     assert_in_epsilon(6072, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnOccupants, schedules: sf.tmp_schedules), 0.1)
@@ -357,7 +357,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod=Jan 1 - Dec 31') })
     assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: ScheduleColumns.ColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames.keys)
     sf.validate_schedules(year: 2012)
 
     vacancy_hrs = 366.0 * 24.0
@@ -410,7 +410,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
     assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: ScheduleColumns.ColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames.keys)
     sf.validate_schedules(year: 2007)
 
     assert_in_epsilon(6020, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnOccupants, schedules: sf.tmp_schedules), 0.1)
@@ -461,7 +461,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
     assert(warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: ScheduleColumns.ColNames.keys)
+    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames.keys)
     sf.validate_schedules(year: 2007)
 
     assert_in_epsilon(6020, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnOccupants, schedules: sf.tmp_schedules), 0.1)
@@ -508,7 +508,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('Created') })
     assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: ScheduleColumns.ColNames.keys, schedule_max_val: 150)
+    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames.keys, schedule_max_val: 150)
     sf.validate_schedules(year: 2007)
 
     assert(sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
@@ -534,7 +534,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('Created') })
     assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
-    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: ScheduleColumns.ColNames.keys, schedule_max_val: 150)
+    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames.keys, schedule_max_val: 150)
     sf.validate_schedules(year: 2007)
 
     assert(sf.schedules.keys.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
