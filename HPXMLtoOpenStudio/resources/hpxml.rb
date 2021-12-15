@@ -54,9 +54,9 @@ class HPXML < Object
                  :roofs, :rim_joists, :walls, :foundation_walls, :frame_floors, :slabs, :windows,
                  :skylights, :doors, :partition_wall_mass, :furniture_mass, :heating_systems,
                  :cooling_systems, :heat_pumps, :hvac_plant, :hvac_controls, :hvac_distributions,
-                 :ventilation_fans, :water_heating_systems,
-                 :hot_water_distributions, :water_fixtures, :water_heating, :solar_thermal_systems,
-                 :pv_systems, :generators, :batteries, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
+                 :ventilation_fans, :water_heating_systems, :hot_water_distributions, :water_fixtures,
+                 :water_heating, :solar_thermal_systems, :pv_systems, :generators, :batteries,
+                 :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
                  :freezers, :dehumidifiers, :cooking_ranges, :ovens, :lighting_groups, :lighting,
                  :ceiling_fans, :pools, :hot_tubs, :plug_loads, :fuel_loads]
   attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings)
@@ -860,7 +860,8 @@ class HPXML < Object
              :sim_begin_month, :sim_begin_day, :sim_end_month, :sim_end_day, :sim_calendar_year,
              :dst_enabled, :dst_begin_month, :dst_begin_day, :dst_end_month, :dst_end_day,
              :use_max_load_for_heat_pumps, :allow_increased_fixed_capacities,
-             :apply_ashrae140_assumptions, :energystar_calculation_version, :schedules_filepath]
+             :apply_ashrae140_assumptions, :energystar_calculation_version, :schedules_filepath,
+             :cambium_scenarios]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -892,6 +893,14 @@ class HPXML < Object
       if not @schedules_filepath.nil?
         unless File.exist? @schedules_filepath
           errors << "Schedules file path '#{@schedules_filepath}' does not exist."
+        end
+      end
+
+      if not @cambium_scenarios.nil?
+        @cambium_scenarios.each do |cambium_scenario_name, cambium_scenario_filepath|
+          unless File.exist? cambium_scenario_filepath
+            errors << "Cambium scenario file path '#{cambium_scenario_filepath}' does not exist."
+          end
         end
       end
 
@@ -958,6 +967,14 @@ class HPXML < Object
         extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
         XMLHelper.add_element(extension, 'SchedulesFilePath', @schedules_filepath, :string) unless @schedules_filepath.nil?
       end
+      if not @cambium_scenarios.nil?
+        @cambium_scenarios.each do |cambium_scenario_name, cambium_scenario_filepath|
+          cambium_scenarios = XMLHelper.create_elements_as_needed(software_info, ['extension', 'CambiumScenarios'])
+          cambium_scenario = XMLHelper.add_element(cambium_scenarios, 'CambiumScenario')
+          XMLHelper.add_element(cambium_scenario, 'Name', cambium_scenario_name, :string)
+          XMLHelper.add_element(cambium_scenario, 'CarbonFactorFilePath', cambium_scenario_filepath, :string)
+        end
+      end
 
       building = XMLHelper.add_element(hpxml, 'Building')
       building_building_id = XMLHelper.add_element(building, 'BuildingID')
@@ -1001,6 +1018,12 @@ class HPXML < Object
       @use_max_load_for_heat_pumps = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/UseMaxLoadForHeatPumps', :boolean)
       @allow_increased_fixed_capacities = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/AllowIncreasedFixedCapacities', :boolean)
       @schedules_filepath = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SchedulesFilePath', :string)
+      @cambium_scenarios = {}
+      XMLHelper.get_elements(hpxml, 'SoftwareInfo/extension/CambiumScenarios/CambiumScenario').each do |cambium_scenario|
+        cambium_scenario_name = XMLHelper.get_value(cambium_scenario, 'Name', :string)
+        cambium_scenario_filepath = XMLHelper.get_value(cambium_scenario, 'CarbonFactorFilePath', :string)
+        @cambium_scenarios[cambium_scenario_name] = cambium_scenario_filepath
+      end
       @building_id = HPXML::get_id(hpxml, 'Building/BuildingID')
       @event_type = XMLHelper.get_value(hpxml, 'Building/ProjectStatus/EventType', :string)
       @state_code = XMLHelper.get_value(hpxml, 'Building/Site/Address/StateCode', :string)
