@@ -234,53 +234,97 @@
                                         "enum": ["roof1", "roof2"],
                                         "description": "Name of this roof instance"
                                     },
-                                    "roof_area": {
-                                        "type": "number",
-                                        "minimum": 1,
-                                        "maximum": 25000,
-                                        "description": "Area of this roof element"
-                                    },
-                                    "roof_assembly_code": {
-                                        "type": "string",
-                                        "enum": ["rfwf00co", "rfwf00wo", "rfwf00rc", "rfwf00lc", "rfwf00tg",
-                                                 "rfwf11co", "rfwf11wo", "rfwf11rc", "rfwf11lc", "rfwf11tg",
-                                                 "rfwf13co", "rfwf13wo", "rfwf13rc", "rfwf13lc", "rfwf13tg",
-                                                 "rfwf15co", "rfwf15wo", "rfwf15rc", "rfwf15lc", "rfwf15tg",
-                                                 "rfwf19co", "rfwf19wo", "rfwf19rc", "rfwf19lc", "rfwf19tg",
-                                                 "rfwf21co", "rfwf21wo", "rfwf21rc", "rfwf21lc", "rfwf21tg",
-                                                 "rfwf27co", "rfwf27wo", "rfwf27rc", "rfwf27lc", "rfwf27tg",
-                                                 "rfwf30co", "rfwf30wo", "rfwf30rc", "rfwf30lc", "rfwf30tg",
-                                                 "rfrb00co", "rfrb00wo", "rfrb00rc", "rfrb00lc", "rfrb00tg",
-                                                 "rfps00co", "rfps00wo", "rfps00rc", "rfps00lc", "rfps00tg",
-                                                 "rfps11co", "rfps11wo", "rfps11rc", "rfps11lc", "rfps11tg",
-                                                 "rfps13co", "rfps13wo", "rfps13rc", "rfps13lc", "rfps13tg",
-                                                 "rfps15co", "rfps15wo", "rfps15rc", "rfps15lc", "rfps15tg",
-                                                 "rfps19co", "rfps19wo", "rfps19rc", "rfps19lc", "rfps19tg",
-                                                 "rfps21co", "rfps21wo", "rfps21rc", "rfps21lc", "rfps21tg"],
-                                        "description": "Roof construction assembly code"
-                                    },
-                                    "roof_color": {
-                                        "type": "string",
-                                        "enum": ["white", "light", "medium", "medium_dark", "dark", "cool_color"],
-                                        "description": "Color of roof exterior surface"
-                                    },
-                                    "roof_absorptance": {
-                                        "type": "number",
-                                        "minimum": 0,
-                                        "maximum": 1,
-                                        "description": "Absorptance of exterior surface (only used if roof_color is cool_color)"
-                                    },
                                     "roof_type": {
                                         "type": "string",
                                         "enum": ["vented_attic", "cond_attic", "cath_ceiling"],
                                         "description": "Type of roof"
                                     },
-                                    "ceiling_assembly_code": {
-                                        "type": "string",
-                                        "enum": ["ecwf00", "ecwf03", "ecwf06", "ecwf09", "ecwf11", "ecwf19",
-                                                 "ecwf21", "ecwf25", "ecwf30", "ecwf38", "ecwf44", "ecwf49",
-                                                 "ecwf60"],
-                                        "description": "Ceiling construction assembly code (required unless roof_type is cath_ceiling)"
+                                    "ceiling": {
+                                        "type": "object",
+                                        "required": [],
+                                        "description": "Inputs describing the floor of the attic or ceiling of the living space, omit if there is no attic.",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                            "area": {
+                                                "type": "number",
+                                                "minimum": 1,
+                                                "maximum": 25000,
+                                                "description": "Area of the roof surface"
+                                            },
+                                            "assembly_code": {
+                                                "type": "string",
+                                                "enum": ["ecwf00", "ecwf03", "ecwf06", "ecwf09", "ecwf11", "ecwf19",
+                                                         "ecwf21", "ecwf25", "ecwf30", "ecwf38", "ecwf44", "ecwf49",
+                                                         "ecwf60"],
+                                                "description": "Ceiling construction assembly code (required unless roof_type is cath_ceiling)"
+                                            }
+                                        }
+                                    },
+                                    "roof": {
+                                        "type": "object",
+                                        "required": [],
+                                        "description": "Inputs describing the roof surface.",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                            "area": {
+                                                "type": "number",
+                                                "minimum": 1,
+                                                "maximum": 25000,
+                                                "description": "Area of the roof surface"
+                                            },
+                                            "assembly_code": {
+                                                "type": "string",
+                                                "enum": ["rfwf00co", "rfwf00wo", "rfwf00rc", "rfwf00lc", "rfwf00tg",
+                                                         "rfwf11co", "rfwf11wo", "rfwf11rc", "rfwf11lc", "rfwf11tg",
+                                                         "rfwf13co", "rfwf13wo", "rfwf13rc", "rfwf13lc", "rfwf13tg",
+                                                         "rfwf15co", "rfwf15wo", "rfwf15rc", "rfwf15lc", "rfwf15tg",
+                                                         "rfwf19co", "rfwf19wo", "rfwf19rc", "rfwf19lc", "rfwf19tg",
+                                                         "rfwf21co", "rfwf21wo", "rfwf21rc", "rfwf21lc", "rfwf21tg",
+                                                         "rfwf27co", "rfwf27wo", "rfwf27rc", "rfwf27lc", "rfwf27tg",
+                                                         "rfwf30co", "rfwf30wo", "rfwf30rc", "rfwf30lc", "rfwf30tg",
+                                                         "rfrb00co", "rfrb00wo", "rfrb00rc", "rfrb00lc", "rfrb00tg",
+                                                         "rfps00co", "rfps00wo", "rfps00rc", "rfps00lc", "rfps00tg",
+                                                         "rfps11co", "rfps11wo", "rfps11rc", "rfps11lc", "rfps11tg",
+                                                         "rfps13co", "rfps13wo", "rfps13rc", "rfps13lc", "rfps13tg",
+                                                         "rfps15co", "rfps15wo", "rfps15rc", "rfps15lc", "rfps15tg",
+                                                         "rfps19co", "rfps19wo", "rfps19rc", "rfps19lc", "rfps19tg",
+                                                         "rfps21co", "rfps21wo", "rfps21rc", "rfps21lc", "rfps21tg"],
+                                                "description": "Roof construction assembly code"
+                                            },
+                                            "color": {
+                                                "type": "string",
+                                                "enum": ["white", "light", "medium", "medium_dark", "dark", "cool_color"],
+                                                "description": "Color of roof exterior surface"
+                                            },
+                                            "absorptance": {
+                                                "type": "number",
+                                                "minimum": 0,
+                                                "maximum": 1,
+                                                "description": "Absorptance of exterior surface (only used if roof_color is cool_color)"
+                                            }
+                                        }
+                                    },
+                                    "knee_wall": {
+                                        "type": "object",
+                                        "required": [],
+                                        "description": "Knee wall inputs.",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                            "area": {
+                                                "type": "number",
+                                                "minimum": 1,
+                                                "maximum": 25000,
+                                                "description": "Area of knee wall surfaces"
+                                            },
+                                            "assembly_code": {
+                                                "type": "string",
+                                                "enum": ["kwwf00", "kwwf01", "kwwf02", "kwwf03", "kwwf04", "kwwf05",
+                                                         "kwwf06", "kwwf07", "kwwf08", "kwwf09", "kwwf10", "kwwf11",
+                                                         "kwwf12", "kwwf13", "kwwf14", "kwwf15", "kwwf16", "kwwf17",
+                                                         "kwwf18", "kwwf19"],
+                                                "description": "Knee wall construction assembly code"
+                                            }
+                                        }
                                     },
                                     "zone_skylight": {
                                         "type": "object",
