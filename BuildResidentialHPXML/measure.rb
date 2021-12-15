@@ -8,21 +8,29 @@ require 'pathname'
 require 'csv'
 require 'oga'
 require_relative 'resources/geometry'
+require_relative '../HPXMLtoOpenStudio/resources/airflow'
 require_relative '../HPXMLtoOpenStudio/resources/battery'
 require_relative '../HPXMLtoOpenStudio/resources/constants'
 require_relative '../HPXMLtoOpenStudio/resources/constructions'
 require_relative '../HPXMLtoOpenStudio/resources/geometry'
+require_relative '../HPXMLtoOpenStudio/resources/hotwater_appliances'
+require_relative '../HPXMLtoOpenStudio/resources/hpxml_defaults'
 require_relative '../HPXMLtoOpenStudio/resources/hpxml'
 require_relative '../HPXMLtoOpenStudio/resources/hvac'
+require_relative '../HPXMLtoOpenStudio/resources/hvac_sizing'
 require_relative '../HPXMLtoOpenStudio/resources/lighting'
 require_relative '../HPXMLtoOpenStudio/resources/location'
 require_relative '../HPXMLtoOpenStudio/resources/materials'
+require_relative '../HPXMLtoOpenStudio/resources/misc_loads'
 require_relative '../HPXMLtoOpenStudio/resources/meta_measure'
 require_relative '../HPXMLtoOpenStudio/resources/psychrometrics'
+require_relative '../HPXMLtoOpenStudio/resources/pv'
 require_relative '../HPXMLtoOpenStudio/resources/schedules'
 require_relative '../HPXMLtoOpenStudio/resources/unit_conversions'
+require_relative '../HPXMLtoOpenStudio/resources/util'
 require_relative '../HPXMLtoOpenStudio/resources/validator'
 require_relative '../HPXMLtoOpenStudio/resources/version'
+require_relative '../HPXMLtoOpenStudio/resources/waterheater'
 require_relative '../HPXMLtoOpenStudio/resources/xmlhelper'
 
 # start the measure
@@ -2890,6 +2898,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1.0)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('apply_defaults', false)
+    arg.setDisplayName('Apply default values')
+    arg.setDescription('Sets OS-HPXML default values in the HPXML output file')
+    arg.setDefaultValue(false)
+    args << arg
+
     return args
   end
 
@@ -3261,6 +3275,18 @@ class HPXMLFile
       if errors.size > 0
         fail "ERROR: Invalid HPXML object produced.\n#{errors}"
       end
+    end
+
+    if args[:apply_defaults].is_initialized
+      apply_defaults = args[:apply_defaults].get
+    else
+      apply_defaults = false
+    end
+
+    if apply_defaults
+      eri_version = Constants.ERIVersions[-1]
+      weather = WeatherProcess.new(model, runner)
+      HPXMLDefaults.apply(hpxml, eri_version, weather, epw_file: epw_file)
     end
 
     hpxml_doc = hpxml.to_oga()

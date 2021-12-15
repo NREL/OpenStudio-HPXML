@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>a4d64934-f26c-4336-938d-4c0f57d95ef7</version_id>
-  <version_modified>20211215T220028Z</version_modified>
+  <version_id>13bca980-5e82-4242-a837-a9ea29d32843</version_id>
+  <version_modified>20211215T221325Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -120,12 +120,6 @@
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
       <checksum>0CB5683C</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4D69FD47</checksum>
     </file>
     <file>
       <filename>clothes_dryer_consumption_dist.csv</filename>
@@ -902,6 +896,12 @@
       <checksum>5FC694CF</checksum>
     </file>
     <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>507E49D4</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.2.0</identifier>
@@ -910,19 +910,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>DA17378D</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9B5FEF43</checksum>
+      <checksum>D43A721E</checksum>
     </file>
     <file>
       <filename>build_residential_schedule_file_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>68A50A95</checksum>
+      <checksum>A2F686E9</checksum>
     </file>
   </files>
 </measure>

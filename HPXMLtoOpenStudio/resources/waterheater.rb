@@ -126,7 +126,7 @@ class Waterheater
 
     hpwh_top_element_sp = nil
     if not schedules_file.nil?
-      hpwh_top_element_sp = schedules_file.create_schedule_file(col_name: ScheduleColumns.WaterHeaterSetpoint)
+      hpwh_top_element_sp = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
     end
     if hpwh_top_element_sp.nil?
       hpwh_top_element_sp = OpenStudio::Model::ScheduleConstant.new(model)
@@ -1018,7 +1018,7 @@ class Waterheater
     elsif control_logic == 'GE'
       op_mode_schedule = nil
       if not schedules_file.nil?
-        op_mode_schedule = schedules_file.create_schedule_file(col_name: ScheduleColumns.WaterHeaterOperatingMode)
+        op_mode_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterOperatingMode)
         if not op_mode_schedule.nil?
           op_mode_schedule_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
           op_mode_schedule_sensor.setName("#{obj_name_hpwh} Op_mode")
@@ -1801,7 +1801,7 @@ class Waterheater
   def self.configure_mixed_tank_setpoint_schedule(new_heater, schedules_file, set_temp_c, model)
     new_schedule = nil
     if not schedules_file.nil?
-      new_schedule = schedules_file.create_schedule_file(col_name: ScheduleColumns.WaterHeaterSetpoint)
+      new_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
     end
     if new_schedule.nil? # constant
       new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
@@ -1816,7 +1816,7 @@ class Waterheater
 
   def self.configure_stratified_tank_setpoint_schedules(new_heater, schedules_file, set_temp_c, model)
     if not schedules_file.nil?
-      new_schedule = schedules_file.create_schedule_file(col_name: ScheduleColumns.WaterHeaterSetpoint)
+      new_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
     else # constant
       new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
       new_schedule.setName('WH Setpoint Temp')
