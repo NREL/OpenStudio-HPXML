@@ -1144,7 +1144,7 @@ class SchedulesFile
     @model = model
     @schedules_path = schedules_path
 
-    import(col_names: SchedulesFile::ColumnNames.keys)
+    import(col_names: SchedulesFile.ColumnNames.keys)
 
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_vacancy
@@ -1336,7 +1336,7 @@ class SchedulesFile
     return unless @tmp_schedules.keys.include? 'vacancy'
     return if @tmp_schedules['vacancy'].all? { |i| i == 0 }
 
-    col_names = SchedulesFile::ColumnNames
+    col_names = SchedulesFile.ColumnNames
 
     @tmp_schedules[col_names.keys[0]].each_with_index do |ts, i|
       col_names.keys.each do |col_name|
