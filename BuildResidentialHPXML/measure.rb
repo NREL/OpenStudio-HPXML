@@ -3117,7 +3117,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   end
 
   def validate_hpxml(runner, hpxml_path, hpxml_doc)
-    schemas_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources')
+    schemas_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schema')
+    schematron_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources/hpxml_schematron')
 
     is_valid = true
 
@@ -3128,8 +3129,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     # Validate input HPXML against schematron docs
-    stron_paths = [File.join(schemas_dir, 'HPXMLvalidator.xml'),
-                   File.join(schemas_dir, 'EPvalidator.xml')]
+    stron_paths = [File.join(schematron_dir, 'HPXMLvalidator.xml'),
+                   File.join(schematron_dir, 'EPvalidator.xml')]
     errors, warnings = Validator.run_validators(hpxml_doc, stron_paths)
     errors.each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
