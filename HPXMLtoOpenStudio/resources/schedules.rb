@@ -1132,6 +1132,13 @@ class SchedulesFile
     get_external_file
   end
 
+  def nil?
+    if @schedules.nil?
+      return true
+    end
+    return false
+  end
+
   def import(col_names:)
     @schedules = {}
     @schedules_paths.each_with_index do |schedules_path, i|
