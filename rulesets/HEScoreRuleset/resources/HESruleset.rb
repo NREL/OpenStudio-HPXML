@@ -728,11 +728,7 @@ class HEScoreRuleset
         tot_frac += orig_duct['fraction'].to_f
         sealed << orig_duct['sealed']
 
-        duct_location = { 'cond_space' => HPXML::LocationLivingSpace,
-                          'uncond_basement' => HPXML::LocationBasementUnconditioned,
-                          'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
-                          'vented_crawl' => HPXML::LocationCrawlspaceVented,
-                          'uncond_attic' => HPXML::LocationAtticVented }[orig_duct['location']]
+        duct_location = $duct_location_map[orig_duct['location']]
 
         next unless duct_location == HPXML::LocationLivingSpace
 
@@ -766,11 +762,7 @@ class HEScoreRuleset
       orig_hvac['hvac_distribution'].each do |orig_duct|
         next if orig_duct['fraction'] == 0
 
-        duct_location = { 'cond_space' => HPXML::LocationLivingSpace,
-                          'uncond_basement' => HPXML::LocationBasementUnconditioned,
-                          'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
-                          'vented_crawl' => HPXML::LocationCrawlspaceVented,
-                          'uncond_attic' => HPXML::LocationAtticVented }[orig_duct['location']]
+        duct_location = $duct_location_map[orig_duct['location']]
 
         next if duct_location == HPXML::LocationLivingSpace
 
@@ -1187,6 +1179,17 @@ $hvac_system_type_map = {
   'baseboard' => HPXML::HVACTypeElectricResistance
 }
 
+$duct_location_map = {
+  'cond_space' => HPXML::LocationLivingSpace,
+  'uncond_basement' => HPXML::LocationBasementUnconditioned,
+  'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
+  'vented_crawl' => HPXML::LocationCrawlspaceVented,
+  'uncond_attic' => HPXML::LocationAtticVented,
+  'under_slab' => HPXML::LocationUnderSlab,
+  'exterior_wall' => HPXML::LocationExteriorWall,
+  'outside' => HPXML::LocationOutside
+}
+
 def get_roof_effective_r_from_doe2code(doe2code)
   # For wood frame with radiant barrier roof, use wood frame roof effective R-value. Radiant barrier will be handled by the actual radiant barrier model in OS.
   if doe2code[2, 2] == 'rb'
@@ -1407,13 +1410,13 @@ def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fn
 
   c_duct = 0.0
   ducts.each do |hvac_frac, duct_frac, duct_location|
-    if duct_location == 'cond_space'
+    if ['cond_space', 'under_slab', 'exterior_wall', 'outside'].include? duct_location
       c_duct += -0.12381 * duct_frac * hvac_frac
-    elsif (duct_location == 'uncond_attic') || (duct_location == 'uncond_basement')
+    elsif ['uncond_attic', 'uncond_basement'].include? duct_location
       c_duct += 0.07126 * duct_frac * hvac_frac
-    elsif duct_location == 'vented_crawl'
+    elsif ['vented_crawl'].include? duct_location
       c_duct += 0.18072 * duct_frac * hvac_frac
-    elsif duct_location == 'unvented_crawl'
+    elsif ['unvented_crawl'].include? duct_location
       c_duct += 0.07126 * duct_frac * hvac_frac
     else
       fail "Unexpected duct location: #{duct_location}"
