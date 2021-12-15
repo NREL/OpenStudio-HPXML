@@ -17,7 +17,7 @@ HPXML files submitted to OpenStudio-HPXML should undergo a two step validation p
 
 1. Validation against the HPXML Schema
 
-  The HPXML XSD Schema can be found at ``HPXMLtoOpenStudio/resources/HPXML.xsd``.
+  The HPXML XSD Schema can be found at ``HPXMLtoOpenStudio/resources/hpxml_schema/HPXML.xsd``.
   It should be used by the software developer to validate their HPXML file prior to running the simulation.
   XSD Schemas are used to validate what elements/attributes/enumerations are available, data types for elements/attributes, the number/order of children elements, etc.
 
@@ -26,7 +26,7 @@ HPXML files submitted to OpenStudio-HPXML should undergo a two step validation p
 
 2. Validation using `Schematron <http://schematron.com/>`_
 
-  The Schematron document for the EnergyPlus use case can be found at ``HPXMLtoOpenStudio/resources/EPvalidator.xml``.
+  The Schematron document for the EnergyPlus use case can be found at ``HPXMLtoOpenStudio/resources/hpxml_schematron/EPvalidator.xml``.
   Schematron is a rule-based validation language, expressed in XML using XPath expressions, for validating the presence or absence of inputs in XML files. 
   As opposed to an XSD Schema, a Schematron document validates constraints and requirements based on conditionals and other logical statements.
   For example, if an element is specified with a particular value, the applicable enumerations of another element may change.
@@ -926,7 +926,7 @@ If a furnace is specified, additional information is entered in ``HeatingSystem`
   ====================================================================  =================  =========  ===============  ========  ========  ================================================
 
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity" or "gravity") or DSE.
-  .. [#] If AnnualHeatingEfficiency[Units="AFUE"]/Value not provided, defaults to 0.98 if FuelType is "electricity", else AFUE from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
+  .. [#] If AnnualHeatingEfficiency[Units="AFUE"]/Value not provided, defaults to 0.98 if FuelType is "electricity", else AFUE from the lookup table that can be found at ``HPXMLtoOpenStudio/resources/data/hvac_equipment_efficiency.csv`` based on YearInstalled.
   .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0 W/cfm if gravity distribution system, else 0.5 W/cfm if AFUE <= 0.9, else 0.375 W/cfm.
   .. [#] If there is a cooling system attached to the DistributionSystem, the heating and cooling systems cannot have different values for FanPowerWattsPerCFM.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
@@ -944,7 +944,7 @@ If a wall furnace or floor furnace is specified, additional information is enter
   ``extension/FanPowerWatts``                                           double             W          >= 0             No        0         Fan power
   ====================================================================  =================  =========  ===============  ========  ========  ==================================
 
-  .. [#] If AnnualHeatingEfficiency[Units="AFUE"]/Value not provided, defaults to 0.98 if FuelType is "electricity", else AFUE from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
+  .. [#] If AnnualHeatingEfficiency[Units="AFUE"]/Value not provided, defaults to 0.98 if FuelType is "electricity", else AFUE from the lookup table that can be found at ``HPXMLtoOpenStudio/resources/data/hvac_equipment_efficiency.csv`` based on YearInstalled.
 
 .. _hvac_heating_boiler:
 
@@ -964,7 +964,7 @@ If a boiler is specified, additional information is entered in ``HeatingSystem``
   .. [#] For in-unit boilers, HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", or "radiant ceiling") or DSE.
          For shared boilers, HVACDistribution type must be HydronicDistribution (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or AirDistribution (type: "fan coil").
          If the shared boiler has "water loop" distribution, a :ref:`hvac_heatpump_wlhp` must also be specified.
-  .. [#] If AnnualHeatingEfficiency[Units="AFUE"]/Value not provided, defaults to 0.98 if FuelType is "electricity", else AFUE from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
+  .. [#] If AnnualHeatingEfficiency[Units="AFUE"]/Value not provided, defaults to 0.98 if FuelType is "electricity", else AFUE from the lookup table that can be found at ``HPXMLtoOpenStudio/resources/data/hvac_equipment_efficiency.csv`` based on YearInstalled.
          
 
 If an in-unit boiler if specified, additional information is entered in ``HeatingSystem``.
@@ -1079,7 +1079,7 @@ If a central air conditioner is specified, additional information is entered in 
   ====================================================================  =================  ===========  ===============  ========  =========  ================================================
 
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
-  .. [#] If AnnualCoolingEfficiency[Units="SEER"]/Value not provided, defaults to SEER from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
+  .. [#] If AnnualCoolingEfficiency[Units="SEER"]/Value not provided, defaults to SEER from the lookup table that can be found at ``HPXMLtoOpenStudio/resources/data/hvac_equipment_efficiency.csv`` based on YearInstalled.
   .. [#] CompressorType choices are "single stage", "two stage", or "variable speed".
   .. [#] If CompressorType not provided, defaults to "single stage" if SEER <= 15, else "two stage" if SEER <= 21, else "variable speed".
   .. [#] If FanPowerWattsPerCFM not provided, defaults to using attached furnace W/cfm if available, else 0.5 W/cfm if SEER <= 13.5, else 0.375 W/cfm.
@@ -1103,7 +1103,7 @@ If a room air conditioner is specified, additional information is entered in ``C
   ``SensibleHeatFraction``                                                             double             frac         0 - 1            No                   Sensible heat fraction
   ===================================================================================  =================  ===========  ===============  ========  =========  ==================================
 
-  .. [#] If AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value not provided, defaults to EER from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
+  .. [#] If AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value not provided, defaults to EER from the lookup table that can be found at ``HPXMLtoOpenStudio/resources/data/hvac_equipment_efficiency.csv`` based on YearInstalled.
 
 Packaged Terminal Air Conditioner
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1293,8 +1293,8 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   .. [#] If CompressorType not provided, defaults to "single stage" if SEER <= 15, else "two stage" if SEER <= 21, else "variable speed".
   .. [#] The sum of all ``FractionHeatLoadServed`` (across both HeatingSystems and HeatPumps) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across both CoolingSystems and HeatPumps) must be less than or equal to 1.
-  .. [#] If AnnualCoolingEfficiency[Units="SEER"]/Value not provided, defaults to SEER from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
-  .. [#] If AnnualHeatingEfficiency[Units="HSPF"]/Value not provided, defaults to HSPF from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_hvac_equipment_efficiency.csv`` based on YearInstalled.
+  .. [#] If AnnualCoolingEfficiency[Units="SEER"]/Value not provided, defaults to SEER from the lookup table that can be found at ``HPXMLtoOpenStudio/resources/data/hvac_equipment_efficiency.csv`` based on YearInstalled.
+  .. [#] If AnnualHeatingEfficiency[Units="HSPF"]/Value not provided, defaults to HSPF from the lookup table that can be found at ``HPXMLtoOpenStudio/resources/data/hvac_equipment_efficiency.csv`` based on YearInstalled.
   .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0.5 W/cfm if HSPF <= 8.75, else 0.375 W/cfm.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
@@ -1854,7 +1854,7 @@ If a conventional storage water heater is specified, additional information is e
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
   .. [#] If TankVolume not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
   .. [#] If HeatingCapacity not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
-  .. [#] If UniformEnergyFactor and EnergyFactor not provided, defaults to EnergyFactor from the lookup table that can be found at ``HPXMLtoOpenStudio\resources\lu_water_heater_efficiency.csv`` based on YearInstalled.
+  .. [#] If UniformEnergyFactor and EnergyFactor not provided, defaults to EnergyFactor from the lookup table that can be found at ``HPXMLtoOpenStudio/resources/data/water_heater_efficiency.csv`` based on YearInstalled.
   .. [#] UsageBin choices are "very small", "low", "medium", or "high".
   .. [#] UsageBin/FirstHourRating are only used for water heaters that use UniformEnergyFactor.
          If neither UsageBin nor FirstHourRating provided, UsageBin defaults to "medium".

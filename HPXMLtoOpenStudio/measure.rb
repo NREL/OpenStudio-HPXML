@@ -134,8 +134,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       if skip_validation
         stron_paths = []
       else
-        stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'HPXMLvalidator.xml'),
-                       File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')]
+        stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'HPXMLvalidator.xml'),
+                       File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'EPvalidator.xml')]
       end
       hpxml = HPXML.new(hpxml_path: hpxml_path, schematron_validators: stron_paths, building_id: building_id)
       hpxml.errors.each do |error|

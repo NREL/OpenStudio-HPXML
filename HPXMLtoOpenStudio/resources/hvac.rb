@@ -4149,7 +4149,7 @@ class HVAC
     metric_id = units.downcase
     value = nil
     lookup_year = 0
-    CSV.foreach(File.join(File.dirname(__FILE__), 'lu_hvac_equipment_efficiency.csv'), headers: true) do |row|
+    CSV.foreach(File.join(File.dirname(__FILE__), 'data', 'hvac_equipment_efficiency.csv'), headers: true) do |row|
       next unless row['type_id'] == type_id
       next unless row['fuel_primary_id'] == fuel_primary_id
       next unless row['metric_id'] == metric_id
