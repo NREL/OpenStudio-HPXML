@@ -32,7 +32,7 @@ following mapping.
    unconditioned attic     uncond_attic
    interstitial space      *not translated*
    garage                  vented_crawl
-   outside                 *not translated*
+   outside                 outside
    ======================  ================
 
 .. table:: Duct Location mapping (HPXML v3)
