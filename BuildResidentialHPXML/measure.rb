@@ -2878,7 +2878,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('apply_defaults', false)
     arg.setDisplayName('Apply default values')
-    arg.setDescription('Sets default values to the HPXML object')
+    arg.setDescription('Sets OS-HPXML default values in the HPXML output file')
     arg.setDefaultValue(false)
     args << arg
 
