@@ -1141,16 +1141,12 @@ class SchedulesFile
   def initialize(runner: nil,
                  model: nil,
                  schedules_paths:,
-                 col_names:,
-                 schedule_min_val: 0,
-                 schedule_max_val: 1)
+                 col_names:)
     return if schedules_paths.nil?
 
     @runner = runner
     @model = model
     @schedules_paths = schedules_paths.split(',')
-    @schedule_min_val = schedule_min_val
-    @schedule_max_val = schedule_max_val
 
     import(col_names: col_names)
 
@@ -1179,7 +1175,7 @@ class SchedulesFile
       columns.each do |col|
         col_name = col[0]
         unless col_names.include? col_name
-          fail "Schedule column name '#{col_name}' is invalid. [context: #{schedules_path}]"
+          fail "Schedule column name '#{col_name}' is invalid. [context: #{schedules_path}]" unless [SchedulesFile::ColumnVacancy].include?(col_name)
         end
 
         values = col[1..-1].reject { |v| v.nil? }
@@ -1207,15 +1203,15 @@ class SchedulesFile
         values = values.map { |v| Float(v) }
         schedule_length = values.length
 
-        if not @schedule_max_val.nil?
-          if values.max > @schedule_max_val
-            fail "Schedule max value for column '#{col_name}' must be less than or equal to #{@schedule_max_val}. [context: #{schedules_path}]"
+        if max_value_one[col_name]
+          if values.max > 1
+            fail "Schedule max value for column '#{col_name}' must be 1. [context: #{schedules_path}]"
           end
         end
 
-        if not @schedule_min_val.nil?
-          if values.min < @schedule_min_val
-            fail "Schedule min value for column '#{col_name}' must be greater than or equal to #{@schedule_min_val}. [context: #{schedules_path}]"
+        if min_value_zero[col_name]
+          if values.min < 0
+            fail "Schedule min value for column '#{col_name}' must be non-negative. [context: #{schedules_path}]"
           end
         end
 
@@ -1381,54 +1377,95 @@ class SchedulesFile
   end
 
   def set_vacancy
-    return unless @tmp_schedules.keys.include? 'vacancy'
-    return if @tmp_schedules['vacancy'].all? { |i| i == 0 }
+    return unless @tmp_schedules.keys.include? ColumnVacancy
+    return if @tmp_schedules[ColumnVacancy].all? { |i| i == 0 }
 
     col_names = SchedulesFile.ColumnNames
 
-    @tmp_schedules[col_names.keys[0]].each_with_index do |ts, i|
-      col_names.keys.each do |col_name|
-        next if col_names[col_name].nil?
-        next unless col_names[col_name] # skip those unaffected by vacancy
+    @tmp_schedules[col_names[0]].each_with_index do |ts, i|
+      col_names.each do |col_name|
+        next unless affected_by_vacancy[col_name] # skip those unaffected by vacancy
 
-        @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules['vacancy'][i])
+        @tmp_schedules[col_name][i] *= (1.0 - @tmp_schedules[ColumnVacancy][i])
       end
     end
   end
 
   def self.ColumnNames
-    # col_name => affected_by_vacancy
-    return {
-      ColumnOccupants => true,
-      ColumnLightingInterior => true,
-      ColumnLightingExterior => true,
-      ColumnLightingGarage => true,
-      ColumnLightingExteriorHoliday => true,
-      ColumnCookingRange => true,
-      ColumnRefrigerator => false,
-      ColumnExtraRefrigerator => false,
-      ColumnFreezer => false,
-      ColumnDishwasher => true,
-      ColumnClothesWasher => true,
-      ColumnClothesDryer => true,
-      ColumnCeilingFan => true,
-      ColumnPlugLoadsOther => true,
-      ColumnPlugLoadsTV => true,
-      ColumnPlugLoadsVehicle => true,
-      ColumnPlugLoadsWellPump => true,
-      ColumnFuelLoadsGrill => true,
-      ColumnFuelLoadsLighting => true,
-      ColumnFuelLoadsFireplace => true,
-      ColumnPoolPump => false,
-      ColumnPoolHeater => false,
-      ColumnHotTubPump => false,
-      ColumnHotTubHeater => false,
-      ColumnHotWaterDishwasher => true,
-      ColumnHotWaterClothesWasher => true,
-      ColumnHotWaterFixtures => true,
-      ColumnVacancy => nil,
-      ColumnWaterHeaterSetpoint => false,
-      ColumnWaterHeaterOperatingMode => false
-    }
+    return [
+      ColumnOccupants,
+      ColumnLightingInterior,
+      ColumnLightingExterior,
+      ColumnLightingGarage,
+      ColumnLightingExteriorHoliday,
+      ColumnCookingRange,
+      ColumnRefrigerator,
+      ColumnExtraRefrigerator,
+      ColumnFreezer,
+      ColumnDishwasher,
+      ColumnClothesWasher,
+      ColumnClothesDryer,
+      ColumnCeilingFan,
+      ColumnPlugLoadsOther,
+      ColumnPlugLoadsTV,
+      ColumnPlugLoadsVehicle,
+      ColumnPlugLoadsWellPump,
+      ColumnFuelLoadsGrill,
+      ColumnFuelLoadsLighting,
+      ColumnFuelLoadsFireplace,
+      ColumnPoolPump,
+      ColumnPoolHeater,
+      ColumnHotTubPump,
+      ColumnHotTubHeater,
+      ColumnHotWaterDishwasher,
+      ColumnHotWaterClothesWasher,
+      ColumnHotWaterFixtures,
+      ColumnWaterHeaterSetpoint,
+      ColumnWaterHeaterOperatingMode
+    ]
+  end
+
+  def affected_by_vacancy
+    affected_by_vacancy = {}
+    column_names = SchedulesFile.ColumnNames
+    column_names.each do |column_name|
+      affected_by_vacancy[column_name] = true
+      next unless [ColumnRefrigerator,
+                   ColumnExtraRefrigerator,
+                   ColumnFreezer,
+                   ColumnPoolPump,
+                   ColumnPoolHeater,
+                   ColumnHotTubPump,
+                   ColumnHotTubHeater,
+                   ColumnWaterHeaterSetpoint,
+                   ColumnWaterHeaterOperatingMode].include? column_name
+
+      affected_by_vacancy[column_name] = false
+    end
+    return affected_by_vacancy
+  end
+
+  def max_value_one
+    max_value_one = {}
+    column_names = SchedulesFile.ColumnNames
+    column_names.each do |column_name|
+      max_value_one[column_name] = true
+      if [ColumnWaterHeaterSetpoint].include? column_name
+        max_value_one[column_name] = false
+      end
+    end
+    return max_value_one
+  end
+
+  def min_value_zero
+    min_value_zero = {}
+    column_names = SchedulesFile.ColumnNames
+    column_names.each do |column_name|
+      min_value_zero[column_name] = true
+      if [ColumnWaterHeaterSetpoint].include? column_name
+        min_value_zero[column_name] = false
+      end
+    end
+    return min_value_zero
   end
 end
