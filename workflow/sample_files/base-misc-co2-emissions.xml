@@ -11,20 +11,47 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <CambiumScenarios>
-        <CambiumScenario>
-          <Name>LRMER_HighRECost</Name>
-          <CarbonFactorFilePath>HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_HighRECost_RMPAc.csv</CarbonFactorFilePath>
-        </CambiumScenario>
-        <CambiumScenario>
-          <Name>LRMER_LowRECost</Name>
-          <CarbonFactorFilePath>HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_LowRECost_RMPAc.csv</CarbonFactorFilePath>
-        </CambiumScenario>
-        <CambiumScenario>
-          <Name>LRMER_MidCase</Name>
-          <CarbonFactorFilePath>HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_MidCase_RMPAc.csv</CarbonFactorFilePath>
-        </CambiumScenario>
-      </CambiumScenarios>
+      <CO2EmissionsScenarios>
+        <CO2EmissionsScenario>
+          <Name>LowRECost LRMER Levelized</Name>
+          <CO2EmissionsFactor>
+            <FuelType>electricity</FuelType>
+            <Units>kg/MWh</Units>
+            <ScheduleFilePath>HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_LowRECost_RMPAc.csv</ScheduleFilePath>
+          </CO2EmissionsFactor>
+          <CO2EmissionsFactor>
+            <FuelType>natural gas</FuelType>
+            <Units>kg/MBtu</Units>
+            <Value>52.91</Value>
+          </CO2EmissionsFactor>
+        </CO2EmissionsScenario>
+        <CO2EmissionsScenario>
+          <Name>MidCase LRMER Levelized</Name>
+          <CO2EmissionsFactor>
+            <FuelType>electricity</FuelType>
+            <Units>kg/MWh</Units>
+            <ScheduleFilePath>HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_MidCase_RMPAc.csv</ScheduleFilePath>
+          </CO2EmissionsFactor>
+          <CO2EmissionsFactor>
+            <FuelType>natural gas</FuelType>
+            <Units>kg/MBtu</Units>
+            <Value>52.91</Value>
+          </CO2EmissionsFactor>
+        </CO2EmissionsScenario>
+        <CO2EmissionsScenario>
+          <Name>HighRECost LRMER Levelized</Name>
+          <CO2EmissionsFactor>
+            <FuelType>electricity</FuelType>
+            <Units>kg/MWh</Units>
+            <ScheduleFilePath>HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_HighRECost_RMPAc.csv</ScheduleFilePath>
+          </CO2EmissionsFactor>
+          <CO2EmissionsFactor>
+            <FuelType>natural gas</FuelType>
+            <Units>kg/MBtu</Units>
+            <Value>52.91</Value>
+          </CO2EmissionsFactor>
+        </CO2EmissionsScenario>
+      </CO2EmissionsScenarios>
     </extension>
   </SoftwareInfo>
   <Building>

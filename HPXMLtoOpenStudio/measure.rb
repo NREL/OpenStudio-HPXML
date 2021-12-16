@@ -2066,6 +2066,8 @@ class OSModel
     additionalProperties.setFeature('hpxml_path', hpxml_path)
     additionalProperties.setFeature('hpxml_defaults_path', @hpxml_defaults_path)
     additionalProperties.setFeature('building_id', building_id.to_s)
+    co2_emissions_scenario_names = @hpxml.header.co2_emissions_scenarios.map { |s| s.name }.to_s
+    additionalProperties.setFeature('co2_emissions_scenario_names', co2_emissions_scenario_names)
   end
 
   def self.map_to_string(map)

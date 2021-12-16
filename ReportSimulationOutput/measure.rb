@@ -709,33 +709,42 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # CO2 Emissions
     # Do this last so that any other adjustments (like DSE) have already been applied
     if not @co2_emissions.empty?
-      # Get hourly electricity
       hourly_elec_consumed_mwh = get_report_meter_data_timeseries(['Electricity:Facility'], UnitConversions.convert(1.0, 'J', 'MWh'), 0, 'hourly')
       hourly_elec_produced_mwh = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', 'MWh'), 0, 'hourly')
-      # Get annual fossil fuels
-      annual_fuel_consumed_mbtu = {}
-      @fuels.each do |fuel_type, fuel|
-        annual_fuel_consumed_mbtu[fuel_type] = UnitConversions.convert(fuel.annual_output, fuel.annual_units, 'MBtu')
-      end
-      # Fossil fuel carbon factors from 301-2019 Addendum D
-      # FUTURE: Expose as user inputs
-      fuel_lbco2_per_mbtu_factors = { FT::Gas => 117.6,
-                                      FT::Oil => 161.0,
-                                      FT::Propane => 136.6,
-                                      FT::WoodCord => 161.0, # assumption
-                                      FT::WoodPellets => 161.0, # assumption
-                                      FT::Coal => 161.0 } # assumption
-      kg_to_lb = UnitConversions.convert(1.0, 'kg', 'lbm')
-      # Calculate CO2 emissions in lb for each Cambium scenario
-      @co2_emissions.each do |cambium_scenario_name, co2_emission|
-        cambium_factors_kgco2_per_mwh = File.readlines(co2_emission.cambium_scenario_filepath).map(&:to_f)
-        co2_emission.annual_output = 0
-        co2_emission.annual_output += hourly_elec_consumed_mwh.zip(cambium_factors_kgco2_per_mwh).map { |x, y| x * y * kg_to_lb }.sum
-        co2_emission.annual_output -= hourly_elec_produced_mwh.zip(cambium_factors_kgco2_per_mwh).map { |x, y| x * y * kg_to_lb }.sum
-        annual_fuel_consumed_mbtu.each do |fuel_type, annual_output|
-          next if fuel_type == FT::Elec # Already processed hourly
 
-          co2_emission.annual_output += annual_output * fuel_lbco2_per_mbtu_factors[fuel_type]
+      # Calculate for each CO2 scenario
+      @hpxml.header.co2_emissions_scenarios.each do |scenario|
+        name = scenario.name
+        elec_hourly_factors = File.readlines(scenario.elec_schedule_filepath).map(&:to_f)
+        if scenario.elec_units == HPXML::CO2EmissionsScenario::UnitsKgPerMWh
+          elec_mult = UnitConversions.convert(1.0, 'kg', 'lbm')
+        elsif scenario.elec_units == HPXML::CO2EmissionsScenario::UnitsLbPerMWh
+          elec_mult = 1.0
+        end
+
+        @co2_emissions[name].annual_output = 0
+
+        # Net electricity
+        @co2_emissions[name].annual_output += hourly_elec_consumed_mwh.zip(elec_hourly_factors).map { |x, y| x * y * elec_mult }.sum
+        @co2_emissions[name].annual_output -= hourly_elec_produced_mwh.zip(elec_hourly_factors).map { |x, y| x * y * elec_mult }.sum
+
+        # Fossil fuels
+        @fuels.each do |fuel_type, fuel|
+          next if [FT::Elec].include? fuel_type
+          next if fuel.annual_output <= 0
+
+          fuel_map = { FT::Gas => [scenario.natural_gas_units, scenario.natural_gas_value],
+                       FT::Propane => [scenario.propane_units, scenario.propane_value],
+                       FT::Oil => [scenario.fuel_oil_units, scenario.fuel_oil_value],
+                       FT::Coal => [scenario.coal_units, scenario.coal_value] }
+          fuel_units, fuel_factor = fuel_map[fuel_type]
+          if fuel_units == HPXML::CO2EmissionsScenario::UnitsKgPerMBtu
+            fuel_mult = UnitConversions.convert(1.0, 'kg', 'lbm')
+          elsif fuel_units == HPXML::CO2EmissionsScenario::UnitsLbPerMBtu
+            fuel_mult = 1.0
+          end
+
+          @co2_emissions[name].annual_output += UnitConversions.convert(fuel.annual_output, fuel.annual_units, 'MBtu') * fuel_factor * fuel_mult
         end
       end
     end
@@ -1419,11 +1428,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   class CO2Emission < BaseOutput
-    def initialize(cambium_scenario_filepath:)
+    def initialize()
       super()
-      @cambium_scenario_filepath = cambium_scenario_filepath
     end
-    attr_accessor(:cambium_scenario_filepath)
   end
 
   class HotWater < BaseOutput
@@ -1668,16 +1675,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # CO2 Emissions
-    # FIXME: Hard-coded; need to look up from HPXML/model
-    cambium_scenarios = { 'LRMER_HighRECost' => 'HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_HighRECost_RMPAc.csv',
-                          'LRMER_LowRECost' => 'HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_LowRECost_RMPAc.csv',
-                          'LRMER_MidCase' => 'HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_MidCase_RMPAc.csv' }
     @co2_emissions = {}
-    cambium_scenarios.each do |cambium_scenario_name, cambium_scenario_filepath|
-      @co2_emissions[cambium_scenario_name] = CO2Emission.new(cambium_scenario_filepath: cambium_scenario_filepath)
-      @co2_emissions[cambium_scenario_name].name = "CO2 Emissions: #{cambium_scenario_name}"
-      @co2_emissions[cambium_scenario_name].annual_units = 'lb'
-      @co2_emissions[cambium_scenario_name].timeseries_units = 'lb'
+    cambium_scenarios = eval(@model.getBuilding.additionalProperties.getFeatureAsString('co2_emissions_scenario_names').get)
+    cambium_scenarios.each do |cambium_scenario|
+      @co2_emissions[cambium_scenario] = CO2Emission.new()
+      @co2_emissions[cambium_scenario].name = "CO2 Emissions: #{cambium_scenario}"
+      @co2_emissions[cambium_scenario].annual_units = 'lb'
+      @co2_emissions[cambium_scenario].timeseries_units = 'lb'
     end
 
     # Hot Water Uses

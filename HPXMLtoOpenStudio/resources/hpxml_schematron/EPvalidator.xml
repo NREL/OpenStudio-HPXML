@@ -10,7 +10,7 @@
       <sch:assert role='ERROR' test='count(h:SoftwareInfo/h:extension/h:SimulationControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SoftwareInfo/extension/SimulationControl</sch:assert> <!-- See [SimulationControl] -->
       <sch:assert role='ERROR' test='count(h:SoftwareInfo/h:extension/h:HVACSizingControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SoftwareInfo/extension/HVACSizingControl</sch:assert> <!-- See [HVACSizingControl] -->
       <sch:assert role='ERROR' test='count(h:SoftwareInfo/h:extension/h:SchedulesFilePath) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SoftwareInfo/extension/SchedulesFilePath</sch:assert>
-      <sch:assert role='ERROR' test='count(h:SoftwareInfo/h:extension/h:CambiumScenarios/h:CambiumScenario) &gt;= 0'>Expected 0 or more element(s) for xpath: SoftwareInfo/extension/CambiumScenarios/CambiumScenario</sch:assert> <!-- See [CambiumScenario] -->
+      <sch:assert role='ERROR' test='count(h:SoftwareInfo/h:extension/h:CO2EmissionsScenarios/h:CO2EmissionsScenario) &gt;= 0'>Expected 0 or more element(s) for xpath: SoftwareInfo/extension/CO2EmissionsScenarios/CO2EmissionsScenario</sch:assert> <!-- See [CO2EmissionsScenario] -->
       <sch:assert role='ERROR' test='count(h:Building) &gt;= 1'>Expected 1 or more element(s) for xpath: Building</sch:assert> <!-- See [Building] -->
     </sch:rule>
   </sch:pattern>
@@ -63,10 +63,14 @@
   </sch:pattern>
 
   <sch:pattern>
-    <sch:title>[CambiumScenario]</sch:title>
-    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:CambiumScenarios/h:CambiumScenario'>
-      <sch:assert role='ERROR' test='count(h:Name) = 1'>Expected 1 element(s) for xpath: Name</sch:assert> <!-- string -->
-      <sch:assert role='ERROR' test='count(h:CarbonFactorFilePath) = 1'>Expected 1 element(s) for xpath: CarbonFactorFilePath</sch:assert> <!-- Note: factors in kgCO2/MWh -->
+    <sch:title>[CO2EmissionsScenario]</sch:title>
+    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:CO2EmissionsScenarios/h:CO2EmissionsScenario'>
+      <sch:assert role='ERROR' test='count(h:Name) = 1'>Expected 1 element(s) for xpath: Name</sch:assert>
+      <sch:assert role='ERROR' test='count(h:CO2EmissionsFactor[h:FuelType="electricity" and (h:Units="lb/MWh" or h:Units="kg/MWh")]/h:ScheduleFilePath) = 1'>Expected 1 element(s) for xpath: CO2EmissionsFactor[FuelType="electricity" and (Units="lb/MWh" or Units="kg/MWh")]/ScheduleFilePath</sch:assert>
+      <sch:assert role='ERROR' test='count(h:CO2EmissionsFactor[h:FuelType="natural gas" and (h:Units="lb/MBtu" or h:Units="kg/MBtu")]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CO2EmissionsFactor[FuelType="natural gas" and (Units="lb/MBtu" or Units="kg/MBtu")]/Value</sch:assert>
+      <sch:assert role='ERROR' test='count(h:CO2EmissionsFactor[h:FuelType="propane" and (h:Units="lb/MBtu" or h:Units="kg/MBtu")]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CO2EmissionsFactor[FuelType="propane" and (Units="lb/MBtu" or Units="kg/MBtu")]/Value</sch:assert>
+      <sch:assert role='ERROR' test='count(h:CO2EmissionsFactor[h:FuelType="fuel oil" and (h:Units="lb/MBtu" or h:Units="kg/MBtu")]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CO2EmissionsFactor[FuelType="fuel oil" and (Units="lb/MBtu" or Units="kg/MBtu")]/Value</sch:assert>
+      <sch:assert role='ERROR' test='count(h:CO2EmissionsFactor[h:FuelType="coal" and (h:Units="lb/MBtu" or h:Units="kg/MBtu")]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CO2EmissionsFactor[FuelType="coal" and (Units="lb/MBtu" or Units="kg/MBtu")]/Value</sch:assert>
     </sch:rule>
   </sch:pattern>
 
