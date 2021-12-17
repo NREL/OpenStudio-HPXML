@@ -698,16 +698,22 @@ class Waterheater
     end
 
     if not schedules_file.nil?
-      hp_setpoint = OpenStudio::Model::ScheduleConstant.new(model)
-      hp_setpoint.setName("#{obj_name_hpwh} hp control")
-      hp_setpoint.setValue(51.67)
+      hp_setpoint = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
+
+      hp_control_sched = OpenStudio::Model::ScheduleConstant.new(model)
+      hp_control_sched.setName("#{obj_name_hpwh} hp control")
+      hp_control_sched.setValue(51.67)
     else
       hp_setpoint = OpenStudio::Model::ScheduleConstant.new(model)
       hp_setpoint.setName("#{obj_name_hpwh} WaterHeaterHPSchedule")
       hp_setpoint.setValue(tset_C)
     end
 
-    hpwh = OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser.new(model, coil, tank, fan, hp_setpoint, model.alwaysOnDiscreteSchedule)
+    if schedules_file.nil?
+      hpwh = OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser.new(model, coil, tank, fan, hp_setpoint, model.alwaysOnDiscreteSchedule)
+    else
+      hpwh = OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser.new(model, coil, tank, fan, hp_control_sched, model.alwaysOnDiscreteSchedule)
+    end
     hpwh.setName("#{obj_name_hpwh} hpwh")
     hpwh.setDeadBandTemperatureDifference(3.89)
     hpwh.setCondenserBottomLocation(h_condbot)
@@ -1023,6 +1029,7 @@ class Waterheater
           op_mode_schedule_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
           op_mode_schedule_sensor.setName("#{obj_name_hpwh} Op_mode")
           op_mode_schedule_sensor.setKeyName(op_mode_schedule.name.to_s)
+          hpwh_ctrl_program.addLine('Set TODO=0')
         end
       end
       if op_mode_schedule.nil?
