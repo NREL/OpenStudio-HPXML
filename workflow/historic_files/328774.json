@@ -122,15 +122,18 @@
           "cooling": {
             "type": "none"
           },
-          "hvac_distribution": [
-            {
-              "name": "duct1",
-              "location": "cond_space",
-              "fraction": 1.0,
-              "insulated": false,
-              "sealed": true
-            }
-          ]
+          "hvac_distribution": {
+            "leakage_method": "qualitative",
+            "sealed": true,
+            "duct": [
+              {
+                "name": "duct1",
+                "location": "cond_space",
+                "fraction": 1.0,
+                "insulated": false
+              }
+            ]
+          }
         }
       ],
       "domestic_hot_water": {

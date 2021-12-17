@@ -1,9 +1,9 @@
 {
     "building_address": {
-        "address": "Regression run 9.131",
-        "city": "Phoenix",
-        "state": "AZ",
-        "zip_code": "85001",
+        "address": "Regression run 9.1",
+        "city": "St Louis",
+        "state": "MO",
+        "zip_code": "63101",
         "assessment_type": "construction-period testing\/daily test out"
     },
     "building": {
@@ -77,9 +77,10 @@
                     "hvac_name": "hvac1",
                     "hvac_fraction": 1,
                     "heating": {
-                        "fuel_primary": "lpg",
+                        "fuel_primary": "natural_gas",
                         "type": "central_furnace",
-                        "efficiency_level": "energy_star"
+                        "efficiency_method": "user",
+                        "efficiency": 0.8
                     },
                     "cooling": {
                         "type": "split_dx",
@@ -87,8 +88,8 @@
                         "efficiency": 13
                     },
                     "hvac_distribution": {
-                        "leakage_method": "qualitative",
-                        "sealed": true,
+                        "leakage_method": "quantitative",
+                        "leakage_to_outside": 100.0,
                         "duct": [
                             {
                                 "name": "duct1",
