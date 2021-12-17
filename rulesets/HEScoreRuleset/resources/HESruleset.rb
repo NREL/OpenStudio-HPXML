@@ -727,20 +727,22 @@ class HEScoreRuleset
       # HVACDistribution
       next unless is_ducted_heating_system(orig_hvac) || is_ducted_cooling_system(orig_hvac)
 
+      if orig_hvac['hvac_distribution']['leakage_method'] == 'quantitative'
+        cfm25 = orig_hvac['hvac_distribution']['leakage_to_outside']
+      elsif orig_hvac['hvac_distribution']['leakage_method'] == 'qualitative'
+        sealed = orig_hvac['hvac_distribution']['sealed']
+      else
+        fail 'Unexpected leakage_method.'
+      end
+
       tot_frac = 0.0
       frac_inside = 0.0
-      sealed = []
-      orig_hvac['hvac_distribution'].each do |orig_duct|
+      orig_hvac['hvac_distribution']['duct'].each do |orig_duct|
         next if orig_duct['fraction'] == 0
 
         tot_frac += orig_duct['fraction'].to_f
-        sealed << orig_duct['sealed']
 
-        duct_location = { 'cond_space' => HPXML::LocationLivingSpace,
-                          'uncond_basement' => HPXML::LocationBasementUnconditioned,
-                          'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
-                          'vented_crawl' => HPXML::LocationCrawlspaceVented,
-                          'uncond_attic' => HPXML::LocationAtticVented }[orig_duct['location']]
+        duct_location = $duct_location_map[orig_duct['location']]
 
         next unless duct_location == HPXML::LocationLivingSpace
 
@@ -756,29 +758,24 @@ class HEScoreRuleset
       hvac_fraction = orig_hvac['hvac_fraction']
       new_hpxml.hvac_distributions[-1].conditioned_floor_area_served = hvac_fraction * @cfa
 
-      sealed = sealed.all? { |d| d == true }
-      lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(@ncfl_ag, @cfa, sealed, frac_inside)
+      lto_units, lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(@ncfl_ag, @cfa, sealed, frac_inside, cfm25)
 
       # Supply duct leakage to the outside
       new_hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                                     duct_leakage_units: HPXML::UnitsPercent,
+                                                                     duct_leakage_units: lto_units,
                                                                      duct_leakage_value: lto_s,
                                                                      duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
 
       # Return duct leakage to the outside
       new_hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                                     duct_leakage_units: HPXML::UnitsPercent,
+                                                                     duct_leakage_units: lto_units,
                                                                      duct_leakage_value: lto_r,
                                                                      duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
 
-      orig_hvac['hvac_distribution'].each do |orig_duct|
+      orig_hvac['hvac_distribution']['duct'].each do |orig_duct|
         next if orig_duct['fraction'] == 0
 
-        duct_location = { 'cond_space' => HPXML::LocationLivingSpace,
-                          'uncond_basement' => HPXML::LocationBasementUnconditioned,
-                          'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
-                          'vented_crawl' => HPXML::LocationCrawlspaceVented,
-                          'uncond_attic' => HPXML::LocationAtticVented }[orig_duct['location']]
+        duct_location = $duct_location_map[orig_duct['location']]
 
         next if duct_location == HPXML::LocationLivingSpace
 
@@ -1195,6 +1192,17 @@ $hvac_system_type_map = {
   'baseboard' => HPXML::HVACTypeElectricResistance
 }
 
+$duct_location_map = {
+  'cond_space' => HPXML::LocationLivingSpace,
+  'uncond_basement' => HPXML::LocationBasementUnconditioned,
+  'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
+  'vented_crawl' => HPXML::LocationCrawlspaceVented,
+  'uncond_attic' => HPXML::LocationAtticVented,
+  'under_slab' => HPXML::LocationUnderSlab,
+  'exterior_wall' => HPXML::LocationExteriorWall,
+  'outside' => HPXML::LocationOutside
+}
+
 def get_roof_effective_r_from_doe2code(doe2code)
   # For wood frame with radiant barrier roof, use wood frame roof effective R-value. Radiant barrier will be handled by the actual radiant barrier model in OS.
   if doe2code[2, 2] == 'rb'
@@ -1369,14 +1377,7 @@ def get_roof_solar_absorptance(roof_color)
   fail "Could not get roof absorptance for color '#{roof_color}'"
 end
 
-def calc_duct_values(ncfl_ag, cfa, is_sealed, frac_inside)
-  # Total leakage fraction of air handler flow
-  if is_sealed
-    total_leakage_frac = 0.10
-  else
-    total_leakage_frac = 0.25
-  end
-
+def calc_duct_values(ncfl_ag, cfa, sealed, frac_inside, cfm25 = nil)
   # Fraction of ducts that are outside conditioned space
   if frac_inside > 0
     f_out_s = 1.0 - frac_inside
@@ -1394,15 +1395,29 @@ def calc_duct_values(ncfl_ag, cfa, is_sealed, frac_inside)
     f_out_r = 1.0
   end
 
-  # Duct leakages to the outside (assume total leakage equally split between supply/return)
-  lto_s = total_leakage_frac / 2.0 * f_out_s
-  lto_r = total_leakage_frac / 2.0 * f_out_r
-
   # Duct surface areas that are outside conditioned space
   uncond_area_s = 0.27 * f_out_s * cfa
   uncond_area_r = 0.05 * ncfl_ag * f_out_r * cfa
 
-  return lto_s.round(5), lto_r.round(5), uncond_area_s.round(2), uncond_area_r.round(2)
+  if not cfm25.nil? # Duct blaster measurements provided
+    cfm25_s = cfm25 / 2.0
+    cfm25_r = cfm25 / 2.0
+
+    return HPXML::UnitsCFM25, cfm25_s.round(2), cfm25_r.round(2), uncond_area_s.round(2), uncond_area_r.round(2)
+  else
+    # Total leakage fraction of air handler flow
+    if sealed
+      total_leakage_frac = 0.10
+    else
+      total_leakage_frac = 0.25
+    end
+
+    # Duct leakages to the outside (assume total leakage equally split between supply/return)
+    percent_s = total_leakage_frac / 2.0 * f_out_s
+    percent_r = total_leakage_frac / 2.0 * f_out_r
+
+    return HPXML::UnitsPercent, percent_s.round(5), percent_r.round(5), uncond_area_s.round(2), uncond_area_r.round(2)
+  end
 end
 
 def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
@@ -1489,13 +1504,13 @@ def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fn
 
   c_duct = 0.0
   ducts.each do |hvac_frac, duct_frac, duct_location|
-    if duct_location == 'cond_space'
+    if ['cond_space', 'under_slab', 'exterior_wall', 'outside'].include? duct_location
       c_duct += -0.12381 * duct_frac * hvac_frac
-    elsif (duct_location == 'uncond_attic') || (duct_location == 'uncond_basement')
+    elsif ['uncond_attic', 'uncond_basement'].include? duct_location
       c_duct += 0.07126 * duct_frac * hvac_frac
-    elsif duct_location == 'vented_crawl'
+    elsif ['vented_crawl'].include? duct_location
       c_duct += 0.18072 * duct_frac * hvac_frac
-    elsif duct_location == 'unvented_crawl'
+    elsif ['unvented_crawl'].include? duct_location
       c_duct += 0.07126 * duct_frac * hvac_frac
     else
       fail "Unexpected duct location: #{duct_location}"
@@ -1602,7 +1617,7 @@ def get_ducts_details(json)
 
     hvac_frac = orig_hvac['hvac_fraction']
 
-    orig_hvac['hvac_distribution'].each do |orig_duct|
+    orig_hvac['hvac_distribution']['duct'].each do |orig_duct|
       next if orig_duct['fraction'].to_f == 0
 
       ducts << [hvac_frac, orig_duct['fraction'].to_f, orig_duct['location']]

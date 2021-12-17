@@ -121,4 +121,4 @@ class HPXML2toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
                          'unconditioned attic': 'uncond_attic',
                          'interstitial space': None,
                          'garage': 'vented_crawl',
-                         'outside': None}
+                         'outside': 'outside'}

@@ -32,7 +32,7 @@ following mapping.
    unconditioned attic     uncond_attic
    interstitial space      *not translated*
    garage                  vented_crawl
-   outside                 *not translated*
+   outside                 outside
    ======================  ================
 
 .. table:: Duct Location mapping (HPXML v3)
@@ -42,7 +42,7 @@ following mapping.
    ===========================  ================
    living space                 cond_space
    unconditioned space          uncond_basement, vented_crawl, unvented_crawl, uncond_attic
-   under slab                   vented_crawl
+   under slab                   under_slab
    basement                     uncond_basement, cond_space
    basement - unconditioned     uncond_basement
    basement - conditioned       cond_space
@@ -51,7 +51,7 @@ following mapping.
    crawlspace - unconditioned   vented_crawl, unvented_crawl
    crawlspace - conditioned     cond_space
    crawlspace                   vented_crawl, unvented_crawl, cond_space
-   exterior wall                *not translated*
+   exterior wall                exterior_wall
    attic                        uncond_attic, cond_space
    attic - unconditioned        uncond_attic
    attic - conditioned          cond_space
@@ -61,8 +61,8 @@ following mapping.
    garage                       vented_crawl
    garage - conditioned         cond_space
    garage - unconditioned       vented_crawl
-   roof deck                    vented_crawl
-   outside                      vented_crawl
+   roof deck                    outside
+   outside                      outside
    ===========================  ================
 
 .. warning:: 
@@ -84,16 +84,13 @@ If the any of the ``Ducts`` elements in a particular
 ``DuctInsulationThickness`` that is greater than zero or have a ``DuctInsulationMaterial`` that is not ``None``, 
 all of the ducts in that location are considered insulated.
 
-Duct Sealing
-************
+Duct Leakage Measurements
+*************************
 
-Duct leakage measurements are not stored on the individual ``Ducts`` elements in
-HEScore, which means they are not directly associated with a duct location.
-They are instead associated with an ``AirDistribution`` element, which can have
-many ducts in many locations. Duct sealing information is therefore associated
-with all ducts in an ``AirDistribution`` element.
+Duct leakage measurements are associated with an ``AirDistribution`` element.
+It can be specified qualitatively or quantatatively.
 
-To specify that the ducts in an ``AirDistribution`` system are sealed, the
+To qualitatively specify that an ``AirDistribution`` system is sealed, the
 translator expects to find either of the following elements:
 
 * ``DuctLeakageMeasurement/LeakinessObservedVisualInspection`` element with
@@ -101,28 +98,12 @@ translator expects to find either of the following elements:
 * ``HVACDistribution/HVACDistributionImprovement/DuctSystemSealed`` element
   with the value of "true".
 
-The ``DuctLeakageMeasurement`` can hold values for actual measurements of
-leakage, but since HEScore cannot do anything with them, they will be ignored.
-Therefore the following will result in an "unsealed" designation:
+To quantitatively specify the duct leakage to outside in CFM25 of an ``AirDistribution`` system, 
+the translator expects to find the following element:
 
-.. code-block:: xml
+* ``DuctLeakageMeasurement/DuctLeakage[TotalOrToOutside="to outside"]/Value`` element 
+  with the numeric value
 
-   <DuctLeakageMeasurement>
-      <DuctType>supply</DuctType>
-      <!-- All of this is ignored -->
-      <DuctLeakageTestMethod>duct leakage tester</DuctLeakageTestMethod>
-      <DuctLeakage>
-          <Units>CFM25</Units>
-          <Value>0.000000001</Value><!-- exceptionally low leakage -->
-      </DuctLeakage>
-   </DuctLeakageMeasurement>
+If both elements are specified, the preference will be given to the duct blaster measurement.
 
-and the following will result in a "sealed" designation:
-
-.. code-block:: xml
-   :emphasize-lines: 3
-
-   <DuctLeakageMeasurement>
-      <DuctType>supply</DuctType>
-      <LeakinessObservedVisualInspection>connections sealed w mastic</LeakinessObservedVisualInspection>
-   </DuctLeakageMeasurement>
+If neither of elements above is specified, it will result in an "unsealed" designation.

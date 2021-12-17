@@ -1,7 +1,7 @@
 OpenStudio-HEScore
 ===============
 
-An OpenStudio/EnergyPlus simulation workflow that operates on a HPXML file produced by DOE's Home Energy Score (HEScore).
+An OpenStudio/EnergyPlus simulation workflow that operates on a JSON file produced by DOE's Home Energy Score (HEScore).
 
 [![ci](https://github.com/NREL/OpenStudio-HEScore/workflows/ci/badge.svg)](https://github.com/NREL/OpenStudio-HEScore/actions)
 
@@ -14,7 +14,7 @@ An OpenStudio/EnergyPlus simulation workflow that operates on a HPXML file produ
 
 ## Running
 
-Run the HEScore simulation on a provided HPXML file:  
+Run the HEScore simulation on a provided JSON file:  
 ```openstudio workflow/run_simulation.rb -j workflow/regression_files/Base.json```  
 
 To additionally request hourly output CSV:

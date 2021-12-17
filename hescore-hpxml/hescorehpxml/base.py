@@ -548,7 +548,7 @@ class HPXMLtoHEScoreTranslatorBase(object):
         return sys_cooling
 
     def get_hvac_distribution(self, hvacd_el, bldg):
-        hvac_distribution = []
+        hvac_distribution = {}
 
         airdist_el = self.xpath(hvacd_el, 'h:DistributionSystemType/h:AirDistribution')
         if isinstance(airdist_el, list):
@@ -563,6 +563,18 @@ class HPXMLtoHEScoreTranslatorBase(object):
             self.xpath(airdist_el,
                        '(h:DuctLeakageMeasurement/h:LeakinessObservedVisualInspection="connections sealed w mastic") ' +
                        'or (ancestor::h:HVACDistribution/h:HVACDistributionImprovement/h:DuctSystemSealed="true")')
+
+        # Duct leakage to outside
+        leakage_to_outside = \
+            self.xpath(airdist_el,
+                       'h:DuctLeakageMeasurement/h:DuctLeakage[h:TotalOrToOutside="to outside"]/h:Value/text()')
+
+        if leakage_to_outside:
+            hvac_distribution['leakage_method'] = 'quantitative'
+            hvac_distribution['leakage_to_outside'] = leakage_to_outside
+        else:
+            hvac_distribution['leakage_method'] = 'qualitative'
+            hvac_distribution['sealed'] = is_sealed
 
         duct_fracs_by_hescore_duct_loc = defaultdict(float)
         hescore_duct_loc_has_insulation = defaultdict(bool)
@@ -592,6 +604,7 @@ class HPXMLtoHEScoreTranslatorBase(object):
                                                in list(duct_fracs_by_hescore_duct_loc.items())])
 
         # Gather the ducts by type
+        hvac_distribution['duct'] = []
         hvacd_sortlist = []
         for duct_loc, duct_frac in list(duct_fracs_by_hescore_duct_loc.items()):
             hvacd = {}
@@ -610,13 +623,12 @@ class HPXMLtoHEScoreTranslatorBase(object):
             hvacd_out['location'] = hvacd['location']
             hvacd_out['fraction'] = hvacd['fraction'] / sum_of_top_3_fractions
             hvacd_out['insulated'] = hescore_duct_loc_has_insulation[hvacd['location']]
-            hvacd_out['sealed'] = is_sealed
-            hvac_distribution.append(hvacd_out)
+            hvac_distribution['duct'].append(hvacd_out)
 
         # Make sure the fractions add up to 1
-        total_pct = sum([x['fraction'] for x in hvac_distribution])
+        total_pct = sum([x['fraction'] for x in hvac_distribution['duct']])
         pct_remainder = 1 - total_pct
-        hvac_distribution[0]['fraction'] += pct_remainder
+        hvac_distribution['duct'][0]['fraction'] += pct_remainder
 
         return hvac_distribution
 
@@ -2410,7 +2422,7 @@ class HPXMLtoHEScoreTranslatorBase(object):
                                     1970, this_year)
 
             if 'hvac_distribution' in sys_hvac:
-                for hvacd in sys_hvac['hvac_distribution']:
+                for hvacd in sys_hvac['hvac_distribution']['duct']:
                     do_bounds_check('hvac_distribution_fraction',
                                     hvacd['fraction'],
                                     0, 1)

@@ -1782,7 +1782,52 @@ class TestPhotovoltaics(unittest.TestCase, ComparatorBase):
             )
 
 
-class TesHPXMLVersion2Point3(unittest.TestCase, ComparatorBase):
+class TestDuctLocations(unittest.TestCase, ComparatorBase):
+    '''
+    These are tests related to allowing additional duct locations
+    '''
+
+    def _set_duct_location(self, location):
+        el = self.xpath('//h:Ducts/h:DuctLocation')
+        el.text = location
+
+    def test_under_slab(self):
+        tr = self._load_xmlfile('house3_v3')
+        self._set_duct_location('under slab')
+        hesd = tr.hpxml_to_hescore()
+        duct = hesd['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]
+        self.assertEqual(duct['location'], 'under_slab')
+
+    def test_exterior_wall(self):
+        tr = self._load_xmlfile('house3_v3')
+        self._set_duct_location('exterior wall')
+        hesd = tr.hpxml_to_hescore()
+        duct = hesd['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]
+        self.assertEqual(duct['location'], 'exterior_wall')
+
+    def test_outside(self):
+        tr = self._load_xmlfile('house3_v3')
+        self._set_duct_location('outside')
+        hesd = tr.hpxml_to_hescore()
+        duct = hesd['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]
+        self.assertEqual(duct['location'], 'outside')
+
+    def test_outside_v2(self):
+        tr = self._load_xmlfile('house3')
+        self._set_duct_location('outside')
+        hesd = tr.hpxml_to_hescore()
+        duct = hesd['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]
+        self.assertEqual(duct['location'], 'outside')
+
+    def test_roof_deck(self):
+        tr = self._load_xmlfile('house3_v3')
+        self._set_duct_location('roof deck')
+        hesd = tr.hpxml_to_hescore()
+        duct = hesd['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]
+        self.assertEqual(duct['location'], 'outside')
+
+
+class TestHPXMLVersion2Point3(unittest.TestCase, ComparatorBase):
 
     def test_floor_furnace(self):
         tr = self._load_xmlfile('hescore_min')
@@ -3365,36 +3410,42 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         el = self.xpath('//h:DuctLocation[1]')
         el.text = 'unconditioned space'
         d_v3 = tr_v3.hpxml_to_hescore()
-        self.assertEqual(d_v3['building']['systems']['hvac'][0]['hvac_distribution'][0]['location'], 'uncond_attic')
+        self.assertEqual(d_v3['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['location'],
+                         'uncond_attic')
 
         el.text = 'basement'
         d_v3 = tr_v3.hpxml_to_hescore()
-        self.assertEqual(d_v3['building']['systems']['hvac'][0]['hvac_distribution'][0]['location'], 'cond_space')
+        self.assertEqual(d_v3['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['location'],
+                         'cond_space')
 
         el.text = 'basement - conditioned'
         d_v3 = tr_v3.hpxml_to_hescore()
-        self.assertEqual(d_v3['building']['systems']['hvac'][0]['hvac_distribution'][0]['location'], 'cond_space')
+        self.assertEqual(d_v3['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['location'],
+                         'cond_space')
 
         el.text = 'attic'
         d_v3 = tr_v3.hpxml_to_hescore()
-        self.assertEqual(d_v3['building']['systems']['hvac'][0]['hvac_distribution'][0]['location'], 'uncond_attic')
+        self.assertEqual(d_v3['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['location'],
+                         'uncond_attic')
 
         # Is this reasonable?
         el.text = 'crawlspace'
         d_v3 = tr_v3.hpxml_to_hescore()
-        self.assertEqual(d_v3['building']['systems']['hvac'][0]['hvac_distribution'][0]['location'], 'cond_space')
+        self.assertEqual(d_v3['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['location'],
+                         'cond_space')
 
         el.text = 'garage'
         fnd_type_el = self.xpath('//h:FoundationType[1]/h:Basement')
         etree.SubElement(fnd_type_el.getparent(), tr_v3.addns('h:Garage'))
         fnd_type_el.getparent().remove(fnd_type_el)
         d_v3 = tr_v3.hpxml_to_hescore()
-        self.assertEqual(d_v3['building']['systems']['hvac'][0]['hvac_distribution'][0]['location'], 'unvented_crawl')
+        self.assertEqual(d_v3['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['location'],
+                         'unvented_crawl')
 
     def test_v3_duct_insulation(self):
         tr = self._load_xmlfile('hescore_min_v3')
         res = tr.hpxml_to_hescore()
-        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution'][0]['insulated'], False)
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['insulated'], False)
 
         E = self.element_maker()
         el = self.xpath('//h:Ducts/h:DuctLocation')
@@ -3403,7 +3454,7 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         )
         el.addprevious(duct_ins_mat)
         res = tr.hpxml_to_hescore()
-        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution'][0]['insulated'], True)
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['insulated'], True)
         el.getparent().remove(duct_ins_mat)
 
         duct_ins_mat = E.DuctInsulationMaterial(
@@ -3411,7 +3462,7 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         )
         el.addprevious(duct_ins_mat)
         res = tr.hpxml_to_hescore()
-        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution'][0]['insulated'], True)
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['insulated'], True)
         el.getparent().remove(duct_ins_mat)
 
         duct_ins_mat = E.DuctInsulationMaterial(
@@ -3419,7 +3470,7 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         )
         el.addprevious(duct_ins_mat)
         res = tr.hpxml_to_hescore()
-        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution'][0]['insulated'], True)
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['insulated'], True)
         el.getparent().remove(duct_ins_mat)
 
         duct_ins_mat = E.DuctInsulationMaterial(
@@ -3427,7 +3478,7 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         )
         el.addprevious(duct_ins_mat)
         res = tr.hpxml_to_hescore()
-        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution'][0]['insulated'], True)
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['insulated'], True)
         el.getparent().remove(duct_ins_mat)
 
         duct_ins_mat = E.DuctInsulationMaterial(
@@ -3435,7 +3486,7 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         )
         el.addprevious(duct_ins_mat)
         res = tr.hpxml_to_hescore()
-        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution'][0]['insulated'], True)
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['insulated'], True)
         el.getparent().remove(duct_ins_mat)
 
         none_type = getattr(E, 'None')
@@ -3444,7 +3495,7 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         )
         el.addprevious(duct_ins_mat)
         res = tr.hpxml_to_hescore()
-        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution'][0]['insulated'], False)
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['insulated'], False)
         el.getparent().remove(duct_ins_mat)
 
         duct_ins_mat = E.DuctInsulationMaterial(
@@ -3452,7 +3503,7 @@ class TestHEScoreV3(unittest.TestCase, ComparatorBase):
         )
         el.addprevious(duct_ins_mat)
         res = tr.hpxml_to_hescore()
-        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution'][0]['insulated'], True)
+        self.assertEqual(res['building']['systems']['hvac'][0]['hvac_distribution']['duct'][0]['insulated'], True)
         el.getparent().remove(duct_ins_mat)
 
 

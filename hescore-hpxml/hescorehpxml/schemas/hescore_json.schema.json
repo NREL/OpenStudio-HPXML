@@ -1661,57 +1661,117 @@
                                 ],
                                 "definitions": {
                                     "def_hvac_distribution": {
-                                        "type": "array",
+                                        "type": "object",
                                         "description": "Inputs about the ducts",
+                                        "required": ["leakage_method", "duct"],
                                         "additionalItems": false,
-                                        "minItems": 0,
-                                        "maxItems": 3,
-                                        "items": {
-                                            "type": "object",
-                                            "additionalProperties": false,
-                                            "properties": {
-                                                "name": {
-                                                    "type": "string",
-                                                    "enum": ["duct1", "duct2", "duct3"],
-                                                    "description": "Name of distribution system"
+                                        "properties": {
+                                            "leakage_method": {
+                                                "type": "string",
+                                                "enum": ["qualitative", "quantitative"],
+                                                "description": "Method for duct leakage inputs"
+                                            },
+                                            "leakage_to_outside": {
+                                                "type": "number",
+                                                "minimum": 0,
+                                                "maximum": 1000,
+                                                "description": "Duct leakage to outside in CFM25 (only used if leakage_method is quantitative)"
+                                            },
+                                            "sealed": {
+                                                "type": "boolean",
+                                                "description": "Are the ducts sealed? (only used if leakage_method is qualitative)"
+                                            },
+                                            "duct": {
+                                                "type": "array",
+                                                "additionalItems": false,
+                                                "minItems": 1,
+                                                "maxItems": 3,
+                                                "items": {
+                                                    "type": "object",
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "enum": ["duct1", "duct2", "duct3"],
+                                                            "description": "Name of distribution system"
+                                                        },
+                                                        "location": {
+                                                            "type": "string",
+                                                            "enum": ["cond_space", "uncond_basement", "unvented_crawl", "vented_crawl", "uncond_attic", "under_slab", "exterior_wall", "outside"],
+                                                            "description": "Location of distribution system"
+                                                        },
+                                                        "fraction": {
+                                                            "type": "number",
+                                                            "minimum": 0,
+                                                            "maximum": 1,
+                                                            "description": "Fraction of total duct length"
+                                                        },
+                                                        "insulated": {
+                                                            "type": "boolean",
+                                                            "description": "Are the ducts insulated?"
+                                                        }
+                                                    },
+                                                    "allOf": [
+                                                        {
+                                                            "required": ["name", "fraction"]
+                                                        },
+                                                        {
+                                                            "if": {
+                                                                "properties": {
+                                                                    "fraction": {"exclusiveMinimum": 0}
+                                                                },
+                                                                "required": ["fraction"]
+                                                            },
+                                                            "then": {
+                                                                "required": ["location", "insulated"]
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        "allOf": [
+                                            {
+                                                "if": {
+                                                    "properties": {
+                                                        "leakage_method": {"const": "qualitative"}
+                                                    },
+                                                    "required": ["leakage_method"]
                                                 },
-                                                "location": {
-                                                    "type": "string",
-                                                    "enum": ["cond_space", "uncond_basement", "unvented_crawl", "vented_crawl", "uncond_attic"],
-                                                    "description": "Location of distribution system"
-                                                },
-                                                "fraction": {
-                                                    "type": "number",
-                                                    "minimum": 0,
-                                                    "maximum": 1,
-                                                    "description": "Fraction of total duct length"
-                                                },
-                                                "insulated": {
-                                                    "type": "boolean",
-                                                    "description": "Are the ducts insulated?"
-                                                },
-                                                "sealed": {
-                                                    "type": "boolean",
-                                                    "description": "Are the ducts sealed?"
+                                                "then": {
+                                                    "allOf": [
+                                                        {
+                                                            "required": ["sealed"]
+                                                        },
+                                                        {
+                                                            "not": {
+                                                                "required": ["leakage_to_outside"]
+                                                            }
+                                                        }
+                                                    ]
                                                 }
                                             },
-                                            "allOf": [
-                                                {
-                                                    "required": ["name", "fraction"]
-                                                },
-                                                {
-                                                    "if": {
-                                                        "properties": {
-                                                            "fraction": {"exclusiveMinimum": 0}
-                                                        },
-                                                        "required": ["fraction"]
+                                            {
+                                                "if": {
+                                                    "properties": {
+                                                        "leakage_method": {"const": "quantitative"}
                                                     },
-                                                    "then": {
-                                                        "required": ["location", "insulated", "sealed"]
-                                                    }
+                                                    "required": ["leakage_method"]
+                                                },
+                                                "then": {
+                                                    "allOf": [
+                                                        {
+                                                            "required": ["leakage_to_outside"]
+                                                        },
+                                                        {
+                                                            "not": {
+                                                                "required": ["sealed"]
+                                                            }
+                                                        }
+                                                    ]
                                                 }
-                                            ]
-                                        }
+                                            }
+                                        ]
                                     }
                                 }
                             }
