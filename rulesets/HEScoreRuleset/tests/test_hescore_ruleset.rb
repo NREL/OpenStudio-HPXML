@@ -80,66 +80,84 @@ class HEScoreRulesetTest < MiniTest::Test
     ncfl_ag = 2
     sealed = true
     frac_inside = 0.0
-    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    lto_units, lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
     assert_in_epsilon(0.0325, lto_s, 0.00001)
     assert_in_epsilon(0.0500, lto_r, 0.00001)
     assert_in_epsilon(351, uncond_area_s, 0.00001)
     assert_in_epsilon(200, uncond_area_r, 0.00001)
+    assert_equal(lto_units, HPXML::UnitsPercent)
 
     # Base w/ ducts completely in conditioned space
     cfa = 2000.0
     ncfl_ag = 2
     sealed = true
     frac_inside = 1.0
-    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    lto_units, lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
     assert_in_epsilon(0, lto_s, 0.00001)
     assert_in_epsilon(0, lto_r, 0.00001)
     assert_in_epsilon(0, uncond_area_s, 0.00001)
     assert_in_epsilon(0, uncond_area_r, 0.00001)
+    assert_equal(lto_units, HPXML::UnitsPercent)
 
     # Base w/ ducts half in conditioned space
     cfa = 2000.0
     ncfl_ag = 2
     sealed = true
     frac_inside = 0.5
-    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    lto_units, lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
     assert_in_epsilon(0.025, lto_s, 0.00001)
     assert_in_epsilon(0.050, lto_r, 0.00001)
     assert_in_epsilon(270, uncond_area_s, 0.00001)
     assert_in_epsilon(200, uncond_area_r, 0.00001)
+    assert_equal(lto_units, HPXML::UnitsPercent)
 
     # Base w/ unsealed ducts
     cfa = 2000.0
     ncfl_ag = 2
     sealed = false
     frac_inside = 0.0
-    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    lto_units, lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
     assert_in_epsilon(0.08125, lto_s, 0.00001)
     assert_in_epsilon(0.12500, lto_r, 0.00001)
     assert_in_epsilon(351, uncond_area_s, 0.00001)
     assert_in_epsilon(200, uncond_area_r, 0.00001)
+    assert_equal(lto_units, HPXML::UnitsPercent)
 
     # Base w/ 1 story home
     cfa = 2000.0
     ncfl_ag = 1
     sealed = true
     frac_inside = 0.0
-    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    lto_units, lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
     assert_in_epsilon(0.05, lto_s, 0.00001)
     assert_in_epsilon(0.05, lto_r, 0.00001)
     assert_in_epsilon(540, uncond_area_s, 0.00001)
     assert_in_epsilon(100, uncond_area_r, 0.00001)
+    assert_equal(lto_units, HPXML::UnitsPercent)
 
     # Base w/ 20000 sqft
     cfa = 20000.0
     ncfl_ag = 2
     sealed = true
     frac_inside = 0.0
-    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    lto_units, lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
     assert_in_epsilon(0.0325, lto_s, 0.00001)
     assert_in_epsilon(0.0500, lto_r, 0.00001)
     assert_in_epsilon(3510, uncond_area_s, 0.00001)
     assert_in_epsilon(2000, uncond_area_r, 0.00001)
+    assert_equal(lto_units, HPXML::UnitsPercent)
+
+    # Base w/ 90 cfm25 supply+return leakage to outside
+    cfa = 2000.0
+    ncfl_ag = 2
+    sealed = true
+    frac_inside = 0.0
+    lto_units, lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside, 90.0)
+    assert_in_epsilon(45.0, lto_s, 0.00001)
+    assert_in_epsilon(45.0, lto_r, 0.00001)
+    assert_in_epsilon(351, uncond_area_s, 0.00001)
+    assert_in_epsilon(200, uncond_area_r, 0.00001)
+    assert_equal(lto_units, HPXML::UnitsCFM25)
   end
 
   def test_infiltration

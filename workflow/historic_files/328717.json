@@ -118,22 +118,24 @@
             "efficiency_method": "user",
             "efficiency": 9.0
           },
-          "hvac_distribution": [
-            {
-              "name": "duct1",
-              "location": "uncond_basement",
-              "fraction": 0.82,
-              "insulated": false,
-              "sealed": false
-            },
-            {
-              "name": "duct2",
-              "location": "cond_space",
-              "fraction": 0.18,
-              "insulated": false,
-              "sealed": false
-            }
-          ]
+          "hvac_distribution": {
+            "leakage_method": "qualitative",
+            "sealed": false,
+            "duct": [
+              {
+                "name": "duct1",
+                "location": "uncond_basement",
+                "fraction": 0.82,
+                "insulated": false
+              },
+              {
+                "name": "duct2",
+                "location": "cond_space",
+                "fraction": 0.18,
+                "insulated": false
+              }
+            ]
+          }
         }
       ],
       "domestic_hot_water": {
