@@ -88,20 +88,36 @@ class Waterheater
     hpwh_rhamb.setName("#{obj_name_hpwh} RHamb act")
     hpwh_rhamb.setValue(0.5)
 
-    tset_C = UnitConversions.convert(water_heating_system.temperature, 'F', 'C').to_f.round(2)
+    bottom_element_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+    bottom_element_setpoint_schedule.setName("#{obj_name_hpwh} BottomElementSetpoint")
+    bottom_element_setpoint_schedule.setValue(-60)
 
-    hpwh_bottom_element_sp = OpenStudio::Model::ScheduleConstant.new(model)
-    hpwh_bottom_element_sp.setName("#{obj_name_hpwh} BottomElementSetpoint")
-    hpwh_bottom_element_sp.setValue(-60)
-
-    hpwh_top_element_sp = nil
+    setpoint_schedule = nil
     if not schedules_file.nil?
-      hpwh_top_element_sp = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
+      # To handle variable setpoints, need one schedule that gets sensed and a new schedule that gets actuated
+      # Sensed schedule
+      setpoint_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
+      if not setpoint_schedule.nil?
+        # Actuated schedule
+        control_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+        control_setpoint_schedule.setName("#{obj_name_hpwh} ControlSetpoint")
+        control_setpoint_schedule.setValue(51.67)
+
+        top_element_setpoint_schedule = setpoint_schedule # FIXME: need to offset this by -16.2
+      end
     end
-    if hpwh_top_element_sp.nil?
-      hpwh_top_element_sp = OpenStudio::Model::ScheduleConstant.new(model)
-      hpwh_top_element_sp.setName("#{obj_name_hpwh} TopElementSetpoint")
-      hpwh_top_element_sp.setValue((tset_C - 9.0001).round(4))
+    if setpoint_schedule.nil?
+      tset_C = UnitConversions.convert(water_heating_system.temperature, 'F', 'C').to_f.round(2)
+
+      setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+      setpoint_schedule.setName("#{obj_name_hpwh} Setpoint")
+      setpoint_schedule.setValue(tset_C)
+
+      control_setpoint_schedule = setpoint_schedule
+
+      top_element_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+      top_element_setpoint_schedule.setName("#{obj_name_hpwh} TopElementSetpoint")
+      top_element_setpoint_schedule.setValue((tset_C - 9.0001).round(4))
     end
 
     airflow_rate = 181.0 # cfm
@@ -112,7 +128,7 @@ class Waterheater
     coil = setup_hpwh_dxcoil(model, water_heating_system, weather, obj_name_hpwh, airflow_rate)
 
     # WaterHeater:Stratified
-    tank = setup_hpwh_stratified_tank(model, water_heating_system, obj_name_hpwh, h_tank, solar_fraction, hpwh_tamb, hpwh_bottom_element_sp, hpwh_top_element_sp)
+    tank = setup_hpwh_stratified_tank(model, water_heating_system, obj_name_hpwh, h_tank, solar_fraction, hpwh_tamb, bottom_element_setpoint_schedule, top_element_setpoint_schedule)
     loop.addSupplyBranchForComponent(tank)
 
     add_desuperheater(model, water_heating_system, tank, loc_space, loc_schedule, loop)
@@ -120,27 +136,8 @@ class Waterheater
     # Fan:SystemModel
     fan = setup_hpwh_fan(model, water_heating_system, obj_name_hpwh, airflow_rate)
 
-    hp_setpoint_sensed = nil
-    if not schedules_file.nil?
-      # To handle variable setpoints, need one schedule that gets sensed and a new schedule that gets actuated
-      # Sensed schedule
-      hp_setpoint_sensed = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnWaterHeaterSetpoint)
-      if not hp_setpoint_sensed.nil?
-        # Actuated schedule
-        hp_setpoint = OpenStudio::Model::ScheduleConstant.new(model)
-        hp_setpoint.setName("#{obj_name_hpwh} hp control")
-        hp_setpoint.setValue(51.67)
-      end
-    end
-    if hp_setpoint_sensed.nil?
-      hp_setpoint = OpenStudio::Model::ScheduleConstant.new(model)
-      hp_setpoint.setName("#{obj_name_hpwh} WaterHeaterHPSchedule")
-      hp_setpoint.setValue(tset_C)
-      hp_setpoint_sensed = hp_setpoint
-    end
-
     # WaterHeater:HeatPump:WrappedCondenser
-    hpwh = setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, tset_C, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, hp_setpoint)
+    hpwh = setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, control_setpoint_schedule)
 
     # Amb temp & RH sensors, temp sensor shared across programs
     amb_temp_sensor, amb_rh_sensors = get_loc_temp_rh_sensors(model, obj_name_hpwh, loc_schedule, loc_space, living_zone)
@@ -148,7 +145,7 @@ class Waterheater
 
     # EMS for the HPWH control logic
     op_mode = water_heating_system.operating_mode
-    hpwh_ctrl_program = add_hpwh_control_program(model, obj_name_hpwh, amb_temp_sensor, hpwh_bottom_element_sp, min_temp, max_temp, tset_C, op_mode, hp_setpoint_sensed, schedules_file)
+    hpwh_ctrl_program = add_hpwh_control_program(model, obj_name_hpwh, amb_temp_sensor, bottom_element_setpoint_schedule, min_temp, max_temp, op_mode, setpoint_schedule, control_setpoint_schedule, schedules_file)
 
     # ProgramCallingManagers
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
@@ -676,13 +673,13 @@ class Waterheater
 
   private
 
-  def self.setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, tset_C, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, hp_setpoint)
+  def self.setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, setpoint_schedule)
     h_condtop = (1.0 - (5.5 / 12.0)) * h_tank # in the 6th node of the tank (counting from top)
     h_condbot = 0.01 # bottom node
     h_hpctrl_up = (1.0 - (2.5 / 12.0)) * h_tank # in the 3rd node of the tank
     h_hpctrl_low = (1.0 - (8.5 / 12.0)) * h_tank # in the 9th node of the tank
 
-    hpwh = OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser.new(model, coil, tank, fan, hp_setpoint, model.alwaysOnDiscreteSchedule)
+    hpwh = OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser.new(model, coil, tank, fan, setpoint_schedule, model.alwaysOnDiscreteSchedule)
     hpwh.setName("#{obj_name_hpwh} hpwh")
     hpwh.setDeadBandTemperatureDifference(3.89)
     hpwh.setCondenserBottomLocation(h_condbot)
@@ -988,7 +985,7 @@ class Waterheater
     return hpwh_inlet_air_program
   end
 
-  def self.add_hpwh_control_program(model, obj_name_hpwh, amb_temp_sensor, hpwh_bottom_element_sp, min_temp, max_temp, tset_C, op_mode, hp_setpoint_sensed, schedules_file)
+  def self.add_hpwh_control_program(model, obj_name_hpwh, amb_temp_sensor, hpwh_bottom_element_sp, min_temp, max_temp, op_mode, setpoint_schedule, control_setpoint_schedule, schedules_file)
     # Lower element is enabled if the ambient air temperature prevents the HP from running
     leschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_bottom_element_sp, *EPlus::EMSActuatorScheduleConstantValue)
     leschedoverride_actuator.setName("#{obj_name_hpwh} LESchedOverride")
@@ -996,7 +993,7 @@ class Waterheater
     # EMS for the HPWH control logic
     t_set_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     t_set_sensor.setName("#{obj_name_hpwh} T_set")
-    t_set_sensor.setKeyName(hp_setpoint_sensed.name.to_s)
+    t_set_sensor.setKeyName(setpoint_schedule.name.to_s)
 
     op_mode_schedule = nil
     if not schedules_file.nil?
