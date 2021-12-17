@@ -25,7 +25,7 @@ class HPXMLTest < MiniTest::Test
 
     xmls = []
     sample_files_dir = File.absolute_path(File.join(@this_dir, '..', 'sample_files'))
-    Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
+    Dir["#{sample_files_dir}/base-dhw-tank-heat-pump-operating-mode-type-scheduled.xml"].sort.each do |xml|
       next if xml.include? 'base-multiple-buildings.xml' # This is tested in test_multiple_building_ids
 
       xmls << File.absolute_path(xml)
