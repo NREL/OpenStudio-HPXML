@@ -748,6 +748,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
       end
 
+      year = 1999 # Intentionally excluding leap year because Cambium has 8760 values
+
       # Calculate for each CO2 scenario
       @hpxml.header.co2_emissions_scenarios.each do |scenario|
         name = scenario.name
@@ -755,6 +757,17 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                                               File.dirname(@hpxml_path),
                                                               'CO2 Emissions Schedule')
         hourly_elec_factors = File.readlines(scenario.elec_schedule_filepath).map(&:to_f)
+        # Trim factors to match simulation run period
+        # FIXME: Merge code w/ hpxml_defaults.rb
+        sim_begin_month = @hpxml.header.sim_begin_month.nil? ? 1 : @hpxml.header.sim_begin_month
+        sim_begin_day = @hpxml.header.sim_begin_day.nil? ? 1 : @hpxml.header.sim_begin_day
+        sim_end_month = @hpxml.header.sim_end_month.nil? ? 12 : @hpxml.header.sim_end_month
+        sim_end_day = @hpxml.header.sim_end_day.nil? ? 31 : @hpxml.header.sim_end_day
+        sim_start_day_of_year = Schedule.get_day_num_from_month_day(year, sim_begin_month, sim_begin_day)
+        sim_end_day_of_year = Schedule.get_day_num_from_month_day(year, sim_end_month, sim_end_day)
+        sim_start_hour = (sim_start_day_of_year - 1) * 24
+        sim_end_hour = sim_end_day_of_year * 24 - 1
+        hourly_elec_factors = hourly_elec_factors[sim_start_hour..sim_end_hour]
         if scenario.elec_units == HPXML::CO2EmissionsScenario::UnitsKgPerMWh
           elec_mult = UnitConversions.convert(1.0, 'kg', 'lbm')
         elsif scenario.elec_units == HPXML::CO2EmissionsScenario::UnitsLbPerMWh
@@ -765,23 +778,38 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         @co2_emissions[name].annual_output = 0
 
         # Add CO2 emissions for net electricity
+        fail 'Unexpected failure.' if hourly_elec_factors.size != hourly_elec_consumed.size
+
         @co2_emissions[name].annual_output += hourly_elec_consumed.zip(hourly_elec_factors).map { |x, y| x * y * elec_mult }.sum
         @co2_emissions[name].annual_output -= hourly_elec_produced.zip(hourly_elec_factors).map { |x, y| x * y * elec_mult }.sum
         if include_timeseries_co2_emissions
-          n_timesteps_per_hour = [Integer((@timestamps.size / 8760.0).round), 1].max
-          timeseries_elec_factors = hourly_elec_factors.flat_map { |y| [y] * n_timesteps_per_hour }
+          # FIXME: Merge code w/ hpxml_defaults.rb
+          timestep = @hpxml.header.timestep.nil? ? 60.0 : @hpxml.header.timestep
+          if timeseries_frequency == 'timestep'
+            n_timesteps_per_hour = Integer(60.0 / timestep)
+            timeseries_elec_factors = hourly_elec_factors.flat_map { |y| [y] * n_timesteps_per_hour }
+          else
+            timeseries_elec_factors = hourly_elec_factors.dup
+          end
+          fail 'Unexpected failure.' if timeseries_elec_factors.size != timeseries_elec_consumed.size
+
           @co2_emissions[name].timeseries_output = timeseries_elec_consumed.zip(timeseries_elec_produced).map { |c, p| c - p }.zip(timeseries_elec_factors).map { |n, f| n * f * elec_mult }
           if ['daily', 'monthly'].include? timeseries_frequency
             # Aggregate up from hourly to this level
             if timeseries_frequency == 'daily'
-              n_hours_per_item = [24] * 365
+              n_hours_per_period = [24] * (sim_end_day_of_year - sim_start_day_of_year + 1)
             elsif timeseries_frequency == 'monthly'
-              year = 1999 # Intentionally excluding leap year designation
-              n_hours_per_item = Constants.NumDaysInMonths(year).map { |x| x * 24 }
+              n_days_per_month = Constants.NumDaysInMonths(year)
+              n_days_per_period = n_days_per_month[sim_begin_month - 1..sim_end_month - 1]
+              n_days_per_period[0] -= sim_begin_day - 1
+              n_days_per_period[-1] = sim_end_day
+              n_hours_per_period = n_days_per_period.map { |x| x * 24 }
             end
             timeseries_output = []
             start_hour = 0
-            n_hours_per_item.each do |n_hours|
+            fail 'Unexpected failure.' if n_hours_per_period.sum != @co2_emissions[name].timeseries_output.size
+
+            n_hours_per_period.each do |n_hours|
               timeseries_output << @co2_emissions[name].timeseries_output[start_hour..start_hour + n_hours - 1].sum()
               start_hour += n_hours
             end

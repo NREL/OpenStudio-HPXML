@@ -66,11 +66,27 @@
     <sch:title>[CO2EmissionsScenario]</sch:title>
     <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:CO2EmissionsScenarios/h:CO2EmissionsScenario'>
       <sch:assert role='ERROR' test='count(h:Name) = 1'>Expected 1 element(s) for xpath: Name</sch:assert>
-      <sch:assert role='ERROR' test='count(h:CO2EmissionsFactor[h:FuelType="electricity" and (h:Units="lb/MWh" or h:Units="kg/MWh")]/h:ScheduleFilePath) = 1'>Expected 1 element(s) for xpath: CO2EmissionsFactor[FuelType="electricity" and (Units="lb/MWh" or Units="kg/MWh")]/ScheduleFilePath</sch:assert>
-      <sch:assert role='ERROR' test='count(h:CO2EmissionsFactor[h:FuelType="natural gas" and (h:Units="lb/MBtu" or h:Units="kg/MBtu")]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CO2EmissionsFactor[FuelType="natural gas" and (Units="lb/MBtu" or Units="kg/MBtu")]/Value</sch:assert>
-      <sch:assert role='ERROR' test='count(h:CO2EmissionsFactor[h:FuelType="propane" and (h:Units="lb/MBtu" or h:Units="kg/MBtu")]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CO2EmissionsFactor[FuelType="propane" and (Units="lb/MBtu" or Units="kg/MBtu")]/Value</sch:assert>
-      <sch:assert role='ERROR' test='count(h:CO2EmissionsFactor[h:FuelType="fuel oil" and (h:Units="lb/MBtu" or h:Units="kg/MBtu")]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CO2EmissionsFactor[FuelType="fuel oil" and (Units="lb/MBtu" or Units="kg/MBtu")]/Value</sch:assert>
-      <sch:assert role='ERROR' test='count(h:CO2EmissionsFactor[h:FuelType="coal" and (h:Units="lb/MBtu" or h:Units="kg/MBtu")]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CO2EmissionsFactor[FuelType="coal" and (Units="lb/MBtu" or Units="kg/MBtu")]/Value</sch:assert>
+      <sch:assert role='ERROR' test='count(h:CO2EmissionsFactor[h:FuelType="electricity"]) = 1'>Expected 1 element(s) for xpath: CO2EmissionsFactor[FuelType="electricity"]</sch:assert> <!-- See [CO2EmissionsFactor=Electricity] -->
+      <sch:assert role='ERROR' test='count(h:CO2EmissionsFactor[h:FuelType="natural gas"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CO2EmissionsFactor[FuelType="natural gas"]</sch:assert> <!-- See [CO2EmissionsFactor=FossilFuel] -->
+      <sch:assert role='ERROR' test='count(h:CO2EmissionsFactor[h:FuelType="propane"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CO2EmissionsFactor[FuelType="propane"]</sch:assert> <!-- See [CO2EmissionsFactor=FossilFuel] -->
+      <sch:assert role='ERROR' test='count(h:CO2EmissionsFactor[h:FuelType="fuel oil"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CO2EmissionsFactor[FuelType="fuel oil"]</sch:assert> <!-- See [CO2EmissionsFactor=FossilFuel] -->
+      <sch:assert role='ERROR' test='count(h:CO2EmissionsFactor[h:FuelType="coal"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CO2EmissionsFactor[FuelType="coal"]</sch:assert> <!-- See [CO2EmissionsFactor=FossilFuel] -->
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[CO2EmissionsFactor=Electricity]</sch:title>
+    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:CO2EmissionsScenarios/h:CO2EmissionsScenario/h:CO2EmissionsFactor[h:FuelType="electricity"]'>
+      <sch:assert role='ERROR' test='count(h:Units[text()="lb/MWh" or text()="kg/MWh"]) = 1'>Expected 1 element(s) for xpath: Units[text()="lb/MWh" or text()="kg/MWh"]</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ScheduleFilePath) = 1'>Expected 1 element(s) for xpath: ScheduleFilePath</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[CO2EmissionsFactor=FossilFuel]</sch:title>
+    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:CO2EmissionsScenarios/h:CO2EmissionsScenario/h:CO2EmissionsFactor[h:FuelType!="electricity"]'>
+      <sch:assert role='ERROR' test='count(h:Units[text()="lb/MBtu" or text()="kg/MBtu"]) = 1'>Expected 1 element(s) for xpath: Units[text()="lb/MBtu" or text()="kg/MBtu"]</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Value) = 1'>Expected 1 element(s) for xpath: Value</sch:assert>
     </sch:rule>
   </sch:pattern>
 
