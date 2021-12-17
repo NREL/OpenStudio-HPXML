@@ -1687,7 +1687,7 @@
                                                         },
                                                         "location": {
                                                             "type": "string",
-                                                            "enum": ["cond_space", "uncond_basement", "unvented_crawl", "vented_crawl", "uncond_attic"],
+                                                            "enum": ["cond_space", "uncond_basement", "unvented_crawl", "vented_crawl", "uncond_attic", "under_slab", "exterior_wall", "outside"],
                                                             "description": "Location of distribution system"
                                                         },
                                                         "fraction": {

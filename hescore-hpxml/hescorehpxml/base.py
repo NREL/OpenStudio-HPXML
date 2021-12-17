@@ -65,6 +65,10 @@ def round_to_nearest(x, vals, tails_tolerance=None):
     return nearest
 
 
+def weighted_average(items, weights):
+    return sum(item * weight for item, weight in zip(items, weights)) / sum(weights)
+
+
 class HPXMLtoHEScoreTranslatorBase(object):
     SCHEMA_DIR = None
 
@@ -2247,31 +2251,28 @@ class HPXMLtoHEScoreTranslatorBase(object):
 
         capacities = []
         collector_areas = []
+        n_panels_per_system = []
         years = []
         azimuths = []
         tilts = []
         for pvsystem in pvsystems:
 
-            max_power_output = self.xpath(pvsystem, 'h:MaxPowerOutput/text()')
-            if max_power_output:
-                capacities.append(float(max_power_output))  # W
-                collector_areas.append(None)
-            else:
-                capacities.append(None)
-                collector_area = self.xpath(pvsystem, 'h:CollectorArea/text()')
-                if collector_area:
-                    collector_areas.append(float(collector_area))
-                else:
-                    raise TranslationError('MaxPowerOutput or CollectorArea is required for every PVSystem.')
+            capacities.append(convert_to_type(float, self.xpath(pvsystem, 'h:MaxPowerOutput/text()')))
+            collector_areas.append(convert_to_type(float, self.xpath(pvsystem, 'h:CollectorArea/text()')))
+            n_panels_per_system.append(convert_to_type(int, self.xpath(pvsystem, 'h:NumberOfPanels/text()')))
 
-            manufacture_years = list(map(
-                int,
-                self.xpath(
+            if not (capacities[-1] or collector_areas[-1] or n_panels_per_system[-1]):
+                raise TranslationError(
+                    'MaxPowerOutput, NumberOfPanels, or CollectorArea is required for every PVSystem.'
+                )
+
+            manufacture_years = [
+                int(x) for x in self.xpath(
                     pvsystem,
                     'h:YearInverterManufactured/text()|h:YearModulesManufactured/text()',
-                    aslist=True)
-            )
-            )
+                    aslist=True
+                )
+            ]
             if manufacture_years:
                 years.append(max(manufacture_years))  # Use the latest year of manufacture
             else:
@@ -2295,31 +2296,25 @@ class HPXMLtoHEScoreTranslatorBase(object):
 
         if None not in capacities:
             solar_electric['capacity_known'] = True
-            total_capacity = sum(capacities)
-            solar_electric['system_capacity'] = total_capacity / 1000.
-            solar_electric['year'] = int(
-                old_div(sum([year * capacity for year, capacity in zip(years, capacities)]), total_capacity))
-            wtavg_azimuth = old_div(sum(
-                [az * capacity for az, capacity in zip(azimuths, capacities)]), total_capacity)
-            wtavg_tilt = sum(t * capacity for t, capacity in zip(tilts, capacities)) / total_capacity
+            solar_electric['system_capacity'] = sum(capacities) / 1000.
+            weights = capacities
+        elif None not in n_panels_per_system:
+            solar_electric['capacity_known'] = False
+            solar_electric['num_panels'] = sum(n_panels_per_system)
+            weights = n_panels_per_system
         elif None not in collector_areas:
             solar_electric['capacity_known'] = False
-            total_area = sum(collector_areas)
-            solar_electric['num_panels'] = int(python2round(total_area / 17.6))
-            solar_electric['year'] = int(sum([year * area for year, area in zip(years, collector_areas)]) / total_area)
-            wtavg_azimuth = old_div(sum(
-                [az * area for az, area in zip(azimuths, collector_areas)]
-            ), total_area)
-            wtavg_tilt = sum(t * area for t, area in zip(tilts, collector_areas)) / total_area
+            solar_electric['num_panels'] = int(round(sum(collector_areas) / 17.6))
+            weights = collector_areas
         else:
             raise TranslationError(
-                'Either a MaxPowerOutput must be specified for every PVSystem '
-                'or CollectorArea must be specified for every PVSystem.'
+                'Either a MaxPowerOutput or NumberOfPanels or CollectorArea must be specified for every PVSystem.'
             )
 
-        nearest_azimuth = self.get_nearest_azimuth(azimuth=wtavg_azimuth)
+        solar_electric['year'] = round(weighted_average(years, weights))
+        nearest_azimuth = self.get_nearest_azimuth(azimuth=weighted_average(azimuths, weights))
         solar_electric['array_azimuth'] = self.azimuth_to_hescore_orientation[nearest_azimuth]
-        solar_electric['array_tilt'] = self.get_nearest_tilt(wtavg_tilt)
+        solar_electric['array_tilt'] = self.get_nearest_tilt(weighted_average(tilts, weights))
 
         return generation
 
