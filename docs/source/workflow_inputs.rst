@@ -151,44 +151,47 @@ Detailed Schedule Inputs
 Detailed schedule inputs allow schedule values for every hour or timestep of the simulation.
 They can be smooth schedules, or they can reflect real-world or stochastic occupancy.
 
-Detailed schedule inputs are provided via a CSV file that should be referenced in the HPXML file at ``/HPXML/SoftwareInfo/extension/SchedulesFilePath``.
-Each column must be normalized to MAX=1; that is, the schedules only define *when* energy is used, not *how much* energy is used.
-The columns in the schedule CSV are:
+Detailed schedule inputs are provided via CSV file(s) that should be referenced (comma-separated) in the HPXML file at ``/HPXML/SoftwareInfo/extension/SchedulesFilePaths``.
+Occupancy related schedule columns must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
+Water heater related schedule columns do not have these constraints.
+The schedule columns in the schedule CSV are:
 
-  =============================  ========================================================  ===================
-  Column Name                    Description                                               Affected by Vacancy
-  =============================  ========================================================  ===================
-  ``occupants``                  Occupant heat gain schedule.                              Yes
-  ``lighting_interior``          Interior lighting energy use schedule.                    Yes
-  ``lighting_exterior``          Exterior lighting energy use schedule.                    Yes
-  ``lighting_garage``            Garage lighting energy use schedule.                      Yes
-  ``lighting_exterior_holiday``  Exterior holiday lighting energy use schedule.            Yes
-  ``cooking_range``              Cooking range & oven energy use schedule.                 Yes
-  ``refrigerator``               Primary refrigerator energy use schedule.                 No
-  ``extra_refrigerator``         Non-primary refrigerator energy use schedule.             No
-  ``freezer``                    Freezer energy use schedule.                              No
-  ``dishwasher``                 Dishwasher energy use schedule.                           Yes
-  ``clothes_washer``             Clothes washer energy use schedule.                       Yes
-  ``clothes_dryer``              Clothes dryer energy use schedule.                        Yes
-  ``ceiling_fan``                Ceiling fan energy use schedule.                          Yes
-  ``plug_loads_other``           Other plug load energy use schedule.                      Yes
-  ``plug_loads_tv``              Television plug load energy use schedule.                 Yes
-  ``plug_loads_vehicle``         Electric vehicle plug load energy use schedule.           Yes
-  ``plug_loads_well_pump``       Well pump plug load energy use schedule.                  Yes
-  ``fuel_loads_grill``           Grill fuel load energy use schedule.                      Yes
-  ``fuel_loads_lighting``        Lighting fuel load energy use schedule.                   Yes
-  ``fuel_loads_fireplace``       Fireplace fuel load energy use schedule.                  Yes
-  ``pool_pump``                  Pool pump energy use schedule.                            No
-  ``pool_heater``                Pool heater energy use schedule.                          No
-  ``hot_tub_pump``               Hot tub pump energy use schedule.                         No
-  ``hot_tub_heater``             Hot tub heater energy use schedule.                       No
-  ``hot_water_dishwasher``       Dishwasher hot water use schedule.                        Yes
-  ``hot_water_clothes_washer``   Clothes washer hot water use schedule.                    Yes
-  ``hot_water_fixtures``         Fixtures (sinks, showers, baths) hot water use schedule.  Yes
-  ``vacancy``                    1=Home is vacant. Automatically overrides other columns.  N/A
-  =============================  ========================================================  ===================
+  ==============================  ========================================================  ===================
+  Column Name                     Description                                               Affected by Vacancy
+  ==============================  ========================================================  ===================
+  ``occupants``                   Occupant heat gain schedule.                              Yes
+  ``lighting_interior``           Interior lighting energy use schedule.                    Yes
+  ``lighting_exterior``           Exterior lighting energy use schedule.                    Yes
+  ``lighting_garage``             Garage lighting energy use schedule.                      Yes
+  ``lighting_exterior_holiday``   Exterior holiday lighting energy use schedule.            Yes
+  ``cooking_range``               Cooking range & oven energy use schedule.                 Yes
+  ``refrigerator``                Primary refrigerator energy use schedule.                 No
+  ``extra_refrigerator``          Non-primary refrigerator energy use schedule.             No
+  ``freezer``                     Freezer energy use schedule.                              No
+  ``dishwasher``                  Dishwasher energy use schedule.                           Yes
+  ``clothes_washer``              Clothes washer energy use schedule.                       Yes
+  ``clothes_dryer``               Clothes dryer energy use schedule.                        Yes
+  ``ceiling_fan``                 Ceiling fan energy use schedule.                          Yes
+  ``plug_loads_other``            Other plug load energy use schedule.                      Yes
+  ``plug_loads_tv``               Television plug load energy use schedule.                 Yes
+  ``plug_loads_vehicle``          Electric vehicle plug load energy use schedule.           Yes
+  ``plug_loads_well_pump``        Well pump plug load energy use schedule.                  Yes
+  ``fuel_loads_grill``            Grill fuel load energy use schedule.                      Yes
+  ``fuel_loads_lighting``         Lighting fuel load energy use schedule.                   Yes
+  ``fuel_loads_fireplace``        Fireplace fuel load energy use schedule.                  Yes
+  ``pool_pump``                   Pool pump energy use schedule.                            No
+  ``pool_heater``                 Pool heater energy use schedule.                          No
+  ``hot_tub_pump``                Hot tub pump energy use schedule.                         No
+  ``hot_tub_heater``              Hot tub heater energy use schedule.                       No
+  ``hot_water_dishwasher``        Dishwasher hot water use schedule.                        Yes
+  ``hot_water_clothes_washer``    Clothes washer hot water use schedule.                    Yes
+  ``hot_water_fixtures``          Fixtures (sinks, showers, baths) hot water use schedule.  Yes
+  ``water_heater_setpoint``       Water heater setpoint schedule.                           No
+  ``water_heater_operating_mode`` Water heater operating mode schedule.                     No
+  ``vacancy``                     1=Home is vacant. Automatically overrides other columns.  N/A
+  ==============================  ========================================================  ===================
 
-A couple schedule CSV file examples are provided in the ``HPXMLtoOpenStudio/resources/schedule_files`` directory.
+Example schedule CSV files are provided in the ``HPXMLtoOpenStudio/resources/schedule_files`` directory.
 
 A detailed stochastic or smooth schedule CSV file can also be automatically generated for you; see the :ref:`usage_instructions` for the commands.
 
