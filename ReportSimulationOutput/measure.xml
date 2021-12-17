@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>04898fa1-7916-43fc-86bd-14b47b80e29e</version_id>
-  <version_modified>20211216T011311Z</version_modified>
+  <version_id>8b54696a-6e23-4bf6-8d6f-c76f9764f059</version_id>
+  <version_modified>20211217T005605Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -93,6 +93,28 @@
       <name>include_timeseries_end_use_consumptions</name>
       <display_name>Generate Timeseries Output: End Use Consumptions</display_name>
       <description>Generates timeseries energy consumptions for each end use.</description>
+      <type>Boolean</type>
+      <units></units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+      <min_value></min_value>
+      <max_value></max_value>
+    </argument>
+    <argument>
+      <name>include_timeseries_co2_emissions</name>
+      <display_name>Generate Timeseries Output: CO2 Emissions</display_name>
+      <description>Generates timeseries CO2 emissions. Requires the appropriate HPXML inputs to be specified.</description>
       <type>Boolean</type>
       <units></units>
       <required>true</required>
@@ -1583,7 +1605,7 @@
       <filename>output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>F67CC508</checksum>
+      <checksum>364BC2CE</checksum>
     </file>
     <file>
       <version>
@@ -1594,7 +1616,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>0CC6BF29</checksum>
+      <checksum>A173690C</checksum>
     </file>
   </files>
 </measure>

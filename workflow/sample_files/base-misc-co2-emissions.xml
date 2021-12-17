@@ -17,7 +17,7 @@
           <CO2EmissionsFactor>
             <FuelType>electricity</FuelType>
             <Units>kg/MWh</Units>
-            <ScheduleFilePath>HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_LowRECost_RMPAc.csv</ScheduleFilePath>
+            <ScheduleFilePath>../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_LowRECost_RMPAc.csv</ScheduleFilePath>
           </CO2EmissionsFactor>
           <CO2EmissionsFactor>
             <FuelType>natural gas</FuelType>
@@ -30,7 +30,7 @@
           <CO2EmissionsFactor>
             <FuelType>electricity</FuelType>
             <Units>kg/MWh</Units>
-            <ScheduleFilePath>HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_MidCase_RMPAc.csv</ScheduleFilePath>
+            <ScheduleFilePath>../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_MidCase_RMPAc.csv</ScheduleFilePath>
           </CO2EmissionsFactor>
           <CO2EmissionsFactor>
             <FuelType>natural gas</FuelType>
@@ -43,7 +43,7 @@
           <CO2EmissionsFactor>
             <FuelType>electricity</FuelType>
             <Units>kg/MWh</Units>
-            <ScheduleFilePath>HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_HighRECost_RMPAc.csv</ScheduleFilePath>
+            <ScheduleFilePath>../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_HighRECost_RMPAc.csv</ScheduleFilePath>
           </CO2EmissionsFactor>
           <CO2EmissionsFactor>
             <FuelType>natural gas</FuelType>

@@ -2506,27 +2506,27 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   if ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
     hpxml.header.allow_increased_fixed_capacities = true
   elsif ['base-schedules-detailed-stochastic.xml'].include? hpxml_file
-    hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'
+    hpxml.header.schedules_filepath = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'
   elsif ['base-schedules-detailed-stochastic-vacancy.xml'].include? hpxml_file
-    hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
+    hpxml.header.schedules_filepath = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
   elsif ['base-schedules-detailed-smooth.xml'].include? hpxml_file
-    hpxml.header.schedules_filepath = 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
+    hpxml.header.schedules_filepath = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
   elsif ['base-location-capetown-zaf.xml'].include? hpxml_file
     hpxml.header.state_code = nil
   elsif ['base-misc-co2-emissions.xml'].include? hpxml_file
     hpxml.header.co2_emissions_scenarios.add(name: 'LowRECost LRMER Levelized',
                                              elec_units: HPXML::CO2EmissionsScenario::UnitsKgPerMWh,
-                                             elec_schedule_filepath: 'HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_LowRECost_RMPAc.csv',
+                                             elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_LowRECost_RMPAc.csv',
                                              natural_gas_units: HPXML::CO2EmissionsScenario::UnitsKgPerMBtu,
                                              natural_gas_value: 52.91)
     hpxml.header.co2_emissions_scenarios.add(name: 'MidCase LRMER Levelized',
                                              elec_units: HPXML::CO2EmissionsScenario::UnitsKgPerMWh,
-                                             elec_schedule_filepath: 'HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_MidCase_RMPAc.csv',
+                                             elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_MidCase_RMPAc.csv',
                                              natural_gas_units: HPXML::CO2EmissionsScenario::UnitsKgPerMBtu,
                                              natural_gas_value: 52.91)
     hpxml.header.co2_emissions_scenarios.add(name: 'HighRECost LRMER Levelized',
                                              elec_units: HPXML::CO2EmissionsScenario::UnitsKgPerMWh,
-                                             elec_schedule_filepath: 'HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_HighRECost_RMPAc.csv',
+                                             elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_HighRECost_RMPAc.csv',
                                              natural_gas_units: HPXML::CO2EmissionsScenario::UnitsKgPerMBtu,
                                              natural_gas_value: 52.91)
   end
