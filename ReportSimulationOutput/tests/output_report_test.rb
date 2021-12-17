@@ -449,14 +449,17 @@ class ReportSimulationOutputTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsFuels
+    co2_cols = ['CO2 Emissions: HighRECost LRMER Levelized',
+                'CO2 Emissions: LowRECost LRMER Levelized',
+                'CO2 Emissions: MidCase LRMER Levelized']
+    expected_timeseries_cols = ['Time'] + co2_cols
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     _check_for_constant_timeseries_step(timeseries_cols[0])
-    _check_for_nonzero_timeseries_value(timeseries_csv, ['Fuel Use: Electricity: Total'])
+    _check_for_nonzero_timeseries_value(timeseries_csv, co2_cols)
   end
 
   def test_timeseries_hourly_enduses

@@ -738,8 +738,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       hourly_elec_consumed = get_report_meter_data_timeseries(['Electricity:Facility'], UnitConversions.convert(1.0, 'J', 'MWh'), 0, 'hourly')
       hourly_elec_produced = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', 'MWh'), 0, 'hourly')
       if include_timeseries_co2_emissions
-        timeseries_elec_consumed = get_report_meter_data_timeseries(['Electricity:Facility'], UnitConversions.convert(1.0, 'J', 'MWh'), 0, timeseries_frequency)
-        timeseries_elec_produced = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', 'MWh'), 0, timeseries_frequency)
+        if timeseries_frequency == 'timestep'
+          timeseries_elec_consumed = get_report_meter_data_timeseries(['Electricity:Facility'], UnitConversions.convert(1.0, 'J', 'MWh'), 0, timeseries_frequency)
+          timeseries_elec_produced = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', 'MWh'), 0, timeseries_frequency)
+        else
+          # Need to perform calculations hourly at a minimum
+          timeseries_elec_consumed = hourly_elec_consumed.dup
+          timeseries_elec_produced = hourly_elec_produced.dup
+        end
       end
 
       # Calculate for each CO2 scenario
@@ -762,9 +768,25 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         @co2_emissions[name].annual_output += hourly_elec_consumed.zip(hourly_elec_factors).map { |x, y| x * y * elec_mult }.sum
         @co2_emissions[name].annual_output -= hourly_elec_produced.zip(hourly_elec_factors).map { |x, y| x * y * elec_mult }.sum
         if include_timeseries_co2_emissions
-          n_timesteps_per_hour = Integer((@timestamps.size / 8760).round)
+          n_timesteps_per_hour = [Integer((@timestamps.size / 8760.0).round), 1].max
           timeseries_elec_factors = hourly_elec_factors.flat_map { |y| [y] * n_timesteps_per_hour }
           @co2_emissions[name].timeseries_output = timeseries_elec_consumed.zip(timeseries_elec_produced).map { |c, p| c - p }.zip(timeseries_elec_factors).map { |n, f| n * f * elec_mult }
+          if ['daily', 'monthly'].include? timeseries_frequency
+            # Aggregate up from hourly to this level
+            if timeseries_frequency == 'daily'
+              n_hours_per_item = [24] * 365
+            elsif timeseries_frequency == 'monthly'
+              year = 1999 # Intentionally excluding leap year designation
+              n_hours_per_item = Constants.NumDaysInMonths(year).map { |x| x * 24 }
+            end
+            timeseries_output = []
+            start_hour = 0
+            n_hours_per_item.each do |n_hours|
+              timeseries_output << @co2_emissions[name].timeseries_output[start_hour..start_hour + n_hours - 1].sum()
+              start_hour += n_hours
+            end
+            @co2_emissions[name].timeseries_output = timeseries_output
+          end
         end
 
         # Add CO2 emissions for fossil fuels
