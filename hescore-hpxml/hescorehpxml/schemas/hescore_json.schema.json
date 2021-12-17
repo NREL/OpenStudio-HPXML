@@ -234,11 +234,17 @@
                                         "enum": ["roof1", "roof2"],
                                         "description": "Name of this roof instance"
                                     },
+                                    "ceiling_area": {
+                                        "type": "number",
+                                        "minimum": 1,
+                                        "maximum": 25000,
+                                        "description": "Area of ceiling (attic floor), used if roof_type = vented_attic"
+                                    },
                                     "roof_area": {
                                         "type": "number",
                                         "minimum": 1,
                                         "maximum": 25000,
-                                        "description": "Area of this roof element"
+                                        "description": "Area of the roof, used if roof_type = cath_ceiling"
                                     },
                                     "roof_assembly_code": {
                                         "type": "string",
@@ -272,7 +278,7 @@
                                     },
                                     "roof_type": {
                                         "type": "string",
-                                        "enum": ["vented_attic", "cond_attic", "cath_ceiling"],
+                                        "enum": ["vented_attic", "cath_ceiling"],
                                         "description": "Type of roof"
                                     },
                                     "ceiling_assembly_code": {
@@ -281,6 +287,25 @@
                                                  "ecwf21", "ecwf25", "ecwf30", "ecwf38", "ecwf44", "ecwf49",
                                                  "ecwf60"],
                                         "description": "Ceiling construction assembly code (required unless roof_type is cath_ceiling)"
+                                    },
+                                    "knee_wall": {
+                                        "type": "object",
+                                        "description": "Knee wall inputs",
+                                        "additionalProperties": false,
+                                        "required": ["area", "assembly_code"],
+                                        "properties": {
+                                            "area": {
+                                                "type": "number",
+                                                "minimum": 1,
+                                                "maximum": 25000,
+                                                "description": "Knee wall area"
+                                            },
+                                            "assembly_code": {
+                                                "type": "string",
+                                                "enum": ["kwwf00", "kwwf03", "kwwf07", "kwwf11", "kwwf15", "kwwf19", "kwwf21"],
+                                                "description": "Knee wall assembly code"
+                                            }
+                                        }
                                     },
                                     "zone_skylight": {
                                         "type": "object",
