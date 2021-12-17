@@ -214,6 +214,11 @@ class OSModel
     @apply_ashrae140_assumptions = @hpxml.header.apply_ashrae140_assumptions # Hidden feature
     @apply_ashrae140_assumptions = false if @apply_ashrae140_assumptions.nil?
 
+    # Check paths
+    @hpxml.header.schedules_filepath = FilePath.check_path(@hpxml.header.schedules_filepath,
+                                                           File.dirname(hpxml_path),
+                                                           'Schedules')
+
     # Init
 
     @schedules_file = nil
