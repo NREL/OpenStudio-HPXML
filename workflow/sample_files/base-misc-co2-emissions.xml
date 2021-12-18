@@ -13,11 +13,11 @@
       </SimulationControl>
       <CO2EmissionsScenarios>
         <CO2EmissionsScenario>
-          <Name>LowRECost LRMER Levelized</Name>
+          <Name>MidCase 2022 AER using RMPA region</Name>
           <CO2EmissionsFactor>
             <FuelType>electricity</FuelType>
             <Units>kg/MWh</Units>
-            <ScheduleFilePath>../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_LowRECost_RMPAc.csv</ScheduleFilePath>
+            <ScheduleFilePath>../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_RMPAc_2022.csv</ScheduleFilePath>
           </CO2EmissionsFactor>
           <CO2EmissionsFactor>
             <FuelType>natural gas</FuelType>
@@ -26,24 +26,11 @@
           </CO2EmissionsFactor>
         </CO2EmissionsScenario>
         <CO2EmissionsScenario>
-          <Name>MidCase LRMER Levelized</Name>
+          <Name>MidCase 2022 AER using National</Name>
           <CO2EmissionsFactor>
             <FuelType>electricity</FuelType>
             <Units>kg/MWh</Units>
-            <ScheduleFilePath>../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_MidCase_RMPAc.csv</ScheduleFilePath>
-          </CO2EmissionsFactor>
-          <CO2EmissionsFactor>
-            <FuelType>natural gas</FuelType>
-            <Units>kg/MBtu</Units>
-            <Value>52.91</Value>
-          </CO2EmissionsFactor>
-        </CO2EmissionsScenario>
-        <CO2EmissionsScenario>
-          <Name>HighRECost LRMER Levelized</Name>
-          <CO2EmissionsFactor>
-            <FuelType>electricity</FuelType>
-            <Units>kg/MWh</Units>
-            <ScheduleFilePath>../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_StdScen20_HighRECost_RMPAc.csv</ScheduleFilePath>
+            <ScheduleFilePath>../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_usa_2022.csv</ScheduleFilePath>
           </CO2EmissionsFactor>
           <CO2EmissionsFactor>
             <FuelType>natural gas</FuelType>
