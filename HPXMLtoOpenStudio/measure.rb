@@ -215,13 +215,15 @@ class OSModel
     @apply_ashrae140_assumptions = false if @apply_ashrae140_assumptions.nil?
 
     # Check paths
-    filepaths = []
-    @hpxml.header.schedules_filepaths.split(',').each do |path|
-      filepaths << FilePath.check_path(path,
-                                       File.dirname(hpxml_path),
-                                       'Schedules')
+    if not @hpxml.header.schedules_filepaths.nil?
+      filepaths = []
+      @hpxml.header.schedules_filepaths.split(',').each do |path|
+        filepaths << FilePath.check_path(path,
+                                         File.dirname(hpxml_path),
+                                         'Schedules')
+      end
+      @hpxml.header.schedules_filepaths = filepaths.join(',')
     end
-    @hpxml.header.schedules_filepaths = filepaths.join(',')
 
     # Init
 
