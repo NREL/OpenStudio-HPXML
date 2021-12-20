@@ -11,7 +11,7 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <SchedulesFilePaths>HPXMLtoOpenStudio/resources/schedule_files/smooth.csv</SchedulesFilePaths>
+      <SchedulesFilePaths>../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv</SchedulesFilePaths>
     </extension>
   </SoftwareInfo>
   <Building>

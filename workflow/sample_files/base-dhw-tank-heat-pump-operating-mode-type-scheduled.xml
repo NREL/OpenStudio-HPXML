@@ -11,7 +11,7 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <SchedulesFilePaths>HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_operating_mode_schedule.csv</SchedulesFilePaths>
+      <SchedulesFilePaths>../../HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_operating_mode_schedule.csv</SchedulesFilePaths>
     </extension>
   </SoftwareInfo>
   <Building>
