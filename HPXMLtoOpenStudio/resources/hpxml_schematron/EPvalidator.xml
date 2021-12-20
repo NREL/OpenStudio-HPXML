@@ -9,7 +9,7 @@
       <sch:assert role='ERROR' test='count(h:XMLTransactionHeaderInformation) = 1'>Expected 1 element(s) for xpath: XMLTransactionHeaderInformation</sch:assert> <!-- See [XMLTransactionHeaderInformation] -->
       <sch:assert role='ERROR' test='count(h:SoftwareInfo/h:extension/h:SimulationControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SoftwareInfo/extension/SimulationControl</sch:assert> <!-- See [SimulationControl] -->
       <sch:assert role='ERROR' test='count(h:SoftwareInfo/h:extension/h:HVACSizingControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SoftwareInfo/extension/HVACSizingControl</sch:assert> <!-- See [HVACSizingControl] -->
-      <sch:assert role='ERROR' test='count(h:SoftwareInfo/h:extension/h:SchedulesFilePaths) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SoftwareInfo/extension/SchedulesFilePaths</sch:assert>
+      <sch:assert role='ERROR' test='count(h:SoftwareInfo/h:extension/h:SchedulesFiles/h:SchedulesFile) &gt;= 0'>Expected 0 or more element(s) for xpath: SoftwareInfo/extension/SchedulesFiles/SchedulesFile</sch:assert> <!-- See [SchedulesFile] -->
       <sch:assert role='ERROR' test='count(h:Building) &gt;= 1'>Expected 1 or more element(s) for xpath: Building</sch:assert> <!-- See [Building] -->
     </sch:rule>
   </sch:pattern>
@@ -50,6 +50,14 @@
     <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:HVACSizingControl'>
       <sch:assert role='ERROR' test='count(h:AllowIncreasedFixedCapacities) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AllowIncreasedFixedCapacities</sch:assert> <!-- boolean -->
       <sch:assert role='ERROR' test='count(h:UseMaxLoadForHeatPumps) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UseMaxLoadForHeatPumps</sch:assert> <!-- boolean -->
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[SchedulesFile]</sch:title>
+    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:SchedulesFiles/h:SchedulesFile'>
+      <sch:assert role='ERROR' test='count(h:Name) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Name</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Path) = 1'>Expected 1 element(s) for xpath: Path</sch:assert>
     </sch:rule>
   </sch:pattern>
 

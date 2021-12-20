@@ -131,12 +131,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     # modify the hpxml with the schedules path
     doc = XMLHelper.parse_file(hpxml_path)
     extension = XMLHelper.create_elements_as_needed(XMLHelper.get_element(doc, '/HPXML'), ['SoftwareInfo', 'extension'])
-    schedules_filepath = XMLHelper.get_value(extension, 'SchedulesFilePaths', :string)
-    if !schedules_filepath.nil?
-      runner.registerWarning("Overwriting existing SchedulesFilePaths element: #{schedules_filepath}")
-      XMLHelper.delete_element(extension, 'SchedulesFilePaths')
+    schedules_files = XMLHelper.get_elements(extension, 'SchedulesFiles')
+    if !schedules_files.empty?
+      runner.registerWarning('Overwriting existing SchedulesFiles.')
+      XMLHelper.delete_element(extension, 'SchedulesFiles')
     end
-    schedules_filepaths = [args[:output_csv_path]]
+    paths = { 'Occupancy' => args[:output_csv_path] }
 
     # water heater scheduled setpoints and/or operating modes
     if args[:water_heater_scheduled_setpoint_path].is_initialized || args[:water_heater_scheduled_operating_mode_path].is_initialized
@@ -144,10 +144,14 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       success = create_water_heater_schedules(runner, hpxml, args)
       return false if not success
 
-      schedules_filepaths << args[:water_heater_output_csv_path].get
+      paths['Water Heater'] = args[:water_heater_output_csv_path].get
     end
-    schedules_filepaths = schedules_filepaths.join(',')
-    XMLHelper.add_element(extension, 'SchedulesFilePaths', schedules_filepaths, :string)
+    schedules_files = XMLHelper.add_element(extension, 'SchedulesFiles')
+    paths.each do |name, path|
+      schedules_file = XMLHelper.add_element(schedules_files, 'SchedulesFile')
+      XMLHelper.add_element(schedules_file, 'Name', name, :string)
+      XMLHelper.add_element(schedules_file, 'Path', path, :string)
+    end
 
     # write out the modified hpxml
     hpxml_output_path = args[:hpxml_output_path]
@@ -155,10 +159,8 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       hpxml_output_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_output_path))
     end
 
-    if (hpxml_path != hpxml_output_path) || (schedules_filepath != schedules_filepaths)
-      XMLHelper.write_file(doc, hpxml_output_path)
-      runner.registerInfo("Wrote file: #{hpxml_output_path}")
-    end
+    XMLHelper.write_file(doc, hpxml_output_path)
+    runner.registerInfo("Wrote file: #{hpxml_output_path}")
 
     return true
   end

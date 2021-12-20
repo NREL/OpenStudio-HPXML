@@ -1142,11 +1142,11 @@ class SchedulesFile
                  model: nil,
                  schedules_paths:,
                  col_names:)
-    return if schedules_paths.nil?
+    return if schedules_paths.empty?
 
     @runner = runner
     @model = model
-    @schedules_paths = schedules_paths.split(',')
+    @schedules_paths = schedules_paths
 
     import(col_names: col_names)
 
@@ -1392,6 +1392,10 @@ class SchedulesFile
   end
 
   def self.ColumnNames
+    return SchedulesFile.OccupancyColumnNames + SchedulesFile.WaterHeaterColumnNames
+  end
+
+  def self.OccupancyColumnNames
     return [
       ColumnOccupants,
       ColumnLightingInterior,
@@ -1419,7 +1423,12 @@ class SchedulesFile
       ColumnHotTubHeater,
       ColumnHotWaterDishwasher,
       ColumnHotWaterClothesWasher,
-      ColumnHotWaterFixtures,
+      ColumnHotWaterFixtures
+    ]
+  end
+
+  def self.WaterHeaterColumnNames
+    return [
       ColumnWaterHeaterSetpoint,
       ColumnWaterHeaterOperatingMode
     ]

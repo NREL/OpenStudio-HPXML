@@ -215,20 +215,14 @@ class OSModel
     @apply_ashrae140_assumptions = false if @apply_ashrae140_assumptions.nil?
 
     # Check paths
-    if not @hpxml.header.schedules_filepaths.nil?
-      filepaths = []
-      @hpxml.header.schedules_filepaths.split(',').each do |path|
-        filepaths << FilePath.check_path(path,
-                                         File.dirname(hpxml_path),
-                                         'Schedules')
-      end
-      @hpxml.header.schedules_filepaths = filepaths.join(',')
-    end
+    schedules_paths = @hpxml.header.schedules_files.collect( |sf| FilePath.check_path(sf.path,
+                                                                  File.dirname(hpxml_path),
+                                                                  'Schedules'))
 
     # Init
 
     @schedules_file = SchedulesFile.new(runner: runner, model: model,
-                                        schedules_paths: @hpxml.header.schedules_filepaths,
+                                        schedules_paths: schedules_paths,
                                         col_names: SchedulesFile.ColumnNames)
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
