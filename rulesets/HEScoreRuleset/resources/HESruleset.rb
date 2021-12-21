@@ -205,14 +205,15 @@ class HEScoreRuleset
     json['building']['zone']['zone_roof'].each do |orig_roof|
       next unless orig_roof.key?('knee_wall')
       orig_knee_wall = orig_roof['knee_wall']
+      assembly_r_value = get_knee_wall_effective_r_from_doe2code(orig_knee_wall['assembly_code'])
 
       new_hpxml.walls.add(
-        id: "#{orig_roof['roof_name']}_knee_wall"
+        id: "#{orig_roof['roof_name']}_knee_wall",
         exterior_adjacent_to: HPXML::LocationAtticVented,
         interior_adjacent_to: HPXML::LocationLivingSpace,
         wall_type: HPXML::WallTypeWoodStud,
         area: orig_knee_wall['area'],
-        insulation_assembly_r_value: get_knee_wall_effective_r_from_doe2code(orig_knee_wall['assembly_code'])
+        insulation_assembly_r_value: assembly_r_value
       )
     end
   end
