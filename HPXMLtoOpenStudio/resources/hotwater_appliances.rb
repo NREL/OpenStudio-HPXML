@@ -29,30 +29,13 @@ class HotWaterAndAppliances
     end
 
     # Create WaterUseConnections object for each water heater (plant loop)
-    # Get water heater setpoint schedule for each water heater (plant loop)
     water_use_connections = {}
-    setpoint_scheds = {}
     hpxml.water_heating_systems.each do |water_heating_system|
       plant_loop = plantloop_map[water_heating_system.id]
       wuc = OpenStudio::Model::WaterUseConnections.new(model)
       wuc.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
       plant_loop.addDemandBranchForComponent(wuc)
       water_use_connections[water_heating_system.id] = wuc
-
-      plant_loop.components.each do |c|
-        if c.to_WaterHeaterMixed.is_initialized
-          setpoint_scheds[water_heating_system.id] = c.to_WaterHeaterMixed.get.setpointTemperatureSchedule.get
-        elsif c.to_WaterHeaterStratified.is_initialized
-          if model.getWaterHeaterHeatPumpWrappedCondensers.size == 0
-            setpoint_scheds[water_heating_system.id] = c.to_WaterHeaterStratified.get.heater1SetpointTemperatureSchedule
-          end
-          model.getWaterHeaterHeatPumpWrappedCondensers.each do |hpwhc|
-            next unless hpwhc.tank.handle.to_s == c.handle.to_s
-
-            setpoint_scheds[water_heating_system.id] = hpwhc.compressorSetpointTemperatureSchedule
-          end
-        end
-      end
     end
 
     # Clothes washer energy
