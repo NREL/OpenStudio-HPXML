@@ -132,11 +132,11 @@ def create_hpxmls
     'base-dhw-tank-heat-pump-uef.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar-fraction.xml' => 'base-dhw-tank-heat-pump.xml',
-    'base-dhw-tank-heat-pump-setpoint-type-scheduled.xml' => 'base-dhw-tank-heat-pump-uef.xml',
+    'base-dhw-tank-heat-pump-setpoint-schedules-detailed.xml' => 'base-dhw-tank-heat-pump-uef.xml',
     'base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml' => 'base-dhw-tank-heat-pump-uef.xml',
-    'base-dhw-tank-heat-pump-operating-mode-type-scheduled.xml' => 'base-dhw-tank-heat-pump-uef.xml',
+    'base-dhw-tank-heat-pump-operating-mode-schedules-detailed.xml' => 'base-dhw-tank-heat-pump-uef.xml',
     'base-dhw-tank-model-type-stratified.xml' => 'base.xml',
-    'base-dhw-tank-setpoint-type-scheduled.xml' => 'base.xml',
+    'base-dhw-tank-setpoint-schedules-detailed.xml' => 'base.xml',
     'base-dhw-tank-oil.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-wood.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
@@ -357,6 +357,7 @@ def create_hpxmls
     'base-pv-battery-garage.xml' => 'base-enclosure-garage.xml',
     'base-schedules-simple.xml' => 'base.xml',
     'base-schedules-detailed-smooth.xml' => 'base.xml',
+    'base-schedules-detailed-smooth2.xml' => 'base.xml',
     'base-schedules-detailed-stochastic.xml' => 'base.xml',
     'base-schedules-detailed-stochastic-vacancy.xml' => 'base.xml',
     'base-simcontrol-calendar-year-custom.xml' => 'base.xml',
@@ -2523,13 +2524,16 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.header.schedules_files.add(path: '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv')
   elsif ['base-schedules-detailed-smooth.xml'].include? hpxml_file
     hpxml.header.schedules_files.add(path: '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv')
+  elsif ['base-schedules-detailed-smooth2.xml'].include? hpxml_file
+    hpxml.header.schedules_files.add(path: '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv')
+    hpxml.header.schedules_files.add(path: '../../HPXMLtoOpenStudio/resources/schedule_files/tank/hourly_setpoint_schedule.csv')
   elsif ['base-location-capetown-zaf.xml'].include? hpxml_file
     hpxml.header.state_code = nil
-  elsif ['base-dhw-tank-heat-pump-setpoint-type-scheduled.xml'].include? hpxml_file
+  elsif ['base-dhw-tank-heat-pump-setpoint-schedules-detailed.xml'].include? hpxml_file
     hpxml.header.schedules_files.add(path: '../../HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_setpoint_schedule.csv')
-  elsif ['base-dhw-tank-heat-pump-operating-mode-type-scheduled.xml'].include? hpxml_file
+  elsif ['base-dhw-tank-heat-pump-operating-mode-schedules-detailed.xml'].include? hpxml_file
     hpxml.header.schedules_files.add(path: '../../HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_operating_mode_schedule.csv')
-  elsif ['base-dhw-tank-setpoint-type-scheduled.xml'].include? hpxml_file
+  elsif ['base-dhw-tank-setpoint-schedules-detailed.xml'].include? hpxml_file
     hpxml.header.schedules_files.add(path: '../../HPXMLtoOpenStudio/resources/schedule_files/tank/hourly_setpoint_schedule.csv')
   end
 
