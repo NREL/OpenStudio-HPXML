@@ -19,6 +19,7 @@ class HEScoreRuleset
     # Enclosure
     set_enclosure_air_infiltration(json, new_hpxml)
     set_enclosure_roofs(json, new_hpxml)
+    set_enclosure_knee_walls(json, new_hpxml)
     set_enclosure_rim_joists(json, new_hpxml)
     set_enclosure_walls(json, new_hpxml)
     set_enclosure_foundation_walls(json, new_hpxml)
@@ -162,11 +163,10 @@ class HEScoreRuleset
   def self.set_enclosure_roofs(json, new_hpxml)
     json['building']['zone']['zone_roof'].each do |orig_roof|
       attic_location = { 'vented_attic' => HPXML::LocationAtticVented,
-                         'cond_attic' => HPXML::LocationLivingSpace,
                          'cath_ceiling' => HPXML::LocationLivingSpace }[orig_roof['roof_type']]
       # Roof: Two surfaces per HES zone_roof
       if orig_roof['roof_type'] == 'vented_attic'
-        roof_area = orig_roof['roof_area'] / Math.cos(@roof_angle_rad)
+        roof_area = orig_roof['ceiling_area'] / Math.cos(@roof_angle_rad)
       else
         roof_area = orig_roof['roof_area']
       end
@@ -198,6 +198,22 @@ class HEScoreRuleset
                             radiant_barrier_grade: radiant_barrier_grade,
                             insulation_assembly_r_value: roof_r)
       end
+    end
+  end
+
+  def self.set_enclosure_knee_walls(json, new_hpxml)
+    json['building']['zone']['zone_roof'].each do |orig_roof|
+      next unless orig_roof.key?('knee_wall')
+      orig_knee_wall = orig_roof['knee_wall']
+
+      new_hpxml.walls.add(
+        id: "#{orig_roof['roof_name']}_knee_wall"
+        exterior_adjacent_to: HPXML::LocationAtticVented,
+        interior_adjacent_to: HPXML::LocationLivingSpace,
+        wall_type: HPXML::WallTypeWoodStud,
+        area: orig_knee_wall['area'],
+        insulation_assembly_r_value: get_knee_wall_effective_r_from_doe2code(orig_knee_wall['assembly_code'])
+      )
     end
   end
 
@@ -288,12 +304,11 @@ class HEScoreRuleset
     # Floors below attic
     json['building']['zone']['zone_roof'].each_with_index do |orig_attic, i|
       attic_location = { 'vented_attic' => HPXML::LocationAtticVented,
-                         'cond_attic' => HPXML::LocationLivingSpace,
                          'cath_ceiling' => HPXML::LocationLivingSpace }[orig_attic['roof_type']]
       next unless attic_location == HPXML::LocationAtticVented
 
       framefloor_r = get_ceiling_effective_r_from_doe2code(orig_attic['ceiling_assembly_code'])
-      framefloor_area = orig_attic['roof_area']
+      framefloor_area = orig_attic['ceiling_area']
 
       new_hpxml.frame_floors.add(id: "#{orig_attic['roof_name']}_floor_#{i}",
                                  exterior_adjacent_to: attic_location,
@@ -1132,15 +1147,19 @@ def get_default_water_heater_capacity(fuel)
   fail "Could not get default water heater capacity for fuel '#{fuel}'"
 end
 
-def get_wall_effective_r_from_doe2code(doe2code)
+def get_effective_r_value_from_lu_tbl(doe2code, lu_tablename)
   val = nil
-  CSV.foreach(File.join(File.dirname(__FILE__), 'lu_wall_eff_rvalue.csv'), headers: true) do |row|
+  CSV.foreach(File.join(File.dirname(__FILE__), "#{lu_tablename}.csv"), headers: true) do |row|
     next unless row['doe2code'] == doe2code
 
     val = Float(row['Eff-R-value'])
     break
   end
   return val
+end
+
+def get_wall_effective_r_from_doe2code(doe2code)
+  return get_effective_r_value_from_lu_tbl(doe2code, 'lu_wall_eff_rvalue')
 end
 
 $roof_color_map = {
@@ -1195,41 +1214,24 @@ $duct_location_map = {
   'outside' => HPXML::LocationOutside
 }
 
+def get_knee_wall_effective_r_from_doe2code(doe2code)
+  return get_effective_r_value_from_lu_tbl(doe2code, 'lu_knee_wall_eff_rvalue')
+end
+
 def get_roof_effective_r_from_doe2code(doe2code)
   # For wood frame with radiant barrier roof, use wood frame roof effective R-value. Radiant barrier will be handled by the actual radiant barrier model in OS.
   if doe2code[2, 2] == 'rb'
     doe2code = doe2code.gsub('rb', 'wf')
   end
-  val = nil
-  CSV.foreach(File.join(File.dirname(__FILE__), 'lu_roof_eff_rvalue.csv'), headers: true) do |row|
-    next unless row['doe2code'] == doe2code
-
-    val = Float(row['Eff-R-value'])
-    break
-  end
-  return val
+  return get_effective_r_value_from_lu_tbl(doe2code, 'lu_roof_eff_rvalue')
 end
 
 def get_ceiling_effective_r_from_doe2code(doe2code)
-  val = nil
-  CSV.foreach(File.join(File.dirname(__FILE__), 'lu_ceiling_eff_rvalue.csv'), headers: true) do |row|
-    next unless row['doe2code'] == doe2code
-
-    val = Float(row['Eff-R-value'])
-    break
-  end
-  return val
+  return get_effective_r_value_from_lu_tbl(doe2code, 'lu_ceiling_eff_rvalue')
 end
 
 def get_floor_effective_r_from_doe2code(doe2code)
-  val = nil
-  CSV.foreach(File.join(File.dirname(__FILE__), 'lu_floor_eff_rvalue.csv'), headers: true) do |row|
-    next unless row['doe2code'] == doe2code
-
-    val = Float(row['Eff-R-value'])
-    break
-  end
-  return val
+  return get_floor_effective_r_from_doe2code(doe2code, 'lu_floor_eff_rvalue')
 end
 
 def get_window_ufactor_shgc_from_doe2code(doe2code)
@@ -1565,9 +1567,8 @@ end
 def calc_conditioned_volume(json)
   cvolume = @cfa * @ceil_height
   json['building']['zone']['zone_roof'].each do |orig_roof|
-    is_conditioned_attic = (orig_roof['roof_type'] == 'cond_attic')
     is_cathedral_ceiling = (orig_roof['roof_type'] == 'cath_ceiling')
-    next unless is_conditioned_attic || is_cathedral_ceiling
+    next unless is_cathedral_ceiling
 
     # Half of the length of short side of the house
     a = 0.5 * [@bldg_length_front, @bldg_length_side].min
@@ -1577,11 +1578,6 @@ def calc_conditioned_volume(json)
     c = a / Math.cos(@roof_angle_rad)
     # The depth this attic area goes back on the non-gable side
     d = 0.5 * orig_roof['roof_area'] / c
-
-    if is_conditioned_attic
-      # Remove erroneous full height volume from the conditioned volume
-      cvolume -= @ceil_height * 2 * a * d
-    end
 
     # Add the volume under the roof and above the "ceiling"
     cvolume += d * a * b

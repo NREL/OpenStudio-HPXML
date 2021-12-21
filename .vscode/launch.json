@@ -24,6 +24,12 @@
             "args": [
                 "-n", "test_foundation_area_lookup"
             ]
+        },
+        {
+            "name": "Run make knee wall",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/rulesets/HEScoreRuleset/resources/make_lu_knee_wall_eff_rvalue.py",
         }
     ]
 }
