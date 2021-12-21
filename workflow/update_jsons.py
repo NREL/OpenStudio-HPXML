@@ -5,8 +5,9 @@ import subprocess
 
 
 def main():
-    here = pathlib.Path(__file__).resolve().parent
-    for filename in here.glob('**/*.json'):
+    file_root = pathlib.Path(__file__).resolve().parent.parent / 'hescore-hpxml' / 'examples'
+    assert file_root.exists()
+    for filename in file_root.glob('**/*.json'):
         print(filename)
         with filename.open('r') as f:
             hesd = json.load(f)
@@ -28,8 +29,8 @@ def main():
 
         if delete_file:
             subprocess.run(
-                ['git', 'rm', str(filename.relative_to(here))],
-                cwd=here
+                ['git', 'rm', str(filename.relative_to(file_root))],
+                cwd=file_root
             )
             continue
 
