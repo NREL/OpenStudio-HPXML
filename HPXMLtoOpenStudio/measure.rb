@@ -215,9 +215,11 @@ class OSModel
     @apply_ashrae140_assumptions = false if @apply_ashrae140_assumptions.nil?
 
     # Check paths
-    schedules_paths = @hpxml.header.schedules_files.collect{ |sf| FilePath.check_path(sf.path,
-                                                                  File.dirname(hpxml_path),
-                                                                  'Schedules')}
+    schedules_paths = @hpxml.header.schedules_files.collect { |sf|
+      FilePath.check_path(sf.path,
+                          File.dirname(hpxml_path),
+                          'Schedules')
+    }
 
     # Init
 

@@ -151,7 +151,15 @@ Detailed Schedule Inputs
 Detailed schedule inputs allow schedule values for every hour or timestep of the simulation.
 They can be smooth schedules, or they can reflect real-world or stochastic occupancy.
 
-Detailed schedule inputs are provided via CSV file(s) that should be referenced (comma-separated) in the HPXML file at ``/HPXML/SoftwareInfo/extension/SchedulesFilePaths``.
+Detailed schedule inputs are provided via CSV file(s) that should be referenced in the HPXML file as a ``/HPXML/SoftwareInfo/extension/SchedulesFiles/SchedulesFile``.
+
+  =========================  =======  =======  ===========  ========  ========  ================================================================
+  Element                    Type     Units    Constraints  Required  Default   Notes
+  =========================  =======  =======  ===========  ========  ========  ================================================================
+  ``Name``                   string                         No                  Category of the schedules file.
+  ``Path``                   string                         Yes                 Path of the schedules file.
+  =========================  =======  =======  ===========  ========  ========  ================================================================
+
 Occupancy related schedule columns must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
 Water heater related schedule columns do not have these constraints.
 The schedule columns in the schedule CSV are:
