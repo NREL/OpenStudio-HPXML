@@ -9,11 +9,10 @@
             "name": "Debug Open HPXML File",
             "type": "Ruby",
             "request": "launch",
-            "program": "/usr/local/openstudio-3.0.0/Ruby/openstudio_cli.rb",
+            "program": "/usr/local/openstudio-3.3.0/Ruby/openstudio_cli.rb",
             "args": [
-                "--no-ssl",
                 "${workspaceRoot}/workflow/run_simulation.rb",
-                "-x", "${file}"
+                "-j", "${file}"
             ]
         },
         {
@@ -26,10 +25,10 @@
             ]
         },
         {
-            "name": "Run make knee wall",
+            "name": "Run Python File",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceRoot}/rulesets/HEScoreRuleset/resources/make_lu_knee_wall_eff_rvalue.py",
+            "program": "${file}",
         }
     ]
 }

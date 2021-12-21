@@ -1232,7 +1232,7 @@ def get_ceiling_effective_r_from_doe2code(doe2code)
 end
 
 def get_floor_effective_r_from_doe2code(doe2code)
-  return get_floor_effective_r_from_doe2code(doe2code, 'lu_floor_eff_rvalue')
+  return get_effective_r_value_from_lu_tbl(doe2code, 'lu_floor_eff_rvalue')
 end
 
 def get_window_ufactor_shgc_from_doe2code(doe2code)
