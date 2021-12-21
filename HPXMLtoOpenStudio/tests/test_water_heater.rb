@@ -1121,7 +1121,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
   def test_tank_heat_pump_setpoint_scheduled
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-heat-pump-setpoint-type-scheduled.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-heat-pump-setpoint-schedules-detailed.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
@@ -1205,7 +1205,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
   def test_tank_heat_pump_operating_mode_scheduled
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-heat-pump-operating-mode-type-scheduled.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-heat-pump-operating-mode-schedules-detailed.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
@@ -1253,7 +1253,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
   def test_tank_mixed_setpoint_scheduled
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-setpoint-type-scheduled.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-setpoint-schedules-detailed.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
