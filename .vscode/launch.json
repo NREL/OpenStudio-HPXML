@@ -6,7 +6,7 @@
     "configurations": [
 
         {
-            "name": "Debug Open HPXML File",
+            "name": "Debug Open JSON File",
             "type": "Ruby",
             "request": "launch",
             "program": "/usr/local/openstudio-3.3.0/Ruby/openstudio_cli.rb",
