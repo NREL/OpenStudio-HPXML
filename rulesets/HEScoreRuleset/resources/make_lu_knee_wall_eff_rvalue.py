@@ -14,13 +14,19 @@ def main():
 
     knee_wall_assembly_codes = json_schema['properties']['building']['properties']['zone']['properties']['zone_roof']['items']['properties']['knee_wall']['properties']['assembly_code']['enum']
 
-    # From https://coloradoenergy.org/procorner/stuff/r-values.htm
-    # TODO: Check against ASHRAE fundamentals
+    # Source ASHRAE Fundamenetals 2013, p 26.20, Table 10, Indoor Vertical Surface Film
     int_air_film_r_value = 0.68
-    gyp_r_value = 0.45
+
+    # Source ASHRAE Fundamentals 2013, p 26.8, Table 1, Gypsum or plaster board, 0.5 inch
+    gyp_r_value = 1 / 1.1 * 0.5
+
+    # Source https://coloradoenergy.org/procorner/stuff/r-values.htm
+    # This is represents a thermal conductivity of wood of about 0.8 (Btu * in) / (h * ft^2 * °F)
+    # Ranges in ASHRAE Fundamentals 2013, p 26.8, Table 1, p 26.11 for soft woods are 0.69 - 1.12
     wood_stud_r_value = 4.38
+
     stud_spacing = 16
-    wood_stud_width = 3.5
+    wood_stud_width = 1.5
 
     csv_filename = here / 'lu_knee_wall_eff_rvalue.csv'
     with csv_filename.open('w') as f:
