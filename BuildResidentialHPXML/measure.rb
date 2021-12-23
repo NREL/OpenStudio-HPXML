@@ -2983,12 +2983,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     warning = (args[:geometry_foundation_type] == HPXML::FoundationTypeSlab) && (args[:geometry_foundation_height] > 0)
-    warnings << 'Selected slab foundation type with a non-zero foundation height. Assuming foundation height is zero.' if warning
+    warnings << 'Selected slab or above apartment foundation type with a non-zero foundation height. Assuming foundation height is zero.' if warning
 
-    warning = (args[:geometry_foundation_type] == HPXML::FoundationTypeAboveApartment) && (args[:geometry_foundation_height] > 0)
-    warnings << 'Selected above apartment foundation type with a non-zero foundation height. Assuming foundation height is zero.' if warning
-
-    error = (args[:geometry_foundation_type] != HPXML::FoundationTypeSlab) && (args[:geometry_foundation_height] == 0)
+    error = ![HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment].include?(args[:geometry_foundation_type]) && (args[:geometry_foundation_height] == 0)
     errors << 'Selected a non-slab or non-above apartment foundation type with a height of zero.' if error
 
     error = [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include?(args[:geometry_unit_type]) && (args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient)
