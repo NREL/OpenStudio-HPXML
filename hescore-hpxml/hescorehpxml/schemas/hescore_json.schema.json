@@ -294,7 +294,7 @@
                                             "area": {
                                                 "type": "number",
                                                 "minimum": 1,
-                                                "maximum": 25000,
+                                                "maximum": 5000,
                                                 "description": "Knee wall area"
                                             },
                                             "assembly_code": {
