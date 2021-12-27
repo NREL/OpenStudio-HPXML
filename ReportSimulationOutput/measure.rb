@@ -386,9 +386,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
     @model.setSqlFile(@sqlFile)
 
-    @hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
+    hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
+    hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
-    @hpxml = HPXML.new(hpxml_path: @hpxml_path, building_id: building_id)
+    @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
     HVAC.apply_shared_systems(@hpxml) # Needed for ERI shared HVAC systems
     @eri_design = @hpxml.header.eri_design
 
@@ -397,8 +398,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Set paths
     if not @eri_design.nil?
       # ERI run, store files in a particular location
-      output_dir = File.dirname(@hpxml_path)
-      hpxml_name = File.basename(@hpxml_path).gsub('.xml', '')
+      output_dir = File.dirname(hpxml_path)
+      hpxml_name = File.basename(hpxml_path).gsub('.xml', '')
       annual_output_path = File.join(output_dir, "#{hpxml_name}.#{output_format}")
       timeseries_output_path = File.join(output_dir, "#{hpxml_name}_#{timeseries_frequency.capitalize}.#{output_format}")
       eri_output_path = File.join(output_dir, "#{hpxml_name}_ERI.csv")
@@ -753,18 +754,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Calculate for each CO2 scenario
       @hpxml.header.co2_emissions_scenarios.each do |scenario|
         name = scenario.name
-        scenario.elec_schedule_filepath = FilePath.check_path(scenario.elec_schedule_filepath,
-                                                              File.dirname(@hpxml_path),
-                                                              'CO2 Emissions Schedule')
         hourly_elec_factors = File.readlines(scenario.elec_schedule_filepath).map(&:to_f)
         # Trim factors to match simulation run period
-        # FIXME: Merge code w/ hpxml_defaults.rb
-        sim_begin_month = @hpxml.header.sim_begin_month.nil? ? 1 : @hpxml.header.sim_begin_month
-        sim_begin_day = @hpxml.header.sim_begin_day.nil? ? 1 : @hpxml.header.sim_begin_day
-        sim_end_month = @hpxml.header.sim_end_month.nil? ? 12 : @hpxml.header.sim_end_month
-        sim_end_day = @hpxml.header.sim_end_day.nil? ? 31 : @hpxml.header.sim_end_day
-        sim_start_day_of_year = Schedule.get_day_num_from_month_day(year, sim_begin_month, sim_begin_day)
-        sim_end_day_of_year = Schedule.get_day_num_from_month_day(year, sim_end_month, sim_end_day)
+        sim_start_day_of_year = Schedule.get_day_num_from_month_day(year, @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day)
+        sim_end_day_of_year = Schedule.get_day_num_from_month_day(year, @hpxml.header.sim_end_month, @hpxml.header.sim_end_day)
         sim_start_hour = (sim_start_day_of_year - 1) * 24
         sim_end_hour = sim_end_day_of_year * 24 - 1
         hourly_elec_factors = hourly_elec_factors[sim_start_hour..sim_end_hour]
@@ -783,10 +776,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         @co2_emissions[name].annual_output += hourly_elec_consumed.zip(hourly_elec_factors).map { |x, y| x * y * elec_mult }.sum
         @co2_emissions[name].annual_output -= hourly_elec_produced.zip(hourly_elec_factors).map { |x, y| x * y * elec_mult }.sum
         if include_timeseries_co2_emissions
-          # FIXME: Merge code w/ hpxml_defaults.rb
-          timestep = @hpxml.header.timestep.nil? ? 60.0 : @hpxml.header.timestep
           if timeseries_frequency == 'timestep'
-            n_timesteps_per_hour = Integer(60.0 / timestep)
+            n_timesteps_per_hour = Integer(60.0 / @hpxml.header.timestep)
             timeseries_elec_factors = hourly_elec_factors.flat_map { |y| [y] * n_timesteps_per_hour }
           else
             timeseries_elec_factors = hourly_elec_factors.dup
@@ -800,9 +791,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
               n_hours_per_period = [24] * (sim_end_day_of_year - sim_start_day_of_year + 1)
             elsif timeseries_frequency == 'monthly'
               n_days_per_month = Constants.NumDaysInMonths(year)
-              n_days_per_period = n_days_per_month[sim_begin_month - 1..sim_end_month - 1]
-              n_days_per_period[0] -= sim_begin_day - 1
-              n_days_per_period[-1] = sim_end_day
+              n_days_per_period = n_days_per_month[@hpxml.header.sim_begin_month - 1..@hpxml.header.sim_end_month - 1]
+              n_days_per_period[0] -= @hpxml.header.sim_begin_day - 1
+              n_days_per_period[-1] = @hpxml.header.sim_end_day
               n_hours_per_period = n_days_per_period.map { |x| x * 24 }
             end
             timeseries_output = []
