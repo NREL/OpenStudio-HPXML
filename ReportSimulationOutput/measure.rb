@@ -466,11 +466,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_timestamps()
+    timestamps = {}
+    timestamps['none'] = []
+
     map = { 'hourly' => 1,
             'daily' => 2,
             'monthly' => 3,
             'timestep' => -1 }
-    timestamps = {}
     map.each do |timeseries_freq, interval_type|
       query = "SELECT Year || ' ' || Month || ' ' || Day || ' ' || Hour || ' ' || Minute As Timestamp FROM Time WHERE IntervalType='#{interval_type}'"
       values = @sqlFile.execAndReturnVectorOfString(query)
