@@ -390,15 +390,7 @@ class HEScoreRuleset
         exterior_shading_factor_summer = 0.29 / interior_shading_factor_summer # Overall shading factor is interior multiplied by exterior
       end
       if not orig_window['storm_type'].nil?
-        # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
-        # U-factor and SHGC adjustment based on the data obtained from the reference above
-        if orig_window['storm_type'] == 'clear'
-          ufactor_abs_reduction = 0.6435 * ufactor - 0.1533
-          shgc_corr = 0.9
-        elsif orig_window['storm_type'] == 'low-e'
-          ufactor_abs_reduction = 0.766 * ufactor - 0.1532
-          shgc_corr = 0.8
-        end
+        ufactor_abs_reduction, shgc_corr = get_storms_ufactor_shgc_adjustment_factors(orig_window['storm_type'])
         ufactor = ufactor - ufactor_abs_reduction
         shgc = shgc_corr * shgc
       end
@@ -442,15 +434,7 @@ class HEScoreRuleset
         exterior_shading_factor_winter = 0.29
       end
       if not orig_skylight['storm_type'].nil?
-        # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
-        # U-factor and SHGC adjustment based on the data obtained from the reference above
-        if orig_skylight['storm_type'] == 'clear'
-          ufactor_abs_reduction = 0.6435 * ufactor - 0.1533
-          shgc_corr = 0.9
-        elsif orig_skylight['storm_type'] == 'low-e'
-          ufactor_abs_reduction = 0.766 * ufactor - 0.1532
-          shgc_corr = 0.8
-        end
+        ufactor_abs_reduction, shgc_corr = get_storms_ufactor_shgc_adjustment_factors(orig_skylight['storm_type'])
         ufactor = ufactor - ufactor_abs_reduction
         shgc = shgc_corr * shgc
       end
@@ -1311,6 +1295,22 @@ def get_skylight_ufactor_shgc_from_doe2code(doe2code)
   return skylight_ufactor_shgc if not skylight_ufactor_shgc.nil?
 
   fail "Could not get default skylight U/SHGC for skylight code '#{doe2code}'"
+end
+
+def get_storms_ufactor_shgc_adjustment_factors(storm_type)
+  # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
+  # U-factor and SHGC adjustment based on the data obtained from the above reference
+  if storm_type == 'clear'
+    ufactor_abs_reduction = 0.6435 * ufactor - 0.1533
+    shgc_corr = 0.9
+  elsif storm_type == 'low-e'
+    ufactor_abs_reduction = 0.766 * ufactor - 0.1532
+    shgc_corr = 0.8
+  else
+    fail "Could not find adjustment factors for storm type '#{storm_type}'"
+  end
+
+  return ufactor_abs_reduction, shgc_corr
 end
 
 def get_roof_solar_absorptance(roof_color)
