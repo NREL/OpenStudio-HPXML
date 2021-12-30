@@ -149,8 +149,9 @@ class HEScoreRuleset
       end
 
       if not json['building']['zone']['zone_wall'][0]['zone_window']['storm_type'].nil?
-        cfm50_corr = get_storm_air_leakage_correction_factor(json['building']['zone']['zone_wall'][0]['zone_window'])
-        cfm50 = cfm50 * cfm50_corr
+        # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
+        # The air leakage of the homes was reduced by 6% to 17% (11% on average) from installing storm windows
+        cfm50 = 0.89 * cfm50
       end
 
       # Convert to ACH50
@@ -389,7 +390,15 @@ class HEScoreRuleset
         exterior_shading_factor_summer = 0.29 / interior_shading_factor_summer # Overall shading factor is interior multiplied by exterior
       end
       if not orig_window['storm_type'].nil?
-        ufactor, shgc = get_storm_effective_r_and_shgc(orig_window)
+        # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
+        # U-factor and SHGC adjustment based on the data obtained from the reference above
+        if orig_window['storm_type'] == 'clear'
+          ufactor = 0.6435 * ufactor - 0.1533
+          shgc = 0.9 * shgc
+        elsif orig_window['storm_type'] == 'low-e'
+          ufactor = 0.766 * ufactor - 0.1532
+          shgc = 0.8 * shgc
+        end
       end
 
       # Add one HPXML window per side of the house with only the overhangs from the roof.
@@ -431,7 +440,15 @@ class HEScoreRuleset
         exterior_shading_factor_winter = 0.29
       end
       if not orig_skylight['storm_type'].nil?
-        ufactor, shgc = get_storm_effective_r_and_shgc(orig_skylight, is_skylight=true)
+        # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
+        # U-factor and SHGC adjustment based on the data obtained from the reference above
+        if orig_skylight['storm_type'] == 'clear'
+          ufactor = 0.6435 * ufactor - 0.1533
+          shgc = 0.9 * shgc
+        elsif orig_skylight['storm_type'] == 'low-e'
+          ufactor = 0.766 * ufactor - 0.1532
+          shgc = 0.8 * shgc
+        end
       end
 
       if @is_townhouse
@@ -1290,80 +1307,6 @@ def get_skylight_ufactor_shgc_from_doe2code(doe2code)
   return skylight_ufactor_shgc if not skylight_ufactor_shgc.nil?
 
   fail "Could not get default skylight U/SHGC for skylight code '#{doe2code}'"
-end
-
-def get_storm_effective_r_and_shgc(window, is_skylight=false)
-  eff_rvalue = nil
-  shgc = nil
-  CSV.foreach(File.join(File.dirname(__FILE__), 'lu_storm_eff_rvalue.csv'), headers: true) do |row|
-    glazing_type, frame_type = get_storm_glazing_and_frame_type(window, is_skylight)
-    next unless row['glazing'] == glazing_type
-    next unless row['frame'] == frame_type
-    next unless row['storm_type'].downcase == window['storm_type']
-
-    eff_rvalue = Float(row['Eff-R-value'])
-    shgc = Float(row['SHGC'])
-    break
-  end
-  return eff_rvalue, shgc
-end
-
-def get_storm_glazing_and_frame_type(window, is_skylight=false)
-  # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
-  if is_skylight
-    method = 'skylight_method'
-    code = 'skylight_code'
-  else
-    method = 'window_method'
-    code = 'window_code'
-  end
-
-  if window[method] == 'code'
-    if window[code].start_with?('s')
-      glazing_type = 'single'
-    elsif window[code].start_with?('d')
-      glazing_type = 'double'
-    elsif window[code].start_with?('t')
-      glazing_type = 'triple'
-      fail "#{window}: Storm window upgrade is not allowed for the window with #{glazing_type}-pane glazing"
-    end
-    if window[code].end_with?('w')
-      frame_type = 'wood_double_hung'
-    elsif window[code].end_with?('a')
-      frame_type = 'aluminum_double_hung'
-    elsif window[code].end_with?('ab')
-      frame_type = 'aluminum_double_hung_with_thermal_break'
-    end
-  elsif window[method] == 'custom'
-    glazing_type = nil
-    frame_type = nil
-    ufactor_diff_prev = 99999
-    CSV.foreach(File.join(File.dirname(__FILE__), 'lu_storm_eff_rvalue.csv'), headers: true) do |row|
-      next unless row['storm_type'] == 'None'
-
-      ufactor_diff = (row['U-Factor'] - window_ufactor).abs
-      if ufactor_diff < ufactor_diff_prev
-        glazing_type = row['glazing']
-        frame_type = row['frame']
-      end
-      ufactor_diff_prev = ufactor_diff
-    end
-  end
-  
-  return glazing_type, frame_type
-end
-
-def get_storm_air_leakage_correction_factor(window, is_skylight=false)
-  # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
-  glazing_type, frame_type = get_storm_glazing_and_frame_type(window, is_skylight)
-  
-  if glazing_type == 'single'
-    cfm50_corr = 1 - 0.94
-  elsif glazing_type == 'double'
-    cfm50_corr = 1 - 0.81
-  end
-
-  return cfm50_corr
 end
 
 def get_roof_solar_absorptance(roof_color)
