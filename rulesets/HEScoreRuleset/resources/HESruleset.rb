@@ -393,12 +393,14 @@ class HEScoreRuleset
         # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
         # U-factor and SHGC adjustment based on the data obtained from the reference above
         if orig_window['storm_type'] == 'clear'
-          ufactor = 0.6435 * ufactor - 0.1533
-          shgc = 0.9 * shgc
+          ufactor_abs_reduction = 0.6435 * ufactor - 0.1533
+          shgc_corr = 0.9
         elsif orig_window['storm_type'] == 'low-e'
-          ufactor = 0.766 * ufactor - 0.1532
-          shgc = 0.8 * shgc
+          ufactor_abs_reduction = 0.766 * ufactor - 0.1532
+          shgc_corr = 0.8
         end
+        ufactor = ufactor - ufactor_abs_reduction
+        shgc = shgc_corr * shgc
       end
 
       # Add one HPXML window per side of the house with only the overhangs from the roof.
@@ -443,12 +445,14 @@ class HEScoreRuleset
         # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
         # U-factor and SHGC adjustment based on the data obtained from the reference above
         if orig_skylight['storm_type'] == 'clear'
-          ufactor = 0.6435 * ufactor - 0.1533
-          shgc = 0.9 * shgc
+          ufactor_abs_reduction = 0.6435 * ufactor - 0.1533
+          shgc_corr = 0.9
         elsif orig_skylight['storm_type'] == 'low-e'
-          ufactor = 0.766 * ufactor - 0.1532
-          shgc = 0.8 * shgc
+          ufactor_abs_reduction = 0.766 * ufactor - 0.1532
+          shgc_corr = 0.8
         end
+        ufactor = ufactor - ufactor_abs_reduction
+        shgc = shgc_corr * shgc
       end
 
       if @is_townhouse
