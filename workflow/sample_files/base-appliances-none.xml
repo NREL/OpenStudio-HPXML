@@ -27,8 +27,8 @@
     <BuildingDetails>
       <BuildingSummary>
         <Site>
-          <SiteType>suburban</SiteType>
           <Surroundings>stand-alone</Surroundings>
+          <SiteType>suburban</SiteType>
           <VerticalSurroundings>no units above or below</VerticalSurroundings>
           <AzimuthOfFrontOfHome>180</AzimuthOfFrontOfHome>
           <FuelTypesAvailable>
