@@ -2042,6 +2042,11 @@ class OSModel
 
   def self.add_photovoltaics(runner, model)
     @hpxml.pv_systems.each do |pv_system|
+      next if pv_system.inverter_efficiency == @hpxml.pv_systems[0].inverter_efficiency
+
+      fail 'Expected all InverterEfficiency values to be equal.'
+    end
+    @hpxml.pv_systems.each do |pv_system|
       PV.apply(model, @nbeds, pv_system)
     end
   end
