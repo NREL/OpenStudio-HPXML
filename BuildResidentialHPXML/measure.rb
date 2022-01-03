@@ -2983,10 +2983,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     warning = (args[:geometry_foundation_type] == HPXML::FoundationTypeSlab) && (args[:geometry_foundation_height] > 0)
-    warnings << 'Selected slab or above apartment foundation type with a non-zero foundation height. Assuming foundation height is zero.' if warning
+    warnings << 'Specified slab or above apartment foundation type with a non-zero foundation height. Assuming foundation height is zero.' if warning
 
     error = ![HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment].include?(args[:geometry_foundation_type]) && (args[:geometry_foundation_height] == 0)
-    errors << 'Selected a non-slab or non-above apartment foundation type with a height of zero.' if error
+    errors << 'Specified a non-slab or non-above apartment foundation type with a height of zero.' if error
 
     error = [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include?(args[:geometry_unit_type]) && (args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient)
     errors << 'Ambient foundation type for single-family attached or apartment units is not currently supported.' if error
@@ -2995,7 +2995,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     errors << 'Conditioned basement/crawlspace foundation type for apartment units is not currently supported.' if error
 
     warning = (args[:geometry_foundation_type] == HPXML::FoundationTypeSlab) && (args[:geometry_foundation_height_above_grade] > 0)
-    warnings << 'Selected a slab foundation type with a non-zero height above grade.' if warning
+    warnings << 'Specified a slab foundation type with a non-zero height above grade.' if warning
 
     error = ((args[:ducts_supply_location] == Constants.Auto) && (args[:ducts_supply_surface_area] != Constants.Auto)) || ((args[:ducts_supply_location] != Constants.Auto) && (args[:ducts_supply_surface_area] == Constants.Auto)) || ((args[:ducts_return_location] == Constants.Auto) && (args[:ducts_return_surface_area] != Constants.Auto)) || ((args[:ducts_return_location] != Constants.Auto) && (args[:ducts_return_surface_area] == Constants.Auto))
     errors << 'Duct location and surface area not both auto or not both specified.' if error
@@ -3019,16 +3019,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     errors << 'No adiabatic surfaces can be applied to single-family detached homes.' if error
 
     warning = [HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeBasementUnconditioned].include?(args[:geometry_foundation_type]) && ((args[:foundation_wall_insulation_r] > 0) || args[:foundation_wall_assembly_r].is_initialized) && (args[:floor_over_foundation_assembly_r] > 2.1)
-    warnings << 'Selected unconditioned basement/crawlspace foundation type with wall and ceiling insulation. Assuming FIXME.' if warning
+    warnings << 'Specified unconditioned basement/crawlspace foundation type with wall and ceiling insulation.' if warning
 
     warning = [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include?(args[:geometry_attic_type]) && (args[:ceiling_assembly_r] > 2.1) && (args[:roof_assembly_r] > 2.3)
-    warnings << 'Selected unconditioned attic type with wall and roof insulation. Assuming FIXME.' if warning
+    warnings << 'Specified unconditioned attic type with floor and roof insulation.' if warning
 
     warning = (args[:geometry_foundation_type] == HPXML::FoundationTypeBasementConditioned) && (args[:floor_over_foundation_assembly_r] > 2.1)
-    warnings << 'Selected conditioned basement with ceiling insulation. Assuming FIXME.' if warning
+    warnings << 'Specified conditioned basement with ceiling insulation.' if warning
 
     warning = (args[:geometry_attic_type] == HPXML::AtticTypeConditioned) && (args[:ceiling_assembly_r] > 2.1)
-    warnings << 'Selected conditioned attic with floor insulation. Assuming FIXME.' if warning
+    warnings << 'Specified conditioned attic with floor insulation.' if warning
 
     error = (args[:geometry_unit_num_floors_above_grade] == 1 && args[:geometry_attic_type] == HPXML::AtticTypeConditioned)
     errors << 'Units with a conditioned attic must have at least two above-grade floors.' if error
