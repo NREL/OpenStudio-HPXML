@@ -3731,7 +3731,7 @@ class HPXMLFile
       end
 
       if args[:foundation_wall_assembly_r].is_initialized && (args[:foundation_wall_assembly_r].get > 0)
-        insulation_assembly_r_value = args[:foundation_wall_assembly_r]
+        insulation_assembly_r_value = args[:foundation_wall_assembly_r].get
       else
         insulation_interior_r_value = 0
         insulation_exterior_r_value = 0
