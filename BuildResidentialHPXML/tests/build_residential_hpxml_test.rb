@@ -304,6 +304,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
   def _set_measure_argument_values(hpxml_file, args)
     args['hpxml_path'] = "tests/extra_files/#{hpxml_file}"
+    args['apply_defaults'] = true
 
     # Base
     if ['base-sfd.xml'].include? hpxml_file

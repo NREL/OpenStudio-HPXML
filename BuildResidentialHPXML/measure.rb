@@ -31,6 +31,7 @@ require_relative '../HPXMLtoOpenStudio/resources/util'
 require_relative '../HPXMLtoOpenStudio/resources/validator'
 require_relative '../HPXMLtoOpenStudio/resources/version'
 require_relative '../HPXMLtoOpenStudio/resources/waterheater'
+require_relative '../HPXMLtoOpenStudio/resources/weather'
 require_relative '../HPXMLtoOpenStudio/resources/xmlhelper'
 
 # start the measure
@@ -3263,6 +3264,7 @@ class HPXMLFile
 
     if apply_defaults
       eri_version = Constants.ERIVersions[-1]
+      OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
       weather = WeatherProcess.new(model, runner)
       HPXMLDefaults.apply(hpxml, eri_version, weather, epw_file: epw_file)
     end
@@ -3729,7 +3731,7 @@ class HPXMLFile
       end
 
       if args[:foundation_wall_assembly_r].is_initialized && (args[:foundation_wall_assembly_r].get > 0)
-        insulation_assembly_r_value = args[:foundation_wall_assembly_r]
+        insulation_assembly_r_value = args[:foundation_wall_assembly_r].get
       else
         insulation_interior_r_value = 0
         insulation_exterior_r_value = 0
