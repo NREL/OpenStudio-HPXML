@@ -31,6 +31,7 @@ require_relative '../HPXMLtoOpenStudio/resources/util'
 require_relative '../HPXMLtoOpenStudio/resources/validator'
 require_relative '../HPXMLtoOpenStudio/resources/version'
 require_relative '../HPXMLtoOpenStudio/resources/waterheater'
+require_relative '../HPXMLtoOpenStudio/resources/weather'
 require_relative '../HPXMLtoOpenStudio/resources/xmlhelper'
 
 # start the measure
@@ -2974,19 +2975,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     if args[:geometry_unit_num_bathrooms] != Constants.Auto
       error = (Float(args[:geometry_unit_num_bathrooms]) % 1 != 0)
-      errors << 'Currently only supporting an integer number of bathrooms.' if error
+      errors << 'Number of bathrooms must be an integer.' if error
     end
 
     if args[:ceiling_fan_quantity] != Constants.Auto
       error = (Float(args[:ceiling_fan_quantity]) % 1 != 0)
-      errors << 'Currently only supporting an integer quantity of ceiling fans.' if error
+      errors << 'Quantity of ceiling fans must be an integer.' if error
     end
 
-    warning = (args[:geometry_foundation_type] == HPXML::FoundationTypeSlab) && (args[:geometry_foundation_height] > 0)
-    warnings << 'Specified slab or above apartment foundation type with a non-zero foundation height. Assuming foundation height is zero.' if warning
+    warning = [HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment].include?(args[:geometry_foundation_type]) && (args[:geometry_foundation_height] > 0)
+    warnings << "Foundation type of '#{args[:geometry_foundation_type]}' cannot have a non-zero height. Assuming height is zero." if warning
 
     error = ![HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment].include?(args[:geometry_foundation_type]) && (args[:geometry_foundation_height] == 0)
-    errors << 'Specified a non-slab or non-above apartment foundation type with a height of zero.' if error
+    errors << "Foundation type of '#{args[:geometry_foundation_type]}' cannot have a height of zero." if error
 
     error = [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include?(args[:geometry_unit_type]) && (args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient)
     errors << 'Ambient foundation type for single-family attached or apartment units is not currently supported.' if error
@@ -3001,7 +3002,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     errors << 'Duct location and surface area not both auto or not both specified.' if error
 
     warning = (args[:heating_system_2_type] != 'none') && (args[:heating_system_2_fraction_heat_load_served] >= 0.5) && (args[:heating_system_2_fraction_heat_load_served] < 1.0)
-    warnings << 'The fraction of heat load served by the second heating system is not less than 50%.' if warning
+    warnings << 'The fraction of heat load served by the second heating system is greater than or equal to 50%.' if warning
 
     error = (args[:heating_system_2_type] != 'none') && (args[:heating_system_2_fraction_heat_load_served] == 1.0)
     errors << 'The fraction of heat load served by the second heating system is 100%.' if error
@@ -3019,16 +3020,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     errors << 'No adiabatic surfaces can be applied to single-family detached homes.' if error
 
     warning = [HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeBasementUnconditioned].include?(args[:geometry_foundation_type]) && ((args[:foundation_wall_insulation_r] > 0) || args[:foundation_wall_assembly_r].is_initialized) && (args[:floor_over_foundation_assembly_r] > 2.1)
-    warnings << 'Specified unconditioned basement/crawlspace foundation type with wall and ceiling insulation.' if warning
+    warnings << 'Home with unconditioned basement/crawlspace foundation type has both foundation wall insulation and floor insulation.' if warning
 
     warning = [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include?(args[:geometry_attic_type]) && (args[:ceiling_assembly_r] > 2.1) && (args[:roof_assembly_r] > 2.3)
-    warnings << 'Specified unconditioned attic type with floor and roof insulation.' if warning
+    warnings << 'Home with unconditioned attic type has both ceiling insulation and roof insulation.' if warning
 
     warning = (args[:geometry_foundation_type] == HPXML::FoundationTypeBasementConditioned) && (args[:floor_over_foundation_assembly_r] > 2.1)
-    warnings << 'Specified conditioned basement with ceiling insulation.' if warning
+    warnings << 'Home with conditioned basement has floor insulation.' if warning
 
     warning = (args[:geometry_attic_type] == HPXML::AtticTypeConditioned) && (args[:ceiling_assembly_r] > 2.1)
-    warnings << 'Specified conditioned attic with floor insulation.' if warning
+    warnings << 'Home with conditioned attic has ceiling insulation.' if warning
 
     error = (args[:geometry_unit_num_floors_above_grade] == 1 && args[:geometry_attic_type] == HPXML::AtticTypeConditioned)
     errors << 'Units with a conditioned attic must have at least two above-grade floors.' if error
@@ -3060,7 +3061,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     warnings << 'Specified a non-zero usage multiplier for a fuel load that is zero.' if warning
 
     error = (args[:geometry_unit_num_bedrooms] <= 0)
-    errors << 'Must specify a number of bedrooms greater than zero.' if error
+    errors << 'Number of bedrooms must be greater than zero.' if error
 
     error = [HPXML::ResidentialTypeSFD].include?(args[:geometry_unit_type]) && args[:heating_system_type].include?('Shared')
     errors << 'Specified a shared system for a single-family detached unit.' if error
@@ -3207,6 +3208,7 @@ class HPXMLFile
 
     if apply_defaults
       eri_version = Constants.ERIVersions[-1]
+      OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
       weather = WeatherProcess.new(model, runner)
       HPXMLDefaults.apply(hpxml, eri_version, weather, epw_file: epw_file)
     end
@@ -3673,7 +3675,7 @@ class HPXMLFile
       end
 
       if args[:foundation_wall_assembly_r].is_initialized && (args[:foundation_wall_assembly_r].get > 0)
-        insulation_assembly_r_value = args[:foundation_wall_assembly_r]
+        insulation_assembly_r_value = args[:foundation_wall_assembly_r].get
       else
         insulation_interior_r_value = 0
         insulation_exterior_r_value = 0

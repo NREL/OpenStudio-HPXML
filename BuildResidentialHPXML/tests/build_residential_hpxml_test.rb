@@ -181,14 +181,14 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     expected_errors = {
       'error-heating-system-and-heat-pump.xml' => 'Multiple central heating systems are not currently supported.',
       'error-cooling-system-and-heat-pump.xml' => 'Multiple central cooling systems are not currently supported.',
-      'error-non-integer-geometry-num-bathrooms.xml' => 'Currently only supporting an integer number of bathrooms.',
-      'error-non-integer-ceiling-fan-quantity.xml' => 'Currently only supporting an integer quantity of ceiling fans.',
-      'error-sfd-conditioned-basement-zero-foundation-height.xml' => 'Specified a non-slab or non-above apartment foundation type with a height of zero.',
+      'error-non-integer-geometry-num-bathrooms.xml' => 'Number of bathrooms must be an integer.',
+      'error-non-integer-ceiling-fan-quantity.xml' => 'Quantity of ceiling fans must be an integer.',
+      'error-sfd-conditioned-basement-zero-foundation-height.xml' => "Foundation type of 'ConditionedBasement' cannot have a height of zero.",
       'error-sfd-adiabatic-walls.xml' => 'No adiabatic surfaces can be applied to single-family detached homes.',
       'error-sfa-ambient.xml' => 'Ambient foundation type for single-family attached or apartment units is not currently supported.',
       'error-mf-conditioned-basement' => 'Conditioned basement/crawlspace foundation type for apartment units is not currently supported.',
       'error-mf-conditioned-crawlspace' => 'Conditioned basement/crawlspace foundation type for apartment units is not currently supported.',
-      'error-mf-bottom-crawlspace-zero-foundation-height.xml' => 'Specified a non-slab or non-above apartment foundation type with a height of zero.',
+      'error-mf-bottom-crawlspace-zero-foundation-height.xml' => "Foundation type of 'UnventedCrawlspace' cannot have a height of zero.",
       'error-ducts-location-and-areas-not-same-type.xml' => 'Duct location and surface area not both auto or not both specified.',
       'error-second-heating-system-serves-total-heat-load.xml' => 'The fraction of heat load served by the second heating system is 100%.',
       'error-second-heating-system-but-no-primary-heating.xml' => 'A second heating system was specified without a primary heating system.',
@@ -201,7 +201,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-mf-two-stories.xml' => 'Apartment units can only have one above-grade floor.',
       'error-dhw-indirect-without-boiler.xml' => 'Must specify a boiler when modeling an indirect water heater type.',
       'error-conditioned-attic-with-one-floor-above-grade.xml' => 'Units with a conditioned attic must have at least two above-grade floors.',
-      'error-zero-number-of-bedrooms.xml' => 'Must specify a number of bedrooms greater than zero.',
+      'error-zero-number-of-bedrooms.xml' => 'Number of bedrooms must be greater than zero.',
       'error-sfd-with-shared-system.xml' => 'Specified a shared system for a single-family detached unit.',
       'error-rim-joist-height-but-no-assembly-r.xml' => 'Specified a rim joist height but no rim joist assembly R-value.',
       'error-rim-joist-assembly-r-but-no-height.xml' => 'Specified a rim joist assembly R-value but no rim joist height.',
@@ -209,17 +209,17 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     expected_warnings = {
       'warning-non-electric-heat-pump-water-heater.xml' => 'Cannot model a heat pump water heater with non-electric fuel type.',
-      'warning-sfd-slab-non-zero-foundation-height.xml' => 'Specified slab or above apartment foundation type with a non-zero foundation height. Assuming foundation height is zero.',
-      'warning-mf-bottom-slab-non-zero-foundation-height.xml' => 'Specified slab or above apartment foundation type with a non-zero foundation height. Assuming foundation height is zero.',
+      'warning-sfd-slab-non-zero-foundation-height.xml' => "Foundation type of 'SlabOnGrade' cannot have a non-zero height. Assuming height is zero.",
+      'warning-mf-bottom-slab-non-zero-foundation-height.xml' => "Foundation type of 'SlabOnGrade' cannot have a non-zero height. Assuming height is zero.",
       'warning-slab-non-zero-foundation-height-above-grade.xml' => 'Specified a slab foundation type with a non-zero height above grade.',
-      'warning-second-heating-system-serves-majority-heat.xml' => 'The fraction of heat load served by the second heating system is not less than 50%.',
-      'warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml' => 'Specified unconditioned basement/crawlspace foundation type with wall and ceiling insulation.',
-      'warning-unvented-crawlspace-with-wall-and-ceiling-insulation.xml' => 'Specified unconditioned basement/crawlspace foundation type with wall and ceiling insulation.',
-      'warning-unconditioned-basement-with-wall-and-ceiling-insulation.xml' => 'Specified unconditioned basement/crawlspace foundation type with wall and ceiling insulation.',
-      'warning-vented-attic-with-floor-and-roof-insulation.xml' => 'Specified unconditioned attic type with floor and roof insulation.',
-      'warning-unvented-attic-with-floor-and-roof-insulation.xml' => 'Specified unconditioned attic type with floor and roof insulation.',
-      'warning-conditioned-basement-with-ceiling-insulation.xml' => 'Specified conditioned basement with ceiling insulation.',
-      'warning-conditioned-attic-with-floor-insulation.xml' => 'Specified conditioned attic with floor insulation.',
+      'warning-second-heating-system-serves-majority-heat.xml' => 'The fraction of heat load served by the second heating system is greater than or equal to 50%.',
+      'warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml' => 'Home with unconditioned basement/crawlspace foundation type has both foundation wall insulation and floor insulation.',
+      'warning-unvented-crawlspace-with-wall-and-ceiling-insulation.xml' => 'Home with unconditioned basement/crawlspace foundation type has both foundation wall insulation and floor insulation.',
+      'warning-unconditioned-basement-with-wall-and-ceiling-insulation.xml' => 'Home with unconditioned basement/crawlspace foundation type has both foundation wall insulation and floor insulation.',
+      'warning-vented-attic-with-floor-and-roof-insulation.xml' => 'Home with unconditioned attic type has both ceiling insulation and roof insulation.',
+      'warning-unvented-attic-with-floor-and-roof-insulation.xml' => 'Home with unconditioned attic type has both ceiling insulation and roof insulation.',
+      'warning-conditioned-basement-with-ceiling-insulation.xml' => 'Home with conditioned basement has floor insulation.',
+      'warning-conditioned-attic-with-floor-insulation.xml' => 'Home with conditioned attic has ceiling insulation.',
       'warning-multipliers-without-tv-plug-loads.xml' => 'Specified a non-zero usage multiplier for zero television plug loads.',
       'warning-multipliers-without-other-plug-loads.xml' => 'Specified a non-zero usage multiplier for zero other plug loads.',
       'warning-multipliers-without-well-pump-plug-loads.xml' => 'Specified a non-zero usage multiplier for zero well pump plug loads.',
@@ -304,6 +304,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
   def _set_measure_argument_values(hpxml_file, args)
     args['hpxml_path'] = "tests/extra_files/#{hpxml_file}"
+    args['apply_defaults'] = true
 
     # Base
     if ['base-sfd.xml'].include? hpxml_file
