@@ -64,22 +64,22 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('output_csv_path', true)
     arg.setDisplayName('Occupancy Schedules: Output CSV Path')
-    arg.setDescription('Absolute (or relative) path of the csv file containing user-specified occupancy schedules.')
+    arg.setDescription('Absolute (or relative) path of the csv file containing occupancy schedules.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('water_heater_scheduled_setpoint_path', false)
     arg.setDisplayName('Water Heater Schedules: Scheduled Setpoint Path')
-    arg.setDescription("Absolute (or relative) path of the csv file containing the setpoint schedule. Setpoint should be defined (in F) for every hour. Applies only to #{HPXML::WaterHeaterTypeStorage} and #{HPXML::WaterHeaterTypeHeatPump}.")
+    arg.setDescription("Absolute (or relative) path of the csv file containing the water heater setpoint schedule. Setpoint should be defined (in F) for every hour. Applies only to #{HPXML::WaterHeaterTypeStorage} and #{HPXML::WaterHeaterTypeHeatPump}.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('water_heater_scheduled_operating_mode_path', false)
     arg.setDisplayName('Water Heater Schedules: Scheduled Operating Mode Path')
-    arg.setDescription("Absolute (or relative) path of the csv file containing the operating mode schedule. Valid values are 0 (standard) and 1 (heat pump only) and must be specified for every hour. Applies only to #{HPXML::WaterHeaterTypeHeatPump}.")
+    arg.setDescription("Absolute (or relative) path of the csv file containing the water heater operating mode schedule. Valid values are 0 (standard) and 1 (heat pump only) and must be specified for every hour. Applies only to #{HPXML::WaterHeaterTypeHeatPump}.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('water_heater_output_csv_path', false)
     arg.setDisplayName('Water Heater Schedules: Output CSV Path')
-    arg.setDescription('Absolute (or relative) path of the csv file containing user-specified occupancy schedules.')
+    arg.setDescription('Absolute (or relative) path of the csv file containing water heater schedules.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_output_path', true)

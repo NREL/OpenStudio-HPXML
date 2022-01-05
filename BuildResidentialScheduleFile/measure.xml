@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>7482f50f-1900-4225-8dd4-a081eeb4d074</version_id>
-  <version_modified>20211220T204408Z</version_modified>
+  <version_id>7e84a67b-2785-4bb5-bdf9-fcc3af473021</version_id>
+  <version_modified>20220105T154643Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -58,7 +58,7 @@
     <argument>
       <name>output_csv_path</name>
       <display_name>Occupancy Schedules: Output CSV Path</display_name>
-      <description>Absolute (or relative) path of the csv file containing user-specified occupancy schedules.</description>
+      <description>Absolute (or relative) path of the csv file containing occupancy schedules.</description>
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -66,7 +66,7 @@
     <argument>
       <name>water_heater_scheduled_setpoint_path</name>
       <display_name>Water Heater Schedules: Scheduled Setpoint Path</display_name>
-      <description>Absolute (or relative) path of the csv file containing the setpoint schedule. Setpoint should be defined (in F) for every hour. Applies only to storage water heater and heat pump water heater.</description>
+      <description>Absolute (or relative) path of the csv file containing the water heater setpoint schedule. Setpoint should be defined (in F) for every hour. Applies only to storage water heater and heat pump water heater.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -74,7 +74,7 @@
     <argument>
       <name>water_heater_scheduled_operating_mode_path</name>
       <display_name>Water Heater Schedules: Scheduled Operating Mode Path</display_name>
-      <description>Absolute (or relative) path of the csv file containing the operating mode schedule. Valid values are 0 (standard) and 1 (heat pump only) and must be specified for every hour. Applies only to heat pump water heater.</description>
+      <description>Absolute (or relative) path of the csv file containing the water heater operating mode schedule. Valid values are 0 (standard) and 1 (heat pump only) and must be specified for every hour. Applies only to heat pump water heater.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -82,7 +82,7 @@
     <argument>
       <name>water_heater_output_csv_path</name>
       <display_name>Water Heater Schedules: Output CSV Path</display_name>
-      <description>Absolute (or relative) path of the csv file containing user-specified occupancy schedules.</description>
+      <description>Absolute (or relative) path of the csv file containing water heater schedules.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -896,17 +896,6 @@
       <checksum>5FC694CF</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.2.0</identifier>
-        <min_compatible>3.2.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>A8093D2B</checksum>
-    </file>
-    <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -917,6 +906,17 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>BC787048</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.2.0</identifier>
+        <min_compatible>3.2.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>C7F571C8</checksum>
     </file>
   </files>
 </measure>
