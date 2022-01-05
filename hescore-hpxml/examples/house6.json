@@ -76,7 +76,7 @@
         },
         {
           "side": "left",
-          "wall_assembly_code": "ewwf03wo",
+          "wall_assembly_code": "ewwf00wo",
           "zone_window": {
             "window_area": 70.0,
             "window_method": "code",
@@ -86,7 +86,7 @@
         },
         {
           "side": "back",
-          "wall_assembly_code": "ewwf03wo",
+          "wall_assembly_code": "ewwf00wo",
           "zone_window": {
             "window_area": 220.0,
             "window_method": "code",

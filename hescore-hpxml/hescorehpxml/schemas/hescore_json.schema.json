@@ -1577,17 +1577,6 @@
                                             "allOf": [
                                                 {
                                                     "properties": {
-                                                        "heating": {
-                                                            "properties": {
-                                                                "type": {"enum": ["wall_furnace", "baseboard", "boiler", "mini_split", "wood_stove", "none"]}
-                                                            },
-                                                            "required": ["type"]
-                                                        }
-                                                    },
-                                                    "required": ["heating"]
-                                                },
-                                                {
-                                                    "properties": {
                                                         "cooling": {
                                                             "properties": {
                                                                 "type": {"enum": ["split_dx", "heat_pump", "gchp"]}
