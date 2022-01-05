@@ -88,22 +88,24 @@ Duct Leakage Measurements
 *************************
 
 Duct leakage measurements are associated with an ``AirDistribution`` element.
-It can be specified qualitatively or quantatatively.
+It can be specified quantitatively or qualitatively.
 
-To qualitatively specify that an ``AirDistribution`` system is sealed, the
-translator expects to find either of the following elements:
+To quantitatively specify the duct leakage to outside in CFM25 of an ``AirDistribution`` system
+(e.g., duct blaster measurement), the translator expects to find the following elements:
+
+* ``DuctLeakageMeasurement[not(DuctType)]/DuctLeakage[TotalOrToOutside="to outside" and Units="CFM25"]/Value`` element 
+  with the numeric value
+* If the above element is not found, 
+  ``DuctLeakageMeasurement[DuctType="supply"]/DuctLeakage[TotalOrToOutside="to outside" and Units="CFM25"]/Value`` and
+  ``DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[TotalOrToOutside="to outside" and Units="CFM25"]/Value`` elements
+  with the numeric values (Note that the sum of two elements will be used)
+
+If quantitative duct leakage measurement is not specified, the
+translator expects to find either of the following qualitatively specified duct leakage measurement elements:
 
 * ``DuctLeakageMeasurement/LeakinessObservedVisualInspection`` element with
   the value of "connections sealed w mastic".
 * ``HVACDistribution/HVACDistributionImprovement/DuctSystemSealed`` element
   with the value of "true".
 
-To quantitatively specify the duct leakage to outside in CFM25 of an ``AirDistribution`` system, 
-the translator expects to find the following element:
-
-* ``DuctLeakageMeasurement/DuctLeakage[TotalOrToOutside="to outside"]/Value`` element 
-  with the numeric value
-
-If both elements are specified, the preference will be given to the duct blaster measurement.
-
-If neither of elements above is specified, it will result in an "unsealed" designation.
+If neither qualitative nor quantitative element is specified, it will result in an "unsealed" designation.
