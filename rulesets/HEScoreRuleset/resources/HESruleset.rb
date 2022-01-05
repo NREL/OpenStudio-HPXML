@@ -651,7 +651,7 @@ class HEScoreRuleset
           if is_ducted_cooling_system(orig_hvac)
             distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
           end
-          year_installed = orig_cooling['year']
+          cooling_year_installed = orig_cooling['year']
           cooling_energy_star = (orig_cooling['efficiency_level'] == 'energy_star')
           heatpump_fraction_cool_load_served = orig_hvac['hvac_fraction']
         end
@@ -665,7 +665,7 @@ class HEScoreRuleset
           if is_ducted_heating_system(orig_hvac)
             distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
           end
-          year_installed = orig_heating['year']
+          heating_year_installed = orig_heating['year']
           heating_energy_star = (orig_heating['efficiency_level'] == 'energy_star')
           heatpump_fraction_heat_load_served = orig_hvac['hvac_fraction']
         end
@@ -674,13 +674,13 @@ class HEScoreRuleset
           if not cooling_efficiency_seer.nil?
             # Do nothing, we have the SEER
           elsif cooling_energy_star
-            cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
+            cooling_efficiency_seer = lookup_hvac_efficiency(cooling_year_installed,
                                                              heat_pump_type,
                                                              heat_pump_fuel,
                                                              'SEER',
                                                              'energy_star')
-          elsif not year_installed.nil?
-            cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
+          elsif not cooling_year_installed.nil?
+            cooling_efficiency_seer = lookup_hvac_efficiency(cooling_year_installed,
                                                              heat_pump_type,
                                                              heat_pump_fuel,
                                                              'SEER')
@@ -688,13 +688,13 @@ class HEScoreRuleset
           if not heating_efficiency_hspf.nil?
             # Do nothing, we have the HSPF
           elsif heating_energy_star
-            heating_efficiency_hspf = lookup_hvac_efficiency(year_installed,
+            heating_efficiency_hspf = lookup_hvac_efficiency(heating_year_installed,
                                                              heat_pump_type,
                                                              heat_pump_fuel,
                                                              'HSPF',
                                                              'energy_star')
-          elsif not year_installed.nil?
-            heating_efficiency_hspf = lookup_hvac_efficiency(year_installed,
+          elsif not heating_year_installed.nil?
+            heating_efficiency_hspf = lookup_hvac_efficiency(heating_year_installed,
                                                              heat_pump_type,
                                                              heat_pump_fuel,
                                                              'HSPF')
