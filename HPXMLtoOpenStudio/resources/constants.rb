@@ -47,14 +47,6 @@ class Constants
     return 'auto using max load'
   end
 
-  def self.CalcTypeCO2RatedHome
-    return 'CO2 Rated Home'
-  end
-
-  def self.CalcTypeCO2ReferenceHome
-    return 'CO2 Reference Home'
-  end
-
   def self.CalcTypeERIRatedHome
     return 'ERI Rated Home'
   end
@@ -76,7 +68,8 @@ class Constants
   end
 
   def self.ERIVersions
-    return ['2014', '2014A', '2014AE', '2014AEG', '2019', '2019A', '2019AB']
+    return ['2014', '2014A', '2014AE', '2014AEG', '2019', '2019A',
+            '2019AB', '2019ABC', '2019ABCD', '2019ABCDE']
   end
 
   def self.FacadeFront
