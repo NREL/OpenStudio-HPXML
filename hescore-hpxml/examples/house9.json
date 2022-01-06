@@ -1,0 +1,138 @@
+{
+  "building_address": {
+    "address": "resstock test house",
+    "city": "resstock test city",
+    "state": "WA",
+    "zip_code": "98052",
+    "assessment_type": "alternative"
+  },
+  "building": {
+    "about": {
+      "assessment_date": "2021-12-28",
+      "shape": "rectangle",
+      "year_built": 1950,
+      "number_bedrooms": 4,
+      "num_floor_above_grade": 2,
+      "floor_to_ceiling_height": 8,
+      "conditioned_floor_area": 2600,
+      "orientation": "south",
+      "blower_door_test": false,
+      "air_sealing_present": false
+    },
+    "zone": {
+      "zone_roof": [
+        {
+          "roof_name": "roof1",
+          "roof_area": 2176.0,
+          "roof_assembly_code": "rfwf00wo",
+          "roof_color": "cool_color",
+          "roof_absorptance": 0.85,
+          "roof_type": "vented_attic",
+          "ceiling_assembly_code": "ecwf25",
+          "zone_skylight": {
+            "skylight_area": 0
+          }
+        }
+      ],
+      "zone_floor": [
+        {
+          "floor_name": "floor1",
+          "floor_area": 2176.0,
+          "foundation_type": "unvented_crawl",
+          "foundation_insulation_level": 0,
+          "floor_assembly_code": "efwf30ca"
+        }
+      ],
+      "wall_construction_same": false,
+      "window_construction_same": false,
+      "zone_wall": [
+        {
+          "side": "front",
+          "wall_assembly_code": "ewwf15wo",
+          "zone_window": {
+            "window_area": 30.03,
+            "window_method": "custom",
+            "window_u_value": 0.47,
+            "window_shgc": 0.54,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "left",
+          "wall_assembly_code": "ewwf13wo",
+          "zone_window": {
+            "window_area": 16.68,
+            "window_method": "custom",
+            "window_u_value": 0.47,
+            "window_shgc": 0.54,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "back",
+          "wall_assembly_code": "ewwf13wo",
+          "zone_window": {
+            "window_area": 30.03,
+            "window_method": "custom",
+            "window_u_value": 0.47,
+            "window_shgc": 0.54,
+            "solar_screen": false
+          }
+        },
+        {
+          "side": "right",
+          "wall_assembly_code": "ewwf13wo",
+          "zone_window": {
+            "window_area": 16.68,
+            "window_method": "custom",
+            "window_u_value": 0.47,
+            "window_shgc": 0.54,
+            "solar_screen": false
+          }
+        }
+      ]
+    },
+    "systems": {
+      "hvac": [
+        {
+          "hvac_name": "hvac1",
+          "hvac_fraction": 1.0,
+          "heating": {
+            "fuel_primary": "electric",
+            "type": "central_furnace"
+          },
+          "cooling": {
+            "type": "split_dx",
+            "efficiency_method": "user",
+            "efficiency": 13.0
+          },
+          "hvac_distribution": {
+            "leakage_method": "quantitative",
+            "leakage_to_outside": 338.0,
+            "duct": [
+              {
+                "name": "duct1",
+                "location": "uncond_attic",
+                "fraction": 0.75,
+                "insulated": true
+              },
+              {
+                "name": "duct2",
+                "location": "cond_space",
+                "fraction": 0.25,
+                "insulated": true
+              }
+            ]
+          }
+        }
+      ],
+      "domestic_hot_water": {
+        "category": "unit",
+        "type": "storage",
+        "fuel_primary": "electric",
+        "efficiency_method": "user",
+        "energy_factor": 0.92
+      }
+    }
+  }
+}
