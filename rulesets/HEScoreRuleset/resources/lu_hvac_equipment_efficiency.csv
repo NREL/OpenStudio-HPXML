@@ -493,8 +493,14 @@ year,performance_id,category_id,type_id,region_id,fuel_primary_id,metric_id,unit
 2010,shipment_weighted,heating,heat_pump,,electric,hspf,btu/wh,7.9
 0,energy_star,cooling,packaged_dx,,electric,eer,btu/wh,12
 0,energy_star,cooling,split_dx,,electric,seer,btu/wh,15
+0,cee_tier1,cooling,split_dx,,electric,seer,btu/wh,16
+0,cee_tier2,cooling,split_dx,,electric,seer,btu/wh,18
 0,energy_star,cooling,heat_pump,,electric,seer,btu/wh,15
+0,cee_tier1,cooling,heat_pump,,electric,seer,btu/wh,15
+0,cee_tier2,cooling,heat_pump,,electric,seer,btu/wh,16
+0,cee_tier3,cooling,heat_pump,,electric,seer,btu/wh,18
 0,energy_star,cooling,mini_split,,electric,seer,btu/wh,15
+0,cee_tier1,cooling,mini_split,,electric,seer,btu/wh,18
 0,energy_star,heating,central_furnace,northern,natural_gas,afue,btu/btu,0.95
 0,energy_star,heating,central_furnace,southern,natural_gas,afue,btu/btu,0.9
 0,energy_star,heating,central_furnace,,fuel_oil,afue,btu/btu,0.85
@@ -504,4 +510,11 @@ year,performance_id,category_id,type_id,region_id,fuel_primary_id,metric_id,unit
 0,energy_star,heating,boiler,,lpg,afue,btu/btu,0.9
 0,energy_star,heating,boiler,,fuel_oil,afue,btu/btu,0.87
 0,energy_star,heating,heat_pump,,electric,hspf,btu/wh,8.5
+0,cee_tier1,heating,heat_pump,southern,electric,hspf,btu/wh,8.5
+0,cee_tier1,heating,heat_pump,northern,electric,hspf,btu/wh,9
+0,cee_tier2,heating,heat_pump,southern,electric,hspf,btu/wh,9
+0,cee_tier2,heating,heat_pump,northern,electric,hspf,btu/wh,9.5
+0,cee_tier3,heating,heat_pump,southern,electric,hspf,btu/wh,9.5
+0,cee_tier3,heating,heat_pump,northern,electric,hspf,btu/wh,10
 0,energy_star,heating,mini_split,,electric,hspf,btu/wh,8.5
+0,cee_tier1,heating,mini_split,,electric,hspf,btu/wh,10
