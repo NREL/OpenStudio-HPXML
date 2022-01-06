@@ -1249,6 +1249,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
     results_out << [line_break]
 
+    # CO2 Scenarios
+    if not @co2_emissions.empty?
+      @co2_emissions.each do |scenario_name, co2_emission|
+        key_name = sanitize_string("co2#{scenario_name}")
+        results_out << [key_name, co2_emission.annual_output.to_s]
+      end
+    end
+
     # Misc
     results_out << ['hpxml_cfa', @hpxml.building_construction.conditioned_floor_area.to_s]
     results_out << ['hpxml_nbr', @hpxml.building_construction.number_of_bedrooms.to_s]

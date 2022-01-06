@@ -325,6 +325,8 @@ class ReportSimulationOutputTest < MiniTest::Test
     'loadHeatingDelivered',
     'loadCoolingDelivered',
     'loadHotWaterDelivered',
+    'co2Cambium2022MidCaseAERusingNational',
+    'co2Cambium2022MidCaseAERusingRMPAregion',
     'hpxml_cfa',
     'hpxml_nbr',
     'hpxml_nst',
@@ -1001,7 +1003,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper.rb'
     require_relative '../../HPXMLtoOpenStudio/resources/constants.rb'
     require 'oga'
-    old_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml')
+    old_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-misc-co2-emissions.xml')
     [Constants.CalcTypeERIReferenceHome, Constants.CalcTypeERIReferenceHome].each do |eri_design|
       new_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/tests/test-eri.xml')
       FileUtils.cp(old_hpxml_path, new_hpxml_path)

@@ -2516,12 +2516,10 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   elsif ['base-misc-co2-emissions.xml'].include? hpxml_file
     hpxml.header.co2_emissions_scenarios.add(name: 'Cambium 2022 MidCase AER using RMPA region',
                                              elec_units: HPXML::CO2EmissionsScenario::UnitsKgPerMWh,
-                                             elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_RMPAc_2022.csv',
-                                             natural_gas_units: HPXML::CO2EmissionsScenario::UnitsKgPerMBtu)
+                                             elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_RMPAc_2022.csv')
     hpxml.header.co2_emissions_scenarios.add(name: 'Cambium 2022 MidCase AER using National',
                                              elec_units: HPXML::CO2EmissionsScenario::UnitsKgPerMWh,
-                                             elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_usa_2022.csv',
-                                             natural_gas_units: HPXML::CO2EmissionsScenario::UnitsKgPerMBtu)
+                                             elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_usa_2022.csv')
   end
 
   # ------------------------- #
