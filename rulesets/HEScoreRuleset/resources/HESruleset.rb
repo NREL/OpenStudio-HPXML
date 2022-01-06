@@ -139,23 +139,17 @@ class HEScoreRuleset
   def self.set_enclosure_air_infiltration(json, new_hpxml)
     if not json['building']['about']['blower_door_test'].nil?
       cfm50 = json['building']['about']['envelope_leakage']
-      if cfm50.nil?
-        if json['building']['about']['air_sealing_present'] == true
-          desc = HPXML::LeakinessTight
-        else
-          desc = HPXML::LeakinessAverage
-        end
-        cfm50 = calc_ach50(@ncfl_ag, @cfa, @ceil_height, @cvolume, desc, @year_built, @iecc_zone, @fnd_areas, @ducts) * @cvolume / 60
+      if json['building']['about']['air_sealing_present'] == true
+        desc = HPXML::LeakinessTight
+      else
+        desc = HPXML::LeakinessAverage
       end
-
-      if not json['building']['zone']['zone_wall'][0]['zone_window']['storm_type'].nil?
-        # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
-        # The air leakage of the homes was reduced by 6% to 17% (11% on average) from installing storm windows
-        cfm50 = 0.89 * cfm50
-      end
-
       # Convert to ACH50
-      ach50 = cfm50 * 60.0 / @cvolume
+      if not cfm50.nil?
+        ach50 = cfm50 * 60.0 / @cvolume
+      else
+        ach50 = calc_ach50(@ncfl_ag, @cfa, @ceil_height, @cvolume, desc, @year_built, @iecc_zone, @fnd_areas, @ducts)
+      end
 
       new_hpxml.air_infiltration_measurements.add(id: 'hescore_blower_door_test',
                                                   house_pressure: 50,
