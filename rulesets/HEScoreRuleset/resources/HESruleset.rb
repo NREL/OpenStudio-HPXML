@@ -385,9 +385,7 @@ class HEScoreRuleset
         exterior_shading_factor_summer = 0.29 / interior_shading_factor_summer # Overall shading factor is interior multiplied by exterior
       end
       if not orig_window['storm_type'].nil?
-        ufactor_abs_reduction, shgc_corr = get_storms_ufactor_shgc_adjustment_factors(orig_window['storm_type'], ufactor)
-        ufactor -= ufactor_abs_reduction
-        shgc = shgc_corr * shgc
+        ufactor, shgc = get_ufactor_shgc_adjusted_by_storms(orig_window['storm_type'], ufactor, shgc)
       end
 
       # Add one HPXML window per side of the house with only the overhangs from the roof.
@@ -429,9 +427,7 @@ class HEScoreRuleset
         exterior_shading_factor_winter = 0.29
       end
       if not orig_skylight['storm_type'].nil?
-        ufactor_abs_reduction, shgc_corr = get_storms_ufactor_shgc_adjustment_factors(orig_skylight['storm_type'], ufactor)
-        ufactor -= ufactor_abs_reduction
-        shgc = shgc_corr * shgc
+        ufactor, shgc = get_ufactor_shgc_adjusted_by_storms(orig_skylight['storm_type'], ufactor, shgc)
       end
 
       if @is_townhouse
@@ -1292,7 +1288,7 @@ def get_skylight_ufactor_shgc_from_doe2code(doe2code)
   fail "Could not get default skylight U/SHGC for skylight code '#{doe2code}'"
 end
 
-def get_storms_ufactor_shgc_adjustment_factors(storm_type, base_ufactor)
+def get_ufactor_shgc_adjusted_by_storms(storm_type, base_ufactor, base_shgc)
   # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
   # U-factor and SHGC adjustment based on the data obtained from the above reference
   if storm_type == 'clear'
@@ -1305,7 +1301,10 @@ def get_storms_ufactor_shgc_adjustment_factors(storm_type, base_ufactor)
     fail "Could not find adjustment factors for storm type '#{storm_type}'"
   end
 
-  return ufactor_abs_reduction, shgc_corr
+  ufactor = base_ufactor - ufactor_abs_reduction
+  shgc = base_shgc * shgc_corr
+
+  return ufactor, shgc
 end
 
 def get_roof_solar_absorptance(roof_color)
