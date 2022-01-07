@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>5f1fad1d-c43c-49be-b470-b4ec4aadcc1b</version_id>
-  <version_modified>20211215T200559Z</version_modified>
+  <version_id>5dd5389e-b0a8-4781-b99d-e341375f506c</version_id>
+  <version_modified>20220107T201007Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -58,7 +58,7 @@
     <argument>
       <name>output_csv_path</name>
       <display_name>Schedules: Output CSV Path</display_name>
-      <description>Absolute (or relative) path of the csv file containing user-specified occupancy schedules.</description>
+      <description>Absolute/relative path of the csv file containing user-specified occupancy schedules.</description>
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -872,6 +872,12 @@
       <checksum>5FC694CF</checksum>
     </file>
     <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>507E49D4</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.2.0</identifier>
@@ -880,19 +886,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>7C5869C1</checksum>
+      <checksum>E3851F45</checksum>
     </file>
     <file>
       <filename>build_residential_schedule_file_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>1FB3B4B0</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>507E49D4</checksum>
+      <checksum>FEEAB50D</checksum>
     </file>
   </files>
 </measure>

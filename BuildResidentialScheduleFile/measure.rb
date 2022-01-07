@@ -64,7 +64,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('output_csv_path', true)
     arg.setDisplayName('Schedules: Output CSV Path')
-    arg.setDescription('Absolute (or relative) path of the csv file containing user-specified occupancy schedules.')
+    arg.setDescription('Absolute/relative path of the csv file containing user-specified occupancy schedules.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_output_path', true)
@@ -116,12 +116,19 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     # modify the hpxml with the schedules path
     doc = XMLHelper.parse_file(hpxml_path)
     extension = XMLHelper.create_elements_as_needed(XMLHelper.get_element(doc, '/HPXML'), ['SoftwareInfo', 'extension'])
-    schedules_filepath = XMLHelper.get_value(extension, 'SchedulesFilePath', :string)
-    if !schedules_filepath.nil?
-      runner.registerWarning("Overwriting existing SchedulesFilePath element: #{schedules_filepath}")
-      XMLHelper.delete_element(extension, 'SchedulesFilePath')
+    schedules_files = XMLHelper.get_elements(extension, 'SchedulesFiles')
+    if !schedules_files.empty?
+      runner.registerWarning('Overwriting existing SchedulesFiles.')
+      XMLHelper.delete_element(extension, 'SchedulesFiles')
     end
-    XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)
+    paths = { 'Occupancy' => args[:output_csv_path] }
+
+    schedules_files = XMLHelper.add_element(extension, 'SchedulesFiles')
+    paths.each do |name, path|
+      schedules_file = XMLHelper.add_element(schedules_files, 'SchedulesFile')
+      XMLHelper.add_element(schedules_file, 'Name', name, :string)
+      XMLHelper.add_element(schedules_file, 'Path', path, :string)
+    end
 
     # write out the modified hpxml
     hpxml_output_path = args[:hpxml_output_path]
@@ -129,10 +136,8 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       hpxml_output_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_output_path))
     end
 
-    if (hpxml_path != hpxml_output_path) || (schedules_filepath != args[:output_csv_path])
-      XMLHelper.write_file(doc, hpxml_output_path)
-      runner.registerInfo("Wrote file: #{hpxml_output_path}")
-    end
+    XMLHelper.write_file(doc, hpxml_output_path)
+    runner.registerInfo("Wrote file: #{hpxml_output_path}")
 
     return true
   end
