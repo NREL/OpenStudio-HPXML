@@ -144,6 +144,7 @@ class HEScoreRuleset
       else
         desc = HPXML::LeakinessAverage
       end
+
       # Convert to ACH50
       if not cfm50.nil?
         ach50 = cfm50 * 60.0 / @cvolume
@@ -385,7 +386,7 @@ class HEScoreRuleset
       end
       if not orig_window['storm_type'].nil?
         ufactor_abs_reduction, shgc_corr = get_storms_ufactor_shgc_adjustment_factors(orig_window['storm_type'], ufactor)
-        ufactor = ufactor - ufactor_abs_reduction
+        ufactor -= ufactor_abs_reduction
         shgc = shgc_corr * shgc
       end
 
@@ -429,7 +430,7 @@ class HEScoreRuleset
       end
       if not orig_skylight['storm_type'].nil?
         ufactor_abs_reduction, shgc_corr = get_storms_ufactor_shgc_adjustment_factors(orig_skylight['storm_type'], ufactor)
-        ufactor = ufactor - ufactor_abs_reduction
+        ufactor -= ufactor_abs_reduction
         shgc = shgc_corr * shgc
       end
 
