@@ -215,23 +215,21 @@ class OSModel
     @apply_ashrae140_assumptions = false if @apply_ashrae140_assumptions.nil?
 
     # Check paths
-    @hpxml.header.schedules_filepath = FilePath.check_path(@hpxml.header.schedules_filepath,
-                                                           File.dirname(hpxml_path),
-                                                           'Schedules')
+    schedules_paths = @hpxml.header.schedules_files.collect { |sf|
+      FilePath.check_path(sf.path,
+                          File.dirname(hpxml_path),
+                          'Schedules')
+    }
 
     # Init
 
-    @schedules_file = nil
-    if not @hpxml.header.schedules_filepath.nil?
-      @schedules_file = SchedulesFile.new(runner: runner, model: model,
-                                          schedules_path: @hpxml.header.schedules_filepath)
-    end
+    @schedules_file = SchedulesFile.new(runner: runner, model: model,
+                                        schedules_paths: schedules_paths,
+                                        col_names: SchedulesFile.ColumnNames)
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
     set_defaults_and_globals(runner, output_dir, epw_file, weather, @schedules_file)
-    if not @schedules_file.nil?
-      @schedules_file.validate_schedules(year: @hpxml.header.sim_calendar_year)
-    end
+    @schedules_file.validate_schedules(year: @hpxml.header.sim_calendar_year) if not @schedules_file.nil?
     Location.apply(model, runner, weather, epw_file, @hpxml)
     add_simulation_params(model)
 
