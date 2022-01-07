@@ -1050,9 +1050,26 @@ def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id = '
 
   metric_id = units.downcase
 
-  fail "Invalid performance_id for HVAC lookup #{performance_id}." if not ['shipment_weighted', 'energy_star'].include?(performance_id)
+  fail "Invalid performance_id for HVAC lookup #{performance_id}." if not ['shipment_weighted', 'energy_star', 'cee_tier1', 'cee_tier2', 'cee_tier3'].include?(performance_id)
 
-  region_id = nil
+  region_id = nil           
+  if ['cee_tier1', 'cee_tier2', 'cee_tier3'].include? (performance_id) && type_id == 'heat_pump'
+    region_id = { '1A' => 'south_southwest',
+                  '2A' => 'south_southwest',
+                  '2B' => 'south_southwest',
+                  '3A' => 'south_southwest',
+                  '3B' => 'south_southwest',
+                  '3C' => 'south_southwest',
+                  '4A' => 'south_southwest',
+                  '4B' => 'south_southwest',
+                  '4C' => 'south_southwest',
+                  '5A' => 'north',
+                  '5B' => 'north',
+                  '6A' => 'north',
+                  '6B' => 'north',
+                  '7' => 'north',
+                  '8' => 'north'}[@iecc_zone]
+  end
   if (performance_id == 'energy_star') && (type_id == 'central_furnace') && ['lpg', 'natural_gas'].include?(fuel_primary_id)
     fail 'state_code required for Energy Star central furnaces' if state_code.nil?
 
@@ -1062,7 +1079,7 @@ def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id = '
       region_id = row['furnace_region']
       break
     end
-    fail "Could not lookup Energy Star furnace region for state #{state_code}." if region_id.nil?
+    fail "Could not lookup Energy Star furnace region for state #{state_code}." if region_id.nil?    
   end
 
   value = nil
