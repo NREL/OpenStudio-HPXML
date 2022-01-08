@@ -325,9 +325,15 @@ class ReportSimulationOutputTest < MiniTest::Test
     'loadHeatingDelivered',
     'loadCoolingDelivered',
     'loadHotWaterDelivered',
-    'co2Cambium2022HourlyMidCaseAERusingRMPAregion',
-    'co2Cambium2022HourlyMidCaseAERusingNational',
-    'co2Cambium2022AnnualMidCaseAERusingNational',
+    'co2Cambium2022HourlyMidCaseAERusingRMPAregionTotal',
+    'co2Cambium2022HourlyMidCaseAERusingRMPAregionElectricity',
+    'co2Cambium2022HourlyMidCaseAERusingRMPAregionNaturalGas',
+    'co2Cambium2022HourlyMidCaseAERusingNationalTotal',
+    'co2Cambium2022HourlyMidCaseAERusingNationalElectricity',
+    'co2Cambium2022HourlyMidCaseAERusingNationalNaturalGas',
+    'co2Cambium2022AnnualMidCaseAERusingNationalTotal',
+    'co2Cambium2022AnnualMidCaseAERusingNationalElectricity',
+    'co2Cambium2022AnnualMidCaseAERusingNationalNaturalGas',
     'hpxml_cfa',
     'hpxml_nbr',
     'hpxml_nst',
@@ -345,9 +351,15 @@ class ReportSimulationOutputTest < MiniTest::Test
   end
 
   def emissions_timeseries_cols
-    return ['Emissions: CO2: Cambium 2022 Hourly MidCase AER using National',
-            'Emissions: CO2: Cambium 2022 Hourly MidCase AER using RMPA region',
-            'Emissions: CO2: Cambium 2022 Annual MidCase AER using National']
+    return ['Emissions: CO2: Cambium 2022 Hourly MidCase AER using National: Total',
+            'Emissions: CO2: Cambium 2022 Hourly MidCase AER using National: Electricity',
+            'Emissions: CO2: Cambium 2022 Hourly MidCase AER using National: Natural Gas',
+            'Emissions: CO2: Cambium 2022 Hourly MidCase AER using RMPA region: Total',
+            'Emissions: CO2: Cambium 2022 Hourly MidCase AER using RMPA region: Electricity',
+            'Emissions: CO2: Cambium 2022 Hourly MidCase AER using RMPA region: Natural Gas',
+            'Emissions: CO2: Cambium 2022 Annual MidCase AER using National: Total',
+            'Emissions: CO2: Cambium 2022 Annual MidCase AER using National: Electricity',
+            'Emissions: CO2: Cambium 2022 Annual MidCase AER using National: Natural Gas']
   end
 
   def test_annual_only

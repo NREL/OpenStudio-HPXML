@@ -206,15 +206,17 @@ Annual Emissions
 
 Results for each emissions scenario defined in the HPXML file is listed as shown below.
 
-   ================================================  ==================================================================
-   Type                                              Notes
-   ================================================  ==================================================================
-   Emissions: <EmissionsType>: <ScenarioName1> (lb)  Emissions for scenario 1 of specified emissions type (e.g., CO2)
-   Emissions: <EmissionsType>: <ScenarioName2> (lb)  Emissions for scenario 2 of specified emissions type (e.g., NOx)
+   =========================================================  ==================================================================
+   Type                                                       Notes
+   =========================================================  ==================================================================
+   Emissions: <EmissionsType>: <ScenarioName1>: Total (lb)    Scenario 1 total emissions
+   Emissions: <EmissionsType>: <ScenarioName1>: <Fuel1> (lb)  Scenario 1 emissions for <Fuel1> only
+   Emissions: <EmissionsType>: <ScenarioName1>: <Fuel2> (lb)  Scenario 1 emissions for <Fuel2> only
+   Emissions: <EmissionsType>: <ScenarioName2>: Total (lb)    Scenario 2 total emissions
+   Emissions: <EmissionsType>: <ScenarioName2>: <Fuel1> (lb)  Scenario 2 emissions for <Fuel1> only
+   Emissions: <EmissionsType>: <ScenarioName2>: <Fuel2> (lb)  Scenario 2 emissions for <Fuel2> only
    ...
-   ================================================  ==================================================================
-
-Emissions for each scenario is the sum of emissions associated with electricity consumption and any fuel consumption.
+   =========================================================  ==================================================================
 
 Annual Building Loads
 ~~~~~~~~~~~~~~~~~~~~~
