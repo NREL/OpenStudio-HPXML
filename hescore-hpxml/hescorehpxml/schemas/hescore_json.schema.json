@@ -319,7 +319,12 @@
                                             },
                                             "solar_screen": {
                                                 "type": "boolean",
-                                                "description": "Does this window have a solar screen?"
+                                                "description": "Does this skylight have a solar screen?"
+                                            },
+                                            "storm_type": {
+                                                "type": "string",
+                                                "enum": ["clear", "low-e"],
+                                                "description": "Type of storm for this skylight"
                                             }
                                         },
                                         "allOf": [
@@ -636,6 +641,11 @@
                                             "solar_screen": {
                                                 "type": "boolean",
                                                 "description": "Does this window have a solar screen?"
+                                            },
+                                            "storm_type": {
+                                                "type": "string",
+                                                "enum": ["clear", "low-e"],
+                                                "description": "Type of storm for this window"
                                             }
                                         }
                                     }
