@@ -854,19 +854,14 @@ class HPXML < Object
   end
 
   class Header < BaseElement
-    def initialize(hpxml_object, *args)
-      @schedules_files = SchedulesFiles.new(hpxml_object)
-      super(hpxml_object, *args)
-    end
     ATTRS = [:xml_type, :xml_generated_by, :created_date_and_time, :transaction,
              :software_program_used, :software_program_version, :eri_calculation_version,
              :eri_design, :timestep, :building_id, :event_type, :state_code, :zip_code,
              :sim_begin_month, :sim_begin_day, :sim_end_month, :sim_end_day, :sim_calendar_year,
              :dst_enabled, :dst_begin_month, :dst_begin_day, :dst_end_month, :dst_end_day,
              :use_max_load_for_heat_pumps, :allow_increased_fixed_capacities,
-             :apply_ashrae140_assumptions, :energystar_calculation_version]
+             :apply_ashrae140_assumptions, :energystar_calculation_version, :schedules_filepaths]
     attr_accessor(*ATTRS)
-    attr_reader(:schedules_files)
 
     def check_for_errors
       errors = []
@@ -893,8 +888,6 @@ class HPXML < Object
       end
 
       errors += HPXML::check_dates('Daylight Saving', @dst_begin_month, @dst_begin_day, @dst_end_month, @dst_end_day)
-
-      errors += @schedules_files.check_for_errors
 
       return errors
     end
@@ -955,7 +948,12 @@ class HPXML < Object
         XMLHelper.add_element(hvac_sizing_control, 'UseMaxLoadForHeatPumps', @use_max_load_for_heat_pumps, :boolean, @use_max_load_for_heat_pumps_isdefaulted) unless @use_max_load_for_heat_pumps.nil?
         XMLHelper.add_element(hvac_sizing_control, 'AllowIncreasedFixedCapacities', @allow_increased_fixed_capacities, :boolean, @allow_increased_fixed_capacities_isdefaulted) unless @allow_increased_fixed_capacities.nil?
       end
-      @schedules_files.to_oga(software_info)
+      if not @schedules_filepaths.nil?
+        extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
+        @schedules_filepaths.each do |schedules_filepath|
+          XMLHelper.add_element(extension, 'SchedulesFilePath', schedules_filepath, :string)
+        end
+      end
 
       building = XMLHelper.add_element(hpxml, 'Building')
       building_building_id = XMLHelper.add_element(building, 'BuildingID')
@@ -998,53 +996,11 @@ class HPXML < Object
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
       @use_max_load_for_heat_pumps = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/UseMaxLoadForHeatPumps', :boolean)
       @allow_increased_fixed_capacities = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/AllowIncreasedFixedCapacities', :boolean)
-      @schedules_files.from_oga(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
+      @schedules_filepaths = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/SchedulesFilePath', :string)
       @building_id = HPXML::get_id(hpxml, 'Building/BuildingID')
       @event_type = XMLHelper.get_value(hpxml, 'Building/ProjectStatus/EventType', :string)
       @state_code = XMLHelper.get_value(hpxml, 'Building/Site/Address/StateCode', :string)
       @zip_code = XMLHelper.get_value(hpxml, 'Building/Site/Address/ZipCode', :string)
-    end
-  end
-
-  class SchedulesFiles < BaseArrayElement
-    def add(**kwargs)
-      self << SchedulesFile.new(@hpxml_object, **kwargs)
-    end
-
-    def from_oga(software_info)
-      return if software_info.nil?
-
-      XMLHelper.get_elements(software_info, 'extension/SchedulesFiles/SchedulesFile').each do |schedules_file|
-        self << SchedulesFile.new(@hpxml_object, schedules_file)
-      end
-    end
-  end
-
-  class SchedulesFile < BaseElement
-    ATTRS = [:name, :path]
-    attr_accessor(*ATTRS)
-
-    def delete
-      @hpxml_object.schedules_files.delete(self)
-    end
-
-    def check_for_errors
-      errors = []
-      return errors
-    end
-
-    def to_oga(software_info)
-      schedules_files = XMLHelper.create_elements_as_needed(software_info, ['extension', 'SchedulesFiles'])
-      schedules_file = XMLHelper.add_element(schedules_files, 'SchedulesFile')
-      XMLHelper.add_element(schedules_file, 'Name', @name, :string) unless @name.nil?
-      XMLHelper.add_element(schedules_file, 'Path', @path, :string) unless @path.nil?
-    end
-
-    def from_oga(schedules_file)
-      return if schedules_file.nil?
-
-      @name = XMLHelper.get_value(schedules_file, 'Name', :string)
-      @path = XMLHelper.get_value(schedules_file, 'Path', :string)
     end
   end
 

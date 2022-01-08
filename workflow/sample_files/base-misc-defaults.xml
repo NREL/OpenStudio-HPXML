@@ -6,7 +6,9 @@
     <CreatedDateAndTime>2000-01-01T00:00:00-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
-  <SoftwareInfo/>
+  <SoftwareInfo>
+    <extension/>
+  </SoftwareInfo>
   <Building>
     <BuildingID id='MyBuilding'/>
     <Site>
