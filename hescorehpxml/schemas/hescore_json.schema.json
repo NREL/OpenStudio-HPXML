@@ -1028,7 +1028,7 @@
                                                         "properties": {
                                                             "heating": {
                                                                 "properties": {
-                                                                    "efficiency_level": {"const": "energy_star"}
+                                                                    "efficiency_level": {"enum": ["energy_star", "cee_tier1", "cee_tier2", "cee_tier3"]}
                                                                 },
                                                                 "required": ["efficiency_level"]
                                                             }
@@ -1243,7 +1243,7 @@
                                                         "properties": {
                                                             "cooling": {
                                                                 "properties": {
-                                                                    "efficiency_level": {"const": "energy_star"}
+                                                                    "efficiency_level": {"enum": ["energy_star", "cee_tier1", "cee_tier2", "cee_tier3"]}
                                                                 },
                                                                 "required": ["efficiency_level"]
                                                             }
