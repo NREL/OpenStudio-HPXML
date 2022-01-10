@@ -400,19 +400,19 @@ class HEScoreRulesetTest < MiniTest::Test
     assert_match(/Could not lookup Energy Star furnace region for state/, err8.message)
 
     eff9 = lookup_hvac_efficiency(nil, 'Boiler', 'natural gas', 'AFUE', 'energy_star')
-    assert_in_epsilon(eff9, 0.85, small_number)
+    assert_in_epsilon(eff9, 0.9, small_number)
 
     eff10 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'SEER', 'energy_star')
-    assert_in_epsilon(eff10, 14.0, small_number)
+    assert_in_epsilon(eff10, 15.0, small_number)
 
     eff11 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'HSPF', 'energy_star')
-    assert_in_epsilon(eff11, 8.2, small_number)
+    assert_in_epsilon(eff11, 8.5, small_number)
 
     eff10 = lookup_hvac_efficiency(nil, 'mini-split', 'electricity', 'SEER', 'energy_star')
-    assert_in_epsilon(eff10, 14.0, small_number)
+    assert_in_epsilon(eff10, 15.0, small_number)
 
     eff11 = lookup_hvac_efficiency(nil, 'mini-split', 'electricity', 'HSPF', 'energy_star')
-    assert_in_epsilon(eff11, 8.2, small_number)
+    assert_in_epsilon(eff11, 8.5, small_number)
 
     err12 = assert_raises RuntimeError do
       lookup_hvac_efficiency(2010, 'central air conditioner', 'electricity', 'SEER', 'bogus_performance_id')
@@ -470,7 +470,7 @@ class HEScoreRulesetTest < MiniTest::Test
     assert_in_epsilon(eff6, 0.67, small_number)
 
     eff7 = lookup_water_heater_efficiency(nil, 'electricity', 'energy_star')
-    assert_in_epsilon(eff7, 2.76, small_number)
+    assert_in_epsilon(eff7, 2.2, small_number)
 
     err8 = assert_raises RuntimeError do
       lookup_water_heater_efficiency(2006, 'unicorn tears')

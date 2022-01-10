@@ -258,7 +258,6 @@ class HEScoreRuleset
                        'vented_crawl' => HPXML::LocationCrawlspaceVented,
                        'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
                        'slab_on_grade' => HPXML::LocationLivingSpace }[orig_foundation['foundation_type']]
-      fnd_area = orig_foundation['floor_area']
       next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? fnd_location
 
       if [HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned].include? fnd_location
@@ -327,7 +326,6 @@ class HEScoreRuleset
                        'unvented_crawl' => HPXML::LocationCrawlspaceUnvented,
                        'slab_on_grade' => HPXML::LocationLivingSpace }[orig_foundation['foundation_type']]
       fnd_type = orig_foundation['foundation_type']
-      fnd_area = orig_foundation['floor_area']
 
       # Slab
       slab_id = nil
@@ -402,6 +400,9 @@ class HEScoreRuleset
         # Summer only, total shading factor reduced to 0.29
         exterior_shading_factor_summer = 0.29 / interior_shading_factor_summer # Overall shading factor is interior multiplied by exterior
       end
+      if not orig_window['storm_type'].nil?
+        ufactor, shgc = get_ufactor_shgc_adjusted_by_storms(orig_window['storm_type'], ufactor, shgc)
+      end
 
       # Add one HPXML window per side of the house with only the overhangs from the roof.
       new_hpxml.windows.add(id: "#{orig_wall['side']}_window",
@@ -440,6 +441,9 @@ class HEScoreRuleset
         # Year-round, total shading factor reduced to 0.29
         exterior_shading_factor_summer = 0.29
         exterior_shading_factor_winter = 0.29
+      end
+      if not orig_skylight['storm_type'].nil?
+        ufactor, shgc = get_ufactor_shgc_adjusted_by_storms(orig_skylight['storm_type'], ufactor, shgc)
       end
 
       if @is_townhouse
@@ -1285,6 +1289,29 @@ def get_skylight_ufactor_shgc_from_doe2code(doe2code)
   return skylight_ufactor_shgc if not skylight_ufactor_shgc.nil?
 
   fail "Could not get default skylight U/SHGC for skylight code '#{doe2code}'"
+end
+
+def get_ufactor_shgc_adjusted_by_storms(storm_type, base_ufactor, base_shgc)
+  # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
+  # U-factor and SHGC adjustment based on the data obtained from the above reference
+  if base_ufactor < 0.45
+    fail "Invalid base window U-Factor for storm windows upgrade '#{base_ufactor}'"
+  end
+
+  if storm_type == 'clear'
+    ufactor_abs_reduction = 0.6435 * base_ufactor - 0.1533
+    shgc_corr = 0.9
+  elsif storm_type == 'low-e'
+    ufactor_abs_reduction = 0.766 * base_ufactor - 0.1532
+    shgc_corr = 0.8
+  else
+    fail "Could not find adjustment factors for storm type '#{storm_type}'"
+  end
+
+  ufactor = base_ufactor - ufactor_abs_reduction
+  shgc = base_shgc * shgc_corr
+
+  return ufactor, shgc
 end
 
 def get_roof_solar_absorptance(roof_color)
