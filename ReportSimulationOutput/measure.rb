@@ -455,7 +455,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     values.get.each do |value|
       year, month, day, hour, minute = value.split(' ')
       ts = Time.utc(year, month, day, hour, minute)
-      timestamps << ts.strftime('%Y/%m/%d %H:%M:00')
+      timestamps << ts.iso8601
     end
 
     return timestamps
