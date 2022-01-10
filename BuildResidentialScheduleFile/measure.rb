@@ -129,8 +129,10 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       hpxml_output_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_output_path))
     end
 
-    XMLHelper.write_file(doc, hpxml_output_path)
-    runner.registerInfo("Wrote file: #{hpxml_output_path}")
+    if (hpxml_path != hpxml_output_path) || (schedules_filepath != args[:output_csv_path])
+      XMLHelper.write_file(doc, hpxml_output_path)
+      runner.registerInfo("Wrote file: #{hpxml_output_path}")
+    end
 
     return true
   end
