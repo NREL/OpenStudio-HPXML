@@ -1350,9 +1350,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Include total and disaggregated by fuel
       emissions_data = []
       @emissions.values.each do |emission|
-        emissions_data << [emission.name, emission.timeseries_units] + emission.timeseries_output.map { |v| v.round(2) }
+        emissions_data << [emission.name, emission.timeseries_units] + emission.timeseries_output.map { |v| v.round(5) }
         emission.timeseries_output_by_fuel.each do |fuel, timeseries_output|
-          emissions_data << [emission.name.gsub(': Total', ': ' + fuel), emission.timeseries_units] + timeseries_output.map { |v| v.round(2) }
+          emissions_data << [emission.name.gsub(': Total', ': ' + fuel), emission.timeseries_units] + timeseries_output.map { |v| v.round(5) }
         end
       end
     else
