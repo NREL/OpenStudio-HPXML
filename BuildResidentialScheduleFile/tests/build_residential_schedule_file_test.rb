@@ -41,7 +41,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
-    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames)
     sf.validate_schedules(year: 2007)
@@ -93,7 +92,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod=Dec 1 - Jan 31') })
-    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames)
     sf.validate_schedules(year: 2007)
@@ -148,7 +146,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
-    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames)
     sf.validate_schedules(year: 2007)
@@ -201,7 +198,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod=Dec 1 - Jan 31') })
-    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames)
     sf.validate_schedules(year: 2007)
@@ -257,7 +253,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('RandomSeed=1') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
-    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames)
     sf.validate_schedules(year: 2007)
@@ -303,7 +298,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('RandomSeed=2') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
-    assert(warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames)
     sf.validate_schedules(year: 2007)
@@ -355,7 +349,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod=Jan 1 - Dec 31') })
-    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames)
     sf.validate_schedules(year: 2012)
@@ -408,58 +401,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
-    assert(!warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
-
-    sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames)
-    sf.validate_schedules(year: 2007)
-
-    assert_in_epsilon(6020, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnOccupants, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(3321, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnLightingInterior, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(2763, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnLightingExterior, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(2763, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnLightingGarage, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(150, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnLightingExteriorHoliday, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(2224, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnCookingRange, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(6673, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnRefrigerator, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(6673, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnExtraRefrigerator, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(6673, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnFreezer, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(2994, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnDishwasher, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(4158, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnClothesWasher, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(4503, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnClothesDryer, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(6020, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnCeilingFan, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(5468, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnPlugLoadsOther, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(2288, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnPlugLoadsTV, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(8760, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnPlugLoadsVehicle, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(3671, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnPlugLoadsWellPump, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(2074, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnFuelLoadsGrill, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(3671, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnFuelLoadsLighting, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(3671, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnFuelLoadsFireplace, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(2471, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnPoolPump, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(2471, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnPoolHeater, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(2502, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotTubPump, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(2650, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotTubHeater, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(2994, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterDishwasher, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(4158, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterClothesWasher, schedules: sf.tmp_schedules), 0.1)
-    assert_in_epsilon(4204, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::ColumnHotWaterFixtures, schedules: sf.tmp_schedules), 0.1)
-    assert(!sf.schedules.keys.include?(SchedulesFile::ColumnVacancy))
-  end
-
-  def test_overwrite_schedules_filepath
-    hpxml = _create_hpxml('base-schedules-detailed-smooth.xml')
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-
-    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic.csv'))
-    model, hpxml, result = _test_measure()
-
-    info_msgs = result.info.map { |x| x.logMessage }
-    warn_msgs = result.warnings.map { |x| x.logMessage }
-    assert(info_msgs.any? { |info_msg| info_msg.include?('smooth schedule') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('SimYear=2007') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('MinutesPerStep=60') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
-    assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
-    assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
-    assert(!info_msgs.any? { |info_msg| info_msg.include?('VacancyPeriod') })
-    assert(warn_msgs.any? { |warn_msg| warn_msg.include?('Overwriting') })
 
     sf = SchedulesFile.new(model: model, schedules_paths: hpxml.header.schedules_filepaths, col_names: SchedulesFile.ColumnNames)
     sf.validate_schedules(year: 2007)
