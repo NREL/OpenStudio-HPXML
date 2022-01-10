@@ -1544,7 +1544,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Hourly Electricity (for Cambium)
-    if not obj.hourly_output_by_system.empty?
+    if obj.is_a?(EndUse) && (not obj.hourly_output_by_system.empty?)
       orig_values = obj.hourly_output_by_system[sys_id]
       obj.hourly_output_by_system[sys_id] = obj.hourly_output_by_system[sys_id].map { |x| x * mult }
       diffs = obj.hourly_output_by_system[sys_id].zip(orig_values).map { |x, y| x - y }
