@@ -754,11 +754,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         next unless end_use.hourly_output.size > 0
 
         hourly_elec_net = [0.0] * end_use.hourly_output.size if hourly_elec_net.nil?
-        if end_use.is_negative
-          hourly_elec_net = hourly_elec_net.zip(end_use.hourly_output).map { |x, y| x - y * kwh_to_mwh }
-        else
-          hourly_elec_net = hourly_elec_net.zip(end_use.hourly_output).map { |x, y| x + y * kwh_to_mwh }
-        end
+        hourly_elec_net = hourly_elec_net.zip(end_use.hourly_output).map { |x, y| x + y * kwh_to_mwh }
       end
       if include_timeseries_emissions
         if timeseries_frequency == 'timestep'
