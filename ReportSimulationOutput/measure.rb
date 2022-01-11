@@ -835,7 +835,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         # Calculate emissions for fossil fuels
         @fuels.each do |fuel_type, fuel|
           next if [FT::Elec].include? fuel_type
-          next if fuel.annual_output <= 0
 
           fuel_map = { FT::Gas => [scenario.natural_gas_units, scenario.natural_gas_value],
                        FT::Propane => [scenario.propane_units, scenario.propane_value],
@@ -845,10 +844,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                        FT::WoodPellets => [scenario.wood_pellets_units, scenario.wood_pellets_value] }
           fuel_units, fuel_factor = fuel_map[fuel_type]
           if fuel_factor.nil?
-            runner.registerWarning("No emissions factor found for Scenario=#{scenario.name}, Type=#{scenario.emissions_type}, Fuel=#{fuel_type}.")
-            next
-          end
-          if fuel_units == HPXML::EmissionsScenario::UnitsKgPerMBtu
+            if fuel.annual_output != 0
+              runner.registerWarning("No emissions factor found for Scenario=#{scenario.name}, Type=#{scenario.emissions_type}, Fuel=#{fuel_type}.")
+            end
+            fuel_factor = 0.0
+            fuel_units_mult = 0.0
+          elsif fuel_units == HPXML::EmissionsScenario::UnitsKgPerMBtu
             fuel_units_mult = UnitConversions.convert(1.0, 'kg', 'lbm')
           elsif fuel_units == HPXML::EmissionsScenario::UnitsLbPerMBtu
             fuel_units_mult = 1.0

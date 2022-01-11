@@ -328,18 +328,43 @@ class ReportSimulationOutputTest < MiniTest::Test
     'co2Cambium2022HourlyMidCaseAERUsingRMPARegionTotal',
     'co2Cambium2022HourlyMidCaseAERUsingRMPARegionElectricity',
     'co2Cambium2022HourlyMidCaseAERUsingRMPARegionNaturalGas',
+    'co2Cambium2022HourlyMidCaseAERUsingRMPARegionFuelOil',
+    'co2Cambium2022HourlyMidCaseAERUsingRMPARegionPropane',
+    'co2Cambium2022HourlyMidCaseAERUsingRMPARegionWoodCord',
+    'co2Cambium2022HourlyMidCaseAERUsingRMPARegionWoodPellets',
+    'co2Cambium2022HourlyMidCaseAERUsingRMPARegionCoal',
     'co2Cambium2022HourlyMidCaseAERUsingNationalTotal',
     'co2Cambium2022HourlyMidCaseAERUsingNationalElectricity',
     'co2Cambium2022HourlyMidCaseAERUsingNationalNaturalGas',
+    'co2Cambium2022HourlyMidCaseAERUsingNationalFuelOil',
+    'co2Cambium2022HourlyMidCaseAERUsingNationalPropane',
+    'co2Cambium2022HourlyMidCaseAERUsingNationalWoodCord',
+    'co2Cambium2022HourlyMidCaseAERUsingNationalWoodPellets',
+    'co2Cambium2022HourlyMidCaseAERUsingNationalCoal',
     'co2Cambium2022AnnualMidCaseAERUsingNationalTotal',
     'co2Cambium2022AnnualMidCaseAERUsingNationalElectricity',
     'co2Cambium2022AnnualMidCaseAERUsingNationalNaturalGas',
+    'co2Cambium2022AnnualMidCaseAERUsingNationalFuelOil',
+    'co2Cambium2022AnnualMidCaseAERUsingNationalPropane',
+    'co2Cambium2022AnnualMidCaseAERUsingNationalWoodCord',
+    'co2Cambium2022AnnualMidCaseAERUsingNationalWoodPellets',
+    'co2Cambium2022AnnualMidCaseAERUsingNationalCoal',
     'so2eGRID2019TotalEmissionsRateUsingRMPARegionTotal',
     'so2eGRID2019TotalEmissionsRateUsingRMPARegionElectricity',
     'so2eGRID2019TotalEmissionsRateUsingRMPARegionNaturalGas',
+    'so2eGRID2019TotalEmissionsRateUsingRMPARegionFuelOil',
+    'so2eGRID2019TotalEmissionsRateUsingRMPARegionPropane',
+    'so2eGRID2019TotalEmissionsRateUsingRMPARegionWoodCord',
+    'so2eGRID2019TotalEmissionsRateUsingRMPARegionWoodPellets',
+    'so2eGRID2019TotalEmissionsRateUsingRMPARegionCoal',
     'noxeGRID2019TotalEmissionsRateUsingRMPARegionTotal',
     'noxeGRID2019TotalEmissionsRateUsingRMPARegionElectricity',
     'noxeGRID2019TotalEmissionsRateUsingRMPARegionNaturalGas',
+    'noxeGRID2019TotalEmissionsRateUsingRMPARegionFuelOil',
+    'noxeGRID2019TotalEmissionsRateUsingRMPARegionPropane',
+    'noxeGRID2019TotalEmissionsRateUsingRMPARegionWoodCord',
+    'noxeGRID2019TotalEmissionsRateUsingRMPARegionWoodPellets',
+    'noxeGRID2019TotalEmissionsRateUsingRMPARegionCoal',
     'hpxml_cfa',
     'hpxml_nbr',
     'hpxml_nst',
@@ -360,18 +385,43 @@ class ReportSimulationOutputTest < MiniTest::Test
     return ['Emissions: CO2: Cambium 2022 Hourly MidCase AER Using National: Total',
             'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using National: Electricity',
             'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using National: Natural Gas',
+            'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using National: Fuel Oil',
+            'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using National: Propane',
+            'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using National: Wood Cord',
+            'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using National: Wood Pellets',
+            'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using National: Coal',
             'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using RMPA Region: Total',
             'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using RMPA Region: Electricity',
             'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using RMPA Region: Natural Gas',
+            'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using RMPA Region: Fuel Oil',
+            'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using RMPA Region: Propane',
+            'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using RMPA Region: Wood Cord',
+            'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using RMPA Region: Wood Pellets',
+            'Emissions: CO2: Cambium 2022 Hourly MidCase AER Using RMPA Region: Coal',
             'Emissions: CO2: Cambium 2022 Annual MidCase AER Using National: Total',
             'Emissions: CO2: Cambium 2022 Annual MidCase AER Using National: Electricity',
             'Emissions: CO2: Cambium 2022 Annual MidCase AER Using National: Natural Gas',
+            'Emissions: CO2: Cambium 2022 Annual MidCase AER Using National: Fuel Oil',
+            'Emissions: CO2: Cambium 2022 Annual MidCase AER Using National: Propane',
+            'Emissions: CO2: Cambium 2022 Annual MidCase AER Using National: Wood Cord',
+            'Emissions: CO2: Cambium 2022 Annual MidCase AER Using National: Wood Pellets',
+            'Emissions: CO2: Cambium 2022 Annual MidCase AER Using National: Coal',
             'Emissions: SO2: eGRID 2019 Total Emissions Rate Using RMPA Region: Total',
             'Emissions: SO2: eGRID 2019 Total Emissions Rate Using RMPA Region: Electricity',
             'Emissions: SO2: eGRID 2019 Total Emissions Rate Using RMPA Region: Natural Gas',
+            'Emissions: SO2: eGRID 2019 Total Emissions Rate Using RMPA Region: Fuel Oil',
+            'Emissions: SO2: eGRID 2019 Total Emissions Rate Using RMPA Region: Propane',
+            'Emissions: SO2: eGRID 2019 Total Emissions Rate Using RMPA Region: Wood Cord',
+            'Emissions: SO2: eGRID 2019 Total Emissions Rate Using RMPA Region: Wood Pellets',
+            'Emissions: SO2: eGRID 2019 Total Emissions Rate Using RMPA Region: Coal',
             'Emissions: NOx: eGRID 2019 Total Emissions Rate Using RMPA Region: Total',
             'Emissions: NOx: eGRID 2019 Total Emissions Rate Using RMPA Region: Electricity',
-            'Emissions: NOx: eGRID 2019 Total Emissions Rate Using RMPA Region: Natural Gas']
+            'Emissions: NOx: eGRID 2019 Total Emissions Rate Using RMPA Region: Natural Gas',
+            'Emissions: NOx: eGRID 2019 Total Emissions Rate Using RMPA Region: Fuel Oil',
+            'Emissions: NOx: eGRID 2019 Total Emissions Rate Using RMPA Region: Propane',
+            'Emissions: NOx: eGRID 2019 Total Emissions Rate Using RMPA Region: Wood Cord',
+            'Emissions: NOx: eGRID 2019 Total Emissions Rate Using RMPA Region: Wood Pellets',
+            'Emissions: NOx: eGRID 2019 Total Emissions Rate Using RMPA Region: Coal']
   end
 
   def test_annual_only
@@ -489,7 +539,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     _check_for_constant_timeseries_step(timeseries_cols[0])
-    _check_for_nonzero_timeseries_value(timeseries_csv, emissions_timeseries_cols)
+    _check_for_nonzero_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
   end
 
   def test_timeseries_hourly_enduses
@@ -825,6 +875,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     _check_for_constant_timeseries_step(timeseries_cols[0])
+    _check_for_nonzero_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
     _check_for_zero_baseload_timeseries_value(timeseries_csv, ['End Use: Electricity: Refrigerator'])
   end
 
@@ -851,6 +902,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(365, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     _check_for_constant_timeseries_step(timeseries_cols[0])
+    _check_for_nonzero_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
     _check_for_zero_baseload_timeseries_value(timeseries_csv, ['End Use: Electricity: Refrigerator'])
   end
 
@@ -875,6 +927,7 @@ class ReportSimulationOutputTest < MiniTest::Test
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)
     assert_equal(12, timeseries_rows.size - 2)
+    _check_for_nonzero_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
     _check_for_zero_baseload_timeseries_value(timeseries_csv, ['End Use: Electricity: Refrigerator'])
   end
 
