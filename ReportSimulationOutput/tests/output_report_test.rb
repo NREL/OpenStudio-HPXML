@@ -947,13 +947,14 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false,
-                  'timeseries_local_time' => 'DST' }
+                  'timestamps_daylight_saving_time' => true }
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     timeseries_rows = CSV.read(timeseries_csv)
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
+    assert_equal(2, timeseries_rows[0].select { |r| r.start_with?('Time') }.size)
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     assert_equal(3, _check_for_constant_timeseries_step(timeseries_cols[1]))
   end
@@ -969,15 +970,41 @@ class ReportSimulationOutputTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false,
-                  'timeseries_local_time' => 'UTC' }
+                  'timestamps_coordinated_universal_time' => true }
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     timeseries_rows = CSV.read(timeseries_csv)
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
+    assert_equal(2, timeseries_rows[0].select { |r| r.start_with?('Time') }.size)
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[1]))
+  end
+
+  def test_timeseries_local_time_dst_and_utc
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
+                  'timeseries_frequency' => 'timestep',
+                  'include_timeseries_fuel_consumptions' => true,
+                  'include_timeseries_end_use_consumptions' => false,
+                  'include_timeseries_hot_water_uses' => false,
+                  'include_timeseries_total_loads' => false,
+                  'include_timeseries_component_loads' => false,
+                  'include_timeseries_zone_temperatures' => false,
+                  'include_timeseries_airflows' => false,
+                  'include_timeseries_weather' => false,
+                  'timestamps_daylight_saving_time' => true,
+                  'timestamps_coordinated_universal_time' => true }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    assert_equal(3, timeseries_rows[0].select { |r| r.start_with?('Time') }.size)
+    assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
+    assert_equal(3, _check_for_constant_timeseries_step(timeseries_cols[1]))
+    assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[2]))
   end
 
   def test_eri_designs
