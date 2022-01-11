@@ -755,45 +755,57 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   def write_annual_output_results(runner, outputs, output_format, annual_output_path)
+    # Set rounding precision.
+    # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 day instead of a full year.
+    dig = 2 # Default for annual (or near-annual) data
+    year = 2000 # Not important
+    sim_n_days = (Schedule.get_day_num_from_month_day(year, @hpxml.header.sim_end_month, @hpxml.header.sim_end_day) -
+                  Schedule.get_day_num_from_month_day(year, @hpxml.header.sim_begin_month, @hpxml.header.sim_begin_day))
+    if sim_n_days <= 10 # 10 days or less; add two decimal places
+      dig += 2
+    elsif sim_n_days <= 100 # 100 days or less; add one decimal place
+      dig += 1
+    end
+
     line_break = nil
     elec_produced = @end_uses.select { |k, eu| eu.is_negative }.map { |k, eu| eu.annual_output.to_f }.sum(0.0)
 
     results_out = []
     @fuels.each do |fuel_type, fuel|
-      results_out << ["#{fuel.name} (#{fuel.annual_units})", fuel.annual_output.to_f.round(2)]
+      results_out << ["#{fuel.name} (#{fuel.annual_units})", fuel.annual_output.to_f.round(dig)]
       if fuel_type == FT::Elec
-        results_out << ['Fuel Use: Electricity: Net (MBtu)', (fuel.annual_output.to_f + elec_produced).round(2)]
+        results_out << ['Fuel Use: Electricity: Net (MBtu)', (fuel.annual_output.to_f + elec_produced).round(dig)]
       end
     end
     results_out << [line_break]
     @end_uses.each do |key, end_use|
-      results_out << ["#{end_use.name} (#{end_use.annual_units})", end_use.annual_output.to_f.round(2)]
+      results_out << ["#{end_use.name} (#{end_use.annual_units})", end_use.annual_output.to_f.round(dig)]
     end
     results_out << [line_break]
     @loads.each do |load_type, load|
-      results_out << ["#{load.name} (#{load.annual_units})", load.annual_output.to_f.round(2)]
+      results_out << ["#{load.name} (#{load.annual_units})", load.annual_output.to_f.round(dig)]
     end
     results_out << [line_break]
     @unmet_hours.each do |load_type, unmet_hour|
-      results_out << ["#{unmet_hour.name} (#{unmet_hour.annual_units})", unmet_hour.annual_output.to_f.round(2)]
+      results_out << ["#{unmet_hour.name} (#{unmet_hour.annual_units})", unmet_hour.annual_output.to_f.round(dig)]
     end
     results_out << [line_break]
     @peak_fuels.each do |key, peak_fuel|
-      results_out << ["#{peak_fuel.name} (#{peak_fuel.annual_units})", peak_fuel.annual_output.to_f.round(0)]
+      results_out << ["#{peak_fuel.name} (#{peak_fuel.annual_units})", peak_fuel.annual_output.to_f.round(dig - 2)]
     end
     results_out << [line_break]
     @peak_loads.each do |load_type, peak_load|
-      results_out << ["#{peak_load.name} (#{peak_load.annual_units})", peak_load.annual_output.to_f.round(2)]
+      results_out << ["#{peak_load.name} (#{peak_load.annual_units})", peak_load.annual_output.to_f.round(dig)]
     end
     if @component_loads.values.map { |load| load.annual_output.to_f }.sum != 0 # Skip if component loads not calculated
       results_out << [line_break]
       @component_loads.each do |load_type, load|
-        results_out << ["#{load.name} (#{load.annual_units})", load.annual_output.to_f.round(2)]
+        results_out << ["#{load.name} (#{load.annual_units})", load.annual_output.to_f.round(dig)]
       end
     end
     results_out << [line_break]
     @hot_water_uses.each do |hot_water_type, hot_water|
-      results_out << ["#{hot_water.name} (#{hot_water.annual_units})", hot_water.annual_output.to_f.round(0)]
+      results_out << ["#{hot_water.name} (#{hot_water.annual_units})", hot_water.annual_output.to_f.round(dig - 2)]
     end
 
     if output_format == 'csv'
@@ -1123,6 +1135,17 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                       include_timeseries_weather)
     return if timeseries_frequency == 'none'
 
+    # Set rounding precision.
+    # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 minute date instead of hourly data.
+    dig = 2 # Default for hourly (or longer) data
+    if timeseries_frequency == 'timestep'
+      if @hpxml.header.timestep <= 2 # 2-minute timesteps or shorter; add two decimal places
+        dig += 2
+      elsif @hpxml.header.timestep <= 15 # 15-minute timesteps or shorter; add one decimal place
+        dig += 1
+      end
+    end
+
     # Time column
     if ['timestep', 'hourly', 'daily', 'monthly'].include? timeseries_frequency
       data = ['Time', nil]
@@ -1134,45 +1157,45 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     if include_timeseries_fuel_consumptions
-      fuel_data = @fuels.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
+      fuel_data = @fuels.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(dig) } }
       if outputs[:total_elec_produced_timeseries].sum(0.0) != 0
-        fuel_data.insert(1, ['Fuel Use: Electricity: Net', get_timeseries_units_from_fuel_type(FT::Elec)] + outputs[:total_elec_net_timeseries].map { |v| v.round(2) })
+        fuel_data.insert(1, ['Fuel Use: Electricity: Net', get_timeseries_units_from_fuel_type(FT::Elec)] + outputs[:total_elec_net_timeseries].map { |v| v.round(dig) })
       end
     else
       fuel_data = []
     end
     if include_timeseries_end_use_consumptions
-      end_use_data = @end_uses.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
+      end_use_data = @end_uses.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(dig) } }
     else
       end_use_data = []
     end
     if include_timeseries_hot_water_uses
-      hot_water_use_data = @hot_water_uses.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
+      hot_water_use_data = @hot_water_uses.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(dig) } }
     else
       hot_water_use_data = []
     end
     if include_timeseries_total_loads
-      total_loads_data = @loads.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
+      total_loads_data = @loads.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(dig) } }
     else
       total_loads_data = {}
     end
     if include_timeseries_component_loads
-      comp_loads_data = @component_loads.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
+      comp_loads_data = @component_loads.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(dig) } }
     else
       comp_loads_data = []
     end
     if include_timeseries_zone_temperatures
-      zone_temps_data = @zone_temps.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
+      zone_temps_data = @zone_temps.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(dig) } }
     else
       zone_temps_data = []
     end
     if include_timeseries_airflows
-      airflows_data = @airflows.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
+      airflows_data = @airflows.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(dig) } }
     else
       airflows_data = []
     end
     if include_timeseries_weather
-      weather_data = @weather.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
+      weather_data = @weather.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(dig) } }
     else
       weather_data = []
     end
