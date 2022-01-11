@@ -2390,7 +2390,7 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
   elsif ['base-schedules-detailed-stochastic-vacancy.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'stochastic'
-    sch_args['schedules_vacancy_period'] = 'Jan 1 - Dec 31'
+    sch_args['schedules_vacancy_period'] = 'Dec 15 - Jan 15'
     sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-schedules-detailed-smooth.xml'].include? hpxml_file
