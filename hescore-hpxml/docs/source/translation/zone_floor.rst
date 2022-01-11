@@ -139,27 +139,25 @@ Floor insulation above basement or crawlspace
 
 If the foundation type is a basement or crawlspace, for each frame floor above
 the foundation, a weighted average using the floor area and R-value are
-calculated. The area is obtained from the ``Area`` element. The R-value is the
-sum of the ``FrameFloor/Insulation/Layer/NominalRValue`` element values for
-each frame floor. The effective R-value is looked up in the following table.
+calculated. The area is obtained from the ``Area`` element.
 
-.. table:: Floor center-of-cavity effective R-value
+The floor R-value can be described by using ``NominalRValue`` or ``AssemblyRValue``.
+If a user wishes to use a nominal R-value, ``NominalRValue`` elements for all layers need to be provided.
+Otherwise, ``AssemblyRValue`` elements for each layer need to be provided.
 
-   =================  ==================
-   Insulation Level   Effective R-value   
-   =================  ==================
-   R-0                4                   
-   R-11               15.8                
-   R-13               17.8                
-   R-15               19.8                
-   R-19               23.8                
-   R-21               25.8                
-   R-25               31.8                
-   R-30               37.8                
-   R-38               42.8                
-   =================  ==================
+If nominal R-value is used, the R-value is the sum of the ``FrameFloor/Insulation/Layer/NominalRValue`` element values 
+for each frame floor. The nearest discrete R-value from the list of possible R-values for that floor type
+is used to determine an assembly code. 
+Then, the assembly R-value of the corresponding assembly code from the lookup table is used. 
+The lookup table can be found at `hescorehpxml\\lookups\\lu_floor_eff_rvalue.csv
+<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_floor_eff_rvalue.csv>`_.
 
-Then a weighted average R-value is calculated by weighting the U-values by area.
+If assembly R-value is used, the discrete R-value nearest to assembly R-value
+from the lookup table is used. The lookup table can be found at `hescorehpxml\\lookups\\lu_floor_eff_rvalue.csv
+<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_floor_eff_rvalue.csv>`_.
+
+When more than one HPXML ``FrameFloor`` element must be combined into one floor
+construction for HEScore, a weighted average assembly R-value is determined by weighting the U-values by area.
 
 .. math::
    :nowrap:
@@ -170,15 +168,5 @@ Then a weighted average R-value is calculated by weighting the U-values by area.
    R_{eff,avg} &= \frac{1}{U_{eff,avg}} \\
    \end{align*}
 
-The effective R-value of the R-0 insulation level is then subtracted.
-
-.. math::
-
-   R = R_{eff,avg} - 4.0
-   
-Finally, the nearest insulation level is selected from the enumeration list.
-
-
-
-
+Then the discrete R-value nearest to the weighted average assembly R-value from the lookup table is used.
 
