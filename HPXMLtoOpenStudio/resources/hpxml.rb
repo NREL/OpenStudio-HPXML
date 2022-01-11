@@ -948,7 +948,7 @@ class HPXML < Object
         XMLHelper.add_element(hvac_sizing_control, 'UseMaxLoadForHeatPumps', @use_max_load_for_heat_pumps, :boolean, @use_max_load_for_heat_pumps_isdefaulted) unless @use_max_load_for_heat_pumps.nil?
         XMLHelper.add_element(hvac_sizing_control, 'AllowIncreasedFixedCapacities', @allow_increased_fixed_capacities, :boolean, @allow_increased_fixed_capacities_isdefaulted) unless @allow_increased_fixed_capacities.nil?
       end
-      if not @schedules_filepaths.nil?
+      if (not @schedules_filepaths.nil?) && (not @schedules_filepaths.empty?)
         extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
         @schedules_filepaths.each do |schedules_filepath|
           XMLHelper.add_element(extension, 'SchedulesFilePath', schedules_filepath, :string)
