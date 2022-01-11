@@ -56,9 +56,44 @@ class HPXML3toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
                           # noqa: E501
                           )
 
+    def get_wall_assembly_rvalue(self, v2_wall, wall):
+        return convert_to_type(float, self.xpath(wall, 'h:Insulation/h:AssemblyEffectiveRValue/text()'))
+
+    def every_wall_layer_has_nominal_rvalue(self, v2_wall, wall):
+        # This variable will be true if every wall layer has a NominalRValue *or*
+        # if there are no insulation layers
+        wall_layers = self.xpath(wall, 'h:Insulation/h:Layer', aslist=True)
+        every_layer_has_nominal_rvalue = True  # Considered to have nominal R-value unless assembly R-value is used
+        if wall_layers:
+            for layer in wall_layers:
+                if self.xpath(layer, 'h:NominalRValue') is None:
+                    every_layer_has_nominal_rvalue = False
+                    break
+        elif self.xpath(wall, 'h:Insulation/h:AssemblyEffectiveRValue/text()') is not None:
+            every_layer_has_nominal_rvalue = False
+
+        return every_layer_has_nominal_rvalue
+
     def get_attic_roof_rvalue(self, v2_attic, roof):
-        return self.xpath(roof,
-                          'sum(h:Insulation/h:Layer/h:NominalRValue)')
+        # if there is no nominal R-value, it will return 0
+        return self.xpath(roof, 'sum(h:Insulation/h:Layer/h:NominalRValue)')
+
+    def get_attic_roof_assembly_rvalue(self, v2_attic, roof):
+        # if there is no assembly effective R-value, it will return None
+        return convert_to_type(float, self.xpath(roof, 'h:Insulation/h:AssemblyEffectiveRValue/text()'))
+
+    def every_attic_roof_layer_has_nominal_rvalue(self, v2_attic, roof):
+        roof_layers = self.xpath(roof, 'h:Insulation/h:Layer', aslist=True)
+        every_layer_has_nominal_rvalue = True  # Considered to have nominal R-value unless assembly R-value is used
+        if roof_layers:
+            for layer in roof_layers:
+                if self.xpath(layer, 'h:NominalRValue') is None:
+                    every_layer_has_nominal_rvalue = False
+                    break
+        elif self.xpath(roof, 'h:Insulation/h:AssemblyEffectiveRValue/text()') is not None:
+            every_layer_has_nominal_rvalue = False
+
+        return every_layer_has_nominal_rvalue
 
     def get_attic_knee_walls(self, attic, b):
         knee_walls = []
@@ -108,6 +143,42 @@ class HPXML3toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
             floor_r = 0
 
         return floor_r
+
+    def get_attic_floor_assembly_rvalue(self, attic, b):
+        frame_floors = self.get_attic_floors(attic, b)
+        if len(frame_floors) == 0:
+            return None
+
+        frame_floor_dict_ls = []
+        for frame_floor in frame_floors:
+            floor_area = convert_to_type(float, self.xpath(frame_floor, 'h:Area/text()'))
+            assembly_rvalue = convert_to_type(
+                float, self.xpath(frame_floor, 'h:Insulation/h:AssemblyEffectiveRValue/text()'))
+            if assembly_rvalue is None:
+                return
+            frame_floor_dict_ls.append({'area': floor_area, 'rvalue': assembly_rvalue})
+        # Average
+        try:
+            floor_r = sum(x['area'] for x in frame_floor_dict_ls) / \
+                      sum(x['area'] / x['rvalue'] for x in frame_floor_dict_ls)
+        except ZeroDivisionError:
+            floor_r = None
+
+        return convert_to_type(float, floor_r)
+
+    def every_attic_floor_layer_has_nominal_rvalue(self, attic, b):
+        frame_floors = self.get_attic_floors(attic, b)
+        every_layer_has_nominal_rvalue = True  # Considered to have nominal R-value unless assembly R-value is used
+        for frame_floor in frame_floors:
+            for layer in self.xpath(frame_floor, 'h:Insulation/h:Layer', aslist=True):
+                if self.xpath(layer, 'h:NominalRValue') is None:
+                    every_layer_has_nominal_rvalue = False
+                    break
+            if self.xpath(frame_floor, 'h:Insulation/h:AssemblyEffectiveRValue/text()') is not None:
+                every_layer_has_nominal_rvalue = False
+                break
+
+        return every_layer_has_nominal_rvalue
 
     def get_attic_floors(self, attic, b):
         floor_idref = self.xpath(attic, 'h:AttachedToFrameFloor/@idref')
@@ -160,15 +231,37 @@ class HPXML3toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
     def get_attic_roof_area(self, roof):
         return self.xpath(roof, 'h:Area/text()')
 
+    def get_framefloor_assembly_rvalue(self, v2_framefloor, framefloor):
+        return convert_to_type(float, self.xpath(framefloor, 'h:Insulation/h:AssemblyEffectiveRValue/text()'))
+
+    def get_foundation_wall_assembly_rvalue(self, v2_fwall, fwall):
+        return convert_to_type(float, self.xpath(fwall, 'h:Insulation/h:AssemblyEffectiveRValue/text()'))
+
+    def get_slab_assembly_rvalue(self, v2_slab, slab):
+        return convert_to_type(float, self.xpath(slab, 'h:PerimeterInsulation/h:AssemblyEffectiveRValue/text()'))
+
+    def every_framefloor_layer_has_nominal_rvalue(self, v2_framefloor, framefloor):
+        framefloor_layers = self.xpath(framefloor, 'h:Insulation/h:Layer', aslist=True)
+        every_layer_has_nominal_rvalue = True  # Considered to have nominal R-value unless assembly R-value is used
+        if framefloor_layers:
+            for layer in framefloor_layers:
+                if self.xpath(layer, 'h:NominalRValue') is None:
+                    every_layer_has_nominal_rvalue = False
+                    break
+        elif self.xpath(framefloor, 'h:Insulation/h:AssemblyEffectiveRValue/text()') is not None:
+            every_layer_has_nominal_rvalue = False
+
+        return every_layer_has_nominal_rvalue
+
     def get_solarscreen(self, wndw_skylight):
         return bool(self.xpath(wndw_skylight, 'h:ExteriorShading/h:Type/text()') == 'solar screens')
 
     def get_hescore_walls(self, b):
-        return self.xpath(b,
-                          'h:BuildingDetails/h:Enclosure/h:Walls/h:Wall[h:ExteriorAdjacentTo="outside" or not('
-                          'h:ExteriorAdjacentTo)]',
-                          # noqa: E501
-                          aslist=True)
+        return self.xpath(
+            b, 'h:BuildingDetails/h:Enclosure/h:Walls/h:Wall\
+                [((h:ExteriorAdjacentTo="outside" and not(contains(h:ExteriorAdjacentTo, "garage"))) or\
+                    not(h:ExteriorAdjacentTo)) and not(contains(h:InteriorAdjacentTo, "attic"))]',  # noqa: E501
+            aslist=True)
 
     def check_is_doublepane(self, window, glass_layers):
         return (self.xpath(window, 'h:StormWindow') is not None and glass_layers == 'single-pane') or \
@@ -181,7 +274,12 @@ class HPXML3toHEScoreTranslator(HPXMLtoHEScoreTranslatorBase):
         return False
 
     def get_duct_location(self, hpxml_duct_location, bldg):
-        loc_hierarchy = self.duct_location_map[hpxml_duct_location]
+        try:
+            loc_hierarchy = self.duct_location_map[hpxml_duct_location]
+            if loc_hierarchy is None:
+                return
+        except TypeError:
+            raise TranslationError('Invalid duct location specified')
         if loc_hierarchy is None:
             return
         for loc in loc_hierarchy:
