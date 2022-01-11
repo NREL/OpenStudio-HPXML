@@ -386,7 +386,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
     HVAC.apply_shared_systems(@hpxml) # Needed for ERI shared HVAC systems
     @eri_design = @hpxml.header.eri_design
-    @timestamps = get_timestamps()
 
     setup_outputs()
 
@@ -412,6 +411,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
       eri_output_path = nil
     end
+
+    @timestamps = get_timestamps(timeseries_frequency)
 
     # Retrieve outputs
     outputs = get_outputs(runner, timeseries_frequency,
@@ -459,25 +460,26 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     GC.start()
   end
 
-  def get_timestamps()
-    timestamps = {}
-    timestamps['none'] = []
+  def get_timestamps(timeseries_frequency)
+    if timeseries_frequency == 'hourly'
+      interval_type = 1
+    elsif timeseries_frequency == 'daily'
+      interval_type = 2
+    elsif timeseries_frequency == 'monthly'
+      interval_type = 3
+    elsif timeseries_frequency == 'timestep'
+      interval_type = -1
+    end
 
-    map = { 'hourly' => 1,
-            'daily' => 2,
-            'monthly' => 3,
-            'timestep' => -1 }
-    map.each do |timeseries_freq, interval_type|
-      query = "SELECT Year || ' ' || Month || ' ' || Day || ' ' || Hour || ' ' || Minute As Timestamp FROM Time WHERE IntervalType='#{interval_type}'"
-      values = @sqlFile.execAndReturnVectorOfString(query)
-      fail "Query error: #{query}" unless values.is_initialized
+    query = "SELECT Year || ' ' || Month || ' ' || Day || ' ' || Hour || ' ' || Minute As Timestamp FROM Time WHERE IntervalType='#{interval_type}'"
+    values = @sqlFile.execAndReturnVectorOfString(query)
+    fail "Query error: #{query}" unless values.is_initialized
 
-      timestamps[timeseries_freq] = []
-      values.get.each do |value|
-        year, month, day, hour, minute = value.split(' ')
-        ts = Time.utc(year, month, day, hour, minute)
-        timestamps[timeseries_freq] << ts.strftime('%Y/%m/%d %H:%M:00')
-      end
+    timestamps = []
+    values.get.each do |value|
+      year, month, day, hour, minute = value.split(' ')
+      ts = Time.utc(year, month, day, hour, minute)
+      timestamps << ts.strftime('%Y/%m/%d %H:%M:00')
     end
 
     return timestamps
@@ -652,7 +654,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next if solar_system.solar_fraction.nil?
 
       @loads[LT::HotWaterSolarThermal].annual_output = 0.0 if @loads[LT::HotWaterSolarThermal].annual_output.nil?
-      @loads[LT::HotWaterSolarThermal].timeseries_output = [0.0] * @timestamps[timeseries_frequency].size if @loads[LT::HotWaterSolarThermal].timeseries_output.nil?
+      @loads[LT::HotWaterSolarThermal].timeseries_output = [0.0] * @timestamps.size if @loads[LT::HotWaterSolarThermal].timeseries_output.nil?
 
       if not solar_system.water_heating_system.nil?
         dhw_ids = [solar_system.water_heating_system.id]
@@ -1350,7 +1352,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     else
       fail "Unexpected timeseries_frequency: #{timeseries_frequency}."
     end
-    @timestamps[timeseries_frequency].each do |timestamp|
+    @timestamps.each do |timestamp|
       data << timestamp
     end
 
@@ -1412,7 +1414,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     return if fuel_data.size + end_use_data.size + emissions_data.size + hot_water_use_data.size + total_loads_data.size + comp_loads_data.size + zone_temps_data.size + airflows_data.size + weather_data.size == 0
 
-    fail 'Unable to obtain timestamps.' if @timestamps[timeseries_frequency].empty?
+    fail 'Unable to obtain timestamps.' if @timestamps.empty?
 
     if output_format == 'csv'
       # Assemble data
@@ -1473,7 +1475,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timeseries_frequency)
-    return [0.0] * @timestamps[timeseries_frequency].size if meter_names.empty?
+    return [0.0] * @timestamps.size if meter_names.empty?
 
     vars = "'" + meter_names.uniq.join("','") + "'"
     query = "SELECT SUM(VariableValue*#{unit_conv}+#{unit_adder}) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex IN (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName IN (#{vars}) AND ReportingFrequency='#{reporting_frequency_map[timeseries_frequency]}' AND VariableUnits='J') GROUP BY TimeIndex ORDER BY TimeIndex"
@@ -1481,12 +1483,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     fail "Query error: #{query}" unless values.is_initialized
 
     values = values.get
-    values += [0.0] * @timestamps[timeseries_frequency].size if values.size == 0
+    values += [0.0] * @timestamps.size if values.size == 0
     return values
   end
 
   def get_report_variable_data_timeseries(key_values, variables, unit_conv, unit_adder, timeseries_frequency, disable_ems_shift = false, is_negative: false)
-    return [0.0] * @timestamps[timeseries_frequency].size if variables.empty?
+    return [0.0] * @timestamps.size if variables.empty?
 
     if key_values.uniq.size > 1 && key_values.include?('EMS') && !disable_ems_shift
       # Split into EMS and non-EMS queries so that the EMS values shift occurs for just the EMS query
@@ -1504,12 +1506,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     fail "Query error: #{query}" unless values.is_initialized
 
     values = values.get
-    values += [0.0] * @timestamps[timeseries_frequency].size if values.size == 0
+    values += [0.0] * @timestamps.size if values.size == 0
 
     return values if disable_ems_shift
 
     # Remove this code if we ever figure out a better way to handle when EMS output should shift
-    if (key_values.size == 1) && (key_values[0] == 'EMS') && (@timestamps[timeseries_frequency].size > 0)
+    if (key_values.size == 1) && (key_values[0] == 'EMS') && (@timestamps.size > 0)
       if (timeseries_frequency.downcase == 'timestep' || (timeseries_frequency.downcase == 'hourly' && @model.getTimestep.numberOfTimestepsPerHour == 1))
         # Shift all values by 1 timestep due to EMS reporting lag
         return values[1..-1] + [values[0]]
