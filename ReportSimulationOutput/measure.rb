@@ -407,8 +407,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @timestamps = get_timestamps(@model, timeseries_frequency, 'none')
     if timeseries_frequency != 'none'
       if timeseries_local_time.is_initialized
-        timeseries_local_time = timeseries_local_time.get
-        timestamps_local_time = get_timestamps(@model, timeseries_frequency, timeseries_local_time) if timeseries_local_time != 'none'
+        @timeseries_local_time = timeseries_local_time.get
+        timestamps_local_time = get_timestamps(@model, timeseries_frequency, @timeseries_local_time) if @timeseries_local_time != 'none'
       end
     end
 
@@ -1194,12 +1194,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     if timestamps_local_time
-      timestamps2 = ['Time2', nil]
+      timestamps2 = ["Time#{@timeseries_local_time}", nil]
       timestamps_local_time.each do |timestamp|
         timestamps2 << timestamp
       end
-    else
-      timestamps2 = []
     end
 
     if include_timeseries_fuel_consumptions
@@ -1252,7 +1250,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     if output_format == 'csv'
       # Assemble data
-      data = data.zip(timestamps2, *fuel_data, *end_use_data, *hot_water_use_data, *total_loads_data, *comp_loads_data, *zone_temps_data, *airflows_data, *weather_data)
+      if timestamps_local_time
+        data = data.zip(timestamps2, *fuel_data, *end_use_data, *hot_water_use_data, *total_loads_data, *comp_loads_data, *zone_temps_data, *airflows_data, *weather_data)
+      else
+        data = data.zip(*fuel_data, *end_use_data, *hot_water_use_data, *total_loads_data, *comp_loads_data, *zone_temps_data, *airflows_data, *weather_data)
+      end
 
       # Error-check
       n_elements = []
@@ -1269,6 +1271,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Assemble data
       h = {}
       h['Time'] = data[2..-1]
+      h["Time#{@timeseries_local_time}"] = timestamps2[2..-1] if timestamps_local_time
+
       [fuel_data, end_use_data, hot_water_use_data, total_loads_data, comp_loads_data, zone_temps_data, airflows_data, weather_data].each do |d|
         d.each do |o|
           grp, name = o[0].split(':', 2)
