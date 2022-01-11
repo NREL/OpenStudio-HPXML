@@ -147,7 +147,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     success = schedule_generator.create(args: args)
     return false if not success
 
-    success = schedule_generator.export(schedules_path: File.expand_path(args[:output_csv_path]))
+    output_csv_path = args[:output_csv_path]
+    unless (Pathname.new output_csv_path).absolute?
+      output_csv_path = File.expand_path(File.join(File.dirname(__FILE__), output_csv_path))
+    end
+
+    success = schedule_generator.export(schedules_path: output_csv_path)
     return false if not success
 
     info_msgs << "SimYear=#{args[:sim_year]}"
