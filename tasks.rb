@@ -365,8 +365,6 @@ def create_hpxmls
 
   hpxml_docs = {}
   hpxmls_files.each_with_index do |(hpxml_file, parent), i|
-    next if !hpxml_file.include?('schedules-')
-
     puts "[#{i + 1}/#{hpxmls_files.size}] Generating #{hpxml_file}..."
 
     begin
@@ -2387,21 +2385,18 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
   if ['base-schedules-detailed-stochastic.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'stochastic'
-    # sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'
-    sch_args['output_csv_path'] = File.expand_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'))
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-schedules-detailed-stochastic-vacancy.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'stochastic'
     sch_args['schedules_vacancy_period'] = 'Jan 1 - Dec 31'
-    # sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
-    sch_args['output_csv_path'] = File.expand_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'))
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   elsif ['base-schedules-detailed-smooth.xml'].include? hpxml_file
     sch_args['hpxml_path'] = args['hpxml_path']
     sch_args['schedules_type'] = 'smooth'
-    # sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
-    sch_args['output_csv_path'] = File.expand_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'))
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
     sch_args['hpxml_output_path'] = sch_args['hpxml_path']
   end
 end
@@ -2532,12 +2527,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   # Logic that can only be applied based on the file name
   if ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
     hpxml.header.allow_increased_fixed_capacities = true
-  elsif ['base-schedules-detailed-stochastic.xml'].include? hpxml_file
-    # hpxml.header.schedules_filepaths << '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'
-  elsif ['base-schedules-detailed-stochastic-vacancy.xml'].include? hpxml_file
-    # hpxml.header.schedules_filepaths << '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
-  elsif ['base-schedules-detailed-smooth.xml'].include? hpxml_file
-    # hpxml.header.schedules_filepaths << '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
   elsif ['base-location-capetown-zaf.xml'].include? hpxml_file
     hpxml.header.state_code = nil
   end

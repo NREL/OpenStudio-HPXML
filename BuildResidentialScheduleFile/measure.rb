@@ -64,7 +64,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('output_csv_path', true)
     arg.setDisplayName('Schedules: Output CSV Path')
-    arg.setDescription('Absolute/relative path of the csv file containing user-specified occupancy schedules.')
+    arg.setDescription('Absolute/relative path of the csv file containing user-specified occupancy schedules. Relative paths are relative to the HPXML output path.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_output_path', true)
@@ -96,6 +96,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       fail "'#{hpxml_path}' does not exist or is not an .xml file."
     end
 
+    hpxml_output_path = args[:hpxml_output_path]
+    unless (Pathname.new hpxml_output_path).absolute?
+      hpxml_output_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_output_path))
+    end
+    args[:hpxml_output_path] = hpxml_output_path
+
     hpxml = HPXML.new(hpxml_path: hpxml_path)
 
     # create EpwFile object
@@ -122,11 +128,6 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     end
 
     # write out the modified hpxml
-    hpxml_output_path = args[:hpxml_output_path]
-    unless (Pathname.new hpxml_output_path).absolute?
-      hpxml_output_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_output_path))
-    end
-
     if (hpxml_path != hpxml_output_path) || !schedules_filepaths.include?(args[:output_csv_path])
       XMLHelper.write_file(doc, hpxml_output_path)
       runner.registerInfo("Wrote file: #{hpxml_output_path}")
@@ -149,7 +150,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     output_csv_path = args[:output_csv_path]
     unless (Pathname.new output_csv_path).absolute?
-      output_csv_path = File.expand_path(File.join(File.dirname(__FILE__), output_csv_path))
+      output_csv_path = File.expand_path(File.join(File.dirname(args[:hpxml_output_path]), output_csv_path))
     end
 
     success = schedule_generator.export(schedules_path: output_csv_path)
