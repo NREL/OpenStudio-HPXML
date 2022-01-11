@@ -209,72 +209,42 @@ HPXML v3
 Radiant Barrier
 ***************
 
-If the ``Roof/RadiantBarrier`` element exists and has a "true" value, the attic
-is assumed to have a radiant barrier and no roof deck insulation is assumed
-according to the construction codes available in HEScore.
+If the ``Roof/RadiantBarrier`` element exists and has a "true" value and roof deck insulation R-value is 0,
+the attic is assumed to have a radiant barrier according to the construction codes available in HEScore.
+If the ``Roof/RadiantBarrier`` element exists and has a "true" value but roof deck insulation R-value greater than 0,
+the roof will be modeled as a roof with no radiant barrier.
 
 .. _roof-rvalues:
 
 Roof R-value
 ************
 
-R-values for the roof deck are added up by summing the values of the
-``Layer/NominalRValue``. If the roof construction was determined to have
-:ref:`rigid-sheathing`, an R-value of 5 is subtracted from the roof R-value sum
+The roof R-value can be described by using ``NominalRValue`` or ``AssemblyRValue``.
+If a user wishes to use a nominal R-value, ``NominalRValue`` elements for all layers need to be provided.
+Otherwise, ``AssemblyRValue`` elements for each layer need to be provided.
+
+If nominal R-value is used, the R-value is summed for all insulation layers. If the roof construction 
+was determined to have :ref:`rigid-sheathing`, an R-value of 5 is subtracted from the roof R-value sum
 to account for the R-value of the sheathing in the HEScore construction.
+The nearest discrete R-value from the list of possible R-values for that roof type
+is used to determine an assembly code. 
+Then, the assembly R-value of the corresponding 
+assembly code from the lookup table is used. The lookup table can be found 
+at `hescorehpxml\\lookups\\lu_roof_eff_rvalue.csv
+<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_roof_eff_rvalue.csv>`_.
 
-Starting from HPXML v3, multiple roofs are allowed to be attached to the same
-attic, if the attic has more than one ``Roof`` element with roof insulation, the
-insulation values are combined by first selecting the nearest roof
-center-of-cavity R-value for each roof area from the table below.
+If assembly R-value is used, the discrete R-value nearest to assembly R-value
+from the lookup table is used. The lookup table can be found at `hescorehpxml\\lookups\\lu_roof_eff_rvalue.csv
+<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_roof_eff_rvalue.csv>`_.
+If the attic has more than one ``Roof`` element, a weighted average assembly R-value is determined
+by weighting the U-values by area.
+Then the discrete R-value nearest to the weighted average assembly R-value from the lookup table is used.
 
-.. table:: Roof Center-of-Cavity Effective R-values
-
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |Exterior           |Composition or Metal |Wood Shakes |Clay Tile |Concrete Tile |Tar and Gravel |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |R-value            |Effective R-value                                                           |
-   +===================+=====================+============+==========+==============+===============+
-   | **Standard**                                                                                   |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |R-0                |2.7                  |3.2         |2.2       |2.3           |2.3            |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |R-11               |13.6                 |14.1        |13.2      |13.2          |13.2           |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |R-13               |15.6                 |16.1        |15.2      |15.2          |15.2           |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |R-15               |17.6                 |18.1        |17.2      |17.2          |17.2           |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |R-19               |21.6                 |22.1        |21.2      |21.2          |21.2           |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |R-21               |23.6                 |24.1        |23.2      |23.2          |23.2           |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |R-27               |29.6                 |30.1        |29.2      |29.2          |29.2           |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |R-30               |32.6                 |33.1        |32.2      |32.2          |32.2           |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   | **w/ Radiant Barrier**                                                                         |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |R-0                |5                    |5.5         |4.5       |4.6           |4.6            |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   | **w/ foam sheeting**                                                                           |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |R-0                |6.8                  |7.3         |6.4       |6.4           |6.4            |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |R-11               |17.8                 |18.3        |17.4      |17.4          |17.4           |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |R-13               |19.8                 |20.3        |19.4      |19.4          |19.4           |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |R-15               |21.8                 |22.3        |21.4      |21.4          |21.4           |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |R-19               |25.8                 |26.3        |25.4      |25.4          |25.4           |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-   |R-21               |27.8                 |28.3        |27.4      |27.4          |27.4           |
-   +-------------------+---------------------+------------+----------+--------------+---------------+
-
-Then a weighted average is calculated by weighting the U-values by area. This averaged Center-of-Cavity Effective
-R value is combined from all roofs attached to the same attic. The highest weighted roof construction type is selected
-to represent properties of the attic.
+Starting from HPXML v3, multiple roofs are allowed to be attached to the same attic. 
+If the attic has more than one ``Roof`` element with roof insulation,
+a weighted average R-value is calculated using assembly R-value for each ``Roof``, 
+whether nominal R-value or assembly R-value is used. 
+The weighted average is calculated by weighting the U-values by area.
 
 .. math::
    :nowrap:
@@ -285,30 +255,22 @@ to represent properties of the attic.
    R_{eff,avg} &= \frac{1}{U_{eff,avg}} \\
    \end{align*}
 
-If the house has more than two attics specified, the attics of the same roof
-types are combined. Therefore, the same weighted average calculation is
-performed (taking roof-level averaged R as :math:`R_{i}` and attic area
-determined in `attic area`_ as :math:`A_{i}`) to combine multiple attics.
-
-Then the R-0 effective center-of-cavity R-value (:math:`R_{offset}`) is selected
-for highest weighted roof construction type for the attic represented in the
-calculation and is subtracted from :math:`R_{eff,avg}`. 
-
-.. math::
-
-   R = R_{eff,avg} - R_{offset}
-
-Finally the R-value is rounded to the nearest insulation level in the
-enumeration choices for the highest weighted roof construction type for the
-attic is included in the calculation.
+Then the nearest discrete R-value to the weighted average R-value from the lookup table is used.
+The lookup table can be found at `hescorehpxml\\lookups\\lu_roof_eff_rvalue.csv
+<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_roof_eff_rvalue.csv>`_.
 
 Attic R-value
 *************
- 
+
 Determining the attic floor insulation levels uses the same procedure as
-:ref:`roof-rvalues` except the lookup table is different. The attic floor
-center-of-cavity R-values are each R-0.5 greater than the nominal R-values in
-the enumeration list. 
+:ref:`roof-rvalues` except the lookup table is different. 
+
+If nominal R-value is used, the attic floor center-of-cavity R-values are each R-0.5 greater
+than the nominal R-values in the enumeration list.
+
+If assembly R-value is used, the lookup table at `hescorehpxml\\lookups\\lu_ceiling_eff_rvalue.csv
+<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_ceiling_eff_rvalue.csv>`_
+is used. 
 
 If the primary roof type is determined to be a cathedral ceiling, then an attic
 R-value is not calculated.
@@ -360,9 +322,18 @@ wall". See below an example:
    <Walls>
 
 If an attic has knee walls specified, the area of the knee walls will be added
-to the attic floor area. The knee walls center-of-cavity R-value is R-1.8 greater 
-than the nominal R-value. The knee walls center-of-cavity R-value will be reflected 
+to the attic floor area.
+
+The knee walls R-value can be described by nominal R-value or assembly R-value.
+
+If nominal R-value is used, the knee walls center-of-cavity R-value will be reflected 
 in the area weighted center-of-cavity effective R-value of the attic floor. 
-This averaged center-of-cavity effective R value is combined from all knee walls 
+The knee walls center-of-cavity R-value is R-1.8 greater than the nominal R-value.
+
+If assembly R-value is used, the knee walls assembly R-value will be reflected in
+the area weighted assembly effective R-value of the attic floor.
+
+The averaged center-of-cavity or assembly effective R value is combined from all knee walls 
 and attic floors attached to the same attic. The highest weighted attic floor 
 construction type is selected.
+

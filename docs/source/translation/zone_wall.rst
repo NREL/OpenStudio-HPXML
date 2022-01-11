@@ -60,6 +60,24 @@ inputs in HPXML to discrete inputs required for HEScore.
 
 .. _construction codes: https://docs.google.com/spreadsheet/pub?key=0Avk3IqpWXaRkdGR6cXFwdVJ4ZVdYX25keDVEX1pPYXc&output=html
 
+The wall R-value can be described by using nominal R-value or assembly R-value.
+If a user wishes to use a nominal R-value, nominal R-value for all layers need to be provided.
+Otherwise, assembly R-values for each layer need to be provided.
+
+If nominal R-value is used, the R-value is summed for all insulation layers. If the wall construction 
+was determined to have :ref:`rigid-sheathing`, an R-value of 5 is subtracted from the wall R-value sum
+to account for the R-value of the sheathing in the HEScore construction. 
+The nearest discrete R-value from the list of possible R-values for that wall type
+is used to determine an assembly code. Then, the assembly R-value of the corresponding 
+assembly code from the lookup table is used. The lookup table can be found 
+at `hescorehpxml\\lookups\\lu_wall_eff_rvalue.csv
+<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_wall_eff_rvalue.csv>`_.
+
+If assembly R-value is used, the discrete R-value nearest to assembly R-value
+from the lookup table for that wall type is used. The lookup table can be found
+at `hescorehpxml\\lookups\\lu_wall_eff_rvalue.csv
+<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_wall_eff_rvalue.csv>`_.
+
 Wood Frame Walls
 ================
 
@@ -118,20 +136,13 @@ is selected.
 Finally, if neither of the above conditions are met, the wall is specified as
 simply "Wood Frame" in HEScore. 
 
-In all cases the R-value is summed for all insulation layers and the
-nearest discrete R-value from the list of possible R-values for that wall type
-is used. For walls with rigid foam sheathing, R-5 is subtracted from the
-nominal R-value sum to account for the R-value of the sheathing in the HEScore
-construction assembly.
-
 Siding is selected according to the :ref:`siding map <sidingmap>`.
 
 Structural Brick
 ================
 
 If ``WallType/StructuralBrick`` is found in HPXML, one of the structural brick
-codes in HEScore is specified. The nearest R-value to the sum of all the
-insulation layer nominal R-values is selected.
+codes in HEScore is specified.
 
 .. code-block:: xml
    :emphasize-lines: 4,9,12
@@ -158,8 +169,7 @@ Concrete Block or Stone
 =======================
 
 If ``WallType/ConcreteMasonryUnit`` or ``WallType/Stone`` is found, one of the
-concrete block construction codes is used in HEScore. The nearest R-value to
-the sum of all the insulation layer nominal R-values is selected. The siding is
+concrete block construction codes is used in HEScore. The siding is
 translated using the :ref:`same assumptions as wood stud walls <sidingmap>`
 with the exception that vinyl, wood, or aluminum siding is not available and if
 those are specified in the HPXML an error will result.
@@ -212,88 +222,9 @@ HPXMl ``Wall`` as described in :ref:`wall-construction`. The wall construction
 and exterior finish that represent the largest combined area are used to
 represent the side of the house. 
 
-A weighted R-value is calculated by looking up the center-of-cavity
-R-value for the wall construction, exterior finish, and nominal R-value for
-each ``Wall`` from the following table.
-
-.. table:: Wall center-of-cavity R-values
-
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |Exterior |Wood Siding       |Stucco |Vinyl |Aluminum |Brick Veneer |None |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-value  |Effective R-value                                              |
-   +=========+==================+=======+======+=========+=============+=====+
-   |**Wood Frame**                                                           |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-0      |3.6               |2.3    |2.2   |2.1      |2.9          |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-3      |5.7               |4.4    |4.3   |4.2      |5.0          |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-7      |9.7               |8.4    |8.3   |8.2      |9.0          |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-11     |13.7              |12.4   |12.3  |12.2     |13.0         |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-13     |15.7              |14.4   |14.3  |14.2     |15.0         |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-15     |17.7              |16.4   |16.3  |16.2     |17.0         |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-19     |21.7              |20.4   |20.3  |20.2     |21.0         |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-21     |23.7              |22.4   |22.3  |22.2     |23.0         |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |**Wood Frame w/insulated sheathing**                                     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-0      |6.1               |5.4    |5.3   |5.2      |6.0          |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-3      |9.1               |8.4    |8.3   |8.2      |9.0          |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-7      |13.1              |12.4   |12.3  |12.2     |13.0         |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-11     |17.1              |16.4   |16.3  |16.2     |17.0         |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-13     |19.1              |18.4   |18.3  |18.2     |19.0         |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-15     |21.1              |20.4   |20.3  |20.2     |21.0         |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-19     |25.1              |24.4   |24.3  |24.2     |25.0         |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-21     |27.1              |26.4   |26.3  |26.2     |27.0         |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |**Optimum Value Engineering**                                            |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-19     |21.0              |20.3   |20.1  |20.1     |20.9         |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-21     |23.0              |22.3   |22.1  |22.1     |22.9         |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-27     |29.0              |28.3   |28.1  |28.1     |28.9         |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-33     |35.0              |34.3   |34.1  |34.1     |34.9         |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-38     |40.0              |39.3   |39.1  |39.1     |39.9         |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |**Structural Brick**                                                     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-0      |                  |       |      |         |             |2.9  |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-5      |                  |       |      |         |             |7.9  |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-10     |                  |       |      |         |             |12.8 |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |**Concrete Block**                                                       |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-0      |                  |4.1    |      |         |5.6          |4.0  |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-3      |                  |5.7    |      |         |7.2          |5.6  |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-6      |                  |8.5    |      |         |10.0         |8.3  |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |**Straw Bale**                                                           |
-   +---------+------------------+-------+------+---------+-------------+-----+
-   |R-0      |                  |58.8   |      |         |             |     |
-   +---------+------------------+-------+------+---------+-------------+-----+
-
-
-Then a weighted average is calculated by weighting the U-values values by area.
+Whether nominal R-value or assembly R-value is used, a weighted average R-value is calculated
+using assembly R-value for each ``Wall``. 
+The weighted average is calculated by weighting the U-values by area.
 
 .. math::
    :nowrap:
@@ -304,18 +235,7 @@ Then a weighted average is calculated by weighting the U-values values by area.
    R_{eff,avg} &= \frac{1}{U_{eff,avg}} \\
    \end{align*}
 
-The R-0 center-of-cavity R-value (:math:`R_{offset}`) is selected for
-the highest weighted wall construction type represented in the calculation and
-is subtracted from :math:`R_{eff,avg}`. For construction types where there is
-no R-0 nominal value, the lowest nominal R-value is subtracted from the
-corresponding effective R-value.
-
-.. math::
-
-   R = R_{eff,avg} - R_{offset}
-
-Finally the R-value is rounded to the nearest insulation level in the
-enumeration choices for the highest weighted roof construction type included in
-the calculation.
-
+Then the nearest discrete R-value to the weighted average R-value from the lookup table is used.
+The lookup table can be found at `hescorehpxml\\lookups\\lu_wall_eff_rvalue.csv
+<https://github.com/NREL/hescore-hpxml/blob/assembly_eff_r_values/hescorehpxml/lookups/lu_wall_eff_rvalue.csv>`_.
 

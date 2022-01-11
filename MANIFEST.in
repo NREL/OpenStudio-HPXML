@@ -1,2 +1,4 @@
-recursive-include hescorehpxml/schemas *.xsd
+recursive-include hescorehpxml/schemas *.xsd *.json
+
+recursive-include hescorehpxml/lookups *.csv
 
