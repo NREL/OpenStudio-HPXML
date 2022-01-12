@@ -101,7 +101,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('timestamps_daylight_saving_time', false)
     arg.setDisplayName('Generate Timeseries Output: TimeDST Column')
-    arg.setDescription('Optionally generate, in addition to the default local standard Time column, a local clock TimeDST column.')
+    arg.setDescription('Optionally generate, in addition to the default local standard Time column, a local clock TimeDST column. Requires that daylight saving time is enabled.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -111,11 +111,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('coordinated_universal_time_offset', false)
-    arg.setDisplayName('Generate Timeseries Output: TimeUTC Offset')
-    arg.setDescription('The UTC offset, in hours. If not specified, the time zone of the EPW weather file is assumed.')
-    arg.setUnits('hr')
-    args << arg
+    # arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('coordinated_universal_time_offset', false)
+    # arg.setDisplayName('Generate Timeseries Output: TimeUTC Offset')
+    # arg.setDescription('The UTC offset, in hours. If not specified, the time zone of the EPW weather file is assumed.')
+    # arg.setUnits('hr')
+    # args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('annual_output_file_name', false)
     arg.setDisplayName('Annual Output File Name')
@@ -363,7 +363,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       include_timeseries_weather = runner.getBoolArgumentValue('include_timeseries_weather', user_arguments)
       timestamps_daylight_saving_time = runner.getOptionalBoolArgumentValue('timestamps_daylight_saving_time', user_arguments)
       timestamps_coordinated_universal_time = runner.getOptionalBoolArgumentValue('timestamps_coordinated_universal_time', user_arguments)
-      coordinated_universal_time_offset = runner.getOptionalIntegerArgumentValue('coordinated_universal_time_offset', user_arguments)
+      # coordinated_universal_time_offset = runner.getOptionalIntegerArgumentValue('coordinated_universal_time_offset', user_arguments)
     end
     annual_output_file_name = runner.getOptionalStringArgumentValue('annual_output_file_name', user_arguments)
     timeseries_output_file_name = runner.getOptionalStringArgumentValue('timeseries_output_file_name', user_arguments)
@@ -381,8 +381,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @model.setSqlFile(@sqlFile)
 
     hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
+    hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     @hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: building_id)
+    @hpxml_defaults = HPXML.new(hpxml_path: hpxml_defaults_path)
     HVAC.apply_shared_systems(@hpxml) # Needed for ERI shared HVAC systems
     @eri_design = @hpxml.header.eri_design
 
@@ -411,15 +413,16 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       eri_output_path = nil
     end
 
-    @timestamps = get_timestamps(@model, timeseries_frequency)
+    @timestamps = get_timestamps(timeseries_frequency)
     if timeseries_frequency != 'none'
       if timestamps_daylight_saving_time.is_initialized
         @timestamps_dst = 'DST'
-        timestamps_dst = get_timestamps(@model, timeseries_frequency, @timestamps_dst) if timestamps_daylight_saving_time.get
+        timestamps_dst = get_timestamps(timeseries_frequency, @timestamps_dst) if timestamps_daylight_saving_time.get
       end
       if timestamps_coordinated_universal_time.is_initialized
         @timestamps_utc = 'UTC'
-        timestamps_utc = get_timestamps(@model, timeseries_frequency, @timestamps_utc, coordinated_universal_time_offset) if timestamps_coordinated_universal_time.get
+        # timestamps_utc = get_timestamps(timeseries_frequency, @timestamps_utc, coordinated_universal_time_offset) if timestamps_coordinated_universal_time.get
+        timestamps_utc = get_timestamps(timeseries_frequency, @timestamps_utc) if timestamps_coordinated_universal_time.get
       end
     end
 
@@ -469,7 +472,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     GC.start()
   end
 
-  def get_timestamps(model, timeseries_frequency, timestamps_local_time = nil, utc_offset = nil)
+  def get_timestamps(timeseries_frequency, timestamps_local_time = nil)
     if timeseries_frequency == 'hourly'
       interval_type = 1
     elsif timeseries_frequency == 'daily'
@@ -485,30 +488,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     fail "Query error: #{query}" unless values.is_initialized
 
     if timestamps_local_time == 'DST'
-      run_period_control_daylight_saving_time = nil
-      model.getModelObjects.each do |model_object| # FIXME: getRunPeriodControlDaylightSavingTime creates the object with defaults
-        obj_type = model_object.to_s.split(',')[0].gsub('OS:', '').gsub(':', '')
-        next if obj_type != 'RunPeriodControlDaylightSavingTime'
-
-        run_period_control_daylight_saving_time = model.getRunPeriodControlDaylightSavingTime
-        break
+      dst_start_ts = Time.utc(@hpxml_defaults.header.sim_calendar_year, @hpxml_defaults.header.dst_begin_month, @hpxml_defaults.header.dst_begin_day, 2)
+      dst_end_ts = Time.utc(@hpxml_defaults.header.sim_calendar_year, @hpxml_defaults.header.dst_end_month, @hpxml_defaults.header.dst_end_day, 1)
+    elsif timestamps_local_time == 'UTC'
+      if @hpxml.header.time_zone.nil?
+        utc_offset = @model.getSite.timeZone
+      else
+        utc_offset = @hpxml.header.time_zone
       end
-
-      unless run_period_control_daylight_saving_time.nil?
-        dst_start_date = run_period_control_daylight_saving_time.startDate
-        # DST starts at 2:00 AM standard time and it ends at 1:00 AM standard time.
-        dst_start_datetime = OpenStudio::DateTime.new(dst_start_date, OpenStudio::Time.new(0, 2, 0, 0))
-        dst_end_date = run_period_control_daylight_saving_time.endDate
-        dst_end_datetime = OpenStudio::DateTime.new(dst_end_date, OpenStudio::Time.new(0, 1, 0, 0))
-
-        dst_start_date = dst_start_datetime.date
-        dst_start_time = dst_start_datetime.time
-        dst_end_date = dst_end_datetime.date
-        dst_end_time = dst_end_datetime.time
-
-        dst_start_ts = Time.utc(dst_start_date.year, dst_start_date.monthOfYear.value, dst_start_date.dayOfMonth, dst_start_time.hours, dst_start_time.minutes)
-        dst_end_ts = Time.utc(dst_end_date.year, dst_end_date.monthOfYear.value, dst_end_date.dayOfMonth, dst_end_time.hours, dst_end_time.minutes)
-      end
+      utc_offset *= 3600 # seconds
     end
 
     timestamps = []
@@ -521,11 +509,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           ts += 3600 # 1 hr shift forward
         end
       elsif timestamps_local_time == 'UTC'
-        utc_offset = model.getSite.timeZone
-        if utc_offset.is_initialized
-          utc_offset = utc_offset.get
-        end
-        utc_offset *= 3600 # seconds
         ts -= utc_offset
       end
 
