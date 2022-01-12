@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>report_utility_bills</name>
+  <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
+  <version_id>9f938c7d-9f90-4917-9f65-56ae7e18d428</version_id>
+  <version_modified>20220112T211747Z</version_modified>
+  <xml_checksum>15BF4E57</xml_checksum>
+  <class_name>ReportUtilityBills</class_name>
+  <display_name>Utility Bills Report</display_name>
+  <description>TODO</description>
+  <modeler_description>TODO</modeler_description>
+  <arguments />
+  <outputs />
+  <provenances />
+  <tags>
+    <tag>Reporting.QAQC</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ReportingMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>utility_bills_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A0F3407E</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>2B22739B</checksum>
+    </file>
+  </files>
+</measure>
