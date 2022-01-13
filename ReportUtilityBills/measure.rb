@@ -184,6 +184,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       return false
     end
 
+    # assign the user inputs to variables
+    args = get_argument_values(runner, arguments(model), user_arguments)
+    args = Hash[args.collect { |k, v| [k.to_sym, v] }]
+
+    output_format = args[:output_format].get
+
     sqlFile = runner.lastEnergyPlusSqlFile
     if sqlFile.empty?
       runner.registerError('Cannot find EnergyPlus sql file.')
@@ -196,14 +202,14 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
     @model.setSqlFile(@sqlFile)
 
-    hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
-    hpxml = HPXML.new(hpxml_path: hpxml_path)
+    hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
 
-    # assign the user inputs to variables
-    args = get_argument_values(runner, arguments(model), user_arguments)
-    args = Hash[args.collect { |k, v| [k.to_sym, v] }]
-
-    output_format = args[:output_format].get
+    # Require full year
+    if !(hpxml.header.sim_begin_month == 1 && hpxml.header.sim_begin_day == 1 && hpxml.header.sim_end_month == 12 && hpxml.header.sim_end_day == 31)
+      runner.registerError('A full annual simulation is required for calculating utility bills.')
+      return false
+    end
 
     # Set paths
     output_dir = File.dirname(@sqlFile.path.to_s)
@@ -218,7 +224,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     # Utility bills
     @utility_bills.each do |fuel_type, utility_bill|
-      fixed_charge = 0.0
       if fuel_type == FT::Elec
         fixed_charge = args[:electricity_fixed_charge]
         marginal_rate = args[:electricity_marginal_rate]
@@ -333,8 +338,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         results_out << [line_break]
         segment = new_segment
       end
-      results_out << ["#{key}: Fixed (#{utility_bill.units})", utility_bill.fixed.round(2)]
-      results_out << ["#{key}: Marginal (#{utility_bill.units})", utility_bill.marginal.round(2)]
+      results_out << ["#{key}: Fixed (#{utility_bill.units})", utility_bill.fixed.round(2)] if !utility_bill.fixed.nil?
+      results_out << ["#{key}: Marginal (#{utility_bill.units})", utility_bill.marginal.round(2)] if !utility_bill.fixed.nil?
       results_out << ["#{key}: Total (#{utility_bill.units})", utility_bill.total.round(2)]
     end
 
@@ -358,7 +363,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
   class BaseOutput
     def initialize()
-      @fixed = 0.0
+      @fixed = nil
       @marginal = 0.0
       @total = 0.0
       @units = '$'

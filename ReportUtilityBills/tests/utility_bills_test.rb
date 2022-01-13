@@ -7,18 +7,18 @@ require 'openstudio/measure/ShowRunnerOutput'
 require_relative '../measure.rb'
 
 class ReportUtilityBillsTest < MiniTest::Test
-  def test_simple
-    args_hash = {}
-    args_hash['electricity_bill_type'] = 'Simple'
-    args_hash['electricity_fixed_charge'] = 12.0
-    args_hash['electricity_marginal_rate'] = Constants.Auto
-    args_hash['natural_gas_fixed_charge'] = 8.0
-    args_hash['natural_gas_marginal_rate'] = Constants.Auto
-    args_hash['fuel_oil_marginal_rate'] = Constants.Auto
-    args_hash['propane_marginal_rate'] = Constants.Auto
-    args_hash['wood_cord_marginal_rate'] = Constants.Auto
-    args_hash['wood_pellets_marginal_rate'] = Constants.Auto
-    args_hash['coal_marginal_rate'] = Constants.Auto
+  def test_simple_calculations
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
+                  'electricity_bill_type' => 'Simple',
+                  'electricity_fixed_charge' => 12.0,
+                  'electricity_marginal_rate' => Constants.Auto,
+                  'natural_gas_fixed_charge' => 8.0,
+                  'natural_gas_marginal_rate' => Constants.Auto,
+                  'fuel_oil_marginal_rate' => Constants.Auto,
+                  'propane_marginal_rate' => Constants.Auto,
+                  'wood_cord_marginal_rate' => Constants.Auto,
+                  'wood_pellets_marginal_rate' => Constants.Auto,
+                  'coal_marginal_rate' => Constants.Auto }
     bills_csv = _test_measure(args_hash)
     assert(File.exist?(bills_csv))
 
@@ -29,20 +29,10 @@ class ReportUtilityBillsTest < MiniTest::Test
       'Natural Gas: Fixed ($)' => 96.0,
       'Natural Gas: Marginal ($)' => 94.01,
       'Natural Gas: Total ($)' => 190.01,
-      'Fuel Oil: Fixed ($)' => 0.0,
-      'Fuel Oil: Marginal ($)' => 0.0,
       'Fuel Oil: Total ($)' => 0.0,
-      'Propane: Fixed ($)' => 0.0,
-      'Propane: Marginal ($)' => 0.0,
       'Propane: Total ($)' => 0.0,
-      'Wood Cord: Fixed ($)' => 0.0,
-      'Wood Cord: Marginal ($)' => 0.0,
       'Wood Cord: Total ($)' => 0.0,
-      'Wood Pellets: Fixed ($)' => 0.0,
-      'Wood Pellets: Marginal ($)' => 0.0,
       'Wood Pellets: Total ($)' => 0.0,
-      'Coal: Fixed ($)' => 0.0,
-      'Coal: Marginal ($)' => 0.0,
       'Coal: Total ($)' => 0.0
     }
 

@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>838d2893-5836-4c12-b1d2-ce259b2e2044</version_id>
-  <version_modified>20220113T222505Z</version_modified>
+  <version_id>3a7eef28-4c9b-4d93-aa44-479dafc2ca12</version_id>
+  <version_modified>20220113T231536Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -24,12 +24,6 @@
     </attribute>
   </attributes>
   <files>
-    <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>AD4704F1</checksum>
-    </file>
     <file>
       <filename>Electricity.csv</filename>
       <filetype>csv</filetype>
@@ -55,10 +49,16 @@
       <checksum>D205D809</checksum>
     </file>
     <file>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>AA4CE890</checksum>
+    </file>
+    <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>4B7F371E</checksum>
+      <checksum>D587D543</checksum>
     </file>
     <file>
       <version>
@@ -69,7 +69,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>6EF7D584</checksum>
+      <checksum>7DC8E247</checksum>
     </file>
   </files>
 </measure>
