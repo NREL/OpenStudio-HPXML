@@ -59,6 +59,12 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
   args['output_format'] = output_format
   update_args_hash(measures, measure_subdir, args)
 
+  # Add utility bills measure to workflow
+  measure_subdir = 'ReportUtilityBills'
+  args = {}
+  args['output_format'] = output_format
+  update_args_hash(measures, measure_subdir, args)
+
   results = run_hpxml_workflow(rundir, measures, measures_dir, debug: debug, ep_input_format: ep_input_format)
 
   return results[:success]

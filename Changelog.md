@@ -1,5 +1,6 @@
 ## OpenStudio-HPXML v1.4.0
 __New Features__
+- Adds a new results_bills.csv output file to summarize calculated utility bills.
 - Allows optional `AirInfiltrationMeasurement/InfiltrationHeight` input.
 - Adds a "Fuel Use: Electricity: Net" timeseries output column for homes with electricity generation.
 - BuildResidentialHPXML measure: Adds an optional argument to allow the HPXML file to be written with default values applied.
