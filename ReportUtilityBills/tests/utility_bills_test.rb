@@ -1,18 +1,64 @@
 # frozen_string_literal: true
 
 require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
-require_relative '../../HPXMLtoOpenStudio/resources/hpxml'
-require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper'
-require 'oga'
-require 'openstudio'
-require 'openstudio/measure/ShowRunnerOutput'
-require 'fileutils'
-require 'csv'
-require_relative '../measure.rb'
+# require_relative '../../HPXMLtoOpenStudio/resources/hpxml'
+# require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper'
+# require 'oga'
+# require 'openstudio'
+# require 'openstudio/measure/ShowRunnerOutput'
+# require 'fileutils'
+# require 'csv'
+# require_relative '../measure.rb'
 
-class ReportHPXMLOutputTest < MiniTest::Test
-  def test_new
+class ReportUtilityBillsTest < MiniTest::Test
+  def test_simple
+    args_hash = {}
+    args_hash['electricity_bill_type'] = 'Simple'
+    args_hash['electricity_fixed_charge'] = 12.0
+    args_hash['electricity_marginal_rate'] = '0.10'
+    args_hash['natural_gas_fixed_charge'] = 8.0
+    args_hash['natural_gas_marginal_rate'] = '0.10'
+    args_hash['fuel_oil_marginal_rate'] = '0.10'
+    args_hash['propane_marginal_rate'] = '0.10'
+    args_hash['wood_cord_marginal_rate'] = '0.10'
+    args_hash['wood_pellets_marginal_rate'] = '0.10'
+    args_hash['coal_marginal_rate'] = '0.10'
+    bills_csv = _test_measure(args_hash)
+    assert(File.exist?(bills_csv))
 
+    expected_bills = {
+      'Electricity: Fixed ($)' => 144.0,
+      'Electricity: Marginal ($)' => 1025.04,
+      'Electricity: Total ($)' => 1169.04,
+      'Natural Gas: Fixed ($)' => 96.0,
+      'Natural Gas: Marginal ($)' => 14.53,
+      'Natural Gas: Total ($)' => 110.53,
+      'Fuel Oil: Fixed ($)' => 0.0,
+      'Fuel Oil: Marginal ($)' => 0.0,
+      'Fuel Oil: Total ($)' => 0.0,
+      'Propane: Fixed ($)' => 0.0,
+      'Propane: Marginal ($)' => 0.0,
+      'Propane: Total ($)' => 0.0,
+      'Wood Cord: Fixed ($)' => 0.0,
+      'Wood Cord: Marginal ($)' => 0.0,
+      'Wood Cord: Total ($)' => 0.0,
+      'Wood Pellets: Fixed ($)' => 0.0,
+      'Wood Pellets: Marginal ($)' => 0.0,
+      'Wood Pellets: Total ($)' => 0.0,
+      'Coal: Fixed ($)' => 0.0,
+      'Coal: Marginal ($)' => 0.0,
+      'Coal: Total ($)' => 0.0
+    }
+
+    actual_bills = {}
+    File.readlines(bills_csv).each do |line|
+      next if line.strip.empty?
+
+      key, value = line.split(',').map { |x| x.strip }
+      actual_bills[key] = Float(value)
+    end
+
+    assert_equal(expected_bills, actual_bills)
   end
 
   def _test_measure(args_hash)
