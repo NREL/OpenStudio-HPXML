@@ -111,12 +111,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(false)
     args << arg
 
-    # arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('coordinated_universal_time_offset', false)
-    # arg.setDisplayName('Generate Timeseries Output: TimeUTC Offset')
-    # arg.setDescription('The UTC offset, in hours. If not specified, the time zone of the EPW weather file is assumed.')
-    # arg.setUnits('hr')
-    # args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('annual_output_file_name', false)
     arg.setDisplayName('Annual Output File Name')
     arg.setDescription("If not provided, defaults to 'results_annual.csv' (or 'results_annual.json').")
@@ -363,7 +357,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       include_timeseries_weather = runner.getBoolArgumentValue('include_timeseries_weather', user_arguments)
       timestamps_daylight_saving_time = runner.getOptionalBoolArgumentValue('timestamps_daylight_saving_time', user_arguments)
       timestamps_coordinated_universal_time = runner.getOptionalBoolArgumentValue('timestamps_coordinated_universal_time', user_arguments)
-      # coordinated_universal_time_offset = runner.getOptionalIntegerArgumentValue('coordinated_universal_time_offset', user_arguments)
     end
     annual_output_file_name = runner.getOptionalStringArgumentValue('annual_output_file_name', user_arguments)
     timeseries_output_file_name = runner.getOptionalStringArgumentValue('timeseries_output_file_name', user_arguments)
@@ -421,7 +414,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
       if timestamps_coordinated_universal_time.is_initialized
         @timestamps_utc = 'UTC'
-        # timestamps_utc = get_timestamps(timeseries_frequency, @timestamps_utc, coordinated_universal_time_offset) if timestamps_coordinated_universal_time.get
         timestamps_utc = get_timestamps(timeseries_frequency, @timestamps_utc) if timestamps_coordinated_universal_time.get
       end
     end

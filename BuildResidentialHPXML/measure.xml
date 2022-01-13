@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>388bdcae-6b4a-4419-9738-b4ebe8fdc400</version_id>
-  <version_modified>20220112T015312Z</version_modified>
+  <version_id>0a905c60-14a8-4eea-a203-3262407fb4fb</version_id>
+  <version_modified>20220113T223326Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -451,7 +451,7 @@
     <argument>
       <name>site_time_zone</name>
       <display_name>Site: Time Zone</display_name>
-      <description>Time zone of the home address. If not provided, uses the EPW weather file time zone.</description>
+      <description>Time zone, for UTC offset, of the home address. If not provided, uses the EPW weather file time zone.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -6025,17 +6025,6 @@
       <checksum>D6804D8C</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>7948A9ED</checksum>
-    </file>
-    <file>
       <filename>extra_files/base-mf.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
@@ -6796,6 +6785,17 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>12832F04</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>0A713AF1</checksum>
     </file>
   </files>
 </measure>

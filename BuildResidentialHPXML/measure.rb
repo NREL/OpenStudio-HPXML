@@ -156,7 +156,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('site_time_zone', site_time_zone_choices, false)
     arg.setDisplayName('Site: Time Zone')
-    arg.setDescription('Time zone of the home address. If not provided, uses the EPW weather file time zone.')
+    arg.setDescription('Time zone, for UTC offset, of the home address. If not provided, uses the EPW weather file time zone.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_station_epw_filepath', true)
@@ -3331,7 +3331,7 @@ class HPXMLFile
       hpxml.header.zip_code = args[:site_zip_code]
     end
     hpxml.header.state_code = args[:site_state_code]
-    hpxml.header.time_zone = args[:site_time_zone]
+    hpxml.header.time_zone_utc_offset = args[:site_time_zone]
     hpxml.header.event_type = 'proposed workscope'
   end
 
