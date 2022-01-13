@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>38958eaf-6446-4508-97ea-d722d1430792</version_id>
-  <version_modified>20220113T194922Z</version_modified>
+  <version_id>af483087-4214-4be4-a065-74de078a4fd9</version_id>
+  <version_modified>20220113T211800Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -25,10 +25,16 @@
   </attributes>
   <files>
     <file>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>AD4704F1</checksum>
+    </file>
+    <file>
       <filename>utility_bills_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>554D712E</checksum>
+      <checksum>8345DD56</checksum>
     </file>
     <file>
       <version>
@@ -39,13 +45,31 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>09639588</checksum>
+      <checksum>4AB4E230</checksum>
     </file>
     <file>
-      <filename>util.rb</filename>
-      <filetype>rb</filetype>
+      <filename>Electricity.csv</filename>
+      <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AD4704F1</checksum>
+      <checksum>6C2CC8FC</checksum>
+    </file>
+    <file>
+      <filename>Fuel Oil.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FBAE07C0</checksum>
+    </file>
+    <file>
+      <filename>Natural Gas.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>43EDF817</checksum>
+    </file>
+    <file>
+      <filename>Propane.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D205D809</checksum>
     </file>
   </files>
 </measure>

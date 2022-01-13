@@ -1,25 +1,21 @@
 # frozen_string_literal: true
 
 require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
-# require_relative '../../HPXMLtoOpenStudio/resources/hpxml'
-# require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper'
-# require 'oga'
-# require 'openstudio'
-# require 'openstudio/measure/ShowRunnerOutput'
-# require 'fileutils'
-# require 'csv'
-# require_relative '../measure.rb'
+require_relative '../../HPXMLtoOpenStudio/resources/constants'
+require 'openstudio'
+require 'openstudio/measure/ShowRunnerOutput'
+require_relative '../measure.rb'
 
 class ReportUtilityBillsTest < MiniTest::Test
   def test_simple
     args_hash = {}
     args_hash['electricity_bill_type'] = 'Simple'
     args_hash['electricity_fixed_charge'] = 12.0
-    args_hash['electricity_marginal_rate'] = '0.10'
+    args_hash['electricity_marginal_rate'] = Constants.Auto
     args_hash['natural_gas_fixed_charge'] = 8.0
-    args_hash['natural_gas_marginal_rate'] = '0.10'
-    args_hash['fuel_oil_marginal_rate'] = '0.10'
-    args_hash['propane_marginal_rate'] = '0.10'
+    args_hash['natural_gas_marginal_rate'] = Constants.Auto
+    args_hash['fuel_oil_marginal_rate'] = Constants.Auto
+    args_hash['propane_marginal_rate'] = Constants.Auto
     args_hash['wood_cord_marginal_rate'] = '0.10'
     args_hash['wood_pellets_marginal_rate'] = '0.10'
     args_hash['coal_marginal_rate'] = '0.10'
@@ -28,11 +24,11 @@ class ReportUtilityBillsTest < MiniTest::Test
 
     expected_bills = {
       'Electricity: Fixed ($)' => 144.0,
-      'Electricity: Marginal ($)' => 1025.04,
-      'Electricity: Total ($)' => 1169.04,
+      'Electricity: Marginal ($)' => 1046.85,
+      'Electricity: Total ($)' => 1190.85,
       'Natural Gas: Fixed ($)' => 96.0,
-      'Natural Gas: Marginal ($)' => 14.53,
-      'Natural Gas: Total ($)' => 110.53,
+      'Natural Gas: Marginal ($)' => 94.01,
+      'Natural Gas: Total ($)' => 190.01,
       'Fuel Oil: Fixed ($)' => 0.0,
       'Fuel Oil: Marginal ($)' => 0.0,
       'Fuel Oil: Total ($)' => 0.0,

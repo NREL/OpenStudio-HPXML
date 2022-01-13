@@ -196,6 +196,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
     @model.setSqlFile(@sqlFile)
 
+    hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
+    hpxml = HPXML.new(hpxml_path: hpxml_path)
+
     # assign the user inputs to variables
     args = get_argument_values(runner, arguments(model), user_arguments)
     args = Hash[args.collect { |k, v| [k.to_sym, v] }]
@@ -235,7 +238,20 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       end
 
       if marginal_rate == Constants.Auto
-        marginal_rate = 0.1 # FIXME: get state averages
+        cols = CSV.read("#{File.dirname(__FILE__)}/resources/#{fuel_type}.csv", { encoding: 'ISO-8859-1' })[3..-1].transpose
+        cols[0].each_with_index do |rate_state, i|
+          next if rate_state != hpxml.header.state_code
+
+          average_rate = Float(cols[1][i])
+          if [FT::Elec, FT::Gas].include? fuel_type
+            household_consumption = Float(cols[2][i])
+            marginal_rate = average_rate - 12.0 * fixed_charge / household_consumption
+          elsif [FT::Oil, FT::Propane].include? fuel_type
+            marginal_rate = average_rate
+          elsif [FT::WoodCord, FT::WoodPellets, FT::Coal].include? fuel_type
+            marginal_rate = 1 # FIXME
+          end
+        end
       else
         marginal_rate = Float(marginal_rate)
       end
