@@ -500,7 +500,7 @@ class HEScoreRuleset
           additional_hydronic_ids << distribution_system_idref
         end
         year_installed = orig_heating['year']
-        energy_star = (orig_heating['efficiency_level'] == 'energy_star')
+        efficiency_level = orig_heating['efficiency_level']
         fraction_heat_load_served = orig_hvac['hvac_fraction']
 
         if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace].include? heating_system_type
@@ -508,12 +508,12 @@ class HEScoreRuleset
             # Do nothing, we already have the AFUE
           elsif heating_system_fuel == HPXML::FuelTypeElectricity
             heating_efficiency_afue = 0.98
-          elsif energy_star && (heating_system_type == HPXML::HVACTypeFurnace)
+          elsif (not efficiency_level.nil?) && (heating_system_type == HPXML::HVACTypeFurnace)
             heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
                                                              heating_system_type,
                                                              heating_system_fuel,
                                                              'AFUE',
-                                                             'energy_star',
+                                                             efficiency_level,
                                                              json['building_address']['state'])
           elsif not year_installed.nil?
             heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
@@ -526,12 +526,12 @@ class HEScoreRuleset
             # Do nothing, we already have the AFUE
           elsif heating_system_fuel == HPXML::FuelTypeElectricity
             heating_efficiency_afue = 0.98
-          elsif energy_star
+          elsif not efficiency_level.nil?
             heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
                                                              heating_system_type,
                                                              heating_system_fuel,
                                                              'AFUE',
-                                                             'energy_star')
+                                                             efficiency_level)
           elsif not year_installed.nil?
             heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
                                                              heating_system_type,
@@ -575,18 +575,18 @@ class HEScoreRuleset
           distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
         end
         year_installed = orig_cooling['year']
-        energy_star = (orig_cooling['efficiency_level'] == 'energy_star')
+        efficiency_level = orig_cooling['efficiency_level']
         fraction_cool_load_served = orig_hvac['hvac_fraction']
 
         if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
           if not cooling_efficiency_seer.nil?
             # Do nothing, we already have the SEER
-          elsif energy_star
+          elsif not efficiency_level.nil?
             cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
                                                              cooling_system_type,
                                                              cooling_system_fuel,
                                                              'SEER',
-                                                             'energy_star')
+                                                             efficiency_level)
           elsif not year_installed.nil?
             cooling_efficiency_seer = lookup_hvac_efficiency(year_installed,
                                                              cooling_system_type,
@@ -596,12 +596,12 @@ class HEScoreRuleset
         elsif cooling_system_type == HPXML::HVACTypeRoomAirConditioner
           if not cooling_efficiency_eer.nil?
             # Do nothing, we already have the EER
-          elsif energy_star
+          elsif not efficiency_level.nil?
             cooling_efficiency_eer = lookup_hvac_efficiency(year_installed,
                                                             cooling_system_type,
                                                             cooling_system_fuel,
                                                             'EER',
-                                                            'energy_star')
+                                                            efficiency_level)
           elsif not year_installed.nil?
             cooling_efficiency_eer = lookup_hvac_efficiency(year_installed,
                                                             cooling_system_type,
@@ -640,7 +640,7 @@ class HEScoreRuleset
             distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
           end
           cooling_year_installed = orig_cooling['year']
-          cooling_energy_star = (orig_cooling['efficiency_level'] == 'energy_star')
+          cooling_efficiency_level = orig_cooling['efficiency_level']
           heatpump_fraction_cool_load_served = orig_hvac['hvac_fraction']
         end
         if has_heating_system && (hp_types.include? orig_heating['type'])
@@ -654,19 +654,21 @@ class HEScoreRuleset
             distribution_system_idref = "#{orig_hvac['hvac_name']}_air_dist"
           end
           heating_year_installed = orig_heating['year']
-          heating_energy_star = (orig_heating['efficiency_level'] == 'energy_star')
+          heating_efficiency_level = orig_heating['efficiency_level']
           heatpump_fraction_heat_load_served = orig_hvac['hvac_fraction']
         end
 
         if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
           if not cooling_efficiency_seer.nil?
             # Do nothing, we have the SEER
-          elsif cooling_energy_star
+          elsif not cooling_efficiency_level.nil?
             cooling_efficiency_seer = lookup_hvac_efficiency(cooling_year_installed,
                                                              heat_pump_type,
                                                              heat_pump_fuel,
                                                              'SEER',
-                                                             'energy_star')
+                                                             cooling_efficiency_level,
+                                                             nil,
+                                                             @iecc_zone)
           elsif not cooling_year_installed.nil?
             cooling_efficiency_seer = lookup_hvac_efficiency(cooling_year_installed,
                                                              heat_pump_type,
@@ -675,12 +677,14 @@ class HEScoreRuleset
           end
           if not heating_efficiency_hspf.nil?
             # Do nothing, we have the HSPF
-          elsif heating_energy_star
+          elsif not heating_efficiency_level.nil?
             heating_efficiency_hspf = lookup_hvac_efficiency(heating_year_installed,
                                                              heat_pump_type,
                                                              heat_pump_fuel,
                                                              'HSPF',
-                                                             'energy_star')
+                                                             heating_efficiency_level,
+                                                             nil,
+                                                             @iecc_zone)
           elsif not heating_year_installed.nil?
             heating_efficiency_hspf = lookup_hvac_efficiency(heating_year_installed,
                                                              heat_pump_type,
@@ -1037,7 +1041,7 @@ class HEScoreRuleset
   end
 end
 
-def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id = 'shipment_weighted', state_code = nil)
+def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id = 'shipment_weighted', state_code = nil, iecc_cz = nil)
   year = 0 if year.nil?
 
   type_id = { HPXML::HVACTypeCentralAirConditioner => 'split_dx',
@@ -1054,9 +1058,27 @@ def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id = '
 
   metric_id = units.downcase
 
-  fail "Invalid performance_id for HVAC lookup #{performance_id}." if not ['shipment_weighted', 'energy_star'].include?(performance_id)
+  fail "Invalid performance_id for HVAC lookup #{performance_id}." if not ['shipment_weighted', 'energy_star', 'cee_tier1', 'cee_tier2', 'cee_tier3'].include?(performance_id)
 
   region_id = nil
+  if (['cee_tier1', 'cee_tier2', 'cee_tier3'].include? performance_id) && (type_id == 'heat_pump')
+    region_id = { '1A' => 'south_southwest',
+                  '2A' => 'south_southwest',
+                  '2B' => 'south_southwest',
+                  '3A' => 'south_southwest',
+                  '3B' => 'south_southwest',
+                  '3C' => 'south_southwest',
+                  '4A' => 'south_southwest',
+                  '4B' => 'south_southwest',
+                  '4C' => 'south_southwest',
+                  '5A' => 'north',
+                  '5B' => 'north',
+                  '6A' => 'north',
+                  '6B' => 'north',
+                  '7' => 'north',
+                  '8' => 'north' }[iecc_cz]
+    fail "Could not lookup CEE region for IECC climate zone #{iecc_cz}." if region_id.nil?
+  end
   if (performance_id == 'energy_star') && (type_id == 'central_furnace') && ['lpg', 'natural_gas'].include?(fuel_primary_id)
     fail 'state_code required for Energy Star central furnaces' if state_code.nil?
 

@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>he_score_measure</name>
   <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
-  <version_id>da5e987c-fcc7-45a1-9e26-0ffb1acc077c</version_id>
-  <version_modified>20211229T001033Z</version_modified>
+  <version_id>0987312a-c277-4aba-aab8-596fd4429224</version_id>
+  <version_modified>20220108T010419Z</version_modified>
   <xml_checksum>2AF3A68E</xml_checksum>
   <class_name>HEScoreMeasure</class_name>
   <display_name>Apply Home Energy Score Ruleset</display_name>
@@ -69,12 +69,6 @@
       <checksum>A662085D</checksum>
     </file>
     <file>
-      <filename>lu_water_heater_efficiency.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FBD37897</checksum>
-    </file>
-    <file>
       <filename>lu_roof_eff_rvalue.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -99,12 +93,6 @@
       <checksum>1154F211</checksum>
     </file>
     <file>
-      <filename>lu_hvac_equipment_efficiency.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C1A6A85C</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.7.0</identifier>
@@ -116,16 +104,28 @@
       <checksum>43B5C359</checksum>
     </file>
     <file>
+      <filename>lu_water_heater_efficiency.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>7991870D</checksum>
+    </file>
+    <file>
+      <filename>lu_hvac_equipment_efficiency.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>56E99952</checksum>
+    </file>
+    <file>
       <filename>test_hescore_ruleset.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>51367226</checksum>
+      <checksum>BFB2FA64</checksum>
     </file>
     <file>
       <filename>HESruleset.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>841976F8</checksum>
+      <checksum>CE5500E1</checksum>
     </file>
   </files>
 </measure>
