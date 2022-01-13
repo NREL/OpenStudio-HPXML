@@ -3,6 +3,10 @@
 # see the URL below for information on how to write OpenStudio measures
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
+require_relative 'resources/util.rb'
+require_relative '../HPXMLtoOpenStudio/resources/meta_measure.rb'
+require_relative '../ReportSimulationOutput/resources/constants.rb'
+
 # start the measure
 class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   # human readable name
@@ -25,6 +29,15 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   def arguments(model = nil)
     args = OpenStudio::Measure::OSArgumentVector.new
 
+    format_chs = OpenStudio::StringVector.new
+    format_chs << 'csv'
+    format_chs << 'json'
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('output_format', format_chs, false)
+    arg.setDisplayName('Output Format')
+    arg.setDescription('The file format of the annual (and timeseries, if requested) outputs.')
+    arg.setDefaultValue('csv')
+    args << arg
+
     electricity_bill_type_choices = OpenStudio::StringVector.new
     electricity_bill_type_choices << 'Simple'
     electricity_bill_type_choices << 'Detailed'
@@ -35,11 +48,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue('Simple')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('electricity_fixed_charge', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electricity_fixed_charge', true)
     arg.setDisplayName('Electricity: Fixed Charge')
     arg.setUnits('$/month')
     arg.setDescription('Monthly fixed charge for electricity.')
-    arg.setDefaultValue('12.0')
+    arg.setDefaultValue(12.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('electricity_marginal_rate', true)
@@ -49,14 +62,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
-
-
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('natural_gas_fixed_charge', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('natural_gas_fixed_charge', true)
     arg.setDisplayName('Natural Gas: Fixed Charge')
     arg.setUnits('$/month')
     arg.setDescription('Monthly fixed charge for natural gas.')
-    arg.setDefaultValue('8.0')
+    arg.setDefaultValue(8.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('natural_gas_marginal_rate', true)
@@ -66,18 +76,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
-
-
-
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('fuel_oil_marginal_rate', true)
     arg.setDisplayName('Fuel Oil: Marginal Rate')
     arg.setUnits('$/gal')
     arg.setDescription("Price per gallon for fuel oil. Use '#{Constants.Auto} for state-average value from EIA.")
     arg.setDefaultValue(Constants.Auto)
     args << arg
-
-
-
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('propane_marginal_rate', true)
     arg.setDisplayName('Propane: Marginal Rate')
@@ -86,37 +90,82 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
-
-
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('wood_marginal_rate', true)
-    arg.setDisplayName('Wood: Marginal Rate')
-    arg.setUnits('$/gal')
-    arg.setDescription("Price per gallon for propane. Use '#{Constants.Auto} for state-average value from EIA.")
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('wood_cord_marginal_rate', true)
+    arg.setDisplayName('Wood Cord: Marginal Rate')
+    arg.setUnits('$/kBtu')
+    arg.setDescription("Price per kBtu for wood cord. Use '#{Constants.Auto} for state-average value from EIA.")
     arg.setDefaultValue(Constants.Auto)
     args << arg
-
-
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('wood_pellets_marginal_rate', true)
     arg.setDisplayName('Wood Pellets: Marginal Rate')
-    arg.setUnits('$/gal')
-    arg.setDescription("Price per gallon for propane. Use '#{Constants.Auto} for state-average value from EIA.")
+    arg.setUnits('$/kBtu')
+    arg.setDescription("Price per kBtu for wood pellets. Use '#{Constants.Auto} for state-average value from EIA.")
     arg.setDefaultValue(Constants.Auto)
     args << arg
-
-
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('coal_marginal_rate', true)
     arg.setDisplayName('Coal: Marginal Rate')
-    arg.setUnits('$/gal')
-    arg.setDescription("Price per gallon for propane. Use '#{Constants.Auto} for state-average value from EIA.")
+    arg.setUnits('$/kBtu')
+    arg.setDescription("Price per kBtu for coal. Use '#{Constants.Auto} for state-average value from EIA.")
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
-
-
     return args
+  end
+
+  def setup_outputs()
+    def get_timeseries_units_from_fuel_type(fuel_type)
+      if fuel_type == FT::Elec
+        return 'kWh'
+      elsif fuel_type == FT::Gas
+        return 'therm'
+      end
+
+      return 'kBtu'
+    end
+
+    @fuels = {}
+    @fuels[FT::Elec] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility"])
+    @fuels[FT::Gas] = Fuel.new(meters: ["#{EPlus::FuelTypeNaturalGas}:Facility"])
+    @fuels[FT::Oil] = Fuel.new(meters: ["#{EPlus::FuelTypeOil}:Facility"])
+    @fuels[FT::Propane] = Fuel.new(meters: ["#{EPlus::FuelTypePropane}:Facility"])
+    @fuels[FT::WoodCord] = Fuel.new(meters: ["#{EPlus::FuelTypeWoodCord}:Facility"])
+    @fuels[FT::WoodPellets] = Fuel.new(meters: ["#{EPlus::FuelTypeWoodPellets}:Facility"])
+    @fuels[FT::Coal] = Fuel.new(meters: ["#{EPlus::FuelTypeCoal}:Facility"])
+
+    @fuels.each do |fuel_type, fuel|
+      fuel.timeseries_units = get_timeseries_units_from_fuel_type(fuel_type)
+    end
+
+    @utility_bills = {}
+    @utility_bills[FT::Elec] = BaseOutput.new
+    @utility_bills[FT::Gas] = BaseOutput.new
+    @utility_bills[FT::Oil] = BaseOutput.new
+    @utility_bills[FT::Propane] = BaseOutput.new
+    @utility_bills[FT::WoodCord] = BaseOutput.new
+    @utility_bills[FT::WoodPellets] = BaseOutput.new
+    @utility_bills[FT::Coal] = BaseOutput.new
+  end
+
+  # return a vector of IdfObject's to request EnergyPlus objects needed by the run method
+  def energyPlusOutputRequests(runner, user_arguments)
+    super(runner, user_arguments)
+
+    result = OpenStudio::IdfObjectVector.new
+    return result if runner.halted
+
+    setup_outputs()
+    timeseries_frequency = 'monthly'
+
+    # Fuel outputs
+    @fuels.each do |fuel_type, fuel|
+      fuel.meters.each do |meter|
+        result << OpenStudio::IdfObject.load("Output:Meter,#{meter},#{timeseries_frequency};").get
+      end
+    end
+
+    return result
   end
 
   # define what happens when the measure is run
@@ -128,20 +177,178 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       runner.registerError('Cannot find OpenStudio model.')
       return false
     end
-    model = model.get
+    @model = model.get
 
     # use the built-in error checking (need model)
     if !runner.validateUserArguments(arguments(model), user_arguments)
       return false
     end
 
+    sqlFile = runner.lastEnergyPlusSqlFile
+    if sqlFile.empty?
+      runner.registerError('Cannot find EnergyPlus sql file.')
+      return false
+    end
+    @sqlFile = sqlFile.get
+    if not @sqlFile.connectionOpen
+      runner.registerError('EnergyPlus simulation failed.')
+      return false
+    end
+    @model.setSqlFile(@sqlFile)
+
     # assign the user inputs to variables
     args = get_argument_values(runner, arguments(model), user_arguments)
     args = Hash[args.collect { |k, v| [k.to_sym, v] }]
 
-puts args
+    output_format = args[:output_format].get
 
+    # Set paths
+    output_dir = File.dirname(@sqlFile.path.to_s)
+    output_path = File.join(output_dir, "results_bills.#{output_format}")
+
+    setup_outputs()
+
+    timeseries_frequency = 'monthly'
+    @timestamps = [0] * 12 # size is used but not contents
+
+    get_outputs(timeseries_frequency)
+
+    # Utility bills
+    @utility_bills.each do |fuel_type, utility_bill|
+      fixed_charge = 0.0
+      if fuel_type == FT::Elec
+        fixed_charge = args[:electricity_fixed_charge]
+        marginal_rate = args[:electricity_marginal_rate]
+      elsif fuel_type == FT::Gas
+        fixed_charge = args[:natural_gas_fixed_charge]
+        marginal_rate = args[:natural_gas_marginal_rate]
+      elsif fuel_type == FT::Oil
+        marginal_rate = args[:fuel_oil_marginal_rate]
+      elsif fuel_type == FT::Propane
+        marginal_rate = args[:propane_marginal_rate]
+      elsif fuel_type == FT::WoodCord
+        marginal_rate = args[:wood_cord_marginal_rate]
+      elsif fuel_type == FT::WoodPellets
+        marginal_rate = args[:wood_pellets_marginal_rate]
+      elsif fuel_type == FT::Coal
+        marginal_rate = args[:coal_marginal_rate]
+      end
+
+      if marginal_rate == Constants.Auto
+        marginal_rate = 0.1 # FIXME: get state averages
+      else
+        marginal_rate = Float(marginal_rate)
+      end
+
+      UtilityBill.calculate_simple(@fuels, fuel_type, utility_bill, fixed_charge, marginal_rate)
+    end
+
+    # Report results
+    @utility_bills.each do |fuel_type, utility_bill|
+      utility_bill_type_str = OpenStudio::toUnderscoreCase("#{fuel_type} #{utility_bill.units}")
+      utility_bill = utility_bill.total.round(2)
+      runner.registerValue(utility_bill_type_str, utility_bill)
+    end
+
+    # Write results
+    write_output(runner, @utility_bills, output_format, output_path)
+
+    teardown()
     return true
+  end
+
+  def teardown
+    @sqlFile.close()
+
+    # Ensure sql file is immediately freed; otherwise we can get
+    # errors on Windows when trying to delete this file.
+    GC.start()
+  end
+
+  def get_outputs(timeseries_frequency)
+    @fuels.each do |fuel_type, fuel|
+      unit_conv = UnitConversions.convert(1.0, 'J', fuel.timeseries_units)
+      unit_conv /= 139.0 if fuel_type == FT::Oil
+      unit_conv /= 91.6 if fuel_type == FT::Propane
+
+      fuel.timeseries_output = get_report_meter_data_timeseries(fuel.meters, unit_conv, 0, timeseries_frequency)
+    end
+  end
+
+  def reporting_frequency_map
+    return {
+      'timestep' => 'Zone Timestep',
+      'hourly' => 'Hourly',
+      'daily' => 'Daily',
+      'monthly' => 'Monthly',
+    }
+  end
+
+  def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timeseries_frequency)
+    return [0.0] * @timestamps.size if meter_names.empty?
+
+    vars = "'" + meter_names.uniq.join("','") + "'"
+    query = "SELECT SUM(VariableValue*#{unit_conv}+#{unit_adder}) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex IN (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName IN (#{vars}) AND ReportingFrequency='#{reporting_frequency_map[timeseries_frequency]}' AND VariableUnits='J') GROUP BY TimeIndex ORDER BY TimeIndex"
+    values = @sqlFile.execAndReturnVectorOfDouble(query)
+    fail "Query error: #{query}" unless values.is_initialized
+
+    values = values.get
+    values += [0.0] * @timestamps.size if values.size == 0
+    return values
+  end
+
+  def write_output(runner, utility_bills, output_format, output_path)
+    line_break = nil
+
+    segment, _ = utility_bills.keys[0].split(':', 2)
+    segment = segment.strip
+    results_out = []
+    utility_bills.each do |key, utility_bill|
+      new_segment, _ = key.split(':', 2)
+      new_segment = new_segment.strip
+      if new_segment != segment
+        results_out << [line_break]
+        segment = new_segment
+      end
+      results_out << ["#{key}: Fixed (#{utility_bill.units})", utility_bill.fixed.round(2)]
+      results_out << ["#{key}: Marginal (#{utility_bill.units})", utility_bill.marginal.round(2)]
+      results_out << ["#{key}: Total (#{utility_bill.units})", utility_bill.total.round(2)]
+    end
+
+    if output_format == 'csv'
+      CSV.open(output_path, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
+    elsif output_format == 'json'
+      h = {}
+      results_out.each do |out|
+        next if out == [line_break]
+
+        grp, name = out[0].split(':', 2)
+        h[grp] = {} if h[grp].nil?
+        h[grp][name.strip] = out[1]
+      end
+
+      require 'json'
+      File.open(output_path, 'w') { |json| json.write(JSON.pretty_generate(h)) }
+    end
+    runner.registerInfo("Wrote bills output to #{output_path}.")
+  end
+
+  class BaseOutput
+    def initialize()
+      @fixed = 0.0
+      @marginal = 0.0
+      @total = 0.0
+      @units = '$'
+    end
+    attr_accessor(:fixed, :marginal, :total, :units)
+  end
+
+  class Fuel
+    def initialize(meters: [])
+      @meters = meters
+      @timeseries_output = []
+    end
+    attr_accessor(:meters, :timeseries_output, :timeseries_units)
   end
 end
 
