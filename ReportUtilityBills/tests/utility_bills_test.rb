@@ -16,9 +16,9 @@ class ReportUtilityBillsTest < MiniTest::Test
     args_hash['natural_gas_marginal_rate'] = Constants.Auto
     args_hash['fuel_oil_marginal_rate'] = Constants.Auto
     args_hash['propane_marginal_rate'] = Constants.Auto
-    args_hash['wood_cord_marginal_rate'] = '0.10'
-    args_hash['wood_pellets_marginal_rate'] = '0.10'
-    args_hash['coal_marginal_rate'] = '0.10'
+    args_hash['wood_cord_marginal_rate'] = Constants.Auto
+    args_hash['wood_pellets_marginal_rate'] = Constants.Auto
+    args_hash['coal_marginal_rate'] = Constants.Auto
     bills_csv = _test_measure(args_hash)
     assert(File.exist?(bills_csv))
 

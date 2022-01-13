@@ -238,19 +238,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       end
 
       if marginal_rate == Constants.Auto
-        cols = CSV.read("#{File.dirname(__FILE__)}/resources/#{fuel_type}.csv", { encoding: 'ISO-8859-1' })[3..-1].transpose
-        cols[0].each_with_index do |rate_state, i|
-          next if rate_state != hpxml.header.state_code
-
-          average_rate = Float(cols[1][i])
-          if [FT::Elec, FT::Gas].include? fuel_type
-            household_consumption = Float(cols[2][i])
-            marginal_rate = average_rate - 12.0 * fixed_charge / household_consumption
-          elsif [FT::Oil, FT::Propane].include? fuel_type
-            marginal_rate = average_rate
-          elsif [FT::WoodCord, FT::WoodPellets, FT::Coal].include? fuel_type
-            marginal_rate = 1 # FIXME
-          end
+        if [FT::Elec, FT::Gas, FT::Oil, FT::Propane].include? fuel_type
+          marginal_rate = get_state_average_marginal_rate(hpxml.header.state_code, fuel_type, fixed_charge)
+        elsif [FT::WoodCord, FT::WoodPellets, FT::Coal].include? fuel_type
+          marginal_rate = 1 # FIXME: can we get these somewhere?
         end
       else
         marginal_rate = Float(marginal_rate)
@@ -271,6 +262,22 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     teardown()
     return true
+  end
+
+  def get_state_average_marginal_rate(state_code, fuel_type, fixed_charge = nil)
+    cols = CSV.read("#{File.dirname(__FILE__)}/resources/#{fuel_type}.csv", { encoding: 'ISO-8859-1' })[3..-1].transpose
+    cols[0].each_with_index do |rate_state, i|
+      next if rate_state != state_code
+
+      average_rate = Float(cols[1][i])
+      if [FT::Elec, FT::Gas].include? fuel_type
+        household_consumption = Float(cols[2][i])
+        marginal_rate = average_rate - 12.0 * fixed_charge / household_consumption
+      elsif [FT::Oil, FT::Propane].include? fuel_type
+        marginal_rate = average_rate
+      end
+      return marginal_rate
+    end
   end
 
   def teardown
