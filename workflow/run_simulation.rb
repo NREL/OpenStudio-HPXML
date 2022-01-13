@@ -5,6 +5,7 @@ start_time = Time.now
 require 'fileutils'
 require 'optparse'
 require 'pathname'
+require_relative '../HPXMLtoOpenStudio/resources/constants'
 require_relative '../HPXMLtoOpenStudio/resources/meta_measure'
 require_relative '../HPXMLtoOpenStudio/resources/version'
 
@@ -63,6 +64,16 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
   measure_subdir = 'ReportUtilityBills'
   args = {}
   args['output_format'] = output_format
+  args['electricity_bill_type'] = 'Simple'
+  args['electricity_fixed_charge'] = 12.0
+  args['electricity_marginal_rate'] = Constants.Auto
+  args['natural_gas_fixed_charge'] = 8.0
+  args['natural_gas_marginal_rate'] = Constants.Auto
+  args['fuel_oil_marginal_rate'] = Constants.Auto
+  args['propane_marginal_rate'] = Constants.Auto
+  args['wood_cord_marginal_rate'] = Constants.Auto
+  args['wood_pellets_marginal_rate'] = Constants.Auto
+  args['coal_marginal_rate'] = Constants.Auto
   update_args_hash(measures, measure_subdir, args)
 
   results = run_hpxml_workflow(rundir, measures, measures_dir, debug: debug, ep_input_format: ep_input_format)
