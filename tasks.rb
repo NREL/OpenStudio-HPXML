@@ -633,7 +633,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['ducts_return_location'] = HPXML::LocationAtticUnvented
     args['ducts_supply_surface_area'] = 150.0
     args['ducts_return_surface_area'] = 50.0
-    args['ducts_number_of_return_registers'] = 2
     args['heating_system_2_type'] = 'none'
     args['heating_system_2_fuel'] = HPXML::FuelTypeElectricity
     args['heating_system_2_heating_efficiency'] = 1.0
@@ -957,7 +956,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['ducts_return_location'] = HPXML::LocationLivingSpace
     args['ducts_supply_surface_area'] = 0
     args['ducts_return_surface_area'] = 0
-    args['ducts_number_of_return_registers'] = 0
     args['heating_system_2_type'] = 'none'
     args['heating_system_2_fuel'] = HPXML::FuelTypeElectricity
     args['heating_system_2_heating_efficiency'] = 0
@@ -1291,7 +1289,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['ducts_return_location'] = HPXML::LocationLivingSpace
     args['ducts_supply_leakage_to_outside_value'] = 50
     args['ducts_return_leakage_to_outside_value'] = 100
-    args['ducts_number_of_return_registers'] = 3
     args['water_heater_location'] = HPXML::LocationBasementConditioned
     args['clothes_washer_location'] = HPXML::LocationBasementConditioned
     args['clothes_dryer_location'] = HPXML::LocationBasementConditioned
@@ -1338,7 +1335,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['cooling_system_cooling_capacity'] = 36000.0
     args['ducts_supply_surface_area'] = 112.5
     args['ducts_return_surface_area'] = 37.5
-    args['ducts_number_of_return_registers'] = 3
     args['misc_plug_loads_other_annual_kwh'] = 2457.0
   end
 
@@ -1365,7 +1361,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['ducts_supply_location'] = HPXML::LocationLivingSpace
     args['ducts_return_location'] = HPXML::LocationLivingSpace
     args['ducts_supply_insulation_r'] = 0.0
-    args['ducts_number_of_return_registers'] = 1
     args['door_area'] = 20.0
     args['misc_plug_loads_other_annual_kwh'] = 819.0
   elsif ['base-bldgtype-multifamily-shared-boiler-only-baseboard.xml',
@@ -1563,7 +1558,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['cooling_system_cooling_capacity'] = 36000.0
     args['ducts_supply_surface_area'] = 112.5
     args['ducts_return_surface_area'] = 37.5
-    args['ducts_number_of_return_registers'] = 3
     args['misc_plug_loads_other_annual_kwh'] = 3685.5
   elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
     args['geometry_unit_cfa'] = 3250.0
@@ -1631,8 +1625,6 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-enclosure-skylights.xml'].include? hpxml_file
     args['skylight_area_front'] = 15
     args['skylight_area_back'] = 15
-  elsif ['base-enclosure-split-level.xml'].include? hpxml_file
-    args['ducts_number_of_return_registers'] = 2
   end
 
   # Foundation
@@ -1642,7 +1634,6 @@ def set_measure_argument_values(hpxml_file, args)
     args.delete('geometry_rim_joist_height')
     args['floor_over_foundation_assembly_r'] = 18.7
     args.delete('rim_joist_assembly_r')
-    args['ducts_number_of_return_registers'] = 1
     args['misc_plug_loads_other_annual_kwh'] = 1228.5
   elsif ['base-foundation-conditioned-basement-slab-insulation.xml'].include? hpxml_file
     args['slab_under_insulation_r'] = 10
@@ -1663,7 +1654,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['slab_carpet_r'] = 2.5
     args['ducts_supply_location'] = HPXML::LocationUnderSlab
     args['ducts_return_location'] = HPXML::LocationUnderSlab
-    args['ducts_number_of_return_registers'] = 1
     args['misc_plug_loads_other_annual_kwh'] = 1228.5
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     args['geometry_unit_cfa'] = 1350.0
@@ -1674,7 +1664,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['rim_joist_assembly_r'] = 4.0
     args['ducts_supply_location'] = HPXML::LocationBasementUnconditioned
     args['ducts_return_location'] = HPXML::LocationBasementUnconditioned
-    args['ducts_number_of_return_registers'] = 1
     args['water_heater_location'] = HPXML::LocationBasementUnconditioned
     args['clothes_washer_location'] = HPXML::LocationBasementUnconditioned
     args['clothes_dryer_location'] = HPXML::LocationBasementUnconditioned
@@ -1702,7 +1691,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['foundation_wall_insulation_distance_to_bottom'] = 4.0
     args['ducts_supply_location'] = HPXML::LocationCrawlspaceUnvented
     args['ducts_return_location'] = HPXML::LocationCrawlspaceUnvented
-    args['ducts_number_of_return_registers'] = 1
     args['water_heater_location'] = HPXML::LocationCrawlspaceUnvented
     args['misc_plug_loads_other_annual_kwh'] = 1228.5
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
@@ -1714,7 +1702,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['foundation_wall_insulation_distance_to_bottom'] = 4.0
     args['ducts_supply_location'] = HPXML::LocationCrawlspaceVented
     args['ducts_return_location'] = HPXML::LocationCrawlspaceVented
-    args['ducts_number_of_return_registers'] = 1
     args['water_heater_location'] = HPXML::LocationCrawlspaceVented
     args['misc_plug_loads_other_annual_kwh'] = 1228.5
   elsif ['base-foundation-conditioned-crawlspace.xml'].include? hpxml_file
@@ -1727,7 +1714,6 @@ def set_measure_argument_values(hpxml_file, args)
     args['ducts_return_location'] = HPXML::LocationCrawlspaceConditioned
     args['ducts_supply_leakage_to_outside_value'] = 0.0
     args['ducts_return_leakage_to_outside_value'] = 0.0
-    args['ducts_number_of_return_registers'] = 1
     args['water_heater_location'] = HPXML::LocationCrawlspaceConditioned
     args['misc_plug_loads_other_annual_kwh'] = 1228.5
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
@@ -2185,6 +2171,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['ducts_return_location'] = Constants.Auto
     args['ducts_supply_surface_area'] = Constants.Auto
     args['ducts_return_surface_area'] = Constants.Auto
+    args['ducts_number_of_return_registers'] = 2
     args['kitchen_fans_quantity'] = Constants.Auto
     args['bathroom_fans_quantity'] = Constants.Auto
     args['water_heater_location'] = Constants.Auto
@@ -2558,7 +2545,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.building_construction.conditioned_floor_area -= 400 * 2
     hpxml.building_construction.conditioned_building_volume -= 400 * 2 * 8
     hpxml.air_infiltration_measurements[0].infiltration_volume = hpxml.building_construction.conditioned_building_volume
-    hpxml.hvac_distributions[0].conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area
   end
 
   # --------------- #
@@ -3661,8 +3647,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                              duct_insulation_r_value: 0,
                                              duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
                                              duct_surface_area: 20)
-      hpxml.hvac_distributions[-1].number_of_return_registers = 1
-      hpxml.hvac_distributions[-1].conditioned_floor_area_served = 900
     end
   end
   if hpxml_file.include? 'shared-ground-loop'
@@ -3726,8 +3710,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.hvac_controls[0].cooling_setup_temp = 80
     hpxml.hvac_controls[0].cooling_setup_hours_per_week = 6 * 7
     hpxml.hvac_controls[0].cooling_setup_start_hour = 9 # 9am
-  elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
-    hpxml.hvac_distributions[0].conditioned_floor_area_served = 2700
   elsif ['base-hvac-dse.xml',
          'base-dhw-indirect-dse.xml',
          'base-mechvent-cfis-dse.xml'].include? hpxml_file
@@ -3787,6 +3769,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml.hvac_distributions[0].ducts[1].duct_fraction_area = 0.75
       hpxml.hvac_distributions[0].ducts[2].duct_fraction_area = 0.25
       hpxml.hvac_distributions[0].ducts[3].duct_fraction_area = 0.25
+      hpxml.hvac_distributions[0].conditioned_floor_area_served = 4050.0
+      hpxml.hvac_distributions[0].number_of_return_registers = 3
     end
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.hvac_distributions.reverse_each do |hvac_distribution|
@@ -3794,9 +3778,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     end
     hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
                                  distribution_system_type: HPXML::HVACDistributionTypeAir,
-                                 air_type: HPXML::AirTypeRegularVelocity,
-                                 number_of_return_registers: 2,
-                                 conditioned_floor_area_served: 270)
+                                 air_type: HPXML::AirTypeRegularVelocity)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
                                                                duct_leakage_value: 75,
@@ -3955,7 +3937,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                          primary_heating_system: true)
   elsif ['base-mechvent-multiple.xml',
          'base-bldgtype-multifamily-shared-mechvent-multiple.xml'].include? hpxml_file
-    hpxml.hvac_distributions[0].conditioned_floor_area_served /= 2.0
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[1].id = "HVACDistribution#{hpxml.hvac_distributions.size}"
     hpxml.heating_systems[0].heating_capacity /= 2.0

@@ -1530,7 +1530,7 @@ Each separate HVAC distribution system is entered as a ``/HPXML/Building/Buildin
   ==============================  =======  =======  ===========  ========  =========  =============================
 
   .. [#] DistributionSystemType child element choices are ``AirDistribution``, ``HydronicDistribution``, or ``Other=DSE``.
-  .. [#] ConditionedFloorAreaServed required only when DistributionSystemType is AirDistribution and ``AirDistribution/Ducts`` are present.
+  .. [#] ConditionedFloorAreaServed required only when DistributionSystemType is AirDistribution and duct surface area is defaulted (i.e., ``AirDistribution/Ducts`` are present without ``DuctSurfaceArea`` child elements).
 
 .. note::
   
@@ -1559,7 +1559,7 @@ To define an air distribution system, additional information is entered in ``HVA
   .. [#] Supply duct leakage required if AirDistributionType is "regular velocity" or "gravity" and optional if AirDistributionType is "fan coil".
   .. [#] Return duct leakage required if AirDistributionType is "regular velocity" or "gravity" and optional if AirDistributionType is "fan coil".
   .. [#] Provide a Ducts element for each supply duct and each return duct.
-  .. [#] If NumberofReturnRegisters not provided and ``AirDistribution/Ducts`` are present, defaults to one return register per conditioned floor per `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_, rounded up to the nearest integer if needed.
+  .. [#] If NumberofReturnRegisters not provided and return ducts are present, defaults to one return register per conditioned floor per `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_, rounded up to the nearest integer if needed.
 
 Additional information is entered in each ``DuctLeakageMeasurement``.
 
@@ -1592,16 +1592,16 @@ Additional information is entered in each ``Ducts``.
   .. [#] If DuctLocation not provided, defaults to the first present space type: "basement - conditioned", "basement - unconditioned", "crawlspace - conditioned", "crawlspace - vented", "crawlspace - unvented", "attic - vented", "attic - unvented", "garage", or "living space".
          If NumberofConditionedFloorsAboveGrade > 1, secondary ducts will be located in "living space".
   .. [#] The sum of all ``[DuctType="supply"]/FractionDuctArea`` and ``[DuctType="return"]/FractionDuctArea`` must each equal to 1.
-  .. [#] Either FractionDuctArea or DuctSurfaceArea (or both) are required if DuctLocation is provided.
-  .. [#] If DuctSurfaceArea not provided, duct surface areas will be calculated based on FractionDuctArea if provided.
-         If FractionDuctArea also not provided, duct surface areas will be calculated based on `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_:
+  .. [#] FractionDuctArea and/or DuctSurfaceArea are required if DuctLocation is provided.
+  .. [#] If neither DuctSurfaceArea nor FractionDuctArea provided, duct surface areas will be calculated based on `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_:
 
-         - **Primary supply ducts**: 0.27 * F_out * ConditionedFloorAreaServed
-         - **Secondary supply ducts**: 0.27 * (1 - F_out) * ConditionedFloorAreaServed
-         - **Primary return ducts**: b_r * F_out * ConditionedFloorAreaServed
-         - **Secondary return ducts**: b_r * (1 - F_out) * ConditionedFloorAreaServed
+         - **Primary supply duct area**: 0.27 * F_out * ConditionedFloorAreaServed
+         - **Secondary supply duct area**: 0.27 * (1 - F_out) * ConditionedFloorAreaServed
+         - **Primary return duct area**: b_r * F_out * ConditionedFloorAreaServed
+         - **Secondary return duct area**: b_r * (1 - F_out) * ConditionedFloorAreaServed
 
          where F_out is 1.0 when NumberofConditionedFloorsAboveGrade <= 1 and 0.75 when NumberofConditionedFloorsAboveGrade > 1, and b_r is 0.05 * NumberofReturnRegisters with a maximum value of 0.25.
+         If FractionDuctArea is provided, each duct surface area will be FractionDuctArea times total duct area, which is calculated using the sum of primary and secondary duct areas from the equations above.
 
 Hydronic Distribution
 ~~~~~~~~~~~~~~~~~~~~~
