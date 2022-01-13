@@ -346,7 +346,6 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <ControlType>programmable thermostat</ControlType>
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetbackTempHeatingSeason>66.0</SetbackTempHeatingSeason>
             <TotalSetbackHoursperWeekHeating>49</TotalSetbackHoursperWeekHeating>

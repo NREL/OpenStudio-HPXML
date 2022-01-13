@@ -398,8 +398,36 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsFuels
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
     _check_for_nonzero_timeseries_value(timeseries_csv, ['Fuel Use: Electricity: Total'])
+  end
+
+  def test_timeseries_hourly_fuels_pv
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-pv.xml',
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_fuel_consumptions' => true,
+                  'include_timeseries_end_use_consumptions' => false,
+                  'include_timeseries_hot_water_uses' => false,
+                  'include_timeseries_total_loads' => false,
+                  'include_timeseries_component_loads' => false,
+                  'include_timeseries_zone_temperatures' => false,
+                  'include_timeseries_airflows' => false,
+                  'include_timeseries_weather' => false }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsFuels + ['Fuel Use: Electricity: Net']
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
+    _check_for_nonzero_timeseries_value(timeseries_csv, ['Fuel Use: Electricity: Total',
+                                                         'Fuel Use: Electricity: Net'])
   end
 
   def test_timeseries_hourly_enduses
@@ -419,7 +447,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsEndUses
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
     _check_for_nonzero_timeseries_value(timeseries_csv, ['End Use: Electricity: Plug Loads'])
   end
 
@@ -440,7 +471,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsWaterUses
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
     _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsWaterUses)
   end
 
@@ -461,7 +495,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsTotalLoads
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
     _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsTotalLoads)
   end
 
@@ -483,7 +520,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsComponentLoads
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
     _check_for_nonzero_timeseries_value(timeseries_csv, ['Component Load: Heating: Internal Gains', 'Component Load: Cooling: Internal Gains'])
   end
 
@@ -504,7 +544,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsZoneTemps
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
     _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsZoneTemps)
   end
 
@@ -532,7 +575,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     cols_temps_other_side.each do |expected_col|
       assert(actual_timeseries_cols.include? expected_col)
     end
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
     _check_for_nonzero_timeseries_value(timeseries_csv, cols_temps_other_side)
   end
 
@@ -553,7 +599,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsAirflows
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
     _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsAirflows.select { |t| t != 'Airflow: Whole House Fan' })
   end
 
@@ -576,7 +625,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsAirflows + add_cols - remove_cols
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
     _check_for_nonzero_timeseries_value(timeseries_csv, add_cols)
   end
 
@@ -597,7 +649,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsAirflows
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
     _check_for_nonzero_timeseries_value(timeseries_csv, ['Airflow: Mechanical Ventilation'])
   end
 
@@ -618,7 +673,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsAirflows
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
     _check_for_nonzero_timeseries_value(timeseries_csv, ['Airflow: Mechanical Ventilation'])
   end
 
@@ -639,7 +697,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsAirflows
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
     _check_for_nonzero_timeseries_value(timeseries_csv, ['Airflow: Mechanical Ventilation'])
   end
 
@@ -660,7 +721,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsWeather
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
     _check_for_nonzero_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsWeather)
   end
 
@@ -681,7 +745,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_timeseries_cols = ['Time'] + all_timeseries_cols
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
     _check_for_zero_baseload_timeseries_value(timeseries_csv, ['End Use: Electricity: Refrigerator'])
   end
 
@@ -702,7 +769,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_timeseries_cols = ['Time'] + all_timeseries_cols
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(365, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(365, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
     _check_for_zero_baseload_timeseries_value(timeseries_csv, ['End Use: Electricity: Refrigerator'])
   end
 
@@ -723,7 +793,8 @@ class ReportSimulationOutputTest < MiniTest::Test
     expected_timeseries_cols = ['Time'] + all_timeseries_cols
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(12, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(12, timeseries_rows.size - 2)
     _check_for_zero_baseload_timeseries_value(timeseries_csv, ['End Use: Electricity: Refrigerator'])
   end
 
@@ -741,7 +812,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
   end
 
   def test_timeseries_timestep_10min
@@ -758,7 +832,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    assert_equal(52560, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(52560, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
   end
 
   def test_timeseries_hourly_runperiod_Jan
@@ -775,7 +852,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    assert_equal(31 * 24, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(31 * 24, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
   end
 
   def test_timeseries_daily_runperiod_Jan
@@ -792,7 +872,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    assert_equal(31, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(31, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
   end
 
   def test_timeseries_monthly_runperiod_Jan
@@ -809,7 +892,8 @@ class ReportSimulationOutputTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    assert_equal(1, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(1, timeseries_rows.size - 2)
   end
 
   def test_timeseries_timestep_runperiod_Jan
@@ -826,7 +910,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    assert_equal(31 * 24, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(31 * 24, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
   end
 
   def test_timeseries_hourly_AMY_2012
@@ -843,7 +930,10 @@ class ReportSimulationOutputTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    assert_equal(8784, File.readlines(timeseries_csv).size - 2)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8784, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    _check_for_constant_timeseries_step(timeseries_cols[0])
   end
 
   def test_eri_designs
@@ -933,6 +1023,26 @@ class ReportSimulationOutputTest < MiniTest::Test
       eri_csv = nil
     end
     return annual_csv, timeseries_csv, eri_csv
+  end
+
+  def _parse_time(ts)
+    date, time = ts.split(' ')
+    year, month, day = date.split('/')
+    hour, minute, second = time.split(':')
+    return Time.utc(year, month, day, hour, minute)
+  end
+
+  def _check_for_constant_timeseries_step(time_col)
+    steps = []
+    time_col.each_with_index do |ts, i|
+      next if i < 3
+
+      t0 = _parse_time(time_col[i - 1])
+      t1 = _parse_time(time_col[i])
+
+      steps << t1 - t0
+    end
+    assert_equal(1, steps.uniq.size)
   end
 
   def _check_for_nonzero_timeseries_value(timeseries_csv, timeseries_cols)
