@@ -508,7 +508,7 @@ class HEScoreRuleset
             # Do nothing, we already have the AFUE
           elsif heating_system_fuel == HPXML::FuelTypeElectricity
             heating_efficiency_afue = 0.98
-          elsif not efficiency_level.nil? && (heating_system_type == HPXML::HVACTypeFurnace)
+          elsif (not efficiency_level.nil?) && (heating_system_type == HPXML::HVACTypeFurnace)
             heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
                                                              heating_system_type,
                                                              heating_system_fuel,
