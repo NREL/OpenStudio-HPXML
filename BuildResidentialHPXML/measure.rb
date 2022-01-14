@@ -3315,10 +3315,19 @@ class HPXMLFile
     end
 
     hpxml.header.building_id = 'MyBuilding'
-    hpxml.header.zip_code = args[:site_zip_code] if args[:site_zip_code].is_initialized
-    hpxml.header.state_code = args[:site_state_code] if args[:site_state_code].is_initialized
-    hpxml.header.time_zone_utc_offset = args[:site_time_zone] if args[:site_time_zone].is_initialized
     hpxml.header.event_type = 'proposed workscope'
+
+    if args[:site_zip_code].is_initialized
+      hpxml.header.zip_code = args[:site_zip_code].get
+    end
+
+    if args[:site_state_code].is_initialized
+      hpxml.header.state_code = args[:site_state_code].get
+    end
+
+    if args[:site_time_zone].is_initialized
+      hpxml.header.time_zone_utc_offset = args[:site_time_zone].get
+    end
   end
 
   def self.set_site(hpxml, runner, args)
@@ -3431,14 +3440,8 @@ class HPXMLFile
 
     if args[:site_iecc_zone].is_initialized
       iecc_zone = args[:site_iecc_zone].get
-    else
-      iecc_zone = Location.get_climate_zone_iecc(epw_file.wmoNumber)
     end
 
-    unless iecc_zone.nil?
-      hpxml.climate_and_risk_zones.iecc_year = 2006
-      hpxml.climate_and_risk_zones.iecc_zone = iecc_zone
-    end
     weather_station_name = File.basename(args[:weather_station_epw_filepath]).gsub('.epw', '')
     hpxml.climate_and_risk_zones.weather_station_name = weather_station_name
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = args[:weather_station_epw_filepath]

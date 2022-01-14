@@ -36,6 +36,7 @@ class HPXMLDefaults
     apply_neighbor_buildings(hpxml)
     apply_building_occupancy(hpxml, nbeds, schedules_file)
     apply_building_construction(hpxml, cfa, nbeds, infil_volume)
+    apply_climate_and_risk_zones(hpxml, epw_file)
     apply_infiltration(hpxml, infil_volume, infil_height, infil_measurements)
     apply_attics(hpxml)
     apply_foundations(hpxml)
@@ -296,6 +297,16 @@ class HPXMLDefaults
 
         hpxml.building_construction.has_flue_or_chimney = true
       end
+    end
+  end
+
+  def self.apply_climate_and_risk_zones(hpxml, epw_file)
+    if hpxml.climate_and_risk_zones.iecc_zone.nil?
+      hpxml.climate_and_risk_zones.iecc_year = 2006
+      hpxml.climate_and_risk_zones.iecc_year_isdefaulted = true
+
+      hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(epw_file.wmoNumber)
+      hpxml.climate_and_risk_zones.iecc_zone_isdefaulted = true
     end
   end
 
