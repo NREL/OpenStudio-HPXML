@@ -5,6 +5,7 @@ __New Features__
 - BuildResidentialHPXML measure: Adds an optional argument to allow the HPXML file to be written with default values applied.
 - ReportSimulationOutput measure: Allows user-specified annual/timeseries output file names.
 - The `WaterFixturesUsageMultiplier` input now also applies to general water use internal gains and recirculation pump energy (for some control types).
+- Relaxes requirement for `ConditionedFloorAreaServed` for air distribution systems; now only needed if duct surface areas not provided.
 
 __Bugfixes__
 - Fixes possible HVAC sizing error if design temperature difference (TD) is negative.
