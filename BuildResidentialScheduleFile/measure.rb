@@ -186,9 +186,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   end
 
   def get_generator_inputs(hpxml, epw_file, args)
-    args[:state] = 'CO'
-    args[:state] = epw_file.stateProvinceRegion unless epw_file.stateProvinceRegion.empty?
-    args[:state] = hpxml.header.state_code unless hpxml.header.state_code.nil?
+    args[:state] = hpxml.header.state_code
 
     args[:random_seed] = args[:schedules_random_seed].get if args[:schedules_random_seed].is_initialized
 
