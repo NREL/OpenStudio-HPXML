@@ -17,8 +17,8 @@
     {
       "arguments": {
         "output_format": "csv",
-        "timeseries_frequency": "none",
-        "include_timeseries_fuel_consumptions": false,
+        "timeseries_frequency": "monthly",
+        "include_timeseries_fuel_consumptions": true,
         "include_timeseries_end_use_consumptions": false,
         "include_timeseries_hot_water_uses": false,
         "include_timeseries_total_loads": false,
@@ -34,6 +34,22 @@
         "output_format": "csv"
       },
       "measure_dir_name": "ReportHPXMLOutput"
+    },
+    {
+      "arguments": {
+        "output_format": "csv",
+        "electricity_bill_type": "Simple",
+        "electricity_fixed_charge": 12.0,
+        "electricity_marginal_rate": "auto",
+        "natural_gas_fixed_charge": 8.0,
+        "natural_gas_marginal_rate": "auto",
+        "fuel_oil_marginal_rate": "auto",
+        "propane_marginal_rate": "auto",
+        "wood_cord_marginal_rate": "auto",
+        "wood_pellets_marginal_rate": "auto",
+        "coal_marginal_rate": "auto"
+      },
+      "measure_dir_name": "ReportUtilityBills"
     }
   ],
   "run_options": {

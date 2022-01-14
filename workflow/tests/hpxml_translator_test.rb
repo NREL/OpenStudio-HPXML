@@ -83,8 +83,6 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? json_output_path)
     json_output_path = File.join(File.dirname(xml), 'run', 'results_hpxml.json')
     assert(File.exist? json_output_path)
-    json_output_path = File.join(File.dirname(xml), 'run', 'results_bills.json')
-    assert(File.exist? json_output_path)
 
     # Check for debug files
     osm_path = File.join(File.dirname(xml), 'run', 'in.osm')
@@ -112,8 +110,6 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? csv_output_path)
     csv_output_path = File.join(File.dirname(xml), 'run', 'results_hpxml.csv')
     assert(File.exist? csv_output_path)
-    csv_output_path = File.join(File.dirname(xml), 'run', 'results_bills.csv')
-    assert(File.exist? csv_output_path)
   end
 
   def test_run_simulation_idf_input
@@ -134,8 +130,6 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? csv_output_path)
     csv_output_path = File.join(File.dirname(xml), 'run', 'results_hpxml.csv')
     assert(File.exist? csv_output_path)
-    csv_output_path = File.join(File.dirname(xml), 'run', 'results_bills.csv')
-    assert(File.exist? csv_output_path)
   end
 
   def test_run_simulation_faster_performance
@@ -151,8 +145,6 @@ class HPXMLTest < MiniTest::Test
     csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
     assert(File.exist? csv_output_path)
     csv_output_path = File.join(File.dirname(xml), 'run', 'results_hpxml.csv')
-    assert(File.exist? csv_output_path)
-    csv_output_path = File.join(File.dirname(xml), 'run', 'results_bills.csv')
     assert(File.exist? csv_output_path)
 
     # Check component loads don't exist
@@ -197,8 +189,6 @@ class HPXMLTest < MiniTest::Test
     csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv')
     assert(File.exist? csv_output_path)
     csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_hpxml.csv')
-    assert(File.exist? csv_output_path)
-    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_bills.csv')
     assert(File.exist? csv_output_path)
 
     # Check for debug files
@@ -305,6 +295,52 @@ class HPXMLTest < MiniTest::Test
     File.delete(xml_path_test)
   end
 
+  def test_template_osw_with_utility_bills
+    # Check that simulation works using template-report-utility-bills.osw
+    require 'json'
+
+    osw_path = File.join(File.dirname(__FILE__), '..', 'template-report-utility-bills.osw')
+
+    # Create derivative OSW for testing
+    osw_path_test = osw_path.gsub('.osw', '_test.osw')
+    FileUtils.cp(osw_path, osw_path_test)
+
+    # Turn on debug mode
+    json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
+    json[:steps][0][:arguments][:debug] = true
+
+    if Dir.exist? File.join(File.dirname(__FILE__), '..', '..', 'project')
+      # CI checks out the repo as "project", so update dir name
+      json[:steps][0][:measure_dir_name] = 'project'
+    end
+
+    File.open(osw_path_test, 'w') do |f|
+      f.write(JSON.pretty_generate(json))
+    end
+
+    command = "#{OpenStudio.getOpenStudioCLI} run -w #{osw_path_test}"
+    system(command, err: File::NULL)
+
+    # Check for output files
+    sql_path = File.join(File.dirname(osw_path_test), 'run', 'eplusout.sql')
+    assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_hpxml.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_bills.csv')
+    assert(File.exist? csv_output_path)
+
+    # Check for debug files
+    osm_path = File.join(File.dirname(osw_path_test), 'run', 'in.osm')
+    assert(File.exist? osm_path)
+    hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
+    assert(File.exist? hpxml_defaults_path)
+
+    # Cleanup
+    File.delete(osw_path_test)
+  end
+
   def test_multiple_building_ids
     os_cli = OpenStudio.getOpenStudioCLI
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
@@ -361,7 +397,6 @@ class HPXMLTest < MiniTest::Test
       system(command)
       assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_annual.csv')
       assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_hpxml.csv')
-      assert(File.exist? 'OpenStudio-HPXML/workflow/sample_files/run/results_bills.csv')
 
       File.delete(zip_path)
       rm_path('OpenStudio-HPXML')
@@ -377,7 +412,7 @@ class HPXMLTest < MiniTest::Test
     # Uses 'monthly' to verify timeseries results match annual results via error-checking
     # inside the ReportSimulationOutput measure.
     cli_path = OpenStudio.getOpenStudioCLI
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} --add-component-loads -o #{rundir} --debug --monthly ALL"
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} --add-component-loads -add-utility-bills -o #{rundir} --debug --monthly ALL"
     workflow_start = Time.now
     success = system(command)
     workflow_time = Time.now - workflow_start

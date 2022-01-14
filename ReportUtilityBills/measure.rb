@@ -148,26 +148,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     @utility_bills[FT::Coal] = BaseOutput.new
   end
 
-  # return a vector of IdfObject's to request EnergyPlus objects needed by the run method
-  def energyPlusOutputRequests(runner, user_arguments)
-    super(runner, user_arguments)
-
-    result = OpenStudio::IdfObjectVector.new
-    return result if runner.halted
-
-    setup_outputs()
-    timeseries_frequency = 'monthly'
-
-    # Fuel outputs
-    @fuels.each do |fuel_type, fuel|
-      fuel.meters.each do |meter|
-        result << OpenStudio::IdfObject.load("Output:Meter,#{meter},#{timeseries_frequency};").get
-      end
-    end
-
-    return result
-  end
-
   # define what happens when the measure is run
   def run(runner, user_arguments)
     super(runner, user_arguments)

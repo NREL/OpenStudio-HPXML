@@ -50,7 +50,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   def _test_measure(args_hash)
     # Run measure via OSW
     require 'json'
-    template_osw = File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'template.osw')
+    template_osw = File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'template-report-utility-bills.osw')
     workflow = OpenStudio::WorkflowJSON.new(template_osw)
     json = JSON.parse(workflow.to_s)
 

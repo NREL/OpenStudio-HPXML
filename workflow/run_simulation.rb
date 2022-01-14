@@ -11,7 +11,7 @@ require_relative '../HPXMLtoOpenStudio/resources/version'
 
 basedir = File.expand_path(File.dirname(__FILE__))
 
-def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseries_outputs, skip_validation, add_comp_loads,
+def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseries_outputs, skip_validation, add_comp_loads, add_utility_bills,
                  output_format, building_id, ep_input_format, detailed_schedules_type)
   measures_dir = File.join(basedir, '..')
 
@@ -61,20 +61,22 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
   update_args_hash(measures, measure_subdir, args)
 
   # Add utility bills measure to workflow
-  measure_subdir = 'ReportUtilityBills'
-  args = {}
-  args['output_format'] = output_format
-  args['electricity_bill_type'] = 'Simple'
-  args['electricity_fixed_charge'] = 12.0
-  args['electricity_marginal_rate'] = Constants.Auto
-  args['natural_gas_fixed_charge'] = 8.0
-  args['natural_gas_marginal_rate'] = Constants.Auto
-  args['fuel_oil_marginal_rate'] = Constants.Auto
-  args['propane_marginal_rate'] = Constants.Auto
-  args['wood_cord_marginal_rate'] = Constants.Auto
-  args['wood_pellets_marginal_rate'] = Constants.Auto
-  args['coal_marginal_rate'] = Constants.Auto
-  update_args_hash(measures, measure_subdir, args)
+  if add_utility_bills
+    measure_subdir = 'ReportUtilityBills'
+    args = {}
+    args['output_format'] = output_format
+    args['electricity_bill_type'] = 'Simple'
+    args['electricity_fixed_charge'] = 12.0
+    args['electricity_marginal_rate'] = Constants.Auto
+    args['natural_gas_fixed_charge'] = 8.0
+    args['natural_gas_marginal_rate'] = Constants.Auto
+    args['fuel_oil_marginal_rate'] = Constants.Auto
+    args['propane_marginal_rate'] = Constants.Auto
+    args['wood_cord_marginal_rate'] = Constants.Auto
+    args['wood_pellets_marginal_rate'] = Constants.Auto
+    args['coal_marginal_rate'] = Constants.Auto
+    update_args_hash(measures, measure_subdir, args)
+  end
 
   results = run_hpxml_workflow(rundir, measures, measures_dir, debug: debug, ep_input_format: ep_input_format)
 
@@ -131,6 +133,11 @@ OptionParser.new do |opts|
 
   opts.on('--add-detailed-schedule TYPE', ['smooth', 'stochastic'], 'Add detailed schedule of type (smooth, stochastic)') do |t|
     options[:detailed_schedules_type] = t
+  end
+
+  options[:add_utility_bills] = false
+  opts.on('--add-utility-bills', 'Add utility bills calculation') do |t|
+    options[:add_utility_bills] = true
   end
 
   options[:ep_input_format] = 'idf'
@@ -221,7 +228,7 @@ rundir = File.join(options[:output_dir], 'run')
 # Run design
 puts "HPXML: #{options[:hpxml]}"
 success = run_workflow(basedir, rundir, options[:hpxml], options[:debug], timeseries_output_freq, timeseries_outputs,
-                       options[:skip_validation], options[:add_comp_loads], options[:output_format], options[:building_id],
+                       options[:skip_validation], options[:add_comp_loads], options[:add_utility_bills], options[:output_format], options[:building_id],
                        options[:ep_input_format], options[:detailed_schedules_type])
 
 if not success
