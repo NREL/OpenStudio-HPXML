@@ -2087,6 +2087,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['weather_station_epw_filepath'] = 'USA_OR_Portland.Intl.AP.726980_TMY3.epw'
     args['heating_system_heating_capacity'] = 24000.0
   elsif ['base-location-capetown-zaf.xml'].include? hpxml_file
+    args['site_iecc_zone'] = '3A'
     args['weather_station_epw_filepath'] = 'ZAF_Cape.Town.688160_IWEC.epw'
     args['heating_system_heating_capacity'] = 24000.0
   end
@@ -2377,7 +2378,6 @@ def apply_hpxml_modification_ashrae_140(hpxml_file, hpxml)
   hpxml.header.xml_generated_by = 'tasks.rb'
   hpxml.header.created_date_and_time = Time.new(2000, 1, 1).strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
   hpxml.header.apply_ashrae140_assumptions = true
-  hpxml.header.state_code = nil
 
   # --------------------- #
   # HPXML BuildingSummary #
@@ -2385,7 +2385,6 @@ def apply_hpxml_modification_ashrae_140(hpxml_file, hpxml)
 
   hpxml.site.azimuth_of_front_of_home = nil
   hpxml.building_construction.average_ceiling_height = nil
-  hpxml.climate_and_risk_zones.iecc_zone = nil
 
   # --------------- #
   # HPXML Enclosure #
@@ -2497,17 +2496,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.header.schedules_filepath = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
   elsif ['base-schedules-detailed-smooth.xml'].include? hpxml_file
     hpxml.header.schedules_filepath = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
-  elsif ['base-location-capetown-zaf.xml'].include? hpxml_file
-    hpxml.header.state_code = nil
-  end
-
-  # ------------------------- #
-  # HPXML ClimateandRiskZones #
-  # ------------------------- #
-
-  if ['base-location-capetown-zaf.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc_zone = '3A'
-    hpxml.climate_and_risk_zones.iecc_year = 2006
   end
 
   # --------------------- #
