@@ -62,6 +62,9 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
 
   # Add utility bills measure to workflow
   if add_utility_bills
+    measures['ReportSimulationOutput'][0]['timeseries_frequency'] = 'monthly'
+    measures['ReportSimulationOutput'][0]['include_timeseries_fuel_consumptions'] = true
+
     measure_subdir = 'ReportUtilityBills'
     args = {}
     args['output_format'] = output_format
@@ -136,7 +139,7 @@ OptionParser.new do |opts|
   end
 
   options[:add_utility_bills] = false
-  opts.on('--add-utility-bills', 'Add utility bills calculation') do |t|
+  opts.on('--add-utility-bills', 'Add utility bill calculations. Requests monthly output.') do |t|
     options[:add_utility_bills] = true
   end
 
