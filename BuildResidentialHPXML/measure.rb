@@ -3118,18 +3118,6 @@ class HPXMLFile
     success = create_geometry_envelope(runner, model, args)
     return false if not success
 
-    if args[:site_state_code].is_initialized
-      args[:site_state_code] = args[:site_state_code].get
-    else
-      args[:site_state_code] = epw_file.stateProvinceRegion
-    end
-
-    if args[:site_time_zone].is_initialized
-      args[:site_time_zone] = args[:site_time_zone].get
-    else
-      args[:site_time_zone] = epw_file.timeZone
-    end
-
     @surface_ids = {}
 
     # Sorting of objects to make the measure deterministic
@@ -3327,11 +3315,9 @@ class HPXMLFile
     end
 
     hpxml.header.building_id = 'MyBuilding'
-    if args[:site_zip_code].is_initialized
-      hpxml.header.zip_code = args[:site_zip_code]
-    end
-    hpxml.header.state_code = args[:site_state_code]
-    hpxml.header.time_zone_utc_offset = args[:site_time_zone]
+    hpxml.header.zip_code = args[:site_zip_code] if args[:site_zip_code].is_initialized
+    hpxml.header.state_code = args[:site_state_code] if args[:site_state_code].is_initialized
+    hpxml.header.time_zone_utc_offset = args[:site_time_zone] if args[:site_time_zone].is_initialized
     hpxml.header.event_type = 'proposed workscope'
   end
 
