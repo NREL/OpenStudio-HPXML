@@ -3305,9 +3305,15 @@ class HPXMLFile
     end
 
     hpxml.header.building_id = 'MyBuilding'
-    hpxml.header.zip_code = args[:zip_code] if args[:zip_code].is_initialized
-    hpxml.header.state_code = args[:site_state_code] if args[:site_state_code].is_initialized
     hpxml.header.event_type = 'proposed workscope'
+
+    if args[:zip_code].is_initialized
+      hpxml.header.zip_code = args[:zip_code].get
+    end
+
+    if args[:site_state_code].is_initialized
+      hpxml.header.state_code = args[:site_state_code].get
+    end
   end
 
   def self.set_site(hpxml, runner, args)
