@@ -15,12 +15,6 @@
   </SoftwareInfo>
   <Building>
     <BuildingID id='MyBuilding'/>
-    <Site>
-      <SiteID id='SiteID'/>
-      <Address>
-        <StateCode>OR</StateCode>
-      </Address>
-    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>
@@ -51,10 +45,6 @@
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
-        <ClimateZoneIECC>
-          <Year>2006</Year>
-          <ClimateZone>4C</ClimateZone>
-        </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
           <Name>USA_OR_Portland.Intl.AP.726980_TMY3</Name>

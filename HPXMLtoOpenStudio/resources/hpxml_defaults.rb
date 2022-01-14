@@ -302,11 +302,14 @@ class HPXMLDefaults
 
   def self.apply_climate_and_risk_zones(hpxml, epw_file)
     if hpxml.climate_and_risk_zones.iecc_zone.nil?
-      hpxml.climate_and_risk_zones.iecc_year = 2006
-      hpxml.climate_and_risk_zones.iecc_year_isdefaulted = true
+      iecc_zone = Location.get_climate_zone_iecc(epw_file.wmoNumber)
+      if !iecc_zone.nil?
+        hpxml.climate_and_risk_zones.iecc_zone = iecc_zone
+        hpxml.climate_and_risk_zones.iecc_zone_isdefaulted = true
 
-      hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(epw_file.wmoNumber)
-      hpxml.climate_and_risk_zones.iecc_zone_isdefaulted = true
+        hpxml.climate_and_risk_zones.iecc_year = 2006
+        hpxml.climate_and_risk_zones.iecc_year_isdefaulted = true
+      end
     end
   end
 

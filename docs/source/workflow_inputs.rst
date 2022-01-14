@@ -192,6 +192,16 @@ A couple schedule CSV file examples are provided in the ``HPXMLtoOpenStudio/reso
 
 A detailed stochastic or smooth schedule CSV file can also be automatically generated for you; see the :ref:`usage_instructions` for the commands.
 
+Generator inputs are entered in ``/HPXML/Building/Site/Address``.
+
+  =================================  ========  =====  ===========  ========  ========  ===============
+  Element                            Type      Units  Constraints  Required  Default   Description
+  =================================  ========  =====  ===========  ========  ========  ===============
+  ``StateCode``                      string                        No        EPW [#]_  Site state code
+  =================================  ========  =====  ===========  ========  ========  ===============
+
+  .. [#] State code will be defined according to the EPW weather file header.
+
 Default Schedules
 ~~~~~~~~~~~~~~~~~
 
@@ -1824,7 +1834,7 @@ If not entered, the simulation will not include water heating.
   .. [#] WaterHeaterType choices are "storage water heater", "instantaneous water heater", "heat pump water heater", "space-heating boiler with storage tank", or "space-heating boiler with tankless coil".
   .. [#] Location choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] If Location not provided, defaults to the first present space type:
+  .. [#] If Location not provided, defaults (``/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC/ClimateZone``) to the first present space type:
   
          - **IECC zones 1-3, excluding 3A**: "garage", "living space"
          - **IECC zones 3A, 4-8, unknown**: "basement - conditioned", "basement - unconditioned", "living space"

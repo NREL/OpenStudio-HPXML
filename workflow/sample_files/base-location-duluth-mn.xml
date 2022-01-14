@@ -15,12 +15,6 @@
   </SoftwareInfo>
   <Building>
     <BuildingID id='MyBuilding'/>
-    <Site>
-      <SiteID id='SiteID'/>
-      <Address>
-        <StateCode>MN</StateCode>
-      </Address>
-    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>
@@ -51,10 +45,6 @@
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
-        <ClimateZoneIECC>
-          <Year>2006</Year>
-          <ClimateZone>7</ClimateZone>
-        </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
           <Name>USA_MN_Duluth.Intl.AP.727450_TMY3</Name>
