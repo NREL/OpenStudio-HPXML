@@ -492,6 +492,7 @@ def set_measure_argument_values(hpxml_file, args)
 
   if ['base.xml'].include? hpxml_file
     args['simulation_control_timestep'] = 60
+    args['site_iecc_zone'] = '5B'
     args['weather_station_epw_filepath'] = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
     args['site_type'] = HPXML::SiteTypeSuburban
     args['geometry_unit_type'] = HPXML::ResidentialTypeSFD

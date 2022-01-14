@@ -132,7 +132,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('site_iecc_zone', site_iecc_zone_choices, false)
     arg.setDisplayName('Site: IECC Zone')
-    arg.setDescription('IECC zone of the home address. If not provided, uses the IECC zone corresponding to the EPW weather file.')
+    arg.setDescription('IECC zone of the home address.')
     args << arg
 
     site_state_code_choices = OpenStudio::StringVector.new
@@ -146,7 +146,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('site_state_code', site_state_code_choices, false)
     arg.setDisplayName('Site: State Code')
-    arg.setDescription('State code of the home address. If not provided, uses the EPW weather file state code.')
+    arg.setDescription('State code of the home address.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_station_epw_filepath', true)
