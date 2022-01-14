@@ -119,9 +119,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('zip_code', false)
-    arg.setDisplayName('Zip Code')
-    arg.setDescription('Zip code - used for informational purposes only')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('site_zip_code', false)
+    arg.setDisplayName('Site: Zip Code')
+    arg.setDescription('Zip code of the home address.')
     args << arg
 
     site_iecc_zone_choices = OpenStudio::StringVector.new
@@ -3108,12 +3108,6 @@ class HPXMLFile
     success = create_geometry_envelope(runner, model, args)
     return false if not success
 
-    if args[:site_state_code].is_initialized
-      args[:site_state_code] = args[:site_state_code].get
-    else
-      args[:site_state_code] = epw_file.stateProvinceRegion
-    end
-
     @surface_ids = {}
 
     # Sorting of objects to make the measure deterministic
@@ -3311,11 +3305,15 @@ class HPXMLFile
     end
 
     hpxml.header.building_id = 'MyBuilding'
-    if args[:zip_code].is_initialized
-      hpxml.header.zip_code = args[:zip_code]
-    end
-    hpxml.header.state_code = args[:site_state_code]
     hpxml.header.event_type = 'proposed workscope'
+
+    if args[:site_zip_code].is_initialized
+      hpxml.header.zip_code = args[:site_zip_code].get
+    end
+
+    if args[:site_state_code].is_initialized
+      hpxml.header.state_code = args[:site_state_code].get
+    end
   end
 
   def self.set_site(hpxml, runner, args)
@@ -3427,15 +3425,10 @@ class HPXMLFile
     hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
 
     if args[:site_iecc_zone].is_initialized
-      iecc_zone = args[:site_iecc_zone].get
-    else
-      iecc_zone = Location.get_climate_zone_iecc(epw_file.wmoNumber)
+      hpxml.climate_and_risk_zones.iecc_zone = args[:site_iecc_zone].get
+      hpxml.climate_and_risk_zones.iecc_year = 2006
     end
 
-    unless iecc_zone.nil?
-      hpxml.climate_and_risk_zones.iecc_year = 2006
-      hpxml.climate_and_risk_zones.iecc_zone = iecc_zone
-    end
     weather_station_name = File.basename(args[:weather_station_epw_filepath]).gsub('.epw', '')
     hpxml.climate_and_risk_zones.weather_station_name = weather_station_name
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = args[:weather_station_epw_filepath]
