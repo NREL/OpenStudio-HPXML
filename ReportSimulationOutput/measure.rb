@@ -483,10 +483,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       dst_start_ts = Time.utc(@hpxml_defaults.header.sim_calendar_year, @hpxml_defaults.header.dst_begin_month, @hpxml_defaults.header.dst_begin_day, 2)
       dst_end_ts = Time.utc(@hpxml_defaults.header.sim_calendar_year, @hpxml_defaults.header.dst_end_month, @hpxml_defaults.header.dst_end_day, 1)
     elsif timestamps_local_time == 'UTC'
-      if @hpxml.header.time_zone.nil?
+      if @hpxml.header.time_zone_utc_offset.nil?
         utc_offset = @model.getSite.timeZone
       else
-        utc_offset = @hpxml.header.time_zone
+        utc_offset = @hpxml.header.time_zone_utc_offset
       end
       utc_offset *= 3600 # seconds
     end
