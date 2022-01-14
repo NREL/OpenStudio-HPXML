@@ -187,6 +187,11 @@ class HPXMLDefaults
       hpxml.header.use_max_load_for_heat_pumps = true
       hpxml.header.use_max_load_for_heat_pumps_isdefaulted = true
     end
+
+    if hpxml.header.state_code.nil?
+      hpxml.header.state_code = epw_file.stateProvinceRegion
+      hpxml.header.state_code_isdefaulted = true
+    end
   end
 
   def self.apply_site(hpxml)
