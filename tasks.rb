@@ -2106,6 +2106,7 @@ def set_measure_argument_values(hpxml_file, args)
     args['heating_system_heating_capacity'] = 24000.0
   elsif ['base-location-capetown-zaf.xml'].include? hpxml_file
     args['site_iecc_zone'] = '3A'
+    args.delete('site_state_code')
     args['weather_station_epw_filepath'] = 'ZAF_Cape.Town.688160_IWEC.epw'
     args['heating_system_heating_capacity'] = 24000.0
   end
