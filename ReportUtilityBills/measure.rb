@@ -226,7 +226,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         if [FT::Elec, FT::Gas, FT::Oil, FT::Propane].include? fuel_type
           marginal_rate = get_state_average_marginal_rate(hpxml.header.state_code, fuel_type, fixed_charge)
         elsif [FT::WoodCord, FT::WoodPellets, FT::Coal].include? fuel_type
-          marginal_rate = 1 # FIXME: can we get these somewhere?
+          marginal_rate = 0.1 # FIXME: can we get these somewhere?
         end
       else
         marginal_rate = Float(marginal_rate)
@@ -318,8 +318,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         results_out << [line_break]
         segment = new_segment
       end
-      results_out << ["#{key}: Fixed (#{utility_bill.units})", utility_bill.fixed.round(2)] if !utility_bill.fixed.nil?
-      results_out << ["#{key}: Marginal (#{utility_bill.units})", utility_bill.marginal.round(2)] if !utility_bill.fixed.nil?
+      results_out << ["#{key}: Fixed (#{utility_bill.units})", utility_bill.fixed.round(2)] if [FT::Elec, FT::Gas].include? key
+      results_out << ["#{key}: Marginal (#{utility_bill.units})", utility_bill.marginal.round(2)] if [FT::Elec, FT::Gas].include? key
       results_out << ["#{key}: Total (#{utility_bill.units})", utility_bill.total.round(2)]
     end
 
@@ -343,7 +343,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
   class BaseOutput
     def initialize()
-      @fixed = nil
+      @fixed = 0.0
       @marginal = 0.0
       @total = 0.0
       @units = '$'
