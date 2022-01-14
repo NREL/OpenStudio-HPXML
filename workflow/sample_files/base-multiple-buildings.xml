@@ -15,6 +15,12 @@
   </SoftwareInfo>
   <Building>
     <BuildingID id='MyBuilding'/>
+    <Site>
+      <SiteID id='SiteID'/>
+      <Address>
+        <StateCode>CO</StateCode>
+      </Address>
+    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>
@@ -562,6 +568,12 @@
   </Building>
   <Building>
     <BuildingID id='MyBuilding_2'/>
+    <Site>
+      <SiteID id='SiteID_2'/>
+      <Address>
+        <StateCode>CO</StateCode>
+      </Address>
+    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>
@@ -1109,6 +1121,12 @@
   </Building>
   <Building>
     <BuildingID id='MyBuilding_3'/>
+    <Site>
+      <SiteID id='SiteID_3'/>
+      <Address>
+        <StateCode>CO</StateCode>
+      </Address>
+    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>

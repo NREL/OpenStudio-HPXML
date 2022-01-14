@@ -493,6 +493,7 @@ def set_measure_argument_values(hpxml_file, args)
   if ['base.xml'].include? hpxml_file
     args['simulation_control_timestep'] = 60
     args['site_iecc_zone'] = '5B'
+    args['site_state_code'] = 'CO'
     args['weather_station_epw_filepath'] = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
     args['site_type'] = HPXML::SiteTypeSuburban
     args['geometry_unit_type'] = HPXML::ResidentialTypeSFD
@@ -2065,26 +2066,42 @@ def set_measure_argument_values(hpxml_file, args)
   if ['base-location-AMY-2012.xml'].include? hpxml_file
     args['weather_station_epw_filepath'] = 'US_CO_Boulder_AMY_2012.epw'
   elsif ['base-location-baltimore-md.xml'].include? hpxml_file
+    args['site_iecc_zone'] = '4A'
+    args['site_state_code'] = 'MD'
     args['weather_station_epw_filepath'] = 'USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw'
     args['heating_system_heating_capacity'] = 24000.0
   elsif ['base-location-dallas-tx.xml'].include? hpxml_file
+    args['site_iecc_zone'] = '3A'
+    args['site_state_code'] = 'TX'
     args['weather_station_epw_filepath'] = 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw'
     args['heating_system_heating_capacity'] = 24000.0
   elsif ['base-location-duluth-mn.xml'].include? hpxml_file
+    args['site_iecc_zone'] = '7'
+    args['site_state_code'] = 'MN'
     args['weather_station_epw_filepath'] = 'USA_MN_Duluth.Intl.AP.727450_TMY3.epw'
   elsif ['base-location-helena-mt.xml'].include? hpxml_file
+    args['site_iecc_zone'] = '6B'
+    args['site_state_code'] = 'MT'
     args['weather_station_epw_filepath'] = 'USA_MT_Helena.Rgnl.AP.727720_TMY3.epw'
     args['heating_system_heating_capacity'] = 48000.0
   elsif ['base-location-honolulu-hi.xml'].include? hpxml_file
+    args['site_iecc_zone'] = '1A'
+    args['site_state_code'] = 'HI'
     args['weather_station_epw_filepath'] = 'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw'
     args['heating_system_heating_capacity'] = 12000.0
   elsif ['base-location-miami-fl.xml'].include? hpxml_file
+    args['site_iecc_zone'] = '1A'
+    args['site_state_code'] = 'FL'
     args['weather_station_epw_filepath'] = 'USA_FL_Miami.Intl.AP.722020_TMY3.epw'
     args['heating_system_heating_capacity'] = 12000.0
   elsif ['base-location-phoenix-az.xml'].include? hpxml_file
+    args['site_iecc_zone'] = '2B'
+    args['site_state_code'] = 'AZ'
     args['weather_station_epw_filepath'] = 'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw'
     args['heating_system_heating_capacity'] = 24000.0
   elsif ['base-location-portland-or.xml'].include? hpxml_file
+    args['site_iecc_zone'] = '4C'
+    args['site_state_code'] = 'OR'
     args['weather_station_epw_filepath'] = 'USA_OR_Portland.Intl.AP.726980_TMY3.epw'
     args['heating_system_heating_capacity'] = 24000.0
   elsif ['base-location-capetown-zaf.xml'].include? hpxml_file
