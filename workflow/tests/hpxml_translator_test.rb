@@ -412,7 +412,7 @@ class HPXMLTest < MiniTest::Test
     # Uses 'monthly' to verify timeseries results match annual results via error-checking
     # inside the ReportSimulationOutput measure.
     cli_path = OpenStudio.getOpenStudioCLI
-    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} --add-component-loads --add-utility-bills -o #{rundir} --debug --monthly ALL"
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml} --add-component-loads -o #{rundir} --debug --monthly ALL"
     workflow_start = Time.now
     success = system(command)
     workflow_time = Time.now - workflow_start
@@ -426,11 +426,9 @@ class HPXMLTest < MiniTest::Test
     annual_csv_path = File.join(rundir, 'results_annual.csv')
     timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
     hpxml_csv_path = File.join(rundir, 'results_hpxml.csv')
-    bills_csv_path = File.join(rundir, 'results_bills.csv')
     assert(File.exist? annual_csv_path)
     assert(File.exist? timeseries_csv_path)
     assert(File.exist? hpxml_csv_path)
-    assert(File.exist? bills_csv_path)
 
     # Get results
     results = _get_simulation_results(annual_csv_path, xml)
