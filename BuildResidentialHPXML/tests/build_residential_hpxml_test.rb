@@ -55,6 +55,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'extra-sfa-unvented-crawlspace.xml' => 'base-sfa.xml',
       'extra-sfa-conditioned-crawlspace.xml' => 'base-sfa.xml',
       'extra-sfa-unconditioned-basement.xml' => 'base-sfa.xml',
+      'extra-sfa-ambient.xml' => 'base-sfa.xml',
 
       'extra-sfa-rear-units.xml' => 'base-sfa.xml',
       'extra-sfa-exterior-corridor.xml' => 'base-sfa.xml',
@@ -71,6 +72,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'extra-mf-slab.xml' => 'base-mf.xml',
       'extra-mf-vented-crawlspace.xml' => 'base-mf.xml',
       'extra-mf-unvented-crawlspace.xml' => 'base-mf.xml',
+      'extra-mf-ambient.xml' => 'base-sfa.xml',
 
       'extra-mf-rear-units.xml' => 'base-mf.xml',
       'extra-mf-exterior-corridor.xml' => 'base-mf.xml',
@@ -140,7 +142,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-non-integer-ceiling-fan-quantity.xml' => 'base-sfd.xml',
       'error-sfd-conditioned-basement-zero-foundation-height.xml' => 'base-sfd.xml',
       'error-sfd-adiabatic-walls.xml' => 'base-sfd.xml',
-      'error-sfa-ambient.xml' => 'base-sfa.xml',
       'error-mf-bottom-crawlspace-zero-foundation-height.xml' => 'base-mf.xml',
       'error-ducts-location-and-areas-not-same-type.xml' => 'base-sfd.xml',
       'error-second-heating-system-serves-total-heat-load.xml' => 'base-sfd.xml',
@@ -185,7 +186,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-non-integer-ceiling-fan-quantity.xml' => 'Quantity of ceiling fans must be an integer.',
       'error-sfd-conditioned-basement-zero-foundation-height.xml' => "Foundation type of 'ConditionedBasement' cannot have a height of zero.",
       'error-sfd-adiabatic-walls.xml' => 'No adiabatic surfaces can be applied to single-family detached homes.',
-      'error-sfa-ambient.xml' => 'Ambient foundation type for single-family attached or apartment units is not currently supported.',
       'error-mf-conditioned-basement' => 'Conditioned basement/crawlspace foundation type for apartment units is not currently supported.',
       'error-mf-conditioned-crawlspace' => 'Conditioned basement/crawlspace foundation type for apartment units is not currently supported.',
       'error-mf-bottom-crawlspace-zero-foundation-height.xml' => "Foundation type of 'UnventedCrawlspace' cannot have a height of zero.",
@@ -855,6 +855,13 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['floor_over_foundation_assembly_r'] = 18.7
       args['foundation_wall_insulation_r'] = 0
       args['foundation_wall_insulation_distance_to_bottom'] = 0.0
+    elsif ['extra-sfa-ambient.xml'].include? hpxml_file
+      args['geometry_unit_cfa'] = 900.0
+      args['geometry_foundation_type'] = HPXML::FoundationTypeAmbient
+      args.delete('geometry_rim_joist_height')
+      args['floor_over_foundation_assembly_r'] = 18.7
+      args.delete('rim_joist_assembly_r')
+      args['misc_plug_loads_other_annual_kwh'] = 1228.5
     elsif ['extra-sfa-rear-units.xml'].include? hpxml_file
       args['geometry_building_num_units'] = 4
     elsif ['extra-sfa-exterior-corridor.xml'].include? hpxml_file
@@ -888,6 +895,13 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['geometry_foundation_height'] = 4.0
       args['floor_over_foundation_assembly_r'] = 18.7
       args['foundation_wall_insulation_distance_to_bottom'] = 4.0
+    elsif ['extra-mf-ambient.xml'].include? hpxml_file
+      args['geometry_unit_cfa'] = 450.0
+      args['geometry_foundation_type'] = HPXML::FoundationTypeAmbient
+      args.delete('geometry_rim_joist_height')
+      args['floor_over_foundation_assembly_r'] = 18.7
+      args.delete('rim_joist_assembly_r')
+      args['misc_plug_loads_other_annual_kwh'] = 1228.5
     elsif ['extra-mf-rear-units.xml'].include? hpxml_file
       args['geometry_building_num_units'] = 18
     elsif ['extra-mf-exterior-corridor.xml'].include? hpxml_file
@@ -992,10 +1006,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['foundation_wall_insulation_distance_to_bottom'] = Constants.Auto
     elsif ['error-sfd-adiabatic-walls.xml'].include? hpxml_file
       args['geometry_unit_left_wall_is_adiabatic'] = true
-    elsif ['error-sfa-ambient.xml'].include? hpxml_file
-      args['geometry_foundation_type'] = HPXML::FoundationTypeAmbient
-      args.delete('geometry_rim_joist_height')
-      args.delete('rim_joist_assembly_r')
     elsif ['error-mf-conditioned-basement'].include? hpxml_file
       args['geometry_foundation_type'] = HPXML::FoundationTypeBasementConditioned
     elsif ['error-mf-conditioned-crawlspace'].include? hpxml_file
