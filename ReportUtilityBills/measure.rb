@@ -187,8 +187,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     # Require full year
     if !(hpxml.header.sim_begin_month == 1 && hpxml.header.sim_begin_day == 1 && hpxml.header.sim_end_month == 12 && hpxml.header.sim_end_day == 31)
-      runner.registerError('A full annual simulation is required for calculating utility bills.')
-      return false
+      runner.registerWarning('A full annual simulation is required for calculating utility bills.')
+      return true
     end
 
     # Set paths
