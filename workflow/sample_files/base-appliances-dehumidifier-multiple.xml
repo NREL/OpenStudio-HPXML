@@ -15,6 +15,12 @@
   </SoftwareInfo>
   <Building>
     <BuildingID id='MyBuilding'/>
+    <Site>
+      <SiteID id='SiteID'/>
+      <Address>
+        <StateCode>TX</StateCode>
+      </Address>
+    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>
@@ -45,6 +51,10 @@
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
+        <ClimateZoneIECC>
+          <Year>2006</Year>
+          <ClimateZone>3A</ClimateZone>
+        </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
           <Name>USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3</Name>

@@ -306,10 +306,12 @@ class HPXMLDefaults
       if !iecc_zone.nil?
         hpxml.climate_and_risk_zones.iecc_zone = iecc_zone
         hpxml.climate_and_risk_zones.iecc_zone_isdefaulted = true
-
-        hpxml.climate_and_risk_zones.iecc_year = 2006
-        hpxml.climate_and_risk_zones.iecc_year_isdefaulted = true
       end
+    end
+
+    if hpxml.climate_and_risk_zones.iecc_year.nil?
+      hpxml.climate_and_risk_zones.iecc_year = 2006
+      hpxml.climate_and_risk_zones.iecc_year_isdefaulted = true
     end
   end
 

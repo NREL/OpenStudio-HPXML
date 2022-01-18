@@ -15,6 +15,12 @@
   </SoftwareInfo>
   <Building>
     <BuildingID id='MyBuilding'/>
+    <Site>
+      <SiteID id='SiteID'/>
+      <Address>
+        <StateCode>CO</StateCode>
+      </Address>
+    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>
@@ -45,6 +51,10 @@
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
+        <ClimateZoneIECC>
+          <Year>2006</Year>
+          <ClimateZone>5B</ClimateZone>
+        </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
           <Name>USA_CO_Denver.Intl.AP.725650_TMY3</Name>
@@ -558,6 +568,12 @@
   </Building>
   <Building>
     <BuildingID id='MyBuilding_2'/>
+    <Site>
+      <SiteID id='SiteID_2'/>
+      <Address>
+        <StateCode>CO</StateCode>
+      </Address>
+    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>
@@ -588,6 +604,10 @@
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
+        <ClimateZoneIECC>
+          <Year>2006</Year>
+          <ClimateZone>5B</ClimateZone>
+        </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation_2'/>
           <Name>USA_CO_Denver.Intl.AP.725650_TMY3</Name>
@@ -1101,6 +1121,12 @@
   </Building>
   <Building>
     <BuildingID id='MyBuilding_3'/>
+    <Site>
+      <SiteID id='SiteID_3'/>
+      <Address>
+        <StateCode>CO</StateCode>
+      </Address>
+    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>
@@ -1131,6 +1157,10 @@
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
+        <ClimateZoneIECC>
+          <Year>2006</Year>
+          <ClimateZone>5B</ClimateZone>
+        </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation_3'/>
           <Name>USA_CO_Denver.Intl.AP.725650_TMY3</Name>
