@@ -2989,9 +2989,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = ![HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment].include?(args[:geometry_foundation_type]) && (args[:geometry_foundation_height] == 0)
     errors << "Foundation type of '#{args[:geometry_foundation_type]}' cannot have a height of zero." if error
 
-    error = [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include?(args[:geometry_unit_type]) && (args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient)
-    errors << 'Ambient foundation type for single-family attached or apartment units is not currently supported.' if error
-
     error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && ([HPXML::FoundationTypeBasementConditioned, HPXML::FoundationTypeCrawlspaceConditioned].include? args[:geometry_foundation_type])
     errors << 'Conditioned basement/crawlspace foundation type for apartment units is not currently supported.' if error
 
