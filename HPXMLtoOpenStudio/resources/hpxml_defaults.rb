@@ -32,6 +32,7 @@ class HPXMLDefaults
     end
 
     apply_header(hpxml, epw_file)
+    apply_emissions_scenarios(hpxml)
     apply_site(hpxml)
     apply_neighbor_buildings(hpxml)
     apply_building_occupancy(hpxml, nbeds, schedules_file)
@@ -186,6 +187,57 @@ class HPXMLDefaults
     if hpxml.header.use_max_load_for_heat_pumps.nil?
       hpxml.header.use_max_load_for_heat_pumps = true
       hpxml.header.use_max_load_for_heat_pumps_isdefaulted = true
+    end
+  end
+
+  def self.apply_emissions_scenarios(hpxml)
+    hpxml.header.emissions_scenarios.each do |scenario|
+      default_units = HPXML::EmissionsScenario::UnitsLbPerMBtu
+      if scenario.emissions_type.downcase == 'co2'
+        natural_gas, propane, fuel_oil, coal, wood, wood_pellets = 117.6, 136.6, 161.0, 211.1, nil, nil
+      elsif scenario.emissions_type.downcase == 'nox'
+        natural_gas, propane, fuel_oil, coal, wood, wood_pellets = 0.0922, 0.1421, 0.1300, nil, nil, nil
+      elsif scenario.emissions_type.downcase == 'so2'
+        natural_gas, propane, fuel_oil, coal, wood, wood_pellets = 0.0006, 0.0002, 0.0015, nil, nil, nil
+      else
+        natural_gas, propane, fuel_oil, coal, wood, wood_pellets = nil, nil, nil, nil, nil, nil
+      end
+      if (scenario.natural_gas_units.nil? || scenario.natural_gas_value.nil?) && (not natural_gas.nil?)
+        scenario.natural_gas_units = default_units
+        scenario.natural_gas_units_isdefaulted = true
+        scenario.natural_gas_value = natural_gas
+        scenario.natural_gas_value_isdefaulted = true
+      end
+      if (scenario.propane_units.nil? || scenario.propane_value.nil?) && (not propane.nil?)
+        scenario.propane_units = default_units
+        scenario.propane_units_isdefaulted = true
+        scenario.propane_value = propane
+        scenario.propane_value_isdefaulted = true
+      end
+      if (scenario.fuel_oil_units.nil? || scenario.fuel_oil_value.nil?) && (not fuel_oil.nil?)
+        scenario.fuel_oil_units = default_units
+        scenario.fuel_oil_units_isdefaulted = true
+        scenario.fuel_oil_value = fuel_oil
+        scenario.fuel_oil_value_isdefaulted = true
+      end
+      if (scenario.coal_units.nil? || scenario.coal_value.nil?) && (not coal.nil?)
+        scenario.coal_units = default_units
+        scenario.coal_units_isdefaulted = true
+        scenario.coal_value = coal
+        scenario.coal_value_isdefaulted = true
+      end
+      if (scenario.wood_units.nil? || scenario.wood_value.nil?) && (not wood.nil?)
+        scenario.wood_units = default_units
+        scenario.wood_units_isdefaulted = true
+        scenario.wood_value = wood
+        scenario.wood_value_isdefaulted = true
+      end
+      next unless (scenario.wood_pellets_units.nil? || scenario.wood_pellets_value.nil?) && (not wood_pellets.nil?)
+
+      scenario.wood_pellets_units = default_units
+      scenario.wood_pellets_units_isdefaulted = true
+      scenario.wood_pellets_value = wood_pellets
+      scenario.wood_pellets_value_isdefaulted = true
     end
   end
 
