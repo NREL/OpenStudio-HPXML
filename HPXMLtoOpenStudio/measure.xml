@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>d67db9e1-4653-41b4-9562-51fd94739dbc</version_id>
-  <version_modified>20220114T210738Z</version_modified>
+  <version_id>0f79dcfb-cc0a-432e-9de5-e58b45f784b3</version_id>
+  <version_modified>20220118T160605Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -210,12 +210,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>D22025B3</checksum>
-    </file>
-    <file>
-      <filename>meta_measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7EC12F73</checksum>
     </file>
     <file>
       <filename>schedule_files/smooth.csv</filename>
@@ -479,6 +473,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>F83D7337</checksum>
+    </file>
+    <file>
+      <filename>meta_measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B65AE92D</checksum>
     </file>
   </files>
 </measure>

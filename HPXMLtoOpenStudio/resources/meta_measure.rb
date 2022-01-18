@@ -149,6 +149,16 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, output_vars
     print "#{print_prefix}Wrote output file: #{timeseries_csv_path}.\n"
   end
 
+  hpxml_csv_path = File.join(rundir, 'results_hpxml.csv')
+  if File.exist? hpxml_csv_path
+    print "#{print_prefix}Wrote output file: #{hpxml_csv_path}.\n"
+  end
+
+  bills_csv_path = File.join(rundir, 'results_bills.csv')
+  if File.exist? bills_csv_path
+    print "#{print_prefix}Wrote output file: #{bills_csv_path}.\n"
+  end
+
   if not success
     print "#{print_prefix}Processing output unsuccessful.\n"
     print "#{print_prefix}See #{File.join(rundir, 'run.log')} for details.\n"
