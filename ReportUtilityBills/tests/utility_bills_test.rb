@@ -37,7 +37,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   end
 
   def test_simple_calculations_auto_rates
-    bills_csv = _test_measure(@args_hash)
+    bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
     @expected_bills['Electricity: Fixed ($)'] = 144.0
     @expected_bills['Electricity: Marginal ($)'] = 1046.85
@@ -52,7 +52,7 @@ class ReportUtilityBillsTest < MiniTest::Test
   def test_simple_calculations_specified_rates
     @args_hash['electricity_marginal_rate'] = '0.1'
     @args_hash['natural_gas_marginal_rate'] = '1.0'
-    bills_csv = _test_measure(@args_hash)
+    bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
     @expected_bills['Electricity: Fixed ($)'] = 144.0
     @expected_bills['Electricity: Marginal ($)'] = 1025.04
@@ -66,7 +66,7 @@ class ReportUtilityBillsTest < MiniTest::Test
 
   def test_simple_calculations_fuel_oil
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-hvac-furnace-oil-only.xml'
-    bills_csv = _test_measure(@args_hash)
+    bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
     @expected_bills['Electricity: Fixed ($)'] = 144.0
     @expected_bills['Electricity: Marginal ($)'] = 922.31
@@ -78,7 +78,7 @@ class ReportUtilityBillsTest < MiniTest::Test
 
   def test_simple_calculations_propane
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-hvac-furnace-propane-only.xml'
-    bills_csv = _test_measure(@args_hash)
+    bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
     @expected_bills['Electricity: Fixed ($)'] = 144.0
     @expected_bills['Electricity: Marginal ($)'] = 922.31
@@ -90,7 +90,7 @@ class ReportUtilityBillsTest < MiniTest::Test
 
   def test_simple_calculations_wood_cord
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-hvac-furnace-wood-only.xml'
-    bills_csv = _test_measure(@args_hash)
+    bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
     @expected_bills['Electricity: Fixed ($)'] = 144.0
     @expected_bills['Electricity: Marginal ($)'] = 922.31
@@ -102,7 +102,7 @@ class ReportUtilityBillsTest < MiniTest::Test
 
   def test_simple_calculations_wood_pellets
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-hvac-stove-wood-pellets-only.xml'
-    bills_csv = _test_measure(@args_hash)
+    bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
     @expected_bills['Electricity: Fixed ($)'] = 144.0
     @expected_bills['Electricity: Marginal ($)'] = 911.9
@@ -114,7 +114,7 @@ class ReportUtilityBillsTest < MiniTest::Test
 
   def test_simple_calculations_coal
     @args_hash['hpxml_path'] = '../workflow/sample_files/base-hvac-furnace-coal-only.xml'
-    bills_csv = _test_measure(@args_hash)
+    bills_csv = _test_measure()
     assert(File.exist?(bills_csv))
     @expected_bills['Electricity: Fixed ($)'] = 144.0
     @expected_bills['Electricity: Marginal ($)'] = 922.31
@@ -122,6 +122,16 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Coal: Total ($)'] = 1505.81
     actual_bills = get_actual_bills(bills_csv)
     assert_equal(@expected_bills, actual_bills)
+  end
+
+  def test_warning_semi_annual_run_period
+    @args_hash['hpxml_path'] = '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml'
+    bills_csv = _test_measure()
+    assert(!File.exist?(bills_csv))
+
+    log_lines = File.readlines(File.join(File.dirname(bills_csv), 'run.log'))
+
+    assert(log_lines.any? { |log_line| log_line.include?('A full annual simulation is required') })
   end
 
   def get_actual_bills(bills_csv)
@@ -135,7 +145,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     return actual_bills
   end
 
-  def _test_measure(args_hash)
+  def _test_measure()
     # Run measure via OSW
     require 'json'
     template_osw = File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'template-report-utility-bills.osw')
@@ -148,10 +158,10 @@ class ReportUtilityBillsTest < MiniTest::Test
     json['steps'].each do |json_step|
       step = OpenStudio::MeasureStep.new(json_step['measure_dir_name'])
       json_step['arguments'].each do |json_arg_name, json_arg_val|
-        if args_hash.keys.include? json_arg_name
+        if @args_hash.keys.include? json_arg_name
           # Override value
           found_args << json_arg_name
-          json_arg_val = args_hash[json_arg_name]
+          json_arg_val = @args_hash[json_arg_name]
         end
         step.setArgument(json_arg_name, json_arg_val)
       end
@@ -160,7 +170,7 @@ class ReportUtilityBillsTest < MiniTest::Test
     workflow.setWorkflowSteps(steps)
     osw_path = File.join(File.dirname(template_osw), 'test.osw')
     workflow.saveAs(osw_path)
-    assert_equal(args_hash.size, found_args.size)
+    assert_equal(@args_hash.size, found_args.size)
 
     # Run OSW
     success = system("#{OpenStudio.getOpenStudioCLI} run -w #{osw_path}")
