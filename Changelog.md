@@ -1,5 +1,6 @@
 ## OpenStudio-HPXML v1.4.0
 __New Features__
+- Allows calculating one or more emissions scenarios (e.g., high renewable penetration vs business as usual) for different emissions types (e.g., CO2).
 - Allows optional `AirInfiltrationMeasurement/InfiltrationHeight` input.
 - Adds a "Fuel Use: Electricity: Net" timeseries output column for homes with electricity generation.
 - BuildResidentialHPXML measure: Adds an optional argument to allow the HPXML file to be written with default values applied.
@@ -10,6 +11,7 @@ __New Features__
 __Bugfixes__
 - Fixes possible HVAC sizing error if design temperature difference (TD) is negative.
 - Fixes an error if there is a pool or hot tub, but the pump `Type` is set to "none".
+- Adds more decimal places in output files as needed for simulations with shorter timesteps and/or abbreviated run periods.
 
 ## OpenStudio-HPXML v1.3.0
 
