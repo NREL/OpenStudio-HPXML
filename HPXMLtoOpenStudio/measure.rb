@@ -301,12 +301,10 @@ class OSModel
 
   def self.check_file_references(hpxml_path)
     # Check/update file references
-    schedules_paths = @hpxml.header.schedules_filepaths
-    @hpxml.header.schedules_filepaths = []
-    schedules_paths.collect { |sfp|
-      @hpxml.header.schedules_filepaths << FilePath.check_path(sfp,
-                                                               File.dirname(hpxml_path),
-                                                               'Schedules')
+    @hpxml.header.schedules_filepaths = @hpxml.header.schedules_filepaths.collect { |sfp|
+      FilePath.check_path(sfp,
+                          File.dirname(hpxml_path),
+                          'Schedules')
     }
 
     @hpxml.header.emissions_scenarios.each do |scenario|
