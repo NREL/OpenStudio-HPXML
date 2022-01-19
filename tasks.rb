@@ -337,6 +337,7 @@ def create_hpxmls
     'base-mechvent-supply.xml' => 'base.xml',
     'base-mechvent-whole-house-fan.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
+    'base-misc-emissions.xml' => 'base-pv-battery-outside.xml',
     'base-misc-generators.xml' => 'base.xml',
     'base-misc-loads-large-uncommon.xml' => 'base-schedules-simple.xml',
     'base-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon.xml',
@@ -2516,6 +2517,27 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.header.allow_increased_fixed_capacities = true
   elsif ['base-location-capetown-zaf.xml'].include? hpxml_file
     hpxml.header.state_code = nil
+  elsif ['base-misc-emissions.xml'].include? hpxml_file
+    hpxml.header.emissions_scenarios.add(name: 'Cambium 2022 Hourly MidCase AER Using RMPA Region',
+                                         emissions_type: 'CO2',
+                                         elec_units: HPXML::EmissionsScenario::UnitsKgPerMWh,
+                                         elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_RMPAc_2022.csv')
+    hpxml.header.emissions_scenarios.add(name: 'Cambium 2022 Hourly MidCase AER Using National',
+                                         emissions_type: 'CO2',
+                                         elec_units: HPXML::EmissionsScenario::UnitsKgPerMWh,
+                                         elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_usa_2022.csv')
+    hpxml.header.emissions_scenarios.add(name: 'Cambium 2022 Annual MidCase AER Using National',
+                                         emissions_type: 'CO2',
+                                         elec_units: HPXML::EmissionsScenario::UnitsKgPerMWh,
+                                         elec_value: 392.6)
+    hpxml.header.emissions_scenarios.add(name: 'eGRID 2019 Total Emissions Rate Using RMPA Region',
+                                         emissions_type: 'SO2',
+                                         elec_units: HPXML::EmissionsScenario::UnitsLbPerMWh,
+                                         elec_value: 0.384)
+    hpxml.header.emissions_scenarios.add(name: 'eGRID 2019 Total Emissions Rate Using RMPA Region',
+                                         emissions_type: 'NOx',
+                                         elec_units: HPXML::EmissionsScenario::UnitsLbPerMWh,
+                                         elec_value: 0.67)
   end
 
   # ------------------------- #
