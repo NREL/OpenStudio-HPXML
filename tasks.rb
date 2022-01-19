@@ -383,12 +383,16 @@ def create_hpxmls
       end
 
       args = {}
+      sch_args = {}
       all_hpxml_files.each do |f|
-        set_measure_argument_values(f, args)
+        set_measure_argument_values(f, args, sch_args)
       end
 
+      measures = {}
+      measures['BuildResidentialHPXML'] = [args] if !args.empty?
+      measures['BuildResidentialScheduleFile'] = [sch_args] if !sch_args.empty?
+
       measures_dir = File.dirname(__FILE__)
-      measures = { 'BuildResidentialHPXML' => [args] }
       model = OpenStudio::Model::Model.new
       runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
@@ -484,7 +488,7 @@ def create_hpxmls
   return hpxml_docs
 end
 
-def set_measure_argument_values(hpxml_file, args)
+def set_measure_argument_values(hpxml_file, args, sch_args)
   if hpxml_file.include? 'ASHRAE_Standard_140'
     args['hpxml_path'] = "../workflow/tests/#{hpxml_file}"
   else
@@ -2384,6 +2388,25 @@ def set_measure_argument_values(hpxml_file, args)
   elsif ['base-simcontrol-timestep-10-mins.xml'].include? hpxml_file
     args['simulation_control_timestep'] = 10
   end
+
+  # Schedules
+  if ['base-schedules-detailed-stochastic.xml'].include? hpxml_file
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['schedules_type'] = 'stochastic'
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  elsif ['base-schedules-detailed-stochastic-vacancy.xml'].include? hpxml_file
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['schedules_type'] = 'stochastic'
+    sch_args['schedules_vacancy_period'] = 'Dec 1 - Jan 31'
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  elsif ['base-schedules-detailed-smooth.xml'].include? hpxml_file
+    sch_args['hpxml_path'] = args['hpxml_path']
+    sch_args['schedules_type'] = 'smooth'
+    sch_args['output_csv_path'] = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
+    sch_args['hpxml_output_path'] = sch_args['hpxml_path']
+  end
 end
 
 def apply_hpxml_modification_ashrae_140(hpxml_file, hpxml)
@@ -2510,12 +2533,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   # Logic that can only be applied based on the file name
   if ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
     hpxml.header.allow_increased_fixed_capacities = true
-  elsif ['base-schedules-detailed-stochastic.xml'].include? hpxml_file
-    hpxml.header.schedules_filepath = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic.csv'
-  elsif ['base-schedules-detailed-stochastic-vacancy.xml'].include? hpxml_file
-    hpxml.header.schedules_filepath = '../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-vacancy.csv'
-  elsif ['base-schedules-detailed-smooth.xml'].include? hpxml_file
-    hpxml.header.schedules_filepath = '../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv'
   elsif ['base-misc-emissions.xml'].include? hpxml_file
     hpxml.header.emissions_scenarios.add(name: 'Cambium 2022 Hourly MidCase AER Using RMPA Region',
                                          emissions_type: 'CO2',
