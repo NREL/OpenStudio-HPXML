@@ -2888,19 +2888,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Names (comma-separated) of emissions scenarios.')
     args << arg
 
-    # emissions_types_choices = OpenStudio::StringVector.new
-    # emissions_types_choices << 'CO2'
-    # emissions_types_choices << 'SO2'
-    # emissions_types_choices << 'NOx'
-
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_types', false)
     arg.setDisplayName('Emissions: Types')
     arg.setDescription('Types (comma-separated) of emissions types. This list corresponds to scenario names.')
     args << arg
-
-    # emissions_electricity_units_choices = OpenStudio::StringVector.new
-    # emissions_electricity_units_choices << HPXML::EmissionsScenario::UnitsKgPerMWh
-    # emissions_electricity_units_choices << HPXML::EmissionsScenario::UnitsLbPerMWh
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_electricity_units', false)
     arg.setDisplayName('Emissions: Electricity Units')
