@@ -193,15 +193,7 @@ Example schedule CSV files are provided in the ``HPXMLtoOpenStudio/resources/sch
 
 A detailed stochastic or smooth schedule CSV file can also be automatically generated for you; see the :ref:`usage_instructions` for the commands.
 
-Generator inputs are entered in ``/HPXML/Building/Site/Address``.
-
-  =================================  ========  =====  ===========  ========  ========  ===============
-  Element                            Type      Units  Constraints  Required  Default   Description
-  =================================  ========  =====  ===========  ========  ========  ===============
-  ``StateCode``                      string                        No        EPW [#]_  Site state code
-  =================================  ========  =====  ===========  ========  ========  ===============
-
-  .. [#] State code will be defined according to the EPW weather file header.
+Generator inputs are entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents`` and ``/HPXML/Building/Site/Address/StateCode``.
 
 Default Schedules
 ~~~~~~~~~~~~~~~~~
@@ -290,6 +282,17 @@ Building site information is entered in ``/HPXML/Building/BuildingDetails/Buildi
 
   .. [#] SiteType choices are "rural", "suburban", or "urban".
   .. [#] ShieldingofHome choices are "normal", "exposed", or "well-shielded".
+
+Additional building site information is entered in ``/HPXML/Building/Site/Address``.
+
+  =================================  ========  =====  ===========  ========  ========  ===============
+  Element                            Type      Units  Constraints  Required  Default   Description
+  =================================  ========  =====  ===========  ========  ========  ===============
+  ``StateCode``                      string                        No        EPW [#]_  Site state code
+  ``ZipCode``                        string                        No                  Site zip code
+  =================================  ========  =====  ===========  ========  ========  ===============
+
+  .. [#] State code will be defined according to the EPW weather file header.
 
 For each neighboring building defined, additional information is entered in a ``extension/Neighbors/NeighborBuilding``.
 
