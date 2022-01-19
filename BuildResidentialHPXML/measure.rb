@@ -1410,9 +1410,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('ducts_number_of_return_registers', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('ducts_number_of_return_registers', false)
     arg.setDisplayName('Ducts: Number of Return Registers')
-    arg.setDescription("The number of return registers of the ducts. Ignored for ducted #{HPXML::HVACTypeEvaporativeCooler}.")
+    arg.setDescription("The number of return registers of the ducts. Only used if duct surface areas are set to #{Constants.Auto}.")
     arg.setUnits('#')
     arg.setDefaultValue(Constants.Auto)
     args << arg
@@ -4437,8 +4437,10 @@ class HPXMLFile
 
     return if air_distribution_systems.size == 0 && fan_coil_distribution_systems.size == 0
 
-    if args[:ducts_number_of_return_registers] != Constants.Auto
-      number_of_return_registers = Integer(args[:ducts_number_of_return_registers])
+    if args[:ducts_number_of_return_registers].is_initialized
+      if args[:ducts_number_of_return_registers].get != Constants.Auto
+        number_of_return_registers = Integer(args[:ducts_number_of_return_registers].get)
+      end
     end
 
     if [HPXML::HVACTypeEvaporativeCooler].include?(args[:cooling_system_type]) && hpxml.heating_systems.size == 0 && hpxml.heat_pumps.size == 0
@@ -4451,7 +4453,6 @@ class HPXMLFile
     if air_distribution_systems.size > 0
       hpxml.hvac_distributions.add(id: "HVACDistribution#{hpxml.hvac_distributions.size + 1}",
                                    distribution_system_type: HPXML::HVACDistributionTypeAir,
-                                   conditioned_floor_area_served: args[:geometry_unit_cfa],
                                    air_type: HPXML::AirTypeRegularVelocity,
                                    number_of_return_registers: number_of_return_registers)
       air_distribution_systems.each do |hvac_system|
@@ -4510,6 +4511,11 @@ class HPXMLFile
                                   duct_insulation_r_value: args[:ducts_return_insulation_r],
                                   duct_location: ducts_return_location,
                                   duct_surface_area: ducts_return_surface_area)
+    end
+
+    # If duct surface areas are defaulted, set CFA served
+    if hvac_distribution.ducts.select { |d| d.duct_surface_area.nil? }.size > 0
+      hvac_distribution.conditioned_floor_area_served = args[:geometry_unit_cfa]
     end
   end
 
