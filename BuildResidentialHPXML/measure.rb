@@ -2898,7 +2898,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Units (comma-separated) of electricity emissions factor units.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_electricity_filepaths', false)
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_electricity_values_or_filepaths', false)
     arg.setDisplayName('Emissions: Electricity CSV Paths')
     arg.setDescription('Absolute/relative paths (comma-separated) of electricity emissions factor schedule files with hourly values. This list corresponds to scenario names.')
     args << arg
@@ -3095,7 +3095,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     emissions_args_initialized = [args[:emissions_scenario_names].is_initialized,
                                   args[:emissions_types].is_initialized,
                                   args[:emissions_electricity_units].is_initialized,
-                                  args[:emissions_electricity_filepaths].is_initialized]
+                                  args[:emissions_electricity_values_or_filepaths].is_initialized]
     error = (emissions_args_initialized.uniq.size != 1)
     errors << 'Did not specify either no emissions arguments or all emissions arguments.' if error
 
@@ -3103,7 +3103,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       emissions_scenario_lengths = [args[:emissions_scenario_names].get.split(',').length,
                                     args[:emissions_types].get.split(',').length,
                                     args[:emissions_electricity_units].get.split(',').length,
-                                    args[:emissions_electricity_filepaths].get.split(',').length]
+                                    args[:emissions_electricity_values_or_filepaths].get.split(',').length]
       error = (emissions_scenario_lengths.uniq.size != 1)
       errors << 'One or more emissions arguments does not have enough comma-separated elements specified.' if error
     end
@@ -3357,14 +3357,17 @@ class HPXMLFile
       emissions_scenario_names = args[:emissions_scenario_names].get.split(',')
       emissions_types = args[:emissions_types].get.split(',')
       emissions_electricity_units = args[:emissions_electricity_units].get.split(',')
-      emissions_electricity_filepaths = args[:emissions_electricity_filepaths].get.split(',')
+      emissions_electricity_values_or_filepaths = args[:emissions_electricity_values_or_filepaths].get.split(',')
 
-      emissions_scenarios = emissions_scenario_names.zip(emissions_types, emissions_electricity_units, emissions_electricity_filepaths)
+      emissions_scenarios = emissions_scenario_names.zip(emissions_types, emissions_electricity_units, emissions_electricity_values_or_filepaths)
       emissions_scenarios.each do |emissions_scenario|
-        name, emissions_type, elec_units, elec_schedule_filepath = emissions_scenario
+        name, emissions_type, elec_units, elec_value_or_schedule_filepath = emissions_scenario
+        elec_value = Float(elec_value_or_schedule_filepath) rescue nil
+        elec_schedule_filepath = elec_value_or_schedule_filepath if elec_value.nil?
         hpxml.header.emissions_scenarios.add(name: name,
                                              emissions_type: emissions_type,
                                              elec_units: elec_units,
+                                             elec_value: elec_value,
                                              elec_schedule_filepath: elec_schedule_filepath)
       end
     end
