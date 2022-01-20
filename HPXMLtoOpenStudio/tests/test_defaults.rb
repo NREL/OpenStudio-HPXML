@@ -45,9 +45,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.dst_end_day = 10
     hpxml.header.use_max_load_for_heat_pumps = false
     hpxml.header.allow_increased_fixed_capacities = true
+    hpxml.header.state_code = 'AZ'
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, 2008, false, 3, 3, 10, 10, false, true)
+    _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, 2008, false, 3, 3, 10, 10, false, true, 'AZ')
 
     # Test defaults - DST not in weather file
     hpxml.header.timestep = nil
@@ -63,9 +64,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.dst_end_day = nil
     hpxml.header.use_max_load_for_heat_pumps = nil
     hpxml.header.allow_increased_fixed_capacities = nil
+    hpxml.header.state_code = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, true, false)
+    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, true, false, 'CO')
 
     # Test defaults - DST in weather file
     hpxml = _create_hpxml('base-location-AMY-2012.xml')
@@ -82,9 +84,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.dst_end_day = nil
     hpxml.header.use_max_load_for_heat_pumps = nil
     hpxml.header.allow_increased_fixed_capacities = nil
+    hpxml.header.state_code = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, true, false)
+    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, true, false, 'CO')
   end
 
   def test_emissions_factors
@@ -271,6 +274,23 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_building_construction_values(hpxml_default, 16200, 8, false, 2)
+  end
+
+  def test_climate_and_risk_zones
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base.xml')
+    hpxml.climate_and_risk_zones.iecc_year = 2009
+    hpxml.climate_and_risk_zones.iecc_zone = '2B'
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_climate_and_risk_zones_values(hpxml_default, 2009, '2B')
+
+    # Test defaults
+    hpxml.climate_and_risk_zones.iecc_year = nil
+    hpxml.climate_and_risk_zones.iecc_zone = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_climate_and_risk_zones_values(hpxml_default, 2006, '5B')
   end
 
   def test_infiltration
@@ -2854,7 +2874,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def _test_default_header_values(hpxml, tstep, sim_begin_month, sim_begin_day, sim_end_month, sim_end_day, sim_calendar_year,
                                   dst_enabled, dst_begin_month, dst_begin_day, dst_end_month, dst_end_day,
-                                  use_max_load_for_heat_pumps, allow_increased_fixed_capacities)
+                                  use_max_load_for_heat_pumps, allow_increased_fixed_capacities, state_code)
     assert_equal(tstep, hpxml.header.timestep)
     assert_equal(sim_begin_month, hpxml.header.sim_begin_month)
     assert_equal(sim_begin_day, hpxml.header.sim_begin_day)
@@ -2868,6 +2888,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(dst_end_day, hpxml.header.dst_end_day)
     assert_equal(use_max_load_for_heat_pumps, hpxml.header.use_max_load_for_heat_pumps)
     assert_equal(allow_increased_fixed_capacities, hpxml.header.allow_increased_fixed_capacities)
+    assert_equal(state_code, hpxml.header.state_code)
   end
 
   def _test_default_emissions_values(scenario, natural_gas_units, natural_gas_value, propane_units, propane_value,
@@ -2946,6 +2967,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     else
       assert_equal(monthly_mults, hpxml.building_occupancy.monthly_multipliers)
     end
+  end
+
+  def _test_default_climate_and_risk_zones_values(hpxml, iecc_year, iecc_zone)
+    assert_equal(iecc_year, hpxml.climate_and_risk_zones.iecc_year)
+    assert_equal(iecc_zone, hpxml.climate_and_risk_zones.iecc_zone)
   end
 
   def _test_default_building_construction_values(hpxml, building_volume, average_ceiling_height, has_flue_or_chimney, n_bathrooms)
