@@ -125,8 +125,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     site_iecc_zone_choices = OpenStudio::StringVector.new
-    ['1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C',
-     '4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C', '7', '8'].each do |iz|
+    Constants.IECCZones.each do |iz|
       site_iecc_zone_choices << iz
     end
 
@@ -136,11 +135,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     site_state_code_choices = OpenStudio::StringVector.new
-    ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
-     'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME',
-     'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM',
-     'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX',
-     'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY'].each do |sc|
+    Constants.StateCodes.each do |sc|
       site_state_code_choices << sc
     end
 

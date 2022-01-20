@@ -98,7 +98,7 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
   ``BeginMonth``                      integer            1 - 12 [#]_    No        1 (January)                  Run period start date
   ``BeginDayOfMonth``                 integer            1 - 31         No        1                            Run period start date
   ``EndMonth``                        integer            1 - 12         No        12 (December)                Run period end date
-  ``EndDayOfMonth``                   integer            1 - 31         No                                     Run period end date
+  ``EndDayOfMonth``                   integer            1 - 31         No        31                           Run period end date
   ``CalendarYear``                    integer            > 1600         No        2007 (for TMY weather) [#]_  Calendar year (for start day of week)
   ``DaylightSaving/Enabled``          boolean                           No        true                         Daylight savings enabled?
   ==================================  ========  =======  =============  ========  ===========================  =====================================
@@ -151,56 +151,50 @@ Detailed Schedule Inputs
 Detailed schedule inputs allow schedule values for every hour or timestep of the simulation.
 They can be smooth schedules, or they can reflect real-world or stochastic occupancy.
 
-Detailed schedule inputs are provided via a CSV file that should be referenced in the HPXML file at ``/HPXML/SoftwareInfo/extension/SchedulesFilePath``.
-Each column must be normalized to MAX=1; that is, the schedules only define *when* energy is used, not *how much* energy is used.
-The columns in the schedule CSV are:
+Detailed schedule inputs are provided via CSV file(s) that should be referenced in the HPXML file as a ``/HPXML/SoftwareInfo/extension/SchedulesFilePath``.
 
-  =============================  ========================================================  ===================
-  Column Name                    Description                                               Affected by Vacancy
-  =============================  ========================================================  ===================
-  ``occupants``                  Occupant heat gain schedule.                              Yes
-  ``lighting_interior``          Interior lighting energy use schedule.                    Yes
-  ``lighting_exterior``          Exterior lighting energy use schedule.                    Yes
-  ``lighting_garage``            Garage lighting energy use schedule.                      Yes
-  ``lighting_exterior_holiday``  Exterior holiday lighting energy use schedule.            Yes
-  ``cooking_range``              Cooking range & oven energy use schedule.                 Yes
-  ``refrigerator``               Primary refrigerator energy use schedule.                 No
-  ``extra_refrigerator``         Non-primary refrigerator energy use schedule.             No
-  ``freezer``                    Freezer energy use schedule.                              No
-  ``dishwasher``                 Dishwasher energy use schedule.                           Yes
-  ``clothes_washer``             Clothes washer energy use schedule.                       Yes
-  ``clothes_dryer``              Clothes dryer energy use schedule.                        Yes
-  ``ceiling_fan``                Ceiling fan energy use schedule.                          Yes
-  ``plug_loads_other``           Other plug load energy use schedule.                      Yes
-  ``plug_loads_tv``              Television plug load energy use schedule.                 Yes
-  ``plug_loads_vehicle``         Electric vehicle plug load energy use schedule.           Yes
-  ``plug_loads_well_pump``       Well pump plug load energy use schedule.                  Yes
-  ``fuel_loads_grill``           Grill fuel load energy use schedule.                      Yes
-  ``fuel_loads_lighting``        Lighting fuel load energy use schedule.                   Yes
-  ``fuel_loads_fireplace``       Fireplace fuel load energy use schedule.                  Yes
-  ``pool_pump``                  Pool pump energy use schedule.                            No
-  ``pool_heater``                Pool heater energy use schedule.                          No
-  ``hot_tub_pump``               Hot tub pump energy use schedule.                         No
-  ``hot_tub_heater``             Hot tub heater energy use schedule.                       No
-  ``hot_water_dishwasher``       Dishwasher hot water use schedule.                        Yes
-  ``hot_water_clothes_washer``   Clothes washer hot water use schedule.                    Yes
-  ``hot_water_fixtures``         Fixtures (sinks, showers, baths) hot water use schedule.  Yes
-  ``vacancy``                    1=Home is vacant. Automatically overrides other columns.  N/A
-  =============================  ========================================================  ===================
+Occupancy related schedule columns must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
+The schedule columns in the schedule CSV are:
 
-A couple schedule CSV file examples are provided in the ``HPXMLtoOpenStudio/resources/schedule_files`` directory.
+  ==============================  ========================================================  ===================
+  Column Name                     Description                                               Affected by Vacancy
+  ==============================  ========================================================  ===================
+  ``occupants``                   Occupant heat gain schedule.                              Yes
+  ``lighting_interior``           Interior lighting energy use schedule.                    Yes
+  ``lighting_exterior``           Exterior lighting energy use schedule.                    Yes
+  ``lighting_garage``             Garage lighting energy use schedule.                      Yes
+  ``lighting_exterior_holiday``   Exterior holiday lighting energy use schedule.            Yes
+  ``cooking_range``               Cooking range & oven energy use schedule.                 Yes
+  ``refrigerator``                Primary refrigerator energy use schedule.                 No
+  ``extra_refrigerator``          Non-primary refrigerator energy use schedule.             No
+  ``freezer``                     Freezer energy use schedule.                              No
+  ``dishwasher``                  Dishwasher energy use schedule.                           Yes
+  ``clothes_washer``              Clothes washer energy use schedule.                       Yes
+  ``clothes_dryer``               Clothes dryer energy use schedule.                        Yes
+  ``ceiling_fan``                 Ceiling fan energy use schedule.                          Yes
+  ``plug_loads_other``            Other plug load energy use schedule.                      Yes
+  ``plug_loads_tv``               Television plug load energy use schedule.                 Yes
+  ``plug_loads_vehicle``          Electric vehicle plug load energy use schedule.           Yes
+  ``plug_loads_well_pump``        Well pump plug load energy use schedule.                  Yes
+  ``fuel_loads_grill``            Grill fuel load energy use schedule.                      Yes
+  ``fuel_loads_lighting``         Lighting fuel load energy use schedule.                   Yes
+  ``fuel_loads_fireplace``        Fireplace fuel load energy use schedule.                  Yes
+  ``pool_pump``                   Pool pump energy use schedule.                            No
+  ``pool_heater``                 Pool heater energy use schedule.                          No
+  ``hot_tub_pump``                Hot tub pump energy use schedule.                         No
+  ``hot_tub_heater``              Hot tub heater energy use schedule.                       No
+  ``hot_water_dishwasher``        Dishwasher hot water use schedule.                        Yes
+  ``hot_water_clothes_washer``    Clothes washer hot water use schedule.                    Yes
+  ``hot_water_fixtures``          Fixtures (sinks, showers, baths) hot water use schedule.  Yes
+  ``vacancy``                     1=Home is vacant. Automatically overrides other columns.  N/A
+  ==============================  ========================================================  ===================
+
+Example schedule CSV files are provided in the ``HPXMLtoOpenStudio/resources/schedule_files`` directory.
 
 A detailed stochastic or smooth schedule CSV file can also be automatically generated for you; see the :ref:`usage_instructions` for the commands.
 
-Generator inputs are entered in ``/HPXML/Building/Site/Address``.
-
-  =================================  ========  =====  ===========  ========  ========  ===============
-  Element                            Type      Units  Constraints  Required  Default   Description
-  =================================  ========  =====  ===========  ========  ========  ===============
-  ``StateCode``                      string                        No        EPW [#]_  Site state code
-  =================================  ========  =====  ===========  ========  ========  ===============
-
-  .. [#] State code will be defined according to the EPW weather file header.
+Generator inputs are entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents`` and ``/HPXML/Building/Site/Address/StateCode``.
+See :ref:`buildingoccupancy` and :ref:`address` for more information.
 
 Default Schedules
 ~~~~~~~~~~~~~~~~~
@@ -268,6 +262,43 @@ If no default value is available, a warning will be issued.
   ============  =============  =============  =============
 
 See :ref:`annual_outputs` and :ref:`timeseries_outputs` for descriptions of how the calculated emissions appear in the output files.
+
+HPXML Building Site
+-------------------
+
+Optional high-level building site information is entered in ``/HPXML/Building/Site`` and ``/HPXML/Building/BuildingDetails/ClimateandRiskZones``.
+
+.. _address:
+
+HPXML Address
+*************
+
+Optional building site state/zip code information is entered in ``/HPXML/Building/Site/Address``.
+
+  =================================  ========  =====  ===========  ========  ========  ===============
+  Element                            Type      Units  Constraints  Required  Default   Description
+  =================================  ========  =====  ===========  ========  ========  ===============
+  ``StateCode``                      string           See [#]_     No        EPW [#]_  Site state code
+  ``ZipCode``                        integer                       No                  Site zip code
+  =================================  ========  =====  ===========  ========  ========  ===============
+
+  .. [#] StateCode choices are any of the 51 U.S. states.
+  .. [#] StateCode will be defined according to the EPW weather file header.
+
+HPXML Climate Zone IECC
+***********************
+
+Optional building site IECC year and climate zone information is entered in ``/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC``.
+
+  =================================  ========  =====  ===========  ========  ========  ===============
+  Element                            Type      Units  Constraints  Required  Default   Description
+  =================================  ========  =====  ===========  ========  ========  ===============
+  ``Year``                           string                        No        2006      Site IECC year
+  ``ClimateZone``                    string           See [#]_     No        EPW [#]_  Site IECC zone
+  =================================  ========  =====  ===========  ========  ========  ===============
+
+  .. [#] ClimateZone choices are "1A", "1B", "1C", "2A", "2B", "2C", "3A", "3B", "3C", "4A", "4B", "4C", "5A", "5B", "5C", "6A", "6B", "6C", "7", or "8".
+  .. [#] ClimateZone will be defined according to the EPW weather file header.
 
 HPXML Building Summary
 ----------------------
@@ -1894,7 +1925,7 @@ If not entered, the simulation will not include water heating.
   .. [#] WaterHeaterType choices are "storage water heater", "instantaneous water heater", "heat pump water heater", "space-heating boiler with storage tank", or "space-heating boiler with tankless coil".
   .. [#] Location choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] If Location not provided, defaults (based on ``/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC/ClimateZone``) to the first present space type:
+  .. [#] If Location not provided, defaults to the first present space type:
   
          - **IECC zones 1-3, excluding 3A**: "garage", "living space"
          - **IECC zones 3A, 4-8, unknown**: "basement - conditioned", "basement - unconditioned", "living space"

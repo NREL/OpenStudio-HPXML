@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>04886b78-0588-4aff-bd3f-33e660d50e9f</version_id>
-  <version_modified>20220114T210734Z</version_modified>
+  <version_id>1a3b2f2b-04e1-4ee0-8186-dfe7ba82535c</version_id>
+  <version_modified>20220120T160820Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -58,7 +58,7 @@
     <argument>
       <name>output_csv_path</name>
       <display_name>Schedules: Output CSV Path</display_name>
-      <description>Absolute (or relative) path of the csv file containing user-specified occupancy schedules.</description>
+      <description>Absolute/relative path of the csv file containing user-specified occupancy schedules. Relative paths are relative to the HPXML output path.</description>
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -872,16 +872,16 @@
       <checksum>5FC694CF</checksum>
     </file>
     <file>
-      <filename>build_residential_schedule_file_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1FB3B4B0</checksum>
-    </file>
-    <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>507E49D4</checksum>
+      <checksum>8C120082</checksum>
+    </file>
+    <file>
+      <filename>build_residential_schedule_file_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DC3A29AC</checksum>
     </file>
     <file>
       <version>
@@ -892,7 +892,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>7DD5313B</checksum>
+      <checksum>45AA1480</checksum>
     </file>
   </files>
 </measure>
