@@ -280,10 +280,13 @@ Optional building site state/zip code information is entered in ``/HPXML/Buildin
   =================================  ========  =====  ===========  ========  ========  ===============
   ``StateCode``                      string           See [#]_     No        EPW [#]_  Site state code
   ``ZipCode``                        integer                       No                  Site zip code
+  ``extension/TimeZoneUTCOffset      integer          See [#]_     No        EPW [#]_  Site time zone
   =================================  ========  =====  ===========  ========  ========  ===============
 
   .. [#] StateCode choices are any of the 51 U.S. states.
   .. [#] StateCode will be defined according to the EPW weather file header.
+  .. [#] TimeZoneUTCOffset choices are integers between -12 and 14.
+  .. [#] TimeZoneUTCOffset will be defined according to the EPW weather file header.
 
 HPXML Climate Zone IECC
 ***********************
