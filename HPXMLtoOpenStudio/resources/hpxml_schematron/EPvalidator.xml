@@ -18,6 +18,7 @@
   <sch:pattern>
     <sch:title>[Building]</sch:title>
     <sch:rule context='/h:HPXML/h:Building'>
+      <sch:assert role='ERROR' test='count(h:Site/h:Address) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Building/Site/Address</sch:assert> <!-- See [Address] -->
       <sch:assert role='ERROR' test='count(h:ProjectStatus/h:EventType) = 1'>Expected 1 element(s) for xpath: Building/ProjectStatus/EventType</sch:assert>
       <sch:assert role='ERROR' test='count(h:BuildingDetails) = 1'>Expected 1 element(s) for xpath: Building/BuildingDetails</sch:assert> <!-- See [BuildingDetails] -->
     </sch:rule>
@@ -90,6 +91,14 @@
     <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:EmissionsScenarios/h:EmissionsScenario/h:EmissionsFactor[h:FuelType!="electricity"]'>
       <sch:assert role='ERROR' test='count(h:Units[text()="lb/MBtu" or text()="kg/MBtu"]) = 1'>Expected 1 element(s) for xpath: Units[text()="lb/MBtu" or text()="kg/MBtu"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:Value) = 1'>Expected 1 element(s) for xpath: Value</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[Address]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:Site/h:Address'>
+      <sch:assert role='ERROR' test='count(h:StateCode) &lt;= 1'>Expected 0 or 1 element(s) for xpath: StateCode</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ZipCode) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ZipCode</sch:assert>
     </sch:rule>
   </sch:pattern>
 
