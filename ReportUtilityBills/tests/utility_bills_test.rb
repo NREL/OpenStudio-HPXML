@@ -20,6 +20,8 @@ class ReportUtilityBillsTest < MiniTest::Test
     @args_hash['wood_cord_marginal_rate'] = Constants.Auto
     @args_hash['wood_pellets_marginal_rate'] = Constants.Auto
     @args_hash['coal_marginal_rate'] = Constants.Auto
+    @args_hash['pv_compensation_type'] = 'Net Metering'
+    @args_hash['pv_feed_in_tariff_rate'] = 0.12
 
     @expected_bills = {
       'Electricity: Fixed ($)' => 0.0,
@@ -120,6 +122,21 @@ class ReportUtilityBillsTest < MiniTest::Test
     @expected_bills['Electricity: Marginal ($)'] = 922.31
     @expected_bills['Electricity: Total ($)'] = 1066.31
     @expected_bills['Coal: Total ($)'] = 1505.81
+    actual_bills = get_actual_bills(bills_csv)
+    assert_equal(@expected_bills, actual_bills)
+  end
+
+  def test_simple_calculations_auto_rates_pv_feed_in_tariff
+    @args_hash['hpxml_path'] = '../workflow/sample_files/base-pv.xml'
+    @args_hash['pv_compensation_type'] = 'Feed-In Tariff'
+    bills_csv = _test_measure()
+    assert(File.exist?(bills_csv))
+    @expected_bills['Electricity: Fixed ($)'] = 144.0
+    @expected_bills['Electricity: Marginal ($)'] = 101.29
+    @expected_bills['Electricity: Total ($)'] = 245.29
+    @expected_bills['Natural Gas: Fixed ($)'] = 96.0
+    @expected_bills['Natural Gas: Marginal ($)'] = 94.01
+    @expected_bills['Natural Gas: Total ($)'] = 190.01
     actual_bills = get_actual_bills(bills_csv)
     assert_equal(@expected_bills, actual_bills)
   end

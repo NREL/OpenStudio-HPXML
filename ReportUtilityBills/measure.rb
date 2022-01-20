@@ -111,6 +111,23 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
+    pv_compensation_type_choices = OpenStudio::StringVector.new
+    pv_compensation_type_choices << 'Net Metering'
+    pv_compensation_type_choices << 'Feed-In Tariff'
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_compensation_type', pv_compensation_type_choices, true)
+    arg.setDisplayName('PV: Compensation Type')
+    arg.setDescription('The type of compensation for PV.')
+    arg.setDefaultValue('Net Metering')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_feed_in_tariff_rate', true)
+    arg.setDisplayName('PV: Feed-In Tariff Rate')
+    arg.setUnits('$/kWh')
+    arg.setDescription("The annual full/gross tariff rate for PV. Only applies if the PV compensation type is 'Feed-In Tariff'.")
+    arg.setDefaultValue(0.12)
+    args << arg
+
     return args
   end
 
@@ -207,6 +224,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       if fuel_type == FT::Elec
         fixed_charge = args[:electricity_fixed_charge]
         marginal_rate = args[:electricity_marginal_rate]
+
+        if @total_elec_produced_timeseries.sum != 0
+          pv_feed_in_tariff_rate = args[:pv_feed_in_tariff_rate] if args[:pv_compensation_type] == 'Feed-In Tariff'
+        end
       elsif fuel_type == FT::Gas
         fixed_charge = args[:natural_gas_fixed_charge]
         marginal_rate = args[:natural_gas_marginal_rate]
@@ -232,7 +253,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         marginal_rate = Float(marginal_rate)
       end
 
-      UtilityBill.calculate_simple(@fuels, fuel_type, utility_bill, fixed_charge, marginal_rate)
+      UtilityBill.calculate_simple(@fuels, fuel_type, utility_bill, fixed_charge, marginal_rate, @total_elec_produced_timeseries, pv_feed_in_tariff_rate)
     end
 
     # Report results
@@ -281,6 +302,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       fuel.timeseries_output = get_report_meter_data_timeseries(fuel.meters, unit_conv, 0, timeseries_frequency)
     end
+    @total_elec_produced_timeseries = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', get_timeseries_units_from_fuel_type(FT::Elec)), 0, timeseries_frequency)
   end
 
   def reporting_frequency_map
