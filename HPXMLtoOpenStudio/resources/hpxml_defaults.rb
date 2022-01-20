@@ -197,9 +197,11 @@ class HPXMLDefaults
       end
     end
 
-    if hpxml.header.time_zone_utc_offset.nil?
-      hpxml.header.time_zone_utc_offset = epw_file.timeZone
-      hpxml.header.time_zone_utc_offset_isdefaulted = true
+    if (not epw_file.nil?) && hpxml.header.time_zone_utc_offset.nil?
+      if Constants.TimeZones.include? epw_file.timeZone
+        hpxml.header.time_zone_utc_offset = epw_file.timeZone
+        hpxml.header.time_zone_utc_offset_isdefaulted = true
+      end
     end
   end
 
