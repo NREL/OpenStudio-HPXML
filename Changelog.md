@@ -1,5 +1,6 @@
 ## OpenStudio-HPXML v1.4.0
 __New Features__
+- **Breaking change**: Changes the BuildResidentialHPXML measure's zip code argument name to `site_zip_code`.
 - Allows calculating one or more emissions scenarios (e.g., high renewable penetration vs business as usual) for different emissions types (e.g., CO2).
 - Allows optional `AirInfiltrationMeasurement/InfiltrationHeight` input.
 - Adds a "Fuel Use: Electricity: Net" timeseries output column for homes with electricity generation.
@@ -9,6 +10,7 @@ __New Features__
 - Relaxes requirement for `ConditionedFloorAreaServed` for air distribution systems; now only needed if duct surface areas not provided.
 
 __Bugfixes__
+- Perform defaulting of state code and IECC climate zone in `hpxml_defaults.rb` instead of the BuildResidentialHPXML measure.
 - Fixes possible HVAC sizing error if design temperature difference (TD) is negative.
 - Fixes an error if there is a pool or hot tub, but the pump `Type` is set to "none".
 - Adds more decimal places in output files as needed for simulations with shorter timesteps and/or abbreviated run periods.

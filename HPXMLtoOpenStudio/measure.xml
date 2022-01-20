@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>2d75ec8c-78be-4067-a478-13b1595929dc</version_id>
-  <version_modified>20220119T154535Z</version_modified>
+  <version_id>8a2e2c93-0c95-49a5-a085-8472908ad889</version_id>
+  <version_modified>20220120T200122Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -218,18 +218,6 @@
       <checksum>3659E63B</checksum>
     </file>
     <file>
-      <filename>schedule_files/stochastic-vacancy.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1574B5D9</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/stochastic.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>23A47B50</checksum>
-    </file>
-    <file>
       <filename>materials.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -404,12 +392,6 @@
       <checksum>D4E7F340</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3A9CB803</checksum>
-    </file>
-    <file>
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -422,51 +404,22 @@
       <checksum>15303EA4</checksum>
     </file>
     <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BE6FF1FB</checksum>
-    </file>
-    <file>
       <filename>unit_conversions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>CF745E52</checksum>
     </file>
     <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
+      <filename>schedule_files/stochastic-vacancy.csv</filename>
+      <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E600B923</checksum>
+      <checksum>F46D463C</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.2.0</identifier>
-        <min_compatible>3.2.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>E3163AC2</checksum>
-    </file>
-    <file>
-      <filename>test_validation.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B2869489</checksum>
-    </file>
-    <file>
-      <filename>hpxml_schematron/EPvalidator.xml</filename>
-      <filetype>xml</filetype>
+      <filename>schedule_files/stochastic.csv</filename>
+      <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C4231B6C</checksum>
-    </file>
-    <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>EEF1BC20</checksum>
+      <checksum>1C142FA2</checksum>
     </file>
     <file>
       <filename>data/cambium/README.md</filename>
@@ -607,16 +560,63 @@
       <checksum>EC4803F4</checksum>
     </file>
     <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BE6FF1FB</checksum>
+    </file>
+    <file>
+      <filename>test_validation.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>214BDBB8</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>415B6E65</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.3.0</identifier>
+        <min_compatible>3.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>8F9AD770</checksum>
+    </file>
+    <file>
+      <filename>hpxml_schematron/EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A3D53D15</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F46FD0D4</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>700C809F</checksum>
+    </file>
+    <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>75851066</checksum>
+      <checksum>89D6A4EF</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>8781B36D</checksum>
+      <checksum>40C760F0</checksum>
     </file>
   </files>
 </measure>

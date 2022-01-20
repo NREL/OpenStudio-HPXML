@@ -190,9 +190,11 @@ class HPXMLDefaults
       hpxml.header.use_max_load_for_heat_pumps_isdefaulted = true
     end
 
-    if hpxml.header.state_code.nil?
-      hpxml.header.state_code = epw_file.stateProvinceRegion
-      hpxml.header.state_code_isdefaulted = true
+    if (not epw_file.nil?) && hpxml.header.state_code.nil?
+      if Constants.StateCodes.include? epw_file.stateProvinceRegion
+        hpxml.header.state_code = epw_file.stateProvinceRegion
+        hpxml.header.state_code_isdefaulted = true
+      end
     end
 
     if hpxml.header.time_zone_utc_offset.nil?
@@ -353,17 +355,19 @@ class HPXMLDefaults
   end
 
   def self.apply_climate_and_risk_zones(hpxml, epw_file)
-    if hpxml.climate_and_risk_zones.iecc_zone.nil?
-      iecc_zone = Location.get_climate_zone_iecc(epw_file.wmoNumber)
-      if !iecc_zone.nil?
-        hpxml.climate_and_risk_zones.iecc_zone = iecc_zone
-        hpxml.climate_and_risk_zones.iecc_zone_isdefaulted = true
+    if (not epw_file.nil?) && (hpxml.climate_and_risk_zones.iecc_zone.nil? || hpxml.climate_and_risk_zones.iecc_year.nil?)
+      if hpxml.climate_and_risk_zones.iecc_zone.nil?
+        climate_zone_iecc = Location.get_climate_zone_iecc(epw_file.wmoNumber)
+        if Constants.IECCZones.include? climate_zone_iecc
+          hpxml.climate_and_risk_zones.iecc_zone = climate_zone_iecc
+          hpxml.climate_and_risk_zones.iecc_zone_isdefaulted = true
+        end
       end
-    end
 
-    if hpxml.climate_and_risk_zones.iecc_year.nil?
-      hpxml.climate_and_risk_zones.iecc_year = 2006
-      hpxml.climate_and_risk_zones.iecc_year_isdefaulted = true
+      if (not hpxml.climate_and_risk_zones.iecc_zone.nil?) && hpxml.climate_and_risk_zones.iecc_year.nil?
+        hpxml.climate_and_risk_zones.iecc_year = 2006
+        hpxml.climate_and_risk_zones.iecc_year_isdefaulted = true
+      end
     end
   end
 
