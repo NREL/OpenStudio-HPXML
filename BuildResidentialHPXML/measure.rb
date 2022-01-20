@@ -145,13 +145,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     site_time_zone_choices = OpenStudio::StringVector.new
-    (-12..14).to_a.each do |tz|
+    Constants.TimeZones.each do |tz|
       site_time_zone_choices << "#{tz}"
     end
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('site_time_zone', site_time_zone_choices, false)
     arg.setDisplayName('Site: Time Zone')
-    arg.setDescription('Time zone, for UTC offset, of the home address. If not provided, uses the EPW weather file time zone.')
+    arg.setDescription('Time zone, for UTC offset, of the home address.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_station_epw_filepath', true)
