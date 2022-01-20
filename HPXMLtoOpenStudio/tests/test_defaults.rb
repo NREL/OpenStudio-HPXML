@@ -88,6 +88,26 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2012, true, 3, 11, 11, 4, true, false, 'CO')
+
+    # Test defaults - invalid state code
+    hpxml = _create_hpxml('base-location-capetown-zaf.xml')
+    hpxml.header.timestep = nil
+    hpxml.header.sim_begin_month = nil
+    hpxml.header.sim_begin_day = nil
+    hpxml.header.sim_end_month = nil
+    hpxml.header.sim_end_day = nil
+    hpxml.header.sim_calendar_year = nil
+    hpxml.header.dst_enabled = nil
+    hpxml.header.dst_begin_month = nil
+    hpxml.header.dst_begin_day = nil
+    hpxml.header.dst_end_month = nil
+    hpxml.header.dst_end_day = nil
+    hpxml.header.use_max_load_for_heat_pumps = nil
+    hpxml.header.allow_increased_fixed_capacities = nil
+    hpxml.header.state_code = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, 2007, true, 3, 12, 11, 5, true, false, nil)
   end
 
   def test_emissions_factors
@@ -291,6 +311,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_climate_and_risk_zones_values(hpxml_default, 2006, '5B')
+
+    # Test defaults - invalid IECC zone
+    hpxml = _create_hpxml('base-location-capetown-zaf.xml')
+    hpxml.climate_and_risk_zones.iecc_year = nil
+    hpxml.climate_and_risk_zones.iecc_zone = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_climate_and_risk_zones_values(hpxml_default, nil, nil)
   end
 
   def test_infiltration
@@ -2888,7 +2916,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(dst_end_day, hpxml.header.dst_end_day)
     assert_equal(use_max_load_for_heat_pumps, hpxml.header.use_max_load_for_heat_pumps)
     assert_equal(allow_increased_fixed_capacities, hpxml.header.allow_increased_fixed_capacities)
-    assert_equal(state_code, hpxml.header.state_code)
+    if state_code.nil?
+      assert_nil(hpxml.header.state_code)
+    else
+      assert_equal(state_code, hpxml.header.state_code)
+    end
   end
 
   def _test_default_emissions_values(scenario, natural_gas_units, natural_gas_value, propane_units, propane_value,
@@ -2970,8 +3002,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def _test_default_climate_and_risk_zones_values(hpxml, iecc_year, iecc_zone)
-    assert_equal(iecc_year, hpxml.climate_and_risk_zones.iecc_year)
-    assert_equal(iecc_zone, hpxml.climate_and_risk_zones.iecc_zone)
+    if iecc_year.nil?
+      assert_nil(hpxml.climate_and_risk_zones.iecc_year)
+    else
+      assert_equal(iecc_year, hpxml.climate_and_risk_zones.iecc_year)
+    end
+    if iecc_zone.nil?
+      assert_nil(hpxml.climate_and_risk_zones.iecc_zone)
+    else
+      assert_equal(iecc_zone, hpxml.climate_and_risk_zones.iecc_zone)
+    end
   end
 
   def _test_default_building_construction_values(hpxml, building_volume, average_ceiling_height, has_flue_or_chimney, n_bathrooms)
