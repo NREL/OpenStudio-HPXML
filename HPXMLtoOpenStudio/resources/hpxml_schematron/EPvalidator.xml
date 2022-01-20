@@ -9,7 +9,7 @@
       <sch:assert role='ERROR' test='count(h:XMLTransactionHeaderInformation) = 1'>Expected 1 element(s) for xpath: XMLTransactionHeaderInformation</sch:assert> <!-- See [XMLTransactionHeaderInformation] -->
       <sch:assert role='ERROR' test='count(h:SoftwareInfo/h:extension/h:SimulationControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SoftwareInfo/extension/SimulationControl</sch:assert> <!-- See [SimulationControl] -->
       <sch:assert role='ERROR' test='count(h:SoftwareInfo/h:extension/h:HVACSizingControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SoftwareInfo/extension/HVACSizingControl</sch:assert> <!-- See [HVACSizingControl] -->
-      <sch:assert role='ERROR' test='count(h:SoftwareInfo/h:extension/h:SchedulesFilePath) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SoftwareInfo/extension/SchedulesFilePath</sch:assert>
+      <sch:assert role='ERROR' test='count(h:SoftwareInfo/h:extension/h:SchedulesFilePath) &gt;= 0'>Expected 0 or more element(s) for xpath: SoftwareInfo/extension/SchedulesFilePath</sch:assert>
       <sch:assert role='ERROR' test='count(h:SoftwareInfo/h:extension/h:EmissionsScenarios/h:EmissionsScenario) &gt;= 0'>Expected 0 or more element(s) for xpath: SoftwareInfo/extension/EmissionsScenarios/EmissionsScenario</sch:assert> <!-- See [EmissionsScenario] -->
       <sch:assert role='ERROR' test='count(h:Building) &gt;= 1'>Expected 1 or more element(s) for xpath: Building</sch:assert> <!-- See [Building] -->
     </sch:rule>
