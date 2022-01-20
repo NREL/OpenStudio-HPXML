@@ -194,6 +194,7 @@ Example schedule CSV files are provided in the ``HPXMLtoOpenStudio/resources/sch
 A detailed stochastic or smooth schedule CSV file can also be automatically generated for you; see the :ref:`usage_instructions` for the commands.
 
 Generator inputs are entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents`` and ``/HPXML/Building/Site/Address/StateCode``.
+See :ref:`buildingoccupancy` and :ref:`address` for more information.
 
 Default Schedules
 ~~~~~~~~~~~~~~~~~
@@ -262,6 +263,43 @@ If no default value is available, a warning will be issued.
 
 See :ref:`annual_outputs` and :ref:`timeseries_outputs` for descriptions of how the calculated emissions appear in the output files.
 
+HPXML Building Site
+-------------------
+
+Optional high-level building site information is entered in ``/HPXML/Building/Site`` and ``/HPXML/Building/BuildingDetails/ClimateandRiskZones``.
+
+.. _address:
+
+HPXML Address
+*************
+
+Optional building site state/zip code information is entered in ``/HPXML/Building/Site/Address``.
+
+  =================================  ========  =====  ===========  ========  ========  ===============
+  Element                            Type      Units  Constraints  Required  Default   Description
+  =================================  ========  =====  ===========  ========  ========  ===============
+  ``StateCode``                      string           See [#]_     No        EPW [#]_  Site state code
+  ``ZipCode``                        integer                       No                  Site zip code
+  =================================  ========  =====  ===========  ========  ========  ===============
+
+  .. [#] StateCode choices are any of the 51 U.S. states.
+  .. [#] StateCode will be defined according to the EPW weather file header.
+
+HPXML Climate Zone IECC
+***********************
+
+Optional building site IECC year and climate zone information is entered in ``/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC``.
+
+  =================================  ========  =====  ===========  ========  ========  ===============
+  Element                            Type      Units  Constraints  Required  Default   Description
+  =================================  ========  =====  ===========  ========  ========  ===============
+  ``Year``                           string                        No        2006      Site IECC year
+  ``ClimateZone``                    string           See [#]_     No        EPW [#]_  Site IECC zone
+  =================================  ========  =====  ===========  ========  ========  ===============
+
+  .. [#] ClimateZone choices are "1A", "1B", "1C", "2A", "2B", "2C", "3A", "3B", "3C", "4A", "4B", "4C", "5A", "5B", "5C", "6A", "6B", "6C", "7", or "8".
+  .. [#] ClimateZone will be defined according to the EPW weather file header.
+
 HPXML Building Summary
 ----------------------
 
@@ -282,17 +320,6 @@ Building site information is entered in ``/HPXML/Building/BuildingDetails/Buildi
 
   .. [#] SiteType choices are "rural", "suburban", or "urban".
   .. [#] ShieldingofHome choices are "normal", "exposed", or "well-shielded".
-
-Additional building site information is entered in ``/HPXML/Building/Site/Address``.
-
-  =================================  ========  =====  ===========  ========  ========  ===============
-  Element                            Type      Units  Constraints  Required  Default   Description
-  =================================  ========  =====  ===========  ========  ========  ===============
-  ``StateCode``                      string                        No        EPW [#]_  Site state code
-  ``ZipCode``                        string                        No                  Site zip code
-  =================================  ========  =====  ===========  ========  ========  ===============
-
-  .. [#] State code will be defined according to the EPW weather file header.
 
 For each neighboring building defined, additional information is entered in a ``extension/Neighbors/NeighborBuilding``.
 
@@ -1898,7 +1925,7 @@ If not entered, the simulation will not include water heating.
   .. [#] WaterHeaterType choices are "storage water heater", "instantaneous water heater", "heat pump water heater", "space-heating boiler with storage tank", or "space-heating boiler with tankless coil".
   .. [#] Location choices are "living space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] If Location not provided, defaults (based on ``/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC/ClimateZone``) to the first present space type:
+  .. [#] If Location not provided, defaults to the first present space type:
   
          - **IECC zones 1-3, excluding 3A**: "garage", "living space"
          - **IECC zones 3A, 4-8, unknown**: "basement - conditioned", "basement - unconditioned", "living space"
