@@ -1913,6 +1913,7 @@ If a conventional storage water heater is specified, additional information is e
   ``UsageBin`` or ``FirstHourRating``                               string or double   str or gal/hr  See [#]_ or > 0  No        See [#]_  EnergyGuide label usage bin/first hour rating
   ``RecoveryEfficiency``                                            double             frac           0 - 1 [#]_       No        See [#]_  Recovery efficiency
   ``WaterHeaterInsulation/Jacket/JacketRValue``                     double             F-ft2-hr/Btu   >= 0             No        0         R-value of additional tank insulation wrap
+  ``extension/TankModelType``                                       string                            See [#]_         No        mixed     Tank model type
   ================================================================  =================  =============  ===============  ========  ========  ====================================================
   
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
@@ -1929,6 +1930,8 @@ If a conventional storage water heater is specified, additional information is e
          - **Electric**: 0.98
          - **Non-electric, EnergyFactor < 0.75**: 0.252 * EnergyFactor + 0.608
          - **Non-electric, EnergyFactor >= 0.75**: 0.561 * EnergyFactor + 0.439
+
+  .. [#] TankModelType choices are "mixed" or "stratified".
 
 Tankless
 ~~~~~~~~
@@ -1959,6 +1962,7 @@ If a heat pump water heater is specified, additional information is entered in `
   ``UniformEnergyFactor`` or ``EnergyFactor``    double            frac           > 1              Yes                 EnergyGuide label rated efficiency
   ``UsageBin`` or ``FirstHourRating``            string or double  str or gal/hr  See [#]_ or > 0  No        See [#]_  EnergyGuide label usage bin/first hour rating
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double            F-ft2-hr/Btu   >= 0             No        0         R-value of additional tank insulation wrap
+  ``extension/OperatingMode``                    string                           See [#]_         No        standard  Operating mode
   =============================================  ================  =============  ===============  ========  ========  =============================================
 
   .. [#] FuelType only choice is "electricity".
@@ -1966,6 +1970,7 @@ If a heat pump water heater is specified, additional information is entered in `
   .. [#] UsageBin/FirstHourRating are only used for water heaters that use UniformEnergyFactor.
          If neither UsageBin nor FirstHourRating provided, UsageBin defaults to "medium".
          If FirstHourRating provided and UsageBin not provided, UsageBin is determined based on the FirstHourRating value.
+  .. [#] OperatingMode choices are "standard" or "heat pump only".
 
 Combi Boiler w/ Storage
 ~~~~~~~~~~~~~~~~~~~~~~~
