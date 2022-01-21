@@ -98,7 +98,7 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
   ``BeginMonth``                      integer            1 - 12 [#]_    No        1 (January)                  Run period start date
   ``BeginDayOfMonth``                 integer            1 - 31         No        1                            Run period start date
   ``EndMonth``                        integer            1 - 12         No        12 (December)                Run period end date
-  ``EndDayOfMonth``                   integer            1 - 31         No                                     Run period end date
+  ``EndDayOfMonth``                   integer            1 - 31         No        31                           Run period end date
   ``CalendarYear``                    integer            > 1600         No        2007 (for TMY weather) [#]_  Calendar year (for start day of week)
   ``DaylightSaving/Enabled``          boolean                           No        true                         Daylight savings enabled?
   ==================================  ========  =======  =============  ========  ===========================  =====================================
@@ -151,14 +151,7 @@ Detailed Schedule Inputs
 Detailed schedule inputs allow schedule values for every hour or timestep of the simulation.
 They can be smooth schedules, or they can reflect real-world or stochastic occupancy.
 
-Detailed schedule inputs are provided via CSV file(s) that should be referenced in the HPXML file as a ``/HPXML/SoftwareInfo/extension/SchedulesFiles/SchedulesFile``.
-
-  =========================  =======  =======  ===========  ========  ========  ================================================================
-  Element                    Type     Units    Constraints  Required  Default   Notes
-  =========================  =======  =======  ===========  ========  ========  ================================================================
-  ``Name``                   string                         No                  Category of the schedules file.
-  ``Path``                   string                         Yes                 Path of the schedules file.
-  =========================  =======  =======  ===========  ========  ========  ================================================================
+Detailed schedule inputs are provided via CSV file(s) that should be referenced in the HPXML file as a ``/HPXML/SoftwareInfo/extension/SchedulesFilePath``.
 
 Occupancy related schedule columns must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
 Water heater related schedule columns do not have these constraints.
@@ -209,6 +202,66 @@ Default Schedules
 If neither simple nor detailed inputs are provided, then schedules are defaulted.
 Default schedules are typically smooth, averaged schedules.
 These default schedules are described elsewhere in the documentation (e.g., see :ref:`buildingoccupancy` for the default occupant heat gain schedule).
+
+HPXML Emissions Scenarios
+*************************
+
+One or more emissions scenarios can be entered as an ``/HPXML/SoftwareInfo/extension/EmissionsScenarios/EmissionsScenario``.
+
+  ================================  ========  =====  ===========  ========  ========  ============================================================
+  Element                           Type      Units  Constraints  Required  Default   Notes
+  ================================  ========  =====  ===========  ========  ========  ============================================================
+  ``Name``                          string                        Yes                 Name of the scenario (which shows up in the output file)
+  ``EmissionsType``                 string           See [#]_     Yes                 Type of emissions (e.g., CO2)
+  ``EmissionsFactor``               element          >= 1         See [#]_            Emissions factor(s) for a given fuel type
+  ================================  ========  =====  ===========  ========  ========  ============================================================
+
+  .. [#] EmissionsType can be anything. But if certain values are provided (e.g., "CO2"), then some emissions factors can be defaulted as described further below.
+  .. [#] EmissionsFactor is required for electricity and optional for all non-electric fuel types.
+
+For each scenario, **electricity** emissions factors must be entered as an ``/HPXML/SoftwareInfo/extension/EmissionsScenarios/EmissionsScenario/EmissionsFactor``.
+
+  =================================  ================  =====  ===========  ========  ========  ============================================================
+  Element                            Type              Units  Constraints  Required  Default   Notes
+  =================================  ================  =====  ===========  ========  ========  ============================================================
+  ``FuelType``                       string                   electricity  Yes                 Emissions factor fuel type
+  ``Units``                          string                   See [#]_     Yes                 Emissions factor units
+  ``Value`` or ``ScheduleFilePath``  double or string         See [#]_     Yes                 Emissions factor annual value or schedule file with hourly values
+  =================================  ================  =====  ===========  ========  ========  ============================================================
+
+  .. [#] Units choices are "lb/MWh" and "kg/MWh".
+  .. [#] ScheduleFilePath must point to a file with a single column of 8760 numeric hourly values.
+         NREL's `Cambium data sets <https://www.nrel.gov/analysis/cambium.html>`_ are typically used, but OpenStudio-HPXML can accommodate alternative data sets as well.
+
+For each scenario, **fuel** emissions factors can be optionally entered as an ``/HPXML/SoftwareInfo/extension/EmissionsScenarios/EmissionsScenario/EmissionsFactor``.
+
+  ================================  ========  =====  ===========  ========  ========  ============================================================
+  Element                           Type      Units  Constraints  Required  Default   Notes
+  ================================  ========  =====  ===========  ========  ========  ============================================================
+  ``FuelType``                      string           See [#]_     Yes                 Emissions factor fuel type
+  ``Units``                         string           See [#]_     Yes                 Emissions factor units
+  ``Value``                         double                        Yes                 Emissions factor annual value
+  ================================  ========  =====  ===========  ========  ========  ============================================================
+
+  .. [#] FuelType choices are "natural gas", "propane", "fuel oil", "coal", "wood", and "wood pellets".
+  .. [#] Units choices are "lb/MBtu" and "kg/MBtu".
+
+If EmissionsType is "CO2", "NOx" or "SO2" and a given fuel's emissions factor is not entered, they will be defaulted as follows.
+Values are based on `EPA data <https://www.epa.gov/air-emissions-factors-and-quantification/ap-42-fifth-edition-volume-i-chapter-1-external-0>`_ and `EIA data <https://www.eia.gov/environment/emissions/co2_vol_mass.php>`_.
+If no default value is available, a warning will be issued.
+
+  ============  =============  =============  =============
+  Fuel Type     CO2 [lb/MBtu]  NOx [lb/MBtu]  SO2 [lb/MBtu]
+  ============  =============  =============  =============
+  natural gas   117.6          0.0922         0.0006
+  propane       136.6          0.1421         0.0002
+  fuel oil      161.0          0.1300         0.0015
+  coal          211.1          --             --
+  wood          --             --             --
+  wood pellets  --             --             --
+  ============  =============  =============  =============
+
+See :ref:`annual_outputs` and :ref:`timeseries_outputs` for descriptions of how the calculated emissions appear in the output files.
 
 HPXML Building Summary
 ----------------------
@@ -1541,7 +1594,7 @@ Each separate HVAC distribution system is entered as a ``/HPXML/Building/Buildin
   ==============================  =======  =======  ===========  ========  =========  =============================
 
   .. [#] DistributionSystemType child element choices are ``AirDistribution``, ``HydronicDistribution``, or ``Other=DSE``.
-  .. [#] ConditionedFloorAreaServed required only when DistributionSystemType is AirDistribution and ``AirDistribution/Ducts`` are present.
+  .. [#] ConditionedFloorAreaServed required only when DistributionSystemType is AirDistribution and duct surface area is defaulted (i.e., ``AirDistribution/Ducts`` are present without ``DuctSurfaceArea`` child elements).
 
 .. note::
   
@@ -1570,7 +1623,7 @@ To define an air distribution system, additional information is entered in ``HVA
   .. [#] Supply duct leakage required if AirDistributionType is "regular velocity" or "gravity" and optional if AirDistributionType is "fan coil".
   .. [#] Return duct leakage required if AirDistributionType is "regular velocity" or "gravity" and optional if AirDistributionType is "fan coil".
   .. [#] Provide a Ducts element for each supply duct and each return duct.
-  .. [#] If NumberofReturnRegisters not provided and ``AirDistribution/Ducts`` are present, defaults to one return register per conditioned floor per `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_, rounded up to the nearest integer if needed.
+  .. [#] If NumberofReturnRegisters not provided and return ducts are present, defaults to one return register per conditioned floor per `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_, rounded up to the nearest integer if needed.
 
 Additional information is entered in each ``DuctLeakageMeasurement``.
 
@@ -1603,16 +1656,16 @@ Additional information is entered in each ``Ducts``.
   .. [#] If DuctLocation not provided, defaults to the first present space type: "basement - conditioned", "basement - unconditioned", "crawlspace - conditioned", "crawlspace - vented", "crawlspace - unvented", "attic - vented", "attic - unvented", "garage", or "living space".
          If NumberofConditionedFloorsAboveGrade > 1, secondary ducts will be located in "living space".
   .. [#] The sum of all ``[DuctType="supply"]/FractionDuctArea`` and ``[DuctType="return"]/FractionDuctArea`` must each equal to 1.
-  .. [#] Either FractionDuctArea or DuctSurfaceArea (or both) are required if DuctLocation is provided.
-  .. [#] If DuctSurfaceArea not provided, duct surface areas will be calculated based on FractionDuctArea if provided.
-         If FractionDuctArea also not provided, duct surface areas will be calculated based on `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_:
+  .. [#] FractionDuctArea and/or DuctSurfaceArea are required if DuctLocation is provided.
+  .. [#] If neither DuctSurfaceArea nor FractionDuctArea provided, duct surface areas will be calculated based on `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_:
 
-         - **Primary supply ducts**: 0.27 * F_out * ConditionedFloorAreaServed
-         - **Secondary supply ducts**: 0.27 * (1 - F_out) * ConditionedFloorAreaServed
-         - **Primary return ducts**: b_r * F_out * ConditionedFloorAreaServed
-         - **Secondary return ducts**: b_r * (1 - F_out) * ConditionedFloorAreaServed
+         - **Primary supply duct area**: 0.27 * F_out * ConditionedFloorAreaServed
+         - **Secondary supply duct area**: 0.27 * (1 - F_out) * ConditionedFloorAreaServed
+         - **Primary return duct area**: b_r * F_out * ConditionedFloorAreaServed
+         - **Secondary return duct area**: b_r * (1 - F_out) * ConditionedFloorAreaServed
 
          where F_out is 1.0 when NumberofConditionedFloorsAboveGrade <= 1 and 0.75 when NumberofConditionedFloorsAboveGrade > 1, and b_r is 0.05 * NumberofReturnRegisters with a maximum value of 0.25.
+         If FractionDuctArea is provided, each duct surface area will be FractionDuctArea times total duct area, which is calculated using the sum of primary and secondary duct areas from the equations above.
 
 Hydronic Distribution
 ~~~~~~~~~~~~~~~~~~~~~

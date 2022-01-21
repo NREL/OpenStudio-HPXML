@@ -3,13 +3,13 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>7e84a67b-2785-4bb5-bdf9-fcc3af473021</version_id>
-  <version_modified>20220105T154643Z</version_modified>
+  <version_id>21ba953c-0555-41f2-8852-010cf6e1e7c7</version_id>
+  <version_modified>20220121T005153Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
   <description>Builds a residential schedule file.</description>
-  <modeler_description>Generates a CSV of schedules at the specified file path, and inserts the CSV schedule file path into the output HPXML file (or overwrites it if one already exists). Schedules corresponding to 'smooth' are average (e.g., Building America). Schedules corresponding to 'stochastic' are generated using time-inhomogeneous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data.</modeler_description>
+  <modeler_description>Generates CSV schedule(s) at the specified file path(s), and inserts the CSV schedule file path(s) into the output HPXML file (or overwrites it if one already exists). Occupancy schedules corresponding to 'smooth' are average (e.g., Building America). Occupancy schedules corresponding to 'stochastic' are generated using time-inhomogeneous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data.</modeler_description>
   <arguments>
     <argument>
       <name>hpxml_path</name>
@@ -58,7 +58,7 @@
     <argument>
       <name>output_csv_path</name>
       <display_name>Occupancy Schedules: Output CSV Path</display_name>
-      <description>Absolute (or relative) path of the csv file containing occupancy schedules.</description>
+      <description>Absolute/relative path of the csv file containing user-specified occupancy schedules. Relative paths are relative to the HPXML output path.</description>
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -66,7 +66,7 @@
     <argument>
       <name>water_heater_scheduled_setpoint_path</name>
       <display_name>Water Heater Schedules: Scheduled Setpoint Path</display_name>
-      <description>Absolute (or relative) path of the csv file containing the water heater setpoint schedule. Setpoint should be defined (in F) for every hour. Applies only to storage water heater and heat pump water heater.</description>
+      <description>Absolute/relative path of the csv file containing the water heater setpoint schedule. Setpoint should be defined (in F) for every hour. Applies only to storage water heater and heat pump water heater.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -74,7 +74,7 @@
     <argument>
       <name>water_heater_scheduled_operating_mode_path</name>
       <display_name>Water Heater Schedules: Scheduled Operating Mode Path</display_name>
-      <description>Absolute (or relative) path of the csv file containing the water heater operating mode schedule. Valid values are 0 (standard) and 1 (heat pump only) and must be specified for every hour. Applies only to heat pump water heater.</description>
+      <description>Absolute/relative path of the csv file containing the water heater operating mode schedule. Valid values are 0 (standard) and 1 (heat pump only) and must be specified for every hour. Applies only to heat pump water heater.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -82,7 +82,7 @@
     <argument>
       <name>water_heater_output_csv_path</name>
       <display_name>Water Heater Schedules: Output CSV Path</display_name>
-      <description>Absolute (or relative) path of the csv file containing water heater schedules.</description>
+      <description>Absolute/relative path of the csv file containing water heater schedules. Relative paths are relative to the HPXML output path.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -902,12 +902,6 @@
       <checksum>8C120082</checksum>
     </file>
     <file>
-      <filename>build_residential_schedule_file_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>BC787048</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.2.0</identifier>
@@ -916,7 +910,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C7F571C8</checksum>
+      <checksum>1E2E105E</checksum>
+    </file>
+    <file>
+      <filename>build_residential_schedule_file_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7B470C07</checksum>
     </file>
   </files>
 </measure>

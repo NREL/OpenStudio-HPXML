@@ -54,12 +54,12 @@ class HPXML < Object
                  :roofs, :rim_joists, :walls, :foundation_walls, :frame_floors, :slabs, :windows,
                  :skylights, :doors, :partition_wall_mass, :furniture_mass, :heating_systems,
                  :cooling_systems, :heat_pumps, :hvac_plant, :hvac_controls, :hvac_distributions,
-                 :ventilation_fans, :water_heating_systems,
-                 :hot_water_distributions, :water_fixtures, :water_heating, :solar_thermal_systems,
-                 :pv_systems, :generators, :batteries, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
+                 :ventilation_fans, :water_heating_systems, :hot_water_distributions, :water_fixtures,
+                 :water_heating, :solar_thermal_systems, :pv_systems, :generators, :batteries,
+                 :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
                  :freezers, :dehumidifiers, :cooking_ranges, :ovens, :lighting_groups, :lighting,
                  :ceiling_fans, :pools, :hot_tubs, :plug_loads, :fuel_loads]
-  attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings)
+  attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings, :hpxml_path)
 
   # Constants
   # FUTURE: Move some of these to within child classes (e.g., HPXML::Attic class)
@@ -859,7 +859,7 @@ class HPXML < Object
 
   class Header < BaseElement
     def initialize(hpxml_object, *args)
-      @schedules_files = SchedulesFiles.new(hpxml_object)
+      @emissions_scenarios = EmissionsScenarios.new(hpxml_object)
       super(hpxml_object, *args)
     end
     ATTRS = [:xml_type, :xml_generated_by, :created_date_and_time, :transaction,
@@ -868,9 +868,9 @@ class HPXML < Object
              :sim_begin_month, :sim_begin_day, :sim_end_month, :sim_end_day, :sim_calendar_year,
              :dst_enabled, :dst_begin_month, :dst_begin_day, :dst_end_month, :dst_end_day,
              :use_max_load_for_heat_pumps, :allow_increased_fixed_capacities,
-             :apply_ashrae140_assumptions, :energystar_calculation_version]
+             :apply_ashrae140_assumptions, :energystar_calculation_version, :schedules_filepaths]
     attr_accessor(*ATTRS)
-    attr_reader(:schedules_files)
+    attr_reader(:emissions_scenarios)
 
     def check_for_errors
       errors = []
@@ -898,7 +898,7 @@ class HPXML < Object
 
       errors += HPXML::check_dates('Daylight Saving', @dst_begin_month, @dst_begin_day, @dst_end_month, @dst_end_day)
 
-      errors += @schedules_files.check_for_errors
+      errors += @emissions_scenarios.check_for_errors
 
       return errors
     end
@@ -959,7 +959,13 @@ class HPXML < Object
         XMLHelper.add_element(hvac_sizing_control, 'UseMaxLoadForHeatPumps', @use_max_load_for_heat_pumps, :boolean, @use_max_load_for_heat_pumps_isdefaulted) unless @use_max_load_for_heat_pumps.nil?
         XMLHelper.add_element(hvac_sizing_control, 'AllowIncreasedFixedCapacities', @allow_increased_fixed_capacities, :boolean, @allow_increased_fixed_capacities_isdefaulted) unless @allow_increased_fixed_capacities.nil?
       end
-      @schedules_files.to_oga(software_info)
+      if (not @schedules_filepaths.nil?) && (not @schedules_filepaths.empty?)
+        extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
+        @schedules_filepaths.each do |schedules_filepath|
+          XMLHelper.add_element(extension, 'SchedulesFilePath', schedules_filepath, :string)
+        end
+      end
+      @emissions_scenarios.to_oga(software_info)
 
       building = XMLHelper.add_element(hpxml, 'Building')
       building_building_id = XMLHelper.add_element(building, 'BuildingID')
@@ -1002,7 +1008,8 @@ class HPXML < Object
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
       @use_max_load_for_heat_pumps = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/UseMaxLoadForHeatPumps', :boolean)
       @allow_increased_fixed_capacities = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/AllowIncreasedFixedCapacities', :boolean)
-      @schedules_files.from_oga(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
+      @schedules_filepaths = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/SchedulesFilePath', :string)
+      @emissions_scenarios.from_oga(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
       @building_id = HPXML::get_id(hpxml, 'Building/BuildingID')
       @event_type = XMLHelper.get_value(hpxml, 'Building/ProjectStatus/EventType', :string)
       @state_code = XMLHelper.get_value(hpxml, 'Building/Site/Address/StateCode', :string)
@@ -1010,26 +1017,34 @@ class HPXML < Object
     end
   end
 
-  class SchedulesFiles < BaseArrayElement
+  class EmissionsScenarios < BaseArrayElement
     def add(**kwargs)
-      self << SchedulesFile.new(@hpxml_object, **kwargs)
+      self << EmissionsScenario.new(@hpxml_object, **kwargs)
     end
 
     def from_oga(software_info)
       return if software_info.nil?
 
-      XMLHelper.get_elements(software_info, 'extension/SchedulesFiles/SchedulesFile').each do |schedules_file|
-        self << SchedulesFile.new(@hpxml_object, schedules_file)
+      XMLHelper.get_elements(software_info, 'extension/EmissionsScenarios/EmissionsScenario').each do |emissions_scenario|
+        self << EmissionsScenario.new(@hpxml_object, emissions_scenario)
       end
     end
   end
 
-  class SchedulesFile < BaseElement
-    ATTRS = [:name, :path]
+  class EmissionsScenario < BaseElement
+    UnitsKgPerMWh = 'kg/MWh'
+    UnitsKgPerMBtu = 'kg/MBtu'
+    UnitsLbPerMWh = 'lb/MWh'
+    UnitsLbPerMBtu = 'lb/MBtu'
+
+    ATTRS = [:name, :emissions_type, :elec_units, :elec_value, :elec_schedule_filepath,
+             :natural_gas_units, :natural_gas_value, :propane_units, :propane_value,
+             :fuel_oil_units, :fuel_oil_value, :coal_units, :coal_value,
+             :wood_units, :wood_value, :wood_pellets_units, :wood_pellets_value]
     attr_accessor(*ATTRS)
 
     def delete
-      @hpxml_object.schedules_files.delete(self)
+      @hpxml_object.emissions_scenarios.delete(self)
     end
 
     def check_for_errors
@@ -1038,17 +1053,60 @@ class HPXML < Object
     end
 
     def to_oga(software_info)
-      schedules_files = XMLHelper.create_elements_as_needed(software_info, ['extension', 'SchedulesFiles'])
-      schedules_file = XMLHelper.add_element(schedules_files, 'SchedulesFile')
-      XMLHelper.add_element(schedules_file, 'Name', @name, :string) unless @name.nil?
-      XMLHelper.add_element(schedules_file, 'Path', @path, :string) unless @path.nil?
+      emissions_scenarios = XMLHelper.create_elements_as_needed(software_info, ['extension', 'EmissionsScenarios'])
+      emissions_scenario = XMLHelper.add_element(emissions_scenarios, 'EmissionsScenario')
+      XMLHelper.add_element(emissions_scenario, 'Name', @name, :string) unless @name.nil?
+      XMLHelper.add_element(emissions_scenario, 'EmissionsType', @emissions_type, :string) unless @emissions_type.nil?
+      if not @elec_schedule_filepath.nil?
+        emissions_factor = XMLHelper.add_element(emissions_scenario, 'EmissionsFactor')
+        XMLHelper.add_element(emissions_factor, 'FuelType', HPXML::FuelTypeElectricity, :string)
+        XMLHelper.add_element(emissions_factor, 'Units', @elec_units, :string)
+        XMLHelper.add_element(emissions_factor, 'ScheduleFilePath', @elec_schedule_filepath, :string)
+      end
+      { HPXML::FuelTypeElectricity => [@elec_units, @elec_units_isdefaulted,
+                                       @elec_value, @elec_value_isdefaulted],
+        HPXML::FuelTypeNaturalGas => [@natural_gas_units, @natural_gas_units_isdefaulted,
+                                      @natural_gas_value, @natural_gas_value_isdefaulted],
+        HPXML::FuelTypePropane => [@propane_units, @propane_units_isdefaulted,
+                                   @propane_value, @propane_value_isdefaulted],
+        HPXML::FuelTypeOil => [@fuel_oil_units, @fuel_oil_units_isdefaulted,
+                               @fuel_oil_value, @fuel_oil_value_isdefaulted],
+        HPXML::FuelTypeCoal => [@coal_units, @coal_units_isdefaulted,
+                                @coal_value, @coal_value_isdefaulted],
+        HPXML::FuelTypeWoodCord => [@wood_units, @wood_units_isdefaulted,
+                                    @wood_value, @wood_value_isdefaulted],
+        HPXML::FuelTypeWoodPellets => [@wood_pellets_units, @wood_pellets_units_isdefaulted,
+                                       @wood_pellets_value, @wood_pellets_value_isdefaulted] }.each do |fuel, vals|
+        units, units_isdefaulted, value, value_isdefaulted = vals
+        next if value.nil?
+
+        emissions_factor = XMLHelper.add_element(emissions_scenario, 'EmissionsFactor')
+        XMLHelper.add_element(emissions_factor, 'FuelType', fuel, :string)
+        XMLHelper.add_element(emissions_factor, 'Units', units, :string, units_isdefaulted)
+        XMLHelper.add_element(emissions_factor, 'Value', value, :float, value_isdefaulted)
+      end
     end
 
-    def from_oga(schedules_file)
-      return if schedules_file.nil?
+    def from_oga(emissions_scenario)
+      return if emissions_scenario.nil?
 
-      @name = XMLHelper.get_value(schedules_file, 'Name', :string)
-      @path = XMLHelper.get_value(schedules_file, 'Path', :string)
+      @name = XMLHelper.get_value(emissions_scenario, 'Name', :string)
+      @emissions_type = XMLHelper.get_value(emissions_scenario, 'EmissionsType', :string)
+      @elec_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeElectricity}']/Units", :string)
+      @elec_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeElectricity}']/Value", :float)
+      @elec_schedule_filepath = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeElectricity}']/ScheduleFilePath", :string)
+      @natural_gas_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeNaturalGas}']/Units", :string)
+      @natural_gas_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeNaturalGas}']/Value", :float)
+      @propane_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypePropane}']/Units", :string)
+      @propane_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypePropane}']/Value", :float)
+      @fuel_oil_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeOil}']/Units", :string)
+      @fuel_oil_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeOil}']/Value", :float)
+      @coal_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeCoal}']/Units", :string)
+      @coal_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeCoal}']/Value", :float)
+      @wood_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeWoodCord}']/Units", :string)
+      @wood_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeWoodCord}']/Value", :float)
+      @wood_pellets_units = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeWoodPellets}']/Units", :string)
+      @wood_pellets_value = XMLHelper.get_value(emissions_scenario, "EmissionsFactor[FuelType='#{HPXML::FuelTypeWoodPellets}']/Value", :float)
     end
   end
 

@@ -11,11 +11,8 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <SchedulesFiles>
-        <SchedulesFile>
-          <Path>../../HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_setpoint_schedule.csv</Path>
-        </SchedulesFile>
-      </SchedulesFiles>
+      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/smooth.csv</SchedulesFilePath>
+      <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/tank.csv</SchedulesFilePath>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -387,22 +384,20 @@
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
-                <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeatingSystem1'/>
             <FuelType>electricity</FuelType>
-            <WaterHeaterType>heat pump water heater</WaterHeaterType>
+            <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>living space</Location>
-            <TankVolume>50.0</TankVolume>
+            <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <UniformEnergyFactor>3.75</UniformEnergyFactor>
-            <UsageBin>medium</UsageBin>
+            <HeatingCapacity>18767.0</HeatingCapacity>
+            <EnergyFactor>0.95</EnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>

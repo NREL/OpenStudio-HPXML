@@ -29,7 +29,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
   # human readable description of modeling approach
   def modeler_description
-    return "Generates a CSV of schedules at the specified file path, and inserts the CSV schedule file path into the output HPXML file (or overwrites it if one already exists). Schedules corresponding to 'smooth' are average (e.g., Building America). Schedules corresponding to 'stochastic' are generated using time-inhomogeneous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data."
+    return "Generates CSV schedule(s) at the specified file path(s), and inserts the CSV schedule file path(s) into the output HPXML file (or overwrites it if one already exists). Occupancy schedules corresponding to 'smooth' are average (e.g., Building America). Occupancy schedules corresponding to 'stochastic' are generated using time-inhomogeneous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data."
   end
 
   # define the arguments that the user will input
@@ -64,22 +64,22 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('output_csv_path', true)
     arg.setDisplayName('Occupancy Schedules: Output CSV Path')
-    arg.setDescription('Absolute (or relative) path of the csv file containing occupancy schedules.')
+    arg.setDescription('Absolute/relative path of the csv file containing user-specified occupancy schedules. Relative paths are relative to the HPXML output path.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('water_heater_scheduled_setpoint_path', false)
     arg.setDisplayName('Water Heater Schedules: Scheduled Setpoint Path')
-    arg.setDescription("Absolute (or relative) path of the csv file containing the water heater setpoint schedule. Setpoint should be defined (in F) for every hour. Applies only to #{HPXML::WaterHeaterTypeStorage} and #{HPXML::WaterHeaterTypeHeatPump}.")
+    arg.setDescription("Absolute/relative path of the csv file containing the water heater setpoint schedule. Setpoint should be defined (in F) for every hour. Applies only to #{HPXML::WaterHeaterTypeStorage} and #{HPXML::WaterHeaterTypeHeatPump}.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('water_heater_scheduled_operating_mode_path', false)
     arg.setDisplayName('Water Heater Schedules: Scheduled Operating Mode Path')
-    arg.setDescription("Absolute (or relative) path of the csv file containing the water heater operating mode schedule. Valid values are 0 (standard) and 1 (heat pump only) and must be specified for every hour. Applies only to #{HPXML::WaterHeaterTypeHeatPump}.")
+    arg.setDescription("Absolute/relative path of the csv file containing the water heater operating mode schedule. Valid values are 0 (standard) and 1 (heat pump only) and must be specified for every hour. Applies only to #{HPXML::WaterHeaterTypeHeatPump}.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('water_heater_output_csv_path', false)
     arg.setDisplayName('Water Heater Schedules: Output CSV Path')
-    arg.setDescription('Absolute (or relative) path of the csv file containing water heater schedules.')
+    arg.setDescription('Absolute/relative path of the csv file containing water heater schedules. Relative paths are relative to the HPXML output path.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_output_path', true)
@@ -111,6 +111,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       fail "'#{hpxml_path}' does not exist or is not an .xml file."
     end
 
+    hpxml_output_path = args[:hpxml_output_path]
+    unless (Pathname.new hpxml_output_path).absolute?
+      hpxml_output_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_output_path))
+    end
+    args[:hpxml_output_path] = hpxml_output_path
+
     hpxml = HPXML.new(hpxml_path: hpxml_path)
 
     # create EpwFile object
@@ -131,12 +137,10 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     # modify the hpxml with the schedules path
     doc = XMLHelper.parse_file(hpxml_path)
     extension = XMLHelper.create_elements_as_needed(XMLHelper.get_element(doc, '/HPXML'), ['SoftwareInfo', 'extension'])
-    schedules_files = XMLHelper.get_elements(extension, 'SchedulesFiles')
-    if !schedules_files.empty?
-      runner.registerWarning('Overwriting existing SchedulesFiles.')
-      XMLHelper.delete_element(extension, 'SchedulesFiles')
+    schedules_filepaths = XMLHelper.get_values(extension, 'SchedulesFilePath', :string)
+    if !schedules_filepaths.include?(args[:output_csv_path])
+      XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)
     end
-    paths = { 'Occupancy' => args[:output_csv_path] }
 
     # water heater scheduled setpoints and/or operating modes
     if args[:water_heater_scheduled_setpoint_path].is_initialized || args[:water_heater_scheduled_operating_mode_path].is_initialized
@@ -144,23 +148,16 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       success = create_water_heater_schedules(runner, hpxml, args)
       return false if not success
 
-      paths['Water Heater'] = args[:water_heater_output_csv_path].get
-    end
-    schedules_files = XMLHelper.add_element(extension, 'SchedulesFiles')
-    paths.each do |name, path|
-      schedules_file = XMLHelper.add_element(schedules_files, 'SchedulesFile')
-      XMLHelper.add_element(schedules_file, 'Name', name, :string)
-      XMLHelper.add_element(schedules_file, 'Path', path, :string)
+      if !schedules_filepaths.include?(args[:water_heater_output_csv_path].get)
+        XMLHelper.add_element(extension, 'SchedulesFilePath', args[:water_heater_output_csv_path].get, :string)
+      end
     end
 
     # write out the modified hpxml
-    hpxml_output_path = args[:hpxml_output_path]
-    unless (Pathname.new hpxml_output_path).absolute?
-      hpxml_output_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_output_path))
+    if (hpxml_path != hpxml_output_path) || !schedules_filepaths.include?(args[:output_csv_path]) || (args[:water_heater_output_csv_path].is_initialized && !schedules_filepaths.include?(args[:water_heater_output_csv_path].get))
+      XMLHelper.write_file(doc, hpxml_output_path)
+      runner.registerInfo("Wrote file: #{hpxml_output_path}")
     end
-
-    XMLHelper.write_file(doc, hpxml_output_path)
-    runner.registerInfo("Wrote file: #{hpxml_output_path}")
 
     return true
   end
@@ -177,7 +174,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     success = schedule_generator.create(args: args)
     return false if not success
 
-    success = schedule_generator.export(schedules_path: File.expand_path(args[:output_csv_path]))
+    output_csv_path = args[:output_csv_path]
+    unless (Pathname.new output_csv_path).absolute?
+      output_csv_path = File.expand_path(File.join(File.dirname(args[:hpxml_output_path]), output_csv_path))
+    end
+
+    success = schedule_generator.export(schedules_path: output_csv_path)
     return false if not success
 
     info_msgs << "SimYear=#{args[:sim_year]}"
@@ -239,14 +241,29 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     rows = []
 
     if args[:water_heater_scheduled_setpoint_path].is_initialized
-      rows << CSV.read(args[:water_heater_scheduled_setpoint_path].get)
+      water_heater_scheduled_setpoint_path = args[:water_heater_scheduled_setpoint_path].get
+      unless (Pathname.new water_heater_scheduled_setpoint_path).absolute?
+        water_heater_scheduled_setpoint_path = File.expand_path(File.join(File.dirname(args[:hpxml_output_path]), water_heater_scheduled_setpoint_path))
+      end
+
+      rows << CSV.read(water_heater_scheduled_setpoint_path)
     end
 
     if args[:water_heater_scheduled_operating_mode_path].is_initialized
-      rows << CSV.read(args[:water_heater_scheduled_operating_mode_path].get)
+      water_heater_scheduled_operating_mode_path = args[:water_heater_scheduled_operating_mode_path].get
+      unless (Pathname.new water_heater_scheduled_operating_mode_path).absolute?
+        water_heater_scheduled_operating_mode_path = File.expand_path(File.join(File.dirname(args[:hpxml_output_path]), water_heater_scheduled_operating_mode_path))
+      end
+
+      rows << CSV.read(water_heater_scheduled_operating_mode_path)
     end
 
-    CSV.open(args[:water_heater_output_csv_path].get, 'w') do |csv|
+    water_heater_output_csv_path = args[:water_heater_output_csv_path].get
+    unless (Pathname.new water_heater_output_csv_path).absolute?
+      water_heater_output_csv_path = File.expand_path(File.join(File.dirname(args[:hpxml_output_path]), water_heater_output_csv_path))
+    end
+
+    CSV.open(water_heater_output_csv_path, 'w') do |csv|
       rows = rows.transpose
       columns = []
       rows[0].each do |column|
@@ -258,7 +275,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       end
     end
 
-    runner.registerInfo("Created #{args[:water_heater_output_csv_path].get}")
+    runner.registerInfo("Created #{water_heater_output_csv_path}")
 
     return true
   end

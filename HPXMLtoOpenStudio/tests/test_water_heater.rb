@@ -1119,53 +1119,6 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
   end
 
-  def test_tank_heat_pump_setpoint_scheduled
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-heat-pump-setpoint-schedules-detailed.xml'))
-    model, hpxml = _test_measure(args_hash)
-
-    # Get HPXML values
-    water_heating_system = hpxml.water_heating_systems[0]
-
-    # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
-    fuel = EPlus.fuel_type(water_heating_system.fuel_type)
-    u =  1.045
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') - 9
-    ther_eff = 1.0
-    cop = 4.004
-    tank_height = 1.0335
-
-    # Check water heater
-    assert_equal(1, model.getWaterHeaterHeatPumpWrappedCondensers.size)
-    assert_equal(1, model.getWaterHeaterStratifieds.size)
-    hpwh = model.getWaterHeaterHeatPumpWrappedCondensers[0]
-    wh = hpwh.tank.to_WaterHeaterStratified.get
-    coil = hpwh.dXCoil.to_CoilWaterHeatingAirToWaterHeatPumpWrapped.get
-    assert_equal(fuel, wh.heaterFuelType)
-    assert_equal('Schedule', wh.ambientTemperatureIndicator)
-    assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
-    assert_in_epsilon(tank_height, wh.tankHeight.get, 0.001)
-    assert_in_epsilon(4500.0, wh.heater1Capacity.get, 0.001)
-    assert_in_epsilon(4500.0, wh.heater2Capacity, 0.001)
-    assert_in_epsilon(u, wh.uniformSkinLossCoefficientperUnitAreatoAmbientTemperature.get, 0.001)
-    assert(wh.heater1SetpointTemperatureSchedule.to_ScheduleFile.is_initialized)
-    assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency, 0.001)
-
-    # Check heat pump cooling coil cop
-    assert_in_epsilon(cop, coil.ratedCOP, 0.001)
-
-    # Check schedule
-    assert_equal(1, model.getScheduleFiles.size)
-    sch = model.getScheduleFiles[0]
-
-    schedule_file_names = []
-    model.getScheduleFiles.each do |schedule_file|
-      schedule_file_names << "#{schedule_file.name}"
-    end
-    assert(schedule_file_names.include?('water_heater_setpoint'))
-  end
-
   def test_tank_heat_pump_operating_mode_heat_pump_only
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml'))
@@ -1203,9 +1156,9 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(cop, coil.ratedCOP, 0.001)
   end
 
-  def test_tank_heat_pump_operating_mode_scheduled
+  def test_tank_heat_pump_scheduled
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-heat-pump-operating-mode-schedules-detailed.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-heat-pump-schedules-detailed.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
@@ -1233,66 +1186,24 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(4500.0, wh.heater1Capacity.get, 0.001)
     assert_in_epsilon(4500.0, wh.heater2Capacity, 0.001)
     assert_in_epsilon(u, wh.uniformSkinLossCoefficientperUnitAreatoAmbientTemperature.get, 0.001)
-    assert_in_epsilon(t_set, wh.heater1SetpointTemperatureSchedule.to_ScheduleConstant.get.value, 0.001)
+    assert(wh.heater1SetpointTemperatureSchedule.to_ScheduleFile.is_initialized)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency, 0.001)
 
     # Check heat pump cooling coil cop
     assert_in_epsilon(cop, coil.ratedCOP, 0.001)
 
     # Check schedule
-    # FIXME: uncomment
-    # assert_equal(1, model.getScheduleFiles.size)
-    # sch = model.getScheduleFiles[0]
-
-    # schedule_file_names = []
-    # model.getScheduleFiles.each do |schedule_file|
-    # schedule_file_names << "#{schedule_file.name}"
-    # end
-    # assert(schedule_file_names.include?('water_heater_operating_mode'))
-  end
-
-  def test_tank_mixed_setpoint_scheduled
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-setpoint-schedules-detailed.xml'))
-    model, hpxml = _test_measure(args_hash)
-
-    # Get HPXML values
-    water_heating_system = hpxml.water_heating_systems[0]
-
-    # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
-    cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
-    fuel = EPlus.fuel_type(water_heating_system.fuel_type)
-    ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
-    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
-    ther_eff = 1.0
-    loc = water_heating_system.location
-
-    # Check water heater
-    assert_equal(1, model.getWaterHeaterMixeds.size)
-    wh = model.getWaterHeaterMixeds[0]
-    assert_equal(fuel, wh.heaterFuelType)
-    assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
-    assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
-    assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
-    assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
-    assert(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleFile.is_initialized)
-    assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
-    assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
-
-    # Check schedule
-    assert_equal(1, model.getScheduleFiles.size)
-    sch = model.getScheduleFiles[0]
+    assert_equal(14, model.getScheduleFiles.size)
 
     schedule_file_names = []
     model.getScheduleFiles.each do |schedule_file|
       schedule_file_names << "#{schedule_file.name}"
     end
-    assert(schedule_file_names.include?('water_heater_setpoint'))
+    assert(schedule_file_names.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
+    # assert(schedule_file_names.include?(SchedulesFile::ColumnWaterHeaterOperatingMode))
   end
 
-  def test_tank_stratified_setpoint_constant
+  def test_tank_stratified
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-model-type-stratified.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -1324,6 +1235,46 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     assert_in_epsilon(u, wh.uniformSkinLossCoefficientperUnitAreatoAmbientTemperature.get, 0.001)
     assert_in_epsilon(t_set, wh.heater1SetpointTemperatureSchedule.to_ScheduleConstant.get.value, 0.001)
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency, 0.001)
+  end
+
+  def test_tank_scheduled
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tank-schedules-detailed.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    water_heating_system = hpxml.water_heating_systems[0]
+
+    # Expected value
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
+    cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
+    fuel = EPlus.fuel_type(water_heating_system.fuel_type)
+    ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    ther_eff = 1.0
+    loc = water_heating_system.location
+
+    # Check water heater
+    assert_equal(1, model.getWaterHeaterMixeds.size)
+    wh = model.getWaterHeaterMixeds[0]
+    assert_equal(fuel, wh.heaterFuelType)
+    assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
+    assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
+    assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
+    assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
+    assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
+    assert(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleFile.is_initialized)
+    assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
+    assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
+
+    # Check schedule
+    assert_equal(14, model.getScheduleFiles.size)
+
+    schedule_file_names = []
+    model.getScheduleFiles.each do |schedule_file|
+      schedule_file_names << "#{schedule_file.name}"
+    end
+    assert(schedule_file_names.include?(SchedulesFile::ColumnWaterHeaterSetpoint))
   end
 
   def _test_measure(args_hash)

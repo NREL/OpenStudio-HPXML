@@ -11,11 +11,53 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <SchedulesFiles>
-        <SchedulesFile>
-          <Path>../../HPXMLtoOpenStudio/resources/schedule_files/heatpump/hourly_operating_mode_schedule.csv</Path>
-        </SchedulesFile>
-      </SchedulesFiles>
+      <EmissionsScenarios>
+        <EmissionsScenario>
+          <Name>Cambium 2022 Hourly MidCase AER Using RMPA Region</Name>
+          <EmissionsType>CO2</EmissionsType>
+          <EmissionsFactor>
+            <FuelType>electricity</FuelType>
+            <Units>kg/MWh</Units>
+            <ScheduleFilePath>../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_RMPAc_2022.csv</ScheduleFilePath>
+          </EmissionsFactor>
+        </EmissionsScenario>
+        <EmissionsScenario>
+          <Name>Cambium 2022 Hourly MidCase AER Using National</Name>
+          <EmissionsType>CO2</EmissionsType>
+          <EmissionsFactor>
+            <FuelType>electricity</FuelType>
+            <Units>kg/MWh</Units>
+            <ScheduleFilePath>../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_usa_2022.csv</ScheduleFilePath>
+          </EmissionsFactor>
+        </EmissionsScenario>
+        <EmissionsScenario>
+          <Name>Cambium 2022 Annual MidCase AER Using National</Name>
+          <EmissionsType>CO2</EmissionsType>
+          <EmissionsFactor>
+            <FuelType>electricity</FuelType>
+            <Units>kg/MWh</Units>
+            <Value>392.6</Value>
+          </EmissionsFactor>
+        </EmissionsScenario>
+        <EmissionsScenario>
+          <Name>eGRID 2019 Total Emissions Rate Using RMPA Region</Name>
+          <EmissionsType>SO2</EmissionsType>
+          <EmissionsFactor>
+            <FuelType>electricity</FuelType>
+            <Units>lb/MWh</Units>
+            <Value>0.384</Value>
+          </EmissionsFactor>
+        </EmissionsScenario>
+        <EmissionsScenario>
+          <Name>eGRID 2019 Total Emissions Rate Using RMPA Region</Name>
+          <EmissionsType>NOx</EmissionsType>
+          <EmissionsFactor>
+            <FuelType>electricity</FuelType>
+            <Units>lb/MWh</Units>
+            <Value>0.67</Value>
+          </EmissionsFactor>
+        </EmissionsScenario>
+      </EmissionsScenarios>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -387,22 +429,20 @@
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
-                <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeatingSystem1'/>
             <FuelType>electricity</FuelType>
-            <WaterHeaterType>heat pump water heater</WaterHeaterType>
+            <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>living space</Location>
-            <TankVolume>50.0</TankVolume>
+            <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <UniformEnergyFactor>3.75</UniformEnergyFactor>
-            <UsageBin>medium</UsageBin>
+            <HeatingCapacity>18767.0</HeatingCapacity>
+            <EnergyFactor>0.95</EnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
@@ -427,6 +467,42 @@
             <LowFlow>false</LowFlow>
           </WaterFixture>
         </WaterHeating>
+        <Photovoltaics>
+          <PVSystem>
+            <SystemIdentifier id='PVSystem1'/>
+            <Location>roof</Location>
+            <ModuleType>standard</ModuleType>
+            <Tracking>fixed</Tracking>
+            <ArrayAzimuth>180</ArrayAzimuth>
+            <ArrayTilt>20.0</ArrayTilt>
+            <MaxPowerOutput>4000.0</MaxPowerOutput>
+            <InverterEfficiency>0.96</InverterEfficiency>
+            <SystemLossesFraction>0.14</SystemLossesFraction>
+          </PVSystem>
+          <PVSystem>
+            <SystemIdentifier id='PVSystem2'/>
+            <Location>roof</Location>
+            <ModuleType>premium</ModuleType>
+            <Tracking>fixed</Tracking>
+            <ArrayAzimuth>90</ArrayAzimuth>
+            <ArrayTilt>20.0</ArrayTilt>
+            <MaxPowerOutput>1500.0</MaxPowerOutput>
+            <InverterEfficiency>0.96</InverterEfficiency>
+            <SystemLossesFraction>0.14</SystemLossesFraction>
+          </PVSystem>
+        </Photovoltaics>
+        <Batteries>
+          <Battery>
+            <SystemIdentifier id='Battery1'/>
+            <Location>outside</Location>
+            <BatteryType>Li-ion</BatteryType>
+            <NominalCapacity>
+              <Units>kWh</Units>
+              <Value>20.0</Value>
+            </NominalCapacity>
+            <RatedPowerOutput>15000.0</RatedPowerOutput>
+          </Battery>
+        </Batteries>
       </Systems>
       <Appliances>
         <ClothesWasher>

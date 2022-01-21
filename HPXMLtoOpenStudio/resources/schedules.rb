@@ -1186,6 +1186,10 @@ class SchedulesFile
           fail "Schedule value must be numeric for column '#{col_name}'. [context: #{schedules_path}]"
         end
 
+        if @schedules.keys.include? col_name
+          fail "Schedule column name '#{col_name}' is duplicated. [context: #{schedules_path}]"
+        end
+
         @schedules[col_name] = values
       end
     end
