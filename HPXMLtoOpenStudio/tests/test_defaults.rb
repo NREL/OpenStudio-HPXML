@@ -1728,11 +1728,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       wh.temperature = 111
       wh.energy_factor = 0.90
       wh.year_installed = 2003
+      wh.tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_storage_water_heater_values(hpxml_default,
-                                              [true, 15000.0, 40.0, 0.95, HPXML::LocationLivingSpace, 111, 0.90])
+                                              [true, 15000.0, 40.0, 0.95, HPXML::LocationLivingSpace, 111, 0.90, HPXML::WaterHeaterTankModelTypeStratified])
 
     # Test defaults w/ 3-bedroom house & electric storage water heater
     hpxml.water_heating_systems.each do |wh|
@@ -1744,11 +1745,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       wh.temperature = nil
       wh.energy_factor = nil
       wh.year_installed = 2003
+      wh.tank_model_type = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_storage_water_heater_values(hpxml_default,
-                                              [false, 18766.7, 50.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.857])
+                                              [false, 18766.7, 50.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.857, HPXML::WaterHeaterTankModelTypeMixed])
 
     # Test defaults w/ 5-bedroom house & electric storage water heater
     hpxml = _create_hpxml('base-enclosure-beds-5.xml')
@@ -1761,11 +1763,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       wh.temperature = nil
       wh.energy_factor = nil
       wh.year_installed = 2010
+      wh.tank_model_type = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_storage_water_heater_values(hpxml_default,
-                                              [false, 18766.7, 66.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.90])
+                                              [false, 18766.7, 66.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.90, HPXML::WaterHeaterTankModelTypeMixed])
 
     # Test defaults w/ 3-bedroom house & 2 storage water heaters (1 electric and 1 natural gas)
     hpxml = _create_hpxml('base-dhw-multiple.xml')
@@ -1780,43 +1783,50 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       wh.temperature = nil
       wh.energy_factor = nil
       wh.year_installed = 2010
+      wh.tank_model_type = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_storage_water_heater_values(hpxml_default,
-                                              [false, 15354.6, 50.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.90],
-                                              [false, 36000.0, 40.0, 0.746, HPXML::LocationBasementConditioned, 125, 0.55])
+                                              [false, 15354.6, 50.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.90, HPXML::WaterHeaterTankModelTypeMixed],
+                                              [false, 36000.0, 40.0, 0.746, HPXML::LocationBasementConditioned, 125, 0.55, HPXML::WaterHeaterTankModelTypeMixed])
 
     # Test inputs not overridden by defaults w/ UEF
     hpxml = _create_hpxml('base-dhw-tank-gas-uef.xml')
     hpxml.water_heating_systems.each do |wh|
       wh.first_hour_rating = nil
       wh.usage_bin = HPXML::WaterHeaterUsageBinVerySmall
+      wh.tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     assert_nil(hpxml_default.water_heating_systems[0].first_hour_rating)
     assert_equal(HPXML::WaterHeaterUsageBinVerySmall, hpxml_default.water_heating_systems[0].usage_bin)
+    assert_equal(HPXML::WaterHeaterTankModelTypeStratified, hpxml_default.water_heating_systems[0].tank_model_type)
 
     # Test defaults w/ UEF & FHR
     hpxml.water_heating_systems.each do |wh|
       wh.first_hour_rating = 40
       wh.usage_bin = nil
+      wh.tank_model_type = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     assert_equal(40, hpxml_default.water_heating_systems[0].first_hour_rating)
     assert_equal(HPXML::WaterHeaterUsageBinLow, hpxml_default.water_heating_systems[0].usage_bin)
+    assert_equal(HPXML::WaterHeaterTankModelTypeMixed, hpxml_default.water_heating_systems[0].tank_model_type)
 
     # Test defaults w/ UEF & no FHR
     hpxml.water_heating_systems.each do |wh|
       wh.first_hour_rating = nil
       wh.usage_bin = nil
+      wh.tank_model_type = nil
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     assert_nil(hpxml_default.water_heating_systems[0].first_hour_rating)
     assert_equal(HPXML::WaterHeaterUsageBinMedium, hpxml_default.water_heating_systems[0].usage_bin)
+    assert_equal(HPXML::WaterHeaterTankModelTypeMixed, hpxml_default.water_heating_systems[0].tank_model_type)
   end
 
   def test_tankless_water_heaters
@@ -1840,6 +1850,21 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_tankless_water_heater_values(hpxml_default, [0.94])
+  end
+
+  def test_heat_pump_water_heaters
+    # Test inputs not overridden by defaults
+    hpxml = _create_hpxml('base-dhw-tank-heat-pump.xml')
+    hpxml.water_heating_systems[0].operating_mode = HPXML::WaterHeaterOperatingModeHeatPumpOnly
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_heat_pump_water_heater_values(hpxml_default, [HPXML::WaterHeaterOperatingModeHeatPumpOnly])
+
+    # Test defaults
+    hpxml.water_heating_systems[0].operating_mode = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_heat_pump_water_heater_values(hpxml_default, [HPXML::WaterHeaterOperatingModeStandard])
   end
 
   def test_hot_water_distribution
@@ -3442,7 +3467,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     storage_water_heaters = hpxml.water_heating_systems.select { |w| w.water_heater_type == HPXML::WaterHeaterTypeStorage }
     assert_equal(expected_wh_values.size, storage_water_heaters.size)
     storage_water_heaters.each_with_index do |wh_system, idx|
-      is_shared, heating_capacity, tank_volume, recovery_efficiency, location, temperature, energy_factor = expected_wh_values[idx]
+      is_shared, heating_capacity, tank_volume, recovery_efficiency, location, temperature, energy_factor, tank_model_type = expected_wh_values[idx]
 
       assert_equal(is_shared, wh_system.is_shared_system)
       assert_in_epsilon(heating_capacity, wh_system.heating_capacity, 0.01)
@@ -3455,6 +3480,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       else
         assert_equal(energy_factor, wh_system.energy_factor)
       end
+      assert_equal(tank_model_type, wh_system.tank_model_type)
     end
   end
 
@@ -3465,6 +3491,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       performance_adjustment, = expected_wh_values[idx]
 
       assert_equal(performance_adjustment, wh_system.performance_adjustment)
+    end
+  end
+
+  def _test_default_heat_pump_water_heater_values(hpxml, *expected_wh_values)
+    heat_pump_water_heaters = hpxml.water_heating_systems.select { |w| w.water_heater_type == HPXML::WaterHeaterTypeHeatPump }
+    assert_equal(expected_wh_values.size, heat_pump_water_heaters.size)
+    heat_pump_water_heaters.each_with_index do |wh_system, idx|
+      operating_mode, = expected_wh_values[idx]
+
+      assert_equal(operating_mode, wh_system.operating_mode)
     end
   end
 
