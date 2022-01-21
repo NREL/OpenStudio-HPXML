@@ -160,6 +160,11 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-sfd-with-shared-system.xml' => 'base-sfd.xml',
       'error-rim-joist-height-but-no-assembly-r.xml' => 'base-sfd.xml',
       'error-rim-joist-assembly-r-but-no-height.xml' => 'base-sfd.xml',
+      'error-invalid-aspect-ratio.xml' => 'base-sfd.xml',
+      'error-negative-foundation-height.xml' => 'base-sfd.xml',
+      'error-too-many-floors.xml' => 'base-sfd.xml',
+      'error-invalid-garage-protrusion.xml' => 'base-sfd.xml',
+      'error-sfa-no-non-adiabatic-walls.xml' => 'base-sfa.xml',
 
       'warning-non-electric-heat-pump-water-heater.xml' => 'base-sfd.xml',
       'warning-sfd-slab-non-zero-foundation-height.xml' => 'base-sfd.xml',
@@ -194,8 +199,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-second-heating-system-serves-total-heat-load.xml' => 'The fraction of heat load served by the second heating system is 100%.',
       'error-second-heating-system-but-no-primary-heating.xml' => 'A second heating system was specified without a primary heating system.',
       'error-sfa-no-building-num-units.xml' => 'Did not specify the number of units in the building for single-family attached or apartment units.',
-      'error-sfa-above-apartment.xml' => 'Single-family attached buildings cannot be above another unit.',
-      'error-sfa-below-apartment.xml' => 'Single-family attached buildings cannot be below another unit.',
+      'error-sfa-above-apartment.xml' => 'Single-family attached units cannot be above another unit.',
+      'error-sfa-below-apartment.xml' => 'Single-family attached units cannot be below another unit.',
       'error-sfa-all-adiabatic-walls.xml' => 'At least one wall must be set to non-adiabatic.',
       'error-mf-no-building-num-units.xml' => 'Did not specify the number of units in the building for single-family attached or apartment units.',
       'error-mf-all-adiabatic-walls.xml' => 'At least one wall must be set to non-adiabatic.',
@@ -207,6 +212,11 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-sfd-with-shared-system.xml' => 'Specified a shared system for a single-family detached unit.',
       'error-rim-joist-height-but-no-assembly-r.xml' => 'Specified a rim joist height but no rim joist assembly R-value.',
       'error-rim-joist-assembly-r-but-no-height.xml' => 'Specified a rim joist assembly R-value but no rim joist height.',
+      'error-invalid-aspect-ratio.xml' => 'Aspect ratio must be greater than zero.',
+      'error-negative-foundation-height.xml' => 'Foundation height cannot be negative.',
+      'error-too-many-floors.xml' => 'Number of above-grade floors must be six or less.',
+      'error-invalid-garage-protrusion.xml' => 'Garage protrusion fraction must be between zero and one.',
+      'error-sfa-no-non-adiabatic-walls.xml' => 'At least one wall must be set to non-adiabatic.',
     }
 
     expected_warnings = {
@@ -1060,6 +1070,18 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args.delete('rim_joist_assembly_r')
     elsif ['error-rim-joist-assembly-r-but-no-height.xml'].include? hpxml_file
       args.delete('geometry_rim_joist_height')
+    elsif ['error-invalid-aspect-ratio.xml'].include? hpxml_file
+      args['geometry_unit_aspect_ratio'] = -1
+    elsif ['error-negative-foundation-height.xml'].include? hpxml_file
+      args['geometry_foundation_height'] = -8
+    elsif ['error-too-many-floors.xml'].include? hpxml_file
+      args['geometry_unit_num_floors_above_grade'] = 7
+    elsif ['error-invalid-garage-protrusion.xml'].include? hpxml_file
+      args['geometry_garage_protrusion'] = 1.5
+    elsif ['error-sfa-no-non-adiabatic-walls.xml'].include? hpxml_file
+      args['geometry_unit_left_wall_is_adiabatic'] = true
+      args['geometry_unit_front_wall_is_adiabatic'] = true
+      args['geometry_unit_back_wall_is_adiabatic'] = true
     end
 
     # Warning
