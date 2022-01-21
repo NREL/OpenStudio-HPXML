@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>82bd359b-0bdd-411e-9410-f645c5e266f6</version_id>
-  <version_modified>20220120T232038Z</version_modified>
+  <version_id>551b5cd5-9a81-479f-b1bf-35b938c8758d</version_id>
+  <version_modified>20220121T023557Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -6715,12 +6715,6 @@
       <checksum>C028936D</checksum>
     </file>
     <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3076E21A</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.0</identifier>
@@ -6730,6 +6724,12 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>4D1156EB</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2F03A852</checksum>
     </file>
   </files>
 </measure>
