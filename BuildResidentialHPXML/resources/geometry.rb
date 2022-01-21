@@ -256,20 +256,6 @@ class Geometry
       has_garage = true
     end
 
-    # error checking
-    if (garage_protrusion > 0) && (roof_type == 'hip') && has_garage
-      runner.registerError('Cannot handle protruding garage and hip roof.')
-      return false
-    end
-    if (garage_protrusion > 0) && (aspect_ratio < 1) && has_garage && (roof_type == 'gable')
-      runner.registerError('Cannot handle protruding garage and attic ridge running from front to back.')
-      return false
-    end
-    if (foundation_type == HPXML::FoundationTypeAmbient) && has_garage
-      runner.registerError('Cannot handle garages with an ambient foundation type.')
-      return false
-    end
-
     # calculate the footprint of the building
     garage_area_inside_footprint = 0
     if has_garage
@@ -291,8 +277,12 @@ class Geometry
     length = footprint / width
 
     # error checking
-    if ((garage_width > length) && (garage_depth > 0)) || ((((1.0 - garage_protrusion) * garage_depth) > width) && (garage_width > 0)) || ((((1.0 - garage_protrusion) * garage_depth) == width) && (garage_width == length))
-      runner.registerError('Invalid living space and garage dimensions.')
+    if ((garage_width >= length) && (garage_depth > 0))
+      runner.registerError('Garage is as wide as the single-family detached unit.')
+      return false
+    end
+    if ((((1.0 - garage_protrusion) * garage_depth) >= width) && (garage_width > 0))
+      runner.registerError('Garage is as deep as the single-family detached unit.')
       return false
     end
 
@@ -979,10 +969,6 @@ class Geometry
         return false
       end
     end
-    if window_aspect_ratio <= 0
-      runner.registerError('Window Aspect Ratio must be greater than 0.')
-      return false
-    end
 
     # Split any surfaces that have doors so that we can ignore them when adding windows
     facades.each do |facade|
@@ -1439,10 +1425,7 @@ class Geometry
                         door_area:,
                         **remainder)
     # error checking
-    if door_area < 0
-      runner.registerError('Invalid door area.')
-      return false
-    elsif door_area == 0
+    if door_area == 0
       runner.registerFinalCondition('No doors added because door area was set to 0.')
       return true
     end

@@ -165,6 +165,13 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-too-many-floors.xml' => 'base-sfd.xml',
       'error-invalid-garage-protrusion.xml' => 'base-sfd.xml',
       'error-sfa-no-non-adiabatic-walls.xml' => 'base-sfa.xml',
+      'error-hip-roof-and-protruding-garage.xml' => 'base-sfd.xml',
+      'error-protruding-garage-under-gable-roof.xml' => 'base-sfd.xml',
+      'error-ambient-with-garage.xml' => 'base-sfd.xml',
+      'error-invalid-door-area.xml' => 'base-sfd.xml',
+      'error-invalid-window-aspect-ratio.xml' => 'base-sfd.xml',
+      'error-garage-too-wide.xml' => 'base-sfd.xml',
+      'error-garage-too-deep.xml' => 'base-sfd.xml',
 
       'warning-non-electric-heat-pump-water-heater.xml' => 'base-sfd.xml',
       'warning-sfd-slab-non-zero-foundation-height.xml' => 'base-sfd.xml',
@@ -217,6 +224,13 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-too-many-floors.xml' => 'Number of above-grade floors must be six or less.',
       'error-invalid-garage-protrusion.xml' => 'Garage protrusion fraction must be between zero and one.',
       'error-sfa-no-non-adiabatic-walls.xml' => 'At least one wall must be set to non-adiabatic.',
+      'error-hip-roof-and-protruding-garage.xml' => 'Cannot handle protruding garage and hip roof.',
+      'error-protruding-garage-under-gable-roof.xml' => 'Cannot handle protruding garage and attic ridge running from front to back.',
+      'error-ambient-with-garage.xml' => 'Cannot handle garages with an ambient foundation type.',
+      'error-invalid-door-area.xml' => 'Door area cannot be negative.',
+      'error-invalid-window-aspect-ratio.xml' => 'Window aspect ratio must be greater than zero.',
+      'error-garage-too-wide.xml' => 'Garage is as wide as the single-family detached unit.',
+      'error-garage-too-deep.xml' => 'Garage is as deep as the single-family detached unit.',
     }
 
     expected_warnings = {
@@ -1082,6 +1096,26 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args['geometry_unit_left_wall_is_adiabatic'] = true
       args['geometry_unit_front_wall_is_adiabatic'] = true
       args['geometry_unit_back_wall_is_adiabatic'] = true
+    elsif ['error-hip-roof-and-protruding-garage.xml'].include? hpxml_file
+      args['geometry_roof_type'] = 'hip'
+      args['geometry_garage_width'] = 12
+      args['geometry_garage_protrusion'] = 0.5
+    elsif ['error-protruding-garage-under-gable-roof.xml'].include? hpxml_file
+      args['geometry_unit_aspect_ratio'] = 0.5
+      args['geometry_garage_width'] = 12
+      args['geometry_garage_protrusion'] = 0.5
+    elsif ['error-ambient-with-garage.xml'].include? hpxml_file
+      args['geometry_garage_width'] = 12
+      args['geometry_foundation_type'] = HPXML::FoundationTypeAmbient
+    elsif ['error-invalid-door-area.xml'].include? hpxml_file
+      args['door_area'] = -10
+    elsif ['error-invalid-window-aspect-ratio.xml'].include? hpxml_file
+      args['window_aspect_ratio'] = 0
+    elsif ['error-garage-too-wide.xml'].include? hpxml_file
+      args['geometry_garage_width'] = 72
+    elsif ['error-garage-too-deep.xml'].include? hpxml_file
+      args['geometry_garage_width'] = 12
+      args['geometry_garage_depth'] = 40
     end
 
     # Warning

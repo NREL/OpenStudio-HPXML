@@ -3106,6 +3106,21 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # error = (args[:geometry_balcony_depth] > 0) && (args[:geometry_inset_width] * args[:geometry_inset_depth] == 0)
     # errors << 'Specified a balcony, but there is not inset.' if error
 
+    error = (args[:geometry_garage_protrusion] > 0) && (args[:geometry_roof_type] == 'hip') && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
+    errors << 'Cannot handle protruding garage and hip roof.' if error
+
+    error = (args[:geometry_garage_protrusion] > 0) && (args[:geometry_unit_aspect_ratio] < 1) && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0) && (args[:geometry_roof_type] == 'gable')
+    errors << 'Cannot handle protruding garage and attic ridge running from front to back.' if error
+
+    error = (args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient) && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
+    errors << 'Cannot handle garages with an ambient foundation type.' if error
+
+    error = (args[:door_area] < 0)
+    errors << 'Door area cannot be negative.' if error
+
+    error = (args[:window_aspect_ratio] <= 0)
+    errors << 'Window aspect ratio must be greater than zero.' if error
+
     return errors
   end
 
