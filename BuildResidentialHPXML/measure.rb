@@ -3028,6 +3028,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     warning = (args[:geometry_attic_type] == HPXML::AtticTypeConditioned) && (args[:ceiling_assembly_r] > 2.1)
     warnings << 'Home with conditioned attic has ceiling insulation.' if warning
 
+    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented, HPXML::AtticTypeConditioned].include?(args[:geometry_attic_type])
+    errors << 'Apartment units can only have a flat roof or be below another apartment unit.' if error
+
     error = (args[:geometry_unit_num_floors_above_grade] == 1 && args[:geometry_attic_type] == HPXML::AtticTypeConditioned)
     errors << 'Units with a conditioned attic must have at least two above-grade floors.' if error
 
