@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>be8f86e6-75ef-410f-b9f3-dd85671f6e62</version_id>
-  <version_modified>20220119T012135Z</version_modified>
+  <version_id>8eac692a-1616-472b-9c25-714864e0ff8b</version_id>
+  <version_modified>20220121T212329Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -5918,12 +5918,6 @@
       <checksum>37503189</checksum>
     </file>
     <file>
-      <filename>extra_files/extra-time-zone-different-than-epw.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>075A2A0F</checksum>
-    </file>
-    <file>
       <filename>extra_files/extra-auto.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
@@ -6678,12 +6672,6 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>A887B353</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-ambient.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C028936D</checksum>
     </file>
   </files>
 </measure>
