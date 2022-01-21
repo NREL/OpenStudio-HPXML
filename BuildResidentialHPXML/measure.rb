@@ -2958,9 +2958,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   end
 
   def validate_arguments(args)
-    # TODO: Remove items below that duplicate checks downstream.
-    # TODO: Add warnings/errors downstream if there are additional checks here.
-
     warnings = argument_warnings(args)
     errors = argument_errors(args)
 
@@ -3054,7 +3051,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:heating_system_type] == 'none') && (args[:heat_pump_type] == 'none') && (args[:heating_system_2_type] != 'none')
     errors << 'A second heating system was specified without a primary heating system.' if error
 
-    error = ((args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) || (args[:geometry_unit_type] == HPXML::ResidentialTypeSFA)) && !args[:geometry_building_num_units].is_initialized
+    error = [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include?(args[:geometry_unit_type]) && !args[:geometry_building_num_units].is_initialized
     errors << 'Did not specify the number of units in the building for single-family attached or apartment units.' if error
 
     error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && (args[:geometry_unit_num_floors_above_grade] > 1)
@@ -3083,6 +3080,31 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     error = args[:rim_joist_assembly_r].is_initialized && !args[:geometry_rim_joist_height].is_initialized
     errors << 'Specified a rim joist assembly R-value but no rim joist height.' if error
+
+    error = (args[:geometry_unit_aspect_ratio] <= 0)
+    errors << 'Aspect ratio must be greater than zero.' if error
+
+    error = (args[:geometry_foundation_height] < 0)
+    errors << 'Foundation height cannot be negative.' if error
+
+    error = (args[:geometry_unit_num_floors_above_grade] > 6)
+    errors << 'Number of above-grade floors must be six or less.' if error
+
+    error = (args[:geometry_garage_protrusion] < 0) || (args[:geometry_garage_protrusion] > 1)
+    errors << 'Garage protrusion fraction must be between zero and one.' if error
+
+    error = (args[:geometry_unit_left_wall_is_adiabatic] && args[:geometry_unit_right_wall_is_adiabatic] && args[:geometry_unit_front_wall_is_adiabatic] && args[:geometry_unit_back_wall_is_adiabatic])
+    errors << 'At least one wall must be set to non-adiabatic.' if error
+
+    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFA) && (args[:geometry_foundation_type] == HPXML::FoundationTypeAboveApartment)
+    errors << 'Single-family attached units cannot be above another unit.' if error
+
+    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFA) && (args[:geometry_attic_type] == HPXML::AtticTypeBelowApartment)
+    errors << 'Single-family attached units cannot be below another unit.' if error
+
+    # These detailed geometry inputs are not currently exposed
+    # error = (args[:geometry_balcony_depth] > 0) && (args[:geometry_inset_width] * args[:geometry_inset_depth] == 0)
+    # errors << 'Specified a balcony, but there is not inset.' if error
 
     return errors
   end
@@ -3263,6 +3285,11 @@ class HPXMLFile
     args[:geometry_inset_depth] = 0.0
     args[:geometry_inset_position] = 'Right'
     args[:geometry_balcony_depth] = 0.0
+
+    if model.getSpaces.size > 0
+      runner.registerError('Starting model is not empty.')
+      return false
+    end
 
     if args[:geometry_unit_type] == HPXML::ResidentialTypeSFD
       success = Geometry.create_single_family_detached(runner: runner, model: model, **args)

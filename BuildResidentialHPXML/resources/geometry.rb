@@ -242,28 +242,6 @@ class Geometry
     roof_type = geometry_roof_type
     roof_pitch = geometry_roof_pitch
 
-    # error checking
-    if model.getSpaces.size > 0
-      runner.registerError('Starting model is not empty.')
-      return false
-    end
-    if aspect_ratio < 0
-      runner.registerError('Invalid aspect ratio entered.')
-      return false
-    end
-    if (foundation_type == HPXML::FoundationTypeAmbient) && (foundation_height <= 0.0)
-      runner.registerError('The ambient foundation height must be greater than 0 ft.')
-      return false
-    end
-    if num_floors > 6
-      runner.registerError('Too many floors.')
-      return false
-    end
-    if (garage_protrusion < 0) || (garage_protrusion > 1)
-      runner.registerError('Invalid garage protrusion value entered.')
-      return false
-    end
-
     # Convert to SI
     cfa = UnitConversions.convert(cfa, 'ft^2', 'm^2')
     average_ceiling_height = UnitConversions.convert(average_ceiling_height, 'ft', 'm')
@@ -1638,28 +1616,6 @@ class Geometry
     adiabatic_front_wall = geometry_unit_front_wall_is_adiabatic
     adiabatic_back_wall = geometry_unit_back_wall_is_adiabatic
 
-    # error checking
-    if model.getSpaces.size > 0
-      runner.registerError('Starting model is not empty.')
-      return false
-    end
-    if aspect_ratio < 0
-      runner.registerError('Invalid aspect ratio entered.')
-      return false
-    end
-    if adiabatic_left_wall && adiabatic_right_wall && adiabatic_front_wall && adiabatic_back_wall
-      runner.registerError('At least one wall must be set to non-adiabatic.')
-      return false
-    end
-    if foundation_type == HPXML::FoundationTypeAboveApartment
-      runner.registerError('Single-family attached buildings cannot be above another unit.')
-      return false
-    end
-    if attic_type == HPXML::AtticTypeBelowApartment
-      runner.registerError('Single-family attached buildings cannot be below another unit.')
-      return false
-    end
-
     # Convert to SI
     cfa = UnitConversions.convert(cfa, 'ft^2', 'm^2')
     average_ceiling_height = UnitConversions.convert(average_ceiling_height, 'ft', 'm')
@@ -1995,7 +1951,6 @@ class Geometry
                               geometry_unit_cfa:,
                               geometry_average_ceiling_height:,
                               geometry_building_num_units:,
-                              geometry_unit_num_floors_above_grade:,
                               geometry_unit_aspect_ratio:,
                               geometry_inset_width:,
                               geometry_inset_depth:,
@@ -2035,24 +1990,6 @@ class Geometry
     end
     if attic_type == HPXML::AtticTypeBelowApartment
       attic_type = HPXML::LocationOtherHousingUnit
-    end
-
-    # Error checking
-    if model.getSpaces.size > 0
-      runner.registerError('Starting model is not empty.')
-      return false
-    end
-    if aspect_ratio < 0
-      runner.registerError('Invalid aspect ratio entered.')
-      return false
-    end
-    if (balcony_depth > 0) && (inset_width * inset_depth == 0)
-      runner.registerWarning('Specified a balcony, but there is no inset.')
-      balcony_depth = 0
-    end
-    if adiabatic_left_wall && adiabatic_right_wall && adiabatic_front_wall && adiabatic_back_wall
-      runner.registerError('At least one wall must be set to non-adiabatic.')
-      return false
     end
 
     # Convert to SI
