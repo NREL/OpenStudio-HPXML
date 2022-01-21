@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>bdd0cb57-2e40-471a-bc8b-1b17f081ed71</version_id>
-  <version_modified>20220121T004350Z</version_modified>
+  <version_id>f34ae15e-3ac4-46f6-83b6-ababf01e376b</version_id>
+  <version_modified>20220121T023718Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -554,12 +554,6 @@
       <checksum>EC4803F4</checksum>
     </file>
     <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>EEF1BC20</checksum>
-    </file>
-    <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -576,12 +570,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>4F273F16</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>298106E3</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
@@ -647,6 +635,18 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>2DFF87CD</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>ECC1A13D</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>85D7C63B</checksum>
     </file>
   </files>
 </measure>

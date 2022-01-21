@@ -4454,8 +4454,8 @@ class HPXML < Object
       end
       if (not @tank_model_type.nil?) || (not @setpoint_schedule_filepath.nil?) || (not @operating_mode.nil?) || (not @operating_mode_schedule_filepath.nil?)
         extension = XMLHelper.create_elements_as_needed(water_heating_system, ['extension'])
-        XMLHelper.add_element(extension, 'TankModelType', @tank_model_type, :string) unless @tank_model_type.nil?
-        XMLHelper.add_element(extension, 'OperatingMode', @operating_mode, :string) unless @operating_mode.nil?
+        XMLHelper.add_element(extension, 'TankModelType', @tank_model_type, :string, @tank_model_type_isdefaulted) unless @tank_model_type.nil?
+        XMLHelper.add_element(extension, 'OperatingMode', @operating_mode, :string, @operating_mode_isdefaulted) unless @operating_mode.nil?
       end
     end
 
