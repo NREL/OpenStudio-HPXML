@@ -2789,6 +2789,12 @@ class HPXML < Object
         XMLHelper.add_element(interior_shading, 'SummerShadingCoefficient', @interior_shading_factor_summer, :float, @interior_shading_factor_summer_isdefaulted) unless @interior_shading_factor_summer.nil?
         XMLHelper.add_element(interior_shading, 'WinterShadingCoefficient', @interior_shading_factor_winter, :float, @interior_shading_factor_winter_isdefaulted) unless @interior_shading_factor_winter.nil?
       end
+      if not @storm_window_type.nil?
+        storm_window = XMLHelper.add_element(window, 'StormWindow')
+        sys_id = XMLHelper.add_element(storm_window, 'SystemIdentifier')
+        XMLHelper.add_attribute(sys_id, 'id', "#{id}StormWindow")
+        XMLHelper.add_element(storm_window, 'GlassType', @storm_window_type, :string) unless @storm_window_type.nil?
+      end
       if (not @overhangs_depth.nil?) || (not @overhangs_distance_to_top_of_window.nil?) || (not @overhangs_distance_to_bottom_of_window.nil?)
         overhangs = XMLHelper.add_element(window, 'Overhangs')
         XMLHelper.add_element(overhangs, 'Depth', @overhangs_depth, :float) unless @overhangs_depth.nil?
@@ -2800,12 +2806,6 @@ class HPXML < Object
       if not @wall_idref.nil?
         attached_to_wall = XMLHelper.add_element(window, 'AttachedToWall')
         XMLHelper.add_attribute(attached_to_wall, 'idref', @wall_idref)
-      end
-      if not @storm_window_type.nil?
-        storm_window = XMLHelper.add_element(window, 'StormWindow')
-        sys_id = XMLHelper.add_element(storm_window, 'SystemIdentifier')
-        XMLHelper.add_attribute(sys_id, 'id', "#{id}StormWindow")
-        XMLHelper.add_element(storm_window, 'GlassType', @storm_window_type, :string) unless @storm_window_type.nil?
       end
     end
 
@@ -2943,15 +2943,15 @@ class HPXML < Object
         XMLHelper.add_element(interior_shading, 'SummerShadingCoefficient', @interior_shading_factor_summer, :float, @interior_shading_factor_summer_isdefaulted) unless @interior_shading_factor_summer.nil?
         XMLHelper.add_element(interior_shading, 'WinterShadingCoefficient', @interior_shading_factor_winter, :float, @interior_shading_factor_winter_isdefaulted) unless @interior_shading_factor_winter.nil?
       end
-      if not @roof_idref.nil?
-        attached_to_roof = XMLHelper.add_element(skylight, 'AttachedToRoof')
-        XMLHelper.add_attribute(attached_to_roof, 'idref', @roof_idref)
-      end
       if not @storm_window_type.nil?
         storm_window = XMLHelper.add_element(skylight, 'StormWindow')
         sys_id = XMLHelper.add_element(storm_window, 'SystemIdentifier')
         XMLHelper.add_attribute(sys_id, 'id', "#{id}StormWindow")
         XMLHelper.add_element(storm_window, 'GlassType', @storm_window_type, :string) unless @storm_window_type.nil?
+      end
+      if not @roof_idref.nil?
+        attached_to_roof = XMLHelper.add_element(skylight, 'AttachedToRoof')
+        XMLHelper.add_attribute(attached_to_roof, 'idref', @roof_idref)
       end
     end
 
