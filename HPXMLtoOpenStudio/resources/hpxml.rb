@@ -532,7 +532,11 @@ class HPXML < Object
     area = 0.0
 
     (@walls + @rim_joists).each do |wall|
+      next unless HPXML::conditioned_locations_this_unit.include? wall.interior_adjacent_to
+
       if wall.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+        area += wall.area
+      elsif wall.exterior_adjacent_to == wall.interior_adjacent_to
         area += wall.area
       end
     end
