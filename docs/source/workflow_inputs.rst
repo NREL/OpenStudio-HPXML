@@ -718,6 +718,7 @@ Each window or glass door area is entered as an ``/HPXML/Building/BuildingDetail
   ``ExteriorShading/WinterShadingCoefficient``  double             frac              0 - 1                No        1.00       Exterior winter shading coefficient (1=transparent, 0=opaque)
   ``InteriorShading/SummerShadingCoefficient``  double             frac              0 - 1                No        0.70 [#]_  Interior summer shading coefficient (1=transparent, 0=opaque)
   ``InteriorShading/WinterShadingCoefficient``  double             frac              0 - 1                No        0.85 [#]_  Interior winter shading coefficient (1=transparent, 0=opaque)
+  ``StormWindow``                               element                                                   No        <none>     Presence of storm window
   ``Overhangs``                                 element                              0 - 1                No        <none>     Presence of overhangs (including roof eaves)
   ``FractionOperable``                          double             frac              0 - 1                No        0.67       Operable fraction [#]_
   ``AttachedToWall``                            idref                                See [#]_             Yes                  ID of attached wall
@@ -780,6 +781,17 @@ If UFactor and SHGC are not provided, they are defaulted as follows:
 
   OpenStudio-HPXML will return an error if the combination of window properties is not in the above table.
 
+If a storm window is specified, additional information is entered in ``StormWindow``.
+
+  ============================  ========  ======  ===========  ========  =======  ========================================================
+  Element                       Type      Units   Constraints  Required  Default  Notes
+  ============================  ========  ======  ===========  ========  =======  ========================================================
+  ``GlassType``                 string            See [#]_     Yes                Type of storm window glass
+  ============================  ========  ======  ===========  ========  =======  ========================================================
+
+  .. [#] GlassType choices are "clear" or "low-e".
+         The ``UFactor`` and ``SHGC`` of the ``Window`` will be adjusted depending on the ``GlassType``, based on `the linear correlation <https://github.com/NREL/OpenStudio-HEScore/pull/319>`_. 
+
 If overhangs are specified, additional information is entered in ``Overhangs``.
 
   ============================  ========  ======  ===========  ========  =======  ========================================================
@@ -810,6 +822,7 @@ Each skylight is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Skyli
   ``ExteriorShading/WinterShadingCoefficient``  double             frac              0 - 1                No        1.00       Exterior winter shading coefficient (1=transparent, 0=opaque)
   ``InteriorShading/SummerShadingCoefficient``  double             frac              0 - 1                No        1.00       Interior summer shading coefficient (1=transparent, 0=opaque)
   ``InteriorShading/WinterShadingCoefficient``  double             frac              0 - 1                No        1.00       Interior winter shading coefficient (1=transparent, 0=opaque)
+  ``StormWindow``                               element                                                   No        <none>     Presence of storm window
   ``AttachedToRoof``                            idref                                See [#]_             Yes                  ID of attached roof
   ============================================  =================  ================  ===================  ========  =========  =============================================================
 
@@ -864,6 +877,17 @@ If UFactor and SHGC are not provided, they are defaulted as follows:
 .. warning::
 
   OpenStudio-HPXML will return an error if the combination of skylight properties is not in the above table.
+
+If a storm window is specified, additional information is entered in ``StormWindow``.
+
+  ============================  ========  ======  ===========  ========  =======  ========================================================
+  Element                       Type      Units   Constraints  Required  Default  Notes
+  ============================  ========  ======  ===========  ========  =======  ========================================================
+  ``GlassType``                 string            See [#]_     Yes                Type of storm window glass
+  ============================  ========  ======  ===========  ========  =======  ========================================================
+
+  .. [#] GlassType choices are "clear" or "low-e".
+         The ``UFactor`` and ``SHGC`` of the ``Skylight`` will be adjusted depending on the ``GlassType``, based on `the linear correlation <https://github.com/NREL/OpenStudio-HEScore/pull/319>`_. 
 
 HPXML Doors
 ***********

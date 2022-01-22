@@ -160,6 +160,7 @@ def create_hpxmls
     'base-enclosure-skylights.xml' => 'base.xml',
     'base-enclosure-skylights-physical-properties.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-skylights-shading.xml' => 'base-enclosure-skylights.xml',
+    'base-enclosure-skylights-storms.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-split-level.xml' => 'base-foundation-slab.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml', # Surfaces should collapse via HPXML.collapse_enclosure_surfaces()
     'base-enclosure-split-surfaces2.xml' => 'base-enclosure-skylights.xml', # Surfaces should NOT collapse via HPXML.collapse_enclosure_surfaces()
@@ -167,6 +168,7 @@ def create_hpxmls
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-enclosure-windows-physical-properties.xml' => 'base.xml',
     'base-enclosure-windows-shading.xml' => 'base.xml',
+    'base-enclosure-windows-storms.xml' => 'base.xml',
     'base-enclosure-thermal-mass.xml' => 'base.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-basement-garage.xml' => 'base.xml',
@@ -2959,6 +2961,20 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.windows[3].exterior_shading_factor_winter = 1.0
     hpxml.windows[3].interior_shading_factor_summer = 0.0
     hpxml.windows[3].interior_shading_factor_winter = 1.0
+  elsif ['base-enclosure-skylights-storms.xml'].include? hpxml_file
+    hpxml.skylights[0].ufactor = 0.46
+    hpxml.skylights[0].storm_window_type = 'clear'
+    hpxml.skylights[1].ufactor = 0.46
+    hpxml.skylights[1].storm_window_type = 'clear'
+  elsif ['base-enclosure-windows-storms.xml'].include? hpxml_file
+    hpxml.windows[0].ufactor = 0.46
+    hpxml.windows[0].storm_window_type = 'low-e'
+    hpxml.windows[1].ufactor = 0.46
+    hpxml.windows[1].storm_window_type = 'low-e'
+    hpxml.windows[2].ufactor = 0.46
+    hpxml.windows[2].storm_window_type = 'low-e'
+    hpxml.windows[3].ufactor = 0.46
+    hpxml.windows[3].storm_window_type = 'low-e'
   elsif ['base-enclosure-thermal-mass.xml'].include? hpxml_file
     hpxml.partition_wall_mass.area_fraction = 0.8
     hpxml.partition_wall_mass.interior_finish_type = HPXML::InteriorFinishGypsumBoard
