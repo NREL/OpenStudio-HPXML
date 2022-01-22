@@ -1367,7 +1367,7 @@ class OSModel
 
       window_length = window.area / window_height
       z_origin = @foundation_top
-      
+
       if not window.storm_window_type.nil?
         ufactor, shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_window_type, window.ufactor, window.shgc)
       else
@@ -1458,7 +1458,7 @@ class OSModel
       width = Math::sqrt(skylight.area)
       length = skylight.area / width
       z_origin = @walls_top + 0.5 * Math.sin(Math.atan(tilt)) * width
-      
+
       if not skylight.storm_window_type.nil?
         ufactor, shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_window_type, skylight.ufactor, skylight.shgc)
       else
