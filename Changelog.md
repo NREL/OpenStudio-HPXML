@@ -10,7 +10,6 @@ __New Features__
 - Relaxes requirement for `ConditionedFloorAreaServed` for air distribution systems; now only needed if duct surface areas not provided.
 
 __Bugfixes__
-- Perform defaulting of state code and IECC climate zone in `hpxml_defaults.rb` instead of the BuildResidentialHPXML measure.
 - Fixes possible HVAC sizing error if design temperature difference (TD) is negative.
 - Fixes an error if there is a pool or hot tub, but the pump `Type` is set to "none".
 - Adds more decimal places in output files as needed for simulations with shorter timesteps and/or abbreviated run periods.

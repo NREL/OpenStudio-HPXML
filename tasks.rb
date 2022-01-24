@@ -2246,6 +2246,11 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args['whole_house_fan_present'] = true
     args['whole_house_fan_flow_rate'] = Constants.Auto
     args['whole_house_fan_power'] = Constants.Auto
+  elsif ['base-misc-emissions.xml'].include? hpxml_file
+    args['emissions_scenario_names'] = 'Cambium 2022 Hourly MidCase AER Using RMPA Region, Cambium 2022 Hourly MidCase AER Using National, Cambium 2022 Annual MidCase AER Using National, eGRID 2019 Total Emissions Rate Using RMPA Region, eGRID 2019 Total Emissions Rate Using RMPA Region'
+    args['emissions_types'] = 'CO2, CO2, CO2, SO2, NOx'
+    args['emissions_electricity_units'] = 'kg/MWh, kg/MWh, kg/MWh, lb/MWh, lb/MWh'
+    args['emissions_electricity_values_or_filepaths'] = '../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_RMPAc_2022.csv, ../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_usa_2022.csv, 392.6, 0.384, 0.67'
   elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
     args['extra_refrigerator_location'] = Constants.Auto
     args['extra_refrigerator_rated_annual_kwh'] = 700.0
@@ -2533,27 +2538,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
   # Logic that can only be applied based on the file name
   if ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
     hpxml.header.allow_increased_fixed_capacities = true
-  elsif ['base-misc-emissions.xml'].include? hpxml_file
-    hpxml.header.emissions_scenarios.add(name: 'Cambium 2022 Hourly MidCase AER Using RMPA Region',
-                                         emissions_type: 'CO2',
-                                         elec_units: HPXML::EmissionsScenario::UnitsKgPerMWh,
-                                         elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_RMPAc_2022.csv')
-    hpxml.header.emissions_scenarios.add(name: 'Cambium 2022 Hourly MidCase AER Using National',
-                                         emissions_type: 'CO2',
-                                         elec_units: HPXML::EmissionsScenario::UnitsKgPerMWh,
-                                         elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_usa_2022.csv')
-    hpxml.header.emissions_scenarios.add(name: 'Cambium 2022 Annual MidCase AER Using National',
-                                         emissions_type: 'CO2',
-                                         elec_units: HPXML::EmissionsScenario::UnitsKgPerMWh,
-                                         elec_value: 392.6)
-    hpxml.header.emissions_scenarios.add(name: 'eGRID 2019 Total Emissions Rate Using RMPA Region',
-                                         emissions_type: 'SO2',
-                                         elec_units: HPXML::EmissionsScenario::UnitsLbPerMWh,
-                                         elec_value: 0.384)
-    hpxml.header.emissions_scenarios.add(name: 'eGRID 2019 Total Emissions Rate Using RMPA Region',
-                                         emissions_type: 'NOx',
-                                         elec_units: HPXML::EmissionsScenario::UnitsLbPerMWh,
-                                         elec_value: 0.67)
   end
 
   # --------------------- #
