@@ -1019,6 +1019,11 @@ class HPXMLTest < MiniTest::Test
       if subsurface.is_a? HPXML::Skylight
         hpxml_value /= 1.2 # Convert from NFRC 20-degree slope to vertical position
       end
+      if (not subsurface.storm_window_type.nil?) && (subsurface.is_a? HPXML::Window)
+        hpxml_value = 0.294 # U-Factor adjusted by Constructions.get_ufactor_shgc_adjusted_by_storms
+      elsif (not subsurface.storm_window_type.nil?) && (subsurface.is_a? HPXML::Skylight)
+        hpxml_value = 0.3672 / 1.2 # U-Factor adjusted by Constructions.get_ufactor_shgc_adjusted_by_storms; converted to the 20-deg slope from the vertical position by multiplying the tested value at vertical
+      end
       hpxml_value = [hpxml_value, UnitConversions.convert(7.0, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')].min # FUTURE: Remove when U-factor restriction is lifted in EnergyPlus
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='#{col_name}' AND Units='W/m2-K'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
@@ -1028,6 +1033,11 @@ class HPXMLTest < MiniTest::Test
 
       # SHGC
       hpxml_value = subsurface.shgc
+      if (not subsurface.storm_window_type.nil?) && (subsurface.is_a? HPXML::Window)
+        hpxml_value = 0.36 # SHGC adjusted by Constructions.get_ufactor_shgc_adjusted_by_storms
+      elsif (not subsurface.storm_window_type.nil?) && (subsurface.is_a? HPXML::Skylight)
+        hpxml_value = 0.405 # SHGC adjusted by Constructions.get_ufactor_shgc_adjusted_by_storms
+      end
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='Glass SHGC'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_delta(hpxml_value, sql_value, 0.01)

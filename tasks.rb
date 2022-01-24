@@ -2946,18 +2946,18 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml.windows[3].interior_shading_factor_summer = 0.0
     hpxml.windows[3].interior_shading_factor_winter = 1.0
   elsif ['base-enclosure-skylights-storms.xml'].include? hpxml_file
-    hpxml.skylights[0].ufactor = 0.46
+    hpxml.skylights[0].ufactor = 0.6
     hpxml.skylights[0].storm_window_type = 'clear'
-    hpxml.skylights[1].ufactor = 0.46
+    hpxml.skylights[1].ufactor = 0.6
     hpxml.skylights[1].storm_window_type = 'clear'
   elsif ['base-enclosure-windows-storms.xml'].include? hpxml_file
-    hpxml.windows[0].ufactor = 0.46
+    hpxml.windows[0].ufactor = 0.6
     hpxml.windows[0].storm_window_type = 'low-e'
-    hpxml.windows[1].ufactor = 0.46
+    hpxml.windows[1].ufactor = 0.6
     hpxml.windows[1].storm_window_type = 'low-e'
-    hpxml.windows[2].ufactor = 0.46
+    hpxml.windows[2].ufactor = 0.6
     hpxml.windows[2].storm_window_type = 'low-e'
-    hpxml.windows[3].ufactor = 0.46
+    hpxml.windows[3].ufactor = 0.6
     hpxml.windows[3].storm_window_type = 'low-e'
   elsif ['base-enclosure-thermal-mass.xml'].include? hpxml_file
     hpxml.partition_wall_mass.area_fraction = 0.8
