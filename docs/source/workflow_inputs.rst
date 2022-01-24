@@ -274,11 +274,10 @@ Building site information can be entered in ``/HPXML/Building/Site``.
   Element                            Type      Units  Constraints  Required  Default   Description
   =================================  ========  =====  ===========  ========  ========  ===============
   ``SiteID``                         id                            Yes                 Unique identifier
-  ``Address/StateCode``              string           See [#]_     No        EPW [#]_  State/territory where the home is located
+  ``Address/StateCode``              string                        No        See [#]_  State/territory where the home is located
   ``Address/ZipCode``                string           See [#]_     No                  ZIP Code where the home is located
   =================================  ========  =====  ===========  ========  ========  ===============
 
-  .. [#] StateCode choices are any of the 51 U.S. states.
   .. [#] If StateCode not provided, defaults according to the EPW weather file header.
   .. [#] ZipCode can be defined as the standard 5 number postal code, or it can have the additional 4 number code separated by a hyphen.
 
@@ -380,7 +379,7 @@ Climate zone information can be entered as an ``/HPXML/Building/BuildingDetails/
   Element                            Type      Units  Constraints  Required  Default   Description
   =================================  ========  =====  ===========  ========  ========  ===============
   ``Year``                           integer          See [#]_     No        2006      IECC year
-  ``ClimateZone``                    string           See [#]_     No        EPW [#]_  IECC zone
+  ``ClimateZone``                    string           See [#]_     No        See [#]_  IECC zone
   =================================  ========  =====  ===========  ========  ========  ===============
 
   .. [#] Year choices are 2003, 2006, 2009, or 2012.
