@@ -188,50 +188,32 @@ class Waterheater
     alternate_stp_sch.setValue(alt_temp)
     new_heater.setIndirectAlternateSetpointTemperatureSchedule(alternate_stp_sch)
 
-    # Create hx setpoint schedule to specify source side temperature
-    hx_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
-    hx_stp_sch.setName("#{obj_name_combi} HX Spt")
+    # Create setpoint schedule to specify source side temperature
+    source_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
+    source_stp_sch.setName("#{obj_name_combi} Source Spt")
     boiler_spt_mngr = model.getSetpointManagerScheduleds.select { |spt_mngr| spt_mngr.setpointNode.get == boiler_plant_loop.loopTemperatureSetpointNode }[0]
-    boiler_spt = boiler_spt_mngr.to_SetpointManagerScheduled.get.schedule.to_ScheduleConstant.get.value
-    hx_temp = (UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + deadband(water_heating_system.water_heater_type) / 2.0 + boiler_spt) / 2.0 # tank source side inlet temperature, degree C
-    hx_stp_sch.setValue(hx_temp)
+    boiler_heating_spt = boiler_spt_mngr.to_SetpointManagerScheduled.get.schedule.to_ScheduleConstant.get.value
+    source_temp = (UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + deadband(water_heating_system.water_heater_type) / 2.0 + boiler_heating_spt) / 2.0 # tank source side inlet temperature, degree C
+    source_stp_sch.setValue(source_temp)
+    # reset dhw boiler setpoint
+    boiler_spt_mngr.to_SetpointManagerScheduled.get.setSchedule(source_stp_sch)
+    boiler_plant_loop.autosizeMaximumLoopFlowRate()
 
     # change loop equipment operation scheme to heating load
     scheme_dhw = OpenStudio::Model::PlantEquipmentOperationHeatingLoad.new(model)
     scheme_dhw.addEquipment(1000000000, new_heater)
     loop.setPrimaryPlantEquipmentOperationScheme(scheme_dhw)
 
-    # Create loop for source side
-    source_loop = create_new_loop(model, 'dhw source loop', hx_temp)
-    source_loop.autosizeMaximumLoopFlowRate()
-
-    # Create heat exchanger
-    combi_hx = create_new_hx(model, Constants.ObjectNameTankHX)
-
-    # Add heat exchanger to the load distribution scheme
+    # Add dhw boiler to the load distribution scheme
     scheme = OpenStudio::Model::PlantEquipmentOperationHeatingLoad.new(model)
-    scheme.addEquipment(1000000000, combi_hx)
-    source_loop.setPrimaryPlantEquipmentOperationScheme(scheme)
-
-    # Add components to the tank source side plant loop
-    source_loop.addSupplyBranchForComponent(combi_hx)
-
-    new_pump = create_new_pump(model)
-    new_pump.autosizeRatedFlowRate()
-    new_pump.addToNode(source_loop.supplyInletNode)
-
-    new_source_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, hx_stp_sch)
-    new_source_manager.addToNode(source_loop.supplyOutletNode)
-
-    source_loop.addDemandBranchForComponent(new_heater)
-
-    # Add heat exchanger to boiler loop
-    boiler_plant_loop.addDemandBranchForComponent(combi_hx)
+    scheme.addEquipment(1000000000, boiler)
+    boiler_plant_loop.setPrimaryPlantEquipmentOperationScheme(scheme)
+    boiler_plant_loop.addDemandBranchForComponent(new_heater)
     boiler_plant_loop.setPlantLoopVolume(0.001) # Cannot be auto-calculated because of large default tank source side mfr(set to be overwritten by EMS)
 
     loop.addSupplyBranchForComponent(new_heater)
 
-    add_ec_adj(model, new_heater, ec_adj, loc_space, water_heating_system, boiler, combi_hx)
+    add_ec_adj(model, new_heater, ec_adj, loc_space, water_heating_system, boiler)
 
     return loop
   end
@@ -1243,7 +1225,7 @@ class Waterheater
     num_baths = num_beds / 2.0 + 0.5
   end
 
-  def self.add_ec_adj(model, heater, ec_adj, loc_space, water_heating_system, combi_boiler = nil, combi_hx = nil)
+  def self.add_ec_adj(model, heater, ec_adj, loc_space, water_heating_system, combi_boiler = nil)
     adjustment = ec_adj - 1.0
 
     if loc_space.nil? # WH is not in a zone, set the other equipment to be in a random space
