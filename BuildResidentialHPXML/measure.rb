@@ -2883,6 +2883,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_scenario_names', false)
+    arg.setDisplayName('Emissions: Scenario Names')
+    arg.setDescription('Names of emissions scenarios. If multiple scenarios, use a comma-separated list.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_types', false)
+    arg.setDisplayName('Emissions: Types')
+    arg.setDescription('Types of emissions (e.g., CO2, NOx, etc.). If multiple scenarios, use a comma-separated list.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_electricity_units', false)
+    arg.setDisplayName('Emissions: Electricity Units')
+    arg.setDescription('Electricity emissions factors units. If multiple scenarios, use a comma-separated list.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_electricity_values_or_filepaths', false)
+    arg.setDisplayName('Emissions: Electricity Values or File Paths')
+    arg.setDescription('Electricity emissions factors values, specified as either an annual factor or an absolute/relative path to a file with hourly factors. If multiple scenarios, use a comma-separated list.')
+    args << arg
+
     return args
   end
 
@@ -3386,6 +3406,25 @@ class HPXMLFile
     end
     hpxml.header.state_code = args[:site_state_code]
     hpxml.header.event_type = 'proposed workscope'
+
+    if args[:emissions_scenario_names].is_initialized
+      emissions_scenario_names = args[:emissions_scenario_names].get.split(',').map(&:strip)
+      emissions_types = args[:emissions_types].get.split(',').map(&:strip)
+      emissions_electricity_units = args[:emissions_electricity_units].get.split(',').map(&:strip)
+      emissions_electricity_values_or_filepaths = args[:emissions_electricity_values_or_filepaths].get.split(',').map(&:strip)
+
+      emissions_scenarios = emissions_scenario_names.zip(emissions_types, emissions_electricity_units, emissions_electricity_values_or_filepaths)
+      emissions_scenarios.each do |emissions_scenario|
+        name, emissions_type, elec_units, elec_value_or_schedule_filepath = emissions_scenario
+        elec_value = Float(elec_value_or_schedule_filepath) rescue nil
+        elec_schedule_filepath = elec_value_or_schedule_filepath if elec_value.nil?
+        hpxml.header.emissions_scenarios.add(name: name,
+                                             emissions_type: emissions_type,
+                                             elec_units: elec_units,
+                                             elec_value: elec_value,
+                                             elec_schedule_filepath: elec_schedule_filepath)
+      end
+    end
   end
 
   def self.set_site(hpxml, runner, args)
