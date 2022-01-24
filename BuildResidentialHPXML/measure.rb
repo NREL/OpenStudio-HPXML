@@ -3081,6 +3081,22 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = args[:rim_joist_assembly_r].is_initialized && !args[:geometry_rim_joist_height].is_initialized
     errors << 'Specified a rim joist assembly R-value but no rim joist height.' if error
 
+    emissions_args_initialized = [args[:emissions_scenario_names].is_initialized,
+                                  args[:emissions_types].is_initialized,
+                                  args[:emissions_electricity_units].is_initialized,
+                                  args[:emissions_electricity_values_or_filepaths].is_initialized]
+    error = (emissions_args_initialized.uniq.size != 1)
+    errors << 'Did not specify either no emissions arguments or all emissions arguments.' if error
+
+    if emissions_args_initialized.uniq.size == 1 && emissions_args_initialized.uniq[0]
+      emissions_scenario_lengths = [args[:emissions_scenario_names].get.split(',').length,
+                                    args[:emissions_types].get.split(',').length,
+                                    args[:emissions_electricity_units].get.split(',').length,
+                                    args[:emissions_electricity_values_or_filepaths].get.split(',').length]
+      error = (emissions_scenario_lengths.uniq.size != 1)
+      errors << 'One or more emissions arguments does not have enough comma-separated elements specified.' if error
+    end
+
     error = (args[:geometry_unit_aspect_ratio] <= 0)
     errors << 'Aspect ratio must be greater than zero.' if error
 

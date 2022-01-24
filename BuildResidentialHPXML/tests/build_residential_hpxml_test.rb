@@ -160,6 +160,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-sfd-with-shared-system.xml' => 'base-sfd.xml',
       'error-rim-joist-height-but-no-assembly-r.xml' => 'base-sfd.xml',
       'error-rim-joist-assembly-r-but-no-height.xml' => 'base-sfd.xml',
+      'error-emissions-args-not-all-specified.xml' => 'base-sfd.xml',
+      'error-emissions-args-not-all-same-size.xml' => 'base-sfd.xml',
       'error-invalid-aspect-ratio.xml' => 'base-sfd.xml',
       'error-negative-foundation-height.xml' => 'base-sfd.xml',
       'error-too-many-floors.xml' => 'base-sfd.xml',
@@ -219,6 +221,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'error-sfd-with-shared-system.xml' => 'Specified a shared system for a single-family detached unit.',
       'error-rim-joist-height-but-no-assembly-r.xml' => 'Specified a rim joist height but no rim joist assembly R-value.',
       'error-rim-joist-assembly-r-but-no-height.xml' => 'Specified a rim joist assembly R-value but no rim joist height.',
+      'error-emissions-args-not-all-specified.xml' => 'Did not specify either no emissions arguments or all emissions arguments.',
+      'error-emissions-args-not-all-same-size.xml' => 'One or more emissions arguments does not have enough comma-separated elements specified.',
       'error-invalid-aspect-ratio.xml' => 'Aspect ratio must be greater than zero.',
       'error-negative-foundation-height.xml' => 'Foundation height cannot be negative.',
       'error-too-many-floors.xml' => 'Number of above-grade floors must be six or less.',
@@ -1084,6 +1088,13 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       args.delete('rim_joist_assembly_r')
     elsif ['error-rim-joist-assembly-r-but-no-height.xml'].include? hpxml_file
       args.delete('geometry_rim_joist_height')
+    elsif ['error-emissions-args-not-all-specified.xml'].include? hpxml_file
+      args['emissions_scenario_names'] = 'Scenario1'
+    elsif ['error-emissions-args-not-all-same-size.xml'].include? hpxml_file
+      args['emissions_scenario_names'] = 'Scenario1'
+      args['emissions_types'] = 'CO2,CO2'
+      args['emissions_electricity_units'] = HPXML::EmissionsScenario::UnitsLbPerMWh
+      args['emissions_electricity_values_or_filepaths'] = '../../HPXMLtoOpenStudio/resources/data/cambium/StdScen21_MidCase_hourly_RMPAc_2022.csv'
     elsif ['error-invalid-aspect-ratio.xml'].include? hpxml_file
       args['geometry_unit_aspect_ratio'] = -1
     elsif ['error-negative-foundation-height.xml'].include? hpxml_file
