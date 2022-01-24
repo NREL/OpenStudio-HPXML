@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<HPXML xmlns='http://hpxmlonline.com/2019/10' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://hpxmlonline.com/2019/10' schemaVersion='3.0'>
+<HPXML xmlns='http://hpxmlonline.com/2019/10' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://hpxmlonline.com/2019/10' schemaVersion='4.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>tasks.rb</XMLGeneratedBy>
@@ -18,6 +18,10 @@
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
+        <Site>
+          <Surroundings>stand-alone</Surroundings>
+          <VerticalSurroundings>no units above or below</VerticalSurroundings>
+        </Site>
         <BuildingOccupancy>
           <NumberofResidents>0.0</NumberofResidents>
         </BuildingOccupancy>
@@ -66,7 +70,7 @@
             <AttachedToRoof idref='Roof2'/>
             <AttachedToWall idref='Wall5'/>
             <AttachedToWall idref='Wall6'/>
-            <AttachedToFrameFloor idref='FrameFloor1'/>
+            <AttachedToFrameFloor idref='FrameFloor2'/>
           </Attic>
         </Attics>
         <Roofs>
@@ -226,6 +230,16 @@
         <FrameFloors>
           <FrameFloor>
             <SystemIdentifier id='FrameFloor1'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>1539.0</Area>
+            <Insulation>
+              <SystemIdentifier id='FrameFloor1Insulation'/>
+              <AssemblyEffectiveRValue>4.24</AssemblyEffectiveRValue>
+            </Insulation>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FrameFloor2'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>1539.0</Area>
@@ -234,18 +248,8 @@
               <Thickness>0.5</Thickness>
             </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='FrameFloor1Insulation'/>
-              <AssemblyEffectiveRValue>11.75</AssemblyEffectiveRValue>
-            </Insulation>
-          </FrameFloor>
-          <FrameFloor>
-            <SystemIdentifier id='FrameFloor2'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>1539.0</Area>
-            <Insulation>
               <SystemIdentifier id='FrameFloor2Insulation'/>
-              <AssemblyEffectiveRValue>4.24</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>11.75</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
         </FrameFloors>

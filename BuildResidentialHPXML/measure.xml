@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>58407674-2c15-4d60-be12-a456e6357986</version_id>
-  <version_modified>20211025T170104Z</version_modified>
+  <version_id>383921ca-9281-4972-8dde-8dc289004200</version_id>
+  <version_modified>20220121T214358Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder (Beta)</display_name>
@@ -143,6 +143,96 @@
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>site_iecc_zone</name>
+      <display_name>Site: IECC Zone</display_name>
+      <description>IECC zone of the home address. If not provided, uses the IECC zone corresponding to the EPW weather file.</description>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>1A</value>
+          <display_name>1A</display_name>
+        </choice>
+        <choice>
+          <value>1B</value>
+          <display_name>1B</display_name>
+        </choice>
+        <choice>
+          <value>1C</value>
+          <display_name>1C</display_name>
+        </choice>
+        <choice>
+          <value>2A</value>
+          <display_name>2A</display_name>
+        </choice>
+        <choice>
+          <value>2B</value>
+          <display_name>2B</display_name>
+        </choice>
+        <choice>
+          <value>2C</value>
+          <display_name>2C</display_name>
+        </choice>
+        <choice>
+          <value>3A</value>
+          <display_name>3A</display_name>
+        </choice>
+        <choice>
+          <value>3B</value>
+          <display_name>3B</display_name>
+        </choice>
+        <choice>
+          <value>3C</value>
+          <display_name>3C</display_name>
+        </choice>
+        <choice>
+          <value>4A</value>
+          <display_name>4A</display_name>
+        </choice>
+        <choice>
+          <value>4B</value>
+          <display_name>4B</display_name>
+        </choice>
+        <choice>
+          <value>4C</value>
+          <display_name>4C</display_name>
+        </choice>
+        <choice>
+          <value>5A</value>
+          <display_name>5A</display_name>
+        </choice>
+        <choice>
+          <value>5B</value>
+          <display_name>5B</display_name>
+        </choice>
+        <choice>
+          <value>5C</value>
+          <display_name>5C</display_name>
+        </choice>
+        <choice>
+          <value>6A</value>
+          <display_name>6A</display_name>
+        </choice>
+        <choice>
+          <value>6B</value>
+          <display_name>6B</display_name>
+        </choice>
+        <choice>
+          <value>6C</value>
+          <display_name>6C</display_name>
+        </choice>
+        <choice>
+          <value>7</value>
+          <display_name>7</display_name>
+        </choice>
+        <choice>
+          <value>8</value>
+          <display_name>8</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>site_state_code</name>
@@ -399,57 +489,85 @@
       </choices>
     </argument>
     <argument>
-      <name>geometry_unit_level</name>
-      <display_name>Geometry: Unit Level</display_name>
-      <description>The level of the unit. This is required for apartment units.</description>
-      <type>Choice</type>
-      <required>false</required>
+      <name>geometry_unit_left_wall_is_adiabatic</name>
+      <display_name>Geometry: Unit Left Wall Is Adiabatic</display_name>
+      <description>Presence of an adiabatic left wall.</description>
+      <type>Boolean</type>
+      <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
       <choices>
         <choice>
-          <value>Bottom</value>
-          <display_name>Bottom</display_name>
+          <value>true</value>
+          <display_name>true</display_name>
         </choice>
         <choice>
-          <value>Middle</value>
-          <display_name>Middle</display_name>
-        </choice>
-        <choice>
-          <value>Top</value>
-          <display_name>Top</display_name>
+          <value>false</value>
+          <display_name>false</display_name>
         </choice>
       </choices>
     </argument>
     <argument>
-      <name>geometry_unit_horizontal_location</name>
-      <display_name>Geometry: Unit Horizontal Location</display_name>
-      <description>The horizontal location of the unit when viewing the front of the building. This is required for single-family attached and apartment units.</description>
-      <type>Choice</type>
-      <required>false</required>
+      <name>geometry_unit_right_wall_is_adiabatic</name>
+      <display_name>Geometry: Unit Right Wall Is Adiabatic</display_name>
+      <description>Presence of an adiabatic right wall.</description>
+      <type>Boolean</type>
+      <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
       <choices>
         <choice>
-          <value>None</value>
-          <display_name>None</display_name>
+          <value>true</value>
+          <display_name>true</display_name>
         </choice>
         <choice>
-          <value>Left</value>
-          <display_name>Left</display_name>
-        </choice>
-        <choice>
-          <value>Middle</value>
-          <display_name>Middle</display_name>
-        </choice>
-        <choice>
-          <value>Right</value>
-          <display_name>Right</display_name>
+          <value>false</value>
+          <display_name>false</display_name>
         </choice>
       </choices>
     </argument>
     <argument>
-      <name>geometry_num_floors_above_grade</name>
-      <display_name>Geometry: Number of Floors Above Grade</display_name>
-      <description>The number of floors above grade (in the unit if single-family detached or single-family attached, and in the building if apartment unit). Conditioned attics are included.</description>
+      <name>geometry_unit_front_wall_is_adiabatic</name>
+      <display_name>Geometry: Unit Front Wall Is Adiabatic</display_name>
+      <description>Presence of an adiabatic front wall, for example, the unit is adjacent to a conditioned corridor.</description>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>geometry_unit_back_wall_is_adiabatic</name>
+      <display_name>Geometry: Unit Back Wall Is Adiabatic</display_name>
+      <description>Presence of an adiabatic back wall.</description>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>geometry_unit_num_floors_above_grade</name>
+      <display_name>Geometry: Unit Number of Floors Above Grade</display_name>
+      <description>The number of floors above grade in the unit. Conditioned attics are included. Assumed to be 1 if apartment unit.</description>
       <type>Integer</type>
       <units>#</units>
       <required>true</required>
@@ -526,15 +644,6 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>geometry_building_num_bedrooms</name>
-      <display_name>Geometry: Building Number of Bedrooms</display_name>
-      <description>The number of bedrooms in the building. This is required for single-family attached and apartment units with shared PV systems.</description>
-      <type>Integer</type>
-      <units>#</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
       <name>geometry_average_ceiling_height</name>
       <display_name>Geometry: Average Ceiling Height</display_name>
       <description>Average distance from the floor to the ceiling.</description>
@@ -594,43 +703,6 @@
       </choices>
     </argument>
     <argument>
-      <name>geometry_corridor_position</name>
-      <display_name>Geometry: Corridor Position</display_name>
-      <description>The position of the corridor. Only applies to single-family attached and apartment units. Exterior corridors are shaded, but not enclosed. Interior corridors are enclosed and conditioned.</description>
-      <type>Choice</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>Double-Loaded Interior</default_value>
-      <choices>
-        <choice>
-          <value>Double-Loaded Interior</value>
-          <display_name>Double-Loaded Interior</display_name>
-        </choice>
-        <choice>
-          <value>Single Exterior (Front)</value>
-          <display_name>Single Exterior (Front)</display_name>
-        </choice>
-        <choice>
-          <value>Double Exterior</value>
-          <display_name>Double Exterior</display_name>
-        </choice>
-        <choice>
-          <value>None</value>
-          <display_name>None</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>geometry_corridor_width</name>
-      <display_name>Geometry: Corridor Width</display_name>
-      <description>The width of the corridor. Only applies to apartment units.</description>
-      <type>Double</type>
-      <units>ft</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>10</default_value>
-    </argument>
-    <argument>
       <name>geometry_foundation_type</name>
       <display_name>Geometry: Foundation Type</display_name>
       <description>The foundation type of the building.</description>
@@ -667,6 +739,10 @@
           <value>Ambient</value>
           <display_name>Ambient</display_name>
         </choice>
+        <choice>
+          <value>AboveApartment</value>
+          <display_name>AboveApartment</display_name>
+        </choice>
       </choices>
     </argument>
     <argument>
@@ -699,9 +775,40 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
+      <name>geometry_attic_type</name>
+      <display_name>Geometry: Attic Type</display_name>
+      <description>The attic type of the building.</description>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>VentedAttic</default_value>
+      <choices>
+        <choice>
+          <value>FlatRoof</value>
+          <display_name>FlatRoof</display_name>
+        </choice>
+        <choice>
+          <value>VentedAttic</value>
+          <display_name>VentedAttic</display_name>
+        </choice>
+        <choice>
+          <value>UnventedAttic</value>
+          <display_name>UnventedAttic</display_name>
+        </choice>
+        <choice>
+          <value>ConditionedAttic</value>
+          <display_name>ConditionedAttic</display_name>
+        </choice>
+        <choice>
+          <value>BelowApartment</value>
+          <display_name>BelowApartment</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
       <name>geometry_roof_type</name>
       <display_name>Geometry: Roof Type</display_name>
-      <description>The roof type of the building. Assumed flat for apartment units.</description>
+      <description>The roof type of the building. Ignored if the building has a flat roof.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -714,10 +821,6 @@
         <choice>
           <value>hip</value>
           <display_name>hip</display_name>
-        </choice>
-        <choice>
-          <value>flat</value>
-          <display_name>flat</display_name>
         </choice>
       </choices>
     </argument>
@@ -777,29 +880,6 @@
         <choice>
           <value>12:12</value>
           <display_name>12:12</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>geometry_attic_type</name>
-      <display_name>Geometry: Attic Type</display_name>
-      <description>The attic type of the building. Ignored if the building has a flat roof.</description>
-      <type>Choice</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>VentedAttic</default_value>
-      <choices>
-        <choice>
-          <value>VentedAttic</value>
-          <display_name>VentedAttic</display_name>
-        </choice>
-        <choice>
-          <value>UnventedAttic</value>
-          <display_name>UnventedAttic</display_name>
-        </choice>
-        <choice>
-          <value>ConditionedAttic</value>
-          <display_name>ConditionedAttic</display_name>
         </choice>
       </choices>
     </argument>
@@ -923,6 +1003,24 @@
       <default_value>28.1</default_value>
     </argument>
     <argument>
+      <name>foundation_wall_type</name>
+      <display_name>Foundation Wall: Type</display_name>
+      <description>The material type of the foundation wall.</description>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>auto</default_value>
+    </argument>
+    <argument>
+      <name>foundation_wall_thickness</name>
+      <display_name>Foundation Wall: Thickness</display_name>
+      <description>The thickness of the foundation wall.</description>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>auto</default_value>
+    </argument>
+    <argument>
       <name>foundation_wall_insulation_r</name>
       <display_name>Foundation Wall: Insulation Nominal R-value</display_name>
       <description>Nominal R-value for the foundation wall insulation. Only applies to basements/crawlspaces.</description>
@@ -980,15 +1078,6 @@
       <units>h-ft^2-R/Btu</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>foundation_wall_thickness</name>
-      <display_name>Foundation Wall: Thickness</display_name>
-      <description>The thickness of the foundation wall.</description>
-      <type>String</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>auto</default_value>
     </argument>
     <argument>
       <name>rim_joist_assembly_r</name>
@@ -2194,18 +2283,37 @@
       <default_value>1</default_value>
     </argument>
     <argument>
-      <name>heat_pump_backup_fuel</name>
-      <display_name>Heat Pump: Backup Fuel Type</display_name>
-      <description>The backup fuel type of the heat pump. Use 'none' if there is no backup heating.</description>
+      <name>heat_pump_backup_type</name>
+      <display_name>Heat Pump: Backup Type</display_name>
+      <description>The backup type of the heat pump. If 'integrated', represents e.g. built-in electric strip heat or dual-fuel integrated furnace. If 'separate', represents e.g. electric baseboard or boiler based on the Heating System 2 specified below. Use 'none' if there is no backup heating.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>none</default_value>
+      <default_value>integrated</default_value>
       <choices>
         <choice>
           <value>none</value>
           <display_name>none</display_name>
         </choice>
+        <choice>
+          <value>integrated</value>
+          <display_name>integrated</display_name>
+        </choice>
+        <choice>
+          <value>separate</value>
+          <display_name>separate</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>heat_pump_backup_fuel</name>
+      <display_name>Heat Pump: Backup Fuel Type</display_name>
+      <description>The backup fuel type of the heat pump. Only applies if Backup Type is 'integrated'.</description>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>electricity</default_value>
+      <choices>
         <choice>
           <value>electricity</value>
           <display_name>electricity</display_name>
@@ -2227,7 +2335,7 @@
     <argument>
       <name>heat_pump_backup_heating_efficiency</name>
       <display_name>Heat Pump: Backup Rated Efficiency</display_name>
-      <description>The backup rated efficiency value of the heat pump. Percent for electricity fuel type. AFUE otherwise.</description>
+      <description>The backup rated efficiency value of the heat pump. Percent for electricity fuel type. AFUE otherwise. Only applies if Backup Type is 'integrated'.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -2236,7 +2344,7 @@
     <argument>
       <name>heat_pump_backup_heating_capacity</name>
       <display_name>Heat Pump: Backup Heating Capacity</display_name>
-      <description>The backup output heating capacity of the heat pump. Enter 'auto' to size the capacity based on ACCA Manual J/S.</description>
+      <description>The backup output heating capacity of the heat pump. Enter 'auto' to size the capacity based on ACCA Manual J/S. Only applies if Backup Type is 'integrated'.</description>
       <type>String</type>
       <units>Btu/hr</units>
       <required>true</required>
@@ -2246,7 +2354,7 @@
     <argument>
       <name>heat_pump_backup_heating_switchover_temp</name>
       <display_name>Heat Pump: Backup Heating Switchover Temperature</display_name>
-      <description>The temperature at which the heat pump stops operating and the backup heating system starts running. Only applies to air-to-air and mini-split. If not provided, backup heating will operate as needed when heat pump capacity is insufficient.</description>
+      <description>The temperature at which the heat pump stops operating and the backup heating system starts running. Only applies to air-to-air and mini-split. If not provided, backup heating will operate as needed when heat pump capacity is insufficient. Applies if Backup Type is either 'integrated' or 'separate'.</description>
       <type>Double</type>
       <units>deg-F</units>
       <required>false</required>
@@ -2393,31 +2501,12 @@
     <argument>
       <name>heating_system_2_fraction_heat_load_served</name>
       <display_name>Heating System 2: Fraction Heat Load Served</display_name>
-      <description>The heat load served fraction of the second heating system.</description>
+      <description>The heat load served fraction of the second heating system. Ignored if this heating system serves as a backup system for a heat pump.</description>
       <type>Double</type>
       <units>Frac</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.25</default_value>
-    </argument>
-    <argument>
-      <name>hvac_control_type</name>
-      <display_name>HVAC Control: Type</display_name>
-      <description>The type of thermostat.</description>
-      <type>Choice</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <default_value>manual thermostat</default_value>
-      <choices>
-        <choice>
-          <value>manual thermostat</value>
-          <display_name>manual thermostat</display_name>
-        </choice>
-        <choice>
-          <value>programmable thermostat</value>
-          <display_name>programmable thermostat</display_name>
-        </choice>
-      </choices>
     </argument>
     <argument>
       <name>hvac_control_heating_weekday_setpoint</name>
@@ -2725,10 +2814,10 @@
     <argument>
       <name>ducts_number_of_return_registers</name>
       <display_name>Ducts: Number of Return Registers</display_name>
-      <description>The number of return registers of the ducts. Ignored for ducted evaporative cooler.</description>
+      <description>The number of return registers of the ducts. Only used if duct surface areas are set to auto.</description>
       <type>String</type>
       <units>#</units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
     </argument>
@@ -3812,7 +3901,7 @@
     <argument>
       <name>pv_system_module_type</name>
       <display_name>PV System: Module Type</display_name>
-      <description>Module type of the PV system. Use 'none' if there is no PV system 1.</description>
+      <description>Module type of the PV system. Use 'none' if there is no PV system.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -3927,7 +4016,7 @@
     <argument>
       <name>pv_system_inverter_efficiency</name>
       <display_name>PV System: Inverter Efficiency</display_name>
-      <description>Inverter efficiency of the PV system.</description>
+      <description>Inverter efficiency of the PV system. If there are two PV systems, this will apply to both.</description>
       <type>Double</type>
       <units>Frac</units>
       <required>false</required>
@@ -3936,21 +4025,21 @@
     <argument>
       <name>pv_system_system_losses_fraction</name>
       <display_name>PV System: System Losses Fraction</display_name>
-      <description>System losses fraction of the PV system.</description>
+      <description>System losses fraction of the PV system. If there are two PV systems, this will apply to both.</description>
       <type>Double</type>
       <units>Frac</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>pv_system_num_units_served</name>
-      <display_name>PV System: Number of Units Served</display_name>
-      <description>Number of dwelling units served by PV system. Must be 1 if single-family detached. Used to apportion PV generation to the unit.</description>
+      <name>pv_system_num_bedrooms_served</name>
+      <display_name>PV System: Number of Bedrooms Served</display_name>
+      <description>Number of bedrooms served by PV system. Ignored if single-family detached. Used to apportion PV generation to the unit of a SFA/MF building. If there are two PV systems, this will apply to both.</description>
       <type>Integer</type>
       <units>#</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>1</default_value>
+      <default_value>3</default_value>
     </argument>
     <argument>
       <name>pv_system_2_module_type</name>
@@ -4068,32 +4157,83 @@
       <default_value>4000</default_value>
     </argument>
     <argument>
-      <name>pv_system_2_inverter_efficiency</name>
-      <display_name>PV System 2: Inverter Efficiency</display_name>
-      <description>Inverter efficiency of the second PV system.</description>
-      <type>Double</type>
-      <units>Frac</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>pv_system_2_system_losses_fraction</name>
-      <display_name>PV System 2: System Losses Fraction</display_name>
-      <description>System losses fraction of the second PV system.</description>
-      <type>Double</type>
-      <units>Frac</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>pv_system_2_num_units_served</name>
-      <display_name>PV System 2: Number of Units Served</display_name>
-      <description>Number of dwelling units served by second PV system. Must be 1 if single-family detached. Used to apportion PV generation to the unit.</description>
-      <type>Integer</type>
-      <units>#</units>
+      <name>battery_location</name>
+      <display_name>Battery: Location</display_name>
+      <description>The space type for the lithium ion battery location.</description>
+      <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>1</default_value>
+      <default_value>none</default_value>
+      <choices>
+        <choice>
+          <value>auto</value>
+          <display_name>auto</display_name>
+        </choice>
+        <choice>
+          <value>none</value>
+          <display_name>none</display_name>
+        </choice>
+        <choice>
+          <value>living space</value>
+          <display_name>living space</display_name>
+        </choice>
+        <choice>
+          <value>basement - conditioned</value>
+          <display_name>basement - conditioned</display_name>
+        </choice>
+        <choice>
+          <value>basement - unconditioned</value>
+          <display_name>basement - unconditioned</display_name>
+        </choice>
+        <choice>
+          <value>crawlspace - vented</value>
+          <display_name>crawlspace - vented</display_name>
+        </choice>
+        <choice>
+          <value>crawlspace - unvented</value>
+          <display_name>crawlspace - unvented</display_name>
+        </choice>
+        <choice>
+          <value>crawlspace - conditioned</value>
+          <display_name>crawlspace - conditioned</display_name>
+        </choice>
+        <choice>
+          <value>attic - vented</value>
+          <display_name>attic - vented</display_name>
+        </choice>
+        <choice>
+          <value>attic - unvented</value>
+          <display_name>attic - unvented</display_name>
+        </choice>
+        <choice>
+          <value>garage</value>
+          <display_name>garage</display_name>
+        </choice>
+        <choice>
+          <value>outside</value>
+          <display_name>outside</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>battery_power</name>
+      <display_name>Battery: Rated Power Output</display_name>
+      <description>The rated power output of the lithium ion battery.</description>
+      <type>String</type>
+      <units>W</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>auto</default_value>
+    </argument>
+    <argument>
+      <name>battery_capacity</name>
+      <display_name>Battery: Nominal Capacity</display_name>
+      <description>The nominal capacity of the lithium ion battery.</description>
+      <type>String</type>
+      <units>kWh</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>auto</default_value>
     </argument>
     <argument>
       <name>lighting_present</name>
@@ -5721,6 +5861,57 @@
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
     </argument>
+    <argument>
+      <name>apply_defaults</name>
+      <display_name>Apply default values</display_name>
+      <description>Sets OS-HPXML default values in the HPXML output file</description>
+      <type>Boolean</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>emissions_scenario_names</name>
+      <display_name>Emissions: Scenario Names</display_name>
+      <description>Names of emissions scenarios. If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>emissions_types</name>
+      <display_name>Emissions: Types</display_name>
+      <description>Types of emissions (e.g., CO2, NOx, etc.). If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>emissions_electricity_units</name>
+      <display_name>Emissions: Electricity Units</display_name>
+      <description>Electricity emissions factors units. If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>emissions_electricity_values_or_filepaths</name>
+      <display_name>Emissions: Electricity Values or File Paths</display_name>
+      <description>Electricity emissions factors values, specified as either an annual factor or an absolute/relative path to a file with hourly factors. If multiple scenarios, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
   </arguments>
   <outputs />
   <provenances />
@@ -5739,13 +5930,769 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E12DF4C0</checksum>
+      <checksum>BBEE9EDC</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-auto.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CE8B80B7</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-fireplace-to-heating-system.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5D5101CC</checksum>
+    </file>
+    <file>
+      <filename>extra_files/base-mf.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CE559523</checksum>
+    </file>
+    <file>
+      <filename>extra_files/base-sfa.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A77C384B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/base-sfd.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>415957AF</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-dhw-solar-latitude.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>72383EF2</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-atticroof-conditioned-eaves-gable.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B2A1C486</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-atticroof-conditioned-eaves-hip.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>928AC799</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-garage-atticroof-conditioned.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2FCD642B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-garage-partially-protruded.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>50E1F03A</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-enclosure-windows-shading.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1D2560A6</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-gas-hot-tub-heater-with-zero-kwh.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>12364E7F</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-gas-pool-heater-with-zero-kwh.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3CE771CD</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-iecc-zone-different-than-epw.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A2D22E8A</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-eaves.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A202CF44</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-exterior-corridor.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CE559523</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CE559523</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-left-bottom-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6CEE0843</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-left-bottom.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>00FF645C</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-left-middle-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2A985B1D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-left-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CE559523</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-left-top-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2A985B1D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-left-top.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CE559523</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-middle-bottom-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4C32F545</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-middle-bottom.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3D069763</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-middle-middle-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9B00B6E6</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-middle-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DBD9C9CE</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-middle-top-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9B00B6E6</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-middle-top.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DBD9C9CE</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6CEE0843</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-right-bottom-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4C32F545</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-right-bottom.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3D069763</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-right-middle-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9B00B6E6</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-right-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DBD9C9CE</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-right-top-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9B00B6E6</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab-right-top.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DBD9C9CE</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-slab.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>00FF645C</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-left-bottom-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A1EA5BC7</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-left-bottom.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>454A93AC</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-left-middle-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2A985B1D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-left-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CE559523</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-left-top-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2A985B1D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-left-top.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CE559523</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-middle-bottom-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DF784FEA</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-middle-bottom.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>EE8D1A0D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-middle-middle-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9B00B6E6</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-middle-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DBD9C9CE</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-middle-top-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9B00B6E6</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-middle-top.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DBD9C9CE</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A1EA5BC7</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-right-bottom-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DF784FEA</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-right-bottom.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>EE8D1A0D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-right-middle-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9B00B6E6</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-right-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DBD9C9CE</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-right-top-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9B00B6E6</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace-right-top.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DBD9C9CE</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-unvented-crawlspace.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>454A93AC</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-left-bottom-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>25704BA5</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-left-bottom.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>19666A0E</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-left-middle-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2A985B1D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-left-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CE559523</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-left-top-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2A985B1D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-left-top.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CE559523</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-middle-bottom-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>30D68EF7</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-middle-bottom.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F196AA8E</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-middle-middle-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9B00B6E6</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-middle-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DBD9C9CE</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-middle-top-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9B00B6E6</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-middle-top.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DBD9C9CE</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>25704BA5</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-right-bottom-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>30D68EF7</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-right-bottom.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F196AA8E</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-right-middle-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9B00B6E6</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-right-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DBD9C9CE</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-right-top-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9B00B6E6</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace-right-top.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DBD9C9CE</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-mf-vented-crawlspace.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>19666A0E</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-no-rim-joists.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>57F4EE9C</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-pv-roofpitch.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>488ECB01</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-boiler-to-heat-pump.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B2288CD1</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-boiler-to-heating-system.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F8F44C3B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-fireplace-to-heat-pump.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>ED1BECD7</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-portable-heater-to-heat-pump.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8BB1BE99</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-heating-system-portable-heater-to-heating-system.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8A83E0B1</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-second-refrigerator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>18B82C45</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-atticroof-conditioned-eaves-gable.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9C882440</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-atticroof-conditioned-eaves-hip.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5293940B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-atticroof-flat.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F4402A1B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-conditioned-crawlspace.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D04099F4</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-exterior-corridor.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A77C384B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-rear-units.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A77C384B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-slab-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>17A9EC6B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-slab-right.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>17A9EC6B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-slab.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>004B1AC1</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-unconditioned-basement-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C8A6003A</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-unconditioned-basement-right.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C8A6003A</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-unconditioned-basement.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>22D018C4</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-unvented-crawlspace-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>18197322</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-unvented-crawlspace-right.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>18197322</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-unvented-crawlspace.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5ACB0D51</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-vented-crawlspace-middle.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>668F8FD7</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-vented-crawlspace-right.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>668F8FD7</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-sfa-vented-crawlspace.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>024064E2</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-state-code-different-than-epw.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7D75A9B0</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-zero-clothes-washer-kwh.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F0402A30</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-zero-dishwasher-kwh.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E1EBF131</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-zero-extra-refrigerator-kwh.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>415957AF</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-zero-freezer-kwh.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>415957AF</checksum>
+    </file>
+    <file>
+      <filename>extra_files/extra-zero-refrigerator-kwh.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>42AEBCC0</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-conditioned-attic-with-floor-insulation.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7DCE1EC5</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-conditioned-basement-with-ceiling-insulation.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>415957AF</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-mf-bottom-slab-non-zero-foundation-height.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>00FF645C</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-multipliers-without-fuel-loads.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>415957AF</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-multipliers-without-other-plug-loads.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F0B6D83D</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-multipliers-without-tv-plug-loads.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D96178DE</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-multipliers-without-vehicle-plug-loads.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>415957AF</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-multipliers-without-well-pump-plug-loads.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>415957AF</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-non-electric-heat-pump-water-heater.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2ADF2171</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-second-heating-system-serves-majority-heat.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0212A41B</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-sfd-slab-non-zero-foundation-height.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A14AF5F1</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-slab-non-zero-foundation-height-above-grade.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A14AF5F1</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-unconditioned-basement-with-wall-and-ceiling-insulation.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0CC75E39</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-unvented-attic-with-floor-and-roof-insulation.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>397BAA2C</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-unvented-crawlspace-with-wall-and-ceiling-insulation.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C93C16EA</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-vented-attic-with-floor-and-roof-insulation.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>11BAA9F6</checksum>
+    </file>
+    <file>
+      <filename>extra_files/warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A887B353</checksum>
     </file>
     <file>
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>C2AB19BE</checksum>
+      <checksum>15B0343C</checksum>
     </file>
     <file>
       <version>
@@ -5756,7 +6703,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>F96F5EF8</checksum>
+      <checksum>A0677A71</checksum>
     </file>
   </files>
 </measure>

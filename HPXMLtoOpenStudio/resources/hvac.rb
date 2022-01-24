@@ -110,11 +110,19 @@ class HVAC
       end
     end
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms)
-    if not cooling_system.nil?
-      disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil, cooling_system.id)
+    if heating_system.is_a?(HPXML::HeatPump) && (not heating_system.backup_system.nil?) && (not heating_system.backup_heating_switchover_temp.nil?)
+      # Disable blower fan power below switchover temperature
+      set_fan_power_ems_program(model, fan, htg_ap.hp_min_temp)
     end
-    if not heating_system.nil?
-      disaggregate_fan_or_pump(model, fan, htg_coil, nil, htg_supp_coil, heating_system.id)
+    if (not cooling_system.nil?) && (not heating_system.nil?) && (cooling_system == heating_system)
+      disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, cooling_system.id)
+    else
+      if not cooling_system.nil?
+        disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil, cooling_system.id)
+      end
+      if not heating_system.nil?
+        disaggregate_fan_or_pump(model, fan, htg_coil, nil, htg_supp_coil, heating_system.id)
+      end
     end
 
     # Unitary System
@@ -413,7 +421,6 @@ class HVAC
 
   def self.apply_boiler(model, runner, heating_system,
                         sequential_heat_load_fracs, control_zone)
-
     obj_name = Constants.ObjectNameBoiler
     is_condensing = false # FUTURE: Expose as input; default based on AFUE
     oat_reset_enabled = false
@@ -750,11 +757,14 @@ class HVAC
     quantity = ceiling_fan.quantity
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, 'Wh', 'kWh')
 
+    # Create schedule
+    ceiling_fan_sch = nil
     if not schedules_file.nil?
       annual_kwh *= Schedule.CeilingFanMonthlyMultipliers(weather: weather).split(',').map(&:to_f).sum(0.0) / 12.0
-      ceiling_fan_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: 'ceiling_fan', annual_kwh: annual_kwh)
-      ceiling_fan_sch = schedules_file.create_schedule_file(col_name: 'ceiling_fan')
-    else
+      ceiling_fan_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: SchedulesFile::ColumnCeilingFan, annual_kwh: annual_kwh)
+      ceiling_fan_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnCeilingFan)
+    end
+    if ceiling_fan_sch.nil?
       annual_kwh *= ceiling_fan.monthly_multipliers.split(',').map(&:to_f).sum(0.0) / 12.0
       weekday_sch = ceiling_fan.weekday_fractions
       weekend_sch = ceiling_fan.weekend_fractions
@@ -762,6 +772,10 @@ class HVAC
       ceiling_fan_sch_obj = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', weekday_sch, weekend_sch, monthly_sch, Constants.ScheduleTypeLimitsFraction)
       ceiling_fan_design_level = ceiling_fan_sch_obj.calcDesignLevelFromDailykWh(annual_kwh / 365.0)
       ceiling_fan_sch = ceiling_fan_sch_obj.schedule
+    else
+      runner.registerWarning("Both '#{SchedulesFile::ColumnCeilingFan}' schedule file and weekday fractions provided; the latter will be ignored.") if !ceiling_fan.weekday_fractions.nil?
+      runner.registerWarning("Both '#{SchedulesFile::ColumnCeilingFan}' schedule file and weekend fractions provided; the latter will be ignored.") if !ceiling_fan.weekend_fractions.nil?
+      runner.registerWarning("Both '#{SchedulesFile::ColumnCeilingFan}' schedule file and monthly multipliers provided; the latter will be ignored.") if !ceiling_fan.monthly_multipliers.nil?
     end
 
     equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
@@ -1174,10 +1188,19 @@ class HVAC
 
     monthly_temps = weather.data.MonthlyAvgDrybulbs
     heat_design_db = weather.design.HeatingDrybulb
+    is_southern_hemisphere = (weather.header.Latitude < 0)
 
     # create basis lists with zero for every month
     cooling_season_temp_basis = Array.new(monthly_temps.length, 0.0)
     heating_season_temp_basis = Array.new(monthly_temps.length, 0.0)
+
+    if is_southern_hemisphere
+      override_heating_months = [6, 7] # July, August
+      override_cooling_months = [0, 11] # December, January
+    else
+      override_heating_months = [0, 11] # December, January
+      override_cooling_months = [6, 7] # July, August
+    end
 
     monthly_temps.each_with_index do |temp, i|
       if temp < 66.0
@@ -1186,9 +1209,9 @@ class HVAC
         cooling_season_temp_basis[i] = 1.0
       end
 
-      if ((i == 0) || (i == 11)) && (heat_design_db < 59.0)
+      if (override_heating_months.include? i) && (heat_design_db < 59.0)
         heating_season_temp_basis[i] = 1.0
-      elsif (i == 6) || (i == 7)
+      elsif override_cooling_months.include? i
         cooling_season_temp_basis[i] = 1.0
       end
     end
@@ -1196,13 +1219,9 @@ class HVAC
     cooling_season = Array.new(monthly_temps.length, 0.0)
     heating_season = Array.new(monthly_temps.length, 0.0)
 
-    monthly_temps.each_with_index do |temp, i|
+    for i in 0..11
       # Heating overlaps with cooling at beginning of summer
-      if i == 0 # January
-        prevmonth = 11 # December
-      else
-        prevmonth = i - 1
-      end
+      prevmonth = i - 1
 
       if ((heating_season_temp_basis[i] == 1.0) || ((cooling_season_temp_basis[prevmonth] == 0.0) && (cooling_season_temp_basis[i] == 1.0)))
         heating_season[i] = 1.0
@@ -1218,7 +1237,7 @@ class HVAC
     end
 
     # Find the first month of cooling and add one month
-    (1...12).to_a.each do |i|
+    for i in 0..11
       if cooling_season[i] == 1.0
         cooling_season[i - 1] = 1.0
         break
@@ -1229,6 +1248,39 @@ class HVAC
   end
 
   private
+
+  def self.set_fan_power_ems_program(model, fan, hp_min_temp)
+    # EMS is used to disable the fan power below the hp_min_temp; the backup heating
+    # system will be operating instead.
+
+    # Sensors
+    tout_db_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
+    tout_db_sensor.setKeyName('Environment')
+
+    # Actuators
+    fan_pressure_rise_act = OpenStudio::Model::EnergyManagementSystemActuator.new(fan, *EPlus::EMSActuatorFanPressureRise)
+    fan_pressure_rise_act.setName("#{fan.name} pressure rise act")
+
+    fan_total_efficiency_act = OpenStudio::Model::EnergyManagementSystemActuator.new(fan, *EPlus::EMSActuatorFanTotalEfficiency)
+    fan_total_efficiency_act.setName("#{fan.name} total efficiency act")
+
+    # Program
+    fan_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    fan_program.setName("#{fan.name} power program")
+    fan_program.addLine("If #{tout_db_sensor.name} < #{UnitConversions.convert(hp_min_temp, 'F', 'C').round(2)}")
+    fan_program.addLine("  Set #{fan_pressure_rise_act.name} = 0")
+    fan_program.addLine("  Set #{fan_total_efficiency_act.name} = 1")
+    fan_program.addLine('Else')
+    fan_program.addLine("  Set #{fan_pressure_rise_act.name} = NULL")
+    fan_program.addLine("  Set #{fan_total_efficiency_act.name} = NULL")
+    fan_program.addLine('EndIf')
+
+    # Calling Point
+    fan_program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    fan_program_calling_manager.setName("#{fan.name} power program calling manager")
+    fan_program_calling_manager.setCallingPoint('AfterPredictorBeforeHVACManagers')
+    fan_program_calling_manager.addProgram(fan_program)
+  end
 
   def self.set_pump_power_ems_program(model, pump_w, pump, heating_object)
     # EMS is used to set the pump power.
@@ -3228,7 +3280,7 @@ class HVAC
     end
 
     if (not cvg) || (final_n > itmax)
-      cop_max_speed = UnitConversions.convert(0.4174 * hspf - 1.1134, 'Btu/hr', 'W') # Correlation developed from JonW's MatLab scripts. Only used if a cop cannot be found.
+      cop_max_speed = UnitConversions.convert(0.4174 * heat_pump.heating_efficiency_hspf - 1.1134, 'Btu/hr', 'W') # Correlation developed from JonW's MatLab scripts. Only used if a cop cannot be found.
     end
 
     hp_ap.heat_rated_eirs = []
@@ -3706,6 +3758,12 @@ class HVAC
         fault_program.addLine("Set #{cap_fff_act.name} = cap_curve_v_pre_#{suffix} * CAP_IQ_adj_#{suffix}")
         fault_program.addLine("Set #{eir_pow_act.name} = pow_curve_v_pre_#{suffix} * EIR_IQ_adj_#{suffix} * CAP_IQ_adj_#{suffix}") # equationfit power curve modifies power instead of cop/eir, should also multiply capacity adjustment
       end
+      fault_program.addLine("If #{cap_fff_act.name} < 0.0")
+      fault_program.addLine("  Set #{cap_fff_act.name} = 1.0")
+      fault_program.addLine('EndIf')
+      fault_program.addLine("If #{eir_pow_act.name} < 0.0")
+      fault_program.addLine("  Set #{eir_pow_act.name} = 1.0")
+      fault_program.addLine('EndIf')
     end
   end
 
@@ -3982,7 +4040,7 @@ class HVAC
     return true
   end
 
-  def self.get_hpxml_hvac_systems(hpxml)
+  def self.get_hpxml_hvac_systems(hpxml, exclude_hp_backup_systems: false)
     # Returns a list of heating/cooling systems, incorporating whether
     # multiple systems are connected to the same distribution system
     # (e.g., a furnace + central air conditioner w/ the same ducts).
@@ -4001,12 +4059,18 @@ class HVAC
       if is_attached_heating_and_cooling_systems(hpxml, heating_system, heating_system.attached_cooling_system)
         next # Already processed with cooling
       end
+      if exclude_hp_backup_systems && heating_system.is_heat_pump_backup_system
+        next
+      end
 
       hvac_systems << { cooling: nil,
                         heating: heating_system }
     end
 
-    hpxml.heat_pumps.each do |heat_pump|
+    # Heat pump with backup system must be sorted last so that the last two
+    # HVAC systems in the EnergyPlus EquipmentList are 1) the heat pump and
+    # 2) the heat pump backup system.
+    hpxml.heat_pumps.sort_by { |hp| hp.backup_system_idref.to_s }.each do |heat_pump|
       hvac_systems << { cooling: heat_pump,
                         heating: heat_pump }
     end
@@ -4019,7 +4083,9 @@ class HVAC
     min_airflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
     hpxml.heating_systems.each do |htg_sys|
       htg_sys.heating_capacity = [htg_sys.heating_capacity, min_capacity].max
-      htg_sys.heating_airflow_cfm = [htg_sys.heating_airflow_cfm, min_airflow].max
+      if not htg_sys.heating_airflow_cfm.nil?
+        htg_sys.heating_airflow_cfm = [htg_sys.heating_airflow_cfm, min_airflow].max
+      end
     end
     hpxml.cooling_systems.each do |clg_sys|
       clg_sys.cooling_capacity = [clg_sys.cooling_capacity, min_capacity].max
@@ -4083,7 +4149,7 @@ class HVAC
     metric_id = units.downcase
     value = nil
     lookup_year = 0
-    CSV.foreach(File.join(File.dirname(__FILE__), 'lu_hvac_equipment_efficiency.csv'), headers: true) do |row|
+    CSV.foreach(File.join(File.dirname(__FILE__), 'data', 'hvac_equipment_efficiency.csv'), headers: true) do |row|
       next unless row['type_id'] == type_id
       next unless row['fuel_primary_id'] == fuel_primary_id
       next unless row['metric_id'] == metric_id

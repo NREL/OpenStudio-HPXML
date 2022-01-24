@@ -21,14 +21,14 @@ class Constants
     return num_days_in_months
   end
 
-  def self.NumDaysInYear(is_leap_year)
-    num_days_in_months = NumDaysInMonths(is_leap_year)
+  def self.NumDaysInYear(year)
+    num_days_in_months = NumDaysInMonths(year)
     num_days_in_year = num_days_in_months.sum
     return num_days_in_year
   end
 
-  def self.NumHoursInYear(is_leap_year)
-    num_days_in_year = NumDaysInYear(is_leap_year)
+  def self.NumHoursInYear(year)
+    num_days_in_year = NumDaysInYear(year)
     num_hours_in_year = num_days_in_year * 24
     return num_hours_in_year
   end
@@ -45,6 +45,14 @@ class Constants
 
   def self.AutoMaxLoad
     return 'auto using max load'
+  end
+
+  def self.CalcTypeCO2RatedHome
+    return 'CO2 Rated Home'
+  end
+
+  def self.CalcTypeCO2ReferenceHome
+    return 'CO2 Reference Home'
   end
 
   def self.CalcTypeERIRatedHome
@@ -68,7 +76,8 @@ class Constants
   end
 
   def self.ERIVersions
-    return ['2014', '2014A', '2014AD', '2014ADE', '2014ADEG', '2014ADEGL', '2019', '2019A', '2019AB']
+    return ['2014', '2014A', '2014AE', '2014AEG', '2019', '2019A',
+            '2019AB', '2019ABC', '2019ABCD', '2019ABCDE']
   end
 
   def self.FacadeFront
@@ -449,39 +458,5 @@ class Constants
 
   def self.ScheduleTypeLimitsTemperature
     return 'Temperature'
-  end
-
-  def self.ScheduleColNames
-    # col_name => affected_by_vacancy
-    return {
-      'occupants' => true,
-      'lighting_interior' => true,
-      'lighting_exterior' => true,
-      'lighting_garage' => true,
-      'lighting_exterior_holiday' => true,
-      'cooking_range' => true,
-      'refrigerator' => false,
-      'extra_refrigerator' => false,
-      'freezer' => false,
-      'dishwasher' => true,
-      'clothes_washer' => true,
-      'clothes_dryer' => true,
-      'ceiling_fan' => true,
-      'plug_loads_other' => true,
-      'plug_loads_tv' => true,
-      'plug_loads_vehicle' => true,
-      'plug_loads_well_pump' => true,
-      'fuel_loads_grill' => true,
-      'fuel_loads_lighting' => true,
-      'fuel_loads_fireplace' => true,
-      'pool_pump' => false,
-      'pool_heater' => false,
-      'hot_tub_pump' => false,
-      'hot_tub_heater' => false,
-      'hot_water_dishwasher' => true,
-      'hot_water_clothes_washer' => true,
-      'hot_water_fixtures' => true,
-      'vacancy' => nil,
-    }
   end
 end

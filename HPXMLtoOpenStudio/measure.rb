@@ -7,6 +7,7 @@ require 'pathname'
 require 'csv'
 require 'oga'
 require_relative 'resources/airflow'
+require_relative 'resources/battery'
 require_relative 'resources/constants'
 require_relative 'resources/constructions'
 require_relative 'resources/energyplus'
@@ -132,8 +133,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       if skip_validation
         stron_paths = []
       else
-        stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'HPXMLvalidator.xml'),
-                       File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')]
+        stron_paths = [File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'HPXMLvalidator.xml'),
+                       File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'EPvalidator.xml')]
       end
       hpxml = HPXML.new(hpxml_path: hpxml_path, schematron_validators: stron_paths, building_id: building_id)
       hpxml.errors.each do |error|
@@ -215,16 +216,16 @@ class OSModel
 
     # Init
 
+    check_file_references(hpxml_path)
+    @schedules_file = SchedulesFile.new(runner: runner, model: model,
+                                        schedules_paths: @hpxml.header.schedules_filepaths,
+                                        col_names: SchedulesFile.ColumnNames)
+
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
-    set_defaults_and_globals(runner, output_dir, epw_file, weather)
+    set_defaults_and_globals(runner, output_dir, epw_file, weather, @schedules_file)
+    @schedules_file.validate_schedules(year: @hpxml.header.sim_calendar_year) if not @schedules_file.nil?
     Location.apply(model, runner, weather, epw_file, @hpxml)
     add_simulation_params(model)
-
-    @schedules_file = nil
-    unless @hpxml.header.schedules_filepath.nil?
-      @schedules_file = SchedulesFile.new(runner: runner, model: model, year: hpxml.header.sim_calendar_year,
-                                          schedules_path: @hpxml.header.schedules_filepath)
-    end
 
     # Conditioned space/zone
 
@@ -279,6 +280,7 @@ class OSModel
     add_airflow(runner, model, weather, spaces, airloop_map)
     add_photovoltaics(runner, model)
     add_generators(runner, model)
+    add_batteries(runner, model, spaces)
     add_additional_properties(runner, model, hpxml_path, building_id)
 
     # Output
@@ -297,7 +299,37 @@ class OSModel
 
   private
 
-  def self.set_defaults_and_globals(runner, output_dir, epw_file, weather)
+  def self.check_file_references(hpxml_path)
+    # Check/update file references
+    @hpxml.header.schedules_filepaths = @hpxml.header.schedules_filepaths.collect { |sfp|
+      FilePath.check_path(sfp,
+                          File.dirname(hpxml_path),
+                          'Schedules')
+    }
+
+    @hpxml.header.emissions_scenarios.each do |scenario|
+      if @hpxml.header.emissions_scenarios.select { |s| s.emissions_type == scenario.emissions_type && s.name == scenario.name }.size > 1
+        fail "Found multiple Emissions Scenarios with the Scenario Name=#{scenario.name} and Emissions Type=#{scenario.emissions_type}."
+      end
+      next if scenario.elec_schedule_filepath.nil?
+
+      scenario.elec_schedule_filepath = FilePath.check_path(scenario.elec_schedule_filepath,
+                                                            File.dirname(hpxml_path),
+                                                            'Emissions File')
+      data = File.readlines(scenario.elec_schedule_filepath)
+      if data.size != 8760
+        fail "Emissions File has invalid number of rows (#{data.size}). Must be 8760."
+      end
+      if data.select { |x| x.include? ',' }.size > 0
+        fail 'Emissions File has multiple columns. Must be a single column of data.'
+      end
+      if data.map(&:strip).map { |x| Float(x) rescue nil }.any? nil
+        fail 'Emissions File has non-numeric values.'
+      end
+    end
+  end
+
+  def self.set_defaults_and_globals(runner, output_dir, epw_file, weather, schedules_file)
     # Initialize
     @remaining_heat_load_frac = 1.0
     @remaining_cool_load_frac = 1.0
@@ -313,7 +345,7 @@ class OSModel
     @default_azimuths = HPXMLDefaults.get_default_azimuths(@hpxml)
 
     # Apply defaults to HPXML object
-    HPXMLDefaults.apply(@hpxml, @eri_version, weather, epw_file: epw_file)
+    HPXMLDefaults.apply(@hpxml, @eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
 
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
@@ -543,7 +575,7 @@ class OSModel
     num_occ = @hpxml.building_occupancy.number_of_residents
     return if num_occ <= 0
 
-    Geometry.apply_occupants(model, @hpxml, num_occ, @cfa, spaces[HPXML::LocationLivingSpace], @schedules_file)
+    Geometry.apply_occupants(model, runner, @hpxml, num_occ, @cfa, spaces[HPXML::LocationLivingSpace], @schedules_file)
   end
 
   def self.create_or_get_space(model, spaces, location)
@@ -1105,20 +1137,20 @@ class OSModel
     set_surface_interior(model, spaces, surface, foundation_wall)
     set_surface_exterior(model, spaces, surface, foundation_wall)
 
-    concrete_thick_in = foundation_wall.thickness
     assembly_r = foundation_wall.insulation_assembly_r_value
     mat_int_finish = Material.InteriorFinishMaterial(foundation_wall.interior_finish_type, foundation_wall.interior_finish_thickness)
+    mat_wall = Material.FoundationWallMaterial(foundation_wall.type, foundation_wall.thickness)
     if not assembly_r.nil?
       ext_rigid_height = height
       ext_rigid_offset = 0.0
       inside_film = Material.AirFilmVertical
-      mat_concrete = Material.Concrete(concrete_thick_in)
+
       mat_int_finish_rvalue = mat_int_finish.nil? ? 0.0 : mat_int_finish.rvalue
-      ext_rigid_r = assembly_r - mat_concrete.rvalue - mat_int_finish_rvalue - inside_film.rvalue
+      ext_rigid_r = assembly_r - mat_wall.rvalue - mat_int_finish_rvalue - inside_film.rvalue
       int_rigid_r = 0.0
       if ext_rigid_r < 0 # Try without interior finish
         mat_int_finish = nil
-        ext_rigid_r = assembly_r - mat_concrete.rvalue - inside_film.rvalue
+        ext_rigid_r = assembly_r - mat_wall.rvalue - inside_film.rvalue
       end
       if (ext_rigid_r > 0) && (ext_rigid_r < 0.1)
         ext_rigid_r = 0.0 # Prevent tiny strip of insulation
@@ -1140,7 +1172,7 @@ class OSModel
 
     Constructions.apply_foundation_wall(runner, model, [surface], "#{foundation_wall.id} construction",
                                         ext_rigid_offset, int_rigid_offset, ext_rigid_height, int_rigid_height,
-                                        ext_rigid_r, int_rigid_r, mat_int_finish, concrete_thick_in, height_ag)
+                                        ext_rigid_r, int_rigid_r, mat_int_finish, mat_wall, height_ag)
 
     if not assembly_r.nil?
       Constructions.check_surface_assembly_rvalue(runner, [surface], inside_film, nil, assembly_r, match)
@@ -1278,24 +1310,20 @@ class OSModel
 
   def self.add_thermal_mass(runner, model, spaces)
     cfa_basement = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationBasementConditioned }.map { |s| s.area }.sum(0.0)
+    basement_frac_of_cfa = cfa_basement / @cfa
     if @apply_ashrae140_assumptions
       # 1024 ft2 of interior partition wall mass, no furniture mass
       mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
       partition_wall_area = 1024.0 * 2 # Exposed partition wall area (both sides)
-      basement_frac_of_cfa = cfa_basement / @cfa
       Constructions.apply_partition_walls(runner, model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area,
                                           basement_frac_of_cfa, @cond_below_grade_surfaces, spaces[HPXML::LocationLivingSpace])
     else
-      mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
-      partition_wall_area = 1.0 * @cfa # Exposed partition wall area (both sides) assumed to be equal to conditioned floor area
-      basement_frac_of_cfa = cfa_basement / @cfa
+      mat_int_finish = Material.InteriorFinishMaterial(@hpxml.partition_wall_mass.interior_finish_type, @hpxml.partition_wall_mass.interior_finish_thickness)
+      partition_wall_area = @hpxml.partition_wall_mass.area_fraction * @cfa # Exposed partition wall area (both sides)
       Constructions.apply_partition_walls(runner, model, 'PartitionWallConstruction', mat_int_finish, partition_wall_area,
                                           basement_frac_of_cfa, @cond_below_grade_surfaces, spaces[HPXML::LocationLivingSpace])
 
-      mass_lb_per_sqft = 8.0
-      density_lb_per_cuft = 40.0
-      mat = BaseMaterial.Wood
-      Constructions.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft, mat, @cfa, @ubfa, @gfa,
+      Constructions.apply_furniture(runner, model, @hpxml.furniture_mass, @cfa, @ubfa, @gfa,
                                     basement_frac_of_cfa, @cond_below_grade_surfaces, spaces[HPXML::LocationLivingSpace])
     end
   end
@@ -1653,11 +1681,26 @@ class OSModel
       end
 
       # Calculate heating sequential load fractions
-      sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heating_system.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
-      @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
+      if heating_system.is_heat_pump_backup_system
+        # Heating system will be last in the EquipmentList and should meet entirety of
+        # remaining load during the heating season.
+        sequential_heat_load_fracs = @heating_days.map(&:to_f)
+        if not heating_system.fraction_heat_load_served.nil?
+          fail 'Heat pump backup system cannot have a fraction heat load served specified.'
+        end
+      else
+        sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heating_system.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
+        @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
+      end
 
       sys_id = heating_system.id
       if [HPXML::HVACTypeFurnace, HPXML::HVACTypePTACHeating].include? heating_system.heating_system_type
+
+        if heating_system.is_heat_pump_backup_system
+          # If we ever want to support this in the future, we have to address HVAC
+          # sizing related to 1) distribution losses and 2) calculating the airflow rate.
+          fail "Heat pump backup system cannot be of type '#{heating_system.heating_system_type}'."
+        end
 
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, runner, nil, heating_system,
                                                                  [0], sequential_heat_load_fracs,
@@ -1683,6 +1726,12 @@ class OSModel
         HVAC.apply_unit_heater(model, runner, heating_system,
                                sequential_heat_load_fracs, living_zone)
       end
+
+      next unless heating_system.is_heat_pump_backup_system
+
+      # Store OS object for later use
+      equipment_list = model.getZoneHVACEquipmentLists.select { |el| el.thermalZone == living_zone }[0]
+      @heat_pump_backup_system_object = equipment_list.equipment[-1]
     end
   end
 
@@ -1725,6 +1774,14 @@ class OSModel
                                                                  living_zone)
 
       end
+
+      next unless not heat_pump.backup_system.nil?
+
+      equipment_list = model.getZoneHVACEquipmentLists.select { |el| el.thermalZone == living_zone }[0]
+
+      # Set priority to be last (i.e., after the heat pump that it is backup for)
+      equipment_list.setHeatingPriority(@heat_pump_backup_system_object, 99)
+      equipment_list.setCoolingPriority(@heat_pump_backup_system_object, 99)
     end
   end
 
@@ -1841,7 +1898,7 @@ class OSModel
         next
       end
 
-      MiscLoads.apply_plug(model, plug_load, obj_name, spaces[HPXML::LocationLivingSpace], @apply_ashrae140_assumptions, @schedules_file)
+      MiscLoads.apply_plug(model, runner, plug_load, obj_name, spaces[HPXML::LocationLivingSpace], @apply_ashrae140_assumptions, @schedules_file)
     end
   end
 
@@ -1860,7 +1917,7 @@ class OSModel
         next
       end
 
-      MiscLoads.apply_fuel(model, fuel_load, obj_name, spaces[HPXML::LocationLivingSpace], @schedules_file)
+      MiscLoads.apply_fuel(model, runner, fuel_load, obj_name, spaces[HPXML::LocationLivingSpace], @schedules_file)
     end
   end
 
@@ -1874,6 +1931,8 @@ class OSModel
       next if pool.type == HPXML::TypeNone
 
       MiscLoads.apply_pool_or_hot_tub_heater(model, pool, Constants.ObjectNameMiscPoolHeater, spaces[HPXML::LocationLivingSpace], @schedules_file)
+      next if pool.pump_type == HPXML::TypeNone
+
       MiscLoads.apply_pool_or_hot_tub_pump(model, pool, Constants.ObjectNameMiscPoolPump, spaces[HPXML::LocationLivingSpace], @schedules_file)
     end
 
@@ -1881,6 +1940,8 @@ class OSModel
       next if hot_tub.type == HPXML::TypeNone
 
       MiscLoads.apply_pool_or_hot_tub_heater(model, hot_tub, Constants.ObjectNameMiscHotTubHeater, spaces[HPXML::LocationLivingSpace], @schedules_file)
+      next if hot_tub.pump_type == HPXML::TypeNone
+
       MiscLoads.apply_pool_or_hot_tub_pump(model, hot_tub, Constants.ObjectNameMiscHotTubPump, spaces[HPXML::LocationLivingSpace], @schedules_file)
     end
   end
@@ -2003,6 +2064,11 @@ class OSModel
 
   def self.add_photovoltaics(runner, model)
     @hpxml.pv_systems.each do |pv_system|
+      next if pv_system.inverter_efficiency == @hpxml.pv_systems[0].inverter_efficiency
+
+      fail 'Expected all InverterEfficiency values to be equal.'
+    end
+    @hpxml.pv_systems.each do |pv_system|
       PV.apply(model, @nbeds, pv_system)
     end
   end
@@ -2013,12 +2079,28 @@ class OSModel
     end
   end
 
+  def self.add_batteries(runner, model, spaces)
+    return if @hpxml.pv_systems.empty?
+
+    @hpxml.batteries.each do |battery|
+      # Assign space
+      if battery.location != HPXML::LocationOutside
+        battery.additional_properties.space = get_space_from_location(battery.location, 'Battery', model, spaces)
+      end
+      Battery.apply(runner, model, battery)
+    end
+  end
+
   def self.add_additional_properties(runner, model, hpxml_path, building_id)
     # Store some data for use in reporting measure
     additionalProperties = model.getBuilding.additionalProperties
     additionalProperties.setFeature('hpxml_path', hpxml_path)
     additionalProperties.setFeature('hpxml_defaults_path', @hpxml_defaults_path)
     additionalProperties.setFeature('building_id', building_id.to_s)
+    emissions_scenario_names = @hpxml.header.emissions_scenarios.map { |s| s.name }.to_s
+    additionalProperties.setFeature('emissions_scenario_names', emissions_scenario_names)
+    emissions_scenario_types = @hpxml.header.emissions_scenarios.map { |s| s.emissions_type }.to_s
+    additionalProperties.setFeature('emissions_scenario_types', emissions_scenario_types)
   end
 
   def self.map_to_string(map)

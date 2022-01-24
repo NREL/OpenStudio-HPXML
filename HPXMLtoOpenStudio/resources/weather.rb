@@ -357,7 +357,7 @@ class WeatherProcess
 
   def calc_ashrae_622_wsf(rowdata)
     require 'csv'
-    ashrae_csv = File.join(File.dirname(__FILE__), 'data_ashrae_622_wsf.csv')
+    ashrae_csv = File.join(File.dirname(__FILE__), 'data', 'ashrae_622_wsf.csv')
 
     wsf = nil
     CSV.read(ashrae_csv, headers: false).each do |data|
@@ -367,7 +367,7 @@ class WeatherProcess
     end
     return wsf unless wsf.nil?
 
-    # If not available in data_ashrae_622_wsf.csv...
+    # If not available in ashrae_622_wsf.csv...
     # Calculates the wSF value per report LBNL-5795E "Infiltration as Ventilation: Weather-Induced Dilution"
 
     # Constants
@@ -520,7 +520,7 @@ class WeatherProcess
     tmains_ratio = 0.4 + 0.01 * (avgOAT - 44)
     tmains_lag = 35 - (avgOAT - 44)
     if latitude < 0
-      sign = 1
+      sign = 1 # southern hemisphere
     else
       sign = -1
     end

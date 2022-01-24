@@ -1,10 +1,34 @@
-## OpenStudio-HPXML v1.3.0 (Pending)
+## OpenStudio-HPXML v1.4.0
+__New Features__
+- Allows calculating one or more emissions scenarios (e.g., high renewable penetration vs business as usual) for different emissions types (e.g., CO2).
+- Allows optional `AirInfiltrationMeasurement/InfiltrationHeight` input.
+- Adds a "Fuel Use: Electricity: Net" timeseries output column for homes with electricity generation.
+- BuildResidentialHPXML measure: Adds an optional argument to allow the HPXML file to be written with default values applied.
+- ReportSimulationOutput measure: Allows user-specified annual/timeseries output file names.
+- The `WaterFixturesUsageMultiplier` input now also applies to general water use internal gains and recirculation pump energy (for some control types).
+- Relaxes requirement for `ConditionedFloorAreaServed` for air distribution systems; now only needed if duct surface areas not provided.
+
+__Bugfixes__
+- Fixes possible HVAC sizing error if design temperature difference (TD) is negative.
+- Fixes an error if there is a pool or hot tub, but the pump `Type` is set to "none".
+- Adds more decimal places in output files as needed for simulations with shorter timesteps and/or abbreviated run periods.
+
+## OpenStudio-HPXML v1.3.0
 
 __New Features__
 - Updates to OpenStudio 3.3.0/EnergyPlus 9.6.0.
 - **Breaking change**: Replaces "Unmet Load" outputs with "Unmet Hours".
 - **Breaking change**: Renames "Load: Heating" and "Peak Load: Heating" (and Cooling) outputs to include "Delivered".
-- **Breaking change**: Replaces ClothesDryer `extension/IsVented` and `extension/VentedFlowRate` with `Vented` and `VentedFlowRate`.
+- **Breaking change**: Any heat pump backup heating requires `HeatPump/BackupType` ("integrated" or "separate") to be specified.
+- **Breaking change**: For homes with multiple PV arrays, all inverter efficiencies must have the same value.
+- **Breaking change**: HPXML schema version must now be '4.0' (proposed).
+  - Moves `ClothesDryer/extension/IsVented` to `ClothesDryer/IsVented`.
+  - Moves `ClothesDryer/extension/VentedFlowRate` to `ClothesDryer/VentedFlowRate`.
+  - Moves `FoundationWall/Insulation/Layer/extension/DistanceToTopOfInsulation` to `FoundationWall/Insulation/Layer/DistanceToTopOfInsulation`.
+  - Moves `FoundationWall/Insulation/Layer/extension/DistanceToBottomOfInsulation` to `FoundationWall/Insulation/Layer/DistanceToBottomOfInsulation`.
+  - Moves `Slab/PerimeterInsulationDepth` to `Slab/PerimeterInsulation/Layer/InsulationDepth`.
+  - Moves `Slab/UnderSlabInsulationWidth` to `Slab/UnderSlabInsulation/Layer/InsulationWidth`.
+  - Moves `Slab/UnderSlabInsulationSpansEntireSlab` to `Slab/UnderSlabInsulation/Layer/InsulationSpansEntireSlab`.
 - Initial release of BuildResidentialHPXML measure, which generates an HPXML file from a set of building description inputs.
 - Expanded capabilities for scheduling:
   - Allows modeling detailed occupancy via a schedule CSV file.
@@ -12,6 +36,19 @@ __New Features__
   - Expands simplified weekday/weekend/monthly schedule inputs to additional building features.
   - Allows `HeatingSeason` & `CoolingSeason` to be specified for defining heating and cooling equipment availability.
 - Adds a new results_hpxml.csv output file to summarize HPXML values (e.g., surface areas, HVAC capacities).
+- Allows modeling lithium ion batteries.
+- Allows use of `HeatPump/BackupSystem` for modeling a standalone (i.e., not integrated) backup heating system.
+- Allows conditioned crawlspaces to be specified; modeled as crawlspaces that are actively maintained at setpoint.
+- Allows non-zero refrigerant charge defect ratios for ground source heat pumps.
+- Expands choices allowed for `Siding` (Wall/RimJoist) and `RoofType` (Roof) elements.
+- Allows "none" for wall/rim joist siding.
+- Allows interior finish inputs (e.g., 0.5" drywall) for walls, ceilings, and roofs.
+- Allows specifying the foundation wall type (e.g., solid concrete, concrete block, wood, etc.).
+- Allows additional fuel types for generators.
+- Switches to the EnergyPlus Fan:SystemModel object for all HVAC systems.
+- Introduces a small amount of infiltration for unvented spaces.
+- Updates the assumption of flue losses vs tank losses for higher efficiency non-electric storage water heaters.
+- Revises shared mechanical ventilation preconditioning control logic to operate less often.
 - Adds alternative inputs:
   - Window/skylight physical properties (`GlassLayers`, `FrameType`, etc.) instead of `UFactor` & `SHGC`.
   - `Ducts/FractionDuctArea` instead of `Ducts/DuctSurfaceArea`.
@@ -29,16 +66,6 @@ __New Features__
   - Door azimuth.
   - Radiant barrier grade.
   - Whole house fan airflow rate and fan power.
-- Allows conditioned crawlspaces to be specified; modeled as crawlspaces that are actively maintained at setpoint.
-- Allows non-zero refrigerant charge defect ratios for ground source heat pumps.
-- Expands choices allowed for `Siding` (Wall/RimJoist) and `RoofType` (Roof) elements.
-- Allows "none" for wall/rim joist siding.
-- Allows interior finish inputs (e.g., 0.5" drywall) for walls, ceilings, and roofs.
-- Allows additional fuel types for generators.
-- Switches to the EnergyPlus Fan:SystemModel object for all HVAC systems.
-- Introduces a small amount of infiltration for unvented spaces.
-- Updates the assumption of flue losses vs tank losses for higher efficiency non-electric storage water heaters.
-- Revises shared mechanical ventilation preconditioning control logic to operate less often.
 - Adds more warnings of inputs based on ANSI/BPI 2400 Standard.
 - Removes error-check for number of bedrooms based on conditioned floor area, per RESNET guidance.
 - Updates the reporting measure to register all outputs from the annual CSV with the OS runner (for use in, e.g., PAT).
@@ -48,6 +75,7 @@ __New Features__
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
 - Eliminates EnergyPlus warnings related to unused objects or invalid output meters/variables.
 - Allows modeling PTAC and PTHP HVAC systems. 
+- Allows user inputs for partition wall mass and furniture mass.
 
 __Bugfixes__
 - Improves ground reflectance when there is shading of windows/skylights.
@@ -60,6 +88,9 @@ __Bugfixes__
 - Relaxes `Overhangs` DistanceToBottomOfWindow vs DistanceToBottomOfWindow validation when Depth is zero.
 - Fixes possibility of double-counting HVAC distribution losses if an `HVACDistribution` element has both AirDistribution properties and DSE values
 - Fixes possibility of incorrect "Peak Electricity: Winter Total (W)" and "Peak Electricity: Summer Total (W)" outputs for homes with duct losses.
+- Fixes heating/cooling seasons (used for e.g. summer vs winter window shading) for the southern hemisphere.
+- Fixes possibility of EnergyPlus simulation failure for homes with ground-source heat pumps and airflow and/or charge defects.
+- Fixes peak load/electricity outputs for homes with ground-source heat pumps and airflow and/or charge defects.
 
 ## OpenStudio-HPXML v1.2.0
 
