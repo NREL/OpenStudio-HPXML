@@ -2114,6 +2114,9 @@ def set_measure_argument_values(hpxml_file, args, sch_args)
     args.delete('site_state_code')
     args['weather_station_epw_filepath'] = 'ZAF_Cape.Town.688160_IWEC.epw'
     args['heating_system_heating_capacity'] = 24000.0
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    args.delete('site_iecc_zone')
+    args.delete('site_state_code')
   end
 
   # Mechanical Ventilation
